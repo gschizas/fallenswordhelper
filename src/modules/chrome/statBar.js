@@ -1,6 +1,7 @@
+import {createAnchor} from '../common/cElement';
+
 function statbarWrapper(href, id) {
-  var myWrapper = document.createElement('a');
-  myWrapper.setAttribute('href', href);
+  var myWrapper = createAnchor({href: href});
   var character = document.getElementById(id);
   var statWrapper = character.parentNode;
   myWrapper.appendChild(character);
@@ -11,11 +12,10 @@ function statbarWrapper(href, id) {
 }
 
 export default function statbar() {
-  var sw = statbarWrapper;
-  sw('index.php?cmd=profile', 'statbar-character');
-  sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
-  sw('index.php?cmd=blacksmith', 'statbar-equipment');
-  sw('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
-  sw('index.php?cmd=points', 'statbar-fsp');
-  sw('index.php?cmd=bank', 'statbar-gold');
+  statbarWrapper('index.php?cmd=profile', 'statbar-character');
+  statbarWrapper('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
+  statbarWrapper('index.php?cmd=blacksmith', 'statbar-equipment');
+  statbarWrapper('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
+  statbarWrapper('index.php?cmd=points', 'statbar-fsp');
+  statbarWrapper('index.php?cmd=bank', 'statbar-gold');
 }

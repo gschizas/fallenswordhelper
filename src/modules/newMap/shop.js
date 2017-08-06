@@ -1,3 +1,4 @@
+import {createButton, createDiv, createInput} from '../common/cElement';
 import * as system from '../support/system';
 
 var shoppingData;
@@ -60,22 +61,23 @@ function qBuy() {
 }
 
 function injectQuickBuy() {
-  fshDiv = document.createElement('div');
-  fshDiv.className = 'fshClear';
-  fshDiv.textContent = 'Select how many to quick-buy:';
-  numInput = document.createElement('input');
-  numInput.id = 'buyAmount';
-  numInput.className = 'fshNumberInput';
-  numInput.min = 1;
-  numInput.max = 99;
-  numInput.value = 1;
-  numInput.type = 'number';
+  fshDiv = createDiv({
+    className: 'fshClear',
+    textContent: 'Select how many to quick-buy:'
+  });
+  numInput = createInput({
+    id: 'buyAmount',
+    className: 'fshNumberInput',
+    min: 1,
+    max: 99,
+    value: 1,
+    type: 'number'
+  });
   fshDiv.appendChild(numInput);
-  qbBtn = document.createElement('button');
-  qbBtn.textContent = 'Quick-buy';
+  qbBtn = createButton({textContent: 'Quick-buy'});
   qbBtn.addEventListener('click', qBuy);
   fshDiv.appendChild(qbBtn);
-  resultDiv = document.createElement('div');
+  resultDiv = createDiv();
   fshDiv.appendChild(resultDiv);
   dialog.appendChild(fshDiv);
 }

@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import mySimpleCheckboxes from './simple';
 import setupConfigData from './configData';
+import {createBr, createSpan} from '../common/cElement';
 import * as layout from '../support/layout';
 import * as settingObj from './settingObj';
 import * as system from '../support/system';
@@ -160,14 +161,15 @@ function showMonsterLogs() {
 }
 
 function createEventListeners() {
-  var tickAll = document.createElement('span');
-  tickAll.id = 'fshAllBuffs';
-  tickAll.className = 'fshLink';
-  tickAll.textContent = 'Tick all buffs';
+  var tickAll = createSpan({
+    id: 'fshAllBuffs',
+    className: 'fshLink',
+    textContent: 'Tick all buffs'
+  });
   tickAll.addEventListener('click', toggleTickAllBuffs);
   var inject = document.getElementById('settingsTabs-4').firstElementChild
     .rows[0].cells[0];
-  inject.appendChild(document.createElement('br'));
+  inject.appendChild(createBr());
   inject.appendChild(tickAll);
 
   document.getElementById('fshClearStorage')

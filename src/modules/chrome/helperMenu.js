@@ -1,3 +1,4 @@
+import {createDiv} from '../common/cElement';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
@@ -50,9 +51,10 @@ var functionLookup = {
 function callHelperFunction(evt) { // jQuery
   var content = document.getElementById('content');
   if (content) {content.innerHTML = '';} else {
-    content = document.createElement('DIV');
-    content.id = 'content';
-    content.style.display = 'none';
+    content = createDiv({
+      id: 'content',
+      style: {display: 'none'}
+    });
     document.body.appendChild(content);
   }
   var functionPath = evt.target.textContent;
@@ -78,11 +80,14 @@ function showHelperMenu() {
   var helperMenu = document.getElementById('helperMenu');
   helperMenu.removeEventListener('mouseenter', showHelperMenu);
 
-  var helperMenuDiv = document.createElement('DIV');
-  helperMenuDiv.id = 'helperMenuDiv';
-  helperMenuDiv.className = 'helperMenuDiv';
-  helperMenuDiv.style.backgroundImage = 'url(' + system.imageServer +
-    '/skin/inner_bg.jpg)';
+  var helperMenuDiv = createDiv({
+    id: 'helperMenuDiv',
+    className: 'helperMenuDiv',
+    style: {
+      backgroundImage: 'url(' + system.imageServer +
+        '/skin/inner_bg.jpg)'
+    }
+  });
   helperMenuDiv.insertAdjacentHTML('beforeend', helperMenuBlob);
   helperMenu.appendChild(helperMenuDiv);
   helperMenu.addEventListener('click', function(evt) {
@@ -94,13 +99,14 @@ function showHelperMenu() {
 }
 
 function haveNode(node) {
-  var helperMenu = document.createElement('DIV');
-  helperMenu.id = 'helperMenu';
-  helperMenu.className = 'helperMenu';
+  var helperMenu = createDiv({
+    id: 'helperMenu',
+    className: 'helperMenu',
+    innerHTML: 'Helper&nbsp;Menu'
+  });
   if (system.getValue('keepHelperMenuOnScreen')) {
     helperMenu.classList.add('fshFixed');
   }
-  helperMenu.innerHTML = 'Helper&nbsp;Menu';
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (system.getValue('draggableHelperMenu')) {
     helperMenu.setAttribute('draggable', 'true');

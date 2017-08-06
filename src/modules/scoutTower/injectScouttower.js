@@ -1,6 +1,7 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import setForage from '../ajax/setForage';
+import {createTBody, createTable} from '../common/cElement';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -32,14 +33,13 @@ function addRow(theTitans, trackerTable, titan) {
 }
 
 function displayTracker(parentTable, theTitans) {
-  var trackerTable = document.createElement('table');
-  trackerTable.className = 'fshTTracker';
-  var tBody = document.createElement('tbody');
+  var trackerTable = createTable({className: 'fshTTracker'});
+  var tBody = createTBody({
+    innerHTML: '<tr><td class="header fshCenter">Titan</td>' +
+      '<td class="header fshCenter">Cooldown</td>' +
+      '<td class="header fshCenter">Visible</td></tr>'
+  });
   trackerTable.appendChild(tBody);
-  tBody.insertAdjacentHTML('beforeend',
-    '<tr><td class="header fshCenter">Titan</td>' +
-    '<td class="header fshCenter">Cooldown</td>' +
-    '<td class="header fshCenter">Visible</td></tr>');
   Object.keys(theTitans).forEach(addRow.bind(null, theTitans, tBody));
 
   var newRow = parentTable.insertRow(5);

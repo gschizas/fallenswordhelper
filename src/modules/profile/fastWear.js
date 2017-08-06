@@ -1,4 +1,5 @@
 import add from '../support/task';
+import {createDiv} from '../common/cElement';
 import {equipItem, useItem} from '../support/ajax';
 import * as system from '../support/system';
 
@@ -47,15 +48,14 @@ function actionText(usable) {
 
 function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
-  var myDiv = document.createElement('DIV');
-  myDiv.className = 'fastDiv';
-  myDiv.insertAdjacentHTML('beforeend', '<span class="' +
-    actionClass(toUse) + '" itemid="' +
-    theSpan.getAttribute('data-inv') + '">' +
-    actionText(toUse) + '</span>&nbsp;');
+  var myDiv = createDiv({
+    className: 'fastDiv',
+    innerHTML: '<span class="' + actionClass(toUse) +
+      '" itemid="' + theSpan.getAttribute('data-inv') + '">' +
+      actionText(toUse) + '</span>&nbsp;'
+  });
   if (theSpan.parentNode.nextElementSibling) {
-    myDiv.appendChild(
-      theSpan.parentNode.nextElementSibling.nextElementSibling);
+    myDiv.appendChild(theSpan.parentNode.nextElementSibling.nextElementSibling);
   }
   theSpan.parentNode.parentNode.appendChild(myDiv);
 }

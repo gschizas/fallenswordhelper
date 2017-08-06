@@ -1,5 +1,6 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
+import {createSpan} from '../common/cElement';
 import fastDebuff from './debuff';
 import injectFastWear from './fastWear';
 import nekidBtn from './nekidBtn';
@@ -61,12 +62,9 @@ function selectAllLink() {
   var node = document.querySelector('#profileRightColumn' +
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
   if (!node) {return;}
-  var allSpan = document.createElement('SPAN');
-  allSpan.className = 'smallLink';
-  allSpan.textContent = 'All';
+  var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
   allSpan.addEventListener('click', profileSelectAll);
-  var wrapper = document.createElement('SPAN');
-  wrapper.insertAdjacentHTML('beforeend', '[&nbsp;');
+  var wrapper = createSpan({innerHTML: '[&nbsp;'});
   wrapper.appendChild(allSpan);
   wrapper.insertAdjacentHTML('beforeend', '&nbsp;]&nbsp;');
   node.parentNode.appendChild(wrapper);

@@ -1,5 +1,6 @@
 import add from './support/task';
 import calf from './support/calf';
+import {createTFoot} from './common/cElement';
 import getMembrList from './ajax/getMembrList';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
@@ -45,65 +46,6 @@ function summaryLink() {
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
 }
 
-/*
-function injectAdvisorDable() {
-
-  var advisorTable = layout.pCC.firstElementChild
-    .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
-
-  // for (var i = advisorTable.attributes.length - 1; i >= 0; i--){
-    // advisorTable.removeAttribute(advisorTable.attributes[i].name);
-  // }
-
-  // Array.prototype.forEach.call(advisorTable.rows, function(row) {
-    // Array.prototype.forEach.call(row.cells, function(cell) {
-      // cell.removeAttribute('align');
-      // cell.removeAttribute('bgcolor');
-      // cell.removeAttribute('class');
-      // cell.removeAttribute('width');
-      // var oldChild = cell.removeChild(cell.firstElementChild);
-      // cell.textContent = oldChild.textContent.trim().replace(/,/g, '');
-    // });
-  // });
-
-  var tBody = advisorTable.firstElementChild;
-
-  var firstRow = tBody.firstElementChild;
-  firstRow.innerHTML = firstRow.innerHTML.replace(/td/g, 'th');
-  var lastRow = tBody.lastElementChild;
-
-  var myHead = advisorTable.createTHead();
-  myHead.appendChild(firstRow);
-
-  var myFoot = advisorTable.createTFoot();
-  myFoot.appendChild(lastRow);
-
-  var wrapperDiv = document.createElement('DIV');
-  wrapperDiv.id = 'fshWrapper';
-
-  advisorTable.parentNode.appendChild(wrapperDiv);
-  wrapperDiv.appendChild(advisorTable);
-
-  // advisorTable.parentNode.removeChild(advisorTable);
-  // wrapperDiv.innerHTML =
-    // '<table><thead>' +
-    // '<tr><th>member</th><th>depo</th></tr>' +
-    // '</thead><tbody>' +
-    // '<tr><td>1</td><td>2</td></tr>' +
-    // '<tr><td>3</td><td>4</td></tr>' +
-    // '</tbody></table>';
-  // document.body.innerHTML = '';
-  // document.body.appendChild(wrapperDiv);
-
-  console.log('fshWrapper', wrapperDiv); // DEV Only
-  var dable = new Dable(wrapperDiv);
-
-  dable.style = 'bootstrap';
-  dable.UpdateStyle();
-
-}
-*/
-
 function playerName(f) {
   if (!membrList[f]) {return f;}
   return '<a href="index.php?cmd=profile&player_id=' +
@@ -131,7 +73,7 @@ function injectAdvisorNew() {
   var totalCell = totalRow.firstElementChild;
   totalCell.className = 'fshRight';
   totalCell.setAttribute('colspan', '3');
-  var tfoot = document.createElement('TFOOT');
+  var tfoot = createTFoot();
   tfoot.insertAdjacentElement('beforeend', totalRow);
   list.className = 'fshXSmall hover';
   list.firstElementChild
@@ -299,7 +241,6 @@ export default function injectAdvisor() {
     getMembrList(false).done(function(response) {
       membrList = response;
       add(3, injectAdvisorNew);
-      // add(3, injectAdvisorDable, [membrList]);
     });
   }
 }

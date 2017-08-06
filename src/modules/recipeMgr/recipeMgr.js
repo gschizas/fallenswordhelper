@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {createDiv} from '../common/cElement';
 import getForage from '../ajax/getForage';
 import setForage from '../ajax/setForage';
 import * as layout from '../support/layout';
@@ -247,7 +248,7 @@ function gotRecipeBook(data) {
     '<span id="rfsh" class="fshLink">' +
     'Refresh</span>]</th>' +
     '</tr></thead></table>';
-  output = document.createElement('div');
+  output = createDiv();
   content.insertAdjacentElement('beforeend', output);
   if (!recipebook) {
     parseInventingStart();

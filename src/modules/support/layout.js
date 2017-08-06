@@ -1,4 +1,10 @@
 import add from './task';
+import {
+  createButton,
+  createDiv,
+  createLi,
+  createUl
+} from '../common/cElement';
 import * as dataObj from './dataObj';
 import * as system from './system';
 
@@ -53,17 +59,18 @@ export function doBuffLinks(members) {
   }, []).reduce(function(prev, curr, i) {
     var theNames = curr.join(',');
     var modifierWord = dataObj.places[i];
-    var li = document.createElement('li');
-    var btn = document.createElement('button');
-    btn.className = 'fshBl fshBls tip-static';
-    btn.dataset.tipped = 'Quick buff functionality from HCS only does 16';
-    btn.textContent = 'Buff ' + modifierWord + ' 16';
+    var li = createLi();
+    var btn = createButton({
+      className: 'fshBl fshBls tip-static',
+      dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
+      textContent: 'Buff ' + modifierWord + ' 16'
+    });
     btn.addEventListener('click',
       openQuickBuffByName.bind(null, theNames));
     li.appendChild(btn);
     prev.appendChild(li);
     return prev;
-  }, document.createElement('ul'));
+  }, createUl());
   return shortList;
 }
 
@@ -202,8 +209,7 @@ export function colouredDots() {
 export function confirm(title, msgText, fn) { // jQuery
   var fshMsg = document.getElementById('fshmsg');
   if (!fshMsg) {
-    fshMsg = document.createElement('div');
-    fshMsg.id = 'fshmsg';
+    fshMsg = createDiv({id: 'fshmsg'});
     document.body.appendChild(fshMsg);
     $(fshMsg).dialog({
       autoOpen: false,

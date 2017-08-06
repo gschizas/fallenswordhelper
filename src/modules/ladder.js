@@ -1,3 +1,4 @@
+import {createTr} from './common/cElement';
 import * as system from './support/system';
 
 function dontPost() {
@@ -31,7 +32,7 @@ function formatTime() {
 
 function lastReset() {
   var topTable = document.querySelector('#pCC table');
-  var newRow = document.createElement('tr');
+  var newRow = createTr();
   var leftCell = newRow.insertCell(-1);
   leftCell.height = 25;
   leftCell.textContent = 'Last Reset:';

@@ -1,3 +1,4 @@
+import {createSpan} from './common/cElement';
 import perfFilter from './common/perfFilter';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -33,9 +34,10 @@ export function injectAuctionHouse() {
     document.getElementById('auto-fill').checked = true;
   }
   document.getElementById('sort0').click();
-  var cancelAll = document.createElement('span');
-  cancelAll.className = 'smallLink';
-  cancelAll.textContent = 'Cancel All';
+  var cancelAll = createSpan({
+    className: 'smallLink',
+    textContent: 'Cancel All'
+  });
   var fill = document.getElementById('fill').parentNode.parentNode
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');

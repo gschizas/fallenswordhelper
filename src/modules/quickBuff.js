@@ -1,3 +1,4 @@
+import {createSpan} from './common/cElement';
 import getProfile from './ajax/getProfile';
 import * as system from './support/system';
 
@@ -91,8 +92,7 @@ function addStatsQuickBuff(data) {
     data.username + '"]');
   var activity = myPlayer.querySelector('span.fshLastActivity');
   if (!activity) {
-    activity = document.createElement('SPAN');
-    activity.className = 'fshLastActivity';
+    activity = createSpan({className: 'fshLastActivity'});
     var player = myPlayer.getElementsByTagName('h1')[0];
     player.insertAdjacentElement('afterend', activity);
   }
@@ -105,8 +105,7 @@ function addStatsQuickBuff(data) {
 
 function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
-    var ret = document.createElement('SPAN');
-    ret.className = 'fshPlayer';
+    var ret = createSpan({className: 'fshPlayer'});
     el.nextElementSibling.insertAdjacentElement('afterend', ret);
     return ret;
   }

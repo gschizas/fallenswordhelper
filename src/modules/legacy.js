@@ -1,4 +1,5 @@
 import calf from './support/calf';
+import {createDiv} from './common/cElement';
 import subscribes from './newMap/newMap';
 import * as debug from './support/debug';
 import * as system from './support/system';
@@ -234,8 +235,7 @@ function checkBuffs() { // Legacy - Old Map
     'and @style="width: 270px;"]]');
   if (!injectHere) {return;}
   // insert after kill all monsters image and text
-  var newSpan = document.createElement('DIV');
-  newSpan.innerHTML = replacementText;
+  var newSpan = createDiv({innerHTML: replacementText});
   injectHere.appendChild(newSpan);
 
   impRecast();

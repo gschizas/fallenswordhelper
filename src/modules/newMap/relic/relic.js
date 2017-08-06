@@ -3,6 +3,7 @@ import getGroupStats from '../../ajax/getGroupStats';
 import getMembrList from '../../ajax/getMembrList';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';
+import {createButton, createDiv} from '../../common/cElement';
 import * as common from '../../common/common';
 import * as dataObj from '../../support/dataObj';
 import * as layout from '../../support/layout';
@@ -258,14 +259,16 @@ function prepareDivs() {
   }
   leftDiv.insertAdjacentHTML('beforeend', assets.proc);
   processingStatus = document.getElementById('ProcessingStatus');
-  midDiv = document.createElement('div');
-  midDiv.className = 'fshFloatLeft midDiv';
-  midDiv.insertAdjacentHTML('beforeend', assets.defStats);
+  midDiv = createDiv({
+    className: 'fshFloatLeft midDiv',
+    innerHTML: assets.defStats
+  });
   containerDiv.appendChild(midDiv);
   setDefVars();
-  rightDiv = document.createElement('div');
-  rightDiv.className = 'fshFloatLeft rightDiv';
-  rightDiv.insertAdjacentHTML('beforeend', assets.atkStats);
+  rightDiv = createDiv({
+    className: 'fshFloatLeft rightDiv',
+    innerHTML: assets.atkStats
+  });
   containerDiv.appendChild(rightDiv);
   setAtkVars();
 }
@@ -377,18 +380,17 @@ function setup() {
   if (containerDiv) {
     containerDiv.innerHTML = '';
   } else {
-    containerDiv = document.createElement('div');
-    containerDiv.className = 'body';
+    containerDiv = createDiv({className: 'body'});
   }
-  leftDiv = document.createElement('div');
-  leftDiv.className = 'fshFloatLeft leftDiv';
+  leftDiv = createDiv({className: 'fshFloatLeft leftDiv'});
   containerDiv.appendChild(leftDiv);
   if (relicData.is_owner) {
     leftDiv.appendChild(layout.doBuffLinks(myDefenders));
   }
-  fetchStatsBtn = document.createElement('button');
-  fetchStatsBtn.className = 'custombutton';
-  fetchStatsBtn.textContent = 'Fetch Stats';
+  fetchStatsBtn = createButton({
+    className: 'custombutton',
+    textContent: 'Fetch Stats'
+  });
   fetchStatsBtn.addEventListener('click', getStats);
   leftDiv.appendChild(fetchStatsBtn);
   var dialogRelic = document.getElementById('dialog-relic');
