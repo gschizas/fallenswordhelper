@@ -1,5 +1,6 @@
 import add from './support/task';
 import calf from './support/calf';
+import {createSpan} from './common/cElement';
 import getMembrList from './ajax/getMembrList';
 import {equipItem, queueRecallItem} from './support/ajax';
 import * as layout from './support/layout';
@@ -157,13 +158,13 @@ function isEquipable(test) {
 }
 
 function mySpan(el) {
-  var inject = document.createElement('span');
   var secondHref = el.children.length === 2;
   var firstHref = hideElement(!secondHref);
   var itemName = el.previousElementSibling.innerHTML;
   var wearable = hideElement(wearRE.test(itemName));
   var equipable = isEquipable(secondHref);
-  inject.innerHTML = '<span' + firstHref +
+  return createSpan({
+    innerHTML: '<span' + firstHref +
     '> | <span class="sendLink recall tip-static" data-tipped="' +
     'Click to recall to backpack" mode="0" action="recall">Fast BP' +
     '</span></span>' +
@@ -173,8 +174,8 @@ function mySpan(el) {
     '<span' + wearable +
     '> | <span class="sendLink ' +
     equipable +
-    '" mode="0" action="wear">Fast Wear</span></span>';
-  return inject;
+    '" mode="0" action="wear">Fast Wear</span></span>'
+  });
 }
 
 function doSpan(el) {

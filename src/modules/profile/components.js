@@ -1,4 +1,9 @@
-import cElement from '../common/cElement';
+import {
+  createDiv,
+  createSpan,
+  createTBody,
+  createTable
+} from '../common/cElement';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -55,8 +60,8 @@ function tallyTableRow(prev, id) {
 }
 
 function displayComponentTally() {
-  var tbl = cElement('table', {className: 'fshTblCenter'});
-  var tBody = cElement('tbody');
+  var tbl = createTable({className: 'fshTblCenter'});
+  var tBody = createTBody();
   tbl.appendChild(tBody);
   tBody.insertAdjacentHTML('beforeend',
     '<tr><td colspan="3">Component Summary</td></tr>' +
@@ -65,7 +70,7 @@ function displayComponentTally() {
   totRow.insertAdjacentHTML('beforeend', '<td>Total:</td>');
   var totCell = totRow.insertCell(-1);
   totCell.colSpan = 2;
-  usedCountDom = cElement('span');
+  usedCountDom = createSpan();
   usedCountDom.innerHTML = usedCount.toString();
   totCell.appendChild(usedCountDom);
   totCell.insertAdjacentText('beforeend', ' / ' + totalCount.toString());
@@ -185,7 +190,8 @@ function compEvt(evt) {
 }
 
 function decorateButton(parentDiv, label) {
-  var innerSpan = cElement('span', {className: 'sendLink', textContent: label});
+  var innerSpan = createSpan(
+    {className: 'sendLink', textContent: label});
   parentDiv.textContent = '[';
   parentDiv.appendChild(innerSpan);
   parentDiv.insertAdjacentHTML('beforeend', ']');
@@ -198,10 +204,10 @@ export default function profileComponents() {
   thisInvTable = invTables[1];
   var compDiv = thisInvTable.parentNode;
   if (compDiv.style.display !== 'block') {return;}
-  var cmDiv = cElement('div', {className: 'fshCenter'});
-  quickDelDiv = cElement('div');
-  sumComp = cElement('div');
-  delAllDiv = cElement('div', {className: 'fshHide'});
+  var cmDiv = createDiv({className: 'fshCenter'});
+  quickDelDiv = createDiv();
+  sumComp = createDiv();
+  delAllDiv = createDiv({className: 'fshHide'});
   compDel = decorateButton(quickDelDiv, 'Enable Quick Del');
   compSum = decorateButton(sumComp, 'Count Components');
   compDelAll = decorateButton(delAllDiv, 'Delete All Visible');

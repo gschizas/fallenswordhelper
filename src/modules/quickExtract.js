@@ -1,3 +1,4 @@
+import {createTable} from './common/cElement';
 import getInventory from './ajax/getInventory';
 import {useItem} from './support/ajax';
 import * as layout from './support/layout';
@@ -142,9 +143,8 @@ export default function insertQuickExtract(injector) { // jQuery.min
     '<label><input type="checkbox" id="fshInSt" checked>' +
     ' Select items in ST</label>&nbsp;&nbsp;' +
     '<label><input type="checkbox" id="fshInMain" checked>' +
-    ' Only extract items in Main Folder</label>'; // +
-  extTbl = document.createElement('table');
-  extTbl.width = '100%';
+    ' Only extract items in Main Folder</label>';
+  extTbl = createTable({width: '100%'});
   content.appendChild(extTbl);
   selectST = true;
   selectMain = true;

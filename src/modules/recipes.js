@@ -1,3 +1,4 @@
+import {createTd} from './common/cElement';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -57,10 +58,11 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
   var plantFromComponent = system.fallback(plantFromComponentHash[itemName],
     itemName);
   if (itemName !== plantFromComponent) {
-    var itemLinks = document.createElement('td');
-    itemLinks.innerHTML = '<a href="' + system.server +
-      '?cmd=auctionhouse&search_text=' +
-      encodeURI(plantFromComponent) + '">AH</a>';
+    var itemLinks = createTd({
+      innerHTML: '<a href="' + system.server +
+        '?cmd=auctionhouse&search_text=' +
+        encodeURI(plantFromComponent) + '">AH</a>'
+    });
     var counter = system.findNode('../../../../tr[2]/td', callback);
     counter.setAttribute('colspan', '2');
     callback.parentNode.parentNode.parentNode.appendChild(itemLinks);

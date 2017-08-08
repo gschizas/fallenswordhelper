@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {createTd, createTr} from '../common/cElement';
 import * as layout from '../support/layout';
 
 function extraButtons() {
@@ -10,10 +11,8 @@ function extraButtons() {
 export default function doFolderButtons(folders) {
   if (calf.subcmd2 === 'storeitems') {
     var formNode = layout.pCC.getElementsByTagName('form')[0];
-    var tr = document.createElement('tr');
-    tr.className = 'fshCenter';
-    var insertHere = document.createElement('td');
-    insertHere.colSpan = 3;
+    var tr = createTr({className: 'fshCenter'});
+    var insertHere = createTd({colSpan: 3});
     tr.appendChild(insertHere);
     formNode.parentNode.insertBefore(tr, formNode);
     var inject = '<span class="fshLink folder" data-folder="0">All</span>' +

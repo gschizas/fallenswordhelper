@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {createSpan} from '../common/cElement';
 import * as system from '../support/system';
 
 function pvpXp(color, xpGain) { // Legacy
@@ -84,8 +85,7 @@ export default function addPvpSummary(aRow, messageType) { // Legacy
     var defeat = /You were defeated by/.test(aRow.cells[2].innerHTML);
     var _winner = 1;
     if (defeat) {_winner = 0;}
-    var combatSummarySpan = document.createElement('SPAN');
-    combatSummarySpan.style.color = 'gray';
+    var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
     system.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,

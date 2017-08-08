@@ -1,5 +1,6 @@
 import addGuildLogWidgets from '../logs/addGuildLogWidgets';
 import addLogColoring from '../logs/addLogColoring';
+import {createTable} from '../common/cElement';
 import getForage from '../ajax/getForage';
 import setForage from '../ajax/setForage';
 import * as assets from './assets';
@@ -109,9 +110,7 @@ function updateOptionsLog() {
 }
 
 function buildTable() {
-  myTable = document.createElement('table');
-  myTable.id = 'fshInjectHere';
-  myTable.className = 'width_full';
+  myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
   myTable.insertAdjacentHTML('beforeend', assets.headerRow);
 
   tmpGuildLog.forEach(function(r) {

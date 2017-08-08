@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {createBr, createTable} from '../common/cElement';
 import * as system from '../support/system';
 
 var bountyList;
@@ -20,9 +21,7 @@ function injectBountyList() {
   system.setValueJSON('bountyList', bountyList);
   var injectHere = document
     .getElementById('Helper:BountyListPlaceholder');
-  var displayList = document.createElement('TABLE');
-  displayList.cellPadding = 1;
-  displayList.width = 125;
+  var displayList = createTable({cellPadding: 1, width: 125});
 
   var aRow = displayList.insertRow(0); // bountyList.rows.length
   var aCell = aRow.insertCell(0);
@@ -60,7 +59,7 @@ function injectBountyList() {
   }
 
   aCell.innerHTML = output;
-  var breaker = document.createElement('BR');
+  var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
   document.getElementById('Helper:resetBountyList')
@@ -88,9 +87,7 @@ function injectWantedList() { // Legacy
   system.setValueJSON('wantedList', wantedList);
   var injectHere = document
     .getElementById('Helper:WantedListPlaceholder');
-  var displayList = document.createElement('TABLE');
-  displayList.cellPadding = 3;
-  displayList.width = 125;
+  var displayList = createTable({cellPadding: 3, width: 125});
 
   var aRow = displayList.insertRow(0);
   var aCell = aRow.insertCell(0);
@@ -127,7 +124,7 @@ function injectWantedList() { // Legacy
   }
 
   aCell.innerHTML = output;
-  var breaker = document.createElement('BR');
+  var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
   document.getElementById('Helper:resetWantedList')

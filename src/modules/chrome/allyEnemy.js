@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import {createDiv} from '../common/cElement';
 import myStats from '../ajax/myStats';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
@@ -193,9 +194,10 @@ function eventHandler(evt) {
 }
 
 function makeDiv(data) {
-  var fshAllyEnemy = document.createElement('DIV');
-  fshAllyEnemy.id = 'fshAllyEnemy';
-  fshAllyEnemy.className = 'minibox';
+  var fshAllyEnemy = createDiv({
+    id: 'fshAllyEnemy',
+    className: 'minibox'
+  });
   var wrapper = '<h3>Allies/Enemies</h3><div class="minibox-content">' +
     '<h4>Online Contacts <span id="fshResetEnemy">Reset</span></h4>' +
     '<div id="minibox-enemy"><ul id="fshContactList"></ul>';

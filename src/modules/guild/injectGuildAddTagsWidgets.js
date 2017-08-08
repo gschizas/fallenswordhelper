@@ -1,3 +1,4 @@
+import {createInput} from '../common/cElement';
 import {takeItem} from '../support/ajax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
@@ -47,8 +48,6 @@ export default function injectGuildAddTagsWidgets() {
   var itemTable = nodeList[nodeList.length - 1];
   if (itemTable) {doItemTable(itemTable.rows);}
 
-  var checkAll = document.createElement('input');
-  checkAll.type = 'button';
-  checkAll.value = 'Check All';
+  var checkAll = createInput({type: 'button', value: 'Check All'});
   nodeList[0].rows[5].cells[0].appendChild(checkAll);
 }

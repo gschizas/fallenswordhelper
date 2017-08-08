@@ -1,4 +1,5 @@
 import {closestTable} from './closest';
+import {createDiv} from './cElement';
 
 function reduceStatTable(prev, curr, index) {
   var key = curr.cells[0].textContent.trim().replace(':', '');
@@ -39,7 +40,7 @@ function addStats(el) {
 }
 
 function fshDataFilter(data) {
-  var container = document.createElement('div');
+  var container = createDiv();
   container.insertAdjacentHTML('beforeend', data);
   var bonus = container.getElementsByTagName('font');
   bonus = Array.prototype.filter.call(bonus, function(el) {

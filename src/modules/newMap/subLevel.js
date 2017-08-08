@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {createDiv} from '../common/cElement';
 import {huntingBuffsHtml} from '../settings/worldPrefs';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import * as system from '../support/system';
@@ -85,17 +86,16 @@ function prefsClickEvent(e) {
 }
 
 function buildFshDivs() {
-  var fshDiv = document.createElement('div');
-  fshDiv.className = 'fshCenter fshFten';
-  var prefsDiv = document.createElement('div');
+  var fshDiv = createDiv({className: 'fshCenter fshFten'});
+  var prefsDiv = createDiv({
+    innerHTML: simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+      huntingBuffsHtml()
+  });
   prefsDiv.addEventListener('click', prefsClickEvent);
   prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  prefsDiv.insertAdjacentHTML('beforeend',
-    simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-    simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-    huntingBuffsHtml());
   fshDiv.insertAdjacentElement('beforeend', prefsDiv);
-  missingBuffsDiv = document.createElement('div');
+  missingBuffsDiv = createDiv();
   fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
   var worldContainerBelow = document.getElementById('worldContainerBelow');
   worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);

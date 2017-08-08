@@ -1,5 +1,6 @@
 import getProfile from './ajax/getProfile';
 import myStats from './ajax/myStats';
+import {createInput, createSpan} from './common/cElement';
 import * as common from './common/common';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -21,7 +22,7 @@ function doOnlineDot(aTable, data) {
   }
   //#if _DEV  //  get cloaked players
   var defender = common.playerDataObject(data);
-  if (defender.cloakLevel !== 0) {console.log('data', data);} // eslint-disable-line no-console
+  if (defender.cloakLevel !== 0) {console.log('Cloaked Player', data);} // eslint-disable-line no-console
   //#endif
 }
 
@@ -54,10 +55,13 @@ function findOnlinePlayers() { // jQuery
 
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
-  spinner = document.createElement('span');
-  spinner.className = 'fshSpinner fshTopListSpinner';
-  spinner.style.backgroundImage = 'url(\'' + system.imageServer +
-    '/world/actionLoadingSpinner.gif\')';
+  spinner = createSpan({
+    className: 'fshSpinner fshTopListSpinner',
+    style: {
+      backgroundImage: 'url(\'' + system.imageServer +
+        '/world/actionLoadingSpinner.gif\')'
+    }
+  });
   e.target.parentNode.replaceChild(spinner, e.target);
   if (highlightPlayersNearMyLvl) {
     myStats(false).done(function(data) {
@@ -73,12 +77,15 @@ function looksLikeTopRated() {
     system.getValue('highlightPlayersNearMyLvl');
   var theCell = layout.pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
-  var findBtn = document.createElement('INPUT');
-  findBtn.className = 'fshFindOnlinePlayers custombutton tip-static';
-  findBtn.setAttribute('type', 'button');
-  findBtn.setAttribute('value', 'Find Online Players');
-  findBtn.setAttribute('data-tipped', 'Fetch the online status of the ' +
-    'top 250 players (warning ... takes a few seconds).');
+  var findBtn = createInput({
+    className: 'fshFindOnlinePlayers custombutton tip-static',
+    type: 'button',
+    value: 'Find Online Players',
+    dataset: {
+      tipped: 'Fetch the online status of the ' +
+        'top 250 players (warning ... takes a few seconds).'
+    }
+  });
   theCell.insertBefore(findBtn, theCell.firstElementChild);
   findBtn.addEventListener('click', getMyVL);
 }

@@ -1,4 +1,5 @@
 import add from './support/task';
+import {createInput} from './common/cElement';
 import getMembrList from './ajax/getMembrList';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -87,11 +88,12 @@ function ajaxifyRankControls(evt) { // jQuery
 
 function doButtons() {
   // gather rank info button
-  var weightButton = document.createElement('input');
-  weightButton.id = 'getrankweightings';
-  weightButton.className = 'custombutton';
-  weightButton.setAttribute('type', 'button');
-  weightButton.setAttribute('value', 'Get Rank Weightings');
+  var weightButton = createInput({
+    id: 'getrankweightings',
+    className: 'custombutton',
+    type: 'button',
+    value: 'Get Rank Weightings'
+  });
   weightButton.addEventListener('click', fetchRankData);
   var theTd = document.getElementById('show-guild-founder-rank-name')
     .parentNode;

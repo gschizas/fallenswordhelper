@@ -7,7 +7,7 @@ var itemList;
 var playerId;
 
 function itemName(item) {
-  return item.extra && item.extra.name || item.n;
+  return item.n;
 }
 
 function foundInvItem(invCount, name) { // Legacy
@@ -101,7 +101,7 @@ function equipProfileInventoryItem(evt) { // Legacy
 
 function itemImage(item) {
   var ret = system.imageServer + '/';
-  if (item.extra) {
+  if (item.b === 13699) {
     ret += 'composing/potions/' + item.extra.design + '_' +
       item.extra.color + '.gif';
   } else {

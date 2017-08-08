@@ -1,15 +1,14 @@
 import add from './support/task';
 import calf from './support/calf';
 import getInventoryById from './ajax/getInventoryById';
+import {createDiv, createTr} from './common/cElement';
 import * as debug from './support/debug';
 import * as system from './support/system';
 
 function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
-    itemDiv = document.createElement('div');
-    itemDiv.id = 'item-div';
-    itemDiv.className = 'itemDiv';
+    itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
     var itemList = document.getElementById('item-list');
     var oldItems = itemList.getElementsByTagName('table');
     while (oldItems.length) {
@@ -48,8 +47,6 @@ function hideFolder(evt) {
 }
 
 function doFolderHeaders(folders) {
-  var foldersRow = document.createElement('tr');
-  foldersRow.id = 'fshFolderSelect';
   var folderCell = '<td colspan=6>';
   // append main folder
   folderCell += '<span id="folderid0" class="fshLink" fid=0>All</span>' +
@@ -59,7 +56,10 @@ function doFolderHeaders(folders) {
       '" class="fshLink fshNoWrap" fid=' + key + '>' +
       folders[key] + '</span> ';
   });
-  foldersRow.insertAdjacentHTML('afterbegin', folderCell);
+  var foldersRow = createTr({
+    id: 'fshFolderSelect',
+    innerHTML: folderCell
+  });
   foldersRow.addEventListener('click', hideFolder);
   var multiple = document.getElementById('fshSelectMultiple');
   multiple.insertAdjacentHTML('afterend', '<tr id="fshShowSTs">' +
@@ -148,8 +148,6 @@ function toggleAllPlants(evt) {
 }
 
 function injectTradeOld() {
-  var multiple = document.createElement('tr');
-  multiple.id = 'fshSelectMultiple';
   var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
     'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
     '<span id="itemid-2" ' +
@@ -162,7 +160,10 @@ function injectTradeOld() {
   });
   myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
     'class="custominput" value="all" size=3></td>';
-  multiple.insertAdjacentHTML('afterbegin', myTd);
+  var multiple = createTr({
+    id: 'fshSelectMultiple',
+    innerHTML: myTd
+  });
   multiple.addEventListener('click', toggleAllPlants);
   var el = document.getElementById('item-list').parentNode.parentNode;
   el.parentNode.insertBefore(multiple, el);

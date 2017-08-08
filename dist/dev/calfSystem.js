@@ -1212,6 +1212,74 @@ function getForage(forage) {
   return dfr.promise();
 }
 
+function mixin(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+      mixin(obj[key], mixins[key]);
+    } else {
+      obj[key] = mixins[key];
+    }
+  });
+}
+
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {mixin(el, props);}
+  return el;
+}
+
+function createDiv(props) {
+  return cElement('div', props);
+}
+
+function createSpan(props) {
+  return cElement('span', props);
+}
+
+function createTable(props) {
+  return cElement('table', props);
+}
+
+function createTBody(props) {
+  return cElement('tbody', props);
+}
+
+function createTr(props) {
+  return cElement('tr', props);
+}
+
+function createTd(props) {
+  return cElement('td', props);
+}
+
+function createTFoot(props) {
+  return cElement('tfoot', props);
+}
+
+function createUl(props) {
+  return cElement('ul', props);
+}
+
+function createLi(props) {
+  return cElement('li', props);
+}
+
+function createButton(props) {
+  return cElement('button', props);
+}
+
+function createBr() {
+  return cElement('br');
+}
+
+function createAnchor(props) {
+  return cElement('a', props);
+}
+
+function createInput(props) {
+  return cElement('input', props);
+}
+
 function setForage(forage, data) {
   // Wrap in jQuery Deferred because we're using 1.7
   // rather than using ES6 promise
@@ -1270,17 +1338,18 @@ function doBuffLinks(members) {
   }, []).reduce(function(prev, curr, i) {
     var theNames = curr.join(',');
     var modifierWord = places[i];
-    var li = document.createElement('li');
-    var btn = document.createElement('button');
-    btn.className = 'fshBl fshBls tip-static';
-    btn.dataset.tipped = 'Quick buff functionality from HCS only does 16';
-    btn.textContent = 'Buff ' + modifierWord + ' 16';
+    var li = createLi();
+    var btn = createButton({
+      className: 'fshBl fshBls tip-static',
+      dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
+      textContent: 'Buff ' + modifierWord + ' 16'
+    });
     btn.addEventListener('click',
       openQuickBuffByName.bind(null, theNames));
     li.appendChild(btn);
     prev.appendChild(li);
     return prev;
-  }, document.createElement('ul'));
+  }, createUl());
   return shortList;
 }
 
@@ -1419,8 +1488,7 @@ function colouredDots() {
 function confirm(title, msgText, fn) { // jQuery
   var fshMsg = document.getElementById('fshmsg');
   if (!fshMsg) {
-    fshMsg = document.createElement('div');
-    fshMsg.id = 'fshmsg';
+    fshMsg = createDiv({id: 'fshmsg'});
     document.body.appendChild(fshMsg);
     $(fshMsg).dialog({
       autoOpen: false,
@@ -1962,7 +2030,7 @@ function gotRecipeBook(data) {
     '<span id="rfsh" class="fshLink">' +
     'Refresh</span>]</th>' +
     '</tr></thead></table>';
-  output = document.createElement('div');
+  output = createDiv();
   content$1.insertAdjacentElement('beforeend', output);
   if (!recipebook) {
     parseInventingStart();
@@ -2271,9 +2339,8 @@ function insertQuickExtract(injector) { // jQuery.min
     '<label><input type="checkbox" id="fshInSt" checked>' +
     ' Select items in ST</label>&nbsp;&nbsp;' +
     '<label><input type="checkbox" id="fshInMain" checked>' +
-    ' Only extract items in Main Folder</label>'; // +
-  extTbl = document.createElement('table');
-  extTbl.width = '100%';
+    ' Only extract items in Main Folder</label>';
+  extTbl = createTable({width: '100%'});
   content.appendChild(extTbl);
   selectST = true;
   selectMain = true;
@@ -2286,7 +2353,7 @@ var itemList;
 var playerId$3;
 
 function itemName(item) {
-  return item.extra && item.extra.name || item.n;
+  return item.n;
 }
 
 function foundInvItem(invCount, name) { // Legacy
@@ -2380,7 +2447,7 @@ function equipProfileInventoryItem(evt) { // Legacy
 
 function itemImage(item) {
   var ret = imageServer + '/';
-  if (item.extra) {
+  if (item.b === 13699) {
     ret += 'composing/potions/' + item.extra.design + '_' +
       item.extra.color + '.gif';
   } else {
@@ -3765,14 +3832,15 @@ function showMonsterLogs() {
 }
 
 function createEventListeners() {
-  var tickAll = document.createElement('span');
-  tickAll.id = 'fshAllBuffs';
-  tickAll.className = 'fshLink';
-  tickAll.textContent = 'Tick all buffs';
+  var tickAll = createSpan({
+    id: 'fshAllBuffs',
+    className: 'fshLink',
+    textContent: 'Tick all buffs'
+  });
   tickAll.addEventListener('click', toggleTickAllBuffs);
   var inject = document.getElementById('settingsTabs-4').firstElementChild
     .rows[0].cells[0];
-  inject.appendChild(document.createElement('br'));
+  inject.appendChild(createBr());
   inject.appendChild(tickAll);
 
   document.getElementById('fshClearStorage')
@@ -4720,9 +4788,10 @@ var functionLookup = {
 function callHelperFunction(evt) { // jQuery
   var content = document.getElementById('content');
   if (content) {content.innerHTML = '';} else {
-    content = document.createElement('DIV');
-    content.id = 'content';
-    content.style.display = 'none';
+    content = createDiv({
+      id: 'content',
+      style: {display: 'none'}
+    });
     document.body.appendChild(content);
   }
   var functionPath = evt.target.textContent;
@@ -4748,11 +4817,14 @@ function showHelperMenu() {
   var helperMenu = document.getElementById('helperMenu');
   helperMenu.removeEventListener('mouseenter', showHelperMenu);
 
-  var helperMenuDiv = document.createElement('DIV');
-  helperMenuDiv.id = 'helperMenuDiv';
-  helperMenuDiv.className = 'helperMenuDiv';
-  helperMenuDiv.style.backgroundImage = 'url(' + imageServer +
-    '/skin/inner_bg.jpg)';
+  var helperMenuDiv = createDiv({
+    id: 'helperMenuDiv',
+    className: 'helperMenuDiv',
+    style: {
+      backgroundImage: 'url(' + imageServer +
+        '/skin/inner_bg.jpg)'
+    }
+  });
   helperMenuDiv.insertAdjacentHTML('beforeend', helperMenuBlob);
   helperMenu.appendChild(helperMenuDiv);
   helperMenu.addEventListener('click', function(evt) {
@@ -4764,13 +4836,14 @@ function showHelperMenu() {
 }
 
 function haveNode$1(node) {
-  var helperMenu = document.createElement('DIV');
-  helperMenu.id = 'helperMenu';
-  helperMenu.className = 'helperMenu';
+  var helperMenu = createDiv({
+    id: 'helperMenu',
+    className: 'helperMenu',
+    innerHTML: 'Helper&nbsp;Menu'
+  });
   if (getValue('keepHelperMenuOnScreen')) {
     helperMenu.classList.add('fshFixed');
   }
-  helperMenu.innerHTML = 'Helper&nbsp;Menu';
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (getValue('draggableHelperMenu')) {
     helperMenu.setAttribute('draggable', 'true');
@@ -5299,9 +5372,10 @@ function eventHandler$1(evt) {
 }
 
 function makeDiv(data) {
-  var fshAllyEnemy = document.createElement('DIV');
-  fshAllyEnemy.id = 'fshAllyEnemy';
-  fshAllyEnemy.className = 'minibox';
+  var fshAllyEnemy = createDiv({
+    id: 'fshAllyEnemy',
+    className: 'minibox'
+  });
   var wrapper = '<h3>Allies/Enemies</h3><div class="minibox-content">' +
     '<h4>Online Contacts <span id="fshResetEnemy">Reset</span></h4>' +
     '<div id="minibox-enemy"><ul id="fshContactList"></ul>';
@@ -5342,9 +5416,7 @@ function injectBountyList() {
   setValueJSON('bountyList', bountyList);
   var injectHere = document
     .getElementById('Helper:BountyListPlaceholder');
-  var displayList = document.createElement('TABLE');
-  displayList.cellPadding = 1;
-  displayList.width = 125;
+  var displayList = createTable({cellPadding: 1, width: 125});
 
   var aRow = displayList.insertRow(0); // bountyList.rows.length
   var aCell = aRow.insertCell(0);
@@ -5382,7 +5454,7 @@ function injectBountyList() {
   }
 
   aCell.innerHTML = output;
-  var breaker = document.createElement('BR');
+  var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
   document.getElementById('Helper:resetBountyList')
@@ -5410,9 +5482,7 @@ function injectWantedList() { // Legacy
   setValueJSON('wantedList', wantedList);
   var injectHere = document
     .getElementById('Helper:WantedListPlaceholder');
-  var displayList = document.createElement('TABLE');
-  displayList.cellPadding = 3;
-  displayList.width = 125;
+  var displayList = createTable({cellPadding: 3, width: 125});
 
   var aRow = displayList.insertRow(0);
   var aCell = aRow.insertCell(0);
@@ -5449,7 +5519,7 @@ function injectWantedList() { // Legacy
   }
 
   aCell.innerHTML = output;
-  var breaker = document.createElement('BR');
+  var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
   document.getElementById('Helper:resetWantedList')
@@ -5854,8 +5924,7 @@ function replaceKeyHandler() {
 }
 
 function statbarWrapper(href, id) {
-  var myWrapper = document.createElement('a');
-  myWrapper.setAttribute('href', href);
+  var myWrapper = createAnchor({href: href});
   var character = document.getElementById(id);
   var statWrapper = character.parentNode;
   myWrapper.appendChild(character);
@@ -5866,13 +5935,12 @@ function statbarWrapper(href, id) {
 }
 
 function statbar() {
-  var sw = statbarWrapper;
-  sw('index.php?cmd=profile', 'statbar-character');
-  sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
-  sw('index.php?cmd=blacksmith', 'statbar-equipment');
-  sw('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
-  sw('index.php?cmd=points', 'statbar-fsp');
-  sw('index.php?cmd=bank', 'statbar-gold');
+  statbarWrapper('index.php?cmd=profile', 'statbar-character');
+  statbarWrapper('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
+  statbarWrapper('index.php?cmd=blacksmith', 'statbar-equipment');
+  statbarWrapper('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
+  statbarWrapper('index.php?cmd=points', 'statbar-fsp');
+  statbarWrapper('index.php?cmd=bank', 'statbar-gold');
 }
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -6626,15 +6694,15 @@ function addHistoryWidgets() { // Legacy
   textArea.value = textArea.value.replace(/<br \/>/ig, '');
   var textAreaDiv = textArea.parentNode;
   var bioPreviewHTML = convertTextToHtml(textArea.value);
-  var newDiv = document.createElement('div');
-  textAreaDiv.appendChild(newDiv);
-  newDiv.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
+  var newDiv = createDiv({
+    innerHTML: '<table align="center" width="325" border="1"><tbody>' +
     '<tr><td style="text-align:center;color:#7D2252;' +
     'background-color:#CD9E4B">Preview</td></tr>' +
     '<tr><td align="left" width="325"><span style="font-size:small;" ' +
     'findme="biopreview">' + bioPreviewHTML +
-    '</span></td></tr></tbody></table>';
-
+    '</span></td></tr></tbody></table>'
+  });
+  textAreaDiv.appendChild(newDiv);
   document.getElementById('textInputBox').addEventListener('keyup',
     updateHistoryCharacters);
 }
@@ -6738,8 +6806,7 @@ function selectPerf() {
 
 function drawFilters(data) {
   inv = data.items;
-  var buttonDiv = document.createElement('div');
-  buttonDiv.className = 'fshAC';
+  var buttonDiv = createDiv({className: 'fshAC'});
   buttonDiv.insertAdjacentHTML('beforeend',
     '<button class="fshBl">Perfect</button>');
   pCC.appendChild(buttonDiv);
@@ -6989,65 +7056,6 @@ function summaryLink() {
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
 }
 
-/*
-function injectAdvisorDable() {
-
-  var advisorTable = layout.pCC.firstElementChild
-    .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
-
-  // for (var i = advisorTable.attributes.length - 1; i >= 0; i--){
-    // advisorTable.removeAttribute(advisorTable.attributes[i].name);
-  // }
-
-  // Array.prototype.forEach.call(advisorTable.rows, function(row) {
-    // Array.prototype.forEach.call(row.cells, function(cell) {
-      // cell.removeAttribute('align');
-      // cell.removeAttribute('bgcolor');
-      // cell.removeAttribute('class');
-      // cell.removeAttribute('width');
-      // var oldChild = cell.removeChild(cell.firstElementChild);
-      // cell.textContent = oldChild.textContent.trim().replace(/,/g, '');
-    // });
-  // });
-
-  var tBody = advisorTable.firstElementChild;
-
-  var firstRow = tBody.firstElementChild;
-  firstRow.innerHTML = firstRow.innerHTML.replace(/td/g, 'th');
-  var lastRow = tBody.lastElementChild;
-
-  var myHead = advisorTable.createTHead();
-  myHead.appendChild(firstRow);
-
-  var myFoot = advisorTable.createTFoot();
-  myFoot.appendChild(lastRow);
-
-  var wrapperDiv = document.createElement('DIV');
-  wrapperDiv.id = 'fshWrapper';
-
-  advisorTable.parentNode.appendChild(wrapperDiv);
-  wrapperDiv.appendChild(advisorTable);
-
-  // advisorTable.parentNode.removeChild(advisorTable);
-  // wrapperDiv.innerHTML =
-    // '<table><thead>' +
-    // '<tr><th>member</th><th>depo</th></tr>' +
-    // '</thead><tbody>' +
-    // '<tr><td>1</td><td>2</td></tr>' +
-    // '<tr><td>3</td><td>4</td></tr>' +
-    // '</tbody></table>';
-  // document.body.innerHTML = '';
-  // document.body.appendChild(wrapperDiv);
-
-  console.log('fshWrapper', wrapperDiv); // DEV Only
-  var dable = new Dable(wrapperDiv);
-
-  dable.style = 'bootstrap';
-  dable.UpdateStyle();
-
-}
-*/
-
 function playerName$2(f) {
   if (!membrList[f]) {return f;}
   return '<a href="index.php?cmd=profile&player_id=' +
@@ -7075,7 +7083,7 @@ function injectAdvisorNew() {
   var totalCell = totalRow.firstElementChild;
   totalCell.className = 'fshRight';
   totalCell.setAttribute('colspan', '3');
-  var tfoot = document.createElement('TFOOT');
+  var tfoot = createTFoot();
   tfoot.insertAdjacentElement('beforeend', totalRow);
   list.className = 'fshXSmall hover';
   list.firstElementChild
@@ -7243,7 +7251,6 @@ function injectAdvisor() {
     getMembrList(false).done(function(response) {
       membrList = response;
       add(3, injectAdvisorNew);
-      // add(3, injectAdvisorDable, [membrList]);
     });
   }
 }
@@ -7821,15 +7828,16 @@ function changeHeight() {
 }
 
 function bioHeight() {
-  var bioEditLinesDiv = document.createElement('DIV');
-  bioEditLinesDiv.insertAdjacentHTML('beforeend',
-    ' Display <input id="fshLinesToShow"' +
-    ' type="number" min="1" max="99" value="' +
-    bioEditLines + '"/> Lines ');
-  var saveLines = document.createElement('INPUT');
-  saveLines.className = 'custombutton';
-  saveLines.value = 'Update Rows To Show';
-  saveLines.type = 'button';
+  var bioEditLinesDiv = createDiv({
+    innerHTML: ' Display <input id="fshLinesToShow"' +
+      ' type="number" min="1" max="99" value="' +
+      bioEditLines + '"/> Lines '
+  });
+  var saveLines = createInput({
+    className: 'custombutton',
+    value: 'Update Rows To Show',
+    type: 'button'
+  });
   saveLines.addEventListener('click', changeHeight);
   bioEditLinesDiv.appendChild(saveLines);
   pCC.appendChild(bioEditLinesDiv);
@@ -8078,9 +8086,7 @@ function injectGuildAddTagsWidgets() {
   var itemTable = nodeList[nodeList.length - 1];
   if (itemTable) {doItemTable(itemTable.rows);}
 
-  var checkAll = document.createElement('input');
-  checkAll.type = 'button';
-  checkAll.value = 'Check All';
+  var checkAll = createInput({type: 'button', value: 'Check All'});
   nodeList[0].rows[5].cells[0].appendChild(checkAll);
 }
 
@@ -8168,11 +8174,12 @@ function ajaxifyRankControls(evt) { // jQuery
 
 function doButtons() {
   // gather rank info button
-  var weightButton = document.createElement('input');
-  weightButton.id = 'getrankweightings';
-  weightButton.className = 'custombutton';
-  weightButton.setAttribute('type', 'button');
-  weightButton.setAttribute('value', 'Get Rank Weightings');
+  var weightButton = createInput({
+    id: 'getrankweightings',
+    className: 'custombutton',
+    type: 'button',
+    value: 'Get Rank Weightings'
+  });
   weightButton.addEventListener('click', fetchRankData);
   var theTd = document.getElementById('show-guild-founder-rank-name')
     .parentNode;
@@ -9931,9 +9938,7 @@ function updateOptionsLog() {
 }
 
 function buildTable() {
-  myTable = document.createElement('table');
-  myTable.id = 'fshInjectHere';
-  myTable.className = 'width_full';
+  myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
   myTable.insertAdjacentHTML('beforeend', headerRow);
 
   tmpGuildLog.forEach(function(r) {
@@ -10097,7 +10102,7 @@ function addStats$1(el) {
 }
 
 function fshDataFilter(data) {
-  var container = document.createElement('div');
+  var container = createDiv();
   container.insertAdjacentHTML('beforeend', data);
   var bonus = container.getElementsByTagName('font');
   bonus = Array.prototype.filter.call(bonus, function(el) {
@@ -10221,15 +10226,14 @@ function actionText(usable) {
 
 function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
-  var myDiv = document.createElement('DIV');
-  myDiv.className = 'fastDiv';
-  myDiv.insertAdjacentHTML('beforeend', '<span class="' +
-    actionClass(toUse) + '" itemid="' +
-    theSpan.getAttribute('data-inv') + '">' +
-    actionText(toUse) + '</span>&nbsp;');
+  var myDiv = createDiv({
+    className: 'fastDiv',
+    innerHTML: '<span class="' + actionClass(toUse) +
+      '" itemid="' + theSpan.getAttribute('data-inv') + '">' +
+      actionText(toUse) + '</span>&nbsp;'
+  });
   if (theSpan.parentNode.nextElementSibling) {
-    myDiv.appendChild(
-      theSpan.parentNode.nextElementSibling.nextElementSibling);
+    myDiv.appendChild(theSpan.parentNode.nextElementSibling.nextElementSibling);
   }
   theSpan.parentNode.parentNode.appendChild(myDiv);
 }
@@ -10287,26 +10291,16 @@ function nekidBtn() {
   var profileRightColumn = document.getElementById('profileRightColumn');
   profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
   var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
-  var nekidDiv = document.createElement('div');
-  nekidDiv.className = 'fshCenter';
-  var theBtn = document.createElement('button');
-  theBtn.className = 'fshBl fshBls';
-  theBtn.textContent = 'Nekid';
+  var nekidDiv = createDiv({className: 'fshCenter'});
+  var theBtn = createButton({
+    className: 'fshBl fshBls',
+    textContent: 'Nekid'
+  });
   nekidDiv.insertAdjacentText('beforeend', '[ ');
   nekidDiv.insertAdjacentElement('beforeend', theBtn);
   nekidDiv.insertAdjacentText('beforeend', ' ]');
   profileRightColumn.replaceChild(nekidDiv, targetBr);
   theBtn.addEventListener('click', getNekid);
-}
-
-function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {
-    Object.keys(props).forEach(function(prop) {
-      el[prop] = props[prop];
-    });
-  }
-  return el;
 }
 
 var quickDelDiv;
@@ -10362,8 +10356,8 @@ function tallyTableRow(prev, id) {
 }
 
 function displayComponentTally() {
-  var tbl = cElement('table', {className: 'fshTblCenter'});
-  var tBody = cElement('tbody');
+  var tbl = createTable({className: 'fshTblCenter'});
+  var tBody = createTBody();
   tbl.appendChild(tBody);
   tBody.insertAdjacentHTML('beforeend',
     '<tr><td colspan="3">Component Summary</td></tr>' +
@@ -10372,7 +10366,7 @@ function displayComponentTally() {
   totRow.insertAdjacentHTML('beforeend', '<td>Total:</td>');
   var totCell = totRow.insertCell(-1);
   totCell.colSpan = 2;
-  usedCountDom = cElement('span');
+  usedCountDom = createSpan();
   usedCountDom.innerHTML = usedCount.toString();
   totCell.appendChild(usedCountDom);
   totCell.insertAdjacentText('beforeend', ' / ' + totalCount.toString());
@@ -10492,7 +10486,8 @@ function compEvt(evt) {
 }
 
 function decorateButton(parentDiv, label) {
-  var innerSpan = cElement('span', {className: 'sendLink', textContent: label});
+  var innerSpan = createSpan(
+    {className: 'sendLink', textContent: label});
   parentDiv.textContent = '[';
   parentDiv.appendChild(innerSpan);
   parentDiv.insertAdjacentHTML('beforeend', ']');
@@ -10505,10 +10500,10 @@ function profileComponents() {
   thisInvTable = invTables[1];
   var compDiv = thisInvTable.parentNode;
   if (compDiv.style.display !== 'block') {return;}
-  var cmDiv = cElement('div', {className: 'fshCenter'});
-  quickDelDiv = cElement('div');
-  sumComp = cElement('div');
-  delAllDiv = cElement('div', {className: 'fshHide'});
+  var cmDiv = createDiv({className: 'fshCenter'});
+  quickDelDiv = createDiv();
+  sumComp = createDiv();
+  delAllDiv = createDiv({className: 'fshHide'});
   compDel = decorateButton(quickDelDiv, 'Enable Quick Del');
   compSum = decorateButton(sumComp, 'Count Components');
   compDelAll = decorateButton(delAllDiv, 'Delete All Visible');
@@ -10692,12 +10687,9 @@ function selectAllLink() {
   var node = document.querySelector('#profileRightColumn' +
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
   if (!node) {return;}
-  var allSpan = document.createElement('SPAN');
-  allSpan.className = 'smallLink';
-  allSpan.textContent = 'All';
+  var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
   allSpan.addEventListener('click', profileSelectAll);
-  var wrapper = document.createElement('SPAN');
-  wrapper.insertAdjacentHTML('beforeend', '[&nbsp;');
+  var wrapper = createSpan({innerHTML: '[&nbsp;'});
   wrapper.appendChild(allSpan);
   wrapper.insertAdjacentHTML('beforeend', '&nbsp;]&nbsp;');
   node.parentNode.appendChild(wrapper);
@@ -10975,8 +10967,7 @@ function addStatsQuickBuff(data) {
     data.username + '"]');
   var activity = myPlayer.querySelector('span.fshLastActivity');
   if (!activity) {
-    activity = document.createElement('SPAN');
-    activity.className = 'fshLastActivity';
+    activity = createSpan({className: 'fshLastActivity'});
     var player = myPlayer.getElementsByTagName('h1')[0];
     player.insertAdjacentElement('afterend', activity);
   }
@@ -10989,8 +10980,7 @@ function addStatsQuickBuff(data) {
 
 function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
-    var ret = document.createElement('SPAN');
-    ret.className = 'fshPlayer';
+    var ret = createSpan({className: 'fshPlayer'});
     el.nextElementSibling.insertAdjacentElement('afterend', ret);
     return ret;
   }
@@ -11289,13 +11279,13 @@ function isEquipable(test) {
 }
 
 function mySpan(el) {
-  var inject = document.createElement('span');
   var secondHref = el.children.length === 2;
   var firstHref = hideElement$1(!secondHref);
   var itemName = el.previousElementSibling.innerHTML;
   var wearable = hideElement$1(wearRE.test(itemName));
   var equipable = isEquipable(secondHref);
-  inject.innerHTML = '<span' + firstHref +
+  return createSpan({
+    innerHTML: '<span' + firstHref +
     '> | <span class="sendLink recall tip-static" data-tipped="' +
     'Click to recall to backpack" mode="0" action="recall">Fast BP' +
     '</span></span>' +
@@ -11305,8 +11295,8 @@ function mySpan(el) {
     '<span' + wearable +
     '> | <span class="sendLink ' +
     equipable +
-    '" mode="0" action="wear">Fast Wear</span></span>';
-  return inject;
+    '" mode="0" action="wear">Fast Wear</span></span>'
+  });
 }
 
 function doSpan(el) {
@@ -11518,14 +11508,13 @@ function addRow(theTitans, trackerTable, titan) {
 }
 
 function displayTracker(parentTable, theTitans) {
-  var trackerTable = document.createElement('table');
-  trackerTable.className = 'fshTTracker';
-  var tBody = document.createElement('tbody');
+  var trackerTable = createTable({className: 'fshTTracker'});
+  var tBody = createTBody({
+    innerHTML: '<tr><td class="header fshCenter">Titan</td>' +
+      '<td class="header fshCenter">Cooldown</td>' +
+      '<td class="header fshCenter">Visible</td></tr>'
+  });
   trackerTable.appendChild(tBody);
-  tBody.insertAdjacentHTML('beforeend',
-    '<tr><td class="header fshCenter">Titan</td>' +
-    '<td class="header fshCenter">Cooldown</td>' +
-    '<td class="header fshCenter">Visible</td></tr>');
   Object.keys(theTitans).forEach(addRow.bind(null, theTitans, tBody));
 
   var newRow = parentTable.insertRow(5);
@@ -11624,9 +11613,7 @@ function injectTitan() { // jQuery
 function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
-    itemDiv = document.createElement('div');
-    itemDiv.id = 'item-div';
-    itemDiv.className = 'itemDiv';
+    itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
     var itemList = document.getElementById('item-list');
     var oldItems = itemList.getElementsByTagName('table');
     while (oldItems.length) {
@@ -11665,8 +11652,6 @@ function hideFolder(evt) {
 }
 
 function doFolderHeaders(folders) {
-  var foldersRow = document.createElement('tr');
-  foldersRow.id = 'fshFolderSelect';
   var folderCell = '<td colspan=6>';
   // append main folder
   folderCell += '<span id="folderid0" class="fshLink" fid=0>All</span>' +
@@ -11676,7 +11661,10 @@ function doFolderHeaders(folders) {
       '" class="fshLink fshNoWrap" fid=' + key + '>' +
       folders[key] + '</span> ';
   });
-  foldersRow.insertAdjacentHTML('afterbegin', folderCell);
+  var foldersRow = createTr({
+    id: 'fshFolderSelect',
+    innerHTML: folderCell
+  });
   foldersRow.addEventListener('click', hideFolder);
   var multiple = document.getElementById('fshSelectMultiple');
   multiple.insertAdjacentHTML('afterend', '<tr id="fshShowSTs">' +
@@ -11765,8 +11753,6 @@ function toggleAllPlants(evt) {
 }
 
 function injectTradeOld() {
-  var multiple = document.createElement('tr');
-  multiple.id = 'fshSelectMultiple';
   var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
     'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
     '<span id="itemid-2" ' +
@@ -11779,7 +11765,10 @@ function injectTradeOld() {
   });
   myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
     'class="custominput" value="all" size=3></td>';
-  multiple.insertAdjacentHTML('afterbegin', myTd);
+  var multiple = createTr({
+    id: 'fshSelectMultiple',
+    innerHTML: myTd
+  });
   multiple.addEventListener('click', toggleAllPlants);
   var el = document.getElementById('item-list').parentNode.parentNode;
   el.parentNode.insertBefore(multiple, el);
@@ -12414,14 +12403,16 @@ function prepareDivs() {
   }
   leftDiv.insertAdjacentHTML('beforeend', assets$1.proc);
   processingStatus = document.getElementById('ProcessingStatus');
-  midDiv = document.createElement('div');
-  midDiv.className = 'fshFloatLeft midDiv';
-  midDiv.insertAdjacentHTML('beforeend', assets$1.defStats);
+  midDiv = createDiv({
+    className: 'fshFloatLeft midDiv',
+    innerHTML: assets$1.defStats
+  });
   containerDiv.appendChild(midDiv);
   setDefVars();
-  rightDiv = document.createElement('div');
-  rightDiv.className = 'fshFloatLeft rightDiv';
-  rightDiv.insertAdjacentHTML('beforeend', assets$1.atkStats);
+  rightDiv = createDiv({
+    className: 'fshFloatLeft rightDiv',
+    innerHTML: assets$1.atkStats
+  });
   containerDiv.appendChild(rightDiv);
   setAtkVars();
 }
@@ -12533,18 +12524,17 @@ function setup$1() {
   if (containerDiv) {
     containerDiv.innerHTML = '';
   } else {
-    containerDiv = document.createElement('div');
-    containerDiv.className = 'body';
+    containerDiv = createDiv({className: 'body'});
   }
-  leftDiv = document.createElement('div');
-  leftDiv.className = 'fshFloatLeft leftDiv';
+  leftDiv = createDiv({className: 'fshFloatLeft leftDiv'});
   containerDiv.appendChild(leftDiv);
   if (relicData.is_owner) {
     leftDiv.appendChild(doBuffLinks(myDefenders));
   }
-  fetchStatsBtn = document.createElement('button');
-  fetchStatsBtn.className = 'custombutton';
-  fetchStatsBtn.textContent = 'Fetch Stats';
+  fetchStatsBtn = createButton({
+    className: 'custombutton',
+    textContent: 'Fetch Stats'
+  });
   fetchStatsBtn.addEventListener('click', getStats);
   leftDiv.appendChild(fetchStatsBtn);
   var dialogRelic = document.getElementById('dialog-relic');
@@ -12620,22 +12610,23 @@ function qBuy() {
 }
 
 function injectQuickBuy() {
-  fshDiv = document.createElement('div');
-  fshDiv.className = 'fshClear';
-  fshDiv.textContent = 'Select how many to quick-buy:';
-  numInput = document.createElement('input');
-  numInput.id = 'buyAmount';
-  numInput.className = 'fshNumberInput';
-  numInput.min = 1;
-  numInput.max = 99;
-  numInput.value = 1;
-  numInput.type = 'number';
+  fshDiv = createDiv({
+    className: 'fshClear',
+    textContent: 'Select how many to quick-buy:'
+  });
+  numInput = createInput({
+    id: 'buyAmount',
+    className: 'fshNumberInput',
+    min: 1,
+    max: 99,
+    value: 1,
+    type: 'number'
+  });
   fshDiv.appendChild(numInput);
-  qbBtn = document.createElement('button');
-  qbBtn.textContent = 'Quick-buy';
+  qbBtn = createButton({textContent: 'Quick-buy'});
   qbBtn.addEventListener('click', qBuy);
   fshDiv.appendChild(qbBtn);
-  resultDiv = document.createElement('div');
+  resultDiv = createDiv();
   fshDiv.appendChild(resultDiv);
   dialog$1.appendChild(fshDiv);
 }
@@ -13415,17 +13406,16 @@ function prefsClickEvent(e) {
 }
 
 function buildFshDivs() {
-  var fshDiv = document.createElement('div');
-  fshDiv.className = 'fshCenter fshFten';
-  var prefsDiv = document.createElement('div');
+  var fshDiv = createDiv({className: 'fshCenter fshFten'});
+  var prefsDiv = createDiv({
+    innerHTML: simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+      huntingBuffsHtml()
+  });
   prefsDiv.addEventListener('click', prefsClickEvent);
   prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  prefsDiv.insertAdjacentHTML('beforeend',
-    simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-    simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-    huntingBuffsHtml());
   fshDiv.insertAdjacentElement('beforeend', prefsDiv);
-  missingBuffsDiv = document.createElement('div');
+  missingBuffsDiv = createDiv();
   fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
   var worldContainerBelow = document.getElementById('worldContainerBelow');
   worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);
@@ -14085,8 +14075,7 @@ function checkBuffs() { // Legacy - Old Map
     'and @style="width: 270px;"]]');
   if (!injectHere) {return;}
   // insert after kill all monsters image and text
-  var newSpan = document.createElement('DIV');
-  newSpan.innerHTML = replacementText;
+  var newSpan = createDiv({innerHTML: replacementText});
   injectHere.appendChild(newSpan);
 
   impRecast();
@@ -14179,10 +14168,11 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
   var plantFromComponent = fallback(plantFromComponentHash[itemName],
     itemName);
   if (itemName !== plantFromComponent) {
-    var itemLinks = document.createElement('td');
-    itemLinks.innerHTML = '<a href="' + server +
-      '?cmd=auctionhouse&search_text=' +
-      encodeURI(plantFromComponent) + '">AH</a>';
+    var itemLinks = createTd({
+      innerHTML: '<a href="' + server +
+        '?cmd=auctionhouse&search_text=' +
+        encodeURI(plantFromComponent) + '">AH</a>'
+    });
     var counter = findNode('../../../../tr[2]/td', callback);
     counter.setAttribute('colspan', '2');
     callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
@@ -14266,7 +14256,7 @@ function formatTime() {
 
 function lastReset() {
   var topTable = document.querySelector('#pCC table');
-  var newRow = document.createElement('tr');
+  var newRow = createTr();
   var leftCell = newRow.insertCell(-1);
   leftCell.height = 25;
   leftCell.textContent = 'Last Reset:';
@@ -14904,9 +14894,10 @@ function injectAuctionHouse() {
     document.getElementById('auto-fill').checked = true;
   }
   document.getElementById('sort0').click();
-  var cancelAll = document.createElement('span');
-  cancelAll.className = 'smallLink';
-  cancelAll.textContent = 'Cancel All';
+  var cancelAll = createSpan({
+    className: 'smallLink',
+    textContent: 'Cancel All'
+  });
   var fill = document.getElementById('fill').parentNode.parentNode
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');
@@ -15114,10 +15105,8 @@ function extraButtons() {
 function doFolderButtons(folders) {
   if (calf.subcmd2 === 'storeitems') {
     var formNode = pCC.getElementsByTagName('form')[0];
-    var tr = document.createElement('tr');
-    tr.className = 'fshCenter';
-    var insertHere = document.createElement('td');
-    insertHere.colSpan = 3;
+    var tr = createTr({className: 'fshCenter'});
+    var insertHere = createTd({colSpan: 3});
     tr.appendChild(insertHere);
     formNode.parentNode.insertBefore(tr, formNode);
     var inject = '<span class="fshLink folder" data-folder="0">All</span>' +
@@ -15848,8 +15837,7 @@ function addPvpSummary(aRow, messageType) { // Legacy
     var defeat = /You were defeated by/.test(aRow.cells[2].innerHTML);
     var _winner = 1;
     if (defeat) {_winner = 0;}
-    var combatSummarySpan = document.createElement('SPAN');
-    combatSummarySpan.style.color = 'gray';
+    var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
     xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,
@@ -16189,7 +16177,7 @@ function doOnlineDot(aTable, data) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
   var defender = playerDataObject(data);
-  if (defender.cloakLevel !== 0) {console.log('data', data);} // eslint-disable-line no-console
+  if (defender.cloakLevel !== 0) {console.log('Cloaked Player', data);} // eslint-disable-line no-console
 }
 
 function parsePlayer(aTable, data, jqXhr) {
@@ -16221,10 +16209,13 @@ function findOnlinePlayers() { // jQuery
 
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
-  spinner$1 = document.createElement('span');
-  spinner$1.className = 'fshSpinner fshTopListSpinner';
-  spinner$1.style.backgroundImage = 'url(\'' + imageServer +
-    '/world/actionLoadingSpinner.gif\')';
+  spinner$1 = createSpan({
+    className: 'fshSpinner fshTopListSpinner',
+    style: {
+      backgroundImage: 'url(\'' + imageServer +
+        '/world/actionLoadingSpinner.gif\')'
+    }
+  });
   e.target.parentNode.replaceChild(spinner$1, e.target);
   if (highlightPlayersNearMyLvl$1) {
     myStats(false).done(function(data) {
@@ -16240,12 +16231,15 @@ function looksLikeTopRated() {
     getValue('highlightPlayersNearMyLvl');
   var theCell = pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
-  var findBtn = document.createElement('INPUT');
-  findBtn.className = 'fshFindOnlinePlayers custombutton tip-static';
-  findBtn.setAttribute('type', 'button');
-  findBtn.setAttribute('value', 'Find Online Players');
-  findBtn.setAttribute('data-tipped', 'Fetch the online status of the ' +
-    'top 250 players (warning ... takes a few seconds).');
+  var findBtn = createInput({
+    className: 'fshFindOnlinePlayers custombutton tip-static',
+    type: 'button',
+    value: 'Find Online Players',
+    dataset: {
+      tipped: 'Fetch the online status of the ' +
+        'top 250 players (warning ... takes a few seconds).'
+    }
+  });
   theCell.insertBefore(findBtn, theCell.firstElementChild);
   findBtn.addEventListener('click', getMyVL);
 }
@@ -16514,6 +16508,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '24';
+window.FSH.calf = '25';
 
 }());

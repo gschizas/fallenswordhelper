@@ -1,5 +1,6 @@
 import bioEvtHdl from './bioEvtHdl';
 import renderBio from './render';
+import {createDiv, createInput} from '../../common/cElement';
 import * as layout from '../../support/layout';
 import * as system from '../../support/system';
 
@@ -44,15 +45,16 @@ function changeHeight() {
 }
 
 function bioHeight() {
-  var bioEditLinesDiv = document.createElement('DIV');
-  bioEditLinesDiv.insertAdjacentHTML('beforeend',
-    ' Display <input id="fshLinesToShow"' +
-    ' type="number" min="1" max="99" value="' +
-    bioEditLines + '"/> Lines ');
-  var saveLines = document.createElement('INPUT');
-  saveLines.className = 'custombutton';
-  saveLines.value = 'Update Rows To Show';
-  saveLines.type = 'button';
+  var bioEditLinesDiv = createDiv({
+    innerHTML: ' Display <input id="fshLinesToShow"' +
+      ' type="number" min="1" max="99" value="' +
+      bioEditLines + '"/> Lines '
+  });
+  var saveLines = createInput({
+    className: 'custombutton',
+    value: 'Update Rows To Show',
+    type: 'button'
+  });
   saveLines.addEventListener('click', changeHeight);
   bioEditLinesDiv.appendChild(saveLines);
   layout.pCC.appendChild(bioEditLinesDiv);
