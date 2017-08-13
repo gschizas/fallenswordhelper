@@ -1,7 +1,7 @@
 import getInventoryById from '../ajax/getInventoryById';
 import getItemImg from '../common/getItemImg';
 import {itemRE} from '../support/dataObj';
-import showQuickWear from './quickwear';
+import showQuickWear from './quickWear';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
