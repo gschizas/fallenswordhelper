@@ -29,7 +29,7 @@ import injectTrade from '../trade';
 import injectViewGuild from '../guild/injectViewGuild';
 import injectWorld from '../legacy';
 import insertQuickExtract from '../quickExtract';
-import insertQuickWear from '../quickWear';
+import insertQuickWear from '../quickWear/scrapeBackpack';
 import inventing from '../recipes';
 import ladder from '../ladder';
 import setupMoves from '../arena/setup';

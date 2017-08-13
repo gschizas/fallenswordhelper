@@ -1,3 +1,37 @@
+/* Quick Wear */
+#invTabs {min-width: 500px;}
+
+#invTabs > div {display: none;}
+
+#invTabs label {
+  display: inline-block;
+  padding: .5em 1em;
+}
+
+#invTabs label:hover {
+  cursor: pointer;
+}
+
+#invTabs > #tab1:checked ~ ul label[for="tab1"],
+#invTabs > #tab2:checked ~ ul label[for="tab2"] {
+  cursor: text;
+}
+
+#invTabs > #tab1:checked ~ ul .inv-tabs-qw,
+#invTabs > #tab2:checked ~ ul .inv-tabs-ah {
+  background: #ffa614 url(http://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_30_ffa614_500x100.png) 50% 50% repeat;
+  margin-bottom: 0;
+  padding-bottom: 1px;
+  border: 1px solid #655e4e;
+  color: #381f00;
+}
+
+#invTabs > input {display: none;}
+
+#invTabs > #tab1:checked ~ #invTabs-qw,
+
+#invTabs > #tab2:checked ~ #invTabs-ah {display: block;}
+
 /* Scout Tower Titan Tracker */
 .fshTTracker {
   width: 500px;

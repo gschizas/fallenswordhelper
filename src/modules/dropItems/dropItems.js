@@ -5,6 +5,7 @@ import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
 import dropItem from '../ajax/dropItem';
 import getInventoryById from '../ajax/getInventoryById';
+import getItemImg from '../common/getItemImg';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
 import moveItemsToFolder from './moveItemsToFolder';
@@ -214,9 +215,7 @@ function getItems() {
   showQuickSendLinks = system.getValue('showQuickSendLinks');
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   layout.pCC.addEventListener('click', evtHandler);
-  var allTables = layout.pCC.getElementsByTagName('table');
-  var lastTable = allTables[allTables.length - 1];
-  var imgList = lastTable.getElementsByTagName('img');
+  var imgList = getItemImg(layout.pCC);
   itemsAry = [];
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
