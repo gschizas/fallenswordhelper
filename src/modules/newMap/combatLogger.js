@@ -21,6 +21,18 @@ function storeEnhancements(enh) {
   }
 }
 
+function hazBuffs(data) {
+  if (data.player.buffs) {
+    data.player.buffs.forEach(storeBuffs); // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler
+  }
+}
+
+function hazEnhancements(data) {
+  if (data.player.enhancements) {
+    data.player.enhancements.forEach(storeEnhancements); // loop through enhancements
+  }
+}
+
 function processCombatResponse(e, data) {
   combatData = {};
   combatData.combat = data.response.data;
@@ -31,10 +43,8 @@ function processCombatResponse(e, data) {
   combatData.player = {};
   combatData.player.buffs = {};
   combatData.player.enhancements = {};
-  data.player.buffs.forEach(storeBuffs); // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler
-  if (data.player.enhancements) {
-    data.player.enhancements.forEach(storeEnhancements); // loop through enhancements
-  }
+  hazBuffs(data);
+  hazEnhancements(data);
   combatData.time = data.time;
   combatLog.push(combatData);
   setForage('fsh_combatLog', combatLog);

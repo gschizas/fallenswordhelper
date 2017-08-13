@@ -148,6 +148,7 @@ export default function subscribes() { // jQuery.min
   //#if _DEV  //  "Your Lvl" does not update during combat #155
   $.subscribe('level.stats-player', function(e, data) {
     console.log('level.stats-player data', data); // eslint-disable-line no-console
+    // level.stats-player data Object { a: 3381, b: 3382 }
   });
   //#endif
 

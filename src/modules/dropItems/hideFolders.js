@@ -1,8 +1,4 @@
-function toggleForce(el, force) { // Polyfill UC
-  if (el.classList.contains('fshHide') !== force) {
-    el.classList.toggle('fshHide');
-  }
-}
+import toggleForce from '../common/toggleForce';
 
 export default function hideFolders(itemsAry, invItems, self) {
   var folderId = self.dataset.folder;
