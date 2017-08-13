@@ -2348,124 +2348,204 @@ function insertQuickExtract(injector) { // jQuery.min
   getInventory().done(prepInv);
 }
 
-var content$2;
-var itemList;
-var playerId$3;
-
-function itemName(item) {
-  return item.n;
+function rekeyInventory(data) {
+  data.items = data.items.reduce(function(prev, curr) {
+    if (curr.is_in_st) {prev.fshHasST = true;}
+    prev[curr.inv_id] = curr;
+    return prev;
+  }, {});
+  return data;
 }
 
-function foundInvItem(invCount, name) { // Legacy
+function getInventoryById() {
+  return getInventory().pipe(rekeyInventory);
+}
+
+function getItemImg(pCC) {
+  var allTables = pCC.getElementsByTagName('table');
+  var lastTable = allTables[allTables.length - 1];
+  return lastTable.getElementsByTagName('img');
+}
+
+function makeFolderSpans(folders) {
+  return '<span class="fshLink folder" data-folder="0">All</span>' +
+    ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
+    Object.keys(folders).reduce(function(prev, key) {
+      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
+        'data-folder="' + key + '">' + folders[key] + '</span>';
+    }, '');
+}
+
+function ahLink(searchname, nickname) {
+  return '<a href="index.php?cmd=auctionhouse&search_text=' + searchname +
+    '">' + nickname + '</a>';
+}
+
+function foundInvItem(invCount, name) {
   if (invCount[name]) {
     invCount[name].count += 1;
   } else {
-    invCount[name] = {count: 1, nicknameList: ''};
+    invCount[name] = {count: 1, nicknameList: []};
   }
 }
 
-function showAHInvManager() { // Legacy
-  var output = '<table width="100%" cellspacing="2" cellpadding="2">' +
-    '<tr><th colspan="5" class="fshCenter">Items from ' +
-    '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
-    'AH Quick Search</a> found in your inventory</td>' +
-    '<tr><th>Name</th><th>Nick Name<th>Inv Count</th><th>' +
-    'AH Min Price</th><th>AH BuyNow Price</th></tr>';
-  var invCount = {};
-  var i;
-  var quickSL = getValueJSON('quickSearchList');
-  // fill up the Inv Counter
-  itemList.forEach(function(item) {
-    var name = itemName(item);
-    foundInvItem(invCount, name);
-    for (i = 0; i < quickSL.length; i += 1) {
-      if (name.indexOf(quickSL[i].searchname) >= 0 &&
-          invCount[name].nicknameList.indexOf(quickSL[i].nickname) < 0) {
-        invCount[name].nicknameList += '<a href="index.php?cmd=' +
-          'auctionhouse&search_text=' + quickSL[i].searchname + '">' +
-          quickSL[i].nickname + '</a> ';
-        quickSL[i].found = true;
-      }
+function displayFoundCount(invCount) {
+  return Object.keys(invCount).reduce(function(prev, key) {
+    if (invCount[key].nicknameList.length !== 0) {
+      return prev + '<tr><td>' + key + '</td><td>' +
+        invCount[key].nicknameList.map(function(nickname) {
+          return ahLink(key, nickname);
+        }).join(' ') + '</td><td>' +
+        invCount[key].count + '</td><td></td><td></td></tr>';
     }
-  });
-  // show inv & counter for item with nickname found
-  Object.keys(invCount).forEach(function(key) {
-    if (invCount[key].nicknameList !== '') {
-      output += '<tr><td>' + key + '</td><td>' +
-        invCount[key].nicknameList + '</td><td>' +
+    return prev;
+  }, '');
+}
+
+function displayNotFound(quickSL) {
+  return quickSL.reduce(function(prev, item) {
+    if (item.displayOnAH && !item.found) {
+      return prev + ahLink(item.searchname, item.nickname) + ', ';
+    }
+    return prev;
+  }, '');
+}
+
+function displayOtherCount(invCount) {
+  return Object.keys(invCount).reduce(function(prev, key) {
+    if (invCount[key].nicknameList.length === 0) {
+      return prev + '<tr><td>' + key + '</td><td></td><td>' +
         invCount[key].count + '</td><td></td><td></td><td></td></tr>';
     }
-  });
-  // show item from quick AH search that are not in our inv
-  output += '</td></tr><tr><td colspan="5"><hr></td></tr>';
-  output += '<tr><td>Did not find:</td><td colspan="4">';
-  for (i = 0; i < quickSL.length; i += 1) {
-    if (quickSL[i].displayOnAH && !quickSL[i].found) {
-      output += '<a href="index.php?cmd=auctionhouse&' +
-        'search_text=' + quickSL[i].searchname + '">' +
-        quickSL[i].nickname + '</a>, ';
+    return prev;
+  }, '');
+}
+
+function buildHTML(invCount, quickSL) {
+  return '<table width="100%" cellspacing="2" cellpadding="2"><thead>' +
+    '<tr><th colspan="5" class="fshCenter">Items from ' +
+    '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
+    'AH Quick Search</a> found in your inventory</th></tr>' +
+    '<tr><th>Name</th><th>Nick Name</th><th>Inv Count</th>' +
+    '<th>AH Min Price</th><th>AH BuyNow Price</th></tr></thead><tbody>' +
+    // show inv & counter for item with nickname found
+    displayFoundCount(invCount) +
+    // show item from quick AH search that are not in our inv
+    '<tr><td colspan="5"><hr></td></tr>' +
+    '<tr><td>Did not find:</td><td colspan="4">' +
+    displayNotFound(quickSL) +
+    '</td></tr><tr><td colspan="5"><hr></td></tr></tbody>' +
+    '<thead><tr><th colspan="5" class="fshCenter">Items NOT from ' +
+    '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
+    'AH Quick Search</a> found in your inventory</td></thead><tbody>' +
+    // show inv & counter for item with nickname NOT found
+    displayOtherCount(invCount) +
+    '</tbody></table>';
+}
+
+function inQuickSearchList(invCount, name, listItem) {
+  if (name === listItem.searchname) {
+    listItem.found = true;
+    if (invCount[name].nicknameList.indexOf(listItem.nickname) < 0) {
+      invCount[name].nicknameList.push(listItem.nickname);
     }
   }
-  output += '</td></tr><tr><td colspan="5"><hr></td></tr>' +
-    '<tr><th colspan="5" class="fshCenter">Items NOT from ' +
-    '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
-    'AH Quick Search</a> found in your inventory</td>';
-  // show inv & counter for item with nickname NOT found
-  Object.keys(invCount).forEach(function(key) {
-    if (invCount[key].nicknameList === '') {
-      output += '<tr><td>' + key + '</td><td>' +
-      invCount[key].nicknameList + '</td><td>' +
-      invCount[key].count + '</td><td></td><td></td><td></td></tr>';
-    }
-  });
-  output += '</table>';
-  document.getElementById('invTabs-ah').innerHTML = output;
 }
 
-function doUseItem(evt) { // Legacy
-  var invId = evt.target.getAttribute('itemID');
+function testItemList(invCount, quickSL, item) {
+  var name = item.n;
+  foundInvItem(invCount, name);
+  quickSL.forEach(inQuickSearchList.bind(null, invCount, name));
+}
+
+function showAHInvManager(itemList) {
+  var invCount = {};
+  var quickSL = getValueJSON('quickSearchList');
+  // fill up the Inv Counter
+  itemList.forEach(testItemList.bind(null, invCount, quickSL));
+  var im = createDiv({
+    id: 'invTabs-ah',
+    className: 'ui-tabs-panel ui-corner-bottom'
+  });
+  im.insertAdjacentHTML('beforeend', buildHTML(invCount, quickSL));
+  return im;
+}
+
+function toggleForce(el, force) { // Polyfill UC
+  if (el.classList.contains('fshHide') !== force) {
+    el.classList.toggle('fshHide');
+  }
+}
+
+var itemList;
+
+function doUseItem(self) { // jQuery.min
+  var invId = self.dataset.itemid;
   useItem(invId).done(function(data) {
     if (data.r !== 0) {return;}
-    evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+    self.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
   });
 }
 
-function useProfileInventoryItem(evt) {
+function useProfileInventoryItem(self) {
   confirm('Use/Extract Item',
     'Are you sure you want to use/extract the item?',
-    doUseItem.bind(null, evt)
+    doUseItem.bind(null, self)
   );
 }
 
-function equipProfileInventoryItem(evt) { // Legacy
-  var invId = evt.target.getAttribute('itemID');
+function equipProfileInventoryItem(self) { // jQuery.min
+  var invId = self.dataset.itemid;
   equipItem(invId).done(function(data) {
     if (data.r !== 0) {return;}
-    evt.target.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
+    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
   });
 }
 
-function itemImage(item) {
-  var ret = imageServer + '/';
-  if (item.b === 13699) {
-    ret += 'composing/potions/' + item.extra.design + '_' +
-      item.extra.color + '.gif';
-  } else {
-    ret += 'items/' + item.b + '.gif';
-  }
-  return ret;
+function hideFolders(self) {
+  var folderId = self.dataset.folder;
+  itemList.forEach(function(o) {
+    var tr = o.dom;
+    if (folderId === '0') {
+      tr.classList.remove('fshHide');
+    } else {
+      var force = folderId !== o.f.toString();
+      toggleForce(tr, force);
+    }
+  });
 }
 
+var evts = [
+  {
+    condition: function(self) {
+      return self.classList.contains('smallLink') &&
+        self.classList.contains('fshEq');
+    },
+    result: equipProfileInventoryItem
+  },
+  {
+    condition: function(self) {
+      return self.classList.contains('smallLink') &&
+        self.classList.contains('fshUse');
+    },
+    result: useProfileInventoryItem
+  },
+  {
+    condition: function(self) {return self.classList.contains('folder');},
+    result: hideFolders
+  }
+];
+
 function listen$1(evt) {
-  if (evt.target.classList.contains('smallLink') &&
-      evt.target.classList.contains('fshEq')) {
-    equipProfileInventoryItem(evt);
-    return;
-  }
-  if (evt.target.classList.contains('smallLink') &&
-      evt.target.classList.contains('fshUse')) {
-    useProfileInventoryItem(evt);
-  }
+  var self = evt.target;
+  evts.some(function(el) {
+    if (el.condition(self)) {
+      el.result(self);
+      return true;
+    }
+    return false;
+  });
+
 }
 
 function alpha(a, b) {
@@ -2481,51 +2561,191 @@ function folder(a, b) {
   return a.f - b.f;
 }
 
-function showQuickWear(data) { // jQuery
-  itemList = data.items;
-  var output = '<div id="invTabs"><ul>' +
-    '<li><a href="#invTabs-qw">Quick Wear / Use / Extract<br>Manager</a></li>' +
-    '<li><a href="#invTabs-ah">Inventory Manager Counter<br>' +
-    'filtered by AH Quick Search</a></li></ul>' +
-    '<div id="invTabs-qw"><table width="100%"><tr ' +
-    'class="fshHeader"><td><b>' +
-    'Quick Wear / Use / Extract Manager</b></td></tr></table>' +
-    '<table width="100%"><tr><th class="fshCenter" width="20%">Actions</th>' +
-    '<th colspan="4">Items</th></tr>';
-  itemList.sort(folder);
-  itemList.forEach(function(item) {
-    var equipClass = 'fshEq ';
-    var useClass = 'fshUse ';
-    if (item.eq) {equipClass += 'smallLink';} else {equipClass += 'notLink';}
-    if (!item.c && item.u) {
-      useClass += 'smallLink';
-    } else {useClass += 'notLink';}
-    output += '<tr><td class="fshCenter">' +
-      '<span class="' + equipClass + '" ' +
-      'itemID="' + item.a + '">Wear</span>&nbsp;|&nbsp;' +
-      '<span class="' + useClass + '" ' +
-      'itemID="' + item.a + '">Use/Ext</span>' +
-      '</td><td></td><td>' +
-      '<img src="' + itemImage(item) + '" ' +
-      'class="tip-dynamic" data-tipped="fetchitem.php?item_id=' + item.b +
-      '&amp;inv_id=' + item.a + '&amp;t=1&amp;p=' + playerId$3 + '&amp;' +
-      'currentPlayerId=' + playerId$3 + '" width="30" height="30" border="0">' +
-      '</td><td width="90%">&nbsp;' + itemName(item) + '</td></tr>';
-  });
-  output += '</table></div><div id="invTabs-ah"></div></div>';
-  content$2.innerHTML = output;
-  document.getElementById('invTabs').addEventListener('click', listen$1);
-  $('#invTabs').tabs();
-  $('#invTabs').tabs('select', 0);
-  showAHInvManager('#invTabs-ah');
+function tableRows$1(tbl, item) {
+  var newRow = tbl.insertRow(-1);
+  item.dom = newRow;
+  var equipClass = 'fshEq ';
+  var useClass = 'fshUse ';
+  if (item.eq) {equipClass += 'smallLink';} else {equipClass += 'notLink';}
+  if (item.u) {useClass += 'smallLink';} else {useClass += 'notLink';}
+  newRow.innerHTML = '<td class="fshCenter"><span class="' + equipClass +
+  '" data-itemid="' + item.a + '">Wear</span>&nbsp;|&nbsp;<span class="' +
+  useClass + '" data-itemid="' + item.a +
+  '">Use/Ext</span></td><td><img src="' + item.src +
+  '" class="tip-dynamic" data-tipped="' + item.tip +
+  '" width="30" height="30" border="0"></td><td width="90%">&nbsp;' +
+  item.n + '</td>';
 }
 
-function insertQuickWear(injector) { // Legacy
+function createQuickWear(folders) {
+  var tbl = createTable({
+    width: '100%',
+    innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
+      makeFolderSpans(folders) + '</th></tr>' +
+      '<tr class="fshHeader"><th class="fshCenter" width="20%">Actions</th>' +
+      '<th colspan="2">Items</th></tr></thead>'
+  });
+  var tbody = createTBody();
+  tbl.appendChild(tbody);
+  itemList.forEach(tableRows$1.bind(null, tbody));
+  var qw = createDiv({
+    id: 'invTabs-qw',
+    className: 'ui-tabs-panel ui-corner-bottom'
+  });
+  qw.appendChild(tbl);
+  return qw;
+}
+
+function createInvTabs() {
+  return createDiv({
+    id: 'invTabs',
+    className: 'ui-tabs ui-widget-content ui-corner-all',
+    innerHTML: '<input id="tab1" type="radio" name="tabs" checked>' +
+      '<input id="tab2" type="radio" name="tabs">' +
+      '<ul class="ui-tabs-nav ui-helper-reset ' +
+        'ui-helper-clearfix ui-widget-header ui-corner-all">' +
+      '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
+      '<label for="tab1">Quick Wear / Use / Extract<br>Manager</label>' +
+      '</li>' +
+      '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
+      '<label for="tab2">Inventory Manager Counter' +
+        '<br>filtered by AH Quick Search</label>' +
+      '</li></ul>'
+  });
+}
+
+function showQuickWear(content, data, folders) {
+  itemList = data;
+  itemList.sort(folder);
+  var invTabs = createInvTabs();
+  var invTabsQw = createQuickWear(folders);
+  invTabs.appendChild(invTabsQw);
+  content.innerHTML = '';
+  content.appendChild(invTabs);
+  invTabsQw.addEventListener('click', listen$1);
+  invTabs.appendChild(showAHInvManager(itemList));
+}
+
+var content$2;
+var scrapedItems;
+var folders;
+var invItems;
+
+function getItems(doc) {
+  var imgList = getItemImg(doc.getElementById('pCC'));
+  Array.prototype.forEach.call(imgList, function(img) {
+    var thisItem = itemRE.exec(img.dataset.tipped);
+    if (!scrapedItems[thisItem[2]]) {
+      scrapedItems[thisItem[2]] = {
+        n: img.parentNode.parentNode.nextElementSibling.textContent.trim(),
+        src: img.src,
+        tip: img.dataset.tipped
+      };
+    }
+  });
+  return scrapedItems;
+}
+
+function queryFolders(doc) {
+  return doc.querySelectorAll('a[href*="folder_id="]');
+}
+
+function folderNotActive(fldr) {
+  return fldr.firstChild.src.indexOf('folder_on.gif') === -1;
+}
+
+function displayProgress(msg) {
+  content$2.insertAdjacentHTML('beforeend', msg + '<br>');
+}
+
+function folderProgress(folderName) {
+  displayProgress('Checking folder ' + folderName + '...');
+}
+
+function folderText(fldr) {
+  return fldr.parentNode.textContent;
+}
+
+function gotOtherPage(folderName, html) {
+  folderProgress(folderName);
+  getItems(createDocument(html));
+}
+
+function gotSecondPage(folderName, html) {
+  folderProgress(folderName);
+  var doc = createDocument(html);
+  var myFolders = queryFolders(doc);
+  if (folderNotActive(myFolders[1])) {
+    displayProgress('No more folders...');
+    return html;
+  }
+  getItems(doc);
+  var prm = [];
+  for (var i = 2; i < myFolders.length; i += 1) {
+    prm.push($.get(myFolders[i].href)
+      .done(gotOtherPage.bind(null, folderText(myFolders[i]))));
+  }
+  return $.when.apply($, prm);
+}
+
+function gotGuildStoreItems(html) {
+  displayProgress('Checking Guild Store Items...');
+  getItems(createDocument(html));
+}
+
+function getGuildStoreItems() {
+  return $.get('index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems')
+    .done(gotGuildStoreItems);
+}
+
+function imDone() {
+  displayProgress('I\'m done.');
+  var itemAry = Object.keys(scrapedItems).map(function(invId) {
+    return {
+      a: invId,
+      eq: Number(invItems[invId].type) < 9,
+      f: Number(invItems[invId].folder_id),
+      n: scrapedItems[invId].n,
+      src: scrapedItems[invId].src,
+      tip: scrapedItems[invId].tip,
+      u: ['10', '12', '15', '16'].indexOf(invItems[invId].type) !== -1 ||
+        scrapedItems[invId].n === 'Zombie Coffin'
+    };
+  });
+  showQuickWear(content$2, itemAry, folders);
+}
+
+function gotInv(data) {
+  displayProgress('Checking Inventory...');
+  // console.log('Inventory', data);
+  folders = data.folders;
+  invItems = data.items;
+}
+
+function gotFirstPage(html) {
+  folderProgress('Main');
+  var doc = createDocument(html);
+  var myFolders = queryFolders(doc);
+  if (folderNotActive(myFolders[0])) {
+    displayProgress('Something has gone horribly wrong!');
+    return;
+  }
+  var prm = [getInventoryById().done(gotInv)];
+  if (myFolders[1]) {
+    var fn = gotSecondPage.bind(null, folderText(myFolders[1]));
+    prm.push($.get(myFolders[1].href).pipe(fn));
+  }
+  getItems(doc);
+  $.when.apply($, prm).pipe(getGuildStoreItems).done(imDone);
+}
+
+function insertQuickWear(injector) {
   content$2 = injector || pCC;
   if (!content$2) {return;}
-  content$2.innerHTML = 'Getting item list from backpack';
-  backpack().done(showQuickWear);
-  playerId$3 = playerId();
+  displayProgress('Getting item list from backpack...');
+  scrapedItems = {};
+  $.get('index.php?cmd=profile&subcmd=dropitems')
+    .done(gotFirstPage);
 }
 
 /* eslint-disable no-multi-spaces, max-len */
@@ -6778,19 +6998,6 @@ function completedArenas() { // jQuery
   $('#pCC input[value="View"]').click(dontPost);
 }
 
-function rekeyInventory(data) {
-  data.items = data.items.reduce(function(prev, curr) {
-    if (curr.is_in_st) {prev.fshHasST = true;}
-    prev[curr.inv_id] = curr;
-    return prev;
-  }, {});
-  return data;
-}
-
-function getInventoryById() {
-  return getInventory().pipe(rekeyInventory);
-}
-
 var inv;
 var target;
 
@@ -9384,7 +9591,7 @@ function injectMonsterLog() {
   getForage('fsh_monsterLog').done(prepAry);
 }
 
-var playerId$4;
+var playerId$3;
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) {return Number(playerAry[1]);}
@@ -9403,8 +9610,8 @@ function findPlayers(aRow) { // Legacy
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);
 
-  if (firstPlayer && firstPlayerID !== playerId$4 &&
-      secondPlayerID !== playerId$4) {
+  if (firstPlayer && firstPlayerID !== playerId$3 &&
+      secondPlayerID !== playerId$3) {
     for (var j = 0; j < 3; j += 1) {
       aRow.cells[j].removeAttribute('class');
     }
@@ -9461,7 +9668,7 @@ function guildLogWidgetsEnabled() { // Legacy
   messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
     '(Guild Log messages not involving self are dimmed!)</span>';
 
-  playerId$4 = playerId();
+  playerId$3 = playerId();
 
   for (var i = 1; i < logTable.rows.length; i += 2) {
     var aRow = logTable.rows[i];
@@ -11674,7 +11881,7 @@ function doFolderHeaders(folders) {
   multiple.insertAdjacentElement('afterend', foldersRow);
 }
 
-var invItems;
+var invItems$1;
 
 function stColor(el, item) {
   if (item.is_in_st) {
@@ -11685,9 +11892,9 @@ function stColor(el, item) {
 function forEachInvItem(el) {
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
-  var item = invItems[checkbox.getAttribute('value')];
+  var item = invItems$1[checkbox.getAttribute('value')];
   el.classList.add('folderid' + item.folder_id);
-  if (invItems.fshHasST) {stColor(el, item);}
+  if (invItems$1.fshHasST) {stColor(el, item);}
   checkbox.classList.add('itemid' + item.item_id);
   checkbox.classList.add('itemtype' + item.type);
 }
@@ -11696,7 +11903,7 @@ function processTrade(data) {
 
   time('trade.processTrade');
 
-  invItems = data.items;
+  invItems$1 = data.items;
   /* Highlight items in ST */
   var nodeList = document.getElementById('item-list')
     .getElementsByTagName('table');
@@ -11903,6 +12110,18 @@ function storeEnhancements(enh) {
   }
 }
 
+function hazBuffs$1(data) {
+  if (data.player.buffs) {
+    data.player.buffs.forEach(storeBuffs); // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler
+  }
+}
+
+function hazEnhancements(data) {
+  if (data.player.enhancements) {
+    data.player.enhancements.forEach(storeEnhancements); // loop through enhancements
+  }
+}
+
 function processCombatResponse(e, data) {
   combatData = {};
   combatData.combat = data.response.data;
@@ -11913,10 +12132,8 @@ function processCombatResponse(e, data) {
   combatData.player = {};
   combatData.player.buffs = {};
   combatData.player.enhancements = {};
-  data.player.buffs.forEach(storeBuffs); // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler
-  if (data.player.enhancements) {
-    data.player.enhancements.forEach(storeEnhancements); // loop through enhancements
-  }
+  hazBuffs$1(data);
+  hazEnhancements(data);
   combatData.time = data.time;
   combatLog$1.push(combatData);
   setForage('fsh_combatLog', combatLog$1);
@@ -13823,6 +14040,7 @@ function subscribes() { // jQuery.min
 
   $.subscribe('level.stats-player', function(e, data) {
     console.log('level.stats-player data', data); // eslint-disable-line no-console
+    // level.stats-player data Object { a: 3381, b: 3382 }
   });
 
 }
@@ -15046,7 +15264,7 @@ function injectBank() {
   ajaxifyBank();
 }
 
-var invItems$2;
+var invItems$3;
 var type;
 var itemId;
 
@@ -15058,12 +15276,12 @@ var types = [
   {
     c: function() {return type === 'guild';},
     r: function(o, el) {
-      el.checked = !el.disabled && invItems$2[o.invid].guild_tag !== '-1';
+      el.checked = !el.disabled && invItems$3[o.invid].guild_tag !== '-1';
     }
   },
   {
     c: function(o) {
-      return type === 'item' && invItems$2[o.invid].item_id === itemId;
+      return type === 'item' && invItems$3[o.invid].item_id === itemId;
     },
     r: tickElement
   },
@@ -15084,7 +15302,7 @@ function testType(o, el) {
 }
 
 function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
-  invItems$2 = invItems_;
+  invItems$3 = invItems_;
   type = type_;
   itemId = itemId_;
   itemsAry.forEach(function(o) {
@@ -15109,13 +15327,7 @@ function doFolderButtons(folders) {
     var insertHere = createTd({colSpan: 3});
     tr.appendChild(insertHere);
     formNode.parentNode.insertBefore(tr, formNode);
-    var inject = '<span class="fshLink folder" data-folder="0">All</span>' +
-      ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>';
-    Object.keys(folders).forEach(function(key) {
-      inject += ' &ensp;<span class="fshLink fshNoWrap folder" data-folder="' +
-        key + '">' + folders[key] + '</span>';
-    });
-    insertHere.innerHTML = inject;
+    insertHere.innerHTML = makeFolderSpans(folders);
     extraButtons();
   }
 }
@@ -15146,13 +15358,7 @@ function doToggleButtons(showExtraLinks, showQuickDropLinks) {
   insertHere.innerHTML = inject;
 }
 
-function toggleForce(el, force) { // Polyfill UC
-  if (el.classList.contains('fshHide') !== force) {
-    el.classList.toggle('fshHide');
-  }
-}
-
-function hideFolders(itemsAry, invItems, self) {
+function hideFolders$1(itemsAry, invItems, self) {
   var folderId = self.dataset.folder;
   itemsAry.forEach(function(o) {
     o.el.parentNode.parentNode.previousElementSibling.firstElementChild
@@ -15257,7 +15463,7 @@ var itemsAry;
 var checkAll;
 var itemsHash;
 var dropLinks;
-var invItems$1;
+var invItems$2;
 var colouring;
 var sendLinks;
 
@@ -15337,7 +15543,7 @@ function invPaint() { // Native - abstract this pattern
   while (performance.now() < limit &&
       paintCount < itemsAry.length) {
     var o = itemsAry[paintCount];
-    var item = invItems$1[o.invid];
+    var item = invItems$2[o.invid];
     afterbegin(o, item);
     beforeend(o, item);
     paintCount += 1;
@@ -15379,7 +15585,7 @@ function toggleShowQuickDropLinks() {
   }
 }
 
-var evts = [
+var evts$1 = [
   {
     condition: function(self) {return self.id === 'fshShowExtraLinks';},
     result: toggleShowExtraLinks
@@ -15390,7 +15596,7 @@ var evts = [
   },
   {
     condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    result: function() {doCheckboxes(itemsAry, invItems$1, 'guild');}
+    result: function() {doCheckboxes(itemsAry, invItems$2, 'guild');}
   },
   {
     condition: function(self) {return self.id === 'fshMove';},
@@ -15399,7 +15605,7 @@ var evts = [
   {
     condition: function(self) {return self.hasAttribute('linkto');},
     result: function(self) {
-      doCheckboxes(itemsAry, invItems$1, 'item', self.getAttribute('linkto'));
+      doCheckboxes(itemsAry, invItems$2, 'item', self.getAttribute('linkto'));
     }
   },
   {
@@ -15417,20 +15623,20 @@ var evts = [
   {
     condition: function(self) {return self.classList.contains('folder');},
     result: function(self) {
-      hideFolders(itemsAry, invItems$1, self);
+      hideFolders$1(itemsAry, invItems$2, self);
     }
   },
   {
     condition: function(self) {return self.id === 'fshChkAll';},
     result: function() {
-      doCheckboxes(itemsAry, invItems$1, 'checkAll');
+      doCheckboxes(itemsAry, invItems$2, 'checkAll');
     }
   }
 ];
 
 function evtHandler(evt) {
   var self = evt.target;
-  evts.some(function(el) {
+  evts$1.some(function(el) {
     if (el.condition(self)) {
       el.result(self);
       return true;
@@ -15439,7 +15645,7 @@ function evtHandler(evt) {
   });
 }
 
-function getItems() {
+function getItems$1() {
   addStatTotalToMouseover();
   disableItemColoring = getValue('disableItemColoring');
   showExtraLinks = getValue('showExtraLinks');
@@ -15447,9 +15653,7 @@ function getItems() {
   showQuickSendLinks$1 = getValue('showQuickSendLinks');
   doToggleButtons(showExtraLinks, showQuickDropLinks$1);
   pCC.addEventListener('click', evtHandler);
-  var allTables = pCC.getElementsByTagName('table');
-  var lastTable = allTables[allTables.length - 1];
-  var imgList = lastTable.getElementsByTagName('img');
+  var imgList = getItemImg(pCC);
   itemsAry = [];
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
@@ -15470,7 +15674,7 @@ function getItems() {
 function inventory(data) {
   extraLinks = false;
   checkAll = false;
-  invItems$1 = data.items;
+  invItems$2 = data.items;
   colouring = false;
   dropLinks = false;
   sendLinks = false;
@@ -15481,7 +15685,7 @@ function inventory(data) {
 
 function injectStoreItems() {
   getInventoryById().done(inventory);
-  add(3, getItems);
+  add(3, getItems$1);
 }
 
 function injectProfileDropItems() {
@@ -16508,6 +16712,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '25';
+window.FSH.calf = '26';
 
 }());
