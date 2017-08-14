@@ -1,11 +1,11 @@
 import {createDiv} from '../common/cElement';
+import dragStart from '../common/dragStart';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/scrapeBackpack';
-import * as common from '../common/common';
 import * as findBuffs from '../findBuffs';
 import * as fshGa from '../support/fshGa';
 import * as lists from '../lists';
@@ -110,7 +110,7 @@ function haveNode(node) {
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (system.getValue('draggableHelperMenu')) {
     helperMenu.setAttribute('draggable', 'true');
-    helperMenu.addEventListener('dragstart', common.drag_start);
+    helperMenu.addEventListener('dragstart', dragStart);
   }
   node.parentNode.insertBefore(helperMenu, node);
 }

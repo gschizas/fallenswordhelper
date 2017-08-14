@@ -1,6 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
-import * as common from '../common/common';
+import dragStart from '../common/dragStart';
 import * as system from '../support/system';
 
 function retOption(option, ifTrue, ifFalse) {
@@ -20,7 +20,7 @@ function retBool(bool, ifTrue, ifFalse) {
 function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
     document.getElementById('fshQuickLinks')
-      .addEventListener('dragstart', common.drag_start, false);
+      .addEventListener('dragstart', dragStart, false);
   }
 }
 
