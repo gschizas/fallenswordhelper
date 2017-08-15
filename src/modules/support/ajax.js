@@ -96,7 +96,7 @@ function guildInvRecall(invId, playerId, mode) {
     .done(dialog);
 }
 
-export function backpack() {
+function backpack() {
   return $.ajax({
     url: 'index.php',
     data: {cmd: 'profile', subcmd: 'fetchinv'},

@@ -5,7 +5,7 @@ import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertQuickExtract from '../quickExtract';
-import insertQuickWear from '../quickWear/scrapeBackpack';
+import insertQuickWear from '../quickWear/quickWear';
 import * as findBuffs from '../findBuffs';
 import * as fshGa from '../support/fshGa';
 import * as lists from '../lists';
