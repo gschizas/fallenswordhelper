@@ -1,5 +1,4 @@
 import calf from '../support/calf';
-import * as common from '../common/common';
 
 function hideElement(el) {
   el.classList.add('fshHide');
@@ -108,11 +107,4 @@ export function addOnlineAlliesWidgets() {
   // add coloring for offline time
   Array.prototype.forEach.call(
     onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
-}
-
-export function fixOnlineGuildBuffLinks() {
-  common.updateHCSQuickBuffLinks(
-    '#minibox-guild-members-list #guild-minibox-action-quickbuff');
-  common.updateHCSQuickBuffLinks(
-    '#minibox-allies-list #online-allies-action-quickbuff');
 }

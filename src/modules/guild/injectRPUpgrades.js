@@ -1,5 +1,5 @@
 import myStats from '../ajax/myStats';
-import {reduceBuffArray} from '../common/common';
+import reduceBuffArray from '../common/reduceBuffArray';
 import * as layout from '../support/layout';
 
 var packRE = />([ a-zA-Z]+) Level (\d+)/g;

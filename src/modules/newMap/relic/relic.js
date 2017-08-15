@@ -3,6 +3,7 @@ import getGroupStats from '../../ajax/getGroupStats';
 import getMembrList from '../../ajax/getMembrList';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';
+import reduceBuffArray from '../../common/reduceBuffArray';
 import {createButton, createDiv} from '../../common/cElement';
 import * as common from '../../common/common';
 import * as dataObj from '../../support/dataObj';
@@ -109,7 +110,7 @@ function calculateGroup() {
   groupDamageElement.textContent = system.addCommas(groupStats.damage);
   groupHPElement.textContent = system.addCommas(groupStats.hp);
 
-  var buffs = common.reduceBuffArray(player.buffs);
+  var buffs = reduceBuffArray(player.buffs);
 
   var nightmareVisageEffect = Math.ceil(groupStats.attack *
     (system.fallback(buffs['Nightmare Visage'], 0) * 0.0025));

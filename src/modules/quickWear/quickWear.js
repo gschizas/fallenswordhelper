@@ -1,10 +1,12 @@
-import makeFolderSpans from '../common/makeFolderSpans';
+import {createDiv} from '../common/cElement';
+import createQuickWear from './createQuickWear';
+import loadInventory from '../app/profile/loadInventory';
 import showAHInvManager from './showAHInvManager';
 import toggleForce from '../common/toggleForce';
-import {createDiv, createTBody, createTable} from '../common/cElement';
 import {equipItem, useItem} from '../support/ajax';
 import * as layout from '../support/layout';
 
+var content;
 var itemList;
 
 function doUseItem(self) { // jQuery.min
@@ -32,14 +34,17 @@ function equipProfileInventoryItem(self) { // jQuery.min
 
 function hideFolders(self) {
   var folderId = self.dataset.folder;
-  itemList.forEach(function(o) {
-    var tr = o.dom;
-    if (folderId === '0') {
-      tr.classList.remove('fshHide');
-    } else {
-      var force = folderId !== o.f.toString();
-      toggleForce(tr, force);
-    }
+  itemList.result.forEach(function(aFolder) {
+    var thisFolder = aFolder.id;
+    aFolder.items.forEach(function(o) {
+      var tr = o.dom;
+      if (folderId === '0') {
+        tr.classList.remove('fshHide');
+      } else {
+        var force = folderId !== thisFolder.toString();
+        toggleForce(tr, force);
+      }
+    });
   });
 }
 
@@ -76,54 +81,6 @@ function listen(evt) {
 
 }
 
-function alpha(a, b) {
-  if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
-  if (a.n.toLowerCase() > b.n.toLowerCase()) {return 1;}
-  return 0;
-}
-
-function folder(a, b) {
-  if (a.f === b.f) {
-    return alpha(a, b);
-  }
-  return a.f - b.f;
-}
-
-function tableRows(tbl, item) {
-  var newRow = tbl.insertRow(-1);
-  item.dom = newRow;
-  var equipClass = 'fshEq ';
-  var useClass = 'fshUse ';
-  if (item.eq) {equipClass += 'smallLink';} else {equipClass += 'notLink';}
-  if (item.u) {useClass += 'smallLink';} else {useClass += 'notLink';}
-  newRow.innerHTML = '<td class="fshCenter"><span class="' + equipClass +
-  '" data-itemid="' + item.a + '">Wear</span>&nbsp;|&nbsp;<span class="' +
-  useClass + '" data-itemid="' + item.a +
-  '">Use/Ext</span></td><td><img src="' + item.src +
-  '" class="tip-dynamic" data-tipped="' + item.tip +
-  '" width="30" height="30" border="0"></td><td width="90%">&nbsp;' +
-  item.n + '</td>';
-}
-
-function createQuickWear(folders) {
-  var tbl = createTable({
-    width: '100%',
-    innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
-      makeFolderSpans(folders) + '</th></tr>' +
-      '<tr class="fshHeader"><th class="fshCenter" width="20%">Actions</th>' +
-      '<th colspan="2">Items</th></tr></thead>'
-  });
-  var tbody = createTBody();
-  tbl.appendChild(tbody);
-  itemList.forEach(tableRows.bind(null, tbody));
-  var qw = createDiv({
-    id: 'invTabs-qw',
-    className: 'ui-tabs-panel ui-corner-bottom'
-  });
-  qw.appendChild(tbl);
-  return qw;
-}
-
 function createInvTabs() {
   return createDiv({
     id: 'invTabs',
@@ -142,14 +99,20 @@ function createInvTabs() {
   });
 }
 
-export default function showQuickWear(content, data, folders) {
-  itemList = data;
-  itemList.sort(folder);
+function showQuickWear(appInv) {
+  itemList = appInv;
   var invTabs = createInvTabs();
-  var invTabsQw = createQuickWear(folders);
+  var invTabsQw = createQuickWear(appInv);
   invTabs.appendChild(invTabsQw);
   content.innerHTML = '';
   content.appendChild(invTabs);
   invTabsQw.addEventListener('click', listen);
-  invTabs.appendChild(showAHInvManager(itemList));
+  invTabs.appendChild(showAHInvManager(appInv));
+}
+
+export default function insertQuickWear(injector) {
+  content = injector || layout.pCC;
+  if (!content) {return;}
+  content.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
+  loadInventory().done(showQuickWear);
 }

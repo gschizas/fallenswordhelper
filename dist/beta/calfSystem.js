@@ -926,186 +926,33 @@ function callback(event) {
 
 window.addEventListener('message', callback);
 
-var drag_target;
+var dragTarget;
 
-function drag_over(event) {
+function dragOver(event) {
   event.preventDefault();
   return false;
 }
 
-function drag_drop(event) {
+function dragDrop(event) {
   var offset = event.dataTransfer.getData('text/plain').split(',');
-  drag_target.style.left =
+  dragTarget.style.left =
     event.clientX + parseInt(offset[0], 10) + 'px';
-  drag_target.style.top =
+  dragTarget.style.top =
     event.clientY + parseInt(offset[1], 10) + 'px';
-  document.body.removeEventListener('dragover', drag_over, false);
-  document.body.removeEventListener('drop', drag_drop, false);
+  document.body.removeEventListener('dragover', dragOver, false);
+  document.body.removeEventListener('drop', dragDrop, false);
   event.preventDefault();
   return false;
 }
 
-function drag_start(event) {
-  drag_target = event.target;
+function dragStart(event) {
+  dragTarget = event.target;
   var style = window.getComputedStyle(event.target, null);
   event.dataTransfer.setData('text/plain',
     parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
     (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
-  document.body.addEventListener('dragover', drag_over, false);
-  document.body.addEventListener('drop', drag_drop, false);
-}
-
-function getStat(stat, doc) { // jQuery
-  // 'Hidden' returns NaN
-  return intValue(
-    $(stat, doc)
-      .contents()
-      .filter(function(i, e) {
-        return e.nodeType === 3;
-      })[0].nodeValue
-  );
-}
-
-function getBuffLevel(doc, buff) { // jQuery
-  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
-    .data('tipped');
-  // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
-  var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
-  if (test) {return intValue(test[1]);}
-  return 0;
-}
-
-function getBonus(stat, doc) { // jQuery
-  var target = $(stat, doc);
-  var children = target.children();
-  if (children.length === 0) {
-    children = target.next();
-  }
-  return intValue(children.text().slice(2, -1));
-}
-
-function cloakGuess(bonus, level) {
-  if (bonus > level * 10 ||
-      bonus < level) {
-    return bonus;
-  }
-  return level * 10;
-}
-
-function updateForCloak(obj) {
-  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
-  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
-  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
-  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
-  obj.hpValue = obj.hpBonus;
-}
-
-function playerDataString(responseText) {
-  var doc = createDocument(responseText);
-  var obj = {
-    levelValue: getStat('#stat-vl', doc),
-    attackValue: getStat('#stat-attack', doc),
-    attackBonus: getBonus('#stat-attack', doc),
-    defenseValue: getStat('#stat-defense', doc),
-    defenseBonus: getBonus('#stat-defense', doc),
-    armorValue: getStat('#stat-armor', doc),
-    armorBonus: getBonus('#stat-armor', doc),
-    damageValue: getStat('#stat-damage', doc),
-    damageBonus: getBonus('#stat-damage', doc),
-    hpValue: getStat('#stat-hp', doc),
-    hpBonus: getBonus('#stat-hp', doc),
-    killStreakValue: getStat('#stat-kill-streak', doc),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
-    doublerLevel: getBuffLevel(doc, 'Doubler'),
-    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
-    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
-    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
-    constitutionLevel: getBuffLevel(doc, 'Constitution'),
-    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
-    flinchLevel: getBuffLevel(doc, 'Flinch'),
-    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
-    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
-    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
-    barricadeLevel: getBuffLevel(doc, 'Barricade'),
-    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
-    anchoredLevel: getBuffLevel(doc, 'Anchored'),
-    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
-    entrenchLevel: getBuffLevel(doc, 'Entrench'),
-    cloakLevel: getBuffLevel(doc, 'Cloak')
-  };
-  obj.superEliteSlayerMultiplier = Math.round(0.002 *
-    obj.superEliteSlayerLevel * 100) / 100;
-
-  if (obj.cloakLevel === 0 ||
-      typeof obj.attackValue === 'number' &&
-      !isNaN(obj.attackValue)) {
-    return obj;
-  }
-
-  updateForCloak(obj);
-  return obj;
-}
-
-function reduceBuffArray(buffAry) {
-  return buffAry.reduce(function(prev, curr) {
-    prev[curr.name] = Number(curr.level);
-    return prev;
-  }, {});
-}
-
-function getBuffLvl(buffs, buff) {
-  return fallback(buffs[buff], 0);
-}
-
-function playerDataObject(json) {
-  var buffs = reduceBuffArray(json._skills);
-  var obj = {
-    levelValue: json.level,
-    attackValue: json.attack,
-    attackBonus: json.bonus_attack,
-    defenseValue: json.defense,
-    defenseBonus: json.bonus_defense,
-    armorValue: json.armor,
-    armorBonus: json.bonus_armor,
-    damageValue: json.damage,
-    damageBonus: json.bonus_damage,
-    hpValue: json.hp,
-    hpBonus: json.bonus_hp,
-    killStreakValue: intValue(json.killstreak),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
-    doublerLevel: getBuffLvl(buffs, 'Doubler'),
-    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
-    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
-    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
-    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
-    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
-    flinchLevel: getBuffLvl(buffs, 'Flinch'),
-    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
-    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
-    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
-    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
-    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
-    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
-    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
-    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
-    cloakLevel: getBuffLvl(buffs, 'Cloak')
-  };
-  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
-  return obj;
-}
-
-function updateHCSQuickBuffLinks(selector) {
-  Array.prototype.forEach.call(document.querySelectorAll(selector),
-    function(el) {
-      el.href = el.getAttribute('href').replace(/, 500/g, ', 1000'); // getAttribute neccessary for FF
-    }
-  );
+  document.body.addEventListener('dragover', dragOver, false);
+  document.body.addEventListener('drop', dragDrop, false);
 }
 
 function retOption(option, ifTrue, ifFalse) {
@@ -1125,7 +972,7 @@ function retBool(bool, ifTrue, ifFalse) {
 function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
     document.getElementById('fshQuickLinks')
-      .addEventListener('dragstart', drag_start, false);
+      .addEventListener('dragstart', dragStart, false);
   }
 }
 
@@ -1182,6 +1029,37 @@ function isMessageSound() {
   }
 }
 
+function testForGuildLogMsg(guildLogNode) {
+  return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
+    guildLogNode.innerHTML.search('Guild Log updated!') === -1;
+}
+
+function hideGuildLogMsg(guildLogNode) {
+  // hide the lhs box
+  if (testForGuildLogMsg(guildLogNode)) {return;}
+  var messageBox = guildLogNode.parentNode;
+  if (messageBox) {
+    messageBox.classList.add('fshHide');
+  }
+}
+
+function gotGuildLogNodes(guildLogNodes) {
+  var guildLogNode;
+  for (var i = 0; i < guildLogNodes.length; i += 1) {
+    guildLogNode = guildLogNodes[i];
+    guildLogNode.setAttribute('href',
+      'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
+  }
+  hideGuildLogMsg(guildLogNode);
+}
+
+function changeGuildLogHREF() {
+  if (!getValue('useNewGuildLog')) {return;}
+  var guildLogNodes = document.querySelectorAll(
+    '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
+  if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
+}
+
 function getForage(forage) {
   // Wrap in jQuery Deferred because we're using 1.7
   // rather than using ES6 promise
@@ -1196,6 +1074,51 @@ function getForage(forage) {
     }
   });
   return dfr.promise();
+}
+
+function setForage(forage, data) {
+  // Wrap in jQuery Deferred because we're using 1.7
+  // rather than using ES6 promise
+  var dfr = $.Deferred();
+  localforage.setItem(forage, data, function setItemCallback(err, _data) {
+    if (err) {
+      log(forage + ' forage error', err);
+      dfr.reject(err);
+    } else {
+      dfr.resolve(_data);
+    }
+  });
+  return dfr.promise();
+}
+
+function getBoxList(boxList) {
+  if (boxList) {return boxList;}
+  return '';
+}
+
+function storeFSBox(_boxList) {
+  var boxList = getBoxList(_boxList);
+  var fsbox = document.getElementById('minibox-fsbox')
+    .getElementsByClassName('message')[0].innerHTML;
+  if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
+  if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
+  setForage('fsh_fsboxcontent', boxList);
+}
+
+function injectFSBoxLog() {
+  var node = document.getElementById('minibox-fsbox');
+  if (!node) {return;}
+  var nodediv = node.lastElementChild;
+  var playerName = nodediv.getElementsByTagName('a');
+  if (playerName.length === 0) {return;}
+  getForage('fsh_fsboxcontent').done(storeFSBox);
+  playerName = playerName[0].textContent;
+  nodediv.insertAdjacentHTML('beforeend',
+    '<br><span class="fshPaleVioletRed">' +
+    '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
+    playerName + '">Ignore</a> ]</span> <span class="fshYellow">[ <a ' +
+    'href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent">Log</a> ]' +
+    '</span>');
 }
 
 function mixin(obj, mixins) {
@@ -1264,21 +1187,6 @@ function createAnchor(props) {
 
 function createInput(props) {
   return cElement('input', props);
-}
-
-function setForage(forage, data) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
-  localforage.setItem(forage, data, function setItemCallback(err, _data) {
-    if (err) {
-      log(forage + ' forage error', err);
-      dfr.reject(err);
-    } else {
-      dfr.resolve(_data);
-    }
-  });
-  return dfr.promise();
 }
 
 var dotList;
@@ -2334,32 +2242,87 @@ function insertQuickExtract(injector) { // jQuery.min
   getInventory().done(prepInv);
 }
 
-function rekeyInventory(data) {
-  data.items = data.items.reduce(function(prev, curr) {
-    if (curr.is_in_st) {prev.fshHasST = true;}
-    prev[curr.inv_id] = curr;
-    return prev;
-  }, {});
-  return data;
+function alpha(a, b) {
+  if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
+  if (a.n.toLowerCase() > b.n.toLowerCase()) {return 1;}
+  return 0;
 }
 
-function getInventoryById() {
-  return getInventory().pipe(rekeyInventory);
+function isUseable(item) {
+  if ([10, 12, 15, 16].indexOf(item.t) !== -1 ||
+      item.n === 'Zombie Coffin') {
+    return 'smallLink';
+  }
+  return 'notLink';
 }
 
-function getItemImg(pCC) {
-  var allTables = pCC.getElementsByTagName('table');
-  var lastTable = allTables[allTables.length - 1];
-  return lastTable.getElementsByTagName('img');
+function itemImage(item) {
+  var ret = imageServer + '/';
+  if (item.b === 13699) {
+    ret += 'composing/potions/' + item.extra.design + '_' +
+      item.extra.color + '.gif';
+  } else {
+    ret += 'items/' + item.b + '.gif';
+  }
+  return ret;
 }
 
-function makeFolderSpans(folders) {
+function tableRows$1(tbl, playerId$$1, item) {
+  var newRow = tbl.insertRow(-1);
+  item.dom = newRow;
+  var equipClass = 'fshEq ';
+  var useClass = 'fshUse ';
+  if (item.t < 9) {equipClass += 'smallLink';} else {equipClass += 'notLink';}
+  useClass += isUseable(item);
+  newRow.innerHTML = '<td class="fshCenter"><span class="' + equipClass +
+    '" data-itemid="' + item.a + '">Wear</span>&nbsp;|&nbsp;<span class="' +
+    useClass + '" data-itemid="' + item.a +
+    '">Use/Ext</span></td><td><img src="' + itemImage(item) + '" ' +
+    'class="tip-dynamic" data-tipped="fetchitem.php?item_id=' + item.b +
+    '&amp;inv_id=' + item.a + '&amp;t=1&amp;p=' + playerId$$1 + '&amp;' +
+    'currentPlayerId=' + playerId$$1 + '" width="30" height="30" border="0">' +
+    '</td><td width="90%">&nbsp;' + item.n + '</td>';
+}
+
+function makeFolderSpans(appInv) {
   return '<span class="fshLink folder" data-folder="0">All</span>' +
     ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
-    Object.keys(folders).reduce(function(prev, key) {
+    appInv.result.reduce(function(prev, folderObj) {
       return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
-        'data-folder="' + key + '">' + folders[key] + '</span>';
+        'data-folder="' + folderObj.id.toString() + '">' +
+        folderObj.name + '</span>';
     }, '');
+}
+
+function createQuickWear(appInv) {
+  var playerId$$1 = playerId();
+  var tbl = createTable({
+    width: '100%',
+    innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
+      makeFolderSpans(appInv) + '</th></tr>' +
+      '<tr class="fshHeader"><th class="fshCenter" width="20%">Actions</th>' +
+      '<th colspan="2">Items</th></tr></thead>'
+  });
+  var tbody = createTBody();
+  tbl.appendChild(tbody);
+  appInv.result.forEach(function(aFolder) {
+    aFolder.items.sort(alpha);
+    aFolder.items.forEach(tableRows$1.bind(null, tbody, playerId$$1));
+  });
+  var qw = createDiv({
+    id: 'invTabs-qw',
+    className: 'ui-tabs-panel ui-corner-bottom'
+  });
+  qw.appendChild(tbl);
+  return qw;
+}
+
+function loadInventory() {
+  return $.ajax({
+    url: 'app.php',
+    data: {cmd: 'profile', subcmd: 'loadinventory', app: '1'},
+    dataType: 'json'
+  });
 }
 
 function ahLink(searchname, nickname) {
@@ -2448,7 +2411,9 @@ function showAHInvManager(itemList) {
   var invCount = {};
   var quickSL = getValueJSON('quickSearchList');
   // fill up the Inv Counter
-  itemList.forEach(testItemList.bind(null, invCount, quickSL));
+  itemList.result.forEach(function(aFolder) {
+    aFolder.items.forEach(testItemList.bind(null, invCount, quickSL));
+  });
   var im = createDiv({
     id: 'invTabs-ah',
     className: 'ui-tabs-panel ui-corner-bottom'
@@ -2463,6 +2428,7 @@ function toggleForce(el, force) { // Polyfill UC
   }
 }
 
+var content$2;
 var itemList;
 
 function doUseItem(self) { // jQuery.min
@@ -2490,14 +2456,17 @@ function equipProfileInventoryItem(self) { // jQuery.min
 
 function hideFolders(self) {
   var folderId = self.dataset.folder;
-  itemList.forEach(function(o) {
-    var tr = o.dom;
-    if (folderId === '0') {
-      tr.classList.remove('fshHide');
-    } else {
-      var force = folderId !== o.f.toString();
-      toggleForce(tr, force);
-    }
+  itemList.result.forEach(function(aFolder) {
+    var thisFolder = aFolder.id;
+    aFolder.items.forEach(function(o) {
+      var tr = o.dom;
+      if (folderId === '0') {
+        tr.classList.remove('fshHide');
+      } else {
+        var force = folderId !== thisFolder.toString();
+        toggleForce(tr, force);
+      }
+    });
   });
 }
 
@@ -2534,54 +2503,6 @@ function listen$1(evt) {
 
 }
 
-function alpha(a, b) {
-  if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
-  if (a.n.toLowerCase() > b.n.toLowerCase()) {return 1;}
-  return 0;
-}
-
-function folder(a, b) {
-  if (a.f === b.f) {
-    return alpha(a, b);
-  }
-  return a.f - b.f;
-}
-
-function tableRows$1(tbl, item) {
-  var newRow = tbl.insertRow(-1);
-  item.dom = newRow;
-  var equipClass = 'fshEq ';
-  var useClass = 'fshUse ';
-  if (item.eq) {equipClass += 'smallLink';} else {equipClass += 'notLink';}
-  if (item.u) {useClass += 'smallLink';} else {useClass += 'notLink';}
-  newRow.innerHTML = '<td class="fshCenter"><span class="' + equipClass +
-  '" data-itemid="' + item.a + '">Wear</span>&nbsp;|&nbsp;<span class="' +
-  useClass + '" data-itemid="' + item.a +
-  '">Use/Ext</span></td><td><img src="' + item.src +
-  '" class="tip-dynamic" data-tipped="' + item.tip +
-  '" width="30" height="30" border="0"></td><td width="90%">&nbsp;' +
-  item.n + '</td>';
-}
-
-function createQuickWear(folders) {
-  var tbl = createTable({
-    width: '100%',
-    innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
-      makeFolderSpans(folders) + '</th></tr>' +
-      '<tr class="fshHeader"><th class="fshCenter" width="20%">Actions</th>' +
-      '<th colspan="2">Items</th></tr></thead>'
-  });
-  var tbody = createTBody();
-  tbl.appendChild(tbody);
-  itemList.forEach(tableRows$1.bind(null, tbody));
-  var qw = createDiv({
-    id: 'invTabs-qw',
-    className: 'ui-tabs-panel ui-corner-bottom'
-  });
-  qw.appendChild(tbl);
-  return qw;
-}
-
 function createInvTabs() {
   return createDiv({
     id: 'invTabs',
@@ -2600,138 +2521,22 @@ function createInvTabs() {
   });
 }
 
-function showQuickWear(content, data, folders) {
-  itemList = data;
-  itemList.sort(folder);
+function showQuickWear(appInv) {
+  itemList = appInv;
   var invTabs = createInvTabs();
-  var invTabsQw = createQuickWear(folders);
+  var invTabsQw = createQuickWear(appInv);
   invTabs.appendChild(invTabsQw);
-  content.innerHTML = '';
-  content.appendChild(invTabs);
+  content$2.innerHTML = '';
+  content$2.appendChild(invTabs);
   invTabsQw.addEventListener('click', listen$1);
-  invTabs.appendChild(showAHInvManager(itemList));
-}
-
-var content$2;
-var scrapedItems;
-var folders;
-var invItems;
-
-function getItems(doc) {
-  var imgList = getItemImg(doc.getElementById('pCC'));
-  Array.prototype.forEach.call(imgList, function(img) {
-    var thisItem = itemRE.exec(img.dataset.tipped);
-    if (!scrapedItems[thisItem[2]]) {
-      scrapedItems[thisItem[2]] = {
-        n: img.parentNode.parentNode.nextElementSibling.textContent.trim(),
-        src: img.src,
-        tip: img.dataset.tipped
-      };
-    }
-  });
-  return scrapedItems;
-}
-
-function queryFolders(doc) {
-  return doc.querySelectorAll('a[href*="folder_id="]');
-}
-
-function folderNotActive(fldr) {
-  return fldr.firstChild.src.indexOf('folder_on.gif') === -1;
-}
-
-function displayProgress(msg) {
-  content$2.insertAdjacentHTML('beforeend', msg + '<br>');
-}
-
-function folderProgress(folderName) {
-  displayProgress('Checking folder ' + folderName + '...');
-}
-
-function folderText(fldr) {
-  return fldr.parentNode.textContent;
-}
-
-function gotOtherPage(folderName, html) {
-  folderProgress(folderName);
-  getItems(createDocument(html));
-}
-
-function gotSecondPage(folderName, html) {
-  folderProgress(folderName);
-  var doc = createDocument(html);
-  var myFolders = queryFolders(doc);
-  if (folderNotActive(myFolders[1])) {
-    displayProgress('No more folders...');
-    return html;
-  }
-  getItems(doc);
-  var prm = [];
-  for (var i = 2; i < myFolders.length; i += 1) {
-    prm.push($.get(myFolders[i].href)
-      .done(gotOtherPage.bind(null, folderText(myFolders[i]))));
-  }
-  return $.when.apply($, prm);
-}
-
-function gotGuildStoreItems(html) {
-  displayProgress('Checking Guild Store Items...');
-  getItems(createDocument(html));
-}
-
-function getGuildStoreItems() {
-  return $.get('index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems')
-    .done(gotGuildStoreItems);
-}
-
-function imDone() {
-  displayProgress('I\'m done.');
-  var itemAry = Object.keys(scrapedItems).map(function(invId) {
-    return {
-      a: invId,
-      eq: Number(invItems[invId].type) < 9,
-      f: Number(invItems[invId].folder_id),
-      n: scrapedItems[invId].n,
-      src: scrapedItems[invId].src,
-      tip: scrapedItems[invId].tip,
-      u: ['10', '12', '15', '16'].indexOf(invItems[invId].type) !== -1 ||
-        scrapedItems[invId].n === 'Zombie Coffin'
-    };
-  });
-  showQuickWear(content$2, itemAry, folders);
-}
-
-function gotInv(data) {
-  displayProgress('Checking Inventory...');
-  // console.log('Inventory', data);
-  folders = data.folders;
-  invItems = data.items;
-}
-
-function gotFirstPage(html) {
-  folderProgress('Main');
-  var doc = createDocument(html);
-  var myFolders = queryFolders(doc);
-  if (folderNotActive(myFolders[0])) {
-    displayProgress('Something has gone horribly wrong!');
-    return;
-  }
-  var prm = [getInventoryById().done(gotInv)];
-  if (myFolders[1]) {
-    var fn = gotSecondPage.bind(null, folderText(myFolders[1]));
-    prm.push($.get(myFolders[1].href).pipe(fn));
-  }
-  getItems(doc);
-  $.when.apply($, prm).pipe(getGuildStoreItems).done(imDone);
+  invTabs.appendChild(showAHInvManager(appInv));
 }
 
 function insertQuickWear(injector) {
   content$2 = injector || pCC;
   if (!content$2) {return;}
-  displayProgress('Getting item list from backpack...');
-  scrapedItems = {};
-  $.get('index.php?cmd=profile&subcmd=dropitems')
-    .done(gotFirstPage);
+  content$2.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
+  loadInventory().done(showQuickWear);
 }
 
 /* eslint-disable no-multi-spaces, max-len */
@@ -5053,7 +4858,7 @@ function haveNode$1(node) {
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (getValue('draggableHelperMenu')) {
     helperMenu.setAttribute('draggable', 'true');
-    helperMenu.addEventListener('dragstart', drag_start);
+    helperMenu.addEventListener('dragstart', dragStart);
   }
   node.parentNode.insertBefore(helperMenu, node);
 }
@@ -6149,6 +5954,14 @@ function statbar() {
   statbarWrapper('index.php?cmd=bank', 'statbar-gold');
 }
 
+function updateHCSQuickBuffLinks(selector) {
+  Array.prototype.forEach.call(document.querySelectorAll(selector),
+    function(el) {
+      el.href = el.getAttribute('href').replace(/, 500/g, ', 1000'); // getAttribute neccessary for FF
+    }
+  );
+}
+
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function formatShortDate(aDate) {
@@ -6646,13 +6459,6 @@ function addOnlineAlliesWidgets() {
     onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
 }
 
-function fixOnlineGuildBuffLinks() {
-  updateHCSQuickBuffLinks(
-    '#minibox-guild-members-list #guild-minibox-action-quickbuff');
-  updateHCSQuickBuffLinks(
-    '#minibox-allies-list #online-allies-action-quickbuff');
-}
-
 function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');
   Array.prototype.forEach.call(nodeList, function(el) {
@@ -6748,67 +6554,6 @@ function navMenu() { // jQuery
   };
 }
 
-function getBoxList(boxList) {
-  if (boxList) {return boxList;}
-  return '';
-}
-
-function storeFSBox(_boxList) {
-  var boxList = getBoxList(_boxList);
-  var fsbox = document.getElementById('minibox-fsbox')
-    .getElementsByClassName('message')[0].innerHTML;
-  if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
-  if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
-  setForage('fsh_fsboxcontent', boxList);
-}
-
-function injectFSBoxLog() {
-  var node = document.getElementById('minibox-fsbox');
-  if (!node) {return;}
-  var nodediv = node.lastElementChild;
-  var playerName = nodediv.getElementsByTagName('a');
-  if (playerName.length === 0) {return;}
-  getForage('fsh_fsboxcontent').done(storeFSBox);
-  playerName = playerName[0].textContent;
-  nodediv.insertAdjacentHTML('beforeend',
-    '<br><span class="fshPaleVioletRed">' +
-    '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
-    playerName + '">Ignore</a> ]</span> <span class="fshYellow">[ <a ' +
-    'href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent">Log</a> ]' +
-    '</span>');
-}
-
-function testForGuildLogMsg(guildLogNode) {
-  return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
-    guildLogNode.innerHTML.search('Guild Log updated!') === -1;
-}
-
-function hideGuildLogMsg(guildLogNode) {
-  // hide the lhs box
-  if (testForGuildLogMsg(guildLogNode)) {return;}
-  var messageBox = guildLogNode.parentNode;
-  if (messageBox) {
-    messageBox.classList.add('fshHide');
-  }
-}
-
-function gotGuildLogNodes(guildLogNodes) {
-  var guildLogNode;
-  for (var i = 0; i < guildLogNodes.length; i += 1) {
-    guildLogNode = guildLogNodes[i];
-    guildLogNode.setAttribute('href',
-      'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
-  }
-  hideGuildLogMsg(guildLogNode);
-}
-
-function changeGuildLogHREF() {
-  if (!getValue('useNewGuildLog')) {return;}
-  var guildLogNodes = document.querySelectorAll(
-    '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
-  if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
-}
-
 function moveRHSBoxUpOnRHS(title) {
   document.getElementById('pCR').insertAdjacentElement('afterbegin',
     document.getElementById(title));
@@ -6836,6 +6581,13 @@ function doMoveFsBox() {
   if (getValue('moveFSBox')) {
     add(3, moveRHSBoxToLHS, ['minibox-fsbox']);
   }
+}
+
+function fixOnlineGuildBuffLinks() {
+  updateHCSQuickBuffLinks(
+    '#minibox-guild-members-list #guild-minibox-action-quickbuff');
+  updateHCSQuickBuffLinks(
+    '#minibox-allies-list #online-allies-action-quickbuff');
 }
 
 function notHuntMode() {
@@ -6982,6 +6734,19 @@ function completedArenas() { // jQuery
     finishButton.click(function() {gotoPage(lastPage);});
   }
   $('#pCC input[value="View"]').click(dontPost);
+}
+
+function rekeyInventory(data) {
+  data.items = data.items.reduce(function(prev, curr) {
+    if (curr.is_in_st) {prev.fshHasST = true;}
+    prev[curr.inv_id] = curr;
+    return prev;
+  }, {});
+  return data;
+}
+
+function getInventoryById() {
+  return getInventory().pipe(rekeyInventory);
 }
 
 var inv;
@@ -11291,6 +11056,13 @@ function injectQuickBuff() { // jQuery
   getProfile(window.self).done(getSustain$1);
 }
 
+function reduceBuffArray(buffAry) {
+  return buffAry.reduce(function(prev, curr) {
+    prev[curr.name] = Number(curr.level);
+    return prev;
+  }, {});
+}
+
 var packRE = />([ a-zA-Z]+) Level (\d+)/g;
 
 function postWarnings(myBuffs) {
@@ -11867,7 +11639,7 @@ function doFolderHeaders(folders) {
   multiple.insertAdjacentElement('afterend', foldersRow);
 }
 
-var invItems$1;
+var invItems;
 
 function stColor(el, item) {
   if (item.is_in_st) {
@@ -11878,9 +11650,9 @@ function stColor(el, item) {
 function forEachInvItem(el) {
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
-  var item = invItems$1[checkbox.getAttribute('value')];
+  var item = invItems[checkbox.getAttribute('value')];
   el.classList.add('folderid' + item.folder_id);
-  if (invItems$1.fshHasST) {stColor(el, item);}
+  if (invItems.fshHasST) {stColor(el, item);}
   checkbox.classList.add('itemid' + item.item_id);
   checkbox.classList.add('itemtype' + item.type);
 }
@@ -11889,7 +11661,7 @@ function processTrade(data) {
 
   time('trade.processTrade');
 
-  invItems$1 = data.items;
+  invItems = data.items;
   /* Highlight items in ST */
   var nodeList = document.getElementById('item-list')
     .getElementsByTagName('table');
@@ -12354,6 +12126,144 @@ function parseMercStats(html) {
 
 function getMercStats() {
   return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
+}
+
+function getStat(stat, doc) { // jQuery
+  // 'Hidden' returns NaN
+  return intValue(
+    $(stat, doc)
+      .contents()
+      .filter(function(i, e) {
+        return e.nodeType === 3;
+      })[0].nodeValue
+  );
+}
+
+function getBuffLevel(doc, buff) { // jQuery
+  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
+    .data('tipped');
+  // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
+  var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
+  if (test) {return intValue(test[1]);}
+  return 0;
+}
+
+function getBonus(stat, doc) { // jQuery
+  var target = $(stat, doc);
+  var children = target.children();
+  if (children.length === 0) {
+    children = target.next();
+  }
+  return intValue(children.text().slice(2, -1));
+}
+
+function cloakGuess(bonus, level) {
+  if (bonus > level * 10 ||
+      bonus < level) {
+    return bonus;
+  }
+  return level * 10;
+}
+
+function updateForCloak(obj) {
+  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
+  obj.hpValue = obj.hpBonus;
+}
+
+function playerDataString(responseText) {
+  var doc = createDocument(responseText);
+  var obj = {
+    levelValue: getStat('#stat-vl', doc),
+    attackValue: getStat('#stat-attack', doc),
+    attackBonus: getBonus('#stat-attack', doc),
+    defenseValue: getStat('#stat-defense', doc),
+    defenseBonus: getBonus('#stat-defense', doc),
+    armorValue: getStat('#stat-armor', doc),
+    armorBonus: getBonus('#stat-armor', doc),
+    damageValue: getStat('#stat-damage', doc),
+    damageBonus: getBonus('#stat-damage', doc),
+    hpValue: getStat('#stat-hp', doc),
+    hpBonus: getBonus('#stat-hp', doc),
+    killStreakValue: getStat('#stat-kill-streak', doc),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
+    doublerLevel: getBuffLevel(doc, 'Doubler'),
+    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
+    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
+    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
+    constitutionLevel: getBuffLevel(doc, 'Constitution'),
+    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
+    flinchLevel: getBuffLevel(doc, 'Flinch'),
+    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
+    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
+    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
+    barricadeLevel: getBuffLevel(doc, 'Barricade'),
+    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
+    anchoredLevel: getBuffLevel(doc, 'Anchored'),
+    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
+    entrenchLevel: getBuffLevel(doc, 'Entrench'),
+    cloakLevel: getBuffLevel(doc, 'Cloak')
+  };
+  obj.superEliteSlayerMultiplier = Math.round(0.002 *
+    obj.superEliteSlayerLevel * 100) / 100;
+
+  if (obj.cloakLevel === 0 ||
+      typeof obj.attackValue === 'number' &&
+      !isNaN(obj.attackValue)) {
+    return obj;
+  }
+
+  updateForCloak(obj);
+  return obj;
+}
+
+function getBuffLvl(buffs, buff) {
+  return fallback(buffs[buff], 0);
+}
+
+function playerDataObject(json) {
+  var buffs = reduceBuffArray(json._skills);
+  var obj = {
+    levelValue: json.level,
+    attackValue: json.attack,
+    attackBonus: json.bonus_attack,
+    defenseValue: json.defense,
+    defenseBonus: json.bonus_defense,
+    armorValue: json.armor,
+    armorBonus: json.bonus_armor,
+    damageValue: json.damage,
+    damageBonus: json.bonus_damage,
+    hpValue: json.hp,
+    hpBonus: json.bonus_hp,
+    killStreakValue: intValue(json.killstreak),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
+    doublerLevel: getBuffLvl(buffs, 'Doubler'),
+    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
+    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
+    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
+    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
+    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
+    flinchLevel: getBuffLvl(buffs, 'Flinch'),
+    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
+    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
+    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
+    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
+    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
+    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
+    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
+    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
+    cloakLevel: getBuffLvl(buffs, 'Cloak')
+  };
+  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
+  return obj;
 }
 
 var relicData;
@@ -15241,7 +15151,7 @@ function injectBank() {
   ajaxifyBank();
 }
 
-var invItems$3;
+var invItems$2;
 var type;
 var itemId;
 
@@ -15253,12 +15163,12 @@ var types = [
   {
     c: function() {return type === 'guild';},
     r: function(o, el) {
-      el.checked = !el.disabled && invItems$3[o.invid].guild_tag !== '-1';
+      el.checked = !el.disabled && invItems$2[o.invid].guild_tag !== '-1';
     }
   },
   {
     c: function(o) {
-      return type === 'item' && invItems$3[o.invid].item_id === itemId;
+      return type === 'item' && invItems$2[o.invid].item_id === itemId;
     },
     r: tickElement
   },
@@ -15279,7 +15189,7 @@ function testType(o, el) {
 }
 
 function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
-  invItems$3 = invItems_;
+  invItems$2 = invItems_;
   type = type_;
   itemId = itemId_;
   itemsAry.forEach(function(o) {
@@ -15289,6 +15199,15 @@ function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
       .firstElementChild;
     testType(o, el);
   });
+}
+
+function makeFolderSpans$1(folders) {
+  return '<span class="fshLink folder" data-folder="0">All</span>' +
+    ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
+    Object.keys(folders).reduce(function(prev, key) {
+      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
+        'data-folder="' + key + '">' + folders[key] + '</span>';
+    }, '');
 }
 
 function extraButtons() {
@@ -15304,7 +15223,7 @@ function doFolderButtons(folders) {
     var insertHere = createTd({colSpan: 3});
     tr.appendChild(insertHere);
     formNode.parentNode.insertBefore(tr, formNode);
-    insertHere.innerHTML = makeFolderSpans(folders);
+    insertHere.innerHTML = makeFolderSpans$1(folders);
     extraButtons();
   }
 }
@@ -15333,6 +15252,12 @@ function doToggleButtons(showExtraLinks, showQuickDropLinks) {
       ' Select All Guild Locked</span>]&nbsp;';
   }
   insertHere.innerHTML = inject;
+}
+
+function getItemImg(pCC) {
+  var allTables = pCC.getElementsByTagName('table');
+  var lastTable = allTables[allTables.length - 1];
+  return lastTable.getElementsByTagName('img');
 }
 
 function hideFolders$1(itemsAry, invItems, self) {
@@ -15440,7 +15365,7 @@ var itemsAry;
 var checkAll;
 var itemsHash;
 var dropLinks;
-var invItems$2;
+var invItems$1;
 var colouring;
 var sendLinks;
 
@@ -15520,7 +15445,7 @@ function invPaint() { // Native - abstract this pattern
   while (performance.now() < limit &&
       paintCount < itemsAry.length) {
     var o = itemsAry[paintCount];
-    var item = invItems$2[o.invid];
+    var item = invItems$1[o.invid];
     afterbegin(o, item);
     beforeend(o, item);
     paintCount += 1;
@@ -15573,7 +15498,7 @@ var evts$1 = [
   },
   {
     condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    result: function() {doCheckboxes(itemsAry, invItems$2, 'guild');}
+    result: function() {doCheckboxes(itemsAry, invItems$1, 'guild');}
   },
   {
     condition: function(self) {return self.id === 'fshMove';},
@@ -15582,7 +15507,7 @@ var evts$1 = [
   {
     condition: function(self) {return self.hasAttribute('linkto');},
     result: function(self) {
-      doCheckboxes(itemsAry, invItems$2, 'item', self.getAttribute('linkto'));
+      doCheckboxes(itemsAry, invItems$1, 'item', self.getAttribute('linkto'));
     }
   },
   {
@@ -15600,13 +15525,13 @@ var evts$1 = [
   {
     condition: function(self) {return self.classList.contains('folder');},
     result: function(self) {
-      hideFolders$1(itemsAry, invItems$2, self);
+      hideFolders$1(itemsAry, invItems$1, self);
     }
   },
   {
     condition: function(self) {return self.id === 'fshChkAll';},
     result: function() {
-      doCheckboxes(itemsAry, invItems$2, 'checkAll');
+      doCheckboxes(itemsAry, invItems$1, 'checkAll');
     }
   }
 ];
@@ -15622,7 +15547,7 @@ function evtHandler(evt) {
   });
 }
 
-function getItems$1() {
+function getItems() {
   addStatTotalToMouseover();
   disableItemColoring = getValue('disableItemColoring');
   showExtraLinks = getValue('showExtraLinks');
@@ -15651,7 +15576,7 @@ function getItems$1() {
 function inventory(data) {
   extraLinks = false;
   checkAll = false;
-  invItems$2 = data.items;
+  invItems$1 = data.items;
   colouring = false;
   dropLinks = false;
   sendLinks = false;
@@ -15662,7 +15587,7 @@ function inventory(data) {
 
 function injectStoreItems() {
   getInventoryById().done(inventory);
-  add(3, getItems$1);
+  add(3, getItems);
 }
 
 function injectProfileDropItems() {
@@ -16676,6 +16601,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '26';
+window.FSH.calf = '27';
 
 }());

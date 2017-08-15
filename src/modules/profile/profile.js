@@ -7,7 +7,7 @@ import nekidBtn from './nekidBtn';
 import profileComponents from './components';
 import profileParseAllyEnemy from './profileAllyEnemy';
 import profileRenderBio from './bio/bio';
-import * as common from '../common/common';
+import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -244,7 +244,7 @@ export default function injectProfile() { // Legacy
   yuuzhan(playername, avyImg);
   //* *************
 
-  common.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
+  updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateNmv();
   updateStatistics();
   profileRenderBio(self);

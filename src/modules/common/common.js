@@ -1,33 +1,5 @@
+import reduceBuffArray from './reduceBuffArray';
 import * as system from '../support/system';
-
-var drag_target;
-
-function drag_over(event) {
-  event.preventDefault();
-  return false;
-}
-
-function drag_drop(event) {
-  var offset = event.dataTransfer.getData('text/plain').split(',');
-  drag_target.style.left =
-    event.clientX + parseInt(offset[0], 10) + 'px';
-  drag_target.style.top =
-    event.clientY + parseInt(offset[1], 10) + 'px';
-  document.body.removeEventListener('dragover', drag_over, false);
-  document.body.removeEventListener('drop', drag_drop, false);
-  event.preventDefault();
-  return false;
-}
-
-export function drag_start(event) {
-  drag_target = event.target;
-  var style = window.getComputedStyle(event.target, null);
-  event.dataTransfer.setData('text/plain',
-    parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
-    (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
-  document.body.addEventListener('dragover', drag_over, false);
-  document.body.addEventListener('drop', drag_drop, false);
-}
 
 function getStat(stat, doc) { // jQuery
   // 'Hidden' returns NaN
@@ -123,13 +95,6 @@ export function playerDataString(responseText) {
   return obj;
 }
 
-export function reduceBuffArray(buffAry) {
-  return buffAry.reduce(function(prev, curr) {
-    prev[curr.name] = Number(curr.level);
-    return prev;
-  }, {});
-}
-
 function getBuffLvl(buffs, buff) {
   return system.fallback(buffs[buff], 0);
 }
@@ -172,12 +137,4 @@ export function playerDataObject(json) {
   };
   if (obj.cloakLevel !== 0) {updateForCloak(obj);}
   return obj;
-}
-
-export function updateHCSQuickBuffLinks(selector) {
-  Array.prototype.forEach.call(document.querySelectorAll(selector),
-    function(el) {
-      el.href = el.getAttribute('href').replace(/, 500/g, ', 1000'); // getAttribute neccessary for FF
-    }
-  );
 }

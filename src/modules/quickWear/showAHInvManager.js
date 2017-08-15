@@ -87,7 +87,9 @@ export default function showAHInvManager(itemList) {
   var invCount = {};
   var quickSL = system.getValueJSON('quickSearchList');
   // fill up the Inv Counter
-  itemList.forEach(testItemList.bind(null, invCount, quickSL));
+  itemList.result.forEach(function(aFolder) {
+    aFolder.items.forEach(testItemList.bind(null, invCount, quickSL));
+  });
   var im = createDiv({
     id: 'invTabs-ah',
     className: 'ui-tabs-panel ui-corner-bottom'
