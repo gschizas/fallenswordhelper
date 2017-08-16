@@ -18,7 +18,7 @@ if (source === 'calf') {
 let version = require('./package.json').version;
 let varAry = version.split('.');
 let core = varAry[0] + varAry[1];
-let local = 'http://' + require('ip').address() + ':9966/';
+let local = 'https://' + require('ip').address() + ':9966/';
 let github = 'https://fallenswordhelper.github.io/fallenswordhelper/';
 
 // rollup options
@@ -44,16 +44,16 @@ case folder === 'beta':
   values._BETA = true;
   values._VER = core + 'b' + varAry[2];
   values._DLURL = github + 'Releases/Beta/fallenswordhelper.user.js';
-  values._CALFJS = github + 'resources/' + core + '/calfSystem.min.js';
-  values._CALFCSS = github + 'resources/' + core + '/calfSystem.css';
+  values._CALFJS = github + 'resources/beta/' + core + '/calfSystem.min.js';
+  values._CALFCSS = github + 'resources/beta/' + core + '/calfSystem.css';
   break;
 case folder === 'prod':
   values._DEV = false;
   values._BETA = false;
   values._VER = core;
   values._DLURL = github + 'Releases/Current/fallenswordhelper.user.js';
-  values._CALFJS = github + 'resources/' + core + '/calfSystem.min.js';
-  values._CALFCSS = github + 'resources/' + core + '/calfSystem.css';
+  values._CALFJS = github + 'resources/prod/' + core + '/calfSystem.min.js';
+  values._CALFCSS = github + 'resources/prod/' + core + '/calfSystem.css';
   // no default
 }
 

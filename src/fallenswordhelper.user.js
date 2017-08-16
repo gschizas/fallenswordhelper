@@ -7,8 +7,15 @@
 // @include        http://fallensword.com/*
 // @include        http://*.fallensword.com/*
 // @include        http://local.huntedcow.com/fallensword/*
+// @include        https://www.fallensword.com/*
+// @include        https://guide.fallensword.com/*
+// @include        https://fallensword.com/*
+// @include        https://*.fallensword.com/*
+// @include        https://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
+// @exclude        https://forum.fallensword.com/*
+// @exclude        https://wiki.fallensword.com/*
 // @version        $_VER
 // @downloadURL    $_DLURL
 // @grant          none
@@ -19,7 +26,7 @@
 // EVERYTHING MUST BE IN main()
 function fshMain() {
 
-  function setVer() { // Native
+  function setVer() {
     var ver = '$_VER';
     if (typeof GM_info === 'undefined') {return ver + '_native';}
     return ver;
@@ -33,14 +40,10 @@ function fshMain() {
     calfSystemJs: '$_CALFJS',
     calfSystemCss: '$_CALFCSS',
     localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.0/localforage.min.js',
-    dataTablesLoc: 'https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js',
-    //#if _DEV  //  Dable resources
-    // dableDev: 'https://raw.githack.com/deltreey/Dable/1.2.1/Dable.js',
-    // dableDev: 'http://localhost/Dable/.build/dable.js'
-    //#endif
+    dataTablesLoc: 'https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js'
   };
 
-  function appendHead(o) { // native
+  function appendHead(o) {
     var count = 0;
     var scriptFiles = o.js || [];
     var cssFiles = o.css || [];
@@ -79,9 +82,6 @@ function fshMain() {
     js: [
       resources.localForage,
       resources.calfSystemJs,
-      //#if _DEV  //  Dable resources
-      // resources.dableDev,
-      //#endif
       resources.dataTablesLoc
     ],
     callback: onPageLoad
