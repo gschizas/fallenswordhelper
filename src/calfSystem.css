@@ -19,7 +19,7 @@
 
 #invTabs > #tab1:checked ~ ul .inv-tabs-qw,
 #invTabs > #tab2:checked ~ ul .inv-tabs-ah {
-  background: #ffa614 url(http://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_30_ffa614_500x100.png) 50% 50% repeat;
+  background: #ffa614 url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_30_ffa614_500x100.png) 50% 50% repeat;
   margin-bottom: 0;
   padding-bottom: 1px;
   border: 1px solid #655e4e;
@@ -508,7 +508,7 @@ ul.enemy-quick-buff {
   height: 12px;
   margin: 0 1px 2px 0;
   vertical-align: bottom;
-  background: transparent url('http://cdn.fallensword.com/media/dist/img/ui/ui.png');
+  background: transparent url('https://cdn.fallensword.com/media/dist/img/ui/ui.png');
   cursor: pointer;
 }
 .enemy-buff-check-off {

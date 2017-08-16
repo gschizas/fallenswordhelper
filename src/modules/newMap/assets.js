@@ -25,7 +25,7 @@ export default {
       '/skin/realm/icon_action_map.gif\');">' +
     '</a>',
   searchMapUFSG:
-    '<a href="http://guide.fallensword.com/index.php?cmd=realms' +
+    '<a href="https://guide.fallensword.com/index.php?cmd=realms' +
       '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
       'class="quicklink tip-static" data-tipped="Search map in ' +
       'Ultimate FSG" style="background-image: url(\'' +
