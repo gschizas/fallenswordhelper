@@ -2,3 +2,5 @@
 node_modules/
 favicon.ico
 Notes.txt
+cert.crt
+key.pem

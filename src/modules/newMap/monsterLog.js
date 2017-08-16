@@ -67,7 +67,7 @@ function doMouseOver() {
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
   var monsterTip = '<table><tr><td>' +
-    '<img src="http://cdn.fallensword.com/creatures/' + creature.image_id +
+    '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
     '.jpg" height="200" width="200"></td><td rowspan="2">' +
     '<table width="400"><tr>' +
     '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>' +

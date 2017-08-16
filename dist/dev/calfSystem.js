@@ -11837,7 +11837,7 @@ var assets = {
       '/skin/realm/icon_action_map.gif\');">' +
     '</a>',
   searchMapUFSG:
-    '<a href="http://guide.fallensword.com/index.php?cmd=realms' +
+    '<a href="https://guide.fallensword.com/index.php?cmd=realms' +
       '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
       'class="quicklink tip-static" data-tipped="Search map in ' +
       'Ultimate FSG" style="background-image: url(\'' +
@@ -13689,7 +13689,7 @@ function doMouseOver() {
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
   var monsterTip = '<table><tr><td>' +
-    '<img src="http://cdn.fallensword.com/creatures/' + creature.image_id +
+    '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
     '.jpg" height="200" width="200"></td><td rowspan="2">' +
     '<table width="400"><tr>' +
     '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>' +
@@ -14329,7 +14329,7 @@ function injectViewRecipe() { // Legacy
   var recipe = $('#pCC table table b').first();
   var name = recipe.html();
   var searchName = recipe.html().replace(/ /g, '%20');
-  recipe.html('<a href="http://guide.fallensword.com/index.php?cmd=' +
+  recipe.html('<a href="https://guide.fallensword.com/index.php?cmd=' +
     'items&subcmd=view&search_name=' + searchName + '">' + name +
     '</a>');
 
@@ -14733,12 +14733,12 @@ function storeQuestPage() {
 
 function guideButtons(questID, questName) {
   return '<div class="parent">' +
-    '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
+    '<a href="https://guide.fallensword.com/index.php?cmd=quests&amp;' +
     'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
     'style="background-image: url(\'' + imageServer +
     '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
-    '<a href="http://wiki.fallensword.com/index.php?title=' +
+    '<a href="https://wiki.fallensword.com/index.php?title=' +
     questName.replace(/ /g, '_') + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Wiki" ' +
     'style="background-image: url(\'' + imageServer +
@@ -15401,7 +15401,7 @@ function afterbegin(o, item) {
     pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
-  pattern += '</span>[<a href="http://guide.fallensword.com/' +
+  pattern += '</span>[<a href="https://guide.fallensword.com/' +
     'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
     '" target="_blank">UFSG</a>]</span>';
   o.injectHere.insertAdjacentHTML('afterbegin', pattern);
@@ -16637,6 +16637,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '27';
+window.FSH.calf = '0';
 
 }());

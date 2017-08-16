@@ -91,7 +91,7 @@ function injectViewRecipe() { // Legacy
   var recipe = $('#pCC table table b').first();
   var name = recipe.html();
   var searchName = recipe.html().replace(/ /g, '%20');
-  recipe.html('<a href="http://guide.fallensword.com/index.php?cmd=' +
+  recipe.html('<a href="https://guide.fallensword.com/index.php?cmd=' +
     'items&subcmd=view&search_name=' + searchName + '">' + name +
     '</a>');
 

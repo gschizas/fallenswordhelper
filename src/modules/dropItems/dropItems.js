@@ -38,7 +38,7 @@ function afterbegin(o, item) {
     pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
-  pattern += '</span>[<a href="http://guide.fallensword.com/' +
+  pattern += '</span>[<a href="https://guide.fallensword.com/' +
     'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
     '" target="_blank">UFSG</a>]</span>';
   o.injectHere.insertAdjacentHTML('afterbegin', pattern);

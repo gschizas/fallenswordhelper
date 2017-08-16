@@ -108,12 +108,12 @@ function storeQuestPage() {
 
 function guideButtons(questID, questName) {
   return '<div class="parent">' +
-    '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
+    '<a href="https://guide.fallensword.com/index.php?cmd=quests&amp;' +
     'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
     'style="background-image: url(\'' + system.imageServer +
     '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
-    '<a href="http://wiki.fallensword.com/index.php?title=' +
+    '<a href="https://wiki.fallensword.com/index.php?title=' +
     questName.replace(/ /g, '_') + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Wiki" ' +
     'style="background-image: url(\'' + system.imageServer +

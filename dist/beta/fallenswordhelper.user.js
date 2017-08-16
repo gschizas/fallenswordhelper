@@ -7,9 +7,16 @@
 // @include        http://fallensword.com/*
 // @include        http://*.fallensword.com/*
 // @include        http://local.huntedcow.com/fallensword/*
+// @include        https://www.fallensword.com/*
+// @include        https://guide.fallensword.com/*
+// @include        https://fallensword.com/*
+// @include        https://*.fallensword.com/*
+// @include        https://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1519b27
+// @exclude        https://forum.fallensword.com/*
+// @exclude        https://wiki.fallensword.com/*
+// @version        1520b0
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -19,8 +26,8 @@
 // EVERYTHING MUST BE IN main()
 function fshMain() {
 
-  function setVer() { // Native
-    var ver = '1519b27';
+  function setVer() {
+    var ver = '1520b0';
     if (typeof GM_info === 'undefined') {return ver + '_native';}
     return ver;
   }
@@ -30,13 +37,13 @@ function fshMain() {
   FSH.version = setVer();
 
   var resources = {
-    calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1519/calfSystem.min.js',
-    calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1519/calfSystem.css',
+    calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/beta/1520/calfSystem.min.js',
+    calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/beta/1520/calfSystem.css',
     localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.0/localforage.min.js',
-    dataTablesLoc: 'https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js',
+    dataTablesLoc: 'https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js'
   };
 
-  function appendHead(o) { // native
+  function appendHead(o) {
     var count = 0;
     var scriptFiles = o.js || [];
     var cssFiles = o.css || [];
