@@ -1,3 +1,41 @@
+/* Guild Report */
+.guildReportSpinner {
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  background-size: contain;
+}
+#potReport {text-align: center;}
+#potReport > div {display: none;}
+#potReport > div > div {
+  display: none;
+  vertical-align: top;
+}
+#potReport label {background: #fece2f; color: #4c3000; padding: .5em 1em;}
+#potReport > #panels {padding: .5em 1em 0;}
+#potReport > #panels > div {padding: .5em 1em 0;}
+#potReport > #panels > #thresholds input {
+  display: block;
+  background-color: #f7ebd3;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #a9772c #f3d99d #f3d99d #a9772c;
+  width: 4em;
+}
+#potReport > input {display: none;}
+#potReport > input:checked + label {background: #ffa614; color: #381f00;}
+#potReport > #tab1:checked ~ #panels,
+#potReport > #tab2:checked ~ #panels,
+#potReport > #tab3:checked ~ #panels {display: block;}
+#potReport > #tab1:checked ~ #panels > #inventory,
+#potReport > #tab2:checked ~ #panels > #mapping,
+#potReport > #tab3:checked ~ #panels > #thresholds {display: inline-block;}
+#potReport > input + label:hover {
+  background: #f0be00;
+  color: #381f00;
+  cursor: pointer;
+}
+
 /* Quick Wear */
 #invTabs {min-width: 500px;}
 
@@ -29,7 +67,6 @@
 #invTabs > input {display: none;}
 
 #invTabs > #tab1:checked ~ #invTabs-qw,
-
 #invTabs > #tab2:checked ~ #invTabs-ah {display: block;}
 
 /* Scout Tower Titan Tracker */
@@ -152,14 +189,6 @@ div.fshFten {font-size: 11px;}
   display: inline-block;
   height: 16px;
   width: 16px;
-}
-
-/* Guild Report */
-.guildReportSpinner {
-  width: 25px;
-  height: 25px;
-  display: inline-block;
-  background-size: contain;
 }
 
 /* Guild Add/Remove Tags */

@@ -20,7 +20,7 @@ import injectProfile from '../profile/profile';
 import injectQuickBuff from '../quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
-import injectReportPaint from '../guildReport';
+import injectReportPaint from '../guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
 import injectScavenging from '../scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';

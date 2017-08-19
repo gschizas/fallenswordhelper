@@ -1,4 +1,4 @@
-function mixin(obj, mixins) {
+export function mixin(obj, mixins) {
   Object.keys(mixins).forEach(function(key) {
     if (typeof mixins[key] === 'object' && mixins[key] !== null) {
       mixin(obj[key], mixins[key]);

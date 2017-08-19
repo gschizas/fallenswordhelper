@@ -247,11 +247,15 @@ export function numberSort(a, b) {
   return sortDesc(result);
 }
 
-export function testQuant(aValue) {
+export function testRange(aValue, min, max) {
   var theValue = parseInt(aValue, 10);
-  if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+  if (!isNaN(theValue) && theValue > min && theValue < max) {
     return theValue;
   }
+}
+
+export function testQuant(aValue) {
+  return testRange(aValue, 0, 100);
 }
 
 export function getRandomInt(_min, _max) {
