@@ -839,11 +839,15 @@ function numberSort(a, b) {
   return sortDesc(result);
 }
 
-function testQuant(aValue) {
+function testRange(aValue, min, max) {
   var theValue = parseInt(aValue, 10);
-  if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+  if (!isNaN(theValue) && theValue > min && theValue < max) {
     return theValue;
   }
+}
+
+function testQuant(aValue) {
+  return testRange(aValue, 0, 100);
 }
 
 function getRandomInt(_min, _max) {
@@ -11091,54 +11095,8 @@ function injectRPUpgrades() { // jQuery.min
   myStats().done(parseProfile);
 }
 
-var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
-  'Gut Rot Head Splitter|Serum');
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
   'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
-var headerCount;
-var headers$1;
-var counter;
-var nodeArray;
-var nodeList;
-var findUser;
-var foundUser;
-
-function hideOther(el) {
-  if (el.firstChild.hasAttribute('bgcolor')) {
-    foundUser = el.firstChild.firstElementChild.textContent === findUser;
-  }
-  if (!foundUser) {
-    el.className = 'fshHide';
-  }
-}
-
-function hideOthers() {
-  var limit = performance.now() + 5;
-  while (performance.now() < limit && counter < nodeList.length) {
-    var el = nodeList[counter];
-
-    hideOther(el);
-
-    counter += 1;
-  }
-  if (counter < nodeList.length) {
-    add(2, hideOthers);
-  }
-}
-
-function searchUser() {
-  findUser = getUrlParameter('user');
-  if (!findUser) {return;}
-  var userNodes = document.querySelectorAll(
-    '#pCC table table td[bgcolor="#DAA534"] b');
-  var userNode = Array.prototype.some.call(userNodes, function(el) {
-    return el.textContent === findUser;
-  });
-  if (!userNode) {return;}
-  nodeList = document.querySelectorAll('#pCC table table tr');
-  counter = 0;
-  add(2, hideOthers);
-}
 
 function recallItem$2(evt) { // jQuery
   $(evt.target).qtip('hide');
@@ -11191,33 +11149,229 @@ function eventHandlers$1(evt) {
   }
 }
 
-function memberHeader(oldhtml) {
-  if (!calf.membrList[oldhtml]) {return oldhtml;}
-  return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
-    '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
-    '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
-    oldhtml + '>m</span> ]';
+var storeMap = 'fsh_potMap';
+var defaultOpts = {
+  tab1: false,
+  tab2: false,
+  tab3: false,
+  myMap: {},
+  minpoint: 12,
+  maxpoint: 20
+};
+var potObj$1;
+var potOpts;
+var inventory;
+var mapping;
+var thresholds;
+
+function createContainer() {
+  return createDiv({
+    id: 'potReport',
+    innerHTML: '<input id="tab1" type="checkbox"' +
+      isChecked(potOpts.tab1) + '>' +
+      '<label for="tab1">Composed Potion Inventory</label>' +
+      '<input id="tab2" type="checkbox"' +
+      isChecked(potOpts.tab2) + '>' +
+      '<label for="tab2">Mapping</label>' +
+      '<input id="tab3" type="checkbox"' +
+      isChecked(potOpts.tab3) + '>' +
+      '<label for="tab3">Thresholds</label>'
+  });
 }
 
-function paintHeader() {
-  var limit = performance.now() + 10;
-  while (performance.now() < limit && headerCount < headers$1.length) {
-    var el = headers$1[headerCount];
-    var oldhtml = el.textContent;
-    el.innerHTML = memberHeader(oldhtml);
-    headerCount += 1;
+function createThresholds() {
+  return createDiv({
+    id: 'thresholds',
+    innerHTML: 'Min:' +
+      '<input id="minpoint" type="number" value="' +
+      potOpts.minpoint + '" min="0" max="999">' +
+      'Max:' +
+      '<input id="maxpoint" type="number" value="' +
+      potOpts.maxpoint + '" min="0" max="999">',
+  });
+}
+
+function alpha$1(a, b) {
+  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
+  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
+  return 0;
+}
+
+function sortKeys(obj) {
+  return Object.keys(obj).sort(alpha$1).reduce(function(result, key) {
+    result[key] = obj[key];
+    return result;
+  }, {});
+}
+
+function resetMap() {
+  potOpts.myMap = Object.keys(potObj$1).reduce(function(prev, pot) {
+    prev[pot] = pot;
+    return prev;
+  }, {});
+}
+
+function buildMap() {
+  Object.keys(potObj$1).forEach(function(pot) {
+    if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
+  });
+  potOpts.myMap = sortKeys(potOpts.myMap);
+}
+
+function buildOptions(select) {
+  return '<select name="' + select +
+    '"><option value="Ignore">Ignore</option>' +
+    Object.keys(potObj$1).reduce(function(prev, pot) {
+      return prev + '<option value="' + pot + '"' +
+        isSelected(pot, potOpts.myMap[select]) + '>' + pot + '</option>';
+    }, '') + '</select>';
+}
+
+function drawMapping() {
+  mapping.innerHTML = '<table><tbody>' +
+    Object.keys(potOpts.myMap).reduce(function(prev, pot) {
+      var options = buildOptions(pot);
+      return prev + '<tr height="19px"><td>' + pot + '</td><td>' + options +
+        '</td></tr>';
+    }, '') + '<tr><td></td><td class="fshCenter">' +
+    '<input id="fshReset" value="Reset" type="button">' +
+    '</td></tr></tbody></table>';
+}
+
+function perc2color(percent) {
+  var perc = Math.max(Math.min(percent, 100), 0);
+  var r;
+  var g;
+  var b = 0;
+  if (perc < 50) {
+    r = 255;
+    g = Math.round(5.1 * perc);
+  } else {
+    g = 255;
+    r = Math.round(510 - 5.10 * perc);
   }
-  if (headerCount < headers$1.length) {
-    add(3, paintHeader);
+  var h = r * 0x10000 + g * 0x100 + b;
+  return '#' + ('000000' + h.toString(16)).slice(-6);
+}
+
+function pivotPotObj(prev, pot) {
+  if (potOpts.myMap[pot] !== 'Ignore') {
+    if (prev[potOpts.myMap[pot]]) {
+      prev[potOpts.myMap[pot]] += potObj$1[pot];
+    } else {
+      prev[potOpts.myMap[pot]] = potObj$1[pot];
+    }
+  }
+  return prev;
+}
+
+function makeRowsFromPivot(pivot, prev, pot) {
+  return prev + '<tr height="19px"><td>' + pot +
+    '</td><td style="background-color: ' +
+    perc2color((pivot[pot] - potOpts.minpoint) /
+    (potOpts.maxpoint - potOpts.minpoint) * 100) + ';">' +
+    pivot[pot].toString() + '</td></tr>';
+}
+
+function drawInventory() {
+  var pivot = Object.keys(potObj$1).reduce(pivotPotObj, {});
+  inventory.innerHTML = '<table><tbody>' +
+    Object.keys(pivot).reduce(makeRowsFromPivot.bind(null, pivot), '') +
+    '</tbody></table>';
+}
+
+function onChange(e) {
+  if (e.target.tagName === 'SELECT') {
+    potOpts.myMap[e.target.name] = e.target.value;
+    setForage(storeMap, potOpts);
+    drawInventory();
   }
 }
 
-function reportHeader() {
-  headers$1 = document.querySelectorAll('#pCC table table ' +
-    'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
-  headerCount = 0;
-  add(3, paintHeader);
+function doReset() {
+  resetMap();
+  setForage(storeMap, potOpts);
+  drawMapping();
+  drawInventory();
 }
+
+function saveState(self) {
+  var option = self.id;
+  potOpts[option] = self.checked;
+  setForage(storeMap, potOpts);
+}
+
+var evtHdl$1 = [
+  {
+    test: function(self) {return self.id === 'fshReset';},
+    act: doReset
+  },
+  {
+    test: function(self) {
+      return /^tab\d$/.test(self.id);
+    },
+    act: saveState
+  }
+];
+
+function onClick(e) {
+  var self = e.target;
+  evtHdl$1.some(function(el) {
+    if (el.test(self)) {
+      el.act(self);
+      return true;
+    }
+    return false;
+  });
+}
+
+function onInput(e) {
+  var self = e.target.id;
+  var maybeValue = testRange(e.target.value, 0, 999);
+  if (maybeValue) {
+    potOpts[self] = maybeValue;
+    setForage(storeMap, potOpts);
+    drawInventory();
+  }
+}
+
+function gotMap(data) {
+  potOpts = defaultOpts;
+  if (data) {
+    mixin(potOpts, data);
+  }
+  buildMap(potObj$1);
+  setForage(storeMap, potOpts);
+  var container = createContainer();
+  var panels = createDiv({id: 'panels'});
+  container.appendChild(panels);
+  inventory = createDiv({id: 'inventory'});
+  drawInventory();
+  panels.appendChild(inventory);
+  mapping = createDiv({id: 'mapping'});
+  drawMapping();
+  panels.appendChild(mapping);
+  thresholds = createThresholds();
+  panels.appendChild(thresholds);
+
+  var myCell = pCC.firstElementChild.insertRow(2).insertCell(-1);
+  myCell.addEventListener('change', onChange);
+  myCell.addEventListener('click', onClick);
+  myCell.addEventListener('input', onInput);
+  myCell.appendChild(container);
+}
+
+function potReport(potObj_) {
+  potObj$1 = sortKeys(potObj_);
+  getForage(storeMap).done(gotMap);
+}
+
+var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
+  'Gut Rot Head Splitter|Serum');
+var counter;
+var nodeArray;
+var nodeList;
+var potObj;
 
 function paintChild() {
   var limit = performance.now() + 1;
@@ -11242,10 +11396,22 @@ function isEquipable(test) {
   return 'equip';
 }
 
+function addPotObj(item) {
+  if (item.indexOf(' (Potion)') !== -1) {
+    var itemName = item.replace(' (Potion)', '');
+    if (potObj[itemName]) {
+      potObj[itemName] += 1;
+    } else {
+      potObj[itemName] = 1;
+    }
+  }
+}
+
 function mySpan(el) {
   var secondHref = el.children.length === 2;
   var firstHref = hideElement$1(!secondHref);
   var itemName = el.previousElementSibling.innerHTML;
+  addPotObj(itemName);
   var wearable = hideElement$1(wearRE.test(itemName));
   var equipable = isEquipable(secondHref);
   return createSpan({
@@ -11288,15 +11454,90 @@ function makeSpan() {
   } else {
     counter = 0;
     add(3, paintChild);
+    potReport(potObj);
   }
 }
 
 function prepareChildRows() {
   nodeList = document.querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td:nth-of-type(3n+0)');
+  potObj = {};
   nodeArray = [];
   counter = 0;
   add(3, makeSpan);
+}
+
+var headerCount;
+var headers$1;
+
+function memberHeader(oldhtml) {
+  if (!calf.membrList[oldhtml]) {return oldhtml;}
+  return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
+    '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
+    '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
+    oldhtml + '>m</span> ]';
+}
+
+function paintHeader() {
+  var limit = performance.now() + 10;
+  while (performance.now() < limit && headerCount < headers$1.length) {
+    var el = headers$1[headerCount];
+    var oldhtml = el.textContent;
+    el.innerHTML = memberHeader(oldhtml);
+    headerCount += 1;
+  }
+  if (headerCount < headers$1.length) {
+    add(3, paintHeader);
+  }
+}
+
+function reportHeader() {
+  headers$1 = document.querySelectorAll('#pCC table table ' +
+    'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
+  headerCount = 0;
+  add(3, paintHeader);
+}
+
+var counter$1;
+var nodeList$1;
+var findUser;
+var foundUser;
+
+function hideOther(el) {
+  if (el.firstChild.hasAttribute('bgcolor')) {
+    foundUser = el.firstChild.firstElementChild.textContent === findUser;
+  }
+  if (!foundUser) {
+    el.className = 'fshHide';
+  }
+}
+
+function hideOthers() {
+  var limit = performance.now() + 5;
+  while (performance.now() < limit && counter$1 < nodeList$1.length) {
+    var el = nodeList$1[counter$1];
+
+    hideOther(el);
+
+    counter$1 += 1;
+  }
+  if (counter$1 < nodeList$1.length) {
+    add(2, hideOthers);
+  }
+}
+
+function searchUser() {
+  findUser = getUrlParameter('user');
+  if (!findUser) {return;}
+  var userNodes = document.querySelectorAll(
+    '#pCC table table td[bgcolor="#DAA534"] b');
+  var userNode = Array.prototype.some.call(userNodes, function(el) {
+    return el.textContent === findUser;
+  });
+  if (!userNode) {return;}
+  nodeList$1 = document.querySelectorAll('#pCC table table tr');
+  counter$1 = 0;
+  add(2, hideOthers);
 }
 
 function injectReportPaint() { // jQuery
@@ -11417,7 +11658,7 @@ function buffEvent(e) {
   }
 }
 
-function evtHdl$1(e) {
+function evtHdl$2(e) {
   if (e.target.classList.contains('fshBl')) {buffEvent(e);}
 }
 
@@ -11437,7 +11678,7 @@ function gotTables(titanTables) {
     if (titanTable.rows.length < 2) {continue;}
     doBuffLinks$1(titanTable);
   }
-  titanTables[1].addEventListener('click', evtHdl$1);
+  titanTables[1].addEventListener('click', evtHdl$2);
 }
 
 function injectScouttowerBuffLinks(titanTables) {
@@ -14887,7 +15128,7 @@ function evtEnabled(evt) {
   }
 }
 
-function evtHdl$2(evt) {
+function evtHdl$3(evt) {
   if (collapseNewsArchive) {evtEnabled(evt);}
 }
 
@@ -14964,7 +15205,7 @@ function viewArchive() {
   var theTables = pCC.getElementsByTagName('table');
   setupPref$1(theTables[0].rows[2]);
   Array.prototype.forEach.call(theTables[2].rows, doTagging);
-  theTables[2].addEventListener('click', evtHdl$2);
+  theTables[2].addEventListener('click', evtHdl$3);
 }
 
 function cancelAllAH() { // jQuery
@@ -15572,7 +15813,7 @@ function getItems() {
   itemsHash[13699] = 1;
 }
 
-function inventory(data) {
+function inventory$1(data) {
   extraLinks = false;
   checkAll = false;
   invItems$1 = data.items;
@@ -15585,7 +15826,7 @@ function inventory(data) {
 }
 
 function injectStoreItems() {
-  getInventoryById().done(inventory);
+  getInventoryById().done(inventory$1);
   add(3, getItems);
 }
 
@@ -15859,49 +16100,12 @@ function addChatTextArea() { // jQuery
   hasTextEntry();
 }
 
-function pvpXp(color, xpGain) { // Legacy
-  var out = '';
-  if (xpGain !== 0) {
-    out = 'XP stolen:<span class="' + color + '">' +
-      addCommas(xpGain) + ' </span>';
+function result$1(stat, desc, color) {
+  if (stat !== 0) {
+    return desc + ':<span class="' + color + '">' +
+      addCommas(stat) + ' </span>';
   }
-  return out;
-}
-
-function pvpGoldGain(color, goldGain) { // Legacy
-  var out = '';
-  if (goldGain !== 0) {
-    out = 'Gold lost:<span class="' + color + '">' +
-      addCommas(goldGain) + ' </span>';
-  }
-  return out;
-}
-
-function pvpGoldStolen(color, goldStolen) { // Legacy
-  var out = '';
-  if (goldStolen !== 0) {
-    out = 'Gold stolen:<span class="' + color + '">' +
-      addCommas(goldStolen) + ' </span>';
-  }
-  return out;
-}
-
-function pvpPrestigeGain(color, prestigeGain) { // Legacy
-  var out = '';
-  if (prestigeGain !== 0) {
-    out = 'Prestige gain:<span class="' + color + '">' +
-      prestigeGain + ' </span>';
-  }
-  return out;
-}
-
-function pvpRating(color, pvpRatingChange) { // Legacy
-  var out = '';
-  if (pvpRatingChange !== 0) {
-    out = 'PvP change:<span class="' + color + '">' +
-    pvpRatingChange + ' </span>';
-  }
-  return out;
+  return '';
 }
 
 function retrievePvPCombatSummary(responseText, callback) { // Legacy
@@ -15923,11 +16127,19 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   var pvpRatingChange = getIntFromRegExp(responseText,
     /var\s+pvpRatingChange=(-?[0-9]+);/i);
   var output = '<br> ';
-  output += pvpXp(color, xpGain);
-  output += pvpGoldGain(color, goldGain);
-  output += pvpGoldStolen(color, goldStolen);
-  output += pvpPrestigeGain(color, prestigeGain);
-  output += pvpRating(color, pvpRatingChange);
+  output += result$1(xpGain, 'XP stolen', color);
+  output += result$1(goldGain, 'Gold lost', color);
+  output += result$1(goldStolen, 'Gold stolen', color);
+  output += result$1(prestigeGain, 'Prestige gain', color);
+  output += result$1(pvpRatingChange, 'PvP change', color);
+  // TODO did I initiate the attack?
+  var specials = createDocument(responseText)
+    .querySelectorAll('#specialsDiv');
+  Array.prototype.forEach.call(specials, function(el) {
+    if (/mesmerized|leeched/.test(el.textContent)) {
+      output += '<br>' + el.innerHTML;
+    }
+  });
   callback.target.innerHTML = output;
 }
 
@@ -16600,6 +16812,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '0';
+window.FSH.calf = '1';
 
 }());
