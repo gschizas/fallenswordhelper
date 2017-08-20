@@ -82,10 +82,10 @@ function tableRows(prev, item_id) {
 function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
   var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
-    '<tr><td id="buy_result" colspan="2"></td></tr>';
+    '<tr><td id="qeresult" colspan="2"></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
-  buyResult = document.getElementById('buy_result');
+  buyResult = document.getElementById('qeresult');
 }
 
 function isExtractable(curr) {
