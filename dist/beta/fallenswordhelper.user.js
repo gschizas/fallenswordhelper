@@ -2,21 +2,16 @@
 // @name           FallenSwordHelper
 // @namespace      terrasoft.gr
 // @description    Fallen Sword Helper
-// @include        http://www.fallensword.com/*
-// @include        http://guide.fallensword.com/*
-// @include        http://fallensword.com/*
-// @include        http://*.fallensword.com/*
-// @include        http://local.huntedcow.com/fallensword/*
 // @include        https://www.fallensword.com/*
 // @include        https://guide.fallensword.com/*
 // @include        https://fallensword.com/*
 // @include        https://*.fallensword.com/*
 // @include        https://local.huntedcow.com/fallensword/*
-// @exclude        http://forum.fallensword.com/*
-// @exclude        http://wiki.fallensword.com/*
 // @exclude        https://forum.fallensword.com/*
 // @exclude        https://wiki.fallensword.com/*
-// @version        1520b1
+// @exclude        https://www.fallensword.com/app.php*
+// @exclude        https://www.fallensword.com/fetchdata.php*
+// @version        1520b2
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -27,7 +22,7 @@
 function fshMain() {
 
   function setVer() {
-    var ver = '1520b1';
+    var ver = '1520b2';
     if (typeof GM_info === 'undefined') {return ver + '_native';}
     return ver;
   }

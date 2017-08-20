@@ -289,6 +289,22 @@ function getLength() {
 
 var calf = {};
 
+function doAjax(options, retries, dfr) {
+  $.ajax(options).pipe(function(data) {dfr.resolve(data);}, function(jqXhr) {
+    if (retries > 0) {
+      setTimeout(doAjax, 100, options, retries - 1, dfr);
+    } else {
+      dfr.reject(jqXhr);
+    }
+  });
+}
+
+function retryAjax(options) {
+  var dfr = $.Deferred();
+  doAjax(options, 10, dfr);
+  return dfr;
+}
+
 /* eslint-disable max-lines */
 var defaults = {
   lastActiveQuestPage: '',
@@ -696,13 +712,9 @@ function createDocument(details) {
 }
 
 function xmlhttp(theUrl, func, theCallback) {
-  return $.ajax({
-    url: theUrl,
-    callback: theCallback,
-    success: function(responseDetails) {
-      if (func) {
-        func.call(this, responseDetails, this.callback);
-      }
+  return retryAjax(theUrl).done(function(responseDetails) {
+    if (func) {
+      func(responseDetails, theCallback);
     }
   });
 }
@@ -1628,8 +1640,7 @@ function getOnlinePlayers(data) { // Bad jQuery
     input = input.parent().text();
     lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
     for (var i = 2; i <= lastPage; i += 1) {
-      $.get('index.php?cmd=onlineplayers&page=' + i,
-        getOnlinePlayers);
+      retryAjax('index.php?cmd=onlineplayers&page=' + i).done(getOnlinePlayers);
     }
   }
   checkLastPage();
@@ -1639,7 +1650,7 @@ function refreshEvt() { // Bad jQuery
   $('#fshRefresh', context).hide();
   onlinePages = 0;
   onlinePlayers = {};
-  $.get('index.php?cmd=onlineplayers&page=1', getOnlinePlayers);
+  retryAjax('index.php?cmd=onlineplayers&page=1').done(getOnlinePlayers);
   setValue('lastOnlineCheck', Date.now());
   $('#fshOutput', context).append('Parsing online players...'); // context
 }
@@ -1868,7 +1879,7 @@ function processFolderAnyPage(data) { // jQuery.min
       name: el.textContent,
       id: getCustomUrlParameter(el.href, 'recipe_id')
     };
-    prev.push($.get(el.href).pipe(processRecipe.bind(null, recipe)));
+    prev.push(retryAjax(el.href).pipe(processRecipe.bind(null, recipe)));
     return prev;
   }, []);
   return $.when.apply($, prm);
@@ -1886,7 +1897,7 @@ function processFolderFirstPage(data) { // jQuery.min
   var pages = pCC$$1.getElementsByClassName('customselect')[0]
     .getElementsByTagName('option').length;
   for (var i = 1; i < pages; i += 1) {
-    prm.push($.get(thisFolder.parentNode.href + '&page=' + i)
+    prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
       .pipe(processFolderAnyPage));
   }
   prm.push($.when(data).pipe(processFolderAnyPage));
@@ -1905,7 +1916,7 @@ function reduceFolders(prev, el) { // jQuery.min
       folderName + '"  as it has the word "quest" in folder name.<br>');
     return prev;
   }
-  prev.push($.get(href).pipe(processFolderFirstPage));
+  prev.push(retryAjax(href).pipe(processFolderFirstPage));
   return prev;
 }
 
@@ -1928,7 +1939,8 @@ function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
-  $.get('index.php?cmd=inventing').pipe(processFirstPage).done(displayStuff);
+  retryAjax('index.php?cmd=inventing').pipe(processFirstPage)
+    .done(displayStuff);
 }
 
 function gotRecipeBook(data) {
@@ -1971,7 +1983,7 @@ function getInventory() {
   if (calf.subcmd === 'guildinvmgr') {
     subcmd = 'guild_store&inc_tagged=1';
   }
-  return $.ajax({
+  return retryAjax({
     dataType: 'json',
     url: 'index.php?cmd=export&subcmd=' + subcmd
   });
@@ -1985,7 +1997,7 @@ function dialog(data) {
 }
 
 function equipItem(backpackInvId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -2005,7 +2017,7 @@ function htmlResult(data) {
 }
 
 function useItem(backpackInvId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -2037,7 +2049,7 @@ function takeItemStatus(action, data) {
 }
 
 function takeItem(invId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -2059,7 +2071,7 @@ function queueTakeItem(invId, action) {
 }
 
 function guildInvRecall(invId, playerId$$1, mode) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -2074,7 +2086,7 @@ function guildInvRecall(invId, playerId$$1, mode) {
 }
 
 function backpack() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {cmd: 'profile', subcmd: 'fetchinv'},
     dataType: 'json'
@@ -2190,10 +2202,10 @@ function tableRows(prev, item_id) {
 function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
   var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
-    '<tr><td id="buy_result" colspan="2"></td></tr>';
+    '<tr><td id="qeresult" colspan="2"></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
-  buyResult = document.getElementById('buy_result');
+  buyResult = document.getElementById('qeresult');
 }
 
 function isExtractable(curr) {
@@ -2336,7 +2348,7 @@ function createQuickWear(appInv) {
 }
 
 function loadInventory() {
-  return $.ajax({
+  return retryAjax({
     url: 'app.php',
     data: {cmd: 'profile', subcmd: 'loadinventory', app: '1'},
     dataType: 'json'
@@ -5175,10 +5187,14 @@ function injectQuickMsgDialogJQ() {
 }
 
 function getProfile(username) {
-  return $.getJSON('index.php', {
-    cmd: 'export',
-    subcmd: 'profile',
-    player_username: username
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'export',
+      subcmd: 'profile',
+      player_username: username
+    },
+    dataType: 'json'
   });
 }
 
@@ -5750,7 +5766,7 @@ function prepareBountyData() {
 }
 
 function doSendGold() { // jQuery
-  $.ajax({
+  retryAjax({
     url: 'index.php',
     data: {
       cmd: 'trade',
@@ -5827,7 +5843,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
   if (itemIndex >= allItems.length) {return;}
   var cbsIndex = allItems[itemIndex].value;
 
-  $.ajax({
+  retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -5893,7 +5909,7 @@ function profile() {
 }
 
 function combatSetKey(itemIndex) {
-  $.get('index.php?cmd=profile').done(function(data) {
+  retryAjax('index.php?cmd=profile').done(function(data) {
     changeCombatSet(data, itemIndex);
   });
 }
@@ -5921,6 +5937,7 @@ var keyDict = {
   '114': {fn: doRepair}, // repair [r]
   '118': {fn: fastWearMgr}, // fast wear manager [v]
   '121': {fn: doSendGold}, // fast send gold [y]
+  '163': {fn: combatSetKey, arg: 3}, // Shift+3 -- for UK keyboards
 };
 
 function handleKey(r) {
@@ -6108,7 +6125,7 @@ function createSuccess(temp, textStatus) {
 }
 
 function createPotion(temp) { // jQuery
-  $.ajax({
+  retryAjax({
     cache: false,
     dataType: 'json',
     url: 'index.php',
@@ -6144,7 +6161,7 @@ function quickCreate(evt) {
 function checkLastCompose() { // jQuery
   var lastComposeCheck = getValue('lastComposeCheck');
   if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
-  $.get('index.php?cmd=composing', function(data) {
+  retryAjax('index.php?cmd=composing').done(function(data) {
     add(3, parseComposing, [data]);
   });
 }
@@ -6241,7 +6258,7 @@ function prayToGods(e) { // jQuery
   if (!myGod) {return;}
   document.getElementById('helperPrayToGods').removeEventListener('click',
     prayToGods);
-  $.get('index.php?cmd=temple&subcmd=pray&type=' + myGod)
+  retryAjax('index.php?cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
   $(e.target).qtip('hide');
 }
@@ -6318,7 +6335,7 @@ function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
   if (doWeNeedToParse()) {
-    $.get('index.php?cmd=temple', parseTemplePage);
+    retryAjax('index.php?cmd=temple').done(parseTemplePage);
   }
 }
 
@@ -6354,7 +6371,7 @@ function notUpgradesPage() {
   }
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
-  $.get('index.php?cmd=points&type=1', function(data) {
+  retryAjax('index.php?cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);
   });
 }
@@ -6831,7 +6848,7 @@ function showComposingMessage(message, bgcolor) { // jQuery
 }
 
 function breakItems() { // jQuery.min
-  return $.ajax({
+  return retryAjax({
     type: 'POST',
     url: 'index.php?cmd=composing&subcmd=dobreakdown',
     data: {'item_list[]': selectedList},
@@ -6902,7 +6919,7 @@ function translateReturnInfo(data) {
 }
 
 function guildMailboxTake(href) {
-  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
+  return retryAjax({url: href}).pipe(translateReturnInfo).done(dialog);
 }
 
 function takeResult(self, data) {
@@ -6933,7 +6950,7 @@ function guildMailbox() {
 }
 
 function getGuild(guildId$$1) {
-  return $.ajax({
+  return retryAjax({
     dataType: 'json',
     url: 'index.php',
     data: {
@@ -7124,7 +7141,7 @@ function returnAdvisorPage(e, response) {
 }
 
 function getAdvisorPage(e) { // jQuery
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -7495,8 +7512,8 @@ function buy() { // jQuery
   document.getElementById('buy_result').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
-    $.get('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
-      ItemId, done);
+    retryAjax('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
+      ItemId).done(done);
   }
 }
 
@@ -7912,7 +7929,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
 }
 
 function conflictInfo() { // jQuery
-  $.get('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
+  retryAjax('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
     gotConflictInfo(data,
       {node: document.getElementById('statisticsControl')});
   });
@@ -8110,7 +8127,7 @@ function fetchRankData() { // jQuery
     var targetNode = anItem.parentNode.parentNode.previousElementSibling;
     var href = /window\.location='(.*)';/.exec(anItem
       .getAttribute('onclick'))[1];
-    $.get(href).done(parseRankData.bind(null, targetNode));
+    retryAjax(href).done(parseRankData.bind(null, targetNode));
   });
 }
 
@@ -8141,7 +8158,7 @@ function ajaxifyRankControls(evt) { // jQuery
   var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
   var parentTable = thisRankRow.parentNode;
   if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
-  $.get(onclickHREF);
+  retryAjax(onclickHREF);
   var injectRow = parentTable.rows[targetRowNum];
   parentTable.insertBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(val);
@@ -8703,7 +8720,7 @@ function doTable$1() { // jQuery
 }
 
 function dropItem(invIdList) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -8716,7 +8733,7 @@ function dropItem(invIdList) {
 }
 
 function moveItem(invIdList, folderId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -8730,7 +8747,7 @@ function moveItem(invIdList, folderId) {
 }
 
 function sendItem(invIdList) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'trade',
@@ -9140,7 +9157,7 @@ function takeAllSimilar(evt) { // jQuery.min
     invIds.length + ' items';
   cn$1 = 0;
   invIds.forEach(function(invId) {
-    $.ajax({
+    retryAjax({
       type: 'POST',
       url: 'index.php',
       data: {
@@ -9825,7 +9842,7 @@ var completeReload = true;
 var myTable;
 
 function getGuildLogPage(page) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {cmd: 'guild', subcmd: 'log', page: page},
     datatype: 'html'
@@ -10100,7 +10117,7 @@ function addStatTotalToMouseover() { // jQuery
 var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
 function debuff(buffId) {
-  return $.ajax({
+  return retryAjax({
     url: 'fetchdata.php',
     data: {
       a: '22',
@@ -10245,6 +10262,19 @@ function injectFastWear() { // jQuery
   });
 }
 
+function unequipitem(item) {
+  return retryAjax({
+    url: 'app.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'unequipitem',
+      inventory_id: item,
+      app: '1'
+    },
+    dataType: 'json'
+  });
+}
+
 var profileCombatSetDiv;
 
 function getNekid() { // jQuery
@@ -10252,11 +10282,10 @@ function getNekid() { // jQuery
   var aLinks = profileBlock.getElementsByTagName('a');
   var prm = [];
   Array.prototype.forEach.call(aLinks, function(link) {
-    var href = link.href;
-    prm.push($.ajax({
-      url: href,
-      timeout: 3000
-    }).pipe(null, function() {return $.when();}));
+    var item = /inventory_id=(\d+)/.exec(link.href)[1];
+    if (item) {
+      prm.push(unequipitem(item).pipe(null, function() {return $.when();}));
+    }
   });
   $.when.apply($, prm).done(function() {
     location.assign('index.php?cmd=profile');
@@ -10366,7 +10395,7 @@ function countComponent(self) { // jQuery.min
   var pageLinks = thisInvTable.rows[lastRowIndex].firstChild.children;
   Array.prototype.forEach.call(pageLinks, function(el) {
     if (el.children.length === 0) {
-      prm.push($.get(el.href).done(gotComponentsPage));
+      prm.push(retryAjax(el.href).done(gotComponentsPage));
     }
   });
   $.when.apply($, prm).done(displayComponentTally);
@@ -10390,7 +10419,7 @@ function compDeleted(self, data) {
 
 function delComponent(self) { // jQuery.min
   var href = self.previousElementSibling.href;
-  $.get(href).done(compDeleted.bind(null, self));
+  retryAjax(href).done(compDeleted.bind(null, self));
 }
 
 function addDelBtn(el) {
@@ -10419,7 +10448,7 @@ function delCompType(self) { // jQuery.min
     '/skin/loading.gif\')';
   var prm = [];
   componentList[id].del.forEach(function(href) {
-    prm.push($.get(href).done(updateUsedCount));
+    prm.push(retryAjax(href).done(updateUsedCount));
   });
   $.when.apply($, prm).done(function() {
     componentList[id].dom.forEach(function(el) {el.innerHTML = '';});
@@ -10925,7 +10954,7 @@ function quickActivate(evt) { // jQuery
   if (trigger.className !== 'quickbuffActivate') {return;}
   var buffHref = '?cmd=quickbuff&subcmd=activate&targetPlayers=' +
     window.self + '&skills[]=' + trigger.getAttribute('buffID');
-  $.get(buffHref).done(function(data) {
+  retryAjax(buffHref).done(function(data) {
     var doc = createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
     if (result &&
@@ -11827,7 +11856,7 @@ function getScoutTowerDetails(responseText) { // Legacy
 }
 
 function injectTitan() { // jQuery
-  $.get('index.php?cmd=guild&subcmd=scouttower', getScoutTowerDetails);
+  retryAjax('index.php?cmd=guild&subcmd=scouttower').done(getScoutTowerDetails);
 }
 
 function getItemDiv() {
@@ -12354,7 +12383,7 @@ function parseGroupStats(html) {
 }
 
 function getGroupStats(viewStats) {
-  return $.ajax(viewStats).pipe(parseGroupStats);
+  return retryAjax(viewStats).pipe(parseGroupStats);
 }
 
 function parseMercStats(html) {
@@ -12380,7 +12409,7 @@ function parseMercStats(html) {
 }
 
 function getMercStats() {
-  return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
+  return retryAjax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }
 
 function getStat(stat, doc) { // jQuery
@@ -12786,7 +12815,7 @@ function prepareDivs() {
 }
 
 function getGuild$1() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -12828,7 +12857,7 @@ function storeLeadDefender(json) {
 }
 
 function getGroups() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -12927,7 +12956,7 @@ var qbBtn;
 var resultDiv;
 
 function quickBuy() {
-  return $.ajax({
+  return retryAjax({
     cache: false,
     url: 'fetchdata.php',
     data: {
@@ -14007,8 +14036,10 @@ function processMonster(data) {
 
 function loopActions(e, i) { // jQuery
   if (e.type !== 6) {return;}
-  $.getJSON('fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i)
-    .done(processMonster);
+  retryAjax({
+    url: 'fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i,
+    dataType: 'json'
+  }).done(processMonster);
 }
 
 function getMyStats() {
@@ -14645,7 +14676,7 @@ var nodes;
 var selectRow;
 
 function doPickMove(moveId, slotId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'arena',
@@ -15232,6 +15263,108 @@ function viewArchive() {
   theTables[2].addEventListener('click', evtHdl$3);
 }
 
+var highlightPlayersNearMyLvl$1;
+var lvlDiffToHighlight$1;
+var myVL;
+var spinner$1;
+var validPvP = Math.floor(Date.now() / 1000) - 604800;
+
+function doOnlineDot(aTable, data) {
+  aTable.rows[0].insertAdjacentHTML('beforeend',
+    '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
+  if (myVL &&
+      data.last_login >= validPvP &&
+      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
+      data.virtual_level < myVL + lvlDiffToHighlight$1) {
+    aTable.parentNode.parentNode.classList.add('lvlHighlight');
+  }
+  var defender = playerDataObject(data);
+  if (defender.cloakLevel !== 0) {console.log('Cloaked Player', data);} // eslint-disable-line no-console
+}
+
+function parsePlayer(aTable, data, jqXhr) {
+  if (data) {
+    doOnlineDot(aTable, data);
+  } else {
+    aTable.rows[0].insertAdjacentHTML('beforeend',
+      '<td class="fshBkRed">' + jqXhr.status + '</td>');
+  }
+}
+
+function failFilter(jqXhr) {
+  return $.Deferred().resolve(null, jqXhr).promise();
+}
+
+function findOnlinePlayers() { // jQuery
+  var someTables = pCC.getElementsByTagName('table');
+  var prm = [];
+  for (var i = 4; i < someTables.length; i += 1) {
+    prm.push(getProfile(someTables[i].textContent.trim())
+      .pipe(null, failFilter)
+      .done(parsePlayer.bind(null, someTables[i]))
+    );
+  }
+  $.when.apply($, prm).done(function() {
+    spinner$1.classList.add('fshHide');
+  });
+}
+
+function getMyVL(e) { // jQuery
+  $(e.target).qtip('hide');
+  spinner$1 = createSpan({
+    className: 'fshSpinner fshTopListSpinner',
+    style: {
+      backgroundImage: 'url(\'' + imageServer +
+        '/world/actionLoadingSpinner.gif\')'
+    }
+  });
+  e.target.parentNode.replaceChild(spinner$1, e.target);
+  if (highlightPlayersNearMyLvl$1) {
+    myStats(false).done(function(data) {
+      myVL = data.virtual_level;
+      lvlDiffToHighlight$1 = 11;
+      if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
+    }).done(findOnlinePlayers);
+  } else {findOnlinePlayers();}
+}
+
+function looksLikeTopRated() {
+  highlightPlayersNearMyLvl$1 =
+    getValue('highlightPlayersNearMyLvl');
+  var theCell = pCC.getElementsByTagName('TD')[0];
+  theCell.firstElementChild.className = 'fshTopListWrap';
+  var findBtn = createInput({
+    className: 'fshFindOnlinePlayers custombutton tip-static',
+    type: 'button',
+    value: 'Find Online Players',
+    dataset: {
+      tipped: 'Fetch the online status of the ' +
+        'top 250 players (warning ... takes a few seconds).'
+    }
+  });
+  theCell.insertBefore(findBtn, theCell.firstElementChild);
+  findBtn.addEventListener('click', getMyVL);
+}
+
+function injectTopRated() {
+  if (pCC &&
+      pCC.firstElementChild &&
+      pCC.firstElementChild.rows &&
+      pCC.firstElementChild.rows.length > 2 &&
+      pCC.firstElementChild.rows[1].textContent
+        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
+}
+
+function globalQuest() {
+  var topTable = pCC.getElementsByTagName('table')[3];
+  for (var i = 2; i < topTable.rows.length; i += 4) {
+    var aCell = topTable.rows[i].cells[1];
+    aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
+      '&search_show_first=1&search_active=1&search_username=' +
+      aCell.textContent + '">' + aCell.textContent + '</a>';
+  }
+}
+
 function cancelAllAH() { // jQuery
   var cancelButtons = document.getElementById('resultRows')
     .getElementsByClassName('auctionCancel');
@@ -15244,12 +15377,10 @@ function cancelAllAH() { // jQuery
     cancelButton.outerHTML = '<img src="' + imageServer +
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
-      $.post(
-        'index.php?cmd=auctionhouse&subcmd=cancel', {
-          auction_id:
-            /inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
-        }
-      )
+      retryAjax({
+        url: 'index.php?cmd=auctionhouse&subcmd=cancel',
+        data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
+      })
     );
   }
   $.when.apply($, prm).done(function() {
@@ -15351,6 +15482,10 @@ function invalidAmount(o, amount) { // jQuery
     !$.isNumeric(amount) || amount < 1;
 }
 
+function doAjax$1(oData) {
+  retryAjax({url: 'index.php', data: oData}).done(transResponse);
+}
+
 function bankDeposit(e) { // jQuery
   e.preventDefault();
   var o = bankSettings;
@@ -15358,7 +15493,7 @@ function bankDeposit(e) { // jQuery
   if (invalidAmount(o, amount)) {return;}
   o.data.mode = 'deposit';
   o.data.deposit_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
+  doAjax$1(o.data);
 }
 
 function bankWithdrawal(e) { // jQuery
@@ -15368,7 +15503,7 @@ function bankWithdrawal(e) { // jQuery
   if (!$.isNumeric(amount) || amount < 1) {return;}
   o.data.mode = 'withdraw';
   o.data.withdraw_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
+  doAjax$1(o.data);
 }
 
 function linkToGuildBank(o, bank) { // jQuery
@@ -15897,7 +16032,7 @@ function displayMinGroupLevel() { // jQuery
 function filterMercs(e) {return e.search('#000099') === -1;}
 
 function joinGroup(groupJoinURL, joinButton) { // jQuery
-  return $.get(groupJoinURL).done(function() {
+  return retryAjax(groupJoinURL).done(function() {
     joinButton.classList.add('fshHide');
   });
 }
@@ -16502,108 +16637,6 @@ function newsShoutbox() {
   injectShoutboxWidgets();
 }
 
-var highlightPlayersNearMyLvl$1;
-var lvlDiffToHighlight$1;
-var myVL;
-var spinner$1;
-var validPvP = Math.floor(Date.now() / 1000) - 604800;
-
-function doOnlineDot(aTable, data) {
-  aTable.rows[0].insertAdjacentHTML('beforeend',
-    '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (myVL &&
-      data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
-      data.virtual_level < myVL + lvlDiffToHighlight$1) {
-    aTable.parentNode.parentNode.classList.add('lvlHighlight');
-  }
-  var defender = playerDataObject(data);
-  if (defender.cloakLevel !== 0) {console.log('Cloaked Player', data);} // eslint-disable-line no-console
-}
-
-function parsePlayer(aTable, data, jqXhr) {
-  if (data) {
-    doOnlineDot(aTable, data);
-  } else {
-    aTable.rows[0].insertAdjacentHTML('beforeend',
-      '<td class="fshBkRed">' + jqXhr.status + '</td>');
-  }
-}
-
-function failFilter(jqXhr) {
-  return $.Deferred().resolve(null, jqXhr).promise();
-}
-
-function findOnlinePlayers() { // jQuery
-  var someTables = pCC.getElementsByTagName('table');
-  var prm = [];
-  for (var i = 4; i < someTables.length; i += 1) {
-    prm.push(getProfile(someTables[i].textContent.trim())
-      .pipe(null, failFilter)
-      .done(parsePlayer.bind(null, someTables[i]))
-    );
-  }
-  $.when.apply($, prm).done(function() {
-    spinner$1.classList.add('fshHide');
-  });
-}
-
-function getMyVL(e) { // jQuery
-  $(e.target).qtip('hide');
-  spinner$1 = createSpan({
-    className: 'fshSpinner fshTopListSpinner',
-    style: {
-      backgroundImage: 'url(\'' + imageServer +
-        '/world/actionLoadingSpinner.gif\')'
-    }
-  });
-  e.target.parentNode.replaceChild(spinner$1, e.target);
-  if (highlightPlayersNearMyLvl$1) {
-    myStats(false).done(function(data) {
-      myVL = data.virtual_level;
-      lvlDiffToHighlight$1 = 11;
-      if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
-    }).done(findOnlinePlayers);
-  } else {findOnlinePlayers();}
-}
-
-function looksLikeTopRated() {
-  highlightPlayersNearMyLvl$1 =
-    getValue('highlightPlayersNearMyLvl');
-  var theCell = pCC.getElementsByTagName('TD')[0];
-  theCell.firstElementChild.className = 'fshTopListWrap';
-  var findBtn = createInput({
-    className: 'fshFindOnlinePlayers custombutton tip-static',
-    type: 'button',
-    value: 'Find Online Players',
-    dataset: {
-      tipped: 'Fetch the online status of the ' +
-        'top 250 players (warning ... takes a few seconds).'
-    }
-  });
-  theCell.insertBefore(findBtn, theCell.firstElementChild);
-  findBtn.addEventListener('click', getMyVL);
-}
-
-function injectTopRated() {
-  if (pCC &&
-      pCC.firstElementChild &&
-      pCC.firstElementChild.rows &&
-      pCC.firstElementChild.rows.length > 2 &&
-      pCC.firstElementChild.rows[1].textContent
-        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
-}
-
-function globalQuest() {
-  var topTable = pCC.getElementsByTagName('table')[3];
-  for (var i = 2; i < topTable.rows.length; i += 4) {
-    var aCell = topTable.rows[i].cells[1];
-    aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
-      '&search_show_first=1&search_active=1&search_username=' +
-      aCell.textContent + '">' + aCell.textContent + '</a>';
-  }
-}
-
 var pageSwitcher = {
   settings: {'-': {'-': {'-': {'-': injectSettings}}}},
   world: {'-': {'-': {'-': {'-': injectWorld}}}},
@@ -16849,6 +16882,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '1';
+window.FSH.calf = '2';
 
 }());
