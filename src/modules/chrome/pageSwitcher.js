@@ -37,6 +37,7 @@ import storeMoves from '../arena/store';
 import storePlayerUpgrades from '../upgrades';
 import unknownPage from './unknownPage';
 import viewArchive from '../news/viewArchive';
+import {globalQuest, injectTopRated} from '../toprated';
 import * as auctionHouse from '../auctionHouse';
 import * as bank from '../bank';
 import * as composing from '../composing/composing';
@@ -51,7 +52,6 @@ import * as news from '../news/news';
 import * as notification from '../notification';
 import * as questBook from '../questBook';
 import * as settingsPage from '../settings/settingsPage';
-import * as toprated from '../toprated';
 
 export default {
   settings: {'-': {'-': {'-': {'-': settingsPage.injectSettings}}}},
@@ -157,16 +157,16 @@ export default {
   },
   titan: {'-': {'-': {'-': {'-': injectTitan}}}},
   toprated: {
-    xp: {'-': {'-': {'-': toprated.injectTopRated}}},
-    monthlyxp: {'-': {'-': {'-': toprated.injectTopRated}}},
-    gold: {'-': {'-': {'-': toprated.injectTopRated}}},
-    killstreak: {'-': {'-': {'-': toprated.injectTopRated}}},
-    bounties: {'-': {'-': {'-': toprated.injectTopRated}}},
-    risingstars: {'-': {'-': {'-': toprated.injectTopRated}}},
-    arena: {'-': {'-': {'-': toprated.injectTopRated}}},
-    superelites: {'-': {'-': {'-': toprated.injectTopRated}}},
-    smasher: {'-': {'-': {'-': toprated.injectTopRated}}},
-    globalquest: {'-': {'-': {'-': toprated.globalQuest}}}
+    xp: {'-': {'-': {'-': injectTopRated}}},
+    monthlyxp: {'-': {'-': {'-': injectTopRated}}},
+    gold: {'-': {'-': {'-': injectTopRated}}},
+    killstreak: {'-': {'-': {'-': injectTopRated}}},
+    bounties: {'-': {'-': {'-': injectTopRated}}},
+    risingstars: {'-': {'-': {'-': injectTopRated}}},
+    arena: {'-': {'-': {'-': injectTopRated}}},
+    superelites: {'-': {'-': {'-': injectTopRated}}},
+    smasher: {'-': {'-': {'-': injectTopRated}}},
+    globalquest: {'-': {'-': {'-': globalQuest}}}
   },
   inventing: {viewrecipe: {'-': {'-': {'-': inventing}}}},
   tempinv: {'-': {'-': {'-': {'-': injectMailbox}}}},
