@@ -1,4 +1,5 @@
 import getForage from './ajax/getForage';
+import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
 import * as dataObj from './support/dataObj';
 import * as system from './support/system';
@@ -134,8 +135,7 @@ function getOnlinePlayers(data) { // Bad jQuery
     input = input.parent().text();
     lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
     for (var i = 2; i <= lastPage; i += 1) {
-      $.get('index.php?cmd=onlineplayers&page=' + i,
-        getOnlinePlayers);
+      retryAjax('index.php?cmd=onlineplayers&page=' + i).done(getOnlinePlayers);
     }
   }
   checkLastPage();
@@ -145,7 +145,7 @@ function refreshEvt() { // Bad jQuery
   $('#fshRefresh', context).hide();
   onlinePages = 0;
   onlinePlayers = {};
-  $.get('index.php?cmd=onlineplayers&page=1', getOnlinePlayers);
+  retryAjax('index.php?cmd=onlineplayers&page=1').done(getOnlinePlayers);
   system.setValue('lastOnlineCheck', Date.now());
   $('#fshOutput', context).append('Parsing online players...'); // context
 }

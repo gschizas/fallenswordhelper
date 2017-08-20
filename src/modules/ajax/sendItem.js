@@ -1,8 +1,9 @@
+import retryAjax from './retryAjax';
 import {dialog, htmlResult} from '../support/ajax';
 import * as system from '../support/system';
 
 export default function sendItem(invIdList) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'trade',

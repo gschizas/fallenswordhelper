@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import getForage from '../ajax/getForage';
+import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
@@ -174,7 +175,7 @@ function processFolderAnyPage(data) { // jQuery.min
       name: el.textContent,
       id: system.getCustomUrlParameter(el.href, 'recipe_id')
     };
-    prev.push($.get(el.href).pipe(processRecipe.bind(null, recipe)));
+    prev.push(retryAjax(el.href).pipe(processRecipe.bind(null, recipe)));
     return prev;
   }, []);
   return $.when.apply($, prm);
@@ -192,7 +193,7 @@ function processFolderFirstPage(data) { // jQuery.min
   var pages = pCC.getElementsByClassName('customselect')[0]
     .getElementsByTagName('option').length;
   for (var i = 1; i < pages; i += 1) {
-    prm.push($.get(thisFolder.parentNode.href + '&page=' + i)
+    prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
       .pipe(processFolderAnyPage));
   }
   prm.push($.when(data).pipe(processFolderAnyPage));
@@ -211,7 +212,7 @@ function reduceFolders(prev, el) { // jQuery.min
       folderName + '"  as it has the word "quest" in folder name.<br>');
     return prev;
   }
-  prev.push($.get(href).pipe(processFolderFirstPage));
+  prev.push(retryAjax(href).pipe(processFolderFirstPage));
   return prev;
 }
 
@@ -234,7 +235,8 @@ function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
-  $.get('index.php?cmd=inventing').pipe(processFirstPage).done(displayStuff);
+  retryAjax('index.php?cmd=inventing').pipe(processFirstPage)
+    .done(displayStuff);
 }
 
 function gotRecipeBook(data) {

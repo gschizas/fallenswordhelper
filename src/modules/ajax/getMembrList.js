@@ -1,10 +1,11 @@
 import calf from '../support/calf';
 import getForage from './getForage';
+import retryAjax from './retryAjax';
 import setForage from './setForage';
 import * as layout from '../support/layout';
 
 function getGuild(guildId) {
-  return $.ajax({
+  return retryAjax({
     dataType: 'json',
     url: 'index.php',
     data: {

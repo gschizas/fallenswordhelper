@@ -1,5 +1,6 @@
 import add from './support/task';
 import calf from './support/calf';
+import retryAjax from './ajax/retryAjax';
 import * as system from './support/system';
 
 var havePrayedMsg =
@@ -41,7 +42,7 @@ function prayToGods(e) { // jQuery
   if (!myGod) {return;}
   document.getElementById('helperPrayToGods').removeEventListener('click',
     prayToGods);
-  $.get('index.php?cmd=temple&subcmd=pray&type=' + myGod)
+  retryAjax('index.php?cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
   $(e.target).qtip('hide');
 }
@@ -118,7 +119,7 @@ export function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
   if (doWeNeedToParse()) {
-    $.get('index.php?cmd=temple', parseTemplePage);
+    retryAjax('index.php?cmd=temple').done(parseTemplePage);
   }
 }
 
@@ -154,7 +155,7 @@ function notUpgradesPage() {
   }
   var lastUpgradeCheck = system.getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
-  $.get('index.php?cmd=points&type=1', function(data) {
+  retryAjax('index.php?cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);
   });
 }

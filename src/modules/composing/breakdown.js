@@ -1,4 +1,5 @@
 import perfFilter from '../common/perfFilter';
+import retryAjax from '../ajax/retryAjax';
 import * as layout from '../support/layout';
 import * as settingsPage from '../settings/settingsPage';
 import * as system from '../support/system';
@@ -40,7 +41,7 @@ function showComposingMessage(message, bgcolor) { // jQuery
 }
 
 function breakItems() { // jQuery.min
-  return $.ajax({
+  return retryAjax({
     type: 'POST',
     url: 'index.php?cmd=composing&subcmd=dobreakdown',
     data: {'item_list[]': selectedList},

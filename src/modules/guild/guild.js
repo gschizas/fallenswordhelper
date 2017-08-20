@@ -1,4 +1,5 @@
 import add from '../support/task';
+import retryAjax from '../ajax/retryAjax';
 import * as guildUtils from './guildUtils';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
@@ -51,7 +52,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
 }
 
 function conflictInfo() { // jQuery
-  $.get('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
+  retryAjax('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
     gotConflictInfo(data,
       {node: document.getElementById('statisticsControl')});
   });

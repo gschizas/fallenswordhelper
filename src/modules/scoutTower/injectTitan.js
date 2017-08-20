@@ -1,4 +1,5 @@
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
+import retryAjax from '../ajax/retryAjax';
 import * as system from '../support/system';
 
 function getScoutTowerDetails(responseText) { // Legacy
@@ -20,5 +21,5 @@ function getScoutTowerDetails(responseText) { // Legacy
 }
 
 export default function injectTitan() { // jQuery
-  $.get('index.php?cmd=guild&subcmd=scouttower', getScoutTowerDetails);
+  retryAjax('index.php?cmd=guild&subcmd=scouttower').done(getScoutTowerDetails);
 }

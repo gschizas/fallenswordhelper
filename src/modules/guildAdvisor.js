@@ -2,6 +2,7 @@ import add from './support/task';
 import calf from './support/calf';
 import {createTFoot} from './common/cElement';
 import getMembrList from './ajax/getMembrList';
+import retryAjax from './ajax/retryAjax';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -138,7 +139,7 @@ function returnAdvisorPage(e, response) {
 }
 
 function getAdvisorPage(e) { // jQuery
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',

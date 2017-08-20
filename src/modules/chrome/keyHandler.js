@@ -1,3 +1,4 @@
+import retryAjax from '../ajax/retryAjax';
 import * as sendGold from '../newMap/sendGold';
 import * as system from '../support/system';
 
@@ -22,7 +23,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
   if (itemIndex >= allItems.length) {return;}
   var cbsIndex = allItems[itemIndex].value;
 
-  $.ajax({
+  retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -88,7 +89,7 @@ function profile() {
 }
 
 function combatSetKey(itemIndex) {
-  $.get('index.php?cmd=profile').done(function(data) {
+  retryAjax('index.php?cmd=profile').done(function(data) {
     changeCombatSet(data, itemIndex);
   });
 }

@@ -1,4 +1,5 @@
 import calf from './calf';
+import retryAjax from '../ajax/retryAjax';
 import * as dataObj from './dataObj';
 
 export var server = document.location.protocol + '//' +
@@ -98,13 +99,9 @@ export function createDocument(details) {
 }
 
 export function xmlhttp(theUrl, func, theCallback) {
-  return $.ajax({
-    url: theUrl,
-    callback: theCallback,
-    success: function(responseDetails) {
-      if (func) {
-        func.call(this, responseDetails, this.callback);
-      }
+  return retryAjax(theUrl).done(function(responseDetails) {
+    if (func) {
+      func(responseDetails, theCallback);
     }
   });
 }

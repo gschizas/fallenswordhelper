@@ -1,4 +1,5 @@
 import getForage from '../ajax/getForage';
+import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
 import * as system from '../support/system';
 
@@ -144,8 +145,10 @@ function processMonster(data) {
 
 function loopActions(e, i) { // jQuery
   if (e.type !== 6) {return;}
-  $.getJSON('fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i)
-    .done(processMonster);
+  retryAjax({
+    url: 'fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i,
+    dataType: 'json'
+  }).done(processMonster);
 }
 
 function getMyStats() {
