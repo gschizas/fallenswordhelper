@@ -1,3 +1,4 @@
+import unequipitem from '../app/profile/unequipitem';
 import {createButton, createDiv} from '../common/cElement';
 
 var profileCombatSetDiv;
@@ -7,11 +8,10 @@ function getNekid() { // jQuery
   var aLinks = profileBlock.getElementsByTagName('a');
   var prm = [];
   Array.prototype.forEach.call(aLinks, function(link) {
-    var href = link.href;
-    prm.push($.ajax({
-      url: href,
-      timeout: 3000
-    }).pipe(null, function() {return $.when();}));
+    var item = /inventory_id=(\d+)/.exec(link.href)[1];
+    if (item) {
+      prm.push(unequipitem(item).pipe(null, function() {return $.when();}));
+    }
   });
   $.when.apply($, prm).done(function() {
     location.assign('index.php?cmd=profile');
