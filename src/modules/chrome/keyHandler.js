@@ -117,6 +117,7 @@ var keyDict = {
   '114': {fn: doRepair}, // repair [r]
   '118': {fn: fastWearMgr}, // fast wear manager [v]
   '121': {fn: sendGold.doSendGold}, // fast send gold [y]
+  '163': {fn: combatSetKey, arg: 3}, // Shift+3 -- for UK keyboards
 };
 
 function handleKey(r) {
