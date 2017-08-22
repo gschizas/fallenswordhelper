@@ -75,6 +75,7 @@ function showHuntMode(worldName) { // jQuery
 export default function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
   worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
+  // TODO initialise GameController.Realm.footprintTileList
   var oldButtonContainer = $('#fshWorldButtonContainer');
   if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
   var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});
