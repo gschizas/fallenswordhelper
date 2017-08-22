@@ -58,9 +58,11 @@ case folder === 'prod':
 }
 
 export default {
-  entry: entry,
-  dest: dest,
-  format: format,
+  input: entry,
+  output: {
+    file: dest,
+    format: format
+  },
   plugins: [
     jscc(opts),
     nodeResolve(),
