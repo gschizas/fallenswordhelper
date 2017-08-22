@@ -1,6 +1,7 @@
 import add from './support/task';
 import {createInput} from './common/cElement';
 import getMembrList from './ajax/getMembrList';
+import retryAjax from './ajax/retryAjax';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -48,7 +49,7 @@ function fetchRankData() { // jQuery
     var targetNode = anItem.parentNode.parentNode.previousElementSibling;
     var href = /window\.location='(.*)';/.exec(anItem
       .getAttribute('onclick'))[1];
-    $.get(href).done(parseRankData.bind(null, targetNode));
+    retryAjax(href).done(parseRankData.bind(null, targetNode));
   });
 }
 
@@ -79,7 +80,7 @@ function ajaxifyRankControls(evt) { // jQuery
   var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
   var parentTable = thisRankRow.parentNode;
   if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
-  $.get(onclickHREF);
+  retryAjax(onclickHREF);
   var injectRow = parentTable.rows[targetRowNum];
   parentTable.insertBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(val);

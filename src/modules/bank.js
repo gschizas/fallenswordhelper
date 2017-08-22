@@ -1,3 +1,4 @@
+import retryAjax from './ajax/retryAjax';
 import * as system from './support/system';
 
 var playerBank = {
@@ -71,6 +72,10 @@ function invalidAmount(o, amount) { // jQuery
     !$.isNumeric(amount) || amount < 1;
 }
 
+function doAjax(oData) {
+  retryAjax({url: 'index.php', data: oData}).done(transResponse);
+}
+
 function bankDeposit(e) { // jQuery
   e.preventDefault();
   var o = bankSettings;
@@ -78,7 +83,7 @@ function bankDeposit(e) { // jQuery
   if (invalidAmount(o, amount)) {return;}
   o.data.mode = 'deposit';
   o.data.deposit_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
+  doAjax(o.data);
 }
 
 function bankWithdrawal(e) { // jQuery
@@ -88,7 +93,7 @@ function bankWithdrawal(e) { // jQuery
   if (!$.isNumeric(amount) || amount < 1) {return;}
   o.data.mode = 'withdraw';
   o.data.withdraw_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
+  doAjax(o.data);
 }
 
 function linkToGuildBank(o, bank) { // jQuery

@@ -1,5 +1,6 @@
 import {createSpan} from './common/cElement';
 import getProfile from './ajax/getProfile';
+import retryAjax from './ajax/retryAjax';
 import * as system from './support/system';
 
 var retries = 0;
@@ -74,7 +75,7 @@ function quickActivate(evt) { // jQuery
   if (trigger.className !== 'quickbuffActivate') {return;}
   var buffHref = '?cmd=quickbuff&subcmd=activate&targetPlayers=' +
     window.self + '&skills[]=' + trigger.getAttribute('buffID');
-  $.get(buffHref).done(function(data) {
+  retryAjax(buffHref).done(function(data) {
     var doc = system.createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
     if (result &&

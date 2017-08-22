@@ -1,3 +1,4 @@
+import retryAjax from '../ajax/retryAjax';
 import * as layout from './layout';
 
 var deferred = window.$ && $.when();
@@ -8,7 +9,7 @@ export function dialog(data) {
 }
 
 export function equipItem(backpackInvId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -28,7 +29,7 @@ export function htmlResult(data) {
 }
 
 export function useItem(backpackInvId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -60,7 +61,7 @@ function takeItemStatus(action, data) {
 }
 
 export function takeItem(invId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -82,7 +83,7 @@ export function queueTakeItem(invId, action) {
 }
 
 function guildInvRecall(invId, playerId, mode) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -97,7 +98,7 @@ function guildInvRecall(invId, playerId, mode) {
 }
 
 function backpack() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {cmd: 'profile', subcmd: 'fetchinv'},
     dataType: 'json'

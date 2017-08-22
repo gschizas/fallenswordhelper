@@ -1,3 +1,4 @@
+import retryAjax from '../ajax/retryAjax';
 import {createButton, createDiv, createInput} from '../common/cElement';
 import * as system from '../support/system';
 
@@ -10,7 +11,7 @@ var qbBtn;
 var resultDiv;
 
 function quickBuy() {
-  return $.ajax({
+  return retryAjax({
     cache: false,
     url: 'fetchdata.php',
     data: {

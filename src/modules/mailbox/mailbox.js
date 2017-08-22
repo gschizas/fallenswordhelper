@@ -1,3 +1,4 @@
+import retryAjax from '../ajax/retryAjax';
 import * as dataObj from '../support/dataObj';
 
 var cn;
@@ -30,7 +31,7 @@ function takeAllSimilar(evt) { // jQuery.min
     invIds.length + ' items';
   cn = 0;
   invIds.forEach(function(invId) {
-    $.ajax({
+    retryAjax({
       type: 'POST',
       url: 'index.php',
       data: {

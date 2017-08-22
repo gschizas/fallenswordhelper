@@ -4,6 +4,7 @@ import getMembrList from '../../ajax/getMembrList';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';
 import reduceBuffArray from '../../common/reduceBuffArray';
+import retryAjax from '../../ajax/retryAjax';
 import {createButton, createDiv} from '../../common/cElement';
 import * as common from '../../common/common';
 import * as dataObj from '../../support/dataObj';
@@ -275,7 +276,7 @@ function prepareDivs() {
 }
 
 function getGuild() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -317,7 +318,7 @@ function storeLeadDefender(json) {
 }
 
 function getGroups() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',

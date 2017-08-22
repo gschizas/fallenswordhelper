@@ -1,7 +1,8 @@
 import {dialog} from '../support/ajax';
+import retryAjax from './retryAjax';
 
 export default function moveItem(invIdList, folderId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',

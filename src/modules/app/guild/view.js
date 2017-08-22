@@ -1,9 +1,9 @@
 import retryAjax from '../../ajax/retryAjax';
 
-export default function loadInventory() {
+export default function guildView(guildId) {
   return retryAjax({
     url: 'app.php',
-    data: {cmd: 'profile', subcmd: 'loadinventory', app: '1'},
+    data: {cmd: 'guild', subcmd: 'view', guild_id: guildId, app: '1'},
     dataType: 'json'
   });
 }

@@ -3,6 +3,7 @@ import getGroupStats from './ajax/getGroupStats';
 import getMembrList from './ajax/getMembrList';
 import getMercStats from './ajax/getMercStats';
 import groupViewStats from './ajax/groupViewStats';
+import retryAjax from './ajax/retryAjax';
 import * as dataObj from './support/dataObj';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
@@ -46,7 +47,7 @@ function displayMinGroupLevel() { // jQuery
 function filterMercs(e) {return e.search('#000099') === -1;}
 
 function joinGroup(groupJoinURL, joinButton) { // jQuery
-  return $.get(groupJoinURL).done(function() {
+  return retryAjax(groupJoinURL).done(function() {
     joinButton.classList.add('fshHide');
   });
 }

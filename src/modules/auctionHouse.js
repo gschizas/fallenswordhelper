@@ -1,5 +1,6 @@
 import {createSpan} from './common/cElement';
 import perfFilter from './common/perfFilter';
+import retryAjax from './ajax/retryAjax';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -15,12 +16,10 @@ function cancelAllAH() { // jQuery
     cancelButton.outerHTML = '<img src="' + system.imageServer +
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
-      $.post(
-        'index.php?cmd=auctionhouse&subcmd=cancel', {
-          auction_id:
-            /inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
-        }
-      )
+      retryAjax({
+        url: 'index.php?cmd=auctionhouse&subcmd=cancel',
+        data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
+      })
     );
   }
   $.when.apply($, prm).done(function() {

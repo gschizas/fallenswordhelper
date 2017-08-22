@@ -289,6 +289,24 @@ function getLength() {
 
 var calf = {};
 
+function doAjax(options, retries, dfr) {
+  $.ajax(options).pipe(function(data, textStatus, jqXHR) {
+    dfr.resolve(data, textStatus, jqXHR);
+  }, function(jqXhr, textStatus, errorThrown) {
+    if (retries > 0) {
+      setTimeout(doAjax, 100, options, retries - 1, dfr);
+    } else {
+      dfr.reject(jqXhr, textStatus, errorThrown);
+    }
+  });
+}
+
+function retryAjax(options) {
+  var dfr = $.Deferred();
+  doAjax(options, 10, dfr);
+  return dfr;
+}
+
 /* eslint-disable max-lines */
 var defaults = {
   lastActiveQuestPage: '',
@@ -692,13 +710,9 @@ function createDocument(details) {
 }
 
 function xmlhttp(theUrl, func, theCallback) {
-  return $.ajax({
-    url: theUrl,
-    callback: theCallback,
-    success: function(responseDetails) {
-      if (func) {
-        func.call(this, responseDetails, this.callback);
-      }
+  return retryAjax(theUrl).done(function(responseDetails) {
+    if (func) {
+      func(responseDetails, theCallback);
     }
   });
 }
@@ -839,11 +853,15 @@ function numberSort(a, b) {
   return sortDesc(result);
 }
 
-function testQuant(aValue) {
+function testRange(aValue, min, max) {
   var theValue = parseInt(aValue, 10);
-  if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+  if (!isNaN(theValue) && theValue > min && theValue < max) {
     return theValue;
   }
+}
+
+function testQuant(aValue) {
+  return testRange(aValue, 0, 100);
 }
 
 function getRandomInt(_min, _max) {
@@ -1610,8 +1628,7 @@ function getOnlinePlayers(data) { // Bad jQuery
     input = input.parent().text();
     lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
     for (var i = 2; i <= lastPage; i += 1) {
-      $.get('index.php?cmd=onlineplayers&page=' + i,
-        getOnlinePlayers);
+      retryAjax('index.php?cmd=onlineplayers&page=' + i).done(getOnlinePlayers);
     }
   }
   checkLastPage();
@@ -1621,7 +1638,7 @@ function refreshEvt() { // Bad jQuery
   $('#fshRefresh', context).hide();
   onlinePages = 0;
   onlinePlayers = {};
-  $.get('index.php?cmd=onlineplayers&page=1', getOnlinePlayers);
+  retryAjax('index.php?cmd=onlineplayers&page=1').done(getOnlinePlayers);
   setValue('lastOnlineCheck', Date.now());
   $('#fshOutput', context).append('Parsing online players...'); // context
 }
@@ -1850,7 +1867,7 @@ function processFolderAnyPage(data) { // jQuery.min
       name: el.textContent,
       id: getCustomUrlParameter(el.href, 'recipe_id')
     };
-    prev.push($.get(el.href).pipe(processRecipe.bind(null, recipe)));
+    prev.push(retryAjax(el.href).pipe(processRecipe.bind(null, recipe)));
     return prev;
   }, []);
   return $.when.apply($, prm);
@@ -1868,7 +1885,7 @@ function processFolderFirstPage(data) { // jQuery.min
   var pages = pCC$$1.getElementsByClassName('customselect')[0]
     .getElementsByTagName('option').length;
   for (var i = 1; i < pages; i += 1) {
-    prm.push($.get(thisFolder.parentNode.href + '&page=' + i)
+    prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
       .pipe(processFolderAnyPage));
   }
   prm.push($.when(data).pipe(processFolderAnyPage));
@@ -1887,7 +1904,7 @@ function reduceFolders(prev, el) { // jQuery.min
       folderName + '"  as it has the word "quest" in folder name.<br>');
     return prev;
   }
-  prev.push($.get(href).pipe(processFolderFirstPage));
+  prev.push(retryAjax(href).pipe(processFolderFirstPage));
   return prev;
 }
 
@@ -1910,7 +1927,8 @@ function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
-  $.get('index.php?cmd=inventing').pipe(processFirstPage).done(displayStuff);
+  retryAjax('index.php?cmd=inventing').pipe(processFirstPage)
+    .done(displayStuff);
 }
 
 function gotRecipeBook(data) {
@@ -1953,7 +1971,7 @@ function getInventory() {
   if (calf.subcmd === 'guildinvmgr') {
     subcmd = 'guild_store&inc_tagged=1';
   }
-  return $.ajax({
+  return retryAjax({
     dataType: 'json',
     url: 'index.php?cmd=export&subcmd=' + subcmd
   });
@@ -1967,7 +1985,7 @@ function dialog(data) {
 }
 
 function equipItem(backpackInvId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -1987,7 +2005,7 @@ function htmlResult(data) {
 }
 
 function useItem(backpackInvId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -2019,7 +2037,7 @@ function takeItemStatus(action, data) {
 }
 
 function takeItem(invId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -2041,7 +2059,7 @@ function queueTakeItem(invId, action) {
 }
 
 function guildInvRecall(invId, playerId$$1, mode) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -2056,7 +2074,7 @@ function guildInvRecall(invId, playerId$$1, mode) {
 }
 
 function backpack() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {cmd: 'profile', subcmd: 'fetchinv'},
     dataType: 'json'
@@ -2172,10 +2190,10 @@ function tableRows(prev, item_id) {
 function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
   var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
-    '<tr><td id="buy_result" colspan="2"></td></tr>';
+    '<tr><td id="qeresult" colspan="2"></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
-  buyResult = document.getElementById('buy_result');
+  buyResult = document.getElementById('qeresult');
 }
 
 function isExtractable(curr) {
@@ -2318,7 +2336,7 @@ function createQuickWear(appInv) {
 }
 
 function loadInventory() {
-  return $.ajax({
+  return retryAjax({
     url: 'app.php',
     data: {cmd: 'profile', subcmd: 'loadinventory', app: '1'},
     dataType: 'json'
@@ -5156,10 +5174,14 @@ function injectQuickMsgDialogJQ() {
 }
 
 function getProfile(username) {
-  return $.getJSON('index.php', {
-    cmd: 'export',
-    subcmd: 'profile',
-    player_username: username
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'export',
+      subcmd: 'profile',
+      player_username: username
+    },
+    dataType: 'json'
   });
 }
 
@@ -5731,7 +5753,7 @@ function prepareBountyData() {
 }
 
 function doSendGold() { // jQuery
-  $.ajax({
+  retryAjax({
     url: 'index.php',
     data: {
       cmd: 'trade',
@@ -5808,7 +5830,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
   if (itemIndex >= allItems.length) {return;}
   var cbsIndex = allItems[itemIndex].value;
 
-  $.ajax({
+  retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -5874,7 +5896,7 @@ function profile() {
 }
 
 function combatSetKey(itemIndex) {
-  $.get('index.php?cmd=profile').done(function(data) {
+  retryAjax('index.php?cmd=profile').done(function(data) {
     changeCombatSet(data, itemIndex);
   });
 }
@@ -5902,6 +5924,7 @@ var keyDict = {
   '114': {fn: doRepair}, // repair [r]
   '118': {fn: fastWearMgr}, // fast wear manager [v]
   '121': {fn: doSendGold}, // fast send gold [y]
+  '163': {fn: combatSetKey, arg: 3}, // Shift+3 -- for UK keyboards
 };
 
 function handleKey(r) {
@@ -6089,7 +6112,7 @@ function createSuccess(temp, textStatus) {
 }
 
 function createPotion(temp) { // jQuery
-  $.ajax({
+  retryAjax({
     cache: false,
     dataType: 'json',
     url: 'index.php',
@@ -6125,7 +6148,7 @@ function quickCreate(evt) {
 function checkLastCompose() { // jQuery
   var lastComposeCheck = getValue('lastComposeCheck');
   if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
-  $.get('index.php?cmd=composing', function(data) {
+  retryAjax('index.php?cmd=composing').done(function(data) {
     add(3, parseComposing, [data]);
   });
 }
@@ -6222,7 +6245,7 @@ function prayToGods(e) { // jQuery
   if (!myGod) {return;}
   document.getElementById('helperPrayToGods').removeEventListener('click',
     prayToGods);
-  $.get('index.php?cmd=temple&subcmd=pray&type=' + myGod)
+  retryAjax('index.php?cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
   $(e.target).qtip('hide');
 }
@@ -6299,7 +6322,7 @@ function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
   if (doWeNeedToParse()) {
-    $.get('index.php?cmd=temple', parseTemplePage);
+    retryAjax('index.php?cmd=temple').done(parseTemplePage);
   }
 }
 
@@ -6335,7 +6358,7 @@ function notUpgradesPage() {
   }
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
-  $.get('index.php?cmd=points&type=1', function(data) {
+  retryAjax('index.php?cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);
   });
 }
@@ -6812,7 +6835,7 @@ function showComposingMessage(message, bgcolor) { // jQuery
 }
 
 function breakItems() { // jQuery.min
-  return $.ajax({
+  return retryAjax({
     type: 'POST',
     url: 'index.php?cmd=composing&subcmd=dobreakdown',
     data: {'item_list[]': selectedList},
@@ -6868,6 +6891,16 @@ function composingBreakdown() {
     .addEventListener('click', togglePref);
 }
 
+function globalQuest() {
+  var topTable = pCC.getElementsByTagName('table')[3];
+  for (var i = 2; i < topTable.rows.length; i += 4) {
+    var aCell = topTable.rows[i].cells[1];
+    aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
+      '&search_show_first=1&search_active=1&search_username=' +
+      aCell.textContent + '">' + aCell.textContent + '</a>';
+  }
+}
+
 function closestTable(el) {
   if (el.tagName === 'TABLE') {return el;}
   return closestTable(el.parentNode);
@@ -6883,7 +6916,7 @@ function translateReturnInfo(data) {
 }
 
 function guildMailboxTake(href) {
-  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
+  return retryAjax({url: href}).pipe(translateReturnInfo).done(dialog);
 }
 
 function takeResult(self, data) {
@@ -6914,7 +6947,7 @@ function guildMailbox() {
 }
 
 function getGuild(guildId$$1) {
-  return $.ajax({
+  return retryAjax({
     dataType: 'json',
     url: 'index.php',
     data: {
@@ -7105,7 +7138,7 @@ function returnAdvisorPage(e, response) {
 }
 
 function getAdvisorPage(e) { // jQuery
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -7476,8 +7509,8 @@ function buy() { // jQuery
   document.getElementById('buy_result').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
-    $.get('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
-      ItemId, done);
+    retryAjax('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
+      ItemId).done(done);
   }
 }
 
@@ -7893,7 +7926,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
 }
 
 function conflictInfo() { // jQuery
-  $.get('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
+  retryAjax('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
     gotConflictInfo(data,
       {node: document.getElementById('statisticsControl')});
   });
@@ -8091,7 +8124,7 @@ function fetchRankData() { // jQuery
     var targetNode = anItem.parentNode.parentNode.previousElementSibling;
     var href = /window\.location='(.*)';/.exec(anItem
       .getAttribute('onclick'))[1];
-    $.get(href).done(parseRankData.bind(null, targetNode));
+    retryAjax(href).done(parseRankData.bind(null, targetNode));
   });
 }
 
@@ -8122,7 +8155,7 @@ function ajaxifyRankControls(evt) { // jQuery
   var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
   var parentTable = thisRankRow.parentNode;
   if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
-  $.get(onclickHREF);
+  retryAjax(onclickHREF);
   var injectRow = parentTable.rows[targetRowNum];
   parentTable.insertBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(val);
@@ -8684,7 +8717,7 @@ function doTable$1() { // jQuery
 }
 
 function dropItem(invIdList) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -8697,7 +8730,7 @@ function dropItem(invIdList) {
 }
 
 function moveItem(invIdList, folderId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
@@ -8711,7 +8744,7 @@ function moveItem(invIdList, folderId) {
 }
 
 function sendItem(invIdList) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'trade',
@@ -9121,7 +9154,7 @@ function takeAllSimilar(evt) { // jQuery.min
     invIds.length + ' items';
   cn$1 = 0;
   invIds.forEach(function(invId) {
-    $.ajax({
+    retryAjax({
       type: 'POST',
       url: 'index.php',
       data: {
@@ -9806,7 +9839,7 @@ var completeReload = true;
 var myTable;
 
 function getGuildLogPage(page) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {cmd: 'guild', subcmd: 'log', page: page},
     datatype: 'html'
@@ -10081,7 +10114,7 @@ function addStatTotalToMouseover() { // jQuery
 var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
 function debuff(buffId) {
-  return $.ajax({
+  return retryAjax({
     url: 'fetchdata.php',
     data: {
       a: '22',
@@ -10226,6 +10259,19 @@ function injectFastWear() { // jQuery
   });
 }
 
+function unequipitem(item) {
+  return retryAjax({
+    url: 'app.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'unequipitem',
+      inventory_id: item,
+      app: '1'
+    },
+    dataType: 'json'
+  });
+}
+
 var profileCombatSetDiv;
 
 function getNekid() { // jQuery
@@ -10233,11 +10279,10 @@ function getNekid() { // jQuery
   var aLinks = profileBlock.getElementsByTagName('a');
   var prm = [];
   Array.prototype.forEach.call(aLinks, function(link) {
-    var href = link.href;
-    prm.push($.ajax({
-      url: href,
-      timeout: 3000
-    }).pipe(null, function() {return $.when();}));
+    var item = /inventory_id=(\d+)/.exec(link.href)[1];
+    if (item) {
+      prm.push(unequipitem(item).pipe(null, function() {return $.when();}));
+    }
   });
   $.when.apply($, prm).done(function() {
     location.assign('index.php?cmd=profile');
@@ -10347,7 +10392,7 @@ function countComponent(self) { // jQuery.min
   var pageLinks = thisInvTable.rows[lastRowIndex].firstChild.children;
   Array.prototype.forEach.call(pageLinks, function(el) {
     if (el.children.length === 0) {
-      prm.push($.get(el.href).done(gotComponentsPage));
+      prm.push(retryAjax(el.href).done(gotComponentsPage));
     }
   });
   $.when.apply($, prm).done(displayComponentTally);
@@ -10371,7 +10416,7 @@ function compDeleted(self, data) {
 
 function delComponent(self) { // jQuery.min
   var href = self.previousElementSibling.href;
-  $.get(href).done(compDeleted.bind(null, self));
+  retryAjax(href).done(compDeleted.bind(null, self));
 }
 
 function addDelBtn(el) {
@@ -10400,7 +10445,7 @@ function delCompType(self) { // jQuery.min
     '/skin/loading.gif\')';
   var prm = [];
   componentList[id].del.forEach(function(href) {
-    prm.push($.get(href).done(updateUsedCount));
+    prm.push(retryAjax(href).done(updateUsedCount));
   });
   $.when.apply($, prm).done(function() {
     componentList[id].dom.forEach(function(el) {el.innerHTML = '';});
@@ -10906,7 +10951,7 @@ function quickActivate(evt) { // jQuery
   if (trigger.className !== 'quickbuffActivate') {return;}
   var buffHref = '?cmd=quickbuff&subcmd=activate&targetPlayers=' +
     window.self + '&skills[]=' + trigger.getAttribute('buffID');
-  $.get(buffHref).done(function(data) {
+  retryAjax(buffHref).done(function(data) {
     var doc = createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
     if (result &&
@@ -11091,54 +11136,8 @@ function injectRPUpgrades() { // jQuery.min
   myStats().done(parseProfile);
 }
 
-var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
-  'Gut Rot Head Splitter|Serum');
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
   'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
-var headerCount;
-var headers$1;
-var counter;
-var nodeArray;
-var nodeList;
-var findUser;
-var foundUser;
-
-function hideOther(el) {
-  if (el.firstChild.hasAttribute('bgcolor')) {
-    foundUser = el.firstChild.firstElementChild.textContent === findUser;
-  }
-  if (!foundUser) {
-    el.className = 'fshHide';
-  }
-}
-
-function hideOthers() {
-  var limit = performance.now() + 5;
-  while (performance.now() < limit && counter < nodeList.length) {
-    var el = nodeList[counter];
-
-    hideOther(el);
-
-    counter += 1;
-  }
-  if (counter < nodeList.length) {
-    add(2, hideOthers);
-  }
-}
-
-function searchUser() {
-  findUser = getUrlParameter('user');
-  if (!findUser) {return;}
-  var userNodes = document.querySelectorAll(
-    '#pCC table table td[bgcolor="#DAA534"] b');
-  var userNode = Array.prototype.some.call(userNodes, function(el) {
-    return el.textContent === findUser;
-  });
-  if (!userNode) {return;}
-  nodeList = document.querySelectorAll('#pCC table table tr');
-  counter = 0;
-  add(2, hideOthers);
-}
 
 function recallItem$2(evt) { // jQuery
   $(evt.target).qtip('hide');
@@ -11191,33 +11190,229 @@ function eventHandlers$1(evt) {
   }
 }
 
-function memberHeader(oldhtml) {
-  if (!calf.membrList[oldhtml]) {return oldhtml;}
-  return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
-    '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
-    '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
-    oldhtml + '>m</span> ]';
+var storeMap = 'fsh_potMap';
+var defaultOpts = {
+  tab1: false,
+  tab2: false,
+  tab3: false,
+  myMap: {},
+  minpoint: 12,
+  maxpoint: 20
+};
+var potObj$1;
+var potOpts;
+var inventory;
+var mapping;
+var thresholds;
+
+function createContainer() {
+  return createDiv({
+    id: 'potReport',
+    innerHTML: '<input id="tab1" type="checkbox"' +
+      isChecked(potOpts.tab1) + '>' +
+      '<label for="tab1">Composed Potion Inventory</label>' +
+      '<input id="tab2" type="checkbox"' +
+      isChecked(potOpts.tab2) + '>' +
+      '<label for="tab2">Mapping</label>' +
+      '<input id="tab3" type="checkbox"' +
+      isChecked(potOpts.tab3) + '>' +
+      '<label for="tab3">Thresholds</label>'
+  });
 }
 
-function paintHeader() {
-  var limit = performance.now() + 10;
-  while (performance.now() < limit && headerCount < headers$1.length) {
-    var el = headers$1[headerCount];
-    var oldhtml = el.textContent;
-    el.innerHTML = memberHeader(oldhtml);
-    headerCount += 1;
+function createThresholds() {
+  return createDiv({
+    id: 'thresholds',
+    innerHTML: 'Min:' +
+      '<input id="minpoint" type="number" value="' +
+      potOpts.minpoint + '" min="0" max="999">' +
+      'Max:' +
+      '<input id="maxpoint" type="number" value="' +
+      potOpts.maxpoint + '" min="0" max="999">',
+  });
+}
+
+function alpha$1(a, b) {
+  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
+  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
+  return 0;
+}
+
+function sortKeys(obj) {
+  return Object.keys(obj).sort(alpha$1).reduce(function(result, key) {
+    result[key] = obj[key];
+    return result;
+  }, {});
+}
+
+function resetMap() {
+  potOpts.myMap = Object.keys(potObj$1).reduce(function(prev, pot) {
+    prev[pot] = pot;
+    return prev;
+  }, {});
+}
+
+function buildMap() {
+  Object.keys(potObj$1).forEach(function(pot) {
+    if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
+  });
+  potOpts.myMap = sortKeys(potOpts.myMap);
+}
+
+function buildOptions(select) {
+  return '<select name="' + select +
+    '"><option value="Ignore">Ignore</option>' +
+    Object.keys(potObj$1).reduce(function(prev, pot) {
+      return prev + '<option value="' + pot + '"' +
+        isSelected(pot, potOpts.myMap[select]) + '>' + pot + '</option>';
+    }, '') + '</select>';
+}
+
+function drawMapping() {
+  mapping.innerHTML = '<table><tbody>' +
+    Object.keys(potOpts.myMap).reduce(function(prev, pot) {
+      var options = buildOptions(pot);
+      return prev + '<tr height="19px"><td>' + pot + '</td><td>' + options +
+        '</td></tr>';
+    }, '') + '<tr><td></td><td class="fshCenter">' +
+    '<input id="fshReset" value="Reset" type="button">' +
+    '</td></tr></tbody></table>';
+}
+
+function perc2color(percent) {
+  var perc = Math.max(Math.min(percent, 100), 0);
+  var r;
+  var g;
+  var b = 0;
+  if (perc < 50) {
+    r = 255;
+    g = Math.round(5.1 * perc);
+  } else {
+    g = 255;
+    r = Math.round(510 - 5.10 * perc);
   }
-  if (headerCount < headers$1.length) {
-    add(3, paintHeader);
+  var h = r * 0x10000 + g * 0x100 + b;
+  return '#' + ('000000' + h.toString(16)).slice(-6);
+}
+
+function pivotPotObj(prev, pot) {
+  if (potOpts.myMap[pot] !== 'Ignore') {
+    if (prev[potOpts.myMap[pot]]) {
+      prev[potOpts.myMap[pot]] += potObj$1[pot];
+    } else {
+      prev[potOpts.myMap[pot]] = potObj$1[pot];
+    }
+  }
+  return prev;
+}
+
+function makeRowsFromPivot(pivot, prev, pot) {
+  return prev + '<tr height="19px"><td>' + pot +
+    '</td><td style="background-color: ' +
+    perc2color((pivot[pot] - potOpts.minpoint) /
+    (potOpts.maxpoint - potOpts.minpoint) * 100) + ';">' +
+    pivot[pot].toString() + '</td></tr>';
+}
+
+function drawInventory() {
+  var pivot = Object.keys(potObj$1).reduce(pivotPotObj, {});
+  inventory.innerHTML = '<table><tbody>' +
+    Object.keys(pivot).reduce(makeRowsFromPivot.bind(null, pivot), '') +
+    '</tbody></table>';
+}
+
+function onChange(e) {
+  if (e.target.tagName === 'SELECT') {
+    potOpts.myMap[e.target.name] = e.target.value;
+    setForage(storeMap, potOpts);
+    drawInventory();
   }
 }
 
-function reportHeader() {
-  headers$1 = document.querySelectorAll('#pCC table table ' +
-    'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
-  headerCount = 0;
-  add(3, paintHeader);
+function doReset() {
+  resetMap();
+  setForage(storeMap, potOpts);
+  drawMapping();
+  drawInventory();
 }
+
+function saveState(self) {
+  var option = self.id;
+  potOpts[option] = self.checked;
+  setForage(storeMap, potOpts);
+}
+
+var evtHdl$1 = [
+  {
+    test: function(self) {return self.id === 'fshReset';},
+    act: doReset
+  },
+  {
+    test: function(self) {
+      return /^tab\d$/.test(self.id);
+    },
+    act: saveState
+  }
+];
+
+function onClick(e) {
+  var self = e.target;
+  evtHdl$1.some(function(el) {
+    if (el.test(self)) {
+      el.act(self);
+      return true;
+    }
+    return false;
+  });
+}
+
+function onInput(e) {
+  var self = e.target.id;
+  var maybeValue = testRange(e.target.value, 0, 999);
+  if (maybeValue) {
+    potOpts[self] = maybeValue;
+    setForage(storeMap, potOpts);
+    drawInventory();
+  }
+}
+
+function gotMap(data) {
+  potOpts = defaultOpts;
+  if (data) {
+    mixin(potOpts, data);
+  }
+  buildMap(potObj$1);
+  setForage(storeMap, potOpts);
+  var container = createContainer();
+  var panels = createDiv({id: 'panels'});
+  container.appendChild(panels);
+  inventory = createDiv({id: 'inventory'});
+  drawInventory();
+  panels.appendChild(inventory);
+  mapping = createDiv({id: 'mapping'});
+  drawMapping();
+  panels.appendChild(mapping);
+  thresholds = createThresholds();
+  panels.appendChild(thresholds);
+
+  var myCell = pCC.firstElementChild.insertRow(2).insertCell(-1);
+  myCell.addEventListener('change', onChange);
+  myCell.addEventListener('click', onClick);
+  myCell.addEventListener('input', onInput);
+  myCell.appendChild(container);
+}
+
+function potReport(potObj_) {
+  potObj$1 = sortKeys(potObj_);
+  getForage(storeMap).done(gotMap);
+}
+
+var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
+  'Gut Rot Head Splitter|Serum');
+var counter;
+var nodeArray;
+var nodeList;
+var potObj;
 
 function paintChild() {
   var limit = performance.now() + 1;
@@ -11242,10 +11437,22 @@ function isEquipable(test) {
   return 'equip';
 }
 
+function addPotObj(item) {
+  if (item.indexOf(' (Potion)') !== -1) {
+    var itemName = item.replace(' (Potion)', '');
+    if (potObj[itemName]) {
+      potObj[itemName] += 1;
+    } else {
+      potObj[itemName] = 1;
+    }
+  }
+}
+
 function mySpan(el) {
   var secondHref = el.children.length === 2;
   var firstHref = hideElement$1(!secondHref);
   var itemName = el.previousElementSibling.innerHTML;
+  addPotObj(itemName);
   var wearable = hideElement$1(wearRE.test(itemName));
   var equipable = isEquipable(secondHref);
   return createSpan({
@@ -11288,15 +11495,90 @@ function makeSpan() {
   } else {
     counter = 0;
     add(3, paintChild);
+    potReport(potObj);
   }
 }
 
 function prepareChildRows() {
   nodeList = document.querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td:nth-of-type(3n+0)');
+  potObj = {};
   nodeArray = [];
   counter = 0;
   add(3, makeSpan);
+}
+
+var headerCount;
+var headers$1;
+
+function memberHeader(oldhtml) {
+  if (!calf.membrList[oldhtml]) {return oldhtml;}
+  return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
+    '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
+    '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
+    oldhtml + '>m</span> ]';
+}
+
+function paintHeader() {
+  var limit = performance.now() + 10;
+  while (performance.now() < limit && headerCount < headers$1.length) {
+    var el = headers$1[headerCount];
+    var oldhtml = el.textContent;
+    el.innerHTML = memberHeader(oldhtml);
+    headerCount += 1;
+  }
+  if (headerCount < headers$1.length) {
+    add(3, paintHeader);
+  }
+}
+
+function reportHeader() {
+  headers$1 = document.querySelectorAll('#pCC table table ' +
+    'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
+  headerCount = 0;
+  add(3, paintHeader);
+}
+
+var counter$1;
+var nodeList$1;
+var findUser;
+var foundUser;
+
+function hideOther(el) {
+  if (el.firstChild.hasAttribute('bgcolor')) {
+    foundUser = el.firstChild.firstElementChild.textContent === findUser;
+  }
+  if (!foundUser) {
+    el.className = 'fshHide';
+  }
+}
+
+function hideOthers() {
+  var limit = performance.now() + 5;
+  while (performance.now() < limit && counter$1 < nodeList$1.length) {
+    var el = nodeList$1[counter$1];
+
+    hideOther(el);
+
+    counter$1 += 1;
+  }
+  if (counter$1 < nodeList$1.length) {
+    add(2, hideOthers);
+  }
+}
+
+function searchUser() {
+  findUser = getUrlParameter('user');
+  if (!findUser) {return;}
+  var userNodes = document.querySelectorAll(
+    '#pCC table table td[bgcolor="#DAA534"] b');
+  var userNode = Array.prototype.some.call(userNodes, function(el) {
+    return el.textContent === findUser;
+  });
+  if (!userNode) {return;}
+  nodeList$1 = document.querySelectorAll('#pCC table table tr');
+  counter$1 = 0;
+  add(2, hideOthers);
 }
 
 function injectReportPaint() { // jQuery
@@ -11417,7 +11699,7 @@ function buffEvent(e) {
   }
 }
 
-function evtHdl$1(e) {
+function evtHdl$2(e) {
   if (e.target.classList.contains('fshBl')) {buffEvent(e);}
 }
 
@@ -11437,7 +11719,7 @@ function gotTables(titanTables) {
     if (titanTable.rows.length < 2) {continue;}
     doBuffLinks$1(titanTable);
   }
-  titanTables[1].addEventListener('click', evtHdl$1);
+  titanTables[1].addEventListener('click', evtHdl$2);
 }
 
 function injectScouttowerBuffLinks(titanTables) {
@@ -11571,7 +11853,291 @@ function getScoutTowerDetails(responseText) { // Legacy
 }
 
 function injectTitan() { // jQuery
-  $.get('index.php?cmd=guild&subcmd=scouttower', getScoutTowerDetails);
+  retryAjax('index.php?cmd=guild&subcmd=scouttower').done(getScoutTowerDetails);
+}
+
+function guildView(guildId) {
+  return retryAjax({
+    url: 'app.php',
+    data: {cmd: 'guild', subcmd: 'view', guild_id: guildId, app: '1'},
+    dataType: 'json'
+  });
+}
+
+function getStat(stat, doc) { // jQuery
+  // 'Hidden' returns NaN
+  return intValue(
+    $(stat, doc)
+      .contents()
+      .filter(function(i, e) {
+        return e.nodeType === 3;
+      })[0].nodeValue
+  );
+}
+
+function getBuffLevel(doc, buff) { // jQuery
+  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
+    .data('tipped');
+  // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
+  var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
+  if (test) {return intValue(test[1]);}
+  return 0;
+}
+
+function getBonus(stat, doc) { // jQuery
+  var target = $(stat, doc);
+  var children = target.children();
+  if (children.length === 0) {
+    children = target.next();
+  }
+  return intValue(children.text().slice(2, -1));
+}
+
+function cloakGuess(bonus, level) {
+  if (bonus > level * 10 ||
+      bonus < level) {
+    return bonus;
+  }
+  return level * 10;
+}
+
+function updateForCloak(obj) {
+  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
+  obj.hpValue = obj.hpBonus;
+}
+
+function playerDataString(responseText) {
+  var doc = createDocument(responseText);
+  var obj = {
+    levelValue: getStat('#stat-vl', doc),
+    attackValue: getStat('#stat-attack', doc),
+    attackBonus: getBonus('#stat-attack', doc),
+    defenseValue: getStat('#stat-defense', doc),
+    defenseBonus: getBonus('#stat-defense', doc),
+    armorValue: getStat('#stat-armor', doc),
+    armorBonus: getBonus('#stat-armor', doc),
+    damageValue: getStat('#stat-damage', doc),
+    damageBonus: getBonus('#stat-damage', doc),
+    hpValue: getStat('#stat-hp', doc),
+    hpBonus: getBonus('#stat-hp', doc),
+    killStreakValue: getStat('#stat-kill-streak', doc),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
+    doublerLevel: getBuffLevel(doc, 'Doubler'),
+    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
+    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
+    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
+    constitutionLevel: getBuffLevel(doc, 'Constitution'),
+    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
+    flinchLevel: getBuffLevel(doc, 'Flinch'),
+    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
+    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
+    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
+    barricadeLevel: getBuffLevel(doc, 'Barricade'),
+    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
+    anchoredLevel: getBuffLevel(doc, 'Anchored'),
+    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
+    entrenchLevel: getBuffLevel(doc, 'Entrench'),
+    cloakLevel: getBuffLevel(doc, 'Cloak')
+  };
+  obj.superEliteSlayerMultiplier = Math.round(0.002 *
+    obj.superEliteSlayerLevel * 100) / 100;
+
+  if (obj.cloakLevel === 0 ||
+      typeof obj.attackValue === 'number' &&
+      !isNaN(obj.attackValue)) {
+    return obj;
+  }
+
+  updateForCloak(obj);
+  return obj;
+}
+
+function getBuffLvl(buffs, buff) {
+  return fallback(buffs[buff], 0);
+}
+
+function playerDataObject(json) {
+  var buffs = reduceBuffArray(json._skills);
+  var obj = {
+    levelValue: json.level,
+    attackValue: json.attack,
+    attackBonus: json.bonus_attack,
+    defenseValue: json.defense,
+    defenseBonus: json.bonus_defense,
+    armorValue: json.armor,
+    armorBonus: json.bonus_armor,
+    damageValue: json.damage,
+    damageBonus: json.bonus_damage,
+    hpValue: json.hp,
+    hpBonus: json.bonus_hp,
+    killStreakValue: intValue(json.killstreak),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
+    doublerLevel: getBuffLvl(buffs, 'Doubler'),
+    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
+    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
+    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
+    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
+    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
+    flinchLevel: getBuffLvl(buffs, 'Flinch'),
+    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
+    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
+    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
+    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
+    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
+    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
+    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
+    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
+    cloakLevel: getBuffLvl(buffs, 'Cloak')
+  };
+  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
+  return obj;
+}
+
+var highlightPlayersNearMyLvl$1;
+var lvlDiffToHighlight$1;
+var myVL;
+var spinner$1;
+var validPvP = Math.floor(Date.now() / 1000) - 604800;
+var guilds;
+
+function doOnlineDot(aTable, data) {
+  aTable.rows[0].insertAdjacentHTML('beforeend',
+    '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
+  if (myVL &&
+      data.last_login >= validPvP &&
+      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
+      data.virtual_level < myVL + lvlDiffToHighlight$1) {
+    aTable.parentNode.parentNode.classList.add('lvlHighlight');
+  }
+}
+
+function parsePlayer(aTable, data, jqXhr) {
+  if (data) {
+    doOnlineDot(aTable, data);
+  } else {
+    aTable.rows[0].insertAdjacentHTML('beforeend',
+      '<td class="fshBkRed">' + jqXhr.status + '</td>');
+  }
+}
+
+function failFilter(jqXhr) {
+  return $.Deferred().resolve(null, jqXhr).promise();
+}
+
+function addPlayerObjectToGuild(guildId$$1, obj) {
+  if (guilds[guildId$$1]) {
+    guilds[guildId$$1].push(obj);
+  } else {
+    guilds[guildId$$1] = [obj];
+  }
+}
+
+function addPlayerToGuild(tbl, playerName$$1) {
+  var guildHRef = tbl.rows[0].cells[0].firstElementChild.href;
+  var guildId$$1 = /guild_id=(\d+)/.exec(guildHRef)[1];
+  addPlayerObjectToGuild(guildId$$1, {dom: tbl, player: playerName$$1});
+}
+
+function stackAjax(prm, playerName$$1, tbl) {
+  prm.push(getProfile(playerName$$1)
+    .pipe(null, failFilter)
+    .done(parsePlayer.bind(null, tbl))
+  );
+}
+
+function parseGuild(data) {
+  var guildId$$1 = data.result.id;
+  data.result.members.forEach(function(member) {
+    guilds[guildId$$1].forEach(function(player) {
+      if (member.name === player.player) {
+        doOnlineDot(player.dom, {
+          last_login: (data.server_time - member.last_activity).toString(),
+          virtual_level: member.vl
+        });
+      }
+    });
+  });
+}
+
+function findOnlinePlayers() { // jQuery
+  var someTables = pCC.getElementsByTagName('table');
+  var prm = [];
+  guilds = {};
+  Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
+    var playerName$$1 = tbl.textContent.trim();
+    if (tbl.rows[0].cells[0].firstElementChild) {
+      addPlayerToGuild(tbl, playerName$$1);
+    } else {
+      stackAjax(prm, playerName$$1, tbl);
+    }
+  });
+  Object.keys(guilds).forEach(function(guildId$$1) {
+    if (guilds[guildId$$1].length === 1) {
+      stackAjax(prm, guilds[guildId$$1][0].player, guilds[guildId$$1][0].dom);
+    } else {
+      guildView(guildId$$1).done(parseGuild);
+    }
+  });
+  $.when.apply($, prm).done(function() {
+    spinner$1.classList.add('fshHide');
+  });
+}
+
+function gotMyVl(data) {
+  myVL = data.virtual_level;
+  lvlDiffToHighlight$1 = 11;
+  if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
+}
+
+function getMyVL(e) { // jQuery
+  $(e.target).qtip('hide');
+  spinner$1 = createSpan({
+    className: 'fshSpinner fshTopListSpinner',
+    style: {
+      backgroundImage: 'url(\'' + imageServer +
+        '/world/actionLoadingSpinner.gif\')'
+    }
+  });
+  e.target.parentNode.replaceChild(spinner$1, e.target);
+  if (highlightPlayersNearMyLvl$1) {
+    myStats(false).done(gotMyVl).done(findOnlinePlayers);
+  } else {findOnlinePlayers();}
+}
+
+function looksLikeTopRated() {
+  highlightPlayersNearMyLvl$1 =
+    getValue('highlightPlayersNearMyLvl');
+  var theCell = pCC.getElementsByTagName('TD')[0];
+  theCell.firstElementChild.className = 'fshTopListWrap';
+  var findBtn = createInput({
+    className: 'fshFindOnlinePlayers custombutton tip-static',
+    type: 'button',
+    value: 'Find Online Players',
+    dataset: {
+      tipped: 'Fetch the online status of the ' +
+        'top 250 players (warning ... takes a few seconds).'
+    }
+  });
+  theCell.insertBefore(findBtn, theCell.firstElementChild);
+  findBtn.addEventListener('click', getMyVL);
+}
+
+function injectTopRated() {
+  if (pCC &&
+      pCC.firstElementChild &&
+      pCC.firstElementChild.rows &&
+      pCC.firstElementChild.rows.length > 2 &&
+      pCC.firstElementChild.rows[1].textContent
+        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
 }
 
 function getItemDiv() {
@@ -12098,7 +12664,7 @@ function parseGroupStats(html) {
 }
 
 function getGroupStats(viewStats) {
-  return $.ajax(viewStats).pipe(parseGroupStats);
+  return retryAjax(viewStats).pipe(parseGroupStats);
 }
 
 function parseMercStats(html) {
@@ -12124,145 +12690,7 @@ function parseMercStats(html) {
 }
 
 function getMercStats() {
-  return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
-}
-
-function getStat(stat, doc) { // jQuery
-  // 'Hidden' returns NaN
-  return intValue(
-    $(stat, doc)
-      .contents()
-      .filter(function(i, e) {
-        return e.nodeType === 3;
-      })[0].nodeValue
-  );
-}
-
-function getBuffLevel(doc, buff) { // jQuery
-  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
-    .data('tipped');
-  // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
-  var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
-  if (test) {return intValue(test[1]);}
-  return 0;
-}
-
-function getBonus(stat, doc) { // jQuery
-  var target = $(stat, doc);
-  var children = target.children();
-  if (children.length === 0) {
-    children = target.next();
-  }
-  return intValue(children.text().slice(2, -1));
-}
-
-function cloakGuess(bonus, level) {
-  if (bonus > level * 10 ||
-      bonus < level) {
-    return bonus;
-  }
-  return level * 10;
-}
-
-function updateForCloak(obj) {
-  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
-  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
-  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
-  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
-  obj.hpValue = obj.hpBonus;
-}
-
-function playerDataString(responseText) {
-  var doc = createDocument(responseText);
-  var obj = {
-    levelValue: getStat('#stat-vl', doc),
-    attackValue: getStat('#stat-attack', doc),
-    attackBonus: getBonus('#stat-attack', doc),
-    defenseValue: getStat('#stat-defense', doc),
-    defenseBonus: getBonus('#stat-defense', doc),
-    armorValue: getStat('#stat-armor', doc),
-    armorBonus: getBonus('#stat-armor', doc),
-    damageValue: getStat('#stat-damage', doc),
-    damageBonus: getBonus('#stat-damage', doc),
-    hpValue: getStat('#stat-hp', doc),
-    hpBonus: getBonus('#stat-hp', doc),
-    killStreakValue: getStat('#stat-kill-streak', doc),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
-    doublerLevel: getBuffLevel(doc, 'Doubler'),
-    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
-    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
-    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
-    constitutionLevel: getBuffLevel(doc, 'Constitution'),
-    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
-    flinchLevel: getBuffLevel(doc, 'Flinch'),
-    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
-    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
-    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
-    barricadeLevel: getBuffLevel(doc, 'Barricade'),
-    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
-    anchoredLevel: getBuffLevel(doc, 'Anchored'),
-    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
-    entrenchLevel: getBuffLevel(doc, 'Entrench'),
-    cloakLevel: getBuffLevel(doc, 'Cloak')
-  };
-  obj.superEliteSlayerMultiplier = Math.round(0.002 *
-    obj.superEliteSlayerLevel * 100) / 100;
-
-  if (obj.cloakLevel === 0 ||
-      typeof obj.attackValue === 'number' &&
-      !isNaN(obj.attackValue)) {
-    return obj;
-  }
-
-  updateForCloak(obj);
-  return obj;
-}
-
-function getBuffLvl(buffs, buff) {
-  return fallback(buffs[buff], 0);
-}
-
-function playerDataObject(json) {
-  var buffs = reduceBuffArray(json._skills);
-  var obj = {
-    levelValue: json.level,
-    attackValue: json.attack,
-    attackBonus: json.bonus_attack,
-    defenseValue: json.defense,
-    defenseBonus: json.bonus_defense,
-    armorValue: json.armor,
-    armorBonus: json.bonus_armor,
-    damageValue: json.damage,
-    damageBonus: json.bonus_damage,
-    hpValue: json.hp,
-    hpBonus: json.bonus_hp,
-    killStreakValue: intValue(json.killstreak),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
-    doublerLevel: getBuffLvl(buffs, 'Doubler'),
-    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
-    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
-    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
-    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
-    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
-    flinchLevel: getBuffLvl(buffs, 'Flinch'),
-    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
-    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
-    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
-    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
-    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
-    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
-    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
-    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
-    cloakLevel: getBuffLvl(buffs, 'Cloak')
-  };
-  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
-  return obj;
+  return retryAjax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }
 
 var relicData;
@@ -12530,7 +12958,7 @@ function prepareDivs() {
 }
 
 function getGuild$1() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -12545,7 +12973,7 @@ function calcRelicMultiplier(rels) {
   return Math.round((1 - rels / 10) * 100) / 100;
 }
 
-function parseGuild(html) {
+function parseGuild$1(html) {
   var doc = createDocument(html);
   var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
   relicCount = nodeList.length;
@@ -12572,7 +13000,7 @@ function storeLeadDefender(json) {
 }
 
 function getGroups() {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'guild',
@@ -12617,7 +13045,7 @@ function getStats() {
   resetCounters();
   player$1 = GameData.player();
   var prm = [];
-  prm.push(getGuild$1().done(parseGuild));
+  prm.push(getGuild$1().done(parseGuild$1));
   if (player$1.hasGroup) {
     prm.push(getGroups().pipe(parseGroups));
   }
@@ -12671,7 +13099,7 @@ var qbBtn;
 var resultDiv;
 
 function quickBuy() {
-  return $.ajax({
+  return retryAjax({
     cache: false,
     url: 'fetchdata.php',
     data: {
@@ -13751,8 +14179,10 @@ function processMonster(data) {
 
 function loopActions(e, i) { // jQuery
   if (e.type !== 6) {return;}
-  $.getJSON('fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i)
-    .done(processMonster);
+  retryAjax({
+    url: 'fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i,
+    dataType: 'json'
+  }).done(processMonster);
 }
 
 function getMyStats() {
@@ -14385,7 +14815,7 @@ var nodes;
 var selectRow;
 
 function doPickMove(moveId, slotId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'arena',
@@ -14887,7 +15317,7 @@ function evtEnabled(evt) {
   }
 }
 
-function evtHdl$2(evt) {
+function evtHdl$3(evt) {
   if (collapseNewsArchive) {evtEnabled(evt);}
 }
 
@@ -14964,7 +15394,7 @@ function viewArchive() {
   var theTables = pCC.getElementsByTagName('table');
   setupPref$1(theTables[0].rows[2]);
   Array.prototype.forEach.call(theTables[2].rows, doTagging);
-  theTables[2].addEventListener('click', evtHdl$2);
+  theTables[2].addEventListener('click', evtHdl$3);
 }
 
 function cancelAllAH() { // jQuery
@@ -14979,12 +15409,10 @@ function cancelAllAH() { // jQuery
     cancelButton.outerHTML = '<img src="' + imageServer +
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
-      $.post(
-        'index.php?cmd=auctionhouse&subcmd=cancel', {
-          auction_id:
-            /inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
-        }
-      )
+      retryAjax({
+        url: 'index.php?cmd=auctionhouse&subcmd=cancel',
+        data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
+      })
     );
   }
   $.when.apply($, prm).done(function() {
@@ -15086,6 +15514,10 @@ function invalidAmount(o, amount) { // jQuery
     !$.isNumeric(amount) || amount < 1;
 }
 
+function doAjax$1(oData) {
+  retryAjax({url: 'index.php', data: oData}).done(transResponse);
+}
+
 function bankDeposit(e) { // jQuery
   e.preventDefault();
   var o = bankSettings;
@@ -15093,7 +15525,7 @@ function bankDeposit(e) { // jQuery
   if (invalidAmount(o, amount)) {return;}
   o.data.mode = 'deposit';
   o.data.deposit_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
+  doAjax$1(o.data);
 }
 
 function bankWithdrawal(e) { // jQuery
@@ -15103,7 +15535,7 @@ function bankWithdrawal(e) { // jQuery
   if (!$.isNumeric(amount) || amount < 1) {return;}
   o.data.mode = 'withdraw';
   o.data.withdraw_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
+  doAjax$1(o.data);
 }
 
 function linkToGuildBank(o, bank) { // jQuery
@@ -15572,7 +16004,7 @@ function getItems() {
   itemsHash[13699] = 1;
 }
 
-function inventory(data) {
+function inventory$1(data) {
   extraLinks = false;
   checkAll = false;
   invItems$1 = data.items;
@@ -15585,7 +16017,7 @@ function inventory(data) {
 }
 
 function injectStoreItems() {
-  getInventoryById().done(inventory);
+  getInventoryById().done(inventory$1);
   add(3, getItems);
 }
 
@@ -15632,7 +16064,7 @@ function displayMinGroupLevel() { // jQuery
 function filterMercs(e) {return e.search('#000099') === -1;}
 
 function joinGroup(groupJoinURL, joinButton) { // jQuery
-  return $.get(groupJoinURL).done(function() {
+  return retryAjax(groupJoinURL).done(function() {
     joinButton.classList.add('fshHide');
   });
 }
@@ -15859,49 +16291,12 @@ function addChatTextArea() { // jQuery
   hasTextEntry();
 }
 
-function pvpXp(color, xpGain) { // Legacy
-  var out = '';
-  if (xpGain !== 0) {
-    out = 'XP stolen:<span class="' + color + '">' +
-      addCommas(xpGain) + ' </span>';
+function result$1(stat, desc, color) {
+  if (stat !== 0) {
+    return desc + ':<span class="' + color + '">' +
+      addCommas(stat) + ' </span>';
   }
-  return out;
-}
-
-function pvpGoldGain(color, goldGain) { // Legacy
-  var out = '';
-  if (goldGain !== 0) {
-    out = 'Gold lost:<span class="' + color + '">' +
-      addCommas(goldGain) + ' </span>';
-  }
-  return out;
-}
-
-function pvpGoldStolen(color, goldStolen) { // Legacy
-  var out = '';
-  if (goldStolen !== 0) {
-    out = 'Gold stolen:<span class="' + color + '">' +
-      addCommas(goldStolen) + ' </span>';
-  }
-  return out;
-}
-
-function pvpPrestigeGain(color, prestigeGain) { // Legacy
-  var out = '';
-  if (prestigeGain !== 0) {
-    out = 'Prestige gain:<span class="' + color + '">' +
-      prestigeGain + ' </span>';
-  }
-  return out;
-}
-
-function pvpRating(color, pvpRatingChange) { // Legacy
-  var out = '';
-  if (pvpRatingChange !== 0) {
-    out = 'PvP change:<span class="' + color + '">' +
-    pvpRatingChange + ' </span>';
-  }
-  return out;
+  return '';
 }
 
 function retrievePvPCombatSummary(responseText, callback) { // Legacy
@@ -15923,11 +16318,19 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   var pvpRatingChange = getIntFromRegExp(responseText,
     /var\s+pvpRatingChange=(-?[0-9]+);/i);
   var output = '<br> ';
-  output += pvpXp(color, xpGain);
-  output += pvpGoldGain(color, goldGain);
-  output += pvpGoldStolen(color, goldStolen);
-  output += pvpPrestigeGain(color, prestigeGain);
-  output += pvpRating(color, pvpRatingChange);
+  output += result$1(xpGain, 'XP stolen', color);
+  output += result$1(goldGain, 'Gold lost', color);
+  output += result$1(goldStolen, 'Gold stolen', color);
+  output += result$1(prestigeGain, 'Prestige gain', color);
+  output += result$1(pvpRatingChange, 'PvP change', color);
+  // TODO did I initiate the attack?
+  var specials = createDocument(responseText)
+    .querySelectorAll('#specialsDiv');
+  Array.prototype.forEach.call(specials, function(el) {
+    if (/mesmerized|leeched/.test(el.textContent)) {
+      output += '<br>' + el.innerHTML;
+    }
+  });
   callback.target.innerHTML = output;
 }
 
@@ -16266,106 +16669,6 @@ function newsShoutbox() {
   injectShoutboxWidgets();
 }
 
-var highlightPlayersNearMyLvl$1;
-var lvlDiffToHighlight$1;
-var myVL;
-var spinner$1;
-var validPvP = Math.floor(Date.now() / 1000) - 604800;
-
-function doOnlineDot(aTable, data) {
-  aTable.rows[0].insertAdjacentHTML('beforeend',
-    '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (myVL &&
-      data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
-      data.virtual_level < myVL + lvlDiffToHighlight$1) {
-    aTable.parentNode.parentNode.classList.add('lvlHighlight');
-  }
-}
-
-function parsePlayer(aTable, data, jqXhr) {
-  if (data) {
-    doOnlineDot(aTable, data);
-  } else {
-    aTable.rows[0].insertAdjacentHTML('beforeend',
-      '<td class="fshBkRed">' + jqXhr.status + '</td>');
-  }
-}
-
-function failFilter(jqXhr) {
-  return $.Deferred().resolve(null, jqXhr).promise();
-}
-
-function findOnlinePlayers() { // jQuery
-  var someTables = pCC.getElementsByTagName('table');
-  var prm = [];
-  for (var i = 4; i < someTables.length; i += 1) {
-    prm.push(getProfile(someTables[i].textContent.trim())
-      .pipe(null, failFilter)
-      .done(parsePlayer.bind(null, someTables[i]))
-    );
-  }
-  $.when.apply($, prm).done(function() {
-    spinner$1.classList.add('fshHide');
-  });
-}
-
-function getMyVL(e) { // jQuery
-  $(e.target).qtip('hide');
-  spinner$1 = createSpan({
-    className: 'fshSpinner fshTopListSpinner',
-    style: {
-      backgroundImage: 'url(\'' + imageServer +
-        '/world/actionLoadingSpinner.gif\')'
-    }
-  });
-  e.target.parentNode.replaceChild(spinner$1, e.target);
-  if (highlightPlayersNearMyLvl$1) {
-    myStats(false).done(function(data) {
-      myVL = data.virtual_level;
-      lvlDiffToHighlight$1 = 11;
-      if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
-    }).done(findOnlinePlayers);
-  } else {findOnlinePlayers();}
-}
-
-function looksLikeTopRated() {
-  highlightPlayersNearMyLvl$1 =
-    getValue('highlightPlayersNearMyLvl');
-  var theCell = pCC.getElementsByTagName('TD')[0];
-  theCell.firstElementChild.className = 'fshTopListWrap';
-  var findBtn = createInput({
-    className: 'fshFindOnlinePlayers custombutton tip-static',
-    type: 'button',
-    value: 'Find Online Players',
-    dataset: {
-      tipped: 'Fetch the online status of the ' +
-        'top 250 players (warning ... takes a few seconds).'
-    }
-  });
-  theCell.insertBefore(findBtn, theCell.firstElementChild);
-  findBtn.addEventListener('click', getMyVL);
-}
-
-function injectTopRated() {
-  if (pCC &&
-      pCC.firstElementChild &&
-      pCC.firstElementChild.rows &&
-      pCC.firstElementChild.rows.length > 2 &&
-      pCC.firstElementChild.rows[1].textContent
-        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
-}
-
-function globalQuest() {
-  var topTable = pCC.getElementsByTagName('table')[3];
-  for (var i = 2; i < topTable.rows.length; i += 4) {
-    var aCell = topTable.rows[i].cells[1];
-    aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
-      '&search_show_first=1&search_active=1&search_username=' +
-      aCell.textContent + '">' + aCell.textContent + '</a>';
-  }
-}
-
 var pageSwitcher = {
   settings: {'-': {'-': {'-': {'-': injectSettings}}}},
   world: {'-': {'-': {'-': {'-': injectWorld}}}},
@@ -16600,6 +16903,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '0';
+window.FSH.calf = '3';
 
 }());

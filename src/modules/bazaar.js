@@ -1,3 +1,4 @@
+import retryAjax from './ajax/retryAjax';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -56,8 +57,8 @@ function buy() { // jQuery
   document.getElementById('buy_result').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
-    $.get('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
-      ItemId, done);
+    retryAjax('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
+      ItemId).done(done);
   }
 }
 

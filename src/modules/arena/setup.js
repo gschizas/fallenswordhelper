@@ -1,3 +1,4 @@
+import retryAjax from '../ajax/retryAjax';
 import * as assets from './assets';
 import * as system from '../support/system';
 
@@ -6,7 +7,7 @@ var nodes;
 var selectRow;
 
 function doPickMove(moveId, slotId) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'arena',

@@ -1,10 +1,11 @@
+import retryAjax from '../ajax/retryAjax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
 var disableDeactivatePrompts = system.getValue('disableDeactivatePrompts');
 
 function debuff(buffId) {
-  return $.ajax({
+  return retryAjax({
     url: 'fetchdata.php',
     data: {
       a: '22',

@@ -1,4 +1,5 @@
 import calf from './calf';
+import retryAjax from '../ajax/retryAjax';
 import * as dataObj from './dataObj';
 
 export var server = document.location.protocol + '//' +
@@ -98,13 +99,9 @@ export function createDocument(details) {
 }
 
 export function xmlhttp(theUrl, func, theCallback) {
-  return $.ajax({
-    url: theUrl,
-    callback: theCallback,
-    success: function(responseDetails) {
-      if (func) {
-        func.call(this, responseDetails, this.callback);
-      }
+  return retryAjax(theUrl).done(function(responseDetails) {
+    if (func) {
+      func(responseDetails, theCallback);
     }
   });
 }
@@ -247,11 +244,15 @@ export function numberSort(a, b) {
   return sortDesc(result);
 }
 
-export function testQuant(aValue) {
+export function testRange(aValue, min, max) {
   var theValue = parseInt(aValue, 10);
-  if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+  if (!isNaN(theValue) && theValue > min && theValue < max) {
     return theValue;
   }
+}
+
+export function testQuant(aValue) {
+  return testRange(aValue, 0, 100);
 }
 
 export function getRandomInt(_min, _max) {

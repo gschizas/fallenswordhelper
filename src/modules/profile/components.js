@@ -1,3 +1,4 @@
+import retryAjax from '../ajax/retryAjax';
 import {
   createDiv,
   createSpan,
@@ -94,7 +95,7 @@ function countComponent(self) { // jQuery.min
   var pageLinks = thisInvTable.rows[lastRowIndex].firstChild.children;
   Array.prototype.forEach.call(pageLinks, function(el) {
     if (el.children.length === 0) {
-      prm.push($.get(el.href).done(gotComponentsPage));
+      prm.push(retryAjax(el.href).done(gotComponentsPage));
     }
   });
   $.when.apply($, prm).done(displayComponentTally);
@@ -118,7 +119,7 @@ function compDeleted(self, data) {
 
 function delComponent(self) { // jQuery.min
   var href = self.previousElementSibling.href;
-  $.get(href).done(compDeleted.bind(null, self));
+  retryAjax(href).done(compDeleted.bind(null, self));
 }
 
 function addDelBtn(el) {
@@ -147,7 +148,7 @@ function delCompType(self) { // jQuery.min
     '/skin/loading.gif\')';
   var prm = [];
   componentList[id].del.forEach(function(href) {
-    prm.push($.get(href).done(updateUsedCount));
+    prm.push(retryAjax(href).done(updateUsedCount));
   });
   $.when.apply($, prm).done(function() {
     componentList[id].dom.forEach(function(el) {el.innerHTML = '';});

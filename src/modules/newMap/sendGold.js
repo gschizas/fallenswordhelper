@@ -1,8 +1,9 @@
+import retryAjax from '../ajax/retryAjax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
 export function doSendGold() { // jQuery
-  $.ajax({
+  retryAjax({
     url: 'index.php',
     data: {
       cmd: 'trade',

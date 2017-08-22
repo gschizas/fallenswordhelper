@@ -1,3 +1,4 @@
+import retryAjax from './retryAjax';
 import * as dataObj from '../support/dataObj';
 import * as system from '../support/system';
 
@@ -24,5 +25,5 @@ function parseMercStats(html) {
 }
 
 export default function getMercStats() {
-  return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
+  return retryAjax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }

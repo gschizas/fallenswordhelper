@@ -1,4 +1,5 @@
 import groupViewStats from './groupViewStats';
+import retryAjax from './retryAjax';
 import * as system from '../support/system';
 
 function parseGroupStats(html) {
@@ -7,5 +8,5 @@ function parseGroupStats(html) {
 }
 
 export default function getGroupStats(viewStats) {
-  return $.ajax(viewStats).pipe(parseGroupStats);
+  return retryAjax(viewStats).pipe(parseGroupStats);
 }

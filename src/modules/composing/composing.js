@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import retryAjax from '../ajax/retryAjax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -62,7 +63,7 @@ function createSuccess(temp, textStatus) {
 }
 
 function createPotion(temp) { // jQuery
-  $.ajax({
+  retryAjax({
     cache: false,
     dataType: 'json',
     url: 'index.php',
@@ -98,7 +99,7 @@ function quickCreate(evt) {
 function checkLastCompose() { // jQuery
   var lastComposeCheck = system.getValue('lastComposeCheck');
   if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
-  $.get('index.php?cmd=composing', function(data) {
+  retryAjax('index.php?cmd=composing').done(function(data) {
     add(3, parseComposing, [data]);
   });
 }

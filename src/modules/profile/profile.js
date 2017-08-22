@@ -225,6 +225,15 @@ function updateNmv() {
     '</center></div>';
 }
 
+function highlightPvpProtection() {
+  var pvpp = document
+    .querySelector('#profileLeftColumn a[href="index.php?cmd=points"]');
+  if (pvpp.parentNode.nextSibling.textContent.trim() !== 'N/A') {
+    pvpp.parentNode.parentNode.style.cssText =
+      'border: 3px solid red';
+  }
+}
+
 export default function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
@@ -247,6 +256,9 @@ export default function injectProfile() { // Legacy
   updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateNmv();
   updateStatistics();
+  //#if _DEV  //  highlightPvpProtection
+  highlightPvpProtection();
+  //#endif
   profileRenderBio(self);
   addStatTotalToMouseover();
   add(3, layout.colouredDots);

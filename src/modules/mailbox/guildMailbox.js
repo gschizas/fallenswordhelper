@@ -1,5 +1,6 @@
 import {closestTable} from '../common/closest';
 import {dialog} from '../support/ajax';
+import retryAjax from '../ajax/retryAjax';
 import * as layout from '../support/layout';
 
 function translateReturnInfo(data) {
@@ -12,7 +13,7 @@ function translateReturnInfo(data) {
 }
 
 function guildMailboxTake(href) {
-  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
+  return retryAjax({url: href}).pipe(translateReturnInfo).done(dialog);
 }
 
 function takeResult(self, data) {

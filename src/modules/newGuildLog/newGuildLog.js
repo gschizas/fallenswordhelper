@@ -2,6 +2,7 @@ import addGuildLogWidgets from '../logs/addGuildLogWidgets';
 import addLogColoring from '../logs/addLogColoring';
 import {createTable} from '../common/cElement';
 import getForage from '../ajax/getForage';
+import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
 import * as assets from './assets';
 import * as layout from '../support/layout';
@@ -21,7 +22,7 @@ var completeReload = true;
 var myTable;
 
 function getGuildLogPage(page) {
-  return $.ajax({
+  return retryAjax({
     url: 'index.php',
     data: {cmd: 'guild', subcmd: 'log', page: page},
     datatype: 'html'

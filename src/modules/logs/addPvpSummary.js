@@ -2,49 +2,12 @@ import calf from '../support/calf';
 import {createSpan} from '../common/cElement';
 import * as system from '../support/system';
 
-function pvpXp(color, xpGain) { // Legacy
-  var out = '';
-  if (xpGain !== 0) {
-    out = 'XP stolen:<span class="' + color + '">' +
-      system.addCommas(xpGain) + ' </span>';
+function result(stat, desc, color) {
+  if (stat !== 0) {
+    return desc + ':<span class="' + color + '">' +
+      system.addCommas(stat) + ' </span>';
   }
-  return out;
-}
-
-function pvpGoldGain(color, goldGain) { // Legacy
-  var out = '';
-  if (goldGain !== 0) {
-    out = 'Gold lost:<span class="' + color + '">' +
-      system.addCommas(goldGain) + ' </span>';
-  }
-  return out;
-}
-
-function pvpGoldStolen(color, goldStolen) { // Legacy
-  var out = '';
-  if (goldStolen !== 0) {
-    out = 'Gold stolen:<span class="' + color + '">' +
-      system.addCommas(goldStolen) + ' </span>';
-  }
-  return out;
-}
-
-function pvpPrestigeGain(color, prestigeGain) { // Legacy
-  var out = '';
-  if (prestigeGain !== 0) {
-    out = 'Prestige gain:<span class="' + color + '">' +
-      prestigeGain + ' </span>';
-  }
-  return out;
-}
-
-function pvpRating(color, pvpRatingChange) { // Legacy
-  var out = '';
-  if (pvpRatingChange !== 0) {
-    out = 'PvP change:<span class="' + color + '">' +
-    pvpRatingChange + ' </span>';
-  }
-  return out;
+  return '';
 }
 
 function retrievePvPCombatSummary(responseText, callback) { // Legacy
@@ -66,11 +29,19 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   var pvpRatingChange = system.getIntFromRegExp(responseText,
     /var\s+pvpRatingChange=(-?[0-9]+);/i);
   var output = '<br> ';
-  output += pvpXp(color, xpGain);
-  output += pvpGoldGain(color, goldGain);
-  output += pvpGoldStolen(color, goldStolen);
-  output += pvpPrestigeGain(color, prestigeGain);
-  output += pvpRating(color, pvpRatingChange);
+  output += result(xpGain, 'XP stolen', color);
+  output += result(goldGain, 'Gold lost', color);
+  output += result(goldStolen, 'Gold stolen', color);
+  output += result(prestigeGain, 'Prestige gain', color);
+  output += result(pvpRatingChange, 'PvP change', color);
+  // TODO did I initiate the attack?
+  var specials = system.createDocument(responseText)
+    .querySelectorAll('#specialsDiv');
+  Array.prototype.forEach.call(specials, function(el) {
+    if (/mesmerized|leeched/.test(el.textContent)) {
+      output += '<br>' + el.innerHTML;
+    }
+  });
   callback.target.innerHTML = output;
 }
 

@@ -1,6 +1,7 @@
 import addHistoryWidgets from '../guild/addHistoryWidgets';
 import completedArenas from '../arena/completedArenas';
 import composingBreakdown from '../composing/breakdown';
+import globalQuest from '../topRated/globalQuest';
 import guildMailbox from '../mailbox/guildMailbox';
 import injectAdvisor from '../guildAdvisor';
 import injectArena from '../arena/arena';
@@ -20,11 +21,12 @@ import injectProfile from '../profile/profile';
 import injectQuickBuff from '../quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
-import injectReportPaint from '../guildReport';
+import injectReportPaint from '../guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
 import injectScavenging from '../scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';
 import injectTitan from '../scoutTower/injectTitan';
+import injectTopRated from '../topRated/toprated';
 import injectTrade from '../trade';
 import injectViewGuild from '../guild/injectViewGuild';
 import injectWorld from '../legacy';
@@ -51,7 +53,6 @@ import * as news from '../news/news';
 import * as notification from '../notification';
 import * as questBook from '../questBook';
 import * as settingsPage from '../settings/settingsPage';
-import * as toprated from '../toprated';
 
 export default {
   settings: {'-': {'-': {'-': {'-': settingsPage.injectSettings}}}},
@@ -157,16 +158,16 @@ export default {
   },
   titan: {'-': {'-': {'-': {'-': injectTitan}}}},
   toprated: {
-    xp: {'-': {'-': {'-': toprated.injectTopRated}}},
-    monthlyxp: {'-': {'-': {'-': toprated.injectTopRated}}},
-    gold: {'-': {'-': {'-': toprated.injectTopRated}}},
-    killstreak: {'-': {'-': {'-': toprated.injectTopRated}}},
-    bounties: {'-': {'-': {'-': toprated.injectTopRated}}},
-    risingstars: {'-': {'-': {'-': toprated.injectTopRated}}},
-    arena: {'-': {'-': {'-': toprated.injectTopRated}}},
-    superelites: {'-': {'-': {'-': toprated.injectTopRated}}},
-    smasher: {'-': {'-': {'-': toprated.injectTopRated}}},
-    globalquest: {'-': {'-': {'-': toprated.globalQuest}}}
+    xp: {'-': {'-': {'-': injectTopRated}}},
+    monthlyxp: {'-': {'-': {'-': injectTopRated}}},
+    gold: {'-': {'-': {'-': injectTopRated}}},
+    killstreak: {'-': {'-': {'-': injectTopRated}}},
+    bounties: {'-': {'-': {'-': injectTopRated}}},
+    risingstars: {'-': {'-': {'-': injectTopRated}}},
+    arena: {'-': {'-': {'-': injectTopRated}}},
+    superelites: {'-': {'-': {'-': injectTopRated}}},
+    smasher: {'-': {'-': {'-': injectTopRated}}},
+    globalquest: {'-': {'-': {'-': globalQuest}}}
   },
   inventing: {viewrecipe: {'-': {'-': {'-': inventing}}}},
   tempinv: {'-': {'-': {'-': {'-': injectMailbox}}}},
