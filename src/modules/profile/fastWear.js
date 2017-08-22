@@ -70,13 +70,7 @@ function fastWearLinks() {
   Array.prototype.forEach.call(items, drawButtons);
 }
 
-export default function injectFastWear() { // jQuery
-  if (!system.getValue('enableQuickDrink')) {return;}
-  var bpBack = document.getElementById('backpack');
-  bpBack.className = 'fshBackpack';
-  bpBack.removeAttribute('style');
-  var backpackContainer = document.getElementById('backpackContainer');
-  var theBackpack = $(backpackContainer).data('backpack');
+function foundBackpack(backpackContainer, theBackpack) {
   var oldShow = theBackpack._showPage;
   theBackpack._showPage = function(type, page) {
     oldShow.call(theBackpack, type, page);
@@ -89,4 +83,14 @@ export default function injectFastWear() { // jQuery
     if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}
     if (e.target.classList.contains('fastUse')) {fastWearUse(e);}
   });
+}
+
+export default function injectFastWear() { // jQuery
+  if (!system.getValue('enableQuickDrink')) {return;}
+  var bpBack = document.getElementById('backpack');
+  bpBack.className = 'fshBackpack';
+  bpBack.removeAttribute('style');
+  var backpackContainer = document.getElementById('backpackContainer');
+  var theBackpack = $(backpackContainer).data('backpack');
+  if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
 }
