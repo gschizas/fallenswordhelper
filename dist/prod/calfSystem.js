@@ -290,11 +290,13 @@ function getLength() {
 var calf = {};
 
 function doAjax(options, retries, dfr) {
-  $.ajax(options).pipe(function(data) {dfr.resolve(data);}, function(jqXhr) {
+  $.ajax(options).pipe(function(data, textStatus, jqXHR) {
+    dfr.resolve(data, textStatus, jqXHR);
+  }, function(jqXhr, textStatus, errorThrown) {
     if (retries > 0) {
       setTimeout(doAjax, 100, options, retries - 1, dfr);
     } else {
-      dfr.reject(jqXhr);
+      dfr.reject(jqXhr, textStatus, errorThrown);
     }
   });
 }
@@ -6889,6 +6891,16 @@ function composingBreakdown() {
     .addEventListener('click', togglePref);
 }
 
+function globalQuest() {
+  var topTable = pCC.getElementsByTagName('table')[3];
+  for (var i = 2; i < topTable.rows.length; i += 4) {
+    var aCell = topTable.rows[i].cells[1];
+    aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
+      '&search_show_first=1&search_active=1&search_username=' +
+      aCell.textContent + '">' + aCell.textContent + '</a>';
+  }
+}
+
 function closestTable(el) {
   if (el.tagName === 'TABLE') {return el;}
   return closestTable(el.parentNode);
@@ -11844,6 +11856,290 @@ function injectTitan() { // jQuery
   retryAjax('index.php?cmd=guild&subcmd=scouttower').done(getScoutTowerDetails);
 }
 
+function guildView(guildId) {
+  return retryAjax({
+    url: 'app.php',
+    data: {cmd: 'guild', subcmd: 'view', guild_id: guildId, app: '1'},
+    dataType: 'json'
+  });
+}
+
+function getStat(stat, doc) { // jQuery
+  // 'Hidden' returns NaN
+  return intValue(
+    $(stat, doc)
+      .contents()
+      .filter(function(i, e) {
+        return e.nodeType === 3;
+      })[0].nodeValue
+  );
+}
+
+function getBuffLevel(doc, buff) { // jQuery
+  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
+    .data('tipped');
+  // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
+  var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
+  if (test) {return intValue(test[1]);}
+  return 0;
+}
+
+function getBonus(stat, doc) { // jQuery
+  var target = $(stat, doc);
+  var children = target.children();
+  if (children.length === 0) {
+    children = target.next();
+  }
+  return intValue(children.text().slice(2, -1));
+}
+
+function cloakGuess(bonus, level) {
+  if (bonus > level * 10 ||
+      bonus < level) {
+    return bonus;
+  }
+  return level * 10;
+}
+
+function updateForCloak(obj) {
+  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
+  obj.hpValue = obj.hpBonus;
+}
+
+function playerDataString(responseText) {
+  var doc = createDocument(responseText);
+  var obj = {
+    levelValue: getStat('#stat-vl', doc),
+    attackValue: getStat('#stat-attack', doc),
+    attackBonus: getBonus('#stat-attack', doc),
+    defenseValue: getStat('#stat-defense', doc),
+    defenseBonus: getBonus('#stat-defense', doc),
+    armorValue: getStat('#stat-armor', doc),
+    armorBonus: getBonus('#stat-armor', doc),
+    damageValue: getStat('#stat-damage', doc),
+    damageBonus: getBonus('#stat-damage', doc),
+    hpValue: getStat('#stat-hp', doc),
+    hpBonus: getBonus('#stat-hp', doc),
+    killStreakValue: getStat('#stat-kill-streak', doc),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
+    doublerLevel: getBuffLevel(doc, 'Doubler'),
+    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
+    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
+    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
+    constitutionLevel: getBuffLevel(doc, 'Constitution'),
+    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
+    flinchLevel: getBuffLevel(doc, 'Flinch'),
+    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
+    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
+    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
+    barricadeLevel: getBuffLevel(doc, 'Barricade'),
+    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
+    anchoredLevel: getBuffLevel(doc, 'Anchored'),
+    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
+    entrenchLevel: getBuffLevel(doc, 'Entrench'),
+    cloakLevel: getBuffLevel(doc, 'Cloak')
+  };
+  obj.superEliteSlayerMultiplier = Math.round(0.002 *
+    obj.superEliteSlayerLevel * 100) / 100;
+
+  if (obj.cloakLevel === 0 ||
+      typeof obj.attackValue === 'number' &&
+      !isNaN(obj.attackValue)) {
+    return obj;
+  }
+
+  updateForCloak(obj);
+  return obj;
+}
+
+function getBuffLvl(buffs, buff) {
+  return fallback(buffs[buff], 0);
+}
+
+function playerDataObject(json) {
+  var buffs = reduceBuffArray(json._skills);
+  var obj = {
+    levelValue: json.level,
+    attackValue: json.attack,
+    attackBonus: json.bonus_attack,
+    defenseValue: json.defense,
+    defenseBonus: json.bonus_defense,
+    armorValue: json.armor,
+    armorBonus: json.bonus_armor,
+    damageValue: json.damage,
+    damageBonus: json.bonus_damage,
+    hpValue: json.hp,
+    hpBonus: json.bonus_hp,
+    killStreakValue: intValue(json.killstreak),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
+    doublerLevel: getBuffLvl(buffs, 'Doubler'),
+    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
+    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
+    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
+    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
+    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
+    flinchLevel: getBuffLvl(buffs, 'Flinch'),
+    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
+    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
+    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
+    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
+    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
+    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
+    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
+    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
+    cloakLevel: getBuffLvl(buffs, 'Cloak')
+  };
+  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
+  return obj;
+}
+
+var highlightPlayersNearMyLvl$1;
+var lvlDiffToHighlight$1;
+var myVL;
+var spinner$1;
+var validPvP = Math.floor(Date.now() / 1000) - 604800;
+var guilds;
+
+function doOnlineDot(aTable, data) {
+  aTable.rows[0].insertAdjacentHTML('beforeend',
+    '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
+  if (myVL &&
+      data.last_login >= validPvP &&
+      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
+      data.virtual_level < myVL + lvlDiffToHighlight$1) {
+    aTable.parentNode.parentNode.classList.add('lvlHighlight');
+  }
+}
+
+function parsePlayer(aTable, data, jqXhr) {
+  if (data) {
+    doOnlineDot(aTable, data);
+  } else {
+    aTable.rows[0].insertAdjacentHTML('beforeend',
+      '<td class="fshBkRed">' + jqXhr.status + '</td>');
+  }
+}
+
+function failFilter(jqXhr) {
+  return $.Deferred().resolve(null, jqXhr).promise();
+}
+
+function addPlayerObjectToGuild(guildId$$1, obj) {
+  if (guilds[guildId$$1]) {
+    guilds[guildId$$1].push(obj);
+  } else {
+    guilds[guildId$$1] = [obj];
+  }
+}
+
+function addPlayerToGuild(tbl, playerName$$1) {
+  var guildHRef = tbl.rows[0].cells[0].firstElementChild.href;
+  var guildId$$1 = /guild_id=(\d+)/.exec(guildHRef)[1];
+  addPlayerObjectToGuild(guildId$$1, {dom: tbl, player: playerName$$1});
+}
+
+function stackAjax(prm, playerName$$1, tbl) {
+  prm.push(getProfile(playerName$$1)
+    .pipe(null, failFilter)
+    .done(parsePlayer.bind(null, tbl))
+  );
+}
+
+function parseGuild(data) {
+  var guildId$$1 = data.result.id;
+  data.result.members.forEach(function(member) {
+    guilds[guildId$$1].forEach(function(player) {
+      if (member.name === player.player) {
+        doOnlineDot(player.dom, {
+          last_login: (data.server_time - member.last_activity).toString(),
+          virtual_level: member.vl
+        });
+      }
+    });
+  });
+}
+
+function findOnlinePlayers() { // jQuery
+  var someTables = pCC.getElementsByTagName('table');
+  var prm = [];
+  guilds = {};
+  Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
+    var playerName$$1 = tbl.textContent.trim();
+    if (tbl.rows[0].cells[0].firstElementChild) {
+      addPlayerToGuild(tbl, playerName$$1);
+    } else {
+      stackAjax(prm, playerName$$1, tbl);
+    }
+  });
+  Object.keys(guilds).forEach(function(guildId$$1) {
+    if (guilds[guildId$$1].length === 1) {
+      stackAjax(prm, guilds[guildId$$1][0].player, guilds[guildId$$1][0].dom);
+    } else {
+      guildView(guildId$$1).done(parseGuild);
+    }
+  });
+  $.when.apply($, prm).done(function() {
+    spinner$1.classList.add('fshHide');
+  });
+}
+
+function gotMyVl(data) {
+  myVL = data.virtual_level;
+  lvlDiffToHighlight$1 = 11;
+  if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
+}
+
+function getMyVL(e) { // jQuery
+  $(e.target).qtip('hide');
+  spinner$1 = createSpan({
+    className: 'fshSpinner fshTopListSpinner',
+    style: {
+      backgroundImage: 'url(\'' + imageServer +
+        '/world/actionLoadingSpinner.gif\')'
+    }
+  });
+  e.target.parentNode.replaceChild(spinner$1, e.target);
+  if (highlightPlayersNearMyLvl$1) {
+    myStats(false).done(gotMyVl).done(findOnlinePlayers);
+  } else {findOnlinePlayers();}
+}
+
+function looksLikeTopRated() {
+  highlightPlayersNearMyLvl$1 =
+    getValue('highlightPlayersNearMyLvl');
+  var theCell = pCC.getElementsByTagName('TD')[0];
+  theCell.firstElementChild.className = 'fshTopListWrap';
+  var findBtn = createInput({
+    className: 'fshFindOnlinePlayers custombutton tip-static',
+    type: 'button',
+    value: 'Find Online Players',
+    dataset: {
+      tipped: 'Fetch the online status of the ' +
+        'top 250 players (warning ... takes a few seconds).'
+    }
+  });
+  theCell.insertBefore(findBtn, theCell.firstElementChild);
+  findBtn.addEventListener('click', getMyVL);
+}
+
+function injectTopRated() {
+  if (pCC &&
+      pCC.firstElementChild &&
+      pCC.firstElementChild.rows &&
+      pCC.firstElementChild.rows.length > 2 &&
+      pCC.firstElementChild.rows[1].textContent
+        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
+}
+
 function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
@@ -12397,144 +12693,6 @@ function getMercStats() {
   return retryAjax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }
 
-function getStat(stat, doc) { // jQuery
-  // 'Hidden' returns NaN
-  return intValue(
-    $(stat, doc)
-      .contents()
-      .filter(function(i, e) {
-        return e.nodeType === 3;
-      })[0].nodeValue
-  );
-}
-
-function getBuffLevel(doc, buff) { // jQuery
-  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
-    .data('tipped');
-  // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
-  var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
-  if (test) {return intValue(test[1]);}
-  return 0;
-}
-
-function getBonus(stat, doc) { // jQuery
-  var target = $(stat, doc);
-  var children = target.children();
-  if (children.length === 0) {
-    children = target.next();
-  }
-  return intValue(children.text().slice(2, -1));
-}
-
-function cloakGuess(bonus, level) {
-  if (bonus > level * 10 ||
-      bonus < level) {
-    return bonus;
-  }
-  return level * 10;
-}
-
-function updateForCloak(obj) {
-  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
-  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
-  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
-  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
-  obj.hpValue = obj.hpBonus;
-}
-
-function playerDataString(responseText) {
-  var doc = createDocument(responseText);
-  var obj = {
-    levelValue: getStat('#stat-vl', doc),
-    attackValue: getStat('#stat-attack', doc),
-    attackBonus: getBonus('#stat-attack', doc),
-    defenseValue: getStat('#stat-defense', doc),
-    defenseBonus: getBonus('#stat-defense', doc),
-    armorValue: getStat('#stat-armor', doc),
-    armorBonus: getBonus('#stat-armor', doc),
-    damageValue: getStat('#stat-damage', doc),
-    damageBonus: getBonus('#stat-damage', doc),
-    hpValue: getStat('#stat-hp', doc),
-    hpBonus: getBonus('#stat-hp', doc),
-    killStreakValue: getStat('#stat-kill-streak', doc),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
-    doublerLevel: getBuffLevel(doc, 'Doubler'),
-    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
-    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
-    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
-    constitutionLevel: getBuffLevel(doc, 'Constitution'),
-    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
-    flinchLevel: getBuffLevel(doc, 'Flinch'),
-    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
-    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
-    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
-    barricadeLevel: getBuffLevel(doc, 'Barricade'),
-    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
-    anchoredLevel: getBuffLevel(doc, 'Anchored'),
-    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
-    entrenchLevel: getBuffLevel(doc, 'Entrench'),
-    cloakLevel: getBuffLevel(doc, 'Cloak')
-  };
-  obj.superEliteSlayerMultiplier = Math.round(0.002 *
-    obj.superEliteSlayerLevel * 100) / 100;
-
-  if (obj.cloakLevel === 0 ||
-      typeof obj.attackValue === 'number' &&
-      !isNaN(obj.attackValue)) {
-    return obj;
-  }
-
-  updateForCloak(obj);
-  return obj;
-}
-
-function getBuffLvl(buffs, buff) {
-  return fallback(buffs[buff], 0);
-}
-
-function playerDataObject(json) {
-  var buffs = reduceBuffArray(json._skills);
-  var obj = {
-    levelValue: json.level,
-    attackValue: json.attack,
-    attackBonus: json.bonus_attack,
-    defenseValue: json.defense,
-    defenseBonus: json.bonus_defense,
-    armorValue: json.armor,
-    armorBonus: json.bonus_armor,
-    damageValue: json.damage,
-    damageBonus: json.bonus_damage,
-    hpValue: json.hp,
-    hpBonus: json.bonus_hp,
-    killStreakValue: intValue(json.killstreak),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
-    doublerLevel: getBuffLvl(buffs, 'Doubler'),
-    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
-    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
-    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
-    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
-    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
-    flinchLevel: getBuffLvl(buffs, 'Flinch'),
-    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
-    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
-    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
-    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
-    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
-    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
-    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
-    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
-    cloakLevel: getBuffLvl(buffs, 'Cloak')
-  };
-  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
-  return obj;
-}
-
 var relicData;
 var containerDiv;
 var leftDiv;
@@ -12815,7 +12973,7 @@ function calcRelicMultiplier(rels) {
   return Math.round((1 - rels / 10) * 100) / 100;
 }
 
-function parseGuild(html) {
+function parseGuild$1(html) {
   var doc = createDocument(html);
   var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
   relicCount = nodeList.length;
@@ -12887,7 +13045,7 @@ function getStats() {
   resetCounters();
   player$1 = GameData.player();
   var prm = [];
-  prm.push(getGuild$1().done(parseGuild));
+  prm.push(getGuild$1().done(parseGuild$1));
   if (player$1.hasGroup) {
     prm.push(getGroups().pipe(parseGroups));
   }
@@ -15239,106 +15397,6 @@ function viewArchive() {
   theTables[2].addEventListener('click', evtHdl$3);
 }
 
-var highlightPlayersNearMyLvl$1;
-var lvlDiffToHighlight$1;
-var myVL;
-var spinner$1;
-var validPvP = Math.floor(Date.now() / 1000) - 604800;
-
-function doOnlineDot(aTable, data) {
-  aTable.rows[0].insertAdjacentHTML('beforeend',
-    '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (myVL &&
-      data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
-      data.virtual_level < myVL + lvlDiffToHighlight$1) {
-    aTable.parentNode.parentNode.classList.add('lvlHighlight');
-  }
-}
-
-function parsePlayer(aTable, data, jqXhr) {
-  if (data) {
-    doOnlineDot(aTable, data);
-  } else {
-    aTable.rows[0].insertAdjacentHTML('beforeend',
-      '<td class="fshBkRed">' + jqXhr.status + '</td>');
-  }
-}
-
-function failFilter(jqXhr) {
-  return $.Deferred().resolve(null, jqXhr).promise();
-}
-
-function findOnlinePlayers() { // jQuery
-  var someTables = pCC.getElementsByTagName('table');
-  var prm = [];
-  for (var i = 4; i < someTables.length; i += 1) {
-    prm.push(getProfile(someTables[i].textContent.trim())
-      .pipe(null, failFilter)
-      .done(parsePlayer.bind(null, someTables[i]))
-    );
-  }
-  $.when.apply($, prm).done(function() {
-    spinner$1.classList.add('fshHide');
-  });
-}
-
-function getMyVL(e) { // jQuery
-  $(e.target).qtip('hide');
-  spinner$1 = createSpan({
-    className: 'fshSpinner fshTopListSpinner',
-    style: {
-      backgroundImage: 'url(\'' + imageServer +
-        '/world/actionLoadingSpinner.gif\')'
-    }
-  });
-  e.target.parentNode.replaceChild(spinner$1, e.target);
-  if (highlightPlayersNearMyLvl$1) {
-    myStats(false).done(function(data) {
-      myVL = data.virtual_level;
-      lvlDiffToHighlight$1 = 11;
-      if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
-    }).done(findOnlinePlayers);
-  } else {findOnlinePlayers();}
-}
-
-function looksLikeTopRated() {
-  highlightPlayersNearMyLvl$1 =
-    getValue('highlightPlayersNearMyLvl');
-  var theCell = pCC.getElementsByTagName('TD')[0];
-  theCell.firstElementChild.className = 'fshTopListWrap';
-  var findBtn = createInput({
-    className: 'fshFindOnlinePlayers custombutton tip-static',
-    type: 'button',
-    value: 'Find Online Players',
-    dataset: {
-      tipped: 'Fetch the online status of the ' +
-        'top 250 players (warning ... takes a few seconds).'
-    }
-  });
-  theCell.insertBefore(findBtn, theCell.firstElementChild);
-  findBtn.addEventListener('click', getMyVL);
-}
-
-function injectTopRated() {
-  if (pCC &&
-      pCC.firstElementChild &&
-      pCC.firstElementChild.rows &&
-      pCC.firstElementChild.rows.length > 2 &&
-      pCC.firstElementChild.rows[1].textContent
-        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
-}
-
-function globalQuest() {
-  var topTable = pCC.getElementsByTagName('table')[3];
-  for (var i = 2; i < topTable.rows.length; i += 4) {
-    var aCell = topTable.rows[i].cells[1];
-    aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
-      '&search_show_first=1&search_active=1&search_username=' +
-      aCell.textContent + '">' + aCell.textContent + '</a>';
-  }
-}
-
 function cancelAllAH() { // jQuery
   var cancelButtons = document.getElementById('resultRows')
     .getElementsByClassName('auctionCancel');
@@ -16845,6 +16903,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '2';
+window.FSH.calf = '3';
 
 }());
