@@ -1,6 +1,6 @@
 import {createTable} from './common/cElement';
 import getInventory from './ajax/getInventory';
-import {useItem} from './support/ajax';
+import useitem from './app/profile/useitem';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -23,11 +23,11 @@ function backpackRemove(invId) {
   });
 }
 
-function quickDoneExtracted(invId, data) {
-  if (data.r !== 0) {return;}
+function quickDoneExtracted(invId, json) {
+  if (!json.success) {return;}
   backpackRemove(invId);
   cn += 1;
-  buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. ' + data.m);
+  buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. Item Extracted.');
 }
 
 function doExtract(target) {
@@ -36,7 +36,7 @@ function doExtract(target) {
     InventoryIDs.length + ' resources';
   cn = 0;
   for (var i = 0; i < InventoryIDs.length; i += 1) {
-    useItem(InventoryIDs[i])
+    useitem(InventoryIDs[i])
       .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
   }
 }

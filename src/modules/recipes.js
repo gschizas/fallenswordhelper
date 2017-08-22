@@ -1,5 +1,5 @@
 import {createTd} from './common/cElement';
-import * as layout from './support/layout';
+import doinvent from './app/inventing/doinvent';
 import * as system from './support/system';
 
 var itemRE = /<b>([^<]+)<\/b>/i;
@@ -16,10 +16,18 @@ var plantFromComponentHash = {
   'Purplet Flower': 'Purplet Plant',
 };
 
-function quickInventDone(responseText) { // jQuery
-  var infoMessage = layout.infoBox(responseText);
-  $('#invent_Result').append('<li style="list-style:decimal">' +
-    infoMessage + '</li>');
+function outputResult(result) {
+  document.getElementById('invent_Result').insertAdjacentHTML('beforeend',
+    '<li style="list-style:decimal">' + result + '</li>');
+}
+
+function quickInventDone(json) {
+  if (!json.success) {return;}
+  if (json.result.success) {
+    outputResult('You successfully invented the item!');
+  } else {
+    outputResult('You have failed to invent the item.');
+  }
 }
 
 function quickInvent() { // Legacy
@@ -27,10 +35,7 @@ function quickInvent() { // Legacy
   var recipeID = $('input[name="recipe_id"]').attr('value');
   $('#invet_Result_label').html('Inventing ' + amountToInvent + ' Items');
   for (var i = 0; i < amountToInvent; i += 1) {
-    // Had to add &fsh=i to ensure that the call is sent out multiple times.
-    system.xmlhttp(
-      'index.php?cmd=inventing&subcmd=doinvent&recipe_id=' +
-      recipeID + '&fsh=' + i, quickInventDone);
+    doinvent(recipeID).done(quickInventDone);
   }
 }
 
