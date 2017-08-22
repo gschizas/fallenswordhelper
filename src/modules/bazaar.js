@@ -1,4 +1,4 @@
-import retryAjax from './ajax/retryAjax';
+import buyitem from './app/potionbazaar/buyitem';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -46,9 +46,11 @@ function quantity() {
   }
 }
 
-function done(responseText) {
-  document.getElementById('buy_result').insertAdjacentHTML('beforeend',
-    '<br>' + layout.infoBox(responseText));
+function done(json) {
+  if (json.success) {
+    document.getElementById('buy_result').insertAdjacentHTML('beforeend',
+      '<br>You purchased the item!');
+  }
 }
 
 function buy() { // jQuery
@@ -57,12 +59,11 @@ function buy() { // jQuery
   document.getElementById('buy_result').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
-    retryAjax('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
-      ItemId).done(done);
+    buyitem(ItemId).done(done);
   }
 }
 
-export default function injectBazaar() {
+export default function injectBazaar() { // TODO stop using getElementById
   var pbImg = layout.pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = layout.pCC.getElementsByTagName('A');

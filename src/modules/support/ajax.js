@@ -21,7 +21,7 @@ export function equipItem(backpackInvId) {
   }).done(dialog);
 }
 
-export function htmlResult(data) {
+export function htmlResult(data) { // TODO change to app code to avoid 302 redirect
   var info = layout.infoBox(data);
   var _r = 1;
   if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
@@ -36,7 +36,7 @@ export function useItem(backpackInvId) {
       subcmd: 'useitem',
       inventory_id: backpackInvId
     }
-  }).pipe(htmlResult)
+  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
     .done(dialog);
 }
 
@@ -93,7 +93,7 @@ function guildInvRecall(invId, playerId, mode) {
       player_id: playerId,
       mode: mode
     }
-  }).pipe(htmlResult)
+  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
     .done(dialog);
 }
 

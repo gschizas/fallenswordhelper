@@ -65,7 +65,6 @@ function getCoreFunction() {
   coreFunction = testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld);
 }
 
-//#if _DEV  //  asyncDispatcher messages
 function devHooks() {
   /* eslint-disable no-console */
   console.log('functionPath', functionPath);
@@ -76,7 +75,6 @@ function devHooks() {
   }
   /* eslint-enable no-console */
 }
-//#endif
 
 function asyncDispatcher() {
   //#if _DEV  //  asyncDispatcher messages

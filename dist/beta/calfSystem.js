@@ -1977,139 +1977,17 @@ function getInventory() {
   });
 }
 
-var deferred = window.$ && $.when();
-
-function dialog(data) {
-  if (data.r === 0) {return;}
-  $('#dialog_msg').html(data.m).dialog('open');
-}
-
-function equipItem(backpackInvId) {
+function useitem(item) {
   return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'equipitem',
-      inventory_id: backpackInvId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function htmlResult(data) {
-  var info = infoBox(data);
-  var _r = 1;
-  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
-  return {r: _r, m: info};
-}
-
-function useItem(backpackInvId) {
-  return retryAjax({
-    url: 'index.php',
+    url: 'app.php',
     data: {
       cmd: 'profile',
       subcmd: 'useitem',
-      inventory_id: backpackInvId
-    }
-  }).pipe(htmlResult)
-    .done(dialog);
-}
-
-function additionalAction(action, data) {
-  if (action === 'wear') {
-    return equipItem(data.b)
-      .pipe(function equipItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the equipitem
-  }
-  if (action === 'use') {
-    return useItem(data.b)
-      .pipe(function useItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the useitem
-  }
-}
-
-function takeItemStatus(action, data) {
-  if (data.r === 0 && action !== 'take') {
-    return additionalAction(action, data);
-  }
-  return data;
-}
-
-function takeItem(invId) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'takeitem',
-      guildstore_id: invId,
-      ajax: 1
+      inventory_id: item,
+      app: '1'
     },
     dataType: 'json'
-  }).done(dialog);
-}
-
-function queueTakeItem(invId, action) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeTakeToQueue() {
-    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
   });
-  return deferred;
-}
-
-function guildInvRecall(invId, playerId$$1, mode) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'recall',
-      id: invId,
-      player_id: playerId$$1,
-      mode: mode
-    }
-  }).pipe(htmlResult)
-    .done(dialog);
-}
-
-function backpack() {
-  return retryAjax({
-    url: 'index.php',
-    data: {cmd: 'profile', subcmd: 'fetchinv'},
-    dataType: 'json'
-  });
-}
-
-function recallItem(o) {
-  return guildInvRecall(o.invId, o.playerId, o.mode)
-    .pipe(function recallItemStatus(data) {
-      if (data.r === 0 && o.action !== 'recall') {
-        return backpack().pipe(function gotBackpack(bpData) {
-          // TODO assuming backpack is successful...
-          if (o.action === 'wear') {
-            return equipItem(bpData.items[bpData.items.length - 1].a)
-              .pipe(function wearItemStatus() {return data;});
-            // Return recall status irrespective of the status of the equipitem
-          }
-          if (o.action === 'use') {
-            return useItem(
-              bpData.items[bpData.items.length - 1].a)
-              .pipe(function useItemStatus() {return data;});
-            // Return recall status irrespective of the status of the useitem
-          }
-        });
-      }
-      return data;
-    });
-}
-
-function queueRecallItem(o) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeRecallToQueue() {
-    return recallItem(o);
-  });
-  return deferred;
 }
 
 var extTbl;
@@ -2131,11 +2009,11 @@ function backpackRemove(invId) {
   });
 }
 
-function quickDoneExtracted(invId, data) {
-  if (data.r !== 0) {return;}
+function quickDoneExtracted(invId, json) {
+  if (!json.success) {return;}
   backpackRemove(invId);
   cn += 1;
-  buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. ' + data.m);
+  buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. Item Extracted.');
 }
 
 function doExtract(target) {
@@ -2144,7 +2022,7 @@ function doExtract(target) {
     InventoryIDs.length + ' resources';
   cn = 0;
   for (var i = 0; i < InventoryIDs.length; i += 1) {
-    useItem(InventoryIDs[i])
+    useitem(InventoryIDs[i])
       .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
   }
 }
@@ -2444,6 +2322,141 @@ function toggleForce(el, force) { // Polyfill UC
   if (el.classList.contains('fshHide') !== force) {
     el.classList.toggle('fshHide');
   }
+}
+
+var deferred = window.$ && $.when();
+
+function dialog(data) {
+  if (data.r === 0) {return;}
+  $('#dialog_msg').html(data.m).dialog('open');
+}
+
+function equipItem(backpackInvId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'equipitem',
+      inventory_id: backpackInvId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function htmlResult(data) { // TODO change to app code to avoid 302 redirect
+  var info = infoBox(data);
+  var _r = 1;
+  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
+  return {r: _r, m: info};
+}
+
+function useItem(backpackInvId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'useitem',
+      inventory_id: backpackInvId
+    }
+  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
+    .done(dialog);
+}
+
+function additionalAction(action, data) {
+  if (action === 'wear') {
+    return equipItem(data.b)
+      .pipe(function equipItemStatus() {return data;});
+    // Return takeitem status irrespective of the status of the equipitem
+  }
+  if (action === 'use') {
+    return useItem(data.b)
+      .pipe(function useItemStatus() {return data;});
+    // Return takeitem status irrespective of the status of the useitem
+  }
+}
+
+function takeItemStatus(action, data) {
+  if (data.r === 0 && action !== 'take') {
+    return additionalAction(action, data);
+  }
+  return data;
+}
+
+function takeItem(invId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'takeitem',
+      guildstore_id: invId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function queueTakeItem(invId, action) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(function pipeTakeToQueue() {
+    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
+  });
+  return deferred;
+}
+
+function guildInvRecall(invId, playerId$$1, mode) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'recall',
+      id: invId,
+      player_id: playerId$$1,
+      mode: mode
+    }
+  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
+    .done(dialog);
+}
+
+function backpack() {
+  return retryAjax({
+    url: 'index.php',
+    data: {cmd: 'profile', subcmd: 'fetchinv'},
+    dataType: 'json'
+  });
+}
+
+function recallItem(o) {
+  return guildInvRecall(o.invId, o.playerId, o.mode)
+    .pipe(function recallItemStatus(data) {
+      if (data.r === 0 && o.action !== 'recall') {
+        return backpack().pipe(function gotBackpack(bpData) {
+          // TODO assuming backpack is successful...
+          if (o.action === 'wear') {
+            return equipItem(bpData.items[bpData.items.length - 1].a)
+              .pipe(function wearItemStatus() {return data;});
+            // Return recall status irrespective of the status of the equipitem
+          }
+          if (o.action === 'use') {
+            return useItem(
+              bpData.items[bpData.items.length - 1].a)
+              .pipe(function useItemStatus() {return data;});
+            // Return recall status irrespective of the status of the useitem
+          }
+        });
+      }
+      return data;
+    });
+}
+
+function queueRecallItem(o) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(function pipeRecallToQueue() {
+    return recallItem(o);
+  });
+  return deferred;
 }
 
 var content$2;
@@ -6641,6 +6654,7 @@ function notHuntMode() {
   add(3, injectHomePageTwoLink);
 
   add(3, injectQuickMsgDialogJQ);
+
 }
 
 function prepareEnv() {
@@ -7455,6 +7469,19 @@ function injectArena() { // jQuery
   getForage('fsh_arena').done(process);
 }
 
+function buyitem(item) {
+  return retryAjax({
+    url: 'app.php',
+    data: {
+      cmd: 'potionbazaar',
+      subcmd: 'buyitem',
+      item_id: item,
+      app: '1'
+    },
+    dataType: 'json'
+  });
+}
+
 var ItemId;
 var bazaarTable =
   '<table id="fshBazaar"><tr><td colspan="5">Select an item to quick-buy:' +
@@ -7499,9 +7526,11 @@ function quantity() {
   }
 }
 
-function done(responseText) {
-  document.getElementById('buy_result').insertAdjacentHTML('beforeend',
-    '<br>' + infoBox(responseText));
+function done(json) {
+  if (json.success) {
+    document.getElementById('buy_result').insertAdjacentHTML('beforeend',
+      '<br>You purchased the item!');
+  }
 }
 
 function buy() { // jQuery
@@ -7510,12 +7539,11 @@ function buy() { // jQuery
   document.getElementById('buy_result').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
-    retryAjax('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
-      ItemId).done(done);
+    buyitem(ItemId).done(done);
   }
 }
 
-function injectBazaar() {
+function injectBazaar() { // TODO stop using getElementById
   var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = pCC.getElementsByTagName('A');
@@ -10239,13 +10267,7 @@ function fastWearLinks() {
   Array.prototype.forEach.call(items, drawButtons);
 }
 
-function injectFastWear() { // jQuery
-  if (!getValue('enableQuickDrink')) {return;}
-  var bpBack = document.getElementById('backpack');
-  bpBack.className = 'fshBackpack';
-  bpBack.removeAttribute('style');
-  var backpackContainer = document.getElementById('backpackContainer');
-  var theBackpack = $(backpackContainer).data('backpack');
+function foundBackpack(backpackContainer, theBackpack) {
   var oldShow = theBackpack._showPage;
   theBackpack._showPage = function(type, page) {
     oldShow.call(theBackpack, type, page);
@@ -10258,6 +10280,16 @@ function injectFastWear() { // jQuery
     if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}
     if (e.target.classList.contains('fastUse')) {fastWearUse(e);}
   });
+}
+
+function injectFastWear() { // jQuery
+  if (!getValue('enableQuickDrink')) {return;}
+  var bpBack = document.getElementById('backpack');
+  bpBack.className = 'fshBackpack';
+  bpBack.removeAttribute('style');
+  var backpackContainer = document.getElementById('backpackContainer');
+  var theBackpack = $(backpackContainer).data('backpack');
+  if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
 }
 
 function unequipitem(item) {
@@ -12551,6 +12583,7 @@ function showHuntMode(worldName) { // jQuery
 function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
   worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
+  // TODO initialise GameController.Realm.footprintTileList
   var oldButtonContainer = $('#fshWorldButtonContainer');
   if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
   var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});
@@ -14652,6 +14685,19 @@ function injectWorld() {
   }
 }
 
+function doinvent(recipe) {
+  return retryAjax({
+    url: 'app.php',
+    data: {
+      cmd: 'inventing',
+      subcmd: 'doinvent',
+      recipe_id: recipe,
+      app: '1'
+    },
+    dataType: 'json'
+  });
+}
+
 var itemRE$1 = /<b>([^<]+)<\/b>/i;
 
 var plantFromComponentHash = {
@@ -14666,10 +14712,18 @@ var plantFromComponentHash = {
   'Purplet Flower': 'Purplet Plant',
 };
 
-function quickInventDone(responseText) { // jQuery
-  var infoMessage = infoBox(responseText);
-  $('#invent_Result').append('<li style="list-style:decimal">' +
-    infoMessage + '</li>');
+function outputResult(result) {
+  document.getElementById('invent_Result').insertAdjacentHTML('beforeend',
+    '<li style="list-style:decimal">' + result + '</li>');
+}
+
+function quickInventDone(json) {
+  if (!json.success) {return;}
+  if (json.result.success) {
+    outputResult('You successfully invented the item!');
+  } else {
+    outputResult('You have failed to invent the item.');
+  }
 }
 
 function quickInvent() { // Legacy
@@ -14677,10 +14731,7 @@ function quickInvent() { // Legacy
   var recipeID = $('input[name="recipe_id"]').attr('value');
   $('#invet_Result_label').html('Inventing ' + amountToInvent + ' Items');
   for (var i = 0; i < amountToInvent; i += 1) {
-    // Had to add &fsh=i to ensure that the call is sent out multiple times.
-    xmlhttp(
-      'index.php?cmd=inventing&subcmd=doinvent&recipe_id=' +
-      recipeID + '&fsh=' + i, quickInventDone);
+    doinvent(recipeID).done(quickInventDone);
   }
 }
 
@@ -16871,7 +16922,6 @@ function getCoreFunction() {
   coreFunction = testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld);
 }
 
-
 function asyncDispatcher() {
   if (typeof coreFunction === 'function') {
     screenview(functionPath);
@@ -16904,6 +16954,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '3';
+window.FSH.calf = '4';
 
 }());
