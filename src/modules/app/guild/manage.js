@@ -1,9 +1,5 @@
-import retryAjax from '../../ajax/retryAjax';
+import callApp from '../callApp';
 
 export default function guildManage() {
-  return retryAjax({
-    url: 'app.php',
-    data: {cmd: 'guild', subcmd: 'manage', app: '1'},
-    dataType: 'json'
-  });
+  return callApp({cmd: 'guild', subcmd: 'manage', app: '1'});
 }

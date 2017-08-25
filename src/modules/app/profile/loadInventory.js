@@ -1,9 +1,5 @@
-import retryAjax from '../../ajax/retryAjax';
+import callApp from '../callApp';
 
 export default function loadInventory() {
-  return retryAjax({
-    url: 'app.php',
-    data: {cmd: 'profile', subcmd: 'loadinventory', app: '1'},
-    dataType: 'json'
-  });
+  return callApp({cmd: 'profile', subcmd: 'loadinventory', app: '1'});
 }

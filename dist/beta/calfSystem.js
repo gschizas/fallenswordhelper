@@ -289,21 +289,47 @@ function getLength() {
 
 var calf = {};
 
+var concurrent = 0;
+var paused$1 = true;
+var queue = [];
+
 function doAjax(options, retries, dfr) {
-  $.ajax(options).pipe(function(data, textStatus, jqXHR) {
-    dfr.resolve(data, textStatus, jqXHR);
-  }, function(jqXhr, textStatus, errorThrown) {
-    if (retries > 0) {
-      setTimeout(doAjax, 100, options, retries - 1, dfr);
-    } else {
-      dfr.reject(jqXhr, textStatus, errorThrown);
+  return $.ajax(options).pipe(dfr.resolve,
+    function(jqXhr, textStatus, errorThrown) {
+      if (retries > 0) {
+        setTimeout(doAjax, 100, options, retries - 1, dfr);
+      } else {
+        dfr.reject(jqXhr, textStatus, errorThrown);
+      }
     }
-  });
+  );
+}
+
+function taskRunner$1() {
+  if (queue.length === 0) {
+    paused$1 = true;
+  } else {
+    paused$1 = false;
+    if (concurrent < 6) {
+      concurrent += 1;
+      var opts = queue.shift();
+      doAjax.apply(null, opts).always(function() {
+        concurrent -= 1;
+        taskRunner$1();
+      });
+      taskRunner$1();
+    }
+  }
+}
+
+function add$1(options, retries, dfr) {
+  queue.push([options, retries, dfr]);
+  if (paused$1) {taskRunner$1();}
 }
 
 function retryAjax(options) {
   var dfr = $.Deferred();
-  doAjax(options, 10, dfr);
+  add$1(options, 10, dfr);
   return dfr;
 }
 
@@ -1977,16 +2003,20 @@ function getInventory() {
   });
 }
 
-function useitem(item) {
+function callApp(data) {
   return retryAjax({
     url: 'app.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'useitem',
-      inventory_id: item,
-      app: '1'
-    },
+    data: data,
     dataType: 'json'
+  });
+}
+
+function useitem(item) {
+  return callApp({
+    cmd: 'profile',
+    subcmd: 'useitem',
+    inventory_id: item,
+    app: '1'
   });
 }
 
@@ -2214,11 +2244,7 @@ function createQuickWear(appInv) {
 }
 
 function loadInventory() {
-  return retryAjax({
-    url: 'app.php',
-    data: {cmd: 'profile', subcmd: 'loadinventory', app: '1'},
-    dataType: 'json'
-  });
+  return callApp({cmd: 'profile', subcmd: 'loadinventory', app: '1'});
 }
 
 function ahLink(searchname, nickname) {
@@ -7470,15 +7496,11 @@ function injectArena() { // jQuery
 }
 
 function buyitem(item) {
-  return retryAjax({
-    url: 'app.php',
-    data: {
-      cmd: 'potionbazaar',
-      subcmd: 'buyitem',
-      item_id: item,
-      app: '1'
-    },
-    dataType: 'json'
+  return callApp({
+    cmd: 'potionbazaar',
+    subcmd: 'buyitem',
+    item_id: item,
+    app: '1'
   });
 }
 
@@ -9037,10 +9059,10 @@ function wearItem(e) { // jQuery
   anotherSpinner(self);
 }
 
-function useItem$1(e) { // jQuery
+function doUseItem$1(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  useItem$1(self.attr('invid')).done(function(data) {
+  useItem(self.attr('invid')).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
@@ -9084,7 +9106,7 @@ function eventHandlers() { // jQuery
   $('#fshInv').on('click', 'span.takeItem', takeItem$1);
   $('#fshInv').on('click', 'span.recallItem', recallItem$1);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
-  $('#fshInv').on('click', 'span.useItem', useItem$1);
+  $('#fshInv').on('click', 'span.useItem', doUseItem$1);
   $('#fshInv').on('change', 'select.moveItem', doMoveItem);
   $('#fshInv').on('click', 'span.dropItem', doDropItem);
   $('#fshInv').on('click', 'span.sendItem', doSendItem);
@@ -10293,15 +10315,11 @@ function injectFastWear() { // jQuery
 }
 
 function unequipitem(item) {
-  return retryAjax({
-    url: 'app.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'unequipitem',
-      inventory_id: item,
-      app: '1'
-    },
-    dataType: 'json'
+  return callApp({
+    cmd: 'profile',
+    subcmd: 'unequipitem',
+    inventory_id: item,
+    app: '1'
   });
 }
 
@@ -10310,22 +10328,20 @@ var profileCombatSetDiv;
 function getNekid() { // jQuery
   var profileBlock = profileCombatSetDiv.nextElementSibling;
   var aLinks = profileBlock.getElementsByTagName('a');
-  var prm = [];
   Array.prototype.forEach.call(aLinks, function(link) {
     var item = /inventory_id=(\d+)/.exec(link.href)[1];
     if (item) {
-      prm.push(unequipitem(item).pipe(null, function() {return $.when();}));
+      unequipitem(item).done(function() {
+        link.parentNode.innerHTML = '';
+      });
     }
-  });
-  $.when.apply($, prm).done(function() {
-    location.assign('index.php?cmd=profile');
   });
 }
 
 function nekidBtn() {
   var profileRightColumn = document.getElementById('profileRightColumn');
   profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
-  var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
+  var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
   var nekidDiv = createDiv({className: 'fshCenter'});
   var theBtn = createButton({
     className: 'fshBl fshBls',
@@ -11890,11 +11906,7 @@ function injectTitan() { // jQuery
 }
 
 function guildView(guildId) {
-  return retryAjax({
-    url: 'app.php',
-    data: {cmd: 'guild', subcmd: 'view', guild_id: guildId, app: '1'},
-    dataType: 'json'
-  });
+  return callApp({cmd: 'guild', subcmd: 'view', guild_id: guildId, app: '1'});
 }
 
 function getStat(stat, doc) { // jQuery
@@ -14686,15 +14698,11 @@ function injectWorld() {
 }
 
 function doinvent(recipe) {
-  return retryAjax({
-    url: 'app.php',
-    data: {
-      cmd: 'inventing',
-      subcmd: 'doinvent',
-      recipe_id: recipe,
-      app: '1'
-    },
-    dataType: 'json'
+  return callApp({
+    cmd: 'inventing',
+    subcmd: 'doinvent',
+    recipe_id: recipe,
+    app: '1'
   });
 }
 
@@ -16954,6 +16962,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '4';
+window.FSH.calf = '5';
 
 }());

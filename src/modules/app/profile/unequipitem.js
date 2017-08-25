@@ -1,14 +1,10 @@
-import retryAjax from '../../ajax/retryAjax';
+import callApp from '../callApp';
 
 export default function unequipitem(item) {
-  return retryAjax({
-    url: 'app.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'unequipitem',
-      inventory_id: item,
-      app: '1'
-    },
-    dataType: 'json'
+  return callApp({
+    cmd: 'profile',
+    subcmd: 'unequipitem',
+    inventory_id: item,
+    app: '1'
   });
 }
