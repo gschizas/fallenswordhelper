@@ -8,7 +8,12 @@ import getMembrList from '../ajax/getMembrList';
 import moveItem from '../ajax/moveItem';
 import sendItem from '../ajax/sendItem';
 import setForage from '../ajax/setForage';
-import {equipItem, queueRecallItem, queueTakeItem} from '../support/ajax';
+import {
+  equipItem,
+  queueRecallItem,
+  queueTakeItem,
+  useItem
+} from '../support/ajax';
 import * as assets from './assets';
 import * as dataObj from '../support/dataObj';
 import * as debug from '../support/debug';
@@ -211,7 +216,7 @@ function wearItem(e) { // jQuery
   anotherSpinner(self);
 }
 
-function useItem(e) { // jQuery
+function doUseItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
   useItem(self.attr('invid')).done(function(data) {
@@ -258,7 +263,7 @@ function eventHandlers() { // jQuery
   $('#fshInv').on('click', 'span.takeItem', takeItem);
   $('#fshInv').on('click', 'span.recallItem', recallItem);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
-  $('#fshInv').on('click', 'span.useItem', useItem);
+  $('#fshInv').on('click', 'span.useItem', doUseItem);
   $('#fshInv').on('change', 'select.moveItem', doMoveItem);
   $('#fshInv').on('click', 'span.dropItem', doDropItem);
   $('#fshInv').on('click', 'span.sendItem', doSendItem);
