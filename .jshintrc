@@ -87,7 +87,7 @@
         "HTMLDocument":         true,
         "localforage":          false,
         "ga":                   false,
-        "GameData":             false,
-        "Dable":                false
+        "GameController":       false,
+        "GameData":             false
     }
 }
