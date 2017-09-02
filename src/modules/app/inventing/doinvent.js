@@ -4,7 +4,6 @@ export default function doinvent(recipe) {
   return callApp({
     cmd: 'inventing',
     subcmd: 'doinvent',
-    recipe_id: recipe,
-    app: '1'
+    recipe_id: recipe
   });
 }
