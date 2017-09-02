@@ -275,6 +275,7 @@ export var defaults = {
   extraProfile: '',
   textToSearchFor: '',
   lastLadderReset: 0,
+  disableQuickWearPrompts: false
 
 };
 

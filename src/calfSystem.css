@@ -39,9 +39,19 @@
 /* Quick Wear */
 #invTabs {min-width: 500px;}
 
+#invTabs > ul > div {
+  float: right;
+  padding: .5em 1em;
+  text-align: center;
+}
+
+#invTabs > ul > div > input {
+  cursor: pointer;
+}
+
 #invTabs > div {display: none;}
 
-#invTabs label {
+#invTabs li > label {
   display: inline-block;
   padding: .5em 1em;
 }
@@ -52,7 +62,7 @@
 
 #invTabs > #tab1:checked ~ ul label[for="tab1"],
 #invTabs > #tab2:checked ~ ul label[for="tab2"] {
-  cursor: text;
+  cursor: default;
 }
 
 #invTabs > #tab1:checked ~ ul .inv-tabs-qw,
@@ -425,6 +435,7 @@ input.fshFindOnlinePlayers {
 .fshXXSmall {font-size: xx-small;}
 .fshSmall {font-size: small;}
 .fshFloatLeft {float: left;}
+.fshFloatRight {float: right;}
 .fshAdvRank {
   width: 62px;
   overflow: hidden;
