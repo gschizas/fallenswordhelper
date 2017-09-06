@@ -11,7 +11,7 @@ var selectST;
 var selectMain;
 var resourceList;
 var buyResult;
-var cn;
+var lastMsg;
 
 function backpackRemove(invId) {
   extractInv.some(function(el, i, ary) {
@@ -23,18 +23,26 @@ function backpackRemove(invId) {
   });
 }
 
+function outputResult(result) {
+  buyResult.insertAdjacentHTML('beforeend',
+    '<li style="list-style: decimal inside;">' + result + '</li>');
+}
+
 function quickDoneExtracted(invId, json) {
+  if (!json.success && lastMsg !== json.error.message) {
+    lastMsg = json.error.message;
+    outputResult(json.error.message);
+    return;
+  }
   if (!json.success) {return;}
   backpackRemove(invId);
-  cn += 1;
-  buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. Item Extracted.');
+  outputResult('Item Extracted.');
 }
 
 function doExtract(target) {
   var InventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
   target.parentNode.innerHTML = 'extracting all ' +
     InventoryIDs.length + ' resources';
-  cn = 0;
   for (var i = 0; i < InventoryIDs.length; i += 1) {
     useitem(InventoryIDs[i])
       .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
@@ -82,7 +90,7 @@ function tableRows(prev, item_id) {
 function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
   var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
-    '<tr><td id="qeresult" colspan="2"></td></tr>';
+    '<tr><td colspan="2"><ol id="qeresult"></ol></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
   buyResult = document.getElementById('qeresult');

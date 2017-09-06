@@ -3,6 +3,7 @@ import doinvent from './app/inventing/doinvent';
 import * as system from './support/system';
 
 var itemRE = /<b>([^<]+)<\/b>/i;
+var lastMsg;
 
 var plantFromComponentHash = {
   'Amber Essense': 'Amber Plant',
@@ -22,11 +23,17 @@ function outputResult(result) {
 }
 
 function quickInventDone(json) {
-  if (!json.success) {return;}
+  if (!json.success && lastMsg !== json.error.message) {
+    lastMsg = json.error.message;
+    outputResult(json.error.message);
+    return;
+  }
   if (json.result.success) {
-    outputResult('You successfully invented the item!');
+    outputResult('<span class="fshGreen">' +
+      'You successfully invented the item!</span>');
   } else {
-    outputResult('You have failed to invent the item.');
+    outputResult('<span class="fshRed">' +
+      'You have failed to invent the item.</span>');
   }
 }
 
