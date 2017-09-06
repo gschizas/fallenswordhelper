@@ -1,4 +1,5 @@
 import buffList from '../support/buffObj';
+import formatDateTime from '../common/formatDateTime';
 import getForage from '../ajax/getForage';
 import setForage from '../ajax/setForage';
 import * as system from '../support/system';
@@ -26,16 +27,6 @@ function successfull(timeStamp, buffCast, buffLog) {
       ' stamina) <br>' + buffLog;
   }
   return buffLog;
-}
-
-function formatDateTime(aDate) {
-  var yyyy = aDate.getFullYear().toString();
-  var mon = system.padZ(aDate.getMonth() + 1);
-  var dd = system.padZ(aDate.getDate());
-  var hh = system.padZ(aDate.getHours());
-  var mm = system.padZ(aDate.getMinutes());
-  var ss = system.padZ(aDate.getSeconds());
-  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
 function buffResult(_buffLog) {
