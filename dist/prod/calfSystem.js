@@ -289,15 +289,97 @@ function getLength() {
 
 var calf = {};
 
+function mixin(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+      mixin(obj[key], mixins[key]);
+    } else {
+      obj[key] = mixins[key];
+    }
+  });
+}
+
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {mixin(el, props);}
+  return el;
+}
+
+function createDiv(props) {
+  return cElement('div', props);
+}
+
+function createSpan(props) {
+  return cElement('span', props);
+}
+
+function createTable(props) {
+  return cElement('table', props);
+}
+
+function createTBody(props) {
+  return cElement('tbody', props);
+}
+
+function createTr(props) {
+  return cElement('tr', props);
+}
+
+function createTd(props) {
+  return cElement('td', props);
+}
+
+function createTFoot(props) {
+  return cElement('tfoot', props);
+}
+
+function createUl(props) {
+  return cElement('ul', props);
+}
+
+function createLi(props) {
+  return cElement('li', props);
+}
+
+function createButton(props) {
+  return cElement('button', props);
+}
+
+function createBr() {
+  return cElement('br');
+}
+
+function createAnchor(props) {
+  return cElement('a', props);
+}
+
+function createInput(props) {
+  return cElement('input', props);
+}
+
 var concurrent = 0;
 var paused$1 = true;
 var queue = [];
 
+function beforeSend(xhr) {
+  window.addEventListener('beforeunload', function() {
+    xhr.abort();
+    queue = [];
+  });
+}
+
 function doAjax(options, retries, dfr) {
-  return $.ajax(options).pipe(dfr.resolve,
+  var opt;
+  if (typeof options === 'string') {
+    opt = {url: options};
+  } else {
+    opt = options;
+  }
+  mixin(opt, {beforeSend: beforeSend});
+  return $.ajax(opt).pipe(dfr.resolve,
     function(jqXhr, textStatus, errorThrown) {
-      if (retries > 0) {
-        setTimeout(doAjax, 100, options, retries - 1, dfr);
+      if (retries > 0 && jqXhr.status === 503) {
+        setTimeout(doAjax, 100, opt, retries - 1, dfr);
       } else {
         dfr.reject(jqXhr, textStatus, errorThrown);
       }
@@ -310,7 +392,7 @@ function taskRunner$1() {
     paused$1 = true;
   } else {
     paused$1 = false;
-    if (concurrent < 6) {
+    if (concurrent < 4) {
       concurrent += 1;
       var opts = queue.shift();
       doAjax.apply(null, opts).always(function() {
@@ -610,6 +692,7 @@ var defaults = {
   extraProfile: '',
   textToSearchFor: '',
   lastLadderReset: 0,
+  disableQuickWearPrompts: false
 
 };
 
@@ -1163,74 +1246,6 @@ function injectFSBoxLog() {
     playerName + '">Ignore</a> ]</span> <span class="fshYellow">[ <a ' +
     'href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent">Log</a> ]' +
     '</span>');
-}
-
-function mixin(obj, mixins) {
-  Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
-      mixin(obj[key], mixins[key]);
-    } else {
-      obj[key] = mixins[key];
-    }
-  });
-}
-
-function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {mixin(el, props);}
-  return el;
-}
-
-function createDiv(props) {
-  return cElement('div', props);
-}
-
-function createSpan(props) {
-  return cElement('span', props);
-}
-
-function createTable(props) {
-  return cElement('table', props);
-}
-
-function createTBody(props) {
-  return cElement('tbody', props);
-}
-
-function createTr(props) {
-  return cElement('tr', props);
-}
-
-function createTd(props) {
-  return cElement('td', props);
-}
-
-function createTFoot(props) {
-  return cElement('tfoot', props);
-}
-
-function createUl(props) {
-  return cElement('ul', props);
-}
-
-function createLi(props) {
-  return cElement('li', props);
-}
-
-function createButton(props) {
-  return cElement('button', props);
-}
-
-function createBr() {
-  return cElement('br');
-}
-
-function createAnchor(props) {
-  return cElement('a', props);
-}
-
-function createInput(props) {
-  return cElement('input', props);
 }
 
 var dotList;
@@ -2004,6 +2019,7 @@ function getInventory() {
 }
 
 function callApp(data) {
+  mixin(data, {app: 1});
   return retryAjax({
     url: 'app.php',
     data: data,
@@ -2015,8 +2031,7 @@ function useitem(item) {
   return callApp({
     cmd: 'profile',
     subcmd: 'useitem',
-    inventory_id: item,
-    app: '1'
+    inventory_id: item
   });
 }
 
@@ -2027,7 +2042,7 @@ var selectST;
 var selectMain;
 var resourceList;
 var buyResult;
-var cn;
+var lastMsg;
 
 function backpackRemove(invId) {
   extractInv.some(function(el, i, ary) {
@@ -2039,18 +2054,26 @@ function backpackRemove(invId) {
   });
 }
 
+function outputResult(result) {
+  buyResult.insertAdjacentHTML('beforeend',
+    '<li style="list-style: decimal inside;">' + result + '</li>');
+}
+
 function quickDoneExtracted(invId, json) {
+  if (!json.success && lastMsg !== json.error.message) {
+    lastMsg = json.error.message;
+    outputResult(json.error.message);
+    return;
+  }
   if (!json.success) {return;}
   backpackRemove(invId);
-  cn += 1;
-  buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. Item Extracted.');
+  outputResult('Item Extracted.');
 }
 
 function doExtract(target) {
   var InventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
   target.parentNode.innerHTML = 'extracting all ' +
     InventoryIDs.length + ' resources';
-  cn = 0;
   for (var i = 0; i < InventoryIDs.length; i += 1) {
     useitem(InventoryIDs[i])
       .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
@@ -2098,7 +2121,7 @@ function tableRows(prev, item_id) {
 function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
   var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
-    '<tr><td id="qeresult" colspan="2"></td></tr>';
+    '<tr><td colspan="2"><ol id="qeresult"></ol></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
   buyResult = document.getElementById('qeresult');
@@ -2244,7 +2267,7 @@ function createQuickWear(appInv) {
 }
 
 function loadInventory() {
-  return callApp({cmd: 'profile', subcmd: 'loadinventory', app: '1'});
+  return callApp({cmd: 'profile', subcmd: 'loadinventory'});
 }
 
 function ahLink(searchname, nickname) {
@@ -2343,393 +2366,6 @@ function showAHInvManager(itemList) {
   im.insertAdjacentHTML('beforeend', buildHTML(invCount, quickSL));
   return im;
 }
-
-function toggleForce(el, force) { // Polyfill UC
-  if (el.classList.contains('fshHide') !== force) {
-    el.classList.toggle('fshHide');
-  }
-}
-
-var deferred = window.$ && $.when();
-
-function dialog(data) {
-  if (data.r === 0) {return;}
-  $('#dialog_msg').html(data.m).dialog('open');
-}
-
-function equipItem(backpackInvId) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'equipitem',
-      inventory_id: backpackInvId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function htmlResult(data) { // TODO change to app code to avoid 302 redirect
-  var info = infoBox(data);
-  var _r = 1;
-  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
-  return {r: _r, m: info};
-}
-
-function useItem(backpackInvId) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'useitem',
-      inventory_id: backpackInvId
-    }
-  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
-    .done(dialog);
-}
-
-function additionalAction(action, data) {
-  if (action === 'wear') {
-    return equipItem(data.b)
-      .pipe(function equipItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the equipitem
-  }
-  if (action === 'use') {
-    return useItem(data.b)
-      .pipe(function useItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the useitem
-  }
-}
-
-function takeItemStatus(action, data) {
-  if (data.r === 0 && action !== 'take') {
-    return additionalAction(action, data);
-  }
-  return data;
-}
-
-function takeItem(invId) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'takeitem',
-      guildstore_id: invId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function queueTakeItem(invId, action) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeTakeToQueue() {
-    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
-  });
-  return deferred;
-}
-
-function guildInvRecall(invId, playerId$$1, mode) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'recall',
-      id: invId,
-      player_id: playerId$$1,
-      mode: mode
-    }
-  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
-    .done(dialog);
-}
-
-function backpack() {
-  return retryAjax({
-    url: 'index.php',
-    data: {cmd: 'profile', subcmd: 'fetchinv'},
-    dataType: 'json'
-  });
-}
-
-function recallItem(o) {
-  return guildInvRecall(o.invId, o.playerId, o.mode)
-    .pipe(function recallItemStatus(data) {
-      if (data.r === 0 && o.action !== 'recall') {
-        return backpack().pipe(function gotBackpack(bpData) {
-          // TODO assuming backpack is successful...
-          if (o.action === 'wear') {
-            return equipItem(bpData.items[bpData.items.length - 1].a)
-              .pipe(function wearItemStatus() {return data;});
-            // Return recall status irrespective of the status of the equipitem
-          }
-          if (o.action === 'use') {
-            return useItem(
-              bpData.items[bpData.items.length - 1].a)
-              .pipe(function useItemStatus() {return data;});
-            // Return recall status irrespective of the status of the useitem
-          }
-        });
-      }
-      return data;
-    });
-}
-
-function queueRecallItem(o) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeRecallToQueue() {
-    return recallItem(o);
-  });
-  return deferred;
-}
-
-var content$2;
-var itemList;
-
-function doUseItem(self) { // jQuery.min
-  var invId = self.dataset.itemid;
-  useItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    self.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
-  });
-}
-
-function useProfileInventoryItem(self) {
-  confirm('Use/Extract Item',
-    'Are you sure you want to use/extract the item?',
-    doUseItem.bind(null, self)
-  );
-}
-
-function equipProfileInventoryItem(self) { // jQuery.min
-  var invId = self.dataset.itemid;
-  equipItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
-}
-
-function hideFolders(self) {
-  var folderId = self.dataset.folder;
-  itemList.result.forEach(function(aFolder) {
-    var thisFolder = aFolder.id;
-    aFolder.items.forEach(function(o) {
-      var tr = o.dom;
-      if (folderId === '0') {
-        tr.classList.remove('fshHide');
-      } else {
-        var force = folderId !== thisFolder.toString();
-        toggleForce(tr, force);
-      }
-    });
-  });
-}
-
-var evts = [
-  {
-    condition: function(self) {
-      return self.classList.contains('smallLink') &&
-        self.classList.contains('fshEq');
-    },
-    result: equipProfileInventoryItem
-  },
-  {
-    condition: function(self) {
-      return self.classList.contains('smallLink') &&
-        self.classList.contains('fshUse');
-    },
-    result: useProfileInventoryItem
-  },
-  {
-    condition: function(self) {return self.classList.contains('folder');},
-    result: hideFolders
-  }
-];
-
-function listen$1(evt) {
-  var self = evt.target;
-  evts.some(function(el) {
-    if (el.condition(self)) {
-      el.result(self);
-      return true;
-    }
-    return false;
-  });
-
-}
-
-function createInvTabs() {
-  return createDiv({
-    id: 'invTabs',
-    className: 'ui-tabs ui-widget-content ui-corner-all',
-    innerHTML: '<input id="tab1" type="radio" name="tabs" checked>' +
-      '<input id="tab2" type="radio" name="tabs">' +
-      '<ul class="ui-tabs-nav ui-helper-reset ' +
-        'ui-helper-clearfix ui-widget-header ui-corner-all">' +
-      '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
-      '<label for="tab1">Quick Wear / Use / Extract<br>Manager</label>' +
-      '</li>' +
-      '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
-      '<label for="tab2">Inventory Manager Counter' +
-        '<br>filtered by AH Quick Search</label>' +
-      '</li></ul>'
-  });
-}
-
-function showQuickWear(appInv) {
-  itemList = appInv;
-  var invTabs = createInvTabs();
-  var invTabsQw = createQuickWear(appInv);
-  invTabs.appendChild(invTabsQw);
-  content$2.innerHTML = '';
-  content$2.appendChild(invTabs);
-  invTabsQw.addEventListener('click', listen$1);
-  invTabs.appendChild(showAHInvManager(appInv));
-}
-
-function insertQuickWear(injector) {
-  content$2 = injector || pCC;
-  if (!content$2) {return;}
-  content$2.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
-  loadInventory().done(showQuickWear);
-}
-
-/* eslint-disable no-multi-spaces, max-len */
-var buffList = [
-  {name: 'Rage',                stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 0,   nicks: 'rage'},
-  {name: 'Stun',                stamina: 15, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 1,   nicks: 'stun,st'},
-  {name: 'Fury',                stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 0, skillId: 2,   nicks: 'fury'},
-  {name: 'Blood Thirst',        stamina: 10, duration: 45,   minCastLevel: 25,   treeId: 0, skillId: 4,   nicks: 'blood thirst,bloodthirst,bt'},
-  {name: 'Enchant Weapon',      stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 0, skillId: 5,   nicks: 'enchant weapon,ew'},
-  {name: 'Berserk',             stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 0, skillId: 3,   nicks: 'berserk'},
-  {name: 'Holy Flame',          stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 0, skillId: 6,   nicks: 'holy flame,hf'},
-  {name: 'Dark Curse',          stamina: 20, duration: 60,   minCastLevel: 150,  treeId: 0, skillId: 7,   nicks: 'dark curse,dc'},
-  {name: 'Shockwave',           stamina: 20, duration: 90,   minCastLevel: 200,  treeId: 0, skillId: 29,  nicks: 'shockwave,sw,shock'},
-  {name: 'Ignite',              stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 0, skillId: 30,  nicks: 'ignite,ign'},
-  {name: 'Super Elite Slayer',  stamina: 25, duration: 15,   minCastLevel: 250,  treeId: 0, skillId: 31,  nicks: 'super elite slayer,ses,se slayer'},
-  {name: 'Wither',              stamina: 15, duration: 60,   minCastLevel: 250,  treeId: 0, skillId: 32,  nicks: 'wither,with'},
-  {name: 'Shatter Armor',       stamina: 20, duration: 60,   minCastLevel: 300,  treeId: 0, skillId: 33,  nicks: 'shatter armor,sa'},
-  {name: 'Death Wish',          stamina: 20, duration: 45,   minCastLevel: 300,  treeId: 0, skillId: 34,  nicks: 'deathwish,dw,deathw,death wish'},
-  {name: 'Spell Breaker',       stamina: 35, duration: 45,   minCastLevel: 300,  treeId: 0, skillId: 35,  nicks: 'spell breaker,sb'},
-  {name: 'Spectral Knight',     stamina: 15, duration: 45,   minCastLevel: 400,  treeId: 0, skillId: 48,  nicks: 'spectral knight,sk,spec knight'},
-  {name: 'Keen Edge',           stamina: 10, duration: 60,   minCastLevel: 400,  treeId: 0, skillId: 47,  nicks: 'keen edge,ke'},
-  {name: 'Arterial Strike',     stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 0, skillId: 49,  nicks: 'arterial strike,as,art strike,art str'},
-  {name: 'Death Dealer',        stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 0, skillId: 50,  nicks: 'death dealer,dd'},
-  {name: 'Savagery',            stamina: 15, duration: 45,   minCastLevel: 600,  treeId: 0, skillId: 51,  nicks: 'savagery,savage'},
-  {name: 'Chi Strike',          stamina: 20, duration: 90,   minCastLevel: 700,  treeId: 0, skillId: 52,  nicks: 'chi strike,chi,chis,chi str'},
-  {name: 'Shield Strike',       stamina: 20, duration: 45,   minCastLevel: 700,  treeId: 0, skillId: 53,  nicks: 'shield strike,ss,sh str'},
-  {name: 'Demoralize',          stamina: 25, duration: 30,   minCastLevel: 800,  treeId: 0, skillId: 73,  nicks: 'demoralize,dem'},
-  {name: 'Poison',              stamina: 25, duration: 60,   minCastLevel: 800,  treeId: 0, skillId: 70,  nicks: 'poison,poi'},
-  {name: 'Iron Fist',           stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 74,  nicks: 'iron fist,if'},
-  {name: 'Spell Leech',         stamina: 50, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 79,  nicks: 'spell leech,sl'},
-  {name: 'Distraction',         stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 78,  nicks: 'distraction,dis'},
-  {name: 'Coordinated Attack',  stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 0, skillId: 118, nicks: 'coordinated attack,coorda'},
-  {name: 'Undermine',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 0, skillId: 108, nicks: 'undermine,um'},
-  {name: 'Cursed Rune',         stamina: 30, duration: 120,  minCastLevel: 1000, treeId: 0, skillId: 89,  nicks: 'cursed rune,crune'},
-  {name: 'Anti Deflect',        stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 0, skillId: 105, nicks: 'anti deflect,ad'},
-  {name: 'Overkill',            stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 0, skillId: 109, nicks: 'overkill,ok'},
-  {name: 'Smashing Hammer',     stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 0, skillId: 111, nicks: 'smashing hammer,sh'},
-  {name: 'Mighty Vigor',        stamina: 35, duration: 60,   minCastLevel: 1200, treeId: 0, skillId: 113, nicks: 'mighty vigor,mv'},
-  {name: 'Fist Fight',          stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 0, skillId: 115, nicks: 'fist fight,ff'},
-  {name: 'Cursed Ring',         stamina: 30, duration: 120,  minCastLevel: 1400, treeId: 0, skillId: 88,  nicks: 'cursed ring,cring'},
-  {name: 'Sharpen',             stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 0, skillId: 106, nicks: 'sharpen,sharp'},
-  {name: 'Balanced Attack',     stamina: 30, duration: 90,   minCastLevel: 1400, treeId: 0, skillId: 116, nicks: 'balanced attack,ba'},
-  {name: 'Heavy Weight',        stamina: 20, duration: 120,  minCastLevel: 1600, treeId: 0, skillId: 146, nicks: 'heavy weight, hw'},
-  {name: 'Armored Strike',      stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 0, skillId: 130, nicks: 'armored strike, armstr'},
-  {name: 'Invert',              stamina: 40, duration: 180,  minCastLevel: 2000, treeId: 0, skillId: 173, nicks: 'invert'},
-  {name: 'Reign of Terror',     stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 0, skillId: 174, nicks: 'reign of terror'},
-  {name: 'Critical Strike',     stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 0, skillId: 175, nicks: 'critical strike'},
-  {name: 'Great Vigor',         stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 1, skillId: 12,  nicks: 'great vigor,vigor,gv'},
-  {name: 'Fortify',             stamina: 10, duration: 120,  minCastLevel: 25,   treeId: 1, skillId: 8,   nicks: 'fortify'},
-  {name: 'Evade',               stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 1, skillId: 10,  nicks: 'evade'},
-  {name: 'Absorb',              stamina: 20, duration: 120,  minCastLevel: 25,   treeId: 1, skillId: 13,  nicks: 'absorb,abs'},
-  {name: 'Rock Skin',           stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 1, skillId: 11,  nicks: 'rock skin,rs'},
-  {name: 'Enchanted Armor',     stamina: 10, duration: 90,   minCastLevel: 75,   treeId: 1, skillId: 9,   nicks: 'enchanted armor,enchant armor,ea,ench arm,ench armor'},
-  {name: 'Aura of Protection',  stamina: 20, duration: 90,   minCastLevel: 150,  treeId: 1, skillId: 15,  nicks: 'aura of protection,aop,aofp'},
-  {name: 'Deflect',             stamina: 25, duration: 300,  minCastLevel: 150,  treeId: 1, skillId: 14,  nicks: 'deflect,defl'},
-  {name: 'Force Shield',        stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 1, skillId: 27,  nicks: 'force shield,fs'},
-  {name: 'Unbreakable',         stamina: 20, duration: 90,   minCastLevel: 200,  treeId: 1, skillId: 28,  nicks: 'unbreakable,ub,unb,unbr'},
-  {name: 'Honor',               stamina: 10, duration: 180,  minCastLevel: 800,  treeId: 1, skillId: 82,  nicks: 'honor'},
-  {name: 'Assist',              stamina: 30, duration: 120,  minCastLevel: 250,  treeId: 1, skillId: 36,  nicks: 'assist,ass'},
-  {name: 'Constitution',        stamina: 25, duration: 30,   minCastLevel: 300,  treeId: 1, skillId: 37,  nicks: 'constitution,const'},
-  {name: 'Counter Attack',      stamina: 20, duration: 60,   minCastLevel: 400,  treeId: 1, skillId: 54,  nicks: 'counter attack,ca'},
-  {name: 'Summon Shield Imp',   stamina: 50, duration: 60,   minCastLevel: 400,  treeId: 1, skillId: 55,  nicks: 'summon shield imp,ssi,imp'},
-  {name: 'Vision',              stamina: 20, duration: 90,   minCastLevel: 500,  treeId: 1, skillId: 56,  nicks: 'vision,vis'},
-  {name: 'Fortitude',           stamina: 15, duration: 90,   minCastLevel: 500,  treeId: 1, skillId: 57,  nicks: 'fortitude,fort'},
-  {name: 'Flinch',              stamina: 20, duration: 60,   minCastLevel: 600,  treeId: 1, skillId: 58,  nicks: 'flinch'},
-  {name: 'Terrorize',           stamina: 20, duration: 60,   minCastLevel: 700,  treeId: 1, skillId: 59,  nicks: 'terrorize,terror'},
-  {name: 'Nightmare Visage',    stamina: 40, duration: 1000, minCastLevel: 700,  treeId: 1, skillId: 60,  nicks: 'nightmare visage,nv,visage'},
-  {name: 'Sanctuary',           stamina: 25, duration: 30,   minCastLevel: 800,  treeId: 1, skillId: 44,  nicks: 'sanctuary,sanc'},
-  {name: 'Dull Edge',           stamina: 10, duration: 60,   minCastLevel: 800,  treeId: 1, skillId: 46,  nicks: 'dull edge,de'},
-  {name: 'Erosion',             stamina: 25, duration: 180,  minCastLevel: 900,  treeId: 1, skillId: 80,  nicks: 'erosion,ero'},
-  {name: 'Avert Gaze',          stamina: 10, duration: 60,   minCastLevel: 900,  treeId: 1, skillId: 71,  nicks: 'avert gaze,ag'},
-  {name: 'Enchant Shield',      stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 1, skillId: 77,  nicks: 'enchant shield,es'},
-  {name: 'Smite',               stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 1, skillId: 97,  nicks: 'smite,sm'},
-  {name: 'Balanced Defense',    stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 117, nicks: 'balanced defense,bd'},
-  {name: 'Bastion',             stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 122, nicks: 'bastion,bast'},
-  {name: 'Side Step',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 86,  nicks: 'side step,sstep'},
-  {name: 'High Guard',          stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 1, skillId: 96,  nicks: 'high guard,hg'},
-  {name: 'Barricade',           stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 98,  nicks: 'barricade,bar'},
-  {name: 'Coordinated Defense', stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 119, nicks: 'coordinated defense,cd'},
-  {name: 'Degrade',             stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 121, nicks: 'degrade,deg,dg'},
-  {name: 'Retaliate',           stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 123, nicks: 'retaliate,ret'},
-  {name: 'Shame',               stamina: 35, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 110, nicks: 'shame'},
-  {name: 'Dispel Curse',        stamina: 35, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 114, nicks: 'dispel curse,dispel'},
-  {name: 'Anchored',            stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 154, nicks: 'anchored, anch, anchor'},
-  {name: 'Hardened',            stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 153, nicks: 'hardened, hard, harden'},
-  {name: 'Armor Boost',         stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 136, nicks: 'armor boost, armbst, arm bst, armb'},
-  {name: 'Shield Wall',         stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 135, nicks: 'shield wall, shldwll, sw'},
-  {name: 'Layered Armor',       stamina: 40, duration: 60,   minCastLevel: 2000, treeId: 1, skillId: 170, nicks: 'layered armor'},
-  {name: 'Defensive Aura',      stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 1, skillId: 171, nicks: 'defensive aura'},
-  {name: 'Fumble',              stamina: 40, duration: 180,  minCastLevel: 3000, treeId: 1, skillId: 172, nicks: 'fumble'},
-  {name: 'Find Item',           stamina: 10, duration: 60,   minCastLevel: 1,    treeId: 2, skillId: 16,  nicks: 'find item,fi'},
-  {name: 'Treasure Hunter',     stamina: 15, duration: 120,  minCastLevel: 1,    treeId: 2, skillId: 17,  nicks: 'treasure hunter,th,treas hunter'},
-  {name: 'Deep Pockets',        stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 2, skillId: 22,  nicks: 'deep pockets,dp'},
-  {name: 'Quest Finder',        stamina: 5,  duration: 90,   minCastLevel: 1,    treeId: 2, skillId: 61,  nicks: 'quest finder,qf'},
-  {name: 'Adept Learner',       stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 2, skillId: 19,  nicks: 'adept learner,al'},
-  {name: 'Defiance',            stamina: 15, duration: 120,  minCastLevel: 25,   treeId: 2, skillId: 18,  nicks: 'defiance'},
-  {name: 'Librarian',           stamina: 10, duration: 60,   minCastLevel: 75,   treeId: 2, skillId: 20,  nicks: 'librarian,lib,libr'},
-  {name: 'Merchant',            stamina: 10, duration: 60,   minCastLevel: 75,   treeId: 2, skillId: 21,  nicks: 'merchant,merch,merc'},
-  {name: 'Last Ditch',          stamina: 15, duration: 120,  minCastLevel: 150,  treeId: 2, skillId: 23,  nicks: 'last ditch,ld'},
-  {name: 'Animal Magnetism',    stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 2, skillId: 24,  nicks: 'animal magnetism,animag,ani mag,am'},
-  {name: 'Empower',             stamina: 20, duration: 60,   minCastLevel: 200,  treeId: 2, skillId: 25,  nicks: 'empower,emp'},
-  {name: 'Doubler',             stamina: 5,  duration: 120,  minCastLevel: 200,  treeId: 2, skillId: 26,  nicks: 'doubler,doub,db'},
-  {name: 'Conserve',            stamina: 10, duration: 45,   minCastLevel: 250,  treeId: 2, skillId: 39,  nicks: 'conserve,cons,consv,con'},
-  {name: 'Brewing Master',      stamina: 10, duration: 30,   minCastLevel: 250,  treeId: 2, skillId: 40,  nicks: 'brewing master,bm,brm,brewm'},
-  {name: 'Four Leaf',           stamina: 20, duration: 60,   minCastLevel: 250,  treeId: 2, skillId: 41,  nicks: 'four leaf,4l,fl'},
-  {name: 'Extend',              stamina: 30, duration: 30,   minCastLevel: 300,  treeId: 2, skillId: 42,  nicks: 'extend,ext'},
-  {name: 'Inventor',            stamina: 15, duration: 60,   minCastLevel: 400,  treeId: 2, skillId: 62,  nicks: 'inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1'},
-  {name: 'Extractor',           stamina: 15, duration: 60,   minCastLevel: 400,  treeId: 2, skillId: 63,  nicks: 'extractor,extr'},
-  {name: 'Inventor II',         stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 2, skillId: 64,  nicks: 'inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2'},
-  {name: 'Buff Master',         stamina: 10, duration: 60,   minCastLevel: 500,  treeId: 2, skillId: 65,  nicks: 'buff master,buffm,bum'},
-  {name: 'Reflection',          stamina: 10, duration: 90,   minCastLevel: 600,  treeId: 2, skillId: 66,  nicks: 'reflection,ref,refl,reflect'},
-  {name: 'Guild Buffer',        stamina: 10, duration: 90,   minCastLevel: 600,  treeId: 2, skillId: 160, nicks: 'guild buffer, gldbfr, gb'},
-  {name: 'Light Foot',          stamina: 15, duration: 120,  minCastLevel: 700,  treeId: 2, skillId: 67,  nicks: 'light foot,lf'},
-  {name: 'Mesmerize',           stamina: 20, duration: 60,   minCastLevel: 700,  treeId: 2, skillId: 68,  nicks: 'mesmerize,mesmer,mes,mez'},
-  {name: 'Resource Finder',     stamina: 25, duration: 90,   minCastLevel: 800,  treeId: 2, skillId: 76,  nicks: 'resource finder,rf'},
-  {name: 'Quest Hunter',        stamina: 25, duration: 120,  minCastLevel: 800,  treeId: 2, skillId: 166, nicks: 'quest hunter'},
-  {name: 'Gloat',               stamina: 10, duration: 30,   minCastLevel: 900,  treeId: 2, skillId: 81,  nicks: 'gloat'},
-  {name: 'Sacrifice',           stamina: 25, duration: 90,   minCastLevel: 900,  treeId: 2, skillId: 75,  nicks: 'sacrifice,sac'},
-  {name: 'Reckoning',           stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 2, skillId: 72,  nicks: 'reckoning,rec,rek'},
-  {name: 'Reinforce',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 2, skillId: 126, nicks: 'reinforce,rein'},
-  {name: 'Bodyguard',           stamina: 30, duration: 120,  minCastLevel: 1000, treeId: 2, skillId: 120, nicks: 'bodyguard,bg'},
-  {name: 'Riposte',             stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 2, skillId: 124, nicks: 'riposte,rip'},
-  {name: 'Severe Condition',    stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 2, skillId: 101, nicks: 'severe condition,sc'},
-  {name: 'Sealed',              stamina: 35, duration: 60,   minCastLevel: 1200, treeId: 2, skillId: 112, nicks: 'sealed,seal'},
-  {name: 'Righteous',           stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 2, skillId: 107, nicks: 'righteous,right'},
-  {name: 'Epic Forge',          stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 2, skillId: 102, nicks: 'epic forge,ef'},
-  {name: 'Golden Shield',       stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 2, skillId: 103, nicks: 'golden shield,gs'},
-  {name: 'Stalker',             stamina: 35, duration: 90,   minCastLevel: 1400, treeId: 2, skillId: 125, nicks: 'stalker,stalk'},
-  {name: 'Ageless',             stamina: 30, duration: 90,   minCastLevel: 1400, treeId: 2, skillId: 100, nicks: 'ageless,age'},
-  {name: 'Extractor II',        stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 2, skillId: 104, nicks: 'extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2'},
-  {name: 'Epic Craft',          stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 2, skillId: 159, nicks: 'epic craft, epc crft, epccrft, ec'},
-  {name: 'Gold Foot',           stamina: 20, duration: 120,  minCastLevel: 1600, treeId: 2, skillId: 137, nicks: 'gold foot, goldfoot, gldft, gf'},
-  {name: 'Titan Doubler',       stamina: 40, duration: 120,  minCastLevel: 2000, treeId: 2, skillId: 167, nicks: 'titan doubler'},
-  {name: 'Teleport',            stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 2, skillId: 168, nicks: 'teleport'},
-  {name: 'Invigorate',          stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 2, skillId: 169, nicks: 'invigorate'}
-];
 
 /* eslint-disable max-lines */
 var mySimpleCheckboxes = {
@@ -3049,6 +2685,12 @@ var mySimpleCheckboxes = {
     helpTitle: 'Hide Player Actions',
     helpText: 'If enabled, will hide player actions.'
   },
+  disableQuickWearPrompts: {
+    id: 'disableQuickWearPrompts',
+    helpTitle: 'Disable Use/Ext<br>Prompts',
+    helpText: 'If enabled, will disable prompts when you Use/Ext items.' +
+      '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
+  }
 };
 
 var networkIcon =
@@ -3945,6 +3587,410 @@ function injectSettings() { // jQuery.min
     .firstElementChild.lastElementChild.rows[1].cells[1].firstElementChild
     .value);
 }
+
+function toggleForce(el, force) { // Polyfill UC
+  if (el.classList.contains('fshHide') !== force) {
+    el.classList.toggle('fshHide');
+  }
+}
+
+var deferred = window.$ && $.when();
+
+function dialog(data) {
+  if (data.r === 0) {return;}
+  $('#dialog_msg').html(data.m).dialog('open');
+}
+
+function equipItem(backpackInvId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'equipitem',
+      inventory_id: backpackInvId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function htmlResult(data) { // TODO change to app code to avoid 302 redirect
+  var info = infoBox(data);
+  var _r = 1;
+  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
+  return {r: _r, m: info};
+}
+
+function useItem(backpackInvId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'useitem',
+      inventory_id: backpackInvId
+    }
+  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
+    .done(dialog);
+}
+
+function additionalAction(action, data) {
+  if (action === 'wear') {
+    return equipItem(data.b)
+      .pipe(function equipItemStatus() {return data;});
+    // Return takeitem status irrespective of the status of the equipitem
+  }
+  if (action === 'use') {
+    return useItem(data.b)
+      .pipe(function useItemStatus() {return data;});
+    // Return takeitem status irrespective of the status of the useitem
+  }
+}
+
+function takeItemStatus(action, data) {
+  if (data.r === 0 && action !== 'take') {
+    return additionalAction(action, data);
+  }
+  return data;
+}
+
+function takeItem(invId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'takeitem',
+      guildstore_id: invId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function queueTakeItem(invId, action) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(function pipeTakeToQueue() {
+    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
+  });
+  return deferred;
+}
+
+function guildInvRecall(invId, playerId$$1, mode) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'recall',
+      id: invId,
+      player_id: playerId$$1,
+      mode: mode
+    }
+  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
+    .done(dialog);
+}
+
+function backpack() {
+  return retryAjax({
+    url: 'index.php',
+    data: {cmd: 'profile', subcmd: 'fetchinv'},
+    dataType: 'json'
+  });
+}
+
+function recallItem(o) {
+  return guildInvRecall(o.invId, o.playerId, o.mode)
+    .pipe(function recallItemStatus(data) {
+      if (data.r === 0 && o.action !== 'recall') {
+        return backpack().pipe(function gotBackpack(bpData) {
+          // TODO assuming backpack is successful...
+          if (o.action === 'wear') {
+            return equipItem(bpData.items[bpData.items.length - 1].a)
+              .pipe(function wearItemStatus() {return data;});
+            // Return recall status irrespective of the status of the equipitem
+          }
+          if (o.action === 'use') {
+            return useItem(
+              bpData.items[bpData.items.length - 1].a)
+              .pipe(function useItemStatus() {return data;});
+            // Return recall status irrespective of the status of the useitem
+          }
+        });
+      }
+      return data;
+    });
+}
+
+function queueRecallItem(o) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(function pipeRecallToQueue() {
+    return recallItem(o);
+  });
+  return deferred;
+}
+
+var disableQuickWearPrompts;
+var content$2;
+var itemList;
+
+function doUseItem(self) { // jQuery.min
+  var invId = self.dataset.itemid;
+  useItem(invId).done(function(data) {
+    if (data.r !== 0) {return;}
+    self.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+  });
+}
+
+function useProfileInventoryItem(self) {
+  if (disableQuickWearPrompts) {
+    doUseItem(self);
+  } else {
+    confirm('Use/Extract Item',
+      'Are you sure you want to use/extract the item?',
+      doUseItem.bind(null, self)
+    );
+  }
+}
+
+function equipProfileInventoryItem(self) { // jQuery.min
+  var invId = self.dataset.itemid;
+  equipItem(invId).done(function(data) {
+    if (data.r !== 0) {return;}
+    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
+  });
+}
+
+function hideFolders(self) {
+  var folderId = self.dataset.folder;
+  itemList.result.forEach(function(aFolder) {
+    var thisFolder = aFolder.id;
+    aFolder.items.forEach(function(o) {
+      var tr = o.dom;
+      if (folderId === '0') {
+        tr.classList.remove('fshHide');
+      } else {
+        var force = folderId !== thisFolder.toString();
+        toggleForce(tr, force);
+      }
+    });
+  });
+}
+
+function togglePref() {
+  disableQuickWearPrompts = !disableQuickWearPrompts;
+  setValue('disableQuickWearPrompts', disableQuickWearPrompts);
+}
+
+var evts = [
+  {
+    condition: function(self) {
+      return self.classList.contains('smallLink') &&
+        self.classList.contains('fshEq');
+    },
+    result: equipProfileInventoryItem
+  },
+  {
+    condition: function(self) {
+      return self.classList.contains('smallLink') &&
+        self.classList.contains('fshUse');
+    },
+    result: useProfileInventoryItem
+  },
+  {
+    condition: function(self) {return self.classList.contains('folder');},
+    result: hideFolders
+  },
+  {
+    condition: function(self) {return self.id === 'disableQuickWearPrompts';},
+    result: togglePref
+  }
+];
+
+function listen$1(evt) {
+  var self = evt.target;
+  evts.some(function(el) {
+    if (el.condition(self)) {
+      el.result(self);
+      return true;
+    }
+    return false;
+  });
+
+}
+
+function createInvTabs() {
+  return createDiv({
+    id: 'invTabs',
+    className: 'ui-tabs ui-widget-content ui-corner-all',
+    innerHTML: '<input id="tab1" type="radio" name="tabs" checked>' +
+      '<input id="tab2" type="radio" name="tabs">' +
+      '<ul class="ui-tabs-nav ui-helper-reset ' +
+        'ui-helper-clearfix ui-widget-header ui-corner-all">' +
+      '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
+      '<label for="tab1">Quick Wear / Use / Extract<br>Manager</label>' +
+      '</li>' +
+      '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
+      '<label for="tab2">Inventory Manager Counter' +
+        '<br>filtered by AH Quick Search</label>' +
+      '</li><div id="setPrompt" class="fshFloatRight fshCenter"></div></ul>'
+  });
+}
+
+function showQuickWear(appInv) {
+  itemList = appInv;
+  var invTabs = createInvTabs();
+  var invTabsQw = createQuickWear(appInv);
+  invTabs.appendChild(invTabsQw);
+  content$2.innerHTML = '';
+  content$2.appendChild(invTabs);
+  invTabs.addEventListener('click', listen$1);
+  invTabs.appendChild(showAHInvManager(appInv));
+  document.getElementById('setPrompt').insertAdjacentHTML('beforeend',
+    simpleCheckboxHtml('disableQuickWearPrompts'));
+}
+
+function insertQuickWear(injector) {
+  content$2 = injector || pCC;
+  if (!content$2) {return;}
+  content$2.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
+  loadInventory().done(showQuickWear);
+  disableQuickWearPrompts = getValue('disableQuickWearPrompts');
+}
+
+/* eslint-disable no-multi-spaces, max-len */
+var buffList = [
+  {name: 'Rage',                stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 0,   nicks: 'rage'},
+  {name: 'Stun',                stamina: 15, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 1,   nicks: 'stun,st'},
+  {name: 'Fury',                stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 0, skillId: 2,   nicks: 'fury'},
+  {name: 'Blood Thirst',        stamina: 10, duration: 45,   minCastLevel: 25,   treeId: 0, skillId: 4,   nicks: 'blood thirst,bloodthirst,bt'},
+  {name: 'Enchant Weapon',      stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 0, skillId: 5,   nicks: 'enchant weapon,ew'},
+  {name: 'Berserk',             stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 0, skillId: 3,   nicks: 'berserk'},
+  {name: 'Holy Flame',          stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 0, skillId: 6,   nicks: 'holy flame,hf'},
+  {name: 'Dark Curse',          stamina: 20, duration: 60,   minCastLevel: 150,  treeId: 0, skillId: 7,   nicks: 'dark curse,dc'},
+  {name: 'Shockwave',           stamina: 20, duration: 90,   minCastLevel: 200,  treeId: 0, skillId: 29,  nicks: 'shockwave,sw,shock'},
+  {name: 'Ignite',              stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 0, skillId: 30,  nicks: 'ignite,ign'},
+  {name: 'Super Elite Slayer',  stamina: 25, duration: 15,   minCastLevel: 250,  treeId: 0, skillId: 31,  nicks: 'super elite slayer,ses,se slayer'},
+  {name: 'Wither',              stamina: 15, duration: 60,   minCastLevel: 250,  treeId: 0, skillId: 32,  nicks: 'wither,with'},
+  {name: 'Shatter Armor',       stamina: 20, duration: 60,   minCastLevel: 300,  treeId: 0, skillId: 33,  nicks: 'shatter armor,sa'},
+  {name: 'Death Wish',          stamina: 20, duration: 45,   minCastLevel: 300,  treeId: 0, skillId: 34,  nicks: 'deathwish,dw,deathw,death wish'},
+  {name: 'Spell Breaker',       stamina: 35, duration: 45,   minCastLevel: 300,  treeId: 0, skillId: 35,  nicks: 'spell breaker,sb'},
+  {name: 'Spectral Knight',     stamina: 15, duration: 45,   minCastLevel: 400,  treeId: 0, skillId: 48,  nicks: 'spectral knight,sk,spec knight'},
+  {name: 'Keen Edge',           stamina: 10, duration: 60,   minCastLevel: 400,  treeId: 0, skillId: 47,  nicks: 'keen edge,ke'},
+  {name: 'Arterial Strike',     stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 0, skillId: 49,  nicks: 'arterial strike,as,art strike,art str'},
+  {name: 'Death Dealer',        stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 0, skillId: 50,  nicks: 'death dealer,dd'},
+  {name: 'Savagery',            stamina: 15, duration: 45,   minCastLevel: 600,  treeId: 0, skillId: 51,  nicks: 'savagery,savage'},
+  {name: 'Chi Strike',          stamina: 20, duration: 90,   minCastLevel: 700,  treeId: 0, skillId: 52,  nicks: 'chi strike,chi,chis,chi str'},
+  {name: 'Shield Strike',       stamina: 20, duration: 45,   minCastLevel: 700,  treeId: 0, skillId: 53,  nicks: 'shield strike,ss,sh str'},
+  {name: 'Demoralize',          stamina: 25, duration: 30,   minCastLevel: 800,  treeId: 0, skillId: 73,  nicks: 'demoralize,dem'},
+  {name: 'Poison',              stamina: 25, duration: 60,   minCastLevel: 800,  treeId: 0, skillId: 70,  nicks: 'poison,poi'},
+  {name: 'Iron Fist',           stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 74,  nicks: 'iron fist,if'},
+  {name: 'Spell Leech',         stamina: 50, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 79,  nicks: 'spell leech,sl'},
+  {name: 'Distraction',         stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 78,  nicks: 'distraction,dis'},
+  {name: 'Coordinated Attack',  stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 0, skillId: 118, nicks: 'coordinated attack,coorda'},
+  {name: 'Undermine',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 0, skillId: 108, nicks: 'undermine,um'},
+  {name: 'Cursed Rune',         stamina: 30, duration: 120,  minCastLevel: 1000, treeId: 0, skillId: 89,  nicks: 'cursed rune,crune'},
+  {name: 'Anti Deflect',        stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 0, skillId: 105, nicks: 'anti deflect,ad'},
+  {name: 'Overkill',            stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 0, skillId: 109, nicks: 'overkill,ok'},
+  {name: 'Smashing Hammer',     stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 0, skillId: 111, nicks: 'smashing hammer,sh'},
+  {name: 'Mighty Vigor',        stamina: 35, duration: 60,   minCastLevel: 1200, treeId: 0, skillId: 113, nicks: 'mighty vigor,mv'},
+  {name: 'Fist Fight',          stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 0, skillId: 115, nicks: 'fist fight,ff'},
+  {name: 'Cursed Ring',         stamina: 30, duration: 120,  minCastLevel: 1400, treeId: 0, skillId: 88,  nicks: 'cursed ring,cring'},
+  {name: 'Sharpen',             stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 0, skillId: 106, nicks: 'sharpen,sharp'},
+  {name: 'Balanced Attack',     stamina: 30, duration: 90,   minCastLevel: 1400, treeId: 0, skillId: 116, nicks: 'balanced attack,ba'},
+  {name: 'Heavy Weight',        stamina: 20, duration: 120,  minCastLevel: 1600, treeId: 0, skillId: 146, nicks: 'heavy weight, hw'},
+  {name: 'Armored Strike',      stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 0, skillId: 130, nicks: 'armored strike, armstr'},
+  {name: 'Invert',              stamina: 40, duration: 180,  minCastLevel: 2000, treeId: 0, skillId: 173, nicks: 'invert'},
+  {name: 'Reign of Terror',     stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 0, skillId: 174, nicks: 'reign of terror'},
+  {name: 'Critical Strike',     stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 0, skillId: 175, nicks: 'critical strike'},
+  {name: 'Great Vigor',         stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 1, skillId: 12,  nicks: 'great vigor,vigor,gv'},
+  {name: 'Fortify',             stamina: 10, duration: 120,  minCastLevel: 25,   treeId: 1, skillId: 8,   nicks: 'fortify'},
+  {name: 'Evade',               stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 1, skillId: 10,  nicks: 'evade'},
+  {name: 'Absorb',              stamina: 20, duration: 120,  minCastLevel: 25,   treeId: 1, skillId: 13,  nicks: 'absorb,abs'},
+  {name: 'Rock Skin',           stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 1, skillId: 11,  nicks: 'rock skin,rs'},
+  {name: 'Enchanted Armor',     stamina: 10, duration: 90,   minCastLevel: 75,   treeId: 1, skillId: 9,   nicks: 'enchanted armor,enchant armor,ea,ench arm,ench armor'},
+  {name: 'Aura of Protection',  stamina: 20, duration: 90,   minCastLevel: 150,  treeId: 1, skillId: 15,  nicks: 'aura of protection,aop,aofp'},
+  {name: 'Deflect',             stamina: 25, duration: 300,  minCastLevel: 150,  treeId: 1, skillId: 14,  nicks: 'deflect,defl'},
+  {name: 'Force Shield',        stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 1, skillId: 27,  nicks: 'force shield,fs'},
+  {name: 'Unbreakable',         stamina: 20, duration: 90,   minCastLevel: 200,  treeId: 1, skillId: 28,  nicks: 'unbreakable,ub,unb,unbr'},
+  {name: 'Honor',               stamina: 10, duration: 180,  minCastLevel: 800,  treeId: 1, skillId: 82,  nicks: 'honor'},
+  {name: 'Assist',              stamina: 30, duration: 120,  minCastLevel: 250,  treeId: 1, skillId: 36,  nicks: 'assist,ass'},
+  {name: 'Constitution',        stamina: 25, duration: 30,   minCastLevel: 300,  treeId: 1, skillId: 37,  nicks: 'constitution,const'},
+  {name: 'Counter Attack',      stamina: 20, duration: 60,   minCastLevel: 400,  treeId: 1, skillId: 54,  nicks: 'counter attack,ca'},
+  {name: 'Summon Shield Imp',   stamina: 50, duration: 60,   minCastLevel: 400,  treeId: 1, skillId: 55,  nicks: 'summon shield imp,ssi,imp'},
+  {name: 'Vision',              stamina: 20, duration: 90,   minCastLevel: 500,  treeId: 1, skillId: 56,  nicks: 'vision,vis'},
+  {name: 'Fortitude',           stamina: 15, duration: 90,   minCastLevel: 500,  treeId: 1, skillId: 57,  nicks: 'fortitude,fort'},
+  {name: 'Flinch',              stamina: 20, duration: 60,   minCastLevel: 600,  treeId: 1, skillId: 58,  nicks: 'flinch'},
+  {name: 'Terrorize',           stamina: 20, duration: 60,   minCastLevel: 700,  treeId: 1, skillId: 59,  nicks: 'terrorize,terror'},
+  {name: 'Nightmare Visage',    stamina: 40, duration: 1000, minCastLevel: 700,  treeId: 1, skillId: 60,  nicks: 'nightmare visage,nv,visage'},
+  {name: 'Sanctuary',           stamina: 25, duration: 30,   minCastLevel: 800,  treeId: 1, skillId: 44,  nicks: 'sanctuary,sanc'},
+  {name: 'Dull Edge',           stamina: 10, duration: 60,   minCastLevel: 800,  treeId: 1, skillId: 46,  nicks: 'dull edge,de'},
+  {name: 'Erosion',             stamina: 25, duration: 180,  minCastLevel: 900,  treeId: 1, skillId: 80,  nicks: 'erosion,ero'},
+  {name: 'Avert Gaze',          stamina: 10, duration: 60,   minCastLevel: 900,  treeId: 1, skillId: 71,  nicks: 'avert gaze,ag'},
+  {name: 'Enchant Shield',      stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 1, skillId: 77,  nicks: 'enchant shield,es'},
+  {name: 'Smite',               stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 1, skillId: 97,  nicks: 'smite,sm'},
+  {name: 'Balanced Defense',    stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 117, nicks: 'balanced defense,bd'},
+  {name: 'Bastion',             stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 122, nicks: 'bastion,bast'},
+  {name: 'Side Step',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 86,  nicks: 'side step,sstep'},
+  {name: 'High Guard',          stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 1, skillId: 96,  nicks: 'high guard,hg'},
+  {name: 'Barricade',           stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 98,  nicks: 'barricade,bar'},
+  {name: 'Coordinated Defense', stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 119, nicks: 'coordinated defense,cd'},
+  {name: 'Degrade',             stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 121, nicks: 'degrade,deg,dg'},
+  {name: 'Retaliate',           stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 123, nicks: 'retaliate,ret'},
+  {name: 'Shame',               stamina: 35, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 110, nicks: 'shame'},
+  {name: 'Dispel Curse',        stamina: 35, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 114, nicks: 'dispel curse,dispel'},
+  {name: 'Anchored',            stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 154, nicks: 'anchored, anch, anchor'},
+  {name: 'Hardened',            stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 153, nicks: 'hardened, hard, harden'},
+  {name: 'Armor Boost',         stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 136, nicks: 'armor boost, armbst, arm bst, armb'},
+  {name: 'Shield Wall',         stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 135, nicks: 'shield wall, shldwll, sw'},
+  {name: 'Layered Armor',       stamina: 40, duration: 60,   minCastLevel: 2000, treeId: 1, skillId: 170, nicks: 'layered armor'},
+  {name: 'Defensive Aura',      stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 1, skillId: 171, nicks: 'defensive aura'},
+  {name: 'Fumble',              stamina: 40, duration: 180,  minCastLevel: 3000, treeId: 1, skillId: 172, nicks: 'fumble'},
+  {name: 'Find Item',           stamina: 10, duration: 60,   minCastLevel: 1,    treeId: 2, skillId: 16,  nicks: 'find item,fi'},
+  {name: 'Treasure Hunter',     stamina: 15, duration: 120,  minCastLevel: 1,    treeId: 2, skillId: 17,  nicks: 'treasure hunter,th,treas hunter'},
+  {name: 'Deep Pockets',        stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 2, skillId: 22,  nicks: 'deep pockets,dp'},
+  {name: 'Quest Finder',        stamina: 5,  duration: 90,   minCastLevel: 1,    treeId: 2, skillId: 61,  nicks: 'quest finder,qf'},
+  {name: 'Adept Learner',       stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 2, skillId: 19,  nicks: 'adept learner,al'},
+  {name: 'Defiance',            stamina: 15, duration: 120,  minCastLevel: 25,   treeId: 2, skillId: 18,  nicks: 'defiance'},
+  {name: 'Librarian',           stamina: 10, duration: 60,   minCastLevel: 75,   treeId: 2, skillId: 20,  nicks: 'librarian,lib,libr'},
+  {name: 'Merchant',            stamina: 10, duration: 60,   minCastLevel: 75,   treeId: 2, skillId: 21,  nicks: 'merchant,merch,merc'},
+  {name: 'Last Ditch',          stamina: 15, duration: 120,  minCastLevel: 150,  treeId: 2, skillId: 23,  nicks: 'last ditch,ld'},
+  {name: 'Animal Magnetism',    stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 2, skillId: 24,  nicks: 'animal magnetism,animag,ani mag,am'},
+  {name: 'Empower',             stamina: 20, duration: 60,   minCastLevel: 200,  treeId: 2, skillId: 25,  nicks: 'empower,emp'},
+  {name: 'Doubler',             stamina: 5,  duration: 120,  minCastLevel: 200,  treeId: 2, skillId: 26,  nicks: 'doubler,doub,db'},
+  {name: 'Conserve',            stamina: 10, duration: 45,   minCastLevel: 250,  treeId: 2, skillId: 39,  nicks: 'conserve,cons,consv,con'},
+  {name: 'Brewing Master',      stamina: 10, duration: 30,   minCastLevel: 250,  treeId: 2, skillId: 40,  nicks: 'brewing master,bm,brm,brewm'},
+  {name: 'Four Leaf',           stamina: 20, duration: 60,   minCastLevel: 250,  treeId: 2, skillId: 41,  nicks: 'four leaf,4l,fl'},
+  {name: 'Extend',              stamina: 30, duration: 30,   minCastLevel: 300,  treeId: 2, skillId: 42,  nicks: 'extend,ext'},
+  {name: 'Inventor',            stamina: 15, duration: 60,   minCastLevel: 400,  treeId: 2, skillId: 62,  nicks: 'inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1'},
+  {name: 'Extractor',           stamina: 15, duration: 60,   minCastLevel: 400,  treeId: 2, skillId: 63,  nicks: 'extractor,extr'},
+  {name: 'Inventor II',         stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 2, skillId: 64,  nicks: 'inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2'},
+  {name: 'Buff Master',         stamina: 10, duration: 60,   minCastLevel: 500,  treeId: 2, skillId: 65,  nicks: 'buff master,buffm,bum'},
+  {name: 'Reflection',          stamina: 10, duration: 90,   minCastLevel: 600,  treeId: 2, skillId: 66,  nicks: 'reflection,ref,refl,reflect'},
+  {name: 'Guild Buffer',        stamina: 10, duration: 90,   minCastLevel: 600,  treeId: 2, skillId: 160, nicks: 'guild buffer, gldbfr, gb'},
+  {name: 'Light Foot',          stamina: 15, duration: 120,  minCastLevel: 700,  treeId: 2, skillId: 67,  nicks: 'light foot,lf'},
+  {name: 'Mesmerize',           stamina: 20, duration: 60,   minCastLevel: 700,  treeId: 2, skillId: 68,  nicks: 'mesmerize,mesmer,mes,mez'},
+  {name: 'Resource Finder',     stamina: 25, duration: 90,   minCastLevel: 800,  treeId: 2, skillId: 76,  nicks: 'resource finder,rf'},
+  {name: 'Quest Hunter',        stamina: 25, duration: 120,  minCastLevel: 800,  treeId: 2, skillId: 166, nicks: 'quest hunter'},
+  {name: 'Gloat',               stamina: 10, duration: 30,   minCastLevel: 900,  treeId: 2, skillId: 81,  nicks: 'gloat'},
+  {name: 'Sacrifice',           stamina: 25, duration: 90,   minCastLevel: 900,  treeId: 2, skillId: 75,  nicks: 'sacrifice,sac'},
+  {name: 'Reckoning',           stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 2, skillId: 72,  nicks: 'reckoning,rec,rek'},
+  {name: 'Reinforce',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 2, skillId: 126, nicks: 'reinforce,rein'},
+  {name: 'Bodyguard',           stamina: 30, duration: 120,  minCastLevel: 1000, treeId: 2, skillId: 120, nicks: 'bodyguard,bg'},
+  {name: 'Riposte',             stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 2, skillId: 124, nicks: 'riposte,rip'},
+  {name: 'Severe Condition',    stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 2, skillId: 101, nicks: 'severe condition,sc'},
+  {name: 'Sealed',              stamina: 35, duration: 60,   minCastLevel: 1200, treeId: 2, skillId: 112, nicks: 'sealed,seal'},
+  {name: 'Righteous',           stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 2, skillId: 107, nicks: 'righteous,right'},
+  {name: 'Epic Forge',          stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 2, skillId: 102, nicks: 'epic forge,ef'},
+  {name: 'Golden Shield',       stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 2, skillId: 103, nicks: 'golden shield,gs'},
+  {name: 'Stalker',             stamina: 35, duration: 90,   minCastLevel: 1400, treeId: 2, skillId: 125, nicks: 'stalker,stalk'},
+  {name: 'Ageless',             stamina: 30, duration: 90,   minCastLevel: 1400, treeId: 2, skillId: 100, nicks: 'ageless,age'},
+  {name: 'Extractor II',        stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 2, skillId: 104, nicks: 'extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2'},
+  {name: 'Epic Craft',          stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 2, skillId: 159, nicks: 'epic craft, epc crft, epccrft, ec'},
+  {name: 'Gold Foot',           stamina: 20, duration: 120,  minCastLevel: 1600, treeId: 2, skillId: 137, nicks: 'gold foot, goldfoot, gldft, gf'},
+  {name: 'Titan Doubler',       stamina: 40, duration: 120,  minCastLevel: 2000, treeId: 2, skillId: 167, nicks: 'titan doubler'},
+  {name: 'Teleport',            stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 2, skillId: 168, nicks: 'teleport'},
+  {name: 'Invigorate',          stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 2, skillId: 169, nicks: 'invigorate'}
+];
 
 var sustainLevelRE = /Level<br>(\d+)%/;
 var buffCustom = {
@@ -6679,7 +6725,6 @@ function notHuntMode() {
   add(3, injectHomePageTwoLink);
 
   add(3, injectQuickMsgDialogJQ);
-
 }
 
 function prepareEnv() {
@@ -6911,7 +6956,7 @@ function itemClick(evt) {
   }
 }
 
-function togglePref() {
+function togglePref$1() {
   disableBreakdownPrompts = !disableBreakdownPrompts;
   setValue('disableBreakdownPrompts', disableBreakdownPrompts);
 }
@@ -6928,7 +6973,7 @@ function composingBreakdown() {
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
   document.getElementById('disableBreakdownPrompts')
-    .addEventListener('click', togglePref);
+    .addEventListener('click', togglePref$1);
 }
 
 function globalQuest() {
@@ -7498,8 +7543,7 @@ function buyitem(item) {
   return callApp({
     cmd: 'potionbazaar',
     subcmd: 'buyitem',
-    item_id: item,
-    app: '1'
+    item_id: item
   });
 }
 
@@ -9174,7 +9218,7 @@ function syncInvMan() { // jQuery
   });
 }
 
-var cn$1;
+var cn;
 
 function showError(data) { // jQuery
   var $tempError = $('#temp_error');
@@ -9194,15 +9238,15 @@ function quickDoneTaken(data) { // jQuery
     $('#temp-inv-' + data.temp_id).remove();
     $('#qtip-' + qtipId).remove();
   }
-  cn$1 += 1;
-  $('#take_result').append('<br>' + cn$1 + '. Item taken.');
+  cn += 1;
+  $('#take_result').append('<br>' + cn + '. Item taken.');
 }
 
 function takeAllSimilar(evt) { // jQuery.min
   var invIds = evt.target.getAttribute('invIDs').split(',');
   evt.target.parentNode.innerHTML = 'taking all ' +
     invIds.length + ' items';
-  cn$1 = 0;
+  cn = 0;
   invIds.forEach(function(invId) {
     retryAjax({
       type: 'POST',
@@ -10317,8 +10361,7 @@ function unequipitem(item) {
   return callApp({
     cmd: 'profile',
     subcmd: 'unequipitem',
-    inventory_id: item,
-    app: '1'
+    inventory_id: item
   });
 }
 
@@ -11310,7 +11353,7 @@ function buildMap() {
 function buildOptions(select) {
   return '<select name="' + select +
     '"><option value="Ignore">Ignore</option>' +
-    Object.keys(potObj$1).reduce(function(prev, pot) {
+    Object.keys(potOpts.myMap).reduce(function(prev, pot) {
       return prev + '<option value="' + pot + '"' +
         isSelected(pot, potOpts.myMap[select]) + '>' + pot + '</option>';
     }, '') + '</select>';
@@ -11905,7 +11948,7 @@ function injectTitan() { // jQuery
 }
 
 function guildView(guildId) {
-  return callApp({cmd: 'guild', subcmd: 'view', guild_id: guildId, app: '1'});
+  return callApp({cmd: 'guild', subcmd: 'view', guild_id: guildId});
 }
 
 function getStat(stat, doc) { // jQuery
@@ -12593,8 +12636,8 @@ function showHuntMode(worldName) { // jQuery
 
 function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
-  worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
-  // TODO initialise GameController.Realm.footprintTileList
+  // worldName.html(data.realm.name); // BUGFIX - incase of switchign between master realm and realm they dont replace teh realm name
+  GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
   var oldButtonContainer = $('#fshWorldButtonContainer');
   if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
   var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});
@@ -14011,7 +14054,9 @@ function xhrDataFilter(data) {
   if (!myData.actions || myData.actions.length === 0) {return data;}
   var realm = GameData.realm();
   myData.actions = myData.actions.filter(function(el) {
-    if (el.type === 6) {return el.data.level >= realm.minlevel;}
+    if (el.type === 6) {
+      return el.data.creature_type !== 0 || el.data.level >= realm.minlevel;
+    }
     return true;
   });
   var ret = JSON.stringify(myData);
@@ -14700,12 +14745,12 @@ function doinvent(recipe) {
   return callApp({
     cmd: 'inventing',
     subcmd: 'doinvent',
-    recipe_id: recipe,
-    app: '1'
+    recipe_id: recipe
   });
 }
 
 var itemRE$1 = /<b>([^<]+)<\/b>/i;
+var lastMsg$1;
 
 var plantFromComponentHash = {
   'Amber Essense': 'Amber Plant',
@@ -14719,17 +14764,23 @@ var plantFromComponentHash = {
   'Purplet Flower': 'Purplet Plant',
 };
 
-function outputResult(result) {
+function outputResult$1(result) {
   document.getElementById('invent_Result').insertAdjacentHTML('beforeend',
     '<li style="list-style:decimal">' + result + '</li>');
 }
 
 function quickInventDone(json) {
-  if (!json.success) {return;}
+  if (!json.success && lastMsg$1 !== json.error.message) {
+    lastMsg$1 = json.error.message;
+    outputResult$1(json.error.message);
+    return;
+  }
   if (json.result.success) {
-    outputResult('You successfully invented the item!');
+    outputResult$1('<span class="fshGreen">' +
+      'You successfully invented the item!</span>');
   } else {
-    outputResult('You have failed to invent the item.');
+    outputResult$1('<span class="fshRed">' +
+      'You have failed to invent the item.</span>');
   }
 }
 
@@ -15037,6 +15088,16 @@ function storePlayerUpgrades() { // Legacy
   injectPoints();
 }
 
+function formatDateTime(aDate) {
+  var yyyy = aDate.getFullYear().toString();
+  var mon = padZ(aDate.getMonth() + 1);
+  var dd = padZ(aDate.getDate());
+  var hh = padZ(aDate.getHours());
+  var mm = padZ(aDate.getMinutes());
+  var ss = padZ(aDate.getSeconds());
+  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+}
+
 function rejected(timeStamp, buffsNotCast, buffLog) {
   if (buffsNotCast) {
     return timeStamp + ' <span style="color: red;">' +
@@ -15060,16 +15121,6 @@ function successfull(timeStamp, buffCast, buffLog) {
       ' stamina) <br>' + buffLog;
   }
   return buffLog;
-}
-
-function formatDateTime(aDate) {
-  var yyyy = aDate.getFullYear().toString();
-  var mon = padZ(aDate.getMonth() + 1);
-  var dd = padZ(aDate.getDate());
-  var hh = padZ(aDate.getHours());
-  var mm = padZ(aDate.getMinutes());
-  var ss = padZ(aDate.getSeconds());
-  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
 function buffResult(_buffLog) {
@@ -15433,7 +15484,7 @@ function toggleHeaderClass() {
   });
 }
 
-function togglePref$1() {
+function togglePref$2() {
   collapseNewsArchive = !collapseNewsArchive;
   setValue('collapseNewsArchive', collapseNewsArchive);
   if (collapseNewsArchive) {collapseAll();} else {expandAll();}
@@ -15445,7 +15496,7 @@ function setupPref$1(rowInjector) {
   rowInjector.insertAdjacentHTML('afterend',
     simpleCheckbox('collapseNewsArchive'));
   document.getElementById('collapseNewsArchive')
-    .addEventListener('click', togglePref$1);
+    .addEventListener('click', togglePref$2);
 }
 
 function viewArchive() {
@@ -16961,6 +17012,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '5';
+window.FSH.calf = '6';
 
 }());
