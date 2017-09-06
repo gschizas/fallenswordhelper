@@ -74,8 +74,8 @@ function showHuntMode(worldName) { // jQuery
 
 export default function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
-  worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
-  // TODO initialise GameController.Realm.footprintTileList
+  // worldName.html(data.realm.name); // BUGFIX - incase of switchign between master realm and realm they dont replace teh realm name
+  GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
   var oldButtonContainer = $('#fshWorldButtonContainer');
   if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
   var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});

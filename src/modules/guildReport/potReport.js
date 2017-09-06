@@ -76,7 +76,7 @@ function buildMap() {
 function buildOptions(select) {
   return '<select name="' + select +
     '"><option value="Ignore">Ignore</option>' +
-    Object.keys(potObj).reduce(function(prev, pot) {
+    Object.keys(potOpts.myMap).reduce(function(prev, pot) {
       return prev + '<option value="' + pot + '"' +
         isSelected(pot, potOpts.myMap[select]) + '>' + pot + '</option>';
     }, '') + '</select>';

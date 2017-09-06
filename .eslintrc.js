@@ -14,6 +14,7 @@ module.exports = {
     FSH: true,
     localforage: false,
     ga: false,
+    GameController: false,
     GameData: false
   },
   'extends': 'eslint:recommended',

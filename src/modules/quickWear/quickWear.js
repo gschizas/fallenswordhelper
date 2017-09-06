@@ -2,10 +2,13 @@ import {createDiv} from '../common/cElement';
 import createQuickWear from './createQuickWear';
 import loadInventory from '../app/profile/loadInventory';
 import showAHInvManager from './showAHInvManager';
+import {simpleCheckboxHtml} from '../settings/settingsPage';
 import toggleForce from '../common/toggleForce';
 import {equipItem, useItem} from '../support/ajax';
 import * as layout from '../support/layout';
+import * as system from '../support/system';
 
+var disableQuickWearPrompts;
 var content;
 var itemList;
 
@@ -18,10 +21,14 @@ function doUseItem(self) { // jQuery.min
 }
 
 function useProfileInventoryItem(self) {
-  layout.confirm('Use/Extract Item',
-    'Are you sure you want to use/extract the item?',
-    doUseItem.bind(null, self)
-  );
+  if (disableQuickWearPrompts) {
+    doUseItem(self);
+  } else {
+    layout.confirm('Use/Extract Item',
+      'Are you sure you want to use/extract the item?',
+      doUseItem.bind(null, self)
+    );
+  }
 }
 
 function equipProfileInventoryItem(self) { // jQuery.min
@@ -48,6 +55,11 @@ function hideFolders(self) {
   });
 }
 
+function togglePref() {
+  disableQuickWearPrompts = !disableQuickWearPrompts;
+  system.setValue('disableQuickWearPrompts', disableQuickWearPrompts);
+}
+
 var evts = [
   {
     condition: function(self) {
@@ -66,6 +78,10 @@ var evts = [
   {
     condition: function(self) {return self.classList.contains('folder');},
     result: hideFolders
+  },
+  {
+    condition: function(self) {return self.id === 'disableQuickWearPrompts';},
+    result: togglePref
   }
 ];
 
@@ -95,7 +111,7 @@ function createInvTabs() {
       '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
       '<label for="tab2">Inventory Manager Counter' +
         '<br>filtered by AH Quick Search</label>' +
-      '</li></ul>'
+      '</li><div id="setPrompt" class="fshFloatRight fshCenter"></div></ul>'
   });
 }
 
@@ -106,8 +122,10 @@ function showQuickWear(appInv) {
   invTabs.appendChild(invTabsQw);
   content.innerHTML = '';
   content.appendChild(invTabs);
-  invTabsQw.addEventListener('click', listen);
+  invTabs.addEventListener('click', listen);
   invTabs.appendChild(showAHInvManager(appInv));
+  document.getElementById('setPrompt').insertAdjacentHTML('beforeend',
+    simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 
 export default function insertQuickWear(injector) {
@@ -115,4 +133,5 @@ export default function insertQuickWear(injector) {
   if (!content) {return;}
   content.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
+  disableQuickWearPrompts = system.getValue('disableQuickWearPrompts');
 }

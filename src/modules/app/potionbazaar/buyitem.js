@@ -4,7 +4,6 @@ export default function buyitem(item) {
   return callApp({
     cmd: 'potionbazaar',
     subcmd: 'buyitem',
-    item_id: item,
-    app: '1'
+    item_id: item
   });
 }

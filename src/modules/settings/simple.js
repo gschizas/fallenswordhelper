@@ -316,4 +316,10 @@ export default {
     helpTitle: 'Hide Player Actions',
     helpText: 'If enabled, will hide player actions.'
   },
+  disableQuickWearPrompts: {
+    id: 'disableQuickWearPrompts',
+    helpTitle: 'Disable Use/Ext<br>Prompts',
+    helpText: 'If enabled, will disable prompts when you Use/Ext items.' +
+      '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
+  }
 };
