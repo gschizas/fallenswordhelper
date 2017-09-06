@@ -106,7 +106,9 @@ function xhrDataFilter(data) {
   if (!myData.actions || myData.actions.length === 0) {return data;}
   var realm = GameData.realm();
   myData.actions = myData.actions.filter(function(el) {
-    if (el.type === 6) {return el.data.level >= realm.minlevel;}
+    if (el.type === 6) {
+      return el.data.creature_type !== 0 || el.data.level >= realm.minlevel;
+    }
     return true;
   });
   var ret = JSON.stringify(myData);
