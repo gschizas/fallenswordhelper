@@ -1,3 +1,4 @@
+import alpha from '../common/alpha';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
@@ -44,12 +45,6 @@ function createThresholds() {
       '<input id="maxpoint" type="number" value="' +
       potOpts.maxpoint + '" min="0" max="999">',
   });
-}
-
-function alpha(a, b) {
-  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
-  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
-  return 0;
 }
 
 function sortKeys(obj) {
