@@ -63,7 +63,11 @@ function callHelperFunction(evt) { // jQuery
     fshGa.screenview(functionPath);
     fn(content);
   }
-  $(content).dialog({width: 'auto', modal: true});
+  $(content).dialog({
+    width: 640,
+    modal: true,
+    position: {my: 'top', at: 'top', offset: '0 60', collision: 'none'}
+  });
 }
 
 function eventHandler(evt) {
