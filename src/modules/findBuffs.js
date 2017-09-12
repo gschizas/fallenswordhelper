@@ -12,7 +12,7 @@ var buffCustom = {
   control: function() {
     var ret = '<select style="width:140px;" id="selectedBuff">';
     for (var j = 0; j < buffList.length; j += 1) {
-      ret += '<option value="' + buffList[j].skillId + '">' +
+      ret += '<option value="' + buffList[j].id + '">' +
         buffList[j].name + '</option>';
     }
     ret += '</select>';
@@ -477,9 +477,9 @@ function findAnyStart(progMsg) {
 function findBuffsStart() { // Legacy
   var selectedBuff = parseInt($('#selectedBuff').val(), 10);
   for (var j = 0; j < buffList.length; j += 1) {
-    if (selectedBuff === buffList[j].skillId) {
+    if (selectedBuff === buffList[j].id) {
       findBuffNicks = buffList[j].nicks;
-      findBuffMinCastLevel = buffList[j].minCastLevel;
+      findBuffMinCastLevel = buffList[j].lvl;
       break;
     }
   }
