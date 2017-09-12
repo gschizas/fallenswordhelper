@@ -1,5 +1,3 @@
-import {mixin} from '../common/cElement';
-
 var concurrent = 0;
 var paused = true;
 var queue = [];
@@ -18,7 +16,7 @@ function doAjax(options, retries, dfr) {
   } else {
     opt = options;
   }
-  mixin(opt, {beforeSend: beforeSend});
+  opt.beforeSend = beforeSend;
   return $.ajax(opt).pipe(dfr.resolve,
     function(jqXhr, textStatus, errorThrown) {
       if (retries > 0 && jqXhr.status === 503) {
