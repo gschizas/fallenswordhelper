@@ -11,7 +11,7 @@ function postWarnings(myBuffs) {
     var tipped = el.dataset.tipped;
     var packBuffs;
     while ((packBuffs = packRE.exec(tipped)) !== null) {
-      if (myBuffs[packBuffs[1]] === packBuffs[2]) {
+      if (myBuffs[packBuffs[1]] === Number(packBuffs[2])) {
         el.parentNode.insertAdjacentHTML('beforeend',
           '<br><span class="fshRed fshNoWrap">' + packBuffs[1] + ' ' +
           packBuffs[2] + ' active</span>');
