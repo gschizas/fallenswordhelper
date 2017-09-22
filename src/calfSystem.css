@@ -349,7 +349,6 @@ input.fshFindOnlinePlayers {
   background-position: center center;
   box-shadow: 0 0 4px #4f3717;
 }
-.fshNoResize {resize: none;}
 .sendLink {
   cursor: pointer;
   text-decoration: underline;
@@ -836,6 +835,9 @@ button.fshBls {font-size: 84%;}
   display: table;
   clear: both;
 }
+
+/* Stop resizable textareas */
+textarea {resize: none;}
 
 /*
  * Table styles

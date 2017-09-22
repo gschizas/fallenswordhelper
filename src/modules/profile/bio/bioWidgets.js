@@ -77,7 +77,6 @@ export default function injectBioWidgets() {
   bioWords();
   bioHeight();
   textArea.rows = bioEditLines;
-  textArea.classList.add('fshNoResize');
 
   textArea.parentNode.addEventListener('click', bioEvtHdl);
   textArea.addEventListener('keyup', updateBioCharacters);
