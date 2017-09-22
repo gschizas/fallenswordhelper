@@ -8,7 +8,8 @@ module.exports = {
     browser: true,
     node: true,
     jquery: true,
-    greasemonkey: true
+    greasemonkey: true,
+    es6: true
   },
   globals: {
     FSH: true,
