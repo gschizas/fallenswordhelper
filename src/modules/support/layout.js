@@ -10,17 +10,18 @@ import * as system from './system';
 
 var dotList;
 var dotCount;
-var redDot = '<span class="redDot tip-static" data-tipped="Offline"></span>';
+var redDot =
+  '<span class="fshDot redDot tip-static" data-tipped="Offline"></span>';
 var greenDiamond =
-  '<span class="greenDiamond tip-static" data-tipped="Online"></span>';
+  '<span class="fshDot greenDiamond tip-static" data-tipped="Online"></span>';
 var yellowDiamond =
-  '<span class="yellowDiamond tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot yellowDiamond tip-static" data-tipped="Offline"></span>';
 var orangeDiamond =
-  '<span class="orangeDiamond tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot orangeDiamond tip-static" data-tipped="Offline"></span>';
 var offlineDot =
-  '<span class="offlineDot tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot offlineDot tip-static" data-tipped="Offline"></span>';
 var sevenDayDot =
-  '<span class="sevenDayDot tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
 
 export var pCC = document.getElementById('pCC');
 

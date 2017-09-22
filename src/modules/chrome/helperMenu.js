@@ -1,21 +1,24 @@
 import {createDiv} from '../common/cElement';
 import dragStart from '../common/dragStart';
 import injectBuffLog from '../buffLog/injectBuffLog';
+import {injectFsBoxContent} from '../misc';
+import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
-import * as findBuffs from '../findBuffs';
+import jQueryDialog from './jQueryDialog';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectFindBuffs, injectFindOther} from '../findBuffs';
 import * as fshGa from '../support/fshGa';
-import * as lists from '../lists';
-import * as misc from '../misc';
 import * as system from '../support/system';
 
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +
   '<li><span class="fshLink">Buff Log</span></li>' +
   '<li><span class="fshLink">Combat Log</span></li>' +
+  '<li><span class="fshLink">Creature Log</span></li>' +
   '<li><span class="fshLink">Recipe Manager</span></li>' +
   '<li><span class="fshLink">Quick Links</span></li>' +
   '</ul><h3>Actions</h3><ul>' +
@@ -37,37 +40,25 @@ var helperMenuBlob =
 var functionLookup = {
   'Buff Log': injectBuffLog,
   'Combat Log': injectNotepadShowLogs,
+  'Creature Log': injectMonsterLog,
   'Recipe Manager': injectRecipeManager,
-  'Quick Links': lists.injectQuickLinkManager,
-  'Find Buffs': findBuffs.injectFindBuffs,
-  'Find Other': findBuffs.injectFindOther,
+  'Quick Links': injectQuickLinkManager,
+  'Find Buffs': injectFindBuffs,
+  'Find Other': injectFindOther,
   'Online Players': injectOnlinePlayers,
-  'AH Quick Search': lists.injectAuctionSearch,
+  'AH Quick Search': injectAuctionSearch,
   'Quick Extract': insertQuickExtract,
   'Quick Wear': insertQuickWear,
-  'FS Box Log': misc.injectFsBoxContent
+  'FS Box Log': injectFsBoxContent
 };
 
 function callHelperFunction(evt) { // jQuery
-  var content = document.getElementById('content');
-  if (content) {content.innerHTML = '';} else {
-    content = createDiv({
-      id: 'content',
-      style: {display: 'none'}
-    });
-    document.body.appendChild(content);
-  }
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
   if (typeof fn === 'function') {
     fshGa.screenview(functionPath);
-    fn(content);
+    jQueryDialog(fn);
   }
-  $(content).dialog({
-    width: 640,
-    modal: true,
-    position: {my: 'top', at: 'top', offset: '0 60', collision: 'none'}
-  });
 }
 
 function eventHandler(evt) {

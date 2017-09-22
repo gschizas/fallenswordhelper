@@ -1,4 +1,7 @@
 import calf from '../support/calf';
+import injectMonsterLog from '../monstorLog';
+import injectNotepadShowLogs from '../combatLog';
+import jQueryDialog from '../chrome/jQueryDialog';
 import mySimpleCheckboxes from './simple';
 import setupConfigData from './configData';
 import {createBr, createSpan} from '../common/cElement';
@@ -151,13 +154,11 @@ function saveConfig(evt) { // Legacy
 }
 
 function showLogs() {
-  document.location = system.server +
-    'index.php?cmd=notepad&blank=1&subcmd=showlogs';
+  jQueryDialog(injectNotepadShowLogs);
 }
 
 function showMonsterLogs() {
-  document.location = system.server +
-    'index.php?cmd=notepad&blank=1&subcmd=monsterlog';
+  jQueryDialog(injectMonsterLog);
 }
 
 function createEventListeners() {

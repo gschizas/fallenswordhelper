@@ -1,3 +1,12 @@
+import injectBuffLog from '../buffLog/injectBuffLog';
+import injectMonsterLog from '../monstorLog';
+import injectNotepadShowLogs from '../combatLog';
+import injectOnlinePlayers from '../onlinePlayers';
+import injectRecipeManager from '../recipeMgr/recipeMgr';
+import jQueryDialog from './jQueryDialog';
+import {createLi, createSpan} from '../common/cElement';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectFindBuffs, injectFindOther} from '../findBuffs';
 import * as system from '../support/system';
 
 function updateQuestLink() {
@@ -8,33 +17,37 @@ function updateQuestLink() {
   }
 }
 
+function spanButton(navLvl, text, fn, target) {
+  var li = createLi({className: 'nav-level-' + navLvl});
+  var sb = createSpan({
+    className: 'nav-link fshPoint',
+    textContent: text
+  });
+  sb.addEventListener('click', function() {
+    jQueryDialog(fn);
+  });
+  li.appendChild(sb);
+  document.getElementById(target).parentNode
+    .insertAdjacentElement('afterend', li);
+}
+
 function buffLogLink() {
   if (system.getValue('keepBuffLog')) {
-    document.getElementById('nav-character-log').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
-        'subcmd=bufflogcontent">Buff Log</a></li>');
+    spanButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
 function combatLogLink() {
   if (system.getValue('keepLogs')) {
-    document.getElementById('nav-character-notepad').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-showlogs" href="index.php?cmd=notepad&blank=1' +
-        '&subcmd=showlogs">Combat Logs</a></li>');
+    spanButton('1', 'Combat Logs', injectNotepadShowLogs,
+      'nav-character-notepad');
   }
 }
 
 function creatureLogLink() {
   if (system.getValue('showMonsterLog')) {
-    document.getElementById('nav-character-notepad').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-monsterlog" href="index.php?cmd=notepad&blank' +
-        '=1&subcmd=monsterlog">Creature Logs</a></li>');
+    spanButton('1', 'Creature Logs', injectMonsterLog,
+      'nav-character-notepad');
   }
 }
 
@@ -79,6 +92,7 @@ export default function injectMenu() {
   if (!document.getElementById('pCL')) {return;}
   updateQuestLink();
   // character
+  spanButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   document.getElementById('nav-character-log').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -86,18 +100,12 @@ export default function injectMenu() {
       'medalguide">Medal Guide</a></li>' +
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
       'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=invmanagernew">Inventory Manager</a></li>' +
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-recipemanager" href="index.php?cmd=notepad&blank' +
-      '=1&subcmd=recipemanager">Recipe Manager</a></li>');
+      'subcmd=invmanagernew">Inventory Manager</a></li>');
   buffLogLink();
   combatLogLink();
   creatureLogLink();
-  document.getElementById('nav-character-notepad').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-quicklinkmanager" href="index.php?cmd=notepad&' +
-      'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
+  spanButton('1', 'Quick Links', injectQuickLinkManager,
+    'nav-character-notepad');
   // guild
   document.getElementById('nav-guild-storehouse-inventory').parentNode
     .insertAdjacentHTML('afterend',
@@ -112,21 +120,13 @@ export default function injectMenu() {
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
       'Top 250 Players</a></li>');
   // actions
-  document.getElementById('nav-actions-trade-auctionhouse').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=auctionsearch">AH Quick Search</a></li>');
-  document.getElementById('nav-actions-interaction-findplayer').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=findbuffs">Find Buffs</a></li>' +
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-findother" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=findother">Find Other</a></li>' +
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=onlineplayers">Online Players</a></li>');
+  spanButton('2', 'AH Quick Search', injectAuctionSearch,
+    'nav-actions-trade-auctionhouse');
+  spanButton('2', 'Online Players', injectOnlinePlayers,
+    'nav-actions-interaction-findplayer');
+  spanButton('2', 'Find Other', injectFindOther,
+    'nav-actions-interaction-findplayer');
+  spanButton('2', 'Find Buffs', injectFindBuffs,
+    'nav-actions-interaction-findplayer');
   adjustHeight();
 }

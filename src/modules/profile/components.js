@@ -1,3 +1,5 @@
+import insertQuickExtract from '../quickExtract';
+import jQueryDialog from '../chrome/jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
 import {
   createDiv,
@@ -14,6 +16,7 @@ var delAllDiv;
 var compDel;
 var compSum;
 var compDelAll;
+var qe;
 var thisInvTable;
 var componentList = {};
 var usedCount;
@@ -170,6 +173,10 @@ var evtHdl = [
     act: delAllComponent
   },
   {
+    test: function(self) {return self === qe;},
+    act: function() {jQueryDialog(insertQuickExtract);}
+  },
+  {
     test: function(self) {return self.classList.contains('compDelBtn');},
     act: delComponent
   },
@@ -209,14 +216,14 @@ export default function profileComponents() {
   quickDelDiv = createDiv();
   sumComp = createDiv();
   delAllDiv = createDiv({className: 'fshHide'});
+  var qeDiv = createDiv();
   compDel = decorateButton(quickDelDiv, 'Enable Quick Del');
   compSum = decorateButton(sumComp, 'Count Components');
   compDelAll = decorateButton(delAllDiv, 'Delete All Visible');
+  qe = decorateButton(qeDiv, 'Quick Extract Components');
   cmDiv.appendChild(quickDelDiv);
   cmDiv.appendChild(sumComp);
-  cmDiv.insertAdjacentHTML('beforeend', '[<a class="fshBlue" ' +
-    'href="index.php?cmd=notepad&blank=1&subcmd=quickextract"' +
-    '>Quick Extract Components</a>]');
+  cmDiv.appendChild(qeDiv);
   cmDiv.appendChild(delAllDiv);
   compDiv.appendChild(cmDiv);
   compDiv.addEventListener('click', compEvt);

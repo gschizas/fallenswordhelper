@@ -1,4 +1,5 @@
 import addHistoryWidgets from '../guild/addHistoryWidgets';
+import allowBack from '../guide/allowBack';
 import completedArenas from '../arena/completedArenas';
 import composingBreakdown from '../composing/breakdown';
 import globalQuest from '../topRated/globalQuest';
@@ -35,18 +36,18 @@ import insertQuickWear from '../quickWear/quickWear';
 import inventing from '../recipes';
 import ladder from '../ladder';
 import setupMoves from '../arena/setup';
+import showAllQuestSteps from '../guide/showAllQuestSteps';
 import storeMoves from '../arena/store';
 import storePlayerUpgrades from '../upgrades';
 import unknownPage from './unknownPage';
 import viewArchive from '../news/viewArchive';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectFindBuffs, injectFindOther} from '../findBuffs';
 import * as auctionHouse from '../auctionHouse';
 import * as bank from '../bank';
 import * as composing from '../composing/composing';
 import * as dropItems from '../dropItems/dropItems';
-import * as findBuffs from '../findBuffs';
 import * as groups from '../groups';
-import * as guide from '../guide';
-import * as lists from '../lists';
 import * as logs from '../logs/logs';
 import * as misc from '../misc';
 import * as news from '../news/news';
@@ -124,21 +125,21 @@ export default {
   marketplace: {createreq: {'-': {'-': {'-': misc.addMarketplaceWidgets}}}},
   quickbuff: {'-': {'-': {'-': {'-': injectQuickBuff}}}}, // No ga
   notepad: {
-    showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}},
+    showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}}, // done
     invmanagernew: {'-': {'-': {'-': injectInventoryManagerNew}}},
     guildinvmgr: {'-': {'-': {'-': injectInventoryManagerNew}}},
-    recipemanager: {'-': {'-': {'-': injectRecipeManager}}},
-    auctionsearch: {'-': {'-': {'-': lists.injectAuctionSearch}}},
-    onlineplayers: {'-': {'-': {'-': injectOnlinePlayers}}},
-    quicklinkmanager: {'-': {'-': {'-': lists.injectQuickLinkManager}}},
-    monsterlog: {'-': {'-': {'-': injectMonsterLog}}},
-    quickextract: {'-': {'-': {'-': insertQuickExtract}}},
-    quickwear: {'-': {'-': {'-': insertQuickWear}}},
-    fsboxcontent: {'-': {'-': {'-': misc.injectFsBoxContent}}},
-    bufflogcontent: {'-': {'-': {'-': injectBuffLog}}},
+    recipemanager: {'-': {'-': {'-': injectRecipeManager}}}, // done
+    auctionsearch: {'-': {'-': {'-': injectAuctionSearch}}},
+    onlineplayers: {'-': {'-': {'-': injectOnlinePlayers}}}, // done
+    quicklinkmanager: {'-': {'-': {'-': injectQuickLinkManager}}}, // done
+    monsterlog: {'-': {'-': {'-': injectMonsterLog}}}, // done
+    quickextract: {'-': {'-': {'-': insertQuickExtract}}}, // done
+    quickwear: {'-': {'-': {'-': insertQuickWear}}}, // done
+    fsboxcontent: {'-': {'-': {'-': misc.injectFsBoxContent}}}, // done
+    bufflogcontent: {'-': {'-': {'-': injectBuffLog}}}, // done
     newguildlog: {'-': {'-': {'-': injectNewGuildLog}}},
-    findbuffs: {'-': {'-': {'-': findBuffs.injectFindBuffs}}},
-    findother: {'-': {'-': {'-': findBuffs.injectFindOther}}},
+    findbuffs: {'-': {'-': {'-': injectFindBuffs}}}, // done
+    findother: {'-': {'-': {'-': injectFindOther}}}, // done
     savesettings: {'-': {'-': {'-': injectSaveSettings}}},
     '-': {'-': {'-': {'-': misc.injectNotepad}}}
   },
@@ -173,15 +174,15 @@ export default {
   tempinv: {'-': {'-': {'-': {'-': injectMailbox}}}},
   findplayer: {'-': {'-': {'-': {'-': misc.injectFindPlayer}}}},
   quests: { // UFSG
-    '-': {'-': {'-': {'-': guide.allowBack}}},
-    view: {'-': {'-': {'-': guide.showAllQuestSteps}}}
+    '-': {'-': {'-': {'-': allowBack}}},
+    view: {'-': {'-': {'-': showAllQuestSteps}}}
   },
-  items: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
-  creatures: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
-  masterrealms: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
-  realms: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
-  relics: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
-  shops: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
+  items: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
+  creatures: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
+  masterrealms: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
+  realms: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
+  relics: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
+  shops: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
   scavenging: {'-': {'-': {'-': {'-': injectScavenging}}}},
   temple: {'-': {'-': {'-': {'-': notification.parseTemplePage}}}},
   composing: {

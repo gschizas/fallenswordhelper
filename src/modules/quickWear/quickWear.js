@@ -101,15 +101,15 @@ function createInvTabs() {
   return createDiv({
     id: 'invTabs',
     className: 'ui-tabs ui-widget-content ui-corner-all',
-    innerHTML: '<input id="tab1" type="radio" name="tabs" checked>' +
-      '<input id="tab2" type="radio" name="tabs">' +
+    innerHTML: '<input id="qwtab1" type="radio" name="qwtabs" checked>' +
+      '<input id="qwtab2" type="radio" name="qwtabs">' +
       '<ul class="ui-tabs-nav ui-helper-reset ' +
         'ui-helper-clearfix ui-widget-header ui-corner-all">' +
       '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
-      '<label for="tab1">Quick Wear / Use / Extract<br>Manager</label>' +
+      '<label for="qwtab1">Quick Wear / Use / Extract<br>Manager</label>' +
       '</li>' +
       '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
-      '<label for="tab2">Inventory Manager Counter' +
+      '<label for="qwtab2">Inventory Manager Counter' +
         '<br>filtered by AH Quick Search</label>' +
       '</li><div id="setPrompt" class="fshFloatRight fshCenter"></div></ul>'
   });

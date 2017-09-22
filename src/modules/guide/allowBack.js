@@ -1,6 +1,4 @@
-import * as system from './support/system';
-
-export function allowBack() {
+export default function allowBack() {
   document.querySelector('input[type="submit"]')
     .addEventListener('click', function(evt) {
       evt.preventDefault();
@@ -11,11 +9,4 @@ export function allowBack() {
         function(e) {url += '&' + e.name + '=' + e.value;});
       window.location = url;
     });
-}
-
-export function showAllQuestSteps() {
-  if (!system.getValue('showNextQuestSteps')) {return;}
-  Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
-    function(e) {e.style.display = 'block';});
-  document.getElementById('next_stage_button').style.display = 'none';
 }

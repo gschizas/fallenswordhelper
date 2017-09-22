@@ -27,8 +27,8 @@ var memberExclusions = [
   function(key) {return key === 'lastUpdate';},
   function(key) {return myDefenders.indexOf(key) !== -1;},
   function(key) {return !guildMemberList[key].last_login;},
-  function(key) {return guildMemberList[key].last_login >= twoMinutes;},
-  function(key) {return guildMemberList[key].last_login <= sevenDays;},
+  function(key) {return Number(guildMemberList[key].last_login) >= twoMinutes;},
+  function(key) {return Number(guildMemberList[key].last_login) <= sevenDays;},
   function(key) {
     return guildMemberList[key].level >= 400 &&
       guildMemberList[key].level <= 421;
