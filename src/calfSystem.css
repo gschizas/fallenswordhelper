@@ -265,8 +265,8 @@ input.fshFindOnlinePlayers {
 }
 .helperMenu {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   color: yellow;
   font-weight: bold;
   cursor: pointer;
@@ -490,15 +490,15 @@ input.fshFindOnlinePlayers {
   background-repeat: no-repeat;
 }
 
-.quickbuffTable {margin: 0px auto;}
+.quickbuffTable {margin: 0 auto;}
 .quickbuffTableHeader {
   text-align: center;
-  padding: 0px 4px;
+  padding: 0 4px;
   color: orange;
 }
 .quickbuffTableDetail {
   text-align: center;
-  padding: 0px 4px;
+  padding: 0 4px;
 }
 .quickbuffActivate {
   cursor: pointer;
