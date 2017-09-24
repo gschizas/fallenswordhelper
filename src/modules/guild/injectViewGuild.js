@@ -44,7 +44,7 @@ export default function injectViewGuild() {
   Array.prototype.forEach.call(memList, function(el) {
     var tipped = el.getAttribute('data-tipped');
     var lastActDays = lastActivityRE.exec(tipped)[1];
-    var vlevel = /VL:.+?(\d+)/.exec(tipped)[1];
+    var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
     var aRow = el.parentNode.parentNode;
     if (lastActDays < 7 &&
         highlightPlayersNearMyLvl &&
