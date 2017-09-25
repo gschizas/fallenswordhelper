@@ -852,8 +852,8 @@ table.dataTable {
 
 table.dataTable thead th,
 table.dataTable thead td {
-  background-color:#cd9e4b;
-  padding:0px;
+  background-color: #cd9e4b;
+  padding: 0;
   border: 0;
   text-decoration: underline;
 }
