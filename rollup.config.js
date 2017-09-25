@@ -1,7 +1,4 @@
-import commonjs from 'rollup-plugin-commonjs';
-import filesize from 'rollup-plugin-filesize';
 import jscc from 'rollup-plugin-jscc';
-import nodeResolve from 'rollup-plugin-node-resolve';
 
 let source = process.env.SOURCE;
 let folder = process.env.FOLDER;
@@ -64,9 +61,6 @@ export default {
     format: format
   },
   plugins: [
-    jscc(opts),
-    nodeResolve(),
-    commonjs(),
-    filesize()
+    jscc(opts)
   ]
 };
