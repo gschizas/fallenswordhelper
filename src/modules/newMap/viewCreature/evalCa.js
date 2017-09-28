@@ -1,3 +1,12 @@
+function calcLowest(combat) {
+  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
+    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
+    combat.player.attackValue / 0.0025), 0);
+  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
+    combat.counterAttackBonusDamage - combat.damageDone + 1) /
+    combat.player.damageValue / 0.0025), 0);
+}
+
 function stamAtLowestCa(combat) {
   if (combat.player.counterAttackLevel > 0) {
     return Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
@@ -7,12 +16,7 @@ function stamAtLowestCa(combat) {
 }
 
 function caRunning(combat) {
-  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
-    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
-    combat.player.attackValue / 0.0025), 0);
-  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
-    combat.counterAttackBonusDamage - combat.damageDone + 1) /
-    combat.player.damageValue / 0.0025), 0);
+  calcLowest(combat);
   combat.lowestFeasibleCALevel =
     Math.max(combat.lowestCALevelToStillHit,
       combat.lowestCALevelToStillKill);
@@ -70,12 +74,7 @@ function evalCaOneHit(combat) {
 }
 
 function caResult(combat) {
-  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
-    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
-    combat.player.attackValue / 0.0025), 0);
-  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
-    combat.counterAttackBonusDamage - combat.damageDone + 1) /
-    combat.player.damageValue / 0.0025), 0);
+  calcLowest(combat);
   evalCaKill(combat);
   evalCaOneHit(combat);
 }

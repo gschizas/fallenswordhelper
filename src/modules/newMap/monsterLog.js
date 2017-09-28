@@ -67,6 +67,8 @@ function processMonsterLog() {
 function doMouseOver() {
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
+  var myLvlClas = 'fshYellow';
+  if (statLevel > creature.level) {myLvlClas = 'fshRed';}
   var monsterTip = '<table><tr><td>' +
     '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
     '.jpg" height="200" width="200"></td><td rowspan="2">' +
@@ -74,7 +76,8 @@ function doMouseOver() {
     '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>' +
     '<tr><td>Class:&nbsp;</td><td width="40%">' + creature.creature_class +
     '</td><td>Level:&nbsp;</td><td width="40%">' + creature.level +
-    ' (your level:<span class="fshYellow">' + statLevel + '</span>)</td>' +
+    ' (your level:<span class="' + myLvlClas + '">' +
+    statLevel + '</span>)</td>' +
     '</tr><tr><td>Attack:&nbsp;</td><td width="40%">' + creature.attack +
     ' (your defense:<span class="fshYellow">' + statDefense + '</span>)</td>' +
     '<td>Defense:&nbsp;</td><td width="40%">' + creature.defense +
@@ -151,20 +154,20 @@ function loopActions(e, i) { // jQuery
   }).done(processMonster);
 }
 
+function getStatText(statTooltip, statClassName) {
+  return statTooltip.getElementsByClassName(statClassName)[0]
+    .nextElementSibling.textContent;
+}
+
 function getMyStats() {
-  statLevel = system.intValue(document
-    .getElementById('statbar-level-tooltip-general')
-    .getElementsByClassName('stat-level')[0].nextElementSibling.textContent);
-  statDefense = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-defense')[0].nextElementSibling.textContent;
-  statAttack = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-attack')[0].nextElementSibling.textContent;
-  statDamage = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-damage')[0].nextElementSibling.textContent;
-  statArmor = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-armor')[0].nextElementSibling.textContent;
-  statHp = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-hp')[0].nextElementSibling.textContent;
+  statLevel = system.intValue(getStatText(document
+    .getElementById('statbar-level-tooltip-general'), 'stat-level'));
+  var statTooltip = document.getElementById('statbar-character-tooltip-stats');
+  statDefense = getStatText(statTooltip, 'stat-defense');
+  statAttack = getStatText(statTooltip, 'stat-attack');
+  statDamage = getStatText(statTooltip, 'stat-damage');
+  statArmor = getStatText(statTooltip, 'stat-armor');
+  statHp = getStatText(statTooltip, 'stat-hp');
 }
 
 function initMonsterLog() {
