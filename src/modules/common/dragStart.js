@@ -17,7 +17,7 @@ function dragDrop(event) {
   return false;
 }
 
-export default function dragStart(event) {
+function dragStart(event) {
   dragTarget = event.target;
   var style = window.getComputedStyle(event.target, null);
   event.dataTransfer.setData('text/plain',
@@ -25,4 +25,9 @@ export default function dragStart(event) {
     (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
   document.body.addEventListener('dragover', dragOver, false);
   document.body.addEventListener('drop', dragDrop, false);
+}
+
+export default function draggable(element) {
+  element.draggable = true;
+  element.addEventListener('dragstart', dragStart);
 }

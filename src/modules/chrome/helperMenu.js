@@ -1,5 +1,5 @@
 import {createDiv} from '../common/cElement';
-import dragStart from '../common/dragStart';
+import draggable from '../common/dragStart';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import {injectFsBoxContent} from '../misc';
 import injectMonsterLog from '../monstorLog';
@@ -104,8 +104,7 @@ function haveNode(node) {
   }
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (system.getValue('draggableHelperMenu')) {
-    helperMenu.setAttribute('draggable', 'true');
-    helperMenu.addEventListener('dragstart', dragStart);
+    draggable(helperMenu);
   }
   node.parentNode.insertBefore(helperMenu, node);
 }
