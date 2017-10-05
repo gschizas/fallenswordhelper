@@ -1,7 +1,7 @@
 export var invManFilter =
   '<table class="fshInvFilter">' +
   '<tr><th colspan="14">@@reportTitle@@</th>' +
-  '<th><span id="fshRefresh">[Refresh]</span></th></tr>' +
+  '<th><span id="fshRefresh" class="fshLink">[Refresh]</span></th></tr>' +
   '<tr><td colspan="2" rowspan="3"><b>&nbsp;Show Items:</b></td>' +
   '<td class="fshRight">&nbsp;Helmet:</td>' +
   '<td><input id="fshHelmet" type="checkbox" item="0"/></td>' +

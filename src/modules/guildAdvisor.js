@@ -210,7 +210,7 @@ function injectAdvisorWeekly() { // jQuery
   list = layout.pCC.firstElementChild.firstElementChild
     .lastElementChild.firstElementChild.firstElementChild;
   if (!list) {return;}
-  list.innerHTML = '<span class="fshSpinner" style="background-image: ' +
+  list.innerHTML = '<span class="fshCurveBtn" style="background-image: ' +
     'url(\'' + system.imageServer +
     '/world/actionLoadingSpinner.gif\');"></span>' +
     '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>';

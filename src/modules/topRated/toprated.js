@@ -109,7 +109,7 @@ function gotMyVl(data) {
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
   spinner = createSpan({
-    className: 'fshSpinner fshTopListSpinner',
+    className: 'fshCurveBtn fshTopListSpinner',
     style: {
       backgroundImage: 'url(\'' + system.imageServer +
         '/world/actionLoadingSpinner.gif\')'
@@ -127,7 +127,8 @@ function looksLikeTopRated() {
   var theCell = layout.pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({
-    className: 'fshFindO nlinePlayers custombutton tip-static',
+    id: 'fshFindOnlinePlayers',
+    className: 'custombutton tip-static',
     type: 'button',
     value: 'Find Online Players',
     dataset: {

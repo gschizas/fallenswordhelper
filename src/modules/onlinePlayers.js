@@ -19,7 +19,7 @@ function buildOnlinePlayerData() { // jQuery
   Object.keys(onlinePlayers).forEach(function(player) {
     var guildImage = $('<div/>')
       .append(onlinePlayers[player][0]);
-    $('img', guildImage).addClass('center');
+    $('img', guildImage).addClass('fshImgCntr');
     onlineData.push([
       guildImage.html(),
       onlinePlayers[player][1],
@@ -179,7 +179,7 @@ function injectOnlinePlayersNew() { // jQuery
   var refreshButton;
   if (now - lastCheck > 300000) {
     refreshButton = '<span> (takes a while to refresh so only do it ' +
-      'if you really need to) </span><span id="fshRefresh"' +
+      'if you really need to) </span><span id="fshRefresh" class="fshLink"' +
       '>[Refresh]</span>';
   } else {
     refreshButton = '<span>[ Wait ' + Math.round(300 - (now -

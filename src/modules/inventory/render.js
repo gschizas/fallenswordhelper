@@ -78,7 +78,7 @@ export function whereRenderDisplay(data, type, row) {
     return whereRenderGuildDisplay(row);
   }
   if (row.equipped) {return 'Worn';}
-  var folderSelect = '<select class="moveItem" data-inv="' + row.inv_id +
+  var folderSelect = '<select class="fshMoveItem" data-inv="' + row.inv_id +
     '">';
   var keysArray = Object.keys(inventory.theInv.folders)
     .sort(function(a, b) {return a - b;});

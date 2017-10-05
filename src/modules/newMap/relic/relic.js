@@ -218,9 +218,10 @@ function missingMembers(membrList) {
     return prev;
   }, []);
   containerDiv.insertAdjacentHTML('beforeend',
-    '<div class="fshFloatLeft lowDiv"><table class="relicT"><tbody>' +
-    '<tr><td class="headr">Offline guild members not at relic:</td></tr>' +
-    '<tr><td>' + filtered.join(' ') + '</td></tr></tbody></table></div>');
+    '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
+    '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
+    '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
+    '</table></div>');
 }
 
 function setDefVars() {
@@ -262,13 +263,13 @@ function prepareDivs() {
   leftDiv.insertAdjacentHTML('beforeend', assets.proc);
   processingStatus = document.getElementById('ProcessingStatus');
   midDiv = createDiv({
-    className: 'fshFloatLeft midDiv',
+    className: 'fshFloatLeft fshRelicMidDiv',
     innerHTML: assets.defStats
   });
   containerDiv.appendChild(midDiv);
   setDefVars();
   rightDiv = createDiv({
-    className: 'fshFloatLeft rightDiv',
+    className: 'fshFloatLeft fshRelicRightDiv',
     innerHTML: assets.atkStats
   });
   containerDiv.appendChild(rightDiv);
@@ -384,7 +385,7 @@ function setup() {
   } else {
     containerDiv = createDiv({className: 'body'});
   }
-  leftDiv = createDiv({className: 'fshFloatLeft leftDiv'});
+  leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
   containerDiv.appendChild(leftDiv);
   if (relicData.is_owner) {
     leftDiv.appendChild(layout.doBuffLinks(myDefenders));

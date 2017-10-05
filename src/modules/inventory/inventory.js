@@ -245,7 +245,7 @@ function eventHandlers() { // jQuery
   $('#fshInv').on('click', 'span.recallItem', recallItem);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
   $('#fshInv').on('click', 'span.useItem', doUseItem);
-  $('#fshInv').on('change', 'select.moveItem', doMoveItem);
+  $('#fshInv').on('change', 'select.fshMoveItem', doMoveItem);
   $('#fshInv').on('click', 'span.dropItem', doDropItem);
   $('#fshInv').on('click', 'span.sendItem', doSendItem);
 }
