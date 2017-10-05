@@ -104,6 +104,7 @@ function haveNode(node) {
   }
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (system.getValue('draggableHelperMenu')) {
+    helperMenu.classList.add('fshMove');
     draggable(helperMenu);
   }
   node.parentNode.insertBefore(helperMenu, node);

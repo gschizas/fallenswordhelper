@@ -373,6 +373,7 @@
   color: grey;
   font-size: x-small;
 }
+.fshMove {cursor: move;}
 
 .pCR a {color: #F7EAC9;}
 

@@ -24,7 +24,7 @@ function haveNode(node, quickLinks) { // Native ?
   var quickLinksTopPx = system.getValue('quickLinksTopPx');
   var quickLinksLeftPx = system.getValue('quickLinksLeftPx');
   var draggableQuickLinks = system.getValue('draggableQuickLinks');
-  var draggableQuickLinksClass = retBool(draggableQuickLinks, ' fshLink', '');
+  var draggableQuickLinksClass = retBool(draggableQuickLinks, ' fshMove', '');
   var html = '<div style="top:' + quickLinksTopPx + 'px; left:' +
     quickLinksLeftPx + 'px; background-image:url(\'' + system.imageServer +
     '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
