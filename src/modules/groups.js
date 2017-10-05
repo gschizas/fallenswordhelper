@@ -79,7 +79,7 @@ function joinAllGroupsUnderSize() { // Legacy
 }
 
 function parseGroupData(linkElement, obj) {
-  var extraText = '<table id="stat">' +
+  var extraText = '<table class="fshgrpstat">' +
     '<tr>' +
     '<td class="fshBrown">Attack</td>' +
     '<td class="fshRight">' + obj.attack + '</td>' +

@@ -127,7 +127,7 @@ function looksLikeTopRated() {
   var theCell = layout.pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({
-    className: 'fshFindOnlinePlayers custombutton tip-static',
+    className: 'fshFindO nlinePlayers custombutton tip-static',
     type: 'button',
     value: 'Find Online Players',
     dataset: {

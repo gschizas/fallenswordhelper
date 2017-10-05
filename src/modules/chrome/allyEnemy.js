@@ -202,7 +202,7 @@ function makeDiv(data) {
     '<h4>Online Contacts <span id="fshResetEnemy">Reset</span></h4>' +
     '<div id="minibox-enemy"><ul id="fshContactList"></ul>';
   if (!calf.hideBuffSelected) {
-    wrapper += '<ul class="enemy-quick-buff">Quick Buff Selected</ul>';
+    wrapper += '<ul class="enemy-qu ick-buff">Quick Buff Selected</ul>';
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);

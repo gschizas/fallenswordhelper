@@ -89,11 +89,9 @@
 }
 
 /* Groups */
-table#stat {
+.fshgrpstat {
   font-size: x-small;
   border-top: 2px black solid;
-  border-spacing: 1px;
-  border-collapse: collapse;
 }
 
 /* Drop Items */
@@ -153,8 +151,8 @@ table#stat {
   box-shadow: 0 0 4px #4f3717;
 }
 
-div.fshFsty {font-size: 70%}
-div.fshFten {font-size: 11px;}
+.fshFsty div {font-size: 70%}
+.fshFten div {font-size: 11px;}
 .fshFten select {
   font-family: 'Open Sans', Helvetica, Arial;
   font-size: 11px;
@@ -213,7 +211,7 @@ div.fshFten {font-size: 11px;}
 }
 
 /* Top Lists */
-input.fshFindOnlinePlayers {
+.fshFindO.nlinePlayers {
   width: 120px;
   float: right;
   margin: 0 100px 0 0;
@@ -532,7 +530,7 @@ input.fshFindOnlinePlayers {
 .enemy-secure-trade {background-position: -222px -80px;}
 .enemy-trade {background-position: -234px -80px;}
 .player-row {white-space: nowrap}
-ul.enemy-quick-buff {
+.enemy-qu.ick-buff {
   clear: both;
   text-align: center;
   font-size: 11px;
@@ -692,13 +690,15 @@ table.fshInvFilter th {
   padding: 0;
   text-decoration: underline;
   -moz-user-select: text;
+  -ms-user-select: text;
+  -webkit-user-select: text;
   user-select: text;
 }
-.fshBl::-moz-focus-inner {
-  border: none;
+button::-moz-focus-inner {
+  border: 0;
   padding: 0;
 }
-button.fshBls {font-size: 84%;}
+.fshBls {font-size: 84%;}
 
 /* Create Aution Craft Buttons */
 .fshAC {
