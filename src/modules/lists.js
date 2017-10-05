@@ -112,7 +112,7 @@ function saveRawEditor() { // jQuery
 }
 
 function resetRawEditor() { // Legacy
-  if (location.search === '?cmd=notepad&blank=1&subcmd=auctionsearch') {
+  if (param.id === 'fshAso') {
     param.currentItems =
       JSON.parse(dataObj.defaults.quickSearchList);
   } else {param.currentItems = [];}
