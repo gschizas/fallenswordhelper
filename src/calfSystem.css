@@ -666,7 +666,7 @@ button::-moz-focus-inner {
 }
 .fshBl.fshBls {font-size: 84%;}
 
-/* Create Aution Craft Buttons */
+/* Create Auction Craft Buttons */
 .fshAC {
   margin: 10px auto 10px auto;
   text-align: center;
@@ -804,6 +804,9 @@ button::-moz-focus-inner {
 
 /* Stop resizable textareas */
 textarea {resize: none;}
+
+/* Quick Extract and Inventing results */
+.fshNbrList {list-style: decimal inside;}
 
 /*
  * Table styles
