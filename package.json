@@ -58,6 +58,7 @@
   "devDependencies": {
     "chokidar-cmd": "^1.2.1",
     "cost": "^1.2.3",
+    "csscomb": "^4.2.0",
     "eslint": "^4.6.1",
     "http-server": "^0.10.0",
     "ip": "^1.1.5",
