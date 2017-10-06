@@ -289,74 +289,6 @@ function getLength() {
 
 var calf = {};
 
-function mixin(obj, mixins) {
-  Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
-      mixin(obj[key], mixins[key]);
-    } else {
-      obj[key] = mixins[key];
-    }
-  });
-}
-
-function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {mixin(el, props);}
-  return el;
-}
-
-function createDiv(props) {
-  return cElement('div', props);
-}
-
-function createSpan(props) {
-  return cElement('span', props);
-}
-
-function createTable(props) {
-  return cElement('table', props);
-}
-
-function createTBody(props) {
-  return cElement('tbody', props);
-}
-
-function createTr(props) {
-  return cElement('tr', props);
-}
-
-function createTd(props) {
-  return cElement('td', props);
-}
-
-function createTFoot(props) {
-  return cElement('tfoot', props);
-}
-
-function createUl(props) {
-  return cElement('ul', props);
-}
-
-function createLi(props) {
-  return cElement('li', props);
-}
-
-function createButton(props) {
-  return cElement('button', props);
-}
-
-function createBr() {
-  return cElement('br');
-}
-
-function createAnchor(props) {
-  return cElement('a', props);
-}
-
-function createInput(props) {
-  return cElement('input', props);
-}
-
 var concurrent = 0;
 var paused$1 = true;
 var queue = [];
@@ -375,7 +307,7 @@ function doAjax(options, retries, dfr) {
   } else {
     opt = options;
   }
-  mixin(opt, {beforeSend: beforeSend});
+  opt.beforeSend = beforeSend;
   return $.ajax(opt).pipe(dfr.resolve,
     function(jqXhr, textStatus, errorThrown) {
       if (retries > 0 && jqXhr.status === 503) {
@@ -1072,9 +1004,13 @@ function dragDrop(event) {
   return false;
 }
 
-function dragStart(event) {
-  dragTarget = event.target;
-  var style = window.getComputedStyle(event.target, null);
+function dragStart(parent, event) {
+  if (parent) {
+    dragTarget = parent;
+  } else {
+    dragTarget = event.target;
+  }
+  var style = window.getComputedStyle(dragTarget, null);
   event.dataTransfer.setData('text/plain',
     parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
     (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
@@ -1082,11 +1018,9 @@ function dragStart(event) {
   document.body.addEventListener('drop', dragDrop, false);
 }
 
-function retOption(option, ifTrue, ifFalse) {
-  if (getValue(option)) {
-    return ifTrue;
-  }
-  return ifFalse;
+function draggable(element, parent) {
+  element.draggable = true;
+  element.addEventListener('dragstart', dragStart.bind(null, parent));
 }
 
 function retBool(bool, ifTrue, ifFalse) {
@@ -1096,10 +1030,13 @@ function retBool(bool, ifTrue, ifFalse) {
   return ifFalse;
 }
 
+function retOption(option, ifTrue, ifFalse) {
+  return retBool(getValue(option), ifTrue, ifFalse);
+}
+
 function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
-    document.getElementById('fshQuickLinks')
-      .addEventListener('dragstart', dragStart, false);
+    draggable(document.getElementById('fshQuickLinks'));
   }
 }
 
@@ -1107,13 +1044,12 @@ function haveNode(node, quickLinks) { // Native ?
   var quickLinksTopPx = getValue('quickLinksTopPx');
   var quickLinksLeftPx = getValue('quickLinksLeftPx');
   var draggableQuickLinks = getValue('draggableQuickLinks');
-  var draggableQuickLinksClass = retBool(draggableQuickLinks,
-    ' fshLink" draggable="true"', '"');
+  var draggableQuickLinksClass = retBool(draggableQuickLinks, ' fshMove', '');
   var html = '<div style="top:' + quickLinksTopPx + 'px; left:' +
     quickLinksLeftPx + 'px; background-image:url(\'' + imageServer +
     '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
-    retOption('keepHelperMenuOnScreen',
-      ' fshFixed', '') + draggableQuickLinksClass + '>';
+    retOption('keepHelperMenuOnScreen', ' fshFixed', '') +
+    draggableQuickLinksClass + '">';
   for (var i = 0; i < quickLinks.length; i += 1) {
     var newWindow = retBool(quickLinks[i].newWindow, ' target="new"', '');
     html += '<li><a href="' + escapeHtml(quickLinks[i].url) + '"' +
@@ -1187,6 +1123,74 @@ function changeGuildLogHREF() {
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
 }
 
+function mixin(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+      mixin(obj[key], mixins[key]);
+    } else {
+      obj[key] = mixins[key];
+    }
+  });
+}
+
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {mixin(el, props);}
+  return el;
+}
+
+function createDiv(props) {
+  return cElement('div', props);
+}
+
+function createSpan(props) {
+  return cElement('span', props);
+}
+
+function createTable(props) {
+  return cElement('table', props);
+}
+
+function createTBody(props) {
+  return cElement('tbody', props);
+}
+
+function createTr(props) {
+  return cElement('tr', props);
+}
+
+function createTd(props) {
+  return cElement('td', props);
+}
+
+function createTFoot(props) {
+  return cElement('tfoot', props);
+}
+
+function createUl(props) {
+  return cElement('ul', props);
+}
+
+function createLi(props) {
+  return cElement('li', props);
+}
+
+function createButton(props) {
+  return cElement('button', props);
+}
+
+function createBr() {
+  return cElement('br');
+}
+
+function createAnchor(props) {
+  return cElement('a', props);
+}
+
+function createInput(props) {
+  return cElement('input', props);
+}
+
 function getForage(forage) {
   // Wrap in jQuery Deferred because we're using 1.7
   // rather than using ES6 promise
@@ -1218,49 +1222,20 @@ function setForage(forage, data) {
   return dfr.promise();
 }
 
-function getBoxList(boxList) {
-  if (boxList) {return boxList;}
-  return '';
-}
-
-function storeFSBox(_boxList) {
-  var boxList = getBoxList(_boxList);
-  var fsbox = document.getElementById('minibox-fsbox')
-    .getElementsByClassName('message')[0].innerHTML;
-  if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
-  if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
-  setForage('fsh_fsboxcontent', boxList);
-}
-
-function injectFSBoxLog() {
-  var node = document.getElementById('minibox-fsbox');
-  if (!node) {return;}
-  var nodediv = node.lastElementChild;
-  var playerName = nodediv.getElementsByTagName('a');
-  if (playerName.length === 0) {return;}
-  getForage('fsh_fsboxcontent').done(storeFSBox);
-  playerName = playerName[0].textContent;
-  nodediv.insertAdjacentHTML('beforeend',
-    '<br><span class="fshPaleVioletRed">' +
-    '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
-    playerName + '">Ignore</a> ]</span> <span class="fshYellow">[ <a ' +
-    'href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent">Log</a> ]' +
-    '</span>');
-}
-
 var dotList;
 var dotCount;
-var redDot = '<span class="redDot tip-static" data-tipped="Offline"></span>';
+var redDot =
+  '<span class="fshDot redDot tip-static" data-tipped="Offline"></span>';
 var greenDiamond =
-  '<span class="greenDiamond tip-static" data-tipped="Online"></span>';
+  '<span class="fshDot greenDiamond tip-static" data-tipped="Online"></span>';
 var yellowDiamond =
-  '<span class="yellowDiamond tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot yellowDiamond tip-static" data-tipped="Offline"></span>';
 var orangeDiamond =
-  '<span class="orangeDiamond tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot orangeDiamond tip-static" data-tipped="Offline"></span>';
 var offlineDot =
-  '<span class="offlineDot tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot offlineDot tip-static" data-tipped="Offline"></span>';
 var sevenDayDot =
-  '<span class="sevenDayDot tip-static" data-tipped="Offline"></span>';
+  '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
 
 var pCC = document.getElementById('pCC');
 
@@ -1464,6 +1439,153 @@ function confirm(title, msgText, fn) { // jQuery
   }).dialog('open');
 }
 
+function injectFindPlayer() { // Bad jQuery
+  var findPlayerButton = $('input[value="Find Player"]');
+  var levelToTest = intValue($('dt.stat-level:first').next()
+    .text());
+  var characterVirtualLevel = getValue('characterVirtualLevel');
+  levelToTest = fallback(characterVirtualLevel, levelToTest);
+  var pvpLowerLevelModifier = 5;
+  if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
+  var pvpUpperLevelModifier = 5;
+  if (levelToTest >= 200) {pvpUpperLevelModifier = 10;}
+  findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
+    'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
+    (levelToTest - pvpLowerLevelModifier) + '&search_level_max=' +
+    (levelToTest + pvpUpperLevelModifier) + '&search_in_guild=0"><span ' +
+    'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
+    'index.php?cmd=findplayer&search_active=1&search_username=&' +
+    'search_level_min=' + (levelToTest - 25) + '&search_level_max=' +
+    (levelToTest + 25) + '&search_in_guild=0"><span style="color:blue;">' +
+    'Get GvG targets</span></a>');
+
+  $('table[class="width_full"]').find('a[href*="player_id"]')
+    .each(function(i, e) {
+      var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
+      $(e).after('<a style="color:blue;font-size:10px;" ' +
+        quickBuffHref(id[1]) + '>[b]</a>');
+    });
+}
+
+function marketplaceWarning(sellPrice) { // Legacy
+  var warningColor = 'green';
+  var warningText =
+    '</b><br>This is probably an offer that will please someone.';
+  if (sellPrice < 100000) {
+    warningColor = 'brown';
+    warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
+  }
+  if (sellPrice > 250000) {
+    warningColor = 'red';
+    warningText = '</b><br>Hold up there ... this is way to high a ' +
+      'price ... you should reconsider.';
+  }
+  var amount = findNode('//input[@id="amount"]').value;
+  var warningField = findNode('//td[@id="warningfield"]');
+  warningField.innerHTML = '<span style="color:' + warningColor +
+    ';">You are offering to buy <b>' + amount +
+    '</b> FSP for >> <b>' + addCommas(sellPrice) +
+    warningText + ' (Total: ' +
+    addCommas(amount * sellPrice +
+    Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
+}
+
+function addMarketplaceWarning() { // Legacy
+  var goldPerPoint = findNode('//input[@id="price"]');
+  var sellPrice = goldPerPoint.value;
+  if (sellPrice.search(/^[0-9]*$/) !== -1) {
+    marketplaceWarning(sellPrice);
+  }
+}
+
+function addMarketplaceWidgets() { // Legacy
+  var requestTable = findNode(
+    '//table[tbody/tr/td/input[@value="Confirm Request"]]');
+  var newRow = requestTable.insertRow(2);
+  var newCell = newRow.insertCell(0);
+  newCell.id = 'warningfield';
+  newCell.colSpan = '2';
+  newCell.align = 'center';
+
+  document.getElementById('price').addEventListener('keyup',
+    addMarketplaceWarning, true);
+  document.getElementById('amount').addEventListener('keyup',
+    addMarketplaceWarning, true);
+}
+
+function injectNotepad() { // jQuery
+  $('#notepad_notes')
+    .attr('cols', '90')
+    .attr('rows', '30')
+    .css('resize', 'none');
+}
+
+function injectFsBoxContent(injector) { // jQuery
+  var content = injector || pCC;
+  content.innerHTML = makePageTemplate('FS Box Log', '',
+    'fsboxclear', 'Clear', 'fsboxdetail');
+  getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
+    document.getElementById('fsboxdetail').innerHTML = fsboxcontent;
+  });
+  document.getElementById('fsboxclear')
+    .addEventListener('click', function() {
+      setForage('fsh_fsboxcontent', '');
+      location.reload();
+    }, true);
+}
+
+function jQueryDialog(fn) { // jQuery
+  var content = document.getElementById('content');
+  if (content) {content.innerHTML = '';} else {
+    content = createDiv({
+      id: 'content',
+      style: {display: 'none'}
+    });
+    document.body.appendChild(content);
+  }
+  $(content).dialog({
+    width: 640,
+    modal: true,
+    position: {my: 'top', at: 'top', offset: '0 60', collision: 'none'},
+    resizable: false
+  });
+  fn(content);
+}
+
+function getBoxList(boxList) {
+  if (boxList) {return boxList;}
+  return '';
+}
+
+function storeFSBox(_boxList) {
+  var boxList = getBoxList(_boxList);
+  var fsbox = document.getElementById('minibox-fsbox')
+    .getElementsByClassName('message')[0].innerHTML;
+  if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
+  if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
+  setForage('fsh_fsboxcontent', boxList);
+}
+
+function injectFSBoxLog() {
+  var node = document.getElementById('minibox-fsbox');
+  if (!node) {return;}
+  var nodediv = node.lastElementChild;
+  var playerName = nodediv.getElementsByTagName('a');
+  if (playerName.length === 0) {return;}
+  getForage('fsh_fsboxcontent').done(storeFSBox);
+  playerName = playerName[0].textContent;
+  nodediv.insertAdjacentHTML('beforeend',
+    '<br><span class="fshPaleVioletRed">' +
+    '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
+    playerName + '">Ignore</a> ]</span> ');
+  var log = createSpan({
+    className: 'fshYellow',
+    innerHTML: '[ <span class="fshLink">Log</span> ]'
+  });
+  log.addEventListener('click', function() {jQueryDialog(injectFsBoxContent);});
+  nodediv.appendChild(log);
+}
+
 function displayBuffLog(buffLog) {
   document.getElementById('bufflog').innerHTML = buffLog;
 }
@@ -1481,6 +1603,146 @@ function injectBuffLog(injector) {
 }
 
 var content;
+var monsterAry;
+
+function noMobs() {
+  content.innerHTML = '<span>No monster information! ' +
+    'Please enable entity log and travel a bit to see the world</span>';
+}
+
+function mobRows() {
+  var result = '';
+  for (var i = 0; i < monsterAry.length; i += 1) {
+    result += '<tr>' +
+      '<td class="fshCenter">' + monsterAry[i].image + '</td>' +
+      '<td>' + monsterAry[i].name + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].creature_class + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].level + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].attack + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].defense + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].armor + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].damage + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].hp + '</td>' +
+      '<td class="fshCenter">' + monsterAry[i].enhancements + '</td></tr>';
+  }
+  return result;
+}
+
+function drawMobs() {
+  var inject = document.getElementById('entityTableOutput');
+  if (!monsterAry || !inject) {return;}
+  inject.innerHTML = mobRows();
+}
+
+function findSortType(target) {
+  return target.getAttribute('sortType') || 'string';
+}
+
+function sortMonsterAry(sortType) {
+  if (sortType === 'string') {
+    monsterAry.sort(stringSort);
+  } else {
+    monsterAry.sort(numberSort);
+  }
+}
+
+function sortCol(target) {
+  var headerClicked = target.getAttribute('sortKey');
+  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
+  if (calf.sortBy && calf.sortBy === headerClicked) {
+    calf.sortAsc = !calf.sortAsc;
+  }
+  calf.sortBy = headerClicked;
+  var sortType = findSortType(target);
+  sortMonsterAry(sortType);
+  drawMobs();
+}
+
+function doHandlers(evt) {
+  var target = evt.target;
+  if (target.id === 'clearEntityLog') {
+    setForage('fsh_monsterLog', '');
+    noMobs();
+    return;
+  }
+  if (!target.classList.contains('fshLink')) {return;}
+  sortCol(target);
+}
+
+function drawTable() {
+  if (!monsterAry) {return;}
+  content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" ' +
+    'width="100%"><tr class="fshBlack fshWhite">' +
+    '<td width="90%" class="fshCenter"><b>Entity Information</b></td>' +
+    '<td width="10%">[<span id="clearEntityLog" class="fshPoint">Clear' +
+    '</span>]</td></tr></table>' +
+    '<table cellspacing="1" cellpadding="2" border="0"><thead>' +
+    '<tr class="fshVerySoftOrange">' +
+    '<th width="25%" class="fshLink" sortkey="name" colspan="2">Entity</th>' +
+    '<th class="fshCenter fshLink" sortkey="creature_class">Class</th>' +
+    '<th class="fshCenter fshLink" sortkey="level" sorttype="number">Lvl</th>' +
+    '<th class="fshCenter">Attack</th>' +
+    '<th class="fshCenter">Defence</th>' +
+    '<th class="fshCenter">Armor</th>' +
+    '<th class="fshCenter">Damage</th>' +
+    '<th class="fshCenter">HP</th>' +
+    '<th class="fshCenter">Enhancements</th>' +
+    '</tr></thead><tbody id="entityTableOutput"></tbody></table>';
+  content.addEventListener('click', doHandlers);
+}
+
+function prepMonster(data) {
+  monsterAry = Object.keys(data).reduce(function(prev, curr) {
+    var tmpObj = data[curr];
+    tmpObj.name = curr;
+    tmpObj.image = '<img class="tip-static" src="' + imageServer +
+      '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
+      imageServer + '/creatures/' + tmpObj.image_id +
+      '.jpg\' width=200 height=200>" width=40 height=40>';
+    tmpObj.level = addCommas(tmpObj.level);
+    tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
+    tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
+    tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
+    tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
+    tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
+    var enhancements;
+    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
+    if (enhancements && enhancements.length > 0) {
+      var tmp = '<span class="fshXXSmall">';
+      tmp += enhancements.reduce(function(_prev, _curr) {
+        return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
+          tmpObj.enhancements[_curr].min + ' - ' +
+          tmpObj.enhancements[_curr].max + '</span><br>';
+      }, '');
+      tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
+    } else {
+      tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
+    }
+    prev.push(tmpObj);
+    return prev;
+  }, []);
+}
+
+function prepAry(data) {
+  if (!data || data === '') {
+    noMobs();
+    return;
+  }
+  prepMonster(data);
+  calf.sortBy = 'level';
+  calf.sortAsc = true;
+  monsterAry.sort(numberSort);
+  drawTable();
+  drawMobs();
+}
+
+function injectMonsterLog(injector) {
+  content = injector || pCC;
+  if (!content) {return;}
+  getForage('fsh_monsterLog').done(prepAry);
+}
+
+var content$1;
 var combatLog = [];
 var textArea;
 
@@ -1511,7 +1773,7 @@ function gotCombatLog(data) {
     'yvong.com/fshlogparser.php<br />' +
     '<tr><td colspan=4 align="center"><input type="hidden" value="true" ' +
     'name="submit"><input type="submit" value="Analyze!"></td></tr>';
-  content.innerHTML = '<h1>Combat Logs</h1><br /><form action="http://' +
+  content$1.innerHTML = '<h1>Combat Logs</h1><br /><form action="http://' +
     'evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
     '<div align="center"><textarea align="center" cols="80" rows="25" ' +
     'readonly style="background-color:white;font-family:Consolas,\'' +
@@ -1534,7 +1796,7 @@ function gotCombatLog(data) {
 }
 
 function injectNotepadShowLogs(injector) { // jQuery.min
-  content = injector || pCC;
+  content$1 = injector || pCC;
   getForage('fsh_combatLog').done(gotCombatLog);
 }
 
@@ -1553,7 +1815,7 @@ function buildOnlinePlayerData() { // jQuery
   Object.keys(onlinePlayers).forEach(function(player) {
     var guildImage = $('<div/>')
       .append(onlinePlayers[player][0]);
-    $('img', guildImage).addClass('center');
+    $('img', guildImage).addClass('fshImgCntr');
     onlineData.push([
       guildImage.html(),
       onlinePlayers[player][1],
@@ -1713,7 +1975,7 @@ function injectOnlinePlayersNew() { // jQuery
   var refreshButton;
   if (now - lastCheck > 300000) {
     refreshButton = '<span> (takes a while to refresh so only do it ' +
-      'if you really need to) </span><span id="fshRefresh"' +
+      'if you really need to) </span><span id="fshRefresh" class="fshLink"' +
       '>[Refresh]</span>';
   } else {
     refreshButton = '<span>[ Wait ' + Math.round(300 - (now -
@@ -1739,7 +2001,7 @@ function injectOnlinePlayers(content) { // jQuery
   injectOnlinePlayersNew();
 }
 
-var content$1;
+var content$2;
 var recipebook;
 var hideRecipes = [];
 var output;
@@ -1977,14 +2239,14 @@ function gotRecipeBook(data) {
   if (getValue('hideRecipes')) {
     hideRecipes = shouldBeArray('hideRecipeNames');
   }
-  content$1.innerHTML = '<table class="fshInvFilter"><thead><tr>' +
+  content$2.innerHTML = '<table class="fshInvFilter"><thead><tr>' +
     '<th width="90%"><b>&nbsp;Recipe Manager</b></th>' +
     '<th width="10%" class="fshBtnBox">[' +
     '<span id="rfsh" class="fshLink">' +
     'Refresh</span>]</th>' +
     '</tr></thead></table>';
   output = createDiv();
-  content$1.insertAdjacentElement('beforeend', output);
+  content$2.insertAdjacentElement('beforeend', output);
   if (!recipebook) {
     parseInventingStart();
   } else {
@@ -2002,9 +2264,9 @@ function rmEvtHdl(evt) {
 }
 
 function injectRecipeManager(injector) { // jQuery.min
-  content$1 = injector || pCC;
+  content$2 = injector || pCC;
   getForage('fsh_recipeBook').done(gotRecipeBook);
-  content$1.addEventListener('click', rmEvtHdl);
+  content$2.addEventListener('click', rmEvtHdl);
 }
 
 function getInventory() {
@@ -2016,6 +2278,21 @@ function getInventory() {
     dataType: 'json',
     url: 'index.php?cmd=export&subcmd=' + subcmd
   });
+}
+
+function outputResult(result, handle) {
+  handle.insertAdjacentHTML('beforeend',
+    '<li class="fshNbrList">' + result + '</li>');
+}
+
+var lastMsg;
+
+function jsonFail(json, handle) {
+  if (!json.success && lastMsg !== json.error.message) {
+    lastMsg = json.error.message;
+    outputResult(json.error.message, handle);
+  }
+  if (!json.success) {return true;}
 }
 
 function callApp(data) {
@@ -2042,7 +2319,6 @@ var selectST;
 var selectMain;
 var resourceList;
 var buyResult;
-var lastMsg;
 
 function backpackRemove(invId) {
   extractInv.some(function(el, i, ary) {
@@ -2054,20 +2330,10 @@ function backpackRemove(invId) {
   });
 }
 
-function outputResult(result) {
-  buyResult.insertAdjacentHTML('beforeend',
-    '<li style="list-style: decimal inside;">' + result + '</li>');
-}
-
 function quickDoneExtracted(invId, json) {
-  if (!json.success && lastMsg !== json.error.message) {
-    lastMsg = json.error.message;
-    outputResult(json.error.message);
-    return;
-  }
-  if (!json.success) {return;}
+  if (jsonFail(json, buyResult)) {return;}
   backpackRemove(invId);
-  outputResult('Item Extracted.');
+  outputResult('Item Extracted.', buyResult);
 }
 
 function doExtract(target) {
@@ -3532,13 +3798,11 @@ function saveConfig(evt) { // Legacy
 }
 
 function showLogs() {
-  document.location = server +
-    'index.php?cmd=notepad&blank=1&subcmd=showlogs';
+  jQueryDialog(injectNotepadShowLogs);
 }
 
 function showMonsterLogs() {
-  document.location = server +
-    'index.php?cmd=notepad&blank=1&subcmd=monsterlog';
+  jQueryDialog(injectMonsterLog);
 }
 
 function createEventListeners() {
@@ -3730,15 +3994,19 @@ function queueRecallItem(o) {
 }
 
 var disableQuickWearPrompts;
-var content$2;
+var content$3;
 var itemList;
 
-function doUseItem(self) { // jQuery.min
+function doAction(self, fn, verb) { // jQuery.min
   var invId = self.dataset.itemid;
-  useItem(invId).done(function(data) {
+  fn(invId).done(function(data) {
     if (data.r !== 0) {return;}
-    self.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+    self.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
   });
+}
+
+function doUseItem(self) {
+  doAction(self, useItem, 'Used');
 }
 
 function useProfileInventoryItem(self) {
@@ -3752,28 +4020,28 @@ function useProfileInventoryItem(self) {
   }
 }
 
-function equipProfileInventoryItem(self) { // jQuery.min
-  var invId = self.dataset.itemid;
-  equipItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
+function equipProfileInventoryItem(self) {
+  doAction(self, equipItem, 'Worn');
+}
+
+function processItems(folderId, thisFolder, o) {
+  var tr = o.dom;
+  if (folderId === '0') {
+    tr.classList.remove('fshHide');
+  } else {
+    var force = folderId !== thisFolder.toString();
+    toggleForce(tr, force);
+  }
+}
+
+function processFolder(folderId, aFolder) {
+  var thisFolder = aFolder.id;
+  aFolder.items.forEach(processItems.bind(null, folderId, thisFolder));
 }
 
 function hideFolders(self) {
   var folderId = self.dataset.folder;
-  itemList.result.forEach(function(aFolder) {
-    var thisFolder = aFolder.id;
-    aFolder.items.forEach(function(o) {
-      var tr = o.dom;
-      if (folderId === '0') {
-        tr.classList.remove('fshHide');
-      } else {
-        var force = folderId !== thisFolder.toString();
-        toggleForce(tr, force);
-      }
-    });
-  });
+  itemList.result.forEach(processFolder.bind(null, folderId));
 }
 
 function togglePref() {
@@ -3822,15 +4090,15 @@ function createInvTabs() {
   return createDiv({
     id: 'invTabs',
     className: 'ui-tabs ui-widget-content ui-corner-all',
-    innerHTML: '<input id="tab1" type="radio" name="tabs" checked>' +
-      '<input id="tab2" type="radio" name="tabs">' +
+    innerHTML: '<input id="qwtab1" type="radio" name="qwtabs" checked>' +
+      '<input id="qwtab2" type="radio" name="qwtabs">' +
       '<ul class="ui-tabs-nav ui-helper-reset ' +
         'ui-helper-clearfix ui-widget-header ui-corner-all">' +
       '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
-      '<label for="tab1">Quick Wear / Use / Extract<br>Manager</label>' +
+      '<label for="qwtab1">Quick Wear / Use / Extract<br>Manager</label>' +
       '</li>' +
       '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
-      '<label for="tab2">Inventory Manager Counter' +
+      '<label for="qwtab2">Inventory Manager Counter' +
         '<br>filtered by AH Quick Search</label>' +
       '</li><div id="setPrompt" class="fshFloatRight fshCenter"></div></ul>'
   });
@@ -3841,8 +4109,8 @@ function showQuickWear(appInv) {
   var invTabs = createInvTabs();
   var invTabsQw = createQuickWear(appInv);
   invTabs.appendChild(invTabsQw);
-  content$2.innerHTML = '';
-  content$2.appendChild(invTabs);
+  content$3.innerHTML = '';
+  content$3.appendChild(invTabs);
   invTabs.addEventListener('click', listen$1);
   invTabs.appendChild(showAHInvManager(appInv));
   document.getElementById('setPrompt').insertAdjacentHTML('beforeend',
@@ -3850,148 +4118,336 @@ function showQuickWear(appInv) {
 }
 
 function insertQuickWear(injector) {
-  content$2 = injector || pCC;
-  if (!content$2) {return;}
-  content$2.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
+  content$3 = injector || pCC;
+  if (!content$3) {return;}
+  content$3.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
 }
 
-/* eslint-disable no-multi-spaces, max-len */
-var buffList = [
-  {name: 'Rage',                stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 0,   nicks: 'rage'},
-  {name: 'Stun',                stamina: 15, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 1,   nicks: 'stun,st'},
-  {name: 'Fury',                stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 0, skillId: 2,   nicks: 'fury'},
-  {name: 'Blood Thirst',        stamina: 10, duration: 45,   minCastLevel: 25,   treeId: 0, skillId: 4,   nicks: 'blood thirst,bloodthirst,bt'},
-  {name: 'Enchant Weapon',      stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 0, skillId: 5,   nicks: 'enchant weapon,ew'},
-  {name: 'Berserk',             stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 0, skillId: 3,   nicks: 'berserk'},
-  {name: 'Holy Flame',          stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 0, skillId: 6,   nicks: 'holy flame,hf'},
-  {name: 'Dark Curse',          stamina: 20, duration: 60,   minCastLevel: 150,  treeId: 0, skillId: 7,   nicks: 'dark curse,dc'},
-  {name: 'Shockwave',           stamina: 20, duration: 90,   minCastLevel: 200,  treeId: 0, skillId: 29,  nicks: 'shockwave,sw,shock'},
-  {name: 'Ignite',              stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 0, skillId: 30,  nicks: 'ignite,ign'},
-  {name: 'Super Elite Slayer',  stamina: 25, duration: 15,   minCastLevel: 250,  treeId: 0, skillId: 31,  nicks: 'super elite slayer,ses,se slayer'},
-  {name: 'Wither',              stamina: 15, duration: 60,   minCastLevel: 250,  treeId: 0, skillId: 32,  nicks: 'wither,with'},
-  {name: 'Shatter Armor',       stamina: 20, duration: 60,   minCastLevel: 300,  treeId: 0, skillId: 33,  nicks: 'shatter armor,sa'},
-  {name: 'Death Wish',          stamina: 20, duration: 45,   minCastLevel: 300,  treeId: 0, skillId: 34,  nicks: 'deathwish,dw,deathw,death wish'},
-  {name: 'Spell Breaker',       stamina: 35, duration: 45,   minCastLevel: 300,  treeId: 0, skillId: 35,  nicks: 'spell breaker,sb'},
-  {name: 'Spectral Knight',     stamina: 15, duration: 45,   minCastLevel: 400,  treeId: 0, skillId: 48,  nicks: 'spectral knight,sk,spec knight'},
-  {name: 'Keen Edge',           stamina: 10, duration: 60,   minCastLevel: 400,  treeId: 0, skillId: 47,  nicks: 'keen edge,ke'},
-  {name: 'Arterial Strike',     stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 0, skillId: 49,  nicks: 'arterial strike,as,art strike,art str'},
-  {name: 'Death Dealer',        stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 0, skillId: 50,  nicks: 'death dealer,dd'},
-  {name: 'Savagery',            stamina: 15, duration: 45,   minCastLevel: 600,  treeId: 0, skillId: 51,  nicks: 'savagery,savage'},
-  {name: 'Chi Strike',          stamina: 20, duration: 90,   minCastLevel: 700,  treeId: 0, skillId: 52,  nicks: 'chi strike,chi,chis,chi str'},
-  {name: 'Shield Strike',       stamina: 20, duration: 45,   minCastLevel: 700,  treeId: 0, skillId: 53,  nicks: 'shield strike,ss,sh str'},
-  {name: 'Demoralize',          stamina: 25, duration: 30,   minCastLevel: 800,  treeId: 0, skillId: 73,  nicks: 'demoralize,dem'},
-  {name: 'Poison',              stamina: 25, duration: 60,   minCastLevel: 800,  treeId: 0, skillId: 70,  nicks: 'poison,poi'},
-  {name: 'Iron Fist',           stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 74,  nicks: 'iron fist,if'},
-  {name: 'Spell Leech',         stamina: 50, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 79,  nicks: 'spell leech,sl'},
-  {name: 'Distraction',         stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 0, skillId: 78,  nicks: 'distraction,dis'},
-  {name: 'Coordinated Attack',  stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 0, skillId: 118, nicks: 'coordinated attack,coorda'},
-  {name: 'Undermine',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 0, skillId: 108, nicks: 'undermine,um'},
-  {name: 'Cursed Rune',         stamina: 30, duration: 120,  minCastLevel: 1000, treeId: 0, skillId: 89,  nicks: 'cursed rune,crune'},
-  {name: 'Anti Deflect',        stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 0, skillId: 105, nicks: 'anti deflect,ad'},
-  {name: 'Overkill',            stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 0, skillId: 109, nicks: 'overkill,ok'},
-  {name: 'Smashing Hammer',     stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 0, skillId: 111, nicks: 'smashing hammer,sh'},
-  {name: 'Mighty Vigor',        stamina: 35, duration: 60,   minCastLevel: 1200, treeId: 0, skillId: 113, nicks: 'mighty vigor,mv'},
-  {name: 'Fist Fight',          stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 0, skillId: 115, nicks: 'fist fight,ff'},
-  {name: 'Cursed Ring',         stamina: 30, duration: 120,  minCastLevel: 1400, treeId: 0, skillId: 88,  nicks: 'cursed ring,cring'},
-  {name: 'Sharpen',             stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 0, skillId: 106, nicks: 'sharpen,sharp'},
-  {name: 'Balanced Attack',     stamina: 30, duration: 90,   minCastLevel: 1400, treeId: 0, skillId: 116, nicks: 'balanced attack,ba'},
-  {name: 'Heavy Weight',        stamina: 20, duration: 120,  minCastLevel: 1600, treeId: 0, skillId: 146, nicks: 'heavy weight, hw'},
-  {name: 'Armored Strike',      stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 0, skillId: 130, nicks: 'armored strike, armstr'},
-  {name: 'Invert',              stamina: 40, duration: 180,  minCastLevel: 2000, treeId: 0, skillId: 173, nicks: 'invert'},
-  {name: 'Reign of Terror',     stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 0, skillId: 174, nicks: 'reign of terror'},
-  {name: 'Critical Strike',     stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 0, skillId: 175, nicks: 'critical strike'},
-  {name: 'Great Vigor',         stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 1, skillId: 12,  nicks: 'great vigor,vigor,gv'},
-  {name: 'Fortify',             stamina: 10, duration: 120,  minCastLevel: 25,   treeId: 1, skillId: 8,   nicks: 'fortify'},
-  {name: 'Evade',               stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 1, skillId: 10,  nicks: 'evade'},
-  {name: 'Absorb',              stamina: 20, duration: 120,  minCastLevel: 25,   treeId: 1, skillId: 13,  nicks: 'absorb,abs'},
-  {name: 'Rock Skin',           stamina: 15, duration: 90,   minCastLevel: 75,   treeId: 1, skillId: 11,  nicks: 'rock skin,rs'},
-  {name: 'Enchanted Armor',     stamina: 10, duration: 90,   minCastLevel: 75,   treeId: 1, skillId: 9,   nicks: 'enchanted armor,enchant armor,ea,ench arm,ench armor'},
-  {name: 'Aura of Protection',  stamina: 20, duration: 90,   minCastLevel: 150,  treeId: 1, skillId: 15,  nicks: 'aura of protection,aop,aofp'},
-  {name: 'Deflect',             stamina: 25, duration: 300,  minCastLevel: 150,  treeId: 1, skillId: 14,  nicks: 'deflect,defl'},
-  {name: 'Force Shield',        stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 1, skillId: 27,  nicks: 'force shield,fs'},
-  {name: 'Unbreakable',         stamina: 20, duration: 90,   minCastLevel: 200,  treeId: 1, skillId: 28,  nicks: 'unbreakable,ub,unb,unbr'},
-  {name: 'Honor',               stamina: 10, duration: 180,  minCastLevel: 800,  treeId: 1, skillId: 82,  nicks: 'honor'},
-  {name: 'Assist',              stamina: 30, duration: 120,  minCastLevel: 250,  treeId: 1, skillId: 36,  nicks: 'assist,ass'},
-  {name: 'Constitution',        stamina: 25, duration: 30,   minCastLevel: 300,  treeId: 1, skillId: 37,  nicks: 'constitution,const'},
-  {name: 'Counter Attack',      stamina: 20, duration: 60,   minCastLevel: 400,  treeId: 1, skillId: 54,  nicks: 'counter attack,ca'},
-  {name: 'Summon Shield Imp',   stamina: 50, duration: 60,   minCastLevel: 400,  treeId: 1, skillId: 55,  nicks: 'summon shield imp,ssi,imp'},
-  {name: 'Vision',              stamina: 20, duration: 90,   minCastLevel: 500,  treeId: 1, skillId: 56,  nicks: 'vision,vis'},
-  {name: 'Fortitude',           stamina: 15, duration: 90,   minCastLevel: 500,  treeId: 1, skillId: 57,  nicks: 'fortitude,fort'},
-  {name: 'Flinch',              stamina: 20, duration: 60,   minCastLevel: 600,  treeId: 1, skillId: 58,  nicks: 'flinch'},
-  {name: 'Terrorize',           stamina: 20, duration: 60,   minCastLevel: 700,  treeId: 1, skillId: 59,  nicks: 'terrorize,terror'},
-  {name: 'Nightmare Visage',    stamina: 40, duration: 1000, minCastLevel: 700,  treeId: 1, skillId: 60,  nicks: 'nightmare visage,nv,visage'},
-  {name: 'Sanctuary',           stamina: 25, duration: 30,   minCastLevel: 800,  treeId: 1, skillId: 44,  nicks: 'sanctuary,sanc'},
-  {name: 'Dull Edge',           stamina: 10, duration: 60,   minCastLevel: 800,  treeId: 1, skillId: 46,  nicks: 'dull edge,de'},
-  {name: 'Erosion',             stamina: 25, duration: 180,  minCastLevel: 900,  treeId: 1, skillId: 80,  nicks: 'erosion,ero'},
-  {name: 'Avert Gaze',          stamina: 10, duration: 60,   minCastLevel: 900,  treeId: 1, skillId: 71,  nicks: 'avert gaze,ag'},
-  {name: 'Enchant Shield',      stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 1, skillId: 77,  nicks: 'enchant shield,es'},
-  {name: 'Smite',               stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 1, skillId: 97,  nicks: 'smite,sm'},
-  {name: 'Balanced Defense',    stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 117, nicks: 'balanced defense,bd'},
-  {name: 'Bastion',             stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 122, nicks: 'bastion,bast'},
-  {name: 'Side Step',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 1, skillId: 86,  nicks: 'side step,sstep'},
-  {name: 'High Guard',          stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 1, skillId: 96,  nicks: 'high guard,hg'},
-  {name: 'Barricade',           stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 98,  nicks: 'barricade,bar'},
-  {name: 'Coordinated Defense', stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 119, nicks: 'coordinated defense,cd'},
-  {name: 'Degrade',             stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 1, skillId: 121, nicks: 'degrade,deg,dg'},
-  {name: 'Retaliate',           stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 123, nicks: 'retaliate,ret'},
-  {name: 'Shame',               stamina: 35, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 110, nicks: 'shame'},
-  {name: 'Dispel Curse',        stamina: 35, duration: 60,   minCastLevel: 1400, treeId: 1, skillId: 114, nicks: 'dispel curse,dispel'},
-  {name: 'Anchored',            stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 154, nicks: 'anchored, anch, anchor'},
-  {name: 'Hardened',            stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 153, nicks: 'hardened, hard, harden'},
-  {name: 'Armor Boost',         stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 136, nicks: 'armor boost, armbst, arm bst, armb'},
-  {name: 'Shield Wall',         stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 1, skillId: 135, nicks: 'shield wall, shldwll, sw'},
-  {name: 'Layered Armor',       stamina: 40, duration: 60,   minCastLevel: 2000, treeId: 1, skillId: 170, nicks: 'layered armor'},
-  {name: 'Defensive Aura',      stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 1, skillId: 171, nicks: 'defensive aura'},
-  {name: 'Fumble',              stamina: 40, duration: 180,  minCastLevel: 3000, treeId: 1, skillId: 172, nicks: 'fumble'},
-  {name: 'Find Item',           stamina: 10, duration: 60,   minCastLevel: 1,    treeId: 2, skillId: 16,  nicks: 'find item,fi'},
-  {name: 'Treasure Hunter',     stamina: 15, duration: 120,  minCastLevel: 1,    treeId: 2, skillId: 17,  nicks: 'treasure hunter,th,treas hunter'},
-  {name: 'Deep Pockets',        stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 2, skillId: 22,  nicks: 'deep pockets,dp'},
-  {name: 'Quest Finder',        stamina: 5,  duration: 90,   minCastLevel: 1,    treeId: 2, skillId: 61,  nicks: 'quest finder,qf'},
-  {name: 'Adept Learner',       stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 2, skillId: 19,  nicks: 'adept learner,al'},
-  {name: 'Defiance',            stamina: 15, duration: 120,  minCastLevel: 25,   treeId: 2, skillId: 18,  nicks: 'defiance'},
-  {name: 'Librarian',           stamina: 10, duration: 60,   minCastLevel: 75,   treeId: 2, skillId: 20,  nicks: 'librarian,lib,libr'},
-  {name: 'Merchant',            stamina: 10, duration: 60,   minCastLevel: 75,   treeId: 2, skillId: 21,  nicks: 'merchant,merch,merc'},
-  {name: 'Last Ditch',          stamina: 15, duration: 120,  minCastLevel: 150,  treeId: 2, skillId: 23,  nicks: 'last ditch,ld'},
-  {name: 'Animal Magnetism',    stamina: 10, duration: 60,   minCastLevel: 200,  treeId: 2, skillId: 24,  nicks: 'animal magnetism,animag,ani mag,am'},
-  {name: 'Empower',             stamina: 20, duration: 60,   minCastLevel: 200,  treeId: 2, skillId: 25,  nicks: 'empower,emp'},
-  {name: 'Doubler',             stamina: 5,  duration: 120,  minCastLevel: 200,  treeId: 2, skillId: 26,  nicks: 'doubler,doub,db'},
-  {name: 'Conserve',            stamina: 10, duration: 45,   minCastLevel: 250,  treeId: 2, skillId: 39,  nicks: 'conserve,cons,consv,con'},
-  {name: 'Brewing Master',      stamina: 10, duration: 30,   minCastLevel: 250,  treeId: 2, skillId: 40,  nicks: 'brewing master,bm,brm,brewm'},
-  {name: 'Four Leaf',           stamina: 20, duration: 60,   minCastLevel: 250,  treeId: 2, skillId: 41,  nicks: 'four leaf,4l,fl'},
-  {name: 'Extend',              stamina: 30, duration: 30,   minCastLevel: 300,  treeId: 2, skillId: 42,  nicks: 'extend,ext'},
-  {name: 'Inventor',            stamina: 15, duration: 60,   minCastLevel: 400,  treeId: 2, skillId: 62,  nicks: 'inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1'},
-  {name: 'Extractor',           stamina: 15, duration: 60,   minCastLevel: 400,  treeId: 2, skillId: 63,  nicks: 'extractor,extr'},
-  {name: 'Inventor II',         stamina: 20, duration: 60,   minCastLevel: 500,  treeId: 2, skillId: 64,  nicks: 'inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2'},
-  {name: 'Buff Master',         stamina: 10, duration: 60,   minCastLevel: 500,  treeId: 2, skillId: 65,  nicks: 'buff master,buffm,bum'},
-  {name: 'Reflection',          stamina: 10, duration: 90,   minCastLevel: 600,  treeId: 2, skillId: 66,  nicks: 'reflection,ref,refl,reflect'},
-  {name: 'Guild Buffer',        stamina: 10, duration: 90,   minCastLevel: 600,  treeId: 2, skillId: 160, nicks: 'guild buffer, gldbfr, gb'},
-  {name: 'Light Foot',          stamina: 15, duration: 120,  minCastLevel: 700,  treeId: 2, skillId: 67,  nicks: 'light foot,lf'},
-  {name: 'Mesmerize',           stamina: 20, duration: 60,   minCastLevel: 700,  treeId: 2, skillId: 68,  nicks: 'mesmerize,mesmer,mes,mez'},
-  {name: 'Resource Finder',     stamina: 25, duration: 90,   minCastLevel: 800,  treeId: 2, skillId: 76,  nicks: 'resource finder,rf'},
-  {name: 'Quest Hunter',        stamina: 25, duration: 120,  minCastLevel: 800,  treeId: 2, skillId: 166, nicks: 'quest hunter'},
-  {name: 'Gloat',               stamina: 10, duration: 30,   minCastLevel: 900,  treeId: 2, skillId: 81,  nicks: 'gloat'},
-  {name: 'Sacrifice',           stamina: 25, duration: 90,   minCastLevel: 900,  treeId: 2, skillId: 75,  nicks: 'sacrifice,sac'},
-  {name: 'Reckoning',           stamina: 25, duration: 60,   minCastLevel: 900,  treeId: 2, skillId: 72,  nicks: 'reckoning,rec,rek'},
-  {name: 'Reinforce',           stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 2, skillId: 126, nicks: 'reinforce,rein'},
-  {name: 'Bodyguard',           stamina: 30, duration: 120,  minCastLevel: 1000, treeId: 2, skillId: 120, nicks: 'bodyguard,bg'},
-  {name: 'Riposte',             stamina: 30, duration: 60,   minCastLevel: 1000, treeId: 2, skillId: 124, nicks: 'riposte,rip'},
-  {name: 'Severe Condition',    stamina: 30, duration: 90,   minCastLevel: 1000, treeId: 2, skillId: 101, nicks: 'severe condition,sc'},
-  {name: 'Sealed',              stamina: 35, duration: 60,   minCastLevel: 1200, treeId: 2, skillId: 112, nicks: 'sealed,seal'},
-  {name: 'Righteous',           stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 2, skillId: 107, nicks: 'righteous,right'},
-  {name: 'Epic Forge',          stamina: 30, duration: 90,   minCastLevel: 1200, treeId: 2, skillId: 102, nicks: 'epic forge,ef'},
-  {name: 'Golden Shield',       stamina: 30, duration: 60,   minCastLevel: 1200, treeId: 2, skillId: 103, nicks: 'golden shield,gs'},
-  {name: 'Stalker',             stamina: 35, duration: 90,   minCastLevel: 1400, treeId: 2, skillId: 125, nicks: 'stalker,stalk'},
-  {name: 'Ageless',             stamina: 30, duration: 90,   minCastLevel: 1400, treeId: 2, skillId: 100, nicks: 'ageless,age'},
-  {name: 'Extractor II',        stamina: 30, duration: 60,   minCastLevel: 1400, treeId: 2, skillId: 104, nicks: 'extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2'},
-  {name: 'Epic Craft',          stamina: 30, duration: 60,   minCastLevel: 1600, treeId: 2, skillId: 159, nicks: 'epic craft, epc crft, epccrft, ec'},
-  {name: 'Gold Foot',           stamina: 20, duration: 120,  minCastLevel: 1600, treeId: 2, skillId: 137, nicks: 'gold foot, goldfoot, gldft, gf'},
-  {name: 'Titan Doubler',       stamina: 40, duration: 120,  minCastLevel: 2000, treeId: 2, skillId: 167, nicks: 'titan doubler'},
-  {name: 'Teleport',            stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 2, skillId: 168, nicks: 'teleport'},
-  {name: 'Invigorate',          stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 2, skillId: 169, nicks: 'invigorate'}
+var param;
+
+function detailRow(j, itemField) { // Legacy
+  if (param.tags[j] === 'checkbox') {
+    return '<input type="checkbox"' + isChecked(itemField) +
+      ' disabled>';
+  } else if (param.url && param.url[j] !== '') {
+    return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
+      '">' + itemField + '</a>';
+  }
+  return itemField;
+}
+
+function itemRow(item) { // Legacy
+  var result = '';
+  for (var j = 0; j < param.fields.length; j += 1) {
+    result += '<td class="fshCenter">';
+    var itemField = item[param.fields[j]];
+    if (param.fields[j] === param.categoryField) {continue;}
+    result += detailRow(j, itemField) + '</td>';
+  }
+  return result;
+}
+
+function doInputs() { // Legacy
+  var result = '<tr>';
+  for (var i = 0; i < param.tags.length; i += 1) {
+    result += '<td align=center><input type="' + param.tags[i] +
+      '" class="custominput" id="fshIn' + param.fields[i] + '"></td>';
+  }
+  return result;
+}
+
+function generateManageTable() { // Legacy
+  var result = '<table cellspacing="2" cellpadding="2" class="fshGc" ' +
+    'width="100%"><tr class="fshOr">';
+  result += param.headers.reduce(function(prev, curr) {
+    return prev + '<th>' + curr + '</th>';
+  }, '');
+  result += '<th>Action</th></tr>';
+  var currentCategory = '';
+  for (var i = 0; i < param.currentItems.length; i += 1) {
+    var item = param.currentItems[i];
+    result += '<tr>';
+    if (param.categoryField &&
+        currentCategory !==
+        item[param.categoryField]) {
+      currentCategory = item[param.categoryField];
+      result += '<td><span class="fshQs">' +
+        currentCategory + '</span></td><td></td><td></td><td></td><td></td>' +
+          '</tr><tr>';
+    }
+    result += itemRow(item);
+    result += '<td><span class="HelperTextLink" data-itemId="' + i +
+      '" id="fshDel' + i + '">[Del]</span></td></tr>';
+  }
+  result += doInputs();
+  result += '<td><span class="HelperTextLink" id="fshAdd">' +
+    '[Add]</span></td></tr></table>' +
+    '<table width="100%"><tr><td class="fshCenter">' +
+    '<textarea cols=70 rows=20 name="fshEd">' +
+    JSON.stringify(param.currentItems) + '</textarea></td></tr>' +
+    '<tr><td class="fshCenter"><input id="fshSave" ' +
+    'type="button" value="Save" class="custombutton">' +
+    '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
+    'class="custombutton"></td></tr>' +
+    '</tbody></table>';
+  document.getElementById(param.id).innerHTML = result;
+  setValueJSON(param.gmname, param.currentItems);
+}
+
+function deleteQuickItem(evt) { // Legacy
+  var itemId = evt.target.getAttribute('data-itemId');
+  param.currentItems.splice(itemId, 1);
+  generateManageTable();
+}
+
+function buildNewItem() { // Legacy
+  var newItem = {};
+  for (var i = 0; i < param.fields.length; i += 1) {
+    if (param.tags[i] === 'checkbox') {
+      newItem[param.fields[i]] =
+        document.getElementById('fshIn' + param.fields[i]).checked;
+    } else {
+      newItem[param.fields[i]] =
+        document.getElementById('fshIn' + param.fields[i]).value;
+    }
+  }
+  return newItem;
+}
+
+function addQuickItem() { // Legacy
+  var isArrayOnly = param.fields.length === 0;
+  var newItem = {};
+  if (isArrayOnly) {
+    newItem = document.getElementById('fshIn0').value;
+  } else {
+    newItem = buildNewItem();
+  }
+  param.currentItems.push(newItem);
+  generateManageTable();
+}
+
+function saveRawEditor() { // jQuery
+  param.currentItems =
+    JSON.parse($('textarea[name="fshEd"]').val());
+  generateManageTable();
+}
+
+function resetRawEditor() { // Legacy
+  if (param.id === 'fshAso') {
+    param.currentItems =
+      JSON.parse(defaults.quickSearchList);
+  } else {param.currentItems = [];}
+  generateManageTable();
+}
+
+var listEvents = [
+  {test: function(e) {return e.target.id === 'fshReset';}, fn: resetRawEditor},
+  {test: function(e) {return e.target.id === 'fshSave';}, fn: saveRawEditor},
+  {test: function(e) {return e.target.id === 'fshAdd';}, fn: addQuickItem},
+  {
+    test: function(e) {return e.target.id.indexOf('fshDel') === 0;},
+    fn: deleteQuickItem
+  }
 ];
 
+function listEvtHnl(e) {
+  for (var i = 0; i < listEvents.length; i += 1) {
+    if (listEvents[i].test(e)) {
+      listEvents[i].fn(e);
+      return;
+    }
+  }
+}
+
+function injectAuctionSearch(injector) { // Legacy
+  var content = injector || pCC;
+  content.innerHTML =
+    makePageHeader('Trade Hub Quick Search', '', '', '') +
+    '<div>This screen allows you to set up some quick ' +
+      'search templates for the Auction House. The Display on AH column ' +
+      'indicates if the quick search will show on the short list on the ' +
+      'Auction House main screen. A maximum of 36 items can show on this ' +
+      'list (It will not show more than 36 even if you have more than 36 ' +
+      'flagged). To edit items, either use the large text area below, or ' +
+      'add a new entry and delete the old one. You can always reset the ' +
+      'list to the default values.</div>' +
+    '<div class="fshSmall" id="fshAso">' +
+    '</div>';
+  // global parameters for the meta function generateManageTable
+  param = {
+    id: 'fshAso',
+    headers: ['Category', 'Nickname', 'Quick Search Text',
+      'Display in AH?'],
+    fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
+    tags: ['text', 'text', 'text', 'checkbox'],
+    url: ['', '',
+      'index.php?cmd=auctionhouse&amp;type=-1&amp;search_text=@replaceme@', ''],
+    currentItems: getValueJSON('quickSearchList'),
+    gmname: 'quickSearchList',
+    categoryField: 'category',
+  };
+  generateManageTable();
+  content.addEventListener('click', listEvtHnl);
+}
+
+function injectQuickLinkManager(injector) { // Legacy
+  var content = injector || pCC;
+  content.innerHTML =
+    makePageTemplate('Quick Links', '', '', '', 'qla');
+
+  // global parameters for the meta function generateManageTable
+  param = {
+    id: 'qla',
+    headers: ['Name', 'URL',
+      'New [<span class="fshLink tip-static" ' +
+      'data-tipped="Open page in a new window">?</span>]'],
+    fields: ['name', 'url', 'newWindow'],
+    tags: ['text', 'text', 'checkbox'],
+    currentItems: getValueJSON('quickLinks'),
+    gmname: 'quickLinks',
+  };
+  generateManageTable();
+  content.addEventListener('click', listEvtHnl);
+}
+
+/* eslint-disable no-multi-spaces, max-len */
+var buffList = [
+  {name: 'Rage',                stam: 10, lvl: 1,    id: 0,   nicks: 'rage'},
+  {name: 'Stun',                stam: 15, lvl: 1,    id: 1,   nicks: 'stun,st'},
+  {name: 'Fury',                stam: 10, lvl: 25,   id: 2,   nicks: 'fury'},
+  {name: 'Blood Thirst',        stam: 10, lvl: 25,   id: 4,   nicks: 'blood thirst,bloodthirst,bt'},
+  {name: 'Enchant Weapon',      stam: 10, lvl: 25,   id: 5,   nicks: 'enchant weapon,ew'},
+  {name: 'Berserk',             stam: 15, lvl: 75,   id: 3,   nicks: 'berserk'},
+  {name: 'Holy Flame',          stam: 15, lvl: 75,   id: 6,   nicks: 'holy flame,hf'},
+  {name: 'Dark Curse',          stam: 20, lvl: 150,  id: 7,   nicks: 'dark curse,dc'},
+  {name: 'Shockwave',           stam: 20, lvl: 200,  id: 29,  nicks: 'shockwave,sw,shock'},
+  {name: 'Ignite',              stam: 10, lvl: 200,  id: 30,  nicks: 'ignite,ign'},
+  {name: 'Super Elite Slayer',  stam: 25, lvl: 250,  id: 31,  nicks: 'super elite slayer,ses,se slayer'},
+  {name: 'Wither',              stam: 15, lvl: 250,  id: 32,  nicks: 'wither,with'},
+  {name: 'Shatter Armor',       stam: 20, lvl: 300,  id: 33,  nicks: 'shatter armor,sa'},
+  {name: 'Death Wish',          stam: 20, lvl: 300,  id: 34,  nicks: 'deathwish,dw,deathw,death wish'},
+  {name: 'Spell Breaker',       stam: 35, lvl: 300,  id: 35,  nicks: 'spell breaker,sb'},
+  {name: 'Spectral Knight',     stam: 15, lvl: 400,  id: 48,  nicks: 'spectral knight,sk,spec knight'},
+  {name: 'Keen Edge',           stam: 10, lvl: 400,  id: 47,  nicks: 'keen edge,ke'},
+  {name: 'Arterial Strike',     stam: 20, lvl: 500,  id: 49,  nicks: 'arterial strike,as,art strike,art str'},
+  {name: 'Death Dealer',        stam: 20, lvl: 500,  id: 50,  nicks: 'death dealer,dd'},
+  {name: 'Savagery',            stam: 15, lvl: 600,  id: 51,  nicks: 'savagery,savage'},
+  {name: 'Chi Strike',          stam: 20, lvl: 700,  id: 52,  nicks: 'chi strike,chi,chis,chi str'},
+  {name: 'Shield Strike',       stam: 20, lvl: 700,  id: 53,  nicks: 'shield strike,ss,sh str'},
+  {name: 'Demoralize',          stam: 25, lvl: 800,  id: 73,  nicks: 'demoralize,dem'},
+  {name: 'Poison',              stam: 25, lvl: 800,  id: 70,  nicks: 'poison,poi'},
+  {name: 'Iron Fist',           stam: 25, lvl: 900,  id: 74,  nicks: 'iron fist,if'},
+  {name: 'Spell Leech',         stam: 50, lvl: 900,  id: 79,  nicks: 'spell leech,sl'},
+  {name: 'Distraction',         stam: 25, lvl: 900,  id: 78,  nicks: 'distraction,dis'},
+  {name: 'Coordinated Attack',  stam: 30, lvl: 1000, id: 118, nicks: 'coordinated attack,coorda'},
+  {name: 'Undermine',           stam: 30, lvl: 1000, id: 108, nicks: 'undermine,um'},
+  {name: 'Cursed Rune',         stam: 30, lvl: 1000, id: 89,  nicks: 'cursed rune,crune'},
+  {name: 'Anti Deflect',        stam: 30, lvl: 1000, id: 105, nicks: 'anti deflect,ad'},
+  {name: 'Overkill',            stam: 30, lvl: 1200, id: 109, nicks: 'overkill,ok'},
+  {name: 'Smashing Hammer',     stam: 30, lvl: 1200, id: 111, nicks: 'smashing hammer,sh'},
+  {name: 'Mighty Vigor',        stam: 35, lvl: 1200, id: 113, nicks: 'mighty vigor,mv'},
+  {name: 'Fist Fight',          stam: 30, lvl: 1200, id: 115, nicks: 'fist fight,ff'},
+  {name: 'Cursed Ring',         stam: 30, lvl: 1400, id: 88,  nicks: 'cursed ring,cring'},
+  {name: 'Sharpen',             stam: 30, lvl: 1400, id: 106, nicks: 'sharpen,sharp'},
+  {name: 'Balanced Attack',     stam: 30, lvl: 1400, id: 116, nicks: 'balanced attack,ba'},
+  {name: 'Heavy Weight',        stam: 20, lvl: 1600, id: 146, nicks: 'heavy weight, hw'},
+  {name: 'Armored Strike',      stam: 30, lvl: 1600, id: 130, nicks: 'armored strike, armstr'},
+  {name: 'Invert',              stam: 40, lvl: 2000, id: 173, nicks: 'invert'},
+  {name: 'Reign of Terror',     stam: 40, lvl: 2500, id: 174, nicks: 'reign of terror'},
+  {name: 'Critical Strike',     stam: 40, lvl: 3000, id: 175, nicks: 'critical strike'},
+  {name: 'Great Vigor',         stam: 10, lvl: 1,    id: 12,  nicks: 'great vigor,vigor,gv'},
+  {name: 'Fortify',             stam: 10, lvl: 25,   id: 8,   nicks: 'fortify'},
+  {name: 'Evade',               stam: 10, lvl: 25,   id: 10,  nicks: 'evade'},
+  {name: 'Absorb',              stam: 20, lvl: 25,   id: 13,  nicks: 'absorb,abs'},
+  {name: 'Rock Skin',           stam: 15, lvl: 75,   id: 11,  nicks: 'rock skin,rs'},
+  {name: 'Enchanted Armor',     stam: 10, lvl: 75,   id: 9,   nicks: 'enchanted armor,enchant armor,ea,ench arm,ench armor'},
+  {name: 'Aura of Protection',  stam: 20, lvl: 150,  id: 15,  nicks: 'aura of protection,aop,aofp'},
+  {name: 'Deflect',             stam: 25, lvl: 150,  id: 14,  nicks: 'deflect,defl'},
+  {name: 'Force Shield',        stam: 10, lvl: 200,  id: 27,  nicks: 'force shield,fs'},
+  {name: 'Unbreakable',         stam: 20, lvl: 200,  id: 28,  nicks: 'unbreakable,ub,unb,unbr'},
+  {name: 'Honor',               stam: 10, lvl: 800,  id: 82,  nicks: 'honor'},
+  {name: 'Assist',              stam: 30, lvl: 250,  id: 36,  nicks: 'assist,ass'},
+  {name: 'Constitution',        stam: 25, lvl: 300,  id: 37,  nicks: 'constitution,const'},
+  {name: 'Counter Attack',      stam: 20, lvl: 400,  id: 54,  nicks: 'counter attack,ca'},
+  {name: 'Summon Shield Imp',   stam: 50, lvl: 400,  id: 55,  nicks: 'summon shield imp,ssi,imp'},
+  {name: 'Vision',              stam: 20, lvl: 500,  id: 56,  nicks: 'vision,vis'},
+  {name: 'Fortitude',           stam: 15, lvl: 500,  id: 57,  nicks: 'fortitude,fort'},
+  {name: 'Flinch',              stam: 20, lvl: 600,  id: 58,  nicks: 'flinch'},
+  {name: 'Terrorize',           stam: 20, lvl: 700,  id: 59,  nicks: 'terrorize,terror'},
+  {name: 'Nightmare Visage',    stam: 40, lvl: 700,  id: 60,  nicks: 'nightmare visage,nv,visage'},
+  {name: 'Sanctuary',           stam: 25, lvl: 800,  id: 44,  nicks: 'sanctuary,sanc'},
+  {name: 'Dull Edge',           stam: 10, lvl: 800,  id: 46,  nicks: 'dull edge,de'},
+  {name: 'Erosion',             stam: 25, lvl: 900,  id: 80,  nicks: 'erosion,ero'},
+  {name: 'Avert Gaze',          stam: 10, lvl: 900,  id: 71,  nicks: 'avert gaze,ag'},
+  {name: 'Enchant Shield',      stam: 25, lvl: 900,  id: 77,  nicks: 'enchant shield,es'},
+  {name: 'Smite',               stam: 30, lvl: 1000, id: 97,  nicks: 'smite,sm'},
+  {name: 'Balanced Defense',    stam: 30, lvl: 1000, id: 117, nicks: 'balanced defense,bd'},
+  {name: 'Bastion',             stam: 30, lvl: 1000, id: 122, nicks: 'bastion,bast'},
+  {name: 'Side Step',           stam: 30, lvl: 1000, id: 86,  nicks: 'side step,sstep'},
+  {name: 'High Guard',          stam: 30, lvl: 1200, id: 96,  nicks: 'high guard,hg'},
+  {name: 'Barricade',           stam: 30, lvl: 1200, id: 98,  nicks: 'barricade,bar'},
+  {name: 'Coordinated Defense', stam: 30, lvl: 1200, id: 119, nicks: 'coordinated defense,cd'},
+  {name: 'Degrade',             stam: 30, lvl: 1200, id: 121, nicks: 'degrade,deg,dg'},
+  {name: 'Retaliate',           stam: 30, lvl: 1400, id: 123, nicks: 'retaliate,ret'},
+  {name: 'Shame',               stam: 35, lvl: 1400, id: 110, nicks: 'shame'},
+  {name: 'Dispel Curse',        stam: 35, lvl: 1400, id: 114, nicks: 'dispel curse,dispel'},
+  {name: 'Anchored',            stam: 30, lvl: 1600, id: 154, nicks: 'anchored, anch, anchor'},
+  {name: 'Hardened',            stam: 30, lvl: 1600, id: 153, nicks: 'hardened, hard, harden'},
+  {name: 'Armor Boost',         stam: 30, lvl: 1600, id: 136, nicks: 'armor boost, armbst, arm bst, armb'},
+  {name: 'Shield Wall',         stam: 30, lvl: 1600, id: 135, nicks: 'shield wall, shldwll, sw'},
+  {name: 'Layered Armor',       stam: 40, lvl: 2000, id: 170, nicks: 'layered armor'},
+  {name: 'Defensive Aura',      stam: 40, lvl: 2500, id: 171, nicks: 'defensive aura'},
+  {name: 'Fumble',              stam: 40, lvl: 3000, id: 172, nicks: 'fumble'},
+  {name: 'Find Item',           stam: 10, lvl: 1,    id: 16,  nicks: 'find item,fi'},
+  {name: 'Treasure Hunter',     stam: 15, lvl: 1,    id: 17,  nicks: 'treasure hunter,th,treas hunter'},
+  {name: 'Deep Pockets',        stam: 10, lvl: 1,    id: 22,  nicks: 'deep pockets,dp'},
+  {name: 'Quest Finder',        stam: 5,  lvl: 1,    id: 61,  nicks: 'quest finder,qf'},
+  {name: 'Adept Learner',       stam: 10, lvl: 25,   id: 19,  nicks: 'adept learner,al'},
+  {name: 'Defiance',            stam: 15, lvl: 25,   id: 18,  nicks: 'defiance'},
+  {name: 'Librarian',           stam: 10, lvl: 75,   id: 20,  nicks: 'librarian,lib,libr'},
+  {name: 'Merchant',            stam: 10, lvl: 75,   id: 21,  nicks: 'merchant,merch,merc'},
+  {name: 'Last Ditch',          stam: 15, lvl: 150,  id: 23,  nicks: 'last ditch,ld'},
+  {name: 'Animal Magnetism',    stam: 10, lvl: 200,  id: 24,  nicks: 'animal magnetism,animag,ani mag,am'},
+  {name: 'Empower',             stam: 20, lvl: 200,  id: 25,  nicks: 'empower,emp'},
+  {name: 'Doubler',             stam: 5,  lvl: 200,  id: 26,  nicks: 'doubler,doub,db'},
+  {name: 'Conserve',            stam: 10, lvl: 250,  id: 39,  nicks: 'conserve,cons,consv,con'},
+  {name: 'Brewing Master',      stam: 10, lvl: 250,  id: 40,  nicks: 'brewing master,bm,brm,brewm'},
+  {name: 'Four Leaf',           stam: 20, lvl: 250,  id: 41,  nicks: 'four leaf,4l,fl'},
+  {name: 'Extend',              stam: 30, lvl: 300,  id: 42,  nicks: 'extend,ext'},
+  {name: 'Inventor',            stam: 15, lvl: 400,  id: 62,  nicks: 'inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1'},
+  {name: 'Extractor',           stam: 15, lvl: 400,  id: 63,  nicks: 'extractor,extr'},
+  {name: 'Inventor II',         stam: 20, lvl: 500,  id: 64,  nicks: 'inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2'},
+  {name: 'Buff Master',         stam: 10, lvl: 500,  id: 65,  nicks: 'buff master,buffm,bum'},
+  {name: 'Reflection',          stam: 10, lvl: 600,  id: 66,  nicks: 'reflection,ref,refl,reflect'},
+  {name: 'Guild Buffer',        stam: 10, lvl: 600,  id: 160, nicks: 'guild buffer, gldbfr, gb'},
+  {name: 'Light Foot',          stam: 15, lvl: 700,  id: 67,  nicks: 'light foot,lf'},
+  {name: 'Mesmerize',           stam: 20, lvl: 700,  id: 68,  nicks: 'mesmerize,mesmer,mes,mez'},
+  {name: 'Resource Finder',     stam: 25, lvl: 800,  id: 76,  nicks: 'resource finder,rf'},
+  {name: 'Quest Hunter',        stam: 25, lvl: 800,  id: 166, nicks: 'quest hunter'},
+  {name: 'Gloat',               stam: 10, lvl: 900,  id: 81,  nicks: 'gloat'},
+  {name: 'Sacrifice',           stam: 25, lvl: 900,  id: 75,  nicks: 'sacrifice,sac'},
+  {name: 'Reckoning',           stam: 25, lvl: 900,  id: 72,  nicks: 'reckoning,rec,rek'},
+  {name: 'Reinforce',           stam: 30, lvl: 1000, id: 126, nicks: 'reinforce,rein'},
+  {name: 'Bodyguard',           stam: 30, lvl: 1000, id: 120, nicks: 'bodyguard,bg'},
+  {name: 'Riposte',             stam: 30, lvl: 1000, id: 124, nicks: 'riposte,rip'},
+  {name: 'Severe Condition',    stam: 30, lvl: 1000, id: 101, nicks: 'severe condition,sc'},
+  {name: 'Sealed',              stam: 35, lvl: 1200, id: 112, nicks: 'sealed,seal'},
+  {name: 'Righteous',           stam: 30, lvl: 1200, id: 107, nicks: 'righteous,right'},
+  {name: 'Epic Forge',          stam: 30, lvl: 1200, id: 102, nicks: 'epic forge,ef'},
+  {name: 'Golden Shield',       stam: 30, lvl: 1200, id: 103, nicks: 'golden shield,gs'},
+  {name: 'Stalker',             stam: 35, lvl: 1400, id: 125, nicks: 'stalker,stalk'},
+  {name: 'Ageless',             stam: 30, lvl: 1400, id: 100, nicks: 'ageless,age'},
+  {name: 'Extractor II',        stam: 30, lvl: 1400, id: 104, nicks: 'extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2'},
+  {name: 'Epic Craft',          stam: 30, lvl: 1600, id: 159, nicks: 'epic craft, epc crft, epccrft, ec'},
+  {name: 'Gold Foot',           stam: 20, lvl: 1600, id: 137, nicks: 'gold foot, goldfoot, gldft, gf'},
+  {name: 'Titan Doubler',       stam: 40, lvl: 2000, id: 167, nicks: 'titan doubler'},
+  {name: 'Teleport',            stam: 40, lvl: 2500, id: 168, nicks: 'teleport'},
+  {name: 'Invigorate',          stam: 40, lvl: 3000, id: 169, nicks: 'invigorate'}
+];
+
+var characterName;
 var sustainLevelRE = /Level<br>(\d+)%/;
 var buffCustom = {
   header: 'Buff',
@@ -3999,7 +4455,7 @@ var buffCustom = {
   control: function() {
     var ret = '<select style="width:140px;" id="selectedBuff">';
     for (var j = 0; j < buffList.length; j += 1) {
-      ret += '<option value="' + buffList[j].skillId + '">' +
+      ret += '<option value="' + buffList[j].id + '">' +
         buffList[j].name + '</option>';
     }
     ret += '</select>';
@@ -4017,8 +4473,8 @@ var otherCustom = {
   control: function() {
     var textToSearchFor = getValue('textToSearchFor') || '';
     return '<input style="width:140px;" class="custominput" ' +
-    'id="textToSearchFor" type="text" title="Text to search for" value="' +
-    textToSearchFor + '">';
+      'id="textToSearchFor" type="text" title="Text to search for" value="' +
+      textToSearchFor + '">';
   },
   cutoff: '500+ play',
   searched: 'Text searched for',
@@ -4186,14 +4642,14 @@ function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
   var playerHREF = callback.href;
   var bioTip = bioCellHtml.replace(/'|"|\n/g, '');
   return '<nobr>' + lastActivityIMG + '&nbsp;<a href="' +
-      playerHREF + '" target="new" ' +
-      // FIXME - It kind works now, but not guaranteed?
-      'class="tip-static" ' +
-      'data-tipped="' + bioTip + '">' + playerName$$1 + '</a>' +
-      '&nbsp;<span class="fshBlue">[<span class="a-reply fshLink" ' +
-      'target_player="' + playerName$$1 + '">m</span>]</span></nobr><br>' +
-      '<span class="fshGray">Level:&nbsp;</span>' + levelValue +
-      '&nbsp;(' + virtualLevelValue + ')';
+    playerHREF + '" target="new" ' +
+    // FIXME - It kind works now, but not guaranteed?
+    'class="tip-static" ' +
+    'data-tipped="' + bioTip + '">' + playerName$$1 + '</a>' +
+    '&nbsp;<span class="fshBlue">[<span class="a-reply fshLink" ' +
+    'target_player="' + playerName$$1 + '">m</span>]</span></nobr><br>' +
+    '<span class="fshGray">Level:&nbsp;</span>' + levelValue +
+    '&nbsp;(' + virtualLevelValue + ')';
 }
 
 function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
@@ -4202,12 +4658,12 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
   var extend = '<span class="fshRed">No</span>';
   if (hasExtendBuff) {extend = '<span class="fshGreen">Yes</span>';}
   return '<table><tbody><tr>' +
-  '<td colspan="2" class="resAct">Last Activity:</td>' +
-  '<td colspan="2"><nobr>' + lastActivity[0] + '</nobr></td></tr>' +
-  '<tr><td class="resLbl">Sustain:' +
-  '</td><td class="resVal ' + sustain + '">' + sustainLevel + '%</td>' +
-  '<td class="resLbl">Extend:</td>' +
-  '<td class="resVal">' + extend + '</td></tr>';
+    '<td colspan="2" class="resAct">Last Activity:</td>' +
+    '<td colspan="2"><nobr>' + lastActivity[0] + '</nobr></td></tr>' +
+    '<tr><td class="resLbl">Sustain:' +
+    '</td><td class="resVal ' + sustain + '">' + sustainLevel + '%</td>' +
+    '<td class="resLbl">Extend:</td>' +
+    '<td class="resVal">' + extend + '</td></tr>';
 }
 
 function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
@@ -4262,7 +4718,6 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
 
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
-  // var bufferProgress = document.getElementById('bufferProgress');
   // now need to parse player pages for buff ...
   document.getElementById('potentialBuffers').innerHTML =
     onlinePlayers$1.length;
@@ -4299,7 +4754,6 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
     .text().replace(/\D/g, ''), 10);
   var curPage = parseInt($(doc).find('input[name="page"]:last').val()
     .replace(/\D/g, ''), 10);
-  var characterName = $('dt.stat-name:first').next().text().replace(/,/g, '');
   if (curPage !== 1) {
     playerRows.each(function(i, e) {
       var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
@@ -4316,7 +4770,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
       }
     });
   }
-  if (curPage < maxPage/* -maxPage+15*/) {
+  if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
     bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
     xmlhttp('index.php?cmd=onlineplayers&page=' + newPage,
@@ -4339,33 +4793,35 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   }
 }
 
-function findBuffsParseProfilePage(responseText) { // jQuery
-  var doc = createDocument(responseText);
-  var characterName = $('dt.stat-name:first').next().text().replace(/,/g, '');
-  var profileAlliesEnemies = $(doc).find('#profileLeftColumn')
-    .find('a[data-tipped*="Last Activity"]');
-  profileAlliesEnemies.each(function(i, e) {
-    var onMouseOver = $(e).data('tipped');
-    var lastActivity = lastActivityRE.exec(onMouseOver);
-    var lastActivityDays = parseInt(lastActivity[1], 10);
-    var lastActivityHours = parseInt(lastActivity[2], 10) +
-      lastActivityDays * 24;
-    var lastActivityMinutes = parseInt(lastActivity[3], 10) +
-      lastActivityHours * 60;
-    // check if they are high enough level to cast the buff
-    var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
-    virtualLevel = parseInt(virtualLevel[1].replace(/,/g, ''), 10);
-    var minPlayerVirtualLevel = calcMinLvl();
-    if (lastActivityMinutes < 5 &&
-      virtualLevel >= findBuffMinCastLevel &&
-      virtualLevel >= minPlayerVirtualLevel) {
-      // add online player to search list (all but self)
-      var onlinePlayer = $(e).attr('href');
-      if (characterName !== $(e).text().trim()) {
-        onlinePlayers$1.push(onlinePlayer);
-      }
+function calcLastActMins(tipped) {
+  var lastActivity = lastActivityRE.exec(tipped);
+  var lastActivityDays = parseInt(lastActivity[1], 10);
+  var lastActivityHours = parseInt(lastActivity[2], 10) + lastActivityDays * 24;
+  return parseInt(lastActivity[3], 10) + lastActivityHours * 60;
+}
+
+function parsePlayerLink(el) {
+  var tipped = el.dataset.tipped;
+  var lastActivityMinutes = calcLastActMins(tipped);
+  // check if they are high enough level to cast the buff
+  var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
+  var minPlayerVirtualLevel = calcMinLvl();
+  if (lastActivityMinutes < 5 &&
+    vlevel >= findBuffMinCastLevel &&
+    vlevel >= minPlayerVirtualLevel) {
+    // add online player to search list (all but self)
+    var onlinePlayer = el.href;
+    if (characterName !== el.textContent) {
+      onlinePlayers$1.push(onlinePlayer);
     }
-  });
+  }
+}
+
+function findBuffsParseProfilePage(responseText) {
+  var doc = createDocument(responseText);
+  var profileAlliesEnemies =
+    doc.querySelectorAll('#profileLeftColumn a[data-tipped*="Last Activity"]');
+  Array.prototype.forEach.call(profileAlliesEnemies, parsePlayerLink);
   // continue with online players
   profilePagesToSearchProcessed += 1;
   if (profilePagesToSearchProcessed ===
@@ -4394,39 +4850,11 @@ function findBuffsParseProfilePageStart() { // Legacy
   }
 }
 
-function guildMember(characterName, i, e) { // jQuery
-  var contactLink = $(e).find('a');
-  var onMouseOver = $(contactLink).data('tipped');
-  var lastActivity = lastActivityRE.exec(onMouseOver);
-  var lastActivityDays = parseInt(lastActivity[1], 10);
-  var lastActivityHours = parseInt(lastActivity[2], 10) +
-    lastActivityDays * 24;
-  var lastActivityMinutes = parseInt(lastActivity[3], 10) +
-    lastActivityHours * 60;
-  // check if they are high enough level to cast the buff
-  var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
-  virtualLevel = parseInt(virtualLevel[1].replace(/,/g, ''), 10);
-  var minPlayerVirtualLevel = calcMinLvl();
-  if (lastActivityMinutes < 5 &&
-    virtualLevel >= findBuffMinCastLevel &&
-    virtualLevel >= minPlayerVirtualLevel) {
-    // add online player to search list (all but self)
-    var onlinePlayer = contactLink.attr('href');
-    if (characterName !== $(e).find('td:eq(1)')
-      .text().trim()) {
-      onlinePlayers$1.push(onlinePlayer);
-    }
-  }
-}
-
-function findBuffsParseGuildManagePage(responseText) { // jQuery
+function findBuffsParseGuildManagePage(responseText) {
   var doc = createDocument(responseText);
-  var characterName = $('dt.stat-name:first').next().text().replace(/,/g, '');
-  var memberTableRows = $(doc)
-    .find('table:has(td:contains("Rank")[bgcolor="#C18B35"]):last')
-    .find('tr:gt(1):not(:has(td[colspan="5"]))');
   if (document.getElementById('guildMembers').checked) {
-    memberTableRows.each(guildMember.bind(characterName));
+    var memList = doc.querySelectorAll('#pCC a[data-tipped*="<td>VL:</td>"]');
+    Array.prototype.forEach.call(memList, parsePlayerLink);
   }
   // continue with profile pages
   findBuffsParseProfilePageStart();
@@ -4446,6 +4874,7 @@ function findBuffsClearResults() { // Legacy
 }
 
 function findAnyStart(progMsg) {
+  characterName = playerName();
   document.getElementById('buffNicks').innerHTML = findBuffNicks;
   bufferProgress = document.getElementById('bufferProgress');
   bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
@@ -4464,9 +4893,9 @@ function findAnyStart(progMsg) {
 function findBuffsStart() { // Legacy
   var selectedBuff = parseInt($('#selectedBuff').val(), 10);
   for (var j = 0; j < buffList.length; j += 1) {
-    if (selectedBuff === buffList[j].skillId) {
+    if (selectedBuff === buffList[j].id) {
       findBuffNicks = buffList[j].nicks;
-      findBuffMinCastLevel = buffList[j].minCastLevel;
+      findBuffMinCastLevel = buffList[j].lvl;
       break;
     }
   }
@@ -4580,292 +5009,11 @@ function screenview(funcName) {
   ga('fshApp.send', 'screenview', {screenName: funcName});
 }
 
-var param;
-
-function detailRow(j, itemField) { // Legacy
-  if (param.tags[j] === 'checkbox') {
-    return '<input type="checkbox"' + isChecked(itemField) +
-      ' disabled>';
-  } else if (param.url && param.url[j] !== '') {
-    return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
-      '">' + itemField + '</a>';
-  }
-  return itemField;
-}
-
-function itemRow(item) { // Legacy
-  var result = '';
-  for (var j = 0; j < param.fields.length; j += 1) {
-    result += '<td class="fshCenter">';
-    var itemField = item[param.fields[j]];
-    if (param.fields[j] === param.categoryField) {continue;}
-    result += detailRow(j, itemField) + '</td>';
-  }
-  return result;
-}
-
-function doInputs() { // Legacy
-  var result = '<tr>';
-  for (var i = 0; i < param.tags.length; i += 1) {
-    result += '<td align=center><input type="' + param.tags[i] +
-      '" class="custominput" id="fshIn' + param.fields[i] + '"></td>';
-  }
-  return result;
-}
-
-function generateManageTable() { // Legacy
-  var result = '<table cellspacing="2" cellpadding="2" class="fshGc" ' +
-    'width="100%"><tr class="fshOr">';
-  result += param.headers.reduce(function(prev, curr) {
-    return prev + '<th>' + curr + '</th>';
-  }, '');
-  result += '<th>Action</th></tr>';
-  var currentCategory = '';
-  for (var i = 0; i < param.currentItems.length; i += 1) {
-    var item = param.currentItems[i];
-    result += '<tr>';
-    if (param.categoryField &&
-        currentCategory !==
-        item[param.categoryField]) {
-      currentCategory = item[param.categoryField];
-      result += '<td><span class="fshQs">' +
-        currentCategory + '</span></td><td></td><td></td><td></td><td></td>' +
-          '</tr><tr>';
-    }
-    result += itemRow(item);
-    result += '<td><span class="HelperTextLink" data-itemId="' + i +
-      '" id="fshDel' + i + '">[Del]</span></td></tr>';
-  }
-  result += doInputs();
-  result += '<td><span class="HelperTextLink" id="fshAdd">' +
-    '[Add]</span></td></tr></table>' +
-    '<table width="100%"><tr><td class="fshCenter">' +
-    '<textarea cols=70 rows=20 name="fshEd">' +
-    JSON.stringify(param.currentItems) + '</textarea></td></tr>' +
-    '<tr><td class="fshCenter"><input id="fshSave" ' +
-    'type="button" value="Save" class="custombutton">' +
-    '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
-    'class="custombutton"></td></tr>' +
-    '</tbody></table>';
-  document.getElementById(param.id).innerHTML = result;
-  setValueJSON(param.gmname, param.currentItems);
-}
-
-function deleteQuickItem(evt) { // Legacy
-  var itemId = evt.target.getAttribute('data-itemId');
-  param.currentItems.splice(itemId, 1);
-  generateManageTable();
-}
-
-function buildNewItem() { // Legacy
-  var newItem = {};
-  for (var i = 0; i < param.fields.length; i += 1) {
-    if (param.tags[i] === 'checkbox') {
-      newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).checked;
-    } else {
-      newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).value;
-    }
-  }
-  return newItem;
-}
-
-function addQuickItem() { // Legacy
-  var isArrayOnly = param.fields.length === 0;
-  var newItem = {};
-  if (isArrayOnly) {
-    newItem = document.getElementById('fshIn0').value;
-  } else {
-    newItem = buildNewItem();
-  }
-  param.currentItems.push(newItem);
-  generateManageTable();
-}
-
-function saveRawEditor() { // jQuery
-  param.currentItems =
-    JSON.parse($('textarea[name="fshEd"]').val());
-  generateManageTable();
-}
-
-function resetRawEditor() { // Legacy
-  if (location.search === '?cmd=notepad&blank=1&subcmd=auctionsearch') {
-    param.currentItems =
-      JSON.parse(defaults.quickSearchList);
-  } else {param.currentItems = [];}
-  generateManageTable();
-}
-
-var listEvents = [
-  {test: function(e) {return e.target.id === 'fshReset';}, fn: resetRawEditor},
-  {test: function(e) {return e.target.id === 'fshSave';}, fn: saveRawEditor},
-  {test: function(e) {return e.target.id === 'fshAdd';}, fn: addQuickItem},
-  {
-    test: function(e) {return e.target.id.indexOf('fshDel') === 0;},
-    fn: deleteQuickItem
-  }
-];
-
-function listEvtHnl(e) {
-  for (var i = 0; i < listEvents.length; i += 1) {
-    if (listEvents[i].test(e)) {
-      listEvents[i].fn(e);
-      return;
-    }
-  }
-}
-
-function injectAuctionSearch(injector) { // Legacy
-  var content = injector || pCC;
-  content.innerHTML =
-    makePageHeader('Trade Hub Quick Search', '', '', '') +
-    '<div>This screen allows you to set up some quick ' +
-      'search templates for the Auction House. The Display on AH column ' +
-      'indicates if the quick search will show on the short list on the ' +
-      'Auction House main screen. A maximum of 36 items can show on this ' +
-      'list (It will not show more than 36 even if you have more than 36 ' +
-      'flagged). To edit items, either use the large text area below, or ' +
-      'add a new entry and delete the old one. You can always reset the ' +
-      'list to the default values.</div>' +
-    '<div class="fshSmall" id="fshAso">' +
-    '</div>';
-  // global parameters for the meta function generateManageTable
-  param = {
-    id: 'fshAso',
-    headers: ['Category', 'Nickname', 'Quick Search Text',
-      'Display in AH?'],
-    fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
-    tags: ['text', 'text', 'text', 'checkbox'],
-    url: ['', '',
-      'index.php?cmd=auctionhouse&amp;type=-1&amp;search_text=@replaceme@', ''],
-    currentItems: getValueJSON('quickSearchList'),
-    gmname: 'quickSearchList',
-    categoryField: 'category',
-  };
-  generateManageTable();
-  content.addEventListener('click', listEvtHnl);
-}
-
-function injectQuickLinkManager(injector) { // Legacy
-  var content = injector || pCC;
-  content.innerHTML =
-    makePageTemplate('Quick Links', '', '', '', 'qla');
-
-  // global parameters for the meta function generateManageTable
-  param = {
-    id: 'qla',
-    headers: ['Name', 'URL',
-      'New [<span class="fshLink tip-static" ' +
-      'data-tipped="Open page in a new window">?</span>]'],
-    fields: ['name', 'url', 'newWindow'],
-    tags: ['text', 'text', 'checkbox'],
-    currentItems: getValueJSON('quickLinks'),
-    gmname: 'quickLinks',
-  };
-  generateManageTable();
-  content.addEventListener('click', listEvtHnl);
-}
-
-function injectFindPlayer() { // Bad jQuery
-  var findPlayerButton = $('input[value="Find Player"]');
-  var levelToTest = intValue($('dt.stat-level:first').next()
-    .text());
-  var characterVirtualLevel = getValue('characterVirtualLevel');
-  levelToTest = fallback(characterVirtualLevel, levelToTest);
-  var pvpLowerLevelModifier = 5;
-  if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
-  var pvpUpperLevelModifier = 5;
-  if (levelToTest >= 200) {pvpUpperLevelModifier = 10;}
-  findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
-    'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
-    (levelToTest - pvpLowerLevelModifier) + '&search_level_max=' +
-    (levelToTest + pvpUpperLevelModifier) + '&search_in_guild=0"><span ' +
-    'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
-    'index.php?cmd=findplayer&search_active=1&search_username=&' +
-    'search_level_min=' + (levelToTest - 25) + '&search_level_max=' +
-    (levelToTest + 25) + '&search_in_guild=0"><span style="color:blue;">' +
-    'Get GvG targets</span></a>');
-
-  $('table[class="width_full"]').find('a[href*="player_id"]')
-    .each(function(i, e) {
-      var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
-      $(e).after('<a style="color:blue;font-size:10px;" ' +
-        quickBuffHref(id[1]) + '>[b]</a>');
-    });
-}
-
-function marketplaceWarning(sellPrice) { // Legacy
-  var warningColor = 'green';
-  var warningText =
-    '</b><br>This is probably an offer that will please someone.';
-  if (sellPrice < 100000) {
-    warningColor = 'brown';
-    warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
-  }
-  if (sellPrice > 250000) {
-    warningColor = 'red';
-    warningText = '</b><br>Hold up there ... this is way to high a ' +
-      'price ... you should reconsider.';
-  }
-  var amount = findNode('//input[@id="amount"]').value;
-  var warningField = findNode('//td[@id="warningfield"]');
-  warningField.innerHTML = '<span style="color:' + warningColor +
-    ';">You are offering to buy <b>' + amount +
-    '</b> FSP for >> <b>' + addCommas(sellPrice) +
-    warningText + ' (Total: ' +
-    addCommas(amount * sellPrice +
-    Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
-}
-
-function addMarketplaceWarning() { // Legacy
-  var goldPerPoint = findNode('//input[@id="price"]');
-  var sellPrice = goldPerPoint.value;
-  if (sellPrice.search(/^[0-9]*$/) !== -1) {
-    marketplaceWarning(sellPrice);
-  }
-}
-
-function addMarketplaceWidgets() { // Legacy
-  var requestTable = findNode(
-    '//table[tbody/tr/td/input[@value="Confirm Request"]]');
-  var newRow = requestTable.insertRow(2);
-  var newCell = newRow.insertCell(0);
-  newCell.id = 'warningfield';
-  newCell.colSpan = '2';
-  newCell.align = 'center';
-
-  document.getElementById('price').addEventListener('keyup',
-    addMarketplaceWarning, true);
-  document.getElementById('amount').addEventListener('keyup',
-    addMarketplaceWarning, true);
-}
-
-function injectNotepad() { // jQuery
-  $('#notepad_notes')
-    .attr('cols', '90')
-    .attr('rows', '30')
-    .css('resize', 'none');
-}
-
-function injectFsBoxContent(injector) { // jQuery
-  var content = injector || pCC;
-  content.innerHTML = makePageTemplate('FS Box Log', '',
-    'fsboxclear', 'Clear', 'fsboxdetail');
-  getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
-    document.getElementById('fsboxdetail').innerHTML = fsboxcontent;
-  });
-  document.getElementById('fsboxclear')
-    .addEventListener('click', function() {
-      setForage('fsh_fsboxcontent', '');
-      location.reload();
-    }, true);
-}
-
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +
   '<li><span class="fshLink">Buff Log</span></li>' +
   '<li><span class="fshLink">Combat Log</span></li>' +
+  '<li><span class="fshLink">Creature Log</span></li>' +
   '<li><span class="fshLink">Recipe Manager</span></li>' +
   '<li><span class="fshLink">Quick Links</span></li>' +
   '</ul><h3>Actions</h3><ul>' +
@@ -4887,6 +5035,7 @@ var helperMenuBlob =
 var functionLookup = {
   'Buff Log': injectBuffLog,
   'Combat Log': injectNotepadShowLogs,
+  'Creature Log': injectMonsterLog,
   'Recipe Manager': injectRecipeManager,
   'Quick Links': injectQuickLinkManager,
   'Find Buffs': injectFindBuffs,
@@ -4899,21 +5048,12 @@ var functionLookup = {
 };
 
 function callHelperFunction(evt) { // jQuery
-  var content = document.getElementById('content');
-  if (content) {content.innerHTML = '';} else {
-    content = createDiv({
-      id: 'content',
-      style: {display: 'none'}
-    });
-    document.body.appendChild(content);
-  }
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
   if (typeof fn === 'function') {
     screenview(functionPath);
-    fn(content);
+    jQueryDialog(fn);
   }
-  $(content).dialog({width: 'auto', modal: true});
 }
 
 function eventHandler(evt) {
@@ -4959,8 +5099,8 @@ function haveNode$1(node) {
   }
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (getValue('draggableHelperMenu')) {
-    helperMenu.setAttribute('draggable', 'true');
-    helperMenu.addEventListener('dragstart', dragStart);
+    helperMenu.classList.add('fshMove');
+    draggable(helperMenu);
   }
   node.parentNode.insertBefore(helperMenu, node);
 }
@@ -5052,33 +5192,37 @@ function updateQuestLink() {
   }
 }
 
+function spanButton(navLvl, text, fn, target) {
+  var li = createLi({className: 'nav-level-' + navLvl});
+  var sb = createSpan({
+    className: 'nav-link fshPoint',
+    textContent: text
+  });
+  sb.addEventListener('click', function() {
+    jQueryDialog(fn);
+  });
+  li.appendChild(sb);
+  document.getElementById(target).parentNode
+    .insertAdjacentElement('afterend', li);
+}
+
 function buffLogLink() {
   if (getValue('keepBuffLog')) {
-    document.getElementById('nav-character-log').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
-        'subcmd=bufflogcontent">Buff Log</a></li>');
+    spanButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
 function combatLogLink() {
   if (getValue('keepLogs')) {
-    document.getElementById('nav-character-notepad').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-showlogs" href="index.php?cmd=notepad&blank=1' +
-        '&subcmd=showlogs">Combat Logs</a></li>');
+    spanButton('1', 'Combat Logs', injectNotepadShowLogs,
+      'nav-character-notepad');
   }
 }
 
 function creatureLogLink() {
   if (getValue('showMonsterLog')) {
-    document.getElementById('nav-character-notepad').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-monsterlog" href="index.php?cmd=notepad&blank' +
-        '=1&subcmd=monsterlog">Creature Logs</a></li>');
+    spanButton('1', 'Creature Logs', injectMonsterLog,
+      'nav-character-notepad');
   }
 }
 
@@ -5123,6 +5267,7 @@ function injectMenu() {
   if (!document.getElementById('pCL')) {return;}
   updateQuestLink();
   // character
+  spanButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   document.getElementById('nav-character-log').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -5130,18 +5275,12 @@ function injectMenu() {
       'medalguide">Medal Guide</a></li>' +
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
       'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=invmanagernew">Inventory Manager</a></li>' +
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-recipemanager" href="index.php?cmd=notepad&blank' +
-      '=1&subcmd=recipemanager">Recipe Manager</a></li>');
+      'subcmd=invmanagernew">Inventory Manager</a></li>');
   buffLogLink();
   combatLogLink();
   creatureLogLink();
-  document.getElementById('nav-character-notepad').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-quicklinkmanager" href="index.php?cmd=notepad&' +
-      'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
+  spanButton('1', 'Quick Links', injectQuickLinkManager,
+    'nav-character-notepad');
   // guild
   document.getElementById('nav-guild-storehouse-inventory').parentNode
     .insertAdjacentHTML('afterend',
@@ -5156,22 +5295,14 @@ function injectMenu() {
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
       'Top 250 Players</a></li>');
   // actions
-  document.getElementById('nav-actions-trade-auctionhouse').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=auctionsearch">AH Quick Search</a></li>');
-  document.getElementById('nav-actions-interaction-findplayer').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=findbuffs">Find Buffs</a></li>' +
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-findother" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=findother">Find Other</a></li>' +
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=onlineplayers">Online Players</a></li>');
+  spanButton('2', 'AH Quick Search', injectAuctionSearch,
+    'nav-actions-trade-auctionhouse');
+  spanButton('2', 'Online Players', injectOnlinePlayers,
+    'nav-actions-interaction-findplayer');
+  spanButton('2', 'Find Other', injectFindOther,
+    'nav-actions-interaction-findplayer');
+  spanButton('2', 'Find Buffs', injectFindBuffs,
+    'nav-actions-interaction-findplayer');
   adjustHeight();
 }
 
@@ -5971,8 +6102,7 @@ function backpack$1() {
 }
 
 function fastWearMgr() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
-  location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
+  jQueryDialog(insertQuickWear);
 }
 
 function profile() {
@@ -6772,6 +6902,19 @@ function addHistoryWidgets() { // Legacy
     updateHistoryCharacters);
 }
 
+function allowBack() {
+  document.querySelector('input[type="submit"]')
+    .addEventListener('click', function(evt) {
+      evt.preventDefault();
+      var url = 'index.php?';
+      Array.prototype.forEach.call(
+        document.querySelectorAll('input:not([type="submit"])' +
+          ':not([type="checkbox"]), select, input[type="checkbox"]:checked'),
+        function(e) {url += '&' + e.name + '=' + e.value;});
+      window.location = url;
+    });
+}
+
 var moveOptions =
   '<td colspan=3 ' +
   'style="padding-top: 2px;padding-bottom: 2px;">' +
@@ -7294,7 +7437,7 @@ function injectAdvisorWeekly() { // jQuery
   list = pCC.firstElementChild.firstElementChild
     .lastElementChild.firstElementChild.firstElementChild;
   if (!list) {return;}
-  list.innerHTML = '<span class="fshSpinner" style="background-image: ' +
+  list.innerHTML = '<span class="fshCurveBtn" style="background-image: ' +
     'url(\'' + imageServer +
     '/world/actionLoadingSpinner.gif\');"></span>' +
     '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>';
@@ -7556,7 +7699,8 @@ var bazaarTable =
   '<td>@1@</td><td>@2@</td><td>@3@</td><td>@4@</td></tr><tr><td>@5@</td>' +
   '<td>@6@</td><td>@7@</td><td>@8@</td><td>@9@</td></tr><tr>' +
   '<td colspan="3">Selected item:</td><td id="selectedItem" colspan="2">' +
-  '</td></tr><tr><td colspan="5"><span id="warning" class="fshHide">' +
+  '</td></tr><tr><td colspan="5">' +
+  '<span id="fshBazaarWarning" class="fshHide">' +
   'Warning:<br>pressing [<span id="fshBuy" class="fshLink">This button' +
   '</span>] now will buy the <span id="quantity">1</span> item(s) WITHOUT ' +
   'confirmation!</span></td></tr><tr><td id="buy_result" colspan="5"></td>' +
@@ -7576,7 +7720,7 @@ function select(evt) {
   if (!theValue) {return;}
   document.getElementById('quantity').textContent = theValue;
   ItemId = target.getAttribute('itemid');
-  document.getElementById('warning').removeAttribute('class');
+  document.getElementById('fshBazaarWarning').removeAttribute('class');
   var dupNode = target.cloneNode(false);
   dupNode.className = 'bazaarSelected tip-dynamic';
   var selected = document.getElementById('selectedItem');
@@ -7944,7 +8088,6 @@ function injectBioWidgets() {
   bioWords();
   bioHeight();
   textArea.rows = bioEditLines;
-  textArea.classList.add('fshNoResize');
 
   textArea.parentNode.addEventListener('click', bioEvtHdl);
   textArea.addEventListener('keyup', updateBioCharacters);
@@ -8326,10 +8469,66 @@ function injectGuildRanks() { // jQuery
   add(3, doButtons);
 }
 
+var locations = [
+  {
+    test: function(row) {return row.player_id && row.player_id === -1;},
+    res: function(row, act) {
+      return 'takeItem" action="' + act.a;
+    }
+  },
+  {
+    test: function(row) {
+      return row.player_id &&
+        row.player_id !== theInv.current_player_id;
+    },
+    res: function(row, act) {
+      return 'recallItem" playerid="' + row.player_id +
+        '" mode="0" action="' + act.a;
+    }
+  },
+  {
+    test: function(row) {
+      return row.folder_id && !row.equipped ||
+        row.player_id && !row.equipped &&
+        row.player_id === theInv.current_player_id;
+    },
+    res: function(row, act) {return act.c;}
+  }
+];
+
+function wuRender(row, act) {
+  for (var i = 0; i < locations.length; i += 1) {
+    if (locations[i].test(row)) {
+      return '<span class="fshLink ' + locations[i].res(row, act) +
+        '" invid="' + row.inv_id + '">' + act.b + '</span>';
+    }
+  }
+  return '';
+}
+
+function wearUseRender(data, _type, row) {
+  //            0  1  2  3  4  5  6  7  8 9 10 11121314 15
+  // eslint-disable-next-line no-sparse-arrays
+  var action = [1, 1, 1, 1, 1, 1, 1, 1, 1, , 2, 2, , , , 2][data]; // jshint ignore:line
+  if (action === 1) {
+    return wuRender(row, {
+      a: 'wear',
+      b: 'Wear',
+      c: 'wearItem'
+    });
+  } else if (action === 2) {
+    return wuRender(row, {
+      a: 'use',
+      b: 'Use',
+      c: 'useItem'
+    });
+  }
+}
+
 var invManFilter =
   '<table class="fshInvFilter">' +
   '<tr><th colspan="14">@@reportTitle@@</th>' +
-  '<th><span id="fshRefresh">[Refresh]</span></th></tr>' +
+  '<th><span id="fshRefresh" class="fshLink">[Refresh]</span></th></tr>' +
   '<tr><td colspan="2" rowspan="3"><b>&nbsp;Show Items:</b></td>' +
   '<td class="fshRight">&nbsp;Helmet:</td>' +
   '<td><input id="fshHelmet" type="checkbox" item="0"/></td>' +
@@ -8515,7 +8714,7 @@ function whereRenderDisplay(data, type, row) {
     return whereRenderGuildDisplay(row);
   }
   if (row.equipped) {return 'Worn';}
-  var folderSelect = '<select class="moveItem" data-inv="' + row.inv_id +
+  var folderSelect = '<select class="fshMoveItem" data-inv="' + row.inv_id +
     '">';
   var keysArray = Object.keys(theInv.folders)
     .sort(function(a, b) {return a - b;});
@@ -8584,84 +8783,6 @@ function gsRender(_data, type, row) {
       row.folder_id && row.guild_tag !== '-1') {
     return gsDisplayType(_data, type, row);
   }
-}
-
-var actionTypes = [
-  {
-    test: function(row) {return row.player_id && row.player_id === -1;},
-    wearAction: function(row) {
-      return 'takeItem" invid="' + row.inv_id + '" action="wear';
-    },
-    useAction: function(row) {
-      return 'takeItem" invid="' + row.inv_id + '" action="use';
-    }
-  },
-  {
-    test: function(row) {
-      return row.player_id &&
-        row.player_id !== theInv.current_player_id;
-    },
-    wearAction: function(row) {
-      return 'recallItem" invid="' + row.inv_id +
-        '" playerid="' + row.player_id + '" mode="0" action="wear';
-    },
-    useAction: function(row) {
-      return 'recallItem" invid="' + row.inv_id +
-        '" playerid="' + row.player_id + '" mode="0" action="use';
-    }
-  },
-  {
-    test: function(row) {
-      return row.folder_id && !row.equipped ||
-        row.player_id && !row.equipped &&
-        row.player_id === theInv.current_player_id;
-    },
-    wearAction: function(row) {return 'wearItem" invid="' + row.inv_id;},
-    useAction: function(row) {return 'useItem" invid="' + row.inv_id;}
-  }
-];
-
-function wearRender(row) {
-  for (var i = 0; i < actionTypes.length; i += 1) {
-    if (actionTypes[i].test(row)) {
-      return '<span class="fshLink ' + actionTypes[i].wearAction(row) +
-        '">Wear</span>';
-    }
-  }
-  return '';
-}
-
-function useRender(row) {
-  for (var i = 0; i < actionTypes.length; i += 1) {
-    if (actionTypes[i].test(row)) {
-      return '<span class="fshLink ' + actionTypes[i].useAction(row) +
-        '">Use</span>';
-    }
-  }
-  return '';
-}
-
-function wuRender(data, _type, row) {
-  var action = {
-    '0': 'Wear',
-    '1': 'Wear',
-    '2': 'Wear',
-    '3': 'Wear',
-    '4': 'Wear',
-    '5': 'Wear',
-    '6': 'Wear',
-    '7': 'Wear',
-    '8': 'Wear',
-    '10': 'Use',
-    '11': 'Use',
-    '15': 'Use'
-  }[data];
-  if (action === 'Wear') {
-    action = wearRender(row);
-  } else if (action === 'Use') {
-    action = useRender(row);
-  }
-  return action;
 }
 
 function dropRender(data, type, row) {
@@ -8772,7 +8893,7 @@ function doTable$1() { // jQuery
       {
         title: 'W/U',
         data: 'type',
-        render: wuRender
+        render: wearUseRender
       },
       {
         title: 'setName',
@@ -9048,7 +9169,8 @@ function removeClass(self) {
     .removeClass().qtip('hide');
 }
 
-function killRow(self) { // jQuery
+function killRow(self, data) { // jQuery
+  if (data.r === 1) {return;}
   var tr = self.closest('tr');
   var td = $('td', tr);
   td.eq(2).empty(); // Where
@@ -9065,51 +9187,41 @@ function anotherSpinner(self) {
     '/skin/loading.gif" width="11" height="11">');
 }
 
+function doAction$1(fn, self) { // jQuery
+  removeClass(self);
+  fn().done(killRow.bind(null, self));
+  anotherSpinner(self);
+}
+
 function takeItem$1(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  queueTakeItem(self.attr('invid'), self.attr('action'))
-    .done(function(data) {
-      if (data.r === 1) {return;}
-      killRow(self);
-    });
-  anotherSpinner(self);
+  doAction$1(
+    queueTakeItem.bind(null, self.attr('invid'), self.attr('action')),
+    self
+  );
 }
 
 function recallItem$1(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  queueRecallItem({
-    invId: self.attr('invid'),
-    playerId: self.attr('playerid'),
-    mode: self.attr('mode'),
-    action: self.attr('action')
-  })
-    .done(function(data) {
-      if (data.r === 1) {return;}
-      killRow(self);
-    });
-  anotherSpinner(self);
+  doAction$1(
+    queueRecallItem.bind(null, {
+      invId: self.attr('invid'),
+      playerId: self.attr('playerid'),
+      mode: self.attr('mode'),
+      action: self.attr('action')
+    }),
+    self
+  );
 }
 
 function wearItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  equipItem(self.attr('invid')).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction$1(equipItem.bind(null, self.attr('invid')), self);
 }
 
 function doUseItem$1(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  useItem(self.attr('invid')).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction$1(useItem.bind(null, self.attr('invid')), self);
 }
 
 function doMoveItem(e) { // jQuery
@@ -9119,22 +9231,12 @@ function doMoveItem(e) { // jQuery
 
 function doDropItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  dropItem([self.data('inv')]).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction$1(dropItem.bind(null, [self.data('inv')]), self);
 }
 
 function doSendItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  sendItem([self.data('inv')]).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction$1(sendItem.bind(null, [self.data('inv')]), self);
 }
 
 function eventHandlers() { // jQuery
@@ -9150,7 +9252,7 @@ function eventHandlers() { // jQuery
   $('#fshInv').on('click', 'span.recallItem', recallItem$1);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
   $('#fshInv').on('click', 'span.useItem', doUseItem$1);
-  $('#fshInv').on('change', 'select.moveItem', doMoveItem);
+  $('#fshInv').on('change', 'select.fshMoveItem', doMoveItem);
   $('#fshInv').on('click', 'span.dropItem', doDropItem);
   $('#fshInv').on('click', 'span.sendItem', doSendItem);
 }
@@ -9218,8 +9320,6 @@ function syncInvMan() { // jQuery
   });
 }
 
-var cn;
-
 function showError(data) { // jQuery
   var $tempError = $('#temp_error');
   $tempError.html('<span style="color: red">Error:</span> ' + data.m);
@@ -9238,15 +9338,13 @@ function quickDoneTaken(data) { // jQuery
     $('#temp-inv-' + data.temp_id).remove();
     $('#qtip-' + qtipId).remove();
   }
-  cn += 1;
-  $('#take_result').append('<br>' + cn + '. Item taken.');
+  outputResult('Item taken.', document.getElementById('take_result'));
 }
 
 function takeAllSimilar(evt) { // jQuery.min
   var invIds = evt.target.getAttribute('invIDs').split(',');
   evt.target.parentNode.innerHTML = 'taking all ' +
     invIds.length + ' items';
-  cn = 0;
   invIds.forEach(function(invId) {
     retryAjax({
       type: 'POST',
@@ -9328,144 +9426,6 @@ function injectMailbox() { // Bad jQuery
   });
   document.getElementById('mailboxSwitcher')
     .addEventListener('click', toggleQuickTake, true);
-}
-
-var monsterAry;
-
-function noMobs() {
-  pCC.innerHTML = '<span>No monster information! ' +
-    'Please enable entity log and travel a bit to see the world</span>';
-}
-
-function mobRows() {
-  var result = '';
-  for (var i = 0; i < monsterAry.length; i += 1) {
-    result += '<tr>' +
-      '<td class="fshCenter">' + monsterAry[i].image + '</td>' +
-      '<td>' + monsterAry[i].name + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].creature_class + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].level + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].attack + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].defense + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].armor + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].damage + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].hp + '</td>' +
-      '<td class="fshCenter">' + monsterAry[i].enhancements + '</td></tr>';
-  }
-  return result;
-}
-
-function drawMobs() {
-  var inject = document.getElementById('entityTableOutput');
-  if (!monsterAry || !inject) {return;}
-  inject.innerHTML = mobRows();
-}
-
-function findSortType(target) {
-  return target.getAttribute('sortType') || 'string';
-}
-
-function sortMonsterAry(sortType) {
-  if (sortType === 'string') {
-    monsterAry.sort(stringSort);
-  } else {
-    monsterAry.sort(numberSort);
-  }
-}
-
-function sortCol(target) {
-  var headerClicked = target.getAttribute('sortKey');
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
-  var sortType = findSortType(target);
-  sortMonsterAry(sortType);
-  drawMobs();
-}
-
-function doHandlers(evt) {
-  var target = evt.target;
-  if (target.id === 'clearEntityLog') {
-    setForage('fsh_monsterLog', '');
-    noMobs();
-    return;
-  }
-  if (!target.classList.contains('fshLink')) {return;}
-  sortCol(target);
-}
-
-function drawTable() {
-  var content = pCC;
-  if (!monsterAry || !content) {return;}
-  content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" ' +
-    'width="100%"><tr class="fshBlack fshWhite">' +
-    '<td width="90%" class="fshCenter"><b>Entity Information</b></td>' +
-    '<td width="10%">[<span id="clearEntityLog" class="fshPoint">Clear' +
-    '</span>]</td></tr></table>' +
-    '<table cellspacing="1" cellpadding="2" border="0"><thead>' +
-    '<tr class="fshVerySoftOrange">' +
-    '<th width="25%" class="fshLink" sortkey="name" colspan="2">Entity</th>' +
-    '<th class="fshCenter fshLink" sortkey="creature_class">Class</th>' +
-    '<th class="fshCenter fshLink" sortkey="level" sorttype="number">Lvl</th>' +
-    '<th class="fshCenter">Attack</th>' +
-    '<th class="fshCenter">Defence</th>' +
-    '<th class="fshCenter">Armor</th>' +
-    '<th class="fshCenter">Damage</th>' +
-    '<th class="fshCenter">HP</th>' +
-    '<th class="fshCenter">Enhancements</th>' +
-    '</tr></thead><tbody id="entityTableOutput"></tbody></table>';
-  content.addEventListener('click', doHandlers);
-}
-
-function prepMonster(data) {
-  monsterAry = Object.keys(data).reduce(function(prev, curr) {
-    var tmpObj = data[curr];
-    tmpObj.name = curr;
-    tmpObj.image = '<img class="tip-static" src="' + imageServer +
-      '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
-      imageServer + '/creatures/' + tmpObj.image_id +
-      '.jpg\' width=200 height=200>" width=40 height=40>';
-    tmpObj.level = addCommas(tmpObj.level);
-    tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
-    tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
-    tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
-    tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
-    tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-    var enhancements;
-    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-    if (enhancements && enhancements.length > 0) {
-      var tmp = '<span class="fshXXSmall">';
-      tmp += enhancements.reduce(function(_prev, _curr) {
-        return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
-          tmpObj.enhancements[_curr].min + ' - ' +
-          tmpObj.enhancements[_curr].max + '</span><br>';
-      }, '');
-      tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
-    } else {
-      tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
-    }
-    prev.push(tmpObj);
-    return prev;
-  }, []);
-}
-
-function prepAry(data) {
-  if (!data || data === '') {
-    noMobs();
-    return;
-  }
-  prepMonster(data);
-  calf.sortBy = 'level';
-  calf.sortAsc = true;
-  monsterAry.sort(numberSort);
-  drawTable();
-  drawMobs();
-}
-
-function injectMonsterLog() {
-  getForage('fsh_monsterLog').done(prepAry);
 }
 
 var playerId$3;
@@ -10402,6 +10362,7 @@ var delAllDiv;
 var compDel;
 var compSum;
 var compDelAll;
+var qe;
 var thisInvTable;
 var componentList = {};
 var usedCount;
@@ -10558,6 +10519,10 @@ var evtHdl = [
     act: delAllComponent
   },
   {
+    test: function(self) {return self === qe;},
+    act: function() {jQueryDialog(insertQuickExtract);}
+  },
+  {
     test: function(self) {return self.classList.contains('compDelBtn');},
     act: delComponent
   },
@@ -10597,14 +10562,14 @@ function profileComponents() {
   quickDelDiv = createDiv();
   sumComp = createDiv();
   delAllDiv = createDiv({className: 'fshHide'});
+  var qeDiv = createDiv();
   compDel = decorateButton(quickDelDiv, 'Enable Quick Del');
   compSum = decorateButton(sumComp, 'Count Components');
   compDelAll = decorateButton(delAllDiv, 'Delete All Visible');
+  qe = decorateButton(qeDiv, 'Quick Extract Components');
   cmDiv.appendChild(quickDelDiv);
   cmDiv.appendChild(sumComp);
-  cmDiv.insertAdjacentHTML('beforeend', '[<a class="fshBlue" ' +
-    'href="index.php?cmd=notepad&blank=1&subcmd=quickextract"' +
-    '>Quick Extract Components</a>]');
+  cmDiv.appendChild(qeDiv);
   cmDiv.appendChild(delAllDiv);
   compDiv.appendChild(cmDiv);
   compDiv.addEventListener('click', compEvt);
@@ -10755,9 +10720,14 @@ function quickWearLink() {
   var node = document.querySelector('#profileRightColumn ' +
     'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
   if (!node) {return;}
-  node.parentNode.insertAdjacentHTML('beforeend',
-    '&nbsp;[<a href="/index.php?cmd=notepad&blank=1&subcmd=quickwear" ' +
-    'class="fshBlue">Quick&nbsp;Wear</a>]');
+  var wrap = createSpan({innerHTML: '&nbsp;['});
+  var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});
+  wrap.appendChild(qw);
+  wrap.insertAdjacentText('beforeend', ']');
+  node.parentNode.appendChild(wrap);
+  qw.addEventListener('click', function() {
+    jQueryDialog(insertQuickWear);
+  });
 }
 
 function profileSelectAll() {
@@ -11207,7 +11177,7 @@ function postWarnings(myBuffs) {
     var tipped = el.dataset.tipped;
     var packBuffs;
     while ((packBuffs = packRE.exec(tipped)) !== null) {
-      if (myBuffs[packBuffs[1]] === packBuffs[2]) {
+      if (myBuffs[packBuffs[1]] === Number(packBuffs[2])) {
         el.parentNode.insertAdjacentHTML('beforeend',
           '<br><span class="fshRed fshNoWrap">' + packBuffs[1] + ' ' +
           packBuffs[2] + ' active</span>');
@@ -11281,11 +11251,17 @@ function eventHandlers$1(evt) {
   }
 }
 
+function alpha$1(a, b) {
+  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
+  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
+  return 0;
+}
+
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
-  tab1: false,
-  tab2: false,
-  tab3: false,
+  pottab1: false,
+  pottab2: false,
+  pottab3: false,
   myMap: {},
   minpoint: 12,
   maxpoint: 20
@@ -11299,15 +11275,15 @@ var thresholds;
 function createContainer() {
   return createDiv({
     id: 'potReport',
-    innerHTML: '<input id="tab1" type="checkbox"' +
-      isChecked(potOpts.tab1) + '>' +
-      '<label for="tab1">Composed Potion Inventory</label>' +
-      '<input id="tab2" type="checkbox"' +
-      isChecked(potOpts.tab2) + '>' +
-      '<label for="tab2">Mapping</label>' +
-      '<input id="tab3" type="checkbox"' +
-      isChecked(potOpts.tab3) + '>' +
-      '<label for="tab3">Thresholds</label>'
+    innerHTML: '<input id="pottab1" type="checkbox" name="pottabs"' +
+      isChecked(potOpts.pottab1) + '>' +
+      '<label for="pottab1">Composed Potion Inventory</label>' +
+      '<input id="pottab2" type="checkbox" name="pottabs"' +
+      isChecked(potOpts.pottab2) + '>' +
+      '<label for="pottab2">Mapping</label>' +
+      '<input id="pottab3" type="checkbox" name="pottabs"' +
+      isChecked(potOpts.pottab3) + '>' +
+      '<label for="pottab3">Thresholds</label>'
   });
 }
 
@@ -11321,12 +11297,6 @@ function createThresholds() {
       '<input id="maxpoint" type="number" value="' +
       potOpts.maxpoint + '" min="0" max="999">',
   });
-}
-
-function alpha$1(a, b) {
-  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
-  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
-  return 0;
 }
 
 function sortKeys(obj) {
@@ -11440,7 +11410,7 @@ var evtHdl$1 = [
   },
   {
     test: function(self) {
-      return /^tab\d$/.test(self.id);
+      return /^pottab\d$/.test(self.id);
     },
     act: saveState
   }
@@ -12188,7 +12158,7 @@ function gotMyVl(data) {
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
   spinner$1 = createSpan({
-    className: 'fshSpinner fshTopListSpinner',
+    className: 'fshCurveBtn fshTopListSpinner',
     style: {
       backgroundImage: 'url(\'' + imageServer +
         '/world/actionLoadingSpinner.gif\')'
@@ -12206,7 +12176,8 @@ function looksLikeTopRated() {
   var theCell = pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({
-    className: 'fshFindOnlinePlayers custombutton tip-static',
+    id: 'fshFindOnlinePlayers',
+    className: 'custombutton tip-static',
     type: 'button',
     value: 'Find Online Players',
     dataset: {
@@ -12436,7 +12407,7 @@ function injectViewGuild() {
   Array.prototype.forEach.call(memList, function(el) {
     var tipped = el.getAttribute('data-tipped');
     var lastActDays = lastActivityRE.exec(tipped)[1];
-    var vlevel = /VL:.+?(\d+)/.exec(tipped)[1];
+    var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
     var aRow = el.parentNode.parentNode;
     if (lastActDays < 7 &&
         highlightPlayersNearMyLvl &&
@@ -12457,27 +12428,27 @@ var assets = {
     '2': 'yellow'
   },
   worldFormgroup:
-    '<a href="#" class="quicklink tip-static" ' +
+    '<a href="#" class="fshCurveBtn tip-static" ' +
       'data-tipped="Quick Create Attack Group" ' +
       'style="background-image: url(\'' + imageServer +
       '/skin/realm/icon_action_formgroup.gif\');">' +
     '</a>',
   worldQuickBuff:
-    '<a href="#" class="quicklink tip-static" ' +
+    '<a href="#" class="fshCurveBtn tip-static" ' +
       'data-tipped="Open Quick Buff Popup" ' +
       'style="background-image: url(\'' + imageServer +
       '/skin/realm/icon_action_quickbuff.gif\');">' +
     '</a>',
   worldMap:
     '<a href="index.php?cmd=world&subcmd=map" target="fsWorldMap" ' +
-      'class="quicklink tip-static" data-tipped="Open Realm Map" ' +
+      'class="fshCurveBtn tip-static" data-tipped="Open Realm Map" ' +
       'style="background-image: url(\'' + imageServer +
       '/skin/realm/icon_action_map.gif\');">' +
     '</a>',
   searchMapUFSG:
     '<a href="https://guide.fallensword.com/index.php?cmd=realms' +
       '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
-      'class="quicklink tip-static" data-tipped="Search map in ' +
+      'class="fshCurveBtn tip-static" data-tipped="Search map in ' +
       'Ultimate FSG" style="background-image: url(\'' +
       imageServer + '/temple/1.gif\');">' +
     '</a>',
@@ -12488,16 +12459,16 @@ var assets = {
     '3': {generalVariable: 1.1053, hpVariable: 1}
   },
   huntingOnImage: '<a href="#" id="HelperToggleHuntingMode" ' +
-    'class="huntOn quicklink tip-static" ' +
+    'class="huntOn fshCurveBtn tip-static" ' +
     'data-tipped="Hunting mode is ON"></a>',
   huntingOffImage: '<a href="#" id="HelperToggleHuntingMode" ' +
-    'class="huntOff quicklink tip-static" ' +
+    'class="huntOff fshCurveBtn tip-static" ' +
     'data-tipped="Hunting mode is OFF"></a>',
   soundMuteImage: '<a href="#" id="toggleSoundLink" ' +
-    'class="soundOn quicklink tip-static" ' +
+    'class="soundOn fshCurveBtn tip-static" ' +
     'data-tipped="Turn Off Sound when you have a new log message"></a>',
   soundImage: '<a href="#" id="toggleSoundLink" ' +
-    'class="soundOff quicklink tip-static" ' +
+    'class="soundOff fshCurveBtn tip-static" ' +
     'data-tipped="Turn On Sound when you have a new log message"></a>'
 };
 
@@ -12651,75 +12622,55 @@ function injectButtons(data) { // jQuery
 }
 
 var assets$1 = {
-  defStats: '<table class="relicT"><tbody>' +
-    '<tr><td colspan="2" class="headr">Defending Guild Stats</td></tr>' +
-    '<tr><td class="brn">Relic Count:</td>' +
-      '<td id="relicCount">0</td></tr>' +
-    '<tr><td class="brn">Lead Defender Bonus:</td>' +
-      '<td id="LDPercentage">0</td></tr>' +
-    '<tr><td class="brn">Lead Defender Cloaked:</td>' +
-      '<td id="LDCloaked">No</td></tr>' +
-    '<tr><td colspan="2" class="headr">Other Defender Stats</td></tr>' +
-    '<tr><td class="brn">Raw Attack:</td>' +
-      '<td class="grey" id="attackValue">0</td></tr>' +
-    '<tr><td class="brn">Attack w/ buffs:</td>' +
-      '<td id="attackValueBuffed">0</td></tr>' +
-    '<tr><td class="brn">Raw Defense:</td>' +
-      '<td class="grey" id="defenseValue">0</td></tr>' +
-    '<tr><td class="brn">Defense w/buffs:</td>' +
-      '<td id="defenseValueBuffed">0</td></tr>' +
-    '<tr><td class="brn">Raw Armor:</td>' +
-      '<td class="grey" id="armorValue">0</td></tr>' +
-    '<tr><td class="brn">Armor w/ buffs:</td>' +
-      '<td id="armorValueBuffed">0</td></tr>' +
-    '<tr><td class="brn">Raw Damage:</td>' +
-      '<td class="grey" id="damageValue">0</td></tr>' +
-    '<tr><td class="brn">Damage w/ buffs:</td>' +
-      '<td id="damageValueBuffed">0</td></tr>' +
-    '<tr><td class="brn">Raw HP:</td>' +
-      '<td class="grey" id="hpValue">0</td></tr>' +
-    '<tr><td class="brn">HP w/ buffs:</td>' +
-      '<td id="hpValueBuffed">0</td></tr>' +
-    '<tr><td class="brn">Cloaked:</td>' +
-      '<td id="defendersCloaked">0</td></tr>' +
-    '<tr><td class="brn">Processed:</td>' +
-      '<td id="defendersProcessed">0</td></tr>' +
+  defStats: '<table class="relicT relicS"><thead>' +
+    '<tr><th colspan="2">Defending Guild Stats</th></tr></thead><tbody>' +
+    '<tr><td>Relic Count:</td><td id="relicCount">0</td></tr>' +
+    '<tr><td>Lead Defender Bonus:</td><td id="LDPercentage">0</td></tr>' +
+    '<tr><td>Lead Defender Cloaked:</td><td id="LDCloaked">No</td></tr>' +
+    '</tbody><thead><tr><th colspan="2">Other Defender Stats</th></tr>' +
+    '</thead><tbody>' +
+    '<tr><td>Raw Attack:</td><td class="fshGrey" id="attackValue">0</td></tr>' +
+    '<tr><td>Attack w/ buffs:</td><td id="attackValueBuffed">0</td></tr>' +
+    '<tr><td>Raw Defense:</td>' +
+      '<td class="fshGrey" id="defenseValue">0</td></tr>' +
+    '<tr><td>Defense w/buffs:</td><td id="defenseValueBuffed">0</td></tr>' +
+    '<tr><td>Raw Armor:</td><td class="fshGrey" id="armorValue">0</td></tr>' +
+    '<tr><td>Armor w/ buffs:</td><td id="armorValueBuffed">0</td></tr>' +
+    '<tr><td>Raw Damage:</td><td class="fshGrey" id="damageValue">0</td></tr>' +
+    '<tr><td>Damage w/ buffs:</td><td id="damageValueBuffed">0</td></tr>' +
+    '<tr><td>Raw HP:</td><td class="fshGrey" id="hpValue">0</td></tr>' +
+    '<tr><td>HP w/ buffs:</td><td id="hpValueBuffed">0</td></tr>' +
+    '<tr><td>Cloaked:</td><td id="defendersCloaked">0</td></tr>' +
+    '<tr><td>Processed:</td><td id="defendersProcessed">0</td></tr>' +
     '</tbody></table>',
-  atkStats: '<table class="relicT"><tbody>' +
-    '<tr><td class="headr" colspan="2">Adjusted defense values:</td></tr>' +
-    '<tr><td class="brn">DC225:</td>' +
-      '<td id="DC225">0</td></tr>' +
-    '<tr><td class="brn">DC175:</td>' +
-      '<td id="DC175">0</td></tr>' +
-    '<tr><td colspan="2">&nbsp;</td></tr>' +
-    '<tr><td class="headr" colspan="2">Attacking Group Stats:</td></tr>' +
-    '<tr><td class="brn">Raw Group Attack:</td>' +
-      '<td class="grey" id="GroupAttack"></td></tr>' +
-    '<tr><td class="brn">Group Attack w/ buffs:</td>' +
-      '<td id="GroupAttackBuffed"></td></tr>' +
-    '<tr><td class="brn">Raw Group Defense:</td>' +
-      '<td class="grey" id="GroupDefense"></td></tr>' +
-    '<tr><td class="brn">Group Defense w/ buffs:</td>' +
+  atkStats: '<table class="relicT relicS"><thead>' +
+    '<tr><th colspan="2">Adjusted defense values</th></tr></thead><tbody>' +
+    '<tr><td>DC225:</td><td id="DC225">0</td></tr>' +
+    '<tr><td>DC175:</td><td id="DC175">0</td></tr>' +
+    '<tr><td colspan="2">&nbsp;</td></tr></tbody><thead>' +
+    '<tr><th colspan="2">Attacking Group Stats</th></tr></thead><tbody>' +
+    '<tr><td>Raw Group Attack:</td>' +
+      '<td class="fshGrey" id="GroupAttack"></td></tr>' +
+    '<tr><td>Group Attack w/ buffs:</td><td id="GroupAttackBuffed"></td></tr>' +
+    '<tr><td>Raw Group Defense:</td>' +
+      '<td class="fshGrey" id="GroupDefense"></td></tr>' +
+    '<tr><td>Group Defense w/ buffs:</td>' +
       '<td id="GroupDefenseBuffed"></td></tr>' +
-    '<tr><td class="brn">Raw Group Armor:</td>' +
-      '<td class="grey" id="GroupArmor"></td></tr>' +
-    '<tr><td class="brn">Group Armor w/ buffs:</td>' +
-      '<td id="GroupArmorBuffed"></td></tr>' +
-    '<tr><td class="brn">Raw Group Damage:</td>' +
-      '<td class="grey" id="GroupDamage"></td></tr>' +
-    '<tr><td class="brn">Group Damage w/ buffs:</td>' +
-      '<td id="GroupDamageBuffed"></td></tr>' +
-    '<tr><td class="brn">Raw Group HP:</td>' +
-      '<td class="grey" id="GroupHP"></td></tr>' +
-    '<tr><td class="brn">Group HP w/ buffs:</td>' +
-      '<td id="GroupHPBuffed"></td></tr>' +
+    '<tr><td>Raw Group Armor:</td>' +
+      '<td class="fshGrey" id="GroupArmor"></td></tr>' +
+    '<tr><td>Group Armor w/ buffs:</td><td id="GroupArmorBuffed"></td></tr>' +
+    '<tr><td>Raw Group Damage:</td>' +
+      '<td class="fshGrey" id="GroupDamage"></td></tr>' +
+    '<tr><td>Group Damage w/ buffs:</td><td id="GroupDamageBuffed"></td></tr>' +
+    '<tr><td>Raw Group HP:</td><td class="fshGrey" id="GroupHP"></td></tr>' +
+    '<tr><td>Group HP w/ buffs:</td><td id="GroupHPBuffed"></td></tr>' +
     '</tbody></table>',
-  proc: '<table class="relicT"><tbody>' +
-    '<tr><td class="headr" colspan="2">Processing:</td></tr>' +
+  proc: '<table class="relicT">' +
+    '<thead><tr><th colspan="2">Processing</th></tr></thead><tbody>' +
     '<tr><td class="fshGreen" colspan="2" id="ProcessingStatus">' +
       'Parsing defending guild stats ...</td></tr>' +
-    '<tr><td class="headr" colspan="2">Assumptions:</td></tr>' +
-    '<tr><td colspan="2" class="grey">Above calculations include ' +
+    '</tbody><thead><tr><th colspan="2">Assumptions</th></tr></thead><tbody>' +
+    '<tr><td colspan="2" class="fshGrey">Above calculations include ' +
       'Constitution, Fortitude, Nightmare Visage, Chi Strike, Sanctuary, ' +
       'Terrorize and Flinch bonus calculations (in that order) on both the ' +
       'defending group and attacking group.</td></tr>' +
@@ -12797,8 +12748,8 @@ var memberExclusions = [
   function(key) {return key === 'lastUpdate';},
   function(key) {return myDefenders.indexOf(key) !== -1;},
   function(key) {return !guildMemberList[key].last_login;},
-  function(key) {return guildMemberList[key].last_login >= twoMinutes;},
-  function(key) {return guildMemberList[key].last_login <= sevenDays;},
+  function(key) {return Number(guildMemberList[key].last_login) >= twoMinutes;},
+  function(key) {return Number(guildMemberList[key].last_login) <= sevenDays;},
   function(key) {
     return guildMemberList[key].level >= 400 &&
       guildMemberList[key].level <= 421;
@@ -12988,9 +12939,10 @@ function missingMembers(membrList) {
     return prev;
   }, []);
   containerDiv.insertAdjacentHTML('beforeend',
-    '<div class="fshFloatLeft lowDiv"><table class="relicT"><tbody>' +
-    '<tr><td class="headr">Offline guild members not at relic:</td></tr>' +
-    '<tr><td>' + filtered.join(' ') + '</td></tr></tbody></table></div>');
+    '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
+    '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
+    '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
+    '</table></div>');
 }
 
 function setDefVars() {
@@ -13032,13 +12984,13 @@ function prepareDivs() {
   leftDiv.insertAdjacentHTML('beforeend', assets$1.proc);
   processingStatus = document.getElementById('ProcessingStatus');
   midDiv = createDiv({
-    className: 'fshFloatLeft midDiv',
+    className: 'fshFloatLeft fshRelicMidDiv',
     innerHTML: assets$1.defStats
   });
   containerDiv.appendChild(midDiv);
   setDefVars();
   rightDiv = createDiv({
-    className: 'fshFloatLeft rightDiv',
+    className: 'fshFloatLeft fshRelicRightDiv',
     innerHTML: assets$1.atkStats
   });
   containerDiv.appendChild(rightDiv);
@@ -13154,7 +13106,7 @@ function setup$1() {
   } else {
     containerDiv = createDiv({className: 'body'});
   }
-  leftDiv = createDiv({className: 'fshFloatLeft leftDiv'});
+  leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
   containerDiv.appendChild(leftDiv);
   if (relicData.is_owner) {
     leftDiv.appendChild(doBuffLinks(myDefenders));
@@ -13437,6 +13389,15 @@ function evalAttack(combat) {
   return combat;
 }
 
+function calcLowest(combat) {
+  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
+    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
+    combat.player.attackValue / 0.0025), 0);
+  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
+    combat.counterAttackBonusDamage - combat.damageDone + 1) /
+    combat.player.damageValue / 0.0025), 0);
+}
+
 function stamAtLowestCa(combat) {
   if (combat.player.counterAttackLevel > 0) {
     return Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
@@ -13446,12 +13407,7 @@ function stamAtLowestCa(combat) {
 }
 
 function caRunning(combat) {
-  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
-    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
-    combat.player.attackValue / 0.0025), 0);
-  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
-    combat.counterAttackBonusDamage - combat.damageDone + 1) /
-    combat.player.damageValue / 0.0025), 0);
+  calcLowest(combat);
   combat.lowestFeasibleCALevel =
     Math.max(combat.lowestCALevelToStillHit,
       combat.lowestCALevelToStillKill);
@@ -13509,12 +13465,7 @@ function evalCaOneHit(combat) {
 }
 
 function caResult(combat) {
-  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
-    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
-    combat.player.attackValue / 0.0025), 0);
-  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
-    combat.counterAttackBonusDamage - combat.damageDone + 1) /
-    combat.player.damageValue / 0.0025), 0);
+  calcLowest(combat);
   evalCaKill(combat);
   evalCaOneHit(combat);
 }
@@ -14191,6 +14142,8 @@ function processMonsterLog() {
 function doMouseOver() {
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
+  var myLvlClas = 'fshYellow';
+  if (statLevel > creature.level) {myLvlClas = 'fshRed';}
   var monsterTip = '<table><tr><td>' +
     '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
     '.jpg" height="200" width="200"></td><td rowspan="2">' +
@@ -14198,7 +14151,8 @@ function doMouseOver() {
     '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>' +
     '<tr><td>Class:&nbsp;</td><td width="40%">' + creature.creature_class +
     '</td><td>Level:&nbsp;</td><td width="40%">' + creature.level +
-    ' (your level:<span class="fshYellow">' + statLevel + '</span>)</td>' +
+    ' (your level:<span class="' + myLvlClas + '">' +
+    statLevel + '</span>)</td>' +
     '</tr><tr><td>Attack:&nbsp;</td><td width="40%">' + creature.attack +
     ' (your defense:<span class="fshYellow">' + statDefense + '</span>)</td>' +
     '<td>Defense:&nbsp;</td><td width="40%">' + creature.defense +
@@ -14275,20 +14229,20 @@ function loopActions(e, i) { // jQuery
   }).done(processMonster);
 }
 
+function getStatText(statTooltip, statClassName) {
+  return statTooltip.getElementsByClassName(statClassName)[0]
+    .nextElementSibling.textContent;
+}
+
 function getMyStats() {
-  statLevel = intValue(document
-    .getElementById('statbar-level-tooltip-general')
-    .getElementsByClassName('stat-level')[0].nextElementSibling.textContent);
-  statDefense = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-defense')[0].nextElementSibling.textContent;
-  statAttack = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-attack')[0].nextElementSibling.textContent;
-  statDamage = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-damage')[0].nextElementSibling.textContent;
-  statArmor = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-armor')[0].nextElementSibling.textContent;
-  statHp = document.getElementById('statbar-character-tooltip-stats')
-    .getElementsByClassName('stat-hp')[0].nextElementSibling.textContent;
+  statLevel = intValue(getStatText(document
+    .getElementById('statbar-level-tooltip-general'), 'stat-level'));
+  var statTooltip = document.getElementById('statbar-character-tooltip-stats');
+  statDefense = getStatText(statTooltip, 'stat-defense');
+  statAttack = getStatText(statTooltip, 'stat-attack');
+  statDamage = getStatText(statTooltip, 'stat-damage');
+  statArmor = getStatText(statTooltip, 'stat-armor');
+  statHp = getStatText(statTooltip, 'stat-hp');
 }
 
 function initMonsterLog() {
@@ -14750,8 +14704,6 @@ function doinvent(recipe) {
 }
 
 var itemRE$1 = /<b>([^<]+)<\/b>/i;
-var lastMsg$1;
-
 var plantFromComponentHash = {
   'Amber Essense': 'Amber Plant',
   'Blood Bloom Flower': 'Blood Bloom Plant',
@@ -14764,23 +14716,15 @@ var plantFromComponentHash = {
   'Purplet Flower': 'Purplet Plant',
 };
 
-function outputResult$1(result) {
-  document.getElementById('invent_Result').insertAdjacentHTML('beforeend',
-    '<li style="list-style:decimal">' + result + '</li>');
-}
-
 function quickInventDone(json) {
-  if (!json.success && lastMsg$1 !== json.error.message) {
-    lastMsg$1 = json.error.message;
-    outputResult$1(json.error.message);
-    return;
-  }
+  var inventResult = document.getElementById('invent_Result');
+  if (jsonFail(json, inventResult)) {return;}
   if (json.result.success) {
-    outputResult$1('<span class="fshGreen">' +
-      'You successfully invented the item!</span>');
+    outputResult('<span class="fshGreen">' +
+      'You successfully invented the item!</span>', inventResult);
   } else {
-    outputResult$1('<span class="fshRed">' +
-      'You have failed to invent the item.</span>');
+    outputResult('<span class="fshRed">' +
+      'You have failed to invent the item.</span>', inventResult);
   }
 }
 
@@ -15003,6 +14947,13 @@ function setupMoves() { // jQuery
   node.click(selectMoves);
 }
 
+function showAllQuestSteps() {
+  if (!getValue('showNextQuestSteps')) {return;}
+  Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
+    function(e) {e.style.display = 'block';});
+  document.getElementById('next_stage_button').style.display = 'none';
+}
+
 function gotMoves(_arena) { // jQuery
   var arena = _arena || {};
   arena.moves = {};
@@ -15109,7 +15060,7 @@ function rejected(timeStamp, buffsNotCast, buffLog) {
 function getStamUsed(buffCast) {
   for (var j = 0; j < buffList.length; j += 1) {
     if (buffList[j].name === buffCast[1]) {
-      return buffList[j].stamina.toString();
+      return buffList[j].stam.toString();
     }
   }
   return '-';
@@ -16206,7 +16157,7 @@ function joinAllGroupsUnderSize() { // Legacy
 }
 
 function parseGroupData(linkElement, obj) {
-  var extraText = '<table id="stat">' +
+  var extraText = '<table class="fshgrpstat">' +
     '<tr>' +
     '<td class="fshBrown">Attack</td>' +
     '<td class="fshRight">' + obj.attack + '</td>' +
@@ -16348,26 +16299,6 @@ function injectGroups() { // jQuery
   displayMinGroupLevel();
   groupButtons();
   fixTable();
-}
-
-function allowBack() {
-  document.querySelector('input[type="submit"]')
-    .addEventListener('click', function(evt) {
-      evt.preventDefault();
-      var url = 'index.php?';
-      Array.prototype.forEach.call(
-        document.querySelectorAll('input:not([type="submit"])' +
-          ':not([type="checkbox"]), select, input[type="checkbox"]:checked'),
-        function(e) {url += '&' + e.name + '=' + e.value;});
-      window.location = url;
-    });
-}
-
-function showAllQuestSteps() {
-  if (!getValue('showNextQuestSteps')) {return;}
-  Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
-    function(e) {e.style.display = 'block';});
-  document.getElementById('next_stage_button').style.display = 'none';
 }
 
 function hasTextEntry() { // jQuery
@@ -16514,7 +16445,7 @@ function buildNickList() {// Native
     var nicks = curr.nicks.split(',');
     nicks.forEach(function(el) {
       var nick = el.toLowerCase();
-      ret[nick] = curr.skillId;
+      ret[nick] = curr.id;
     });
     return ret;
   }, {});
@@ -16765,7 +16696,6 @@ function updateShoutboxPreview() {
 
 function injectShoutboxWidgets() {
   textArea$1 = document.getElementById('textInputBox');
-  textArea$1.classList.add('fshNoResize');
   textArea$1.addEventListener('keyup', updateShoutboxPreview);
 }
 
@@ -16849,21 +16779,21 @@ var pageSwitcher = {
   marketplace: {createreq: {'-': {'-': {'-': addMarketplaceWidgets}}}},
   quickbuff: {'-': {'-': {'-': {'-': injectQuickBuff}}}}, // No ga
   notepad: {
-    showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}},
+    showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}}, // done
     invmanagernew: {'-': {'-': {'-': refresh}}},
     guildinvmgr: {'-': {'-': {'-': refresh}}},
-    recipemanager: {'-': {'-': {'-': injectRecipeManager}}},
+    recipemanager: {'-': {'-': {'-': injectRecipeManager}}}, // done
     auctionsearch: {'-': {'-': {'-': injectAuctionSearch}}},
-    onlineplayers: {'-': {'-': {'-': injectOnlinePlayers}}},
-    quicklinkmanager: {'-': {'-': {'-': injectQuickLinkManager}}},
-    monsterlog: {'-': {'-': {'-': injectMonsterLog}}},
-    quickextract: {'-': {'-': {'-': insertQuickExtract}}},
-    quickwear: {'-': {'-': {'-': insertQuickWear}}},
-    fsboxcontent: {'-': {'-': {'-': injectFsBoxContent}}},
-    bufflogcontent: {'-': {'-': {'-': injectBuffLog}}},
+    onlineplayers: {'-': {'-': {'-': injectOnlinePlayers}}}, // done
+    quicklinkmanager: {'-': {'-': {'-': injectQuickLinkManager}}}, // done
+    monsterlog: {'-': {'-': {'-': injectMonsterLog}}}, // done
+    quickextract: {'-': {'-': {'-': insertQuickExtract}}}, // done
+    quickwear: {'-': {'-': {'-': insertQuickWear}}}, // done
+    fsboxcontent: {'-': {'-': {'-': injectFsBoxContent}}}, // done
+    bufflogcontent: {'-': {'-': {'-': injectBuffLog}}}, // done
     newguildlog: {'-': {'-': {'-': injectNewGuildLog}}},
-    findbuffs: {'-': {'-': {'-': injectFindBuffs}}},
-    findother: {'-': {'-': {'-': injectFindOther}}},
+    findbuffs: {'-': {'-': {'-': injectFindBuffs}}}, // done
+    findother: {'-': {'-': {'-': injectFindOther}}}, // done
     savesettings: {'-': {'-': {'-': injectSaveSettings}}},
     '-': {'-': {'-': {'-': injectNotepad}}}
   },
@@ -17012,6 +16942,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '6';
+window.FSH.calf = '7';
 
 }());
