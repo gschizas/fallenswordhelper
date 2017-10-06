@@ -7,27 +7,27 @@ export default {
     '2': 'yellow'
   },
   worldFormgroup:
-    '<a href="#" class="quicklink tip-static" ' +
+    '<a href="#" class="fshCurveBtn tip-static" ' +
       'data-tipped="Quick Create Attack Group" ' +
       'style="background-image: url(\'' + system.imageServer +
       '/skin/realm/icon_action_formgroup.gif\');">' +
     '</a>',
   worldQuickBuff:
-    '<a href="#" class="quicklink tip-static" ' +
+    '<a href="#" class="fshCurveBtn tip-static" ' +
       'data-tipped="Open Quick Buff Popup" ' +
       'style="background-image: url(\'' + system.imageServer +
       '/skin/realm/icon_action_quickbuff.gif\');">' +
     '</a>',
   worldMap:
     '<a href="index.php?cmd=world&subcmd=map" target="fsWorldMap" ' +
-      'class="quicklink tip-static" data-tipped="Open Realm Map" ' +
+      'class="fshCurveBtn tip-static" data-tipped="Open Realm Map" ' +
       'style="background-image: url(\'' + system.imageServer +
       '/skin/realm/icon_action_map.gif\');">' +
     '</a>',
   searchMapUFSG:
     '<a href="https://guide.fallensword.com/index.php?cmd=realms' +
       '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
-      'class="quicklink tip-static" data-tipped="Search map in ' +
+      'class="fshCurveBtn tip-static" data-tipped="Search map in ' +
       'Ultimate FSG" style="background-image: url(\'' +
       system.imageServer + '/temple/1.gif\');">' +
     '</a>',
@@ -38,15 +38,15 @@ export default {
     '3': {generalVariable: 1.1053, hpVariable: 1}
   },
   huntingOnImage: '<a href="#" id="HelperToggleHuntingMode" ' +
-    'class="huntOn quicklink tip-static" ' +
+    'class="huntOn fshCurveBtn tip-static" ' +
     'data-tipped="Hunting mode is ON"></a>',
   huntingOffImage: '<a href="#" id="HelperToggleHuntingMode" ' +
-    'class="huntOff quicklink tip-static" ' +
+    'class="huntOff fshCurveBtn tip-static" ' +
     'data-tipped="Hunting mode is OFF"></a>',
   soundMuteImage: '<a href="#" id="toggleSoundLink" ' +
-    'class="soundOn quicklink tip-static" ' +
+    'class="soundOn fshCurveBtn tip-static" ' +
     'data-tipped="Turn Off Sound when you have a new log message"></a>',
   soundImage: '<a href="#" id="toggleSoundLink" ' +
-    'class="soundOff quicklink tip-static" ' +
+    'class="soundOff fshCurveBtn tip-static" ' +
     'data-tipped="Turn On Sound when you have a new log message"></a>'
 };

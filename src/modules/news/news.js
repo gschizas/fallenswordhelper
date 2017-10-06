@@ -22,7 +22,6 @@ function updateShoutboxPreview() {
 
 function injectShoutboxWidgets() {
   textArea = document.getElementById('textInputBox');
-  textArea.classList.add('fshNoResize');
   textArea.addEventListener('keyup', updateShoutboxPreview);
 }
 

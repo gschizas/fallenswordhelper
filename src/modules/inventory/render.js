@@ -1,7 +1,7 @@
 import calf from '../support/calf';
+import {theInv} from './inventory';
 import * as assets from './assets';
 import * as dataObj from '../support/dataObj';
-import * as inventory from './inventory';
 import * as system from '../support/system';
 
 function getT(player_id) {
@@ -16,11 +16,11 @@ function player(invPlayer, rowPlayer, guild) {
 }
 
 function nameRenderDisplay(data, row) {
-  var cur = system.fallback(inventory.theInv.player_id,
-    inventory.theInv.current_player_id);
+  var cur = system.fallback(theInv.player_id,
+    theInv.current_player_id);
   var t = getT(row.player_id);
-  var p = player(inventory.theInv.player_id, row.player_id,
-    inventory.theInv.guild_id);
+  var p = player(theInv.player_id, row.player_id,
+    theInv.guild_id);
 
   var bold = data;
   if (row.equipped) {bold = '<b>' + data + '</b>';}
@@ -78,14 +78,14 @@ export function whereRenderDisplay(data, type, row) {
     return whereRenderGuildDisplay(row);
   }
   if (row.equipped) {return 'Worn';}
-  var folderSelect = '<select class="moveItem" data-inv="' + row.inv_id +
+  var folderSelect = '<select class="fshMoveItem" data-inv="' + row.inv_id +
     '">';
-  var keysArray = Object.keys(inventory.theInv.folders)
+  var keysArray = Object.keys(theInv.folders)
     .sort(function(a, b) {return a - b;});
   keysArray.forEach(function(value) {
     folderSelect += '<option value="' + value + '"' +
       system.isSelected(value, row.folder_id) + '>' +
-      inventory.theInv.folders[value] + '</option>';
+      theInv.folders[value] + '</option>';
   });
   folderSelect += '</select>';
   return folderSelect;
@@ -101,7 +101,7 @@ export function whereRenderFilter(data, type, row) {
     return whereRenderGuildFilter(row);
   }
   if (row.equipped) {return 'Worn';}
-  return inventory.theInv.folders[row.folder_id];
+  return theInv.folders[row.folder_id];
 }
 
 export function craftRender(craft) {
@@ -128,7 +128,7 @@ function bpDisplayType(type, row) {
 
 export function bpRender(where, type, row) {
   if (row.folder_id || row.player_id ===
-    inventory.theInv.current_player_id) {return;}
+    theInv.current_player_id) {return;}
   return bpDisplayType(type, row);
 }
 
@@ -136,7 +136,7 @@ function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
     row.inv_id + '" playerid="' +
-    system.fallback(row.player_id, inventory.theInv.player_id) +
+    system.fallback(row.player_id, theInv.player_id) +
     '" mode="1" action="recall">GS</span>';
   }
   return 'GS';
@@ -147,84 +147,6 @@ export function gsRender(_data, type, row) {
       row.folder_id && row.guild_tag !== '-1') {
     return gsDisplayType(_data, type, row);
   }
-}
-
-var actionTypes = [
-  {
-    test: function(row) {return row.player_id && row.player_id === -1;},
-    wearAction: function(row) {
-      return 'takeItem" invid="' + row.inv_id + '" action="wear';
-    },
-    useAction: function(row) {
-      return 'takeItem" invid="' + row.inv_id + '" action="use';
-    }
-  },
-  {
-    test: function(row) {
-      return row.player_id &&
-        row.player_id !== inventory.theInv.current_player_id;
-    },
-    wearAction: function(row) {
-      return 'recallItem" invid="' + row.inv_id +
-        '" playerid="' + row.player_id + '" mode="0" action="wear';
-    },
-    useAction: function(row) {
-      return 'recallItem" invid="' + row.inv_id +
-        '" playerid="' + row.player_id + '" mode="0" action="use';
-    }
-  },
-  {
-    test: function(row) {
-      return row.folder_id && !row.equipped ||
-        row.player_id && !row.equipped &&
-        row.player_id === inventory.theInv.current_player_id;
-    },
-    wearAction: function(row) {return 'wearItem" invid="' + row.inv_id;},
-    useAction: function(row) {return 'useItem" invid="' + row.inv_id;}
-  }
-];
-
-function wearRender(row) {
-  for (var i = 0; i < actionTypes.length; i += 1) {
-    if (actionTypes[i].test(row)) {
-      return '<span class="fshLink ' + actionTypes[i].wearAction(row) +
-        '">Wear</span>';
-    }
-  }
-  return '';
-}
-
-function useRender(row) {
-  for (var i = 0; i < actionTypes.length; i += 1) {
-    if (actionTypes[i].test(row)) {
-      return '<span class="fshLink ' + actionTypes[i].useAction(row) +
-        '">Use</span>';
-    }
-  }
-  return '';
-}
-
-export function wuRender(data, _type, row) {
-  var action = {
-    '0': 'Wear',
-    '1': 'Wear',
-    '2': 'Wear',
-    '3': 'Wear',
-    '4': 'Wear',
-    '5': 'Wear',
-    '6': 'Wear',
-    '7': 'Wear',
-    '8': 'Wear',
-    '10': 'Use',
-    '11': 'Use',
-    '15': 'Use'
-  }[data];
-  if (action === 'Wear') {
-    action = wearRender(row);
-  } else if (action === 'Use') {
-    action = useRender(row);
-  }
-  return action;
 }
 
 export function dropRender(data, type, row) {

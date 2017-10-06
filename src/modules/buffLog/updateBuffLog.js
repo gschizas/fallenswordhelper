@@ -15,7 +15,7 @@ function rejected(timeStamp, buffsNotCast, buffLog) {
 function getStamUsed(buffCast) {
   for (var j = 0; j < buffList.length; j += 1) {
     if (buffList[j].name === buffCast[1]) {
-      return buffList[j].stamina.toString();
+      return buffList[j].stam.toString();
     }
   }
   return '-';

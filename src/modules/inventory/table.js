@@ -1,3 +1,4 @@
+import wearUseRender from './wearUseRender';
 import * as assets from './assets';
 import * as inventory from './inventory';
 import * as render from './render';
@@ -74,7 +75,7 @@ export default function doTable() { // jQuery
       {
         title: 'W/U',
         data: 'type',
-        render: render.wuRender
+        render: wearUseRender
       },
       {
         title: 'setName',

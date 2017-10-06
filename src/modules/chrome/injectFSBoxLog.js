@@ -1,4 +1,7 @@
+import {createSpan} from '../common/cElement';
 import getForage from '../ajax/getForage';
+import {injectFsBoxContent} from '../misc';
+import jQueryDialog from './jQueryDialog';
 import setForage from '../ajax/setForage';
 
 function getBoxList(boxList) {
@@ -26,7 +29,11 @@ export default function injectFSBoxLog() {
   nodediv.insertAdjacentHTML('beforeend',
     '<br><span class="fshPaleVioletRed">' +
     '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
-    playerName + '">Ignore</a> ]</span> <span class="fshYellow">[ <a ' +
-    'href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent">Log</a> ]' +
-    '</span>');
+    playerName + '">Ignore</a> ]</span> ');
+  var log = createSpan({
+    className: 'fshYellow',
+    innerHTML: '[ <span class="fshLink">Log</span> ]'
+  });
+  log.addEventListener('click', function() {jQueryDialog(injectFsBoxContent);});
+  nodediv.appendChild(log);
 }

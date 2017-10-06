@@ -1,3 +1,4 @@
+import alpha from '../common/alpha';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
@@ -6,9 +7,9 @@ import {isChecked, isSelected, testRange} from '../support/system';
 
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
-  tab1: false,
-  tab2: false,
-  tab3: false,
+  pottab1: false,
+  pottab2: false,
+  pottab3: false,
   myMap: {},
   minpoint: 12,
   maxpoint: 20
@@ -22,15 +23,15 @@ var thresholds;
 function createContainer() {
   return createDiv({
     id: 'potReport',
-    innerHTML: '<input id="tab1" type="checkbox"' +
-      isChecked(potOpts.tab1) + '>' +
-      '<label for="tab1">Composed Potion Inventory</label>' +
-      '<input id="tab2" type="checkbox"' +
-      isChecked(potOpts.tab2) + '>' +
-      '<label for="tab2">Mapping</label>' +
-      '<input id="tab3" type="checkbox"' +
-      isChecked(potOpts.tab3) + '>' +
-      '<label for="tab3">Thresholds</label>'
+    innerHTML: '<input id="pottab1" type="checkbox" name="pottabs"' +
+      isChecked(potOpts.pottab1) + '>' +
+      '<label for="pottab1">Composed Potion Inventory</label>' +
+      '<input id="pottab2" type="checkbox" name="pottabs"' +
+      isChecked(potOpts.pottab2) + '>' +
+      '<label for="pottab2">Mapping</label>' +
+      '<input id="pottab3" type="checkbox" name="pottabs"' +
+      isChecked(potOpts.pottab3) + '>' +
+      '<label for="pottab3">Thresholds</label>'
   });
 }
 
@@ -44,12 +45,6 @@ function createThresholds() {
       '<input id="maxpoint" type="number" value="' +
       potOpts.maxpoint + '" min="0" max="999">',
   });
-}
-
-function alpha(a, b) {
-  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
-  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
-  return 0;
 }
 
 function sortKeys(obj) {
@@ -163,7 +158,7 @@ var evtHdl = [
   },
   {
     test: function(self) {
-      return /^tab\d$/.test(self.id);
+      return /^pottab\d$/.test(self.id);
     },
     act: saveState
   }

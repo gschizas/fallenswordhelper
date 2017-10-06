@@ -41,7 +41,7 @@ function buildNickList() {// Native
     var nicks = curr.nicks.split(',');
     nicks.forEach(function(el) {
       var nick = el.toLowerCase();
-      ret[nick] = curr.skillId;
+      ret[nick] = curr.id;
     });
     return ret;
   }, {});

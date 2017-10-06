@@ -12,12 +12,16 @@ var disableQuickWearPrompts;
 var content;
 var itemList;
 
-function doUseItem(self) { // jQuery.min
+function doAction(self, fn, verb) { // jQuery.min
   var invId = self.dataset.itemid;
-  useItem(invId).done(function(data) {
+  fn(invId).done(function(data) {
     if (data.r !== 0) {return;}
-    self.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+    self.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
   });
+}
+
+function doUseItem(self) {
+  doAction(self, useItem, 'Used');
 }
 
 function useProfileInventoryItem(self) {
@@ -31,28 +35,28 @@ function useProfileInventoryItem(self) {
   }
 }
 
-function equipProfileInventoryItem(self) { // jQuery.min
-  var invId = self.dataset.itemid;
-  equipItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
+function equipProfileInventoryItem(self) {
+  doAction(self, equipItem, 'Worn');
+}
+
+function processItems(folderId, thisFolder, o) {
+  var tr = o.dom;
+  if (folderId === '0') {
+    tr.classList.remove('fshHide');
+  } else {
+    var force = folderId !== thisFolder.toString();
+    toggleForce(tr, force);
+  }
+}
+
+function processFolder(folderId, aFolder) {
+  var thisFolder = aFolder.id;
+  aFolder.items.forEach(processItems.bind(null, folderId, thisFolder));
 }
 
 function hideFolders(self) {
   var folderId = self.dataset.folder;
-  itemList.result.forEach(function(aFolder) {
-    var thisFolder = aFolder.id;
-    aFolder.items.forEach(function(o) {
-      var tr = o.dom;
-      if (folderId === '0') {
-        tr.classList.remove('fshHide');
-      } else {
-        var force = folderId !== thisFolder.toString();
-        toggleForce(tr, force);
-      }
-    });
-  });
+  itemList.result.forEach(processFolder.bind(null, folderId));
 }
 
 function togglePref() {
@@ -101,15 +105,15 @@ function createInvTabs() {
   return createDiv({
     id: 'invTabs',
     className: 'ui-tabs ui-widget-content ui-corner-all',
-    innerHTML: '<input id="tab1" type="radio" name="tabs" checked>' +
-      '<input id="tab2" type="radio" name="tabs">' +
+    innerHTML: '<input id="qwtab1" type="radio" name="qwtabs" checked>' +
+      '<input id="qwtab2" type="radio" name="qwtabs">' +
       '<ul class="ui-tabs-nav ui-helper-reset ' +
         'ui-helper-clearfix ui-widget-header ui-corner-all">' +
       '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
-      '<label for="tab1">Quick Wear / Use / Extract<br>Manager</label>' +
+      '<label for="qwtab1">Quick Wear / Use / Extract<br>Manager</label>' +
       '</li>' +
       '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
-      '<label for="tab2">Inventory Manager Counter' +
+      '<label for="qwtab2">Inventory Manager Counter' +
         '<br>filtered by AH Quick Search</label>' +
       '</li><div id="setPrompt" class="fshFloatRight fshCenter"></div></ul>'
   });

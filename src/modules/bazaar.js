@@ -11,7 +11,8 @@ var bazaarTable =
   '<td>@1@</td><td>@2@</td><td>@3@</td><td>@4@</td></tr><tr><td>@5@</td>' +
   '<td>@6@</td><td>@7@</td><td>@8@</td><td>@9@</td></tr><tr>' +
   '<td colspan="3">Selected item:</td><td id="selectedItem" colspan="2">' +
-  '</td></tr><tr><td colspan="5"><span id="warning" class="fshHide">' +
+  '</td></tr><tr><td colspan="5">' +
+  '<span id="fshBazaarWarning" class="fshHide">' +
   'Warning:<br>pressing [<span id="fshBuy" class="fshLink">This button' +
   '</span>] now will buy the <span id="quantity">1</span> item(s) WITHOUT ' +
   'confirmation!</span></td></tr><tr><td id="buy_result" colspan="5"></td>' +
@@ -31,7 +32,7 @@ function select(evt) {
   if (!theValue) {return;}
   document.getElementById('quantity').textContent = theValue;
   ItemId = target.getAttribute('itemid');
-  document.getElementById('warning').removeAttribute('class');
+  document.getElementById('fshBazaarWarning').removeAttribute('class');
   var dupNode = target.cloneNode(false);
   dupNode.className = 'bazaarSelected tip-dynamic';
   var selected = document.getElementById('selectedItem');

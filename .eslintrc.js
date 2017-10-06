@@ -8,7 +8,8 @@ module.exports = {
     browser: true,
     node: true,
     jquery: true,
-    greasemonkey: true
+    greasemonkey: true,
+    es6: true
   },
   globals: {
     FSH: true,
@@ -142,13 +143,13 @@ module.exports = {
       ignoreUrls: true
     }],
     'max-lines': ['error', {
-      max: 463, // 200 ? 300
+      max: 439, // 200 ? 300
       skipBlankLines: true,
       skipComments: true
     }],
     'max-nested-callbacks': ['error', 3],
     'max-params': ['error', 5],
-    'max-statements': ['error', 30],
+    'max-statements': ['error', 27],
     'max-statements-per-line': ['error', {max: 3}],
     'multiline-ternary': ['off'],
     'new-cap': ['error', {

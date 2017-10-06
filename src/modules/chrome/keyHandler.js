@@ -1,3 +1,5 @@
+import insertQuickWear from '../quickWear/quickWear';
+import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
 import * as sendGold from '../newMap/sendGold';
 import * as system from '../support/system';
@@ -79,8 +81,7 @@ function backpack() {
 }
 
 function fastWearMgr() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
-  location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
+  jQueryDialog(insertQuickWear);
 }
 
 function profile() {

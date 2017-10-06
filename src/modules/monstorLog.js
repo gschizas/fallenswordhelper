@@ -4,10 +4,11 @@ import setForage from './ajax/setForage';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
+var content;
 var monsterAry;
 
 function noMobs() {
-  layout.pCC.innerHTML = '<span>No monster information! ' +
+  content.innerHTML = '<span>No monster information! ' +
     'Please enable entity log and travel a bit to see the world</span>';
 }
 
@@ -71,8 +72,7 @@ function doHandlers(evt) {
 }
 
 function drawTable() {
-  var content = layout.pCC;
-  if (!monsterAry || !content) {return;}
+  if (!monsterAry) {return;}
   content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" ' +
     'width="100%"><tr class="fshBlack fshWhite">' +
     '<td width="90%" class="fshCenter"><b>Entity Information</b></td>' +
@@ -138,6 +138,8 @@ function prepAry(data) {
   drawMobs();
 }
 
-export default function injectMonsterLog() {
+export default function injectMonsterLog(injector) {
+  content = injector || layout.pCC;
+  if (!content) {return;}
   getForage('fsh_monsterLog').done(prepAry);
 }

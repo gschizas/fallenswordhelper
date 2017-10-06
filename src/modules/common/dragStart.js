@@ -17,12 +17,21 @@ function dragDrop(event) {
   return false;
 }
 
-export default function dragStart(event) {
-  dragTarget = event.target;
-  var style = window.getComputedStyle(event.target, null);
+function dragStart(parent, event) {
+  if (parent) {
+    dragTarget = parent;
+  } else {
+    dragTarget = event.target;
+  }
+  var style = window.getComputedStyle(dragTarget, null);
   event.dataTransfer.setData('text/plain',
     parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
     (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
   document.body.addEventListener('dragover', dragOver, false);
   document.body.addEventListener('drop', dragDrop, false);
+}
+
+export default function draggable(element, parent) {
+  element.draggable = true;
+  element.addEventListener('dragstart', dragStart.bind(null, parent));
 }

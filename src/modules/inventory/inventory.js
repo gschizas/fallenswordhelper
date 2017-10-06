@@ -162,7 +162,8 @@ function removeClass(self) {
     .removeClass().qtip('hide');
 }
 
-function killRow(self) { // jQuery
+function killRow(self, data) { // jQuery
+  if (data.r === 1) {return;}
   var tr = self.closest('tr');
   var td = $('td', tr);
   td.eq(2).empty(); // Where
@@ -179,51 +180,41 @@ function anotherSpinner(self) {
     '/skin/loading.gif" width="11" height="11">');
 }
 
+function doAction(fn, self) { // jQuery
+  removeClass(self);
+  fn().done(killRow.bind(null, self));
+  anotherSpinner(self);
+}
+
 function takeItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  queueTakeItem(self.attr('invid'), self.attr('action'))
-    .done(function(data) {
-      if (data.r === 1) {return;}
-      killRow(self);
-    });
-  anotherSpinner(self);
+  doAction(
+    queueTakeItem.bind(null, self.attr('invid'), self.attr('action')),
+    self
+  );
 }
 
 function recallItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  queueRecallItem({
-    invId: self.attr('invid'),
-    playerId: self.attr('playerid'),
-    mode: self.attr('mode'),
-    action: self.attr('action')
-  })
-    .done(function(data) {
-      if (data.r === 1) {return;}
-      killRow(self);
-    });
-  anotherSpinner(self);
+  doAction(
+    queueRecallItem.bind(null, {
+      invId: self.attr('invid'),
+      playerId: self.attr('playerid'),
+      mode: self.attr('mode'),
+      action: self.attr('action')
+    }),
+    self
+  );
 }
 
 function wearItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  equipItem(self.attr('invid')).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction(equipItem.bind(null, self.attr('invid')), self);
 }
 
 function doUseItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  useItem(self.attr('invid')).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction(useItem.bind(null, self.attr('invid')), self);
 }
 
 function doMoveItem(e) { // jQuery
@@ -233,22 +224,12 @@ function doMoveItem(e) { // jQuery
 
 function doDropItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  dropItem([self.data('inv')]).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction(dropItem.bind(null, [self.data('inv')]), self);
 }
 
 function doSendItem(e) { // jQuery
   var self = $(e.target);
-  removeClass(self);
-  sendItem([self.data('inv')]).done(function(data) {
-    if (data.r === 1) {return;}
-    killRow(self);
-  });
-  anotherSpinner(self);
+  doAction(sendItem.bind(null, [self.data('inv')]), self);
 }
 
 function eventHandlers() { // jQuery
@@ -264,7 +245,7 @@ function eventHandlers() { // jQuery
   $('#fshInv').on('click', 'span.recallItem', recallItem);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
   $('#fshInv').on('click', 'span.useItem', doUseItem);
-  $('#fshInv').on('change', 'select.moveItem', doMoveItem);
+  $('#fshInv').on('change', 'select.fshMoveItem', doMoveItem);
   $('#fshInv').on('click', 'span.dropItem', doDropItem);
   $('#fshInv').on('click', 'span.sendItem', doSendItem);
 }
