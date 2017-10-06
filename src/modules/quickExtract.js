@@ -1,5 +1,7 @@
 import {createTable} from './common/cElement';
 import getInventory from './ajax/getInventory';
+import jsonFail from './common/jsonFail';
+import outputResult from './common/outputResult';
 import useitem from './app/profile/useitem';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -11,7 +13,6 @@ var selectST;
 var selectMain;
 var resourceList;
 var buyResult;
-var lastMsg;
 
 function backpackRemove(invId) {
   extractInv.some(function(el, i, ary) {
@@ -23,20 +24,10 @@ function backpackRemove(invId) {
   });
 }
 
-function outputResult(result) {
-  buyResult.insertAdjacentHTML('beforeend',
-    '<li style="list-style: decimal inside;">' + result + '</li>');
-}
-
 function quickDoneExtracted(invId, json) {
-  if (!json.success && lastMsg !== json.error.message) {
-    lastMsg = json.error.message;
-    outputResult(json.error.message);
-    return;
-  }
-  if (!json.success) {return;}
+  if (jsonFail(json, buyResult)) {return;}
   backpackRemove(invId);
-  outputResult('Item Extracted.');
+  outputResult('Item Extracted.', buyResult);
 }
 
 function doExtract(target) {

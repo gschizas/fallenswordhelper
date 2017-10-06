@@ -1,10 +1,10 @@
 import {createTd} from './common/cElement';
 import doinvent from './app/inventing/doinvent';
+import jsonFail from './common/jsonFail';
+import outputResult from './common/outputResult';
 import * as system from './support/system';
 
 var itemRE = /<b>([^<]+)<\/b>/i;
-var lastMsg;
-
 var plantFromComponentHash = {
   'Amber Essense': 'Amber Plant',
   'Blood Bloom Flower': 'Blood Bloom Plant',
@@ -17,23 +17,15 @@ var plantFromComponentHash = {
   'Purplet Flower': 'Purplet Plant',
 };
 
-function outputResult(result) {
-  document.getElementById('invent_Result').insertAdjacentHTML('beforeend',
-    '<li style="list-style:decimal">' + result + '</li>');
-}
-
 function quickInventDone(json) {
-  if (!json.success && lastMsg !== json.error.message) {
-    lastMsg = json.error.message;
-    outputResult(json.error.message);
-    return;
-  }
+  var inventResult = document.getElementById('invent_Result');
+  if (jsonFail(json, inventResult)) {return;}
   if (json.result.success) {
     outputResult('<span class="fshGreen">' +
-      'You successfully invented the item!</span>');
+      'You successfully invented the item!</span>', inventResult);
   } else {
     outputResult('<span class="fshRed">' +
-      'You have failed to invent the item.</span>');
+      'You have failed to invent the item.</span>', inventResult);
   }
 }
 
