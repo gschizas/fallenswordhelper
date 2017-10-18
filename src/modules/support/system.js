@@ -1,6 +1,6 @@
 import calf from './calf';
 import retryAjax from '../ajax/retryAjax';
-import * as dataObj from './dataObj';
+import {defaults, months, nowSecs} from './dataObj';
 
 export var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -14,12 +14,12 @@ export function fallback(a, b) {
 
 export function getValue(name) {
   //#if _DEV  //  No default setting available
-  if (typeof dataObj.defaults[name] === 'undefined') {
+  if (typeof defaults[name] === 'undefined') {
     // eslint-disable-next-line no-console
-    console.log(name, dataObj.defaults[name]);
+    console.log(name, defaults[name]);
   }
   //#endif
-  return GM_getValue(name, dataObj.defaults[name]);
+  return GM_getValue(name, defaults[name]);
 }
 
 function reviver(key, value) {
@@ -137,7 +137,7 @@ export function convertTextToHtml(inputText) {
 
 export function parseDateAsTimestamp(textDate) {
   var dateAry = textDate.split(/[: /[]/);
-  return Date.UTC(Number(dateAry[4]), dataObj.months.indexOf(dateAry[3]),
+  return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
     Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
 }
 
@@ -184,7 +184,7 @@ export function outputFormat(value, suffix) {
 }
 
 export function formatLastActivity(last_login) {
-  var s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
+  var s = Math.abs(nowSecs - last_login);
   var m = Math.floor(s / 60);
   s %= 60;
   var h = Math.floor(m / 60);

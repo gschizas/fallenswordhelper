@@ -5,7 +5,7 @@ import {
   createLi,
   createUl
 } from '../common/cElement';
-import * as dataObj from './dataObj';
+import {lastActivityRE, nowSecs, places} from './dataObj';
 import * as system from './system';
 
 var dotList;
@@ -59,7 +59,7 @@ export function doBuffLinks(members) {
     return prev;
   }, []).reduce(function(prev, curr, i) {
     var theNames = curr.join(',');
-    var modifierWord = dataObj.places[i];
+    var modifierWord = places[i];
     var li = createLi();
     var btn = createButton({
       className: 'fshBl fshBls tip-static',
@@ -146,7 +146,7 @@ var getMins = [
   },
   function(obj, min) {
     if (obj.last_login) {
-      return Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
+      return Math.floor((nowSecs - obj.last_login) / 60);
     }
     return min;
   },
@@ -177,7 +177,7 @@ export function onlineDot(obj) {
 }
 
 function changeOnlineDot(contactLink) {
-  var lastActivity = dataObj.lastActivityRE
+  var lastActivity = lastActivityRE
     .exec(contactLink.getAttribute('data-tipped'));
   contactLink.parentNode.previousSibling.innerHTML =
     onlineDot({

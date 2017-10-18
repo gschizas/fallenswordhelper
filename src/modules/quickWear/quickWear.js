@@ -56,7 +56,7 @@ function processFolder(folderId, aFolder) {
 
 function hideFolders(self) {
   var folderId = self.dataset.folder;
-  itemList.result.forEach(processFolder.bind(null, folderId));
+  itemList.r.forEach(processFolder.bind(null, folderId));
 }
 
 function togglePref() {

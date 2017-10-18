@@ -6,8 +6,8 @@ import getProfile from '../../ajax/getProfile';
 import reduceBuffArray from '../../common/reduceBuffArray';
 import retryAjax from '../../ajax/retryAjax';
 import {createButton, createDiv} from '../../common/cElement';
+import {defenderMultiplier, nowSecs} from '../../support/dataObj';
 import * as common from '../../common/common';
-import * as dataObj from '../../support/dataObj';
 import * as layout from '../../support/layout';
 import * as system from '../../support/system';
 
@@ -206,9 +206,8 @@ function doCalculations() {
 function missingMembers(membrList) {
   guildMemberList = membrList;
   var myMembers = Object.keys(guildMemberList);
-  var now = Date.now() / 1000;
-  twoMinutes = now - 120;
-  sevenDays = now - 604800;
+  twoMinutes = nowSecs - 120;
+  sevenDays = nowSecs - 604800;
   var filtered = myMembers.reduce(function(prev, key) {
     for (var i = 0; i < memberExclusions.length; i += 1) {
       if (memberExclusions[i](key)) {return prev;}
@@ -304,12 +303,12 @@ function parseGuild(html) {
 
 function parseDefender(json) {
   var defender = common.playerDataObject(json);
-  defRawAttack += Math.round(defender.attackValue * dataObj.defenderMultiplier);
+  defRawAttack += Math.round(defender.attackValue * defenderMultiplier);
   defRawDefense += Math.round(defender.defenseValue *
-    dataObj.defenderMultiplier);
-  defRawArmor += Math.round(defender.armorValue * dataObj.defenderMultiplier);
-  defRawDamage += Math.round(defender.damageValue * dataObj.defenderMultiplier);
-  defRawHp += Math.round(defender.hpValue * dataObj.defenderMultiplier);
+    defenderMultiplier);
+  defRawArmor += Math.round(defender.armorValue * defenderMultiplier);
+  defRawDamage += Math.round(defender.damageValue * defenderMultiplier);
+  defRawHp += Math.round(defender.hpValue * defenderMultiplier);
   if (defender.cloakLevel !== 0) {defCloaked += 1;}
   updateDefValues();
 }

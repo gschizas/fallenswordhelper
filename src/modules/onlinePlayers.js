@@ -1,7 +1,7 @@
 import getForage from './ajax/getForage';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
-import * as dataObj from './support/dataObj';
+import {defaults, now} from './support/dataObj';
 import * as system from './support/system';
 
 var context;
@@ -146,7 +146,7 @@ function refreshEvt() { // Bad jQuery
   onlinePages = 0;
   onlinePlayers = {};
   retryAjax('index.php?cmd=onlineplayers&page=1').done(getOnlinePlayers);
-  system.setValue('lastOnlineCheck', Date.now());
+  system.setValue('lastOnlineCheck', now);
   $('#fshOutput', context).append('Parsing online players...'); // context
 }
 
@@ -158,13 +158,13 @@ function changeLvl(e) { // jQuery
 
 function resetEvt() { // context
   system.setValue('onlinePlayerMinLvl',
-    dataObj.defaults.onlinePlayerMinLvl);
+    defaults.onlinePlayerMinLvl);
   system.setValue('onlinePlayerMaxLvl',
-    dataObj.defaults.onlinePlayerMaxLvl);
+    defaults.onlinePlayerMaxLvl);
   $('#fshMinLvl', context).val(
-    dataObj.defaults.onlinePlayerMinLvl); // context
+    defaults.onlinePlayerMinLvl); // context
   $('#fshMaxLvl', context).val(
-    dataObj.defaults.onlinePlayerMaxLvl); // context
+    defaults.onlinePlayerMaxLvl); // context
   table.draw();
 }
 
@@ -175,7 +175,6 @@ function doOnlinePlayerEventHandlers(e) {
 
 function injectOnlinePlayersNew() { // jQuery
   var lastCheck = system.getValue('lastOnlineCheck');
-  var now = Date.now();
   var refreshButton;
   if (now - lastCheck > 300000) {
     refreshButton = '<span> (takes a while to refresh so only do it ' +

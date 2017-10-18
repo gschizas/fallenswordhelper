@@ -1,4 +1,4 @@
-import * as dataObj from '../support/dataObj';
+import {months, now} from '../support/dataObj';
 import * as system from '../support/system';
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -7,7 +7,7 @@ function formatShortDate(aDate) {
   var yyyy = aDate.getFullYear();
   var dd = system.padZ(aDate.getDate());
   var ddd = days[aDate.getDay()];
-  var month = dataObj.months[aDate.getMonth()];
+  var month = months[aDate.getMonth()];
   var hh = system.padZ(aDate.getHours());
   var mm = system.padZ(aDate.getMinutes());
   return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
@@ -17,7 +17,7 @@ function timeBox(nextGainTime, hrsToGo) {
   var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
   if (!nextGain) {return;}
   return '<dd>' +
-    formatShortDate(new Date(Date.now() +
+    formatShortDate(new Date(now +
     (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
     parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
 }

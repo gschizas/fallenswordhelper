@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import getForage from './getForage';
+import {now} from '../support/dataObj';
 import retryAjax from './retryAjax';
 import setForage from './setForage';
 import * as layout from '../support/layout';
@@ -28,7 +29,7 @@ function getGuildMembers(guildId) {
   return getGuild(guildId).pipe(function membrListToHash(data) {
     var membrList = {};
     membrList[guildId] = {};
-    membrList[guildId].lastUpdate = Date.now();
+    membrList[guildId].lastUpdate = now;
     data.forEach(function memberToObject(ele) {
       membrList[guildId][ele.username] = ele;
     });
@@ -39,7 +40,7 @@ function getGuildMembers(guildId) {
 function getMembrListFromForage(guildId, membrList) {
   if (membrList && membrList[guildId] &&
       membrList[guildId].lastUpdate &&
-      membrList[guildId].lastUpdate > Date.now() - 300000) {
+      membrList[guildId].lastUpdate > now - 300000) {
     return membrList;
   }
   return getGuildMembers(guildId).done(addMembrListToForage);

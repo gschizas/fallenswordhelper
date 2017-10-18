@@ -310,3 +310,7 @@ export var mercRE = [
 
 export var lastActivityRE =
   /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
+
+export var now = Date.now();
+
+export var nowSecs = Math.floor(now / 1000);

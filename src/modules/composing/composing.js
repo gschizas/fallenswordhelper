@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import {now} from '../support/dataObj';
 import retryAjax from '../ajax/retryAjax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
@@ -33,7 +34,7 @@ function parseComposing(data) {
     } else {
       var timeArr = timeRE.exec(el.textContent);
       var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
-        1000 + Date.now();
+        1000 + now;
       times.push(milli);
     }
   });
@@ -98,7 +99,7 @@ function quickCreate(evt) {
 
 function checkLastCompose() { // jQuery
   var lastComposeCheck = system.getValue('lastComposeCheck');
-  if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
+  if (lastComposeCheck && now < lastComposeCheck) {return;}
   retryAjax('index.php?cmd=composing').done(function(data) {
     add(3, parseComposing, [data]);
   });

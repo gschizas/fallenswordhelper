@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import getForage from './getForage';
 import getProfile from './getProfile';
+import {now} from '../support/dataObj';
 import setForage from './setForage';
 import * as layout from '../support/layout';
 
@@ -9,7 +10,7 @@ function sendMyProfileToForage(data) {
 }
 
 function addLastUpdateDate(data) {
-  data.lastUpdate = Date.now();
+  data.lastUpdate = now;
   return data;
 }
 
@@ -20,7 +21,7 @@ function getMyProfile() {
 }
 
 function getProfileFromForage(data) {
-  if (!data || data.lastUpdate < Date.now() -
+  if (!data || data.lastUpdate < now -
     calf.allyEnemyOnlineRefreshTime) {
     return getMyProfile();
   }

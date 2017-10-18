@@ -1,5 +1,6 @@
 import add from './support/task';
 import calf from './support/calf';
+import {now} from './support/dataObj';
 import retryAjax from './ajax/retryAjax';
 import * as system from './support/system';
 
@@ -103,8 +104,7 @@ export function parseTemplePage(responseText) {
 }
 
 function checkLastUpdate(templeAlertLastUpdate) {
-  return !templeAlertLastUpdate ||
-    Date.now() > templeAlertLastUpdate;
+  return !templeAlertLastUpdate || now > templeAlertLastUpdate;
 }
 
 function doWeNeedToParse() {
@@ -154,7 +154,7 @@ function notUpgradesPage() {
     return;
   }
   var lastUpgradeCheck = system.getValue('lastUpgradeCheck');
-  if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
+  if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
   retryAjax('index.php?cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);
   });
