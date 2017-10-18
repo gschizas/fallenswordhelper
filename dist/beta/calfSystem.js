@@ -660,6 +660,10 @@ var mercRE = [
 var lastActivityRE =
   /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 
+var now = Date.now();
+
+var nowSecs = Math.floor(now / 1000);
+
 var server = document.location.protocol + '//' +
   document.location.host + '/';
 var imageServer = window.HCS && window.HCS.defines &&
@@ -834,7 +838,7 @@ function outputFormat(value, suffix) {
 }
 
 function formatLastActivity(last_login) {
-  var s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
+  var s = Math.abs(nowSecs - last_login);
   var m = Math.floor(s / 60);
   s %= 60;
   var h = Math.floor(m / 60);
@@ -1352,7 +1356,7 @@ var getMins = [
   },
   function(obj, min) {
     if (obj.last_login) {
-      return Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
+      return Math.floor((nowSecs - obj.last_login) / 60);
     }
     return min;
   },
@@ -1942,7 +1946,7 @@ function refreshEvt() { // Bad jQuery
   onlinePages = 0;
   onlinePlayers = {};
   retryAjax('index.php?cmd=onlineplayers&page=1').done(getOnlinePlayers);
-  setValue('lastOnlineCheck', Date.now());
+  setValue('lastOnlineCheck', now);
   $('#fshOutput', context).append('Parsing online players...'); // context
 }
 
@@ -1971,7 +1975,6 @@ function doOnlinePlayerEventHandlers(e) {
 
 function injectOnlinePlayersNew() { // jQuery
   var lastCheck = getValue('lastOnlineCheck');
-  var now = Date.now();
   var refreshButton;
   if (now - lastCheck > 300000) {
     refreshButton = '<span> (takes a while to refresh so only do it ' +
@@ -2288,11 +2291,11 @@ function outputResult(result, handle) {
 var lastMsg;
 
 function jsonFail(json, handle) {
-  if (!json.success && lastMsg !== json.error.message) {
-    lastMsg = json.error.message;
-    outputResult(json.error.message, handle);
+  if (!json.s && lastMsg !== json.e.message) {
+    lastMsg = json.e.message;
+    outputResult(json.e.message, handle);
   }
-  if (!json.success) {return true;}
+  if (!json.s) {return true;}
 }
 
 function callApp(data) {
@@ -2502,7 +2505,7 @@ function tableRows$1(tbl, playerId$$1, item) {
 function makeFolderSpans(appInv) {
   return '<span class="fshLink folder" data-folder="0">All</span>' +
     ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
-    appInv.result.reduce(function(prev, folderObj) {
+    appInv.r.reduce(function(prev, folderObj) {
       return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
         'data-folder="' + folderObj.id.toString() + '">' +
         folderObj.name + '</span>';
@@ -2520,7 +2523,7 @@ function createQuickWear(appInv) {
   });
   var tbody = createTBody();
   tbl.appendChild(tbody);
-  appInv.result.forEach(function(aFolder) {
+  appInv.r.forEach(function(aFolder) {
     aFolder.items.sort(alpha);
     aFolder.items.forEach(tableRows$1.bind(null, tbody, playerId$$1));
   });
@@ -2622,7 +2625,7 @@ function showAHInvManager(itemList) {
   var invCount = {};
   var quickSL = getValueJSON('quickSearchList');
   // fill up the Inv Counter
-  itemList.result.forEach(function(aFolder) {
+  itemList.r.forEach(function(aFolder) {
     aFolder.items.forEach(testItemList.bind(null, invCount, quickSL));
   });
   var im = createDiv({
@@ -4041,7 +4044,7 @@ function processFolder(folderId, aFolder) {
 
 function hideFolders(self) {
   var folderId = self.dataset.folder;
-  itemList.result.forEach(processFolder.bind(null, folderId));
+  itemList.r.forEach(processFolder.bind(null, folderId));
 }
 
 function togglePref() {
@@ -5407,7 +5410,7 @@ function sendMyProfileToForage(data) {
 }
 
 function addLastUpdateDate(data) {
-  data.lastUpdate = Date.now();
+  data.lastUpdate = now;
   return data;
 }
 
@@ -5418,7 +5421,7 @@ function getMyProfile() {
 }
 
 function getProfileFromForage(data) {
-  if (!data || data.lastUpdate < Date.now() -
+  if (!data || data.lastUpdate < now -
     calf.allyEnemyOnlineRefreshTime) {
     return getMyProfile();
   }
@@ -5462,10 +5465,9 @@ function allyOrEnemy(type, test) {
 }
 
 function contactColor(last_login, type) {
-  var now = Math.floor(Date.now() / 1000);
   for (var i = 0; i < contactClass.length; i += 1) {
     var test = contactClass[i];
-    if (test.condition(now - last_login)) {
+    if (test.condition(nowSecs - last_login)) {
       return allyOrEnemy(type, test);
     }
   }
@@ -5524,10 +5526,9 @@ function doTradeButton(val) {
 }
 
 function addContact(contactList, type) {
-  var now = Math.floor(Date.now() / 1000);
   var output = '';
   contactList.forEach(function(val) {
-    if (now - val.last_login > 1800) {return;} // 30 mins
+    if (nowSecs - val.last_login > 1800) {return;} // 30 mins
     output += '<li class="player"><div class="player-row">';
     output += doBuffCheck();
     output += playerName$1(val, type);
@@ -5889,7 +5890,6 @@ function parseBountyPageForWorld(details) {
 }
 
 function testCacheInvalid() { // Legacy
-  var now = Date.now();
   return bountyList &&
     now - bountyList.lastUpdate.getTime() > bountyListRefreshTime ||
     wantedList &&
@@ -6216,7 +6216,7 @@ function timeBox(nextGainTime, hrsToGo) {
   var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
   if (!nextGain) {return;}
   return '<dd>' +
-    formatShortDate(new Date(Date.now() +
+    formatShortDate(new Date(now +
     (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
     parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
 }
@@ -6298,7 +6298,7 @@ function parseComposing(data) {
     } else {
       var timeArr = timeRE.exec(el.textContent);
       var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
-        1000 + Date.now();
+        1000 + now;
       times.push(milli);
     }
   });
@@ -6363,7 +6363,7 @@ function quickCreate(evt) {
 
 function checkLastCompose() { // jQuery
   var lastComposeCheck = getValue('lastComposeCheck');
-  if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
+  if (lastComposeCheck && now < lastComposeCheck) {return;}
   retryAjax('index.php?cmd=composing').done(function(data) {
     add(3, parseComposing, [data]);
   });
@@ -6522,8 +6522,7 @@ function parseTemplePage(responseText) {
 }
 
 function checkLastUpdate(templeAlertLastUpdate) {
-  return !templeAlertLastUpdate ||
-    Date.now() > templeAlertLastUpdate;
+  return !templeAlertLastUpdate || now > templeAlertLastUpdate;
 }
 
 function doWeNeedToParse() {
@@ -6573,7 +6572,7 @@ function notUpgradesPage() {
     return;
   }
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
-  if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
+  if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
   retryAjax('index.php?cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);
   });
@@ -7199,7 +7198,7 @@ function getGuildMembers(guildId$$1) {
   return getGuild(guildId$$1).pipe(function membrListToHash(data) {
     var membrList = {};
     membrList[guildId$$1] = {};
-    membrList[guildId$$1].lastUpdate = Date.now();
+    membrList[guildId$$1].lastUpdate = now;
     data.forEach(function memberToObject(ele) {
       membrList[guildId$$1][ele.username] = ele;
     });
@@ -7210,7 +7209,7 @@ function getGuildMembers(guildId$$1) {
 function getMembrListFromForage(guildId$$1, membrList) {
   if (membrList && membrList[guildId$$1] &&
       membrList[guildId$$1].lastUpdate &&
-      membrList[guildId$$1].lastUpdate > Date.now() - 300000) {
+      membrList[guildId$$1].lastUpdate > now - 300000) {
     return membrList;
   }
   return getGuildMembers(guildId$$1).done(addMembrListToForage);
@@ -11807,7 +11806,7 @@ function cooldownTracker(aRow, theTitans) {
 }
 
 function addRow(theTitans, trackerTable, titan) {
-  if (theTitans[titan].coolTime < Date.now()) {return;}
+  if (theTitans[titan].coolTime < now) {return;}
   trackerTable.insertAdjacentHTML('beforeend',
     '<tr><td class="fshCenter">' + titan + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
@@ -11835,7 +11834,7 @@ function addMissingTitansFromOld(oldTitans, newTitans) {
   if (!oldTitans) {return;}
   Object.keys(oldTitans).forEach(function(oldTitan) {
     if (newTitans[oldTitan]) {return;}
-    if (oldTitans[oldTitan].coolTime <= Date.now()) {return;}
+    if (oldTitans[oldTitan].coolTime <= now) {return;}
     newTitans[oldTitan] = {
       cooldownText: oldTitans[oldTitan].cooldownText,
       coolTime: oldTitans[oldTitan].coolTime,
@@ -12064,7 +12063,7 @@ var highlightPlayersNearMyLvl$1;
 var lvlDiffToHighlight$1;
 var myVL;
 var spinner$1;
-var validPvP = Math.floor(Date.now() / 1000) - 604800;
+var validPvP = nowSecs - 604800;
 var guilds;
 
 function doOnlineDot(aTable, data) {
@@ -12113,12 +12112,12 @@ function stackAjax(prm, playerName$$1, tbl) {
 }
 
 function parseGuild(data) {
-  var guildId$$1 = data.result.id;
-  data.result.members.forEach(function(member) {
+  var guildId$$1 = data.r.id;
+  data.r.members.forEach(function(member) {
     guilds[guildId$$1].forEach(function(player) {
       if (member.name === player.player) {
         doOnlineDot(player.dom, {
-          last_login: (data.server_time - member.last_activity).toString(),
+          last_login: (nowSecs - member.last_activity).toString(),
           virtual_level: member.vl
         });
       }
@@ -12928,9 +12927,8 @@ function doCalculations() {
 function missingMembers(membrList) {
   guildMemberList = membrList;
   var myMembers = Object.keys(guildMemberList);
-  var now = Date.now() / 1000;
-  twoMinutes = now - 120;
-  sevenDays = now - 604800;
+  twoMinutes = nowSecs - 120;
+  sevenDays = nowSecs - 604800;
   var filtered = myMembers.reduce(function(prev, key) {
     for (var i = 0; i < memberExclusions.length; i += 1) {
       if (memberExclusions[i](key)) {return prev;}
@@ -14720,7 +14718,7 @@ var plantFromComponentHash = {
 function quickInventDone(json) {
   var inventResult = document.getElementById('invent_Result');
   if (jsonFail(json, inventResult)) {return;}
-  if (json.result.success) {
+  if (json.r.success) {
     outputResult('<span class="fshGreen">' +
       'You successfully invented the item!</span>', inventResult);
   } else {
@@ -14830,8 +14828,8 @@ function dontPost$2() {
   }
 }
 
-function formatLastReset(last_login) {
-  var m = Math.floor((Date.now() - last_login) / 60000);
+function formatLastReset(lastLadderReset) {
+  var m = Math.floor((now - lastLadderReset) / 60000);
   var h = Math.floor(m / 60);
   m %= 60;
   return outputFormat(h, ' hours, ') + m + ' mins';
@@ -14839,7 +14837,6 @@ function formatLastReset(last_login) {
 
 function formatTime() {
   var lastLadderReset = getValue('lastLadderReset');
-  var now = Date.now();
   if (lastLadderReset < now - 48 * 60 * 60 * 1000) {
     return '<span class="fshLink tip-static" data-tipped="FSH has not seen ' +
       'the last ladder reset.<br>You can find it in your log if you ' +
@@ -16943,6 +16940,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '7';
+window.FSH.calf = '8';
 
 }());
