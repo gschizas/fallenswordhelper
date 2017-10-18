@@ -2,6 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import myStats from '../ajax/myStats';
+import {nowSecs} from '../support/dataObj';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -35,10 +36,9 @@ function allyOrEnemy(type, test) {
 }
 
 function contactColor(last_login, type) {
-  var now = Math.floor(Date.now() / 1000);
   for (var i = 0; i < contactClass.length; i += 1) {
     var test = contactClass[i];
-    if (test.condition(now - last_login)) {
+    if (test.condition(nowSecs - last_login)) {
       return allyOrEnemy(type, test);
     }
   }
@@ -97,10 +97,9 @@ function doTradeButton(val) {
 }
 
 function addContact(contactList, type) {
-  var now = Math.floor(Date.now() / 1000);
   var output = '';
   contactList.forEach(function(val) {
-    if (now - val.last_login > 1800) {return;} // 30 mins
+    if (nowSecs - val.last_login > 1800) {return;} // 30 mins
     output += '<li class="player"><div class="player-row">';
     output += doBuffCheck();
     output += playerName(val, type);

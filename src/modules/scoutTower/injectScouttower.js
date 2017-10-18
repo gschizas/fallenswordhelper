@@ -1,5 +1,6 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
+import {now} from '../support/dataObj';
 import setForage from '../ajax/setForage';
 import {createTBody, createTable} from '../common/cElement';
 import * as layout from '../support/layout';
@@ -24,7 +25,7 @@ function cooldownTracker(aRow, theTitans) {
 }
 
 function addRow(theTitans, trackerTable, titan) {
-  if (theTitans[titan].coolTime < Date.now()) {return;}
+  if (theTitans[titan].coolTime < now) {return;}
   trackerTable.insertAdjacentHTML('beforeend',
     '<tr><td class="fshCenter">' + titan + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
@@ -52,7 +53,7 @@ function addMissingTitansFromOld(oldTitans, newTitans) {
   if (!oldTitans) {return;}
   Object.keys(oldTitans).forEach(function(oldTitan) {
     if (newTitans[oldTitan]) {return;}
-    if (oldTitans[oldTitan].coolTime <= Date.now()) {return;}
+    if (oldTitans[oldTitan].coolTime <= now) {return;}
     newTitans[oldTitan] = {
       cooldownText: oldTitans[oldTitan].cooldownText,
       coolTime: oldTitans[oldTitan].coolTime,

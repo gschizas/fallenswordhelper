@@ -1,6 +1,7 @@
 import getProfile from '../ajax/getProfile';
 import guildView from '../app/guild/view';
 import myStats from '../ajax/myStats';
+import {nowSecs} from '../support/dataObj';
 import {createInput, createSpan} from '../common/cElement';
 import * as common from '../common/common';
 import * as layout from '../support/layout';
@@ -10,7 +11,7 @@ var highlightPlayersNearMyLvl;
 var lvlDiffToHighlight;
 var myVL;
 var spinner;
-var validPvP = Math.floor(Date.now() / 1000) - 604800;
+var validPvP = nowSecs - 604800;
 var guilds;
 
 function doOnlineDot(aTable, data) {
@@ -63,12 +64,12 @@ function stackAjax(prm, playerName, tbl) {
 }
 
 function parseGuild(data) {
-  var guildId = data.result.id;
-  data.result.members.forEach(function(member) {
+  var guildId = data.r.id;
+  data.r.members.forEach(function(member) {
     guilds[guildId].forEach(function(player) {
       if (member.name === player.player) {
         doOnlineDot(player.dom, {
-          last_login: (data.server_time - member.last_activity).toString(),
+          last_login: (nowSecs - member.last_activity).toString(),
           virtual_level: member.vl
         });
       }

@@ -47,7 +47,7 @@ function tableRows(tbl, playerId, item) {
 function makeFolderSpans(appInv) {
   return '<span class="fshLink folder" data-folder="0">All</span>' +
     ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
-    appInv.result.reduce(function(prev, folderObj) {
+    appInv.r.reduce(function(prev, folderObj) {
       return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
         'data-folder="' + folderObj.id.toString() + '">' +
         folderObj.name + '</span>';
@@ -65,7 +65,7 @@ export default function createQuickWear(appInv) {
   });
   var tbody = createTBody();
   tbl.appendChild(tbody);
-  appInv.result.forEach(function(aFolder) {
+  appInv.r.forEach(function(aFolder) {
     aFolder.items.sort(alpha);
     aFolder.items.forEach(tableRows.bind(null, tbody, playerId));
   });

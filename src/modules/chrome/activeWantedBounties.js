@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {now} from '../support/dataObj';
 import {createBr, createTable} from '../common/cElement';
 import * as system from '../support/system';
 
@@ -245,7 +246,6 @@ function parseBountyPageForWorld(details) {
 }
 
 function testCacheInvalid() { // Legacy
-  var now = Date.now();
   return bountyList &&
     now - bountyList.lastUpdate.getTime() > bountyListRefreshTime ||
     wantedList &&
