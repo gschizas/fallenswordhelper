@@ -289,16 +289,12 @@ export var rarity = [
   {colour: '#009900', clas: 'fshEpic'}
 ];
 
-export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
-
 export var places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
   'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
   'fourteenth'];
 
 export var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
   'Sep', 'Oct', 'Nov', 'Dec'];
-
-export var defenderMultiplier = 0.2;
 
 export var mercRE = [
   /<td>Attack:<\/td><td>(\d+)<\/td>/,
@@ -311,6 +307,9 @@ export var mercRE = [
 export var lastActivityRE =
   /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 
+export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
+export var defenderMultiplier = 0.2;
 export var now = Date.now();
-
 export var nowSecs = Math.floor(now / 1000);
+export var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
+export var newGuildLogUrl = 'index.php' + newGuildLogLoc;

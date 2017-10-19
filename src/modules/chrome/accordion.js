@@ -4,6 +4,7 @@ import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import jQueryDialog from './jQueryDialog';
+import {newGuildLogUrl} from '../support/dataObj';
 import {createLi, createSpan} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs';
@@ -57,7 +58,7 @@ function newGuildLogLink() {
     document.getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
         '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="index.php?cmd=notepad&blank=1&subcmd=newguildlog"' +
+        'href="index.php' + newGuildLogUrl + '"' +
         '>New Guild Log</a></li>');
   }
 }

@@ -1,8 +1,9 @@
+import {newGuildLogLoc, newGuildLogUrl} from '../support/dataObj';
 import * as system from '../support/system';
 
 function testForGuildLogMsg(guildLogNode) {
-  return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
-    guildLogNode.innerHTML.search('Guild Log updated!') === -1;
+  return location.search !== newGuildLogLoc ||
+    guildLogNode.parentNode.id !== 'notification-guild-log';
 }
 
 function hideGuildLogMsg(guildLogNode) {
@@ -18,8 +19,7 @@ function gotGuildLogNodes(guildLogNodes) {
   var guildLogNode;
   for (var i = 0; i < guildLogNodes.length; i += 1) {
     guildLogNode = guildLogNodes[i];
-    guildLogNode.setAttribute('href',
-      'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
+    guildLogNode.href = newGuildLogUrl;
   }
   hideGuildLogMsg(guildLogNode);
 }
