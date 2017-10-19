@@ -3,8 +3,8 @@ import getGroupStats from './ajax/getGroupStats';
 import getMembrList from './ajax/getMembrList';
 import getMercStats from './ajax/getMercStats';
 import groupViewStats from './ajax/groupViewStats';
+import {months} from './support/dataObj';
 import retryAjax from './ajax/retryAjax';
-import * as dataObj from './support/dataObj';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -148,7 +148,7 @@ function fixTable() { // jQuery
 function groupLocalTime(theDateCell) { // jQuery
   var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
   var x = xRE.exec(theDateCell.text());
-  var month = dataObj.months.indexOf(x[3]);
+  var month = months.indexOf(x[3]);
   var curYear = new Date().getFullYear(); // Boundary condition
   var groupDate = new Date();
   groupDate.setUTCDate(x[2]);

@@ -11,7 +11,7 @@ import injectMoveItems from './injectMoveItems';
 import moveItemsToFolder from './moveItemsToFolder';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
-import * as dataObj from '../support/dataObj';
+import {itemRE, rarity} from '../support/dataObj';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -80,7 +80,7 @@ var buildTrailer = [
 
 function beforeend(o, item) {
   if (!colouring && !disableItemColoring) {
-    o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
+    o.injectHere.classList.add(rarity[item.rarity].clas);
   }
   var pattern = buildTrailer.reduce(function(prev, el) {
     var ret = prev;
@@ -220,7 +220,7 @@ function getItems() {
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
     var tipped = el.getAttribute('data-tipped');
-    var matches = tipped.match(dataObj.itemRE);
+    var matches = tipped.match(itemRE);
     itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
     var injectHere = el.parentNode.parentNode.nextElementSibling;
     itemsAry.push({

@@ -1,7 +1,7 @@
+import {defaults} from '../support/dataObj';
 import getForage from '../ajax/getForage';
 import setForage from '../ajax/setForage';
 import * as assets from './assets';
-import * as dataObj from '../support/dataObj';
 import * as debug from '../support/debug';
 import * as system from '../support/system';
 
@@ -24,8 +24,8 @@ function changeLvls() { // jQuery
 
 function resetLvls() { // jQuery
   opts = opts || {};
-  opts.minLvl = dataObj.defaults.arenaMinLvl;
-  opts.maxLvl = dataObj.defaults.arenaMaxLvl;
+  opts.minLvl = defaults.arenaMinLvl;
+  opts.maxLvl = defaults.arenaMaxLvl;
   setForage('fsh_arena', opts);
   $('#fshMinLvl').val(opts.minLvl);
   $('#fshMaxLvl').val(opts.maxLvl);
@@ -68,7 +68,7 @@ function minLvlValue(aTable) { // jQuery
   if (opts && 'minLvl' in opts) {
     fshMinLvl.val(opts.minLvl);
   } else {
-    fshMinLvl.val(dataObj.defaults.arenaMinLvl);
+    fshMinLvl.val(defaults.arenaMinLvl);
   }
 }
 
@@ -77,7 +77,7 @@ function maxLvlValue(aTable) { // jQuery
   if (opts && 'maxLvl' in opts) {
     fshMaxLvl.val(opts.maxLvl);
   } else {
-    fshMaxLvl.val(dataObj.defaults.arenaMaxLvl);
+    fshMaxLvl.val(defaults.arenaMaxLvl);
   }
 }
 

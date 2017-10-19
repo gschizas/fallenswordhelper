@@ -1,7 +1,7 @@
 import calf from '../support/calf';
+import {rarity} from '../support/dataObj';
 import {theInv} from './inventory';
 import * as assets from './assets';
-import * as dataObj from '../support/dataObj';
 import * as system from '../support/system';
 
 function getT(player_id) {
@@ -33,7 +33,7 @@ function nameRenderDisplay(data, row) {
 
   return '<a href="index.php?cmd=auctionhouse&search_text=' + data +
     '" class="fshInvItem tip-dynamic ' +
-    dataObj.rarity[row.rarity].clas + '" ' +
+    rarity[row.rarity].clas + '" ' +
     'data-tipped="fetchitem.php?item_id=' + row.item_id +
     '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p +
     '&currentPlayerId=' + cur + '">' +

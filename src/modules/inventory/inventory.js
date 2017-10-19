@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import {defaults} from '../support/dataObj';
 import doTable from './table';
 import dropItem from '../ajax/dropItem';
 import getForage from '../ajax/getForage';
@@ -15,7 +16,6 @@ import {
   useItem
 } from '../support/ajax';
 import * as assets from './assets';
-import * as dataObj from '../support/dataObj';
 import * as debug from '../support/debug';
 import * as filters from './filters';
 import * as system from '../support/system';
@@ -103,8 +103,8 @@ function changeLvls() { // jQuery
 }
 
 function resetLvls() { // jQuery
-  options.fshMinLvl = dataObj.defaults.inventoryMinLvl;
-  options.fshMaxLvl = dataObj.defaults.inventoryMaxLvl;
+  options.fshMinLvl = defaults.inventoryMinLvl;
+  options.fshMaxLvl = defaults.inventoryMaxLvl;
   setForage('fsh_inventory', options);
   $('#fshMinLvl').val(options.fshMinLvl);
   $('#fshMaxLvl').val(options.fshMaxLvl);
@@ -146,7 +146,7 @@ function clearChecks() { // jQuery
 }
 
 function resetChecks() { // jQuery
-  options.checkedElements = dataObj.defaults.inventoryCheckedElements;
+  options.checkedElements = defaults.inventoryCheckedElements;
   setChecks();
   $('#fshInv').DataTable().draw(false);
 }
@@ -290,11 +290,11 @@ function getInvMan() {
 function extendOptions(data) {
   options = system.fallback(data, {});
   options.fshMinLvl = system.fallback(options.fshMinLvl,
-    dataObj.defaults.inventoryMinLvl);
+    defaults.inventoryMinLvl);
   options.fshMaxLvl = system.fallback(options.fshMaxLvl,
-    dataObj.defaults.inventoryMaxLvl);
+    defaults.inventoryMaxLvl);
   options.checkedElements = system.fallback(options.checkedElements,
-    dataObj.defaults.inventoryCheckedElements);
+    defaults.inventoryCheckedElements);
 }
 
 function syncInvMan() { // jQuery

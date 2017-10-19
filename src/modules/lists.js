@@ -1,4 +1,4 @@
-import * as dataObj from './support/dataObj';
+import {defaults} from './support/dataObj';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -114,7 +114,7 @@ function saveRawEditor() { // jQuery
 function resetRawEditor() { // Legacy
   if (param.id === 'fshAso') {
     param.currentItems =
-      JSON.parse(dataObj.defaults.quickSearchList);
+      JSON.parse(defaults.quickSearchList);
   } else {param.currentItems = [];}
   generateManageTable();
 }
