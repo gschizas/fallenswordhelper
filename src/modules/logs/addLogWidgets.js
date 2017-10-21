@@ -4,8 +4,8 @@ import calf from '../support/calf';
 import getMembrList from '../ajax/getMembrList';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {quickBuffHref} from '../support/layout';
+import {fallback, findNode, getValue} from '../support/system';
 
 var myPlayer = {};
 var addAttackLinkToLog;
@@ -59,7 +59,7 @@ function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
     }
     return ret;
   }, '');
-  return ' | <a ' + layout.quickBuffHref(targetPlayerID, quickBuff) +
+  return ' | <a ' + quickBuffHref(targetPlayerID, quickBuff) +
       '>Buff</a></span>';
 }
 
@@ -79,7 +79,7 @@ function isChat(aRow, isGuildMate, playerName) { // Legacy
   var thirdPart = messageHTML.substring(messageHTML.indexOf('>Reply</a>') + 10,
     messageHTML.indexOf('>Buff</a>') + 9);
   var targetPlayerID = /quickBuff\((\d+)\)/.exec(thirdPart)[1];
-  thirdPart = ' | <a ' + layout.quickBuffHref(targetPlayerID) +
+  thirdPart = ' | <a ' + quickBuffHref(targetPlayerID) +
     '>Buff</a></span>';
   var fourthPart = messageHTML.substring(messageHTML
     .indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
@@ -153,7 +153,7 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
     buffingPlayerName + '">Trade</a> | <a title="Secure Trade" ' +
     'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
     buffingPlayerName + '">ST</a>';
-  extraText += ' | <a ' + layout.quickBuffHref(buffingPlayerID) +
+  extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
     '>Buff</a>';
   if (addAttackLinkToLog) {
     extraText += ' | <a href="index.php?cmd=attackplayer' +
@@ -186,7 +186,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
     playerName = playerElement.innerHTML;
     colorPlayerName = true;
   }
-  if (system.fallback(messageType === 'General',
+  if (fallback(messageType === 'General',
     messageType === 'Notification') &&
       hasPlayerLink(aRow)) {
     playerElement = aRow.cells[2].firstChild.nextSibling;
@@ -214,9 +214,9 @@ function foundLogTable(logTable) { // Legacy
   listOfEnemies = myPlayer._enemies.map(function(obj) {
     return obj.username;
   });
-  calf.showPvPSummaryInLog = system.getValue('showPvPSummaryInLog');
-  calf.lastLadderReset = system.getValue('lastLadderReset');
-  enableChatParsing = system.getValue('enableChatParsing');
+  calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
+  calf.lastLadderReset = getValue('lastLadderReset');
+  enableChatParsing = getValue('enableChatParsing');
   var messageHeader = logTable.rows[0].cells[2];
   if (messageHeader) {
     messageHeader.insertAdjacentHTML('beforeend', '&nbsp;&nbsp;' +
@@ -234,8 +234,8 @@ function foundLogTable(logTable) { // Legacy
 
 function addLogWidgetsOld() { // Legacy
   buildNickList();
-  addAttackLinkToLog = system.getValue('addAttackLinkToLog');
-  var logTable = system.findNode('//table[tbody/tr/td/span[contains' +
+  addAttackLinkToLog = getValue('addAttackLinkToLog');
+  var logTable = findNode('//table[tbody/tr/td/span[contains' +
     '(.,"Currently showing:")]]');
   if (logTable) {foundLogTable(logTable);}
 }

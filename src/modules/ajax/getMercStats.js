@@ -1,6 +1,6 @@
+import {createDocument} from '../support/system';
 import retryAjax from './retryAjax';
 import {defenderMultiplier, mercRE} from '../support/dataObj';
-import * as system from '../support/system';
 
 function addMercStat(mouseover, stat, i) {
   return stat +
@@ -27,7 +27,7 @@ function transform(mercTotal) {
 }
 
 function parseMercStats(html) {
-  var doc = system.createDocument(html);
+  var doc = createDocument(html);
   var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
   var mercTotal = addAllMercStats(mercElements);
   return transform(mercTotal);

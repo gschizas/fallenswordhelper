@@ -3,8 +3,8 @@ import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {openQuickBuffByName} from '../support/layout';
+import {fallback, formatLastActivity} from '../support/system';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
 var msgButton = '<span class="enemy-send-message guild-icon left ' +
@@ -50,7 +50,7 @@ function playerName(val, type) {
     contactColor(val.last_login, type) +
     '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
     '<td>Level:</td><td>' + val.level + '</td></tr><tr><td>Last ' +
-    'Activity:</td><td>' + system.formatLastActivity(val.last_login) +
+    'Activity:</td><td>' + formatLastActivity(val.last_login) +
     '</td></tr></tbody></table>" href="index.php?cmd=profile&player_id=' +
     val.id + '">' + val.username + '</a>';
 }
@@ -133,8 +133,8 @@ function hazAllies(allies, enemies) {
 }
 
 function injectAllyEnemyList(data) {
-  var allies = system.fallback(data._allies, []);
-  var enemies = system.fallback(data._enemies, []);
+  var allies = fallback(data._allies, []);
+  var enemies = fallback(data._enemies, []);
   if (noAllies(allies, enemies)) {return;}
   hazAllies(allies, enemies);
 }
@@ -154,7 +154,7 @@ function msgPlayer(self) {
 }
 
 function buffPlayer(self) {
-  layout.openQuickBuffByName(self.parentNode
+  openQuickBuffByName(self.parentNode
     .previousElementSibling.lastElementChild.textContent);
 }
 
@@ -166,7 +166,7 @@ function selectedBuff() {
       prev.push(curr.nextElementSibling.textContent);
       return prev;
     }, []);
-  layout.openQuickBuffByName(sendstring.join());
+  openQuickBuffByName(sendstring.join());
 }
 
 var classEvt = [

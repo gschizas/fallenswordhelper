@@ -1,8 +1,17 @@
 import calf from './support/calf';
 import {createDiv} from './common/cElement';
+import {log} from './support/debug';
 import subscribes from './newMap/newMap';
-import * as debug from './support/debug';
-import * as system from './support/system';
+import {
+  addCommas,
+  createDocument,
+  findNode,
+  getValue,
+  imageServer,
+  intValue,
+  setValue,
+  xmlhttp
+} from './support/system';
 
 var impStyles = [
   ' style="color:red; font-size:large; font-weight:bold"',
@@ -45,8 +54,7 @@ function getCaLvl(hasCounterAttack) { // Legacy
 
 function hasCA() { // Legacy
   var replacementText = '';
-  var hasCounterAttack = system
-    .findNode('//img[contains(@src,"/54_sm.gif")]');
+  var hasCounterAttack = findNode('//img[contains(@src,"/54_sm.gif")]');
   if (hasCounterAttack) {
     replacementText += getCaLvl(hasCounterAttack);
   }
@@ -74,7 +82,7 @@ function getDoublerLevel(hasDoubler) { // Legacy
 }
 
 function hasDblr() { // Legacy
-  var hasDoubler = system.findNode('//img[contains(@src,"/26_sm.gif")]');
+  var hasDoubler = findNode('//img[contains(@src,"/26_sm.gif")]');
   if (hasDoubler) {
     return getDoublerLevel(hasDoubler);
   }
@@ -82,18 +90,18 @@ function hasDblr() { // Legacy
 }
 
 function getKillStreak(responseText) { // Hybrid
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
-  debug.log('killStreakLocation', killStreakLocation);
+  log('killStreakLocation', killStreakLocation); // TODO WTF?
   var playerKillStreakValue;
   if (killStreakLocation.length > 0) {
-    playerKillStreakValue = system.intValue(killStreakLocation.text());
+    playerKillStreakValue = intValue(killStreakLocation.text());
   }
-  var killStreakElement = system.findNode('//span[@findme="killstreak"]');
-  killStreakElement.innerHTML = system.addCommas(playerKillStreakValue);
-  system.setValue('lastKillStreak', playerKillStreakValue);
+  var killStreakElement = findNode('//span[@findme="killstreak"]');
+  killStreakElement.innerHTML = addCommas(playerKillStreakValue);
+  setValue('lastKillStreak', playerKillStreakValue);
   var deathDealerBuff =
-    system.findNode('//img[contains(@data-tipped,"Death Dealer")]');
+    findNode('//img[contains(@data-tipped,"Death Dealer")]');
   var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
   var deathDealer = deathDealerRE.exec($(deathDealerBuff).data('tipped'));
   var deathDealerPercentage;
@@ -104,15 +112,15 @@ function getKillStreak(responseText) { // Hybrid
     ) * 0.01, 20);
   }
   var deathDealerPercentageElement =
-    system.findNode('//span[@findme="damagebonus"]');
+    findNode('//span[@findme="damagebonus"]');
   deathDealerPercentageElement.innerHTML = deathDealerPercentage;
-  system.setValue('lastDeathDealerPercentage', deathDealerPercentage);
+  setValue('lastDeathDealerPercentage', deathDealerPercentage);
 }
 
 function getLastValue(pref) {
-  var val = system.getValue(pref);
+  var val = getValue(pref);
   if (typeof val === 'undefined') {
-    system.setValue(pref, 0);
+    setValue(pref, 0);
     val = 0;
   }
   return val;
@@ -126,12 +134,12 @@ function getTrackText(trackKillStreak) { // Legacy
 function doDeathDealer(impsRemaining) { // Legacy
   var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
   var lastKillStreak = getLastValue('lastKillStreak');
-  var trackKillStreak = system.getValue('trackKillStreak');
+  var trackKillStreak = getValue('trackKillStreak');
   var trackText = getTrackText(trackKillStreak);
   if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
     return '<tr><td style="font-size:small; color:black"' +
       '>Kill Streak: <span findme="killstreak">&gt;' +
-      system.addCommas(lastKillStreak) + '</span> Damage bonus: <' +
+      addCommas(lastKillStreak) + '</span> Damage bonus: <' +
       'span findme="damagebonus">20</span>%</td></tr>';
   }
   if (!trackKillStreak) {
@@ -142,10 +150,10 @@ function doDeathDealer(impsRemaining) { // Legacy
       'decoration:underline;" title="Click to toggle">' +
       trackText + '</span></span></td></tr>';
   }
-  system.xmlhttp('index.php?cmd=profile', getKillStreak);
+  xmlhttp('index.php?cmd=profile', getKillStreak);
   return '<tr><td style="font-size:small; color:' +
     'navy" nowrap>KillStreak: <span findme="killstreak">' +
-    system.addCommas(lastKillStreak) + '</span> Damage bonus' +
+    addCommas(lastKillStreak) + '</span> Damage bonus' +
     ': <span findme="damagebonus">' +
     Math.round(lastDeathDealerPercentage * 100) / 100 +
     '</span>%&nbsp;<span style="font-size:xx-small">Track: ' +
@@ -155,7 +163,7 @@ function doDeathDealer(impsRemaining) { // Legacy
 }
 
 function recastImpAndRefresh(responseText) { // Legacy
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   if (doc) {
     location.reload();
   }
@@ -165,8 +173,8 @@ function toggleKsTracker() { // Legacy
   var trackKS = document.getElementById('Helper:toggleKStracker');
   if (trackKS) {
     trackKS.addEventListener('click', function() {
-      system.setValue('trackKillStreak',
-        !system.getValue('trackKillStreak'));
+      setValue('trackKillStreak',
+        !getValue('trackKillStreak'));
       location.reload();
     }, true);
   }
@@ -207,20 +215,20 @@ function impRecast() { // Legacy - Old Map
       $('dt.stat-name:first').next().text().replace(/,/g, '') +
       '&skills%5B%5D=55';
     _recastImpAndRefresh.addEventListener('click', function() {
-      system.xmlhttp(impHref, recastImpAndRefresh, true);
+      xmlhttp(impHref, recastImpAndRefresh, true);
     }, true);
   }
 }
 
 function checkBuffs() { // Legacy - Old Map
   // extra world screen text
-  var replacementText = '<td background="' + system.imageServer +
+  var replacementText = '<td background="' + imageServer +
     '/skin/realm_right_bg.jpg"><table align="right" cellpadding="1" ' +
     'style="width:270px;margin-left:38px;margin-right:38px;font-size' +
     ':medium; border-spacing: 1px; border-collapse: collapse;"><tr><' +
     'td colspan="2" height="10"></td></tr><tr>';
-  hasShieldImp = system.findNode('//img[contains(@src,"/55_sm.gif")]');
-  hasDeathDealer = system.findNode('//img[contains(@src,"/50_sm.gif")]');
+  hasShieldImp = findNode('//img[contains(@src,"/55_sm.gif")]');
+  hasDeathDealer = findNode('//img[contains(@src,"/50_sm.gif")]');
   replacementText += findImps();
   replacementText += hasCA();
   replacementText += hasDblr();
@@ -231,7 +239,7 @@ function checkBuffs() { // Legacy - Old Map
   replacementText += '<tr><td colspan="2" height="10"></td></tr>';
   replacementText += '</td>';
 
-  var injectHere = system.findNode('//div[table[@class="centered" ' +
+  var injectHere = findNode('//div[table[@class="centered" ' +
     'and @style="width: 270px;"]]');
   if (!injectHere) {return;}
   // insert after kill all monsters image and text

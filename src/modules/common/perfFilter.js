@@ -1,6 +1,6 @@
 import {createDiv} from './cElement';
 import getInventoryById from '../ajax/getInventoryById';
-import * as layout from '../support/layout';
+import {pCC} from '../support/layout';
 
 var inv;
 var target;
@@ -20,7 +20,7 @@ function drawFilters(data) {
   var buttonDiv = createDiv({className: 'fshAC'});
   buttonDiv.insertAdjacentHTML('beforeend',
     '<button class="fshBl">Perfect</button>');
-  layout.pCC.appendChild(buttonDiv);
+  pCC.appendChild(buttonDiv);
   buttonDiv.addEventListener('click', selectPerf);
 }
 

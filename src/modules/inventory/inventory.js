@@ -15,10 +15,10 @@ import {
   queueTakeItem,
   useItem
 } from '../support/ajax';
-import * as assets from './assets';
-import * as debug from '../support/debug';
-import * as filters from './filters';
-import * as system from '../support/system';
+import {fallback, getValue, imageServer} from '../support/system';
+import {invManFilter, inventoryCheckAll} from './assets';
+import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
+import {time, timeEnd} from '../support/debug';
 
 /* jshint latedef: nofunc */
 export var options;
@@ -28,7 +28,7 @@ export var theInv;
 
 function doSpinner() { // jQuery
   $('#pCC').html('<span id="fshInvMan"><img src = "' +
-  system.imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
+  imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
     'Getting inventory data...</span>');
 }
 
@@ -67,7 +67,7 @@ function headers() { // jQuery
       theInv.items.length +
       ' items (maroon = in BP, blue=guild store)';
   }
-  var myHtml = assets.invManFilter.replace('@@reportTitle@@', reportTitle);
+  var myHtml = invManFilter.replace('@@reportTitle@@', reportTitle);
   $('#pCC').html(myHtml);
 }
 
@@ -124,7 +124,7 @@ function getChecks() { // jQuery
 }
 
 function allChecks() { // jQuery
-  options.checkedElements = assets.inventoryCheckAll;
+  options.checkedElements = inventoryCheckAll;
   setChecks();
   $('#fshInv').DataTable().draw(false);
 }
@@ -176,7 +176,7 @@ function killRow(self, data) { // jQuery
 }
 
 function anotherSpinner(self) {
-  self.empty().append('<img src="' + system.imageServer +
+  self.empty().append('<img src="' + imageServer +
     '/skin/loading.gif" width="11" height="11">');
 }
 
@@ -264,18 +264,18 @@ function clearButton() { // jQuery
 
 function getInvMan() {
 
-  debug.time('inventory.getInvMan');
+  time('inventory.getInvMan');
 
-  showQuickDropLinks = system.getValue('showQuickDropLinks');
-  showQuickSendLinks = system.getValue('showQuickSendLinks');
+  showQuickDropLinks = getValue('showQuickDropLinks');
+  showQuickSendLinks = getValue('showQuickSendLinks');
 
   if (calf.membrList) {rekeyMembrList();}
 
   decorate();
-  filters.lvlFilter();
-  filters.typeFilter();
-  filters.setFilter();
-  filters.rarityFilter();
+  lvlFilter();
+  typeFilter();
+  setFilter();
+  rarityFilter();
   headers();
   setChecks();
   setLvls();
@@ -283,17 +283,17 @@ function getInvMan() {
   eventHandlers();
   clearButton();
 
-  debug.timeEnd('inventory.getInvMan');
+  timeEnd('inventory.getInvMan');
 
 }
 
 function extendOptions(data) {
-  options = system.fallback(data, {});
-  options.fshMinLvl = system.fallback(options.fshMinLvl,
+  options = fallback(data, {});
+  options.fshMinLvl = fallback(options.fshMinLvl,
     defaults.inventoryMinLvl);
-  options.fshMaxLvl = system.fallback(options.fshMaxLvl,
+  options.fshMaxLvl = fallback(options.fshMaxLvl,
     defaults.inventoryMaxLvl);
-  options.checkedElements = system.fallback(options.checkedElements,
+  options.checkedElements = fallback(options.checkedElements,
     defaults.inventoryCheckedElements);
 }
 

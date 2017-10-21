@@ -1,5 +1,5 @@
-import * as layout from '../../support/layout';
-import * as system from '../../support/system';
+import {getValue} from '../../support/system';
+import {pCC, playerName} from '../../support/layout';
 
 var buffCost = {count: 0, buffs: {}};
 var numRE = /[^a-zA-Z0-9.,+\- ]/g;
@@ -7,12 +7,12 @@ var priceRE =
   /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
 
 function getTargetPlayer() {
-  var targetPlayer = layout.pCC
+  var targetPlayer = pCC
     .getElementsByTagName('h1');
   if (targetPlayer.length !== 0) {
     targetPlayer = targetPlayer[0].textContent;
   } else {
-    targetPlayer = layout.playerName();
+    targetPlayer = playerName();
   }
   return targetPlayer;
 }
@@ -20,7 +20,7 @@ function getTargetPlayer() {
 function formatBuffsToBuy() { // Legacy
   var targetPlayer = getTargetPlayer();
   var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
-  var greetingText = system.getValue('buyBuffsGreeting').trim();
+  var greetingText = getValue('buyBuffsGreeting').trim();
   var hasBuffTag = greetingText.indexOf('{buffs}') !== -1;
   var hasCostTag = greetingText.indexOf('{cost}') !== -1;
   greetingText = greetingText.replace(/{playername}/g, targetPlayer);

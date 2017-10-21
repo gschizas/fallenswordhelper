@@ -1,6 +1,6 @@
+import {imageServer} from '../support/system';
+import {playerId} from '../support/layout';
 import {createDiv, createTBody, createTable} from '../common/cElement';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
 
 function alpha(a, b) {
   if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
@@ -17,7 +17,7 @@ function isUseable(item) {
 }
 
 function itemImage(item) {
-  var ret = system.imageServer + '/';
+  var ret = imageServer + '/';
   if (item.b === 13699) {
     ret += 'composing/potions/' + item.extra.design + '_' +
       item.extra.color + '.gif';
@@ -27,7 +27,7 @@ function itemImage(item) {
   return ret;
 }
 
-function tableRows(tbl, playerId, item) {
+function tableRows(tbl, currentPlayerId, item) {
   var newRow = tbl.insertRow(-1);
   item.dom = newRow;
   var equipClass = 'fshEq ';
@@ -37,11 +37,12 @@ function tableRows(tbl, playerId, item) {
   newRow.innerHTML = '<td class="fshCenter"><span class="' + equipClass +
     '" data-itemid="' + item.a + '">Wear</span>&nbsp;|&nbsp;<span class="' +
     useClass + '" data-itemid="' + item.a +
-    '">Use/Ext</span></td><td><img src="' + itemImage(item) + '" ' +
-    'class="tip-dynamic" data-tipped="fetchitem.php?item_id=' + item.b +
-    '&amp;inv_id=' + item.a + '&amp;t=1&amp;p=' + playerId + '&amp;' +
-    'currentPlayerId=' + playerId + '" width="30" height="30" border="0">' +
-    '</td><td width="90%">&nbsp;' + item.n + '</td>';
+    '">Use/Ext</span></td><td><img src="' + itemImage(item) +
+    '" class="tip-dynamic" data-tipped="fetchitem.php?item_id=' + item.b +
+    '&amp;inv_id=' + item.a + '&amp;t=1&amp;p=' + currentPlayerId +
+    '&amp;currentPlayerId=' + currentPlayerId +
+    '" width="30" height="30" border="0"></td><td width="90%">&nbsp;' +
+    item.n + '</td>';
 }
 
 function makeFolderSpans(appInv) {
@@ -55,7 +56,7 @@ function makeFolderSpans(appInv) {
 }
 
 export default function createQuickWear(appInv) {
-  var playerId = layout.playerId();
+  var currentPlayerId = playerId();
   var tbl = createTable({
     width: '100%',
     innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
@@ -67,7 +68,7 @@ export default function createQuickWear(appInv) {
   tbl.appendChild(tbody);
   appInv.r.forEach(function(aFolder) {
     aFolder.items.sort(alpha);
-    aFolder.items.forEach(tableRows.bind(null, tbody, playerId));
+    aFolder.items.forEach(tableRows.bind(null, tbody, currentPlayerId));
   });
   var qw = createDiv({
     id: 'invTabs-qw',

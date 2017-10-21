@@ -1,6 +1,11 @@
-import * as layout from '../support/layout';
-import * as settingsPage from '../settings/settingsPage';
-import * as system from '../support/system';
+import {pCC} from '../support/layout';
+import {simpleCheckbox} from '../settings/settingsPage';
+import {
+  fallback,
+  getValue,
+  parseDateAsTimestamp,
+  setValue
+} from '../support/system';
 
 var warehouse = [];
 var collapseNewsArchive;
@@ -76,10 +81,10 @@ function collapseDuringAnalysis(row, thisArticle) {
 
 function checkForPvPLadder(row) {
   if (row.children[1].children[0].textContent === 'PvP Ladder') {
-    var logTime = system.parseDateAsTimestamp(
+    var logTime = parseDateAsTimestamp(
       row.children[1].children[2].textContent.replace('Posted: ', ''));
     if (logTime > lastLadderReset) {
-      system.setValue('lastLadderReset', logTime);
+      setValue('lastLadderReset', logTime);
       lastLadderReset = logTime;
     }
   }
@@ -93,7 +98,7 @@ function testRowType(row, rowType, thisArticle) {
   }
   if (rowType > 1) {
     thisArticle.rows[rowType] =
-      system.fallback(thisArticle[rowType], {});
+      fallback(thisArticle[rowType], {});
     thisArticle.rows[rowType].row = row;
     collapseDuringAnalysis(row, thisArticle);
   }
@@ -102,7 +107,7 @@ function testRowType(row, rowType, thisArticle) {
 function doTagging(row) {
   var rowType = row.rowIndex % 6;
   var articleNo = (row.rowIndex - rowType) / 6;
-  warehouse[articleNo] = system.fallback(warehouse[articleNo], {});
+  warehouse[articleNo] = fallback(warehouse[articleNo], {});
   var thisArticle = warehouse[articleNo];
   thisArticle.rows = thisArticle.rows || [];
   testRowType(row, rowType, thisArticle);
@@ -116,22 +121,22 @@ function toggleHeaderClass() {
 
 function togglePref() {
   collapseNewsArchive = !collapseNewsArchive;
-  system.setValue('collapseNewsArchive', collapseNewsArchive);
+  setValue('collapseNewsArchive', collapseNewsArchive);
   if (collapseNewsArchive) {collapseAll();} else {expandAll();}
   toggleHeaderClass();
 }
 
 function setupPref(rowInjector) {
-  collapseNewsArchive = system.getValue('collapseNewsArchive');
+  collapseNewsArchive = getValue('collapseNewsArchive');
   rowInjector.insertAdjacentHTML('afterend',
-    settingsPage.simpleCheckbox('collapseNewsArchive'));
+    simpleCheckbox('collapseNewsArchive'));
   document.getElementById('collapseNewsArchive')
     .addEventListener('click', togglePref);
 }
 
 export default function viewArchive() {
-  lastLadderReset = system.getValue('lastLadderReset');
-  var theTables = layout.pCC.getElementsByTagName('table');
+  lastLadderReset = getValue('lastLadderReset');
+  var theTables = pCC.getElementsByTagName('table');
   setupPref(theTables[0].rows[2]);
   Array.prototype.forEach.call(theTables[2].rows, doTagging);
   theTables[2].addEventListener('click', evtHdl);

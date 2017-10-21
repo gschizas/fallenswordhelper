@@ -1,4 +1,4 @@
-import * as system from '../support/system';
+import {getValue} from '../support/system';
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   var _c = '';
@@ -18,10 +18,10 @@ function findAllyEnemy(el) {
     .getElementsByTagName('table').length - 1;
   if (isAllies) {
     totalAllyEnemy(target, numberOfContacts,
-      system.getValue('alliestotal'));
+      getValue('alliestotal'));
   } else {
     totalAllyEnemy(target, numberOfContacts,
-      system.getValue('enemiestotal'));
+      getValue('enemiestotal'));
   }
 }
 

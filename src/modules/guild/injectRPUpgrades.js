@@ -1,11 +1,11 @@
 import myStats from '../ajax/myStats';
+import {pCC} from '../support/layout';
 import reduceBuffArray from '../common/reduceBuffArray';
-import * as layout from '../support/layout';
 
 var packRE = />([ a-zA-Z]+) Level (\d+)/g;
 
 function postWarnings(myBuffs) {
-  var nodeList = layout.pCC.firstElementChild.rows[9]
+  var nodeList = pCC.firstElementChild.rows[9]
     .cells[0].firstElementChild.getElementsByTagName('A');
   Array.prototype.forEach.call(nodeList, function(el) {
     var tipped = el.dataset.tipped;

@@ -1,6 +1,8 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
+import {getValue} from '../support/system';
+import {injectComposeAlert} from '../composing/composing';
 import injectFSBoxLog from './injectFSBoxLog';
 import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
@@ -11,11 +13,13 @@ import prepareBountyData from './activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
 import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
-import * as calc from './calc';
-import * as composing from '../composing/composing';
-import * as notification from '../notification';
-import * as system from '../support/system';
-import * as widgets from './widgets';
+import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
+import {
+  injectJoinAllLink,
+  injectTempleAlert,
+  injectUpgradeAlert
+} from '../notification';
+import {injectLevelupCalculator, injectStaminaCalculator} from './calc';
 
 function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');
@@ -27,23 +31,23 @@ function gameHelpLink() {
 }
 
 function getEnvVars() {
-  calf.enableAllyOnlineList = system.getValue('enableAllyOnlineList');
-  calf.enableEnemyOnlineList = system.getValue('enableEnemyOnlineList');
-  calf.enableGuildInfoWidgets = system.getValue('enableGuildInfoWidgets');
+  calf.enableAllyOnlineList = getValue('enableAllyOnlineList');
+  calf.enableEnemyOnlineList = getValue('enableEnemyOnlineList');
+  calf.enableGuildInfoWidgets = getValue('enableGuildInfoWidgets');
   calf.enableOnlineAlliesWidgets =
-    system.getValue('enableOnlineAlliesWidgets');
-  calf.hideGuildInfoTrade = system.getValue('hideGuildInfoTrade');
-  calf.hideGuildInfoSecureTrade = system.getValue('hideGuildInfoSecureTrade');
-  calf.hideGuildInfoBuff = system.getValue('hideGuildInfoBuff');
-  calf.hideGuildInfoMessage = system.getValue('hideGuildInfoMessage');
-  calf.hideBuffSelected = system.getValue('hideBuffSelected');
-  calf.enableTempleAlert = system.getValue('enableTempleAlert');
-  calf.enableUpgradeAlert = system.getValue('enableUpgradeAlert');
-  calf.enableComposingAlert = system.getValue('enableComposingAlert');
-  calf.enableActiveBountyList = system.getValue('enableActiveBountyList');
-  calf.enableWantedList = system.getValue('enableWantedList');
+    getValue('enableOnlineAlliesWidgets');
+  calf.hideGuildInfoTrade = getValue('hideGuildInfoTrade');
+  calf.hideGuildInfoSecureTrade = getValue('hideGuildInfoSecureTrade');
+  calf.hideGuildInfoBuff = getValue('hideGuildInfoBuff');
+  calf.hideGuildInfoMessage = getValue('hideGuildInfoMessage');
+  calf.hideBuffSelected = getValue('hideBuffSelected');
+  calf.enableTempleAlert = getValue('enableTempleAlert');
+  calf.enableUpgradeAlert = getValue('enableUpgradeAlert');
+  calf.enableComposingAlert = getValue('enableComposingAlert');
+  calf.enableActiveBountyList = getValue('enableActiveBountyList');
+  calf.enableWantedList = getValue('enableWantedList');
   calf.allyEnemyOnlineRefreshTime =
-    system.getValue('allyEnemyOnlineRefreshTime') * 1000;
+    getValue('allyEnemyOnlineRefreshTime') * 1000;
 }
 
 function callAllyEnemy() {
@@ -62,31 +66,31 @@ function callBounties() {
 
 function callGuildInfo() {
   if (calf.enableGuildInfoWidgets) {
-    add(3, widgets.addGuildInfoWidgets);
+    add(3, addGuildInfoWidgets);
   }
 }
 
 function callAllies() {
   if (calf.enableOnlineAlliesWidgets) {
-    add(3, widgets.addOnlineAlliesWidgets);
+    add(3, addOnlineAlliesWidgets);
   }
 }
 
 function callTemple() {
   if (calf.enableTempleAlert) {
-    add(3, notification.injectTempleAlert);
+    add(3, injectTempleAlert);
   }
 }
 
 function callUpgrade() {
   if (calf.enableUpgradeAlert) {
-    add(3, notification.injectUpgradeAlert);
+    add(3, injectUpgradeAlert);
   }
 }
 
 function callComposing() {
   if (calf.enableComposingAlert) {
-    add(3, composing.injectComposeAlert);
+    add(3, injectComposeAlert);
   }
 }
 
@@ -124,19 +128,19 @@ function moveRHSBoxToLHS(title) {
 }
 
 function doMoveGuildList() {
-  if (system.getValue('moveGuildList')) {
+  if (getValue('moveGuildList')) {
     add(3, moveRHSBoxUpOnRHS, ['minibox-guild']);
   }
 }
 
 function doMoveAllyList() {
-  if (system.getValue('moveOnlineAlliesList')) {
+  if (getValue('moveOnlineAlliesList')) {
     add(3, moveRHSBoxUpOnRHS, ['minibox-allies']);
   }
 }
 
 function doMoveFsBox() {
-  if (system.getValue('moveFSBox')) {
+  if (getValue('moveFSBox')) {
     add(3, moveRHSBoxToLHS, ['minibox-fsbox']);
   }
 }
@@ -161,17 +165,17 @@ function notHuntMode() {
   add(3, navMenu);
   add(3, statbar);
 
-  add(3, calc.injectStaminaCalculator);
-  add(3, calc.injectLevelupCalculator);
+  add(3, injectStaminaCalculator);
+  add(3, injectLevelupCalculator);
 
   add(3, injectMenu);
 
-  if (system.getValue('fsboxlog')) {
+  if (getValue('fsboxlog')) {
     add(3, injectFSBoxLog);
   }
   add(3, fixOnlineGuildBuffLinks);
 
-  add(3, notification.injectJoinAllLink);
+  add(3, injectJoinAllLink);
   add(3, changeGuildLogHREF);
   add(3, injectHomePageTwoLink);
 
@@ -179,13 +183,13 @@ function notHuntMode() {
 }
 
 function prepareEnv() {
-  if (system.getValue('gameHelpLink')) {
+  if (getValue('gameHelpLink')) {
     add(3, gameHelpLink);
   }
-  calf.huntingMode = system.getValue('huntingMode');
+  calf.huntingMode = getValue('huntingMode');
   add(3, replaceKeyHandler);
   notHuntMode();
-  if (!system.getValue('hideHelperMenu')) {
+  if (!getValue('hideHelperMenu')) {
     add(3, injectHelperMenu);
   }
 }

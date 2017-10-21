@@ -2,8 +2,8 @@ import calf from '../support/calf';
 import getForage from './getForage';
 import getProfile from './getProfile';
 import {now} from '../support/dataObj';
+import {playerName} from '../support/layout';
 import setForage from './setForage';
-import * as layout from '../support/layout';
 
 function sendMyProfileToForage(data) {
   setForage('fsh_selfProfile', data);
@@ -15,7 +15,7 @@ function addLastUpdateDate(data) {
 }
 
 function getMyProfile() {
-  return getProfile(layout.playerName())
+  return getProfile(playerName())
     .pipe(addLastUpdateDate)
     .done(sendMyProfileToForage);
 }

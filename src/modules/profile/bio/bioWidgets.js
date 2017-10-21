@@ -1,14 +1,14 @@
 import bioEvtHdl from './bioEvtHdl';
+import {pCC} from '../../support/layout';
 import renderBio from './render';
+import {convertTextToHtml, getValue, setValue} from '../../support/system';
 import {createDiv, createInput} from '../../common/cElement';
-import * as layout from '../../support/layout';
-import * as system from '../../support/system';
 
 var bioEditLines;
 
 function bioPreview() {
   var textArea = document.getElementById('textInputBox');
-  var bioPreviewHTML = system.convertTextToHtml(textArea.value);
+  var bioPreviewHTML = convertTextToHtml(textArea.value);
   textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
     '<table align="center" width="325" border="1">' +
     '<tbody><tr><td style="text-align:center;color:#7D2252;' +
@@ -19,7 +19,7 @@ function bioPreview() {
 
 function bioWords() {
   // Add description text for the new tags
-  layout.pCC.insertAdjacentHTML('beforeend', '<div>' +
+  pCC.insertAdjacentHTML('beforeend', '<div>' +
     '`~This will allow FSH Script users to ' +
     'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
     'determine where to put the "Ask For Buffs" button<br><br>' +
@@ -40,7 +40,7 @@ function changeHeight() {
   var boxVal = parseInt(theBox.value, 10);
   if (testHeightValid(boxVal)) {return;}
   bioEditLines = boxVal;
-  system.setValue('bioEditLines', boxVal);
+  setValue('bioEditLines', boxVal);
   document.getElementById('textInputBox').rows = bioEditLines;
 }
 
@@ -57,13 +57,13 @@ function bioHeight() {
   });
   saveLines.addEventListener('click', changeHeight);
   bioEditLinesDiv.appendChild(saveLines);
-  layout.pCC.appendChild(bioEditLinesDiv);
+  pCC.appendChild(bioEditLinesDiv);
 }
 
 function updateBioCharacters() {
   var textArea = document.getElementById('textInputBox');
   var previewArea = document.getElementById('biopreview');
-  var bioContents = system.convertTextToHtml(textArea.value);
+  var bioContents = convertTextToHtml(textArea.value);
   bioContents = renderBio(bioContents);
   if (bioContents) {
     previewArea.innerHTML = bioContents;
@@ -71,7 +71,7 @@ function updateBioCharacters() {
 }
 
 export default function injectBioWidgets() {
-  bioEditLines = system.getValue('bioEditLines');
+  bioEditLines = getValue('bioEditLines');
   var textArea = document.getElementById('textInputBox');
   bioPreview();
   bioWords();

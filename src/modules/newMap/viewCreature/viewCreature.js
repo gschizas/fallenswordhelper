@@ -8,8 +8,15 @@ import evalDamage from './evalDamage';
 import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHtml from './evalHtml';
-import * as common from '../../common/common';
-import * as system from '../../support/system';
+import {playerDataString} from '../../common/common';
+import {
+  createDocument,
+  findNode,
+  getValue,
+  intValue,
+  setValue,
+  xmlhttp
+} from '../../support/system';
 
 function getBiasGeneral(combat) {
   if (assets.bias[combat.combatEvaluatorBias]) {
@@ -31,15 +38,15 @@ function creatureData(ses) { // jQuery
   obj.class = $('#dialog-viewcreature')
     .find('span.classification')
     .text();
-  obj.attack = system.intValue($('#dialog-viewcreature')
+  obj.attack = intValue($('#dialog-viewcreature')
     .find('dd.attribute-atk').text());
-  obj.defense = system.intValue($('#dialog-viewcreature')
+  obj.defense = intValue($('#dialog-viewcreature')
     .find('dd.attribute-def').text());
-  obj.armor = system.intValue($('#dialog-viewcreature')
+  obj.armor = intValue($('#dialog-viewcreature')
     .find('dd.attribute-arm').text());
-  obj.damage = system.intValue($('#dialog-viewcreature')
+  obj.damage = intValue($('#dialog-viewcreature')
     .find('dd.attribute-dmg').text());
-  obj.hp = system.intValue($('#dialog-viewcreature')
+  obj.hp = intValue($('#dialog-viewcreature')
     .find('p.health-max').text());
   // reduce stats if critter is a SE and player has SES cast on them.
   if (obj.name.search('Super Elite') !== -1) {
@@ -72,8 +79,8 @@ function getCreaturePlayerData(responseText, callback) { // Legacy
   var combat = {};
   combat.callback = callback;
   // playerdata
-  combat.player = common.playerDataString(responseText);
-  combat.combatEvaluatorBias = system.getValue('combatEvaluatorBias');
+  combat.player = playerDataString(responseText);
+  combat.combatEvaluatorBias = getValue('combatEvaluatorBias');
   combat.attackVariable = 1.1053;
   combat.generalVariable = getBiasGeneral(combat);
   combat.hpVariable = getBiasHp(combat);
@@ -100,23 +107,23 @@ function getCreaturePlayerData(responseText, callback) { // Legacy
 }
 
 function getCreatureGroupData(responseText) { // Legacy
-  var doc = system.createDocument(responseText);
-  var groupAttackValue = Number(system.findNode('//table[@width="400"]/tbody' +
+  var doc = createDocument(responseText);
+  var groupAttackValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"Attack:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  var groupDefenseValue = Number(system.findNode('//table[@width="400"]/tbody' +
+  var groupDefenseValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"Defense:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  var groupArmorValue = Number(system.findNode('//table[@width="400"]/tbody' +
+  var groupArmorValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"Armor:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  var groupDamageValue = Number(system.findNode('//table[@width="400"]/tbody' +
+  var groupDamageValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"Damage:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  var groupHPValue = Number(system.findNode('//table[@width="400"]/tbody' +
+  var groupHPValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  system.xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
+  xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
     groupExists: true,
     groupAttackValue: groupAttackValue,
     groupDefenseValue: groupDefenseValue,
@@ -128,13 +135,13 @@ function getCreatureGroupData(responseText) { // Legacy
 }
 
 function checkIfGroupExists(responseText) { // Hybrid
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   var groupExistsIMG = $(doc)
     .find('img[title="Disband Group (Cancel Attack)"]');
   if (groupExistsIMG.length > 0) {
     var groupHref = groupExistsIMG.parents('td:first').find('a:first')
       .attr('href');
-    system.xmlhttp(groupHref, getCreatureGroupData);
+    xmlhttp(groupHref, getCreatureGroupData);
   }
 }
 
@@ -148,7 +155,7 @@ function addRemoveCreatureToDoNotKillList(evt) {
     calf.doNotKillList.push(creatureName);
     evt.target.innerHTML = 'Remove from do not kill list';
   }
-  system.setValue('doNotKillList', calf.doNotKillList.join());
+  setValue('doNotKillList', calf.doNotKillList.join());
   // refresh the action list
   window.GameData.doAction(-1);
 }
@@ -157,7 +164,7 @@ export default function readyViewCreature() { // Hybrid
   $('#creatureEvaluator').html('');
   $('#creatureEvaluatorGroup').html('');
 
-  system.xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
+  xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
     groupExists: false,
     groupAttackValue: 0,
     groupDefenseValue: 0,
@@ -166,7 +173,7 @@ export default function readyViewCreature() { // Hybrid
     groupHPValue: 0,
     groupEvaluation: false
   });
-  system.xmlhttp('index.php?cmd=guild&subcmd=groups',
+  xmlhttp('index.php?cmd=guild&subcmd=groups',
     checkIfGroupExists);
 
   $('#addRemoveCreatureToDoNotKillList').html('');

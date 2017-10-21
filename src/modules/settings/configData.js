@@ -5,10 +5,10 @@ import generalPrefs from './generalPrefs';
 import guildPrefs from './guildPrefs';
 import logPrefs from './logPrefs';
 import otherPrefs from './otherPrefs';
+import {prefs} from './worldPrefs';
 import profilePrefs from './profilePrefs';
 import questPrefs from './questPrefs';
-import * as system from '../support/system';
-import * as world from './worldPrefs';
+import {server} from '../support/system';
 
 export default function setupConfigData() {
   calf.configData =
@@ -39,7 +39,7 @@ export default function setupConfigData() {
     guildPrefs() +
 
     // World Screen
-    world.prefs() +
+    prefs() +
 
     // Log screen prefs
     logPrefs() +
@@ -63,31 +63,31 @@ export default function setupConfigData() {
     // http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
     '<tr><td colspan="2" align=center><input type="button" class=' +
       '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
-    '<tr><td colspan="2" align=center><a href="' + system.server +
+    '<tr><td colspan="2" align=center><a href="' + server +
       'index.php?cmd=notepad&blank=1&subcmd=savesettings">Export or Load ' +
       'Settings!</a></td></tr>' +
     '<tr><td colspan="2" align=center>' +
       '<span style="font-size:xx-small">Fallen Sword Helper was coded by ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=1599987">yuuzhan</a>, ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=1963510">PointyHair</a>, ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=1346893">Tangtop</a>, ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=2156859">ByteBoy</a>, and ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=2169401">McBush</a>, ' +
       'with valuable contributions by ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
-      '<a href="' + system.server +
+      '<a href="' + server +
       'index.php?cmd=profile&player_id=37905">Ananasii</a></span></td></tr>' +
     '</table></form>';
 }

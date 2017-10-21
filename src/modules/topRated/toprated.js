@@ -2,10 +2,10 @@ import getProfile from '../ajax/getProfile';
 import guildView from '../app/guild/view';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
+import {playerDataObject} from '../common/common';
 import {createInput, createSpan} from '../common/cElement';
-import * as common from '../common/common';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {getValue, imageServer} from '../support/system';
+import {onlineDot, pCC} from '../support/layout';
 
 var highlightPlayersNearMyLvl;
 var lvlDiffToHighlight;
@@ -16,7 +16,7 @@ var guilds;
 
 function doOnlineDot(aTable, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
-    '<td>' + layout.onlineDot({last_login: data.last_login}) + '</td>');
+    '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
   if (myVL &&
       data.last_login >= validPvP &&
       data.virtual_level > myVL - lvlDiffToHighlight &&
@@ -29,7 +29,7 @@ function parsePlayer(aTable, data, jqXhr) {
   if (data) {
     doOnlineDot(aTable, data);
     //#if _DEV  //  get cloaked players
-    var defender = common.playerDataObject(data);
+    var defender = playerDataObject(data);
     if (defender.cloakLevel !== 0) {console.log('Cloaked Player', data);} // eslint-disable-line no-console
     //#endif
   } else {
@@ -78,7 +78,7 @@ function parseGuild(data) {
 }
 
 function findOnlinePlayers() { // jQuery
-  var someTables = layout.pCC.getElementsByTagName('table');
+  var someTables = pCC.getElementsByTagName('table');
   var prm = [];
   guilds = {};
   Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
@@ -112,7 +112,7 @@ function getMyVL(e) { // jQuery
   spinner = createSpan({
     className: 'fshCurveBtn fshTopListSpinner',
     style: {
-      backgroundImage: 'url(\'' + system.imageServer +
+      backgroundImage: 'url(\'' + imageServer +
         '/world/actionLoadingSpinner.gif\')'
     }
   });
@@ -124,8 +124,8 @@ function getMyVL(e) { // jQuery
 
 function looksLikeTopRated() {
   highlightPlayersNearMyLvl =
-    system.getValue('highlightPlayersNearMyLvl');
-  var theCell = layout.pCC.getElementsByTagName('TD')[0];
+    getValue('highlightPlayersNearMyLvl');
+  var theCell = pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({
     id: 'fshFindOnlinePlayers',
@@ -142,10 +142,10 @@ function looksLikeTopRated() {
 }
 
 export default function injectTopRated() {
-  if (layout.pCC &&
-      layout.pCC.firstElementChild &&
-      layout.pCC.firstElementChild.rows &&
-      layout.pCC.firstElementChild.rows.length > 2 &&
-      layout.pCC.firstElementChild.rows[1].textContent
+  if (pCC &&
+      pCC.firstElementChild &&
+      pCC.firstElementChild.rows &&
+      pCC.firstElementChild.rows.length > 2 &&
+      pCC.firstElementChild.rows[1].textContent
         .indexOf('Last Updated') === 0) {looksLikeTopRated();}
 }

@@ -1,5 +1,10 @@
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {pCC} from './support/layout';
+import {
+  getUrlParameter,
+  getValue,
+  imageServer,
+  setValue
+} from './support/system';
 
 var normalLink;
 var seasonLink;
@@ -41,7 +46,7 @@ var savePrefKey = [
 ];
 
 function whereAmI() {
-  var aLinks = layout.pCC.getElementsByTagName('a');
+  var aLinks = pCC.getElementsByTagName('a');
   normalLink = aLinks[0];
   seasonLink = aLinks[1];
   activeLink = aLinks[2];
@@ -58,8 +63,8 @@ function whereAmI() {
 
 function storeLoc() {
   var lastQBPage = location.search;
-  system.setValue('lastActiveQuestPage', lastQBPage);
-  system.setValue(savePrefKey[currentPageValue], lastQBPage);
+  setValue('lastActiveQuestPage', lastQBPage);
+  setValue(savePrefKey[currentPageValue], lastQBPage);
 }
 
 function setLink(aLink, url) {
@@ -69,12 +74,12 @@ function setLink(aLink, url) {
 }
 
 function updateLinks() {
-  var lastNormalActiveQuestPage = system.getValue(savePrefKey[0]);
-  var lastNormalCompletedQuestPage = system.getValue(savePrefKey[1]);
-  var lastNormalNotStartedQuestPage = system.getValue(savePrefKey[2]);
-  var lastSeasonalActiveQuestPage = system.getValue(savePrefKey[3]);
-  var lastSeasonalCompletedQuestPage = system.getValue(savePrefKey[4]);
-  var lastSeasonalNotStartedQuestPage = system.getValue(savePrefKey[5]);
+  var lastNormalActiveQuestPage = getValue(savePrefKey[0]);
+  var lastNormalCompletedQuestPage = getValue(savePrefKey[1]);
+  var lastNormalNotStartedQuestPage = getValue(savePrefKey[2]);
+  var lastSeasonalActiveQuestPage = getValue(savePrefKey[3]);
+  var lastSeasonalCompletedQuestPage = getValue(savePrefKey[4]);
+  var lastSeasonalNotStartedQuestPage = getValue(savePrefKey[5]);
 
   var oppositeTypeUrl = [
     lastSeasonalActiveQuestPage,
@@ -99,7 +104,7 @@ function updateLinks() {
 }
 
 function storeQuestPage() {
-  if (system.getValue('storeLastQuestPage')) {
+  if (getValue('storeLastQuestPage')) {
     whereAmI();
     storeLoc();
     updateLinks();
@@ -111,18 +116,18 @@ function guideButtons(questID, questName) {
     '<a href="https://guide.fallensword.com/index.php?cmd=quests&amp;' +
     'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
-    'style="background-image: url(\'' + system.imageServer +
+    'style="background-image: url(\'' + imageServer +
     '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
     '<a href="https://wiki.fallensword.com/index.php?title=' +
     questName.replace(/ /g, '_') + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Wiki" ' +
-    'style="background-image: url(\'' + system.imageServer +
+    'style="background-image: url(\'' + imageServer +
     '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
 }
 
 function isHideQuests() {
-  if (system.getValue('hideQuests')) {
-    return system.getValue('hideQuestNames').split(',');
+  if (getValue('hideQuests')) {
+    return getValue('hideQuestNames').split(',');
   }
   return [];
 }
@@ -138,9 +143,9 @@ function doHideQuests(hideQuests, questName, aRow) {
 }
 
 export function injectQuestBookFull() {
-  layout.pCC.addEventListener('click', dontPost);
+  pCC.addEventListener('click', dontPost);
   storeQuestPage();
-  var questTable = layout.pCC.getElementsByTagName('table')[5];
+  var questTable = pCC.getElementsByTagName('table')[5];
   if (!questTable) {return;}
   var hideQuests = isHideQuests();
   for (var i = 2; i < questTable.rows.length; i += 4) {
@@ -153,13 +158,13 @@ export function injectQuestBookFull() {
 }
 
 export function injectQuestTracker() {
-  var lastActiveQuestPage = system.getValue('lastActiveQuestPage');
+  var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
-    layout.pCC.getElementsByTagName('a')[0]
+    pCC.getElementsByTagName('a')[0]
       .setAttribute('href', lastActiveQuestPage);
   }
-  var questID = system.getUrlParameter('quest_id');
-  var injectHere = layout.pCC.getElementsByTagName('td')[0];
+  var questID = getUrlParameter('quest_id');
+  var injectHere = pCC.getElementsByTagName('td')[0];
   var questName = injectHere.getElementsByTagName('font')[1].textContent
     .replace(/"/g, '');
   injectHere.insertAdjacentHTML('beforeend', guideButtons(questID, questName));

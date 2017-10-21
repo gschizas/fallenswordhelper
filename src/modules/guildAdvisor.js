@@ -2,10 +2,16 @@ import add from './support/task';
 import calf from './support/calf';
 import {createTFoot} from './common/cElement';
 import getMembrList from './ajax/getMembrList';
+import {pCC} from './support/layout';
 import retryAjax from './ajax/retryAjax';
-import * as debug from './support/debug';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {
+  addCommas,
+  createDocument,
+  fallback,
+  imageServer,
+  intValue
+} from './support/system';
+import {time, timeEnd} from './support/debug';
 
 var newSummary = {};
 var advisorColumns = [
@@ -41,7 +47,7 @@ function doTable() { // jQuery
 }
 
 function summaryLink() {
-  var updateInput = layout.pCC.getElementsByClassName('custombutton');
+  var updateInput = pCC.getElementsByClassName('custombutton');
   if (!updateInput) {return;}
   updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
@@ -66,9 +72,9 @@ function playerRank(f) {
 
 function injectAdvisorNew() {
 
-  debug.time('guildAdvisor.injectAdvisorNew');
+  time('guildAdvisor.injectAdvisorNew');
 
-  list = layout.pCC.getElementsByTagName('TABLE')[1];
+  list = pCC.getElementsByTagName('TABLE')[1];
   if (!list) {return;}
   var totalRow = list.firstElementChild.lastElementChild;
   var totalCell = totalRow.firstElementChild;
@@ -93,16 +99,16 @@ function injectAdvisorNew() {
   add(3, doTable);
   summaryLink();
 
-  debug.timeEnd('guildAdvisor.injectAdvisorNew');
+  timeEnd('guildAdvisor.injectAdvisorNew');
 
 }
 
 function returnAdvisorPage(e, response) {
 
-  debug.time('guildAdvisor.returnAdvisorPage' + e);
+  time('guildAdvisor.returnAdvisorPage' + e);
 
   list.lastElementChild.insertAdjacentHTML('beforeend', ' day ' + e + ',');
-  var doc = system.createDocument(response);
+  var doc = createDocument(response);
   var table = doc.getElementById('pCC').firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
   var tr = table.rows;
@@ -110,31 +116,31 @@ function returnAdvisorPage(e, response) {
     var tds = el.cells;
     var member = tds[0].textContent.trim();
     if (member === 'Member') {return;}
-    newSummary[member] = system.fallback(newSummary[member], {});
+    newSummary[member] = fallback(newSummary[member], {});
     newSummary[member].deposit =
-      system.fallback(newSummary[member].deposit, 0) +
-      system.intValue(tds[1].textContent);
-    newSummary[member].tax = system.fallback(newSummary[member].tax, 0) +
-      system.intValue(tds[2].textContent);
-    newSummary[member].total = system.fallback(newSummary[member].total, 0) +
-      system.intValue(tds[3].textContent);
-    newSummary[member].fsp = system.fallback(newSummary[member].fsp, 0) +
-      system.intValue(tds[4].textContent);
-    newSummary[member].skills = system.fallback(newSummary[member].skills, 0) +
-      system.intValue(tds[5].textContent);
-    newSummary[member].grpCrt = system.fallback(newSummary[member].grpCrt, 0) +
-      system.intValue(tds[6].textContent);
+      fallback(newSummary[member].deposit, 0) +
+      intValue(tds[1].textContent);
+    newSummary[member].tax = fallback(newSummary[member].tax, 0) +
+      intValue(tds[2].textContent);
+    newSummary[member].total = fallback(newSummary[member].total, 0) +
+      intValue(tds[3].textContent);
+    newSummary[member].fsp = fallback(newSummary[member].fsp, 0) +
+      intValue(tds[4].textContent);
+    newSummary[member].skills = fallback(newSummary[member].skills, 0) +
+      intValue(tds[5].textContent);
+    newSummary[member].grpCrt = fallback(newSummary[member].grpCrt, 0) +
+      intValue(tds[6].textContent);
     newSummary[member].grpJoin =
-      system.fallback(newSummary[member].grpJoin, 0) +
-      system.intValue(tds[7].textContent);
-    newSummary[member].relics = system.fallback(newSummary[member].relics, 0) +
-      system.intValue(tds[8].textContent);
+      fallback(newSummary[member].grpJoin, 0) +
+      intValue(tds[7].textContent);
+    newSummary[member].relics = fallback(newSummary[member].relics, 0) +
+      intValue(tds[8].textContent);
     newSummary[member].contrib =
-      system.fallback(newSummary[member].contrib, 0) +
-      system.intValue(tds[9].textContent);
+      fallback(newSummary[member].contrib, 0) +
+      intValue(tds[9].textContent);
   });
 
-  debug.timeEnd('guildAdvisor.returnAdvisorPage' + e);
+  timeEnd('guildAdvisor.returnAdvisorPage' + e);
 
 }
 
@@ -151,20 +157,20 @@ function getAdvisorPage(e) { // jQuery
 
 function displayAdvisor() { // jQuery
 
-  debug.time('guildAdvisor.displayAdvisor');
+  time('guildAdvisor.displayAdvisor');
 
   list.className = 'fshXSmall hover';
   list.innerHTML = '<tfoot id="advTFoot"><tr><td class="fshRight" ' +
     'colspan="3">Total: </td><td><u>' +
-    system.addCommas(newSummary['Total:'].deposit) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].tax) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].total) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].fsp) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].skills) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].grpCrt) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].grpJoin) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].relics) + '</u></td><td><u>' +
-    system.addCommas(newSummary['Total:'].contrib) +
+    addCommas(newSummary['Total:'].deposit) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].tax) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].total) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].fsp) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].skills) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].grpCrt) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].grpJoin) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].relics) + '</u></td><td><u>' +
+    addCommas(newSummary['Total:'].contrib) +
       '</u></td></tr></tfoot>';
   $(list).dataTable({
     data: data,
@@ -176,7 +182,7 @@ function displayAdvisor() { // jQuery
     stateDuration: 0
   });
 
-  debug.timeEnd('guildAdvisor.displayAdvisor');
+  timeEnd('guildAdvisor.displayAdvisor');
 
 }
 
@@ -186,15 +192,15 @@ function addStats(f) {
     playerName(f),
     playerLevel(f),
     playerRank(f),
-    system.addCommas(newSummary[f].deposit),
-    system.addCommas(newSummary[f].tax),
-    system.addCommas(newSummary[f].total),
-    system.addCommas(newSummary[f].fsp),
-    system.addCommas(newSummary[f].skills),
-    system.addCommas(newSummary[f].grpCrt),
-    system.addCommas(newSummary[f].grpJoin),
-    system.addCommas(newSummary[f].relics),
-    system.addCommas(newSummary[f].contrib),
+    addCommas(newSummary[f].deposit),
+    addCommas(newSummary[f].tax),
+    addCommas(newSummary[f].total),
+    addCommas(newSummary[f].fsp),
+    addCommas(newSummary[f].skills),
+    addCommas(newSummary[f].grpCrt),
+    addCommas(newSummary[f].grpJoin),
+    addCommas(newSummary[f].relics),
+    addCommas(newSummary[f].contrib),
   ]);
 }
 
@@ -205,13 +211,13 @@ function addAdvisorPages() {
 
 function injectAdvisorWeekly() { // jQuery
 
-  debug.time('guildAdvisor.injectAdvisorWeekly');
+  time('guildAdvisor.injectAdvisorWeekly');
 
-  list = layout.pCC.firstElementChild.firstElementChild
+  list = pCC.firstElementChild.firstElementChild
     .lastElementChild.firstElementChild.firstElementChild;
   if (!list) {return;}
   list.innerHTML = '<span class="fshCurveBtn" style="background-image: ' +
-    'url(\'' + system.imageServer +
+    'url(\'' + imageServer +
     '/world/actionLoadingSpinner.gif\');"></span>' +
     '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>';
 
@@ -231,7 +237,7 @@ function injectAdvisorWeekly() { // jQuery
     add(3, addAdvisorPages);
   });
 
-  debug.timeEnd('guildAdvisor.injectAdvisorWeekly');
+  timeEnd('guildAdvisor.injectAdvisorWeekly');
 
 }
 

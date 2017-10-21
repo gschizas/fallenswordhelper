@@ -5,29 +5,35 @@ import getMercStats from './ajax/getMercStats';
 import groupViewStats from './ajax/groupViewStats';
 import {months} from './support/dataObj';
 import retryAjax from './ajax/retryAjax';
-import * as debug from './support/debug';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {
+  addCommas,
+  findNode,
+  findNodes,
+  getValue,
+  server
+} from './support/system';
+import {doBuffLinks, onlineDot} from './support/layout';
+import {time, timeEnd} from './support/debug';
 
 var maxGroupSizeToJoin;
 var groupStats;
 
 function parseMercStats(mercStats) {
   groupStats.attackElement.innerHTML = '<span class="fshBlue">' +
-    system.addCommas(groupStats.attack) + '</span>' +
-    ' ( ' + system.addCommas(groupStats.attack - mercStats.attack) + ' )';
+    addCommas(groupStats.attack) + '</span>' +
+    ' ( ' + addCommas(groupStats.attack - mercStats.attack) + ' )';
   groupStats.defenseElement.innerHTML = '<span class="fshBlue">' +
-    system.addCommas(groupStats.defense) + '</span>' +
-    ' ( ' + system.addCommas(groupStats.defense - mercStats.defense) + ' )';
+    addCommas(groupStats.defense) + '</span>' +
+    ' ( ' + addCommas(groupStats.defense - mercStats.defense) + ' )';
   groupStats.armorElement.innerHTML = '<span class="fshBlue">' +
-    system.addCommas(groupStats.armor) + '</span>' +
-    ' ( ' + system.addCommas(groupStats.armor - mercStats.armor) + ' )';
+    addCommas(groupStats.armor) + '</span>' +
+    ' ( ' + addCommas(groupStats.armor - mercStats.armor) + ' )';
   groupStats.damageElement.innerHTML = '<span class="fshBlue">' +
-    system.addCommas(groupStats.damage) + '</span>' +
-    ' ( ' + system.addCommas(groupStats.damage - mercStats.damage) + ' )';
+    addCommas(groupStats.damage) + '</span>' +
+    ' ( ' + addCommas(groupStats.damage - mercStats.damage) + ' )';
   groupStats.hpElement.innerHTML = '<span class="fshBlue">' +
-    system.addCommas(groupStats.hp) + '</span>' +
-    ' ( ' + system.addCommas(groupStats.hp - mercStats.hp) + ' )';
+    addCommas(groupStats.hp) + '</span>' +
+    ' ( ' + addCommas(groupStats.hp - mercStats.hp) + ' )';
 }
 
 export function injectGroupStats() { // jQuery
@@ -36,7 +42,7 @@ export function injectGroupStats() { // jQuery
 }
 
 function displayMinGroupLevel() { // jQuery
-  var minGroupLevel = system.getValue('minGroupLevel');
+  var minGroupLevel = getValue('minGroupLevel');
   if (minGroupLevel) {
     $('#pCC > table > tbody > tr > td > table td').first()
       .append('<span style="color:blue"> ' +
@@ -69,7 +75,7 @@ function doJoinUnderSize(prev, joinButton) { // Legacy
 }
 
 function joinAllGroupsUnderSize() { // Legacy
-  var joinButtons = system.findNodes(
+  var joinButtons = findNodes(
     '//img[contains(@src,"skin/icon_action_join.gif")]');
   if (!joinButtons) {return;}
   var prm = joinButtons.reduce(doJoinUnderSize, []);
@@ -109,12 +115,12 @@ function fetchGroupData(evt) {
 }
 
 function groupButtons() { // Legacy
-  var buttonElement = system.findNode('//td[input[@value="Join All ' +
+  var buttonElement = findNode('//td[input[@value="Join All ' +
     'Available Groups"]]');
   var enableMaxGroupSizeToJoin =
-    system.getValue('enableMaxGroupSizeToJoin');
+    getValue('enableMaxGroupSizeToJoin');
   if (enableMaxGroupSizeToJoin) {
-    maxGroupSizeToJoin = system.getValue('maxGroupSizeToJoin');
+    maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
     var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
     joinAllInput.classList.add('fshHide');
     buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
@@ -162,8 +168,8 @@ function groupLocalTime(theDateCell) { // jQuery
 
 function getCreator(membrlist, creator) {
   if (membrlist[creator]) {
-    return layout.onlineDot({last_login: membrlist[creator].last_login}) +
-      '&nbsp;<a href="' + system.server + 'index.php?cmd=profile&player_id=' +
+    return onlineDot({last_login: membrlist[creator].last_login}) +
+      '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
       membrlist[creator].id + '"><b>' + creator + '</b></a> [' +
       membrlist[creator].level + ']';
   }
@@ -190,7 +196,7 @@ function doGroupRow(row, membrlist) { // jQuery
   var buffList = listArr.filter(function(name) {
     return name !== '[none]' && name.indexOf('<font') === -1;
   });
-  if (buffList.length > 0) {td.append(layout.doBuffLinks(buffList));}
+  if (buffList.length > 0) {td.append(doBuffLinks(buffList));}
   td.append('<span class="fshXSmall">Members: ' +
     buffList.length + '</span>');
   listArr = listArr.map(function(name) {
@@ -204,14 +210,14 @@ function doGroupRow(row, membrlist) { // jQuery
 
 function doGroupPaint(m) { // jQuery
 
-  debug.time('groups.doGroupPaint');
+  time('groups.doGroupPaint');
 
   $('#pCC table table table tr').has('.group-action-container')
     .each(function(i, e) {
       doGroupRow(e, m);
     });
 
-  debug.timeEnd('groups.doGroupPaint');
+  timeEnd('groups.doGroupPaint');
 
 }
 

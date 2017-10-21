@@ -5,8 +5,8 @@ import {
   createLi,
   createUl
 } from '../common/cElement';
+import {createDocument, fallback, getValue, setValue} from './system';
 import {lastActivityRE, nowSecs, places} from './dataObj';
-import * as system from './system';
 
 var dotList;
 var dotCount;
@@ -54,7 +54,7 @@ export function doBuffLinks(members) {
   // quick buff only supports 16
   var shortList = members.reduce(function(prev, curr, i) {
     var slot = Math.floor(i / 16);
-    prev[slot] = system.fallback(prev[slot], []);
+    prev[slot] = fallback(prev[slot], []);
     prev[slot].push(curr);
     return prev;
   }, []).reduce(function(prev, curr, i) {
@@ -76,7 +76,7 @@ export function doBuffLinks(members) {
 }
 
 export function infoBox(documentText) {
-  var doc = system.createDocument(documentText);
+  var doc = createDocument(documentText);
   var result;
   var infoMsg = doc.getElementById('info-msg');
   if (infoMsg) {
@@ -90,21 +90,10 @@ export function infoBox(documentText) {
   return result;
 }
 
-export function guildId() {
-  var _guildId;
-  var nodeList = document.body.getElementsByTagName('script');
-  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
-    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-    if (match) {_guildId = parseInt(match[1], 10);}
-  });
-  system.setValue('guildId', _guildId);
-  return _guildId;
-}
-
 export function playerId() {
   var thePlayerId = parseInt(document.getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
-  system.setValue('playerID', thePlayerId);
+  setValue('playerID', thePlayerId);
   return thePlayerId;
 }
 
@@ -200,14 +189,14 @@ function batchDots() {
 }
 
 export function colouredDots() {
-  if (!system.getValue('enhanceOnlineDots')) {return;}
+  if (!getValue('enhanceOnlineDots')) {return;}
   dotList = document.querySelectorAll(
     '#pCC a[data-tipped*="Last Activity"]');
   dotCount = 0;
   add(3, batchDots);
 }
 
-export function confirm(title, msgText, fn) { // jQuery
+export function jConfirm(title, msgText, fn) { // jQuery
   var fshMsg = document.getElementById('fshmsg');
   if (!fshMsg) {
     fshMsg = createDiv({id: 'fshmsg'});

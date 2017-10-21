@@ -10,27 +10,40 @@ import profileComponents from './components';
 import profileParseAllyEnemy from './profileAllyEnemy';
 import profileRenderBio from './bio/bio';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {
+  colouredDots,
+  pCC,
+  playerId,
+  playerName,
+  quickBuffHref
+} from '../support/layout';
+import {
+  fallback,
+  getUrlParameter,
+  getValue,
+  imageServer,
+  intValue,
+  setValue
+} from '../support/system';
 
 var guildId;
 var currentGuildRelationship;
 var guildMessages = {
   self: {
     color: 'fshGreen',
-    message: system.getValue('guildSelfMessage')
+    message: getValue('guildSelfMessage')
   },
   friendly: {
     color: 'fshOliveDrab',
-    message: system.getValue('guildFrndMessage')
+    message: getValue('guildFrndMessage')
   },
   old: {
     color: 'fshDarkCyan',
-    message: system.getValue('guildPastMessage')
+    message: getValue('guildPastMessage')
   },
   enemy: {
     color: 'fshRed',
-    message: system.getValue('guildEnmyMessage')
+    message: getValue('guildEnmyMessage')
   }
 };
 
@@ -81,11 +94,11 @@ function storeVL() {
   // store the VL of the player
   var virtualLevel = parseInt(
     document.getElementById('stat-vl').textContent, 10);
-  if (system.intValue(document.getElementsByClassName('stat-level')[0]
+  if (intValue(document.getElementsByClassName('stat-level')[0]
     .nextElementSibling.textContent) === virtualLevel) {
-    system.setValue('characterVirtualLevel', ''); // ?
+    setValue('characterVirtualLevel', ''); // ?
   } else {
-    system.setValue('characterVirtualLevel', virtualLevel);
+    setValue('characterVirtualLevel', virtualLevel);
   }
 }
 
@@ -98,10 +111,10 @@ function guildAry(val) {
 
 function guildRelationship(_txt) {
   var scenario = [
-    {test: guildAry(system.getValue('guildSelf')), type: 'self'},
-    {test: guildAry(system.getValue('guildFrnd')), type: 'friendly'},
-    {test: guildAry(system.getValue('guildPast')), type: 'old'},
-    {test: guildAry(system.getValue('guildEnmy')), type: 'enemy'}
+    {test: guildAry(getValue('guildSelf')), type: 'self'},
+    {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
+    {test: guildAry(getValue('guildPast')), type: 'old'},
+    {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
   ];
   var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
   for (var i = 0; i < scenario.length; i += 1) {
@@ -130,45 +143,45 @@ function profileInjectGuildRel() {
 function profileInjectQuickButton(avyImg, playerid, playername) {
   var newhtml = '<div align="center">';
   newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
-    layout.quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
-    '" style="background-image: url(\'' + system.imageServer +
+    quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
+    '" style="background-image: url(\'' + imageServer +
     '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
-  if (!system.getValue('enableMaxGroupSizeToJoin')) {
+  if (!getValue('enableMaxGroupSizeToJoin')) {
     newhtml += '<a class="quickButton buttonJoinAll tip-static" ' +
       'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
       'data-tipped="Join All Groups" style="background-image: url(\'' +
-      system.imageServer +
+      imageServer +
       '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
   } else {
-    var maxGroupSizeToJoin = system.getValue('maxGroupSizeToJoin');
+    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
     newhtml += '<a class="quickButton buttonJoinUnder tip-static" ' +
       'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
       'joinallgroupsundersize" data-tipped="Join All Groups < ' +
       maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
-      system.imageServer +
+      imageServer +
       '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
   }
   newhtml += '<a class="quickButton tip-static" ' +
     'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid +
     '" data-tipped="Go to ' + playername +
     '\'s auctions" style="background-image: url(\'' +
-    system.imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
+    imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
   newhtml += '<a class="quickButton tip-static" ' +
     'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
     playername + '" data-tipped="Create Secure Trade to ' + playername +
-    '" style="background-image: url(\'' + system.imageServer +
+    '" style="background-image: url(\'' + imageServer +
     '/temple/2.gif\');"></a>&nbsp;&nbsp;';
   newhtml += '<a class="quickButton tip-static" ' +
     'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
     playername + '" data-tipped="Recall items from ' + playername +
-    '" style="background-image: url(\'' + system.imageServer +
+    '" style="background-image: url(\'' + imageServer +
     '/temple/3.gif\');"></a>&nbsp;&nbsp;';
   if (currentGuildRelationship === 'self' &&
-      system.getValue('showAdmin')) {
+      getValue('showAdmin')) {
     newhtml += '<a class="quickButton buttonGuildRank tip-static" href="' +
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
-      '" style="background-image: url(\'' + system.imageServer +
+      '" style="background-image: url(\'' + imageServer +
       '/guilds/' + guildId + '_mini.jpg\');"></a>&nbsp;&nbsp;';
   }
   newhtml += '</div>';
@@ -245,15 +258,15 @@ export default function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
-  var playername = layout.pCC
+  var playername = pCC
     .getElementsByTagName('h1')[0].textContent;
-  var self = playername === layout.playerName();
+  var self = playername === playerName();
   ifSelf(self);
   // Must be before profileInjectQuickButton
   profileInjectGuildRel();
   // It sets up guildId and currentGuildRelationship
-  var playerid = system.fallback(system.getUrlParameter('player_id'),
-    layout.playerId());
+  var playerid = fallback(getUrlParameter('player_id'),
+    playerId());
   profileInjectQuickButton(avyImg, playerid, playername);
 
   //* ************* yuuzhan having fun
@@ -268,5 +281,5 @@ export default function injectProfile() { // Legacy
   //#endif
   profileRenderBio(self);
   addStatTotalToMouseover();
-  add(3, layout.colouredDots);
+  add(3, colouredDots);
 }

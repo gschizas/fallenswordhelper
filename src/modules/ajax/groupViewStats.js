@@ -1,4 +1,4 @@
-import * as system from '../support/system';
+import {intValue} from '../support/system';
 
 export default function groupViewStats(doc) {
   var attackElement = doc.getElementById('stat-attack');
@@ -7,15 +7,15 @@ export default function groupViewStats(doc) {
   var damageElement = doc.getElementById('stat-damage');
   var hpElement = doc.getElementById('stat-hp');
   return {
-    attack: system.intValue(attackElement.textContent),
+    attack: intValue(attackElement.textContent),
     attackElement: attackElement,
-    defense: system.intValue(defenseElement.textContent),
+    defense: intValue(defenseElement.textContent),
     defenseElement: defenseElement,
-    armor: system.intValue(armorElement.textContent),
+    armor: intValue(armorElement.textContent),
     armorElement: armorElement,
-    damage: system.intValue(damageElement.textContent),
+    damage: intValue(damageElement.textContent),
     damageElement: damageElement,
-    hp: system.intValue(hpElement.textContent),
+    hp: intValue(hpElement.textContent),
     hpElement: hpElement
   };
 }

@@ -1,5 +1,5 @@
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {pCC} from '../support/layout';
+import {getValue, parseDateAsTimestamp, setValue} from '../support/system';
 
 function containsNewsHead(el) {
   return el.classList.contains('news_head') ||
@@ -46,13 +46,13 @@ function fixCollapse() {
 }
 
 function lookForPvPLadder() {
-  var lastLadderReset = system.getValue('lastLadderReset');
-  var rumours = layout.pCC.getElementsByClassName('news_head_tavern');
+  var lastLadderReset = getValue('lastLadderReset');
+  var rumours = pCC.getElementsByClassName('news_head_tavern');
   Array.prototype.forEach.call(rumours, function(head) {
     if (head.children[1].textContent === 'PvP Ladder') {
-      var logTime = system.parseDateAsTimestamp(head.children[2].textContent);
+      var logTime = parseDateAsTimestamp(head.children[2].textContent);
       if (logTime > lastLadderReset) {
-        system.setValue('lastLadderReset', logTime);
+        setValue('lastLadderReset', logTime);
         lastLadderReset = logTime;
       }
     }

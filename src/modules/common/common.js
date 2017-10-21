@@ -1,9 +1,9 @@
 import reduceBuffArray from './reduceBuffArray';
-import * as system from '../support/system';
+import {createDocument, fallback, intValue} from '../support/system';
 
 function getStat(stat, doc) { // jQuery
   // 'Hidden' returns NaN
-  return system.intValue(
+  return intValue(
     $(stat, doc)
       .contents()
       .filter(function(i, e) {
@@ -17,7 +17,7 @@ function getBuffLevel(doc, buff) { // jQuery
     .data('tipped');
   // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
   var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
-  if (test) {return system.intValue(test[1]);}
+  if (test) {return intValue(test[1]);}
   return 0;
 }
 
@@ -27,7 +27,7 @@ function getBonus(stat, doc) { // jQuery
   if (children.length === 0) {
     children = target.next();
   }
-  return system.intValue(children.text().slice(2, -1));
+  return intValue(children.text().slice(2, -1));
 }
 
 function cloakGuess(bonus, level) {
@@ -47,7 +47,7 @@ function updateForCloak(obj) {
 }
 
 export function playerDataString(responseText) {
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   var obj = {
     levelValue: getStat('#stat-vl', doc),
     attackValue: getStat('#stat-attack', doc),
@@ -96,7 +96,7 @@ export function playerDataString(responseText) {
 }
 
 function getBuffLvl(buffs, buff) {
-  return system.fallback(buffs[buff], 0);
+  return fallback(buffs[buff], 0);
 }
 
 export function playerDataObject(json) {
@@ -113,7 +113,7 @@ export function playerDataObject(json) {
     damageBonus: json.bonus_damage,
     hpValue: json.hp,
     hpBonus: json.bonus_hp,
-    killStreakValue: system.intValue(json.killstreak),
+    killStreakValue: intValue(json.killstreak),
     // get buffs here later ... DD, CA, DC, Constitution, etc
     counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
     doublerLevel: getBuffLvl(buffs, 'Doubler'),

@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import * as layout from '../support/layout';
+import {pCC} from '../support/layout';
 
 var insertHere;
 
@@ -11,7 +11,7 @@ function showHideLabel(pref) {
 export default function doToggleButtons(showExtraLinks, showQuickDropLinks) {
   // Option toggle buttons for both screens
   if (!insertHere) {
-    insertHere = layout.pCC.getElementsByTagName('form')[0]
+    insertHere = pCC.getElementsByTagName('form')[0]
       .previousElementSibling.firstElementChild;
   }
   var inject = '[<span id="fshShowExtraLinks" class="sendLink">' +

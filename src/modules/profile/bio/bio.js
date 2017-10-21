@@ -1,6 +1,6 @@
 import bioEvtHdl from './bioEvtHdl';
+import {getValue} from '../../support/system';
 import renderBio from './render';
-import * as system from '../../support/system';
 
 function expandBio() {
   var bioExpander = document.getElementById('fshBioExpander');
@@ -55,8 +55,8 @@ function findStartPosition(bioContents, _maxRowsToShow) {
 
 function compressBio(bioCell) {
   var bioContents = bioCell.innerHTML;
-  var maxCharactersToShow = system.getValue('maxCompressedCharacters');
-  var maxRowsToShow = system.getValue('maxCompressedLines');
+  var maxCharactersToShow = getValue('maxCompressedCharacters');
+  var maxRowsToShow = getValue('maxCompressedLines');
   var numberOfLines = bioContents.substr(0, maxCharactersToShow)
     .split(/<br>\n/).length - 1;
   if (bioContents.length <= maxCharactersToShow &&
@@ -76,8 +76,8 @@ function doRender(bioCell) {
 }
 
 function testForRender(self, bioCell) {
-  if (self && system.getValue('renderSelfBio') ||
-      !self && system.getValue('renderOtherBios')) {
+  if (self && getValue('renderSelfBio') ||
+      !self && getValue('renderOtherBios')) {
     doRender(bioCell);
   }
 }
@@ -86,6 +86,6 @@ export default function profileRenderBio(self) {
   var bioCell = document.getElementById('profile-bio');
   if (!bioCell) {return;}
   testForRender(self, bioCell);
-  if (system.getValue('enableBioCompressor')) {compressBio(bioCell);}
+  if (getValue('enableBioCompressor')) {compressBio(bioCell);}
   bioCell.addEventListener('click', bioEvtHdl);
 }

@@ -1,15 +1,20 @@
 import assets from './assets';
+import {doBuffLinks} from '../../support/layout';
 import getGroupStats from '../../ajax/getGroupStats';
 import getMembrList from '../../ajax/getMembrList';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';
+import {playerDataObject} from '../../common/common';
 import reduceBuffArray from '../../common/reduceBuffArray';
 import retryAjax from '../../ajax/retryAjax';
+import {
+  addCommas,
+  createDocument,
+  fallback,
+  getValue
+} from '../../support/system';
 import {createButton, createDiv} from '../../common/cElement';
 import {defenderMultiplier, nowSecs} from '../../support/dataObj';
-import * as common from '../../common/common';
-import * as layout from '../../support/layout';
-import * as system from '../../support/system';
 
 var relicData;
 var containerDiv;
@@ -84,11 +89,11 @@ function ajaxFailure(jqXHR) {
 }
 
 function updateDefValues() {
-  attackElement.textContent = system.addCommas(defRawAttack);
-  defenseElement.textContent = system.addCommas(defRawDefense);
-  armorElement.textContent = system.addCommas(defRawArmor);
-  damageElement.textContent = system.addCommas(defRawDamage);
-  hpElement.textContent = system.addCommas(defRawHp);
+  attackElement.textContent = addCommas(defRawAttack);
+  defenseElement.textContent = addCommas(defRawDefense);
+  armorElement.textContent = addCommas(defRawArmor);
+  damageElement.textContent = addCommas(defRawDamage);
+  hpElement.textContent = addCommas(defRawHp);
   defCloakedElement.textContent = defCloaked.toString();
   defProcessed += 1;
   defProcessedElement.textContent = defProcessed.toString();
@@ -105,50 +110,50 @@ function deductMercStats() {
 function calculateGroup() {
   processingStatus.textContent = 'Processing attacking group stats ... ';
   if (mercStats) {deductMercStats();}
-  groupAttackElement.textContent = system.addCommas(groupStats.attack);
-  groupDefenseElement.textContent = system.addCommas(groupStats.defense);
-  groupArmorElement.textContent = system.addCommas(groupStats.armor);
-  groupDamageElement.textContent = system.addCommas(groupStats.damage);
-  groupHPElement.textContent = system.addCommas(groupStats.hp);
+  groupAttackElement.textContent = addCommas(groupStats.attack);
+  groupDefenseElement.textContent = addCommas(groupStats.defense);
+  groupArmorElement.textContent = addCommas(groupStats.armor);
+  groupDamageElement.textContent = addCommas(groupStats.damage);
+  groupHPElement.textContent = addCommas(groupStats.hp);
 
   var buffs = reduceBuffArray(player.buffs);
 
   var nightmareVisageEffect = Math.ceil(groupStats.attack *
-    (system.fallback(buffs['Nightmare Visage'], 0) * 0.0025));
+    (fallback(buffs['Nightmare Visage'], 0) * 0.0025));
   groupStats.attack -= nightmareVisageEffect;
 
   var storedFlinchEffectValue = Math.ceil(groupStats.attack *
     leadDefender.flinchLevel * 0.001);
-  groupAttackBuffedElement.textContent = system.addCommas(groupStats.attack -
+  groupAttackBuffedElement.textContent = addCommas(groupStats.attack -
     storedFlinchEffectValue);
 
   var defenseWithConstitution = Math.ceil(groupStats.defense *
-    (1 + system.fallback(buffs.Constitution, 0) * 0.001));
+    (1 + fallback(buffs.Constitution, 0) * 0.001));
   var totalDefense = defenseWithConstitution + nightmareVisageEffect;
-  groupDefenseBuffedElement.textContent = system.addCommas(totalDefense);
+  groupDefenseBuffedElement.textContent = addCommas(totalDefense);
 
-  groupArmorBuffedElement.textContent = system.addCommas(groupStats.armor +
-    Math.floor(groupStats.armor * system.fallback(buffs.Sanctuary, 0) * 0.001));
+  groupArmorBuffedElement.textContent = addCommas(groupStats.armor +
+    Math.floor(groupStats.armor * fallback(buffs.Sanctuary, 0) * 0.001));
 
   var fortitudeBonusHP = Math.ceil(defenseWithConstitution *
-    system.fallback(buffs.Fortitude, 0) * 0.001);
+    fallback(buffs.Fortitude, 0) * 0.001);
   var chiStrikeBonusDamage = Math.ceil((groupStats.hp + fortitudeBonusHP) *
-    system.fallback(buffs['Chi Strike'], 0) * 0.001);
+    fallback(buffs['Chi Strike'], 0) * 0.001);
   var storedTerrorizeEffectValue = Math.ceil(
     groupStats.damage * leadDefender.terrorizeLevel * 0.001);
-  groupDamageBuffedElement.textContent = system.addCommas(groupStats.damage +
+  groupDamageBuffedElement.textContent = addCommas(groupStats.damage +
     chiStrikeBonusDamage - storedTerrorizeEffectValue);
-  groupHPBuffedElement.textContent = system.addCommas(groupStats.hp +
+  groupHPBuffedElement.textContent = addCommas(groupStats.hp +
     fortitudeBonusHP);
 
   // Effect on defending group from Flinch on attacking group.
   var flinchEffectValue = Math.ceil(defBuffedAttack *
-    system.fallback(buffs.Flinch, 0) * 0.001);
-  defenseBuffedElement.textContent = system.addCommas(defBuffedAttack -
+    fallback(buffs.Flinch, 0) * 0.001);
+  defenseBuffedElement.textContent = addCommas(defBuffedAttack -
     flinchEffectValue);
   var terrorizeEffectValue = Math.ceil(defBuffedDamage *
-    system.fallback(buffs.Terrorize, 0) * 0.001);
-  damageBuffedElement.textContent = system.addCommas(defBuffedDamage -
+    fallback(buffs.Terrorize, 0) * 0.001);
+  damageBuffedElement.textContent = addCommas(defBuffedDamage -
     terrorizeEffectValue);
 
   processingStatus.textContent = 'Done.';
@@ -179,17 +184,17 @@ function doCalculations() {
   updateDefValues();
 
   defBuffedAttack = defRawAttack - nightmareVisageEffect;
-  attackBuffedElement.textContent = system.addCommas(defBuffedAttack);
-  defenseBuffedElement.textContent = system.addCommas(defBuffedDefense);
-  dc225Element.textContent = system.addCommas(Math.ceil(
+  attackBuffedElement.textContent = addCommas(defBuffedAttack);
+  defenseBuffedElement.textContent = addCommas(defBuffedDefense);
+  dc225Element.textContent = addCommas(Math.ceil(
     defBuffedDefense * 0.55));
-  dc175Element.textContent = system.addCommas(Math.ceil(
+  dc175Element.textContent = addCommas(Math.ceil(
     defBuffedDefense * 0.65));
-  armorBuffedElement.textContent = system.addCommas(defRawArmor +
+  armorBuffedElement.textContent = addCommas(defRawArmor +
     Math.floor(defRawArmor * leadDefender.sanctuaryLevel * 0.001));
   defBuffedDamage = defRawDamage + chiStrikeBonusDamage;
-  damageBuffedElement.textContent = system.addCommas(defBuffedDamage);
-  hpBuffedElement.textContent = system.addCommas(defBuffedHp);
+  damageBuffedElement.textContent = addCommas(defBuffedDamage);
+  hpBuffedElement.textContent = addCommas(defBuffedHp);
 
   if (leadDefender.cloakLevel !== 0) {
     document.getElementById('LDCloaked').textContent = 'Yes';
@@ -255,7 +260,7 @@ function setAtkVars() {
 
 function prepareDivs() {
   fetchStatsBtn.classList.add('fshHide');
-  hideRelicOffline = system.getValue('hideRelicOffline');
+  hideRelicOffline = getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(false).done(missingMembers);
   }
@@ -292,7 +297,7 @@ function calcRelicMultiplier(rels) {
 }
 
 function parseGuild(html) {
-  var doc = system.createDocument(html);
+  var doc = createDocument(html);
   var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
   relicCount = nodeList.length;
   document.getElementById('relicCount').textContent = relicCount.toString();
@@ -302,7 +307,7 @@ function parseGuild(html) {
 }
 
 function parseDefender(json) {
-  var defender = common.playerDataObject(json);
+  var defender = playerDataObject(json);
   defRawAttack += Math.round(defender.attackValue * defenderMultiplier);
   defRawDefense += Math.round(defender.defenseValue *
     defenderMultiplier);
@@ -314,7 +319,7 @@ function parseDefender(json) {
 }
 
 function storeLeadDefender(json) {
-  leadDefender = common.playerDataObject(json);
+  leadDefender = playerDataObject(json);
 }
 
 function getGroups() {
@@ -336,7 +341,7 @@ function storeMercStats(obj) {
 }
 
 function parseGroups(html) {
-  var doc = system.createDocument(html);
+  var doc = createDocument(html);
   var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
   var viewStats = disband.previousElementSibling.href;
   var prm = [getGroupStats(viewStats).done(storeGroupStats)];
@@ -387,7 +392,7 @@ function setup() {
   leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
   containerDiv.appendChild(leftDiv);
   if (relicData.is_owner) {
-    leftDiv.appendChild(layout.doBuffLinks(myDefenders));
+    leftDiv.appendChild(doBuffLinks(myDefenders));
   }
   fetchStatsBtn = createButton({
     className: 'custombutton',

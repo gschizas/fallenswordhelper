@@ -1,6 +1,6 @@
 import retryAjax from '../ajax/retryAjax';
+import {addCommas, fallback, rnd, testQuant} from '../support/system';
 import {createButton, createDiv, createInput} from '../common/cElement';
-import * as system from '../support/system';
 
 var shoppingData;
 var dialog;
@@ -19,7 +19,7 @@ function quickBuy() {
       d: 0,
       id: shoppingData.id,
       item_id: shoppingData.itemId,
-      _rnd: system.rnd()
+      _rnd: rnd()
     },
     dataType: 'json'
   });
@@ -38,7 +38,7 @@ function quickDone(data) {
     }
   } else {
     msg = 'You purchased ' + data.response.data.name +
-      ' for ' + system.addCommas(data.response.data.cost) + ' gold.';
+      ' for ' + addCommas(data.response.data.cost) + ' gold.';
   }
   resultDiv.insertAdjacentHTML('beforeend', msg + '<br>');
 }
@@ -52,7 +52,7 @@ function normalBuy() {
 }
 
 function qBuy() {
-  var theValue = system.testQuant(numInput.value);
+  var theValue = testQuant(numInput.value);
   if (!theValue) {return;}
   var prm = [];
   for (var i = 1; i < theValue; i += 1) {
@@ -85,10 +85,10 @@ function injectQuickBuy() {
 
 function worldDialogShop(e, data) {
   shoppingData = data;
-  dialog = system.fallback(dialog,
+  dialog = fallback(dialog,
     document.getElementById('shopDialogConfirm'));
   if (!dialog) {return;}
-  jDialog = system.fallback(jDialog, $(dialog).data('worldDialogShopConfirm'));
+  jDialog = fallback(jDialog, $(dialog).data('worldDialogShopConfirm'));
   if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}
 }
 

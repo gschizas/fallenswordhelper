@@ -2,7 +2,12 @@ import add from './support/task';
 import calf from './support/calf';
 import {now} from './support/dataObj';
 import retryAjax from './ajax/retryAjax';
-import * as system from './support/system';
+import {
+  createDocument,
+  getValue,
+  imageServer,
+  setValue
+} from './support/system';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +
@@ -12,16 +17,16 @@ var godsNotification =
   '<span id="helperPrayToGods" class="fastPray">' +
   '<table><tbody><tr><td>' +
   '<span class="tip-static" data-tipped="Pray to Sahria" ' +
-  'style="background-image: url(\'' + system.imageServer +
+  'style="background-image: url(\'' + imageServer +
   '/temple/0.gif\');" praytype="0"></span></td><td>' +
   '<span class="tip-static" data-tipped="Pray to Osverin" ' +
-  'style="background-image: url(\'' + system.imageServer +
+  'style="background-image: url(\'' + imageServer +
   '/temple/1.gif\');" praytype="1"></span></td></tr><tr><td>' +
   '<span class="tip-static" data-tipped="Pray to Gurgriss" ' +
-  'style="background-image: url(\'' + system.imageServer +
+  'style="background-image: url(\'' + imageServer +
   '/temple/2.gif\');" praytype="2"></span></td><td>' +
   '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
-  'style="background-image: url(\'' + system.imageServer +
+  'style="background-image: url(\'' + imageServer +
   '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
   '<a href="index.php?cmd=temple">' +
   '<p class="notification-content">Bow down to the gods</p>' +
@@ -33,8 +38,8 @@ var goldUpgradeMsg =
 
 function havePrayed() {
   document.getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
-  system.setValue('needToPray', false);
-  system.setValue('lastTempleCheck', new Date()
+  setValue('needToPray', false);
+  setValue('lastTempleCheck', new Date()
     .setUTCHours(23, 59, 59, 999) + 1); // Midnight
 }
 
@@ -65,12 +70,12 @@ function displayUpgradeMsg() {
 function findNewGroup(el) {
   if (el.textContent.indexOf('New attack group created.') === -1) {return;}
   var groupJoinHTML = '';
-  if (!system.getValue('enableMaxGroupSizeToJoin')) {
+  if (!getValue('enableMaxGroupSizeToJoin')) {
     groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
       'subcmd2=joinall"><span class="notification-icon"></span>' +
       '<p class="notification-content">Join all attack groups.</p></a>';
   } else {
-    var maxGroupSizeToJoin = system.getValue('maxGroupSizeToJoin');
+    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
     groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
       'subcmd2=joinallgroupsundersize"><span class="notification-icon">' +
       '</span><p class="notification-content">Join all attack groups ' +
@@ -84,7 +89,7 @@ function templeAlertEnabled(responseText) {
   var checkNeedToPray;
   var doc;
   if (calf.cmd !== 'temple') {
-    doc = system.createDocument(responseText);
+    doc = createDocument(responseText);
   } else {
     doc = document;
   }
@@ -94,8 +99,8 @@ function templeAlertEnabled(responseText) {
     displayDisconnectedFromGodsMessage();
     needToPray = true;
   }
-  system.setValue('needToPray', needToPray);
-  system.setValue('lastTempleCheck', new Date()
+  setValue('needToPray', needToPray);
+  setValue('lastTempleCheck', new Date()
     .setUTCHours(23, 59, 59, 999) + 1); // midnight
 }
 
@@ -108,8 +113,8 @@ function checkLastUpdate(templeAlertLastUpdate) {
 }
 
 function doWeNeedToParse() {
-  if (checkLastUpdate(system.getValue('lastTempleCheck'))) {return true;}
-  if (system.getValue('needToPray')) {
+  if (checkLastUpdate(getValue('lastTempleCheck'))) {return true;}
+  if (getValue('needToPray')) {
     displayDisconnectedFromGodsMessage();
   }
   return false;
@@ -125,7 +130,7 @@ export function injectTempleAlert() { // jQuery
 
 function findDoc(data) {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
-    return system.createDocument(data);
+    return createDocument(data);
   }
   document.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
   return document;
@@ -139,21 +144,21 @@ export function parseGoldUpgrades(data) {
   var checkDoneUpgrade = limit.textContent.split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
     displayUpgradeMsg();
-    system.setValue('needToDoUpgrade', true);
+    setValue('needToDoUpgrade', true);
   } else {
-    system.setValue('needToDoUpgrade', false);
-    system.setValue('lastUpgradeCheck',
+    setValue('needToDoUpgrade', false);
+    setValue('lastUpgradeCheck',
       Date.parse(limit.nextElementSibling.textContent + ' GMT'));
   }
 }
 
 function notUpgradesPage() {
-  var needToDoUpgrade = system.getValue('needToDoUpgrade');
+  var needToDoUpgrade = getValue('needToDoUpgrade');
   if (needToDoUpgrade) {
     displayUpgradeMsg();
     return;
   }
-  var lastUpgradeCheck = system.getValue('lastUpgradeCheck');
+  var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
   retryAjax('index.php?cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);

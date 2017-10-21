@@ -1,8 +1,8 @@
 import add from '../support/task';
-import * as system from '../support/system';
+import {getValue} from '../support/system';
 
 function doMsgSound() { // jQuery
-  var soundLocation = system.getValue('defaultMessageSound');
+  var soundLocation = getValue('defaultMessageSound');
   $('a:contains("New log messages"):first').each(function(i, e) {
     $(e).after('<audio src="' + soundLocation +
     '" autoplay=true />');
@@ -14,7 +14,7 @@ function doMsgSound() { // jQuery
 }
 
 export default function isMessageSound() {
-  if (system.getValue('playNewMessageSound')) {
+  if (getValue('playNewMessageSound')) {
     add(3, doMsgSound);
   }
 }

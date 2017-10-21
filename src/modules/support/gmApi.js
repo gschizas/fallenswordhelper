@@ -1,4 +1,4 @@
-import * as debug from './debug';
+import {log} from './debug';
 
 // GM_ApiBrowserCheck
 // @author        GIJoe
@@ -87,7 +87,7 @@ if (needApiUpgrade) {
     if (result) {
       ws = typeof window.localStorage;
     } else {
-      debug.log('There is a problem with your local storage. ' +
+      log('There is a problem with your local storage. ' +
         'FSH cannot persist your settings.');
       ws = null;
     }

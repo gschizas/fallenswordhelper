@@ -1,7 +1,7 @@
 import getForage from '../ajax/getForage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
-import * as system from '../support/system';
+import {fallback, getValue, intValue} from '../support/system';
 
 var showCreatureInfo;
 var showMonsterLog;
@@ -19,7 +19,7 @@ var statArmor;
 var statHp;
 
 function updateMinMax(_logStat, creatureStat) {
-  var logStat = system.fallback(_logStat, {});
+  var logStat = fallback(_logStat, {});
   if (logStat.min) {
     logStat.min = Math.min(logStat.min, creatureStat);
   } else {
@@ -35,15 +35,15 @@ function updateMinMax(_logStat, creatureStat) {
 
 function processMonsterLog() {
   if (!showMonsterLog) {return;}
-  monsterLog[creature.name] = system.fallback(monsterLog[creature.name], {});
+  monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
   var logCreature = monsterLog[creature.name];
-  logCreature.creature_class = system.fallback(logCreature.creature_class,
+  logCreature.creature_class = fallback(logCreature.creature_class,
     creature.creature_class);
-  logCreature.image_id = system.fallback(logCreature.image_id,
+  logCreature.image_id = fallback(logCreature.image_id,
     creature.image_id);
-  logCreature.level = system.fallback(logCreature.level,
+  logCreature.level = fallback(logCreature.level,
     Number(creature.level));
-  logCreature.type = system.fallback(logCreature.type, creature.type);
+  logCreature.type = fallback(logCreature.type, creature.type);
   logCreature.armor = updateMinMax(logCreature.armor,
     Number(creature.armor));
   logCreature.attack = updateMinMax(logCreature.attack,
@@ -55,7 +55,7 @@ function processMonsterLog() {
   logCreature.hp = updateMinMax(logCreature.hp,
     Number(creature.hp));
   if (creature.enhancements && creature.enhancements.length > 0) {
-    logCreature.enhancements = system.fallback(logCreature.enhancements, {});
+    logCreature.enhancements = fallback(logCreature.enhancements, {});
     var logEnh = logCreature.enhancements;
     creature.enhancements.forEach(function(e) {
       logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
@@ -160,7 +160,7 @@ function getStatText(statTooltip, statClassName) {
 }
 
 function getMyStats() {
-  statLevel = system.intValue(getStatText(document
+  statLevel = intValue(getStatText(document
     .getElementById('statbar-level-tooltip-general'), 'stat-level'));
   var statTooltip = document.getElementById('statbar-character-tooltip-stats');
   statDefense = getStatText(statTooltip, 'stat-defense');
@@ -180,14 +180,14 @@ var genVar = [0, 1.1, 1.053, 1.1053];
 var hpVar = [0, 1.053, 1, 1];
 
 function getBias() {
-  var combatEvaluatorBias = system.getValue('combatEvaluatorBias');
+  var combatEvaluatorBias = getValue('combatEvaluatorBias');
   generalVariable = genVar[combatEvaluatorBias];
   hpVariable = hpVar[combatEvaluatorBias];
 }
 
 export default function startMonsterLog() { // jQuery
-  showCreatureInfo = system.getValue('showCreatureInfo');
-  showMonsterLog = system.getValue('showMonsterLog');
+  showCreatureInfo = getValue('showCreatureInfo');
+  showMonsterLog = getValue('showMonsterLog');
   if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo) {getBias();}
   $.subscribe('after-update.actionlist', initMonsterLog);

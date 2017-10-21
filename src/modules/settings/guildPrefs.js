@@ -1,15 +1,15 @@
-import * as settingsPage from './settingsPage';
-import * as system from '../support/system';
+import {getValue, isChecked} from '../support/system';
+import {helpLink, simpleCheckbox} from './settingsPage';
 
 function injectSettingsGuildData(guildType) {
   return '<input name="guild' + guildType + '" size="60" value="' +
-    system.getValue('guild' + guildType) + '">' +
+    getValue('guild' + guildType) + '">' +
     '<span class="fshPoint" ' +
     'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
     guildType + 'Message"> &#x00bb;</span>' +
     '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
     '<input name="guild' + guildType + 'Message" size="60" value="' +
-    system.getValue('guild' + guildType + 'Message') + '">' +
+    getValue('guild' + guildType + 'Message') + '">' +
     '</div>';
 }
 
@@ -29,18 +29,18 @@ export default function guildPrefs() {
       injectSettingsGuildData('Enmy') + '</td></tr>' +
 
     '<tr><td class="fshRight">Highlight Valid PvP Targets' +
-      settingsPage.helpLink('Highlight Valid PvP Targets',
+      helpLink('Highlight Valid PvP Targets',
         'Enabling this option will highlight targets in OTHER guilds that ' +
         'are within your level range to attack for PvP or GvG.') +
       ':</td><td>PvP: <input name="highlightPlayersNearMyLvl" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(system.getValue('highlightPlayersNearMyLvl')) +
+      isChecked(getValue('highlightPlayersNearMyLvl')) +
       '> GvG: <input name="highlightGvGPlayersNearMyLvl" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(system.getValue('highlightGvGPlayersNearMyLvl')) +
+      isChecked(getValue('highlightGvGPlayersNearMyLvl')) +
       '></td></tr>' +
 
-    settingsPage.simpleCheckbox('showAdmin') +
-    settingsPage.simpleCheckbox('ajaxifyRankControls') +
-    settingsPage.simpleCheckbox('detailedConflictInfo');
+    simpleCheckbox('showAdmin') +
+    simpleCheckbox('ajaxifyRankControls') +
+    simpleCheckbox('detailedConflictInfo');
 }

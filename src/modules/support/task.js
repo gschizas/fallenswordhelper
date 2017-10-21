@@ -1,12 +1,12 @@
-import * as debug from './debug';
-import * as sch from './sch';
-import * as system from './system';
+import {fallback} from './system';
+import {log} from './debug';
+import {getLength, pop, push} from './sch';
 
 var paused = true;
 var message = 'fshMessage';
 
 function taskRunner() {
-  if (sch.getLength() === 0) {
+  if (getLength() === 0) {
     paused = true;
   } else {
     paused = false;
@@ -26,18 +26,18 @@ export default function add(priority, fn, args, scope) {
   devLog(args);
   //#endif
   if (typeof fn === 'function') {
-    var _scope = system.fallback(scope, window);
-    var _args = system.fallback(args, []);
-    sch.push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
+    var _scope = fallback(scope, window);
+    var _args = fallback(args, []);
+    push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
     if (paused) {taskRunner();}
   }
 }
 
 function asyncTask() {
   try {
-    sch.pop()();
+    pop()();
   } catch (error) {
-    debug.log('Unhandled Exception:', error);
+    log('Unhandled Exception:', error);
     //#if _DEV  //  Unhandled Exception
     // eslint-disable-next-line no-console
     console.log('Unhandled Exception:', error);

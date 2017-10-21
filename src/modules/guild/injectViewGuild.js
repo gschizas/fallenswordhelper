@@ -1,13 +1,13 @@
 import add from '../support/task';
+import {colouredDots} from '../support/layout';
 import {lastActivityRE} from '../support/dataObj';
-import * as guildUtils from './guildUtils';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {getValue, intValue} from '../support/system';
+import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 function calcLvlToTest() {
-  var levelToTest = system.intValue(document.getElementsByClassName(
+  var levelToTest = intValue(document.getElementsByClassName(
     'stat-level')[0].nextElementSibling.textContent);
-  var characterVirtualLevel = system.getValue('characterVirtualLevel');
+  var characterVirtualLevel = getValue('characterVirtualLevel');
   if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
   return levelToTest;
 }
@@ -28,13 +28,13 @@ function calcGvgRange(levelToTest) {
 }
 
 export default function injectViewGuild() {
-  add(3, layout.colouredDots);
-  guildUtils.removeGuildAvyImgBorder();
-  guildUtils.guildXPLock();
+  add(3, colouredDots);
+  removeGuildAvyImgBorder();
+  guildXPLock();
   var highlightPlayersNearMyLvl =
-    system.getValue('highlightPlayersNearMyLvl');
+    getValue('highlightPlayersNearMyLvl');
   var highlightGvGPlayersNearMyLvl =
-    system.getValue('highlightGvGPlayersNearMyLvl');
+    getValue('highlightGvGPlayersNearMyLvl');
   if (!highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl) {return;}
   var levelToTest = calcLvlToTest();
   var pvpRange = calcPvpRange(levelToTest);

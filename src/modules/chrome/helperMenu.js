@@ -9,10 +9,10 @@ import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
+import {screenview} from '../support/fshGa';
+import {getValue, imageServer} from '../support/system';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs';
-import * as fshGa from '../support/fshGa';
-import * as system from '../support/system';
 
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +
@@ -56,7 +56,7 @@ function callHelperFunction(evt) { // jQuery
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
   if (typeof fn === 'function') {
-    fshGa.screenview(functionPath);
+    screenview(functionPath);
     jQueryDialog(fn);
   }
 }
@@ -79,7 +79,7 @@ function showHelperMenu() {
     id: 'helperMenuDiv',
     className: 'helperMenuDiv',
     style: {
-      backgroundImage: 'url(' + system.imageServer +
+      backgroundImage: 'url(' + imageServer +
         '/skin/inner_bg.jpg)'
     }
   });
@@ -99,11 +99,11 @@ function haveNode(node) {
     className: 'helperMenu',
     innerHTML: 'Helper&nbsp;Menu'
   });
-  if (system.getValue('keepHelperMenuOnScreen')) {
+  if (getValue('keepHelperMenuOnScreen')) {
     helperMenu.classList.add('fshFixed');
   }
   helperMenu.addEventListener('mouseenter', showHelperMenu);
-  if (system.getValue('draggableHelperMenu')) {
+  if (getValue('draggableHelperMenu')) {
     helperMenu.classList.add('fshMove');
     draggable(helperMenu);
   }

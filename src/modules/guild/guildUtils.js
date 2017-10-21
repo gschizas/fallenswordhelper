@@ -1,4 +1,4 @@
-import * as system from '../support/system';
+import {addCommas, getIntFromRegExp} from '../support/system';
 
 export function removeGuildAvyImgBorder() {
   document.querySelector('#pCC img[oldtitle$="\'s Logo"]')
@@ -10,12 +10,12 @@ export function guildXPLock() {
     .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   if (!xpLock) {return;}
   var xpLockmouseover = xpLock.getAttribute('data-tipped');
-  var xpLockXP = system.getIntFromRegExp(xpLockmouseover,
+  var xpLockXP = getIntFromRegExp(xpLockmouseover,
     /XP Lock: <b>(\d*)/);
-  var actualXP = system.getIntFromRegExp(xpLockmouseover,
+  var actualXP = getIntFromRegExp(xpLockmouseover,
     /XP: <b>(\d*)/);
   if (actualXP < xpLockXP) {
     xpLock.parentNode.nextElementSibling.insertAdjacentHTML('beforeend',
-      ' (<b>' + system.addCommas(xpLockXP - actualXP) + '</b>)');
+      ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
   }
 }

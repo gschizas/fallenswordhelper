@@ -1,4 +1,4 @@
-import * as layout from '../support/layout';
+import {openQuickBuffByName} from '../support/layout';
 
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;
@@ -7,13 +7,13 @@ function buffAll(self) {
     var firstCell = titanTable.rows[j].cells[0].firstChild.firstChild;
     shortList.push(firstCell.textContent);
   }
-  layout.openQuickBuffByName(shortList.join());
+  openQuickBuffByName(shortList.join());
 }
 
 function buffEvent(e) {
   var self = e.target;
   if (self.textContent === '[b]') {
-    layout.openQuickBuffByName(self.previousElementSibling.textContent);
+    openQuickBuffByName(self.previousElementSibling.textContent);
   }
   if (self.textContent === 'all') {
     buffAll(self);

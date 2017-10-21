@@ -1,16 +1,21 @@
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {quickBuffHref} from '../support/layout';
+import {
+  findNode,
+  getValue,
+  parseDateAsTimestamp,
+  setValue
+} from '../support/system';
 
 var nowUtc;
 var lastCheckUtc;
 
 function findChatTable() { // Legacy
-  var chatTable = system.findNode('//table[@class="width_full"]'); // Guild Log
+  var chatTable = findNode('//table[@class="width_full"]'); // Guild Log
   if (!chatTable) {
-    chatTable = system.findNode('//table[tbody/tr/td[.="Message"]]'); // Outbox & Guild Chat
+    chatTable = findNode('//table[tbody/tr/td[.="Message"]]'); // Outbox & Guild Chat
   }
   if (!chatTable) {
-    chatTable = system.findNode('//table[tbody/tr/td/span[' +
+    chatTable = findNode('//table[tbody/tr/td/span[' +
       'contains(.,"Currently showing:")]]'); // personal log
   }
   return chatTable;
@@ -21,14 +26,14 @@ function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
     var playerIDRE = /player_id=(\d+)/;
     var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
     aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
-      layout.quickBuffHref(playerID) + '>[b]</a>';
+      quickBuffHref(playerID) + '>[b]</a>';
   }
 }
 
 function rowColor(aRow, logScreen, dateColumn) { // Legacy
   var addBuffTag = true;
   var cellContents = aRow.cells[dateColumn].textContent;
-  var postDateUtc = system.parseDateAsTimestamp(cellContents);
+  var postDateUtc = parseDateAsTimestamp(cellContents);
   var postAgeMins = (nowUtc - postDateUtc) / (1000 * 60);
   if (postDateUtc > lastCheckUtc) {
     aRow.classList.add('fshNr');
@@ -40,7 +45,7 @@ function rowColor(aRow, logScreen, dateColumn) { // Legacy
 }
 
 function getLastCheck(lastCheckScreen) {
-  return system.getValue(lastCheckScreen) || nowUtc;
+  return getValue(lastCheckScreen) || nowUtc;
 }
 
 function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
@@ -55,11 +60,11 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   for (var i = 1; i < chatTable.rows.length; i += increment) {
     rowColor(chatTable.rows[i], logScreen, dateColumn);
   }
-  system.setValue(lastCheckScreen, nowUtc);
+  setValue(lastCheckScreen, nowUtc);
 }
 
 export default function addLogColoring(logScreen, dateColumn) { // Legacy
-  if (!system.getValue('enableLogColoring')) {return;}
+  if (!getValue('enableLogColoring')) {return;}
   var chatTable = findChatTable();
   if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
 }

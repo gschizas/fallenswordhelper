@@ -1,8 +1,8 @@
 import {createSpan} from './common/cElement';
+import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 import retryAjax from './ajax/retryAjax';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {getValue, imageServer} from './support/system';
 
 function cancelAllAH() { // jQuery
   var cancelButtons = document.getElementById('resultRows')
@@ -13,7 +13,7 @@ function cancelAllAH() { // jQuery
     var cancelButton = cancelButtons[i];
     var itemImage = cancelButton.parentNode.parentNode.firstElementChild
       .firstElementChild;
-    cancelButton.outerHTML = '<img src="' + system.imageServer +
+    cancelButton.outerHTML = '<img src="' + imageServer +
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
       retryAjax({
@@ -28,8 +28,8 @@ function cancelAllAH() { // jQuery
 }
 
 export function injectAuctionHouse() {
-  if (!layout.pCC) {return;}
-  if (system.getValue('autoFillMinBidPrice')) {
+  if (!pCC) {return;}
+  if (getValue('autoFillMinBidPrice')) {
     document.getElementById('auto-fill').checked = true;
   }
   document.getElementById('sort0').click();

@@ -1,5 +1,5 @@
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {getValue} from '../support/system';
+import {pCC} from '../support/layout';
 
 function hasTextEntry() { // jQuery
   $('#pCC form').first().attr('id', 'dochat');
@@ -26,8 +26,8 @@ function hasTextEntry() { // jQuery
   });
 }
 
-export default function addChatTextArea() { // jQuery
-  if (!system.getValue('enhanceChatTextEntry') ||
-      !layout.pCC) {return;}
+export default function addChatTextArea() {
+  if (!getValue('enhanceChatTextEntry') ||
+      !pCC) {return;}
   hasTextEntry();
 }

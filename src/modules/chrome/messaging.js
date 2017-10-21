@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import * as system from '../support/system';
+import {fallback, getValueJSON, setValueJSON} from '../support/system';
 
 function showMsgTemplate() { // jQuery
   var targetPlayer = $('#quickMsgDialog_targetUsername').text();
@@ -26,14 +26,14 @@ function showMsgTemplate() { // jQuery
   $('.del-button').click(function(evt) {
     calf.template.splice($('#msgTemplate li')
       .index(evt.target.parentNode), 1);
-    system.setValueJSON('quickMsg', calf.template);
+    setValueJSON('quickMsg', calf.template);
     $('#msgTemplateDialog').dialog('close');
     showMsgTemplate();
   });
   $('#newTmplAdd').click(function() {
     if ($('#newTmpl').val() === '') {return;}
     calf.template.push($('#newTmpl').val());
-    system.setValueJSON('quickMsg', calf.template);
+    setValueJSON('quickMsg', calf.template);
     $('#msgTemplateDialog').dialog('close');
     showMsgTemplate();
   });
@@ -67,16 +67,16 @@ function showMsgTemplate() { // jQuery
 
 function openQuickMsgDialog(name, msg, tip) { // jQuery
   if (!calf.template) {
-    calf.template = system.getValueJSON('quickMsg');
+    calf.template = getValueJSON('quickMsg');
     var buttons = $('#quickMessageDialog').dialog('option', 'buttons');
     buttons.Template = showMsgTemplate;
     $('#quickMessageDialog').dialog('option', 'buttons', buttons);
   }
   $('#quickMsgDialog_targetUsername').html(name);
   $('#quickMsgDialog_targetPlayer').val(name);
-  $('#quickMsgDialog_msg').val(system.fallback(msg, ''));
+  $('#quickMsgDialog_msg').val(fallback(msg, ''));
   $('#quickMsgDialog_msg').removeAttr('disabled');
-  $('.validateTips').text(system.fallback(tip, ''));
+  $('.validateTips').text(fallback(tip, ''));
   $('#quickMessageDialog').dialog('open');
 }
 

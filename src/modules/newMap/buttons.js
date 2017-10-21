@@ -1,7 +1,7 @@
 import assets from './assets';
 import calf from '../support/calf';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {getValue, setValue} from '../support/system';
+import {openQuickBuffByName, playerName} from '../support/layout';
 
 function doFormGroup(e) { // jQuery
   e.preventDefault();
@@ -11,7 +11,7 @@ function doFormGroup(e) { // jQuery
 
 function openQuickBuff(e) {
   e.preventDefault();
-  layout.openQuickBuffByName(layout.playerName());
+  openQuickBuffByName(playerName());
 }
 
 function showQuickLinks(worldName, data) { // jQuery
@@ -33,20 +33,20 @@ function showSearchButtons(worldName, data) { // jQuery
 
 function toggleSound(e) { // jQuery
   e.preventDefault();
-  if (system.getValue('playNewMessageSound') === false) {
+  if (getValue('playNewMessageSound') === false) {
     $('#toggleSoundLink').qtip('hide')
       .replaceWith(assets.soundMuteImage);
   } else {
     $('#toggleSoundLink').qtip('hide')
       .replaceWith(assets.soundImage);
   }
-  system.setValue('playNewMessageSound',
-    !system.getValue('playNewMessageSound'));
+  setValue('playNewMessageSound',
+    !getValue('playNewMessageSound'));
 }
 
 function showSpeakerOnWorld(worldName) { // jQuery
   var img = assets.soundImage;
-  if (system.getValue('playNewMessageSound')) {img = assets.soundMuteImage;}
+  if (getValue('playNewMessageSound')) {img = assets.soundMuteImage;}
   worldName.append('&nbsp;').append(img);
   worldName.on('click', '#toggleSoundLink', toggleSound);
 }
@@ -61,7 +61,7 @@ function toggleHuntMode(e) { // jQuery
       .replaceWith(assets.huntingOffImage);
   }
   calf.huntingMode = !calf.huntingMode;
-  system.setValue('huntingMode', calf.huntingMode);
+  setValue('huntingMode', calf.huntingMode);
 }
 
 function showHuntMode(worldName) { // jQuery
@@ -81,7 +81,7 @@ export default function injectButtons(data) { // jQuery
   var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});
   showQuickLinks(buttonContainer, data);
   showSearchButtons(buttonContainer, data);
-  if (system.getValue('showSpeakerOnWorld')) {
+  if (getValue('showSpeakerOnWorld')) {
     showSpeakerOnWorld(buttonContainer);
   }
   showHuntMode(buttonContainer);

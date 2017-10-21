@@ -1,5 +1,5 @@
+import {getValue} from '../support/system';
 import {newGuildLogLoc, newGuildLogUrl} from '../support/dataObj';
-import * as system from '../support/system';
 
 function testForGuildLogMsg(guildLogNode) {
   return location.search !== newGuildLogLoc ||
@@ -25,7 +25,7 @@ function gotGuildLogNodes(guildLogNodes) {
 }
 
 export default function changeGuildLogHREF() {
-  if (!system.getValue('useNewGuildLog')) {return;}
+  if (!getValue('useNewGuildLog')) {return;}
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}

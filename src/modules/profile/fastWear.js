@@ -1,7 +1,7 @@
 import add from '../support/task';
 import {createDiv} from '../common/cElement';
+import {getValue} from '../support/system';
 import {equipItem, useItem} from '../support/ajax';
-import * as system from '../support/system';
 
 function backpackRemove(invId) { // jQuery
   var _invId = parseInt(invId, 10);
@@ -86,7 +86,7 @@ function foundBackpack(backpackContainer, theBackpack) {
 }
 
 export default function injectFastWear() { // jQuery
-  if (!system.getValue('enableQuickDrink')) {return;}
+  if (!getValue('enableQuickDrink')) {return;}
   var bpBack = document.getElementById('backpack');
   bpBack.className = 'fshBackpack';
   bpBack.removeAttribute('style');

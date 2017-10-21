@@ -4,8 +4,8 @@ import doQuickLinks from './doQuickLinks';
 import isMessageSound from './isMessageSound';
 import lookForHcsData from './lookForHcsData';
 import pageSwitcher from './pageSwitcher';
-import * as fshGa from '../support/fshGa';
-import * as system from '../support/system';
+import {end, screenview, setup, start} from '../support/fshGa';
+import {fallback, getUrlParameter} from '../support/system';
 
 var coreFunction;
 var functionPath;
@@ -13,7 +13,7 @@ var functionPath;
 function getType(cmd) {
   var type = '-';
   if (cmd === 'points') {
-    type = system.fallback(system.getUrlParameter('type'), '-');
+    type = fallback(getUrlParameter('type'), '-');
   }
   return type;
 }
@@ -40,11 +40,11 @@ function getCoreFunction() {
   var type;
   var fromWorld;
   if (document.location.search !== '') {
-    cmd = system.fallback(system.getUrlParameter('cmd'), '-');
-    subcmd = system.fallback(system.getUrlParameter('subcmd'), '-');
-    subcmd2 = system.fallback(system.getUrlParameter('subcmd2'), '-');
+    cmd = fallback(getUrlParameter('cmd'), '-');
+    subcmd = fallback(getUrlParameter('subcmd'), '-');
+    subcmd2 = fallback(getUrlParameter('subcmd2'), '-');
     type = getType(cmd);
-    fromWorld = system.fallback(system.getUrlParameter('fromworld'), '-');
+    fromWorld = fallback(getUrlParameter('fromworld'), '-');
   } else {
     cmd = newSelector('input[name="cmd"]');
     subcmd = newSelector('input[name="subcmd"]');
@@ -81,18 +81,18 @@ function asyncDispatcher() {
   devHooks();
   //#endif
   if (typeof coreFunction === 'function') {
-    fshGa.screenview(functionPath);
-    fshGa.start('JS Perf', functionPath);
+    screenview(functionPath);
+    start('JS Perf', functionPath);
     coreFunction();
-    fshGa.end('JS Perf', functionPath);
+    end('JS Perf', functionPath);
   }
 }
 
 // main event dispatcher
 FSH.dispatch = function dispatch() {
 
-  fshGa.setup();
-  fshGa.start('JS Perf', 'FSH.dispatch');
+  setup();
+  start('JS Perf', 'FSH.dispatch');
 
   getCoreFunction();
   lookForHcsData();
@@ -103,9 +103,9 @@ FSH.dispatch = function dispatch() {
   isMessageSound();
 
   /* This must be at the end in order not to
-  screw up other system.findNode calls (Issue 351) */
+  screw up other findNode calls (Issue 351) */
   doQuickLinks();
 
-  fshGa.end('JS Perf', 'FSH.dispatch');
+  end('JS Perf', 'FSH.dispatch');
 
 };

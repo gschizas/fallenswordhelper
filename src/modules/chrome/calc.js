@@ -1,15 +1,15 @@
+import {intValue, padZ} from '../support/system';
 import {months, now} from '../support/dataObj';
-import * as system from '../support/system';
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function formatShortDate(aDate) {
   var yyyy = aDate.getFullYear();
-  var dd = system.padZ(aDate.getDate());
+  var dd = padZ(aDate.getDate());
   var ddd = days[aDate.getDay()];
   var month = months[aDate.getMonth()];
-  var hh = system.padZ(aDate.getHours());
-  var mm = system.padZ(aDate.getMinutes());
+  var hh = padZ(aDate.getHours());
+  var mm = padZ(aDate.getMinutes());
   return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
 }
 
@@ -37,9 +37,9 @@ export function injectStaminaCalculator() {
       nextGain[0].nextElementSibling.textContent,
       // get the max hours to still be inside stamina maximum
       Math.floor(
-        (system.intValue(stamVals[2]) -
-        system.intValue(stamVals[1])) /
-        system.intValue(
+        (intValue(stamVals[2]) -
+        intValue(stamVals[1])) /
+        intValue(
           document.getElementsByClassName('stat-stamina-gainPerHour')[0]
             .nextElementSibling.textContent
         )
@@ -57,11 +57,11 @@ export function injectLevelupCalculator() {
       timeBox(
         nextGain[0].nextElementSibling.textContent,
         Math.ceil(
-          system.intValue(
+          intValue(
             document.getElementsByClassName('stat-xp-remaining')[0]
               .nextElementSibling.textContent
           ) /
-          system.intValue(
+          intValue(
             document.getElementsByClassName('stat-xp-gainPerHour')[0]
               .nextElementSibling.textContent
           )

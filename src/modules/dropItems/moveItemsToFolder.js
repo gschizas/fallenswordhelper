@@ -1,5 +1,5 @@
+import {fallback} from '../support/system';
 import moveItem from '../ajax/moveItem';
-import * as system from '../support/system';
 
 export default function moveItemsToFolder(itemsAry) { // jQuery.min
   var folderId = document.getElementById('selectFolderId').value;
@@ -12,7 +12,7 @@ export default function moveItemsToFolder(itemsAry) { // jQuery.min
       .firstElementChild;
     if (el.checked) {
       batchNo = Math.floor(counter / 50);
-      invList[batchNo] = system.fallback(invList[batchNo], []);
+      invList[batchNo] = fallback(invList[batchNo], []);
       invList[batchNo].push(o.invid);
       counter += 1;
       if (counter % 50 === 0) {

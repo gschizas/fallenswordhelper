@@ -1,5 +1,5 @@
-import * as inventory from './inventory';
-import * as system from '../support/system';
+import {intValue} from '../support/system';
+import {options} from './inventory';
 
 var lvlTests = [
   function(level) {return level === 0;},
@@ -10,9 +10,9 @@ var lvlTests = [
 ];
 
 function doLvlFilter(_settings, data) {
-  var min = inventory.options.fshMinLvl;
-  var max = inventory.options.fshMaxLvl;
-  var level = system.intValue(data[1]); // use data for the level column
+  var min = options.fshMinLvl;
+  var max = options.fshMaxLvl;
+  var level = intValue(data[1]); // use data for the level column
   for (var i = 0; i < lvlTests.length; i += 1) {
     if (lvlTests[i](level, min, max)) {return true;}
   }
@@ -28,8 +28,8 @@ export function lvlFilter() { // jQuery
 export function typeFilter() { // jQuery
   $.fn.dataTable.ext.search.push(
     function(_settings, _row, _index, data) {
-      return !inventory.options.checkedElements ||
-        inventory.options.checkedElements[data.type];
+      return !options.checkedElements ||
+        options.checkedElements[data.type];
     }
   );
 }
@@ -37,9 +37,9 @@ export function typeFilter() { // jQuery
 export function setFilter() { // jQuery
   $.fn.dataTable.ext.search.push(
     function(_settings, _row, _index, data) {
-      return !inventory.options.checkedElements ||
-        !inventory.options.checkedElements['-1'] ||
-        inventory.options.checkedElements['-1'] &&
+      return !options.checkedElements ||
+        !options.checkedElements['-1'] ||
+        options.checkedElements['-1'] &&
         data.stats &&
         data.stats.set_id !== '-1';
     }
@@ -50,8 +50,8 @@ export function rarityFilter() { // jQuery
   $.fn.dataTable.ext.search.push(
     function(_settings, _row, _index, data) {
       var rarity = (parseInt(data.rarity, 10) + 100).toString();
-      return !inventory.options.checkedElements ||
-        inventory.options.checkedElements[rarity];
+      return !options.checkedElements ||
+        options.checkedElements[rarity];
     }
   );
 }

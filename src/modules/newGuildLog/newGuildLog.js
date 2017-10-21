@@ -2,12 +2,17 @@ import addGuildLogWidgets from '../logs/addGuildLogWidgets';
 import addLogColoring from '../logs/addLogColoring';
 import {createTable} from '../common/cElement';
 import getForage from '../ajax/getForage';
+import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
+import {rowProfile} from './profiler';
 import setForage from '../ajax/setForage';
-import * as assets from './assets';
-import * as layout from '../support/layout';
-import * as profiler from './profiler';
-import * as system from '../support/system';
+import {
+  createDocument,
+  getValue,
+  imageServer,
+  parseDateAsTimestamp
+} from '../support/system';
+import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
 
 var options = {};
 var fshNewGuildLog;
@@ -42,7 +47,7 @@ function getPageInput() {
 }
 
 function parsePage(data) {
-  doc = system.createDocument(data);
+  doc = createDocument(data);
   var pageInput = getPageInput();
   currPage = Number(pageInput.value);
   lastPage = Number(/\d+/.exec(pageInput.parentNode.textContent)[0]);
@@ -56,7 +61,7 @@ function getTableList(tableList) {
   for (var i = 1; i < limit; i += 2) {
     var myRow = theTable.rows[i];
     var myDate = myRow.cells[1].textContent;
-    var timestamp = system.parseDateAsTimestamp(myDate);
+    var timestamp = parseDateAsTimestamp(myDate);
     var myMsg = myRow.cells[2].innerHTML;
     if (currPage === 1 &&
         options.log &&
@@ -66,7 +71,7 @@ function getTableList(tableList) {
       break;
     }
     tmpGuildLog.push([currPage * 100 + i, timestamp, myDate, myMsg,
-      profiler.rowProfile(myMsg)]);
+      rowProfile(myMsg)]);
   }
 }
 
@@ -112,7 +117,7 @@ function updateOptionsLog() {
 
 function buildTable() {
   myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
-  myTable.insertAdjacentHTML('beforeend', assets.headerRow);
+  myTable.insertAdjacentHTML('beforeend', headerRow);
 
   tmpGuildLog.forEach(function(r) {
     var myRow = myTable.insertRow(-1);
@@ -120,7 +125,7 @@ function buildTable() {
     if (!options.checks[r[4]]) {myRow.className = 'fshHide';}
     myRow.insertCell(-1).innerHTML =
       '<span class="newGuildLog" style="background-image: url(\'' +
-      system.imageServer + '/skin/log_1.gif\');"></span>';
+      imageServer + '/skin/log_1.gif\');"></span>';
     myRow.cells[0].className = 'row';
     myRow.insertCell(-1).innerHTML = '<nobr>' + r[2] + '</nobr>';
     myRow.cells[1].className = 'row';
@@ -135,7 +140,7 @@ function buildTable() {
   });
 
   var injector = document.getElementById('fshInjectHere');
-  layout.pCC.replaceChild(myTable, injector);
+  pCC.replaceChild(myTable, injector);
   addLogColoring('myGuildLog', 1);
   addGuildLogWidgets();
 }
@@ -178,7 +183,7 @@ function toggleItem(self) {
 }
 
 function selectAll() {
-  options.checks = assets.defChecks.slice(0);
+  options.checks = defChecks.slice(0);
   setChecks();
   tmpGuildLog.forEach(function(r) {
     r[5].classList.remove('fshHide');
@@ -187,7 +192,7 @@ function selectAll() {
 }
 
 function selectNone() {
-  options.checks = assets.noChecks.slice(0);
+  options.checks = noChecks.slice(0);
   setChecks();
   tmpGuildLog.forEach(function(r) {
     r[5].classList.add('fshHide');
@@ -221,13 +226,13 @@ function eventHandler(evt) {
 
 function gotOptions(guildLog) {
   options = guildLog || options;
-  options.checks = options.checks || assets.defChecks.slice(0);
-  layout.pCC.innerHTML = assets.guildLogFilter;
+  options.checks = options.checks || defChecks.slice(0);
+  pCC.innerHTML = guildLogFilter;
   fshNewGuildLog = document.getElementById('fshNewGuildLog');
   fshNewGuildLog.addEventListener('click', eventHandler);
   setChecks();
   fshOutput = document.getElementById('fshOutput');
-  maxPagesToFetch = Number(system.getValue('newGuildLogHistoryPages'));
+  maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));
   maxPage = maxPagesToFetch;
   getGuildLogPage(1).done(processFirstPage);
 }

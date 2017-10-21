@@ -1,4 +1,4 @@
-import * as system from '../support/system';
+import {imageServer} from '../support/system';
 
 export default {
   colorHash: {
@@ -9,19 +9,19 @@ export default {
   worldFormgroup:
     '<a href="#" class="fshCurveBtn tip-static" ' +
       'data-tipped="Quick Create Attack Group" ' +
-      'style="background-image: url(\'' + system.imageServer +
+      'style="background-image: url(\'' + imageServer +
       '/skin/realm/icon_action_formgroup.gif\');">' +
     '</a>',
   worldQuickBuff:
     '<a href="#" class="fshCurveBtn tip-static" ' +
       'data-tipped="Open Quick Buff Popup" ' +
-      'style="background-image: url(\'' + system.imageServer +
+      'style="background-image: url(\'' + imageServer +
       '/skin/realm/icon_action_quickbuff.gif\');">' +
     '</a>',
   worldMap:
     '<a href="index.php?cmd=world&subcmd=map" target="fsWorldMap" ' +
       'class="fshCurveBtn tip-static" data-tipped="Open Realm Map" ' +
-      'style="background-image: url(\'' + system.imageServer +
+      'style="background-image: url(\'' + imageServer +
       '/skin/realm/icon_action_map.gif\');">' +
     '</a>',
   searchMapUFSG:
@@ -29,7 +29,7 @@ export default {
       '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
       'class="fshCurveBtn tip-static" data-tipped="Search map in ' +
       'Ultimate FSG" style="background-image: url(\'' +
-      system.imageServer + '/temple/1.gif\');">' +
+      imageServer + '/temple/1.gif\');">' +
     '</a>',
   bias: {
     '0': {generalVariable: 1.1053, hpVariable: 1.1},
