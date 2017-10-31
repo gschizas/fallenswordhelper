@@ -1,7 +1,7 @@
 import {getValue} from '../support/system';
-import {pCC, playerName} from '../support/layout';
+import {pCC, playerId, playerName} from '../support/layout';
 
-var playerId;
+var currentPlayerId;
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) {return Number(playerAry[1]);}
@@ -20,8 +20,8 @@ function findPlayers(aRow) { // Legacy
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);
 
-  if (firstPlayer && firstPlayerID !== playerId &&
-      secondPlayerID !== playerId) {
+  if (firstPlayer && firstPlayerID !== currentPlayerId &&
+      secondPlayerID !== currentPlayerId) {
     for (var j = 0; j < 3; j += 1) {
       aRow.cells[j].removeAttribute('class');
     }
@@ -78,7 +78,7 @@ function guildLogWidgetsEnabled() { // Legacy
   messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
     '(Guild Log messages not involving self are dimmed!)</span>';
 
-  playerId = playerId();
+  currentPlayerId = playerId();
 
   for (var i = 1; i < logTable.rows.length; i += 2) {
     var aRow = logTable.rows[i];
