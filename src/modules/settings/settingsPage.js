@@ -7,6 +7,7 @@ import mySimpleCheckboxes from './simple';
 import setupConfigData from './configData';
 import {createBr, createSpan} from '../common/cElement';
 import {
+  fallback,
   findNode,
   getValue,
   isChecked,
@@ -51,7 +52,7 @@ function isOn(o) {
 function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
-    '<label for="' + o.id + '">' + o.helpTitle +
+    '<label for="' + o.id + '">' + fallback(o.title, o.helpTitle) +
     helpLink(o.helpTitle, o.helpText) +
     ':</label>';
 }

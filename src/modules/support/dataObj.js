@@ -275,8 +275,8 @@ export var defaults = {
   extraProfile: '',
   textToSearchFor: '',
   lastLadderReset: 0,
-  disableQuickWearPrompts: false
-
+  disableQuickWearPrompts: false,
+  enableGuildActivityTracker: false
 };
 
 export var rarity = [

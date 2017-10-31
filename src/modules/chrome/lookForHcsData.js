@@ -2,6 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
 import {getValue} from '../support/system';
+import guildActivity from '../guild/guildActivity';
 import {injectComposeAlert} from '../composing/composing';
 import injectFSBoxLog from './injectFSBoxLog';
 import injectHelperMenu from './helperMenu';
@@ -180,6 +181,8 @@ function notHuntMode() {
   add(3, injectHomePageTwoLink);
 
   add(3, injectQuickMsgDialogJQ);
+
+  add(4, guildActivity);
 }
 
 function prepareEnv() {

@@ -1,4 +1,5 @@
 import add from '../support/task';
+import guildTracker from './guildTracker/guildTracker';
 import retryAjax from '../ajax/retryAjax';
 import {
   colouredDots,
@@ -160,10 +161,9 @@ export default function injectGuild() {
   add(3, structureToggle);
   add(3, buffLinks);
   add(3, selfRecallLink);
-
   // Detailed conflict information
   if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo);
   }
-
+  add(4, guildTracker);
 }
