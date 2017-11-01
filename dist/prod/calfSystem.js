@@ -222,71 +222,6 @@ if (needApiUpgrade) {
   };
 }
 
-/*
-Based on
-fiddle.jshell.net/GRIFFnDOOR/r7tvg/
-*/
-
-var heap = [null];
-
-function cmp(i, j) {
-  return heap[i] && heap[i].priority < heap[j].priority;
-}
-
-function swp(i, j) {
-  var temp = heap[i];
-  heap[i] = heap[j];
-  heap[j] = temp;
-}
-
-function calcChildIndex(leftHigher, i) {
-  if (leftHigher) {return i * 2;}
-  return i * 2 + 1;
-}
-
-function sink(j) {
-  var i = j;
-  while (i * 2 < heap.length) {
-    var leftHigher = !cmp(i * 2 + 1, i * 2);
-    var childIndex = calcChildIndex(leftHigher, i);
-    if (cmp(i, childIndex)) {break;}
-    swp(i, childIndex);
-    i = childIndex;
-  }
-}
-
-function bubble(j) {
-  var i = j;
-  while (i > 1) {
-    /* jshint -W016 */
-    // eslint-disable-next-line no-bitwise
-    var parentIndex = i >> 1;
-    /* jshint +W016 */
-    if (!cmp(i, parentIndex)) {break;}
-    swp(i, parentIndex);
-    i = parentIndex;
-  }
-}
-
-function pop() {
-  if (heap.length === 1) {return;}
-  var topVal = heap[1].data;
-  var last = heap.pop();
-  if (heap.length > 1) {
-    heap[1] = last;
-    sink(1);
-  }
-  return topVal;
-}
-
-function push(data, priority) {
-  bubble(heap.push({data: data, priority: priority}) - 1);
-}
-
-function getLength() {
-  return heap.length - 1;
-}
-
 var calf = {};
 
 var concurrent = 0;
@@ -624,8 +559,8 @@ var defaults = {
   extraProfile: '',
   textToSearchFor: '',
   lastLadderReset: 0,
-  disableQuickWearPrompts: false
-
+  disableQuickWearPrompts: false,
+  enableGuildActivityTracker: false
 };
 
 var rarity = [
@@ -638,16 +573,12 @@ var rarity = [
   {colour: '#009900', clas: 'fshEpic'}
 ];
 
-var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
-
 var places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
   'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
   'fourteenth'];
 
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
   'Sep', 'Oct', 'Nov', 'Dec'];
-
-var defenderMultiplier = 0.2;
 
 var mercRE = [
   /<td>Attack:<\/td><td>(\d+)<\/td>/,
@@ -660,9 +591,12 @@ var mercRE = [
 var lastActivityRE =
   /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 
+var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
+var defenderMultiplier = 0.2;
 var now = Date.now();
-
 var nowSecs = Math.floor(now / 1000);
+var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
+var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 
 var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -950,6 +884,71 @@ function padZ(n) {
   return ret;
 }
 
+/*
+Based on
+fiddle.jshell.net/GRIFFnDOOR/r7tvg/
+*/
+
+var heap = [null];
+
+function cmp(i, j) {
+  return heap[i] && heap[i].priority < heap[j].priority;
+}
+
+function swp(i, j) {
+  var temp = heap[i];
+  heap[i] = heap[j];
+  heap[j] = temp;
+}
+
+function calcChildIndex(leftHigher, i) {
+  if (leftHigher) {return i * 2;}
+  return i * 2 + 1;
+}
+
+function sink(j) {
+  var i = j;
+  while (i * 2 < heap.length) {
+    var leftHigher = !cmp(i * 2 + 1, i * 2);
+    var childIndex = calcChildIndex(leftHigher, i);
+    if (cmp(i, childIndex)) {break;}
+    swp(i, childIndex);
+    i = childIndex;
+  }
+}
+
+function bubble(j) {
+  var i = j;
+  while (i > 1) {
+    /* jshint -W016 */
+    // eslint-disable-next-line no-bitwise
+    var parentIndex = i >> 1;
+    /* jshint +W016 */
+    if (!cmp(i, parentIndex)) {break;}
+    swp(i, parentIndex);
+    i = parentIndex;
+  }
+}
+
+function pop() {
+  if (heap.length === 1) {return;}
+  var topVal = heap[1].data;
+  var last = heap.pop();
+  if (heap.length > 1) {
+    heap[1] = last;
+    sink(1);
+  }
+  return topVal;
+}
+
+function push(data, priority) {
+  bubble(heap.push({data: data, priority: priority}) - 1);
+}
+
+function getLength() {
+  return heap.length - 1;
+}
+
 var paused = true;
 var message = 'fshMessage';
 
@@ -1097,8 +1096,8 @@ function isMessageSound() {
 }
 
 function testForGuildLogMsg(guildLogNode) {
-  return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
-    guildLogNode.innerHTML.search('Guild Log updated!') === -1;
+  return location.search !== newGuildLogLoc ||
+    guildLogNode.parentNode.id !== 'notification-guild-log';
 }
 
 function hideGuildLogMsg(guildLogNode) {
@@ -1114,8 +1113,7 @@ function gotGuildLogNodes(guildLogNodes) {
   var guildLogNode;
   for (var i = 0; i < guildLogNodes.length; i += 1) {
     guildLogNode = guildLogNodes[i];
-    guildLogNode.setAttribute('href',
-      'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
+    guildLogNode.href = newGuildLogUrl;
   }
   hideGuildLogMsg(guildLogNode);
 }
@@ -1125,6 +1123,22 @@ function changeGuildLogHREF() {
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
+}
+
+function getForage(forage) {
+  // Wrap in jQuery Deferred because we're using 1.7
+  // rather than using ES6 promise
+  var dfr = $.Deferred();
+  localforage.getItem(forage, function getItemCallback(err, data) {
+    if (err) {
+      log(forage + ' forage error', err);
+      dfr.reject(err);
+    } else {
+      // returns null if key does not exist
+      dfr.resolve(data);
+    }
+  });
+  return dfr.promise();
 }
 
 function mixin(obj, mixins) {
@@ -1195,20 +1209,25 @@ function createInput(props) {
   return cElement('input', props);
 }
 
-function getForage(forage) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
-  localforage.getItem(forage, function getItemCallback(err, data) {
-    if (err) {
-      log(forage + ' forage error', err);
-      dfr.reject(err);
-    } else {
-      // returns null if key does not exist
-      dfr.resolve(data);
-    }
+function createTextArea(props) {
+  return cElement('textarea', props);
+}
+
+function createTh(props) {
+  return cElement('th', props);
+}
+
+function callApp(data) {
+  mixin(data, {app: 1});
+  return retryAjax({
+    url: 'app.php',
+    data: data,
+    dataType: 'json'
   });
-  return dfr.promise();
+}
+
+function guildManage() {
+  return callApp({cmd: 'guild', subcmd: 'manage'});
 }
 
 function setForage(forage, data) {
@@ -1224,6 +1243,110 @@ function setForage(forage, data) {
     }
   });
   return dfr.promise();
+}
+
+var act = 0;
+var cur = 1;
+var lvl = 2;
+var max = 3;
+var utc = 4;
+var vl = 5;
+var gxp = 6;
+
+var oldArchive;
+var guild;
+
+function pushNewRecord(member) {
+  oldArchive.members[member.name].push([
+    Math.floor(member.last_activity / 86400),
+    member.current_stamina,
+    member.level,
+    member.max_stamina,
+    nowSecs,
+    member.vl,
+    member.guild_xp,
+  ]);
+}
+
+function initMember(member) {
+  if (!oldArchive.members[member.name]) {
+    oldArchive.members[member.name] = [];
+    pushNewRecord(member);
+  }
+}
+
+var type2tests = [
+  function(archive, current) {
+    // Has current stam changed ?
+    return current.current_stamina !== archive[cur]; // probably want a weighted percentage here
+    // Might only care if it has dropped significantly ?
+  },
+  function(archive, current) {
+    // Has Max Stam increased ?
+    return current.max_stamina > archive[max]; // probably want a weighted percentage here
+  },
+  function(archive, current) {
+    // Has level changed ?
+    return current.level !== archive[lvl];
+  },
+  function(archive, current) {
+    // Has VL changed ?
+    return current.vl !== archive[vl];
+  },
+  function(archive, current) {
+    // Has GXP changed ?
+    return current.guild_xp !== archive[gxp]; // probably want a weighted percentage here
+  }
+];
+
+function doMerge() {
+  var newArchive = {lastUpdate: nowSecs, members: {}};
+  guild.r.members.forEach(function(member) {
+    initMember(member);
+    var archiveMember = oldArchive.members[member.name];
+    var archiveLength = archiveMember.length;
+    var archiveRecord = archiveMember[archiveLength - 1];
+    var archiveAge = nowSecs - archiveRecord[utc];
+    if (archiveAge >= 86100) {
+      var type2change = type2tests.some(function(test) {
+        if (test(archiveRecord, member)) {
+          return true;
+        }
+        return false;
+      });
+      if (type2change) {
+        pushNewRecord(member);
+      } else {
+        archiveRecord[act] = Math.floor(member.last_activity / 86400);
+        archiveRecord[utc] = nowSecs;
+      }
+    }
+    newArchive.members[member.name] = oldArchive.members[member.name];
+  });
+  setForage('fsh_guildActivity', newArchive);
+}
+
+function gotGuild(data) {
+  guild = data;
+  doMerge();
+}
+
+function gotActivity(data) {
+  if (data) {
+    oldArchive = data;
+    // oldArchive = transformActivity(data);
+  } else {
+    oldArchive = {lastUpdate: 0, members: {}};
+  }
+  if (nowSecs > fallback(oldArchive.lastUpdate, 0) + 300) { // 5 mins - probably want to increase
+    guildManage().done(gotGuild);
+  }
+}
+
+function guildActivity() {
+  if (getValue('enableGuildActivityTracker')) {
+    getForage('fsh_guildActivity').done(gotActivity);
+  }
 }
 
 var dotList;
@@ -1298,17 +1421,6 @@ function infoBox(documentText) {
     }
   }
   return result;
-}
-
-function guildId() {
-  var _guildId;
-  var nodeList = document.body.getElementsByTagName('script');
-  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
-    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-    if (match) {_guildId = parseInt(match[1], 10);}
-  });
-  setValue('guildId', _guildId);
-  return _guildId;
 }
 
 function playerId() {
@@ -1417,7 +1529,7 @@ function colouredDots() {
   add(3, batchDots);
 }
 
-function confirm(title, msgText, fn) { // jQuery
+function jConfirm(title, msgText, fn) { // jQuery
   var fshMsg = document.getElementById('fshmsg');
   if (!fshMsg) {
     fshMsg = createDiv({id: 'fshmsg'});
@@ -1441,6 +1553,159 @@ function confirm(title, msgText, fn) { // jQuery
     },
     title: title
   }).dialog('open');
+}
+
+var composeMsg =
+  '<li class="notification"><a href="index.php?cmd=composing"><span' +
+  ' class="notification-icon"></span><p class="notification-content">' +
+  'Composing to do</p></a></li>';
+
+function displayComposeMsg() {
+  document.getElementById('notifications')
+    .insertAdjacentHTML('afterbegin', composeMsg);
+}
+
+function getDoc(data) {
+  if (calf.cmd !== 'composing') {
+    return createDocument(data);
+  }
+  return document;
+}
+
+function parseComposing(data) {
+  var doc = getDoc(data);
+  var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
+  var times = [];
+  var openSlots = doc.getElementsByClassName('composing-potion-time');
+  Array.prototype.forEach.call(openSlots, function(el) {
+    if (el.textContent === 'ETA: Ready to Collect!' ||
+        el.textContent === 'ETA: n/a') {
+      times.push(0);
+    } else {
+      var timeArr = timeRE.exec(el.textContent);
+      var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
+        1000 + now;
+      times.push(milli);
+    }
+  });
+  var eta = Math.min.apply(null, times);
+  if (eta === 0) {
+    if (calf.cmd !== 'composing') {displayComposeMsg();}
+    setValue('needToCompose', true);
+  } else {
+    setValue('needToCompose', false);
+    setValue('lastComposeCheck', eta);
+  }
+}
+
+function createSuccess(temp, textStatus) {
+  var potName = temp[temp.selectedIndex].text;
+  var myParent = temp.parentNode;
+  var infoDiv = myParent.previousElementSibling.previousElementSibling;
+  infoDiv.children[0].innerHTML = '';
+  infoDiv.children[0].classList.add('fshPot');
+  infoDiv.children[0].style.backgroundImage = 'url(' + imageServer +
+    '/composing/potions/' + getRandomInt(1, 11) + '_' +
+    getRandomInt(1, 51) + '.gif)';
+  infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
+    potName + '</span>\' Potion';
+  infoDiv.children[3].innerHTML = '';
+  myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
+}
+
+function createPotion(temp) { // jQuery
+  retryAjax({
+    cache: false,
+    dataType: 'json',
+    url: 'index.php',
+    data: {
+      cmd: 'composing',
+      subcmd: 'createajax',
+      template_id: temp.value,
+      _rnd: rnd()
+    }
+  }).done(function potionDone(data, textStatus) {
+    if (data.error !== '') {
+      temp.parentNode.innerHTML = '<div class="fshScs">' +
+        data.error + '</div>';
+    } else {
+      createSuccess(temp, textStatus);
+    }
+  });
+}
+
+function quickCreateBailOut(target) {
+  return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
+}
+
+function quickCreate(evt) {
+  var target = evt.target;
+  if (quickCreateBailOut(target)) {return;}
+  var temp = target.previousElementSibling.previousElementSibling;
+  if (temp && temp.value !== 'none') {
+    createPotion(temp);
+  }
+}
+
+function checkLastCompose() { // jQuery
+  var lastComposeCheck = getValue('lastComposeCheck');
+  if (lastComposeCheck && now < lastComposeCheck) {return;}
+  retryAjax('index.php?cmd=composing').done(function(data) {
+    add(3, parseComposing, [data]);
+  });
+}
+
+function composeAlert() {
+  var needToCompose = getValue('needToCompose');
+  if (needToCompose) {
+    displayComposeMsg();
+    return;
+  }
+  checkLastCompose();
+}
+
+function injectComposeAlert() {
+  if (calf.cmd !== 'composing') {composeAlert();}
+}
+
+function moveButtons() {
+  if (getValue('moveComposingButtons')) {
+    var buttonDiv = document.getElementById('composing-error-dialog')
+      .previousElementSibling;
+    buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
+    var top = pCC.getElementsByClassName('composing-level')[0]
+      .parentNode;
+    top.insertAdjacentElement('beforebegin', buttonDiv);
+  }
+}
+
+function injectComposing() {
+  if (!pCC) {return;}
+  if (calf.enableComposingAlert) {
+    parseComposing();
+  }
+
+  var buttons = pCC
+    .querySelectorAll('input[id^=create-]:not(#create-multi)');
+  Array.prototype.forEach.call(buttons, function(el) {
+    el.insertAdjacentHTML('afterend',
+      '&nbsp;[<span class="quickCreate">Quick Create</span>]');
+  });
+  pCC.addEventListener('click', quickCreate);
+  moveButtons();
+}
+
+function composingCreate() {
+  document.getElementById('composing-add-skill')
+    .addEventListener('click', function() {
+      document.getElementById('composing-skill-level-input').value =
+        document.getElementById('composing-skill-level-max').textContent;
+    });
+  document.getElementById('composing-skill-select')
+    .addEventListener('change', function() {
+      document.getElementById('composing-skill-level-input').value =
+        document.getElementById('composing-skill-level-max').textContent;
+    });
 }
 
 function injectFindPlayer() { // Bad jQuery
@@ -1762,7 +2027,7 @@ function clearCombatLog() {
 }
 
 function notepadClearLog() { // jQuery
-  confirm('Clear Combat Log',
+  jConfirm('Clear Combat Log',
     'Are you sure you want to clear your log?', clearCombatLog
   );
 }
@@ -2010,7 +2275,7 @@ var hideRecipes = [];
 var output;
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
-var playerId$1;
+var currentPlayerId;
 
 function storeRecipeBook() {
   setForage('fsh_recipeBook', recipebook);
@@ -2022,7 +2287,7 @@ function getRecipeItems(recipe) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
         'data-tipped="fetchitem.php?item_id=' +
         itm.id + '&inv_id=-1&t=2&p=' +
-        playerId$1 + '&vcode=' +
+        currentPlayerId + '&vcode=' +
         itm.verify + '" src="' +
         itm.img + '" height="20px" width="20px"><p>' +
         itm.amountPresent + '/' +
@@ -2038,7 +2303,7 @@ function getComponents(recipe) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
         'data-tipped="fetchitem.php?item_id=' +
         comp.id + '&inv_id=-1&t=2&p=' +
-        playerId$1 + '&vcode=' +
+        currentPlayerId + '&vcode=' +
         comp.verify + '" src="' +
         comp.img + '" height="20px" width="20px"><p>' +
         comp.amountPresent + '/' +
@@ -2052,7 +2317,7 @@ function getImg(recipe) {
   if (recipe.target) {
     return ' <img class="tip-dynamic" ' +
       'data-tipped="fetchitem.php?item_id=' +
-      recipe.target.id + '&inv_id=-1&t=2&p=' + playerId$1 +
+      recipe.target.id + '&inv_id=-1&t=2&p=' + currentPlayerId +
       '&vcode=' + recipe.target.verify + '" ' +
       'src="' + recipe.target.img +
       '" height="30px" width="30px"><br/>';
@@ -2061,7 +2326,7 @@ function getImg(recipe) {
 }
 
 function drawRecipeTable() { // Legacy
-  playerId$1 = playerId();
+  currentPlayerId = playerId();
   var i;
   var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
     '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
@@ -2160,8 +2425,8 @@ function processRecipe(recipe, data) {
 
 function processFolderAnyPage(data) { // jQuery.min
   var doc = createDocument(data);
-  var pCC$$1 = doc.getElementById('pCC');
-  var scope = pCC$$1.firstElementChild.rows[6].cells[0]
+  var innerPcc = doc.getElementById('pCC');
+  var scope = innerPcc.firstElementChild.rows[6].cells[0]
     .firstElementChild.getElementsByTagName('a');
   var prm = Array.prototype.reduce.call(scope, function(prev, el) {
     output.insertAdjacentHTML('beforeend',
@@ -2182,13 +2447,13 @@ function processFolderAnyPage(data) { // jQuery.min
 function processFolderFirstPage(data) { // jQuery.min
   var prm = [];
   var doc = createDocument(data);
-  var pCC$$1 = doc.getElementById('pCC');
-  var scope = pCC$$1.firstElementChild.rows[4].cells[0]
+  var innerPcc = doc.getElementById('pCC');
+  var scope = innerPcc.firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var thisFolder = Array.prototype.filter.call(scope, function(el) {
     return /\/folder_on\.gif/.test(el.getAttribute('src'));
   })[0];
-  var pages = pCC$$1.getElementsByClassName('customselect')[0]
+  var pages = innerPcc.getElementsByClassName('customselect')[0]
     .getElementsByTagName('option').length;
   for (var i = 1; i < pages; i += 1) {
     prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
@@ -2298,15 +2563,6 @@ function jsonFail(json, handle) {
   if (!json.s) {return true;}
 }
 
-function callApp(data) {
-  mixin(data, {app: 1});
-  return retryAjax({
-    url: 'app.php',
-    data: data,
-    dataType: 'json'
-  });
-}
-
 function useitem(item) {
   return callApp({
     cmd: 'profile',
@@ -2316,7 +2572,7 @@ function useitem(item) {
 }
 
 var extTbl;
-var playerId$2;
+var playerId$1;
 var extractInv;
 var selectST;
 var selectMain;
@@ -2350,7 +2606,7 @@ function doExtract(target) {
 }
 
 function extractAllSimilar(evt) {
-  confirm('Extract Resources',
+  jConfirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
     doExtract.bind(null, evt.target)
   );
@@ -2383,7 +2639,7 @@ function tableRows(prev, item_id) {
     '<td><img src="' + imageServer + '/items/' +
     item_id + '.gif" class="tip-dynamic" data-tipped="' +
     'fetchitem.php?item_id=' + item_id + '&inv_id=' +
-    res.inv_id + '&t=1&p=' + playerId$2 +
+    res.inv_id + '&t=1&p=' + playerId$1 +
     '" border=0></td><td>' + res.item_name + '</td></tr>';
 }
 
@@ -2403,7 +2659,7 @@ function isExtractable(curr) {
 }
 
 function prepInv(data) {
-  playerId$2 = data.player_id;
+  playerId$1 = data.player_id;
   extractInv = data.items.reduce(function(prev, curr) {
     if (isExtractable(curr)) {prev.push(curr);}
     return prev;
@@ -2485,7 +2741,7 @@ function itemImage(item) {
   return ret;
 }
 
-function tableRows$1(tbl, playerId$$1, item) {
+function tableRows$1(tbl, currentPlayerId, item) {
   var newRow = tbl.insertRow(-1);
   item.dom = newRow;
   var equipClass = 'fshEq ';
@@ -2495,16 +2751,17 @@ function tableRows$1(tbl, playerId$$1, item) {
   newRow.innerHTML = '<td class="fshCenter"><span class="' + equipClass +
     '" data-itemid="' + item.a + '">Wear</span>&nbsp;|&nbsp;<span class="' +
     useClass + '" data-itemid="' + item.a +
-    '">Use/Ext</span></td><td><img src="' + itemImage(item) + '" ' +
-    'class="tip-dynamic" data-tipped="fetchitem.php?item_id=' + item.b +
-    '&amp;inv_id=' + item.a + '&amp;t=1&amp;p=' + playerId$$1 + '&amp;' +
-    'currentPlayerId=' + playerId$$1 + '" width="30" height="30" border="0">' +
-    '</td><td width="90%">&nbsp;' + item.n + '</td>';
+    '">Use/Ext</span></td><td><img src="' + itemImage(item) +
+    '" class="tip-dynamic" data-tipped="fetchitem.php?item_id=' + item.b +
+    '&amp;inv_id=' + item.a + '&amp;t=1&amp;p=' + currentPlayerId +
+    '&amp;currentPlayerId=' + currentPlayerId +
+    '" width="30" height="30" border="0"></td><td width="90%">&nbsp;' +
+    item.n + '</td>';
 }
 
 function makeFolderSpans(appInv) {
   return '<span class="fshLink folder" data-folder="0">All</span>' +
-    ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
+    // ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
     appInv.r.reduce(function(prev, folderObj) {
       return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
         'data-folder="' + folderObj.id.toString() + '">' +
@@ -2513,7 +2770,7 @@ function makeFolderSpans(appInv) {
 }
 
 function createQuickWear(appInv) {
-  var playerId$$1 = playerId();
+  var currentPlayerId = playerId();
   var tbl = createTable({
     width: '100%',
     innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
@@ -2525,7 +2782,7 @@ function createQuickWear(appInv) {
   tbl.appendChild(tbody);
   appInv.r.forEach(function(aFolder) {
     aFolder.items.sort(alpha);
-    aFolder.items.forEach(tableRows$1.bind(null, tbody, playerId$$1));
+    aFolder.items.forEach(tableRows$1.bind(null, tbody, currentPlayerId));
   });
   var qw = createDiv({
     id: 'invTabs-qw',
@@ -2585,6 +2842,7 @@ function displayOtherCount(invCount) {
 }
 
 function buildHTML(invCount, quickSL) {
+  // TODO this is going to need significant rebuild
   return '<table width="100%" cellspacing="2" cellpadding="2"><thead>' +
     '<tr><th colspan="5" class="fshCenter">Items from ' +
     '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
@@ -2956,9 +3214,17 @@ var mySimpleCheckboxes = {
   },
   disableQuickWearPrompts: {
     id: 'disableQuickWearPrompts',
-    helpTitle: 'Disable Use/Ext<br>Prompts',
+    helpTitle: 'Disable Use/Ext Prompts',
     helpText: 'If enabled, will disable prompts when you Use/Ext items.' +
-      '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
+      '<br>NO REFUNDS OR DO-OVERS! Use at own risk.',
+    title: 'Disable Use/Ext<br>Prompts'
+  },
+  enableGuildActivityTracker: {
+    id: 'enableGuildActivityTracker',
+    helpTitle: 'Enable Guild Activity Tracker',
+    helpText: 'If enabled, will track guild member activity over time.',
+    network: true,
+    title: 'Enable Tracker'
   }
 };
 
@@ -3355,57 +3621,6 @@ function otherPrefs() {
     simpleCheckbox('moveComposingButtons');
 }
 
-function profilePrefs() {
-  // profile prefs
-  return '<tr><th colspan="2"><b>Profile preferences</b></th></tr>' +
-
-    simpleCheckbox('renderSelfBio') +
-    simpleCheckbox('renderOtherBios') +
-
-    '<tr><td class="fshRight">Enable Bio Compressor' +
-      helpLink('Enable Bio Compressor',
-        'This will compress long bios according to settings and provide a ' +
-        'link to expand the compressed section.') +
-      ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
-      'value="on"' +
-      isChecked(getValue('enableBioCompressor')) +
-      '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
-      'value="' + getValue('maxCompressedCharacters') + '" />' +
-      ' Max Lines:<input name="maxCompressedLines" size="3" value="' +
-      getValue('maxCompressedLines') + '"></td></tr>' +
-
-    '<tr><td class="fshRight">Buy Buffs Greeting' +
-      helpLink('Buy Buffs Greeting',
-        'This is the default text to open a message with when asking to ' +
-        'buy buffs. You can use {playername} to insert the target players ' +
-        'name. You can also use {buffs} to insert the list of buffs. You ' +
-        'can use {cost} to insert the total cost of the buffs.') +
-      ':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" ' +
-      'value="' + getValue('buyBuffsGreeting') + '"></td></tr>' +
-
-    simpleCheckbox('showStatBonusTotal') +
-    simpleCheckbox('enableQuickDrink') +
-    simpleCheckbox('disableDeactivatePrompts');
-}
-
-function questPrefs() {
-  // Quest Preferences
-  return '<tr><th colspan="2"><b>Quest preferences</b></th></tr>' +
-
-    '<tr><td class="fshRight">Hide Specific Quests' +
-      helpLink('Hide Specific Quests',
-        'If enabled, this hides quests whose name matches the list ' +
-        '(separated by commas). This works on Quest Manager and Quest Book.') +
-      ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
-      'value="on"' +
-      isChecked(getValue('hideQuests')) + '>' +
-      '&nbsp;<input name="hideQuestNames" size="60" value="' +
-      getValue('hideQuestNames') + '"></td></tr>' +
-
-    simpleCheckbox('storeLastQuestPage') +
-    simpleCheckbox('showNextQuestSteps');
-}
-
 function worldGroup() {
   // World Screen
   return '<tr><td class="fshRight">Hide Create Group Button' +
@@ -3574,6 +3789,57 @@ function prefs() {
     simpleCheckbox('huntingMode');
 }
 
+function profilePrefs() {
+  // profile prefs
+  return '<tr><th colspan="2"><b>Profile preferences</b></th></tr>' +
+
+    simpleCheckbox('renderSelfBio') +
+    simpleCheckbox('renderOtherBios') +
+
+    '<tr><td class="fshRight">Enable Bio Compressor' +
+      helpLink('Enable Bio Compressor',
+        'This will compress long bios according to settings and provide a ' +
+        'link to expand the compressed section.') +
+      ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
+      'value="on"' +
+      isChecked(getValue('enableBioCompressor')) +
+      '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
+      'value="' + getValue('maxCompressedCharacters') + '" />' +
+      ' Max Lines:<input name="maxCompressedLines" size="3" value="' +
+      getValue('maxCompressedLines') + '"></td></tr>' +
+
+    '<tr><td class="fshRight">Buy Buffs Greeting' +
+      helpLink('Buy Buffs Greeting',
+        'This is the default text to open a message with when asking to ' +
+        'buy buffs. You can use {playername} to insert the target players ' +
+        'name. You can also use {buffs} to insert the list of buffs. You ' +
+        'can use {cost} to insert the total cost of the buffs.') +
+      ':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" ' +
+      'value="' + getValue('buyBuffsGreeting') + '"></td></tr>' +
+
+    simpleCheckbox('showStatBonusTotal') +
+    simpleCheckbox('enableQuickDrink') +
+    simpleCheckbox('disableDeactivatePrompts');
+}
+
+function questPrefs() {
+  // Quest Preferences
+  return '<tr><th colspan="2"><b>Quest preferences</b></th></tr>' +
+
+    '<tr><td class="fshRight">Hide Specific Quests' +
+      helpLink('Hide Specific Quests',
+        'If enabled, this hides quests whose name matches the list ' +
+        '(separated by commas). This works on Quest Manager and Quest Book.') +
+      ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
+      'value="on"' +
+      isChecked(getValue('hideQuests')) + '>' +
+      '&nbsp;<input name="hideQuestNames" size="60" value="' +
+      getValue('hideQuestNames') + '"></td></tr>' +
+
+    simpleCheckbox('storeLastQuestPage') +
+    simpleCheckbox('showNextQuestSteps');
+}
+
 function setupConfigData() {
   calf.configData =
     '<form><table id="fshSettingsTable">' +
@@ -3692,7 +3958,7 @@ function isOn(o) {
 function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
-    '<label for="' + o.id + '">' + o.helpTitle +
+    '<label for="' + o.id + '">' + fallback(o.title, o.helpTitle) +
     helpLink(o.helpTitle, o.helpText) +
     ':</label>';
 }
@@ -3725,7 +3991,7 @@ function toggleTickAllBuffs(e) { // jQuery
 }
 
 function clearStorage() {
-  confirm('Clear localStorage',
+  jConfirm('Clear localStorage',
     'Are you sure you want to clear you localStorage?',
     function() {localStorage.clear();}
   );
@@ -4016,7 +4282,7 @@ function useProfileInventoryItem(self) {
   if (disableQuickWearPrompts) {
     doUseItem(self);
   } else {
-    confirm('Use/Extract Item',
+    jConfirm('Use/Extract Item',
       'Are you sure you want to use/extract the item?',
       doUseItem.bind(null, self)
     );
@@ -4126,6 +4392,84 @@ function insertQuickWear(injector) {
   content$3.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
+}
+
+var times = {};
+var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
+
+function isAuto() {
+  var docRef = document.referrer
+    .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
+  if (docRef) {docRef = docRef[1];}
+  return refAry.indexOf(docRef) !== -1;
+}
+
+function start(category, variable, label) {
+  if (isAuto() || typeof ga === 'undefined') {return;}
+  times[category + ':' + variable + ':' + label] =
+    performance.now() * 1000;
+}
+
+function sendTiming(category, variable, label) {
+  var myTime = Math.round(performance.now() * 1000 -
+    times[category + ':' + variable + ':' + label]) / 1000;
+  if (myTime > 10) {
+    ga('fshApp.send', 'timing', category, variable, Math.round(myTime),
+      label);
+  }
+}
+
+function end(category, variable, label) {
+  if (isAuto() || typeof ga === 'undefined') {return;}
+  sendTiming(category, variable, label);
+}
+
+function fixupUrl() {
+  var origPath = window.location.pathname + window.location.search;
+  var page = origPath.replace(/&m=.*/, '')
+    .replace(/&subcmd=&.*/, '')
+    .replace(/&subcmd2=&.*/, '')
+    .replace(/&[a-z_]+_id=.+/, '')
+    .replace(/&id=.+/, '')
+    .replace(/&target_player=.+/, '')
+    .replace(/&[a-z]+_username=.+/, '')
+    .replace(/\?cmd=auctionhouse.+/, '?cmd=auctionhouse')
+    .replace(/&subcmd=[0-9a-f]{32}/, '')
+    .replace(/&search_active=.+/, '')
+    .replace(/&letter=.+/, '')
+    .replace(/&guild_name=.+/, '')
+    .replace(/&user=.+/, '')
+    .replace(/&[a-z_]*page=.+/, '')
+    .replace(/&prestige=.+/, '')
+    .replace(/&withdraw_amount=.+/, '')
+    .replace(/&tickets=.+/, '')
+    .replace(/&search=.+/, '')
+    .replace(/&target=.+/, '')
+    .replace(/&xcv=[0-9a-f]{32}/, '')
+    .replace(/\?ref=[0-9]+/, '');
+  ga('fsh.set', 'page', page);
+}
+
+function setup() {
+  if (isAuto() || typeof ga === 'undefined') {return;}
+
+  ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
+    userId: playerId(),
+    siteSpeedSampleRate: 10
+  });
+  ga('fshApp.set', 'appName', 'fshApp');
+  ga('fshApp.set', 'appVersion', FSH.version + '(' + FSH.calf + ')');
+  ga('create', 'UA-76488113-2', 'auto', 'fsh', {
+    userId: playerId(),
+    siteSpeedSampleRate: 10
+  });
+  fixupUrl();
+  ga('fsh.send', 'pageview');
+}
+
+function screenview(funcName) {
+  if (isAuto() || typeof ga === 'undefined') {return;}
+  ga('fshApp.send', 'screenview', {screenName: funcName});
 }
 
 var param;
@@ -4634,7 +4978,7 @@ function getSustain(doc) {
 }
 
 function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
-  var playerName$$1 = doc.getElementById('pCC')
+  var innerPlayerName = doc.getElementById('pCC')
     .getElementsByTagName('h1')[0].textContent;
   var levelValue = intValue(doc.getElementById('profileLeftColumn')
     .children[4].children[0].rows[0].cells[1].textContent);
@@ -4648,9 +4992,9 @@ function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
     playerHREF + '" target="new" ' +
     // FIXME - It kind works now, but not guaranteed?
     'class="tip-static" ' +
-    'data-tipped="' + bioTip + '">' + playerName$$1 + '</a>' +
+    'data-tipped="' + bioTip + '">' + innerPlayerName + '</a>' +
     '&nbsp;<span class="fshBlue">[<span class="a-reply fshLink" ' +
-    'target_player="' + playerName$$1 + '">m</span>]</span></nobr><br>' +
+    'target_player="' + innerPlayerName + '">m</span>]</span></nobr><br>' +
     '<span class="fshGray">Level:&nbsp;</span>' + levelValue +
     '&nbsp;(' + virtualLevelValue + ')';
 }
@@ -4672,9 +5016,9 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
 function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
   var doc = createDocument(responseText);
   // name and level
-  var pCC$$1 = doc.getElementById('pCC');
+  var innerPcc = doc.getElementById('pCC');
   // last activity
-  var lastActivityElement = pCC$$1.getElementsByTagName('p')[0];
+  var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
   var lastActivity = /(\d+) mins, (\d+) secs/
     .exec(lastActivityElement.textContent);
   // buffs
@@ -4934,84 +5278,6 @@ function injectFindOther(injector) { // Native - Bad
     .addEventListener('click', findBuffsClearResults, true);
 }
 
-var times = {};
-var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
-
-function isAuto() {
-  var docRef = document.referrer
-    .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
-  if (docRef) {docRef = docRef[1];}
-  return refAry.indexOf(docRef) !== -1;
-}
-
-function start(category, variable, label) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
-  times[category + ':' + variable + ':' + label] =
-    performance.now() * 1000;
-}
-
-function sendTiming(category, variable, label) {
-  var myTime = Math.round(performance.now() * 1000 -
-    times[category + ':' + variable + ':' + label]) / 1000;
-  if (myTime > 10) {
-    ga('fshApp.send', 'timing', category, variable, Math.round(myTime),
-      label);
-  }
-}
-
-function end(category, variable, label) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
-  sendTiming(category, variable, label);
-}
-
-function fixupUrl() {
-  var origPath = window.location.pathname + window.location.search;
-  var page = origPath.replace(/&m=.*/, '')
-    .replace(/&subcmd=&.*/, '')
-    .replace(/&subcmd2=&.*/, '')
-    .replace(/&[a-z_]+_id=.+/, '')
-    .replace(/&id=.+/, '')
-    .replace(/&target_player=.+/, '')
-    .replace(/&[a-z]+_username=.+/, '')
-    .replace(/\?cmd=auctionhouse.+/, '?cmd=auctionhouse')
-    .replace(/&subcmd=[0-9a-f]{32}/, '')
-    .replace(/&search_active=.+/, '')
-    .replace(/&letter=.+/, '')
-    .replace(/&guild_name=.+/, '')
-    .replace(/&user=.+/, '')
-    .replace(/&[a-z_]*page=.+/, '')
-    .replace(/&prestige=.+/, '')
-    .replace(/&withdraw_amount=.+/, '')
-    .replace(/&tickets=.+/, '')
-    .replace(/&search=.+/, '')
-    .replace(/&target=.+/, '')
-    .replace(/&xcv=[0-9a-f]{32}/, '')
-    .replace(/\?ref=[0-9]+/, '');
-  ga('fsh.set', 'page', page);
-}
-
-function setup() {
-  if (isAuto() || typeof ga === 'undefined') {return;}
-
-  ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
-    userId: playerId(),
-    siteSpeedSampleRate: 10
-  });
-  ga('fshApp.set', 'appName', 'fshApp');
-  ga('fshApp.set', 'appVersion', FSH.version + '(' + FSH.calf + ')');
-  ga('create', 'UA-76488113-2', 'auto', 'fsh', {
-    userId: playerId(),
-    siteSpeedSampleRate: 10
-  });
-  fixupUrl();
-  ga('fsh.send', 'pageview');
-}
-
-function screenview(funcName) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
-  ga('fshApp.send', 'screenview', {screenName: funcName});
-}
-
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +
   '<li><span class="fshLink">Buff Log</span></li>' +
@@ -5235,7 +5501,7 @@ function newGuildLogLink() {
     document.getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
         '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="index.php?cmd=notepad&blank=1&subcmd=newguildlog"' +
+        'href="index.php' + newGuildLogUrl + '"' +
         '>New Guild Log</a></li>');
   }
 }
@@ -6199,226 +6465,113 @@ function updateHCSQuickBuffLinks(selector) {
   );
 }
 
-var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-function formatShortDate(aDate) {
-  var yyyy = aDate.getFullYear();
-  var dd = padZ(aDate.getDate());
-  var ddd = days[aDate.getDay()];
-  var month = months[aDate.getMonth()];
-  var hh = padZ(aDate.getHours());
-  var mm = padZ(aDate.getMinutes());
-  return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
+function hideElement(el) {
+  el.classList.add('fshHide');
 }
 
-function timeBox(nextGainTime, hrsToGo) {
-  var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
-  if (!nextGain) {return;}
-  return '<dd>' +
-    formatShortDate(new Date(now +
-    (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
-    parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
+function hideNodeList(nodeList) {
+  Array.prototype.forEach.call(nodeList, hideElement);
 }
 
-function injectStaminaCalculator() {
-  var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
-  if (!nextGain) {return;}
-  var staminaMouseover =
-    document.getElementById('statbar-stamina-tooltip-stamina');
-  var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
-    staminaMouseover.getElementsByClassName('stat-name')[0]
-      .nextElementSibling.textContent
-  );
-  staminaMouseover.insertAdjacentHTML('beforeend',
-    '<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
-    timeBox(
-      nextGain[0].nextElementSibling.textContent,
-      // get the max hours to still be inside stamina maximum
-      Math.floor(
-        (intValue(stamVals[2]) -
-        intValue(stamVals[1])) /
-        intValue(
-          document.getElementsByClassName('stat-stamina-gainPerHour')[0]
-            .nextElementSibling.textContent
-        )
-      )
-    )
-  );
+function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
+  hideNodeList(parent.querySelectorAll(selector));
 }
 
-function injectLevelupCalculator() {
-  var nextGain = document.getElementsByClassName('stat-xp-nextGain');
-  if (!nextGain) {return;}
-  document.getElementById('statbar-level-tooltip-general')
-    .insertAdjacentHTML('beforeend',
-      '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
-      timeBox(
-        nextGain[0].nextElementSibling.textContent,
-        Math.ceil(
-          intValue(
-            document.getElementsByClassName('stat-xp-remaining')[0]
-              .nextElementSibling.textContent
-          ) /
-          intValue(
-            document.getElementsByClassName('stat-xp-gainPerHour')[0]
-              .nextElementSibling.textContent
-          )
-        )
-      )
-    );
-}
-
-var composeMsg =
-  '<li class="notification"><a href="index.php?cmd=composing"><span' +
-  ' class="notification-icon"></span><p class="notification-content">' +
-  'Composing to do</p></a></li>';
-
-function displayComposeMsg() {
-  document.getElementById('notifications')
-    .insertAdjacentHTML('afterbegin', composeMsg);
-}
-
-function getDoc(data) {
-  if (calf.cmd !== 'composing') {
-    return createDocument(data);
-  }
-  return document;
-}
-
-function parseComposing(data) {
-  var doc = getDoc(data);
-  var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
-  var times = [];
-  var openSlots = doc.getElementsByClassName('composing-potion-time');
-  Array.prototype.forEach.call(openSlots, function(el) {
-    if (el.textContent === 'ETA: Ready to Collect!' ||
-        el.textContent === 'ETA: n/a') {
-      times.push(0);
-    } else {
-      var timeArr = timeRE.exec(el.textContent);
-      var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
-        1000 + now;
-      times.push(milli);
-    }
-  });
-  var eta = Math.min.apply(null, times);
-  if (eta === 0) {
-    if (calf.cmd !== 'composing') {displayComposeMsg();}
-    setValue('needToCompose', true);
+function contactColour(el, obj) {
+  var onMouseOver = el.getAttribute('data-tipped');
+  var lastActivityMinutes =
+    /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+  if (lastActivityMinutes < 2) {
+    el.classList.add(obj.l1);
+  } else if (lastActivityMinutes < 5) {
+    el.classList.add(obj.l2);
   } else {
-    setValue('needToCompose', false);
-    setValue('lastComposeCheck', eta);
+    el.classList.add(obj.l3);
   }
 }
 
-function createSuccess(temp, textStatus) {
-  var potName = temp[temp.selectedIndex].text;
-  var myParent = temp.parentNode;
-  var infoDiv = myParent.previousElementSibling.previousElementSibling;
-  infoDiv.children[0].innerHTML = '';
-  infoDiv.children[0].classList.add('fshPot');
-  infoDiv.children[0].style.backgroundImage = 'url(' + imageServer +
-    '/composing/potions/' + getRandomInt(1, 11) + '_' +
-    getRandomInt(1, 51) + '.gif)';
-  infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
-    potName + '</span>\' Potion';
-  infoDiv.children[3].innerHTML = '';
-  myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
+function guildColour(el) {
+  contactColour(el, {
+    l1: 'fshGreen',
+    l2: 'fshWhite',
+    l3: 'fshGrey'
+  });
 }
 
-function createPotion(temp) { // jQuery
-  retryAjax({
-    cache: false,
-    dataType: 'json',
-    url: 'index.php',
-    data: {
-      cmd: 'composing',
-      subcmd: 'createajax',
-      template_id: temp.value,
-      _rnd: rnd()
+function alliesColour(el) {
+  contactColour(el, {
+    l1: 'fshDodgerBlue',
+    l2: 'fshLightSkyBlue',
+    l3: 'fshPowderBlue'
+  });
+}
+
+var hideBtn = [
+  {
+    condition: function() {return calf.hideGuildInfoTrade;},
+    guildSelector: '#guild-minibox-action-trade',
+    allySelector: '#online-allies-action-trade'
+  },
+  {
+    condition: function() {return calf.hideGuildInfoSecureTrade;},
+    guildSelector: '#guild-minibox-action-secure-trade',
+    allySelector: '#online-allies-action-secure-trade'
+  },
+  {
+    condition: function() {return calf.hideGuildInfoBuff;},
+    guildSelector: '#guild-minibox-action-quickbuff',
+    allySelector: '#online-allies-action-quickbuff'
+  },
+  {
+    condition: function() {return calf.hideGuildInfoMessage;},
+    guildSelector: '#guild-minibox-action-send-message',
+    allySelector: '#online-allies-action-send-message'
+  }
+];
+
+function doHideBtn(context, selector) {
+  hideBtn.forEach(function(el) {
+    if (el.condition()) {
+      hideQuerySelectorAll(context, el[selector]);
     }
-  }).done(function potionDone(data, textStatus) {
-    if (data.error !== '') {
-      temp.parentNode.innerHTML = '<div class="fshScs">' +
-        data.error + '</div>';
-    } else {
-      createSuccess(temp, textStatus);
+  });
+}
+
+function addGuildInfoWidgets() {
+  var guildMembrList = document.getElementById('minibox-guild-members-list');
+  if (!guildMembrList) {return;} // list exists
+  // hide guild info links
+  doHideBtn(guildMembrList, 'guildSelector');
+  if (calf.hideBuffSelected) {
+    hideNodeList(
+      guildMembrList.getElementsByClassName('guild-buff-check-on'));
+    document.getElementById('guild-quick-buff').classList.add('fshHide');
+  }
+  // add coloring for offline time
+  Array.prototype.forEach.call(
+    guildMembrList.getElementsByClassName('player-name'), guildColour);
+  Array.prototype.forEach.call(
+    document.querySelectorAll('#pCR h4'),
+    function(el) {
+      if (el.textContent !== 'Chat') {return;}
+      el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">' +
+        el.textContent + '</a>';
     }
-  });
+  );
 }
 
-function quickCreateBailOut(target) {
-  return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
-}
-
-function quickCreate(evt) {
-  var target = evt.target;
-  if (quickCreateBailOut(target)) {return;}
-  var temp = target.previousElementSibling.previousElementSibling;
-  if (temp && temp.value !== 'none') {
-    createPotion(temp);
+function addOnlineAlliesWidgets() {
+  var onlineAlliesList = document.getElementById('minibox-allies-list');
+  if (!onlineAlliesList) {return;}
+  doHideBtn(onlineAlliesList, 'allySelector');
+  if (calf.hideBuffSelected) {
+    hideNodeList(
+      onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
+    document.getElementById('ally-quick-buff').classList.add('fshHide');
   }
-}
-
-function checkLastCompose() { // jQuery
-  var lastComposeCheck = getValue('lastComposeCheck');
-  if (lastComposeCheck && now < lastComposeCheck) {return;}
-  retryAjax('index.php?cmd=composing').done(function(data) {
-    add(3, parseComposing, [data]);
-  });
-}
-
-function composeAlert() {
-  var needToCompose = getValue('needToCompose');
-  if (needToCompose) {
-    displayComposeMsg();
-    return;
-  }
-  checkLastCompose();
-}
-
-function injectComposeAlert() {
-  if (calf.cmd !== 'composing') {composeAlert();}
-}
-
-function moveButtons() {
-  if (getValue('moveComposingButtons')) {
-    var buttonDiv = document.getElementById('composing-error-dialog')
-      .previousElementSibling;
-    buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-    var top = pCC.getElementsByClassName('composing-level')[0]
-      .parentNode;
-    top.insertAdjacentElement('beforebegin', buttonDiv);
-  }
-}
-
-function injectComposing() {
-  if (!pCC) {return;}
-  if (calf.enableComposingAlert) {
-    parseComposing();
-  }
-
-  var buttons = pCC
-    .querySelectorAll('input[id^=create-]:not(#create-multi)');
-  Array.prototype.forEach.call(buttons, function(el) {
-    el.insertAdjacentHTML('afterend',
-      '&nbsp;[<span class="quickCreate">Quick Create</span>]');
-  });
-  pCC.addEventListener('click', quickCreate);
-  moveButtons();
-}
-
-function composingCreate() {
-  document.getElementById('composing-add-skill')
-    .addEventListener('click', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
-    });
-  document.getElementById('composing-skill-select')
-    .addEventListener('change', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
-    });
+  // add coloring for offline time
+  Array.prototype.forEach.call(
+    onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
 }
 
 var havePrayedMsg =
@@ -6586,113 +6739,73 @@ function injectJoinAllLink() {
   Array.prototype.forEach.call(nodeList, findNewGroup);
 }
 
-function hideElement(el) {
-  el.classList.add('fshHide');
+var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function formatShortDate(aDate) {
+  var yyyy = aDate.getFullYear();
+  var dd = padZ(aDate.getDate());
+  var ddd = days[aDate.getDay()];
+  var month = months[aDate.getMonth()];
+  var hh = padZ(aDate.getHours());
+  var mm = padZ(aDate.getMinutes());
+  return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
 }
 
-function hideNodeList(nodeList) {
-  Array.prototype.forEach.call(nodeList, hideElement);
+function timeBox(nextGainTime, hrsToGo) {
+  var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
+  if (!nextGain) {return;}
+  return '<dd>' +
+    formatShortDate(new Date(now +
+    (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
+    parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
 }
 
-function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
-  hideNodeList(parent.querySelectorAll(selector));
-}
-
-function contactColour(el, obj) {
-  var onMouseOver = el.getAttribute('data-tipped');
-  var lastActivityMinutes =
-    /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-  if (lastActivityMinutes < 2) {
-    el.classList.add(obj.l1);
-  } else if (lastActivityMinutes < 5) {
-    el.classList.add(obj.l2);
-  } else {
-    el.classList.add(obj.l3);
-  }
-}
-
-function guildColour(el) {
-  contactColour(el, {
-    l1: 'fshGreen',
-    l2: 'fshWhite',
-    l3: 'fshGrey'
-  });
-}
-
-function alliesColour(el) {
-  contactColour(el, {
-    l1: 'fshDodgerBlue',
-    l2: 'fshLightSkyBlue',
-    l3: 'fshPowderBlue'
-  });
-}
-
-var hideBtn = [
-  {
-    condition: function() {return calf.hideGuildInfoTrade;},
-    guildSelector: '#guild-minibox-action-trade',
-    allySelector: '#online-allies-action-trade'
-  },
-  {
-    condition: function() {return calf.hideGuildInfoSecureTrade;},
-    guildSelector: '#guild-minibox-action-secure-trade',
-    allySelector: '#online-allies-action-secure-trade'
-  },
-  {
-    condition: function() {return calf.hideGuildInfoBuff;},
-    guildSelector: '#guild-minibox-action-quickbuff',
-    allySelector: '#online-allies-action-quickbuff'
-  },
-  {
-    condition: function() {return calf.hideGuildInfoMessage;},
-    guildSelector: '#guild-minibox-action-send-message',
-    allySelector: '#online-allies-action-send-message'
-  }
-];
-
-function doHideBtn(context, selector) {
-  hideBtn.forEach(function(el) {
-    if (el.condition()) {
-      hideQuerySelectorAll(context, el[selector]);
-    }
-  });
-}
-
-function addGuildInfoWidgets() {
-  var guildMembrList = document.getElementById('minibox-guild-members-list');
-  if (!guildMembrList) {return;} // list exists
-  // hide guild info links
-  doHideBtn(guildMembrList, 'guildSelector');
-  if (calf.hideBuffSelected) {
-    hideNodeList(
-      guildMembrList.getElementsByClassName('guild-buff-check-on'));
-    document.getElementById('guild-quick-buff').classList.add('fshHide');
-  }
-  // add coloring for offline time
-  Array.prototype.forEach.call(
-    guildMembrList.getElementsByClassName('player-name'), guildColour);
-  Array.prototype.forEach.call(
-    document.querySelectorAll('#pCR h4'),
-    function(el) {
-      if (el.textContent !== 'Chat') {return;}
-      el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">' +
-        el.textContent + '</a>';
-    }
+function injectStaminaCalculator() {
+  var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
+  if (!nextGain) {return;}
+  var staminaMouseover =
+    document.getElementById('statbar-stamina-tooltip-stamina');
+  var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
+    staminaMouseover.getElementsByClassName('stat-name')[0]
+      .nextElementSibling.textContent
+  );
+  staminaMouseover.insertAdjacentHTML('beforeend',
+    '<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
+    timeBox(
+      nextGain[0].nextElementSibling.textContent,
+      // get the max hours to still be inside stamina maximum
+      Math.floor(
+        (intValue(stamVals[2]) -
+        intValue(stamVals[1])) /
+        intValue(
+          document.getElementsByClassName('stat-stamina-gainPerHour')[0]
+            .nextElementSibling.textContent
+        )
+      )
+    )
   );
 }
 
-function addOnlineAlliesWidgets() {
-  var onlineAlliesList = document.getElementById('minibox-allies-list');
-  if (!onlineAlliesList) {return;}
-  doHideBtn(onlineAlliesList, 'allySelector');
-  if (calf.hideBuffSelected) {
-    hideNodeList(
-      onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
-    document.getElementById('ally-quick-buff').classList.add('fshHide');
-  }
-  // add coloring for offline time
-  Array.prototype.forEach.call(
-    onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
+function injectLevelupCalculator() {
+  var nextGain = document.getElementsByClassName('stat-xp-nextGain');
+  if (!nextGain) {return;}
+  document.getElementById('statbar-level-tooltip-general')
+    .insertAdjacentHTML('beforeend',
+      '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
+      timeBox(
+        nextGain[0].nextElementSibling.textContent,
+        Math.ceil(
+          intValue(
+            document.getElementsByClassName('stat-xp-remaining')[0]
+              .nextElementSibling.textContent
+          ) /
+          intValue(
+            document.getElementsByClassName('stat-xp-gainPerHour')[0]
+              .nextElementSibling.textContent
+          )
+        )
+      )
+    );
 }
 
 function gameHelpLink() {
@@ -6854,6 +6967,8 @@ function notHuntMode() {
   add(3, injectHomePageTwoLink);
 
   add(3, injectQuickMsgDialogJQ);
+
+  add(4, guildActivity);
 }
 
 function prepareEnv() {
@@ -7173,14 +7288,24 @@ function guildMailbox() {
       '<span class="sendLink">Take All</span>');
 }
 
-function getGuild(guildId$$1) {
+function currentGuildId() {
+  var _guildId;
+  var nodeList = document.body.getElementsByTagName('script');
+  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
+    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
+    if (match) {_guildId = parseInt(match[1], 10);}
+  });
+  return _guildId;
+}
+
+function getGuild(guildId) {
   return retryAjax({
     dataType: 'json',
     url: 'index.php',
     data: {
       cmd: 'export',
       subcmd: 'guild_members',
-      guild_id: guildId$$1
+      guild_id: guildId
     }
   });
 }
@@ -7193,44 +7318,44 @@ function addMembrListToForage(membrList) {
     });
 }
 
-function getGuildMembers(guildId$$1) {
-  return getGuild(guildId$$1).pipe(function membrListToHash(data) {
+function getGuildMembers(guildId) {
+  return getGuild(guildId).pipe(function membrListToHash(data) {
     var membrList = {};
-    membrList[guildId$$1] = {};
-    membrList[guildId$$1].lastUpdate = now;
+    membrList[guildId] = {};
+    membrList[guildId].lastUpdate = now;
     data.forEach(function memberToObject(ele) {
-      membrList[guildId$$1][ele.username] = ele;
+      membrList[guildId][ele.username] = ele;
     });
     return membrList;
   });
 }
 
-function getMembrListFromForage(guildId$$1, membrList) {
-  if (membrList && membrList[guildId$$1] &&
-      membrList[guildId$$1].lastUpdate &&
-      membrList[guildId$$1].lastUpdate > now - 300000) {
+function getMembrListFromForage(guildId, membrList) {
+  if (membrList && membrList[guildId] &&
+      membrList[guildId].lastUpdate &&
+      membrList[guildId].lastUpdate > now - 300000) {
     return membrList;
   }
-  return getGuildMembers(guildId$$1).done(addMembrListToForage);
+  return getGuildMembers(guildId).done(addMembrListToForage);
 }
 
-function guildMembers(force, guildId$$1) {
+function guildMembers(force, guildId) {
   if (force) {
-    return getGuildMembers(guildId$$1).done(addMembrListToForage);
+    return getGuildMembers(guildId).done(addMembrListToForage);
   }
   return getForage('fsh_membrList')
-    .pipe(getMembrListFromForage.bind(null, guildId$$1));
+    .pipe(getMembrListFromForage.bind(null, guildId));
 }
 
-function setHelperMembrList(guildId$$1, membrList) {
-  calf.membrList = membrList[guildId$$1];
+function setHelperMembrList(guildId, membrList) {
+  calf.membrList = membrList[guildId];
   return calf.membrList;
 }
 
 function getMembrList(force) {
-  var guildId$$1 = guildId();
-  return guildMembers(force, guildId$$1)
-    .pipe(setHelperMembrList.bind(null, guildId$$1));
+  var guildId = currentGuildId();
+  return guildMembers(force, guildId)
+    .pipe(setHelperMembrList.bind(null, guildId));
 }
 
 var newSummary = {};
@@ -7708,14 +7833,14 @@ var bazaarItem =
   '<span class="bazaarButton tip-dynamic" style="background-image: ' +
   'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
 
-function testQuant$1() {
+function testBuyAmount() {
   return testQuant(document.getElementById('buy_amount').value);
 }
 
 function select(evt) {
   var target = evt.target;
   if (!target.classList.contains('bazaarButton')) {return;}
-  var theValue = testQuant$1();
+  var theValue = testBuyAmount();
   if (!theValue) {return;}
   document.getElementById('quantity').textContent = theValue;
   ItemId = target.getAttribute('itemid');
@@ -7728,7 +7853,7 @@ function select(evt) {
 }
 
 function quantity() {
-  var theValue = testQuant$1();
+  var theValue = testBuyAmount();
   if (theValue) {
     document.getElementById('quantity').textContent = theValue;
   }
@@ -8094,6 +8219,282 @@ function injectBioWidgets() {
   updateBioCharacters();
 }
 
+function alpha$1(a, b) {
+  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
+  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
+  return 0;
+}
+
+function formatDateTime(aDate) {
+  if (Object.prototype.toString.call(aDate) === '[object Date]' &&
+      !isNaN(aDate.getTime())) {
+    var yyyy = aDate.getFullYear().toString();
+    var mon = padZ(aDate.getMonth() + 1);
+    var dd = padZ(aDate.getDate());
+    var hh = padZ(aDate.getHours());
+    var mm = padZ(aDate.getMinutes());
+    var ss = padZ(aDate.getSeconds());
+    return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+  }
+}
+
+var actBody;
+var selMember;
+var tgCont;
+var memberSelect;
+var myMembers;
+
+function buildOptions() {
+  return '<select name="member">' +
+    '<option value="- All -" selected>- All -</option>' +
+    Object.keys(myMembers).sort(alpha$1).reduce(function(prev, member) {
+      return prev + '<option value="' + member + '">' + member + '</option>';
+    }, '') + '</select>';
+}
+
+function toText(val) {
+  if (typeof val === 'undefined') {return '#DEF';}
+  return val.toLocaleString();
+}
+
+function memberRows() {
+  return Object.keys(myMembers).reduce(function(outside, memberKey) {
+    if (selMember &&
+        selMember !== '- All -' &&
+        selMember !== memberKey) {return outside;}
+    return outside + myMembers[memberKey].reduce(
+      function(inside, activity) {
+        return inside + '<tr>' +
+          '<td>' +
+          formatDateTime(new Date(activity[utc] * 1000)) +
+          '</td>' +
+          '<td>' + memberKey + '</td>' +
+          '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
+          '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
+          '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
+          '<td class="fshRight">' + toText(activity[max]) + '</td>' +
+          '<td class="fshRight">' +
+            Math.floor(activity[cur] / activity[max] * 100) +
+          '</td>' +
+          '<td class="fshRight">' + activity[act] + '</td>' +
+          '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
+          '</tr>';
+      }, '');
+  }, '');
+}
+
+function drawRows() {
+  actBody.innerHTML = memberRows();
+  tgCont.classList.remove('fshSpinner');
+}
+
+function queueDrawRows() {
+  add(3, drawRows);
+}
+
+function myChange(e) {
+  selMember = e.target.value;
+  queueDrawRows();
+}
+
+function initTable(theMembers) {
+  myMembers = theMembers;
+  memberSelect.innerHTML = buildOptions();
+  queueDrawRows();
+}
+
+function makeTg() {
+  var tg = createTable({id: 'tg'});
+  var hrow = tg.createTHead().insertRow(-1);
+  hrow.insertAdjacentHTML('beforeend', '<th>Date</th>');
+
+  var memberHead = createTh({textContent: 'Member'});
+  memberSelect = createDiv();
+  memberHead.appendChild(memberSelect);
+  hrow.appendChild(memberHead);
+
+  hrow.insertAdjacentHTML('beforeend', '<th>Level</th><th>VL</th>' +
+  '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
+  '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
+
+  actBody = createTBody();
+  tg.appendChild(actBody);
+  tg.addEventListener('change', myChange);
+  tgCont = createDiv({className: 'tgCont fshSpinner fshSpinner64'});
+  tgCont.appendChild(tg);
+  return tgCont;
+}
+
+function jsonParse(str) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    // Ignore bad json
+  }
+}
+
+var ioText;
+var saveBtn;
+var resetBtn;
+var io;
+
+function drawRawData(trackerData) {
+  ioText.value = trackerData;
+  io.classList.remove('fshSpinner');
+}
+
+function queueRawData(trackerData) {
+  io.className = 'fshSpinner fshSpinner64';
+  add(4, drawRawData, [trackerData]);
+}
+
+function doReset() {
+  ioText.value = '{"lastUpdate": 0, "members": {}}';
+}
+
+function doSave() {
+  var newData = jsonParse(ioText.value);
+  setForage('fsh_guildActivity', newData)
+    .done(function() {
+      $('#dialog_msg').text('Update successful').dialog('open');
+      initTable(newData.members);
+    })
+    .fail(function(err) {
+      $('#dialog_msg').text(err).dialog('open');
+    });
+}
+
+function customButton(text, fn) {
+  var btn = createButton({
+    className: 'custombutton',
+    textContent: text
+  });
+  btn.addEventListener('click', fn);
+  return btn;
+}
+
+function makeInOut() {
+  io = createDiv({id: 'io'});
+  ioText = createTextArea();
+  ioText.setAttribute('autocapitalize', 'off');
+  ioText.setAttribute('autocomplete', 'off');
+  ioText.setAttribute('autocorrect', 'off');
+  ioText.setAttribute('spellcheck', 'false');
+  saveBtn = customButton('Save', doSave);
+  resetBtn = customButton('Reset', doReset);
+  io.appendChild(ioText);
+  io.appendChild(createBr());
+  io.appendChild(saveBtn);
+  io.appendChild(resetBtn);
+  return io;
+}
+
+var trackerData;
+var tracker;
+var trDialog;
+var acttab2;
+
+function makeDragHandle() {
+  return createUl({
+    className: 'fshMove ui-tabs-nav ui-widget-header ui-corner-all ' +
+      'ui-helper-reset ui-helper-clearfix',
+    innerHTML: '<li class="ui-state-default ui-corner-top">' +
+      '<label class="fsh-tab-label" for="acttab1">' +
+      'Guild Activity Tracker</label></li>' +
+      '<li class="ui-state-default ui-corner-top">' +
+      '<label class="fsh-tab-label" for="acttab2">Import/Export</label></li>' +
+      '<label for="tracker" class="fsh-dialog-close ' +
+      'ui-dialog-titlebar-close">&times;</label>'
+  });
+}
+
+function updateRawData() {
+  acttab2.removeEventListener('change', updateRawData);
+  queueRawData(trackerData);
+}
+
+function makeInnerPopup() {
+  var dialogPopup = createDiv({
+    className: 'fsh-dialog-popup ' +
+      'ui-dialog ui-tabs ui-widget ui-widget-content ui-corner-all',
+    innerHTML: '<input id="acttab1" class="fsh-tab-open" ' +
+      'name="acttabs" checked type="radio">'
+  });
+  acttab2 = createInput({
+    className: 'fsh-tab-open',
+    id: 'acttab2',
+    name: 'acttabs',
+    type: 'radio'
+  });
+  acttab2.addEventListener('change', updateRawData);
+  dialogPopup.appendChild(acttab2);
+  return dialogPopup;
+}
+
+function makePopup() {
+  var ret = makeInnerPopup();
+  var hdl = makeDragHandle();
+  ret.appendChild(hdl);
+  var container = createDiv({className: 'fsh-dialog-content'});
+  container.appendChild(makeTg());
+  container.appendChild(makeInOut());
+  ret.appendChild(container);
+  draggable(hdl, ret);
+  trDialog.appendChild(ret);
+}
+
+function addOverlay() {
+  trDialog.insertAdjacentHTML('beforeend',
+    '<div class="fsh-dialog-overlay">' +
+    '<label class="fsh-dialog-cancel" for="tracker"></label>' +
+    '</div>');
+}
+
+function gotActivity$1(data) {
+  // console.log('guildTracker', data);
+  trackerData = JSON.stringify(data);
+  // var tempAct = transformActivity(data);
+  // trackerData = JSON.stringify(tempAct);
+  initTable(data.members);
+  // initTable(tempAct.members);
+}
+
+function togglePref$2(evt) {
+  if (evt.target.id === 'enableGuildActivityTracker') {
+    setValue('enableGuildActivityTracker',
+      !getValue('enableGuildActivityTracker'));
+  }
+}
+
+function openDialog() {
+  getForage('fsh_guildActivity').done(gotActivity$1);
+  tracker.removeEventListener('change', openDialog);
+  addOverlay();
+  makePopup();
+}
+
+function guildTracker() {
+  var gs = document.querySelector('#pCC img.guild_openGuildStore');
+  var oldTr = gs.parentNode.parentNode;
+  var newTr = createTr();
+  var cellOne = newTr.insertCell(-1);
+  var cellTwo = newTr.insertCell(-1);
+  cellOne.appendChild(gs);
+  cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
+    '&nbsp;<label class="custombutton" for="tracker">Show</label>';
+  newTr.addEventListener('change', togglePref$2);
+  oldTr.parentNode.replaceChild(newTr, oldTr);
+  tracker = createInput({
+    id: 'tracker',
+    className: 'fsh-dialog-open',
+    type: 'checkbox'
+  });
+  tracker.addEventListener('change', openDialog);
+  trDialog = createDiv({className: 'fsh-dialog'});
+  trDialog.appendChild(tracker);
+  document.body.appendChild(trDialog);
+}
+
 function removeGuildAvyImgBorder() {
   document.querySelector('#pCC img[oldtitle$="\'s Logo"]')
     .removeAttribute('style');
@@ -8259,12 +8660,11 @@ function injectGuild() {
   add(3, structureToggle);
   add(3, buffLinks);
   add(3, selfRecallLink);
-
   // Detailed conflict information
   if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo);
   }
-
+  add(4, guildTracker);
 }
 
 function doItemTable(rows) {
@@ -9427,7 +9827,7 @@ function injectMailbox() { // Bad jQuery
     .addEventListener('click', toggleQuickTake, true);
 }
 
-var playerId$3;
+var currentPlayerId$1;
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) {return Number(playerAry[1]);}
@@ -9446,8 +9846,8 @@ function findPlayers(aRow) { // Legacy
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);
 
-  if (firstPlayer && firstPlayerID !== playerId$3 &&
-      secondPlayerID !== playerId$3) {
+  if (firstPlayer && firstPlayerID !== currentPlayerId$1 &&
+      secondPlayerID !== currentPlayerId$1) {
     for (var j = 0; j < 3; j += 1) {
       aRow.cells[j].removeAttribute('class');
     }
@@ -9504,7 +9904,7 @@ function guildLogWidgetsEnabled() { // Legacy
   messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
     '(Guild Log messages not involving self are dimmed!)</span>';
 
-  playerId$3 = playerId();
+  currentPlayerId$1 = playerId();
 
   for (var i = 1; i < logTable.rows.length; i += 2) {
     var aRow = logTable.rows[i];
@@ -9512,7 +9912,7 @@ function guildLogWidgetsEnabled() { // Legacy
   }
 }
 
-function addGuildLogWidgets() { // Legacy
+function addGuildLogWidgets() {
   if (getValue('hideNonPlayerGuildLogMessages')) {
     guildLogWidgetsEnabled();
   }
@@ -9580,60 +9980,6 @@ function addLogColoring(logScreen, dateColumn) { // Legacy
   var chatTable = findChatTable();
   if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
 }
-
-var guildLogFilter =
-  '<table id="fshNewGuildLog" class="fshInvFilter"><thead><tr>' +
-  '<th colspan="11"><b>Guild Log Version 4</b></th>' +
-  '<th colspan="3"><span id="rfsh" class="sendLink">Reset</span> ' +
-  '<a href="index.php?cmd=guild&subcmd=log" class="sendLink">' +
-  'Old Guild Log</a></th>' +
-  '</tr></thead><tbody>' +
-  '<tr><td rowspan="3"><b>&nbsp;Filters:</b></td>' +
-  '<td class="fshRight">&nbsp;Potions:</td>' +
-  '<td><input id="fshPotion" type="checkbox" item="1"/></td>' +
-  '<td class="fshRight">&nbsp;Store/Recalls:</td>' +
-  '<td><input id="fshStore" type="checkbox" item="2"/></td>' +
-  '<td class="fshRight">&nbsp;Relics:</td>' +
-  '<td><input id="fshRelic" type="checkbox" item="4"/></td>' +
-  '<td class="fshRight">&nbsp;Mercenaries:</td>' +
-  '<td><input id="fshMerc" type="checkbox" item="5"/></td>' +
-  '<td class="fshRight">&nbsp;Group Combats:</td>' +
-  '<td><input id="fshGroup" type="checkbox" item="6"/></td>' +
-  '<td colspan="3">&nbsp;</td>' +
-  '</tr><tr>' +
-  '<td class="fshRight">&nbsp;Donations:</td>' +
-  '<td><input id="fshDonation" type="checkbox" item="7"/></td>' +
-  '<td class="fshRight">&nbsp;Rankings:</td>' +
-  '<td><input id="fshRank" type="checkbox" item="8"/></td>' +
-  '<td class="fshRight">&nbsp;GvGs:</td>' +
-  '<td><input id="fshGvG" type="checkbox" item="9"/></td>' +
-  '<td class="fshRight">&nbsp;Tag/UnTags:</td>' +
-  '<td><input id="fshTag" type="checkbox" item="3"/></td>' +
-  '<td class="fshRight">&nbsp;Titans:</td>' +
-  '<td><input id="fshTitan" type="checkbox" item="10"/></td>' +
-  '<td class="fshRight">&nbsp;Other:</td>' +
-  '<td><input id="fshOther" type="checkbox" item="0"/></td>' +
-  '<td>&nbsp;</td>' +
-  '</tr><tr>' +
-  '<td colspan="2">' +
-  '&nbsp;[<span id="fshAll" class="fshLink">Select All</span>]</td>' +
-  '<td colspan="2">' +
-  '&nbsp;[<span id="fshNone" class="fshLink">Select None</span>]</td>' +
-  '<td colspan="9"></td>' +
-  '</tr><tr><td id="fshOutput" class="fshBlue" colspan="14">' +
-  'Loading Page 1 ...</td></tr>' +
-  '</tbody></table>' +
-  '<table id="fshInjectHere">' +
-  '</table>';
-var headerRow = '<tbody><tr>' +
-  '<td class="header" width="16">&nbsp;</td>' +
-  '<td class="header" width="20%">Date</td>' +
-  '<td class="header" width="80%">Message</td></tr></tbody>';
-
-var defChecks = [true, true, true, true, true, true,
-  true, true, true, true, true];
-var noChecks = [false, false, false, false, false, false,
-  false, false, false, false, false];
 
 var depoRe = /deposited ([,0-9]+) FallenSword Points into the guild./;
 var lookup = [
@@ -9878,6 +10224,60 @@ function rowProfile(data) {
   }
   return 0;
 }
+
+var guildLogFilter =
+  '<table id="fshNewGuildLog" class="fshInvFilter"><thead><tr>' +
+  '<th colspan="11"><b>Guild Log Version 4</b></th>' +
+  '<th colspan="3"><span id="rfsh" class="sendLink">Reset</span> ' +
+  '<a href="index.php?cmd=guild&subcmd=log" class="sendLink">' +
+  'Old Guild Log</a></th>' +
+  '</tr></thead><tbody>' +
+  '<tr><td rowspan="3"><b>&nbsp;Filters:</b></td>' +
+  '<td class="fshRight">&nbsp;Potions:</td>' +
+  '<td><input id="fshPotion" type="checkbox" item="1"/></td>' +
+  '<td class="fshRight">&nbsp;Store/Recalls:</td>' +
+  '<td><input id="fshStore" type="checkbox" item="2"/></td>' +
+  '<td class="fshRight">&nbsp;Relics:</td>' +
+  '<td><input id="fshRelic" type="checkbox" item="4"/></td>' +
+  '<td class="fshRight">&nbsp;Mercenaries:</td>' +
+  '<td><input id="fshMerc" type="checkbox" item="5"/></td>' +
+  '<td class="fshRight">&nbsp;Group Combats:</td>' +
+  '<td><input id="fshGroup" type="checkbox" item="6"/></td>' +
+  '<td colspan="3">&nbsp;</td>' +
+  '</tr><tr>' +
+  '<td class="fshRight">&nbsp;Donations:</td>' +
+  '<td><input id="fshDonation" type="checkbox" item="7"/></td>' +
+  '<td class="fshRight">&nbsp;Rankings:</td>' +
+  '<td><input id="fshRank" type="checkbox" item="8"/></td>' +
+  '<td class="fshRight">&nbsp;GvGs:</td>' +
+  '<td><input id="fshGvG" type="checkbox" item="9"/></td>' +
+  '<td class="fshRight">&nbsp;Tag/UnTags:</td>' +
+  '<td><input id="fshTag" type="checkbox" item="3"/></td>' +
+  '<td class="fshRight">&nbsp;Titans:</td>' +
+  '<td><input id="fshTitan" type="checkbox" item="10"/></td>' +
+  '<td class="fshRight">&nbsp;Other:</td>' +
+  '<td><input id="fshOther" type="checkbox" item="0"/></td>' +
+  '<td>&nbsp;</td>' +
+  '</tr><tr>' +
+  '<td colspan="2">' +
+  '&nbsp;[<span id="fshAll" class="fshLink">Select All</span>]</td>' +
+  '<td colspan="2">' +
+  '&nbsp;[<span id="fshNone" class="fshLink">Select None</span>]</td>' +
+  '<td colspan="9"></td>' +
+  '</tr><tr><td id="fshOutput" class="fshBlue" colspan="14">' +
+  'Loading Page 1 ...</td></tr>' +
+  '</tbody></table>' +
+  '<table id="fshInjectHere">' +
+  '</table>';
+var headerRow = '<tbody><tr>' +
+  '<td class="header" width="16">&nbsp;</td>' +
+  '<td class="header" width="20%">Date</td>' +
+  '<td class="header" width="80%">Message</td></tr></tbody>';
+
+var defChecks = [true, true, true, true, true, true,
+  true, true, true, true, true];
+var noChecks = [false, false, false, false, false, false,
+  false, false, false, false, false];
 
 var options$1 = {};
 var fshNewGuildLog;
@@ -10194,7 +10594,7 @@ function doPrompt(aLink) {
   var onclick = aLink.getAttribute('onclick');
   var warn = onclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
-  confirm('Remove Skill', warn, function() {
+  jConfirm('Remove Skill', warn, function() {
     doDebuff(aLink);
   });
 }
@@ -10693,7 +11093,7 @@ function profileRenderBio(self) {
   bioCell.addEventListener('click', bioEvtHdl);
 }
 
-var guildId$1;
+var guildId;
 var currentGuildRelationship;
 var guildMessages = {
   self: {
@@ -10791,7 +11191,7 @@ function guildRelationship(_txt) {
 
 function foundGuildLink(aLink) {
   var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-  if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
+  if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
   if (currentGuildRelationship) {
     aLink.parentNode.classList.add(
@@ -10849,7 +11249,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
       '" style="background-image: url(\'' + imageServer +
-      '/guilds/' + guildId$1 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
+      '/guilds/' + guildId + '_mini.jpg\');"></a>&nbsp;&nbsp;';
   }
   newhtml += '</div>';
   avyImg.insertAdjacentHTML('afterend', newhtml);
@@ -11250,12 +11650,6 @@ function eventHandlers$1(evt) {
   }
 }
 
-function alpha$1(a, b) {
-  if (a.toLowerCase() < b.toLowerCase()) {return -1;}
-  if (a.toLowerCase() > b.toLowerCase()) {return 1;}
-  return 0;
-}
-
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
   pottab1: false,
@@ -11319,7 +11713,7 @@ function buildMap() {
   potOpts.myMap = sortKeys(potOpts.myMap);
 }
 
-function buildOptions(select) {
+function buildOptions$1(select) {
   return '<select name="' + select +
     '"><option value="Ignore">Ignore</option>' +
     Object.keys(potOpts.myMap).reduce(function(prev, pot) {
@@ -11331,7 +11725,7 @@ function buildOptions(select) {
 function drawMapping() {
   mapping.innerHTML = '<table><tbody>' +
     Object.keys(potOpts.myMap).reduce(function(prev, pot) {
-      var options = buildOptions(pot);
+      var options = buildOptions$1(pot);
       return prev + '<tr height="19px"><td>' + pot + '</td><td>' + options +
         '</td></tr>';
     }, '') + '<tr><td></td><td class="fshCenter">' +
@@ -11389,7 +11783,7 @@ function onChange(e) {
   }
 }
 
-function doReset() {
+function doReset$1() {
   resetMap();
   setForage(storeMap, potOpts);
   drawMapping();
@@ -11405,7 +11799,7 @@ function saveState(self) {
 var evtHdl$1 = [
   {
     test: function(self) {return self.id === 'fshReset';},
-    act: doReset
+    act: doReset$1
   },
   {
     test: function(self) {
@@ -11455,7 +11849,7 @@ function gotMap(data) {
   thresholds = createThresholds();
   panels.appendChild(thresholds);
 
-  var myCell = pCC.firstElementChild.insertRow(2).insertCell(-1);
+  var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   myCell.addEventListener('change', onChange);
   myCell.addEventListener('click', onClick);
   myCell.addEventListener('input', onInput);
@@ -12089,18 +12483,18 @@ function failFilter(jqXhr) {
   return $.Deferred().resolve(null, jqXhr).promise();
 }
 
-function addPlayerObjectToGuild(guildId$$1, obj) {
-  if (guilds[guildId$$1]) {
-    guilds[guildId$$1].push(obj);
+function addPlayerObjectToGuild(guildId, obj) {
+  if (guilds[guildId]) {
+    guilds[guildId].push(obj);
   } else {
-    guilds[guildId$$1] = [obj];
+    guilds[guildId] = [obj];
   }
 }
 
 function addPlayerToGuild(tbl, playerName$$1) {
   var guildHRef = tbl.rows[0].cells[0].firstElementChild.href;
-  var guildId$$1 = /guild_id=(\d+)/.exec(guildHRef)[1];
-  addPlayerObjectToGuild(guildId$$1, {dom: tbl, player: playerName$$1});
+  var guildId = /guild_id=(\d+)/.exec(guildHRef)[1];
+  addPlayerObjectToGuild(guildId, {dom: tbl, player: playerName$$1});
 }
 
 function stackAjax(prm, playerName$$1, tbl) {
@@ -12111,9 +12505,9 @@ function stackAjax(prm, playerName$$1, tbl) {
 }
 
 function parseGuild(data) {
-  var guildId$$1 = data.r.id;
+  var guildId = data.r.id;
   data.r.members.forEach(function(member) {
-    guilds[guildId$$1].forEach(function(player) {
+    guilds[guildId].forEach(function(player) {
       if (member.name === player.player) {
         doOnlineDot(player.dom, {
           last_login: (nowSecs - member.last_activity).toString(),
@@ -12136,11 +12530,11 @@ function findOnlinePlayers() { // jQuery
       stackAjax(prm, playerName$$1, tbl);
     }
   });
-  Object.keys(guilds).forEach(function(guildId$$1) {
-    if (guilds[guildId$$1].length === 1) {
-      stackAjax(prm, guilds[guildId$$1][0].player, guilds[guildId$$1][0].dom);
+  Object.keys(guilds).forEach(function(guildId) {
+    if (guilds[guildId].length === 1) {
+      stackAjax(prm, guilds[guildId][0].player, guilds[guildId][0].dom);
     } else {
-      guildView(guildId$$1).done(parseGuild);
+      guildView(guildId).done(parseGuild);
     }
   });
   $.when.apply($, prm).done(function() {
@@ -12705,19 +13099,21 @@ function getGroupStats(viewStats) {
   return retryAjax(viewStats).pipe(parseGroupStats);
 }
 
-function parseMercStats(html) {
-  var doc = createDocument(html);
-  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
-  var mercTotal = [0, 0, 0, 0, 0];
-  Array.prototype.forEach.call(mercElements, function(merc) {
-    var mouseoverText = merc.dataset.tipped;
-    mercTotal = mercTotal.map(function(el, i) {
-      return el + Number(mercRE[i].exec(mouseoverText)[1]);
-    });
-  });
-  mercTotal = mercTotal.map(function(el) {
-    return Math.round(el * defenderMultiplier);
-  });
+function addMercStat(mouseover, stat, i) {
+  return stat +
+    Math.round(Number(mercRE[i].exec(mouseover)[1]) * defenderMultiplier);
+}
+
+function addMercStats(prev, merc) {
+  return prev.map(addMercStat.bind(null, merc.dataset.tipped));
+}
+
+function addAllMercStats(mercElements) {
+  return Array.prototype.reduce.call(mercElements, addMercStats,
+    [0, 0, 0, 0, 0]);
+}
+
+function transform(mercTotal) {
   return {
     attack: mercTotal[0],
     defense: mercTotal[1],
@@ -12725,6 +13121,13 @@ function parseMercStats(html) {
     damage: mercTotal[3],
     hp: mercTotal[4]
   };
+}
+
+function parseMercStats(html) {
+  var doc = createDocument(html);
+  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
+  var mercTotal = addAllMercStats(mercElements);
+  return transform(mercTotal);
 }
 
 function getMercStats() {
@@ -14505,7 +14908,7 @@ function hasDblr() { // Legacy
 function getKillStreak(responseText) { // Hybrid
   var doc = createDocument(responseText);
   var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
-  log('killStreakLocation', killStreakLocation);
+  log('killStreakLocation', killStreakLocation); // TODO WTF?
   var playerKillStreakValue;
   if (killStreakLocation.length > 0) {
     playerKillStreakValue = intValue(killStreakLocation.text());
@@ -15036,65 +15439,6 @@ function storePlayerUpgrades() { // Legacy
   injectPoints();
 }
 
-function formatDateTime(aDate) {
-  var yyyy = aDate.getFullYear().toString();
-  var mon = padZ(aDate.getMonth() + 1);
-  var dd = padZ(aDate.getDate());
-  var hh = padZ(aDate.getHours());
-  var mm = padZ(aDate.getMinutes());
-  var ss = padZ(aDate.getSeconds());
-  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
-}
-
-function rejected(timeStamp, buffsNotCast, buffLog) {
-  if (buffsNotCast) {
-    return timeStamp + ' <span style="color: red;">' +
-      buffsNotCast[0] + '</span><br>' + buffLog;
-  }
-  return buffLog;
-}
-
-function getStamUsed(buffCast) {
-  for (var j = 0; j < buffList.length; j += 1) {
-    if (buffList[j].name === buffCast[1]) {
-      return buffList[j].stam.toString();
-    }
-  }
-  return '-';
-}
-
-function successfull(timeStamp, buffCast, buffLog) {
-  if (buffCast) {
-    return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
-      ' stamina) <br>' + buffLog;
-  }
-  return buffLog;
-}
-
-function buffResult(_buffLog) {
-  var buffLog = _buffLog;
-  if (!buffLog) {buffLog = '';}
-  var timeStamp = formatDateTime(new Date());
-  var buffsAttempted = document.getElementById('quickbuff-report')
-    .innerHTML.split('<p>');
-  var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
-    ' higher level is currently active on \'(\\w*)\'');
-  var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
-    'activated on \'(\\w*)\'');
-  for (var i = 0; i < buffsAttempted.length; i += 1) {
-    var buffCast = buffsCastRE.exec(buffsAttempted[i]);
-    var buffNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
-    buffLog = successfull(timeStamp, buffCast, buffLog);
-    buffLog = rejected(timeStamp, buffNotCast, buffLog);
-  }
-  setForage('fsh_buffLog', buffLog);
-}
-
-function updateBuffLog() {
-  if (!getValue('keepBuffLog')) {return;}
-  getForage('fsh_buffLog').done(buffResult);
-}
-
 var normalLink;
 var seasonLink;
 var activeLink;
@@ -15259,6 +15603,55 @@ function injectQuestTracker() {
   injectHere.insertAdjacentHTML('beforeend', guideButtons(questID, questName));
 }
 
+function rejected(timeStamp, buffsNotCast, buffLog) {
+  if (buffsNotCast) {
+    return timeStamp + ' <span style="color: red;">' +
+      buffsNotCast[0] + '</span><br>' + buffLog;
+  }
+  return buffLog;
+}
+
+function getStamUsed(buffCast) {
+  for (var j = 0; j < buffList.length; j += 1) {
+    if (buffList[j].name === buffCast[1]) {
+      return buffList[j].stam.toString();
+    }
+  }
+  return '-';
+}
+
+function successfull(timeStamp, buffCast, buffLog) {
+  if (buffCast) {
+    return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
+      ' stamina) <br>' + buffLog;
+  }
+  return buffLog;
+}
+
+function buffResult(_buffLog) {
+  var buffLog = _buffLog;
+  if (!buffLog) {buffLog = '';}
+  var timeStamp = formatDateTime(new Date());
+  var buffsAttempted = document.getElementById('quickbuff-report')
+    .innerHTML.split('<p>');
+  var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
+    ' higher level is currently active on \'(\\w*)\'');
+  var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
+    'activated on \'(\\w*)\'');
+  for (var i = 0; i < buffsAttempted.length; i += 1) {
+    var buffCast = buffsCastRE.exec(buffsAttempted[i]);
+    var buffNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
+    buffLog = successfull(timeStamp, buffCast, buffLog);
+    buffLog = rejected(timeStamp, buffNotCast, buffLog);
+  }
+  setForage('fsh_buffLog', buffLog);
+}
+
+function updateBuffLog() {
+  if (!getValue('keepBuffLog')) {return;}
+  getForage('fsh_buffLog').done(buffResult);
+}
+
 var unknown = [
   {
     condition: function() {
@@ -15291,10 +15684,10 @@ var unknown = [
   },
   // {
   //   condition: function() {
-  //     return system.findNode('//a[.="Back to Scavenging"]');
+  //     return findNode('//a[.="Back to Scavenging"]');
   //   },
   //   result: function() {
-  //     fshGa.screenview('unknown.scavenging.injectScavenging');
+  //     screenview('unknown.scavenging.injectScavenging');
   //     FSH.scavenging.injectScavenging(); // Is this used???
   //   }
   // },
@@ -15432,7 +15825,7 @@ function toggleHeaderClass() {
   });
 }
 
-function togglePref$2() {
+function togglePref$3() {
   collapseNewsArchive = !collapseNewsArchive;
   setValue('collapseNewsArchive', collapseNewsArchive);
   if (collapseNewsArchive) {collapseAll();} else {expandAll();}
@@ -15444,7 +15837,7 @@ function setupPref$1(rowInjector) {
   rowInjector.insertAdjacentHTML('afterend',
     simpleCheckbox('collapseNewsArchive'));
   document.getElementById('collapseNewsArchive')
-    .addEventListener('click', togglePref$2);
+    .addEventListener('click', togglePref$3);
 }
 
 function viewArchive() {
@@ -15453,849 +15846,6 @@ function viewArchive() {
   setupPref$1(theTables[0].rows[2]);
   Array.prototype.forEach.call(theTables[2].rows, doTagging);
   theTables[2].addEventListener('click', evtHdl$3);
-}
-
-function cancelAllAH() { // jQuery
-  var cancelButtons = document.getElementById('resultRows')
-    .getElementsByClassName('auctionCancel');
-  if (cancelButtons.length === 0) {return;}
-  var prm = [];
-  for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
-    var cancelButton = cancelButtons[i];
-    var itemImage = cancelButton.parentNode.parentNode.firstElementChild
-      .firstElementChild;
-    cancelButton.outerHTML = '<img src="' + imageServer +
-      '/skin/loading.gif" width="14" height="14">';
-    prm.push(
-      retryAjax({
-        url: 'index.php?cmd=auctionhouse&subcmd=cancel',
-        data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
-      })
-    );
-  }
-  $.when.apply($, prm).done(function() {
-    document.getElementById('refresh').click();
-  });
-}
-
-function injectAuctionHouse() {
-  if (!pCC) {return;}
-  if (getValue('autoFillMinBidPrice')) {
-    document.getElementById('auto-fill').checked = true;
-  }
-  document.getElementById('sort0').click();
-  var cancelAll = createSpan({
-    className: 'smallLink',
-    textContent: 'Cancel All'
-  });
-  var fill = document.getElementById('fill').parentNode.parentNode
-    .nextElementSibling.firstElementChild;
-  fill.classList.add('fshCenter');
-  fill.insertAdjacentHTML('afterbegin', ']');
-  fill.insertAdjacentElement('afterbegin', cancelAll);
-  fill.insertAdjacentHTML('afterbegin', '[');
-  cancelAll.addEventListener('click', cancelAllAH);
-}
-
-function quickCreate$1() {
-  perfFilter('auction');
-}
-
-var playerBank = {
-  headText: 'Bank',
-  appLink: true,
-  depoPos: 2,
-  balPos: 1,
-  data: {
-    cmd: 'bank',
-    subcmd: 'transaction'
-  },
-  initWithdraw: ''
-};
-var guildBank = {
-  headText: 'Guild Bank',
-  appLink: false,
-  depoPos: 3,
-  balPos: 2,
-  data: {
-    cmd: 'guild',
-    subcmd: 'bank',
-    subcmd2: 'transaction'
-  },
-  initWithdraw: '1'
-};
-var bankSettings;
-
-function doInfoBox(infoBox) { // jQuery
-  var target = $('#pCC #info-msg');
-  if (target.length === 0) {
-    $('#pCC').prepend(infoBox.closest('table'));
-  } else {
-    target.closest('table').replaceWith(infoBox.closest('table'));
-  }
-}
-
-function disableDepo(o) { // jQuery
-  if ($('#pCC b').eq(o.depoPos).text() === '0') {
-    $('#pCC input[value="Deposit"]').prop('disabled', true);
-  }
-}
-
-function updateDepoAmount(o, doc) { // jQuery
-  if (o.data.deposit_amount !== '1') {
-    $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
-  } else {
-    $('#pCC #deposit_amount').val('1');
-  }
-}
-
-function transResponse(response) { // jQuery
-  var doc = createDocument(response);
-  var infoBox = $('#pCC #info-msg', doc);
-  if (infoBox.length === 0) {return;}
-  doInfoBox(infoBox);
-  $('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
-  $('#pH #statbar-gold-tooltip-general dd').text(function(index) {
-    return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
-  });
-  var o = bankSettings;
-  $('#pCC b').slice(o.balPos).text(function(index) {
-    return $('#pCC b', doc).slice(o.balPos).eq(index).text();
-  });
-  disableDepo(o);
-  updateDepoAmount(o, doc);
-  $('#pCC #withdraw_amount').val(o.initWithdraw);
-}
-
-function invalidAmount(o, amount) { // jQuery
-  return $('#pCC b').eq(o.depoPos).text() === '0' ||
-    !$.isNumeric(amount) || amount < 1;
-}
-
-function doAjax$1(oData) {
-  retryAjax({url: 'index.php', data: oData}).done(transResponse);
-}
-
-function bankDeposit(e) { // jQuery
-  e.preventDefault();
-  var o = bankSettings;
-  var amount = $('#pCC #deposit_amount').val();
-  if (invalidAmount(o, amount)) {return;}
-  o.data.mode = 'deposit';
-  o.data.deposit_amount = amount;
-  doAjax$1(o.data);
-}
-
-function bankWithdrawal(e) { // jQuery
-  e.preventDefault();
-  var o = bankSettings;
-  var amount = $('#pCC #withdraw_amount').val();
-  if (!$.isNumeric(amount) || amount < 1) {return;}
-  o.data.mode = 'withdraw';
-  o.data.withdraw_amount = amount;
-  doAjax$1(o.data);
-}
-
-function linkToGuildBank(o, bank) { // jQuery
-  if (o.appLink) {
-    bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
-      '<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
-      '</td></tr>');
-  }
-}
-
-function captureButtons(o, depo, withdraw) { // jQuery
-  if ($('#pCC b').eq(o.depoPos).text() === '0') { // Check Deposits Available
-    depo.prop('disabled', true);
-  } else {
-    depo.click(bankDeposit);
-  }
-  withdraw.click(bankWithdrawal);
-}
-
-function appLink(o, bank) { // jQuery
-  linkToGuildBank(o, bank);
-  var depo = $('#pCC input[value="Deposit"]');
-  if (depo.length !== 1) {return;}
-  var withdraw = $('#pCC input[value="Withdraw"]');
-  if (withdraw.length !== 1) {return;}
-  captureButtons(o, depo, withdraw);
-}
-
-function ajaxifyBank() { // jQuery
-  var o = bankSettings;
-  var bank = $('#pCC b');
-  if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
-    appLink(o, bank);
-  }
-}
-
-function injectGuildBank() {
-  bankSettings = guildBank;
-  ajaxifyBank();
-}
-
-function injectBank() {
-  bankSettings = playerBank;
-  ajaxifyBank();
-}
-
-var invItems$2;
-var type;
-var itemId;
-
-function tickElement(o, el) {
-  el.checked = !el.disabled && !el.checked;
-}
-
-var types = [
-  {
-    c: function() {return type === 'guild';},
-    r: function(o, el) {
-      el.checked = !el.disabled && invItems$2[o.invid].guild_tag !== '-1';
-    }
-  },
-  {
-    c: function(o) {
-      return type === 'item' && invItems$2[o.invid].item_id === itemId;
-    },
-    r: tickElement
-  },
-  {
-    c: function() {return type === 'checkAll';},
-    r: tickElement
-  }
-];
-
-function testType(o, el) {
-  types.some(function(test) {
-    if (test.c(o)) {
-      test.r(o, el);
-      return true;
-    }
-    return false;
-  });
-}
-
-function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
-  invItems$2 = invItems_;
-  type = type_;
-  itemId = itemId_;
-  itemsAry.forEach(function(o) {
-    var tr = o.injectHere.parentNode;
-    if (tr.classList.contains('fshHide')) {return;}
-    var el = o.el.parentNode.parentNode.previousElementSibling
-      .firstElementChild;
-    testType(o, el);
-  });
-}
-
-function makeFolderSpans$1(folders) {
-  return '<span class="fshLink folder" data-folder="0">All</span>' +
-    ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
-    Object.keys(folders).reduce(function(prev, key) {
-      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
-        'data-folder="' + key + '">' + folders[key] + '</span>';
-    }, '');
-}
-
-function extraButtons() {
-  var tRows = pCC.getElementsByTagName('table')[0].rows;
-  tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
-    '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
-}
-
-function doFolderButtons(folders) {
-  if (calf.subcmd2 === 'storeitems') {
-    var formNode = pCC.getElementsByTagName('form')[0];
-    var tr = createTr({className: 'fshCenter'});
-    var insertHere = createTd({colSpan: 3});
-    tr.appendChild(insertHere);
-    formNode.parentNode.insertBefore(tr, formNode);
-    insertHere.innerHTML = makeFolderSpans$1(folders);
-    extraButtons();
-  }
-}
-
-var insertHere;
-
-function showHideLabel(pref) {
-  if (pref) {return 'Hide';}
-  return 'Show';
-}
-
-function doToggleButtons(showExtraLinks, showQuickDropLinks) {
-  // Option toggle buttons for both screens
-  if (!insertHere) {
-    insertHere = pCC.getElementsByTagName('form')[0]
-      .previousElementSibling.firstElementChild;
-  }
-  var inject = '[<span id="fshShowExtraLinks" class="sendLink">' +
-    showHideLabel(showExtraLinks) +
-    ' AH and UFSG links</span>]&nbsp;' +
-    '[<span id="fshShowQuickDropLinks" class="sendLink">' +
-    showHideLabel(showQuickDropLinks) +
-    ' Quick Drop links</span>]&nbsp;';
-  if (calf.subcmd2 === 'storeitems') {
-    inject += '[<span id="fshSelectAllGuildLocked" class="sendLink">' +
-      ' Select All Guild Locked</span>]&nbsp;';
-  }
-  insertHere.innerHTML = inject;
-}
-
-function getItemImg(pCC) {
-  var allTables = pCC.getElementsByTagName('table');
-  var lastTable = allTables[allTables.length - 1];
-  return lastTable.getElementsByTagName('img');
-}
-
-function hideFolders$1(itemsAry, invItems, self) {
-  var folderId = self.dataset.folder;
-  itemsAry.forEach(function(o) {
-    o.el.parentNode.parentNode.previousElementSibling.firstElementChild
-      .checked = false;
-    var tr = o.injectHere.parentNode;
-    var separator = tr.nextElementSibling;
-    if (folderId === '0') {
-      tr.classList.remove('fshHide');
-      separator.classList.remove('fshHide');
-    } else {
-      var folder = invItems[o.invid].folder_id;
-      var force = folderId !== folder;
-      toggleForce(tr, force);
-      toggleForce(separator, force);
-    }
-  });
-}
-
-function injectMoveItems() {
-  var flrRow = pCC.getElementsByTagName('form')[0]
-    .nextElementSibling.nextElementSibling.nextElementSibling;
-  var folders = flrRow.getElementsByTagName('img');
-  var flrEnabled;
-  var oFlr;
-  var options = '<tr><td class="fshCenter">Move selected items to: ' +
-    '<select name="folder" id="selectFolderId" class="customselect">';
-  Array.prototype.forEach.call(folders, function(e) {
-    var src = e.getAttribute('src');
-    if (src.indexOf('/folder_on.gif') !== -1) {flrEnabled = true;}
-    if (src.indexOf('/folder.gif') !== -1) {
-      oFlr = true;
-      options += '<option value=' + e.parentNode.href
-        .match(/&folder_id=(-*\d+)/i)[1] + '>' +
-        e.parentNode.parentNode.textContent + '</option>';
-    }
-  });
-  if (!flrEnabled || !oFlr) {return;}
-  options += '</select>&nbsp;<input type="button" class="custombutton" ' +
-    'id="fshMove" value="Move"></td></tr>';
-  flrRow.insertAdjacentHTML('afterend', options);
-}
-
-function moveItemsToFolder(itemsAry) { // jQuery.min
-  var folderId = document.getElementById('selectFolderId').value;
-  var batchNo;
-  var counter = 0;
-  var invList = [];
-  var prm = [];
-  itemsAry.forEach(function(o) {
-    var el = o.injectHere.previousElementSibling.previousElementSibling
-      .firstElementChild;
-    if (el.checked) {
-      batchNo = Math.floor(counter / 50);
-      invList[batchNo] = fallback(invList[batchNo], []);
-      invList[batchNo].push(o.invid);
-      counter += 1;
-      if (counter % 50 === 0) {
-        prm.push(moveItem(invList[batchNo], folderId));
-      }
-    }
-  });
-  if (counter % 50 !== 0) {
-    prm.push(moveItem(invList[batchNo], folderId));
-  }
-  $.when.apply($, prm).done(function() {location.reload();});
-}
-
-function anotherSpinner$1(self) {
-  self.innerHTML = '<img class="quickActionSpinner" src="' +
-    imageServer +
-    '/skin/loading.gif" width="15" height="15">';
-}
-
-function quickAction(self, fn, success, otherClass) { // jQuery.min
-  self.className = 'quickAction';
-  var itemInvId = self.getAttribute('itemInvId');
-  fn([itemInvId]).done(function(data) {
-    if (data.r === 1) {return;}
-    self.style.color = 'green';
-    self.innerHTML = success;
-  });
-  $(self).qtip('hide');
-  anotherSpinner$1(self);
-  var theTd = self.parentNode;
-  var otherButton = theTd.querySelector(otherClass);
-  if (otherButton) {
-    otherButton.className = 'quickAction';
-    otherButton.innerHTML = '';
-  }
-  var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
-  checkbox.checked = false;
-  checkbox.disabled = true;
-}
-
-var disableItemColoring;
-var showExtraLinks;
-var showQuickDropLinks$1;
-var showQuickSendLinks$1;
-var extraLinks;
-var paintCount;
-var itemsAry;
-var checkAll;
-var itemsHash;
-var dropLinks;
-var invItems$1;
-var colouring;
-var sendLinks;
-
-function afterbegin(o, item) {
-  if (fallback(extraLinks, !showExtraLinks)) {
-    return;
-  }
-  var pattern = '<span><span class="aHLink">';
-  if (!item.bound) {
-    pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
-      encodeURIComponent(item.item_name) + '">AH</a>]';
-  }
-  pattern += '</span>[<a href="https://guide.fallensword.com/' +
-    'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
-    '" target="_blank">UFSG</a>]</span>';
-  o.injectHere.insertAdjacentHTML('afterbegin', pattern);
-}
-
-var buildTrailer = [
-  {
-    condition: function(item) {
-      return !checkAll && itemsHash[item.item_id] !== 1;
-    },
-    result: function(o, item) {
-      return ' [<span linkto="' + item.item_id +
-        '" class="fshLink">Check all</span>]';
-    }
-  },
-  {
-    condition: function(item) {
-      return !sendLinks && showQuickSendLinks$1 &&
-        !item.bound;
-    },
-    result: function(o) {
-      return ' <span class="quickAction sendLink tip-static" ' +
-        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
-        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
-    }
-  },
-  {
-    condition: function(item) {
-      return !dropLinks && showQuickDropLinks$1 &&
-        item.guild_tag === '-1';
-    },
-    result: function(o) {
-      return ' <span class="quickAction dropLink tip-static" itemInvId="' +
-        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
-        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
-    }
-  }
-];
-
-function beforeend(o, item) {
-  if (!colouring && !disableItemColoring) {
-    o.injectHere.classList.add(rarity[item.rarity].clas);
-  }
-  var pattern = buildTrailer.reduce(function(prev, el) {
-    var ret = prev;
-    if (el.condition(item)) {
-      ret += el.result(o, item);
-    }
-    return ret;
-  }, '');
-  if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
-}
-
-function doneInvPaint() {
-  if (showExtraLinks) {extraLinks = true;}
-  checkAll = true;
-  colouring = true;
-  if (showQuickDropLinks$1) {dropLinks = true;}
-  sendLinks = true;
-}
-
-function invPaint() { // Native - abstract this pattern
-  var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      paintCount < itemsAry.length) {
-    var o = itemsAry[paintCount];
-    var item = invItems$1[o.invid];
-    afterbegin(o, item);
-    beforeend(o, item);
-    paintCount += 1;
-  }
-  if (paintCount < itemsAry.length) {
-    add(3, invPaint);
-  } else {
-    doneInvPaint();
-  }
-}
-
-function toggleShowExtraLinks() {
-  showExtraLinks = !showExtraLinks;
-  setValue('showExtraLinks', showExtraLinks);
-  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
-  if (!extraLinks) {
-    paintCount = 0;
-    add(3, invPaint);
-  } else {
-    itemsAry.forEach(function(o) {
-      var el = o.injectHere.firstElementChild;
-      el.classList.toggle('fshHide');
-    });
-  }
-}
-
-function toggleShowQuickDropLinks() {
-  showQuickDropLinks$1 = !showQuickDropLinks$1;
-  setValue('showQuickDropLinks', showQuickDropLinks$1);
-  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
-  if (!dropLinks) {
-    paintCount = 0;
-    add(3, invPaint);
-  } else {
-    itemsAry.forEach(function(o) {
-      var el = o.injectHere.querySelector('.dropLink');
-      el.classList.toggle('fshHide');
-    });
-  }
-}
-
-var evts$1 = [
-  {
-    condition: function(self) {return self.id === 'fshShowExtraLinks';},
-    result: toggleShowExtraLinks
-  },
-  {
-    condition: function(self) {return self.id === 'fshShowQuickDropLinks';},
-    result: toggleShowQuickDropLinks
-  },
-  {
-    condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    result: function() {doCheckboxes(itemsAry, invItems$1, 'guild');}
-  },
-  {
-    condition: function(self) {return self.id === 'fshMove';},
-    result: function() {moveItemsToFolder(itemsAry);}
-  },
-  {
-    condition: function(self) {return self.hasAttribute('linkto');},
-    result: function(self) {
-      doCheckboxes(itemsAry, invItems$1, 'item', self.getAttribute('linkto'));
-    }
-  },
-  {
-    condition: function(self) {return self.classList.contains('sendLink');},
-    result: function(self) {
-      quickAction(self, sendItem, 'Sent', '.dropLink');
-    }
-  },
-  {
-    condition: function(self) {return self.classList.contains('dropLink');},
-    result: function(self) {
-      quickAction(self, dropItem, 'Dropped', '.sendLink');
-    }
-  },
-  {
-    condition: function(self) {return self.classList.contains('folder');},
-    result: function(self) {
-      hideFolders$1(itemsAry, invItems$1, self);
-    }
-  },
-  {
-    condition: function(self) {return self.id === 'fshChkAll';},
-    result: function() {
-      doCheckboxes(itemsAry, invItems$1, 'checkAll');
-    }
-  }
-];
-
-function evtHandler(evt) {
-  var self = evt.target;
-  evts$1.some(function(el) {
-    if (el.condition(self)) {
-      el.result(self);
-      return true;
-    }
-    return false;
-  });
-}
-
-function getItems() {
-  addStatTotalToMouseover();
-  disableItemColoring = getValue('disableItemColoring');
-  showExtraLinks = getValue('showExtraLinks');
-  showQuickDropLinks$1 = getValue('showQuickDropLinks');
-  showQuickSendLinks$1 = getValue('showQuickSendLinks');
-  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
-  pCC.addEventListener('click', evtHandler);
-  var imgList = getItemImg(pCC);
-  itemsAry = [];
-  itemsHash = {};
-  Array.prototype.forEach.call(imgList, function(el) {
-    var tipped = el.getAttribute('data-tipped');
-    var matches = tipped.match(itemRE);
-    itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
-    var injectHere = el.parentNode.parentNode.nextElementSibling;
-    itemsAry.push({
-      el: el,
-      invid: matches[2],
-      injectHere: injectHere
-    });
-  });
-  // Exclude composed pots
-  itemsHash[13699] = 1;
-}
-
-function inventory$1(data) {
-  extraLinks = false;
-  checkAll = false;
-  invItems$1 = data.items;
-  colouring = false;
-  dropLinks = false;
-  sendLinks = false;
-  paintCount = 0;
-  add(3, invPaint);
-  doFolderButtons(data.folders);
-}
-
-function injectStoreItems() {
-  getInventoryById().done(inventory$1);
-  add(3, getItems);
-}
-
-function injectProfileDropItems() {
-  injectStoreItems();
-  injectMoveItems();
-}
-
-var maxGroupSizeToJoin;
-var groupStats$1;
-
-function parseMercStats$1(mercStats) {
-  groupStats$1.attackElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats$1.attack) + '</span>' +
-    ' ( ' + addCommas(groupStats$1.attack - mercStats.attack) + ' )';
-  groupStats$1.defenseElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats$1.defense) + '</span>' +
-    ' ( ' + addCommas(groupStats$1.defense - mercStats.defense) + ' )';
-  groupStats$1.armorElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats$1.armor) + '</span>' +
-    ' ( ' + addCommas(groupStats$1.armor - mercStats.armor) + ' )';
-  groupStats$1.damageElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats$1.damage) + '</span>' +
-    ' ( ' + addCommas(groupStats$1.damage - mercStats.damage) + ' )';
-  groupStats$1.hpElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats$1.hp) + '</span>' +
-    ' ( ' + addCommas(groupStats$1.hp - mercStats.hp) + ' )';
-}
-
-function injectGroupStats() { // jQuery
-  groupStats$1 = groupViewStats(document);
-  getMercStats().done(parseMercStats$1);
-}
-
-function displayMinGroupLevel() { // jQuery
-  var minGroupLevel = getValue('minGroupLevel');
-  if (minGroupLevel) {
-    $('#pCC > table > tbody > tr > td > table td').first()
-      .append('<span style="color:blue"> ' +
-      'Current Min Level Setting: ' + minGroupLevel + '</span>');
-  }
-}
-
-function filterMercs(e) {return e.search('#000099') === -1;}
-
-function joinGroup(groupJoinURL, joinButton) { // jQuery
-  return retryAjax(groupJoinURL).done(function() {
-    joinButton.classList.add('fshHide');
-  });
-}
-
-function doJoinUnderSize(prev, joinButton) { // Legacy
-  var memList = joinButton.parentNode.parentNode.parentNode
-    .previousSibling.previousSibling.previousSibling.previousSibling;
-  var memListArrayWithMercs = memList.innerHTML.split(',');
-  var memListArrayWithoutMercs = memListArrayWithMercs
-    .filter(filterMercs);
-  if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
-    var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
-      joinButton.parentNode.href)[1];
-    var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
-      '&group_id=' + groupID;
-    prev.push(joinGroup(groupJoinURL, joinButton));
-  }
-  return prev;
-}
-
-function joinAllGroupsUnderSize() { // Legacy
-  var joinButtons = findNodes(
-    '//img[contains(@src,"skin/icon_action_join.gif")]');
-  if (!joinButtons) {return;}
-  var prm = joinButtons.reduce(doJoinUnderSize, []);
-  $.when.apply($, prm).done(function() {
-    location.href = 'index.php?cmd=guild&subcmd=groups';
-  });
-}
-
-function parseGroupData(linkElement, obj) {
-  var extraText = '<table class="fshgrpstat">' +
-    '<tr>' +
-    '<td class="fshBrown">Attack</td>' +
-    '<td class="fshRight">' + obj.attack + '</td>' +
-    '<td class="fshBrown">Defense</td>' +
-    '<td class="fshRight">' + obj.defense + '</td>' +
-    '</tr><tr>' +
-    '<td class="fshBrown">Armor</td>' +
-    '<td class="fshRight">' + obj.armor + '</td>' +
-    '<td class="fshBrown">Damage</td>' +
-    '<td class="fshRight">' + obj.damage + '</td>' +
-    '</tr><tr>' +
-    '<td class="fshBrown">HP</td>' +
-    '<td class="fshRight">' + obj.hp + '</td>' +
-    '<td colspan="2"></td>' +
-    '</tr></table>';
-  var expiresLocation = linkElement.parentNode.parentNode
-    .previousElementSibling;
-  expiresLocation.insertAdjacentHTML('beforeend', extraText);
-}
-
-function fetchGroupData(evt) {
-  evt.target.classList.add('fshHide');
-  var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
-  Array.prototype.forEach.call(allItems, function(aLink) {
-    getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
-  });
-}
-
-function groupButtons() { // Legacy
-  var buttonElement = findNode('//td[input[@value="Join All ' +
-    'Available Groups"]]');
-  var enableMaxGroupSizeToJoin =
-    getValue('enableMaxGroupSizeToJoin');
-  if (enableMaxGroupSizeToJoin) {
-    maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
-    joinAllInput.classList.add('fshHide');
-    buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
-      'size" type="button" value="Join All Groups < ' +
-      maxGroupSizeToJoin + ' Members" class="custombutton">&nbsp;' +
-      '<input id="fetchgroupstats" type="button" value="Fetch ' +
-      'Group Stats" class="custombutton">';
-    document.getElementById('joinallgroupsundersize')
-      .addEventListener('click', joinAllGroupsUnderSize, true);
-  } else {
-    buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
-      'type="button" value="Fetch Group Stats" class="custombutton">';
-  }
-  document.getElementById('fetchgroupstats')
-    .addEventListener('click', fetchGroupData);
-
-  if (calf.subcmd2 === 'joinallgroupsundersize') {
-    joinAllGroupsUnderSize();
-  }
-}
-
-function fixTable() { // jQuery
-  // Cows don't add!
-  var tds = $('#pCC td.header-dark');
-  tds.eq(0).attr('width', '20%');
-  tds.eq(1).attr('width', '51%');
-  tds.eq(2).attr('width', '22%');
-  tds.eq(3).attr('width', '7%');
-}
-
-function groupLocalTime(theDateCell) { // jQuery
-  var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
-  var x = xRE.exec(theDateCell.text());
-  var month = months.indexOf(x[3]);
-  var curYear = new Date().getFullYear(); // Boundary condition
-  var groupDate = new Date();
-  groupDate.setUTCDate(x[2]);
-  groupDate.setUTCMonth(month);
-  groupDate.setUTCFullYear(curYear);
-  groupDate.setUTCHours(x[4]);
-  groupDate.setUTCMinutes(x[5]);
-  theDateCell.append('<br><span style="color:blue; font-size:x-small">' +
-    'Local: ' + groupDate.toString().substr(0, 21) + '</span>');
-}
-
-function getCreator(membrlist, creator) {
-  if (membrlist[creator]) {
-    return onlineDot({last_login: membrlist[creator].last_login}) +
-      '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
-      membrlist[creator].id + '"><b>' + creator + '</b></a> [' +
-      membrlist[creator].level + ']';
-  }
-  return '<b>' + creator + '</b>';
-}
-
-function memberLevel(membrlist, member) {
-  if (membrlist[member]) {return membrlist[member].level;}
-  return 0;
-}
-
-function byMember(membrlist, a, b) {
-  return memberLevel(membrlist, b) - memberLevel(membrlist, a);
-}
-
-function doGroupRow(row, membrlist) { // jQuery
-  var creator = $('b', row).text();
-  var td = $('td', row).first();
-  td.html(getCreator(membrlist, creator));
-  var td2 = $('td', row).eq(1);
-  var theList = td2.html();
-  var listArr = theList.split(', ');
-  if (listArr.length > 1) {listArr.sort(byMember.bind(null, membrlist));}
-  var buffList = listArr.filter(function(name) {
-    return name !== '[none]' && name.indexOf('<font') === -1;
-  });
-  if (buffList.length > 0) {td.append(doBuffLinks(buffList));}
-  td.append('<span class="fshXSmall">Members: ' +
-    buffList.length + '</span>');
-  listArr = listArr.map(function(name) {
-    if (!membrlist[name]) {return name;}
-    return '<a href="index.php?cmd=profile&player_id=' +
-      membrlist[name].id + '">' + name + '</a>';
-  });
-  td2.html('<span>' + listArr.join(', ') + '</span>');
-  groupLocalTime($('td', row).eq(2));
-}
-
-function doGroupPaint(m) { // jQuery
-
-  time('groups.doGroupPaint');
-
-  $('#pCC table table table tr').has('.group-action-container')
-    .each(function(i, e) {
-      doGroupRow(e, m);
-    });
-
-  timeEnd('groups.doGroupPaint');
-
-}
-
-function injectGroups() { // jQuery
-  getMembrList(false)
-    .done(doGroupPaint);
-  displayMinGroupLevel();
-  groupButtons();
-  fixTable();
 }
 
 function hasTextEntry() { // jQuery
@@ -16323,7 +15873,7 @@ function hasTextEntry() { // jQuery
   });
 }
 
-function addChatTextArea() { // jQuery
+function addChatTextArea() {
   if (!getValue('enhanceChatTextEntry') ||
       !pCC) {return;}
   hasTextEntry();
@@ -16669,6 +16219,849 @@ function playerLog() {
   addLogWidgets();
 }
 
+function cancelAllAH() { // jQuery
+  var cancelButtons = document.getElementById('resultRows')
+    .getElementsByClassName('auctionCancel');
+  if (cancelButtons.length === 0) {return;}
+  var prm = [];
+  for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
+    var cancelButton = cancelButtons[i];
+    var itemImage = cancelButton.parentNode.parentNode.firstElementChild
+      .firstElementChild;
+    cancelButton.outerHTML = '<img src="' + imageServer +
+      '/skin/loading.gif" width="14" height="14">';
+    prm.push(
+      retryAjax({
+        url: 'index.php?cmd=auctionhouse&subcmd=cancel',
+        data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
+      })
+    );
+  }
+  $.when.apply($, prm).done(function() {
+    document.getElementById('refresh').click();
+  });
+}
+
+function injectAuctionHouse() {
+  if (!pCC) {return;}
+  if (getValue('autoFillMinBidPrice')) {
+    document.getElementById('auto-fill').checked = true;
+  }
+  document.getElementById('sort0').click();
+  var cancelAll = createSpan({
+    className: 'smallLink',
+    textContent: 'Cancel All'
+  });
+  var fill = document.getElementById('fill').parentNode.parentNode
+    .nextElementSibling.firstElementChild;
+  fill.classList.add('fshCenter');
+  fill.insertAdjacentHTML('afterbegin', ']');
+  fill.insertAdjacentElement('afterbegin', cancelAll);
+  fill.insertAdjacentHTML('afterbegin', '[');
+  cancelAll.addEventListener('click', cancelAllAH);
+}
+
+function quickCreate$1() {
+  perfFilter('auction');
+}
+
+var playerBank = {
+  headText: 'Bank',
+  appLink: true,
+  depoPos: 2,
+  balPos: 1,
+  data: {
+    cmd: 'bank',
+    subcmd: 'transaction'
+  },
+  initWithdraw: ''
+};
+var guildBank = {
+  headText: 'Guild Bank',
+  appLink: false,
+  depoPos: 3,
+  balPos: 2,
+  data: {
+    cmd: 'guild',
+    subcmd: 'bank',
+    subcmd2: 'transaction'
+  },
+  initWithdraw: '1'
+};
+var bankSettings;
+
+function doInfoBox(infoBox) { // jQuery
+  var target = $('#pCC #info-msg');
+  if (target.length === 0) {
+    $('#pCC').prepend(infoBox.closest('table'));
+  } else {
+    target.closest('table').replaceWith(infoBox.closest('table'));
+  }
+}
+
+function disableDepo(o) { // jQuery
+  if ($('#pCC b').eq(o.depoPos).text() === '0') {
+    $('#pCC input[value="Deposit"]').prop('disabled', true);
+  }
+}
+
+function updateDepoAmount(o, doc) { // jQuery
+  if (o.data.deposit_amount !== '1') {
+    $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
+  } else {
+    $('#pCC #deposit_amount').val('1');
+  }
+}
+
+function transResponse(response) { // jQuery
+  var doc = createDocument(response);
+  var infoBox = $('#pCC #info-msg', doc);
+  if (infoBox.length === 0) {return;}
+  doInfoBox(infoBox);
+  $('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
+  $('#pH #statbar-gold-tooltip-general dd').text(function(index) {
+    return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
+  });
+  var o = bankSettings;
+  $('#pCC b').slice(o.balPos).text(function(index) {
+    return $('#pCC b', doc).slice(o.balPos).eq(index).text();
+  });
+  disableDepo(o);
+  updateDepoAmount(o, doc);
+  $('#pCC #withdraw_amount').val(o.initWithdraw);
+}
+
+function invalidAmount(o, amount) { // jQuery
+  return $('#pCC b').eq(o.depoPos).text() === '0' ||
+    !$.isNumeric(amount) || amount < 1;
+}
+
+function doAjax$1(oData) {
+  retryAjax({url: 'index.php', data: oData}).done(transResponse);
+}
+
+function bankDeposit(e) { // jQuery
+  e.preventDefault();
+  var o = bankSettings;
+  var amount = $('#pCC #deposit_amount').val();
+  if (invalidAmount(o, amount)) {return;}
+  o.data.mode = 'deposit';
+  o.data.deposit_amount = amount;
+  doAjax$1(o.data);
+}
+
+function bankWithdrawal(e) { // jQuery
+  e.preventDefault();
+  var o = bankSettings;
+  var amount = $('#pCC #withdraw_amount').val();
+  if (!$.isNumeric(amount) || amount < 1) {return;}
+  o.data.mode = 'withdraw';
+  o.data.withdraw_amount = amount;
+  doAjax$1(o.data);
+}
+
+function linkToGuildBank(o, bank) { // jQuery
+  if (o.appLink) {
+    bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
+      '<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
+      '</td></tr>');
+  }
+}
+
+function captureButtons(o, depo, withdraw) { // jQuery
+  if ($('#pCC b').eq(o.depoPos).text() === '0') { // Check Deposits Available
+    depo.prop('disabled', true);
+  } else {
+    depo.click(bankDeposit);
+  }
+  withdraw.click(bankWithdrawal);
+}
+
+function appLink(o, bank) { // jQuery
+  linkToGuildBank(o, bank);
+  var depo = $('#pCC input[value="Deposit"]');
+  if (depo.length !== 1) {return;}
+  var withdraw = $('#pCC input[value="Withdraw"]');
+  if (withdraw.length !== 1) {return;}
+  captureButtons(o, depo, withdraw);
+}
+
+function ajaxifyBank() { // jQuery
+  var o = bankSettings;
+  var bank = $('#pCC b');
+  if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
+    appLink(o, bank);
+  }
+}
+
+function injectGuildBank() {
+  bankSettings = guildBank;
+  ajaxifyBank();
+}
+
+function injectBank() {
+  bankSettings = playerBank;
+  ajaxifyBank();
+}
+
+var maxGroupSizeToJoin;
+var groupStats$1;
+
+function parseMercStats$1(mercStats) {
+  groupStats$1.attackElement.innerHTML = '<span class="fshBlue">' +
+    addCommas(groupStats$1.attack) + '</span>' +
+    ' ( ' + addCommas(groupStats$1.attack - mercStats.attack) + ' )';
+  groupStats$1.defenseElement.innerHTML = '<span class="fshBlue">' +
+    addCommas(groupStats$1.defense) + '</span>' +
+    ' ( ' + addCommas(groupStats$1.defense - mercStats.defense) + ' )';
+  groupStats$1.armorElement.innerHTML = '<span class="fshBlue">' +
+    addCommas(groupStats$1.armor) + '</span>' +
+    ' ( ' + addCommas(groupStats$1.armor - mercStats.armor) + ' )';
+  groupStats$1.damageElement.innerHTML = '<span class="fshBlue">' +
+    addCommas(groupStats$1.damage) + '</span>' +
+    ' ( ' + addCommas(groupStats$1.damage - mercStats.damage) + ' )';
+  groupStats$1.hpElement.innerHTML = '<span class="fshBlue">' +
+    addCommas(groupStats$1.hp) + '</span>' +
+    ' ( ' + addCommas(groupStats$1.hp - mercStats.hp) + ' )';
+}
+
+function injectGroupStats() { // jQuery
+  groupStats$1 = groupViewStats(document);
+  getMercStats().done(parseMercStats$1);
+}
+
+function displayMinGroupLevel() { // jQuery
+  var minGroupLevel = getValue('minGroupLevel');
+  if (minGroupLevel) {
+    $('#pCC > table > tbody > tr > td > table td').first()
+      .append('<span style="color:blue"> ' +
+      'Current Min Level Setting: ' + minGroupLevel + '</span>');
+  }
+}
+
+function filterMercs(e) {return e.search('#000099') === -1;}
+
+function joinGroup(groupJoinURL, joinButton) { // jQuery
+  return retryAjax(groupJoinURL).done(function() {
+    joinButton.classList.add('fshHide');
+  });
+}
+
+function doJoinUnderSize(prev, joinButton) { // Legacy
+  var memList = joinButton.parentNode.parentNode.parentNode
+    .previousSibling.previousSibling.previousSibling.previousSibling;
+  var memListArrayWithMercs = memList.innerHTML.split(',');
+  var memListArrayWithoutMercs = memListArrayWithMercs
+    .filter(filterMercs);
+  if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
+    var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
+      joinButton.parentNode.href)[1];
+    var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
+      '&group_id=' + groupID;
+    prev.push(joinGroup(groupJoinURL, joinButton));
+  }
+  return prev;
+}
+
+function joinAllGroupsUnderSize() { // Legacy
+  var joinButtons = findNodes(
+    '//img[contains(@src,"skin/icon_action_join.gif")]');
+  if (!joinButtons) {return;}
+  var prm = joinButtons.reduce(doJoinUnderSize, []);
+  $.when.apply($, prm).done(function() {
+    location.href = 'index.php?cmd=guild&subcmd=groups';
+  });
+}
+
+function parseGroupData(linkElement, obj) {
+  var extraText = '<table class="fshgrpstat">' +
+    '<tr>' +
+    '<td class="fshBrown">Attack</td>' +
+    '<td class="fshRight">' + obj.attack + '</td>' +
+    '<td class="fshBrown">Defense</td>' +
+    '<td class="fshRight">' + obj.defense + '</td>' +
+    '</tr><tr>' +
+    '<td class="fshBrown">Armor</td>' +
+    '<td class="fshRight">' + obj.armor + '</td>' +
+    '<td class="fshBrown">Damage</td>' +
+    '<td class="fshRight">' + obj.damage + '</td>' +
+    '</tr><tr>' +
+    '<td class="fshBrown">HP</td>' +
+    '<td class="fshRight">' + obj.hp + '</td>' +
+    '<td colspan="2"></td>' +
+    '</tr></table>';
+  var expiresLocation = linkElement.parentNode.parentNode
+    .previousElementSibling;
+  expiresLocation.insertAdjacentHTML('beforeend', extraText);
+}
+
+function fetchGroupData(evt) {
+  evt.target.classList.add('fshHide');
+  var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
+  Array.prototype.forEach.call(allItems, function(aLink) {
+    getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
+  });
+}
+
+function groupButtons() { // Legacy
+  var buttonElement = findNode('//td[input[@value="Join All ' +
+    'Available Groups"]]');
+  var enableMaxGroupSizeToJoin =
+    getValue('enableMaxGroupSizeToJoin');
+  if (enableMaxGroupSizeToJoin) {
+    maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+    var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
+    joinAllInput.classList.add('fshHide');
+    buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
+      'size" type="button" value="Join All Groups < ' +
+      maxGroupSizeToJoin + ' Members" class="custombutton">&nbsp;' +
+      '<input id="fetchgroupstats" type="button" value="Fetch ' +
+      'Group Stats" class="custombutton">';
+    document.getElementById('joinallgroupsundersize')
+      .addEventListener('click', joinAllGroupsUnderSize, true);
+  } else {
+    buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
+      'type="button" value="Fetch Group Stats" class="custombutton">';
+  }
+  document.getElementById('fetchgroupstats')
+    .addEventListener('click', fetchGroupData);
+
+  if (calf.subcmd2 === 'joinallgroupsundersize') {
+    joinAllGroupsUnderSize();
+  }
+}
+
+function fixTable() { // jQuery
+  // Cows don't add!
+  var tds = $('#pCC td.header-dark');
+  tds.eq(0).attr('width', '20%');
+  tds.eq(1).attr('width', '51%');
+  tds.eq(2).attr('width', '22%');
+  tds.eq(3).attr('width', '7%');
+}
+
+function groupLocalTime(theDateCell) { // jQuery
+  var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
+  var x = xRE.exec(theDateCell.text());
+  var month = months.indexOf(x[3]);
+  var curYear = new Date().getFullYear(); // Boundary condition
+  var groupDate = new Date();
+  groupDate.setUTCDate(x[2]);
+  groupDate.setUTCMonth(month);
+  groupDate.setUTCFullYear(curYear);
+  groupDate.setUTCHours(x[4]);
+  groupDate.setUTCMinutes(x[5]);
+  theDateCell.append('<br><span style="color:blue; font-size:x-small">' +
+    'Local: ' + groupDate.toString().substr(0, 21) + '</span>');
+}
+
+function getCreator(membrlist, creator) {
+  if (membrlist[creator]) {
+    return onlineDot({last_login: membrlist[creator].last_login}) +
+      '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
+      membrlist[creator].id + '"><b>' + creator + '</b></a> [' +
+      membrlist[creator].level + ']';
+  }
+  return '<b>' + creator + '</b>';
+}
+
+function memberLevel(membrlist, member) {
+  if (membrlist[member]) {return membrlist[member].level;}
+  return 0;
+}
+
+function byMember(membrlist, a, b) {
+  return memberLevel(membrlist, b) - memberLevel(membrlist, a);
+}
+
+function doGroupRow(row, membrlist) { // jQuery
+  var creator = $('b', row).text();
+  var td = $('td', row).first();
+  td.html(getCreator(membrlist, creator));
+  var td2 = $('td', row).eq(1);
+  var theList = td2.html();
+  var listArr = theList.split(', ');
+  if (listArr.length > 1) {listArr.sort(byMember.bind(null, membrlist));}
+  var buffList = listArr.filter(function(name) {
+    return name !== '[none]' && name.indexOf('<font') === -1;
+  });
+  if (buffList.length > 0) {td.append(doBuffLinks(buffList));}
+  td.append('<span class="fshXSmall">Members: ' +
+    buffList.length + '</span>');
+  listArr = listArr.map(function(name) {
+    if (!membrlist[name]) {return name;}
+    return '<a href="index.php?cmd=profile&player_id=' +
+      membrlist[name].id + '">' + name + '</a>';
+  });
+  td2.html('<span>' + listArr.join(', ') + '</span>');
+  groupLocalTime($('td', row).eq(2));
+}
+
+function doGroupPaint(m) { // jQuery
+
+  time('groups.doGroupPaint');
+
+  $('#pCC table table table tr').has('.group-action-container')
+    .each(function(i, e) {
+      doGroupRow(e, m);
+    });
+
+  timeEnd('groups.doGroupPaint');
+
+}
+
+function injectGroups() { // jQuery
+  getMembrList(false)
+    .done(doGroupPaint);
+  displayMinGroupLevel();
+  groupButtons();
+  fixTable();
+}
+
+var invItems$2;
+var type;
+var itemId;
+
+function tickElement(o, el) {
+  el.checked = !el.disabled && !el.checked;
+}
+
+var types = [
+  {
+    c: function() {return type === 'guild';},
+    r: function(o, el) {
+      el.checked = !el.disabled && invItems$2[o.invid].guild_tag !== '-1';
+    }
+  },
+  {
+    c: function(o) {
+      return type === 'item' && invItems$2[o.invid].item_id === itemId;
+    },
+    r: tickElement
+  },
+  {
+    c: function() {return type === 'checkAll';},
+    r: tickElement
+  }
+];
+
+function testType(o, el) {
+  types.some(function(test) {
+    if (test.c(o)) {
+      test.r(o, el);
+      return true;
+    }
+    return false;
+  });
+}
+
+function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
+  invItems$2 = invItems_;
+  type = type_;
+  itemId = itemId_;
+  itemsAry.forEach(function(o) {
+    var tr = o.injectHere.parentNode;
+    if (tr.classList.contains('fshHide')) {return;}
+    var el = o.el.parentNode.parentNode.previousElementSibling
+      .firstElementChild;
+    testType(o, el);
+  });
+}
+
+function makeFolderSpans$1(folders) {
+  return '<span class="fshLink folder" data-folder="0">All</span>' +
+    ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
+    Object.keys(folders).reduce(function(prev, key) {
+      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
+        'data-folder="' + key + '">' + folders[key] + '</span>';
+    }, '');
+}
+
+function extraButtons() {
+  var tRows = pCC.getElementsByTagName('table')[0].rows;
+  tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
+    '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
+}
+
+function doFolderButtons(folders) {
+  if (calf.subcmd2 === 'storeitems') {
+    var formNode = pCC.getElementsByTagName('form')[0];
+    var tr = createTr({className: 'fshCenter'});
+    var insertHere = createTd({colSpan: 3});
+    tr.appendChild(insertHere);
+    formNode.parentNode.insertBefore(tr, formNode);
+    insertHere.innerHTML = makeFolderSpans$1(folders);
+    extraButtons();
+  }
+}
+
+var insertHere;
+
+function showHideLabel(pref) {
+  if (pref) {return 'Hide';}
+  return 'Show';
+}
+
+function doToggleButtons(showExtraLinks, showQuickDropLinks) {
+  // Option toggle buttons for both screens
+  if (!insertHere) {
+    insertHere = pCC.getElementsByTagName('form')[0]
+      .previousElementSibling.firstElementChild;
+  }
+  var inject = '[<span id="fshShowExtraLinks" class="sendLink">' +
+    showHideLabel(showExtraLinks) +
+    ' AH and UFSG links</span>]&nbsp;' +
+    '[<span id="fshShowQuickDropLinks" class="sendLink">' +
+    showHideLabel(showQuickDropLinks) +
+    ' Quick Drop links</span>]&nbsp;';
+  if (calf.subcmd2 === 'storeitems') {
+    inject += '[<span id="fshSelectAllGuildLocked" class="sendLink">' +
+      ' Select All Guild Locked</span>]&nbsp;';
+  }
+  insertHere.innerHTML = inject;
+}
+
+function getItemImg(pCC) {
+  var allTables = pCC.getElementsByTagName('table');
+  var lastTable = allTables[allTables.length - 1];
+  return lastTable.getElementsByTagName('img');
+}
+
+function hideFolders$1(itemsAry, invItems, self) {
+  var folderId = self.dataset.folder;
+  itemsAry.forEach(function(o) {
+    o.el.parentNode.parentNode.previousElementSibling.firstElementChild
+      .checked = false;
+    var tr = o.injectHere.parentNode;
+    var separator = tr.nextElementSibling;
+    if (folderId === '0') {
+      tr.classList.remove('fshHide');
+      separator.classList.remove('fshHide');
+    } else {
+      var folder = invItems[o.invid].folder_id;
+      var force = folderId !== folder;
+      toggleForce(tr, force);
+      toggleForce(separator, force);
+    }
+  });
+}
+
+function injectMoveItems() {
+  var flrRow = pCC.getElementsByTagName('form')[0]
+    .nextElementSibling.nextElementSibling.nextElementSibling;
+  var folders = flrRow.getElementsByTagName('img');
+  var flrEnabled;
+  var oFlr;
+  var options = '<tr><td class="fshCenter">Move selected items to: ' +
+    '<select name="folder" id="selectFolderId" class="customselect">';
+  Array.prototype.forEach.call(folders, function(e) {
+    var src = e.getAttribute('src');
+    if (src.indexOf('/folder_on.gif') !== -1) {flrEnabled = true;}
+    if (src.indexOf('/folder.gif') !== -1) {
+      oFlr = true;
+      options += '<option value=' + e.parentNode.href
+        .match(/&folder_id=(-*\d+)/i)[1] + '>' +
+        e.parentNode.parentNode.textContent + '</option>';
+    }
+  });
+  if (!flrEnabled || !oFlr) {return;}
+  options += '</select>&nbsp;<input type="button" class="custombutton" ' +
+    'id="fshMove" value="Move"></td></tr>';
+  flrRow.insertAdjacentHTML('afterend', options);
+}
+
+function moveItemsToFolder(itemsAry) { // jQuery.min
+  var folderId = document.getElementById('selectFolderId').value;
+  var batchNo;
+  var counter = 0;
+  var invList = [];
+  var prm = [];
+  itemsAry.forEach(function(o) {
+    var el = o.injectHere.previousElementSibling.previousElementSibling
+      .firstElementChild;
+    if (el.checked) {
+      batchNo = Math.floor(counter / 50);
+      invList[batchNo] = fallback(invList[batchNo], []);
+      invList[batchNo].push(o.invid);
+      counter += 1;
+      if (counter % 50 === 0) {
+        prm.push(moveItem(invList[batchNo], folderId));
+      }
+    }
+  });
+  if (counter % 50 !== 0) {
+    prm.push(moveItem(invList[batchNo], folderId));
+  }
+  $.when.apply($, prm).done(function() {location.reload();}); // TODO ajaxify this
+}
+
+function anotherSpinner$1(self) {
+  self.innerHTML = '<img class="quickActionSpinner" src="' +
+    imageServer +
+    '/skin/loading.gif" width="15" height="15">';
+}
+
+function quickAction(self, fn, success, otherClass) { // jQuery.min
+  self.className = 'quickAction';
+  var itemInvId = self.getAttribute('itemInvId');
+  fn([itemInvId]).done(function(data) {
+    if (data.r === 1) {return;}
+    self.style.color = 'green';
+    self.innerHTML = success;
+  });
+  $(self).qtip('hide');
+  anotherSpinner$1(self);
+  var theTd = self.parentNode;
+  var otherButton = theTd.querySelector(otherClass);
+  if (otherButton) {
+    otherButton.className = 'quickAction';
+    otherButton.innerHTML = '';
+  }
+  var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
+  checkbox.checked = false;
+  checkbox.disabled = true;
+}
+
+var disableItemColoring;
+var showExtraLinks;
+var showQuickDropLinks$1;
+var showQuickSendLinks$1;
+var extraLinks;
+var paintCount;
+var itemsAry;
+var checkAll;
+var itemsHash;
+var dropLinks;
+var invItems$1;
+var colouring;
+var sendLinks;
+
+function afterbegin(o, item) {
+  if (fallback(extraLinks, !showExtraLinks)) {
+    return;
+  }
+  var pattern = '<span><span class="aHLink">';
+  if (!item.bound) {
+    pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
+      encodeURIComponent(item.item_name) + '">AH</a>]';
+  }
+  pattern += '</span>[<a href="https://guide.fallensword.com/' +
+    'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
+    '" target="_blank">UFSG</a>]</span>';
+  o.injectHere.insertAdjacentHTML('afterbegin', pattern);
+}
+
+var buildTrailer = [
+  {
+    condition: function(item) {
+      return !checkAll && itemsHash[item.item_id] !== 1;
+    },
+    result: function(o, item) {
+      return ' [<span linkto="' + item.item_id +
+        '" class="fshLink">Check all</span>]';
+    }
+  },
+  {
+    condition: function(item) {
+      return !sendLinks && showQuickSendLinks$1 &&
+        !item.bound;
+    },
+    result: function(o) {
+      return ' <span class="quickAction sendLink tip-static" ' +
+        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
+        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
+    }
+  },
+  {
+    condition: function(item) {
+      return !dropLinks && showQuickDropLinks$1 &&
+        item.guild_tag === '-1';
+    },
+    result: function(o) {
+      return ' <span class="quickAction dropLink tip-static" itemInvId="' +
+        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
+        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
+    }
+  }
+];
+
+function beforeend(o, item) {
+  if (!colouring && !disableItemColoring) {
+    o.injectHere.classList.add(rarity[item.rarity].clas);
+  }
+  var pattern = buildTrailer.reduce(function(prev, el) {
+    var ret = prev;
+    if (el.condition(item)) {
+      ret += el.result(o, item);
+    }
+    return ret;
+  }, '');
+  if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
+}
+
+function doneInvPaint() {
+  if (showExtraLinks) {extraLinks = true;}
+  checkAll = true;
+  colouring = true;
+  if (showQuickDropLinks$1) {dropLinks = true;}
+  sendLinks = true;
+}
+
+function invPaint() { // Native - abstract this pattern
+  var limit = performance.now() + 5;
+  while (performance.now() < limit &&
+      paintCount < itemsAry.length) {
+    var o = itemsAry[paintCount];
+    var item = invItems$1[o.invid];
+    afterbegin(o, item);
+    beforeend(o, item);
+    paintCount += 1;
+  }
+  if (paintCount < itemsAry.length) {
+    add(3, invPaint);
+  } else {
+    doneInvPaint();
+  }
+}
+
+function toggleShowExtraLinks() {
+  showExtraLinks = !showExtraLinks;
+  setValue('showExtraLinks', showExtraLinks);
+  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
+  if (!extraLinks) {
+    paintCount = 0;
+    add(3, invPaint);
+  } else {
+    itemsAry.forEach(function(o) {
+      var el = o.injectHere.firstElementChild;
+      el.classList.toggle('fshHide');
+    });
+  }
+}
+
+function toggleShowQuickDropLinks() {
+  showQuickDropLinks$1 = !showQuickDropLinks$1;
+  setValue('showQuickDropLinks', showQuickDropLinks$1);
+  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
+  if (!dropLinks) {
+    paintCount = 0;
+    add(3, invPaint);
+  } else {
+    itemsAry.forEach(function(o) {
+      var el = o.injectHere.querySelector('.dropLink');
+      el.classList.toggle('fshHide');
+    });
+  }
+}
+
+var evts$1 = [
+  {
+    condition: function(self) {return self.id === 'fshShowExtraLinks';},
+    result: toggleShowExtraLinks
+  },
+  {
+    condition: function(self) {return self.id === 'fshShowQuickDropLinks';},
+    result: toggleShowQuickDropLinks
+  },
+  {
+    condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
+    result: function() {doCheckboxes(itemsAry, invItems$1, 'guild');}
+  },
+  {
+    condition: function(self) {return self.id === 'fshMove';},
+    result: function() {moveItemsToFolder(itemsAry);}
+  },
+  {
+    condition: function(self) {return self.hasAttribute('linkto');},
+    result: function(self) {
+      doCheckboxes(itemsAry, invItems$1, 'item', self.getAttribute('linkto'));
+    }
+  },
+  {
+    condition: function(self) {return self.classList.contains('sendLink');},
+    result: function(self) {
+      quickAction(self, sendItem, 'Sent', '.dropLink');
+    }
+  },
+  {
+    condition: function(self) {return self.classList.contains('dropLink');},
+    result: function(self) {
+      quickAction(self, dropItem, 'Dropped', '.sendLink');
+    }
+  },
+  {
+    condition: function(self) {return self.classList.contains('folder');},
+    result: function(self) {
+      hideFolders$1(itemsAry, invItems$1, self);
+    }
+  },
+  {
+    condition: function(self) {return self.id === 'fshChkAll';},
+    result: function() {
+      doCheckboxes(itemsAry, invItems$1, 'checkAll');
+    }
+  }
+];
+
+function evtHandler(evt) {
+  var self = evt.target;
+  evts$1.some(function(el) {
+    if (el.condition(self)) {
+      el.result(self);
+      return true;
+    }
+    return false;
+  });
+}
+
+function getItems() {
+  addStatTotalToMouseover();
+  disableItemColoring = getValue('disableItemColoring');
+  showExtraLinks = getValue('showExtraLinks');
+  showQuickDropLinks$1 = getValue('showQuickDropLinks');
+  showQuickSendLinks$1 = getValue('showQuickSendLinks');
+  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
+  pCC.addEventListener('click', evtHandler);
+  var imgList = getItemImg(pCC);
+  itemsAry = [];
+  itemsHash = {};
+  Array.prototype.forEach.call(imgList, function(el) {
+    var tipped = el.getAttribute('data-tipped');
+    var matches = tipped.match(itemRE);
+    itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
+    var injectHere = el.parentNode.parentNode.nextElementSibling;
+    itemsAry.push({
+      el: el,
+      invid: matches[2],
+      injectHere: injectHere
+    });
+  });
+  // Exclude composed pots
+  itemsHash[13699] = 1;
+}
+
+function inventory$1(data) {
+  extraLinks = false;
+  checkAll = false;
+  invItems$1 = data.items;
+  colouring = false;
+  dropLinks = false;
+  sendLinks = false;
+  paintCount = 0;
+  add(3, invPaint);
+  doFolderButtons(data.folders);
+}
+
+function injectStoreItems() {
+  getInventoryById().done(inventory$1);
+  add(3, getItems);
+}
+
+function injectProfileDropItems() {
+  injectStoreItems();
+  injectMoveItems();
+}
+
 var maxcharacters;
 var textArea$1;
 var shoutboxPreview;
@@ -16931,7 +17324,7 @@ FSH.dispatch = function dispatch() {
   isMessageSound();
 
   /* This must be at the end in order not to
-  screw up other system.findNode calls (Issue 351) */
+  screw up other findNode calls (Issue 351) */
   doQuickLinks();
 
   end('JS Perf', 'FSH.dispatch');
@@ -16939,6 +17332,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '8';
+window.FSH.calf = '9';
 
 }());
