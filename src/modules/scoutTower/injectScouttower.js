@@ -1,10 +1,10 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import {now} from '../support/dataObj';
+import {pCC} from '../support/layout';
+import {parseDateAsTimestamp} from '../support/system';
 import setForage from '../ajax/setForage';
 import {createTBody, createTable} from '../common/cElement';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
 
 function cooldownTracker(aRow, theTitans) {
   var myName = aRow.cells[0].firstElementChild.getAttribute('oldtitle')
@@ -13,7 +13,7 @@ function cooldownTracker(aRow, theTitans) {
     var cooldown = aRow.nextElementSibling.cells[0].textContent;
     var coolTime = 0;
     if (cooldown.indexOf('until') !== -1) {
-      coolTime = system.parseDateAsTimestamp(
+      coolTime = parseDateAsTimestamp(
         cooldown.replace('Cooldown until: ', ''));
     }
     theTitans[myName] = {
@@ -96,7 +96,7 @@ function killsSummary(aRow) {
 }
 
 function gotOldTitans(oldTitans) {
-  var titanTables = layout.pCC.getElementsByTagName('table');
+  var titanTables = pCC.getElementsByTagName('table');
   injectScouttowerBuffLinks(titanTables);
   var titanTable = titanTables[1];
   var newTitans = {};

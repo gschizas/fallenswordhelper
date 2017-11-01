@@ -1,8 +1,8 @@
+import {pCC} from '../support/layout';
 import perfFilter from '../common/perfFilter';
 import retryAjax from '../ajax/retryAjax';
-import * as layout from '../support/layout';
-import * as settingsPage from '../settings/settingsPage';
-import * as system from '../support/system';
+import {simpleCheckbox} from '../settings/settingsPage';
+import {getValue, setValue} from '../support/system';
 
 var disableBreakdownPrompts;
 var selectedList = [];
@@ -79,19 +79,19 @@ function itemClick(evt) {
 
 function togglePref() {
   disableBreakdownPrompts = !disableBreakdownPrompts;
-  system.setValue('disableBreakdownPrompts', disableBreakdownPrompts);
+  setValue('disableBreakdownPrompts', disableBreakdownPrompts);
 }
 
 export default function composingBreakdown() {
   perfFilter('composing');
-  disableBreakdownPrompts = system.getValue('disableBreakdownPrompts');
+  disableBreakdownPrompts = getValue('disableBreakdownPrompts');
   document.getElementById('breakdown-selected-items').parentNode
     .addEventListener('click', breakEvt, true);
   document.getElementById('composing-items')
     .addEventListener('click', itemClick);
-  layout.pCC.insertAdjacentHTML('beforeend',
+  pCC.insertAdjacentHTML('beforeend',
     '<table class="fshTblCenter"><tbody>' +
-    settingsPage.simpleCheckbox('disableBreakdownPrompts') +
+    simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
   document.getElementById('disableBreakdownPrompts')
     .addEventListener('click', togglePref);

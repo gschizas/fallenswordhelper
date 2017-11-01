@@ -1,7 +1,7 @@
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {getValue} from '../support/system';
+import {pCC, playerId, playerName} from '../support/layout';
 
-var playerId;
+var currentPlayerId;
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) {return Number(playerAry[1]);}
@@ -20,8 +20,8 @@ function findPlayers(aRow) { // Legacy
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);
 
-  if (firstPlayer && firstPlayerID !== playerId &&
-      secondPlayerID !== playerId) {
+  if (firstPlayer && firstPlayerID !== currentPlayerId &&
+      secondPlayerID !== currentPlayerId) {
     for (var j = 0; j < 3; j += 1) {
       aRow.cells[j].removeAttribute('class');
     }
@@ -43,7 +43,7 @@ function likeInvite(aRow, hasInvited) { // Legacy
     targetPlayerName + '&search_show_first=1">' + targetPlayerName +
     '</a>' + message.substring(secondQuote, message.length);
   if (!hasInvited &&
-    targetPlayerName !== layout.playerName()) {
+    targetPlayerName !== playerName()) {
     $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
     aRow.style.color = 'gray';
   }
@@ -63,7 +63,7 @@ function processGuildWidgetRow(aRow) { // Legacy
 }
 
 function getMessageHeader() {
-  var nodeList = layout.pCC.getElementsByTagName('TD');
+  var nodeList = pCC.getElementsByTagName('TD');
   for (var i = 0; i < nodeList.length; i += 1) {
     if (nodeList[i].textContent === 'Message') {
       return nodeList[i];
@@ -78,7 +78,7 @@ function guildLogWidgetsEnabled() { // Legacy
   messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
     '(Guild Log messages not involving self are dimmed!)</span>';
 
-  playerId = layout.playerId();
+  currentPlayerId = playerId();
 
   for (var i = 1; i < logTable.rows.length; i += 2) {
     var aRow = logTable.rows[i];
@@ -86,8 +86,8 @@ function guildLogWidgetsEnabled() { // Legacy
   }
 }
 
-export default function addGuildLogWidgets() { // Legacy
-  if (system.getValue('hideNonPlayerGuildLogMessages')) {
+export default function addGuildLogWidgets() {
+  if (getValue('hideNonPlayerGuildLogMessages')) {
     guildLogWidgetsEnabled();
   }
 }

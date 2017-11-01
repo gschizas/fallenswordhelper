@@ -1,8 +1,9 @@
-import * as system from '../support/system';
+import {getValue} from '../support/system';
+import {newGuildLogLoc, newGuildLogUrl} from '../support/dataObj';
 
 function testForGuildLogMsg(guildLogNode) {
-  return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
-    guildLogNode.innerHTML.search('Guild Log updated!') === -1;
+  return location.search !== newGuildLogLoc ||
+    guildLogNode.parentNode.id !== 'notification-guild-log';
 }
 
 function hideGuildLogMsg(guildLogNode) {
@@ -18,14 +19,13 @@ function gotGuildLogNodes(guildLogNodes) {
   var guildLogNode;
   for (var i = 0; i < guildLogNodes.length; i += 1) {
     guildLogNode = guildLogNodes[i];
-    guildLogNode.setAttribute('href',
-      'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
+    guildLogNode.href = newGuildLogUrl;
   }
   hideGuildLogMsg(guildLogNode);
 }
 
 export default function changeGuildLogHREF() {
-  if (!system.getValue('useNewGuildLog')) {return;}
+  if (!getValue('useNewGuildLog')) {return;}
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}

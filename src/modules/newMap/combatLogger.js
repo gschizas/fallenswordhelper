@@ -1,6 +1,6 @@
 import getForage from '../ajax/getForage';
+import {getValue} from '../support/system';
 import setForage from '../ajax/setForage';
-import * as system from '../support/system';
 
 // Taking the Not Save in case they add new enhancements.
 var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
@@ -61,7 +61,7 @@ function gotCombatLog(data) { // jQuery.min
 }
 
 export default function combatLogger() { // jQuery.min
-  if (system.getValue('keepLogs')) {
+  if (getValue('keepLogs')) {
     getForage('fsh_combatLog').done(gotCombatLog);
   }
 }

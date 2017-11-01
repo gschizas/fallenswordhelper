@@ -1,7 +1,7 @@
-import * as layout from '../support/layout';
+import {pCC} from '../support/layout';
 
 export default function injectMoveItems() {
-  var flrRow = layout.pCC.getElementsByTagName('form')[0]
+  var flrRow = pCC.getElementsByTagName('form')[0]
     .nextElementSibling.nextElementSibling.nextElementSibling;
   var folders = flrRow.getElementsByTagName('img');
   var flrEnabled;

@@ -1,7 +1,7 @@
 import {createSpan} from './common/cElement';
 import getProfile from './ajax/getProfile';
 import retryAjax from './ajax/retryAjax';
-import * as system from './support/system';
+import {createDocument, fallback, formatLastActivity} from './support/system';
 
 var retries = 0;
 var quickBuffHeader =
@@ -53,7 +53,7 @@ function buffTimeLeft(_s) {
 }
 
 function getBuff(doc, buff, inject) {
-  var s = system.fallback(doc[buff], 0);
+  var s = fallback(doc[buff], 0);
   if (s) {
     var buffTimeToExpire = buffTimeLeft(s);
     inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
@@ -76,7 +76,7 @@ function quickActivate(evt) { // jQuery
   var buffHref = '?cmd=quickbuff&subcmd=activate&targetPlayers=' +
     window.self + '&skills[]=' + trigger.getAttribute('buffID');
   retryAjax(buffHref).done(function(data) {
-    var doc = system.createDocument(data);
+    var doc = createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
     if (result &&
         (result.textContent.indexOf(
@@ -98,7 +98,7 @@ function addStatsQuickBuff(data) {
     player.insertAdjacentElement('afterend', activity);
   }
   activity.innerHTML = 'Last Activity: ' +
-    system.formatLastActivity(data.last_login) +
+    formatLastActivity(data.last_login) +
     '<br>Stamina: ' + data.current_stamina + ' / ' +
     data.stamina + ' ( ' + Math.floor(data.current_stamina /
     data.stamina * 100) + '% )';

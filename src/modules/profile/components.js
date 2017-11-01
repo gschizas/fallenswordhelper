@@ -1,3 +1,4 @@
+import {infoBox} from '../support/layout';
 import insertQuickExtract from '../quickExtract';
 import jQueryDialog from '../chrome/jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
@@ -7,8 +8,7 @@ import {
   createTBody,
   createTable
 } from '../common/cElement';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {createDocument, imageServer} from '../support/system';
 
 var quickDelDiv;
 var sumComp;
@@ -85,7 +85,7 @@ function displayComponentTally() {
 function gotComponentsPage(data) {
   pageCount += 1;
   sumComp.insertAdjacentHTML('beforeend', pageCount + ', ');
-  retriveComponent(system.createDocument(data));
+  retriveComponent(createDocument(data));
 }
 
 function countComponent(self) { // jQuery.min
@@ -112,7 +112,7 @@ function delAllComponent() {
 }
 
 function compDeleted(self, data) {
-  var response = layout.infoBox(data);
+  var response = infoBox(data);
   if (response === 'Component destroyed.') {
     self.parentNode.innerHTML = '';
   } else {
@@ -147,7 +147,7 @@ function delCompType(self) { // jQuery.min
   var td = self.parentNode;
   td.innerHTML = '';
   td.className = 'guildTagSpinner';
-  td.style.backgroundImage = 'url(\'' + system.imageServer +
+  td.style.backgroundImage = 'url(\'' + imageServer +
     '/skin/loading.gif\')';
   var prm = [];
   componentList[id].del.forEach(function(href) {

@@ -1,8 +1,8 @@
-import * as system from '../support/system';
+import {imageServer} from '../support/system';
 
 function anotherSpinner(self) {
   self.innerHTML = '<img class="quickActionSpinner" src="' +
-    system.imageServer +
+    imageServer +
     '/skin/loading.gif" width="15" height="15">';
 }
 

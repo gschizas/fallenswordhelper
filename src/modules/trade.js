@@ -2,8 +2,8 @@ import add from './support/task';
 import calf from './support/calf';
 import getInventoryById from './ajax/getInventoryById';
 import {createDiv, createTr} from './common/cElement';
-import * as debug from './support/debug';
-import * as system from './support/system';
+import {fallback, getValue} from './support/system';
+import {time, timeEnd} from './support/debug';
 
 function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
@@ -30,7 +30,7 @@ function doHideFolder(evt) {
     var hidden = el.classList.contains('fshHide');
     var all = folderid === 'folderid0';
     var hasFolder = el.classList.contains(folderid);
-    if (hidden && system.fallback(all, hasFolder)) {
+    if (hidden && fallback(all, hasFolder)) {
       el.classList.remove('fshHide');
       el.classList.add('fshBlock'); // show()
     }
@@ -89,7 +89,7 @@ function forEachInvItem(el) {
 
 function processTrade(data) {
 
-  debug.time('trade.processTrade');
+  time('trade.processTrade');
 
   invItems = data.items;
   /* Highlight items in ST */
@@ -98,7 +98,7 @@ function processTrade(data) {
   Array.prototype.forEach.call(nodeList, forEachInvItem);
   doFolderHeaders(data.folders);
 
-  debug.timeEnd('trade.processTrade');
+  timeEnd('trade.processTrade');
 
 }
 
@@ -133,7 +133,7 @@ function doCheckAll(evt) {
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
     if (howMany &&
-        system.fallback(itemsInSt, !el.classList.contains('isInST')) &&
+        fallback(itemsInSt, !el.classList.contains('isInST')) &&
         shouldBeChecked(itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;
@@ -152,7 +152,7 @@ function injectTradeOld() {
     'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
     '<span id="itemid-2" ' +
     'class="fshCheckAll fshLink fshNoWrap">All Resources</span>';
-  var sendClasses = system.getValue('sendClasses');
+  var sendClasses = getValue('sendClasses');
   var itemList = JSON.parse('[' + sendClasses + ']');
   itemList.forEach(function(el) {
     myTd += ' &ensp;<span id="itemid' + el[1] +

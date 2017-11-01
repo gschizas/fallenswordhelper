@@ -1,20 +1,20 @@
-import * as settingsPage from './settingsPage';
-import * as system from '../support/system';
+import {getValue, isChecked} from '../support/system';
+import {helpLink, simpleCheckbox} from './settingsPage';
 
 export default function questPrefs() {
   // Quest Preferences
   return '<tr><th colspan="2"><b>Quest preferences</b></th></tr>' +
 
     '<tr><td class="fshRight">Hide Specific Quests' +
-      settingsPage.helpLink('Hide Specific Quests',
+      helpLink('Hide Specific Quests',
         'If enabled, this hides quests whose name matches the list ' +
         '(separated by commas). This works on Quest Manager and Quest Book.') +
       ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
       'value="on"' +
-      system.isChecked(system.getValue('hideQuests')) + '>' +
+      isChecked(getValue('hideQuests')) + '>' +
       '&nbsp;<input name="hideQuestNames" size="60" value="' +
-      system.getValue('hideQuestNames') + '"></td></tr>' +
+      getValue('hideQuestNames') + '"></td></tr>' +
 
-    settingsPage.simpleCheckbox('storeLastQuestPage') +
-    settingsPage.simpleCheckbox('showNextQuestSteps');
+    simpleCheckbox('storeLastQuestPage') +
+    simpleCheckbox('showNextQuestSteps');
 }

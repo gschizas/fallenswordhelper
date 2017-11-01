@@ -318,8 +318,16 @@ export default {
   },
   disableQuickWearPrompts: {
     id: 'disableQuickWearPrompts',
-    helpTitle: 'Disable Use/Ext<br>Prompts',
+    helpTitle: 'Disable Use/Ext Prompts',
     helpText: 'If enabled, will disable prompts when you Use/Ext items.' +
-      '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
+      '<br>NO REFUNDS OR DO-OVERS! Use at own risk.',
+    title: 'Disable Use/Ext<br>Prompts'
+  },
+  enableGuildActivityTracker: {
+    id: 'enableGuildActivityTracker',
+    helpTitle: 'Enable Guild Activity Tracker',
+    helpText: 'If enabled, will track guild member activity over time.',
+    network: true,
+    title: 'Enable Tracker'
   }
 };

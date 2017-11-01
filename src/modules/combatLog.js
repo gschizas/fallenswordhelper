@@ -1,6 +1,6 @@
 import getForage from './ajax/getForage';
 import setForage from './ajax/setForage';
-import * as layout from './support/layout';
+import {jConfirm, pCC} from './support/layout';
 
 var content;
 var combatLog = [];
@@ -18,7 +18,7 @@ function clearCombatLog() {
 }
 
 function notepadClearLog() { // jQuery
-  layout.confirm('Clear Combat Log',
+  jConfirm('Clear Combat Log',
     'Are you sure you want to clear your log?', clearCombatLog
   );
 }
@@ -56,6 +56,6 @@ function gotCombatLog(data) {
 }
 
 export default function injectNotepadShowLogs(injector) { // jQuery.min
-  content = injector || layout.pCC;
+  content = injector || pCC;
   getForage('fsh_combatLog').done(gotCombatLog);
 }

@@ -1,6 +1,6 @@
+import {imageServer} from '../support/system';
+import {moveOptions} from './assets';
 import retryAjax from '../ajax/retryAjax';
-import * as assets from './assets';
-import * as system from '../support/system';
 
 var oldMoves = [];
 var nodes;
@@ -28,7 +28,7 @@ function updateMoves() { // jQuery
     if (val === oldMoves[ind]) {return;}
     prm.push(doPickMove('x', ind));
     nodes.eq(ind).attr({
-      src: system.imageServer + '/world/actionLoadingSpinner.gif',
+      src: imageServer + '/world/actionLoadingSpinner.gif',
       width: '25',
       height: '25'
     });
@@ -61,7 +61,7 @@ function selectMoves(evt) { // jQuery
     } else {
       move = move.match(/pvp\/(\d+).gif$/)[1];
     }
-    var html = $(assets.moveOptions);
+    var html = $(moveOptions);
     $('option[value=' + move + ']', html).prop('selected', true);
     row.append(html);
   });

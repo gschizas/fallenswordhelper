@@ -65,3 +65,15 @@ export function createAnchor(props) {
 export function createInput(props) {
   return cElement('input', props);
 }
+
+export function createTextArea(props) {
+  return cElement('textarea', props);
+}
+
+export function createTh(props) {
+  return cElement('th', props);
+}
+
+export function createLabel(props) {
+  return cElement('label', props);
+}

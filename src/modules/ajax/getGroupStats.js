@@ -1,9 +1,9 @@
+import {createDocument} from '../support/system';
 import groupViewStats from './groupViewStats';
 import retryAjax from './retryAjax';
-import * as system from '../support/system';
 
 function parseGroupStats(html) {
-  var doc = system.createDocument(html);
+  var doc = createDocument(html);
   return groupViewStats(doc);
 }
 

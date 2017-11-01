@@ -1,11 +1,16 @@
 import calf from '../support/calf';
 import {createSpan} from '../common/cElement';
-import * as system from '../support/system';
+import {
+  addCommas,
+  createDocument,
+  getIntFromRegExp,
+  xmlhttp
+} from '../support/system';
 
 function result(stat, desc, color) {
   if (stat !== 0) {
     return desc + ':<span class="' + color + '">' +
-      system.addCommas(stat) + ' </span>';
+      addCommas(stat) + ' </span>';
   }
   return '';
 }
@@ -18,15 +23,15 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   } else {
     color = 'fshRed';
   }
-  var xpGain = system.getIntFromRegExp(responseText,
+  var xpGain = getIntFromRegExp(responseText,
     /var\s+xpGain=(-?[0-9]+);/i);
-  var goldGain = system.getIntFromRegExp(responseText,
+  var goldGain = getIntFromRegExp(responseText,
     /var\s+goldGain=(-?[0-9]+);/i);
-  var prestigeGain = system.getIntFromRegExp(responseText,
+  var prestigeGain = getIntFromRegExp(responseText,
     /var\s+prestigeGain=(-?[0-9]+);/i);
-  var goldStolen = system.getIntFromRegExp(responseText,
+  var goldStolen = getIntFromRegExp(responseText,
     /var\s+goldStolen=(-?[0-9]+);/i);
-  var pvpRatingChange = system.getIntFromRegExp(responseText,
+  var pvpRatingChange = getIntFromRegExp(responseText,
     /var\s+pvpRatingChange=(-?[0-9]+);/i);
   var output = '<br> ';
   output += result(xpGain, 'XP stolen', color);
@@ -35,7 +40,7 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   output += result(prestigeGain, 'Prestige gain', color);
   output += result(pvpRatingChange, 'PvP change', color);
   // TODO did I initiate the attack?
-  var specials = system.createDocument(responseText)
+  var specials = createDocument(responseText)
     .querySelectorAll('#specialsDiv');
   Array.prototype.forEach.call(specials, function(el) {
     if (/mesmerized|leeched/.test(el.textContent)) {
@@ -58,7 +63,7 @@ export default function addPvpSummary(aRow, messageType) { // Legacy
     if (defeat) {_winner = 0;}
     var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
-    system.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
+    xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,
       {
         target: combatSummarySpan,

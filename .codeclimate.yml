@@ -19,5 +19,4 @@ ratings:
   - "**.css"
   - "**.js"
 exclude_paths:
-- "archive/"
 - "dist/"

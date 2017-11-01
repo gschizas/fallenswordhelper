@@ -1,7 +1,7 @@
 import {createInput} from '../common/cElement';
+import {imageServer} from '../support/system';
+import {pCC} from '../support/layout';
 import {takeItem} from '../support/ajax';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
 
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
@@ -31,7 +31,7 @@ function fastBp(el) {
   takeItem(itmId).done(takeResult.bind(null, el));
   el.textContent = '';
   el.className = 'guildTagSpinner';
-  el.style.backgroundImage = 'url(\'' + system.imageServer +
+  el.style.backgroundImage = 'url(\'' + imageServer +
     '/skin/loading.gif\')';
 }
 
@@ -42,9 +42,9 @@ function evtHdlr(e) {
 }
 
 export default function injectGuildAddTagsWidgets() {
-  layout.pCC.addEventListener('click', evtHdlr);
+  pCC.addEventListener('click', evtHdlr);
 
-  var nodeList = layout.pCC.getElementsByTagName('table');
+  var nodeList = pCC.getElementsByTagName('table');
   var itemTable = nodeList[nodeList.length - 1];
   if (itemTable) {doItemTable(itemTable.rows);}
 

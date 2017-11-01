@@ -1,5 +1,5 @@
+import {infoBox} from './layout';
 import retryAjax from '../ajax/retryAjax';
-import * as layout from './layout';
 
 var deferred = window.$ && $.when();
 
@@ -22,7 +22,7 @@ export function equipItem(backpackInvId) {
 }
 
 export function htmlResult(data) { // TODO change to app code to avoid 302 redirect
-  var info = layout.infoBox(data);
+  var info = infoBox(data);
   var _r = 1;
   if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
   return {r: _r, m: info};

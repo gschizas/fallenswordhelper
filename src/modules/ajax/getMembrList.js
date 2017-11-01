@@ -3,7 +3,16 @@ import getForage from './getForage';
 import {now} from '../support/dataObj';
 import retryAjax from './retryAjax';
 import setForage from './setForage';
-import * as layout from '../support/layout';
+
+function currentGuildId() {
+  var _guildId;
+  var nodeList = document.body.getElementsByTagName('script');
+  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
+    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
+    if (match) {_guildId = parseInt(match[1], 10);}
+  });
+  return _guildId;
+}
 
 function getGuild(guildId) {
   return retryAjax({
@@ -60,7 +69,7 @@ function setHelperMembrList(guildId, membrList) {
 }
 
 export default function getMembrList(force) {
-  var guildId = layout.guildId();
+  var guildId = currentGuildId();
   return guildMembers(force, guildId)
     .pipe(setHelperMembrList.bind(null, guildId));
 }

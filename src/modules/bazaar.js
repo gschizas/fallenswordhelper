@@ -1,6 +1,6 @@
 import buyitem from './app/potionbazaar/buyitem';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {pCC} from './support/layout';
+import {testQuant} from './support/system';
 
 var ItemId;
 var bazaarTable =
@@ -21,14 +21,14 @@ var bazaarItem =
   '<span class="bazaarButton tip-dynamic" style="background-image: ' +
   'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
 
-function testQuant() {
-  return system.testQuant(document.getElementById('buy_amount').value);
+function testBuyAmount() {
+  return testQuant(document.getElementById('buy_amount').value);
 }
 
 function select(evt) {
   var target = evt.target;
   if (!target.classList.contains('bazaarButton')) {return;}
-  var theValue = testQuant();
+  var theValue = testBuyAmount();
   if (!theValue) {return;}
   document.getElementById('quantity').textContent = theValue;
   ItemId = target.getAttribute('itemid');
@@ -41,7 +41,7 @@ function select(evt) {
 }
 
 function quantity() {
-  var theValue = testQuant();
+  var theValue = testBuyAmount();
   if (theValue) {
     document.getElementById('quantity').textContent = theValue;
   }
@@ -65,9 +65,9 @@ function buy() { // jQuery
 }
 
 export default function injectBazaar() { // TODO stop using getElementById
-  var pbImg = layout.pCC.getElementsByTagName('IMG')[0];
+  var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
-  var potions = layout.pCC.getElementsByTagName('A');
+  var potions = pCC.getElementsByTagName('A');
   Array.prototype.forEach.call(potions, function(el, i) {
     var item = el.firstElementChild;
     var tipped = item.getAttribute('data-tipped');

@@ -1,8 +1,20 @@
 import add from '../support/task';
+import guildTracker from './guildTracker/guildTracker';
 import retryAjax from '../ajax/retryAjax';
-import * as guildUtils from './guildUtils';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {
+  colouredDots,
+  openQuickBuffByName,
+  pCC,
+  playerName
+} from '../support/layout';
+import {
+  createDocument,
+  findNode,
+  getValue,
+  toggleVisibilty,
+  xmlhttp
+} from '../support/system';
+import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var leftHandSideColumnTable;
 var members;
@@ -28,7 +40,7 @@ function hazConflict(conflictTable, curPage, insertHere) { // Legacy
 }
 
 function activeConflicts(doc, curPage, insertHere) { // Legacy
-  var conflictTable = system.findNode(
+  var conflictTable = findNode(
     '//font[contains(.,"Participants")]/ancestor::table[1]', doc);
   if (conflictTable && conflictTable.rows.length > 3) {
     hazConflict(conflictTable, curPage, insertHere);
@@ -36,14 +48,14 @@ function activeConflicts(doc, curPage, insertHere) { // Legacy
 }
 
 function gotConflictInfo(responseText, callback) { // Legacy
-  var doc = system.createDocument(responseText);
-  var page = system.findNode('//td[contains(.,"Page:")]', doc);
-  var curPage = parseInt(system.findNode('//input[@name="page"]',
+  var doc = createDocument(responseText);
+  var page = findNode('//td[contains(.,"Page:")]', doc);
+  var curPage = parseInt(findNode('//input[@name="page"]',
     doc).value, 10);
   var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
   activeConflicts(doc, curPage, callback.node);
   if (maxPage && parseInt(maxPage[1], 10) > curPage) {
-    system.xmlhttp(
+    xmlhttp(
       'index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=' +
       (curPage + 1) + '&search_text=',
       gotConflictInfo,
@@ -66,11 +78,11 @@ function logoToggle() {
   var guildLogoElement = leftHandSideColumnTable.rows[2].cells[0]
     .firstChild.nextSibling;
   guildLogoElement.id = 'guildLogoControl';
-  if (system.getValue('guildLogoControl')) {
+  if (getValue('guildLogoControl')) {
     guildLogoElement.classList.add('fshHide');
   }
   document.getElementById('toggleGuildLogoControl')
-    .addEventListener('click', system.toggleVisibilty);
+    .addEventListener('click', toggleVisibilty);
 }
 
 function statToggle() {
@@ -82,11 +94,11 @@ function statToggle() {
   var statisticsControlElement = leftHandSideColumnTable.rows[6].cells[0]
     .firstChild.nextSibling;
   statisticsControlElement.id = 'statisticsControl';
-  if (system.getValue('statisticsControl')) {
+  if (getValue('statisticsControl')) {
     statisticsControlElement.classList.add('fshHide');
   }
   document.getElementById('toggleStatisticsControl')
-    .addEventListener('click', system.toggleVisibilty);
+    .addEventListener('click', toggleVisibilty);
 }
 
 function structureToggle() {
@@ -97,11 +109,11 @@ function structureToggle() {
   var guildStructureControlElement = leftHandSideColumnTable.rows[17]
     .cells[0].firstChild.nextSibling;
   guildStructureControlElement.id = 'guildStructureControl';
-  if (system.getValue('guildStructureControl')) {
+  if (getValue('guildStructureControl')) {
     guildStructureControlElement.classList.add('fshHide');
   }
   document.getElementById('toggleGuildStructureControl')
-    .addEventListener('click', system.toggleVisibilty);
+    .addEventListener('click', toggleVisibilty);
 }
 
 function batchBuffLinks() {
@@ -122,9 +134,9 @@ function buffLinks() {
   members = document.querySelectorAll(
     '#pCC a[href^="index.php?cmd=profile&player_id="]');
   add(3, batchBuffLinks);
-  layout.pCC.addEventListener('click', function(evt) {
+  pCC.addEventListener('click', function(evt) {
     if (evt.target.className !== 'smallLink') {return;}
-    layout.openQuickBuffByName(evt.target.previousElementSibling.text);
+    openQuickBuffByName(evt.target.previousElementSibling.text);
   });
 }
 
@@ -134,25 +146,24 @@ function selfRecallLink() {
   var selfRecall = getLi[getLi.length - 1].parentNode;
   selfRecall.insertAdjacentHTML('beforeend',
     '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
-    'user=' + layout.playerName() +
+    'user=' + playerName() +
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
 export default function injectGuild() {
-  add(3, layout.colouredDots);
-  add(3, guildUtils.removeGuildAvyImgBorder);
-  add(3, guildUtils.guildXPLock);
-  leftHandSideColumnTable = layout.pCC
+  add(3, colouredDots);
+  add(3, removeGuildAvyImgBorder);
+  add(3, guildXPLock);
+  leftHandSideColumnTable = pCC
     .lastElementChild.rows[2].cells[0].firstElementChild;
   add(3, logoToggle);
   add(3, statToggle);
   add(3, structureToggle);
   add(3, buffLinks);
   add(3, selfRecallLink);
-
   // Detailed conflict information
-  if (system.getValue('detailedConflictInfo')) {
+  if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo);
   }
-
+  add(4, guildTracker);
 }

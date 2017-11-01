@@ -1,28 +1,35 @@
 import calf from '../support/calf';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
+import {jConfirm} from '../support/layout';
 import jQueryDialog from '../chrome/jQueryDialog';
 import mySimpleCheckboxes from './simple';
 import setupConfigData from './configData';
 import {createBr, createSpan} from '../common/cElement';
-import * as layout from '../support/layout';
-import * as settingObj from './settingObj';
-import * as system from '../support/system';
+import {
+  fallback,
+  findNode,
+  getValue,
+  isChecked,
+  setValue,
+  toggleVisibilty
+} from '../support/system';
+import {networkIcon, saveBoxes} from './settingObj';
 
 function getVars() {
-  calf.showBuffs = system.getValue('showHuntingBuffs');
-  calf.buffs = system.getValue('huntingBuffs');
-  calf.buffsName = system.getValue('huntingBuffsName');
-  calf.buffs2 = system.getValue('huntingBuffs2');
-  calf.buffs2Name = system.getValue('huntingBuffs2Name');
-  calf.buffs3 = system.getValue('huntingBuffs3');
-  calf.buffs3Name = system.getValue('huntingBuffs3Name');
-  calf.doNotKillList = system.getValue('doNotKillList');
+  calf.showBuffs = getValue('showHuntingBuffs');
+  calf.buffs = getValue('huntingBuffs');
+  calf.buffsName = getValue('huntingBuffsName');
+  calf.buffs2 = getValue('huntingBuffs2');
+  calf.buffs2Name = getValue('huntingBuffs2Name');
+  calf.buffs3 = getValue('huntingBuffs3');
+  calf.buffs3Name = getValue('huntingBuffs3Name');
+  calf.doNotKillList = getValue('doNotKillList');
 
-  calf.bountyListRefreshTime = system.getValue('bountyListRefreshTime');
-  calf.wantedNames = system.getValue('wantedNames');
-  calf.combatEvaluatorBias = system.getValue('combatEvaluatorBias');
-  calf.enabledHuntingMode = system.getValue('enabledHuntingMode');
+  calf.bountyListRefreshTime = getValue('bountyListRefreshTime');
+  calf.wantedNames = getValue('wantedNames');
+  calf.combatEvaluatorBias = getValue('combatEvaluatorBias');
+  calf.enabledHuntingMode = getValue('enabledHuntingMode');
   calf.storage = (JSON.stringify(localStorage).length /
     (5 * 1024 * 1024) * 100).toFixed(2);
 }
@@ -34,18 +41,18 @@ export function helpLink(title, text) {
 }
 
 function hasNetwork(o) {
-  if (o.network) {return settingObj.networkIcon;}
+  if (o.network) {return networkIcon;}
   return '';
 }
 
 function isOn(o) {
-  return system.isChecked(system.getValue(o.id));
+  return isChecked(getValue(o.id));
 }
 
 function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
-    '<label for="' + o.id + '">' + o.helpTitle +
+    '<label for="' + o.id + '">' + fallback(o.title, o.helpTitle) +
     helpLink(o.helpTitle, o.helpText) +
     ':</label>';
 }
@@ -78,7 +85,7 @@ function toggleTickAllBuffs(e) { // jQuery
 }
 
 function clearStorage() {
-  layout.confirm('Clear localStorage',
+  jConfirm('Clear localStorage',
     'Are you sure you want to clear you localStorage?',
     function() {localStorage.clear();}
   );
@@ -86,17 +93,17 @@ function clearStorage() {
 
 function saveValueForm(oForm, name) { // Legacy
   var formElement =
-    system.findNode('//input[@name="' + name + '"]', oForm);
+    findNode('//input[@name="' + name + '"]', oForm);
   if (formElement.getAttribute('type') === 'checkbox') {
-    system.setValue(name, formElement.checked);
+    setValue(name, formElement.checked);
   } else {
-    system.setValue(name, formElement.value);
+    setValue(name, formElement.value);
   }
 }
 
 function setMaxCompressedCharacters(oForm) { // Legacy
   var maxCompressedCharacters =
-    system.findNode('//input[@name="maxCompressedCharacters"]', oForm);
+    findNode('//input[@name="maxCompressedCharacters"]', oForm);
   var maxCompressedCharactersValue = Number(maxCompressedCharacters.value);
   if (isNaN(maxCompressedCharactersValue) ||
       maxCompressedCharactersValue <= 50) {
@@ -106,7 +113,7 @@ function setMaxCompressedCharacters(oForm) { // Legacy
 
 function setMaxCompressedLines(oForm) { // Legacy
   var maxCompressedLines =
-    system.findNode('//input[@name="maxCompressedLines"]', oForm);
+    findNode('//input[@name="maxCompressedLines"]', oForm);
   var maxCompressedLinesValue = Number(maxCompressedLines.value);
   if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue <= 1) {
     maxCompressedLines.value = 25;
@@ -115,7 +122,7 @@ function setMaxCompressedLines(oForm) { // Legacy
 
 function setGuildLogHistoryPages(oForm) { // Legacy
   var newGuildLogHistoryPages =
-    system.findNode('//input[@name="newGuildLogHistoryPages"]', oForm);
+    findNode('//input[@name="newGuildLogHistoryPages"]', oForm);
   var newGuildLogHistoryPagesValue = Number(newGuildLogHistoryPages.value);
   if (isNaN(newGuildLogHistoryPagesValue) ||
       newGuildLogHistoryPagesValue <= 1) {
@@ -125,7 +132,7 @@ function setGuildLogHistoryPages(oForm) { // Legacy
 
 function setMaxGroupSizeToJoin(oForm) { // Legacy
   var maxGroupSizeToJoin =
-    system.findNode('//input[@name="maxGroupSizeToJoin"]', oForm);
+    findNode('//input[@name="maxGroupSizeToJoin"]', oForm);
   var maxGroupSizeToJoinValue = Number(maxGroupSizeToJoin.value);
   if (isNaN(maxGroupSizeToJoinValue) || maxGroupSizeToJoinValue <= 1) {
     maxGroupSizeToJoin.value = 11;
@@ -140,15 +147,15 @@ function saveConfig(evt) { // Legacy
   setGuildLogHistoryPages(oForm);
   setMaxGroupSizeToJoin(oForm);
   var combatEvaluatorBiasElement =
-    system.findNode('//select[@name="combatEvaluatorBias"]', oForm);
+    findNode('//select[@name="combatEvaluatorBias"]', oForm);
   var combatEvaluatorBias = Number(combatEvaluatorBiasElement.value);
-  system.setValue('combatEvaluatorBias', combatEvaluatorBias);
+  setValue('combatEvaluatorBias', combatEvaluatorBias);
   var enabledHuntingModeElement =
-    system.findNode('//select[@name="enabledHuntingMode"]', oForm);
+    findNode('//select[@name="enabledHuntingMode"]', oForm);
   var enabledHuntingMode = enabledHuntingModeElement.value;
-  system.setValue('enabledHuntingMode', enabledHuntingMode);
+  setValue('enabledHuntingMode', enabledHuntingMode);
 
-  settingObj.saveBoxes.forEach(saveValueForm.bind(null, oForm));
+  saveBoxes.forEach(saveValueForm.bind(null, oForm));
 
   $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
 }
@@ -184,13 +191,13 @@ function createEventListeners() {
     .addEventListener('click', showMonsterLogs);
 
   document.getElementById('toggleShowGuildSelfMessage')
-    .addEventListener('click', system.toggleVisibilty);
+    .addEventListener('click', toggleVisibilty);
   document.getElementById('toggleShowGuildFrndMessage')
-    .addEventListener('click', system.toggleVisibilty);
+    .addEventListener('click', toggleVisibilty);
   document.getElementById('toggleShowGuildPastMessage')
-    .addEventListener('click', system.toggleVisibilty);
+    .addEventListener('click', toggleVisibilty);
   document.getElementById('toggleShowGuildEnmyMessage')
-    .addEventListener('click', system.toggleVisibilty);
+    .addEventListener('click', toggleVisibilty);
 }
 
 export function injectSettings() { // jQuery.min
@@ -203,7 +210,7 @@ export function injectSettings() { // jQuery.min
     $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
   }
   createEventListeners();
-  system.setValue('minGroupLevel', document.getElementById('settingsTabs-1')
+  setValue('minGroupLevel', document.getElementById('settingsTabs-1')
     .firstElementChild.lastElementChild.rows[1].cells[1].firstElementChild
     .value);
 }

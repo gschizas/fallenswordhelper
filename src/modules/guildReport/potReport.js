@@ -204,7 +204,7 @@ function gotMap(data) {
   thresholds = createThresholds();
   panels.appendChild(thresholds);
 
-  var myCell = pCC.firstElementChild.insertRow(2).insertCell(-1);
+  var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   myCell.addEventListener('change', onChange);
   myCell.addEventListener('click', onClick);
   myCell.addEventListener('input', onInput);

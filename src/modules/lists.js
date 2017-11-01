@@ -1,12 +1,12 @@
-import * as dataObj from './support/dataObj';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {defaults} from './support/dataObj';
+import {getValueJSON, isChecked, setValueJSON} from './support/system';
+import {makePageHeader, makePageTemplate, pCC} from './support/layout';
 
 var param;
 
 function detailRow(j, itemField) { // Legacy
   if (param.tags[j] === 'checkbox') {
-    return '<input type="checkbox"' + system.isChecked(itemField) +
+    return '<input type="checkbox"' + isChecked(itemField) +
       ' disabled>';
   } else if (param.url && param.url[j] !== '') {
     return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
@@ -70,7 +70,7 @@ function generateManageTable() { // Legacy
     'class="custombutton"></td></tr>' +
     '</tbody></table>';
   document.getElementById(param.id).innerHTML = result;
-  system.setValueJSON(param.gmname, param.currentItems);
+  setValueJSON(param.gmname, param.currentItems);
 }
 
 function deleteQuickItem(evt) { // Legacy
@@ -114,7 +114,7 @@ function saveRawEditor() { // jQuery
 function resetRawEditor() { // Legacy
   if (param.id === 'fshAso') {
     param.currentItems =
-      JSON.parse(dataObj.defaults.quickSearchList);
+      JSON.parse(defaults.quickSearchList);
   } else {param.currentItems = [];}
   generateManageTable();
 }
@@ -139,9 +139,9 @@ function listEvtHnl(e) {
 }
 
 export function injectAuctionSearch(injector) { // Legacy
-  var content = injector || layout.pCC;
+  var content = injector || pCC;
   content.innerHTML =
-    layout.makePageHeader('Trade Hub Quick Search', '', '', '') +
+    makePageHeader('Trade Hub Quick Search', '', '', '') +
     '<div>This screen allows you to set up some quick ' +
       'search templates for the Auction House. The Display on AH column ' +
       'indicates if the quick search will show on the short list on the ' +
@@ -161,7 +161,7 @@ export function injectAuctionSearch(injector) { // Legacy
     tags: ['text', 'text', 'text', 'checkbox'],
     url: ['', '',
       'index.php?cmd=auctionhouse&amp;type=-1&amp;search_text=@replaceme@', ''],
-    currentItems: system.getValueJSON('quickSearchList'),
+    currentItems: getValueJSON('quickSearchList'),
     gmname: 'quickSearchList',
     categoryField: 'category',
   };
@@ -170,9 +170,9 @@ export function injectAuctionSearch(injector) { // Legacy
 }
 
 export function injectQuickLinkManager(injector) { // Legacy
-  var content = injector || layout.pCC;
+  var content = injector || pCC;
   content.innerHTML =
-    layout.makePageTemplate('Quick Links', '', '', '', 'qla');
+    makePageTemplate('Quick Links', '', '', '', 'qla');
 
   // global parameters for the meta function generateManageTable
   param = {
@@ -182,7 +182,7 @@ export function injectQuickLinkManager(injector) { // Legacy
       'data-tipped="Open page in a new window">?</span>]'],
     fields: ['name', 'url', 'newWindow'],
     tags: ['text', 'text', 'checkbox'],
-    currentItems: system.getValueJSON('quickLinks'),
+    currentItems: getValueJSON('quickLinks'),
     gmname: 'quickLinks',
   };
   generateManageTable();

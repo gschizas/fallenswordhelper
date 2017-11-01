@@ -1,4 +1,4 @@
-import * as system from './support/system';
+import {findNode, intValue, server, setValue} from './support/system';
 
 var currentFSP;
 
@@ -36,31 +36,31 @@ function injectUpgradeHelper(value, type) { // jQuery
 }
 
 function injectPoints() { // jQuery
-  currentFSP = system.intValue($('#statbar-fsp').text());
+  currentFSP = intValue($('#statbar-fsp').text());
   injectUpgradeHelper(0, 'Current');
   injectUpgradeHelper(1, 'Maximum');
   $('#pCC td')
     .has('input[name="upgrade_id"][value="3"]')
-    .html('<a href="' + system.server +
+    .html('<a href="' + server +
       '?cmd=marketplace">Sell at Marketplace</a>');
 }
 
 export default function storePlayerUpgrades() { // Legacy
-  var alliesText = system.findNode('//td[.="+1 Max Allies"]');
+  var alliesText = findNode('//td[.="+1 Max Allies"]');
   var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling
     .nextSibling;
   if (alliesRatio) {
     var alliesValueRE = /(\d+) \/ 115/;
     var alliesValue = Number(alliesValueRE.exec(alliesRatio.innerHTML)[1]);
-    system.setValue('alliestotal', alliesValue + 5);
+    setValue('alliestotal', alliesValue + 5);
   }
-  var enemiesText = system.findNode('//td[.="+1 Max Enemies"]');
+  var enemiesText = findNode('//td[.="+1 Max Enemies"]');
   var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling
     .nextSibling;
   if (enemiesRatio) {
     var enemiesValueRE = /(\d+) \/ 115/;
     var enemiesValue = Number(enemiesValueRE.exec(enemiesRatio.innerHTML)[1]);
-    system.setValue('enemiestotal', enemiesValue + 5);
+    setValue('enemiestotal', enemiesValue + 5);
   }
   injectPoints();
 }

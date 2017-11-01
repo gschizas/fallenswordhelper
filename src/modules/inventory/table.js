@@ -1,13 +1,26 @@
 import wearUseRender from './wearUseRender';
-import * as assets from './assets';
-import * as inventory from './inventory';
-import * as render from './render';
+import {
+  bpRender,
+  craftRender,
+  createdRow,
+  dropRender,
+  durabilityRender,
+  gsRender,
+  nameRender,
+  sendRender,
+  whereData,
+  whereRender,
+  whereRenderDisplay,
+  whereRenderFilter
+} from './render';
+import {craftHash, itemType} from './assets';
+import {showQuickDropLinks, showQuickSendLinks, theInv} from './inventory';
 
 export default function doTable() { // jQuery
   $('#pCC').append('<table id="fshInv" class="hover" ' +
     'style="font-size: x-small;"></table>');
   var table = $('#fshInv').DataTable({
-    data: inventory.theInv.items,
+    data: theInv.items,
     autoWidth: false,
     pageLength: 50,
     lengthMenu: [[50, 100, 150, 200, -1], [50, 100, 150, 200, 'All']],
@@ -20,22 +33,22 @@ export default function doTable() { // jQuery
       {
         title: 'Name',
         data: 'item_name',
-        render: render.nameRender
+        render: nameRender
       },
       {title: 'Level', data: 'stats.min_level'},
       {
         title: 'Where',
-        data: render.whereData,
+        data: whereData,
         render: {
-          _: render.whereRender,
-          display: render.whereRenderDisplay,
-          filter: render.whereRenderFilter
+          _: whereRender,
+          display: whereRenderDisplay,
+          filter: whereRenderFilter
         }
       },
       {
         title: 'Type',
         data: 'type',
-        render: function(type) {return assets.itemType[type];}
+        render: function(type) {return itemType[type];}
       },
       {title: 'Att', data: 'stats.attack'},
       {title: 'Def', data: 'stats.defense'},
@@ -48,29 +61,29 @@ export default function doTable() { // jQuery
         data: 'craft',
         render: {
           _: function(craft) {
-            if (assets.craftHash[craft]) {
-              return assets.craftHash[craft].index;
+            if (craftHash[craft]) {
+              return craftHash[craft].index;
             }
             return 0;
           },
-          display: render.craftRender,
-          filter: render.craftRender
+          display: craftRender,
+          filter: craftRender
         }
       },
       {
         title: 'Du%',
         data: 'durability',
-        render: render.durabilityRender
+        render: durabilityRender
       },
       {
         title: 'BP',
-        data: render.whereData,
-        render: render.bpRender
+        data: whereData,
+        render: bpRender
       },
       {
         title: 'GS',
-        data: render.whereData,
-        render: render.gsRender
+        data: whereData,
+        render: gsRender
       },
       {
         title: 'W/U',
@@ -94,21 +107,21 @@ export default function doTable() { // jQuery
       {
         title: 'Drop',
         data: 'type',
-        render: render.dropRender
+        render: dropRender
       },
       {
         title: 'Send',
         data: 'type',
-        render: render.sendRender
+        render: sendRender
       }
     ],
-    createdRow: render.createdRow,
+    createdRow: createdRow,
     stateSave: true,
     stateDuration: 0
   });
-  table.column(12).visible('current_player_id' in inventory.theInv);
-  table.column(17).visible('player_id' in inventory.theInv &&
-    inventory.showQuickDropLinks);
-  table.column(18).visible('player_id' in inventory.theInv &&
-    inventory.showQuickSendLinks);
+  table.column(12).visible('current_player_id' in theInv);
+  table.column(17).visible('player_id' in theInv &&
+    showQuickDropLinks);
+  table.column(18).visible('player_id' in theInv &&
+    showQuickSendLinks);
 }

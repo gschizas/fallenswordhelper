@@ -1,5 +1,5 @@
-import * as debug from './debug';
-import * as layout from './layout';
+import {log} from './debug';
+import {playerId} from './layout';
 
 var times = {};
 var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
@@ -25,7 +25,7 @@ function sendTiming(category, variable, label) {
       label);
   }
   //#if _BETA  //  Timing output
-  debug.log(variable, myTime + 'ms');
+  log(variable, myTime + 'ms');
   //#endif
 }
 
@@ -64,13 +64,13 @@ export function setup() {
   if (isAuto() || typeof ga === 'undefined') {return;}
 
   ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
-    userId: layout.playerId(),
+    userId: playerId(),
     siteSpeedSampleRate: 10
   });
   ga('fshApp.set', 'appName', 'fshApp');
   ga('fshApp.set', 'appVersion', FSH.version + '(' + FSH.calf + ')');
   ga('create', 'UA-76488113-2', 'auto', 'fsh', {
-    userId: layout.playerId(),
+    userId: playerId(),
     siteSpeedSampleRate: 10
   });
   fixupUrl();

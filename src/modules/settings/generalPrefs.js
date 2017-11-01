@@ -1,7 +1,7 @@
 import calf from '../support/calf';
-import * as settingObj from './settingObj';
-import * as settingsPage from './settingsPage';
-import * as system from '../support/system';
+import {networkIcon} from './settingObj';
+import {getValue, isChecked} from '../support/system';
+import {helpLink, simpleCheckbox} from './settingsPage';
 
 export default function generalPrefs() {
   // General Prefs
@@ -11,70 +11,70 @@ export default function generalPrefs() {
     '<tr><td class="fshRight">' +
       '<label for="enableGuildInfoWidgets">' +
       'Enable Guild Info Widgets' +
-      settingsPage.helpLink('Enable Guild Info Widgets',
+      helpLink('Enable Guild Info Widgets',
         'Enabling this option will enable the Guild Info Widgets ' +
         '(coloring on the Guild Info panel)') + ':</label></td><td>' +
       '<input id="enableGuildInfoWidgets" name="enableGuildInfoWidgets" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(calf.enableGuildInfoWidgets) +
+      isChecked(calf.enableGuildInfoWidgets) +
       '>&nbsp;' +
       '<label>Hide Message&gt;<input name="hideGuildInfoMessage" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(calf.hideGuildInfoMessage) +
+      isChecked(calf.hideGuildInfoMessage) +
       '></label>&nbsp;' +
       '<label>Hide Buff&gt;<input name="hideGuildInfoBuff" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(calf.hideGuildInfoBuff) +
+      isChecked(calf.hideGuildInfoBuff) +
       '></label>&nbsp;' +
       '<label>Hide ST&gt;<input name="hideGuildInfoSecureTrade" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(calf.hideGuildInfoSecureTrade) +
+      isChecked(calf.hideGuildInfoSecureTrade) +
       '></label>&nbsp;' +
       '<label>Hide Trade&gt;<input name="hideGuildInfoTrade" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(calf.hideGuildInfoTrade) +
+      isChecked(calf.hideGuildInfoTrade) +
       '></label></td></tr>' +
 
-    settingsPage.simpleCheckbox('moveGuildList') +
-    settingsPage.simpleCheckbox('moveOnlineAlliesList') +
+    simpleCheckbox('moveGuildList') +
+    simpleCheckbox('moveOnlineAlliesList') +
 
-    '<tr><td class="fshRight">' + settingObj.networkIcon +
+    '<tr><td class="fshRight">' + networkIcon +
       'Show Online Allies/Enemies' +
-      settingsPage.helpLink('Show Online Allies/Enemies',
+      helpLink('Show Online Allies/Enemies',
         'This will show the allies/enemies online list on the right.') +
       ':</td><td><label>Allies&nbsp;<input name="enableAllyOnlineList" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(calf.enableAllyOnlineList) +
+      isChecked(calf.enableAllyOnlineList) +
       '></label>&nbsp;&nbsp;<label>Enemies&nbsp;' +
       '<input name="enableEnemyOnlineList" type="checkbox" value="on"' +
-      system.isChecked(calf.enableEnemyOnlineList) +
+      isChecked(calf.enableEnemyOnlineList) +
       '></label>&nbsp;&nbsp;' +
       '<input name="allyEnemyOnlineRefreshTime" size="3" value="' +
-      system.getValue('allyEnemyOnlineRefreshTime') +
+      getValue('allyEnemyOnlineRefreshTime') +
       '"> seconds refresh</td></tr>' +
 
-    settingsPage.simpleCheckbox('enableOnlineAlliesWidgets') +
-    settingsPage.simpleCheckbox('moveFSBox') +
-    settingsPage.simpleCheckbox('fsboxlog') +
-    settingsPage.simpleCheckbox('gameHelpLink') +
-    settingsPage.simpleCheckbox('enableTempleAlert') +
-    settingsPage.simpleCheckbox('enableUpgradeAlert') +
-    settingsPage.simpleCheckbox('enableComposingAlert') +
-    settingsPage.simpleCheckbox('enhanceOnlineDots') +
-    settingsPage.simpleCheckbox('hideBuffSelected') +
-    settingsPage.simpleCheckbox('hideHelperMenu') +
-    settingsPage.simpleCheckbox('keepHelperMenuOnScreen') +
-    settingsPage.simpleCheckbox('draggableHelperMenu') +
+    simpleCheckbox('enableOnlineAlliesWidgets') +
+    simpleCheckbox('moveFSBox') +
+    simpleCheckbox('fsboxlog') +
+    simpleCheckbox('gameHelpLink') +
+    simpleCheckbox('enableTempleAlert') +
+    simpleCheckbox('enableUpgradeAlert') +
+    simpleCheckbox('enableComposingAlert') +
+    simpleCheckbox('enhanceOnlineDots') +
+    simpleCheckbox('hideBuffSelected') +
+    simpleCheckbox('hideHelperMenu') +
+    simpleCheckbox('keepHelperMenuOnScreen') +
+    simpleCheckbox('draggableHelperMenu') +
 
     '<tr><td class="fshRight">Quick Links Screen Location' +
-      settingsPage.helpLink('Quick Links Screen Location',
+      helpLink('Quick Links Screen Location',
         'Determines where the quick links dialog shows on the screen. ' +
         'Default is top 22, left 0.') +
       ':</td><td>Top: <input name="quickLinksTopPx" size="3" value="' +
-      system.getValue('quickLinksTopPx') +
+      getValue('quickLinksTopPx') +
       '"> Left: <input name="quickLinksLeftPx" size="3" value="' +
-      system.getValue('quickLinksLeftPx') +
+      getValue('quickLinksLeftPx') +
       '"></td></tr>' +
-    settingsPage.simpleCheckbox('draggableQuickLinks') +
-    settingsPage.simpleCheckbox('expandMenuOnKeyPress');
+    simpleCheckbox('draggableQuickLinks') +
+    simpleCheckbox('expandMenuOnKeyPress');
 }

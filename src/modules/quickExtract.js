@@ -1,10 +1,10 @@
 import {createTable} from './common/cElement';
 import getInventory from './ajax/getInventory';
+import {imageServer} from './support/system';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import useitem from './app/profile/useitem';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {jConfirm, pCC} from './support/layout';
 
 var extTbl;
 var playerId;
@@ -41,7 +41,7 @@ function doExtract(target) {
 }
 
 function extractAllSimilar(evt) {
-  layout.confirm('Extract Resources',
+  jConfirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
     doExtract.bind(null, evt.target)
   );
@@ -71,7 +71,7 @@ function tableRows(prev, item_id) {
   return prev + '<tr><td class="fshCenter"><span class="smallLink"' +
     ' id="fshExtr' + item_id +
     '">Extract all ' + res.invIDs.length + '</span></td>' +
-    '<td><img src="' + system.imageServer + '/items/' +
+    '<td><img src="' + imageServer + '/items/' +
     item_id + '.gif" class="tip-dynamic" data-tipped="' +
     'fetchitem.php?item_id=' + item_id + '&inv_id=' +
     res.inv_id + '&t=1&p=' + playerId +
@@ -135,7 +135,7 @@ function listen(e) {
 }
 
 export default function insertQuickExtract(injector) { // jQuery.min
-  var content = injector || layout.pCC;
+  var content = injector || pCC;
   content.innerHTML = '<div class="qeHead"><b>Quick Extract</b></div>' +
     'Select which type of plants you wish to extract all of. Only ' +
     'select extractable resources.<br>' +

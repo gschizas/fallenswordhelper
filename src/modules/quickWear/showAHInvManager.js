@@ -1,5 +1,5 @@
 import {createDiv} from '../common/cElement';
-import * as system from '../support/system';
+import {getValueJSON} from '../support/system';
 
 function ahLink(searchname, nickname) {
   return '<a href="index.php?cmd=auctionhouse&search_text=' + searchname +
@@ -85,7 +85,7 @@ function testItemList(invCount, quickSL, item) {
 
 export default function showAHInvManager(itemList) {
   var invCount = {};
-  var quickSL = system.getValueJSON('quickSearchList');
+  var quickSL = getValueJSON('quickSearchList');
   // fill up the Inv Counter
   itemList.r.forEach(function(aFolder) {
     aFolder.items.forEach(testItemList.bind(null, invCount, quickSL));

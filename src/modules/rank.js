@@ -2,8 +2,8 @@ import add from './support/task';
 import {createInput} from './common/cElement';
 import getMembrList from './ajax/getMembrList';
 import retryAjax from './ajax/retryAjax';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {createDocument, getValue} from './support/system';
+import {pCC, playerName} from './support/layout';
 
 var ranks;
 var myRank;
@@ -26,7 +26,7 @@ var privLookup = {
 
 function parseRankData(linkElement, responseText) {
   // Makes a weighted calculation of available permissions and gets tax rate
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   var checkBoxes = doc.querySelectorAll(
     '#pCC input[type="checkbox"]:checked');
   var count = 0;
@@ -101,8 +101,8 @@ function doButtons() {
   theTd.insertAdjacentHTML('beforeend', '&nbsp;');
   theTd.insertAdjacentElement('beforeend', weightButton);
 
-  if (system.getValue('ajaxifyRankControls')) {
-    layout.pCC.addEventListener('click',
+  if (getValue('ajaxifyRankControls')) {
+    pCC.addEventListener('click',
       ajaxifyRankControls, true);
   }
 }
@@ -143,8 +143,8 @@ function getRanks(membrList) {
     }
     return prev;
   }, {});
-  myRank = membrList[layout.playerName()].rank_name;
-  theRows = layout.pCC.firstElementChild
+  myRank = membrList[playerName()].rank_name;
+  theRows = pCC.firstElementChild
     .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
   rankCount = 1;
   add(3, paintRanks);

@@ -1,9 +1,9 @@
+import {findNode} from '../support/system';
 import injectAdvisor from '../guildAdvisor';
+import {injectQuestBookFull} from '../questBook';
 import inventing from '../recipes';
+import {screenview} from '../support/fshGa';
 import updateBuffLog from '../buffLog/updateBuffLog';
-import * as fshGa from '../support/fshGa';
-import * as questBook from '../questBook';
-import * as system from '../support/system';
 
 var unknown = [
   {
@@ -11,36 +11,36 @@ var unknown = [
       return document.getElementById('quickbuff-report');
     },
     result: function() {
-      fshGa.screenview('unknown.buffLog.updateBuffLog');
+      screenview('unknown.buffLog.updateBuffLog');
       updateBuffLog();
     }
   },
   {
     condition: function() {
-      return system.findNode('//td[.="Quest Name"]');
+      return findNode('//td[.="Quest Name"]');
     },
     result: function() {
-      fshGa.screenview('unknown.questBook.injectQuestBookFull');
-      questBook.injectQuestBookFull();
+      screenview('unknown.questBook.injectQuestBookFull');
+      injectQuestBookFull();
     }
   },
   {
     condition: function() {
-      return system.findNode('//font[@size=2 and .="Advisor"]') &&
-        system.findNode('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
+      return findNode('//font[@size=2 and .="Advisor"]') &&
+        findNode('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
           'and .="Back to Guild Management"]');
     },
     result: function() {
-      fshGa.screenview('unknown.guildAdvisor.injectAdvisor');
+      screenview('unknown.guildAdvisor.injectAdvisor');
       injectAdvisor();
     }
   },
   // {
   //   condition: function() {
-  //     return system.findNode('//a[.="Back to Scavenging"]');
+  //     return findNode('//a[.="Back to Scavenging"]');
   //   },
   //   result: function() {
-  //     fshGa.screenview('unknown.scavenging.injectScavenging');
+  //     screenview('unknown.scavenging.injectScavenging');
   //     FSH.scavenging.injectScavenging(); // Is this used???
   //   }
   // },
@@ -49,7 +49,7 @@ var unknown = [
       return $('#pCC img[title="Inventing"]').length > 0;
     },
     result: function() {
-      fshGa.screenview('unknown.recipes.inventing');
+      screenview('unknown.recipes.inventing');
       inventing();
     }
   //#if _DEV  //  Fell through!

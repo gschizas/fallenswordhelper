@@ -1,36 +1,36 @@
-import * as settingsPage from './settingsPage';
-import * as system from '../support/system';
+import {getValue, isChecked} from '../support/system';
+import {helpLink, simpleCheckbox} from './settingsPage';
 
 export default function otherPrefs() {
   // Other prefs
   return '<tr><th colspan="2"><b>Other preferences</b></th></tr>' +
 
-    settingsPage.simpleCheckbox('autoFillMinBidPrice') +
+    simpleCheckbox('autoFillMinBidPrice') +
 
     '<tr><td class="fshRight">Hide Specific Recipes' +
-      settingsPage.helpLink('Hide Specific Recipes',
+      helpLink('Hide Specific Recipes',
         'If enabled, this hides recipes whose name matches the list ' +
         '(separated by commas). This works on Recipe Manager') +
       ':</td><td colspan="3"><input name="hideRecipes" ' +
       'type="checkbox" value="on"' +
-      system.isChecked(system.getValue('hideRecipes')) + '>' +
+      isChecked(getValue('hideRecipes')) + '>' +
       '&nbsp;<input name="hideRecipeNames" size="60" value="' +
-      system.getValue('hideRecipeNames') + '"></td></tr>' +
+      getValue('hideRecipeNames') + '"></td></tr>' +
 
-    settingsPage.simpleCheckbox('hideRelicOffline') +
-    settingsPage.simpleCheckbox('enterForSendMessage') +
-    settingsPage.simpleCheckbox('navigateToLogAfterMsg') +
+    simpleCheckbox('hideRelicOffline') +
+    simpleCheckbox('enterForSendMessage') +
+    simpleCheckbox('navigateToLogAfterMsg') +
 
     '<tr><td align= "right">Max Group Size to Join' +
-      settingsPage.helpLink('Max Group Size to Join',
+      helpLink('Max Group Size to Join',
         'This will disable HCSs Join All functionality and will only join ' +
         'groups less than a set size. ') +
       ':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" ' +
       'type = "checkbox" value = "on"' +
-      system.isChecked(system.getValue('enableMaxGroupSizeToJoin')) +
+      isChecked(getValue('enableMaxGroupSizeToJoin')) +
       '>&nbsp;&nbsp;Max Size: ' +
       '<input name="maxGroupSizeToJoin" size="3" value="' +
-      system.getValue('maxGroupSizeToJoin') + '"></td></tr>' +
+      getValue('maxGroupSizeToJoin') + '"></td></tr>' +
 
-    settingsPage.simpleCheckbox('moveComposingButtons');
+    simpleCheckbox('moveComposingButtons');
 }

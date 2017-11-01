@@ -2,7 +2,7 @@ import {createTd} from './common/cElement';
 import doinvent from './app/inventing/doinvent';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
-import * as system from './support/system';
+import {fallback, findNode, findNodes, server, xmlhttp} from './support/system';
 
 var itemRE = /<b>([^<]+)<\/b>/i;
 var plantFromComponentHash = {
@@ -59,15 +59,15 @@ function getItemName(responseText) { // Legacy
 
 function injectViewRecipeLinks(responseText, callback) { // Legacy
   var itemName = getItemName(responseText);
-  var plantFromComponent = system.fallback(plantFromComponentHash[itemName],
+  var plantFromComponent = fallback(plantFromComponentHash[itemName],
     itemName);
   if (itemName !== plantFromComponent) {
     var itemLinks = createTd({
-      innerHTML: '<a href="' + system.server +
+      innerHTML: '<a href="' + server +
         '?cmd=auctionhouse&search_text=' +
         encodeURI(plantFromComponent) + '">AH</a>'
     });
-    var counter = system.findNode('../../../../tr[2]/td', callback);
+    var counter = findNode('../../../../tr[2]/td', callback);
     counter.setAttribute('colspan', '2');
     callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
   }
@@ -87,7 +87,7 @@ function linkFromMouseoverCustom(mouseOver) { // Legacy
   var vcode = reResult[5];
   var theUrl = 'fetchitem.php?item_id=' + itemId + '&inv_id=' + invId +
     '&t=' + type + '&p=' + pid + '&vcode=' + vcode;
-  theUrl = system.server + theUrl;
+  theUrl = server + theUrl;
   return theUrl;
 }
 
@@ -99,12 +99,12 @@ function injectViewRecipe() { // Legacy
     'items&subcmd=view&search_name=' + searchName + '">' + name +
     '</a>');
 
-  var components = system.findNodes(
+  var components = findNodes(
     '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
   if (components) {
     for (var i = 0; i < components.length; i += 1) {
       var mo = components[i].getAttribute('data-tipped');
-      system.xmlhttp(linkFromMouseoverCustom(mo),
+      xmlhttp(linkFromMouseoverCustom(mo),
         injectViewRecipeLinks, components[i]);
       var componentCountElement = components[i].parentNode.parentNode
         .parentNode.nextSibling.firstChild;

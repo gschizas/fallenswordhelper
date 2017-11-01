@@ -1,7 +1,16 @@
 import calf from '../support/calf';
 import {now} from '../support/dataObj';
 import {createBr, createTable} from '../common/cElement';
-import * as system from '../support/system';
+import {
+  createDocument,
+  findNode,
+  getValue,
+  getValueJSON,
+  server,
+  setValue,
+  setValueJSON,
+  xmlhttp
+} from '../support/system';
 
 var bountyList;
 var wantedList;
@@ -14,12 +23,12 @@ var wantedNames;
 var wantedArray;
 
 function resetBountyList() {
-  system.setValueJSON('bountyList', null);
+  setValueJSON('bountyList', null);
   location.reload();
 }
 
 function injectBountyList() {
-  system.setValueJSON('bountyList', bountyList);
+  setValueJSON('bountyList', bountyList);
   var injectHere = document
     .getElementById('Helper:BountyListPlaceholder');
   var displayList = createTable({cellPadding: 1, width: 125});
@@ -46,10 +55,10 @@ function injectBountyList() {
         '</div>';
 
       output += '<li style="padding-bottom:0px;"><a style="color:' +
-        'red;font-size:10px;"href="' + system.server +
+        'red;font-size:10px;"href="' + server +
         'index.php?cmd=attackplayer&mode=bounty&target_username=' +
         bountyList.bounty[i].target + '">[a]</a>&nbsp;<a style="' +
-        'color:#A0CFEC;font-size:10px;"href="' + system.server +
+        'color:#A0CFEC;font-size:10px;"href="' + server +
         'index.php?cmd=message&target_player=' +
         bountyList.bounty[i].target + '">[m]</a> &nbsp;<a href="' +
         bountyList.bounty[i].link + '" class="tip-static" ' +
@@ -68,7 +77,7 @@ function injectBountyList() {
 }
 
 function resetWantedList() { // Legacy
-  system.setValueJSON('wantedList', null);
+  setValueJSON('wantedList', null);
   location.reload();
 }
 
@@ -79,13 +88,13 @@ function acceptOrAttack(bounty) { // Legacy
       'Bounty" onclick="' + bounty.accept +
       '">[a]</a>&nbsp;';
   }
-  return 'color:red;" href="' + system.server +
+  return 'color:red;" href="' + server +
     'index.php?cmd=attackplayer&target_username=' +
     bounty.target + '">[a]</a>&nbsp;';
 }
 
 function injectWantedList() { // Legacy
-  system.setValueJSON('wantedList', wantedList);
+  setValueJSON('wantedList', wantedList);
   var injectHere = document
     .getElementById('Helper:WantedListPlaceholder');
   var displayList = createTable({cellPadding: 3, width: 125});
@@ -181,10 +190,10 @@ function findTarget(activeTable) {
 
 function getWantedBountyList(doc) { // Legacy
   if (!calf.enableWantedList) {return;}
-  var page = system.findNode('//input[@name="page"]', doc);
+  var page = findNode('//input[@name="page"]', doc);
   curPage = parseInt(page.value, 10);
   maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
-  var activeTable = system.findNode('//table[@width = "630" and ' +
+  var activeTable = findNode('//table[@width = "630" and ' +
     'contains(.,"Target")]', doc);
   if (activeTable) {findTarget(activeTable);}
 }
@@ -220,7 +229,7 @@ function parseActiveBounty(activeTable) { // Legacy
 }
 
 function getActiveBountyList(doc) { // Legacy
-  var activeTable = system.findNode('//table[@width = 620]', doc);
+  var activeTable = findNode('//table[@width = 620]', doc);
   bountyList = {};
   bountyList.bounty = [];
   bountyList.isRefreshed = true;
@@ -231,14 +240,14 @@ function getActiveBountyList(doc) { // Legacy
 }
 
 function parseBountyPageForWorld(details) {
-  var doc = system.createDocument(details);
+  var doc = createDocument(details);
   getWantedBountyList(doc);
   if (calf.enableActiveBountyList &&
       !activeBountyListPosted) {
     getActiveBountyList(doc);
   }
   if (curPage < maxPage) {
-    system.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
+    xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
       parseBountyPageForWorld);
   } else {
     injectWantedList();
@@ -253,10 +262,10 @@ function testCacheInvalid() { // Legacy
 }
 
 function invalidateCache() { // Legacy
-  bountyList = system.getValueJSON('bountyList');
-  wantedList = system.getValueJSON('wantedList');
-  bountyListRefreshTime = system.getValue('bountyListRefreshTime');
-  bwNeedsRefresh = system.getValue('bwNeedsRefresh');
+  bountyList = getValueJSON('bountyList');
+  wantedList = getValueJSON('wantedList');
+  bountyListRefreshTime = getValue('bountyListRefreshTime');
+  bwNeedsRefresh = getValue('bwNeedsRefresh');
   bountyListRefreshTime *= 1000;
   if (bwNeedsRefresh) {return;}
   if (testCacheInvalid()) {
@@ -271,10 +280,10 @@ function doRefresh() { // Legacy
   wantedList.lastUpdate = new Date();
   wantedList.wantedBounties = false;
   activeBountyListPosted = false;
-  wantedNames = system.getValue('wantedNames');
+  wantedNames = getValue('wantedNames');
   wantedArray = wantedNames.split(',');
-  system.xmlhttp('index.php?cmd=bounty&page=1', parseBountyPageForWorld);
-  system.setValue('bwNeedsRefresh', false);
+  xmlhttp('index.php?cmd=bounty&page=1', parseBountyPageForWorld);
+  setValue('bwNeedsRefresh', false);
 }
 
 function notRefreshed(enableActiveBountyList, enableWantedList) {

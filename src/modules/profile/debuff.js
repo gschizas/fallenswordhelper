@@ -1,8 +1,8 @@
+import {getValue} from '../support/system';
+import {jConfirm} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
 
-var disableDeactivatePrompts = system.getValue('disableDeactivatePrompts');
+var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
 function debuff(buffId) {
   return retryAjax({
@@ -32,7 +32,7 @@ function doPrompt(aLink) {
   var onclick = aLink.getAttribute('onclick');
   var warn = onclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
-  layout.confirm('Remove Skill', warn, function() {
+  jConfirm('Remove Skill', warn, function() {
     doDebuff(aLink);
   });
 }

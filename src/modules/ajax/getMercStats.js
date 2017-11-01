@@ -1,20 +1,22 @@
+import {createDocument} from '../support/system';
 import retryAjax from './retryAjax';
-import * as dataObj from '../support/dataObj';
-import * as system from '../support/system';
+import {defenderMultiplier, mercRE} from '../support/dataObj';
 
-function parseMercStats(html) {
-  var doc = system.createDocument(html);
-  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
-  var mercTotal = [0, 0, 0, 0, 0];
-  Array.prototype.forEach.call(mercElements, function(merc) {
-    var mouseoverText = merc.dataset.tipped;
-    mercTotal = mercTotal.map(function(el, i) {
-      return el + Number(dataObj.mercRE[i].exec(mouseoverText)[1]);
-    });
-  });
-  mercTotal = mercTotal.map(function(el) {
-    return Math.round(el * dataObj.defenderMultiplier);
-  });
+function addMercStat(mouseover, stat, i) {
+  return stat +
+    Math.round(Number(mercRE[i].exec(mouseover)[1]) * defenderMultiplier);
+}
+
+function addMercStats(prev, merc) {
+  return prev.map(addMercStat.bind(null, merc.dataset.tipped));
+}
+
+function addAllMercStats(mercElements) {
+  return Array.prototype.reduce.call(mercElements, addMercStats,
+    [0, 0, 0, 0, 0]);
+}
+
+function transform(mercTotal) {
   return {
     attack: mercTotal[0],
     defense: mercTotal[1],
@@ -22,6 +24,13 @@ function parseMercStats(html) {
     damage: mercTotal[3],
     hp: mercTotal[4]
   };
+}
+
+function parseMercStats(html) {
+  var doc = createDocument(html);
+  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
+  var mercTotal = addAllMercStats(mercElements);
+  return transform(mercTotal);
 }
 
 export default function getMercStats() {

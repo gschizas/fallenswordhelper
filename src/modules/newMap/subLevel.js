@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import {huntingBuffsHtml} from '../settings/worldPrefs';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
-import * as system from '../support/system';
+import {getValue, setValue, shouldBeArray} from '../support/system';
 
 var huntingBuffs;
 var huntingBuffsName;
@@ -10,17 +10,17 @@ var hidePlayerActions;
 var missingBuffsDiv;
 
 function getPrefs() {
-  calf.hideSubLvlCreature = system.getValue('hideSubLvlCreature');
-  hidePlayerActions = system.getValue('hidePlayerActions');
-  calf.showBuffs = system.getValue('showHuntingBuffs');
-  calf.enabledHuntingMode = system.getValue('enabledHuntingMode');
-  calf.buffs = system.shouldBeArray('huntingBuffs');
-  calf.buffsName = system.getValue('huntingBuffsName');
-  calf.buffs2 = system.shouldBeArray('huntingBuffs2');
-  calf.buffs2Name = system.getValue('huntingBuffs2Name');
-  calf.buffs3 = system.shouldBeArray('huntingBuffs3');
-  calf.buffs3Name = system.getValue('huntingBuffs3Name');
-  calf.doNotKillList = system.shouldBeArray('doNotKillList');
+  calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
+  hidePlayerActions = getValue('hidePlayerActions');
+  calf.showBuffs = getValue('showHuntingBuffs');
+  calf.enabledHuntingMode = getValue('enabledHuntingMode');
+  calf.buffs = shouldBeArray('huntingBuffs');
+  calf.buffsName = getValue('huntingBuffsName');
+  calf.buffs2 = shouldBeArray('huntingBuffs2');
+  calf.buffs2Name = getValue('huntingBuffs2Name');
+  calf.buffs3 = shouldBeArray('huntingBuffs3');
+  calf.buffs3Name = getValue('huntingBuffs3Name');
+  calf.doNotKillList = shouldBeArray('doNotKillList');
 }
 
 var buffLookup = {
@@ -47,26 +47,26 @@ function setCurrentBuffList() {
 
 function toggleSubLvlCreature() {
   calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
-  system.setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
+  setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
   GameData.fetch(256);
 }
 
 function toggleHidePlayerActions() {
   hidePlayerActions = !hidePlayerActions;
-  system.setValue('hidePlayerActions', hidePlayerActions);
+  setValue('hidePlayerActions', hidePlayerActions);
   GameData.fetch(256);
 }
 
 function toggleShowHuntingBuffs() {
   calf.showBuffs = !calf.showBuffs;
-  system.setValue('showHuntingBuffs', calf.showBuffs);
+  setValue('showHuntingBuffs', calf.showBuffs);
   GameData.fetch(16);
 }
 
 function toggleEnabledHuntingMode(e) {
   if (e.target.name !== 'enabledHuntingMode') {return;}
   calf.enabledHuntingMode = e.target.value;
-  system.setValue('enabledHuntingMode', calf.enabledHuntingMode);
+  setValue('enabledHuntingMode', calf.enabledHuntingMode);
   setCurrentBuffList();
   GameData.fetch(16);
 }

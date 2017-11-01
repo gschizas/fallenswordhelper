@@ -1,9 +1,9 @@
+import {defaults} from '../support/dataObj';
 import getForage from '../ajax/getForage';
+import {intValue} from '../support/system';
 import setForage from '../ajax/setForage';
-import * as assets from './assets';
-import * as dataObj from '../support/dataObj';
-import * as debug from '../support/debug';
-import * as system from '../support/system';
+import {arenaFilter, dontPost, tableOpts} from './assets';
+import {time, timeEnd} from '../support/debug';
 
 var tabs;
 var theTables;
@@ -24,8 +24,8 @@ function changeLvls() { // jQuery
 
 function resetLvls() { // jQuery
   opts = opts || {};
-  opts.minLvl = dataObj.defaults.arenaMinLvl;
-  opts.maxLvl = dataObj.defaults.arenaMaxLvl;
+  opts.minLvl = defaults.arenaMinLvl;
+  opts.maxLvl = defaults.arenaMaxLvl;
   setForage('fsh_arena', opts);
   $('#fshMinLvl').val(opts.minLvl);
   $('#fshMaxLvl').val(opts.maxLvl);
@@ -68,7 +68,7 @@ function minLvlValue(aTable) { // jQuery
   if (opts && 'minLvl' in opts) {
     fshMinLvl.val(opts.minLvl);
   } else {
-    fshMinLvl.val(dataObj.defaults.arenaMinLvl);
+    fshMinLvl.val(defaults.arenaMinLvl);
   }
 }
 
@@ -77,7 +77,7 @@ function maxLvlValue(aTable) { // jQuery
   if (opts && 'maxLvl' in opts) {
     fshMaxLvl.val(opts.maxLvl);
   } else {
-    fshMaxLvl.val(dataObj.defaults.arenaMaxLvl);
+    fshMaxLvl.val(defaults.arenaMaxLvl);
   }
 }
 
@@ -85,7 +85,7 @@ function filterHeader() { // jQuery
   var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
   theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
   theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
-  var aTable = $(assets.arenaFilter);
+  var aTable = $(arenaFilter);
   hideMovesCheckbox(aTable);
   minLvlValue(aTable);
   maxLvlValue(aTable);
@@ -106,7 +106,7 @@ var doLvlFilter = [
 function hazOpts(_settings, data) {
   var min = opts.minLvl;
   var max = opts.maxLvl;
-  var level = system.intValue(data[7]);
+  var level = intValue(data[7]);
   for (var i = 0; i < doLvlFilter.length; i += 1) {
     if (doLvlFilter[i](min, max, level)) {return true;}
   }
@@ -186,7 +186,7 @@ function redoHead(i, e) { // jQuery
 
 function process(arena) { // jQuery
 
-  debug.time('arena.process');
+  time('arena.process');
 
   theTables.each(redoHead);
   opts = arena || {};
@@ -197,13 +197,13 @@ function process(arena) { // jQuery
   filterHeader();
   setForage('fsh_arena', opts);
   $.fn.dataTable.ext.search.push(lvlFilter);
-  theTables.DataTable(assets.tableOpts);
+  theTables.DataTable(tableOpts);
   $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
   $('div.dataTables_filter').hide();
   tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
-  tabs.on('click', 'input.custombutton[type="submit"]', assets.dontPost);
+  tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
 
-  debug.timeEnd('arena.process');
+  timeEnd('arena.process');
 
 }
 

@@ -1,8 +1,14 @@
 import getForage from './ajax/getForage';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
+import {
+  createDocument,
+  fallback,
+  getValue,
+  intValue,
+  setValue
+} from './support/system';
 import {defaults, now} from './support/dataObj';
-import * as system from './support/system';
 
 var context;
 var onlinePlayers;
@@ -31,7 +37,7 @@ function buildOnlinePlayerData() { // jQuery
 }
 
 function saveVal(key, val) {
-  if (!isNaN(val)) {system.setValue(key, val);}
+  if (!isNaN(val)) {setValue(key, val);}
 }
 
 var lvlTests = [
@@ -48,7 +54,7 @@ function dataTableSearch(_settings, data) { // jQuery
   var max = parseInt($('#fshMaxLvl', context).val(), 10); // context
   saveVal('onlinePlayerMinLvl', min);
   saveVal('onlinePlayerMaxLvl', max);
-  var level = system.fallback(system.intValue(data[2]), 0);
+  var level = fallback(intValue(data[2]), 0);
   for (var i = 0; i < lvlTests.length; i += 1) {
     if (lvlTests[i](level, min, max)) {return true;}
   }
@@ -57,18 +63,18 @@ function dataTableSearch(_settings, data) { // jQuery
 
 function filterHeaderOnlinePlayers() { // jQuery
   highlightPlayersNearMyLvl =
-    system.getValue('highlightPlayersNearMyLvl');
+    getValue('highlightPlayersNearMyLvl');
   lvlDiffToHighlight = 10;
-  levelToTest = system.intValue($('dt.stat-level:first')
+  levelToTest = intValue($('dt.stat-level:first')
     .next().text());
-  var characterVirtualLevel = system.getValue('characterVirtualLevel');
+  var characterVirtualLevel = getValue('characterVirtualLevel');
   if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
   if (levelToTest <= 205) {lvlDiffToHighlight = 5;}
   $('#fshOutput', context).html( // context
     '<div align=right>' +
-    'Min lvl:<input value="' + system.getValue('onlinePlayerMinLvl') +
+    'Min lvl:<input value="' + getValue('onlinePlayerMinLvl') +
       '" size=5 id="fshMinLvl" /> ' +
-    'Max lvl:<input value="' + system.getValue('onlinePlayerMaxLvl') +
+    'Max lvl:<input value="' + getValue('onlinePlayerMaxLvl') +
       '" size=5 id="fshMaxLvl" /> ' +
     '<input id="fshReset" type="button" value="Reset"/>' +
     '</div><table id="fshInv" class="allow stripe hover"></table>');
@@ -91,7 +97,7 @@ function gotOnlinePlayers() { // jQuery
     ],
     createdRow: function(row, data) {
       if (highlightPlayersNearMyLvl &&
-        Math.abs(system.intValue(data[2]) - levelToTest) <=
+        Math.abs(intValue(data[2]) - levelToTest) <=
         lvlDiffToHighlight) {
         $('td', row).eq(2).addClass('lvlHighlight');
       }
@@ -112,7 +118,7 @@ function checkLastPage() {
 function getOnlinePlayers(data) { // Bad jQuery
   $('#fshOutput', context).append(' ' +
     (onlinePages + 1)); // context
-  var doc = system.createDocument(data);
+  var doc = createDocument(data);
   var input = $('#pCC input.custominput', doc).first();
   var thePage = input.attr('value');
   var theRows = $('#pCC img[src$="/skin/icon_action_view.gif',
@@ -146,7 +152,7 @@ function refreshEvt() { // Bad jQuery
   onlinePages = 0;
   onlinePlayers = {};
   retryAjax('index.php?cmd=onlineplayers&page=1').done(getOnlinePlayers);
-  system.setValue('lastOnlineCheck', now);
+  setValue('lastOnlineCheck', now);
   $('#fshOutput', context).append('Parsing online players...'); // context
 }
 
@@ -157,9 +163,9 @@ function changeLvl(e) { // jQuery
 }
 
 function resetEvt() { // context
-  system.setValue('onlinePlayerMinLvl',
+  setValue('onlinePlayerMinLvl',
     defaults.onlinePlayerMinLvl);
-  system.setValue('onlinePlayerMaxLvl',
+  setValue('onlinePlayerMaxLvl',
     defaults.onlinePlayerMaxLvl);
   $('#fshMinLvl', context).val(
     defaults.onlinePlayerMinLvl); // context
@@ -174,7 +180,7 @@ function doOnlinePlayerEventHandlers(e) {
 }
 
 function injectOnlinePlayersNew() { // jQuery
-  var lastCheck = system.getValue('lastOnlineCheck');
+  var lastCheck = getValue('lastOnlineCheck');
   var refreshButton;
   if (now - lastCheck > 300000) {
     refreshButton = '<span> (takes a while to refresh so only do it ' +

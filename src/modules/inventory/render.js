@@ -1,8 +1,8 @@
 import calf from '../support/calf';
+import {craftHash} from './assets';
+import {rarity} from '../support/dataObj';
 import {theInv} from './inventory';
-import * as assets from './assets';
-import * as dataObj from '../support/dataObj';
-import * as system from '../support/system';
+import {fallback, isSelected} from '../support/system';
 
 function getT(player_id) {
   if (player_id === -1) {return 4;}
@@ -16,7 +16,7 @@ function player(invPlayer, rowPlayer, guild) {
 }
 
 function nameRenderDisplay(data, row) {
-  var cur = system.fallback(theInv.player_id,
+  var cur = fallback(theInv.player_id,
     theInv.current_player_id);
   var t = getT(row.player_id);
   var p = player(theInv.player_id, row.player_id,
@@ -33,7 +33,7 @@ function nameRenderDisplay(data, row) {
 
   return '<a href="index.php?cmd=auctionhouse&search_text=' + data +
     '" class="fshInvItem tip-dynamic ' +
-    dataObj.rarity[row.rarity].clas + '" ' +
+    rarity[row.rarity].clas + '" ' +
     'data-tipped="fetchitem.php?item_id=' + row.item_id +
     '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p +
     '&currentPlayerId=' + cur + '">' +
@@ -46,7 +46,7 @@ export function nameRender(data, type, row) {
 }
 
 export function whereData(row) {
-  return system.fallback(row.folder_id, row.player_id);
+  return fallback(row.folder_id, row.player_id);
 }
 
 function whereRenderUserFolder(row) {
@@ -84,7 +84,7 @@ export function whereRenderDisplay(data, type, row) {
     .sort(function(a, b) {return a - b;});
   keysArray.forEach(function(value) {
     folderSelect += '<option value="' + value + '"' +
-      system.isSelected(value, row.folder_id) + '>' +
+      isSelected(value, row.folder_id) + '>' +
       theInv.folders[value] + '</option>';
   });
   folderSelect += '</select>';
@@ -105,7 +105,7 @@ export function whereRenderFilter(data, type, row) {
 }
 
 export function craftRender(craft) {
-  if (assets.craftHash[craft]) {return assets.craftHash[craft].abbr;}
+  if (craftHash[craft]) {return craftHash[craft].abbr;}
   return '';
 }
 
@@ -136,7 +136,7 @@ function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
     row.inv_id + '" playerid="' +
-    system.fallback(row.player_id, theInv.player_id) +
+    fallback(row.player_id, theInv.player_id) +
     '" mode="1" action="recall">GS</span>';
   }
   return 'GS';
@@ -150,7 +150,7 @@ export function gsRender(_data, type, row) {
 }
 
 export function dropRender(data, type, row) {
-  if (system.fallback(row.guild_tag !== '-1', row.equipped)) {return;}
+  if (fallback(row.guild_tag !== '-1', row.equipped)) {return;}
   if (type !== 'display') {return 'Drop';}
   return '<span class="dropItem tip-static dropLink" data-tipped=' +
     '"INSTANTLY DESTROY THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk."' +
@@ -158,7 +158,7 @@ export function dropRender(data, type, row) {
 }
 
 export function sendRender(data, type, row) {
-  if (system.fallback(row.bound, row.equipped)) {return;}
+  if (fallback(row.bound, row.equipped)) {return;}
   if (type !== 'display') {return 'Send';}
   return '<span class="sendItem tip-static sendLink" data-tipped=' +
     '"INSTANTLY SEND THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk."' +

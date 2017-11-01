@@ -1,13 +1,13 @@
+import {doSendGold} from '../newMap/sendGold';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
-import * as sendGold from '../newMap/sendGold';
-import * as system from '../support/system';
+import {createDocument, findNode, getValue} from '../support/system';
 
 var expandMenuOnKeyPress;
 
 function movePage(dir) { // Legacy
-  var dirButton = system.findNode('//input[@value="' + dir + '"]');
+  var dirButton = findNode('//input[@value="' + dir + '"]');
   if (!dirButton) {return;}
   var url = dirButton.getAttribute('onClick');
   url = url.replace(/^[^']*'/m, '').replace(/';$/m, '');
@@ -15,7 +15,7 @@ function movePage(dir) { // Legacy
 }
 
 function changeCombatSet(responseText, itemIndex) { // jQuery.min
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
 
   var cbsSelect = doc.querySelector(
     '#profileCombatSetDiv select[name="combatSetId"]');
@@ -67,7 +67,7 @@ function gotoGuild() {
 
 function joinAllGroup() {
   if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '4');}
-  if (!system.getValue('enableMaxGroupSizeToJoin')) {
+  if (!getValue('enableMaxGroupSizeToJoin')) {
     location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
   } else {
     location.href =
@@ -117,7 +117,7 @@ var keyDict = {
   '112': {fn: profile}, // profile [p]
   '114': {fn: doRepair}, // repair [r]
   '118': {fn: fastWearMgr}, // fast wear manager [v]
-  '121': {fn: sendGold.doSendGold}, // fast send gold [y]
+  '121': {fn: doSendGold}, // fast send gold [y]
   '163': {fn: combatSetKey, arg: 3}, // Shift+3 -- for UK keyboards
 };
 
@@ -146,6 +146,6 @@ function keyPress(evt) {
 }
 
 export default function replaceKeyHandler() {
-  expandMenuOnKeyPress = system.getValue('expandMenuOnKeyPress');
+  expandMenuOnKeyPress = getValue('expandMenuOnKeyPress');
   document.onkeypress = keyPress;
 }

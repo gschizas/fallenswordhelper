@@ -1,14 +1,20 @@
 import getForage from './ajax/getForage';
 import setForage from './ajax/setForage';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {
+  addCommas,
+  fallback,
+  findNode,
+  getValue,
+  intValue
+} from './support/system';
+import {makePageTemplate, pCC, quickBuffHref} from './support/layout';
 
 export function injectFindPlayer() { // Bad jQuery
   var findPlayerButton = $('input[value="Find Player"]');
-  var levelToTest = system.intValue($('dt.stat-level:first').next()
+  var levelToTest = intValue($('dt.stat-level:first').next()
     .text());
-  var characterVirtualLevel = system.getValue('characterVirtualLevel');
-  levelToTest = system.fallback(characterVirtualLevel, levelToTest);
+  var characterVirtualLevel = getValue('characterVirtualLevel');
+  levelToTest = fallback(characterVirtualLevel, levelToTest);
   var pvpLowerLevelModifier = 5;
   if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
   var pvpUpperLevelModifier = 5;
@@ -27,7 +33,7 @@ export function injectFindPlayer() { // Bad jQuery
     .each(function(i, e) {
       var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
       $(e).after('<a style="color:blue;font-size:10px;" ' +
-        layout.quickBuffHref(id[1]) + '>[b]</a>');
+        quickBuffHref(id[1]) + '>[b]</a>');
     });
 }
 
@@ -44,18 +50,18 @@ function marketplaceWarning(sellPrice) { // Legacy
     warningText = '</b><br>Hold up there ... this is way to high a ' +
       'price ... you should reconsider.';
   }
-  var amount = system.findNode('//input[@id="amount"]').value;
-  var warningField = system.findNode('//td[@id="warningfield"]');
+  var amount = findNode('//input[@id="amount"]').value;
+  var warningField = findNode('//td[@id="warningfield"]');
   warningField.innerHTML = '<span style="color:' + warningColor +
     ';">You are offering to buy <b>' + amount +
-    '</b> FSP for >> <b>' + system.addCommas(sellPrice) +
+    '</b> FSP for >> <b>' + addCommas(sellPrice) +
     warningText + ' (Total: ' +
-    system.addCommas(amount * sellPrice +
+    addCommas(amount * sellPrice +
     Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
 }
 
 function addMarketplaceWarning() { // Legacy
-  var goldPerPoint = system.findNode('//input[@id="price"]');
+  var goldPerPoint = findNode('//input[@id="price"]');
   var sellPrice = goldPerPoint.value;
   if (sellPrice.search(/^[0-9]*$/) !== -1) {
     marketplaceWarning(sellPrice);
@@ -63,7 +69,7 @@ function addMarketplaceWarning() { // Legacy
 }
 
 export function addMarketplaceWidgets() { // Legacy
-  var requestTable = system.findNode(
+  var requestTable = findNode(
     '//table[tbody/tr/td/input[@value="Confirm Request"]]');
   var newRow = requestTable.insertRow(2);
   var newCell = newRow.insertCell(0);
@@ -85,8 +91,8 @@ export function injectNotepad() { // jQuery
 }
 
 export function injectFsBoxContent(injector) { // jQuery
-  var content = injector || layout.pCC;
-  content.innerHTML = layout.makePageTemplate('FS Box Log', '',
+  var content = injector || pCC;
+  content.innerHTML = makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
   getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
     document.getElementById('fsboxdetail').innerHTML = fsboxcontent;

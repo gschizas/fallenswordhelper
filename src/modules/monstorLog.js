@@ -1,8 +1,8 @@
 import calf from './support/calf';
 import getForage from './ajax/getForage';
+import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
-import * as layout from './support/layout';
-import * as system from './support/system';
+import {addCommas, imageServer, numberSort, stringSort} from './support/system';
 
 var content;
 var monsterAry;
@@ -42,9 +42,9 @@ function findSortType(target) {
 
 function sortMonsterAry(sortType) {
   if (sortType === 'string') {
-    monsterAry.sort(system.stringSort);
+    monsterAry.sort(stringSort);
   } else {
-    monsterAry.sort(system.numberSort);
+    monsterAry.sort(numberSort);
   }
 }
 
@@ -97,11 +97,11 @@ function prepMonster(data) {
   monsterAry = Object.keys(data).reduce(function(prev, curr) {
     var tmpObj = data[curr];
     tmpObj.name = curr;
-    tmpObj.image = '<img class="tip-static" src="' + system.imageServer +
+    tmpObj.image = '<img class="tip-static" src="' + imageServer +
       '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
-      system.imageServer + '/creatures/' + tmpObj.image_id +
+      imageServer + '/creatures/' + tmpObj.image_id +
       '.jpg\' width=200 height=200>" width=40 height=40>';
-    tmpObj.level = system.addCommas(tmpObj.level);
+    tmpObj.level = addCommas(tmpObj.level);
     tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
     tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
     tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
@@ -133,13 +133,13 @@ function prepAry(data) {
   prepMonster(data);
   calf.sortBy = 'level';
   calf.sortAsc = true;
-  monsterAry.sort(system.numberSort);
+  monsterAry.sort(numberSort);
   drawTable();
   drawMobs();
 }
 
 export default function injectMonsterLog(injector) {
-  content = injector || layout.pCC;
+  content = injector || pCC;
   if (!content) {return;}
   getForage('fsh_monsterLog').done(prepAry);
 }

@@ -1,6 +1,6 @@
+import {itemRE} from '../support/dataObj';
 import outputResult from '../common/outputResult';
 import retryAjax from '../ajax/retryAjax';
-import * as dataObj from '../support/dataObj';
 
 function showError(data) { // jQuery
   var $tempError = $('#temp_error');
@@ -74,7 +74,7 @@ export default function injectMailbox() { // Bad jQuery
     'id="currentMBDisplay" value="mailbox" />' + quickTakeDiv);
   var itemList = {};
   $('#regularMailbox img[data-tipped*="t=5"]').each(function(i, e) {
-    var itemIDs = dataObj.itemRE.exec($(e).attr('data-tipped'));
+    var itemIDs = itemRE.exec($(e).attr('data-tipped'));
     if (!itemIDs) {return;}
     var itemId = itemIDs[1];
     var invId = itemIDs[2];

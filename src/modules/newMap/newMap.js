@@ -1,14 +1,14 @@
 import assets from './assets';
 import calf from '../support/calf';
 import combatLogger from './combatLogger';
+import {getValue} from '../support/system';
 import injectButtons from './buttons';
 import injectRelic from './relic/relic';
 import prepareShop from './shop';
 import readyViewCreature from './viewCreature/viewCreature';
 import setupPref from './subLevel';
 import startMonsterLog from './monsterLog';
-import * as sendGold from './sendGold';
-import * as system from '../support/system';
+import {injectSendGoldOnWorld, updateSendGoldOnWorld} from './sendGold';
 
 var def_afterUpdateActionlist = 'after-update.actionlist';
 
@@ -30,7 +30,7 @@ var hideGroupTypes = [
 
 function hideGroupButton() {
   hideGroupTypes.forEach(function(el, i) {
-    if (system.getValue(el)) {
+    if (getValue(el)) {
       hideGroupSubscribe(i + 1);
       hideGroupByType(i + 1);
     }
@@ -52,7 +52,7 @@ function colorMonsters() {
 }
 
 function doMonsterColors() { // jQuery.min
-  if (system.getValue('enableCreatureColoring')) {
+  if (getValue('enableCreatureColoring')) {
     $.subscribe(def_afterUpdateActionlist, colorMonsters);
     colorMonsters();
   }
@@ -101,7 +101,7 @@ function fixDebuffQTip(e) { // jQuery.min
 }
 
 function injectWorldNewMap(data) {
-  sendGold.updateSendGoldOnWorld(data);
+  updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     injectButtons(data);
     document.getElementById('buffList')
@@ -112,7 +112,7 @@ function injectWorldNewMap(data) {
 
 export default function subscribes() { // jQuery.min
   setupPref();
-  sendGold.injectSendGoldOnWorld();
+  injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
   hideGroupButton(); // Hide Create Group button

@@ -1,8 +1,8 @@
 import buffList from '../support/buffObj';
 import formatDateTime from '../common/formatDateTime';
 import getForage from '../ajax/getForage';
+import {getValue} from '../support/system';
 import setForage from '../ajax/setForage';
-import * as system from '../support/system';
 
 function rejected(timeStamp, buffsNotCast, buffLog) {
   if (buffsNotCast) {
@@ -49,6 +49,6 @@ function buffResult(_buffLog) {
 }
 
 export default function updateBuffLog() {
-  if (!system.getValue('keepBuffLog')) {return;}
+  if (!getValue('keepBuffLog')) {return;}
   getForage('fsh_buffLog').done(buffResult);
 }

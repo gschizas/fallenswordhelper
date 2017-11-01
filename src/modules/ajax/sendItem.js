@@ -1,6 +1,6 @@
+import {getValue} from '../support/system';
 import retryAjax from './retryAjax';
 import {dialog, htmlResult} from '../support/ajax';
-import * as system from '../support/system';
 
 export default function sendItem(invIdList) {
   return retryAjax({
@@ -9,7 +9,7 @@ export default function sendItem(invIdList) {
       cmd: 'trade',
       subcmd: 'senditems',
       xc: window.ajaxXC,
-      target_username: system.getValue('itemRecipient'),
+      target_username: getValue('itemRecipient'),
       sendItemList: invIdList
     }
   }).pipe(htmlResult)

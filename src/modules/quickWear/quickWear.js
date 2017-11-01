@@ -5,8 +5,8 @@ import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import toggleForce from '../common/toggleForce';
 import {equipItem, useItem} from '../support/ajax';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {getValue, setValue} from '../support/system';
+import {jConfirm, pCC} from '../support/layout';
 
 var disableQuickWearPrompts;
 var content;
@@ -28,7 +28,7 @@ function useProfileInventoryItem(self) {
   if (disableQuickWearPrompts) {
     doUseItem(self);
   } else {
-    layout.confirm('Use/Extract Item',
+    jConfirm('Use/Extract Item',
       'Are you sure you want to use/extract the item?',
       doUseItem.bind(null, self)
     );
@@ -61,7 +61,7 @@ function hideFolders(self) {
 
 function togglePref() {
   disableQuickWearPrompts = !disableQuickWearPrompts;
-  system.setValue('disableQuickWearPrompts', disableQuickWearPrompts);
+  setValue('disableQuickWearPrompts', disableQuickWearPrompts);
 }
 
 var evts = [
@@ -133,9 +133,9 @@ function showQuickWear(appInv) {
 }
 
 export default function insertQuickWear(injector) {
-  content = injector || layout.pCC;
+  content = injector || pCC;
   if (!content) {return;}
   content.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
-  disableQuickWearPrompts = system.getValue('disableQuickWearPrompts');
+  disableQuickWearPrompts = getValue('disableQuickWearPrompts');
 }

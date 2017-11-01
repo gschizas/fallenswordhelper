@@ -1,4 +1,4 @@
-import * as assets from './assets';
+import {dontPost} from './assets';
 
 function gotoPage(pageId) {
   window.location = 'index.php?cmd=arena&subcmd=completed&page=' + pageId;
@@ -19,5 +19,5 @@ export default function completedArenas() { // jQuery
     nextButton.after(finishButton).after('&nbsp;');
     finishButton.click(function() {gotoPage(lastPage);});
   }
-  $('#pCC input[value="View"]').click(assets.dontPost);
+  $('#pCC input[value="View"]').click(dontPost);
 }

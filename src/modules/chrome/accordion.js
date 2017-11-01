@@ -1,16 +1,17 @@
+import {getValue} from '../support/system';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import jQueryDialog from './jQueryDialog';
+import {newGuildLogUrl} from '../support/dataObj';
 import {createLi, createSpan} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs';
-import * as system from '../support/system';
 
 function updateQuestLink() {
-  var lastActiveQuestPage = system.getValue('lastActiveQuestPage');
+  var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
     document.getElementById('nav-character-questbook')
       .setAttribute('href', lastActiveQuestPage);
@@ -32,32 +33,32 @@ function spanButton(navLvl, text, fn, target) {
 }
 
 function buffLogLink() {
-  if (system.getValue('keepBuffLog')) {
+  if (getValue('keepBuffLog')) {
     spanButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
 function combatLogLink() {
-  if (system.getValue('keepLogs')) {
+  if (getValue('keepLogs')) {
     spanButton('1', 'Combat Logs', injectNotepadShowLogs,
       'nav-character-notepad');
   }
 }
 
 function creatureLogLink() {
-  if (system.getValue('showMonsterLog')) {
+  if (getValue('showMonsterLog')) {
     spanButton('1', 'Creature Logs', injectMonsterLog,
       'nav-character-notepad');
   }
 }
 
 function newGuildLogLink() {
-  if (!system.getValue('useNewGuildLog')) {
+  if (!getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
     document.getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
         '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="index.php?cmd=notepad&blank=1&subcmd=newguildlog"' +
+        'href="index.php' + newGuildLogUrl + '"' +
         '>New Guild Log</a></li>');
   }
 }

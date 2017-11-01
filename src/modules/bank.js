@@ -1,5 +1,5 @@
+import {createDocument} from './support/system';
 import retryAjax from './ajax/retryAjax';
-import * as system from './support/system';
 
 var playerBank = {
   headText: 'Bank',
@@ -50,7 +50,7 @@ function updateDepoAmount(o, doc) { // jQuery
 }
 
 function transResponse(response) { // jQuery
-  var doc = system.createDocument(response);
+  var doc = createDocument(response);
   var infoBox = $('#pCC #info-msg', doc);
   if (infoBox.length === 0) {return;}
   doInfoBox(infoBox);

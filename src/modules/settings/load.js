@@ -1,12 +1,12 @@
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {pCC} from '../support/layout';
+import {getValue, setValue} from '../support/system';
 
 export default function injectSaveSettings() { // Hybrid
-  var content = layout.pCC;
+  var content = pCC;
   var fshSettings = {};
   var list = GM_listValues();
   for (var i = 0; i < list.length; i += 1) {
-    fshSettings[list[i]] = system.getValue(list[i]);
+    fshSettings[list[i]] = getValue(list[i]);
   }
   content.innerHTML = '<h1>FSH Settings</h1><br><center>The box below ' +
     'is your current settings. Copy it to save your current settings<br>' +
@@ -22,7 +22,7 @@ export default function injectSaveSettings() { // Hybrid
   $('#HelperLoadSettings').click(function() {
     var settings = JSON.parse($('#HelperfshSettings').val());
     Object.keys(settings).forEach(function(id) {
-      system.setValue(id, settings[id]);
+      setValue(id, settings[id]);
     });
     $('#dialog_msg').text('Settings loaded successfully!').dialog('open');
   });

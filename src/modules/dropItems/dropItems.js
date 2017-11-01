@@ -9,11 +9,11 @@ import getItemImg from '../common/getItemImg';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
 import moveItemsToFolder from './moveItemsToFolder';
+import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
-import * as dataObj from '../support/dataObj';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {fallback, getValue, setValue} from '../support/system';
+import {itemRE, rarity} from '../support/dataObj';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -30,7 +30,7 @@ var colouring;
 var sendLinks;
 
 function afterbegin(o, item) {
-  if (system.fallback(extraLinks, !showExtraLinks)) {
+  if (fallback(extraLinks, !showExtraLinks)) {
     return;
   }
   var pattern = '<span><span class="aHLink">';
@@ -80,7 +80,7 @@ var buildTrailer = [
 
 function beforeend(o, item) {
   if (!colouring && !disableItemColoring) {
-    o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
+    o.injectHere.classList.add(rarity[item.rarity].clas);
   }
   var pattern = buildTrailer.reduce(function(prev, el) {
     var ret = prev;
@@ -119,7 +119,7 @@ function invPaint() { // Native - abstract this pattern
 
 function toggleShowExtraLinks() {
   showExtraLinks = !showExtraLinks;
-  system.setValue('showExtraLinks', showExtraLinks);
+  setValue('showExtraLinks', showExtraLinks);
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
     paintCount = 0;
@@ -134,7 +134,7 @@ function toggleShowExtraLinks() {
 
 function toggleShowQuickDropLinks() {
   showQuickDropLinks = !showQuickDropLinks;
-  system.setValue('showQuickDropLinks', showQuickDropLinks);
+  setValue('showQuickDropLinks', showQuickDropLinks);
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
     paintCount = 0;
@@ -209,18 +209,18 @@ function evtHandler(evt) {
 
 function getItems() {
   addStatTotalToMouseover();
-  disableItemColoring = system.getValue('disableItemColoring');
-  showExtraLinks = system.getValue('showExtraLinks');
-  showQuickDropLinks = system.getValue('showQuickDropLinks');
-  showQuickSendLinks = system.getValue('showQuickSendLinks');
+  disableItemColoring = getValue('disableItemColoring');
+  showExtraLinks = getValue('showExtraLinks');
+  showQuickDropLinks = getValue('showQuickDropLinks');
+  showQuickSendLinks = getValue('showQuickSendLinks');
   doToggleButtons(showExtraLinks, showQuickDropLinks);
-  layout.pCC.addEventListener('click', evtHandler);
-  var imgList = getItemImg(layout.pCC);
+  pCC.addEventListener('click', evtHandler);
+  var imgList = getItemImg(pCC);
   itemsAry = [];
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
     var tipped = el.getAttribute('data-tipped');
-    var matches = tipped.match(dataObj.itemRE);
+    var matches = tipped.match(itemRE);
     itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
     var injectHere = el.parentNode.parentNode.nextElementSibling;
     itemsAry.push({

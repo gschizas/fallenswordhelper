@@ -1,9 +1,17 @@
 import buffList from './support/buffObj';
 import calf from './support/calf';
+import {helpLink} from './settings/settingsPage';
 import {lastActivityRE} from './support/dataObj';
-import * as layout from './support/layout';
-import * as settingsPage from './settings/settingsPage';
-import * as system from './support/system';
+import {
+  createDocument,
+  fallback,
+  getValue,
+  intValue,
+  setValue,
+  stringSort,
+  xmlhttp
+} from './support/system';
+import {onlineDot, pCC, playerName} from './support/layout';
 
 var characterName;
 var sustainLevelRE = /Level<br>(\d+)%/;
@@ -29,7 +37,7 @@ var otherCustom = {
   header: 'Other',
   what: 'text',
   control: function() {
-    var textToSearchFor = system.getValue('textToSearchFor') || '';
+    var textToSearchFor = getValue('textToSearchFor') || '';
     return '<input style="width:140px;" class="custominput" ' +
       'id="textToSearchFor" type="text" title="Text to search for" value="' +
       textToSearchFor + '">';
@@ -51,7 +59,7 @@ var profilePagesToSearchProcessed;
 var bufferProgress;
 
 function pageLayout(o) { // Legacy
-  extraProfile = system.getValue('extraProfile');
+  extraProfile = getValue('extraProfile');
   return '<table class="fshFind"><tbody>' +
     '<tr><td rowspan="2" colspan="2" class="headCell">' +
     '<h1>Find ' + o.header + '</h1></td>' +
@@ -74,7 +82,7 @@ function pageLayout(o) { // Legacy
     '# potential ' + o.potential + 'ers to search:&nbsp;</td>' +
     '<td id="potentialBuffers"></td>' +
     '<td class="findLabel">Search allies/enemies:' +
-    settingsPage.helpLink('Search Allies/Enemies',
+    helpLink('Search Allies/Enemies',
       'The checkbox enables searching your own personal ' +
       'allies/enemies list for buffs.<br><br>' +
       'Additional profiles to search can be added in the text ' +
@@ -185,27 +193,27 @@ function getSustain(doc) {
     }
     return false;
   });
-  return system.fallback(sustainLevel, -1);
+  return fallback(sustainLevel, -1);
 }
 
 function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
-  var playerName = doc.getElementById('pCC')
+  var innerPlayerName = doc.getElementById('pCC')
     .getElementsByTagName('h1')[0].textContent;
-  var levelValue = system.intValue(doc.getElementById('profileLeftColumn')
+  var levelValue = intValue(doc.getElementById('profileLeftColumn')
     .children[4].children[0].rows[0].cells[1].textContent);
   var virtualLevelValue = parseInt(doc.getElementById('stat-vl')
     .textContent, 10);
   var lastActivityMinutes = parseInt(lastActivity[1], 10);
-  var lastActivityIMG = layout.onlineDot({min: lastActivityMinutes});
+  var lastActivityIMG = onlineDot({min: lastActivityMinutes});
   var playerHREF = callback.href;
   var bioTip = bioCellHtml.replace(/'|"|\n/g, '');
   return '<nobr>' + lastActivityIMG + '&nbsp;<a href="' +
     playerHREF + '" target="new" ' +
     // FIXME - It kind works now, but not guaranteed?
     'class="tip-static" ' +
-    'data-tipped="' + bioTip + '">' + playerName + '</a>' +
+    'data-tipped="' + bioTip + '">' + innerPlayerName + '</a>' +
     '&nbsp;<span class="fshBlue">[<span class="a-reply fshLink" ' +
-    'target_player="' + playerName + '">m</span>]</span></nobr><br>' +
+    'target_player="' + innerPlayerName + '">m</span>]</span></nobr><br>' +
     '<span class="fshGray">Level:&nbsp;</span>' + levelValue +
     '&nbsp;(' + virtualLevelValue + ')';
 }
@@ -225,11 +233,11 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
 }
 
 function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   // name and level
-  var pCC = doc.getElementById('pCC');
+  var innerPcc = doc.getElementById('pCC');
   // last activity
-  var lastActivityElement = pCC.getElementsByTagName('p')[0];
+  var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
   var lastActivity = /(\d+) mins, (\d+) secs/
     .exec(lastActivityElement.textContent);
   // buffs
@@ -288,7 +296,7 @@ function findBuffsParsePlayersForBuffs() { // Legacy
   bufferProgress.style.color = 'green';
 
   for (var j = 0; j < onlinePlayers.length; j += 1) {
-    system.xmlhttp(onlinePlayers[j],
+    xmlhttp(onlinePlayers[j],
       findBuffsParseProfileAndDisplay,
       {href: onlinePlayers[j]});
   }
@@ -305,7 +313,7 @@ function calcNextPage(curPage, maxPage) { // Legacy
 }
 
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has' +
     '(td>a[href*="cmd=profile&player_id="])');
   var maxPage = parseInt($(doc).find('td:has(input[name="page"]):last')
@@ -331,7 +339,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
     bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
-    system.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage,
+    xmlhttp('index.php?cmd=onlineplayers&page=' + newPage,
       findBuffsParseOnlinePlayers, {page: newPage});
   } else {
     // all done so moving on
@@ -344,7 +352,7 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   onlinePlayersSetting =
     parseInt(document.getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
-    system.xmlhttp('index.php?cmd=onlineplayers&page=1',
+    xmlhttp('index.php?cmd=onlineplayers&page=1',
       findBuffsParseOnlinePlayers, {page: 1});
   } else {
     findBuffsParsePlayersForBuffs();
@@ -376,7 +384,7 @@ function parsePlayerLink(el) {
 }
 
 function findBuffsParseProfilePage(responseText) {
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   var profileAlliesEnemies =
     doc.querySelectorAll('#profileLeftColumn a[data-tipped*="Last Activity"]');
   Array.prototype.forEach.call(profileAlliesEnemies, parsePlayerLink);
@@ -401,7 +409,7 @@ function findBuffsParseProfilePageStart() { // Legacy
   profilePagesToSearchProcessed = 0;
   if (document.getElementById('alliesEnemies').checked) {
     profilePagesToSearch.forEach(function(el) {
-      system.xmlhttp(el, findBuffsParseProfilePage);
+      xmlhttp(el, findBuffsParseProfilePage);
     });
   } else {
     findBuffsParseOnlinePlayersStart();
@@ -409,7 +417,7 @@ function findBuffsParseProfilePageStart() { // Legacy
 }
 
 function findBuffsParseGuildManagePage(responseText) {
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   if (document.getElementById('guildMembers').checked) {
     var memList = doc.querySelectorAll('#pCC a[data-tipped*="<td>VL:</td>"]');
     Array.prototype.forEach.call(memList, parsePlayerLink);
@@ -432,7 +440,7 @@ function findBuffsClearResults() { // Legacy
 }
 
 function findAnyStart(progMsg) {
-  characterName = layout.playerName();
+  characterName = playerName();
   document.getElementById('buffNicks').innerHTML = findBuffNicks;
   bufferProgress = document.getElementById('bufferProgress');
   bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
@@ -442,9 +450,9 @@ function findAnyStart(progMsg) {
   document.getElementById('buffersProcessed').innerHTML = 0;
   onlinePlayers = [];
   extraProfile = document.getElementById('extraProfile').value;
-  system.setValue('extraProfile', extraProfile);
+  setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
-  system.xmlhttp('index.php?cmd=guild&subcmd=manage',
+  xmlhttp('index.php?cmd=guild&subcmd=manage',
     findBuffsParseGuildManagePage);
 }
 
@@ -462,17 +470,17 @@ function findBuffsStart() { // Legacy
 
 function findOtherStart() { // Legacy
   var textToSearchFor = $('#textToSearchFor').val().replace(/\s*,\s*/, ',');
-  system.setValue('textToSearchFor', textToSearchFor);
+  setValue('textToSearchFor', textToSearchFor);
   findBuffNicks = textToSearchFor;
   findBuffMinCastLevel = 1;
   findAnyStart('profiles to search');
 }
 
 export function injectFindBuffs(injector) { // Legacy
-  var content = injector || layout.pCC;
+  var content = injector || pCC;
   calf.sortBy = 'name';
   calf.sortAsc = true;
-  buffList.sort(system.stringSort);
+  buffList.sort(stringSort);
   content.innerHTML = pageLayout(buffCustom);
   document.getElementById('findbuffsbutton')
     .addEventListener('click', findBuffsStart, true);
@@ -481,7 +489,7 @@ export function injectFindBuffs(injector) { // Legacy
 }
 
 export function injectFindOther(injector) { // Native - Bad
-  var content = injector || layout.pCC;
+  var content = injector || pCC;
   content.innerHTML = pageLayout(otherCustom);
   document.getElementById('findbuffsbutton')
     .addEventListener('click', findOtherStart, true);

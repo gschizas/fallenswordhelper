@@ -1,9 +1,16 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import {now} from '../support/dataObj';
+import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {
+  createDocument,
+  getRandomInt,
+  getValue,
+  imageServer,
+  rnd,
+  setValue
+} from '../support/system';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
@@ -17,7 +24,7 @@ function displayComposeMsg() {
 
 function getDoc(data) {
   if (calf.cmd !== 'composing') {
-    return system.createDocument(data);
+    return createDocument(data);
   }
   return document;
 }
@@ -41,10 +48,10 @@ function parseComposing(data) {
   var eta = Math.min.apply(null, times);
   if (eta === 0) {
     if (calf.cmd !== 'composing') {displayComposeMsg();}
-    system.setValue('needToCompose', true);
+    setValue('needToCompose', true);
   } else {
-    system.setValue('needToCompose', false);
-    system.setValue('lastComposeCheck', eta);
+    setValue('needToCompose', false);
+    setValue('lastComposeCheck', eta);
   }
 }
 
@@ -54,9 +61,9 @@ function createSuccess(temp, textStatus) {
   var infoDiv = myParent.previousElementSibling.previousElementSibling;
   infoDiv.children[0].innerHTML = '';
   infoDiv.children[0].classList.add('fshPot');
-  infoDiv.children[0].style.backgroundImage = 'url(' + system.imageServer +
-    '/composing/potions/' + system.getRandomInt(1, 11) + '_' +
-    system.getRandomInt(1, 51) + '.gif)';
+  infoDiv.children[0].style.backgroundImage = 'url(' + imageServer +
+    '/composing/potions/' + getRandomInt(1, 11) + '_' +
+    getRandomInt(1, 51) + '.gif)';
   infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
     potName + '</span>\' Potion';
   infoDiv.children[3].innerHTML = '';
@@ -72,7 +79,7 @@ function createPotion(temp) { // jQuery
       cmd: 'composing',
       subcmd: 'createajax',
       template_id: temp.value,
-      _rnd: system.rnd()
+      _rnd: rnd()
     }
   }).done(function potionDone(data, textStatus) {
     if (data.error !== '') {
@@ -98,7 +105,7 @@ function quickCreate(evt) {
 }
 
 function checkLastCompose() { // jQuery
-  var lastComposeCheck = system.getValue('lastComposeCheck');
+  var lastComposeCheck = getValue('lastComposeCheck');
   if (lastComposeCheck && now < lastComposeCheck) {return;}
   retryAjax('index.php?cmd=composing').done(function(data) {
     add(3, parseComposing, [data]);
@@ -106,7 +113,7 @@ function checkLastCompose() { // jQuery
 }
 
 function composeAlert() {
-  var needToCompose = system.getValue('needToCompose');
+  var needToCompose = getValue('needToCompose');
   if (needToCompose) {
     displayComposeMsg();
     return;
@@ -119,29 +126,29 @@ export function injectComposeAlert() {
 }
 
 function moveButtons() {
-  if (system.getValue('moveComposingButtons')) {
+  if (getValue('moveComposingButtons')) {
     var buttonDiv = document.getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-    var top = layout.pCC.getElementsByClassName('composing-level')[0]
+    var top = pCC.getElementsByClassName('composing-level')[0]
       .parentNode;
     top.insertAdjacentElement('beforebegin', buttonDiv);
   }
 }
 
 export function injectComposing() {
-  if (!layout.pCC) {return;}
+  if (!pCC) {return;}
   if (calf.enableComposingAlert) {
     parseComposing();
   }
 
-  var buttons = layout.pCC
+  var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
     el.insertAdjacentHTML('afterend',
       '&nbsp;[<span class="quickCreate">Quick Create</span>]');
   });
-  layout.pCC.addEventListener('click', quickCreate);
+  pCC.addEventListener('click', quickCreate);
   moveButtons();
 }
 

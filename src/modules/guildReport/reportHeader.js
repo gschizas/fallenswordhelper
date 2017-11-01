@@ -1,13 +1,13 @@
 import add from '../support/task';
 import calf from '../support/calf';
-import * as layout from '../support/layout';
+import {onlineDot} from '../support/layout';
 
 var headerCount;
 var headers;
 
 function memberHeader(oldhtml) {
   if (!calf.membrList[oldhtml]) {return oldhtml;}
-  return layout.onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
+  return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
     '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
     '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
     oldhtml + '>m</span> ]';

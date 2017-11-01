@@ -3,8 +3,15 @@ import {createDiv} from '../common/cElement';
 import getForage from '../ajax/getForage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
-import * as layout from '../support/layout';
-import * as system from '../support/system';
+import {
+  createDocument,
+  getCustomUrlParameter,
+  getValue,
+  numberSort,
+  shouldBeArray,
+  stringSort
+} from '../support/system';
+import {pCC, playerId} from '../support/layout';
 
 var content;
 var recipebook;
@@ -12,7 +19,7 @@ var hideRecipes = [];
 var output;
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
-var playerId;
+var currentPlayerId;
 
 function storeRecipeBook() {
   setForage('fsh_recipeBook', recipebook);
@@ -24,7 +31,7 @@ function getRecipeItems(recipe) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
         'data-tipped="fetchitem.php?item_id=' +
         itm.id + '&inv_id=-1&t=2&p=' +
-        playerId + '&vcode=' +
+        currentPlayerId + '&vcode=' +
         itm.verify + '" src="' +
         itm.img + '" height="20px" width="20px"><p>' +
         itm.amountPresent + '/' +
@@ -40,7 +47,7 @@ function getComponents(recipe) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
         'data-tipped="fetchitem.php?item_id=' +
         comp.id + '&inv_id=-1&t=2&p=' +
-        playerId + '&vcode=' +
+        currentPlayerId + '&vcode=' +
         comp.verify + '" src="' +
         comp.img + '" height="20px" width="20px"><p>' +
         comp.amountPresent + '/' +
@@ -54,7 +61,7 @@ function getImg(recipe) {
   if (recipe.target) {
     return ' <img class="tip-dynamic" ' +
       'data-tipped="fetchitem.php?item_id=' +
-      recipe.target.id + '&inv_id=-1&t=2&p=' + playerId +
+      recipe.target.id + '&inv_id=-1&t=2&p=' + currentPlayerId +
       '&vcode=' + recipe.target.verify + '" ' +
       'src="' + recipe.target.img +
       '" height="30px" width="30px"><br/>';
@@ -63,7 +70,7 @@ function getImg(recipe) {
 }
 
 function drawRecipeTable() { // Legacy
-  playerId = layout.playerId();
+  currentPlayerId = playerId();
   var i;
   var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
     '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
@@ -102,9 +109,9 @@ function testSortType(evt) {
 
 function sortRecipeBook(sortType) {
   if (sortType === 'number') {
-    recipebook.recipe.sort(system.numberSort);
+    recipebook.recipe.sort(numberSort);
   } else {
-    recipebook.recipe.sort(system.stringSort);
+    recipebook.recipe.sort(stringSort);
   }
 }
 
@@ -151,7 +158,7 @@ function parseRecipeItemOrComponent(bgGif, doc) {
 }
 
 function processRecipe(recipe, data) {
-  var doc = system.createDocument(data);
+  var doc = createDocument(data);
   output.insertAdjacentHTML('beforeend',
     'Parsing blueprint ' + recipe.name + '...<br>');
   recipe.items = parseRecipeItemOrComponent('/inventory/2x3.gif', doc);
@@ -161,9 +168,9 @@ function processRecipe(recipe, data) {
 }
 
 function processFolderAnyPage(data) { // jQuery.min
-  var doc = system.createDocument(data);
-  var pCC = doc.getElementById('pCC');
-  var scope = pCC.firstElementChild.rows[6].cells[0]
+  var doc = createDocument(data);
+  var innerPcc = doc.getElementById('pCC');
+  var scope = innerPcc.firstElementChild.rows[6].cells[0]
     .firstElementChild.getElementsByTagName('a');
   var prm = Array.prototype.reduce.call(scope, function(prev, el) {
     output.insertAdjacentHTML('beforeend',
@@ -173,7 +180,7 @@ function processFolderAnyPage(data) { // jQuery.min
         .getAttribute('src'),
       link: el.href,
       name: el.textContent,
-      id: system.getCustomUrlParameter(el.href, 'recipe_id')
+      id: getCustomUrlParameter(el.href, 'recipe_id')
     };
     prev.push(retryAjax(el.href).pipe(processRecipe.bind(null, recipe)));
     return prev;
@@ -183,14 +190,14 @@ function processFolderAnyPage(data) { // jQuery.min
 
 function processFolderFirstPage(data) { // jQuery.min
   var prm = [];
-  var doc = system.createDocument(data);
-  var pCC = doc.getElementById('pCC');
-  var scope = pCC.firstElementChild.rows[4].cells[0]
+  var doc = createDocument(data);
+  var innerPcc = doc.getElementById('pCC');
+  var scope = innerPcc.firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var thisFolder = Array.prototype.filter.call(scope, function(el) {
     return /\/folder_on\.gif/.test(el.getAttribute('src'));
   })[0];
-  var pages = pCC.getElementsByClassName('customselect')[0]
+  var pages = innerPcc.getElementsByClassName('customselect')[0]
     .getElementsByTagName('option').length;
   for (var i = 1; i < pages; i += 1) {
     prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
@@ -204,7 +211,7 @@ function reduceFolders(prev, el) { // jQuery.min
   var href = el.parentNode.href;
   var folderName = el.parentNode.nextElementSibling.nextElementSibling
     .firstChild.textContent;
-  if (system.getCustomUrlParameter(href, 'folder_id') === '-1') {
+  if (getCustomUrlParameter(href, 'folder_id') === '-1') {
     return prev;
   }
   if (/quest/i.test(folderName)) {
@@ -217,7 +224,7 @@ function reduceFolders(prev, el) { // jQuery.min
 }
 
 function processFirstPage(data) { // jQuery.min
-  var doc = system.createDocument(data);
+  var doc = createDocument(data);
   var scope = doc.getElementById('pCC').firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var prm = Array.prototype.reduce.call(scope, reduceFolders, []);
@@ -241,8 +248,8 @@ function parseInventingStart() { // jQuery.min
 
 function gotRecipeBook(data) {
   recipebook = data;
-  if (system.getValue('hideRecipes')) {
-    hideRecipes = system.shouldBeArray('hideRecipeNames');
+  if (getValue('hideRecipes')) {
+    hideRecipes = shouldBeArray('hideRecipeNames');
   }
   content.innerHTML = '<table class="fshInvFilter"><thead><tr>' +
     '<th width="90%"><b>&nbsp;Recipe Manager</b></th>' +
@@ -269,7 +276,7 @@ function rmEvtHdl(evt) {
 }
 
 export default function injectRecipeManager(injector) { // jQuery.min
-  content = injector || layout.pCC;
+  content = injector || pCC;
   getForage('fsh_recipeBook').done(gotRecipeBook);
   content.addEventListener('click', rmEvtHdl);
 }

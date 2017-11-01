@@ -1,10 +1,10 @@
 import {closestTable} from '../common/closest';
 import {dialog} from '../support/ajax';
 import retryAjax from '../ajax/retryAjax';
-import * as layout from '../support/layout';
+import {infoBox, pCC} from '../support/layout';
 
 function translateReturnInfo(data) {
-  var info = layout.infoBox(data);
+  var info = infoBox(data);
   var _r = {r: 1, m: info};
   if (info === 'Item was transferred to the guild store!') {
     _r = {r: 0, m: ''};
@@ -31,13 +31,13 @@ function guildMailboxEvent(e) {
     guildMailboxTake(anchor).done(takeResult.bind(null, self));
   }
   if (self.className === 'sendLink') {
-    var nodeList = layout.pCC.getElementsByTagName('img');
+    var nodeList = pCC.getElementsByTagName('img');
     Array.prototype.forEach.call(nodeList, function(el) {el.click();});
   }
 }
 
 export default function guildMailbox() {
-  layout.pCC.addEventListener('click', guildMailboxEvent);
+  pCC.addEventListener('click', guildMailboxEvent);
   document.querySelector('#pCC td[height="25"]')
     .insertAdjacentHTML('beforeend',
       '<span class="sendLink">Take All</span>');

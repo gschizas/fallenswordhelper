@@ -1,5 +1,5 @@
 import add from '../support/task';
-import * as system from '../support/system';
+import {getUrlParameter} from '../support/system';
 
 var counter;
 var nodeList;
@@ -30,7 +30,7 @@ function hideOthers() {
 }
 
 export default function searchUser() {
-  findUser = system.getUrlParameter('user');
+  findUser = getUrlParameter('user');
   if (!findUser) {return;}
   var userNodes = document.querySelectorAll(
     '#pCC table table td[bgcolor="#DAA534"] b');

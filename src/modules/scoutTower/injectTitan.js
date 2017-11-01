@@ -1,16 +1,16 @@
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import retryAjax from '../ajax/retryAjax';
-import * as system from '../support/system';
+import {createDocument, findNode} from '../support/system';
 
 function getScoutTowerDetails(responseText) { // Legacy
-  var doc = system.createDocument(responseText);
+  var doc = createDocument(responseText);
   injectScouttowerBuffLinks(doc.getElementById('pCC')
     .getElementsByTagName('table'));
-  var scoutTowerTable = system.findNode(
+  var scoutTowerTable = findNode(
     '//table[tbody/tr/td/img[contains(@src,"/banners/scouttower.png")]]',
     doc);
   if (scoutTowerTable) {
-    var titanTable = system.findNode(
+    var titanTable = findNode(
       '//table[tbody/tr/td/img[contains(@src,"/banners/titankilllog.png")]]');
     var newRow = titanTable.insertRow(0);
     newRow.appendChild(scoutTowerTable.rows[1].cells[0])

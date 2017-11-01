@@ -1,6 +1,6 @@
 import {createTr} from './common/cElement';
 import {now} from './support/dataObj';
-import * as system from './support/system';
+import {getValue, outputFormat} from './support/system';
 
 function dontPost() {
   var submitButton = document.querySelector('#pCC input[type="submit"]');
@@ -17,11 +17,11 @@ function formatLastReset(lastLadderReset) {
   var m = Math.floor((now - lastLadderReset) / 60000);
   var h = Math.floor(m / 60);
   m %= 60;
-  return system.outputFormat(h, ' hours, ') + m + ' mins';
+  return outputFormat(h, ' hours, ') + m + ' mins';
 }
 
 function formatTime() {
-  var lastLadderReset = system.getValue('lastLadderReset');
+  var lastLadderReset = getValue('lastLadderReset');
   if (lastLadderReset < now - 48 * 60 * 60 * 1000) {
     return '<span class="fshLink tip-static" data-tipped="FSH has not seen ' +
       'the last ladder reset.<br>You can find it in your log if you ' +

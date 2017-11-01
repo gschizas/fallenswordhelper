@@ -1,8 +1,8 @@
+import {imageServer} from '../support/system';
 import {equipItem, queueRecallItem} from '../support/ajax';
-import * as system from '../support/system';
 
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
-  'url(\'' + system.imageServer + '/skin/loading.gif\');"></span>';
+  'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
 
 function recallItem(evt) { // jQuery
   $(evt.target).qtip('hide');
