@@ -103,7 +103,7 @@ export default function guildTracker() {
   var cellTwo = newTr.insertCell(-1);
   cellOne.appendChild(gs);
   cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
-    '[ <label class="sendLink" for="tracker">Show</label> ]';
+    '&nbsp;<label class="custombutton" for="tracker">Show</label>';
   newTr.addEventListener('change', togglePref);
   oldTr.parentNode.replaceChild(newTr, oldTr);
   tracker = createInput({

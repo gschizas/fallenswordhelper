@@ -58,6 +58,12 @@
   border: 1px solid #655e4e;
   color: #381f00;
 }
+.fsh-tab-open:nth-child(1):checked ~ ul li:nth-child(2):hover,
+.fsh-tab-open:nth-child(2):checked ~ ul li:nth-child(1):hover {
+  border: 1px solid #a45b13;
+  background: #f0be00 url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_70_f0be00_500x100.png) 50% 50% repeat-x;
+  color: #381f00;
+}
 .fsh-dialog-content {
   margin: 12px;
   position: relative;
@@ -238,6 +244,13 @@
   margin-bottom: 0;
   padding-bottom: 1px;
   border: 1px solid #655e4e;
+  color: #381f00;
+}
+
+#invTabs > #qwtab1:checked ~ ul .inv-tabs-ah:hover,
+#invTabs > #qwtab2:checked ~ ul .inv-tabs-qw:hover {
+  border: 1px solid #a45b13;
+  background: #f0be00 url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_70_f0be00_500x100.png) 50% 50% repeat-x;
   color: #381f00;
 }
 
