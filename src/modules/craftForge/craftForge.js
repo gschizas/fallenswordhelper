@@ -14,11 +14,11 @@ var folderId = '0';
 var perfBox;
 
 function whichTableHasItems() {
-  var allTables = pCC.getElementsByTagName('table');
+  var allTables = pCC.lastElementChild.getElementsByTagName('table');
   if (calf.cmd === 'crafting') {
-    return allTables[2];
+    return allTables[1];
   }
-  return allTables[1];
+  return allTables[0];
 }
 
 function drawingNewItemTable() {
