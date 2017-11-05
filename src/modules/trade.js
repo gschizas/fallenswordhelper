@@ -5,6 +5,8 @@ import {createDiv, createTr} from './common/cElement';
 import {fallback, getValue} from './support/system';
 import {time, timeEnd} from './support/debug';
 
+var multiple;
+
 function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
@@ -61,7 +63,6 @@ function doFolderHeaders(folders) {
     innerHTML: folderCell
   });
   foldersRow.addEventListener('click', hideFolder);
-  var multiple = document.getElementById('fshSelectMultiple');
   multiple.insertAdjacentHTML('afterend', '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
@@ -160,7 +161,7 @@ function injectTradeOld() {
   });
   myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
     'class="custominput" value="all" size=3></td>';
-  var multiple = createTr({
+  multiple = createTr({
     id: 'fshSelectMultiple',
     innerHTML: myTd
   });

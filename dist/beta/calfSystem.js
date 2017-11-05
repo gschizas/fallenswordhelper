@@ -597,6 +597,8 @@ var now = Date.now();
 var nowSecs = Math.floor(now / 1000);
 var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
 var newGuildLogUrl = 'index.php' + newGuildLogLoc;
+var beginFolderSpanElement =
+  '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
 
 var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -1217,6 +1219,10 @@ function createTh(props) {
   return cElement('th', props);
 }
 
+function createLabel(props) {
+  return cElement('label', props);
+}
+
 function callApp(data) {
   mixin(data, {app: 1});
   return retryAjax({
@@ -1500,7 +1506,7 @@ function onlineDot(obj) {
 
 function changeOnlineDot(contactLink) {
   var lastActivity = lastActivityRE
-    .exec(contactLink.getAttribute('data-tipped'));
+    .exec(contactLink.dataset.tipped);
   contactLink.parentNode.previousSibling.innerHTML =
     onlineDot({
       min: lastActivity[3],
@@ -2395,7 +2401,7 @@ function reduceItemOrComponent(bgGif, prev, el) {
   var background = el.getAttribute('background');
   if (!background || background.indexOf(bgGif) === -1) {return prev;}
   var img = el.children[0].children[0];
-  var mouseOver = img.getAttribute('data-tipped');
+  var mouseOver = img.dataset.tipped;
   var mouseOverRX = mouseOver.match(itmRE);
   var result = {
     img: img.getAttribute('src'),
@@ -2760,12 +2766,10 @@ function tableRows$1(tbl, currentPlayerId, item) {
 }
 
 function makeFolderSpans(appInv) {
-  return '<span class="fshLink folder" data-folder="0">All</span>' +
-    // ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
+  return beginFolderSpanElement + '0">All</span>' +
     appInv.r.reduce(function(prev, folderObj) {
-      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
-        'data-folder="' + folderObj.id.toString() + '">' +
-        folderObj.name + '</span>';
+      return prev + ' &ensp;' + beginFolderSpanElement +
+        folderObj.id.toString() + '">' + folderObj.name + '</span>';
     }, '');
 }
 
@@ -4334,7 +4338,7 @@ var evts = [
     result: useProfileInventoryItem
   },
   {
-    condition: function(self) {return self.classList.contains('folder');},
+    condition: function(self) {return self.classList.contains('fshFolder');},
     result: hideFolders
   },
   {
@@ -4969,7 +4973,7 @@ function getSustain(doc) {
   Array.prototype.some.call(aLinks, function(el) {
     if (el.textContent === 'Sustain') {
       var sustainText = el.parentNode.parentNode.parentNode.nextElementSibling
-        .firstElementChild.getAttribute('data-tipped');
+        .firstElementChild.dataset.tipped;
       sustainLevel = parseInt(sustainLevelRE.exec(sustainText)[1], 10);
       return true;
     }
@@ -6479,7 +6483,7 @@ function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
 }
 
 function contactColour(el, obj) {
-  var onMouseOver = el.getAttribute('data-tipped');
+  var onMouseOver = el.dataset.tipped;
   var lastActivityMinutes =
     /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
   if (lastActivityMinutes < 2) {
@@ -7234,6 +7238,128 @@ function composingBreakdown() {
     .addEventListener('click', togglePref$1);
 }
 
+function makeFolderSpans$1(folders, needsWorn) {
+  var wornSelector = '';
+  if (needsWorn) {
+    wornSelector = ' &ensp;' + beginFolderSpanElement + '-2">Worn</span>';
+  }
+  return beginFolderSpanElement + '0">All</span>' + wornSelector +
+    ' &ensp;' + beginFolderSpanElement + '-1">Main</span>' +
+    Object.keys(folders).reduce(function(prev, key) {
+      return prev + ' &ensp;' + beginFolderSpanElement + key + '">' +
+        folders[key] + '</span>';
+    }, '');
+}
+
+var itemTable;
+var itemsAry;
+var invItems;
+var folderId = '0';
+var perfBox;
+
+function whichTableHasItems() {
+  var allTables = pCC.getElementsByTagName('table');
+  if (calf.cmd === 'crafting') {
+    return allTables[2];
+  }
+  return allTables[1];
+}
+
+function drawingNewItemTable() {
+  if (!drawingNewItemTable.itemGrid) {
+    drawingNewItemTable.itemGrid = createDiv({className: 'fshItemGrid'});
+    itemsAry.forEach(function(item) {
+      var itemDiv = createDiv();
+      var aLink = item[0].parentNode;
+      itemDiv.appendChild(aLink);
+      drawingNewItemTable.itemGrid.appendChild(itemDiv);
+    });
+    itemTable.parentNode.insertAdjacentElement('afterbegin',
+      drawingNewItemTable.itemGrid);
+    itemTable.classList.add('fshHide');
+  }
+}
+
+function reDrawGrid() {
+  drawingNewItemTable();
+  itemsAry.forEach(function(item) {
+    var myDiv = item[0].parentNode.parentNode;
+    toggleForce(myDiv, folderId !== '0' && item[2] !== folderId ||
+      perfBox.checked && item[3] !== 'Perfect');
+  });
+}
+
+function doHideFolders(evt) {
+  if (!evt.target.classList.contains('fshFolder')) {return;}
+  var evtFid = evt.target.dataset.folder;
+  if (evtFid !== folderId) {
+    folderId = evtFid;
+    reDrawGrid();
+  }
+}
+
+function getFolderId(item) {
+  if (item.equipped) {return '-2';}
+  return item.folder_id;
+}
+
+function enhanceWarehouse() {
+  itemsAry.forEach(function(item) {
+    var invItem = invItems[item[1]];
+    item.push(getFolderId(invItem), invItem.craft);
+  });
+}
+
+function doFolderButtons(folders) {
+  var inject = itemTable.parentNode.parentNode
+    .previousElementSibling.firstElementChild;
+  inject.classList.add('fshCenter');
+  inject.addEventListener('click', doHideFolders);
+  inject.insertAdjacentHTML('beforeend', makeFolderSpans$1(folders, true));
+  return inject;
+}
+
+function doPerfSwitch(inject) {
+  if (calf.cmd === 'crafting') {
+    perfBox = {checked: false};
+    return;
+  }
+  var perfLabel = createLabel({
+    className: 'fshVMid',
+    innerHTML: '<span class="fshLink">Perfect</span> '
+  });
+  perfBox = createInput({
+    className: 'fshVMid',
+    type: 'checkbox'
+  });
+  perfBox.addEventListener('change', reDrawGrid);
+  perfLabel.appendChild(perfBox);
+  inject.insertAdjacentHTML('beforeend', ' &ensp;');
+  inject.appendChild(perfLabel);
+}
+
+function inventory(data) {
+  invItems = data.items;
+  add(4, enhanceWarehouse);
+  var inject = doFolderButtons(data.folders);
+  doPerfSwitch(inject);
+}
+
+function getItems() {
+  itemTable = whichTableHasItems();
+  var imgList = itemTable.getElementsByTagName('img');
+  itemsAry = Array.prototype.map.call(imgList, function(img) {
+    var tipped = img.dataset.tipped;
+    var matches = tipped.match(itemRE);
+    return [img, matches[2]];
+  });
+}
+
+function craftForge() {
+  getInventoryById().done(inventory);
+  add(3, getItems);
+}
+
 function globalQuest() {
   var topTable = pCC.getElementsByTagName('table')[3];
   for (var i = 2; i < topTable.rows.length; i += 4) {
@@ -7883,7 +8009,7 @@ function injectBazaar() { // TODO stop using getElementById
   var potions = pCC.getElementsByTagName('A');
   Array.prototype.forEach.call(potions, function(el, i) {
     var item = el.firstElementChild;
-    var tipped = item.getAttribute('data-tipped');
+    var tipped = item.dataset.tipped;
     bazaarTable = bazaarTable
       .replace('@' + i + '@', bazaarItem)
       .replace('@src@', item.getAttribute('src'))
@@ -8505,7 +8631,7 @@ function guildXPLock() {
   var xpLock = document
     .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   if (!xpLock) {return;}
-  var xpLockmouseover = xpLock.getAttribute('data-tipped');
+  var xpLockmouseover = xpLock.dataset.tipped;
   var xpLockXP = getIntFromRegExp(xpLockmouseover,
     /XP Lock: <b>(\d*)/);
   var actualXP = getIntFromRegExp(xpLockmouseover,
@@ -10776,7 +10902,7 @@ function getInvTables(doc) {
 }
 
 function tallyComponent(visible, el) {
-  var mouseover = el.getAttribute('data-tipped');
+  var mouseover = el.dataset.tipped;
   var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
   componentList[id] = componentList[id] || {
     count: 0,
@@ -11495,10 +11621,10 @@ function addBuffLevels(evt) {
 
 function doLabels(el) {
   var nameSpan = el.firstElementChild;
-  var dataTipped = nameSpan.getAttribute('data-tipped');
+  var dataTipped = nameSpan.dataset.tipped;
   var cost = el.previousElementSibling.getAttribute('data-cost');
-  nameSpan.setAttribute('data-tipped', dataTipped
-    .replace('</center>', '<br>Stamina Cost: ' + cost + '$&'));
+  nameSpan.dataset.tipped = dataTipped
+    .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
   var lvlSpan = nameSpan.firstElementChild;
   var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
   if (!excludeBuff[el.getAttribute('for')] && myLvl < 125) {
@@ -11662,7 +11788,7 @@ var defaultOpts = {
 };
 var potObj$1;
 var potOpts;
-var inventory;
+var inventory$1;
 var mapping;
 var thresholds;
 
@@ -11771,7 +11897,7 @@ function makeRowsFromPivot(pivot, prev, pot) {
 
 function drawInventory() {
   var pivot = Object.keys(potObj$1).reduce(pivotPotObj, {});
-  inventory.innerHTML = '<table><tbody>' +
+  inventory$1.innerHTML = '<table><tbody>' +
     Object.keys(pivot).reduce(makeRowsFromPivot.bind(null, pivot), '') +
     '</tbody></table>';
 }
@@ -11841,9 +11967,9 @@ function gotMap(data) {
   var container = createContainer();
   var panels = createDiv({id: 'panels'});
   container.appendChild(panels);
-  inventory = createDiv({id: 'inventory'});
+  inventory$1 = createDiv({id: 'inventory'});
   drawInventory();
-  panels.appendChild(inventory);
+  panels.appendChild(inventory$1);
   mapping = createDiv({id: 'mapping'});
   drawMapping();
   panels.appendChild(mapping);
@@ -12592,6 +12718,8 @@ function injectTopRated() {
         .indexOf('Last Updated') === 0) {looksLikeTopRated();}
 }
 
+var multiple;
+
 function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
@@ -12648,7 +12776,6 @@ function doFolderHeaders(folders) {
     innerHTML: folderCell
   });
   foldersRow.addEventListener('click', hideFolder);
-  var multiple = document.getElementById('fshSelectMultiple');
   multiple.insertAdjacentHTML('afterend', '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
@@ -12656,7 +12783,7 @@ function doFolderHeaders(folders) {
   multiple.insertAdjacentElement('afterend', foldersRow);
 }
 
-var invItems;
+var invItems$1;
 
 function stColor(el, item) {
   if (item.is_in_st) {
@@ -12667,9 +12794,9 @@ function stColor(el, item) {
 function forEachInvItem(el) {
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
-  var item = invItems[checkbox.getAttribute('value')];
+  var item = invItems$1[checkbox.getAttribute('value')];
   el.classList.add('folderid' + item.folder_id);
-  if (invItems.fshHasST) {stColor(el, item);}
+  if (invItems$1.fshHasST) {stColor(el, item);}
   checkbox.classList.add('itemid' + item.item_id);
   checkbox.classList.add('itemtype' + item.type);
 }
@@ -12678,7 +12805,7 @@ function processTrade(data) {
 
   time('trade.processTrade');
 
-  invItems = data.items;
+  invItems$1 = data.items;
   /* Highlight items in ST */
   var nodeList = document.getElementById('item-list')
     .getElementsByTagName('table');
@@ -12747,7 +12874,7 @@ function injectTradeOld() {
   });
   myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
     'class="custominput" value="all" size=3></td>';
-  var multiple = createTr({
+  multiple = createTr({
     id: 'fshSelectMultiple',
     innerHTML: myTd
   });
@@ -12799,7 +12926,7 @@ function injectViewGuild() {
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
   Array.prototype.forEach.call(memList, function(el) {
-    var tipped = el.getAttribute('data-tipped');
+    var tipped = el.dataset.tipped;
     var lastActDays = lastActivityRE.exec(tipped)[1];
     var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
     var aRow = el.parentNode.parentNode;
@@ -14586,7 +14713,7 @@ function doMouseOver() {
     '<tr><td class="fshCenter"><b>' + creature.name + '</b></td></tr>' +
     '</table>';
 
-  monster.setAttribute('data-tipped', monsterTip);
+  monster.dataset.tipped = monsterTip;
 }
 
 var bailOut$1 = [
@@ -15204,7 +15331,7 @@ function injectViewRecipe() { // Legacy
     '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
   if (components) {
     for (var i = 0; i < components.length; i += 1) {
-      var mo = components[i].getAttribute('data-tipped');
+      var mo = components[i].dataset.tipped;
       xmlhttp(linkFromMouseoverCustom(mo),
         injectViewRecipeLinks, components[i]);
       var componentCountElement = components[i].parentNode.parentNode
@@ -16619,7 +16746,7 @@ function injectGroups() { // jQuery
   fixTable();
 }
 
-var invItems$2;
+var invItems$3;
 var type;
 var itemId;
 
@@ -16631,12 +16758,12 @@ var types = [
   {
     c: function() {return type === 'guild';},
     r: function(o, el) {
-      el.checked = !el.disabled && invItems$2[o.invid].guild_tag !== '-1';
+      el.checked = !el.disabled && invItems$3[o.invid].guild_tag !== '-1';
     }
   },
   {
     c: function(o) {
-      return type === 'item' && invItems$2[o.invid].item_id === itemId;
+      return type === 'item' && invItems$3[o.invid].item_id === itemId;
     },
     r: tickElement
   },
@@ -16657,7 +16784,7 @@ function testType(o, el) {
 }
 
 function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
-  invItems$2 = invItems_;
+  invItems$3 = invItems_;
   type = type_;
   itemId = itemId_;
   itemsAry.forEach(function(o) {
@@ -16669,22 +16796,13 @@ function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
   });
 }
 
-function makeFolderSpans$1(folders) {
-  return '<span class="fshLink folder" data-folder="0">All</span>' +
-    ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
-    Object.keys(folders).reduce(function(prev, key) {
-      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
-        'data-folder="' + key + '">' + folders[key] + '</span>';
-    }, '');
-}
-
 function extraButtons() {
   var tRows = pCC.getElementsByTagName('table')[0].rows;
   tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
     '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
 }
 
-function doFolderButtons(folders) {
+function doFolderButtons$1(folders) {
   if (calf.subcmd2 === 'storeitems') {
     var formNode = pCC.getElementsByTagName('form')[0];
     var tr = createTr({className: 'fshCenter'});
@@ -16720,12 +16838,6 @@ function doToggleButtons(showExtraLinks, showQuickDropLinks) {
       ' Select All Guild Locked</span>]&nbsp;';
   }
   insertHere.innerHTML = inject;
-}
-
-function getItemImg(pCC) {
-  var allTables = pCC.getElementsByTagName('table');
-  var lastTable = allTables[allTables.length - 1];
-  return lastTable.getElementsByTagName('img');
 }
 
 function hideFolders$1(itemsAry, invItems, self) {
@@ -16829,13 +16941,19 @@ var showQuickDropLinks$1;
 var showQuickSendLinks$1;
 var extraLinks;
 var paintCount;
-var itemsAry;
+var itemsAry$1;
 var checkAll;
 var itemsHash;
 var dropLinks;
-var invItems$1;
+var invItems$2;
 var colouring;
 var sendLinks;
+
+function getItemImg() {
+  var allTables = pCC.getElementsByTagName('table');
+  var lastTable = allTables[allTables.length - 1];
+  return lastTable.getElementsByTagName('img');
+}
 
 function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {
@@ -16911,14 +17029,14 @@ function doneInvPaint() {
 function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
   while (performance.now() < limit &&
-      paintCount < itemsAry.length) {
-    var o = itemsAry[paintCount];
-    var item = invItems$1[o.invid];
+      paintCount < itemsAry$1.length) {
+    var o = itemsAry$1[paintCount];
+    var item = invItems$2[o.invid];
     afterbegin(o, item);
     beforeend(o, item);
     paintCount += 1;
   }
-  if (paintCount < itemsAry.length) {
+  if (paintCount < itemsAry$1.length) {
     add(3, invPaint);
   } else {
     doneInvPaint();
@@ -16933,7 +17051,7 @@ function toggleShowExtraLinks() {
     paintCount = 0;
     add(3, invPaint);
   } else {
-    itemsAry.forEach(function(o) {
+    itemsAry$1.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
       el.classList.toggle('fshHide');
     });
@@ -16948,7 +17066,7 @@ function toggleShowQuickDropLinks() {
     paintCount = 0;
     add(3, invPaint);
   } else {
-    itemsAry.forEach(function(o) {
+    itemsAry$1.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
       el.classList.toggle('fshHide');
     });
@@ -16966,16 +17084,16 @@ var evts$1 = [
   },
   {
     condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    result: function() {doCheckboxes(itemsAry, invItems$1, 'guild');}
+    result: function() {doCheckboxes(itemsAry$1, invItems$2, 'guild');}
   },
   {
     condition: function(self) {return self.id === 'fshMove';},
-    result: function() {moveItemsToFolder(itemsAry);}
+    result: function() {moveItemsToFolder(itemsAry$1);}
   },
   {
     condition: function(self) {return self.hasAttribute('linkto');},
     result: function(self) {
-      doCheckboxes(itemsAry, invItems$1, 'item', self.getAttribute('linkto'));
+      doCheckboxes(itemsAry$1, invItems$2, 'item', self.getAttribute('linkto'));
     }
   },
   {
@@ -16991,15 +17109,15 @@ var evts$1 = [
     }
   },
   {
-    condition: function(self) {return self.classList.contains('folder');},
+    condition: function(self) {return self.classList.contains('fshFolder');},
     result: function(self) {
-      hideFolders$1(itemsAry, invItems$1, self);
+      hideFolders$1(itemsAry$1, invItems$2, self);
     }
   },
   {
     condition: function(self) {return self.id === 'fshChkAll';},
     result: function() {
-      doCheckboxes(itemsAry, invItems$1, 'checkAll');
+      doCheckboxes(itemsAry$1, invItems$2, 'checkAll');
     }
   }
 ];
@@ -17015,7 +17133,7 @@ function evtHandler(evt) {
   });
 }
 
-function getItems() {
+function getItems$1() {
   addStatTotalToMouseover();
   disableItemColoring = getValue('disableItemColoring');
   showExtraLinks = getValue('showExtraLinks');
@@ -17023,15 +17141,15 @@ function getItems() {
   showQuickSendLinks$1 = getValue('showQuickSendLinks');
   doToggleButtons(showExtraLinks, showQuickDropLinks$1);
   pCC.addEventListener('click', evtHandler);
-  var imgList = getItemImg(pCC);
-  itemsAry = [];
+  var imgList = getItemImg();
+  itemsAry$1 = [];
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
-    var tipped = el.getAttribute('data-tipped');
+    var tipped = el.dataset.tipped;
     var matches = tipped.match(itemRE);
     itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
     var injectHere = el.parentNode.parentNode.nextElementSibling;
-    itemsAry.push({
+    itemsAry$1.push({
       el: el,
       invid: matches[2],
       injectHere: injectHere
@@ -17041,21 +17159,21 @@ function getItems() {
   itemsHash[13699] = 1;
 }
 
-function inventory$1(data) {
+function inventory$2(data) {
   extraLinks = false;
   checkAll = false;
-  invItems$1 = data.items;
+  invItems$2 = data.items;
   colouring = false;
   dropLinks = false;
   sendLinks = false;
   paintCount = 0;
   add(3, invPaint);
-  doFolderButtons(data.folders);
+  doFolderButtons$1(data.folders);
 }
 
 function injectStoreItems() {
-  getInventoryById().done(inventory$1);
-  add(3, getItems);
+  getInventoryById().done(inventory$2);
+  add(3, getItems$1);
 }
 
 function injectProfileDropItems() {
@@ -17236,6 +17354,8 @@ var pageSwitcher = {
     create: {'-': {'-': {'-': composingCreate}}}
   },
   pvpladder: {'-': {'-': {'-': {'-': ladder}}}},
+  crafting: {'-': {'-': {'-': {'-': craftForge}}}},
+  hellforge: {'-': {'-': {'-': {'-': craftForge}}}},
   '-': {
     viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
     viewarchive: {'-': {'-': {'-': viewArchive}}},
@@ -17333,6 +17453,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '9';
+window.FSH.calf = '10';
 
 }());

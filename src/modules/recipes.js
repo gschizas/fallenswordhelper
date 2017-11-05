@@ -103,7 +103,7 @@ function injectViewRecipe() { // Legacy
     '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
   if (components) {
     for (var i = 0; i < components.length; i += 1) {
-      var mo = components[i].getAttribute('data-tipped');
+      var mo = components[i].dataset.tipped;
       xmlhttp(linkFromMouseoverCustom(mo),
         injectViewRecipeLinks, components[i]);
       var componentCountElement = components[i].parentNode.parentNode

@@ -313,3 +313,5 @@ export var now = Date.now();
 export var nowSecs = Math.floor(now / 1000);
 export var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
 export var newGuildLogUrl = 'index.php' + newGuildLogLoc;
+export var beginFolderSpanElement =
+  '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';

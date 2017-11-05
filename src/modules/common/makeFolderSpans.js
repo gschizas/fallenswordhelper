@@ -1,8 +1,14 @@
-export default function makeFolderSpans(folders) {
-  return '<span class="fshLink folder" data-folder="0">All</span>' +
-    ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
+import {beginFolderSpanElement} from '../support/dataObj';
+
+export default function makeFolderSpans(folders, needsWorn) {
+  var wornSelector = '';
+  if (needsWorn) {
+    wornSelector = ' &ensp;' + beginFolderSpanElement + '-2">Worn</span>';
+  }
+  return beginFolderSpanElement + '0">All</span>' + wornSelector +
+    ' &ensp;' + beginFolderSpanElement + '-1">Main</span>' +
     Object.keys(folders).reduce(function(prev, key) {
-      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
-        'data-folder="' + key + '">' + folders[key] + '</span>';
+      return prev + ' &ensp;' + beginFolderSpanElement + key + '">' +
+        folders[key] + '</span>';
     }, '');
 }

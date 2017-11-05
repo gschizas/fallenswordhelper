@@ -2,6 +2,7 @@ import addHistoryWidgets from '../guild/addHistoryWidgets';
 import allowBack from '../guide/allowBack';
 import completedArenas from '../arena/completedArenas';
 import composingBreakdown from '../composing/breakdown';
+import craftForge from '../craftForge/craftForge';
 import globalQuest from '../topRated/globalQuest';
 import guildMailbox from '../mailbox/guildMailbox';
 import injectAdvisor from '../guildAdvisor';
@@ -196,6 +197,8 @@ export default {
     create: {'-': {'-': {'-': composingCreate}}}
   },
   pvpladder: {'-': {'-': {'-': {'-': ladder}}}},
+  crafting: {'-': {'-': {'-': {'-': craftForge}}}},
+  hellforge: {'-': {'-': {'-': {'-': craftForge}}}},
   '-': {
     viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
     viewarchive: {'-': {'-': {'-': viewArchive}}},

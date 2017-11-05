@@ -9,7 +9,7 @@ export function guildXPLock() {
   var xpLock = document
     .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   if (!xpLock) {return;}
-  var xpLockmouseover = xpLock.getAttribute('data-tipped');
+  var xpLockmouseover = xpLock.dataset.tipped;
   var xpLockXP = getIntFromRegExp(xpLockmouseover,
     /XP Lock: <b>(\d*)/);
   var actualXP = getIntFromRegExp(xpLockmouseover,

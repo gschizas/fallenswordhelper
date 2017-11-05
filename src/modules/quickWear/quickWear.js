@@ -80,7 +80,7 @@ var evts = [
     result: useProfileInventoryItem
   },
   {
-    condition: function(self) {return self.classList.contains('folder');},
+    condition: function(self) {return self.classList.contains('fshFolder');},
     result: hideFolders
   },
   {

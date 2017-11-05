@@ -1,3 +1,4 @@
+import {beginFolderSpanElement} from '../support/dataObj';
 import {imageServer} from '../support/system';
 import {playerId} from '../support/layout';
 import {createDiv, createTBody, createTable} from '../common/cElement';
@@ -46,12 +47,10 @@ function tableRows(tbl, currentPlayerId, item) {
 }
 
 function makeFolderSpans(appInv) {
-  return '<span class="fshLink folder" data-folder="0">All</span>' +
-    // ' &ensp;<span class="fshLink folder" data-folder="-1">Main</span>' +
+  return beginFolderSpanElement + '0">All</span>' +
     appInv.r.reduce(function(prev, folderObj) {
-      return prev + ' &ensp;<span class="fshLink fshNoWrap folder" ' +
-        'data-folder="' + folderObj.id.toString() + '">' +
-        folderObj.name + '</span>';
+      return prev + ' &ensp;' + beginFolderSpanElement +
+        folderObj.id.toString() + '">' + folderObj.name + '</span>';
     }, '');
 }
 

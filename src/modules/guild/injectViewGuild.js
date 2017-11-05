@@ -42,7 +42,7 @@ export default function injectViewGuild() {
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
   Array.prototype.forEach.call(memList, function(el) {
-    var tipped = el.getAttribute('data-tipped');
+    var tipped = el.dataset.tipped;
     var lastActDays = lastActivityRE.exec(tipped)[1];
     var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
     var aRow = el.parentNode.parentNode;

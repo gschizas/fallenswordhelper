@@ -167,7 +167,7 @@ export function onlineDot(obj) {
 
 function changeOnlineDot(contactLink) {
   var lastActivity = lastActivityRE
-    .exec(contactLink.getAttribute('data-tipped'));
+    .exec(contactLink.dataset.tipped);
   contactLink.parentNode.previousSibling.innerHTML =
     onlineDot({
       min: lastActivity[3],

@@ -1,3 +1,24 @@
+/* Crafting & Forging */
+.fshItemGrid {
+  display: grid;
+  grid-gap: 2px;
+  grid-template-columns: repeat(9, 60px);
+  justify-content: center;
+}
+
+.fshItemGrid div {
+  align-items: center;
+  background: url('https://cdn.fallensword.com/inventory/2x3.gif');
+  display: flex;
+  height: 90px;
+  justify-content: center;
+  width: 60px;
+}
+
+.fshItemGrid .fshHide {
+  display: none;
+}
+
 /* Guild Manage */
 .fsh-dialog-overlay {
   position: fixed;
@@ -33,6 +54,7 @@
   transform: none;
 }
 .fsh-tab-label {
+  cursor: pointer;
   display: block;
   padding: 0.5em 0.5em;
 }
@@ -57,6 +79,10 @@
   padding-bottom: 1px;
   border: 1px solid #655e4e;
   color: #381f00;
+}
+.fsh-tab-open:nth-child(1):checked ~ ul li:nth-child(1) label:hover,
+.fsh-tab-open:nth-child(2):checked ~ ul li:nth-child(2) label:hover {
+  cursor: text;
 }
 .fsh-tab-open:nth-child(1):checked ~ ul li:nth-child(2):hover,
 .fsh-tab-open:nth-child(2):checked ~ ul li:nth-child(1):hover {

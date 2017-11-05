@@ -30,7 +30,7 @@ function getInvTables(doc) {
 }
 
 function tallyComponent(visible, el) {
-  var mouseover = el.getAttribute('data-tipped');
+  var mouseover = el.dataset.tipped;
   var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
   componentList[id] = componentList[id] || {
     count: 0,
