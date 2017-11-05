@@ -315,3 +315,4 @@ export var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
 export var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 export var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
+export var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';

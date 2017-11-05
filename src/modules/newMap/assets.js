@@ -1,3 +1,4 @@
+import {guideUrl} from '../support/dataObj';
 import {imageServer} from '../support/system';
 
 export default {
@@ -25,7 +26,7 @@ export default {
       '/skin/realm/icon_action_map.gif\');">' +
     '</a>',
   searchMapUFSG:
-    '<a href="https://guide.fallensword.com/index.php?cmd=realms' +
+    '<a href="' + guideUrl + 'realms' +
       '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
       'class="fshCurveBtn tip-static" data-tipped="Search map in ' +
       'Ultimate FSG" style="background-image: url(\'' +

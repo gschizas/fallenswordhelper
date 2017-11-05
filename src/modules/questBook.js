@@ -1,3 +1,4 @@
+import {guideUrl} from './support/dataObj';
 import {pCC} from './support/layout';
 import {
   getUrlParameter,
@@ -113,8 +114,8 @@ function storeQuestPage() {
 
 function guideButtons(questID, questName) {
   return '<div class="parent">' +
-    '<a href="https://guide.fallensword.com/index.php?cmd=quests&amp;' +
-    'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
+    '<a href="' + guideUrl + 'quests&' +
+    'subcmd=view&quest_id=' + questID + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
     'style="background-image: url(\'' + imageServer +
     '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
