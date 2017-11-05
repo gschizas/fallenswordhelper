@@ -183,7 +183,7 @@ var evts = [
     }
   },
   {
-    condition: function(self) {return self.classList.contains('folder');},
+    condition: function(self) {return self.classList.contains('fshFolder');},
     result: function(self) {
       hideFolders(itemsAry, invItems, self);
     }
