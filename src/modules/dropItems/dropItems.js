@@ -219,7 +219,7 @@ function getItems() {
   itemsAry = [];
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
-    var tipped = el.getAttribute('data-tipped');
+    var tipped = el.dataset.tipped;
     var matches = tipped.match(itemRE);
     itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
     var injectHere = el.parentNode.parentNode.nextElementSibling;

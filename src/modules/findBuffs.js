@@ -187,7 +187,7 @@ function getSustain(doc) {
   Array.prototype.some.call(aLinks, function(el) {
     if (el.textContent === 'Sustain') {
       var sustainText = el.parentNode.parentNode.parentNode.nextElementSibling
-        .firstElementChild.getAttribute('data-tipped');
+        .firstElementChild.dataset.tipped;
       sustainLevel = parseInt(sustainLevelRE.exec(sustainText)[1], 10);
       return true;
     }

@@ -158,10 +158,10 @@ function addBuffLevels(evt) {
 
 function doLabels(el) {
   var nameSpan = el.firstElementChild;
-  var dataTipped = nameSpan.getAttribute('data-tipped');
+  var dataTipped = nameSpan.dataset.tipped;
   var cost = el.previousElementSibling.getAttribute('data-cost');
-  nameSpan.setAttribute('data-tipped', dataTipped
-    .replace('</center>', '<br>Stamina Cost: ' + cost + '$&'));
+  nameSpan.dataset.tipped = dataTipped
+    .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
   var lvlSpan = nameSpan.firstElementChild;
   var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
   if (!excludeBuff[el.getAttribute('for')] && myLvl < 125) {

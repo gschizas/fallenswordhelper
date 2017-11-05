@@ -13,7 +13,7 @@ function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
 }
 
 function contactColour(el, obj) {
-  var onMouseOver = el.getAttribute('data-tipped');
+  var onMouseOver = el.dataset.tipped;
   var lastActivityMinutes =
     /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
   if (lastActivityMinutes < 2) {

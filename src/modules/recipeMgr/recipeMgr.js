@@ -139,7 +139,7 @@ function reduceItemOrComponent(bgGif, prev, el) {
   var background = el.getAttribute('background');
   if (!background || background.indexOf(bgGif) === -1) {return prev;}
   var img = el.children[0].children[0];
-  var mouseOver = img.getAttribute('data-tipped');
+  var mouseOver = img.dataset.tipped;
   var mouseOverRX = mouseOver.match(itmRE);
   var result = {
     img: img.getAttribute('src'),

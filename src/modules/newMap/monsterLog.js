@@ -109,7 +109,7 @@ function doMouseOver() {
     '<tr><td class="fshCenter"><b>' + creature.name + '</b></td></tr>' +
     '</table>';
 
-  monster.setAttribute('data-tipped', monsterTip);
+  monster.dataset.tipped = monsterTip;
 }
 
 var bailOut = [

@@ -70,7 +70,7 @@ export default function injectBazaar() { // TODO stop using getElementById
   var potions = pCC.getElementsByTagName('A');
   Array.prototype.forEach.call(potions, function(el, i) {
     var item = el.firstElementChild;
-    var tipped = item.getAttribute('data-tipped');
+    var tipped = item.dataset.tipped;
     bazaarTable = bazaarTable
       .replace('@' + i + '@', bazaarItem)
       .replace('@src@', item.getAttribute('src'))
