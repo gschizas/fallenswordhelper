@@ -5,7 +5,6 @@ import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
 import dropItem from '../ajax/dropItem';
 import getInventoryById from '../ajax/getInventoryById';
-import getItemImg from '../common/getItemImg';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
 import moveItemsToFolder from './moveItemsToFolder';
@@ -28,6 +27,12 @@ var dropLinks;
 var invItems;
 var colouring;
 var sendLinks;
+
+function getItemImg() {
+  var allTables = pCC.getElementsByTagName('table');
+  var lastTable = allTables[allTables.length - 1];
+  return lastTable.getElementsByTagName('img');
+}
 
 function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {
@@ -215,7 +220,7 @@ function getItems() {
   showQuickSendLinks = getValue('showQuickSendLinks');
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   pCC.addEventListener('click', evtHandler);
-  var imgList = getItemImg(pCC);
+  var imgList = getItemImg();
   itemsAry = [];
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
