@@ -11,7 +11,7 @@
 // @exclude        https://wiki.fallensword.com/*
 // @exclude        https://www.fallensword.com/app.php*
 // @exclude        https://www.fallensword.com/fetchdata.php*
-// @version        1520a11
+// @version        1520a12
 // @downloadURL    https://192.168.137.1:9966/dist/dev/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -22,7 +22,7 @@
 function fshMain() {
 
   function setVer() {
-    var ver = '1520a11';
+    var ver = '1520a12';
     if (typeof GM_info === 'undefined') {return ver + '_native';}
     return ver;
   }

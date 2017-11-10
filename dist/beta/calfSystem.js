@@ -560,7 +560,8 @@ var defaults = {
   textToSearchFor: '',
   lastLadderReset: 0,
   disableQuickWearPrompts: false,
-  enableGuildActivityTracker: false
+  enableGuildActivityTracker: false,
+  enableSeTracker: false
 };
 
 var rarity = [
@@ -599,6 +600,7 @@ var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
 var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
+var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
 
 var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -1340,7 +1342,6 @@ function gotGuild(data) {
 function gotActivity(data) {
   if (data) {
     oldArchive = data;
-    // oldArchive = transformActivity(data);
   } else {
     oldArchive = {lastUpdate: 0, members: {}};
   }
@@ -3229,6 +3230,16 @@ var mySimpleCheckboxes = {
     helpText: 'If enabled, will track guild member activity over time.',
     network: true,
     title: 'Enable Tracker'
+  },
+  enableSeTracker: {
+    id: 'enableSeTracker',
+    helpTitle: 'Enable SE Tracker',
+    helpText: 'If enabled, will track the last time each SE was killed.<br>' +
+      'This is DIFFERENT from the usual FSH network activity.<br>' +
+      'When this is enabled, if you have ANY game page open in a<br>' +
+      'browser tab it will scan the SE Log every 10 minutes.<br>' +
+      'You do not need auto-refresh for this to work.',
+    network: true
   }
 };
 
@@ -5580,6 +5591,10 @@ function injectMenu() {
   adjustHeight();
 }
 
+var enterForSendMessage;
+var fshTemplate;
+var sendMessage;
+
 function showMsgTemplate() { // jQuery
   var targetPlayer = $('#quickMsgDialog_targetUsername').text();
   $('#msgTemplateDialog').remove();
@@ -5588,9 +5603,9 @@ function showMsgTemplate() { // jQuery
   var html = '<div id=msgTemplateDialog title="Choose Msg Template" ' +
     'style="display:none"><style>#msgTemplate .ui-selecting { ' +
     'background: #FECA40; };</style><ol id=msgTemplate valign=center>';
-  for (var i = 0; i < calf.template.length; i += 1) {
+  for (var i = 0; i < fshTemplate.length; i += 1) {
     html += '<li class="ui-widget-content">' +
-      calf.template[i].replace(/\{playername\}/g, targetPlayer) + '</li>';
+      fshTemplate[i].replace(/\{playername\}/g, targetPlayer) + '</li>';
   }
   html += '</ol></div>';
   $('body').append(html);
@@ -5603,16 +5618,16 @@ function showMsgTemplate() { // jQuery
     'class=ui-widget-content></li>');
   $(':button', '#msgTemplate').button();
   $('.del-button').click(function(evt) {
-    calf.template.splice($('#msgTemplate li')
+    fshTemplate.splice($('#msgTemplate li')
       .index(evt.target.parentNode), 1);
-    setValueJSON('quickMsg', calf.template);
+    setValueJSON('quickMsg', fshTemplate);
     $('#msgTemplateDialog').dialog('close');
     showMsgTemplate();
   });
   $('#newTmplAdd').click(function() {
     if ($('#newTmpl').val() === '') {return;}
-    calf.template.push($('#newTmpl').val());
-    setValueJSON('quickMsg', calf.template);
+    fshTemplate.push($('#newTmpl').val());
+    setValueJSON('quickMsg', fshTemplate);
     $('#msgTemplateDialog').dialog('close');
     showMsgTemplate();
   });
@@ -5644,10 +5659,25 @@ function showMsgTemplate() { // jQuery
   });
 }
 
+function keypress(evt) {
+  if (evt.code === 'Enter' && !evt.shiftKey) {
+    evt.preventDefault();
+    sendMessage();
+  }
+}
+
+function captureEnter() {
+  if (enterForSendMessage) {
+    document.getElementById('quickMsgDialog_msg')
+      .addEventListener('keypress', keypress);
+  }
+}
+
 function openQuickMsgDialog(name, msg, tip) { // jQuery
-  if (!calf.template) {
-    calf.template = getValueJSON('quickMsg');
+  if (!fshTemplate) {
+    fshTemplate = getValueJSON('quickMsg');
     var buttons = $('#quickMessageDialog').dialog('option', 'buttons');
+    sendMessage = buttons['Send Message'];
     buttons.Template = showMsgTemplate;
     $('#quickMessageDialog').dialog('option', 'buttons', buttons);
   }
@@ -5655,11 +5685,13 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
   $('#quickMsgDialog_targetPlayer').val(name);
   $('#quickMsgDialog_msg').val(fallback(msg, ''));
   $('#quickMsgDialog_msg').removeAttr('disabled');
+  captureEnter();
   $('.validateTips').text(fallback(tip, ''));
   $('#quickMessageDialog').dialog('open');
 }
 
 function injectQuickMsgDialogJQ() {
+  enterForSendMessage = getValue('enterForSendMessage');
   window.openQuickMsgDialog = openQuickMsgDialog;
 }
 
@@ -6442,6 +6474,67 @@ function replaceKeyHandler() {
   document.onkeypress = keyPress;
 }
 
+function superelite() {
+  return callApp({cmd: 'superelite'});
+}
+
+var oldLog;
+var timeoutId;
+var intervalId;
+
+function disableBackgroundChecks() {
+  if (timeoutId) {
+    window.clearTimeout(timeoutId);
+    timeoutId = false;
+  }
+  if (intervalId) {
+    window.clearInterval(intervalId);
+    intervalId = false;
+  }
+}
+
+function gotSe(data) {
+  var serverTime = Number(data.t.split(' ')[1]);
+  if (!oldLog) {oldLog = {lastUpdate: 0, se: {}};}
+  oldLog.lastUpdate = serverTime;
+  var resultAry = data.r;
+  resultAry.forEach(function(element) {
+    var myTime = serverTime - element.time;
+    var mobName = element.creature.name.replace(' (Super Elite)', '');
+    if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
+      oldLog.se[mobName] = myTime;
+    }
+  });
+  setForage('fsh_seLog', oldLog);
+}
+
+function getSeLog() {
+  return superelite().done(gotSe);
+}
+
+function doBackgroundCheck() {
+  disableBackgroundChecks();
+  intervalId = window.setInterval(getSeLog, 600000);
+  return getSeLog();
+}
+
+function gotLog(data) {
+  if (data) {oldLog = data;}
+  var lastCheckSecs = nowSecs - fallback(oldLog.lastUpdate, 0);
+  if (lastCheckSecs >= 600) {
+    doBackgroundCheck();
+  } else {
+    timeoutId = window.setTimeout(doBackgroundCheck,
+      (600 - lastCheckSecs) * 1000);
+  }
+}
+
+function seLog() {
+  if (getValue('enableSeTracker')) {
+    getForage('fsh_seLog').done(gotLog);
+  }
+}
+
 function statbarWrapper(href, id) {
   var myWrapper = createAnchor({href: href});
   var character = document.getElementById(id);
@@ -6974,6 +7067,7 @@ function notHuntMode() {
   add(3, injectQuickMsgDialogJQ);
 
   add(4, guildActivity);
+  add(4, seLog);
 }
 
 function prepareEnv() {
@@ -8371,10 +8465,10 @@ var tgCont;
 var memberSelect;
 var myMembers;
 
-function buildOptions() {
+function buildOptions(ourMembers) {
   return '<select name="member">' +
     '<option value="- All -" selected>- All -</option>' +
-    Object.keys(myMembers).sort(alpha$1).reduce(function(prev, member) {
+    Object.keys(ourMembers).sort(alpha$1).reduce(function(prev, member) {
       return prev + '<option value="' + member + '">' + member + '</option>';
     }, '') + '</select>';
 }
@@ -8411,11 +8505,12 @@ function memberRows() {
 }
 
 function drawRows() {
-  actBody.innerHTML = memberRows();
+  if (myMembers) {actBody.innerHTML = memberRows();}
   tgCont.classList.remove('fshSpinner');
 }
 
 function queueDrawRows() {
+  tgCont.classList.add('fshSpinner');
   add(3, drawRows);
 }
 
@@ -8425,9 +8520,11 @@ function myChange(e) {
 }
 
 function initTable(theMembers) {
-  myMembers = theMembers;
-  memberSelect.innerHTML = buildOptions();
-  queueDrawRows();
+  if (theMembers) {
+    myMembers = theMembers;
+    memberSelect.innerHTML = buildOptions(theMembers);
+    queueDrawRows();
+  }
 }
 
 function makeTg() {
@@ -8447,7 +8544,7 @@ function makeTg() {
   actBody = createTBody();
   tg.appendChild(actBody);
   tg.addEventListener('change', myChange);
-  tgCont = createDiv({className: 'tgCont fshSpinner fshSpinner64'});
+  tgCont = createDiv({className: 'tgCont fshSpinner64'});
   tgCont.appendChild(tg);
   return tgCont;
 }
@@ -8471,8 +8568,10 @@ function drawRawData(trackerData) {
 }
 
 function queueRawData(trackerData) {
-  io.className = 'fshSpinner fshSpinner64';
-  add(4, drawRawData, [trackerData]);
+  if (trackerData) {
+    io.classList.add('fshSpinner');
+    add(4, drawRawData, [trackerData]);
+  }
 }
 
 function doReset() {
@@ -8501,7 +8600,7 @@ function customButton(text, fn) {
 }
 
 function makeInOut() {
-  io = createDiv({id: 'io'});
+  io = createDiv({id: 'io', className: 'fshSpinner64'});
   ioText = createTextArea();
   ioText.setAttribute('autocapitalize', 'off');
   ioText.setAttribute('autocomplete', 'off');
@@ -8537,7 +8636,7 @@ function makeDragHandle() {
 
 function updateRawData() {
   acttab2.removeEventListener('change', updateRawData);
-  queueRawData(trackerData);
+  if (trackerData) {queueRawData(trackerData);}
 }
 
 function makeInnerPopup() {
@@ -8578,12 +8677,10 @@ function addOverlay() {
 }
 
 function gotActivity$1(data) {
-  // console.log('guildTracker', data);
-  trackerData = JSON.stringify(data);
-  // var tempAct = transformActivity(data);
-  // trackerData = JSON.stringify(tempAct);
-  initTable(data.members);
-  // initTable(tempAct.members);
+  if (data) {
+    trackerData = JSON.stringify(data);
+    initTable(data.members);
+  }
 }
 
 function togglePref$2(evt) {
@@ -12307,9 +12404,12 @@ function injectScouttowerBuffLinks(titanTables) {
   if (titanTables.length > 2) {gotTables(titanTables);}
 }
 
+function getTitanName(aRow) {
+  return aRow.cells[0].firstElementChild.getAttribute('oldtitle');
+}
+
 function cooldownTracker(aRow, theTitans) {
-  var myName = aRow.cells[0].firstElementChild.getAttribute('oldtitle')
-    .replace(' (Titan)', '');
+  var myName = getTitanName(aRow).replace(' (Titan)', '');
   if (!theTitans[myName]) {
     var cooldown = aRow.nextElementSibling.cells[0].textContent;
     var coolTime = 0;
@@ -12396,6 +12496,17 @@ function killsSummary(aRow) {
     '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')');
 }
 
+function guideLink(aRow) {
+  var myName = encodeURIComponent(getTitanName(aRow));
+  var myImg = aRow.cells[0].firstElementChild;
+  var myLink = createAnchor({
+    href: guideUrl + 'creatures&search_name=' + myName,
+    target: '_blank'
+  });
+  myLink.appendChild(myImg);
+  aRow.cells[0].appendChild(myLink);
+}
+
 function gotOldTitans(oldTitans) {
   var titanTables = pCC.getElementsByTagName('table');
   injectScouttowerBuffLinks(titanTables);
@@ -12404,15 +12515,16 @@ function gotOldTitans(oldTitans) {
   for (var i = 1; i < titanTable.rows.length - 1; i += 6) {
     var aRow = titanTable.rows[i];
     killsSummary(aRow);
-    cooldownTracker(aRow, newTitans);
+    cooldownTracker(aRow, newTitans); // Pref
+    guideLink(aRow);
   }
-  addMissingTitansFromOld(oldTitans, newTitans);
-  displayTracker(titanTables[0], newTitans);
-  setForage('fsh_titans', newTitans);
+  addMissingTitansFromOld(oldTitans, newTitans); // Pref
+  displayTracker(titanTables[0], newTitans); // Pref
+  setForage('fsh_titans', newTitans); // Pref
 }
 
 function injectScouttower() {
-  getForage('fsh_titans').done(gotOldTitans);
+  getForage('fsh_titans').done(gotOldTitans); // Pref
 }
 
 function getScoutTowerDetails(responseText) { // Legacy
@@ -12967,7 +13079,7 @@ var assets = {
       '/skin/realm/icon_action_map.gif\');">' +
     '</a>',
   searchMapUFSG:
-    '<a href="https://guide.fallensword.com/index.php?cmd=realms' +
+    '<a href="' + guideUrl + 'realms' +
       '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
       'class="fshCurveBtn tip-static" data-tipped="Search map in ' +
       'Ultimate FSG" style="background-image: url(\'' +
@@ -15323,7 +15435,7 @@ function injectViewRecipe() { // Legacy
   var recipe = $('#pCC table table b').first();
   var name = recipe.html();
   var searchName = recipe.html().replace(/ /g, '%20');
-  recipe.html('<a href="https://guide.fallensword.com/index.php?cmd=' +
+  recipe.html('<a href="' + guideUrl +
     'items&subcmd=view&search_name=' + searchName + '">' + name +
     '</a>');
 
@@ -15567,6 +15679,83 @@ function storePlayerUpgrades() { // Legacy
   injectPoints();
 }
 
+var enableSeTracker = 'enableSeTracker';
+var seTrackerEnabled;
+var trackerCell;
+
+function addRow$1(trackerTable, se) {
+  trackerTable.insertAdjacentHTML('beforeend',
+    '<tr><td class="fshCenter">' + se[0] + '</td>' +
+    '<td class="fshBold fshCenter fshCooldown">' +
+    formatDateTime(new Date(se[1] * 1000)) + '</td></tr>');
+}
+
+function buildTrackerTable(seAry) {
+  var trackerTable = createTable({className: 'fshTTracker'});
+  var tBody = createTBody({
+    innerHTML: '<tr><td class="header fshCenter">Creature</td>' +
+      '<td class="header fshCenter">Last Kill</td></tr>'
+  });
+  trackerTable.appendChild(tBody);
+  seAry.forEach(addRow$1.bind(null, tBody));
+  return trackerTable;
+}
+
+function insertNewRow() {
+  var newRow = pCC.lastElementChild.insertRow(-1);
+  var newCell = newRow.insertCell(-1);
+  newCell.colSpan = 3;
+  return newCell;
+}
+
+function displayTracker$1(seAry) {
+  var trackerTable = buildTrackerTable(seAry);
+  trackerCell = insertNewRow();
+  trackerCell.appendChild(trackerTable);
+}
+
+function gotSeLog() {
+  var seAry = Object.keys(oldLog.se).map(function(key) {
+    return [key, oldLog.se[key]];
+  }).sort(function(a, b) {
+    return a[1] - b[1];
+  });
+  displayTracker$1(seAry);
+}
+
+function killTable() {
+  if (!seTrackerEnabled) {
+    if (trackerCell) {
+      trackerCell.parentNode.remove();
+      trackerCell = false;
+    }
+    disableBackgroundChecks();
+  } else {
+    doBackgroundCheck().done(gotSeLog);
+  }
+}
+
+function togglePref$3(evt) {
+  if (evt.target.id === enableSeTracker) {
+    seTrackerEnabled = !seTrackerEnabled;
+    setValue(enableSeTracker, seTrackerEnabled);
+    killTable();
+  }
+}
+
+function superelite$1() {
+  var newCell = insertNewRow();
+  newCell.height = 20;
+  newCell = insertNewRow();
+  newCell.className = 'fshCenter';
+  newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
+  newCell.addEventListener('change', togglePref$3);
+  seTrackerEnabled = getValue(enableSeTracker);
+  if (seTrackerEnabled) {
+    getSeLog().done(gotSeLog);
+  }
+}
+
 var normalLink;
 var seasonLink;
 var activeLink;
@@ -15674,8 +15863,8 @@ function storeQuestPage() {
 
 function guideButtons(questID, questName) {
   return '<div class="parent">' +
-    '<a href="https://guide.fallensword.com/index.php?cmd=quests&amp;' +
-    'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
+    '<a href="' + guideUrl + 'quests&' +
+    'subcmd=view&quest_id=' + questID + '" class="tip-static" ' +
     'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
     'style="background-image: url(\'' + imageServer +
     '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
@@ -15953,7 +16142,7 @@ function toggleHeaderClass() {
   });
 }
 
-function togglePref$3() {
+function togglePref$4() {
   collapseNewsArchive = !collapseNewsArchive;
   setValue('collapseNewsArchive', collapseNewsArchive);
   if (collapseNewsArchive) {collapseAll();} else {expandAll();}
@@ -15965,7 +16154,7 @@ function setupPref$1(rowInjector) {
   rowInjector.insertAdjacentHTML('afterend',
     simpleCheckbox('collapseNewsArchive'));
   document.getElementById('collapseNewsArchive')
-    .addEventListener('click', togglePref$3);
+    .addEventListener('click', togglePref$4);
 }
 
 function viewArchive() {
@@ -16964,8 +17153,8 @@ function afterbegin(o, item) {
     pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
-  pattern += '</span>[<a href="https://guide.fallensword.com/' +
-    'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
+  pattern += '</span>[<a href="' + guideUrl +
+    'items&subcmd=view&item_id=' + item.item_id +
     '" target="_blank">UFSG</a>]</span>';
   o.injectHere.insertAdjacentHTML('afterbegin', pattern);
 }
@@ -17356,6 +17545,7 @@ var pageSwitcher = {
   pvpladder: {'-': {'-': {'-': {'-': ladder}}}},
   crafting: {'-': {'-': {'-': {'-': craftForge}}}},
   hellforge: {'-': {'-': {'-': {'-': craftForge}}}},
+  superelite: {'-': {'-': {'-': {'-': superelite$1}}}},
   '-': {
     viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
     viewarchive: {'-': {'-': {'-': viewArchive}}},
@@ -17453,6 +17643,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '11';
+window.FSH.calf = '12';
 
 }());
