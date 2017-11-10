@@ -32,7 +32,7 @@ function makeDragHandle() {
 
 function updateRawData() {
   acttab2.removeEventListener('change', updateRawData);
-  queueRawData(trackerData);
+  if (trackerData) {queueRawData(trackerData);}
 }
 
 function makeInnerPopup() {
@@ -73,12 +73,10 @@ function addOverlay() {
 }
 
 function gotActivity(data) {
-  // console.log('guildTracker', data);
-  trackerData = JSON.stringify(data);
-  // var tempAct = transformActivity(data);
-  // trackerData = JSON.stringify(tempAct);
-  initTable(data.members);
-  // initTable(tempAct.members);
+  if (data) {
+    trackerData = JSON.stringify(data);
+    initTable(data.members);
+  }
 }
 
 function togglePref(evt) {

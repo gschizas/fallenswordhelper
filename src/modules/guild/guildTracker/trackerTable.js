@@ -15,10 +15,10 @@ var tgCont;
 var memberSelect;
 var myMembers;
 
-function buildOptions() {
+function buildOptions(ourMembers) {
   return '<select name="member">' +
     '<option value="- All -" selected>- All -</option>' +
-    Object.keys(myMembers).sort(alpha).reduce(function(prev, member) {
+    Object.keys(ourMembers).sort(alpha).reduce(function(prev, member) {
       return prev + '<option value="' + member + '">' + member + '</option>';
     }, '') + '</select>';
 }
@@ -55,11 +55,12 @@ function memberRows() {
 }
 
 function drawRows() {
-  actBody.innerHTML = memberRows();
+  if (myMembers) {actBody.innerHTML = memberRows();}
   tgCont.classList.remove('fshSpinner');
 }
 
 function queueDrawRows() {
+  tgCont.classList.add('fshSpinner');
   add(3, drawRows);
 }
 
@@ -69,9 +70,11 @@ function myChange(e) {
 }
 
 export function initTable(theMembers) {
-  myMembers = theMembers;
-  memberSelect.innerHTML = buildOptions();
-  queueDrawRows();
+  if (theMembers) {
+    myMembers = theMembers;
+    memberSelect.innerHTML = buildOptions(theMembers);
+    queueDrawRows();
+  }
 }
 
 export function makeTg() {
@@ -91,7 +94,7 @@ export function makeTg() {
   actBody = createTBody();
   tg.appendChild(actBody);
   tg.addEventListener('change', myChange);
-  tgCont = createDiv({className: 'tgCont fshSpinner fshSpinner64'});
+  tgCont = createDiv({className: 'tgCont fshSpinner64'});
   tgCont.appendChild(tg);
   return tgCont;
 }
