@@ -86,7 +86,6 @@ function gotGuild(data) {
 function gotActivity(data) {
   if (data) {
     oldArchive = data;
-    // oldArchive = transformActivity(data);
   } else {
     oldArchive = {lastUpdate: 0, members: {}};
   }

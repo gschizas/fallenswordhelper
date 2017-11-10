@@ -41,6 +41,7 @@ import setupMoves from '../arena/setup';
 import showAllQuestSteps from '../guide/showAllQuestSteps';
 import storeMoves from '../arena/store';
 import storePlayerUpgrades from '../upgrades';
+import superelite from '../seLog/superelite';
 import unknownPage from './unknownPage';
 import viewArchive from '../news/viewArchive';
 import {
@@ -199,6 +200,7 @@ export default {
   pvpladder: {'-': {'-': {'-': {'-': ladder}}}},
   crafting: {'-': {'-': {'-': {'-': craftForge}}}},
   hellforge: {'-': {'-': {'-': {'-': craftForge}}}},
+  superelite: {'-': {'-': {'-': {'-': superelite}}}},
   '-': {
     viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
     viewarchive: {'-': {'-': {'-': viewArchive}}},

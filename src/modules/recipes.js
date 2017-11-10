@@ -1,5 +1,6 @@
 import {createTd} from './common/cElement';
 import doinvent from './app/inventing/doinvent';
+import {guideUrl} from './support/dataObj';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import {fallback, findNode, findNodes, server, xmlhttp} from './support/system';
@@ -95,7 +96,7 @@ function injectViewRecipe() { // Legacy
   var recipe = $('#pCC table table b').first();
   var name = recipe.html();
   var searchName = recipe.html().replace(/ /g, '%20');
-  recipe.html('<a href="https://guide.fallensword.com/index.php?cmd=' +
+  recipe.html('<a href="' + guideUrl +
     'items&subcmd=view&search_name=' + searchName + '">' + name +
     '</a>');
 

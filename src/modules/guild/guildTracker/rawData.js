@@ -20,8 +20,10 @@ function drawRawData(trackerData) {
 }
 
 export function queueRawData(trackerData) {
-  io.className = 'fshSpinner fshSpinner64';
-  add(4, drawRawData, [trackerData]);
+  if (trackerData) {
+    io.classList.add('fshSpinner');
+    add(4, drawRawData, [trackerData]);
+  }
 }
 
 function doReset() {
@@ -50,7 +52,7 @@ function customButton(text, fn) {
 }
 
 export function makeInOut() {
-  io = createDiv({id: 'io'});
+  io = createDiv({id: 'io', className: 'fshSpinner64'});
   ioText = createTextArea();
   ioText.setAttribute('autocapitalize', 'off');
   ioText.setAttribute('autocomplete', 'off');

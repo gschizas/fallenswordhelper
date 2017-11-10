@@ -1,14 +1,17 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
-import {now} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import {parseDateAsTimestamp} from '../support/system';
 import setForage from '../ajax/setForage';
-import {createTBody, createTable} from '../common/cElement';
+import {createAnchor, createTBody, createTable} from '../common/cElement';
+import {guideUrl, now} from '../support/dataObj';
+
+function getTitanName(aRow) {
+  return aRow.cells[0].firstElementChild.getAttribute('oldtitle');
+}
 
 function cooldownTracker(aRow, theTitans) {
-  var myName = aRow.cells[0].firstElementChild.getAttribute('oldtitle')
-    .replace(' (Titan)', '');
+  var myName = getTitanName(aRow).replace(' (Titan)', '');
   if (!theTitans[myName]) {
     var cooldown = aRow.nextElementSibling.cells[0].textContent;
     var coolTime = 0;
@@ -95,6 +98,17 @@ function killsSummary(aRow) {
     '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')');
 }
 
+function guideLink(aRow) {
+  var myName = encodeURIComponent(getTitanName(aRow));
+  var myImg = aRow.cells[0].firstElementChild;
+  var myLink = createAnchor({
+    href: guideUrl + 'creatures&search_name=' + myName,
+    target: '_blank'
+  });
+  myLink.appendChild(myImg);
+  aRow.cells[0].appendChild(myLink);
+}
+
 function gotOldTitans(oldTitans) {
   var titanTables = pCC.getElementsByTagName('table');
   injectScouttowerBuffLinks(titanTables);
@@ -104,6 +118,7 @@ function gotOldTitans(oldTitans) {
     var aRow = titanTable.rows[i];
     killsSummary(aRow);
     cooldownTracker(aRow, newTitans);
+    guideLink(aRow);
   }
   addMissingTitansFromOld(oldTitans, newTitans);
   displayTracker(titanTables[0], newTitans);

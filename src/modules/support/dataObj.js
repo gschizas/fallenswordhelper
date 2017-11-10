@@ -276,7 +276,8 @@ export var defaults = {
   textToSearchFor: '',
   lastLadderReset: 0,
   disableQuickWearPrompts: false,
-  enableGuildActivityTracker: false
+  enableGuildActivityTracker: false,
+  enableSeTracker: false
 };
 
 export var rarity = [
@@ -315,3 +316,4 @@ export var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
 export var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 export var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
+export var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
