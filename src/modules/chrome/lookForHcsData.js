@@ -12,6 +12,7 @@ import injectQuickMsgDialogJQ from './messaging';
 import prepareAllyEnemyList from './allyEnemy';
 import prepareBountyData from './activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
+import seLog from '../seLog/seLog';
 import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
@@ -183,6 +184,7 @@ function notHuntMode() {
   add(3, injectQuickMsgDialogJQ);
 
   add(4, guildActivity);
+  add(4, seLog);
 }
 
 function prepareEnv() {

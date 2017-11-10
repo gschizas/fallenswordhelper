@@ -329,5 +329,15 @@ export default {
     helpText: 'If enabled, will track guild member activity over time.',
     network: true,
     title: 'Enable Tracker'
+  },
+  enableSeTracker: {
+    id: 'enableSeTracker',
+    helpTitle: 'Enable SE Tracker',
+    helpText: 'If enabled, will track the last time each SE was killed.<br>' +
+      'This is DIFFERENT from the usual FSH network activity.<br>' +
+      'When this is enabled, if you have ANY game page open in a<br>' +
+      'browser tab it will scan the SE Log every 10 minutes.<br>' +
+      'You do not need auto-refresh for this to work.',
+    network: true
   }
 };

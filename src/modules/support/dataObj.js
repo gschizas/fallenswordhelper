@@ -276,7 +276,8 @@ export var defaults = {
   textToSearchFor: '',
   lastLadderReset: 0,
   disableQuickWearPrompts: false,
-  enableGuildActivityTracker: false
+  enableGuildActivityTracker: false,
+  enableSeTracker: false
 };
 
 export var rarity = [
