@@ -38,7 +38,7 @@
     "postuglify:dev": "cost :max,unzip:dist/dev/calfSystem.min.js && cost :max:dist/dev/calfSystem.min.js",
     "uglify:prod": "uglifyjs dist/prod/calfSystem.js --stats -m -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -o dist/prod/calfSystem.min.js",
     "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
-    "watch": "chokidar-cmd -c \"npm run rollup:devcalf\" -t src/**/*.js --initial",
+    "watch": "rollup -c -w -m inline --environment FOLDER:dev,SOURCE:calf",
     "ws": "http-server -p 9966 -c-1 -S -C cert.crt -K key.pem"
   },
   "repository": {
@@ -56,7 +56,6 @@
   },
   "homepage": "https://fallenswordhelper.github.io/fallenswordhelper",
   "devDependencies": {
-    "chokidar-cmd": "^1.2.1",
     "cost": "^1.2.3",
     "csscomb": "^4.2.0",
     "eslint": "^4.6.1",
