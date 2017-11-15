@@ -17620,8 +17620,11 @@ function asyncDispatcher() {
   }
 }
 
+window.FSH = window.FSH || {};
+window.FSH.calf = '0';
+
 // main event dispatcher
-FSH.dispatch = function dispatch() {
+window.FSH.dispatch = function dispatch() {
 
   setup();
   start('JS Perf', 'FSH.dispatch');
@@ -17641,8 +17644,5 @@ FSH.dispatch = function dispatch() {
   end('JS Perf', 'FSH.dispatch');
 
 };
-
-window.FSH = window.FSH || {};
-window.FSH.calf = '12';
 
 }());
