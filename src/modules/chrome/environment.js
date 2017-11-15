@@ -88,8 +88,11 @@ function asyncDispatcher() {
   }
 }
 
+window.FSH = window.FSH || {};
+window.FSH.calf = '$_CALFVER';
+
 // main event dispatcher
-FSH.dispatch = function dispatch() {
+window.FSH.dispatch = function dispatch() {
 
   setup();
   start('JS Perf', 'FSH.dispatch');
