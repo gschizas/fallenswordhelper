@@ -269,6 +269,7 @@ export var defaults = {
   expandMenuOnKeyPress: false,
   disableBreakdownPrompts: false,
   collapseNewsArchive: false,
+  collapseHallPosts: false,
   lastmyGuildLogCheck: 0,
   hideSubLvlCreature: false,
   hidePlayerActions: false,

@@ -4,6 +4,7 @@ import completedArenas from '../arena/completedArenas';
 import composingBreakdown from '../composing/breakdown';
 import craftForge from '../craftForge/craftForge';
 import globalQuest from '../topRated/globalQuest';
+import guildHall from '../guild/hall';
 import guildMailbox from '../mailbox/guildMailbox';
 import injectAdvisor from '../guildAdvisor';
 import injectArena from '../arena/arena';
@@ -121,7 +122,8 @@ export default {
     mailbox: {'-': {'-': {'-': guildMailbox}}},
     ranks: {'-': {'-': {'-': injectGuildRanks}}},
     conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
-    bank: {'-': {'-': {'-': injectGuildBank}}}
+    bank: {'-': {'-': {'-': injectGuildBank}}},
+    hall: {'-': {'-': {'-': guildHall}}}
   },
   bank: {'-': {'-': {'-': {'-': injectBank}}}},
   log: {

@@ -1,3 +1,10 @@
+/* Guild Hall */
+.fshHallPref {
+  position: absolute;
+  right: 1em;
+  top: 0.2em;
+}
+
 /* Crafting & Forging */
 .fshItemGrid {
   display: grid;
@@ -628,6 +635,7 @@
 .fshBold {font-weight: bold;}
 .quickCreate {cursor: pointer;}
 .fshFixed {position: fixed;}
+.fshRelative {position: relative;}
 .fshXSmall {font-size: x-small;}
 .fshXXSmall {font-size: xx-small;}
 .fshSmall {font-size: small;}

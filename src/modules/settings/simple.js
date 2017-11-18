@@ -305,6 +305,11 @@ export default {
     helpTitle: 'Collapse News Archive',
     helpText: 'If enabled, will collapse news archives.'
   },
+  collapseHallPosts: {
+    id: 'collapseHallPosts',
+    helpTitle: 'Collapse Hall Posts',
+    helpText: 'If enabled, will collapse hall posts.'
+  },
   hideSubLvlCreature: {
     id: 'hideSubLvlCreature',
     helpTitle: 'Hide Sub Level Creatures',
