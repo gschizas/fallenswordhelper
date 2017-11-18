@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {getElementById} from '../common/getElement';
 
 function hideElement(el) {
   el.classList.add('fshHide');
@@ -73,14 +74,14 @@ function doHideBtn(context, selector) {
 }
 
 export function addGuildInfoWidgets() {
-  var guildMembrList = document.getElementById('minibox-guild-members-list');
+  var guildMembrList = getElementById('minibox-guild-members-list');
   if (!guildMembrList) {return;} // list exists
   // hide guild info links
   doHideBtn(guildMembrList, 'guildSelector');
   if (calf.hideBuffSelected) {
     hideNodeList(
       guildMembrList.getElementsByClassName('guild-buff-check-on'));
-    document.getElementById('guild-quick-buff').classList.add('fshHide');
+    getElementById('guild-quick-buff').classList.add('fshHide');
   }
   // add coloring for offline time
   Array.prototype.forEach.call(
@@ -96,13 +97,13 @@ export function addGuildInfoWidgets() {
 }
 
 export function addOnlineAlliesWidgets() {
-  var onlineAlliesList = document.getElementById('minibox-allies-list');
+  var onlineAlliesList = getElementById('minibox-allies-list');
   if (!onlineAlliesList) {return;}
   doHideBtn(onlineAlliesList, 'allySelector');
   if (calf.hideBuffSelected) {
     hideNodeList(
       onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
-    document.getElementById('ally-quick-buff').classList.add('fshHide');
+    getElementById('ally-quick-buff').classList.add('fshHide');
   }
   // add coloring for offline time
   Array.prototype.forEach.call(

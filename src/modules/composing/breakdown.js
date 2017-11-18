@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {pCC} from '../support/layout';
 import perfFilter from '../common/perfFilter';
 import retryAjax from '../ajax/retryAjax';
@@ -85,14 +86,14 @@ function togglePref() {
 export default function composingBreakdown() {
   perfFilter('composing');
   disableBreakdownPrompts = getValue('disableBreakdownPrompts');
-  document.getElementById('breakdown-selected-items').parentNode
+  getElementById('breakdown-selected-items').parentNode
     .addEventListener('click', breakEvt, true);
-  document.getElementById('composing-items')
+  getElementById('composing-items')
     .addEventListener('click', itemClick);
   pCC.insertAdjacentHTML('beforeend',
     '<table class="fshTblCenter"><tbody>' +
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
-  document.getElementById('disableBreakdownPrompts')
+  getElementById('disableBreakdownPrompts')
     .addEventListener('click', togglePref);
 }

@@ -1,6 +1,7 @@
 import add from './support/task';
 import calf from './support/calf';
 import {createTFoot} from './common/cElement';
+import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import {pCC} from './support/layout';
 import retryAjax from './ajax/retryAjax';
@@ -109,7 +110,7 @@ function returnAdvisorPage(e, response) {
 
   list.lastElementChild.insertAdjacentHTML('beforeend', ' day ' + e + ',');
   var doc = createDocument(response);
-  var table = doc.getElementById('pCC').firstElementChild
+  var table = getElementById('pCC', doc).firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
   var tr = table.rows;
   Array.prototype.forEach.call(tr, function(el) {

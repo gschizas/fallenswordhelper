@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import unequipitem from '../app/profile/unequipitem';
 import {createButton, createDiv} from '../common/cElement';
 
@@ -17,8 +18,8 @@ function getNekid() { // jQuery
 }
 
 export default function nekidBtn() {
-  var profileRightColumn = document.getElementById('profileRightColumn');
-  profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
+  var profileRightColumn = getElementById('profileRightColumn');
+  profileCombatSetDiv = getElementById('profileCombatSetDiv');
   var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
   var nekidDiv = createDiv({className: 'fshCenter'});
   var theBtn = createButton({

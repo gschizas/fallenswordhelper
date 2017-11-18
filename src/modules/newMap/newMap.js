@@ -1,6 +1,7 @@
 import assets from './assets';
 import calf from '../support/calf';
 import combatLogger from './combatLogger';
+import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import injectButtons from './buttons';
 import injectRelic from './relic/relic';
@@ -45,7 +46,7 @@ function colorType(actionList, creatureClass, colorClass) {
 }
 
 function colorMonsters() {
-  var act = document.getElementById('actionList');
+  var act = getElementById('actionList');
   colorType(act, 'creature-1', 'fshGreen');
   colorType(act, 'creature-2', 'fshYellow');
   colorType(act, 'creature-3', 'fshRed');
@@ -60,7 +61,7 @@ function doMonsterColors() { // jQuery.min
 
 function afterUpdateActionList() {
   // color the critters in the do no kill list blue
-  var act = document.getElementById('actionList');
+  var act = getElementById('actionList');
   var creatures = act.getElementsByClassName('creature');
   Array.prototype.forEach.call(creatures, function(el) {
     if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
@@ -104,7 +105,7 @@ function injectWorldNewMap(data) {
   updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     injectButtons(data);
-    document.getElementById('buffList')
+    getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
     if (calf.hideSubLvlCreature) {GameData.fetch(256);}
   }

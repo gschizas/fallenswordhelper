@@ -1,4 +1,5 @@
 import calf from './support/calf';
+import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
@@ -31,7 +32,7 @@ function mobRows() {
 }
 
 function drawMobs() {
-  var inject = document.getElementById('entityTableOutput');
+  var inject = getElementById('entityTableOutput');
   if (!monsterAry || !inject) {return;}
   inject.innerHTML = mobRows();
 }

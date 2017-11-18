@@ -1,6 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
 import {openQuickBuffByName} from '../support/layout';
@@ -127,7 +128,7 @@ function hazAllies(allies, enemies) {
   if (calf.enableEnemyOnlineList) {
     output += addContact(enemies, false);
   }
-  var fshContactList = document.getElementById('fshContactList');
+  var fshContactList = getElementById('fshContactList');
   fshContactList.innerHTML = '';
   fshContactList.insertAdjacentHTML('beforeend', output);
 }
@@ -159,7 +160,7 @@ function buffPlayer(self) {
 }
 
 function selectedBuff() {
-  var buffBalls = document.getElementById('fshContactList')
+  var buffBalls = getElementById('fshContactList')
     .getElementsByClassName('enemy-buff-check-on');
   var sendstring = Array.prototype.reduce.call(buffBalls,
     function(prev, curr) {
@@ -205,7 +206,7 @@ function makeDiv(data) {
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  document.getElementById('pCR')
+  getElementById('pCR')
     .insertAdjacentElement('afterbegin', fshAllyEnemy);
   fshAllyEnemy.addEventListener('click', eventHandler);
   injectAllyEnemyList(data);

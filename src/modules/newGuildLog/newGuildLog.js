@@ -1,6 +1,7 @@
 import addGuildLogWidgets from '../logs/addGuildLogWidgets';
 import addLogColoring from '../logs/addLogColoring';
 import {createTable} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
@@ -41,7 +42,7 @@ function findPageInput(prev, curr) {
 }
 
 function getPageInput() {
-  var inputList = doc.getElementById('pCC')
+  var inputList = getElementById('pCC', doc)
     .getElementsByClassName('custominput');
   return Array.prototype.reduce.call(inputList, findPageInput, null);
 }
@@ -139,7 +140,7 @@ function buildTable() {
     sep.colSpan = 3;
   });
 
-  var injector = document.getElementById('fshInjectHere');
+  var injector = getElementById('fshInjectHere');
   pCC.replaceChild(myTable, injector);
   addLogColoring('myGuildLog', 1);
   addGuildLogWidgets();
@@ -206,7 +207,7 @@ function refresh() {
   fshOutput.textContent = 'Loading Page 1 ...';
   tmpGuildLog = [];
   completeReload = true;
-  document.getElementById('fshInjectHere').innerHTML = '';
+  getElementById('fshInjectHere').innerHTML = '';
   getGuildLogPage(1).done(processFirstPage);
 }
 
@@ -228,10 +229,10 @@ function gotOptions(guildLog) {
   options = guildLog || options;
   options.checks = options.checks || defChecks.slice(0);
   pCC.innerHTML = guildLogFilter;
-  fshNewGuildLog = document.getElementById('fshNewGuildLog');
+  fshNewGuildLog = getElementById('fshNewGuildLog');
   fshNewGuildLog.addEventListener('click', eventHandler);
   setChecks();
-  fshOutput = document.getElementById('fshOutput');
+  fshOutput = getElementById('fshOutput');
   maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));
   maxPage = maxPagesToFetch;
   getGuildLogPage(1).done(processFirstPage);

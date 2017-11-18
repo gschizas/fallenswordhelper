@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
@@ -152,7 +153,7 @@ function reduceItemOrComponent(bgGif, prev, el) {
 }
 
 function parseRecipeItemOrComponent(bgGif, doc) {
-  var tblCells = doc.getElementById('pCC').getElementsByTagName('td');
+  var tblCells = getElementById('pCC', doc).getElementsByTagName('td');
   return Array.prototype.reduce.call(tblCells,
     reduceItemOrComponent.bind(null, bgGif), []);
 }
@@ -169,7 +170,7 @@ function processRecipe(recipe, data) {
 
 function processFolderAnyPage(data) { // jQuery.min
   var doc = createDocument(data);
-  var innerPcc = doc.getElementById('pCC');
+  var innerPcc = getElementById('pCC', doc);
   var scope = innerPcc.firstElementChild.rows[6].cells[0]
     .firstElementChild.getElementsByTagName('a');
   var prm = Array.prototype.reduce.call(scope, function(prev, el) {
@@ -191,7 +192,7 @@ function processFolderAnyPage(data) { // jQuery.min
 function processFolderFirstPage(data) { // jQuery.min
   var prm = [];
   var doc = createDocument(data);
-  var innerPcc = doc.getElementById('pCC');
+  var innerPcc = getElementById('pCC', doc);
   var scope = innerPcc.firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var thisFolder = Array.prototype.filter.call(scope, function(el) {
@@ -225,7 +226,7 @@ function reduceFolders(prev, el) { // jQuery.min
 
 function processFirstPage(data) { // jQuery.min
   var doc = createDocument(data);
-  var scope = doc.getElementById('pCC').firstElementChild.rows[4].cells[0]
+  var scope = getElementById('pCC', doc).firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var prm = Array.prototype.reduce.call(scope, reduceFolders, []);
   prm.push($.when(data).pipe(processFolderFirstPage));

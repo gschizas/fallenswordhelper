@@ -1,10 +1,11 @@
+import {getElementById} from '../common/getElement';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import retryAjax from '../ajax/retryAjax';
 import {createDocument, findNode} from '../support/system';
 
 function getScoutTowerDetails(responseText) { // Legacy
   var doc = createDocument(responseText);
-  injectScouttowerBuffLinks(doc.getElementById('pCC')
+  injectScouttowerBuffLinks(getElementById('pCC', doc)
     .getElementsByTagName('table'));
   var scoutTowerTable = findNode(
     '//table[tbody/tr/td/img[contains(@src,"/banners/scouttower.png")]]',

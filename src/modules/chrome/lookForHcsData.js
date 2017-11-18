@@ -1,6 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
+import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import guildActivity from '../guild/guildActivity';
 import {injectComposeAlert} from '../composing/composing';
@@ -119,14 +120,14 @@ function navMenu() { // jQuery
 }
 
 function moveRHSBoxUpOnRHS(title) {
-  document.getElementById('pCR').insertAdjacentElement('afterbegin',
-    document.getElementById(title));
+  getElementById('pCR').insertAdjacentElement('afterbegin',
+    getElementById(title));
 }
 
 function moveRHSBoxToLHS(title) {
-  var boxDiv = document.getElementById(title);
+  var boxDiv = getElementById(title);
   boxDiv.classList.add('pCR');
-  document.getElementById('pCL').appendChild(boxDiv);
+  getElementById('pCL').appendChild(boxDiv);
 }
 
 function doMoveGuildList() {
@@ -200,7 +201,7 @@ function prepareEnv() {
 }
 
 export default function lookForHcsData() {
-  var hcsData = document.getElementById('html');
+  var hcsData = getElementById('html');
   if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
   }

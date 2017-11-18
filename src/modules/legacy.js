@@ -1,5 +1,6 @@
 import calf from './support/calf';
 import {createDiv} from './common/cElement';
+import {getElementById} from './common/getElement';
 import {log} from './support/debug';
 import subscribes from './newMap/newMap';
 import {
@@ -170,7 +171,7 @@ function recastImpAndRefresh(responseText) { // Legacy
 }
 
 function toggleKsTracker() { // Legacy
-  var trackKS = document.getElementById('Helper:toggleKStracker');
+  var trackKS = getElementById('Helper:toggleKStracker');
   if (trackKS) {
     trackKS.addEventListener('click', function() {
       setValue('trackKillStreak',
@@ -208,8 +209,7 @@ function findImps() { // Legacy - Old Map
 
 function impRecast() { // Legacy - Old Map
   if ((hasDeathDealer || hasShieldImp) && impsRemaining === 0) {
-    var _recastImpAndRefresh = document
-      .getElementById('Helper:recastImpAndRefresh');
+    var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
     var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
       'Players=' +
       $('dt.stat-name:first').next().text().replace(/,/g, '') +
@@ -272,7 +272,7 @@ export default function injectWorld() {
   // 15 = repair
   // 17 = login
   // 18 = username not found
-  if (document.getElementById('worldPage')) { // new map
+  if (getElementById('worldPage')) { // new map
     subscribes();
   } else {
     // not new map.

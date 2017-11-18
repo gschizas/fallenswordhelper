@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
@@ -126,7 +127,7 @@ var bailOut = [
 ];
 
 function doCreatureInfo(data) {
-  var actions = document.getElementById('actionList').children;
+  var actions = getElementById('actionList').children;
   for (var i = 0; i < bailOut.length; i += 1) {
     if (bailOut[i](data, actions)) {return;}
   }
@@ -160,9 +161,9 @@ function getStatText(statTooltip, statClassName) {
 }
 
 function getMyStats() {
-  statLevel = intValue(getStatText(document
-    .getElementById('statbar-level-tooltip-general'), 'stat-level'));
-  var statTooltip = document.getElementById('statbar-character-tooltip-stats');
+  statLevel = intValue(getStatText(
+    getElementById('statbar-level-tooltip-general'), 'stat-level'));
+  var statTooltip = getElementById('statbar-character-tooltip-stats');
   statDefense = getStatText(statTooltip, 'stat-defense');
   statAttack = getStatText(statTooltip, 'stat-attack');
   statDamage = getStatText(statTooltip, 'stat-damage');

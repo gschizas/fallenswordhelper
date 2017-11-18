@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';
 import {addCommas, fallback, rnd, testQuant} from '../support/system';
 import {createButton, createDiv, createInput} from '../common/cElement';
@@ -86,7 +87,7 @@ function injectQuickBuy() {
 function worldDialogShop(e, data) {
   shoppingData = data;
   dialog = fallback(dialog,
-    document.getElementById('shopDialogConfirm'));
+    getElementById('shopDialogConfirm'));
   if (!dialog) {return;}
   jDialog = fallback(jDialog, $(dialog).data('worldDialogShopConfirm'));
   if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}

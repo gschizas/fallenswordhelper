@@ -1,15 +1,16 @@
 import bioEvtHdl from './bioEvtHdl';
+import {getElementById} from '../../common/getElement';
 import {getValue} from '../../support/system';
 import renderBio from './render';
 
 function expandBio() {
-  var bioExpander = document.getElementById('fshBioExpander');
+  var bioExpander = getElementById('fshBioExpander');
   if (bioExpander.textContent === 'More ...') {
     bioExpander.textContent = 'Less ...';
   } else {
     bioExpander.textContent = 'More ...';
   }
-  document.getElementById('fshBioHidden').classList.toggle('fshHide');
+  getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
 function doCompression(bioCell, bioContents, maxCharactersToShow) {
@@ -39,7 +40,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
     '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
-  document.getElementById('fshBioExpander')
+  getElementById('fshBioExpander')
     .addEventListener('click', expandBio);
 }
 
@@ -83,7 +84,7 @@ function testForRender(self, bioCell) {
 }
 
 export default function profileRenderBio(self) {
-  var bioCell = document.getElementById('profile-bio');
+  var bioCell = getElementById('profile-bio');
   if (!bioCell) {return;}
   testForRender(self, bioCell);
   if (getValue('enableBioCompressor')) {compressBio(bioCell);}

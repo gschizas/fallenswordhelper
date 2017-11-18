@@ -1,11 +1,12 @@
 import {createSpan} from './common/cElement';
+import {getElementById} from './common/getElement';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 import retryAjax from './ajax/retryAjax';
 import {getValue, imageServer} from './support/system';
 
 function cancelAllAH() { // jQuery
-  var cancelButtons = document.getElementById('resultRows')
+  var cancelButtons = getElementById('resultRows')
     .getElementsByClassName('auctionCancel');
   if (cancelButtons.length === 0) {return;}
   var prm = [];
@@ -23,21 +24,21 @@ function cancelAllAH() { // jQuery
     );
   }
   $.when.apply($, prm).done(function() {
-    document.getElementById('refresh').click();
+    getElementById('refresh').click();
   });
 }
 
 export function injectAuctionHouse() {
   if (!pCC) {return;}
   if (getValue('autoFillMinBidPrice')) {
-    document.getElementById('auto-fill').checked = true;
+    getElementById('auto-fill').checked = true;
   }
-  document.getElementById('sort0').click();
+  getElementById('sort0').click();
   var cancelAll = createSpan({
     className: 'smallLink',
     textContent: 'Cancel All'
   });
-  var fill = document.getElementById('fill').parentNode.parentNode
+  var fill = getElementById('fill').parentNode.parentNode
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');
   fill.insertAdjacentHTML('afterbegin', ']');

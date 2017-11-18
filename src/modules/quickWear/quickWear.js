@@ -1,5 +1,6 @@
 import {createDiv} from '../common/cElement';
 import createQuickWear from './createQuickWear';
+import {getElementById} from '../common/getElement';
 import loadInventory from '../app/profile/loadInventory';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
@@ -128,7 +129,7 @@ function showQuickWear(appInv) {
   content.appendChild(invTabs);
   invTabs.addEventListener('click', listen);
   invTabs.appendChild(showAHInvManager(appInv));
-  document.getElementById('setPrompt').insertAdjacentHTML('beforeend',
+  getElementById('setPrompt').insertAdjacentHTML('beforeend',
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 

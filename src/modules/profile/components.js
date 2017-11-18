@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {infoBox} from '../support/layout';
 import insertQuickExtract from '../quickExtract';
 import jQueryDialog from '../chrome/jQueryDialog';
@@ -25,7 +26,7 @@ var totalCount;
 var pageCount;
 
 function getInvTables(doc) {
-  return doc.getElementById('profileRightColumn')
+  return getElementById('profileRightColumn', doc)
     .getElementsByClassName('inventory-table');
 }
 

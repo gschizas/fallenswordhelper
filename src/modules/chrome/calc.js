@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {intValue, padZ} from '../support/system';
 import {months, now} from '../support/dataObj';
 
@@ -26,7 +27,7 @@ export function injectStaminaCalculator() {
   var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
   if (!nextGain) {return;}
   var staminaMouseover =
-    document.getElementById('statbar-stamina-tooltip-stamina');
+    getElementById('statbar-stamina-tooltip-stamina');
   var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
     staminaMouseover.getElementsByClassName('stat-name')[0]
       .nextElementSibling.textContent
@@ -51,7 +52,7 @@ export function injectStaminaCalculator() {
 export function injectLevelupCalculator() {
   var nextGain = document.getElementsByClassName('stat-xp-nextGain');
   if (!nextGain) {return;}
-  document.getElementById('statbar-level-tooltip-general')
+  getElementById('statbar-level-tooltip-general')
     .insertAdjacentHTML('beforeend',
       '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
       timeBox(

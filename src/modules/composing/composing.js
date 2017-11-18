@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import {getElementById} from '../common/getElement';
 import {now} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
@@ -18,7 +19,7 @@ var composeMsg =
   'Composing to do</p></a></li>';
 
 function displayComposeMsg() {
-  document.getElementById('notifications')
+  getElementById('notifications')
     .insertAdjacentHTML('afterbegin', composeMsg);
 }
 
@@ -127,7 +128,7 @@ export function injectComposeAlert() {
 
 function moveButtons() {
   if (getValue('moveComposingButtons')) {
-    var buttonDiv = document.getElementById('composing-error-dialog')
+    var buttonDiv = getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
     var top = pCC.getElementsByClassName('composing-level')[0]
@@ -153,14 +154,14 @@ export function injectComposing() {
 }
 
 export function composingCreate() {
-  document.getElementById('composing-add-skill')
+  getElementById('composing-add-skill')
     .addEventListener('click', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
+      getElementById('composing-skill-level-input').value =
+        getElementById('composing-skill-level-max').textContent;
     });
-  document.getElementById('composing-skill-select')
+  getElementById('composing-skill-select')
     .addEventListener('change', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
+      getElementById('composing-skill-level-input').value =
+        getElementById('composing-skill-level-max').textContent;
     });
 }

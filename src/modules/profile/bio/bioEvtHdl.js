@@ -1,3 +1,4 @@
+import {getElementById} from '../../common/getElement';
 import {getValue} from '../../support/system';
 import {pCC, playerName} from '../../support/layout';
 
@@ -119,7 +120,7 @@ function hazBuffs() { // Legacy
   var totalText = formatCost(total);
 
   html += '</table><b>Total: ' + totalText + '</b>';
-  document.getElementById('buffCost').innerHTML = '<br/><span ' +
+  getElementById('buffCost').innerHTML = '<br/><span ' +
     'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
     totalText + '</b></span>';
   buffCost.buffCostTotalText = totalText;
@@ -129,7 +130,7 @@ function updateBuffCost() { // Legacy
   if (buffCost.count > 0) {
     hazBuffs();
   } else {
-    document.getElementById('buffCost').innerHTML = '';
+    getElementById('buffCost').innerHTML = '';
     buffCost.buffCostTotalText = '';
   }
 }

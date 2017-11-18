@@ -1,4 +1,5 @@
 import buyitem from './app/potionbazaar/buyitem';
+import {getElementById} from './common/getElement';
 import {pCC} from './support/layout';
 import {testQuant} from './support/system';
 
@@ -22,7 +23,7 @@ var bazaarItem =
   'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
 
 function testBuyAmount() {
-  return testQuant(document.getElementById('buy_amount').value);
+  return testQuant(getElementById('buy_amount').value);
 }
 
 function select(evt) {
@@ -30,12 +31,12 @@ function select(evt) {
   if (!target.classList.contains('bazaarButton')) {return;}
   var theValue = testBuyAmount();
   if (!theValue) {return;}
-  document.getElementById('quantity').textContent = theValue;
+  getElementById('quantity').textContent = theValue;
   ItemId = target.getAttribute('itemid');
-  document.getElementById('fshBazaarWarning').removeAttribute('class');
+  getElementById('fshBazaarWarning').removeAttribute('class');
   var dupNode = target.cloneNode(false);
   dupNode.className = 'bazaarSelected tip-dynamic';
-  var selected = document.getElementById('selectedItem');
+  var selected = getElementById('selectedItem');
   selected.innerHTML = '';
   selected.appendChild(dupNode);
 }
@@ -43,21 +44,21 @@ function select(evt) {
 function quantity() {
   var theValue = testBuyAmount();
   if (theValue) {
-    document.getElementById('quantity').textContent = theValue;
+    getElementById('quantity').textContent = theValue;
   }
 }
 
 function done(json) {
   if (json.success) {
-    document.getElementById('buy_result').insertAdjacentHTML('beforeend',
+    getElementById('buy_result').insertAdjacentHTML('beforeend',
       '<br>You purchased the item!');
   }
 }
 
-function buy() { // jQuery
+function buy() { // jQuery.min
   if (!ItemId) {return;}
-  var buyAmount = document.getElementById('quantity').textContent;
-  document.getElementById('buy_result').textContent =
+  var buyAmount = getElementById('quantity').textContent;
+  getElementById('buy_result').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
     buyitem(ItemId).done(done);
@@ -79,7 +80,7 @@ export default function injectBazaar() { // TODO stop using getElementById
   });
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);
-  document.getElementById('fshBazaar').addEventListener('click', select);
-  document.getElementById('buy_amount').addEventListener('input', quantity);
-  document.getElementById('fshBuy').addEventListener('click', buy);
+  getElementById('fshBazaar').addEventListener('click', select);
+  getElementById('buy_amount').addEventListener('input', quantity);
+  getElementById('fshBuy').addEventListener('click', buy);
 }

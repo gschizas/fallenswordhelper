@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {fallback, setValue} from '../support/system';
 
 var warehouse = [];
@@ -113,9 +114,9 @@ function togglePref(prefName) {
 }
 
 function setupPref(prefName) {
-  var prefEl = document.getElementById(prefName);
+  var prefEl = getElementById(prefName);
   prefValue = prefEl.checked;
-  document.getElementById(prefName)
+  getElementById(prefName)
     .addEventListener('change', togglePref.bind(null, prefName));
 }
 

@@ -1,4 +1,5 @@
 import bioEvtHdl from './bioEvtHdl';
+import {getElementById} from '../../common/getElement';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
 import {convertTextToHtml, getValue, setValue} from '../../support/system';
@@ -7,7 +8,7 @@ import {createDiv, createInput} from '../../common/cElement';
 var bioEditLines;
 
 function bioPreview() {
-  var textArea = document.getElementById('textInputBox');
+  var textArea = getElementById('textInputBox');
   var bioPreviewHTML = convertTextToHtml(textArea.value);
   textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
     '<table align="center" width="325" border="1">' +
@@ -36,12 +37,12 @@ function testHeightValid(boxVal) {
 }
 
 function changeHeight() {
-  var theBox = document.getElementById('fshLinesToShow');
+  var theBox = getElementById('fshLinesToShow');
   var boxVal = parseInt(theBox.value, 10);
   if (testHeightValid(boxVal)) {return;}
   bioEditLines = boxVal;
   setValue('bioEditLines', boxVal);
-  document.getElementById('textInputBox').rows = bioEditLines;
+  getElementById('textInputBox').rows = bioEditLines;
 }
 
 function bioHeight() {
@@ -61,8 +62,8 @@ function bioHeight() {
 }
 
 function updateBioCharacters() {
-  var textArea = document.getElementById('textInputBox');
-  var previewArea = document.getElementById('biopreview');
+  var textArea = getElementById('textInputBox');
+  var previewArea = getElementById('biopreview');
   var bioContents = convertTextToHtml(textArea.value);
   bioContents = renderBio(bioContents);
   if (bioContents) {
@@ -72,7 +73,7 @@ function updateBioCharacters() {
 
 export default function injectBioWidgets() {
   bioEditLines = getValue('bioEditLines');
-  var textArea = document.getElementById('textInputBox');
+  var textArea = getElementById('textInputBox');
   bioPreview();
   bioWords();
   bioHeight();

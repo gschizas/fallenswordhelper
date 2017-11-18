@@ -1,6 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import draggable from '../common/dragStart';
+import {getElementById} from '../common/getElement';
 import {
   escapeHtml,
   fallback,
@@ -22,7 +23,7 @@ function retOption(option, ifTrue, ifFalse) {
 
 function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
-    draggable(document.getElementById('fshQuickLinks'));
+    draggable(getElementById('fshQuickLinks'));
   }
 }
 
@@ -47,7 +48,7 @@ function haveNode(node, quickLinks) { // Native ?
 }
 
 function injectQuickLinks() { // Native ?
-  var node = document.getElementById('statbar-container');
+  var node = getElementById('statbar-container');
   if (!node) {return;}
   var quickLinks = fallback(getValueJSON('quickLinks'), []);
   if (quickLinks.length <= 0) {return;}

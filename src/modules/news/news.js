@@ -1,3 +1,5 @@
+import {getElementById} from '../common/getElement';
+
 var maxcharacters;
 var textArea;
 var shoutboxPreview;
@@ -21,7 +23,7 @@ function updateShoutboxPreview() {
 }
 
 function injectShoutboxWidgets() {
-  textArea = document.getElementById('textInputBox');
+  textArea = getElementById('textInputBox');
   textArea.addEventListener('keyup', updateShoutboxPreview);
 }
 

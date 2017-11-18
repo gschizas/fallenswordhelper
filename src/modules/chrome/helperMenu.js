@@ -1,5 +1,6 @@
 import {createDiv} from '../common/cElement';
 import draggable from '../common/dragStart';
+import {getElementById} from '../common/getElement';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import {injectFsBoxContent} from '../misc';
 import injectMonsterLog from '../monstorLog';
@@ -72,7 +73,7 @@ function eventHandler(evt) {
 }
 
 function showHelperMenu() {
-  var helperMenu = document.getElementById('helperMenu');
+  var helperMenu = getElementById('helperMenu');
   helperMenu.removeEventListener('mouseenter', showHelperMenu);
 
   var helperMenuDiv = createDiv({
@@ -112,6 +113,6 @@ function haveNode(node) {
 
 export default function injectHelperMenu() {
   // don't put all the menu code here (but call if clicked) to minimize lag
-  var node = document.getElementById('statbar-container');
+  var node = getElementById('statbar-container');
   if (node) {haveNode(node);}
 }

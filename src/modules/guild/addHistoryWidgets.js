@@ -1,4 +1,5 @@
 import {createDiv} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 import {convertTextToHtml, findNode} from '../support/system';
 
 function updateHistoryCharacters() { // Legacy
@@ -23,6 +24,6 @@ export default function addHistoryWidgets() { // Legacy
     '</span></td></tr></tbody></table>'
   });
   textAreaDiv.appendChild(newDiv);
-  document.getElementById('textInputBox').addEventListener('keyup',
+  getElementById('textInputBox').addEventListener('keyup',
     updateHistoryCharacters);
 }

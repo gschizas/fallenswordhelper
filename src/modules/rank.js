@@ -1,5 +1,6 @@
 import add from './support/task';
 import {createInput} from './common/cElement';
+import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import retryAjax from './ajax/retryAjax';
 import {createDocument, getValue} from './support/system';
@@ -42,7 +43,7 @@ function parseRankData(linkElement, responseText) {
 }
 
 function fetchRankData() { // jQuery
-  var calcButton = document.getElementById('getrankweightings');
+  var calcButton = getElementById('getrankweightings');
   calcButton.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
   Array.prototype.forEach.call(allItems, function(anItem) {
@@ -96,7 +97,7 @@ function doButtons() {
     value: 'Get Rank Weightings'
   });
   weightButton.addEventListener('click', fetchRankData);
-  var theTd = document.getElementById('show-guild-founder-rank-name')
+  var theTd = getElementById('show-guild-founder-rank-name')
     .parentNode;
   theTd.insertAdjacentHTML('beforeend', '&nbsp;');
   theTd.insertAdjacentElement('beforeend', weightButton);

@@ -1,4 +1,5 @@
 import {createTable} from './common/cElement';
+import {getElementById} from './common/getElement';
 import getInventory from './ajax/getInventory';
 import {imageServer} from './support/system';
 import jsonFail from './common/jsonFail';
@@ -84,7 +85,7 @@ function showQuickExtract() {
     '<tr><td colspan="2"><ol id="qeresult"></ol></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
-  buyResult = document.getElementById('qeresult');
+  buyResult = getElementById('qeresult');
 }
 
 function isExtractable(curr) {

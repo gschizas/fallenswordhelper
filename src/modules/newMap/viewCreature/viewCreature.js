@@ -8,6 +8,7 @@ import evalDamage from './evalDamage';
 import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHtml from './evalHtml';
+import {getElementById} from '../../common/getElement';
 import {playerDataString} from '../../common/common';
 import {
   createDocument,
@@ -193,7 +194,7 @@ export default function readyViewCreature() { // Hybrid
     extraText = 'Remove from do not kill list';
   }
   $('#addRemoveCreatureToDoNotKillList').html(extraText);
-  document.getElementById('addRemoveCreatureToDoNotKillList')
+  getElementById('addRemoveCreatureToDoNotKillList')
     .addEventListener('click',
       addRemoveCreatureToDoNotKillList, true);
 }

@@ -1,5 +1,6 @@
 import add from '../support/task';
 import {createDiv} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import {equipItem, useItem} from '../support/ajax';
 
@@ -61,7 +62,7 @@ function drawButtons(theSpan) {
 }
 
 function fastWearLinks() {
-  var bpTabs = document.getElementById('backpack_tabs');
+  var bpTabs = getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
   var items = document.querySelectorAll('#backpackTab_' + type +
@@ -76,7 +77,7 @@ function foundBackpack(backpackContainer, theBackpack) {
     oldShow.call(theBackpack, type, page);
     fastWearLinks();
   };
-  if (document.getElementById('backpack_current').textContent.length !== 0) {
+  if (getElementById('backpack_current').textContent.length !== 0) {
     add(3, fastWearLinks);
   }
   backpackContainer.addEventListener('click', function(e) {
@@ -87,10 +88,10 @@ function foundBackpack(backpackContainer, theBackpack) {
 
 export default function injectFastWear() { // jQuery
   if (!getValue('enableQuickDrink')) {return;}
-  var bpBack = document.getElementById('backpack');
+  var bpBack = getElementById('backpack');
   bpBack.className = 'fshBackpack';
   bpBack.removeAttribute('style');
-  var backpackContainer = document.getElementById('backpackContainer');
+  var backpackContainer = getElementById('backpackContainer');
   var theBackpack = $(backpackContainer).data('backpack');
   if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
 }

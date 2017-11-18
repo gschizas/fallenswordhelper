@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 import {huntingBuffsHtml} from '../settings/worldPrefs';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import {getValue, setValue, shouldBeArray} from '../support/system';
@@ -97,7 +98,7 @@ function buildFshDivs() {
   fshDiv.insertAdjacentElement('beforeend', prefsDiv);
   missingBuffsDiv = createDiv();
   fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
-  var worldContainerBelow = document.getElementById('worldContainerBelow');
+  var worldContainerBelow = getElementById('worldContainerBelow');
   worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);
 }
 
@@ -126,7 +127,7 @@ function interceptXHR() { // jQuery.min
 
 function doHidePlayerActions() {
   if (!hidePlayerActions) {return;}
-  var act = document.getElementById('actionList');
+  var act = getElementById('actionList');
   var players = act.getElementsByClassName('player');
   Array.prototype.forEach.call(players, function(el) {
     var verbs = el.getElementsByClassName('verbs');

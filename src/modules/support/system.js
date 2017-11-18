@@ -1,4 +1,5 @@
 import calf from './calf';
+import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';
 import {defaults, months, nowSecs} from './dataObj';
 
@@ -147,7 +148,7 @@ export function parseDate(textDate) {
 
 export function toggleVisibilty(evt) {
   var anItemId = evt.target.getAttribute('linkto');
-  var anItem = document.getElementById(anItemId);
+  var anItem = getElementById(anItemId);
   var currentVisibility = anItem.classList.contains('fshHide');
   anItem.classList.toggle('fshHide');
   if (currentVisibility) {

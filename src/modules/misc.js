@@ -1,3 +1,4 @@
+import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import setForage from './ajax/setForage';
 import {
@@ -77,9 +78,9 @@ export function addMarketplaceWidgets() { // Legacy
   newCell.colSpan = '2';
   newCell.align = 'center';
 
-  document.getElementById('price').addEventListener('keyup',
+  getElementById('price').addEventListener('keyup',
     addMarketplaceWarning, true);
-  document.getElementById('amount').addEventListener('keyup',
+  getElementById('amount').addEventListener('keyup',
     addMarketplaceWarning, true);
 }
 
@@ -95,9 +96,9 @@ export function injectFsBoxContent(injector) { // jQuery
   content.innerHTML = makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
   getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
-    document.getElementById('fsboxdetail').innerHTML = fsboxcontent;
+    getElementById('fsboxdetail').innerHTML = fsboxcontent;
   });
-  document.getElementById('fsboxclear')
+  getElementById('fsboxclear')
     .addEventListener('click', function() {
       setForage('fsh_fsboxcontent', '');
       location.reload();

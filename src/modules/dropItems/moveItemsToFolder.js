@@ -1,8 +1,9 @@
 import {fallback} from '../support/system';
+import {getElementById} from '../common/getElement';
 import moveItem from '../ajax/moveItem';
 
 export default function moveItemsToFolder(itemsAry) { // jQuery.min
-  var folderId = document.getElementById('selectFolderId').value;
+  var folderId = getElementById('selectFolderId').value;
   var batchNo;
   var counter = 0;
   var invList = [];
@@ -23,5 +24,5 @@ export default function moveItemsToFolder(itemsAry) { // jQuery.min
   if (counter % 50 !== 0) {
     prm.push(moveItem(invList[batchNo], folderId));
   }
-  $.when.apply($, prm).done(function() {location.reload();});
+  $.when.apply($, prm).done(function() {location.reload();}); // TODO ajaxify this
 }

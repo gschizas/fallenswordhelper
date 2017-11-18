@@ -1,4 +1,5 @@
 import {defaults} from './support/dataObj';
+import {getElementById} from './common/getElement';
 import {getValueJSON, isChecked, setValueJSON} from './support/system';
 import {makePageHeader, makePageTemplate, pCC} from './support/layout';
 
@@ -69,7 +70,7 @@ function generateManageTable() { // Legacy
     '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
     'class="custombutton"></td></tr>' +
     '</tbody></table>';
-  document.getElementById(param.id).innerHTML = result;
+  getElementById(param.id).innerHTML = result;
   setValueJSON(param.gmname, param.currentItems);
 }
 
@@ -84,10 +85,10 @@ function buildNewItem() { // Legacy
   for (var i = 0; i < param.fields.length; i += 1) {
     if (param.tags[i] === 'checkbox') {
       newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).checked;
+        getElementById('fshIn' + param.fields[i]).checked;
     } else {
       newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).value;
+        getElementById('fshIn' + param.fields[i]).value;
     }
   }
   return newItem;
@@ -97,7 +98,7 @@ function addQuickItem() { // Legacy
   var isArrayOnly = param.fields.length === 0;
   var newItem = {};
   if (isArrayOnly) {
-    newItem = document.getElementById('fshIn0').value;
+    newItem = getElementById('fshIn0').value;
   } else {
     newItem = buildNewItem();
   }

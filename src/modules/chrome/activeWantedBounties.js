@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {getElementById} from '../common/getElement';
 import {now} from '../support/dataObj';
 import {createBr, createTable} from '../common/cElement';
 import {
@@ -29,8 +30,7 @@ function resetBountyList() {
 
 function injectBountyList() {
   setValueJSON('bountyList', bountyList);
-  var injectHere = document
-    .getElementById('Helper:BountyListPlaceholder');
+  var injectHere = getElementById('Helper:BountyListPlaceholder');
   var displayList = createTable({cellPadding: 1, width: 125});
 
   var aRow = displayList.insertRow(0); // bountyList.rows.length
@@ -72,7 +72,7 @@ function injectBountyList() {
   var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-  document.getElementById('Helper:resetBountyList')
+  getElementById('Helper:resetBountyList')
     .addEventListener('click', resetBountyList, true);
 }
 
@@ -95,8 +95,7 @@ function acceptOrAttack(bounty) { // Legacy
 
 function injectWantedList() { // Legacy
   setValueJSON('wantedList', wantedList);
-  var injectHere = document
-    .getElementById('Helper:WantedListPlaceholder');
+  var injectHere = getElementById('Helper:WantedListPlaceholder');
   var displayList = createTable({cellPadding: 3, width: 125});
 
   var aRow = displayList.insertRow(0);
@@ -137,7 +136,7 @@ function injectWantedList() { // Legacy
   var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-  document.getElementById('Helper:resetWantedList')
+  getElementById('Helper:resetWantedList')
     .addEventListener('click', resetWantedList);
 }
 
@@ -320,7 +319,7 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
 }
 
 export default function prepareBountyData() {
-  var pCR = document.getElementById('pCR');
+  var pCR = getElementById('pCR');
   if (calf.enableWantedList) {
     pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +
       '<span id="Helper:WantedListPlaceholder"></span></div>');
