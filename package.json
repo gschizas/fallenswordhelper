@@ -66,8 +66,8 @@
     "jsonlint": "^1.6.2",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
-    "rollup": "^0.51.7",
+    "rollup": "^0.51.8",
     "rollup-plugin-jscc": "^0.3.3",
-    "uglify-js": "^3.1.9"
+    "uglify-js": "^3.1.10"
   }
 }
