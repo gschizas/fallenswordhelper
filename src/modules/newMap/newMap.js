@@ -3,12 +3,12 @@ import calf from '../support/calf';
 import combatLogger from './combatLogger';
 import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
-import injectButtons from './buttons';
 import injectRelic from './relic/relic';
 import prepareShop from './shop';
 import readyViewCreature from './viewCreature/viewCreature';
 import setupPref from './subLevel';
 import startMonsterLog from './monsterLog';
+import {injectButtons, levelStats} from './buttons';
 import {injectSendGoldOnWorld, updateSendGoldOnWorld} from './sendGold';
 
 var def_afterUpdateActionlist = 'after-update.actionlist';
@@ -145,14 +145,7 @@ export default function subscribes() { // jQuery.min
   // somewhere near here will be multi buy on shop
   prepareShop();
   injectRelic();
-
-  //#if _DEV  //  "Your Lvl" does not update during combat #155
-  $.subscribe('level.stats-player', function(e, data) {
-    console.log('level.stats-player data', data); // eslint-disable-line no-console
-    // level.stats-player data Object { a: 3381, b: 3382 }
-  });
-  //#endif
-
+  $.subscribe('level.stats-player', levelStats);
 }
 
 /* fetchFlags = {

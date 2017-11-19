@@ -1,89 +1,187 @@
-import assets from './assets';
 import calf from '../support/calf';
+import eventHandler from '../common/eventHandler';
+import {getElementById} from '../common/getElement';
+import {guideUrl} from '../support/dataObj';
+import {
+  createButton,
+  createDiv,
+  createInput,
+  createLabel,
+  createSpan
+} from '../common/cElement';
 import {getValue, setValue} from '../support/system';
 import {openQuickBuffByName, playerName} from '../support/layout';
 
-function doFormGroup(e) { // jQuery
-  e.preventDefault();
-  $(e.target).qtip('hide');
+var buttonContainer;
+var yourLvl;
+var formGroup;
+var quickBuff;
+var realmMap;
+var ufsgMap;
+var soundCheck;
+var huntCheck;
+
+function doFormGroup(self) { // jQuery.min
+  $(self).qtip('hide');
   GameData.doAction(12, 401, {}, 0);
 }
 
-function openQuickBuff(e) {
-  e.preventDefault();
+function openQuickBuff() {
   openQuickBuffByName(playerName());
 }
 
-function showQuickLinks(worldName, data) { // jQuery
-  worldName.append('<div class="fshFsty"><div>Min Lvl: ' + data.realm.minlevel +
-    '</div><div>Your Lvl: ' + data.player.level + '</div></div>');
-  var formgroup = $(assets.worldFormgroup);
-  worldName.append('&nbsp;&nbsp;').append(formgroup);
-  formgroup.click(doFormGroup);
-  var quickbuff = $(assets.worldQuickBuff);
-  worldName.append('&nbsp;').append(quickbuff);
-  quickbuff.click(openQuickBuff);
-  worldName.append('&nbsp;').append(assets.worldMap);
+function openRealmMap() {
+  window.open('index.php?cmd=world&subcmd=map', 'fsMap');
 }
 
-function showSearchButtons(worldName, data) { // jQuery
-  worldName.append('&nbsp;')
-    .append(assets.searchMapUFSG.replace('@@realmId@@', data.realm.id));
+function openUfsgMap() {
+  var gameRealm = GameData.realm();
+  window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
+    'mapUfsg');
 }
 
-function toggleSound(e) { // jQuery
-  e.preventDefault();
-  if (getValue('playNewMessageSound') === false) {
-    $('#toggleSoundLink').qtip('hide')
-      .replaceWith(assets.soundMuteImage);
-  } else {
-    $('#toggleSoundLink').qtip('hide')
-      .replaceWith(assets.soundImage);
-  }
-  setValue('playNewMessageSound',
-    !getValue('playNewMessageSound'));
+function toggleSound() {
+  // Doesn't actually work in New World...
+  setValue('playNewMessageSound', !getValue('playNewMessageSound'));
 }
 
-function showSpeakerOnWorld(worldName) { // jQuery
-  var img = assets.soundImage;
-  if (getValue('playNewMessageSound')) {img = assets.soundMuteImage;}
-  worldName.append('&nbsp;').append(img);
-  worldName.on('click', '#toggleSoundLink', toggleSound);
-}
-
-function toggleHuntMode(e) { // jQuery
-  e.preventDefault();
-  if (!calf.huntingMode) {
-    $('#HelperToggleHuntingMode').qtip('hide')
-      .replaceWith(assets.huntingOnImage);
-  } else {
-    $('#HelperToggleHuntingMode').qtip('hide')
-      .replaceWith(assets.huntingOffImage);
-  }
+function toggleHuntMode() {
   calf.huntingMode = !calf.huntingMode;
   setValue('huntingMode', calf.huntingMode);
 }
 
-function showHuntMode(worldName) { // jQuery
-  var img = assets.huntingOffImage;
-  if (calf.huntingMode) {img = assets.huntingOnImage;}
-  worldName.append('&nbsp;').append(img);
-  worldName.on('click', '#HelperToggleHuntingMode',
-    toggleHuntMode);
+var changeHdl = [
+  {
+    test: function(self) {return self === soundCheck;},
+    act: toggleSound
+  },
+  {
+    test: function(self) {return self === huntCheck;},
+    act: toggleHuntMode
+  }
+];
+
+var clickHdl = [
+  {
+    test: function(self) {return self === formGroup;},
+    act: doFormGroup
+  },
+  {
+    test: function(self) {return self === quickBuff;},
+    act: openQuickBuff
+  },
+  {
+    test: function(self) {return self === realmMap;},
+    act: openRealmMap
+  },
+  {
+    test: function(self) {return self === ufsgMap;},
+    act: openUfsgMap
+  }
+];
+
+function doLevels(data, worldName) {
+  var lvlDiv = createDiv({
+    className: 'fshFsty',
+    innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
+  });
+  var btmDiv = createDiv({textContent: 'Your Lvl: '});
+  yourLvl = createSpan({textContent: data.player.level});
+  lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
+  worldName.appendChild(lvlDiv);
 }
 
-export default function injectButtons(data) { // jQuery
-  var worldName = $('#worldName');
-  // worldName.html(data.realm.name); // BUGFIX - incase of switchign between master realm and realm they dont replace teh realm name
+function doBtn(className, tip, worldName) {
+  var btn = createButton({
+    className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
+    dataset: {tipped: tip}
+  });
+  worldName.appendChild(btn);
+  return btn;
+}
+
+function showQuickLinks(worldName, data) {
+  doLevels(data, worldName);
+  formGroup = doBtn('fshFormGroup', 'Quick Create Attack Group', worldName);
+  quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
+  realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
+  ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
+}
+
+function createLbl(className, tip, htmlFor) {
+  return createLabel({
+    className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
+    dataset: {tipped: tip},
+    htmlFor: htmlFor
+  });
+}
+
+function makeToggleBtn(o) {
+  var btnDiv = createDiv({className: 'fshToggle'});
+  var btnCheck = createInput({
+    checked: o.prefVal,
+    id: o.checkId,
+    type: 'checkbox'
+  });
+  btnDiv.appendChild(btnCheck);
+  var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
+  btnDiv.appendChild(onLbl);
+  var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
+  btnDiv.appendChild(offLbl);
+  o.worldName.appendChild(btnDiv);
+  return btnCheck;
+}
+
+function showSpeakerOnWorld(worldName) {
+  var msgSounds = getValue('playNewMessageSound');
+  soundCheck = makeToggleBtn({
+    prefVal: msgSounds,
+    checkId: 'fshSoundCheck',
+    onClass: 'soundOn',
+    onTip: 'Turn Off Sound when you have a new log message',
+    offClass: 'soundOff',
+    offTip: 'Turn On Sound when you have a new log message',
+    worldName: worldName
+  });
+}
+
+function showHuntMode(worldName) {
+  var inHuntMode = calf.huntingMode;
+  huntCheck = makeToggleBtn({
+    prefVal: inHuntMode,
+    checkId: 'fshHuntCheck',
+    onClass: 'huntOn',
+    onTip: 'Hunting mode is ON',
+    offClass: 'huntOff',
+    offTip: 'Hunting mode is OFF',
+    worldName: worldName
+  });
+}
+
+export function injectButtons(data) {
   GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
-  var oldButtonContainer = $('#fshWorldButtonContainer');
-  if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
-  var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});
+  if (buttonContainer) {buttonContainer.remove();}
+  buttonContainer = createDiv({
+    className: 'fshCurveContainer',
+    id: 'fshWorldButtonContainer'
+  });
+
   showQuickLinks(buttonContainer, data);
-  showSearchButtons(buttonContainer, data);
   if (getValue('showSpeakerOnWorld')) {
     showSpeakerOnWorld(buttonContainer);
   }
   showHuntMode(buttonContainer);
-  worldName.after(buttonContainer);
+  buttonContainer.addEventListener('click', eventHandler(clickHdl));
+  buttonContainer.addEventListener('change', eventHandler(changeHdl));
+
+  getElementById('worldContainer')
+    .insertBefore(buttonContainer, getElementById('worldCoord'));
+}
+
+export function levelStats(e, data) {
+  //#if _DEV  //  "Your Lvl" does not update during combat #155
+  console.log('level.stats-player data', data); // eslint-disable-line no-console
+  // level.stats-player data Object { a: 3381, b: 3382 }
+  //#endif
+  yourLvl.textContent = data.b;
 }

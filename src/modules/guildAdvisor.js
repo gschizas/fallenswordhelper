@@ -9,7 +9,6 @@ import {
   addCommas,
   createDocument,
   fallback,
-  imageServer,
   intValue
 } from './support/system';
 import {time, timeEnd} from './support/debug';
@@ -108,7 +107,8 @@ function returnAdvisorPage(e, response) {
 
   time('guildAdvisor.returnAdvisorPage' + e);
 
-  list.lastElementChild.insertAdjacentHTML('beforeend', ' day ' + e + ',');
+  list.lastElementChild.lastElementChild
+    .insertAdjacentHTML('beforeend', ' day ' + e + ',');
   var doc = createDocument(response);
   var table = getElementById('pCC', doc).firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
@@ -217,10 +217,10 @@ function injectAdvisorWeekly() { // jQuery
   list = pCC.firstElementChild.firstElementChild
     .lastElementChild.firstElementChild.firstElementChild;
   if (!list) {return;}
-  list.innerHTML = '<span class="fshCurveBtn" style="background-image: ' +
-    'url(\'' + imageServer +
-    '/world/actionLoadingSpinner.gif\');"></span>' +
-    '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>';
+  list.innerHTML = '<span class="fshCurveContainer fshFlex">' +
+    '<span class="fshCurveEle fshCurveLbl fshOldSpinner"></span>' +
+    '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>' +
+    '</span>';
 
   $.when(
     getMembrList(false)

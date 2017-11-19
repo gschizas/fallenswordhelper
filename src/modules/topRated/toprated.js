@@ -1,10 +1,10 @@
 import getProfile from '../ajax/getProfile';
+import {getValue} from '../support/system';
 import guildView from '../app/guild/view';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
 import {playerDataObject} from '../common/common';
 import {createInput, createSpan} from '../common/cElement';
-import {getValue, imageServer} from '../support/system';
 import {onlineDot, pCC} from '../support/layout';
 
 var highlightPlayersNearMyLvl;
@@ -110,11 +110,8 @@ function gotMyVl(data) {
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
   spinner = createSpan({
-    className: 'fshCurveBtn fshTopListSpinner',
-    style: {
-      backgroundImage: 'url(\'' + imageServer +
-        '/world/actionLoadingSpinner.gif\')'
-    }
+    className: 'fshCurveContainer fshTopListSpinner',
+    innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
   });
   e.target.parentNode.replaceChild(spinner, e.target);
   if (highlightPlayersNearMyLvl) {
