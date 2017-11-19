@@ -1,6 +1,7 @@
 import addGuildLogWidgets from '../logs/addGuildLogWidgets';
 import addLogColoring from '../logs/addLogColoring';
 import {createTable} from '../common/cElement';
+import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
@@ -212,25 +213,18 @@ function refresh() {
 }
 
 var guildLogEvents = [
-  {test: function(self) {return self.tagName === 'INPUT';}, fn: toggleItem},
-  {test: function(self) {return self.id === 'fshAll';}, fn: selectAll},
-  {test: function(self) {return self.id === 'fshNone';}, fn: selectNone},
-  {test: function(self) {return self.id === 'rfsh';}, fn: refresh}
+  {test: function(self) {return self.tagName === 'INPUT';}, act: toggleItem},
+  {test: function(self) {return self.id === 'fshAll';}, act: selectAll},
+  {test: function(self) {return self.id === 'fshNone';}, act: selectNone},
+  {test: function(self) {return self.id === 'rfsh';}, act: refresh}
 ];
-
-function eventHandler(evt) {
-  var self = evt.target;
-  for (var i = 0; i < guildLogEvents.length; i += 1) {
-    if (guildLogEvents[i].test(self)) {guildLogEvents[i].fn(self);}
-  }
-}
 
 function gotOptions(guildLog) {
   options = guildLog || options;
   options.checks = options.checks || defChecks.slice(0);
   pCC.innerHTML = guildLogFilter;
   fshNewGuildLog = getElementById('fshNewGuildLog');
-  fshNewGuildLog.addEventListener('click', eventHandler);
+  fshNewGuildLog.addEventListener('click', eventHandler(guildLogEvents));
   setChecks();
   fshOutput = getElementById('fshOutput');
   maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));

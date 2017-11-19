@@ -4,6 +4,7 @@ import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
 import dropItem from '../ajax/dropItem';
+import eventHandler from '../common/eventHandler';
 import getInventoryById from '../ajax/getInventoryById';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
@@ -51,31 +52,31 @@ function afterbegin(o, item) {
 
 var buildTrailer = [
   {
-    condition: function(item) {
+    test: function(item) {
       return !checkAll && itemsHash[item.item_id] !== 1;
     },
-    result: function(o, item) {
+    act: function(o, item) {
       return ' [<span linkto="' + item.item_id +
         '" class="fshLink">Check all</span>]';
     }
   },
   {
-    condition: function(item) {
+    test: function(item) {
       return !sendLinks && showQuickSendLinks &&
         !item.bound;
     },
-    result: function(o) {
+    act: function(o) {
       return ' <span class="quickAction sendLink tip-static" ' +
         'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
         'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
     }
   },
   {
-    condition: function(item) {
+    test: function(item) {
       return !dropLinks && showQuickDropLinks &&
         item.guild_tag === '-1';
     },
-    result: function(o) {
+    act: function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
         o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
         'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
@@ -89,8 +90,8 @@ function beforeend(o, item) {
   }
   var pattern = buildTrailer.reduce(function(prev, el) {
     var ret = prev;
-    if (el.condition(item)) {
-      ret += el.result(o, item);
+    if (el.test(item)) {
+      ret += el.act(o, item);
     }
     return ret;
   }, '');
@@ -154,63 +155,52 @@ function toggleShowQuickDropLinks() {
 
 var evts = [
   {
-    condition: function(self) {return self.id === 'fshShowExtraLinks';},
-    result: toggleShowExtraLinks
+    test: function(self) {return self.id === 'fshShowExtraLinks';},
+    act: toggleShowExtraLinks
   },
   {
-    condition: function(self) {return self.id === 'fshShowQuickDropLinks';},
-    result: toggleShowQuickDropLinks
+    test: function(self) {return self.id === 'fshShowQuickDropLinks';},
+    act: toggleShowQuickDropLinks
   },
   {
-    condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    result: function() {doCheckboxes(itemsAry, invItems, 'guild');}
+    test: function(self) {return self.id === 'fshSelectAllGuildLocked';},
+    act: function() {doCheckboxes(itemsAry, invItems, 'guild');}
   },
   {
-    condition: function(self) {return self.id === 'fshMove';},
-    result: function() {moveItemsToFolder(itemsAry);}
+    test: function(self) {return self.id === 'fshMove';},
+    act: function() {moveItemsToFolder(itemsAry);}
   },
   {
-    condition: function(self) {return self.hasAttribute('linkto');},
-    result: function(self) {
+    test: function(self) {return self.hasAttribute('linkto');},
+    act: function(self) {
       doCheckboxes(itemsAry, invItems, 'item', self.getAttribute('linkto'));
     }
   },
   {
-    condition: function(self) {return self.classList.contains('sendLink');},
-    result: function(self) {
+    test: function(self) {return self.classList.contains('sendLink');},
+    act: function(self) {
       quickAction(self, sendItem, 'Sent', '.dropLink');
     }
   },
   {
-    condition: function(self) {return self.classList.contains('dropLink');},
-    result: function(self) {
+    test: function(self) {return self.classList.contains('dropLink');},
+    act: function(self) {
       quickAction(self, dropItem, 'Dropped', '.sendLink');
     }
   },
   {
-    condition: function(self) {return self.classList.contains('fshFolder');},
-    result: function(self) {
+    test: function(self) {return self.classList.contains('fshFolder');},
+    act: function(self) {
       hideFolders(itemsAry, invItems, self);
     }
   },
   {
-    condition: function(self) {return self.id === 'fshChkAll';},
-    result: function() {
+    test: function(self) {return self.id === 'fshChkAll';},
+    act: function() {
       doCheckboxes(itemsAry, invItems, 'checkAll');
     }
   }
 ];
-
-function evtHandler(evt) {
-  var self = evt.target;
-  evts.some(function(el) {
-    if (el.condition(self)) {
-      el.result(self);
-      return true;
-    }
-    return false;
-  });
-}
 
 function getItems() {
   addStatTotalToMouseover();
@@ -219,7 +209,7 @@ function getItems() {
   showQuickDropLinks = getValue('showQuickDropLinks');
   showQuickSendLinks = getValue('showQuickSendLinks');
   doToggleButtons(showExtraLinks, showQuickDropLinks);
-  pCC.addEventListener('click', evtHandler);
+  pCC.addEventListener('click', eventHandler(evts));
   var imgList = getItemImg();
   itemsAry = [];
   itemsHash = {};

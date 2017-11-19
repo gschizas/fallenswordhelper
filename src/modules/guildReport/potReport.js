@@ -1,4 +1,5 @@
 import alpha from '../common/alpha';
+import eventHandler from '../common/eventHandler';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
@@ -164,17 +165,6 @@ var evtHdl = [
   }
 ];
 
-function onClick(e) {
-  var self = e.target;
-  evtHdl.some(function(el) {
-    if (el.test(self)) {
-      el.act(self);
-      return true;
-    }
-    return false;
-  });
-}
-
 function onInput(e) {
   var self = e.target.id;
   var maybeValue = testRange(e.target.value, 0, 999);
@@ -206,7 +196,7 @@ function gotMap(data) {
 
   var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   myCell.addEventListener('change', onChange);
-  myCell.addEventListener('click', onClick);
+  myCell.addEventListener('click', eventHandler(evtHdl));
   myCell.addEventListener('input', onInput);
   myCell.appendChild(container);
 }

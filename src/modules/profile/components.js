@@ -1,3 +1,4 @@
+import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import {infoBox} from '../support/layout';
 import insertQuickExtract from '../quickExtract';
@@ -187,17 +188,6 @@ var evtHdl = [
   }
 ];
 
-function compEvt(evt) {
-  var self = evt.target;
-  evtHdl.some(function(el) {
-    if (el.test(self)) {
-      el.act(self);
-      return true;
-    }
-    return false;
-  });
-}
-
 function decorateButton(parentDiv, label) {
   var innerSpan = createSpan(
     {className: 'sendLink', textContent: label});
@@ -227,5 +217,5 @@ export default function profileComponents() {
   cmDiv.appendChild(qeDiv);
   cmDiv.appendChild(delAllDiv);
   compDiv.appendChild(cmDiv);
-  compDiv.addEventListener('click', compEvt);
+  compDiv.addEventListener('click', eventHandler(evtHdl));
 }

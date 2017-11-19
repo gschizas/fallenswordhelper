@@ -1,4 +1,5 @@
 import {defaults} from './support/dataObj';
+import eventHandler from './common/eventHandler';
 import {getElementById} from './common/getElement';
 import {getValueJSON, isChecked, setValueJSON} from './support/system';
 import {makePageHeader, makePageTemplate, pCC} from './support/layout';
@@ -74,8 +75,8 @@ function generateManageTable() { // Legacy
   setValueJSON(param.gmname, param.currentItems);
 }
 
-function deleteQuickItem(evt) { // Legacy
-  var itemId = evt.target.getAttribute('data-itemId');
+function deleteQuickItem(self) { // Legacy
+  var itemId = self.getAttribute('data-itemId');
   param.currentItems.splice(itemId, 1);
   generateManageTable();
 }
@@ -121,23 +122,14 @@ function resetRawEditor() { // Legacy
 }
 
 var listEvents = [
-  {test: function(e) {return e.target.id === 'fshReset';}, fn: resetRawEditor},
-  {test: function(e) {return e.target.id === 'fshSave';}, fn: saveRawEditor},
-  {test: function(e) {return e.target.id === 'fshAdd';}, fn: addQuickItem},
+  {test: function(self) {return self.id === 'fshReset';}, act: resetRawEditor},
+  {test: function(self) {return self.id === 'fshSave';}, act: saveRawEditor},
+  {test: function(self) {return self.id === 'fshAdd';}, act: addQuickItem},
   {
-    test: function(e) {return e.target.id.indexOf('fshDel') === 0;},
-    fn: deleteQuickItem
+    test: function(self) {return self.id.indexOf('fshDel') === 0;},
+    act: deleteQuickItem
   }
 ];
-
-function listEvtHnl(e) {
-  for (var i = 0; i < listEvents.length; i += 1) {
-    if (listEvents[i].test(e)) {
-      listEvents[i].fn(e);
-      return;
-    }
-  }
-}
 
 export function injectAuctionSearch(injector) { // Legacy
   var content = injector || pCC;
@@ -167,7 +159,7 @@ export function injectAuctionSearch(injector) { // Legacy
     categoryField: 'category',
   };
   generateManageTable();
-  content.addEventListener('click', listEvtHnl);
+  content.addEventListener('click', eventHandler(listEvents));
 }
 
 export function injectQuickLinkManager(injector) { // Legacy
@@ -187,5 +179,5 @@ export function injectQuickLinkManager(injector) { // Legacy
     gmname: 'quickLinks',
   };
   generateManageTable();
-  content.addEventListener('click', listEvtHnl);
+  content.addEventListener('click', eventHandler(listEvents));
 }

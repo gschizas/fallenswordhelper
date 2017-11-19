@@ -1,5 +1,6 @@
 import {createDiv} from '../common/cElement';
 import createQuickWear from './createQuickWear';
+import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import loadInventory from '../app/profile/loadInventory';
 import showAHInvManager from './showAHInvManager';
@@ -65,42 +66,30 @@ function togglePref() {
   setValue('disableQuickWearPrompts', disableQuickWearPrompts);
 }
 
-var evts = [
+var events = [
   {
-    condition: function(self) {
+    test: function(self) {
       return self.classList.contains('smallLink') &&
         self.classList.contains('fshEq');
     },
-    result: equipProfileInventoryItem
+    act: equipProfileInventoryItem
   },
   {
-    condition: function(self) {
+    test: function(self) {
       return self.classList.contains('smallLink') &&
         self.classList.contains('fshUse');
     },
-    result: useProfileInventoryItem
+    act: useProfileInventoryItem
   },
   {
-    condition: function(self) {return self.classList.contains('fshFolder');},
-    result: hideFolders
+    test: function(self) {return self.classList.contains('fshFolder');},
+    act: hideFolders
   },
   {
-    condition: function(self) {return self.id === 'disableQuickWearPrompts';},
-    result: togglePref
+    test: function(self) {return self.id === 'disableQuickWearPrompts';},
+    act: togglePref
   }
 ];
-
-function listen(evt) {
-  var self = evt.target;
-  evts.some(function(el) {
-    if (el.condition(self)) {
-      el.result(self);
-      return true;
-    }
-    return false;
-  });
-
-}
 
 function createInvTabs() {
   return createDiv({
@@ -127,7 +116,7 @@ function showQuickWear(appInv) {
   invTabs.appendChild(invTabsQw);
   content.innerHTML = '';
   content.appendChild(invTabs);
-  invTabs.addEventListener('click', listen);
+  invTabs.addEventListener('click', eventHandler(events));
   invTabs.appendChild(showAHInvManager(appInv));
   getElementById('setPrompt').insertAdjacentHTML('beforeend',
     simpleCheckboxHtml('disableQuickWearPrompts'));
