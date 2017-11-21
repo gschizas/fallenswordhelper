@@ -1,3 +1,4 @@
+import calf from '../support/calf';
 import {doSendGold} from '../newMap/sendGold';
 import {getElementById} from '../common/getElement';
 import insertQuickWear from '../quickWear/quickWear';
@@ -82,7 +83,9 @@ function backpack() {
 }
 
 function fastWearMgr() {
-  jQueryDialog(insertQuickWear);
+  if (!('dialogIsClosed' in calf) || calf.dialogIsClosed()) {
+    jQueryDialog(insertQuickWear);
+  }
 }
 
 function profile() {
