@@ -146,6 +146,7 @@ export default function subscribes() { // jQuery.min
   prepareShop();
   injectRelic();
   $.subscribe('level.stats-player', levelStats);
+  $('#messageCenter').worldMessageCenter({offset: '0 60'});
 }
 
 /* fetchFlags = {
