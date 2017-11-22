@@ -1,3 +1,4 @@
+import {def_afterUpdateActionlist} from '../support/dataObj';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import retryAjax from '../ajax/retryAjax';
@@ -191,7 +192,7 @@ export default function startMonsterLog() { // jQuery
   showMonsterLog = getValue('showMonsterLog');
   if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo) {getBias();}
-  $.subscribe('after-update.actionlist', initMonsterLog);
+  $.subscribe(def_afterUpdateActionlist, initMonsterLog);
   getForage('fsh_monsterLog').done(function(data) {
     monsterLog = data || {};
   });

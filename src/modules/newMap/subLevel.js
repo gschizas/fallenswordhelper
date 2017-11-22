@@ -3,6 +3,7 @@ import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import {huntingBuffsHtml} from '../settings/worldPrefs';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
+import {def_afterUpdateActionlist, def_playerBuffs} from '../support/dataObj';
 import {getValue, setValue, shouldBeArray} from '../support/system';
 
 var huntingBuffs;
@@ -163,8 +164,7 @@ function dataEventsPlayerBuffs(evt, data) {
 
 function doHuntingBuffs() { // jQuery.min
   setCurrentBuffList();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    dataEventsPlayerBuffs);
+  $.subscribe(def_playerBuffs, dataEventsPlayerBuffs);
   if (calf.showBuffs && window.initialGameData) { // HCS initial data
     dataEventsPlayerBuffs(null,
       {b: window.initialGameData.player.buffs});
@@ -176,6 +176,6 @@ export default function setupPref() {
   buildFshDivs();
   interceptXHR();
   doHuntingBuffs();
-  $.subscribe('after-update.actionlist', doHidePlayerActions);
+  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
   doHidePlayerActions();
 }

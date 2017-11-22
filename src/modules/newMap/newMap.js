@@ -1,17 +1,14 @@
-import assets from './assets';
-import calf from '../support/calf';
 import combatLogger from './combatLogger';
+import {def_afterUpdateActionlist} from '../support/dataObj';
+import doNotKill from './doNotKill';
 import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import injectRelic from './relic/relic';
+import onWorld from './onWorld';
 import prepareShop from './shop';
 import readyViewCreature from './viewCreature/viewCreature';
 import setupPref from './subLevel';
 import startMonsterLog from './monsterLog';
-import {injectButtons, levelStats} from './buttons';
-import {injectSendGoldOnWorld, updateSendGoldOnWorld} from './sendGold';
-
-var def_afterUpdateActionlist = 'after-update.actionlist';
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
@@ -59,93 +56,24 @@ function doMonsterColors() { // jQuery.min
   }
 }
 
-function afterUpdateActionList() {
-  // color the critters in the do no kill list blue
-  var act = getElementById('actionList');
-  var creatures = act.getElementsByClassName('creature');
-  Array.prototype.forEach.call(creatures, function(el) {
-    if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
-      el.classList.add('fshBlue');
-    }
-  });
-}
-
-function interceptDoAction() { // jQuery
-  var gameData = GameData;
-  var hcs = window.HCS;
-  var oldDoAction = gameData.doAction;
-  gameData.doAction = function(actionCode, fetchFlags, data) {
-    if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
-      // Do custom stuff e.g. do not kill list
-      var creatureIcon = $('#actionList div.header')
-        .eq(data.passback).find('a.icon');
-      if (calf.doNotKillList.indexOf(creatureIcon.data('name')) !== -1) {
-        creatureIcon.removeClass('loading');
-        return;
-      }
-    }
-    // Call standard action
-    oldDoAction(actionCode, fetchFlags, data);
-  };
-}
-
-function impIconColour() { // jQuery
-  var imp = $('#actionlist-shield-imp');
-  if (imp.length === 1) {
-    imp.css('background-color',
-      assets.colorHash[imp.text()] || '#ad8043');
-  }
-}
-
-function fixDebuffQTip(e) { // jQuery.min
-  $(e.target).qtip('hide');
-}
-
-function injectWorldNewMap(data) {
-  updateSendGoldOnWorld(data);
-  if (data.realm && data.realm.name) {
-    injectButtons(data);
-    getElementById('buffList')
-      .addEventListener('click', fixDebuffQTip);
-    if (calf.hideSubLvlCreature) {GameData.fetch(256);}
-  }
+function doRepair(e, key) {
+  if (key === 'ACT_REPAIR') {GameData.fetch(403);}
 }
 
 export default function subscribes() { // jQuery.min
   setupPref();
-  injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
   hideGroupButton(); // Hide Create Group button
   doMonsterColors();
-  // add do-not-kill list functionality
-  $.subscribe(def_afterUpdateActionlist, afterUpdateActionList);
-  afterUpdateActionList();
-  // add monster log functionality
-  startMonsterLog();
-  // then intercept the action call
-  interceptDoAction();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    impIconColour);
-  $.subscribe('keydown.controls', function(e, key) {
-    if (key === 'ACT_REPAIR') {GameData.fetch(403);}
-  });
+  doNotKill(); // add do-not-kill list functionality
+  startMonsterLog(); // add monster log functionality
+  $.subscribe('keydown.controls', doRepair);
   combatLogger();
-  // on world
-  if (window.initialGameData) {// HCS initial data
-    injectWorldNewMap(window.initialGameData);
-    impIconColour(null,
-      {b: window.initialGameData.player.buffs});
-  }
-  $.subscribe('-1-success.action-response 5-success.action-response',
-    function(e, data) { // change of information
-      injectWorldNewMap(data);
-    }
-  );
+  onWorld(); // on world
   // somewhere near here will be multi buy on shop
   prepareShop();
   injectRelic();
-  $.subscribe('level.stats-player', levelStats);
   $('#messageCenter').worldMessageCenter({offset: '0 60'});
 }
 

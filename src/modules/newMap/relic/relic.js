@@ -15,7 +15,11 @@ import {
   getValue
 } from '../../support/system';
 import {createButton, createDiv} from '../../common/cElement';
-import {defenderMultiplier, nowSecs} from '../../support/dataObj';
+import {
+  def_suffixSuccessActionResponse,
+  defenderMultiplier,
+  nowSecs
+} from '../../support/dataObj';
 
 var relicData;
 var containerDiv;
@@ -411,5 +415,5 @@ function viewRelic(e, data) {
 }
 
 export default function injectRelic() {
-  $.subscribe('9-success.action-response', viewRelic);
+  $.subscribe('9' + def_suffixSuccessActionResponse, viewRelic);
 }
