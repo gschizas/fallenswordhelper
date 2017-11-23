@@ -1,69 +1,6 @@
 (function () {
 'use strict';
 
-/*
- * DOMParser HTML extension
- * 2012-09-04
- *
- * By Eli Grey, http://eligrey.com
- * Public domain.
- * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
- */
-
-/* ! @source https://gist.github.com/1129031 */
-/* global document, DOMParser*/
-
-(function(DOMParser) {
-  var DOMParser_proto = DOMParser.prototype;
-  var real_parseFromString = DOMParser_proto.parseFromString;
-
-  // Firefox/Opera/IE throw errors on unsupported types
-  try {
-    // WebKit returns null on unsupported types
-    if ((new DOMParser()).parseFromString('', 'text/html')) {
-      // text/html parsing is natively supported
-      return;
-    }
-  } catch (ex) {
-    // Nothing
-  }
-
-  DOMParser_proto.parseFromString = function(markup, type) {
-    if (/^\s*text\/html\s*(?:;|$)/i.test(type)) {
-      var doc = document.implementation.createHTMLDocument('');
-      if (markup.toLowerCase().indexOf('<!doctype') > -1) {
-        doc.documentElement.innerHTML = markup;
-      } else {
-        doc.body.innerHTML = markup;
-      }
-      return doc;
-    }
-    return real_parseFromString.apply(this, arguments);
-  };
-}(DOMParser));
-
-/*
-// @license http://opensource.org/licenses/MIT
-// copyright Paul Irish 2015
-*/
-
-if ('performance' in window === false) {
-  window.performance = {};
-}
-
-if ('now' in window.performance === false) {
-
-  var nowOffset = Date.now();
-
-  if (performance.timing && performance.timing.navigationStart) {
-    nowOffset = performance.timing.navigationStart;
-  }
-
-  window.performance.now = function now() {
-    return Date.now() - nowOffset;
-  };
-}
-
 function getElementById(id, doc) {
   if (doc) {return doc.getElementById(id);}
   return document.getElementById(id);
@@ -607,6 +544,10 @@ var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
 var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
+var def_afterUpdateActionlist = 'after-update.actionlist';
+var def_playerBuffs = 'buffs.player';
+var def_suffixSuccessActionResponse = '-success.action-response';
+var def_creatureCombat = 2;
 
 var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -1719,24 +1660,91 @@ function composingCreate() {
     });
 }
 
-function injectFindPlayer() { // Bad jQuery
-  var findPlayerButton = $('input[value="Find Player"]');
-  var levelToTest = intValue($('dt.stat-level:first').next()
-    .text());
+var pvpLowerLevel;
+var pvpUpperLevel;
+var gvgLowerLevel;
+var gvgUpperLevel;
+
+function calcLvlToTest() {
+  var levelToTest = intValue(document.getElementsByClassName(
+    'stat-level')[0].nextElementSibling.textContent);
   var characterVirtualLevel = getValue('characterVirtualLevel');
-  levelToTest = fallback(characterVirtualLevel, levelToTest);
-  var pvpLowerLevelModifier = 5;
-  if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
-  var pvpUpperLevelModifier = 5;
-  if (levelToTest >= 200) {pvpUpperLevelModifier = 10;}
+  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
+  return levelToTest;
+}
+
+function calcLowerPvpLevel(levelToTest) {
+  var modifier = 10;
+  if (levelToTest <= 205) {modifier = 5;}
+  if (levelToTest >= 206 && levelToTest <= 209) {
+    modifier = levelToTest - 200;
+  }
+  return levelToTest - modifier;
+}
+
+function calcUpperPvpLevel(levelToTest) {
+  var modifier = 10;
+  if (levelToTest < 200) {modifier = 5;}
+  return levelToTest + modifier;
+}
+
+var lowerGvgCalcs = [
+  {
+    test: function(levelToTest) {return levelToTest >= 801;},
+    act: function() {return 100;}
+  },
+  {
+    test: function(levelToTest) {return levelToTest >= 752;},
+    act: function(levelToTest) {return levelToTest - 701;}
+  },
+  {
+    test: function(levelToTest) {return levelToTest >= 351;},
+    act: function() {return 50;}
+  },
+  {
+    test: function(levelToTest) {return levelToTest >= 326;},
+    act: function(levelToTest) {return levelToTest - 301;}
+  }
+];
+
+function calcLowerGvgLevel(levelToTest) {
+  var modifier = 25;
+  lowerGvgCalcs.some(function(el) {
+    if (el.test(levelToTest)) {
+      modifier = el.act(levelToTest);
+      return true;
+    }
+    return false;
+  });
+  return levelToTest - modifier;
+}
+
+function calcUpperGvgLevel(levelToTest) {
+  var modifier = 100;
+  if (levelToTest <= 700) {modifier = 50;}
+  if (levelToTest <= 300) {modifier = 25;}
+  return levelToTest + modifier;
+}
+
+function calculateBoundaries() {
+  var levelToTest = calcLvlToTest();
+  pvpLowerLevel = calcLowerPvpLevel(levelToTest);
+  pvpUpperLevel = calcUpperPvpLevel(levelToTest);
+  gvgLowerLevel = calcLowerGvgLevel(levelToTest);
+  gvgUpperLevel = calcUpperGvgLevel(levelToTest);
+}
+
+function injectFindPlayer() { // Bad jQuery
+  calculateBoundaries();
+  var findPlayerButton = $('input[value="Find Player"]');
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
     'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
-    (levelToTest - pvpLowerLevelModifier) + '&search_level_max=' +
-    (levelToTest + pvpUpperLevelModifier) + '&search_in_guild=0"><span ' +
+    pvpLowerLevel + '&search_level_max=' +
+    pvpUpperLevel + '&search_in_guild=0"><span ' +
     'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
     'index.php?cmd=findplayer&search_active=1&search_username=&' +
-    'search_level_min=' + (levelToTest - 25) + '&search_level_max=' +
-    (levelToTest + 25) + '&search_in_guild=0"><span style="color:blue;">' +
+    'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
+    gvgUpperLevel + '&search_in_guild=0"><span style="color:blue;">' +
     'Get GvG targets</span></a>');
 
   $('table[class="width_full"]').find('a[href*="player_id"]')
@@ -2084,8 +2092,6 @@ var context;
 var onlinePlayers;
 var onlineData;
 var highlightPlayersNearMyLvl;
-var lvlDiffToHighlight;
-var levelToTest;
 var onlinePages;
 var lastPage;
 var table;
@@ -2132,14 +2138,6 @@ function dataTableSearch(_settings, data) { // jQuery
 }
 
 function filterHeaderOnlinePlayers() { // jQuery
-  highlightPlayersNearMyLvl =
-    getValue('highlightPlayersNearMyLvl');
-  lvlDiffToHighlight = 10;
-  levelToTest = intValue($('dt.stat-level:first')
-    .next().text());
-  var characterVirtualLevel = getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  if (levelToTest <= 205) {lvlDiffToHighlight = 5;}
   $('#fshOutput', context).html( // context
     '<div align=right>' +
     'Min lvl:<input value="' + getValue('onlinePlayerMinLvl') +
@@ -2154,6 +2152,8 @@ function gotOnlinePlayers() { // jQuery
   buildOnlinePlayerData();
   $.fn.dataTable.ext.search.push(dataTableSearch);
   filterHeaderOnlinePlayers();
+  highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
+  calculateBoundaries();
 
   table = $('#fshInv', context).dataTable({ // context
     data: onlineData,
@@ -2167,8 +2167,8 @@ function gotOnlinePlayers() { // jQuery
     ],
     createdRow: function(row, data) {
       if (highlightPlayersNearMyLvl &&
-        Math.abs(intValue(data[2]) - levelToTest) <=
-        lvlDiffToHighlight) {
+        intValue(data[2]) >= pvpLowerLevel &&
+        intValue(data[2]) <= pvpUpperLevel) {
         $('td', row).eq(2).addClass('lvlHighlight');
       }
     },
@@ -6407,7 +6407,9 @@ function backpack$1() {
 }
 
 function fastWearMgr() {
-  jQueryDialog(insertQuickWear);
+  if (!('dialogIsClosed' in calf) || calf.dialogIsClosed()) {
+    jQueryDialog(insertQuickWear);
+  }
 }
 
 function profile() {
@@ -8773,6 +8775,24 @@ var tracker;
 var trDialog;
 var acttab2;
 
+function isClosed() {
+  return !tracker.checked;
+}
+
+function isOpen() {
+  return tracker.checked;
+}
+
+function closeDialog() {
+  tracker.checked = false;
+}
+
+function keydownHandler(evt) {
+  if (isOpen() && evt.code === 'Escape') {
+    closeDialog();
+  }
+}
+
 function makeDragHandle() {
   return createUl({
     className: 'fshMove ui-tabs-nav ui-widget-header ui-corner-all ' +
@@ -8846,6 +8866,7 @@ function togglePref$3(evt) {
 function openDialog() {
   getForage('fsh_guildActivity').done(gotActivity$1);
   tracker.removeEventListener('change', openDialog);
+  calf.dialogIsClosed = isClosed;
   addOverlay();
   makePopup();
 }
@@ -8869,6 +8890,7 @@ function guildTracker() {
   tracker.addEventListener('change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   trDialog.appendChild(tracker);
+  document.body.addEventListener('keydown', keydownHandler);
   document.body.appendChild(trDialog);
 }
 
@@ -12816,8 +12838,6 @@ function playerDataObject(json) {
 }
 
 var highlightPlayersNearMyLvl$1;
-var lvlDiffToHighlight$1;
-var myVL;
 var spinner$1;
 var validPvP = nowSecs - 604800;
 var guilds;
@@ -12825,10 +12845,10 @@ var guilds;
 function doOnlineDot(aTable, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (myVL &&
+  if (highlightPlayersNearMyLvl$1 &&
       data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
-      data.virtual_level < myVL + lvlDiffToHighlight$1) {
+      data.virtual_level >= pvpLowerLevel &&
+      data.virtual_level <= pvpUpperLevel) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
 }
@@ -12905,12 +12925,6 @@ function findOnlinePlayers() { // jQuery
   });
 }
 
-function gotMyVl(data) {
-  myVL = data.virtual_level;
-  lvlDiffToHighlight$1 = 11;
-  if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
-}
-
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
   spinner$1 = createSpan({
@@ -12918,14 +12932,14 @@ function getMyVL(e) { // jQuery
     innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
   });
   e.target.parentNode.replaceChild(spinner$1, e.target);
+  highlightPlayersNearMyLvl$1 = getValue('highlightPlayersNearMyLvl');
   if (highlightPlayersNearMyLvl$1) {
-    myStats(false).done(gotMyVl).done(findOnlinePlayers);
-  } else {findOnlinePlayers();}
+    calculateBoundaries();
+  }
+  findOnlinePlayers();
 }
 
 function looksLikeTopRated() {
-  highlightPlayersNearMyLvl$1 =
-    getValue('highlightPlayersNearMyLvl');
   var theCell = pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({
@@ -13121,73 +13135,39 @@ function injectTrade() {
   add(3, injectTradeOld);
 }
 
-function calcLvlToTest() {
-  var levelToTest = intValue(document.getElementsByClassName(
-    'stat-level')[0].nextElementSibling.textContent);
-  var characterVirtualLevel = getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  return levelToTest;
-}
+var highlightPlayersNearMyLvl$2;
+var highlightGvGPlayersNearMyLvl;
 
-function calcPvpRange(levelToTest) {
-  if (levelToTest <= 205) {return 5;}
-  return 10;
-}
-
-function calcGvgRange(levelToTest) {
-  if (levelToTest <= 300) {
-    return 25;
+function highlightMembers(el) {
+  var tipped = el.dataset.tipped;
+  var lastActDays = lastActivityRE.exec(tipped)[1];
+  var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
+  var aRow = el.parentNode.parentNode;
+  if (lastActDays < 7 &&
+      highlightPlayersNearMyLvl$2 &&
+      vlevel >= pvpLowerLevel &&
+      vlevel <= pvpUpperLevel) {
+    aRow.classList.add('lvlHighlight');
+  } else if (lastActDays < 7 &&
+      highlightGvGPlayersNearMyLvl &&
+      vlevel >= gvgLowerLevel &&
+      vlevel <= gvgUpperLevel) {
+    aRow.classList.add('lvlGvGHighlight');
   }
-  if (levelToTest <= 700) {
-    return 50;
-  }
-  return 100;
 }
 
 function injectViewGuild() {
   add(3, colouredDots);
   removeGuildAvyImgBorder();
   guildXPLock();
-  var highlightPlayersNearMyLvl =
-    getValue('highlightPlayersNearMyLvl');
-  var highlightGvGPlayersNearMyLvl =
-    getValue('highlightGvGPlayersNearMyLvl');
-  if (!highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl) {return;}
-  var levelToTest = calcLvlToTest();
-  var pvpRange = calcPvpRange(levelToTest);
-  var gvgRange = calcGvgRange(levelToTest);
+  highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
+  highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
+  if (!highlightPlayersNearMyLvl$2 && !highlightGvGPlayersNearMyLvl) {return;}
+  calculateBoundaries();
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
-  Array.prototype.forEach.call(memList, function(el) {
-    var tipped = el.dataset.tipped;
-    var lastActDays = lastActivityRE.exec(tipped)[1];
-    var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
-    var aRow = el.parentNode.parentNode;
-    if (lastActDays < 7 &&
-        highlightPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <= pvpRange) {
-      aRow.classList.add('lvlHighlight');
-    } else if (lastActDays < 7 &&
-        highlightGvGPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <= gvgRange) {
-      aRow.classList.add('lvlGvGHighlight');
-    }
-  });
+  Array.prototype.forEach.call(memList, highlightMembers);
 }
-
-var assets = {
-  colorHash: {
-    '0': 'red', // Should never see this.
-    '1': 'orange',
-    '2': 'yellow'
-  },
-  bias: {
-    '0': {generalVariable: 1.1053, hpVariable: 1.1},
-    '1': {generalVariable: 1.1, hpVariable: 1.053},
-    '2': {generalVariable: 1.053, hpVariable: 1},
-    '3': {generalVariable: 1.1053, hpVariable: 1}
-  }
-};
 
 // Taking the Not Save in case they add new enhancements.
 var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
@@ -13244,7 +13224,7 @@ function combatResponse(e, data) {
 
 function gotCombatLog$1(data) { // jQuery.min
   if (data) {combatLog$1 = data;}
-  $.subscribe('2-success.action-response', combatResponse);
+  $.subscribe('2' + def_suffixSuccessActionResponse, combatResponse);
 }
 
 function combatLogger() { // jQuery.min
@@ -13253,7 +13233,44 @@ function combatLogger() { // jQuery.min
   }
 }
 
-var assets$1 = {
+function afterUpdateActionList() {
+  // color the critters in the do no kill list blue
+  var act = getElementById('actionList');
+  var creatures = act.getElementsByClassName('creature');
+  Array.prototype.forEach.call(creatures, function(el) {
+    if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
+      el.classList.add('fshBlue');
+    }
+  });
+}
+
+function maybeIntercept(oldDoAction, actionCode, fetchFlags, data) {
+  if (actionCode === def_creatureCombat) {
+    // Do custom stuff e.g. do not kill list
+    var creatureName = GameData.actions()[data.passback].data.name;
+    if (calf.doNotKillList.indexOf(creatureName) !== -1) {
+      $('#actionList div.header').eq(data.passback)
+        .find('a.icon').removeClass('loading');
+      return;
+    }
+  }
+  // Call standard action
+  oldDoAction(actionCode, fetchFlags, data);
+}
+
+function interceptDoAction() { // jQuery
+  var oldDoAction = GameData.doAction;
+  GameData.doAction = maybeIntercept.bind(null, oldDoAction);
+}
+
+function doNotKill() {
+  $.subscribe(def_afterUpdateActionlist, afterUpdateActionList);
+  afterUpdateActionList();
+  // then intercept the action call
+  interceptDoAction();
+}
+
+var assets = {
   defStats: '<table class="relicT relicS"><thead>' +
     '<tr><th colspan="2">Defending Guild Stats</th></tr></thead><tbody>' +
     '<tr><td>Relic Count:</td><td id="relicCount">0</td></tr>' +
@@ -13621,17 +13638,17 @@ function prepareDivs() {
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(false).done(missingMembers);
   }
-  leftDiv.insertAdjacentHTML('beforeend', assets$1.proc);
+  leftDiv.insertAdjacentHTML('beforeend', assets.proc);
   processingStatus = getElementById('ProcessingStatus');
   midDiv = createDiv({
     className: 'fshFloatLeft fshRelicMidDiv',
-    innerHTML: assets$1.defStats
+    innerHTML: assets.defStats
   });
   containerDiv.appendChild(midDiv);
   setDefVars();
   rightDiv = createDiv({
     className: 'fshFloatLeft fshRelicRightDiv',
-    innerHTML: assets$1.atkStats
+    innerHTML: assets.atkStats
   });
   containerDiv.appendChild(rightDiv);
   setAtkVars();
@@ -13767,7 +13784,229 @@ function viewRelic(e, data) {
 }
 
 function injectRelic() {
-  $.subscribe('9-success.action-response', viewRelic);
+  $.subscribe('9' + def_suffixSuccessActionResponse, viewRelic);
+}
+
+var assets$1 = {
+  colorHash: {
+    '0': 'red', // Should never see this.
+    '1': 'orange',
+    '2': 'yellow'
+  },
+  bias: {
+    '0': {generalVariable: 1.1053, hpVariable: 1.1},
+    '1': {generalVariable: 1.1, hpVariable: 1.053},
+    '2': {generalVariable: 1.053, hpVariable: 1},
+    '3': {generalVariable: 1.1053, hpVariable: 1}
+  }
+};
+
+var buttonContainer;
+var yourLvl;
+var formGroup;
+var quickBuff;
+var realmMap;
+var ufsgMap;
+var soundCheck;
+var huntCheck;
+
+function doFormGroup(self) { // jQuery.min
+  $(self).qtip('hide');
+  GameData.doAction(12, 401, {}, 0);
+}
+
+function openQuickBuff() {
+  openQuickBuffByName(playerName());
+}
+
+function openRealmMap() {
+  window.open('index.php?cmd=world&subcmd=map', 'fsMap');
+}
+
+function openUfsgMap() {
+  var gameRealm = GameData.realm();
+  window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
+    'mapUfsg');
+}
+
+function toggleSound() {
+  // Doesn't actually work in New World...
+  setValue('playNewMessageSound', !getValue('playNewMessageSound'));
+}
+
+function toggleHuntMode() {
+  calf.huntingMode = !calf.huntingMode;
+  setValue('huntingMode', calf.huntingMode);
+}
+
+var changeHdl = [
+  {
+    test: function(self) {return self === soundCheck;},
+    act: toggleSound
+  },
+  {
+    test: function(self) {return self === huntCheck;},
+    act: toggleHuntMode
+  }
+];
+
+var clickHdl = [
+  {
+    test: function(self) {return self === formGroup;},
+    act: doFormGroup
+  },
+  {
+    test: function(self) {return self === quickBuff;},
+    act: openQuickBuff
+  },
+  {
+    test: function(self) {return self === realmMap;},
+    act: openRealmMap
+  },
+  {
+    test: function(self) {return self === ufsgMap;},
+    act: openUfsgMap
+  }
+];
+
+function doLevels(data, worldName) {
+  var lvlDiv = createDiv({
+    className: 'fshFsty',
+    innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
+  });
+  var btmDiv = createDiv({textContent: 'Your Lvl: '});
+  yourLvl = createSpan({textContent: data.player.level});
+  lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
+  worldName.appendChild(lvlDiv);
+}
+
+function doBtn(className, tip, worldName) {
+  var btn = createButton({
+    className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
+    dataset: {tipped: tip}
+  });
+  worldName.appendChild(btn);
+  return btn;
+}
+
+function showQuickLinks(worldName, data) {
+  doLevels(data, worldName);
+  formGroup = doBtn('fshFormGroup', 'Quick Create Attack Group', worldName);
+  quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
+  realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
+  ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
+}
+
+function createLbl(className, tip, htmlFor) {
+  return createLabel({
+    className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
+    dataset: {tipped: tip},
+    htmlFor: htmlFor
+  });
+}
+
+function makeToggleBtn(o) {
+  var btnDiv = createDiv({className: 'fshToggle'});
+  var btnCheck = createInput({
+    checked: o.prefVal,
+    id: o.checkId,
+    type: 'checkbox'
+  });
+  btnDiv.appendChild(btnCheck);
+  var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
+  btnDiv.appendChild(onLbl);
+  var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
+  btnDiv.appendChild(offLbl);
+  o.worldName.appendChild(btnDiv);
+  return btnCheck;
+}
+
+function showSpeakerOnWorld(worldName) {
+  var msgSounds = getValue('playNewMessageSound');
+  soundCheck = makeToggleBtn({
+    prefVal: msgSounds,
+    checkId: 'fshSoundCheck',
+    onClass: 'soundOn',
+    onTip: 'Turn Off Sound when you have a new log message',
+    offClass: 'soundOff',
+    offTip: 'Turn On Sound when you have a new log message',
+    worldName: worldName
+  });
+}
+
+function showHuntMode(worldName) {
+  var inHuntMode = calf.huntingMode;
+  huntCheck = makeToggleBtn({
+    prefVal: inHuntMode,
+    checkId: 'fshHuntCheck',
+    onClass: 'huntOn',
+    onTip: 'Hunting mode is ON',
+    offClass: 'huntOff',
+    offTip: 'Hunting mode is OFF',
+    worldName: worldName
+  });
+}
+
+function injectButtons(data) {
+  GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
+  if (buttonContainer) {buttonContainer.remove();}
+  buttonContainer = createDiv({
+    className: 'fshCurveContainer',
+    id: 'fshWorldButtonContainer'
+  });
+
+  showQuickLinks(buttonContainer, data);
+  if (getValue('showSpeakerOnWorld')) {
+    showSpeakerOnWorld(buttonContainer);
+  }
+  showHuntMode(buttonContainer);
+  buttonContainer.addEventListener('click', eventHandler$1(clickHdl));
+  buttonContainer.addEventListener('change', eventHandler$1(changeHdl));
+
+  getElementById('worldContainer')
+    .insertBefore(buttonContainer, getElementById('worldCoord'));
+}
+
+function levelStats(e, data) {
+  yourLvl.textContent = data.b;
+}
+
+function fixDebuffQTip(e) { // jQuery.min
+  $(e.target).qtip('hide');
+}
+
+function injectWorldNewMap(data) {
+  updateSendGoldOnWorld(data);
+  if (data.realm && data.realm.name) {
+    injectButtons(data);
+    getElementById('buffList')
+      .addEventListener('click', fixDebuffQTip);
+    if (calf.hideSubLvlCreature) {GameData.fetch(256);}
+  }
+}
+
+function impIconColour() { // jQuery
+  var imp = $('#actionlist-shield-imp');
+  if (imp.length === 1) {
+    imp.css('background-color',
+      assets$1.colorHash[imp.text()] || '#ad8043');
+  }
+}
+
+function onWorld() {
+  injectSendGoldOnWorld();
+  if (window.initialGameData) {// HCS initial data
+    injectWorldNewMap(window.initialGameData);
+    impIconColour(null,
+      {b: window.initialGameData.player.buffs});
+  }
+  $.subscribe('-1' + def_suffixSuccessActionResponse +
+              ' 5' + def_suffixSuccessActionResponse,
+  function(e, data) { // change of information
+    injectWorldNewMap(data);
+  });
+  $.subscribe(def_playerBuffs, impIconColour);
+  $.subscribe('level.stats-player', levelStats);
 }
 
 var shoppingData;
@@ -14364,15 +14603,15 @@ function evalHTML(combat) {
 }
 
 function getBiasGeneral(combat) {
-  if (assets.bias[combat.combatEvaluatorBias]) {
-    return assets.bias[combat.combatEvaluatorBias].generalVariable;
+  if (assets$1.bias[combat.combatEvaluatorBias]) {
+    return assets$1.bias[combat.combatEvaluatorBias].generalVariable;
   }
   return 1.1053;
 }
 
 function getBiasHp(combat) {
-  if (assets.bias[combat.combatEvaluatorBias]) {
-    return assets.bias[combat.combatEvaluatorBias].hpVariable;
+  if (assets$1.bias[combat.combatEvaluatorBias]) {
+    return assets$1.bias[combat.combatEvaluatorBias].hpVariable;
   }
   return 1.1;
 }
@@ -14701,8 +14940,7 @@ function dataEventsPlayerBuffs(evt, data) {
 
 function doHuntingBuffs() { // jQuery.min
   setCurrentBuffList();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    dataEventsPlayerBuffs);
+  $.subscribe(def_playerBuffs, dataEventsPlayerBuffs);
   if (calf.showBuffs && window.initialGameData) { // HCS initial data
     dataEventsPlayerBuffs(null,
       {b: window.initialGameData.player.buffs});
@@ -14714,7 +14952,7 @@ function setupPref$2() {
   buildFshDivs();
   interceptXHR();
   doHuntingBuffs();
-  $.subscribe('after-update.actionlist', doHidePlayerActions);
+  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
   doHidePlayerActions();
 }
 
@@ -14905,184 +15143,12 @@ function startMonsterLog() { // jQuery
   showMonsterLog = getValue('showMonsterLog');
   if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo) {getBias();}
-  $.subscribe('after-update.actionlist', initMonsterLog);
+  $.subscribe(def_afterUpdateActionlist, initMonsterLog);
   getForage('fsh_monsterLog').done(function(data) {
     monsterLog = data || {};
   });
   initMonsterLog();
 }
-
-var buttonContainer;
-var yourLvl;
-var formGroup;
-var quickBuff;
-var realmMap;
-var ufsgMap;
-var soundCheck;
-var huntCheck;
-
-function doFormGroup(self) { // jQuery.min
-  $(self).qtip('hide');
-  GameData.doAction(12, 401, {}, 0);
-}
-
-function openQuickBuff() {
-  openQuickBuffByName(playerName());
-}
-
-function openRealmMap() {
-  window.open('index.php?cmd=world&subcmd=map', 'fsMap');
-}
-
-function openUfsgMap() {
-  var gameRealm = GameData.realm();
-  window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
-    'mapUfsg');
-}
-
-function toggleSound() {
-  // Doesn't actually work in New World...
-  setValue('playNewMessageSound', !getValue('playNewMessageSound'));
-}
-
-function toggleHuntMode() {
-  calf.huntingMode = !calf.huntingMode;
-  setValue('huntingMode', calf.huntingMode);
-}
-
-var changeHdl = [
-  {
-    test: function(self) {return self === soundCheck;},
-    act: toggleSound
-  },
-  {
-    test: function(self) {return self === huntCheck;},
-    act: toggleHuntMode
-  }
-];
-
-var clickHdl = [
-  {
-    test: function(self) {return self === formGroup;},
-    act: doFormGroup
-  },
-  {
-    test: function(self) {return self === quickBuff;},
-    act: openQuickBuff
-  },
-  {
-    test: function(self) {return self === realmMap;},
-    act: openRealmMap
-  },
-  {
-    test: function(self) {return self === ufsgMap;},
-    act: openUfsgMap
-  }
-];
-
-function doLevels(data, worldName) {
-  var lvlDiv = createDiv({
-    className: 'fshFsty',
-    innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
-  });
-  var btmDiv = createDiv({textContent: 'Your Lvl: '});
-  yourLvl = createSpan({textContent: data.player.level});
-  lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
-  worldName.appendChild(lvlDiv);
-}
-
-function doBtn(className, tip, worldName) {
-  var btn = createButton({
-    className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
-    dataset: {tipped: tip}
-  });
-  worldName.appendChild(btn);
-  return btn;
-}
-
-function showQuickLinks(worldName, data) {
-  doLevels(data, worldName);
-  formGroup = doBtn('fshFormGroup', 'Quick Create Attack Group', worldName);
-  quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
-  realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
-  ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
-}
-
-function createLbl(className, tip, htmlFor) {
-  return createLabel({
-    className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
-    dataset: {tipped: tip},
-    htmlFor: htmlFor
-  });
-}
-
-function makeToggleBtn(o) {
-  var btnDiv = createDiv({className: 'fshToggle'});
-  var btnCheck = createInput({
-    checked: o.prefVal,
-    id: o.checkId,
-    type: 'checkbox'
-  });
-  btnDiv.appendChild(btnCheck);
-  var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
-  btnDiv.appendChild(onLbl);
-  var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
-  btnDiv.appendChild(offLbl);
-  o.worldName.appendChild(btnDiv);
-  return btnCheck;
-}
-
-function showSpeakerOnWorld(worldName) {
-  var msgSounds = getValue('playNewMessageSound');
-  soundCheck = makeToggleBtn({
-    prefVal: msgSounds,
-    checkId: 'fshSoundCheck',
-    onClass: 'soundOn',
-    onTip: 'Turn Off Sound when you have a new log message',
-    offClass: 'soundOff',
-    offTip: 'Turn On Sound when you have a new log message',
-    worldName: worldName
-  });
-}
-
-function showHuntMode(worldName) {
-  var inHuntMode = calf.huntingMode;
-  huntCheck = makeToggleBtn({
-    prefVal: inHuntMode,
-    checkId: 'fshHuntCheck',
-    onClass: 'huntOn',
-    onTip: 'Hunting mode is ON',
-    offClass: 'huntOff',
-    offTip: 'Hunting mode is OFF',
-    worldName: worldName
-  });
-}
-
-function injectButtons(data) {
-  GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
-  if (buttonContainer) {buttonContainer.remove();}
-  buttonContainer = createDiv({
-    className: 'fshCurveContainer',
-    id: 'fshWorldButtonContainer'
-  });
-
-  showQuickLinks(buttonContainer, data);
-  if (getValue('showSpeakerOnWorld')) {
-    showSpeakerOnWorld(buttonContainer);
-  }
-  showHuntMode(buttonContainer);
-  buttonContainer.addEventListener('click', eventHandler$1(clickHdl));
-  buttonContainer.addEventListener('change', eventHandler$1(changeHdl));
-
-  getElementById('worldContainer')
-    .insertBefore(buttonContainer, getElementById('worldCoord'));
-}
-
-function levelStats(e, data) {
-  yourLvl.textContent = data.b;
-}
-
-var def_afterUpdateActionlist = 'after-update.actionlist';
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
@@ -15130,93 +15196,25 @@ function doMonsterColors() { // jQuery.min
   }
 }
 
-function afterUpdateActionList() {
-  // color the critters in the do no kill list blue
-  var act = getElementById('actionList');
-  var creatures = act.getElementsByClassName('creature');
-  Array.prototype.forEach.call(creatures, function(el) {
-    if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
-      el.classList.add('fshBlue');
-    }
-  });
-}
-
-function interceptDoAction() { // jQuery
-  var gameData = GameData;
-  var hcs = window.HCS;
-  var oldDoAction = gameData.doAction;
-  gameData.doAction = function(actionCode, fetchFlags, data) {
-    if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
-      // Do custom stuff e.g. do not kill list
-      var creatureIcon = $('#actionList div.header')
-        .eq(data.passback).find('a.icon');
-      if (calf.doNotKillList.indexOf(creatureIcon.data('name')) !== -1) {
-        creatureIcon.removeClass('loading');
-        return;
-      }
-    }
-    // Call standard action
-    oldDoAction(actionCode, fetchFlags, data);
-  };
-}
-
-function impIconColour() { // jQuery
-  var imp = $('#actionlist-shield-imp');
-  if (imp.length === 1) {
-    imp.css('background-color',
-      assets.colorHash[imp.text()] || '#ad8043');
-  }
-}
-
-function fixDebuffQTip(e) { // jQuery.min
-  $(e.target).qtip('hide');
-}
-
-function injectWorldNewMap(data) {
-  updateSendGoldOnWorld(data);
-  if (data.realm && data.realm.name) {
-    injectButtons(data);
-    getElementById('buffList')
-      .addEventListener('click', fixDebuffQTip);
-    if (calf.hideSubLvlCreature) {GameData.fetch(256);}
-  }
+function doRepair$1(e, key) {
+  if (key === 'ACT_REPAIR') {GameData.fetch(403);}
 }
 
 function subscribes() { // jQuery.min
   setupPref$2();
-  injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
   hideGroupButton(); // Hide Create Group button
   doMonsterColors();
-  // add do-not-kill list functionality
-  $.subscribe(def_afterUpdateActionlist, afterUpdateActionList);
-  afterUpdateActionList();
-  // add monster log functionality
-  startMonsterLog();
-  // then intercept the action call
-  interceptDoAction();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    impIconColour);
-  $.subscribe('keydown.controls', function(e, key) {
-    if (key === 'ACT_REPAIR') {GameData.fetch(403);}
-  });
+  doNotKill(); // add do-not-kill list functionality
+  startMonsterLog(); // add monster log functionality
+  $.subscribe('keydown.controls', doRepair$1);
   combatLogger();
-  // on world
-  if (window.initialGameData) {// HCS initial data
-    injectWorldNewMap(window.initialGameData);
-    impIconColour(null,
-      {b: window.initialGameData.player.buffs});
-  }
-  $.subscribe('-1-success.action-response 5-success.action-response',
-    function(e, data) { // change of information
-      injectWorldNewMap(data);
-    }
-  );
+  onWorld(); // on world
   // somewhere near here will be multi buy on shop
   prepareShop();
   injectRelic();
-  $.subscribe('level.stats-player', levelStats);
+  $('#messageCenter').worldMessageCenter({offset: '0 60'});
 }
 
 /* fetchFlags = {
@@ -17677,7 +17675,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '1';
+window.FSH.calf = '2';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
