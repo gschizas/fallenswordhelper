@@ -2,6 +2,11 @@ import getForage from './ajax/getForage';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
 import {
+  calculateBoundaries,
+  pvpLowerLevel,
+  pvpUpperLevel
+} from './common/levelHighlight';
+import {
   createDocument,
   fallback,
   getValue,
@@ -14,8 +19,6 @@ var context;
 var onlinePlayers;
 var onlineData;
 var highlightPlayersNearMyLvl;
-var lvlDiffToHighlight;
-var levelToTest;
 var onlinePages;
 var lastPage;
 var table;
@@ -62,14 +65,6 @@ function dataTableSearch(_settings, data) { // jQuery
 }
 
 function filterHeaderOnlinePlayers() { // jQuery
-  highlightPlayersNearMyLvl =
-    getValue('highlightPlayersNearMyLvl');
-  lvlDiffToHighlight = 10;
-  levelToTest = intValue($('dt.stat-level:first')
-    .next().text());
-  var characterVirtualLevel = getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  if (levelToTest <= 205) {lvlDiffToHighlight = 5;}
   $('#fshOutput', context).html( // context
     '<div align=right>' +
     'Min lvl:<input value="' + getValue('onlinePlayerMinLvl') +
@@ -84,6 +79,8 @@ function gotOnlinePlayers() { // jQuery
   buildOnlinePlayerData();
   $.fn.dataTable.ext.search.push(dataTableSearch);
   filterHeaderOnlinePlayers();
+  highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
+  calculateBoundaries();
 
   table = $('#fshInv', context).dataTable({ // context
     data: onlineData,
@@ -97,8 +94,8 @@ function gotOnlinePlayers() { // jQuery
     ],
     createdRow: function(row, data) {
       if (highlightPlayersNearMyLvl &&
-        Math.abs(intValue(data[2]) - levelToTest) <=
-        lvlDiffToHighlight) {
+        intValue(data[2]) >= pvpLowerLevel &&
+        intValue(data[2]) <= pvpUpperLevel) {
         $('td', row).eq(2).addClass('lvlHighlight');
       }
     },

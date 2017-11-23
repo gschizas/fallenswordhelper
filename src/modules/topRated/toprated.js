@@ -1,15 +1,17 @@
 import getProfile from '../ajax/getProfile';
 import {getValue} from '../support/system';
 import guildView from '../app/guild/view';
-import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
 import {playerDataObject} from '../common/common';
+import {
+  calculateBoundaries,
+  pvpLowerLevel,
+  pvpUpperLevel
+} from '../common/levelHighlight';
 import {createInput, createSpan} from '../common/cElement';
 import {onlineDot, pCC} from '../support/layout';
 
 var highlightPlayersNearMyLvl;
-var lvlDiffToHighlight;
-var myVL;
 var spinner;
 var validPvP = nowSecs - 604800;
 var guilds;
@@ -17,10 +19,10 @@ var guilds;
 function doOnlineDot(aTable, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (myVL &&
+  if (highlightPlayersNearMyLvl &&
       data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight &&
-      data.virtual_level < myVL + lvlDiffToHighlight) {
+      data.virtual_level >= pvpLowerLevel &&
+      data.virtual_level <= pvpUpperLevel) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
 }
@@ -101,12 +103,6 @@ function findOnlinePlayers() { // jQuery
   });
 }
 
-function gotMyVl(data) {
-  myVL = data.virtual_level;
-  lvlDiffToHighlight = 11;
-  if (myVL <= 205) {lvlDiffToHighlight = 6;}
-}
-
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
   spinner = createSpan({
@@ -114,14 +110,14 @@ function getMyVL(e) { // jQuery
     innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
   });
   e.target.parentNode.replaceChild(spinner, e.target);
+  highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   if (highlightPlayersNearMyLvl) {
-    myStats(false).done(gotMyVl).done(findOnlinePlayers);
-  } else {findOnlinePlayers();}
+    calculateBoundaries();
+  }
+  findOnlinePlayers();
 }
 
 function looksLikeTopRated() {
-  highlightPlayersNearMyLvl =
-    getValue('highlightPlayersNearMyLvl');
   var theCell = pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({

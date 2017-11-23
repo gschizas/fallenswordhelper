@@ -1,33 +1,27 @@
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import setForage from './ajax/setForage';
+import {addCommas, findNode} from './support/system';
 import {
-  addCommas,
-  fallback,
-  findNode,
-  getValue,
-  intValue
-} from './support/system';
+  calculateBoundaries,
+  gvgLowerLevel,
+  gvgUpperLevel,
+  pvpLowerLevel,
+  pvpUpperLevel
+} from './common/levelHighlight';
 import {makePageTemplate, pCC, quickBuffHref} from './support/layout';
 
 export function injectFindPlayer() { // Bad jQuery
+  calculateBoundaries();
   var findPlayerButton = $('input[value="Find Player"]');
-  var levelToTest = intValue($('dt.stat-level:first').next()
-    .text());
-  var characterVirtualLevel = getValue('characterVirtualLevel');
-  levelToTest = fallback(characterVirtualLevel, levelToTest);
-  var pvpLowerLevelModifier = 5;
-  if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
-  var pvpUpperLevelModifier = 5;
-  if (levelToTest >= 200) {pvpUpperLevelModifier = 10;}
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
     'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
-    (levelToTest - pvpLowerLevelModifier) + '&search_level_max=' +
-    (levelToTest + pvpUpperLevelModifier) + '&search_in_guild=0"><span ' +
+    pvpLowerLevel + '&search_level_max=' +
+    pvpUpperLevel + '&search_in_guild=0"><span ' +
     'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
     'index.php?cmd=findplayer&search_active=1&search_username=&' +
-    'search_level_min=' + (levelToTest - 25) + '&search_level_max=' +
-    (levelToTest + 25) + '&search_in_guild=0"><span style="color:blue;">' +
+    'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
+    gvgUpperLevel + '&search_in_guild=0"><span style="color:blue;">' +
     'Get GvG targets</span></a>');
 
   $('table[class="width_full"]').find('a[href*="player_id"]')
