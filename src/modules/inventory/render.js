@@ -135,16 +135,16 @@ export function bpRender(where, type, row) {
 function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
-    row.inv_id + '" playerid="' +
-    fallback(row.player_id, theInv.player_id) +
-    '" mode="1" action="recall">GS</span>';
+      row.inv_id + '" playerid="' +
+      fallback(row.player_id, theInv.player_id) +
+      '" mode="1" action="recall">GS</span>';
   }
   return 'GS';
 }
 
 export function gsRender(_data, type, row) {
   if (row.player_id && row.player_id !== -1 ||
-      row.folder_id && row.guild_tag !== '-1') {
+      row.folder_id && !row.bound && !row.equipped) {
     return gsDisplayType(_data, type, row);
   }
 }
