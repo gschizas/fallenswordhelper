@@ -97,10 +97,12 @@ function quickCreateBailOut(target) {
 }
 
 function quickCreate(evt) {
-  var target = evt.target;
-  if (quickCreateBailOut(target)) {return;}
-  var temp = target.previousElementSibling.previousElementSibling;
+  var self = evt.target.parentNode;
+  if (quickCreateBailOut(self)) {return;}
+  var temp = self.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
+    self.innerHTML = '';
+    self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
     createPotion(temp);
   }
 }
@@ -146,8 +148,8 @@ export function injectComposing() {
   var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
-    el.insertAdjacentHTML('afterend',
-      '&nbsp;[<span class="quickCreate">Quick Create</span>]');
+    el.insertAdjacentHTML('afterend', '<span class="quickCreate">' +
+      '[<span class="sendLink">Quick Create</span>]</span>');
   });
   pCC.addEventListener('click', quickCreate);
   moveButtons();

@@ -203,6 +203,15 @@
   margin-left: -32px;
   border-width: 4px;
 }
+.fshSpinner12:before {
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  margin-left: -6px;
+}
+.fshComposingSpinner:before {
+  top: 75%;
+}
 
 /* Guild Report */
 .guildReportSpinner {
@@ -545,24 +554,20 @@
 .fshBackpack  {height: 490px;}
 .fshBackpack .backpackTabContent > div {height: 110px;}
 .backpackTabContent > div {width: 60px;}
-.fastDiv {height: 16px;}
-.fastWear {
-  cursor: pointer;
-  text-decoration: underline;
-  color: blue;
+.fastDiv {
+  display: flex;
+  height: 16px;
+  justify-content: center;
+}
+.fastAction {
+  /* margin-right: 0.2em; */
   position: relative;
   top: -16%;
+  width: 3em;
 }
 .fastWorn {
   color: green;
   font-weight: bold;
-}
-.fastUse {
-  cursor: pointer;
-  text-decoration: underline;
-  color: blue;
-  position: relative;
-  top: -16%;
 }
 .compDelBtn {
   cursor: pointer;
@@ -656,7 +661,13 @@
 .fshBlock {display: inline-block;}
 .fshNoWrap {white-space: nowrap;}
 .fshBold {font-weight: bold;}
-.quickCreate {cursor: pointer;}
+.quickCreate {
+  display: inline-block;
+  height: 1.2em;
+  margin-left: 0.4em;
+  position: relative;
+  width: 6.4em;
+}
 .fshFixed {position: fixed;}
 .fshRelative {position: relative;}
 .fshXSmall {font-size: x-small;}

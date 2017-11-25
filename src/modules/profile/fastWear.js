@@ -4,7 +4,7 @@ import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import {equipItem, useItem} from '../support/ajax';
 
-function backpackRemove(invId) { // jQuery
+function backpackRemove(invId) { // jQuery.min
   var _invId = parseInt(invId, 10);
   var theBackpack = $('#backpackContainer').data('backpack');
   // remove from srcData
@@ -17,24 +17,29 @@ function backpackRemove(invId) { // jQuery
   });
 }
 
-function fastWearUse(evt) { // jQuery
-  var InventoryItemID = evt.target.getAttribute('itemID');
-  useItem(InventoryItemID).done(function(data) {
+function getInvId(self) {
+  return self.parentNode.parentNode.firstElementChild.dataset.inv;
+}
+
+function fastAction(evt, action, result) { // jQuery.min
+  var self = evt.target;
+  var invId = getInvId(self);
+  self.textContent = '';
+  self.className = 'fastAction fshSpinner fshSpinner12';
+  action(invId).done(function(data) {
     if (data.r !== 0) {return;}
-    backpackRemove(InventoryItemID);
-    evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+    backpackRemove(invId);
+    self.classList.remove('fshSpinner');
+    self.parentNode.innerHTML = '<span class="fastWorn">' + result + '</span>';
   });
 }
 
-function fastWearEquip(e) { // jQuery
-  var self = e.target;
-  var invId = self.getAttribute('itemid');
-  equipItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    backpackRemove(invId);
-    // TODO Insert item from worn
-    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
+function fastWearUse(evt) {
+  fastAction(evt, useItem, 'Used');
+}
+
+function fastWearEquip(evt) {
+  fastAction(evt, equipItem, 'Worn');
 }
 
 function actionClass(usable) {
@@ -51,9 +56,8 @@ function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = createDiv({
     className: 'fastDiv',
-    innerHTML: '<span class="' + actionClass(toUse) +
-      '" itemid="' + theSpan.getAttribute('data-inv') + '">' +
-      actionText(toUse) + '</span>&nbsp;'
+    innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
+      actionText(toUse) + '</span>'
   });
   if (theSpan.parentNode.nextElementSibling) {
     myDiv.appendChild(theSpan.parentNode.nextElementSibling.nextElementSibling);
@@ -63,8 +67,7 @@ function drawButtons(theSpan) {
 
 function fastWearLinks() {
   var bpTabs = getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0]
-    .getAttribute('data-type');
+  var type = bpTabs.getElementsByClassName('tab-selected')[0].dataset.type;
   var items = document.querySelectorAll('#backpackTab_' + type +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
   if (items.length === 0) {return;}
