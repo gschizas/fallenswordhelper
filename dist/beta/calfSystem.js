@@ -667,15 +667,6 @@ function addCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function convertTextToHtml(inputText) {
-  return inputText
-    .replace(/</g, '&lt')
-    .replace(/>/g, '&gt')
-    .replace(/\n/g, '<br>')
-    .replace(/\[\/([a-z])\]/g, '</$1>')
-    .replace(/\[([a-z])\]/g, '<$1>');
-}
-
 function parseDateAsTimestamp(textDate) {
   var dateAry = textDate.split(/[: /[]/);
   return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
@@ -1591,10 +1582,12 @@ function quickCreateBailOut(target) {
 }
 
 function quickCreate(evt) {
-  var target = evt.target;
-  if (quickCreateBailOut(target)) {return;}
-  var temp = target.previousElementSibling.previousElementSibling;
+  var self = evt.target.parentNode;
+  if (quickCreateBailOut(self)) {return;}
+  var temp = self.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
+    self.innerHTML = '';
+    self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
     createPotion(temp);
   }
 }
@@ -1640,8 +1633,8 @@ function injectComposing() {
   var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
-    el.insertAdjacentHTML('afterend',
-      '&nbsp;[<span class="quickCreate">Quick Create</span>]');
+    el.insertAdjacentHTML('afterend', '<span class="quickCreate">' +
+      '[<span class="sendLink">Quick Create</span>]</span>');
   });
   pCC.addEventListener('click', quickCreate);
   moveButtons();
@@ -7094,32 +7087,6 @@ function lookForHcsData() {
   }
 }
 
-function updateHistoryCharacters() { // Legacy
-  var textArea = findNode('//textarea[@id="textInputBox"]');
-  var previewArea = findNode('//span[@findme="biopreview"]');
-  var bioPreviewHTML = convertTextToHtml(textArea.value);
-  previewArea.innerHTML = bioPreviewHTML;
-}
-
-function addHistoryWidgets() { // Legacy
-  var textArea = findNode('//textarea[@name="history"]');
-  if (!textArea) {return;}
-  textArea.value = textArea.value.replace(/<br \/>/ig, '');
-  var textAreaDiv = textArea.parentNode;
-  var bioPreviewHTML = convertTextToHtml(textArea.value);
-  var newDiv = createDiv({
-    innerHTML: '<table align="center" width="325" border="1"><tbody>' +
-    '<tr><td style="text-align:center;color:#7D2252;' +
-    'background-color:#CD9E4B">Preview</td></tr>' +
-    '<tr><td align="left" width="325"><span style="font-size:small;" ' +
-    'findme="biopreview">' + bioPreviewHTML +
-    '</span></td></tr></tbody></table>'
-  });
-  textAreaDiv.appendChild(newDiv);
-  getElementById('textInputBox').addEventListener('keyup',
-    updateHistoryCharacters);
-}
-
 function allowBack() {
   document.querySelector('input[type="submit"]')
     .addEventListener('click', function(evt) {
@@ -8501,7 +8468,7 @@ function renderBio(_bioContents) {
   var bioContents = _bioContents.replace(/\{b\}/g, '`~')
     .replace(/\{\/b\}/g, '~`');
   var buffs = bioContents.match(/`~([^~]|~(?!`))*~`/g);
-  if (!buffs) {return;}
+  if (!buffs) {return _bioContents;}
   buffs.forEach(function(buff, i) {
     var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
     var cbString = '<span id="fshBuff' + i + '" class="buffLink fshBlue">' +
@@ -8517,51 +8484,79 @@ function renderBio(_bioContents) {
 }
 
 var bioEditLines;
+var textArea$1;
+var previewArea;
+var theBox;
+
+function convertTextToHtml(inputText) {
+  var ret = inputText
+    .replace(/</g, '&lt')
+    .replace(/>/g, '&gt')
+    .replace(/\n/g, '<br>')
+    .replace(/\[(\/?)([biu])\]/g, '<$1$2>')
+    .replace(/\\\\/g, '&#92')
+    .replace(/\\/g, '');
+  if (calf.cmd === 'guild') {
+    ret = ret
+      .replace(/\[(\/?)block\]/g, '<$1blockquote>')
+      .replace(/\[list\]/g, '<ul class="list">')
+      .replace(/\[\/list\]/g, '</ul>')
+      .replace(/\[\*\](.*?)<br>/g, '<li>$1</li>');
+  }
+  return ret;
+}
 
 function bioPreview() {
-  var textArea = getElementById('textInputBox');
-  var bioPreviewHTML = convertTextToHtml(textArea.value);
-  textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
-    '<table align="center" width="325" border="1">' +
-    '<tbody><tr><td style="text-align:center;color:#7D2252;' +
-    'background-color:#CD9E4B">Preview</td></tr><tr>' +
-    '<td align="left" width="325"><span id="biopreview">' +
-    bioPreviewHTML + '</span></td></tr></tbody></table></div>');
+  var widthClass = 'fshBioProfile';
+  if (calf.cmd === 'guild') {widthClass = 'fshBioGuild';}
+  var previewContainer = createDiv({
+    className:
+      'fshBioContainer ' + widthClass
+  });
+  var previewHeader = createDiv({
+    className: 'fshBioHeader fshBioInner',
+    innerHTML: 'Preview'
+  });
+  previewContainer.appendChild(previewHeader);
+  previewArea = createDiv({className: 'fshBioPreview fshBioInner'});
+  previewContainer.appendChild(previewArea);
+  textArea$1.parentNode.appendChild(previewContainer);
 }
 
 function bioWords() {
-  // Add description text for the new tags
-  pCC.insertAdjacentHTML('beforeend', '<div>' +
-    '`~This will allow FSH Script users to ' +
-    'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
-    'determine where to put the "Ask For Buffs" button<br><br>' +
-    '&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same ' +
-    'key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br>' +
-    '&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special ' +
-    'characters (non-alphanumeric).<br>' +
-    '&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff ' +
-    'pack names in them to make buffing even easier!</div>');
+  if (calf.cmd === 'profile') {
+    // Add description text for the new tags
+    pCC.insertAdjacentHTML('beforeend', '<div>' +
+      '`~This will allow FSH Script users to select buffs from your bio~`<br>' +
+      'You can use the [cmd] tag as well to determine where to put the "Ask ' +
+      'For Buffs" button<br><br><blockquote><ul class="list">' +
+      '<li>Note 1: The ` and ~ characters are on the same key on US QWERTY ' +
+      'keyboards. ` is <b>NOT</b> an apostrophe.</li>' +
+      '<li>Note 2: Inner text will not contain special characters ' +
+      '(non-alphanumeric).</li>' +
+      '<li>P.S. Be creative with these! Wrap your buff pack names in ' +
+      'them to make buffing even easier!</li>' +
+      '</ul></blockquote></div>');
+  }
 }
 
-function testHeightValid(boxVal) {
+function badHeight(boxVal) {
   return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
 }
 
 function changeHeight() {
-  var theBox = getElementById('fshLinesToShow');
   var boxVal = parseInt(theBox.value, 10);
-  if (testHeightValid(boxVal)) {return;}
+  if (badHeight(boxVal)) {return;}
   bioEditLines = boxVal;
   setValue('bioEditLines', boxVal);
-  getElementById('textInputBox').rows = bioEditLines;
+  textArea$1.rows = bioEditLines;
 }
 
 function bioHeight() {
-  var bioEditLinesDiv = createDiv({
-    innerHTML: ' Display <input id="fshLinesToShow"' +
-      ' type="number" min="1" max="99" value="' +
-      bioEditLines + '"/> Lines '
-  });
+  var bioEditLinesDiv = createDiv({innerHTML: '<br>Display '});
+  theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines});
+  bioEditLinesDiv.appendChild(theBox);
+  bioEditLinesDiv.insertAdjacentText('beforeend', ' Lines ');
   var saveLines = createInput({
     className: 'custombutton',
     value: 'Update Rows To Show',
@@ -8573,25 +8568,22 @@ function bioHeight() {
 }
 
 function updateBioCharacters() {
-  var textArea = getElementById('textInputBox');
-  var previewArea = getElementById('biopreview');
-  var bioContents = convertTextToHtml(textArea.value);
+  var bioContents = convertTextToHtml(textArea$1.value);
   bioContents = renderBio(bioContents);
-  if (bioContents) {
-    previewArea.innerHTML = bioContents;
-  }
+  previewArea.innerHTML = bioContents;
 }
 
 function injectBioWidgets() {
   bioEditLines = getValue('bioEditLines');
-  var textArea = getElementById('textInputBox');
+  textArea$1 = getElementById('textInputBox');
   bioPreview();
   bioWords();
   bioHeight();
-  textArea.rows = bioEditLines;
-
-  textArea.parentNode.addEventListener('click', bioEvtHdl);
-  textArea.addEventListener('keyup', updateBioCharacters);
+  textArea$1.rows = bioEditLines;
+  if (calf.cmd === 'profile') {
+    textArea$1.parentNode.addEventListener('click', bioEvtHdl);
+  }
+  textArea$1.addEventListener('keyup', updateBioCharacters);
   // Force the preview area to render
   updateBioCharacters();
 }
@@ -9570,16 +9562,16 @@ function bpRender(where, type, row) {
 function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
-    row.inv_id + '" playerid="' +
-    fallback(row.player_id, theInv.player_id) +
-    '" mode="1" action="recall">GS</span>';
+      row.inv_id + '" playerid="' +
+      fallback(row.player_id, theInv.player_id) +
+      '" mode="1" action="recall">GS</span>';
   }
   return 'GS';
 }
 
 function gsRender(_data, type, row) {
   if (row.player_id && row.player_id !== -1 ||
-      row.folder_id && row.guild_tag !== '-1') {
+      row.folder_id && !row.bound && !row.equipped) {
     return gsDisplayType(_data, type, row);
   }
 }
@@ -11017,7 +11009,7 @@ function fastDebuff() {
   profileRightColumn.addEventListener('click', interceptDebuff, true);
 }
 
-function backpackRemove$1(invId) { // jQuery
+function backpackRemove$1(invId) { // jQuery.min
   var _invId = parseInt(invId, 10);
   var theBackpack = $('#backpackContainer').data('backpack');
   // remove from srcData
@@ -11030,24 +11022,29 @@ function backpackRemove$1(invId) { // jQuery
   });
 }
 
-function fastWearUse(evt) { // jQuery
-  var InventoryItemID = evt.target.getAttribute('itemID');
-  useItem(InventoryItemID).done(function(data) {
+function getInvId(self) {
+  return self.parentNode.parentNode.firstElementChild.dataset.inv;
+}
+
+function fastAction(evt, action, result) { // jQuery.min
+  var self = evt.target;
+  var invId = getInvId(self);
+  self.textContent = '';
+  self.className = 'fastAction fshSpinner fshSpinner12';
+  action(invId).done(function(data) {
     if (data.r !== 0) {return;}
-    backpackRemove$1(InventoryItemID);
-    evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+    backpackRemove$1(invId);
+    self.classList.remove('fshSpinner');
+    self.parentNode.innerHTML = '<span class="fastWorn">' + result + '</span>';
   });
 }
 
-function fastWearEquip(e) { // jQuery
-  var self = e.target;
-  var invId = self.getAttribute('itemid');
-  equipItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    backpackRemove$1(invId);
-    // TODO Insert item from worn
-    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
+function fastWearUse(evt) {
+  fastAction(evt, useItem, 'Used');
+}
+
+function fastWearEquip(evt) {
+  fastAction(evt, equipItem, 'Worn');
 }
 
 function actionClass(usable) {
@@ -11064,9 +11061,8 @@ function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = createDiv({
     className: 'fastDiv',
-    innerHTML: '<span class="' + actionClass(toUse) +
-      '" itemid="' + theSpan.getAttribute('data-inv') + '">' +
-      actionText(toUse) + '</span>&nbsp;'
+    innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
+      actionText(toUse) + '</span>'
   });
   if (theSpan.parentNode.nextElementSibling) {
     myDiv.appendChild(theSpan.parentNode.nextElementSibling.nextElementSibling);
@@ -11076,8 +11072,7 @@ function drawButtons(theSpan) {
 
 function fastWearLinks() {
   var bpTabs = getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0]
-    .getAttribute('data-type');
+  var type = bpTabs.getElementsByClassName('tab-selected')[0].dataset.type;
   var items = document.querySelectorAll('#backpackTab_' + type +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
   if (items.length === 0) {return;}
@@ -16261,6 +16256,11 @@ function addChatTextArea() {
   hasTextEntry();
 }
 
+function getCombatStat(responseText, label) {
+  var statRe = new RegExp('var\\s+' + label + '=(-?[0-9]+);', 'i');
+  return getIntFromRegExp(responseText, statRe);
+}
+
 function result$1(stat, desc, color) {
   if (stat !== 0) {
     return desc + ':<span class="' + color + '">' +
@@ -16271,22 +16271,15 @@ function result$1(stat, desc, color) {
 
 function retrievePvPCombatSummary(responseText, callback) { // Legacy
   var winner = callback.winner;
-  var color;
+  var color = 'fshRed';
   if (winner === 1) {
     color = 'fshGreen';
-  } else {
-    color = 'fshRed';
   }
-  var xpGain = getIntFromRegExp(responseText,
-    /var\s+xpGain=(-?[0-9]+);/i);
-  var goldGain = getIntFromRegExp(responseText,
-    /var\s+goldGain=(-?[0-9]+);/i);
-  var prestigeGain = getIntFromRegExp(responseText,
-    /var\s+prestigeGain=(-?[0-9]+);/i);
-  var goldStolen = getIntFromRegExp(responseText,
-    /var\s+goldStolen=(-?[0-9]+);/i);
-  var pvpRatingChange = getIntFromRegExp(responseText,
-    /var\s+pvpRatingChange=(-?[0-9]+);/i);
+  var xpGain = getCombatStat(responseText, 'xpGain');
+  var goldGain = getCombatStat(responseText, 'goldGain');
+  var prestigeGain = getCombatStat(responseText, 'prestigeGain');
+  var goldStolen = getCombatStat(responseText, 'goldStolen');
+  var pvpRatingChange = getCombatStat(responseText, 'pvpRatingChange');
   var output = '<br> ';
   output += result$1(xpGain, 'XP stolen', color);
   output += result$1(goldGain, 'Gold lost', color);
@@ -16304,6 +16297,22 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   callback.target.innerHTML = output;
 }
 
+function parseCombatWinner(msgCell) {
+  var replaceText = createSpan({
+    innerHTML:
+      'You were <span class="fshRed">defeated</span> by '
+  });
+  var defeat = /You were defeated by/.test(msgCell.innerHTML);
+  if (defeat) {
+    msgCell.replaceChild(replaceText, msgCell.firstChild);
+    return 0;
+  }
+  replaceText.innerHTML =
+    'You were <span class="fshGreen">victorious</span> over ';
+  msgCell.replaceChild(replaceText, msgCell.firstChild);
+  return 1;
+}
+
 function addPvpSummary(aRow, messageType) { // Legacy
   // add PvP combat log summary
   if (messageType === 'Combat' &&
@@ -16312,17 +16321,12 @@ function addPvpSummary(aRow, messageType) { // Legacy
       /combat_id=/.test(aRow.cells[2].innerHTML) &&
       !/\(Guild Conflict\)/.test(aRow.cells[2].textContent)) {
     var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-    var defeat = /You were defeated by/.test(aRow.cells[2].innerHTML);
-    var _winner = 1;
-    if (defeat) {_winner = 0;}
+    var _winner = parseCombatWinner(aRow.cells[2]);
     var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
     xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,
-      {
-        target: combatSummarySpan,
-        winner: _winner
-      }
+      {target: combatSummarySpan, winner: _winner}
     );
   }
 }
@@ -17425,19 +17429,19 @@ function injectProfileDropItems() {
 }
 
 var maxcharacters;
-var textArea$1;
+var textArea$2;
 var shoutboxPreview;
 
 function updateShoutboxPreview() {
-  var textContent = textArea$1.value;
+  var textContent = textArea$2.value;
   var chars = textContent.length;
   if (chars > maxcharacters) {
     textContent = textContent.substring(0, maxcharacters);
-    textArea$1.value = textContent;
+    textArea$2.value = textContent;
     chars = maxcharacters;
   }
   if (!shoutboxPreview) {
-    shoutboxPreview = textArea$1.parentNode.parentNode.parentNode.parentNode
+    shoutboxPreview = textArea$2.parentNode.parentNode.parentNode.parentNode
       .insertRow().insertCell();
   }
   shoutboxPreview.innerHTML = '<table class="sbpTbl"><tbody><tr>' +
@@ -17447,8 +17451,8 @@ function updateShoutboxPreview() {
 }
 
 function injectShoutboxWidgets() {
-  textArea$1 = getElementById('textInputBox');
-  textArea$1.addEventListener('keyup', updateShoutboxPreview);
+  textArea$2 = getElementById('textInputBox');
+  textArea$2.addEventListener('keyup', updateShoutboxPreview);
 }
 
 function newsFsbox() {
@@ -17514,7 +17518,7 @@ var pageSwitcher = {
       '-': {'-': {'-': injectAdvisor}},
       weekly: {'-': {'-': injectAdvisor}}
     },
-    history: {'-': {'-': {'-': addHistoryWidgets}}},
+    history: {'-': {'-': {'-': injectBioWidgets}}},
     view: {'-': {'-': {'-': injectViewGuild}}},
     scouttower: {'-': {'-': {'-': injectScouttower}}},
     mailbox: {'-': {'-': {'-': guildMailbox}}},
@@ -17676,7 +17680,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '2';
+window.FSH.calf = '3';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
