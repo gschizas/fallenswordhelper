@@ -1,4 +1,3 @@
-import addHistoryWidgets from '../guild/addHistoryWidgets';
 import allowBack from '../guide/allowBack';
 import completedArenas from '../arena/completedArenas';
 import composingBreakdown from '../composing/breakdown';
@@ -116,7 +115,7 @@ export default {
       '-': {'-': {'-': injectAdvisor}},
       weekly: {'-': {'-': injectAdvisor}}
     },
-    history: {'-': {'-': {'-': addHistoryWidgets}}},
+    history: {'-': {'-': {'-': injectBioWidgets}}},
     view: {'-': {'-': {'-': injectViewGuild}}},
     scouttower: {'-': {'-': {'-': injectScouttower}}},
     mailbox: {'-': {'-': {'-': guildMailbox}}},

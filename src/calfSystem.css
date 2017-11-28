@@ -1,3 +1,29 @@
+/* Bio Preview */
+.fshBioContainer {
+  border: 1px solid;
+  border-color: grey black black grey;
+  margin: 1em auto 0;
+}
+.fshBioProfile {
+  width: 327px;
+}
+.fshBioGuild {
+  width: 334px;
+}
+.fshBioHeader {
+  background-color: #CD9E4B;
+  color: #7D2252;
+}
+.fshBioPreview {
+  padding: 2px;
+  text-align: left;
+}
+.fshBioInner {
+  border: 1px solid;
+  border-color: black grey grey black;
+  margin: 1.5px;
+}
+
 /* Guild Hall */
 .fshHallPref {
   position: absolute;

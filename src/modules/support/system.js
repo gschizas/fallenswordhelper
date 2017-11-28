@@ -127,15 +127,6 @@ export function addCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-export function convertTextToHtml(inputText) {
-  return inputText
-    .replace(/</g, '&lt')
-    .replace(/>/g, '&gt')
-    .replace(/\n/g, '<br>')
-    .replace(/\[\/([a-z])\]/g, '</$1>')
-    .replace(/\[([a-z])\]/g, '<$1>');
-}
-
 export function parseDateAsTimestamp(textDate) {
   var dateAry = textDate.split(/[: /[]/);
   return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
