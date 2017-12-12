@@ -7,7 +7,7 @@ import {
   createDiv,
   createInput,
   createLabel,
-  createSpan
+  textSpan
 } from '../common/cElement';
 import {getValue, setValue} from '../support/system';
 import {openQuickBuffByName, playerName} from '../support/layout';
@@ -80,13 +80,27 @@ var clickHdl = [
   }
 ];
 
+function fixTeleport() {
+  if (GameController && GameController.Realm) {
+    GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
+  }
+}
+
+function makeButtonContainer() {
+  if (buttonContainer) {buttonContainer.remove();}
+  return createDiv({
+    className: 'fshCurveContainer',
+    id: 'fshWorldButtonContainer'
+  });
+}
+
 function doLevels(data, worldName) {
   var lvlDiv = createDiv({
     className: 'fshFsty',
     innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
   });
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
-  yourLvl = createSpan({textContent: data.player.level});
+  yourLvl = textSpan(data.player.level.toString());
   lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
   worldName.appendChild(lvlDiv);
 }
@@ -133,16 +147,18 @@ function makeToggleBtn(o) {
 }
 
 function showSpeakerOnWorld(worldName) {
-  var msgSounds = getValue('playNewMessageSound');
-  soundCheck = makeToggleBtn({
-    prefVal: msgSounds,
-    checkId: 'fshSoundCheck',
-    onClass: 'soundOn',
-    onTip: 'Turn Off Sound when you have a new log message',
-    offClass: 'soundOff',
-    offTip: 'Turn On Sound when you have a new log message',
-    worldName: worldName
-  });
+  if (getValue('showSpeakerOnWorld')) {
+    var msgSounds = getValue('playNewMessageSound');
+    soundCheck = makeToggleBtn({
+      prefVal: msgSounds,
+      checkId: 'fshSoundCheck',
+      onClass: 'soundOn',
+      onTip: 'Turn Off Sound when you have a new log message',
+      offClass: 'soundOff',
+      offTip: 'Turn On Sound when you have a new log message',
+      worldName: worldName
+    });
+  }
 }
 
 function showHuntMode(worldName) {
@@ -159,21 +175,13 @@ function showHuntMode(worldName) {
 }
 
 export function injectButtons(data) {
-  GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
-  if (buttonContainer) {buttonContainer.remove();}
-  buttonContainer = createDiv({
-    className: 'fshCurveContainer',
-    id: 'fshWorldButtonContainer'
-  });
-
+  fixTeleport();
+  buttonContainer = makeButtonContainer();
   showQuickLinks(buttonContainer, data);
-  if (getValue('showSpeakerOnWorld')) {
-    showSpeakerOnWorld(buttonContainer);
-  }
+  showSpeakerOnWorld(buttonContainer);
   showHuntMode(buttonContainer);
   buttonContainer.addEventListener('click', eventHandler(clickHdl));
   buttonContainer.addEventListener('change', eventHandler(changeHdl));
-
   getElementById('worldContainer')
     .insertBefore(buttonContainer, getElementById('worldCoord'));
 }
@@ -183,5 +191,7 @@ export function levelStats(e, data) {
   console.log('level.stats-player data', data); // eslint-disable-line no-console
   // level.stats-player data Object { a: 3381, b: 3382 }
   //#endif
-  yourLvl.textContent = data.b;
+  if (yourLvl) {
+    yourLvl.textContent = data.b;
+  }
 }
