@@ -1,4 +1,3 @@
-var concurrent = 0;
 var paused = true;
 var queue = [];
 
@@ -33,13 +32,9 @@ function taskRunner() {
     paused = true;
   } else {
     paused = false;
-    if (concurrent < 4) {
-      concurrent += 1;
+    if ($.active < 4) {
       var opts = queue.shift();
-      doAjax.apply(null, opts).always(function() {
-        concurrent -= 1;
-        taskRunner();
-      });
+      doAjax.apply(null, opts);
       taskRunner();
     }
   }
@@ -55,3 +50,7 @@ export default function retryAjax(options) {
   add(options, 10, dfr);
   return dfr;
 }
+
+$(document).ajaxComplete(function() {
+  taskRunner();
+});
