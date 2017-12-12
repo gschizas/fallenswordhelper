@@ -1,6 +1,7 @@
 import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
+import isNaN from '../../common/isNaN';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
 import {createDiv, createInput} from '../../common/cElement';
