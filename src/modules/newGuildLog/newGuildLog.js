@@ -8,6 +8,7 @@ import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import {rowProfile} from './profiler';
 import setForage from '../ajax/setForage';
+import toggleForce from '../common/toggleForce';
 import {
   createDocument,
   getValue,
@@ -177,10 +178,11 @@ function toggleItem(self) {
   var item = Number(self.getAttribute('item'));
   options.checks[item] = !options.checks[item];
   storeOptions();
+  var hide = !options.checks[item];
   tmpGuildLog.forEach(function(r) {
     if (r[4] !== item) {return;}
-    r[5].classList.toggle('fshHide');
-    r[6].classList.toggle('fshHide');
+    toggleForce(r[5], hide);
+    toggleForce(r[6], hide);
   });
 }
 

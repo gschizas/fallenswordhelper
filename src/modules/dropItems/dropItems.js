@@ -12,6 +12,7 @@ import moveItemsToFolder from './moveItemsToFolder';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
+import toggleForce from '../common/toggleForce';
 import {fallback, getValue, setValue} from '../support/system';
 import {guideUrl, itemRE, rarity} from '../support/dataObj';
 
@@ -133,7 +134,7 @@ function toggleShowExtraLinks() {
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
-      el.classList.toggle('fshHide');
+      toggleForce(el, !showExtraLinks);
     });
   }
 }
@@ -148,7 +149,7 @@ function toggleShowQuickDropLinks() {
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
-      el.classList.toggle('fshHide');
+      toggleForce(el, !showQuickDropLinks);
     });
   }
 }
