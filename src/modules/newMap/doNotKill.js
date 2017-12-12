@@ -1,23 +1,22 @@
 import calf from '../support/calf';
+import {def_afterUpdateActionlist} from '../support/dataObj';
 import {getElementById} from '../common/getElement';
-import {
-  def_afterUpdateActionlist,
-  def_creatureCombat
-} from '../support/dataObj';
 
-function afterUpdateActionList() {
+var oldDoAction;
+
+export function afterUpdateActionList() {
   // color the critters in the do no kill list blue
   var act = getElementById('actionList');
   var creatures = act.getElementsByClassName('creature');
   Array.prototype.forEach.call(creatures, function(el) {
-    if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
-      el.classList.add('fshBlue');
-    }
+    el.classList.toggle('fshBlue',
+      calf.doNotKillList.indexOf(el.textContent) !== -1);
   });
 }
 
-function maybeIntercept(oldDoAction, actionCode, fetchFlags, data) {
-  if (actionCode === def_creatureCombat) {
+var actionsToIntercept = {
+  // def_creatureCombat
+  '2': function(action, fetch, data, attempts) {
     // Do custom stuff e.g. do not kill list
     var creatureName = GameData.actions()[data.passback].data.name;
     if (calf.doNotKillList.indexOf(creatureName) !== -1) {
@@ -25,14 +24,24 @@ function maybeIntercept(oldDoAction, actionCode, fetchFlags, data) {
         .find('a.icon').removeClass('loading');
       return;
     }
+    // Call standard action
+    oldDoAction(action, fetch, data, attempts);
   }
-  // Call standard action
-  oldDoAction(actionCode, fetchFlags, data);
+};
+
+function maybeIntercept(action, fetch, data, attempts) {
+  var interceptFunction = actionsToIntercept[action];
+  if ((typeof attempts === 'undefined' || attempts === 0) &&
+      interceptFunction && typeof interceptFunction === 'function') {
+    interceptFunction(action, fetch, data, attempts);
+  } else {
+    oldDoAction(action, fetch, data, attempts);
+  }
 }
 
-function interceptDoAction() { // jQuery
-  var oldDoAction = GameData.doAction;
-  GameData.doAction = maybeIntercept.bind(null, oldDoAction);
+function interceptDoAction() {
+  oldDoAction = GameData.doAction;
+  GameData.doAction = maybeIntercept;
 }
 
 export default function doNotKill() {
