@@ -46,22 +46,21 @@ function hasNetwork(o) {
   return '';
 }
 
-function isOn(o) {
-  return isChecked(getValue(o.id));
+function isOn(name) {
+  return isChecked(getValue(name));
 }
 
-function justLabel(name) {
+export function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
-    '<label for="' + o.id + '">' + fallback(o.title, o.helpTitle) +
+    '<label for="' + name + '">' + fallback(o.title, o.helpTitle) +
     helpLink(o.helpTitle, o.helpText) +
     ':</label>';
 }
 
-function justCheckbox(name) {
-  var o = mySimpleCheckboxes[name];
-  return '<input id="' + o.id + '" name="' + o.id +
-    '" class="fshVMid" type="checkbox" value="on"' + isOn(o) + '>';
+export function justCheckbox(name) {
+  return '<input id="' + name + '" name="' + name +
+    '" class="fshVMid" type="checkbox" value="on"' + isOn(name) + '>';
 }
 
 export function simpleCheckboxHtml(name) {
