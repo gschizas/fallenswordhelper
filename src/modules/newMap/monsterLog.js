@@ -1,9 +1,10 @@
+import {bias} from './assets';
 import {def_afterUpdateActionlist} from '../support/dataObj';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
-import {fallback, getValue, intValue} from '../support/system';
+import {fallback, getValue, intValue, setValue} from '../support/system';
 
 var showCreatureInfo;
 var showMonsterLog;
@@ -19,6 +20,16 @@ var statAttack;
 var statDamage;
 var statArmor;
 var statHp;
+
+export function toggleShowCreatureInfo() {
+  showCreatureInfo = !showCreatureInfo;
+  setValue('showCreatureInfo', showCreatureInfo);
+}
+
+export function toggleShowMonsterLog() {
+  showMonsterLog = !showMonsterLog;
+  setValue('showMonsterLog', showMonsterLog);
+}
 
 function updateMinMax(_logStat, creatureStat) {
   var logStat = fallback(_logStat, {});
@@ -148,10 +159,10 @@ function processMonster(data) {
   processMonsterLog();
 }
 
-function loopActions(e, i) { // jQuery
+function loopActions(e, i) { // jQuery.min
   if (e.type !== 6) {return;}
   retryAjax({
-    url: 'fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i,
+    url: 'fetchdata.php?a=1&id=' + e.data.id + '&passback=' + i,
     dataType: 'json'
   }).done(processMonster);
 }
@@ -173,25 +184,25 @@ function getMyStats() {
 }
 
 function initMonsterLog() {
+  if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo) {getMyStats();}
   actionData = GameData.actions();
   actionData.forEach(loopActions);
 }
 
-var genVar = [0, 1.1, 1.053, 1.1053];
-var hpVar = [0, 1.053, 1, 1];
-
 function getBias() {
   var combatEvaluatorBias = getValue('combatEvaluatorBias');
-  generalVariable = genVar[combatEvaluatorBias];
-  hpVariable = hpVar[combatEvaluatorBias];
+  if (combatEvaluatorBias &&
+      combatEvaluatorBias >= 0 && combatEvaluatorBias <= 3) {
+    generalVariable = bias[combatEvaluatorBias].generalVariable;
+    hpVariable = bias[combatEvaluatorBias].hpVariable;
+  }
 }
 
-export default function startMonsterLog() { // jQuery
+export default function startMonsterLog() { // jQuery.min
   showCreatureInfo = getValue('showCreatureInfo');
   showMonsterLog = getValue('showMonsterLog');
-  if (!showCreatureInfo && !showMonsterLog) {return;}
-  if (showCreatureInfo) {getBias();}
+  getBias();
   $.subscribe(def_afterUpdateActionlist, initMonsterLog);
   getForage('fsh_monsterLog').done(function(data) {
     monsterLog = data || {};
