@@ -1,4 +1,5 @@
-import assets from '../assets';
+import {afterUpdateActionList} from '../doNotKill';
+import {bias} from '../assets';
 import calf from '../../support/calf';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
@@ -20,15 +21,15 @@ import {
 } from '../../support/system';
 
 function getBiasGeneral(combat) {
-  if (assets.bias[combat.combatEvaluatorBias]) {
-    return assets.bias[combat.combatEvaluatorBias].generalVariable;
+  if (bias[combat.combatEvaluatorBias]) {
+    return bias[combat.combatEvaluatorBias].generalVariable;
   }
   return 1.1053;
 }
 
 function getBiasHp(combat) {
-  if (assets.bias[combat.combatEvaluatorBias]) {
-    return assets.bias[combat.combatEvaluatorBias].hpVariable;
+  if (bias[combat.combatEvaluatorBias]) {
+    return bias[combat.combatEvaluatorBias].hpVariable;
   }
   return 1.1;
 }
@@ -158,7 +159,7 @@ function addRemoveCreatureToDoNotKillList(evt) {
   }
   setValue('doNotKillList', calf.doNotKillList.join());
   // refresh the action list
-  window.GameData.doAction(-1);
+  afterUpdateActionList();
 }
 
 export default function readyViewCreature() { // Hybrid
