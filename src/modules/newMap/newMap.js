@@ -7,8 +7,8 @@ import injectRelic from './relic/relic';
 import onWorld from './onWorld';
 import prepareShop from './shop';
 import readyViewCreature from './viewCreature/viewCreature';
-import setupPref from './subLevel';
 import startMonsterLog from './monsterLog';
+import worldPrefs from './worldPrefs';
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
@@ -57,11 +57,11 @@ function doMonsterColors() { // jQuery.min
 }
 
 function doRepair(e, key) {
-  if (key === 'ACT_REPAIR') {GameData.fetch(403);}
+  if (key === 'ACT_REPAIR') {GameData.fetch(402);}
 }
 
 export default function subscribes() { // jQuery.min
-  setupPref();
+  worldPrefs();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
   hideGroupButton(); // Hide Create Group button
@@ -75,22 +75,5 @@ export default function subscribes() { // jQuery.min
   prepareShop();
   injectRelic();
   $('#messageCenter').worldMessageCenter({offset: '0 60'});
+  $('#mapTooltip').qtip('hide');
 }
-
-/* fetchFlags = {
-  playerStats : 1,
-  playerBackpackCount : 2,
-  playerBackpackItems : 4,
-  playerPrefs : 8,
-
-  playerBuffs : 16,
-  worldDefines : 32,
-  worldRealmStatic : 64,
-  worldRealmDynamic : 128,
-
-  worldRealmActions : 256,
-  PLAYER_EQUIPMENT : 512,
-  PLAYER_NOTIFICATIONS : 1024,
-
-  all : 2047
-}; */

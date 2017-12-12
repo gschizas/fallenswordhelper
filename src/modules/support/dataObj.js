@@ -278,7 +278,8 @@ export var defaults = {
   lastLadderReset: 0,
   disableQuickWearPrompts: false,
   enableGuildActivityTracker: false,
-  enableSeTracker: false
+  enableSeTracker: false,
+  showTitanInfo: false
 };
 
 export var rarity = [
@@ -321,4 +322,20 @@ export var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
 export var def_afterUpdateActionlist = 'after-update.actionlist';
 export var def_playerBuffs = 'buffs.player';
 export var def_suffixSuccessActionResponse = '-success.action-response';
+
 export var def_creatureCombat = 2;
+export var def_repairAll = 15;
+
+export var def_fetch_playerStats = 1;
+export var def_fetch_playerBackpackCount = 2;
+export var def_fetch_playerBackpackItems = 4;
+export var def_fetch_playerPrefs = 8;
+
+export var def_fetch_playerBuffs = 16;
+export var def_fetch_worldDefines = 32;
+export var def_fetch_worldRealmStatic = 64;
+export var def_fetch_worldRealmDynamic = 128;
+
+export var def_fetch_worldRealmActions = 256;
+export var def_fetch_playerEquipment = 512;
+export var def_fetch_playerNotifications = 1024;

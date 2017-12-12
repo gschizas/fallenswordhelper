@@ -289,5 +289,16 @@ export default {
       'browser tab it will scan the SE Log every 10 minutes.<br>' +
       'You do not need auto-refresh for this to work.',
     network: true
+  },
+  showMonsterLog: {
+    helpTitle: 'Keep Creature Log',
+    helpText: 'This will show the creature log for each creature you see ' +
+      'when you travel.',
+    network: true
+  },
+  showTitanInfo: {
+    helpTitle: 'Show Titan Info',
+    helpText: 'This will show titan info in the action list.',
+    network: true
   }
 };

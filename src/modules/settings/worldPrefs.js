@@ -1,7 +1,11 @@
 import calf from '../support/calf';
-import {networkIcon} from './settingObj';
 import {getValue, isChecked, isSelected} from '../support/system';
-import {helpLink, simpleCheckbox} from './settingsPage';
+import {
+  helpLink,
+  justCheckbox,
+  justLabel,
+  simpleCheckbox
+} from './settingsPage';
 
 function worldGroup() {
   // World Screen
@@ -111,12 +115,8 @@ export function prefs() {
 
     combatEvalBias() +
 
-    '<tr><td class="fshRight">' + networkIcon + 'Keep Creature Log' +
-      helpLink('Keep Creature Log',
-        'This will show the creature log for each creature you see when ' +
-        'you travel.') +
-      ':</td><td><input name="showMonsterLog" type="checkbox" value="on"' +
-      isChecked(getValue('showMonsterLog')) + '>' +
+    '<tr><td class="fshRight">' + justLabel('showMonsterLog') +
+      '</td><td>' + justCheckbox('showMonsterLog') +
       '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
       'value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 

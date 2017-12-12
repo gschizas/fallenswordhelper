@@ -47,6 +47,7 @@ function displayOtherCount(invCount) {
 }
 
 function buildHTML(invCount, quickSL) {
+  // TODO this is going to need significant rebuild
   return '<table width="100%" cellspacing="2" cellpadding="2"><thead>' +
     '<tr><th colspan="5" class="fshCenter">Items from ' +
     '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +

@@ -1,6 +1,7 @@
-import assets from './assets';
 import calf from '../support/calf';
+import {colorHash} from './assets';
 import {getElementById} from '../common/getElement';
+import titanStats from './titanStats/titanStats';
 import {
   def_playerBuffs,
   def_suffixSuccessActionResponse
@@ -16,6 +17,7 @@ function injectWorldNewMap(data) {
   updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     injectButtons(data);
+    titanStats(data);
     getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
     if (calf.hideSubLvlCreature) {GameData.fetch(256);}
@@ -26,7 +28,7 @@ function impIconColour() { // jQuery
   var imp = $('#actionlist-shield-imp');
   if (imp.length === 1) {
     imp.css('background-color',
-      assets.colorHash[imp.text()] || '#ad8043');
+      colorHash[imp.text()] || '#ad8043');
   }
 }
 
