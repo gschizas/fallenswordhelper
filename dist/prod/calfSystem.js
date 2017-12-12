@@ -166,7 +166,6 @@ if (needApiUpgrade) {
 
 var calf = {};
 
-var concurrent = 0;
 var paused$1 = true;
 var queue = [];
 
@@ -201,13 +200,9 @@ function taskRunner$1() {
     paused$1 = true;
   } else {
     paused$1 = false;
-    if (concurrent < 4) {
-      concurrent += 1;
+    if ($.active < 4) {
       var opts = queue.shift();
-      doAjax.apply(null, opts).always(function() {
-        concurrent -= 1;
-        taskRunner$1();
-      });
+      doAjax.apply(null, opts);
       taskRunner$1();
     }
   }
@@ -223,6 +218,10 @@ function retryAjax(options) {
   add$1(options, 10, dfr);
   return dfr;
 }
+
+$(document).ajaxComplete(function() {
+  taskRunner$1();
+});
 
 /* eslint-disable max-lines */
 var defaults = {
@@ -504,7 +503,8 @@ var defaults = {
   lastLadderReset: 0,
   disableQuickWearPrompts: false,
   enableGuildActivityTracker: false,
-  enableSeTracker: false
+  enableSeTracker: false,
+  showTitanInfo: false
 };
 
 var rarity = [
@@ -547,7 +547,21 @@ var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
 var def_afterUpdateActionlist = 'after-update.actionlist';
 var def_playerBuffs = 'buffs.player';
 var def_suffixSuccessActionResponse = '-success.action-response';
-var def_creatureCombat = 2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var def_fetch_worldRealmActions = 256;
 
 var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -1161,6 +1175,10 @@ function createTh(props) {
 
 function createLabel(props) {
   return cElement('label', props);
+}
+
+function textSpan(text) {
+  return createSpan({textContent: text});
 }
 
 function callApp(data) {
@@ -2901,93 +2919,78 @@ function showAHInvManager(itemList) {
 /* eslint-disable max-lines */
 var mySimpleCheckboxes = {
   moveGuildList: {
-    id: 'moveGuildList',
     helpTitle: 'Move Guild Info List',
     helpText: 'This will Move the Guild Info List higher ' +
       'on the bar on the right'
   },
   moveOnlineAlliesList: {
-    id: 'moveOnlineAlliesList',
     helpTitle: 'Move Online Allies List',
     helpText: 'This will Move the Online Allies List higher ' +
       'on the bar on the right'
   },
   enableOnlineAlliesWidgets: {
-    id: 'enableOnlineAlliesWidgets',
     helpTitle: 'Enable Online Allies Widgets',
     helpText: 'Enabling this option will enable the Allies List ' +
       'Widgets (coloring on the Allies List panel)'
   },
   moveFSBox: {
-    id: 'moveFSBox',
     helpTitle: 'Move FS box',
     helpText: 'This will move the FS box to the left, under the menu, ' +
       'for better visibility (unless it is already hidden.)'
   },
   gameHelpLink: {
-    id: 'gameHelpLink',
     helpTitle: '&quot;Game Help&quot; Settings Link',
     helpText: 'This turns the Game Help text in the lower ' +
       'right box into a link to this settings page.'
   },
   enableTempleAlert: {
-    id: 'enableTempleAlert',
     helpTitle: 'Enable Temple Alert',
     helpText: 'Puts an alert on the LHS if you have not ' +
       'prayed at the temple today.',
     network: true
   },
   enableUpgradeAlert: {
-    id: 'enableUpgradeAlert',
     helpTitle: 'Enable Gold Upgrade Alert',
     helpText: 'Puts an alert on the LHS if you have not upgraded your ' +
       'stamina with gold today.',
     network: true
   },
   enableComposingAlert: {
-    id: 'enableComposingAlert',
     helpTitle: 'Enable Composing Alert',
     helpText: 'Puts an alert on the LHS if you have composing ' +
       'slots available.',
     network: true
   },
   enhanceOnlineDots: {
-    id: 'enhanceOnlineDots',
     helpTitle: 'Enhance Online Dots',
     helpText: 'Enhances the green/grey dots by player names to show ' +
       'online/offline status.'
   },
   hideBuffSelected: {
-    id: 'hideBuffSelected',
     helpTitle: 'Hide Buff Selected',
     helpText: 'Hides the buff selected functionality in the online allies ' +
       'and guild info section.'
   },
   hideHelperMenu: {
-    id: 'hideHelperMenu',
     helpTitle: 'Hide Helper Menu',
     helpText: 'Hides the helper menu from top left.'
   },
   keepHelperMenuOnScreen: {
-    id: 'keepHelperMenuOnScreen',
     helpTitle: 'Keep Helper Menu On Screen',
     helpText: 'Keeps helper menu on screen as you scroll (helper ' +
       'menu must be enabled to work). Also works with quick links.'
   },
   showAdmin: {
-    id: 'showAdmin',
     helpTitle: 'Show rank controls',
     helpText: 'Show ranking controls for guild managemenet in member ' +
       'profile page - this works for guild founders only'
   },
   ajaxifyRankControls: {
-    id: 'ajaxifyRankControls',
     helpTitle: 'AJAXify rank controls',
     helpText: 'Enables guild founders with ranking rights to change rank ' +
       'positions without a screen refresh.'
   },
   detailedConflictInfo: {
-    id: 'detailedConflictInfo',
     helpTitle: 'Show Conflict Details',
     helpText: 'Inserts detailed conflict information onto your guild\'s ' +
       'manage page. Currently displays the target guild as well as ' +
@@ -2995,100 +2998,84 @@ var mySimpleCheckboxes = {
     network: true
   },
   showCombatLog: {
-    id: 'showCombatLog',
     helpTitle: 'Show Combat Log',
     helpText: 'This will show the combat log for each automatic ' +
       'battle below the monster list.'
   },
   enableCreatureColoring: {
-    id: 'enableCreatureColoring',
     helpTitle: 'Color Special Creatures',
     helpText: 'Creatures will be colored according to their rarity. ' +
       'Champions will be colored green, Elites yellow and Super Elites red.'
   },
   showCreatureInfo: {
-    id: 'showCreatureInfo',
     helpTitle: 'Show Creature Info',
     helpText: 'This will show the information from the view creature ' +
       'link when you mouseover the link.',
     network: true
   },
   fsboxlog: {
-    id: 'fsboxlog',
     helpTitle: 'Enable FS Box Log',
     helpText: 'This enables the functionality to keep a log of ' +
       'recent seen FS Box message.'
   },
   keepBuffLog: {
-    id: 'keepBuffLog',
     helpTitle: 'Enable Buff Log',
     helpText: 'This enables the functionality to keep a log of ' +
       'recently casted buffs'
   },
   huntingMode: {
-    id: 'huntingMode',
     helpTitle: 'Enable Hunting Mode',
     helpText: 'This disable menu and some visual features to ' +
       'speed up the calf.'
   },
   hideNonPlayerGuildLogMessages: {
-    id: 'hideNonPlayerGuildLogMessages',
     helpTitle: 'Cleanup Guild Log',
     helpText: 'Any log messages not related to the current player ' +
       'will be dimmed (e.g. recall messages from guild store)'
   },
   useNewGuildLog: {
-    id: 'useNewGuildLog',
     helpTitle: 'Use New Guild Log',
     helpText: 'This will replace the standard guild log with the ' +
       'helper version of the guild log.'
   },
   enableLogColoring: {
-    id: 'enableLogColoring',
     helpTitle: 'Enable Log Coloring',
     helpText: 'Three logs will be colored if this is enabled, ' +
       'Guild Chat, Guild Log and Player Log. It will show any new ' +
       'messages in yellow and anything 20 minutes old ones in brown.'
   },
   enableChatParsing: {
-    id: 'enableChatParsing',
     helpTitle: 'Enable Chat Parsing',
     helpText: 'If this is checked, your character log will be parsed for ' +
       'chat messages and show the chat message on the screen if you reply ' +
       'to that message.'
   },
   addAttackLinkToLog: {
-    id: 'addAttackLinkToLog',
     helpTitle: 'Add attack link to log',
     helpText: 'If checked, this will add an Attack link to each message ' +
       'in your log.'
   },
   enhanceChatTextEntry: {
-    id: 'enhanceChatTextEntry',
     helpTitle: 'Enhance Chat Text Entry',
     helpText: 'If checked, this will enhance the entry field for entering ' +
       'chat text on the guild chat page.'
   },
   showExtraLinks: {
-    id: 'showExtraLinks',
     helpTitle: 'Show Extra Links',
     helpText: 'If checked, this will add AH and UFSG ' +
       'links to equipment screens.'
   },
   disableItemColoring: {
-    id: 'disableItemColoring',
     helpTitle: 'Disable Item Coloring',
     helpText: 'Disable the code that colors the item text based on the ' +
       'rarity of the item.'
   },
   showQuickDropLinks: {
-    id: 'showQuickDropLinks',
     helpTitle: 'Show Quick Drop Item',
     helpText: 'This will show a link beside each item which gives the ' +
       'option to drop the item.  WARNING: NO REFUNDS ON ERROR'
   },
   storeLastQuestPage: {
-    id: 'storeLastQuestPage',
     helpTitle: 'Store Last Quest Page',
     helpText: 'This will store the page and sort order of each of the ' +
       'three quest selection pages for next time you visit. If you need ' +
@@ -3096,74 +3083,62 @@ var mySimpleCheckboxes = {
       'wish to reset and then turn this option back on again.'
   },
   showNextQuestSteps: {
-    id: 'showNextQuestSteps',
     helpTitle: 'Show Next Quest Steps',
     helpText: 'Shows all quest steps in the UFSG.'
   },
   renderSelfBio: {
-    id: 'renderSelfBio',
     helpTitle: 'Render self bio',
     helpText: 'This determines if your own bio will render the FSH ' +
       'special bio tags.'
   },
   renderOtherBios: {
-    id: 'renderOtherBios',
     helpTitle: 'Render other players&#39; bios',
     helpText: 'This determines if other players bios will render the FSH ' +
       'special bio tags.'
   },
   showStatBonusTotal: {
-    id: 'showStatBonusTotal',
     helpTitle: 'Show Stat Bonus Total',
     helpText: 'This will show a total of the item stats when you ' +
       'mouseover an item on the profile screen.'
   },
   enableQuickDrink: {
-    id: 'enableQuickDrink',
     helpTitle: 'Enable Quick Drink/Wear',
     helpText: 'This enables the quick drink/wear functionality on the ' +
       'profile page.'
   },
   disableDeactivatePrompts: {
-    id: 'disableDeactivatePrompts',
     helpTitle: 'Disable Deactivate Prompts',
     helpText: 'This disables the prompts for deactivating buffs on ' +
       'the profile page.'
   },
   enableAttackHelper: {
-    id: 'enableAttackHelper',
     helpTitle: 'Show Attack Helper',
     helpText: 'This will show extra information on the attack player ' +
       'screen about stats and buffs on you and your target',
     network: true
   },
   showPvPSummaryInLog: {
-    id: 'showPvPSummaryInLog',
     helpTitle: 'Show PvP Summary in Log',
     helpText: 'This will show a summary of the PvP results in the log.',
     network: true
   },
   autoFillMinBidPrice: {
-    id: 'autoFillMinBidPrice',
     helpTitle: 'Auto Fill Min Bid Price',
     helpText: 'This enables the functionality to automatically fill in ' +
       'the min bid price so you just have to hit bid and your bid will ' +
       'be placed.'
   },
   hideRelicOffline: {
-    id: 'hideRelicOffline',
     helpTitle: 'Hide Relic Offline',
     helpText: 'This hides the relic offline defenders checker.'
   },
   enterForSendMessage: {
-    id: 'enterForSendMessage',
     helpTitle: 'Enter Sends Message',
     helpText: 'If enabled, will send a message from the Send Message ' +
       'screen if you press enter. You can still insert a new line by ' +
       'holding down shift when you press enter.'
   },
   navigateToLogAfterMsg: {
-    id: 'navigateToLogAfterMsg',
     helpTitle: 'Navigate After Message Sent',
     helpText: 'If enabled, will navigate to the referring page after a ' +
       'successful message is sent. Example:  if you are on the world ' +
@@ -3171,78 +3146,77 @@ var mySimpleCheckboxes = {
       'message, it will return you to the world screen.'
   },
   moveComposingButtons: {
-    id: 'moveComposingButtons',
     helpTitle: 'Move Composing Buttons',
     helpText: 'If enabled, will move composing buttons to the top of ' +
       'the composing screen.'
   },
   draggableHelperMenu: {
-    id: 'draggableHelperMenu',
     helpTitle: 'Draggable Helper Menu',
     helpText: 'If enabled, allows the helper menu to ' +
       'be dragged around the screen.'
   },
   draggableQuickLinks: {
-    id: 'draggableQuickLinks',
     helpTitle: 'Draggable Quick Links',
     helpText: 'If enabled, allows the quick link box to ' +
       'be dragged around the screen.'
   },
   expandMenuOnKeyPress: {
-    id: 'expandMenuOnKeyPress',
     helpTitle: 'Expand Menu on Key Press',
     helpText: 'If enabled, expands the left hand menu ' +
       'when you use hotkeys.'
   },
   disableBreakdownPrompts: {
-    id: 'disableBreakdownPrompts',
     helpTitle: 'Disable Breakdown Prompts',
     helpText: 'If enabled, will disable prompts when you breakdown items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
   },
   collapseNewsArchive: {
-    id: 'collapseNewsArchive',
     helpTitle: 'Collapse News Archive',
     helpText: 'If enabled, will collapse news archives.'
   },
   collapseHallPosts: {
-    id: 'collapseHallPosts',
     helpTitle: 'Collapse Hall Posts',
     helpText: 'If enabled, will collapse hall posts.'
   },
   hideSubLvlCreature: {
-    id: 'hideSubLvlCreature',
     helpTitle: 'Hide Sub Level Creatures',
     helpText: 'If enabled, will hide creatures that are ' +
       'lower than the current realm level.'
   },
   hidePlayerActions: {
-    id: 'hidePlayerActions',
     helpTitle: 'Hide Player Actions',
     helpText: 'If enabled, will hide player actions.'
   },
   disableQuickWearPrompts: {
-    id: 'disableQuickWearPrompts',
     helpTitle: 'Disable Use/Ext Prompts',
     helpText: 'If enabled, will disable prompts when you Use/Ext items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.',
     title: 'Disable Use/Ext<br>Prompts'
   },
   enableGuildActivityTracker: {
-    id: 'enableGuildActivityTracker',
     helpTitle: 'Enable Guild Activity Tracker',
     helpText: 'If enabled, will track guild member activity over time.',
     network: true,
     title: 'Enable Tracker'
   },
   enableSeTracker: {
-    id: 'enableSeTracker',
     helpTitle: 'Enable SE Tracker',
     helpText: 'If enabled, will track the last time each SE was killed.<br>' +
       'This is DIFFERENT from the usual FSH network activity.<br>' +
       'When this is enabled, if you have ANY game page open in a<br>' +
       'browser tab it will scan the SE Log every 10 minutes.<br>' +
       'You do not need auto-refresh for this to work.',
+    network: true
+  },
+  showMonsterLog: {
+    helpTitle: 'Keep Creature Log',
+    helpText: 'This will show the creature log for each creature you see ' +
+      'when you travel.',
+    network: true
+  },
+  showTitanInfo: {
+    helpTitle: 'Show Titan Info',
+    helpText: 'This will show titan info in the action list.',
     network: true
   }
 };
@@ -3748,12 +3722,8 @@ function prefs() {
 
     combatEvalBias() +
 
-    '<tr><td class="fshRight">' + networkIcon + 'Keep Creature Log' +
-      helpLink('Keep Creature Log',
-        'This will show the creature log for each creature you see when ' +
-        'you travel.') +
-      ':</td><td><input name="showMonsterLog" type="checkbox" value="on"' +
-      isChecked(getValue('showMonsterLog')) + '>' +
+    '<tr><td class="fshRight">' + justLabel('showMonsterLog') +
+      '</td><td>' + justCheckbox('showMonsterLog') +
       '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
       'value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 
@@ -3970,22 +3940,21 @@ function hasNetwork(o) {
   return '';
 }
 
-function isOn(o) {
-  return isChecked(getValue(o.id));
+function isOn(name) {
+  return isChecked(getValue(name));
 }
 
 function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
-    '<label for="' + o.id + '">' + fallback(o.title, o.helpTitle) +
+    '<label for="' + name + '">' + fallback(o.title, o.helpTitle) +
     helpLink(o.helpTitle, o.helpText) +
     ':</label>';
 }
 
 function justCheckbox(name) {
-  var o = mySimpleCheckboxes[name];
-  return '<input id="' + o.id + '" name="' + o.id +
-    '" class="fshVMid" type="checkbox" value="on"' + isOn(o) + '>';
+  return '<input id="' + name + '" name="' + name +
+    '" class="fshVMid" type="checkbox" value="on"' + isOn(name) + '>';
 }
 
 function simpleCheckboxHtml(name) {
@@ -4140,10 +4109,8 @@ function injectSettings() { // jQuery.min
     .value);
 }
 
-function toggleForce(el, force) { // Polyfill UC
-  if (el.classList.contains('fshHide') !== force) {
-    el.classList.toggle('fshHide');
-  }
+function toggleForce(el, force) {
+  el.classList.toggle('fshHide', force);
 }
 
 var deferred = window.$ && $.when();
@@ -8463,6 +8430,10 @@ function bioEvtHdl(e) {
   }
 }
 
+function isNaN$1(value) {
+  return Number.isNaN(value);
+}
+
 function renderBio(_bioContents) {
   var bioContents = _bioContents.replace(/\{b\}/g, '`~')
     .replace(/\{\/b\}/g, '~`');
@@ -8540,7 +8511,7 @@ function bioWords() {
 }
 
 function badHeight(boxVal) {
-  return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
+  return isNaN$1(boxVal) || boxVal < '1' || boxVal > '99';
 }
 
 function changeHeight() {
@@ -10831,10 +10802,11 @@ function toggleItem(self) {
   var item = Number(self.getAttribute('item'));
   options$1.checks[item] = !options$1.checks[item];
   storeOptions();
+  var hide = !options$1.checks[item];
   tmpGuildLog.forEach(function(r) {
     if (r[4] !== item) {return;}
-    r[5].classList.toggle('fshHide');
-    r[6].classList.toggle('fshHide');
+    toggleForce(r[5], hide);
+    toggleForce(r[6], hide);
   });
 }
 
@@ -12545,6 +12517,16 @@ function injectScouttowerBuffLinks(titanTables) {
   if (titanTables.length > 2) {gotTables(titanTables);}
 }
 
+function round(number, precision) {
+  var factor = Math.pow(10, precision);
+  if (isNaN$1(factor)) {factor = 1;}
+  return Math.round(number * factor) / factor;
+}
+
+function roundToString(number, precision) {
+  return round(number, precision).toString();
+}
+
 function getTitanName(aRow) {
   return aRow.cells[0].firstElementChild.getAttribute('oldtitle');
 }
@@ -12609,11 +12591,11 @@ function getTitanString(guildKills, totalHP, currentHP) {
   if (guildKills >= numberOfKillsToSecure) {
     return 'Secured';
   }
-  if (numberOfKillsToSecure - guildKills > currentHP) {
+  var remainingKills = numberOfKillsToSecure - guildKills;
+  if (remainingKills > currentHP) {
     return '<span class="fshRed">Cannot Secure</span>';
   }
-  return '<span class="fshRed">' +
-    (numberOfKillsToSecure - guildKills) + '</span> to secure';
+  return '<span class="fshRed">' + remainingKills + '</span> to secure';
 }
 
 function getKillsPct(currentNumberOfKills, guildKills) {
@@ -12628,13 +12610,11 @@ function killsSummary(aRow) {
   var titanHPArray = titanHP.split('/');
   var currentHP = Number(titanHPArray[0]);
   var totalHP = Number(titanHPArray[1]);
-  var currentNumberOfKills = totalHP - currentHP;
-  var titanString = getTitanString(guildKills, totalHP, currentHP);
-  var killsTotPct = (guildKills * 100 / totalHP).toFixed(2);
   aRow.cells[3].insertAdjacentHTML('beforeend',
     '<br><span class="fshBlue"> (' +
-    getKillsPct(currentNumberOfKills, guildKills).toFixed(2) +
-    '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')');
+    roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
+    '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
+    '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
 }
 
 function guideLink(aRow) {
@@ -13228,19 +13208,21 @@ function combatLogger() { // jQuery.min
   }
 }
 
+var oldDoAction;
+
 function afterUpdateActionList() {
   // color the critters in the do no kill list blue
   var act = getElementById('actionList');
   var creatures = act.getElementsByClassName('creature');
   Array.prototype.forEach.call(creatures, function(el) {
-    if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
-      el.classList.add('fshBlue');
-    }
+    el.classList.toggle('fshBlue',
+      calf.doNotKillList.indexOf(el.textContent) !== -1);
   });
 }
 
-function maybeIntercept(oldDoAction, actionCode, fetchFlags, data) {
-  if (actionCode === def_creatureCombat) {
+var actionsToIntercept = {
+  // def_creatureCombat
+  '2': function(action, fetch, data, attempts) {
     // Do custom stuff e.g. do not kill list
     var creatureName = GameData.actions()[data.passback].data.name;
     if (calf.doNotKillList.indexOf(creatureName) !== -1) {
@@ -13248,14 +13230,24 @@ function maybeIntercept(oldDoAction, actionCode, fetchFlags, data) {
         .find('a.icon').removeClass('loading');
       return;
     }
+    // Call standard action
+    oldDoAction(action, fetch, data, attempts);
   }
-  // Call standard action
-  oldDoAction(actionCode, fetchFlags, data);
+};
+
+function maybeIntercept(action, fetch, data, attempts) {
+  var interceptFunction = actionsToIntercept[action];
+  if ((typeof attempts === 'undefined' || attempts === 0) &&
+      interceptFunction && typeof interceptFunction === 'function') {
+    interceptFunction(action, fetch, data, attempts);
+  } else {
+    oldDoAction(action, fetch, data, attempts);
+  }
 }
 
-function interceptDoAction() { // jQuery
-  var oldDoAction = GameData.doAction;
-  GameData.doAction = maybeIntercept.bind(null, oldDoAction);
+function interceptDoAction() {
+  oldDoAction = GameData.doAction;
+  GameData.doAction = maybeIntercept;
 }
 
 function doNotKill() {
@@ -13782,19 +13774,257 @@ function injectRelic() {
   $.subscribe('9' + def_suffixSuccessActionResponse, viewRelic);
 }
 
-var assets$1 = {
-  colorHash: {
-    '0': 'red', // Should never see this.
-    '1': 'orange',
-    '2': 'yellow'
-  },
-  bias: {
-    '0': {generalVariable: 1.1053, hpVariable: 1.1},
-    '1': {generalVariable: 1.1, hpVariable: 1.053},
-    '2': {generalVariable: 1.053, hpVariable: 1},
-    '3': {generalVariable: 1.1053, hpVariable: 1}
-  }
+var colorHash = {
+  '0': 'red', // Should never see this.
+  '1': 'orange',
+  '2': 'yellow'
 };
+
+var bias = {
+  '0': {generalVariable: 1.1053, hpVariable: 1.1},
+  '1': {generalVariable: 1.1, hpVariable: 1.053},
+  '2': {generalVariable: 1.053, hpVariable: 1},
+  '3': {generalVariable: 1.1053, hpVariable: 1}
+};
+
+function insertElement(parent, child) {
+  parent.appendChild(child);
+}
+
+/*
+  colSpan = attributes[0]
+  anElement = attributes[1]
+  isHeader = attributes[2]
+*/
+function addNextCell(row, attributes) {
+  var aCell = row.insertCell(-1);
+  aCell.colSpan = attributes[0];
+  if (attributes[2]) {aCell.className = 'header';}
+  insertElement(aCell, attributes[1]);
+  return aCell;
+}
+
+function addRowCells(aRow, someCells) {
+  someCells.forEach(function(cell) {
+    addNextCell(aRow, cell);
+  });
+}
+
+function addNextRow(tbl, cells, isBlue) {
+  var aRow = tbl.insertRow(-1);
+  if (isBlue) {aRow.className = 'fshBlue';}
+  addRowCells(aRow, cells);
+  return aRow;
+}
+
+function addRows(tbl, rows) {
+  rows.forEach(function(row) {
+    addNextRow(tbl, row[0], row[1]);
+  });
+}
+
+function insertElement$1(parent, text) {
+  parent.insertAdjacentText('beforeend', text);
+}
+
+function makeTitanHpWrapper() {
+  var titanHpWrapper = createSpan();
+  insertElement(titanHpWrapper, currentHp);
+  insertElement$1(titanHpWrapper, '/');
+  insertElement(titanHpWrapper, maxHp);
+  return titanHpWrapper;
+}
+
+function makePctWrapper(pct) {
+  var pctWrapper = createSpan();
+  insertElement(pctWrapper, pct);
+  insertElement$1(pctWrapper, '%');
+  return pctWrapper;
+}
+
+function buildTitanInfoTable() {
+  var titanTbl$$1 = createTable({className: 'fshCenter'});
+  addRows(titanTbl$$1, [
+    [[[2, textSpan('Titan HP'), true], [4, textSpan('Your Guild'), true]]],
+    [[[2, makeTitanHpWrapper()], [4, guildKills]]],
+    [[[2, textSpan('Current'), true], [4, makePctWrapper(currentPct)]], true],
+    [[[2, textSpan('Total'), true], [4, makePctWrapper(totalPct)]], true],
+    [[[2, textSpan('Status'), true], [4, statusText]], true],
+    [[[6, cooldownText]]],
+    [[[2, textSpan('Member'), true], [2, textSpan('Kills'), true],
+      [2, textSpan('% of Total'), true]]]
+  ]);
+  return titanTbl$$1;
+}
+
+function scouttower() {
+  return callApp({cmd: 'guild', subcmd: 'scouttower'});
+}
+
+function formatOffset(secs) {
+  var aDate = new Date(now + secs * 1000);
+  var yyyy = aDate.getFullYear();
+  var dd = padZ(aDate.getDate());
+  var month = months[aDate.getMonth()];
+  var hh = padZ(aDate.getHours());
+  var mm = padZ(aDate.getMinutes());
+  return hh + ':' + mm + ' ' + dd + '/' + month + '/' + yyyy;
+}
+
+function getCooldownHtml(cooldown) {
+  if (cooldown <= 0) {
+    return '<span class="fshGreen cooldown">No active cooldown</span>';
+  }
+  return '<span class="fshMaroon cooldown">Cooldown until: ' +
+    formatOffset(cooldown) +
+    '</span>';
+}
+
+function doTopLabels(ourTitan) {
+  currentHp.textContent = ourTitan.current_hp.toString();
+  maxHp.textContent = ourTitan.max_hp.toString();
+  guildKills.textContent = ourTitan.kills.toString();
+  currentPct.textContent = roundToString(getKillsPct(ourTitan.max_hp -
+    ourTitan.current_hp, ourTitan.kills), 2);
+  totalPct.textContent = roundToString(ourTitan.kills * 100 / ourTitan.max_hp,
+    2);
+  statusText.innerHTML = getTitanString(ourTitan.kills, ourTitan.max_hp,
+    ourTitan.current_hp);
+  cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
+}
+
+function clearMemberRows() {
+  if (titanTbl.rows.length > 7) {
+    for (var i = 7; i < titanTbl.rows.length; i += 1) {
+      titanTbl.deleteRow(i);
+    }
+  }
+}
+
+function doMemberRows(ourTitan) {
+  clearMemberRows();
+  var memberRows = ourTitan.members.map(function(member) {
+    return [[
+      [2, textSpan(member.player.name)],
+      [2, textSpan(member.kills.toString())],
+      [2, textSpan(roundToString(member.kills * 100 / ourTitan.kills, 2) + '%')]
+    ]];
+  });
+  addRows(titanTbl, memberRows);
+}
+
+function currentTitan(el) {
+  return el.alive && el.id === titanId && el.realm === realmName;
+}
+
+function processTitans(r) {
+  var ourTitan = r.find(currentTitan);
+  doTopLabels(ourTitan);
+  doMemberRows(ourTitan);
+}
+
+var realmName;
+var titanId;
+var titanDiv;
+var timeoutId$1;
+
+var titanTbl;
+var currentHp;
+var maxHp;
+var guildKills;
+var currentPct;
+var totalPct;
+var statusText;
+var cooldownText;
+
+function clearTitanDiv() {
+  currentHp.textContent = '';
+  maxHp.textContent = '';
+  guildKills.textContent = '';
+  currentPct.textContent = '';
+  totalPct.textContent = '';
+  statusText.innerHTML = '';
+  cooldownText.innerHTML = '';
+  clearMemberRows();
+}
+
+function hideTitanDiv() {
+  if (titanDiv && !titanDiv.classList.contains('fshHide')) {
+    toggleForce(titanDiv, true);
+    clearTitanDiv();
+  }
+}
+
+function clearTheTimeout() {
+  if (timeoutId$1) {
+    window.clearTimeout(timeoutId$1);
+    timeoutId$1 = null;
+  }
+}
+
+function ajaxScoutTower() {
+  scouttower().done(function processScoutTower(data) {
+    if (data.s && Array.isArray(data.r)) {
+      processTitans(data.r);
+      timeoutId$1 = window.setTimeout(ajaxScoutTower, 30000);
+    }
+  });
+}
+
+function initVars() {
+  currentHp = createSpan();
+  maxHp = createSpan();
+  guildKills = createSpan();
+  currentPct = createSpan();
+  totalPct = createSpan();
+  statusText = createSpan();
+  cooldownText = createSpan();
+}
+
+function setupTitanDiv() {
+  if (titanDiv) {
+    toggleForce(titanDiv, false);
+  } else {
+    var actCont = getElementById('actionContainer');
+    titanDiv = createDiv({className: 'titanInfo'});
+    initVars();
+    titanTbl = buildTitanInfoTable();
+    insertElement(titanDiv, titanTbl);
+    insertElement(actCont, titanDiv);
+  }
+}
+
+function hasTitan(el) {
+  if (el.type === 0) {
+    titanId = el.base_creature_id;
+    return true;
+  }
+  return false;
+}
+
+function testDynamics(dynamic) {
+  clearTheTimeout();
+  if (calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan)) {
+    setupTitanDiv();
+    ajaxScoutTower();
+  } else {
+    titanId = null;
+    hideTitanDiv();
+  }
+}
+
+function titanStats(data) {
+  if (data.realm.dynamic) {
+    realmName = data.realm.name;
+    testDynamics(data.realm.dynamic);
+  }
+}
+
+function toggleShowTitanInfo() {
+  calf.showTitanInfo = !calf.showTitanInfo;
+  setValue('showTitanInfo', calf.showTitanInfo);
+  testDynamics(GameData.realm().dynamic);
+}
 
 var buttonContainer;
 var yourLvl;
@@ -13864,13 +14094,27 @@ var clickHdl = [
   }
 ];
 
+function fixTeleport() {
+  if (GameController && GameController.Realm) {
+    GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
+  }
+}
+
+function makeButtonContainer() {
+  if (buttonContainer) {buttonContainer.remove();}
+  return createDiv({
+    className: 'fshCurveContainer',
+    id: 'fshWorldButtonContainer'
+  });
+}
+
 function doLevels(data, worldName) {
   var lvlDiv = createDiv({
     className: 'fshFsty',
     innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
   });
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
-  yourLvl = createSpan({textContent: data.player.level});
+  yourLvl = textSpan(data.player.level.toString());
   lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
   worldName.appendChild(lvlDiv);
 }
@@ -13917,16 +14161,18 @@ function makeToggleBtn(o) {
 }
 
 function showSpeakerOnWorld(worldName) {
-  var msgSounds = getValue('playNewMessageSound');
-  soundCheck = makeToggleBtn({
-    prefVal: msgSounds,
-    checkId: 'fshSoundCheck',
-    onClass: 'soundOn',
-    onTip: 'Turn Off Sound when you have a new log message',
-    offClass: 'soundOff',
-    offTip: 'Turn On Sound when you have a new log message',
-    worldName: worldName
-  });
+  if (getValue('showSpeakerOnWorld')) {
+    var msgSounds = getValue('playNewMessageSound');
+    soundCheck = makeToggleBtn({
+      prefVal: msgSounds,
+      checkId: 'fshSoundCheck',
+      onClass: 'soundOn',
+      onTip: 'Turn Off Sound when you have a new log message',
+      offClass: 'soundOff',
+      offTip: 'Turn On Sound when you have a new log message',
+      worldName: worldName
+    });
+  }
 }
 
 function showHuntMode(worldName) {
@@ -13943,27 +14189,21 @@ function showHuntMode(worldName) {
 }
 
 function injectButtons(data) {
-  GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
-  if (buttonContainer) {buttonContainer.remove();}
-  buttonContainer = createDiv({
-    className: 'fshCurveContainer',
-    id: 'fshWorldButtonContainer'
-  });
-
+  fixTeleport();
+  buttonContainer = makeButtonContainer();
   showQuickLinks(buttonContainer, data);
-  if (getValue('showSpeakerOnWorld')) {
-    showSpeakerOnWorld(buttonContainer);
-  }
+  showSpeakerOnWorld(buttonContainer);
   showHuntMode(buttonContainer);
   buttonContainer.addEventListener('click', eventHandler$1(clickHdl));
   buttonContainer.addEventListener('change', eventHandler$1(changeHdl));
-
   getElementById('worldContainer')
     .insertBefore(buttonContainer, getElementById('worldCoord'));
 }
 
 function levelStats(e, data) {
-  yourLvl.textContent = data.b;
+  if (yourLvl) {
+    yourLvl.textContent = data.b;
+  }
 }
 
 function fixDebuffQTip(e) { // jQuery.min
@@ -13974,6 +14214,7 @@ function injectWorldNewMap(data) {
   updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     injectButtons(data);
+    titanStats(data);
     getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
     if (calf.hideSubLvlCreature) {GameData.fetch(256);}
@@ -13984,7 +14225,7 @@ function impIconColour() { // jQuery
   var imp = $('#actionlist-shield-imp');
   if (imp.length === 1) {
     imp.css('background-color',
-      assets$1.colorHash[imp.text()] || '#ad8043');
+      colorHash[imp.text()] || '#ad8043');
   }
 }
 
@@ -14598,15 +14839,15 @@ function evalHTML(combat) {
 }
 
 function getBiasGeneral(combat) {
-  if (assets$1.bias[combat.combatEvaluatorBias]) {
-    return assets$1.bias[combat.combatEvaluatorBias].generalVariable;
+  if (bias[combat.combatEvaluatorBias]) {
+    return bias[combat.combatEvaluatorBias].generalVariable;
   }
   return 1.1053;
 }
 
 function getBiasHp(combat) {
-  if (assets$1.bias[combat.combatEvaluatorBias]) {
-    return assets$1.bias[combat.combatEvaluatorBias].hpVariable;
+  if (bias[combat.combatEvaluatorBias]) {
+    return bias[combat.combatEvaluatorBias].hpVariable;
   }
   return 1.1;
 }
@@ -14736,7 +14977,7 @@ function addRemoveCreatureToDoNotKillList(evt) {
   }
   setValue('doNotKillList', calf.doNotKillList.join());
   // refresh the action list
-  window.GameData.doAction(-1);
+  afterUpdateActionList();
 }
 
 function readyViewCreature() { // Hybrid
@@ -14777,180 +15018,6 @@ function readyViewCreature() { // Hybrid
       addRemoveCreatureToDoNotKillList, true);
 }
 
-var huntingBuffs$1;
-var huntingBuffsName;
-var hidePlayerActions;
-var missingBuffsDiv;
-
-function getPrefs() {
-  calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
-  hidePlayerActions = getValue('hidePlayerActions');
-  calf.showBuffs = getValue('showHuntingBuffs');
-  calf.enabledHuntingMode = getValue('enabledHuntingMode');
-  calf.buffs = shouldBeArray('huntingBuffs');
-  calf.buffsName = getValue('huntingBuffsName');
-  calf.buffs2 = shouldBeArray('huntingBuffs2');
-  calf.buffs2Name = getValue('huntingBuffs2Name');
-  calf.buffs3 = shouldBeArray('huntingBuffs3');
-  calf.buffs3Name = getValue('huntingBuffs3Name');
-  calf.doNotKillList = shouldBeArray('doNotKillList');
-}
-
-var buffLookup = {
-  '1': function() {
-    huntingBuffs$1 = calf.buffs;
-    huntingBuffsName = calf.buffsName;
-  },
-  '2': function() {
-    huntingBuffs$1 = calf.buffs2;
-    huntingBuffsName = calf.buffs2Name;
-  },
-  '3': function() {
-    huntingBuffs$1 = calf.buffs3;
-    huntingBuffsName = calf.buffs3Name;
-  }
-};
-
-function setCurrentBuffList() {
-  var tmpFn = buffLookup[calf.enabledHuntingMode];
-  if (typeof tmpFn === 'function') {
-    tmpFn();
-  }
-}
-
-function toggleSubLvlCreature() {
-  calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
-  setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
-  GameData.fetch(256);
-}
-
-function toggleHidePlayerActions() {
-  hidePlayerActions = !hidePlayerActions;
-  setValue('hidePlayerActions', hidePlayerActions);
-  GameData.fetch(256);
-}
-
-function toggleShowHuntingBuffs() {
-  calf.showBuffs = !calf.showBuffs;
-  setValue('showHuntingBuffs', calf.showBuffs);
-  GameData.fetch(16);
-}
-
-function toggleEnabledHuntingMode(e) {
-  if (e.target.name !== 'enabledHuntingMode') {return;}
-  calf.enabledHuntingMode = e.target.value;
-  setValue('enabledHuntingMode', calf.enabledHuntingMode);
-  setCurrentBuffList();
-  GameData.fetch(16);
-}
-
-var fshEvents = {
-  hideSubLvlCreature: toggleSubLvlCreature,
-  hidePlayerActions: toggleHidePlayerActions,
-  showHuntingBuffs: toggleShowHuntingBuffs
-};
-
-function prefsClickEvent(e) {
-  var tmpFn = fshEvents[e.target.name];
-  if (typeof tmpFn === 'function') {
-    e.target.blur();
-    tmpFn(e);
-  }
-}
-
-function buildFshDivs() {
-  var fshDiv = createDiv({className: 'fshCenter fshFten'});
-  var prefsDiv = createDiv({
-    innerHTML: simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-      huntingBuffsHtml()
-  });
-  prefsDiv.addEventListener('click', prefsClickEvent);
-  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  fshDiv.insertAdjacentElement('beforeend', prefsDiv);
-  missingBuffsDiv = createDiv();
-  fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
-  var worldContainerBelow = getElementById('worldContainerBelow');
-  worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);
-}
-
-function xhrDataFilter(data) {
-  var myData = JSON.parse(data);
-  if (!myData.actions || myData.actions.length === 0) {return data;}
-  var realm = GameData.realm();
-  myData.actions = myData.actions.filter(function(el) {
-    if (el.type === 6) {
-      return el.data.creature_type !== 0 || el.data.level >= realm.minlevel;
-    }
-    return true;
-  });
-  var ret = JSON.stringify(myData);
-  return ret;
-}
-
-function xhrPreFilter(options, originalOptions) {
-  if (!originalOptions.data || !calf.hideSubLvlCreature) {return;}
-  options.dataFilter = xhrDataFilter;
-}
-
-function interceptXHR() { // jQuery.min
-  $.ajaxPrefilter('JSON', xhrPreFilter);
-}
-
-function doHidePlayerActions() {
-  if (!hidePlayerActions) {return;}
-  var act = getElementById('actionList');
-  var players = act.getElementsByClassName('player');
-  Array.prototype.forEach.call(players, function(el) {
-    var verbs = el.getElementsByClassName('verbs');
-    if (verbs && verbs.length === 1) {
-      verbs[0].classList.add('fshHide');
-    }
-  });
-}
-
-function huntingBuffsEnabled(evt, data) {
-  if (!calf.showBuffs) {
-    missingBuffsDiv.innerHTML = '';
-    return;
-  }
-  var buffHash = data.b.reduce(function(prev, curr) {
-    prev[curr.name] = true;
-    return prev;
-  }, {});
-  var missingBuffs = huntingBuffs$1.reduce(function(prev, curr) {
-    if (!buffHash[curr.trim()]) {prev.push(curr);}
-    return prev;
-  }, []);
-  if (missingBuffs.length > 0) {
-    missingBuffsDiv.innerHTML = 'You are missing some ' +
-      huntingBuffsName + ' hunting buffs<br>(' +
-      missingBuffs.join(', ') + ')';
-  } else {missingBuffsDiv.innerHTML = '';}
-}
-
-function dataEventsPlayerBuffs(evt, data) {
-  if (huntingBuffs$1) {huntingBuffsEnabled(evt, data);}
-}
-
-function doHuntingBuffs() { // jQuery.min
-  setCurrentBuffList();
-  $.subscribe(def_playerBuffs, dataEventsPlayerBuffs);
-  if (calf.showBuffs && window.initialGameData) { // HCS initial data
-    dataEventsPlayerBuffs(null,
-      {b: window.initialGameData.player.buffs});
-  }
-}
-
-function setupPref$2() {
-  getPrefs();
-  buildFshDivs();
-  interceptXHR();
-  doHuntingBuffs();
-  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
-  doHidePlayerActions();
-}
-
 var showCreatureInfo;
 var showMonsterLog;
 var monsterLog;
@@ -14965,6 +15032,16 @@ var statAttack;
 var statDamage;
 var statArmor;
 var statHp;
+
+function toggleShowCreatureInfo() {
+  showCreatureInfo = !showCreatureInfo;
+  setValue('showCreatureInfo', showCreatureInfo);
+}
+
+function toggleShowMonsterLog() {
+  showMonsterLog = !showMonsterLog;
+  setValue('showMonsterLog', showMonsterLog);
+}
 
 function updateMinMax(_logStat, creatureStat) {
   var logStat = fallback(_logStat, {});
@@ -15094,10 +15171,10 @@ function processMonster(data) {
   processMonsterLog();
 }
 
-function loopActions(e, i) { // jQuery
+function loopActions(e, i) { // jQuery.min
   if (e.type !== 6) {return;}
   retryAjax({
-    url: 'fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i,
+    url: 'fetchdata.php?a=1&id=' + e.data.id + '&passback=' + i,
     dataType: 'json'
   }).done(processMonster);
 }
@@ -15119,30 +15196,231 @@ function getMyStats() {
 }
 
 function initMonsterLog() {
+  if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo) {getMyStats();}
   actionData = GameData.actions();
   actionData.forEach(loopActions);
 }
 
-var genVar = [0, 1.1, 1.053, 1.1053];
-var hpVar = [0, 1.053, 1, 1];
-
 function getBias() {
   var combatEvaluatorBias = getValue('combatEvaluatorBias');
-  generalVariable = genVar[combatEvaluatorBias];
-  hpVariable = hpVar[combatEvaluatorBias];
+  if (combatEvaluatorBias &&
+      combatEvaluatorBias >= 0 && combatEvaluatorBias <= 3) {
+    generalVariable = bias[combatEvaluatorBias].generalVariable;
+    hpVariable = bias[combatEvaluatorBias].hpVariable;
+  }
 }
 
-function startMonsterLog() { // jQuery
+function startMonsterLog() { // jQuery.min
   showCreatureInfo = getValue('showCreatureInfo');
   showMonsterLog = getValue('showMonsterLog');
-  if (!showCreatureInfo && !showMonsterLog) {return;}
-  if (showCreatureInfo) {getBias();}
+  getBias();
   $.subscribe(def_afterUpdateActionlist, initMonsterLog);
   getForage('fsh_monsterLog').done(function(data) {
     monsterLog = data || {};
   });
   initMonsterLog();
+}
+
+function insertElementBefore(newNode, referenceNode) {
+  return referenceNode.parentNode.insertBefore(newNode, referenceNode);
+}
+
+var huntingBuffs$1;
+var huntingBuffsName;
+var buffLookup = {
+  '1': function() {
+    huntingBuffs$1 = calf.buffs;
+    huntingBuffsName = calf.buffsName;
+  },
+  '2': function() {
+    huntingBuffs$1 = calf.buffs2;
+    huntingBuffsName = calf.buffs2Name;
+  },
+  '3': function() {
+    huntingBuffs$1 = calf.buffs3;
+    huntingBuffsName = calf.buffs3Name;
+  }
+};
+
+function setCurrentBuffList() {
+  var tmpFn = buffLookup[calf.enabledHuntingMode];
+  if (typeof tmpFn === 'function') {
+    tmpFn();
+  }
+}
+
+function toggleShowHuntingBuffs() {
+  calf.showBuffs = !calf.showBuffs;
+  setValue('showHuntingBuffs', calf.showBuffs);
+  GameData.fetch(16);
+}
+
+function toggleEnabledHuntingMode(e) {
+  if (e.target.name !== 'enabledHuntingMode') {return;}
+  calf.enabledHuntingMode = e.target.value;
+  setValue('enabledHuntingMode', calf.enabledHuntingMode);
+  setCurrentBuffList();
+  GameData.fetch(16);
+}
+
+function huntingBuffsEnabled(evt, data) {
+  if (!calf.showBuffs) {
+    missingBuffsDiv.innerHTML = '';
+    return;
+  }
+  var buffHash = data.b.reduce(function(prev, curr) {
+    prev[curr.name] = true;
+    return prev;
+  }, {});
+  var missingBuffs = huntingBuffs$1.reduce(function(prev, curr) {
+    if (!buffHash[curr.trim()]) {prev.push(curr);}
+    return prev;
+  }, []);
+  if (missingBuffs.length > 0) {
+    missingBuffsDiv.innerHTML = 'You are missing some ' +
+      huntingBuffsName + ' hunting buffs<br>(' +
+      missingBuffs.join(', ') + ')';
+  } else {missingBuffsDiv.innerHTML = '';}
+}
+
+function dataEventsPlayerBuffs(evt, data) {
+  if (huntingBuffs$1) {huntingBuffsEnabled(evt, data);}
+}
+
+function doHuntingBuffs() { // jQuery.min
+  setCurrentBuffList();
+  $.subscribe(def_playerBuffs, dataEventsPlayerBuffs);
+  if (calf.showBuffs && window.initialGameData) { // HCS initial data
+    dataEventsPlayerBuffs(null,
+      {b: window.initialGameData.player.buffs});
+  }
+}
+
+function bitwiseAnd(a, b) {
+  /* jshint -W016 */
+  return a & b; // eslint-disable-line no-bitwise
+  /* jshint +W016 */
+}
+
+function toggleSubLvlCreature() {
+  calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
+  setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
+  GameData.fetch(256);
+}
+
+function xhrDataFilter(data) {
+  var myData = JSON.parse(data);
+  if (!myData.actions || myData.actions.length === 0) {return data;}
+  var realm = GameData.realm();
+  myData.actions = myData.actions.filter(function(el) {
+    if (el.type === 6) {
+      return el.data.creature_type !== 0 || el.data.level >= realm.minlevel;
+    }
+    return true;
+  });
+  var ret = JSON.stringify(myData);
+  return ret;
+}
+
+function xhrPreFilter(options, originalOptions) {
+  if (calf.hideSubLvlCreature && originalOptions.data &&
+      originalOptions.data.d &&
+      bitwiseAnd(originalOptions.data.d, def_fetch_worldRealmActions)) {
+    options.dataFilter = xhrDataFilter;
+  }
+}
+
+function interceptXHR() { // jQuery.min
+  $.ajaxPrefilter('JSON', xhrPreFilter);
+}
+
+var hidePlayerActions;
+
+function toggleHidePlayerActions() {
+  hidePlayerActions = !hidePlayerActions;
+  setValue('hidePlayerActions', hidePlayerActions);
+  GameData.fetch(256);
+}
+
+function doHidePlayerActions() {
+  if (!hidePlayerActions) {return;}
+  var act = getElementById('actionList');
+  var players = act.getElementsByClassName('player');
+  Array.prototype.forEach.call(players, function(el) {
+    var verbs = el.getElementsByClassName('verbs');
+    if (verbs && verbs.length === 1) {
+      verbs[0].classList.add('fshHide');
+    }
+  });
+}
+
+function prepareHidePlayerActions() {
+  hidePlayerActions = getValue('hidePlayerActions');
+  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
+  doHidePlayerActions();
+}
+
+var missingBuffsDiv;
+
+function getPrefs() {
+  calf.buffs = shouldBeArray('huntingBuffs');
+  calf.buffsName = getValue('huntingBuffsName');
+  calf.buffs2 = shouldBeArray('huntingBuffs2');
+  calf.buffs2Name = getValue('huntingBuffs2Name');
+  calf.buffs3 = shouldBeArray('huntingBuffs3');
+  calf.buffs3Name = getValue('huntingBuffs3Name');
+  calf.doNotKillList = shouldBeArray('doNotKillList');
+  calf.enabledHuntingMode = getValue('enabledHuntingMode');
+  calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
+  calf.showBuffs = getValue('showHuntingBuffs');
+  calf.showTitanInfo = getValue('showTitanInfo');
+}
+
+var fshEvents = {
+  hideSubLvlCreature: toggleSubLvlCreature,
+  hidePlayerActions: toggleHidePlayerActions,
+  showCreatureInfo: toggleShowCreatureInfo,
+  showHuntingBuffs: toggleShowHuntingBuffs,
+  showMonsterLog: toggleShowMonsterLog,
+  showTitanInfo: toggleShowTitanInfo
+};
+
+function prefsClickEvent(e) {
+  var tmpFn = fshEvents[e.target.name];
+  if (typeof tmpFn === 'function') {
+    e.target.blur();
+    tmpFn(e);
+  }
+}
+
+function buildFshDivs() {
+  var fshDiv = createDiv({className: 'fshCenter fshFten'});
+  var prefsDiv = createDiv({
+    id: 'fshWorldPrefs',
+    innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
+      '<br>' +
+      simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+      huntingBuffsHtml()
+  });
+  prefsDiv.addEventListener('click', prefsClickEvent);
+  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
+  insertElement(fshDiv, prefsDiv);
+  missingBuffsDiv = createDiv();
+  insertElement(fshDiv, missingBuffsDiv);
+  var tempWorldButtons = getElementById('worldContainerBelow').children[0];
+  insertElementBefore(fshDiv, tempWorldButtons);
+}
+
+function worldPrefs() {
+  getPrefs();
+  buildFshDivs();
+  interceptXHR();
+  doHuntingBuffs();
+  prepareHidePlayerActions();
 }
 
 function hideGroupByType(type) { // jQuery
@@ -15192,11 +15470,11 @@ function doMonsterColors() { // jQuery.min
 }
 
 function doRepair$1(e, key) {
-  if (key === 'ACT_REPAIR') {GameData.fetch(403);}
+  if (key === 'ACT_REPAIR') {GameData.fetch(402);}
 }
 
 function subscribes() { // jQuery.min
-  setupPref$2();
+  worldPrefs();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
   hideGroupButton(); // Hide Create Group button
@@ -15210,25 +15488,8 @@ function subscribes() { // jQuery.min
   prepareShop();
   injectRelic();
   $('#messageCenter').worldMessageCenter({offset: '0 60'});
+  $('#mapTooltip').qtip('hide');
 }
-
-/* fetchFlags = {
-  playerStats : 1,
-  playerBackpackCount : 2,
-  playerBackpackItems : 4,
-  playerPrefs : 8,
-
-  playerBuffs : 16,
-  worldDefines : 32,
-  worldRealmStatic : 64,
-  worldRealmDynamic : 128,
-
-  worldRealmActions : 256,
-  PLAYER_EQUIPMENT : 512,
-  PLAYER_NOTIFICATIONS : 1024,
-
-  all : 2047
-}; */
 
 var impStyles = [
   ' style="color:red; font-size:large; font-weight:bold"',
@@ -15774,68 +16035,116 @@ function storeMoves() { // jQuery.min
   getForage('fsh_arena').done(gotMoves);
 }
 
+var upgrades;
 var currentFSP;
+var warehouse$1 = {};
 
-function updateStamCount(evt) { // jQuery
-  var target = $(evt.target);
-  var amount = target.attr('amount');
-  var cost = target.attr('cost');
-  var quantity = target.val();
+function findText(text) {
+  return Array.prototype.find.call(upgrades, function(el) {
+    return el.textContent.indexOf(text) !== -1;
+  });
+}
+
+function getInputCell(label) {
+  return findText(label).nextElementSibling.nextElementSibling
+    .nextElementSibling;
+}
+
+function getInputElement(el) {
+  return el.nextElementSibling.nextElementSibling
+    .nextElementSibling.children[0].rows[0].cells[0].children[0];
+}
+
+function getRe(type, label) {
+  if (label === 'amount') {
+    return new RegExp('\\+(\\d+) ' + type);
+  }
+  return /(\d+)\xA0/;
+}
+
+function getValue$1(type, element, label) {
+  if (!warehouse$1[type][label]) {
+    var valRe = getRe(type, label);
+    var value = element.textContent.match(valRe)[1];
+    warehouse$1[type][label] = value;
+  }
+  return warehouse$1[type][label];
+}
+
+function getAmount(type, upgrade) {
+  return getValue$1(type, upgrade, 'amount');
+}
+
+function getCost(type, upgrade) {
+  return getValue$1(type, upgrade.nextElementSibling, 'cost');
+}
+
+function getCell(type, upgrade) {
+  if (!warehouse$1[type]) {warehouse$1[type] = {};}
+  if (!warehouse$1[type].span) {
+    var span = createSpan();
+    insertElement$1(upgrade, ' ');
+    insertElement(upgrade, span);
+    warehouse$1[type].span = span;
+  }
+  return warehouse$1[type].span;
+}
+
+function doStamCount(type, upgrade, quantity, cell) {
+  var amount = getAmount(type, upgrade);
+  var cost = getCost(type, upgrade);
   // cap the value if the user goes over his current FSP
-  var color = 'red';
-  var extraStam = Math.floor(currentFSP / cost) * amount;
+  var extraStam;
   if (quantity * cost <= currentFSP) {
     extraStam = quantity * amount;
-    color = 'blue';
+    cell.className = 'fshBlue';
+  } else {
+    extraStam = Math.floor(currentFSP / cost) * amount;
+    cell.className = 'fshRed';
   }
-  $('#pCC span[id="totalStam"][type="' + target.attr('stamtype') + '"]')
-    .css('color', color)
-    .html('(+' + extraStam + ' stamina)');
+  cell.textContent = '(+' + extraStam + ' stamina)';
 }
 
-function injectUpgradeHelper(value, type) { // jQuery
-  var theCells = $('#pCC tr')
-    .has('input[name="upgrade_id"][value="' + value + '"]')
-    .find('td');
-  var cell = theCells.first();
-  cell.append(' <span style="color:blue" ' +
-    'id="totalStam" type="' + type + '"></span>');
-  var amountRE = new RegExp('\\+(\\d+) ' + type + ' Stamina');
-  var amount = cell.text().match(amountRE)[1];
-  $('input[name="quantity"]', theCells)
-    .attr('stamtype', type)
-    .attr('amount', amount)
-    .attr('cost', theCells.eq(1).text())
-    .keyup(updateStamCount);
+function updateStamCount(type, upgrade, evt) {
+  var self = evt.target;
+  var quantity = Number(self.value);
+  var cell = getCell(type, upgrade);
+  if (isNaN$1(quantity) || quantity === 0) {
+    cell.className = 'fshHide';
+    return;
+  }
+  doStamCount(type, upgrade, quantity, cell);
 }
 
-function injectPoints() { // jQuery
-  currentFSP = intValue($('#statbar-fsp').text());
-  injectUpgradeHelper(0, 'Current');
-  injectUpgradeHelper(1, 'Maximum');
-  $('#pCC td')
-    .has('input[name="upgrade_id"][value="3"]')
-    .html('<a href="' + server +
-      '?cmd=marketplace">Sell at Marketplace</a>');
+function injectUpgradeHelper(type) {
+  var upgrade = findText(type);
+  getInputElement(upgrade).addEventListener('keyup',
+    updateStamCount.bind(null, type, upgrade));
 }
 
-function storePlayerUpgrades() { // Legacy
-  var alliesText = findNode('//td[.="+1 Max Allies"]');
-  var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling
-    .nextSibling;
-  if (alliesRatio) {
-    var alliesValueRE = /(\d+) \/ 115/;
-    var alliesValue = Number(alliesValueRE.exec(alliesRatio.innerHTML)[1]);
-    setValue('alliestotal', alliesValue + 5);
+function injectPoints() {
+  currentFSP = intValue(getElementById('statbar-fsp').textContent);
+  injectUpgradeHelper('Current');
+  injectUpgradeHelper('Maximum');
+  getInputCell('Gold').innerHTML = '<a href="' + server +
+    'index.php?cmd=marketplace">Sell at Marketplace</a>';
+}
+
+function saveUpgradeValue(upgrade, key) {
+  var text = findText(upgrade);
+  var ratio = text.nextElementSibling.nextElementSibling;
+  if (ratio) {
+    var valueRE = /(\d+) \/ 115/;
+    var value = Number(valueRE.exec(ratio.innerHTML)[1]);
+    setValue(key, value + 5);
   }
-  var enemiesText = findNode('//td[.="+1 Max Enemies"]');
-  var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling
-    .nextSibling;
-  if (enemiesRatio) {
-    var enemiesValueRE = /(\d+) \/ 115/;
-    var enemiesValue = Number(enemiesValueRE.exec(enemiesRatio.innerHTML)[1]);
-    setValue('enemiestotal', enemiesValue + 5);
-  }
+}
+
+function storePlayerUpgrades() {
+  upgrades = document.querySelectorAll('#pCC > table:last-of-type > tbody > ' +
+    'tr:nth-child(even) > td:first-child');
+  saveUpgradeValue('+1 Max Allies', 'alliestotal');
+  saveUpgradeValue('+1 Max Enemies', 'enemiestotal');
   injectPoints();
 }
 
@@ -16206,7 +16515,7 @@ function checkForPvPLadder(row) {
 
 function testArticle$1(rowType) {return rowType > 1;}
 
-function setupPref$3(prefName, rowInjector) {
+function setupPref$2(prefName, rowInjector) {
   rowInjector.insertAdjacentHTML('afterend', simpleCheckbox(prefName));
 }
 
@@ -16214,7 +16523,7 @@ function viewArchive() {
   lastLadderReset = getValue(ladderResetPref);
   var prefName = 'collapseNewsArchive';
   var theTables = pCC.getElementsByTagName('table');
-  setupPref$3(prefName, theTables[0].rows[2]);
+  setupPref$2(prefName, theTables[0].rows[2]);
   collapse({
     prefName: prefName,
     theTable: theTables[2],
@@ -17310,7 +17619,7 @@ function toggleShowExtraLinks() {
   } else {
     itemsAry$1.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
-      el.classList.toggle('fshHide');
+      toggleForce(el, !showExtraLinks);
     });
   }
 }
@@ -17325,7 +17634,7 @@ function toggleShowQuickDropLinks() {
   } else {
     itemsAry$1.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
-      el.classList.toggle('fshHide');
+      toggleForce(el, !showQuickDropLinks$1);
     });
   }
 }
@@ -17679,7 +17988,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '3';
+window.FSH.calf = '4';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
