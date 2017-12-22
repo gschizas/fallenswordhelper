@@ -10,6 +10,7 @@ import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
 import injectMenu from './accordion';
 import injectQuickMsgDialogJQ from './messaging';
+import injectServerNode from './injectServerNode';
 import prepareAllyEnemyList from './allyEnemy';
 import prepareBountyData from './activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
@@ -183,6 +184,8 @@ function notHuntMode() {
   add(3, injectHomePageTwoLink);
 
   add(3, injectQuickMsgDialogJQ);
+
+  add(3, injectServerNode);
 
   add(4, guildActivity);
   add(4, seLog);
