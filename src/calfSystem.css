@@ -1101,6 +1101,9 @@ textarea {resize: none;}
 /* Quick Extract and Inventing results */
 .fshNbrList {list-style: decimal inside;}
 
+/* topbanner-stats */
+#topbanner-stats a {color: #F7EAC9;}
+
 /*
  * Table styles
  */
