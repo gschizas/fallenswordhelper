@@ -24,8 +24,6 @@ function fshMain(ver) {
   window.FSH = window.FSH || {};
   window.FSH.version = ver;
 
-  var count = 0;
-  var head = document.getElementsByTagName('head')[0];
   var cssFiles = ['$_CALFCSS'];
   var scriptFiles = [
     'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.3/localforage.min.js',
@@ -34,18 +32,20 @@ function fshMain(ver) {
   if (typeof window.jQuery !== 'undefined') {
     scriptFiles.push('https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
   }
+  var count = cssFiles.length + scriptFiles.length;
 
   function onPageLoad() {
-    count += 1;
-    if (count === scriptFiles.length) {FSH.dispatch();}
+    count -= 1;
+    if (count === 0) {FSH.dispatch();}
   }
 
   cssFiles.forEach(function(c) {
     var linkTag = document.createElement('link');
     linkTag.type = 'text/css';
     linkTag.rel = 'stylesheet';
+    linkTag.onload = onPageLoad;
     linkTag.href = c;
-    head.appendChild(linkTag);
+    document.body.appendChild(linkTag);
   });
 
   scriptFiles.forEach(function(s) {
@@ -53,7 +53,7 @@ function fshMain(ver) {
     scriptTag.type = 'text/javascript';
     scriptTag.onload = onPageLoad;
     scriptTag.src = s;
-    head.appendChild(scriptTag);
+    document.body.appendChild(scriptTag);
   });
 
 } // end of var main
@@ -61,10 +61,17 @@ function fshMain(ver) {
 function setVer() {
   var ver = '$_VER';
   if (typeof GM_info === 'undefined') {return ver + '_native';}
+  if (GM_info.scriptHandler === 'Greasemonkey' &&
+      Number(GM_info.version.split('.')[0]) >= 4) {return;}
   return ver;
 }
 
-var script = document.createElement('script');
-script.textContent = '(' + fshMain.toString() + ')(\'' + setVer() + '\');';
-document.body.appendChild(script);
-document.body.removeChild(script);
+function injectFsh(fshVer) {
+  var script = document.createElement('script');
+  script.textContent = '(' + fshMain.toString() + ')(\'' + fshVer + '\');';
+  document.body.appendChild(script);
+  document.body.removeChild(script);
+}
+
+var getVer = setVer();
+if (getVer) {injectFsh(getVer);}
