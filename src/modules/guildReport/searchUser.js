@@ -1,5 +1,6 @@
 import add from '../support/task';
 import {getUrlParameter} from '../support/system';
+import moreToDo from '../common/moreToDo';
 
 var counter;
 var nodeList;
@@ -17,7 +18,7 @@ function hideOther(el) {
 
 function hideOthers() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit && counter < nodeList.length) {
+  while (moreToDo(limit, counter, nodeList)) {
     var el = nodeList[counter];
 
     hideOther(el);
