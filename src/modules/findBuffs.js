@@ -313,6 +313,25 @@ function calcNextPage(curPage, maxPage) { // Legacy
   return curPage + 1;
 }
 
+function addPlayerToSearchList(onlinePlayer, onlinePlayerName) {
+  // add online player to search list (all but self)
+  if (characterName !== onlinePlayerName.trim()) {
+    onlinePlayers.push(onlinePlayer);
+  }
+}
+
+function playerRow(i, e) {
+  var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
+  var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
+    .replace(/,/g, ''), 10);
+  var onlinePlayerName = $(e).find('td:eq(1) a').text();
+  var minPlayerVirtualLevel = calcMinLvl();
+  if (onlinePlayerLevel >= findBuffMinCastLevel &&
+      onlinePlayerLevel >= minPlayerVirtualLevel) {
+    addPlayerToSearchList(onlinePlayer, onlinePlayerName);
+  }
+}
+
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var doc = createDocument(responseText);
   var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has' +
@@ -322,20 +341,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var curPage = parseInt($(doc).find('input[name="page"]:last').val()
     .replace(/\D/g, ''), 10);
   if (curPage !== 1) {
-    playerRows.each(function(i, e) {
-      var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
-      var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
-        .replace(/,/g, ''), 10);
-      var onlinePlayerName = $(e).find('td:eq(1) a').text();
-      var minPlayerVirtualLevel = calcMinLvl();
-      if (onlinePlayerLevel >= findBuffMinCastLevel &&
-        onlinePlayerLevel >= minPlayerVirtualLevel) {
-        // add online player to search list (all but self)
-        if (characterName !== onlinePlayerName.trim()) {
-          onlinePlayers.push(onlinePlayer);
-        }
-      }
-    });
+    playerRows.each(playerRow);
   }
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
@@ -367,20 +373,19 @@ function calcLastActMins(tipped) {
   return parseInt(lastActivity[3], 10) + lastActivityHours * 60;
 }
 
+function isValidPlayer(lastActivityMinutes, vlevel, minPlayerVirtualLevel) {
+  return lastActivityMinutes < 5 && vlevel >= findBuffMinCastLevel &&
+    vlevel >= minPlayerVirtualLevel;
+}
+
 function parsePlayerLink(el) {
   var tipped = el.dataset.tipped;
   var lastActivityMinutes = calcLastActMins(tipped);
   // check if they are high enough level to cast the buff
   var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
   var minPlayerVirtualLevel = calcMinLvl();
-  if (lastActivityMinutes < 5 &&
-    vlevel >= findBuffMinCastLevel &&
-    vlevel >= minPlayerVirtualLevel) {
-    // add online player to search list (all but self)
-    var onlinePlayer = el.href;
-    if (characterName !== el.textContent) {
-      onlinePlayers.push(onlinePlayer);
-    }
+  if (isValidPlayer(lastActivityMinutes, vlevel, minPlayerVirtualLevel)) {
+    addPlayerToSearchList(el.href, el.textContent);
   }
 }
 
