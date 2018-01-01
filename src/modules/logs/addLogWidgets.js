@@ -170,6 +170,11 @@ function hasPlayerLink(aRow) {
     /player_id/.test(aRow.cells[2].firstChild.nextSibling.href);
 }
 
+function otherMsgType(aRow, messageType) {
+  return fallback(messageType === 'General', messageType === 'Notification') &&
+    hasPlayerLink(aRow);
+}
+
 function doExtraStuff(aRow, messageType, playerName, isGuildMate) {
   if (messageType === 'Notification' &&
       hasPlayerLink(aRow)) {
@@ -186,9 +191,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
     playerName = playerElement.innerHTML;
     colorPlayerName = true;
   }
-  if (fallback(messageType === 'General',
-    messageType === 'Notification') &&
-      hasPlayerLink(aRow)) {
+  if (otherMsgType(aRow, messageType)) {
     playerElement = aRow.cells[2].firstChild.nextSibling;
     playerName = playerElement.innerHTML;
     colorPlayerName = true;
