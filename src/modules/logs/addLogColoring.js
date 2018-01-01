@@ -21,6 +21,10 @@ function findChatTable() { // Legacy
   return chatTable;
 }
 
+function isOldRow(postAgeMins, postDateUtc) {
+  return postAgeMins > 20 && postDateUtc <= lastCheckUtc;
+}
+
 function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
   if (logScreen === 'Chat' && addBuffTag) {
     var playerIDRE = /player_id=(\d+)/;
@@ -37,7 +41,7 @@ function rowColor(aRow, logScreen, dateColumn) { // Legacy
   var postAgeMins = (nowUtc - postDateUtc) / (1000 * 60);
   if (postDateUtc > lastCheckUtc) {
     aRow.classList.add('fshNr');
-  } else if (postAgeMins > 20 && postDateUtc <= lastCheckUtc) {
+  } else if (isOldRow(postAgeMins, postDateUtc)) {
     aRow.classList.add('fshOr');
     addBuffTag = false;
   }
