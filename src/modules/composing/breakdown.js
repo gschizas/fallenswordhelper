@@ -55,15 +55,19 @@ function breakItems() { // jQuery.min
   });
 }
 
+function validBreakEvent(evt) {
+  evt.stopPropagation();
+  if (selectedList.length === 0) {
+    showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
+    return;
+  }
+  breakItems();
+}
+
 function breakEvt(evt) {
   if (disableBreakdownPrompts &&
       evt.target.id === 'breakdown-selected-items') {
-    evt.stopPropagation();
-    if (selectedList.length === 0) {
-      showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
-      return;
-    }
-    breakItems();
+    validBreakEvent(evt);
   }
 }
 
