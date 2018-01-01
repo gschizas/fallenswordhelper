@@ -19,6 +19,15 @@ function doOnlinePlayers(topbannerStats, miniboxList) {
   bannerPlayers.innerHTML = 'Online: ' + playersOnline;
 }
 
+function statBoxesExist(topbannerStats, gameStats) {
+  var miniboxList = gameStats.nextElementSibling.children[0];
+  if (miniboxList.children.length === 8) {
+    doServerNode(topbannerStats, miniboxList);
+    doOnlinePlayers(topbannerStats, miniboxList);
+    toggleForce(gameStats.parentNode, true);
+  }
+}
+
 export default function injectServerNode() {
   var topbannerStats = getElementById('topbanner-stats');
   var h3coll = document.querySelectorAll('#pCR h3');
@@ -26,11 +35,6 @@ export default function injectServerNode() {
     return el.textContent === 'Game Stats';
   });
   if (topbannerStats && gameStats) {
-    var miniboxList = gameStats.nextElementSibling.children[0];
-    if (miniboxList.children.length === 8) {
-      doServerNode(topbannerStats, miniboxList);
-      doOnlinePlayers(topbannerStats, miniboxList);
-      toggleForce(gameStats.parentNode, true);
-    }
+    statBoxesExist(topbannerStats, gameStats);
   }
 }
