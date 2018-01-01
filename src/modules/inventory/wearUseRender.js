@@ -1,5 +1,14 @@
 import {theInv} from './inventory';
 
+function userInvNotEquipped(row) {
+  return row.folder_id && !row.equipped;
+}
+
+function guidInvNotEquipped(row) {
+  return row.player_id && !row.equipped &&
+    row.player_id === theInv.current_player_id;
+}
+
 var locations = [
   {
     test: function(row) {return row.player_id && row.player_id === -1;},
@@ -19,9 +28,7 @@ var locations = [
   },
   {
     test: function(row) {
-      return row.folder_id && !row.equipped ||
-        row.player_id && !row.equipped &&
-        row.player_id === theInv.current_player_id;
+      return userInvNotEquipped(row) || guidInvNotEquipped(row);
     },
     res: function(row, act) {return act.c;}
   }
