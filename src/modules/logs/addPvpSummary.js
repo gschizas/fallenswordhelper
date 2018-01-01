@@ -48,31 +48,45 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   callback.target.innerHTML = output;
 }
 
-function parseCombatWinner(msgCell) {
-  var replaceText = createSpan({
-    innerHTML:
-      'You were <span class="fshRed">defeated</span> by '
-  });
-  var defeat = /You were defeated by/.test(msgCell.innerHTML);
-  if (defeat) {
-    msgCell.replaceChild(replaceText, msgCell.firstChild);
-    return 0;
-  }
-  replaceText.innerHTML =
-    'You were <span class="fshGreen">victorious</span> over ';
+function replaceLeadingText(msgCell, newHtml) {
+  var replaceText = createSpan({innerHTML: newHtml});
   msgCell.replaceChild(replaceText, msgCell.firstChild);
-  return 1;
 }
 
-export default function addPvpSummary(aRow, messageType) { // Legacy
-  // add PvP combat log summary
-  if (messageType === 'Combat' &&
-      aRow.cells[2] &&
-      calf.showPvPSummaryInLog &&
-      /combat_id=/.test(aRow.cells[2].innerHTML) &&
-      !/\(Guild Conflict\)/.test(aRow.cells[2].textContent)) {
-    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-    var _winner = parseCombatWinner(aRow.cells[2]);
+function parseCombatWinner(msgCell) {
+  var victory = /You were victorious over/.test(msgCell.innerHTML);
+  if (victory) {
+    replaceLeadingText(msgCell,
+      'You were <span class="fshGreen">victorious</span> over ');
+    return 1;
+  }
+  var defeat = /You were defeated by/.test(msgCell.innerHTML);
+  if (defeat) {
+    replaceLeadingText(msgCell,
+      'You were <span class="fshRed">defeated</span> by ');
+    return 0;
+  }
+}
+
+var combatRowTests = [
+  function(aRow, messageType) {return messageType === 'Combat';},
+  function() {return calf.showPvPSummaryInLog;},
+  function(aRow) {
+    return aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML);
+  },
+  function(aRow) {
+    return !/\(Guild Conflict\)/.test(aRow.cells[2].textContent);
+  }
+];
+
+function isCombatRow(aRow, messageType) {
+  return combatRowTests.every(function(e) {return e(aRow, messageType);});
+}
+
+function processCombatRow(aRow) {
+  var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+  var _winner = parseCombatWinner(aRow.cells[2]);
+  if (_winner === 0 || _winner === 1) {
     var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
     xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
@@ -80,4 +94,9 @@ export default function addPvpSummary(aRow, messageType) { // Legacy
       {target: combatSummarySpan, winner: _winner}
     );
   }
+}
+
+export default function addPvpSummary(aRow, messageType) { // Legacy
+  // add PvP combat log summary
+  if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
 }
