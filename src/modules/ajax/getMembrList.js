@@ -46,10 +46,19 @@ function getGuildMembers(guildId) {
   });
 }
 
+var testList = [
+  function(guildId, membrList) {return typeof membrList === 'object';},
+  function(guildId, membrList) {return typeof membrList[guildId] === 'object';},
+  function(guildId, membrList) {
+    return typeof membrList[guildId].lastUpdate === 'number';
+  },
+  function(guildId, membrList) {
+    return membrList[guildId].lastUpdate > now - 300000;
+  }
+];
+
 function getMembrListFromForage(guildId, membrList) {
-  if (membrList && membrList[guildId] &&
-      membrList[guildId].lastUpdate &&
-      membrList[guildId].lastUpdate > now - 300000) {
+  if (testList.every(function(e) {return e(guildId, membrList);})) {
     return membrList;
   }
   return getGuildMembers(guildId).done(addMembrListToForage);
