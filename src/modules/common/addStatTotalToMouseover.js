@@ -1,11 +1,15 @@
 import {closestTable} from './closest';
 import {createDiv} from './cElement';
 
+function cellOneHazText(curr) {
+  return curr.cells[1] && curr.cells[1].textContent;
+}
+
 function reduceStatTable(prev, curr, index) {
   var key = curr.cells[0].textContent.trim().replace(':', '');
   if (!key) {return prev;}
   prev[key] = {ind: index};
-  if (curr.cells[1] && curr.cells[1].textContent) {
+  if (cellOneHazText(curr)) {
     prev[key].value = Number(
       curr.cells[1].textContent.trim().replace('+', '')
     );
