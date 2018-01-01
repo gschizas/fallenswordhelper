@@ -36,13 +36,22 @@ function drawingNewItemTable() {
   }
 }
 
+function testFolder(item) {
+  return folderId !== '0' && item[2] !== folderId;
+}
+
+function testCraft(item) {
+  return perfBox.checked && item[3] !== 'Perfect';
+}
+
+function afn(item) {
+  var myDiv = item[0].parentNode.parentNode;
+  toggleForce(myDiv, testFolder(item) || testCraft(item));
+}
+
 function reDrawGrid() {
   drawingNewItemTable();
-  itemsAry.forEach(function(item) {
-    var myDiv = item[0].parentNode.parentNode;
-    toggleForce(myDiv, folderId !== '0' && item[2] !== folderId ||
-      perfBox.checked && item[3] !== 'Perfect');
-  });
+  itemsAry.forEach(afn);
 }
 
 function doHideFolders(evt) {
