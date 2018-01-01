@@ -132,17 +132,9 @@ function getTrackText(trackKillStreak) { // Legacy
   return 'off';
 }
 
-function doDeathDealer(impsRemaining) { // Legacy
-  var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
-  var lastKillStreak = getLastValue('lastKillStreak');
+function notMaxDd(lastDeathDealerPercentage, lastKillStreak) {
   var trackKillStreak = getValue('trackKillStreak');
   var trackText = getTrackText(trackKillStreak);
-  if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
-    return '<tr><td style="font-size:small; color:black"' +
-      '>Kill Streak: <span findme="killstreak">&gt;' +
-      addCommas(lastKillStreak) + '</span> Damage bonus: <' +
-      'span findme="damagebonus">20</span>%</td></tr>';
-  }
   if (!trackKillStreak) {
     return '<tr><td style="font-size:small; color:' +
       'navy" nowrap>KillStreak tracker disabled. <span style="' +
@@ -161,6 +153,18 @@ function doDeathDealer(impsRemaining) { // Legacy
     '<span id=Helper:toggleKStracker style="color:navy;' +
     'cursor:pointer;text-decoration:underline;" title="Click' +
     ' to toggle">' + trackText + '</span></span></td></tr>';
+}
+
+function doDeathDealer(impsRemaining) { // Legacy
+  var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
+  var lastKillStreak = getLastValue('lastKillStreak');
+  if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
+    return '<tr><td style="font-size:small; color:black"' +
+      '>Kill Streak: <span findme="killstreak">&gt;' +
+      addCommas(lastKillStreak) + '</span> Damage bonus: <' +
+      'span findme="damagebonus">20</span>%</td></tr>';
+  }
+  return notMaxDd(lastDeathDealerPercentage, lastKillStreak);
 }
 
 function recastImpAndRefresh(responseText) { // Legacy
@@ -207,8 +211,12 @@ function findImps() { // Legacy - Old Map
   return '';
 }
 
+function canRecast() {
+  return (hasDeathDealer || hasShieldImp) && impsRemaining === 0;
+}
+
 function impRecast() { // Legacy - Old Map
-  if ((hasDeathDealer || hasShieldImp) && impsRemaining === 0) {
+  if (canRecast()) {
     var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
     var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
       'Players=' +
