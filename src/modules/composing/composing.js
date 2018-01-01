@@ -92,19 +92,22 @@ function createPotion(temp) { // jQuery
   });
 }
 
-function quickCreateBailOut(target) {
-  return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
+function isOurTarget(target) {
+  return target.tagName === 'SPAN' && target.className === 'quickCreate';
 }
 
-function quickCreate(evt) {
-  var self = evt.target.parentNode;
-  if (quickCreateBailOut(self)) {return;}
+function doQuickCreate(self) {
   var temp = self.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
     self.innerHTML = '';
     self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
     createPotion(temp);
   }
+}
+
+function quickCreate(evt) {
+  var self = evt.target.parentNode;
+  if (isOurTarget(self)) {doQuickCreate(self);}
 }
 
 function checkLastCompose() { // jQuery
