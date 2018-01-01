@@ -238,13 +238,17 @@ function getActiveBountyList(doc) { // Legacy
   activeBountyListPosted = true;
 }
 
-function parseBountyPageForWorld(details) {
-  var doc = createDocument(details);
-  getWantedBountyList(doc);
+function hazActiveBountyList(doc) {
   if (calf.enableActiveBountyList &&
       !activeBountyListPosted) {
     getActiveBountyList(doc);
   }
+}
+
+function parseBountyPageForWorld(details) {
+  var doc = createDocument(details);
+  getWantedBountyList(doc);
+  hazActiveBountyList(doc);
   if (curPage < maxPage) {
     xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
       parseBountyPageForWorld);
@@ -253,11 +257,18 @@ function parseBountyPageForWorld(details) {
   }
 }
 
-function testCacheInvalid() { // Legacy
+function testBountyList() {
   return bountyList &&
-    now - bountyList.lastUpdate.getTime() > bountyListRefreshTime ||
-    wantedList &&
+    now - bountyList.lastUpdate.getTime() > bountyListRefreshTime;
+}
+
+function testWantedList() {
+  return wantedList &&
     now - wantedList.lastUpdate.getTime() > bountyListRefreshTime;
+}
+
+function testCacheInvalid() { // Legacy
+  return testBountyList() || testWantedList();
 }
 
 function invalidateCache() { // Legacy
