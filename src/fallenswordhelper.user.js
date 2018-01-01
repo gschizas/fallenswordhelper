@@ -58,12 +58,24 @@ function fshMain(ver) {
 
 } // end of var main
 
+var verTest = [
+  [
+    function() {return GM_info === 'undefined';},
+    function(ver) {return ver + '_native';}
+  ],
+  [
+    function() {
+      return GM_info.scriptHandler === 'Greasemonkey' &&
+        Number(GM_info.version.split('.')[0]) >= 4;
+    },
+    function() {return false;}
+  ],
+  [function() {return true;}, function(ver) {return ver;}]
+];
+
 function setVer() {
   var ver = '$_VER';
-  if (typeof GM_info === 'undefined') {return ver + '_native';}
-  if (GM_info.scriptHandler === 'Greasemonkey' &&
-      Number(GM_info.version.split('.')[0]) >= 4) {return;}
-  return ver;
+  return verTest.find(function(e) {return e[0]();})[1](ver);
 }
 
 function injectFsh(fshVer) {
