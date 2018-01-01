@@ -1,6 +1,6 @@
 import add from '../../support/task';
 import alpha from '../../common/alpha';
-import formatDateTime from '../../common/formatDateTime';
+import formatLocalDateTime from '../../common/formatLocalDateTime';
 import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
 import {
   createDiv,
@@ -37,7 +37,7 @@ function memberRows() {
       function(inside, activity) {
         return inside + '<tr>' +
           '<td>' +
-          formatDateTime(new Date(activity[utc] * 1000)) +
+          formatLocalDateTime(new Date(activity[utc] * 1000)) +
           '</td>' +
           '<td>' + memberKey + '</td>' +
           '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
