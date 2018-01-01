@@ -23,12 +23,19 @@ function newSelector(selector) {
   return test_cmd && test_cmd.value || '-';
 }
 
+var isValid = [
+  function(cmd) {return pageSwitcher[cmd];},
+  function(cmd, subcmd) {return pageSwitcher[cmd][subcmd];},
+  function(cmd, subcmd, subcmd2) {return pageSwitcher[cmd][subcmd][subcmd2];},
+  function(cmd, subcmd, subcmd2, type) {
+    return pageSwitcher[cmd][subcmd][subcmd2][type];
+  }
+];
+
 function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
-  if (pageSwitcher[cmd] &&
-      pageSwitcher[cmd][subcmd] &&
-      pageSwitcher[cmd][subcmd][subcmd2] &&
-      pageSwitcher[cmd][subcmd][subcmd2][type] &&
-      pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
+  if (isValid.every(function(e) {
+    return typeof e(cmd, subcmd, subcmd2, type) === 'object';
+  }) && pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
     return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
   }
 }
