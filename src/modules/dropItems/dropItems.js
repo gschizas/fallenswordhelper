@@ -51,6 +51,12 @@ function afterbegin(o, item) {
   o.injectHere.insertAdjacentHTML('afterbegin', pattern);
 }
 
+function itemColouring(o, item) {
+  if (!colouring && !disableItemColoring) {
+    o.injectHere.classList.add(rarity[item.rarity].clas);
+  }
+}
+
 var buildTrailer = [
   {
     test: function(item) {
@@ -86,9 +92,7 @@ var buildTrailer = [
 ];
 
 function beforeend(o, item) {
-  if (!colouring && !disableItemColoring) {
-    o.injectHere.classList.add(rarity[item.rarity].clas);
-  }
+  itemColouring(o, item);
   var pattern = buildTrailer.reduce(function(prev, el) {
     var ret = prev;
     if (el.test(item)) {
@@ -107,10 +111,13 @@ function doneInvPaint() {
   sendLinks = true;
 }
 
+function moreToDo(limit) {
+  return performance.now() < limit && paintCount < itemsAry.length;
+}
+
 function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      paintCount < itemsAry.length) {
+  while (moreToDo(limit)) {
     var o = itemsAry[paintCount];
     var item = invItems[o.invid];
     afterbegin(o, item);

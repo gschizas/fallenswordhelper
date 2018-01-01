@@ -117,9 +117,13 @@ function structureToggle() {
     .addEventListener('click', toggleVisibilty);
 }
 
+function moreToDo(limit) {
+  return performance.now() < limit && memCount < members.length;
+}
+
 function batchBuffLinks() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit && memCount < members.length) {
+  while (moreToDo(limit)) {
     members[memCount].parentNode.insertAdjacentHTML('beforeend',
       ' <span class="smallLink">[b]</span>');
     memCount += 1;
