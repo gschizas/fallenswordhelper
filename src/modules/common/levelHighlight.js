@@ -13,13 +13,21 @@ function calcLvlToTest() {
   return levelToTest;
 }
 
+var lowerPvpCalcs = [
+  {
+    a: function(levelToTest) {return levelToTest <= 205;},
+    b: function() {return 5;}
+  },
+  {
+    a: function(levelToTest) {return levelToTest >= 206 && levelToTest <= 209;},
+    b: function(levelToTest) {return levelToTest - 200;}
+  },
+  {a: function() {return true;}, b: function() {return 10;}}
+];
+
 function calcLowerPvpLevel(levelToTest) {
-  var modifier = 10;
-  if (levelToTest <= 205) {modifier = 5;}
-  if (levelToTest >= 206 && levelToTest <= 209) {
-    modifier = levelToTest - 200;
-  }
-  return levelToTest - modifier;
+  return levelToTest -
+    lowerPvpCalcs.find(function(e) {return e.a(levelToTest);}).b(levelToTest);
 }
 
 function calcUpperPvpLevel(levelToTest) {
@@ -30,33 +38,27 @@ function calcUpperPvpLevel(levelToTest) {
 
 var lowerGvgCalcs = [
   {
-    test: function(levelToTest) {return levelToTest >= 801;},
-    act: function() {return 100;}
+    a: function(levelToTest) {return levelToTest >= 801;},
+    b: function() {return 100;}
   },
   {
-    test: function(levelToTest) {return levelToTest >= 752;},
-    act: function(levelToTest) {return levelToTest - 701;}
+    a: function(levelToTest) {return levelToTest >= 752;},
+    b: function(levelToTest) {return levelToTest - 701;}
   },
   {
-    test: function(levelToTest) {return levelToTest >= 351;},
-    act: function() {return 50;}
+    a: function(levelToTest) {return levelToTest >= 351;},
+    b: function() {return 50;}
   },
   {
-    test: function(levelToTest) {return levelToTest >= 326;},
-    act: function(levelToTest) {return levelToTest - 301;}
-  }
+    a: function(levelToTest) {return levelToTest >= 326;},
+    b: function(levelToTest) {return levelToTest - 301;}
+  },
+  {a: function() {return true;}, b: function() {return 25;}}
 ];
 
 function calcLowerGvgLevel(levelToTest) {
-  var modifier = 25;
-  lowerGvgCalcs.some(function(el) {
-    if (el.test(levelToTest)) {
-      modifier = el.act(levelToTest);
-      return true;
-    }
-    return false;
-  });
-  return levelToTest - modifier;
+  return levelToTest -
+    lowerGvgCalcs.find(function(e) {return e.a(levelToTest);}).b(levelToTest);
 }
 
 function calcUpperGvgLevel(levelToTest) {
