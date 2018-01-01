@@ -9,9 +9,13 @@ var nodeArray;
 var nodeList;
 var potObj;
 
+function moreToDo(limit, list) {
+  return performance.now() < limit && counter < list.length;
+}
+
 function paintChild() {
   var limit = performance.now() + 1;
-  while (performance.now() < limit && counter < nodeArray.length) {
+  while (moreToDo(limit, nodeArray)) {
     var el = nodeList[counter];
     var inject = nodeArray[counter];
     el.appendChild(inject);
@@ -78,7 +82,7 @@ function doSpan(el) {
 
 function makeSpan() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit && counter < nodeList.length) {
+  while (moreToDo(limit, nodeList)) {
     var el = nodeList[counter];
 
     doSpan(el);
