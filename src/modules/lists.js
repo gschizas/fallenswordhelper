@@ -6,11 +6,15 @@ import {makePageHeader, makePageTemplate, pCC} from './support/layout';
 
 var param;
 
+function hasUrl(j) {
+  return param.url && param.url[j] !== '';
+}
+
 function detailRow(j, itemField) { // Legacy
   if (param.tags[j] === 'checkbox') {
     return '<input type="checkbox"' + isChecked(itemField) +
       ' disabled>';
-  } else if (param.url && param.url[j] !== '') {
+  } else if (hasUrl(j)) {
     return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
       '">' + itemField + '</a>';
   }
@@ -45,8 +49,7 @@ function generateManageTable() { // Legacy
   }, '');
   result += '<th>Action</th></tr>';
   var currentCategory = '';
-  for (var i = 0; i < param.currentItems.length; i += 1) {
-    var item = param.currentItems[i];
+  param.currentItems.forEach(function(item, i) {
     result += '<tr>';
     if (param.categoryField &&
         currentCategory !==
@@ -59,7 +62,7 @@ function generateManageTable() { // Legacy
     result += itemRow(item);
     result += '<td><span class="HelperTextLink" data-itemId="' + i +
       '" id="fshDel' + i + '">[Del]</span></td></tr>';
-  }
+  });
   result += doInputs();
   result += '<td><span class="HelperTextLink" id="fshAdd">' +
     '[Add]</span></td></tr></table>' +
