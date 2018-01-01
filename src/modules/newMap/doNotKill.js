@@ -29,10 +29,17 @@ var actionsToIntercept = {
   }
 };
 
+function firstAttempt(attempts) {
+  return typeof attempts === 'undefined' || attempts === 0;
+}
+
+function goodInterceptFunction(interceptFunction) {
+  return interceptFunction && typeof interceptFunction === 'function';
+}
+
 function maybeIntercept(action, fetch, data, attempts) {
   var interceptFunction = actionsToIntercept[action];
-  if ((typeof attempts === 'undefined' || attempts === 0) &&
-      interceptFunction && typeof interceptFunction === 'function') {
+  if (goodInterceptFunction(interceptFunction) && firstAttempt(attempts)) {
     interceptFunction(action, fetch, data, attempts);
   } else {
     oldDoAction(action, fetch, data, attempts);
