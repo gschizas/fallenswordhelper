@@ -142,9 +142,16 @@ function gsDisplayType(_data, type, row) {
   return 'GS';
 }
 
+function onGuildMember(row) {
+  return row.player_id && row.player_id !== -1;
+}
+
+function canStore(row) {
+  return row.folder_id && !row.bound && !row.equipped;
+}
+
 export function gsRender(_data, type, row) {
-  if (row.player_id && row.player_id !== -1 ||
-      row.folder_id && !row.bound && !row.equipped) {
+  if (onGuildMember(row) || canStore(row)) {
     return gsDisplayType(_data, type, row);
   }
 }
