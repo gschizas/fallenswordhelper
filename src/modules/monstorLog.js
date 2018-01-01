@@ -49,10 +49,14 @@ function sortMonsterAry(sortType) {
   }
 }
 
+function reverseSort(headerClicked) {
+  return calf.sortBy && calf.sortBy === headerClicked;
+}
+
 function sortCol(target) {
   var headerClicked = target.getAttribute('sortKey');
   if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
+  if (reverseSort(headerClicked)) {
     calf.sortAsc = !calf.sortAsc;
   }
   calf.sortBy = headerClicked;
@@ -94,6 +98,10 @@ function drawTable() {
   content.addEventListener('click', doHandlers);
 }
 
+function hazEnhancements(enhancements) {
+  return enhancements && enhancements.length > 0;
+}
+
 function prepMonster(data) {
   monsterAry = Object.keys(data).reduce(function(prev, curr) {
     var tmpObj = data[curr];
@@ -110,7 +118,7 @@ function prepMonster(data) {
     tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
     var enhancements;
     if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-    if (enhancements && enhancements.length > 0) {
+    if (hazEnhancements(enhancements)) {
       var tmp = '<span class="fshXXSmall">';
       tmp += enhancements.reduce(function(_prev, _curr) {
         return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
