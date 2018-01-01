@@ -15,6 +15,10 @@ function player(invPlayer, rowPlayer, guild) {
   return guild;
 }
 
+function isPartOfSet(row) {
+  return row.stats && row.stats.set_name !== '';
+}
+
 function nameRenderDisplay(data, row) {
   var cur = fallback(theInv.player_id,
     theInv.current_player_id);
@@ -26,7 +30,7 @@ function nameRenderDisplay(data, row) {
   if (row.equipped) {bold = '<b>' + data + '</b>';}
 
   var _setName = '';
-  if (row.stats && row.stats.set_name !== '') {
+  if (isPartOfSet(row)) {
     _setName = ' (<span class="fshLink setName" set="' + row.stats.set_name +
       '">set</span>)';
   }
