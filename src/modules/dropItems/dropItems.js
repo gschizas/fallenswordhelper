@@ -8,6 +8,7 @@ import eventHandler from '../common/eventHandler';
 import getInventoryById from '../ajax/getInventoryById';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
+import moreToDo from '../common/moreToDo';
 import moveItemsToFolder from './moveItemsToFolder';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
@@ -111,13 +112,9 @@ function doneInvPaint() {
   sendLinks = true;
 }
 
-function moreToDo(limit) {
-  return performance.now() < limit && paintCount < itemsAry.length;
-}
-
 function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
-  while (moreToDo(limit)) {
+  while (moreToDo(limit, paintCount, itemsAry)) {
     var o = itemsAry[paintCount];
     var item = invItems[o.invid];
     afterbegin(o, item);

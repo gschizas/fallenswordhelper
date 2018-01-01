@@ -1,6 +1,7 @@
 import add from '../support/task';
 import {getElementById} from '../common/getElement';
 import guildTracker from './guildTracker/guildTracker';
+import moreToDo from '../common/moreToDo';
 import retryAjax from '../ajax/retryAjax';
 import {
   colouredDots,
@@ -117,13 +118,9 @@ function structureToggle() {
     .addEventListener('click', toggleVisibilty);
 }
 
-function moreToDo(limit) {
-  return performance.now() < limit && memCount < members.length;
-}
-
 function batchBuffLinks() {
   var limit = performance.now() + 5;
-  while (moreToDo(limit)) {
+  while (moreToDo(limit, memCount, members)) {
     members[memCount].parentNode.insertAdjacentHTML('beforeend',
       ' <span class="smallLink">[b]</span>');
     memCount += 1;
