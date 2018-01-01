@@ -27,7 +27,10 @@ function fastAction(evt, action, result) { // jQuery.min
   self.textContent = '';
   self.className = 'fastAction fshSpinner fshSpinner12';
   action(invId).done(function(data) {
-    if (data.r !== 0) {return;}
+    if (data.r !== 0) {
+      self.remove();
+      return;
+    }
     backpackRemove(invId);
     self.classList.remove('fshSpinner');
     self.parentNode.innerHTML = '<span class="fastWorn">' + result + '</span>';
