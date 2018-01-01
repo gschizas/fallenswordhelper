@@ -34,14 +34,17 @@ export function typeFilter() { // jQuery
   );
 }
 
+function testSetId(data) {
+  return options.checkedElements['-1'] &&
+    data.stats && data.stats.set_id !== '-1';
+}
+
 export function setFilter() { // jQuery
   $.fn.dataTable.ext.search.push(
     function(_settings, _row, _index, data) {
       return !options.checkedElements ||
         !options.checkedElements['-1'] ||
-        options.checkedElements['-1'] &&
-        data.stats &&
-        data.stats.set_id !== '-1';
+        testSetId(data);
     }
   );
 }
