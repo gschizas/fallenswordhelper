@@ -28,29 +28,35 @@ function toText(val) {
   return val.toLocaleString();
 }
 
+function memberFilter(memberKey) {
+  return selMember && selMember !== '- All -' && selMember !== memberKey;
+}
+
+function aMembersActivityRows(memberKey) {
+  return function(inside, activity) {
+    return inside + '<tr>' +
+      '<td>' +
+      formatLocalDateTime(new Date(activity[utc] * 1000)) +
+      '</td>' +
+      '<td>' + memberKey + '</td>' +
+      '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[max]) + '</td>' +
+      '<td class="fshRight">' +
+        Math.floor(activity[cur] / activity[max] * 100) +
+      '</td>' +
+      '<td class="fshRight">' + activity[act] + '</td>' +
+      '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
+      '</tr>';
+  };
+}
+
 function memberRows() {
   return Object.keys(myMembers).reduce(function(outside, memberKey) {
-    if (selMember &&
-        selMember !== '- All -' &&
-        selMember !== memberKey) {return outside;}
-    return outside + myMembers[memberKey].reduce(
-      function(inside, activity) {
-        return inside + '<tr>' +
-          '<td>' +
-          formatLocalDateTime(new Date(activity[utc] * 1000)) +
-          '</td>' +
-          '<td>' + memberKey + '</td>' +
-          '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
-          '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
-          '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
-          '<td class="fshRight">' + toText(activity[max]) + '</td>' +
-          '<td class="fshRight">' +
-            Math.floor(activity[cur] / activity[max] * 100) +
-          '</td>' +
-          '<td class="fshRight">' + activity[act] + '</td>' +
-          '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
-          '</tr>';
-      }, '');
+    if (memberFilter(memberKey)) {return outside;}
+    return outside +
+      myMembers[memberKey].reduce(aMembersActivityRows(memberKey), '');
   }, '');
 }
 
