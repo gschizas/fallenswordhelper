@@ -58,6 +58,14 @@ function parsePage(data) {
   fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage + '...';
 }
 
+function rowMatchesLog(timestamp, myMsg) {
+  return timestamp === options.log[0][0] && myMsg === options.log[0][2];
+}
+
+function seenRowBefore(timestamp, myMsg) {
+  return currPage === 1 && options.log && rowMatchesLog(timestamp, myMsg);
+}
+
 function getTableList(tableList) {
   var theTable = tableList[0];
   var limit = theTable.rows.length - 1;
@@ -66,10 +74,7 @@ function getTableList(tableList) {
     var myDate = myRow.cells[1].textContent;
     var timestamp = parseDateAsTimestamp(myDate);
     var myMsg = myRow.cells[2].innerHTML;
-    if (currPage === 1 &&
-        options.log &&
-        timestamp === options.log[0][0] &&
-        myMsg === options.log[0][2]) {
+    if (seenRowBefore(timestamp, myMsg)) {
       completeReload = false;
       break;
     }
