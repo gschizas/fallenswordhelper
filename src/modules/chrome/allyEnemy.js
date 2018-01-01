@@ -114,10 +114,18 @@ function addContact(contactList, type) {
   return output;
 }
 
+var noAlliesTests = [
+  function(allies, enemies) {return allies.length + enemies.length;},
+  function(allies, enemies) {
+    if (!calf.enableAllyOnlineList) {return enemies.length;}
+  },
+  function(allies) {
+    if (!calf.enableEnemyOnlineList) {return allies.length;}
+  }
+];
+
 function noAllies(allies, enemies) {
-  return allies.length + enemies.length === 0 ||
-    !calf.enableAllyOnlineList && enemies.length === 0 ||
-    !calf.enableEnemyOnlineList && allies.length === 0;
+  return noAlliesTests.every(function(e) {return e(allies, enemies) === 0;});
 }
 
 function hazAllies(allies, enemies) {
