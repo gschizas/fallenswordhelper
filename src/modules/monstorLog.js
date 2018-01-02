@@ -2,6 +2,7 @@ import calf from './support/calf';
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import {pCC} from './support/layout';
+import reverseSort from './common/reverseSort';
 import setForage from './ajax/setForage';
 import {addCommas, imageServer, numberSort, stringSort} from './support/system';
 
@@ -47,10 +48,6 @@ function sortMonsterAry(sortType) {
   } else {
     monsterAry.sort(numberSort);
   }
-}
-
-function reverseSort(headerClicked) {
-  return calf.sortBy && calf.sortBy === headerClicked;
 }
 
 function sortCol(target) {
