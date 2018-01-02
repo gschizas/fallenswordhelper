@@ -75,6 +75,12 @@ function filterHeaderOnlinePlayers() { // jQuery
     '</div><table id="fshInv" class="allow stripe hover"></table>');
 }
 
+function pvpHighlight(data) {
+  return highlightPlayersNearMyLvl &&
+    intValue(data[2]) >= pvpLowerLevel &&
+    intValue(data[2]) <= pvpUpperLevel;
+}
+
 function gotOnlinePlayers() { // jQuery
   buildOnlinePlayerData();
   $.fn.dataTable.ext.search.push(dataTableSearch);
@@ -93,9 +99,7 @@ function gotOnlinePlayers() { // jQuery
       {title: 'Page/Index', 'class': 'dt-center'}
     ],
     createdRow: function(row, data) {
-      if (highlightPlayersNearMyLvl &&
-        intValue(data[2]) >= pvpLowerLevel &&
-        intValue(data[2]) <= pvpUpperLevel) {
+      if (pvpHighlight(data)) {
         $('td', row).eq(2).addClass('lvlHighlight');
       }
     },
