@@ -153,17 +153,20 @@ export function parseGoldUpgrades(data) {
   }
 }
 
-function notUpgradesPage() {
-  var needToDoUpgrade = getValue('needToDoUpgrade');
-  if (needToDoUpgrade) {
-    displayUpgradeMsg();
-    return;
-  }
+function checkLastUpgrade() {
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
   retryAjax('index.php?cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);
   });
+}
+
+function notUpgradesPage() {
+  if (getValue('needToDoUpgrade')) {
+    displayUpgradeMsg();
+    return;
+  }
+  checkLastUpgrade();
 }
 
 export function injectUpgradeAlert() { // jQuery
