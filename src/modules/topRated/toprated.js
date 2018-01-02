@@ -1,6 +1,7 @@
 import getProfile from '../ajax/getProfile';
 import {getValue} from '../support/system';
 import guildView from '../app/guild/view';
+import isObject from '../common/isObject';
 import {nowSecs} from '../support/dataObj';
 import {playerDataObject} from '../common/common';
 import {
@@ -16,13 +17,17 @@ var spinner;
 var validPvP = nowSecs - 604800;
 var guilds;
 
+function pvpHighlight(data) {
+  return data.last_login >= validPvP &&
+    data.virtual_level >= pvpLowerLevel &&
+    data.virtual_level <= pvpUpperLevel;
+}
+
 function doOnlineDot(aTable, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
   if (highlightPlayersNearMyLvl &&
-      data.last_login >= validPvP &&
-      data.virtual_level >= pvpLowerLevel &&
-      data.virtual_level <= pvpUpperLevel) {
+    pvpHighlight(data)) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
 }
@@ -134,11 +139,21 @@ function looksLikeTopRated() {
   findBtn.addEventListener('click', getMyVL);
 }
 
+var topRatedTests = [
+  function() {return isObject(pCC);},
+  function() {return isObject(pCC.firstElementChild);},
+  function() {return isObject(pCC.firstElementChild.rows);},
+  function() {return pCC.firstElementChild.rows.length > 2;},
+  function() {
+    return pCC.firstElementChild.rows[1].textContent.indexOf(
+      'Last Updated') === 0;
+  }
+];
+
+function testforTopRated() {
+  return topRatedTests.every(function(e) {return e();});
+}
+
 export default function injectTopRated() {
-  if (pCC &&
-      pCC.firstElementChild &&
-      pCC.firstElementChild.rows &&
-      pCC.firstElementChild.rows.length > 2 &&
-      pCC.firstElementChild.rows[1].textContent
-        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
+  if (testforTopRated()) {looksLikeTopRated();}
 }

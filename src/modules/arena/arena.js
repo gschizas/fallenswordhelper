@@ -1,5 +1,6 @@
 import {defaults} from '../support/dataObj';
 import getForage from '../ajax/getForage';
+import isObject from '../common/isObject';
 import setForage from '../ajax/setForage';
 import {arenaFilter, dontPost, tableOpts} from './assets';
 import {fallback, intValue} from '../support/system';
@@ -170,8 +171,6 @@ function colourNewRow(row, id) { // jQuery
     row.find('tr').css('background-color', '#F5F298');
   }
 }
-
-function isObject(e) {return typeof e === 'object';}
 
 function checkTournamentId(row, cell) { // jQuery
   var matches = /#\s(\d+)/.exec(cell.text());
