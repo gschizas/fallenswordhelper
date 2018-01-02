@@ -141,6 +141,10 @@ function profileInjectGuildRel() {
   if (aLink) {foundGuildLink(aLink);}
 }
 
+function showRankButton() {
+  return currentGuildRelationship === 'self' && getValue('showAdmin');
+}
+
 function profileInjectQuickButton(avyImg, playerid, playername) {
   var newhtml = '<div align="center">';
   newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
@@ -177,8 +181,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
     playername + '" data-tipped="Recall items from ' + playername +
     '" style="background-image: url(\'' + imageServer +
     '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-  if (currentGuildRelationship === 'self' &&
-      getValue('showAdmin')) {
+  if (showRankButton()) {
     newhtml += '<a class="quickButton buttonGuildRank tip-static" href="' +
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
