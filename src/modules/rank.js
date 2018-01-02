@@ -2,6 +2,7 @@ import add from './support/task';
 import {createInput} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
+import moreToDo from './common/moreToDo';
 import retryAjax from './ajax/retryAjax';
 import {createDocument, getValue} from './support/system';
 import {pCC, playerName} from './support/layout';
@@ -70,9 +71,7 @@ function getPxScroll(val) {
   return 22;
 }
 
-function ajaxifyRankControls(evt) { // jQuery
-  var val = evt.target.getAttribute('value');
-  if (val !== 'Up' && val !== 'Down') {return;}
+function overrideUpDown(evt, val) {
   evt.stopPropagation();
   var onclickHREF = /window.location='(.*)';/
     .exec(evt.target.getAttribute('onclick'))[1];
@@ -86,6 +85,11 @@ function ajaxifyRankControls(evt) { // jQuery
   parentTable.insertBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(val);
   window.scrollBy(0, pxScroll);
+}
+
+function ajaxifyRankControls(evt) { // jQuery
+  var val = evt.target.getAttribute('value');
+  if (val === 'Up' || val === 'Down') {overrideUpDown(evt, val);}
 }
 
 function doButtons() {
@@ -122,8 +126,7 @@ function writeMembers(el) {
 
 function paintRanks() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit &&
-      rankCount < theRows.length) {
+  while (moreToDo(limit, rankCount, theRows)) {
     var el = theRows[rankCount];
 
     writeMembers(el);
