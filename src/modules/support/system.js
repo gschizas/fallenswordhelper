@@ -225,9 +225,17 @@ function intFromString(val) {
   return val;
 }
 
+function aIsNotEquipment(a) {
+  return typeof a.type !== 'undefined' && a.type > 8;
+}
+
+function bIsNotEquipment(a, b) {
+  return typeof a.type !== 'undefined' && b.type > 8;
+}
+
 export function numberSort(a, b) {
-  if (typeof a.type !== 'undefined' && a.type > 8) {return 1;} // non equipment items
-  if (typeof a.type !== 'undefined' && b.type > 8) {return -1;}
+  if (aIsNotEquipment(a)) {return 1;} // non equipment items
+  if (bIsNotEquipment(a, b)) {return -1;}
   var valueA = path(a, calf.sortBy, 1);
   var valueB = path(b, calf.sortBy, 1);
   valueA = intFromString(valueA);
@@ -236,9 +244,13 @@ export function numberSort(a, b) {
   return sortDesc(result);
 }
 
+function theValueIsValid(theValue, min, max) {
+  return !isNaN(theValue) && theValue > min && theValue < max;
+}
+
 export function testRange(aValue, min, max) {
   var theValue = parseInt(aValue, 10);
-  if (!isNaN(theValue) && theValue > min && theValue < max) {
+  if (theValueIsValid(theValue, min, max)) {
     return theValue;
   }
 }
