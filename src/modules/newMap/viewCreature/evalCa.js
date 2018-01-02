@@ -1,3 +1,8 @@
+function caIsRunning(combat) {
+  return combat.player.counterAttackLevel > 0 &&
+    combat.numberOfHitsRequired === 1;
+}
+
 function calcLowest(combat) {
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
@@ -80,8 +85,7 @@ function caResult(combat) {
 }
 
 export default function evalCA(combat) {
-  if (combat.player.counterAttackLevel > 0 &&
-      combat.numberOfHitsRequired === 1) {
+  if (caIsRunning(combat)) {
     caRunning(combat);
   }
   if (needCa(combat)) {
