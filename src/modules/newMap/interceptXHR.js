@@ -23,10 +23,14 @@ function xhrDataFilter(data) {
   return ret;
 }
 
+function isActionList(originalOptions) {
+  return originalOptions.data &&
+    originalOptions.data.d &&
+    bitwiseAnd(originalOptions.data.d, def_fetch_worldRealmActions);
+}
+
 function xhrPreFilter(options, originalOptions) {
-  if (calf.hideSubLvlCreature && originalOptions.data &&
-      originalOptions.data.d &&
-      bitwiseAnd(originalOptions.data.d, def_fetch_worldRealmActions)) {
+  if (calf.hideSubLvlCreature && isActionList(originalOptions)) {
     options.dataFilter = xhrDataFilter;
   }
 }
