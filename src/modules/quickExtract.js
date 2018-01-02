@@ -49,9 +49,16 @@ function extractAllSimilar(self) {
   );
 }
 
+function inMain(item) {
+  return selectMain && item.folder_id !== '-1';
+}
+
+function inSt(item) {
+  return !selectST && item.is_in_st;
+}
+
 function checkFlags(item) {
-  return selectMain && item.folder_id !== '-1' ||
-    !selectST && item.is_in_st;
+  return inMain(item) || inSt(item);
 }
 
 function resources(prev, item) {
