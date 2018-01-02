@@ -71,6 +71,13 @@ function getBuff(doc, buff, inject) {
   }
 }
 
+function itWorked(result) {
+  return result &&
+    (result.textContent.indexOf(
+      'current or higher level is currently active on') !== -1 ||
+    result.textContent.indexOf('was activated on') !== -1);
+}
+
 function quickActivate(evt) { // jQuery
   var trigger = evt.target;
   if (trigger.className !== 'quickbuffActivate') {return;}
@@ -79,10 +86,7 @@ function quickActivate(evt) { // jQuery
   retryAjax(buffHref).done(function(data) {
     var doc = createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
-    if (result &&
-        (result.textContent.indexOf(
-          'current or higher level is currently active on') !== -1 ||
-        result.textContent.indexOf('was activated on') !== -1)) {
+    if (itWorked(result)) {
       trigger.className = 'fshLime';
       trigger.innerHTML = 'On';
     }
@@ -119,21 +123,26 @@ function getBuffColor(myLvl, playerBuffLevel) {
   return 'fshGreen';
 }
 
-function hazBuff(playerData, el) {
-  var myBuffName = el.getAttribute('data-name');
-  var playerBuffLevel = playerData[myBuffName];
-  var playerSpan = el.nextElementSibling.nextElementSibling;
-  if (!playerBuffLevel && !playerSpan) {return;}
+function buffRunning(el, playerBuffLevel, playerSpan) {
   if (!playerBuffLevel) {
     playerSpan.innerHTML = '';
     return;
   }
   var lvlSpan = el.nextElementSibling.firstElementChild.firstElementChild;
   var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
-  playerSpan = newPlayerSpan(el, playerSpan);
+  var fshPlayerSpan = newPlayerSpan(el, playerSpan);
   var buffColor = getBuffColor(myLvl, playerBuffLevel);
-  playerSpan.innerHTML = ' <span class="' + buffColor +
+  fshPlayerSpan.innerHTML = ' <span class="' + buffColor +
     '">[' + playerBuffLevel + ']</span>';
+}
+
+function hazBuff(playerData, el) {
+  var myBuffName = el.getAttribute('data-name');
+  var playerBuffLevel = playerData[myBuffName];
+  var playerSpan = el.nextElementSibling.nextElementSibling;
+  if (playerBuffLevel || playerSpan) {
+    buffRunning(el, playerBuffLevel, playerSpan);
+  }
 }
 
 function addBuffLevels(evt) {
@@ -144,8 +153,8 @@ function addBuffLevels(evt) {
   var playerData = player.parentNode.lastElementChild.textContent.split(',');
   playerData = playerData.reduce(function(prev, curr) {
     if (curr.indexOf(' [') !== -1) {
-      var bob = curr.split(' [');
-      prev[bob[0].trim()] = parseInt(bob[1].replace(']', ''), 10);
+      var foo = curr.split(' [');
+      prev[foo[0].trim()] = parseInt(foo[1].replace(']', ''), 10);
     }
     return prev;
   }, {});
@@ -170,10 +179,14 @@ function doLabels(el) {
   }
 }
 
+function waitForPlayer(firstPlayer) {
+  return !firstPlayer && retries < 9;
+}
+
 function haveTargets() {
   var firstPlayer = getElementById('players')
     .getElementsByTagName('h1')[0];
-  if (!firstPlayer && retries < 9) {
+  if (waitForPlayer(firstPlayer)) {
     retries += 1;
     setTimeout(haveTargets, 100);
     return;
