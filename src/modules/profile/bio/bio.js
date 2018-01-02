@@ -13,6 +13,11 @@ function expandBio() {
   getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
+function foundMatchingTags(closeTagIndex, openTagIndex) {
+  return closeTagIndex !== -1 &&
+    (openTagIndex > closeTagIndex || openTagIndex === -1);
+}
+
 function doCompression(bioCell, bioContents, maxCharactersToShow) {
   // find the end of next HTML tag after the max characters to show.
   var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
@@ -30,8 +35,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
   tagList.forEach(function(tag) {
     var closeTagIndex = bioEnd.indexOf('</' + tag + '>');
     var openTagIndex = bioEnd.indexOf('<' + tag + '>');
-    if (closeTagIndex !== -1 && (openTagIndex > closeTagIndex ||
-        openTagIndex === -1)) {
+    if (foundMatchingTags(closeTagIndex, openTagIndex)) {
       extraOpenHTML += '<' + tag + '>';
       extraCloseHTML += '</' + tag + '>';
     }
@@ -54,14 +58,18 @@ function findStartPosition(bioContents, _maxRowsToShow) {
   return startIndex;
 }
 
+function bioIsTooSmall(bio, maxChar, lines, maxRows) {
+  return bio.length <= maxChar && lines < maxRows;
+}
+
 function compressBio(bioCell) {
   var bioContents = bioCell.innerHTML;
   var maxCharactersToShow = getValue('maxCompressedCharacters');
   var maxRowsToShow = getValue('maxCompressedLines');
   var numberOfLines = bioContents.substr(0, maxCharactersToShow)
     .split(/<br>\n/).length - 1;
-  if (bioContents.length <= maxCharactersToShow &&
-      numberOfLines < maxRowsToShow) {return;}
+  if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
+    maxRowsToShow)) {return;}
   if (numberOfLines >= maxRowsToShow) {
     maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
   }
@@ -76,9 +84,20 @@ function doRender(bioCell) {
   }
 }
 
+function selfRender(self) {
+  return self && getValue('renderSelfBio');
+}
+
+function otherRender(self) {
+  return !self && getValue('renderOtherBios');
+}
+
+function shouldRender(self) {
+  return selfRender(self) || otherRender(self);
+}
+
 function testForRender(self, bioCell) {
-  if (self && getValue('renderSelfBio') ||
-      !self && getValue('renderOtherBios')) {
+  if (shouldRender(self)) {
     doRender(bioCell);
   }
 }
