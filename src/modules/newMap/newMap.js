@@ -7,7 +7,7 @@ import injectRelic from './relic/relic';
 import onWorld from './onWorld';
 import prepareShop from './shop';
 import readyViewCreature from './viewCreature/viewCreature';
-import startMonsterLog from './monsterLog';
+import startMonsterLog from './monsterLog/monsterLog';
 import worldPrefs from './worldPrefs';
 
 function hideGroupByType(type) { // jQuery

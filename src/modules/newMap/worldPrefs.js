@@ -5,6 +5,8 @@ import {huntingBuffsHtml} from '../settings/worldPrefs';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
+import {toggleShowCreatureInfo} from './monsterLog/creatureInfo';
+import {toggleShowMonsterLog} from './monsterLog/processMonsterLog';
 import {toggleShowTitanInfo} from './titanStats/titanStats';
 import {
   doHuntingBuffs,
@@ -17,7 +19,6 @@ import {
   prepareHidePlayerActions,
   toggleHidePlayerActions
 } from './prepareHidePlayerActions';
-import {toggleShowCreatureInfo, toggleShowMonsterLog} from './monsterLog';
 
 export var missingBuffsDiv;
 
