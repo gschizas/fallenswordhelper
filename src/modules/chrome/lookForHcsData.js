@@ -14,7 +14,7 @@ import injectServerNode from './injectServerNode';
 import prepareAllyEnemyList from './allyEnemy';
 import prepareBountyData from './activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
-import seLog from '../seLog/seLog';
+import {seLog} from '../seLog/seLog';
 import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
@@ -40,6 +40,7 @@ function getEnvVars() {
   calf.enableGuildInfoWidgets = getValue('enableGuildInfoWidgets');
   calf.enableOnlineAlliesWidgets =
     getValue('enableOnlineAlliesWidgets');
+  calf.enableSeTracker = getValue('enableSeTracker');
   calf.hideGuildInfoTrade = getValue('hideGuildInfoTrade');
   calf.hideGuildInfoSecureTrade = getValue('hideGuildInfoSecureTrade');
   calf.hideGuildInfoBuff = getValue('hideGuildInfoBuff');
