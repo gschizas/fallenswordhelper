@@ -13,9 +13,13 @@ function fixDebuffQTip(e) { // jQuery.min
   $(e.target).qtip('hide');
 }
 
+function hazRealm(data) {
+  return data.realm && data.realm.name;
+}
+
 function injectWorldNewMap(data) {
   updateSendGoldOnWorld(data);
-  if (data.realm && data.realm.name) {
+  if (hazRealm(data)) {
     injectButtons(data);
     titanStats(data);
     getElementById('buffList')
