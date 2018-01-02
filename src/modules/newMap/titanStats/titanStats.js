@@ -34,6 +34,7 @@ function clearTitanDiv() {
 }
 
 function hideTitanDiv() {
+  titanId = null;
   if (titanDiv && !titanDiv.classList.contains('fshHide')) {
     toggleForce(titanDiv, true);
     clearTitanDiv();
@@ -47,11 +48,31 @@ function clearTheTimeout() {
   }
 }
 
+function goodData(data) {
+  return data.s && Array.isArray(data.r);
+}
+
+function hasTitan(el) {
+  if (el.type === 0) {
+    titanId = el.base_creature_id;
+    return true;
+  }
+  return false;
+}
+
+function titanToShow(dynamic) {
+  return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
+}
+
 function ajaxScoutTower() {
   scouttower().done(function processScoutTower(data) {
-    if (data.s && Array.isArray(data.r)) {
+    if (goodData(data)) {
       processTitans(data.r);
-      timeoutId = window.setTimeout(ajaxScoutTower, 30000);
+      if (titanToShow(GameData.realm().dynamic)) {
+        timeoutId = window.setTimeout(ajaxScoutTower, 30000);
+      } else {
+        hideTitanDiv();
+      }
     }
   });
 }
@@ -79,25 +100,12 @@ function setupTitanDiv() {
   }
 }
 
-function hasTitan(el) {
-  if (el.type === 0) {
-    titanId = el.base_creature_id;
-    return true;
-  }
-  return false;
-}
-
-function titanToShow(dynamic) {
-  return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
-}
-
 function testDynamics(dynamic) {
   clearTheTimeout();
   if (titanToShow(dynamic)) {
     setupTitanDiv();
     ajaxScoutTower();
   } else {
-    titanId = null;
     hideTitanDiv();
   }
 }

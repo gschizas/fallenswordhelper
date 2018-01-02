@@ -75,6 +75,8 @@ function currentTitan(el) {
 
 export function processTitans(r) {
   var ourTitan = r.find(currentTitan);
-  doTopLabels(ourTitan);
-  doMemberRows(ourTitan);
+  if (ourTitan) {
+    doTopLabels(ourTitan);
+    doMemberRows(ourTitan);
+  }
 }
