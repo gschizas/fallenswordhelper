@@ -23,6 +23,14 @@ function getItemDiv() {
   return itemDiv;
 }
 
+function shouldShow(hidden, all, hasFolder) {
+  return hidden && fallback(all, hasFolder);
+}
+
+function shouldHide(hidden, all, hasFolder) {
+  return !hidden && !all && !hasFolder;
+}
+
 function doHideFolder(evt) {
   var folderid = evt.target.id;
   var itemDiv = getItemDiv();
@@ -33,11 +41,11 @@ function doHideFolder(evt) {
     var hidden = el.classList.contains('fshHide');
     var all = folderid === 'folderid0';
     var hasFolder = el.classList.contains(folderid);
-    if (hidden && fallback(all, hasFolder)) {
+    if (shouldShow(hidden, all, hasFolder)) {
       el.classList.remove('fshHide');
       el.classList.add('fshBlock'); // show()
     }
-    if (!hidden && !all && !hasFolder) {
+    if (shouldHide(hidden, all, hasFolder)) {
       el.classList.remove('fshBlock');
       el.classList.add('fshHide'); // hide()
     }
@@ -118,10 +126,20 @@ function getHowMany(itemTables) {
   return howMany;
 }
 
+function itemType(itemid, checkbox) {
+  return itemid === 'itemid-2' && checkbox.classList.contains('itemtype12');
+}
+
 function shouldBeChecked(itemid, checkbox) {
   return itemid === 'itemid-1' ||
-    itemid === 'itemid-2' && checkbox.classList.contains('itemtype12') ||
+    itemType(itemid, checkbox) ||
     checkbox.classList.contains(itemid);
+}
+
+function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
+  return howMany &&
+    fallback(itemsInSt, !el.classList.contains('isInST')) &&
+    shouldBeChecked(itemid, checkbox);
 }
 
 function doCheckAll(evt) {
@@ -134,9 +152,7 @@ function doCheckAll(evt) {
   Array.prototype.forEach.call(itemTables, function(el) {
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
-    if (howMany &&
-        fallback(itemsInSt, !el.classList.contains('isInST')) &&
-        shouldBeChecked(itemid, checkbox)) {
+    if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;
       return;
