@@ -87,9 +87,13 @@ function hasTitan(el) {
   return false;
 }
 
+function titanToShow(dynamic) {
+  return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
+}
+
 function testDynamics(dynamic) {
   clearTheTimeout();
-  if (calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan)) {
+  if (titanToShow(dynamic)) {
     setupTitanDiv();
     ajaxScoutTower();
   } else {
