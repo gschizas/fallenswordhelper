@@ -1,9 +1,8 @@
-import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
+import doSortParams from '../common/doSortParams';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import retryAjax from '../ajax/retryAjax';
-import reverseSort from '../common/reverseSort';
 import setForage from '../ajax/setForage';
 import {
   createDocument,
@@ -118,13 +117,8 @@ function sortRecipeBook(sortType) {
 }
 
 function sortRecipeTable(evt) { // Legacy
-  var headerClicked = evt.target.getAttribute('sortKey');
+  doSortParams(evt.target.getAttribute('sortKey'));
   var sortType = testSortType(evt);
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (reverseSort(headerClicked)) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
   sortRecipeBook(sortType);
   generateRecipeTable();
 }

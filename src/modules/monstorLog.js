@@ -1,8 +1,8 @@
 import calf from './support/calf';
+import doSortParams from './common/doSortParams';
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import {pCC} from './support/layout';
-import reverseSort from './common/reverseSort';
 import setForage from './ajax/setForage';
 import {addCommas, imageServer, numberSort, stringSort} from './support/system';
 
@@ -51,12 +51,7 @@ function sortMonsterAry(sortType) {
 }
 
 function sortCol(target) {
-  var headerClicked = target.getAttribute('sortKey');
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (reverseSort(headerClicked)) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
+  doSortParams(target.getAttribute('sortKey'));
   var sortType = findSortType(target);
   sortMonsterAry(sortType);
   drawMobs();
