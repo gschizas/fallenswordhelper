@@ -1,4 +1,4 @@
-import calf from './support/calf';
+import calf from '../support/calf';
 
 function reverseSort(headerClicked) {
   return calf.sortBy && calf.sortBy === headerClicked;
