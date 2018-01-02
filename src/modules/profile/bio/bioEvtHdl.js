@@ -145,12 +145,16 @@ function priceUnit(price) {
   return 'stam';
 }
 
+function thisLine(node) {
+  return node && node.nodeName.toLowerCase() !== 'br';
+}
+
 function priceBeforeName(buffNameNode, price) {
   if (!price) { // some players have prices BEFORE the buff names
     var newtext;
     var text = '';
     var node = buffNameNode;
-    while (node && node.nodeName.toLowerCase() !== 'br') {
+    while (thisLine(node)) {
       newtext = node.textContent;
       node = node.previousSibling;
       text = newtext + text;
@@ -167,7 +171,7 @@ function getBuffCost(buffNameNode) {
   var text = '';
   // get the whole line from the buff name towards the end (even after
   // the ',', in case of 'AL, Lib, Mer: 10k each'
-  while (node && node.nodeName.toLowerCase() !== 'br') {
+  while (thisLine(node)) {
     newtext = node.textContent;
     node = node.nextSibling;
     text += newtext;
@@ -216,10 +220,14 @@ function getBuffNameNode(e) {
   return buffNameNode;
 }
 
+function isBuffLink(buffNameNode) {
+  return buffNameNode.classList &&
+    buffNameNode.classList.contains('buffLink');
+}
+
 export default function bioEvtHdl(e) {
   var buffNameNode = getBuffNameNode(e);
-  if (buffNameNode.classList &&
-      buffNameNode.classList.contains('buffLink')) {
+  if (isBuffLink(buffNameNode)) {
     toggleBuffsToBuy(e);
   } else if (e.target.id === 'fshSendBuffMsg') {
     getBuffsToBuy(e);
