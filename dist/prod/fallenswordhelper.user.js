@@ -11,7 +11,7 @@
 // @exclude        https://wiki.fallensword.com/*
 // @exclude        https://www.fallensword.com/app.php*
 // @exclude        https://www.fallensword.com/fetchdata.php*
-// @version        1521
+// @version        1522
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -24,28 +24,28 @@ function fshMain(ver) {
   window.FSH = window.FSH || {};
   window.FSH.version = ver;
 
-  var count = 0;
-  var head = document.getElementsByTagName('head')[0];
-  var cssFiles = ['https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1521/calfSystem.css'];
+  var cssFiles = ['https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1522/calfSystem.css'];
   var scriptFiles = [
     'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.3/localforage.min.js',
-    'https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1521/calfSystem.min.js'
+    'https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1522/calfSystem.min.js'
   ];
   if (typeof window.jQuery !== 'undefined') {
     scriptFiles.push('https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
   }
+  var count = cssFiles.length + scriptFiles.length;
 
   function onPageLoad() {
-    count += 1;
-    if (count === scriptFiles.length) {FSH.dispatch();}
+    count -= 1;
+    if (count === 0) {FSH.dispatch();}
   }
 
   cssFiles.forEach(function(c) {
     var linkTag = document.createElement('link');
     linkTag.type = 'text/css';
     linkTag.rel = 'stylesheet';
+    linkTag.onload = onPageLoad;
     linkTag.href = c;
-    head.appendChild(linkTag);
+    document.body.appendChild(linkTag);
   });
 
   scriptFiles.forEach(function(s) {
@@ -53,18 +53,37 @@ function fshMain(ver) {
     scriptTag.type = 'text/javascript';
     scriptTag.onload = onPageLoad;
     scriptTag.src = s;
-    head.appendChild(scriptTag);
+    document.body.appendChild(scriptTag);
   });
 
 } // end of var main
 
+var verTest = [
+  [
+    function() {return GM_info === 'undefined';},
+    function(ver) {return ver + '_native';}
+  ],
+  [
+    function() {
+      return GM_info.scriptHandler === 'Greasemonkey' &&
+        Number(GM_info.version.split('.')[0]) >= 4;
+    },
+    function() {return false;}
+  ],
+  [function() {return true;}, function(ver) {return ver;}]
+];
+
 function setVer() {
-  var ver = '1521';
-  if (typeof GM_info === 'undefined') {return ver + '_native';}
-  return ver;
+  var ver = '1522';
+  return verTest.find(function(e) {return e[0]();})[1](ver);
 }
 
-var script = document.createElement('script');
-script.textContent = '(' + fshMain.toString() + ')(\'' + setVer() + '\');';
-document.body.appendChild(script);
-document.body.removeChild(script);
+function injectFsh(fshVer) {
+  var script = document.createElement('script');
+  script.textContent = '(' + fshMain.toString() + ')(\'' + fshVer + '\');';
+  document.body.appendChild(script);
+  document.body.removeChild(script);
+}
+
+var getVer = setVer();
+if (getVer) {injectFsh(getVer);}
