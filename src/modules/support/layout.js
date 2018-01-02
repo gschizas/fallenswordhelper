@@ -1,5 +1,6 @@
 import add from './task';
 import {getElementById} from '../common/getElement';
+import moreToDo from '../common/moreToDo';
 import {
   createButton,
   createDiv,
@@ -172,8 +173,7 @@ function changeOnlineDot(contactLink) {
 
 function batchDots() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      dotCount < dotList.length) {
+  while (moreToDo(limit, dotCount, dotList)) {
     changeOnlineDot(dotList[dotCount]);
     dotCount += 1;
   }
