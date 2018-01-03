@@ -16519,6 +16519,19 @@ function storePlayerUpgrades() {
   injectPoints();
 }
 
+function formatUtcDateTime(aDate) {
+  if (Object.prototype.toString.call(aDate) === '[object Date]' &&
+      !isNaN(aDate.getTime())) {
+    var yyyy = aDate.getUTCFullYear().toString();
+    var mon = padZ(aDate.getUTCMonth() + 1);
+    var dd = padZ(aDate.getUTCDate());
+    var hh = padZ(aDate.getUTCHours());
+    var mm = padZ(aDate.getUTCMinutes());
+    var ss = padZ(aDate.getUTCSeconds());
+    return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+  }
+}
+
 var enableSeTracker = 'enableSeTracker';
 var trackerCell;
 
@@ -16526,7 +16539,7 @@ function addRow$1(trackerTable, se) {
   trackerTable.insertAdjacentHTML('beforeend',
     '<tr><td class="fshCenter">' + se[0] + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
-    formatLocalDateTime(new Date(se[1] * 1000)) + '</td></tr>');
+    formatUtcDateTime(new Date(se[1] * 1000)) + '</td></tr>');
 }
 
 function buildTrackerTable(seAry) {
@@ -18402,7 +18415,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '0';
+window.FSH.calf = '1';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
