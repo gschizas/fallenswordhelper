@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import formatLocalDateTime from '../common/formatLocalDateTime';
+import formatUtcDateTime from '../common/formatUtcDateTime';
 import {pCC} from '../support/layout';
 import {setValue} from '../support/system';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
@@ -18,7 +18,7 @@ function addRow(trackerTable, se) {
   trackerTable.insertAdjacentHTML('beforeend',
     '<tr><td class="fshCenter">' + se[0] + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
-    formatLocalDateTime(new Date(se[1] * 1000)) + '</td></tr>');
+    formatUtcDateTime(new Date(se[1] * 1000)) + '</td></tr>');
 }
 
 function buildTrackerTable(seAry) {
