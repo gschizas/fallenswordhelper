@@ -7,6 +7,11 @@ import {
   xmlhttp
 } from '../support/system';
 
+function getCombatStat(responseText, label) {
+  var statRe = new RegExp('var\\s+' + label + '=(-?[0-9]+);', 'i');
+  return getIntFromRegExp(responseText, statRe);
+}
+
 function result(stat, desc, color) {
   if (stat !== 0) {
     return desc + ':<span class="' + color + '">' +
@@ -17,22 +22,15 @@ function result(stat, desc, color) {
 
 function retrievePvPCombatSummary(responseText, callback) { // Legacy
   var winner = callback.winner;
-  var color;
+  var color = 'fshRed';
   if (winner === 1) {
     color = 'fshGreen';
-  } else {
-    color = 'fshRed';
   }
-  var xpGain = getIntFromRegExp(responseText,
-    /var\s+xpGain=(-?[0-9]+);/i);
-  var goldGain = getIntFromRegExp(responseText,
-    /var\s+goldGain=(-?[0-9]+);/i);
-  var prestigeGain = getIntFromRegExp(responseText,
-    /var\s+prestigeGain=(-?[0-9]+);/i);
-  var goldStolen = getIntFromRegExp(responseText,
-    /var\s+goldStolen=(-?[0-9]+);/i);
-  var pvpRatingChange = getIntFromRegExp(responseText,
-    /var\s+pvpRatingChange=(-?[0-9]+);/i);
+  var xpGain = getCombatStat(responseText, 'xpGain');
+  var goldGain = getCombatStat(responseText, 'goldGain');
+  var prestigeGain = getCombatStat(responseText, 'prestigeGain');
+  var goldStolen = getCombatStat(responseText, 'goldStolen');
+  var pvpRatingChange = getCombatStat(responseText, 'pvpRatingChange');
   var output = '<br> ';
   output += result(xpGain, 'XP stolen', color);
   output += result(goldGain, 'Gold lost', color);
@@ -50,25 +48,55 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   callback.target.innerHTML = output;
 }
 
-export default function addPvpSummary(aRow, messageType) { // Legacy
-  // add PvP combat log summary
-  if (messageType === 'Combat' &&
-      aRow.cells[2] &&
-      calf.showPvPSummaryInLog &&
-      /combat_id=/.test(aRow.cells[2].innerHTML) &&
-      !/\(Guild Conflict\)/.test(aRow.cells[2].textContent)) {
-    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-    var defeat = /You were defeated by/.test(aRow.cells[2].innerHTML);
-    var _winner = 1;
-    if (defeat) {_winner = 0;}
+function replaceLeadingText(msgCell, newHtml) {
+  var replaceText = createSpan({innerHTML: newHtml});
+  msgCell.replaceChild(replaceText, msgCell.firstChild);
+}
+
+function parseCombatWinner(msgCell) {
+  var victory = /You were victorious over/.test(msgCell.innerHTML);
+  if (victory) {
+    replaceLeadingText(msgCell,
+      'You were <span class="fshGreen">victorious</span> over ');
+    return 1;
+  }
+  var defeat = /You were defeated by/.test(msgCell.innerHTML);
+  if (defeat) {
+    replaceLeadingText(msgCell,
+      'You were <span class="fshRed">defeated</span> by ');
+    return 0;
+  }
+}
+
+var combatRowTests = [
+  function(aRow, messageType) {return messageType === 'Combat';},
+  function() {return calf.showPvPSummaryInLog;},
+  function(aRow) {
+    return aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML);
+  },
+  function(aRow) {
+    return !/\(Guild Conflict\)/.test(aRow.cells[2].textContent);
+  }
+];
+
+function isCombatRow(aRow, messageType) {
+  return combatRowTests.every(function(e) {return e(aRow, messageType);});
+}
+
+function processCombatRow(aRow) {
+  var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+  var _winner = parseCombatWinner(aRow.cells[2]);
+  if (_winner === 0 || _winner === 1) {
     var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
     xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,
-      {
-        target: combatSummarySpan,
-        winner: _winner
-      }
+      {target: combatSummarySpan, winner: _winner}
     );
   }
+}
+
+export default function addPvpSummary(aRow, messageType) { // Legacy
+  // add PvP combat log summary
+  if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
 }

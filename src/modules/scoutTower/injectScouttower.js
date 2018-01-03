@@ -2,6 +2,7 @@ import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import {pCC} from '../support/layout';
 import {parseDateAsTimestamp} from '../support/system';
+import roundToString from '../common/roundToString';
 import setForage from '../ajax/setForage';
 import {createAnchor, createTBody, createTable} from '../common/cElement';
 import {guideUrl, now} from '../support/dataObj';
@@ -65,19 +66,19 @@ function addMissingTitansFromOld(oldTitans, newTitans) {
   });
 }
 
-function getTitanString(guildKills, totalHP, currentHP) {
+export function getTitanString(guildKills, totalHP, currentHP) {
   var numberOfKillsToSecure = Math.ceil(totalHP / 2 + 1);
   if (guildKills >= numberOfKillsToSecure) {
     return 'Secured';
   }
-  if (numberOfKillsToSecure - guildKills > currentHP) {
+  var remainingKills = numberOfKillsToSecure - guildKills;
+  if (remainingKills > currentHP) {
     return '<span class="fshRed">Cannot Secure</span>';
   }
-  return '<span class="fshRed">' +
-    (numberOfKillsToSecure - guildKills) + '</span> to secure';
+  return '<span class="fshRed">' + remainingKills + '</span> to secure';
 }
 
-function getKillsPct(currentNumberOfKills, guildKills) {
+export function getKillsPct(currentNumberOfKills, guildKills) {
   if (currentNumberOfKills === 0) {return 0;}
   return guildKills * 100 / currentNumberOfKills;
 }
@@ -89,13 +90,11 @@ function killsSummary(aRow) {
   var titanHPArray = titanHP.split('/');
   var currentHP = Number(titanHPArray[0]);
   var totalHP = Number(titanHPArray[1]);
-  var currentNumberOfKills = totalHP - currentHP;
-  var titanString = getTitanString(guildKills, totalHP, currentHP);
-  var killsTotPct = (guildKills * 100 / totalHP).toFixed(2);
   aRow.cells[3].insertAdjacentHTML('beforeend',
     '<br><span class="fshBlue"> (' +
-    getKillsPct(currentNumberOfKills, guildKills).toFixed(2) +
-    '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')');
+    roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
+    '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
+    '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
 }
 
 function guideLink(aRow) {
@@ -117,14 +116,14 @@ function gotOldTitans(oldTitans) {
   for (var i = 1; i < titanTable.rows.length - 1; i += 6) {
     var aRow = titanTable.rows[i];
     killsSummary(aRow);
-    cooldownTracker(aRow, newTitans);
+    cooldownTracker(aRow, newTitans); // Pref
     guideLink(aRow);
   }
-  addMissingTitansFromOld(oldTitans, newTitans);
-  displayTracker(titanTables[0], newTitans);
-  setForage('fsh_titans', newTitans);
+  addMissingTitansFromOld(oldTitans, newTitans); // Pref
+  displayTracker(titanTables[0], newTitans); // Pref
+  setForage('fsh_titans', newTitans); // Pref
 }
 
 export default function injectScouttower() {
-  getForage('fsh_titans').done(gotOldTitans);
+  getForage('fsh_titans').done(gotOldTitans); // Pref
 }

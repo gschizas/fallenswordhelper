@@ -15,6 +15,10 @@ function player(invPlayer, rowPlayer, guild) {
   return guild;
 }
 
+function isPartOfSet(row) {
+  return row.stats && row.stats.set_name !== '';
+}
+
 function nameRenderDisplay(data, row) {
   var cur = fallback(theInv.player_id,
     theInv.current_player_id);
@@ -26,7 +30,7 @@ function nameRenderDisplay(data, row) {
   if (row.equipped) {bold = '<b>' + data + '</b>';}
 
   var _setName = '';
-  if (row.stats && row.stats.set_name !== '') {
+  if (isPartOfSet(row)) {
     _setName = ' (<span class="fshLink setName" set="' + row.stats.set_name +
       '">set</span>)';
   }
@@ -135,16 +139,23 @@ export function bpRender(where, type, row) {
 function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
-    row.inv_id + '" playerid="' +
-    fallback(row.player_id, theInv.player_id) +
-    '" mode="1" action="recall">GS</span>';
+      row.inv_id + '" playerid="' +
+      fallback(row.player_id, theInv.player_id) +
+      '" mode="1" action="recall">GS</span>';
   }
   return 'GS';
 }
 
+function onGuildMember(row) {
+  return row.player_id && row.player_id !== -1;
+}
+
+function canStore(row) {
+  return row.folder_id && !row.bound && !row.equipped;
+}
+
 export function gsRender(_data, type, row) {
-  if (row.player_id && row.player_id !== -1 ||
-      row.folder_id && row.guild_tag !== '-1') {
+  if (onGuildMember(row) || canStore(row)) {
     return gsDisplayType(_data, type, row);
   }
 }

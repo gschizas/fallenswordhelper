@@ -1,5 +1,7 @@
+import {getElementById} from '../common/getElement';
+
 var timers = {};
-var footWrap = document.getElementById('foot-wrap');
+var footWrap = getElementById('foot-wrap');
 
 export function log(text, value) {
   if (footWrap) {

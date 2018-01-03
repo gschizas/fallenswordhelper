@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import {jConfirm} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
@@ -57,7 +58,7 @@ function interceptDebuff(e) { // jQuery
 }
 
 export default function fastDebuff() {
-  var profileRightColumn = document.getElementById('profileRightColumn')
+  var profileRightColumn = getElementById('profileRightColumn')
     .lastElementChild;
   profileRightColumn.addEventListener('click', interceptDebuff, true);
 }

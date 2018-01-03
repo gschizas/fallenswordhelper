@@ -1,8 +1,9 @@
 import {defaults} from '../support/dataObj';
 import getForage from '../ajax/getForage';
-import {intValue} from '../support/system';
+import isObject from '../common/isObject';
 import setForage from '../ajax/setForage';
 import {arenaFilter, dontPost, tableOpts} from './assets';
+import {fallback, intValue} from '../support/system';
 import {time, timeEnd} from '../support/debug';
 
 var tabs;
@@ -10,11 +11,15 @@ var theTables;
 var opts;
 var oldIds;
 
+function levelsAreNotNaN(minLvl, maxLvl) {
+  return !isNaN(minLvl) && !isNaN(maxLvl);
+}
+
 function changeLvls() { // jQuery
   var minLvl = parseInt($('#fshMinLvl').val(), 10);
   var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
-  if (!isNaN(minLvl) && !isNaN(maxLvl)) {
-    opts = opts || {};
+  if (levelsAreNotNaN(minLvl, maxLvl)) {
+    opts = fallback(opts, {});
     opts.minLvl = minLvl;
     opts.maxLvl = maxLvl;
     setForage('fsh_arena', opts);
@@ -39,6 +44,10 @@ function hideMoves(evt) { // jQuery
   $('.moveMax').toggle(!evt.target.checked);
 }
 
+function testIsNotDesc(test) {
+  return test && test[1] === '_desc';
+}
+
 function sortHandler(evt) { // jQuery
   var self = $(evt.target).closest('td');
   var table = self.closest('table').DataTable();
@@ -46,7 +55,7 @@ function sortHandler(evt) { // jQuery
   var classes = self.attr('class');
   var test = /sorting([^\s]+)/.exec(classes);
   var sortOrder = 'desc';
-  if (test && test[1] === '_desc') {sortOrder = 'asc';}
+  if (testIsNotDesc(test)) {sortOrder = 'asc';}
   if (myCol !== 3) {
     table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {
@@ -137,13 +146,17 @@ function hazMaxMoves(matches, row) { // jQuery
   }
 }
 
+function optsHazMoves(cell, row) { // jQuery
+  var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+  if (matches) {
+    hazMaxMoves(matches, row);
+    cell.attr('data-order', matches[1]);
+  }
+}
+
 function maxMoves(cell, row) { // jQuery
   if (opts && opts.moves) {
-    var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
-    if (matches) {
-      hazMaxMoves(matches, row);
-      cell.attr('data-order', matches[1]);
-    }
+    optsHazMoves(cell, row);
   }
 }
 
@@ -152,21 +165,26 @@ function reward(cell) { // jQuery
   cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
 }
 
-function orderData(i, e) { // jQuery
+function colourNewRow(row, id) { // jQuery
+  if (oldIds && !oldIds[id]) {
+    row.css('background-color', '#F5F298');
+    row.find('tr').css('background-color', '#F5F298');
+  }
+}
 
+function checkTournamentId(row, cell) { // jQuery
+  var matches = /#\s(\d+)/.exec(cell.text());
+  if ([matches, opts, opts.id].every(isObject)) {
+    opts.id[matches[1]] = matches[1];
+    colourNewRow(row, matches[1]);
+  }
+}
+
+function orderData(i, e) { // jQuery
   var row = $(e);
   var theCells = row.children();
-
   var cell = theCells.eq(0);
-  var matches = /#\s(\d+)/.exec(cell.text());
-  if (matches && opts && opts.id) {
-    opts.id[matches[1]] = matches[1];
-    if (oldIds && !oldIds[matches[1]]) {
-      row.css('background-color', '#F5F298');
-      row.find('tr').css('background-color', '#F5F298');
-    }
-  }
-
+  checkTournamentId(row, cell);
   players(theCells.eq(1));
   cell = theCells.eq(2);
   cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
@@ -175,7 +193,6 @@ function orderData(i, e) { // jQuery
   boolData(theCells.eq(6));
   maxMoves(theCells.eq(8), row);
   reward(theCells.eq(8));
-
 }
 
 function redoHead(i, e) { // jQuery

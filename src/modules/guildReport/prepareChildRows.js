@@ -1,5 +1,6 @@
 import add from '../support/task';
 import {createSpan} from '../common/cElement';
+import moreToDo from '../common/moreToDo';
 import potReport from './potReport';
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
@@ -11,7 +12,7 @@ var potObj;
 
 function paintChild() {
   var limit = performance.now() + 1;
-  while (performance.now() < limit && counter < nodeArray.length) {
+  while (moreToDo(limit, counter, nodeArray)) {
     var el = nodeList[counter];
     var inject = nodeArray[counter];
     el.appendChild(inject);
@@ -78,7 +79,7 @@ function doSpan(el) {
 
 function makeSpan() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit && counter < nodeList.length) {
+  while (moreToDo(limit, counter, nodeList)) {
     var el = nodeList[counter];
 
     doSpan(el);

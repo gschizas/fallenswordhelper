@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {pCC} from '../support/layout';
 import perfFilter from '../common/perfFilter';
 import retryAjax from '../ajax/retryAjax';
@@ -54,15 +55,19 @@ function breakItems() { // jQuery.min
   });
 }
 
+function validBreakEvent(evt) {
+  evt.stopPropagation();
+  if (selectedList.length === 0) {
+    showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
+    return;
+  }
+  breakItems();
+}
+
 function breakEvt(evt) {
   if (disableBreakdownPrompts &&
       evt.target.id === 'breakdown-selected-items') {
-    evt.stopPropagation();
-    if (selectedList.length === 0) {
-      showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
-      return;
-    }
-    breakItems();
+    validBreakEvent(evt);
   }
 }
 
@@ -85,14 +90,14 @@ function togglePref() {
 export default function composingBreakdown() {
   perfFilter('composing');
   disableBreakdownPrompts = getValue('disableBreakdownPrompts');
-  document.getElementById('breakdown-selected-items').parentNode
+  getElementById('breakdown-selected-items').parentNode
     .addEventListener('click', breakEvt, true);
-  document.getElementById('composing-items')
+  getElementById('composing-items')
     .addEventListener('click', itemClick);
   pCC.insertAdjacentHTML('beforeend',
     '<table class="fshTblCenter"><tbody>' +
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
-  document.getElementById('disableBreakdownPrompts')
+  getElementById('disableBreakdownPrompts')
     .addEventListener('click', togglePref);
 }

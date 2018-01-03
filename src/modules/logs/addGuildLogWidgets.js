@@ -8,7 +8,7 @@ function getPlayer(playerAry) { // Legacy
   return 0;
 }
 
-function findPlayers(aRow) { // Legacy
+function msgDoesNotIncludePlayer(aRow) {
   var messageHTML = aRow.cells[2].innerHTML;
   var doublerPlayerMessageRE =
     /member\s<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
@@ -16,12 +16,15 @@ function findPlayers(aRow) { // Legacy
   var singlePlayerMessageRE =
     /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
   var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
-
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);
+  return firstPlayer &&
+    firstPlayerID !== currentPlayerId &&
+    secondPlayerID !== currentPlayerId;
+}
 
-  if (firstPlayer && firstPlayerID !== currentPlayerId &&
-      secondPlayerID !== currentPlayerId) {
+function findPlayers(aRow) { // Legacy
+  if (msgDoesNotIncludePlayer(aRow)) {
     for (var j = 0; j < 3; j += 1) {
       aRow.cells[j].removeAttribute('class');
     }

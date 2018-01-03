@@ -1,4 +1,6 @@
 import {createTable} from './common/cElement';
+import eventHandler from './common/eventHandler';
+import {getElementById} from './common/getElement';
 import getInventory from './ajax/getInventory';
 import {imageServer} from './support/system';
 import jsonFail from './common/jsonFail';
@@ -40,16 +42,23 @@ function doExtract(target) {
   }
 }
 
-function extractAllSimilar(evt) {
+function extractAllSimilar(self) {
   jConfirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
-    doExtract.bind(null, evt.target)
+    doExtract.bind(null, self)
   );
 }
 
+function inMain(item) {
+  return selectMain && item.folder_id !== '-1';
+}
+
+function inSt(item) {
+  return !selectST && item.is_in_st;
+}
+
 function checkFlags(item) {
-  return selectMain && item.folder_id !== '-1' ||
-    !selectST && item.is_in_st;
+  return inMain(item) || inSt(item);
 }
 
 function resources(prev, item) {
@@ -84,7 +93,7 @@ function showQuickExtract() {
     '<tr><td colspan="2"><ol id="qeresult"></ol></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
-  buyResult = document.getElementById('qeresult');
+  buyResult = getElementById('qeresult');
 }
 
 function isExtractable(curr) {
@@ -104,35 +113,24 @@ function prepInv(data) {
 
 var extractEvents = [
   {
-    test: function(e) {return e.target.id === 'fshInSt';},
-    fn: function() {
+    test: function(self) {return self.id === 'fshInSt';},
+    act: function() {
       selectST = !selectST;
       showQuickExtract();
     }
   },
   {
-    test: function(e) {return e.target.id === 'fshInMain';},
-    fn: function() {
+    test: function(self) {return self.id === 'fshInMain';},
+    act: function() {
       selectMain = !selectMain;
       showQuickExtract();
     }
   },
   {
-    test: function(e) {return e.target.id.indexOf('fshExtr') === 0;},
-    fn: function(e) {
-      extractAllSimilar(e);
-    }
+    test: function(self) {return self.id.indexOf('fshExtr') === 0;},
+    act: extractAllSimilar
   }
 ];
-
-function listen(e) {
-  for (var i = 0; i < extractEvents.length; i += 1) {
-    if (extractEvents[i].test(e)) {
-      extractEvents[i].fn(e);
-      return;
-    }
-  }
-}
 
 export default function insertQuickExtract(injector) { // jQuery.min
   var content = injector || pCC;
@@ -147,6 +145,6 @@ export default function insertQuickExtract(injector) { // jQuery.min
   content.appendChild(extTbl);
   selectST = true;
   selectMain = true;
-  content.addEventListener('click', listen);
+  content.addEventListener('click', eventHandler(extractEvents));
   getInventory().done(prepInv);
 }

@@ -1,14 +1,20 @@
 import {defaults} from './support/dataObj';
+import eventHandler from './common/eventHandler';
+import {getElementById} from './common/getElement';
 import {getValueJSON, isChecked, setValueJSON} from './support/system';
 import {makePageHeader, makePageTemplate, pCC} from './support/layout';
 
 var param;
 
+function hasUrl(j) {
+  return param.url && param.url[j] !== '';
+}
+
 function detailRow(j, itemField) { // Legacy
   if (param.tags[j] === 'checkbox') {
     return '<input type="checkbox"' + isChecked(itemField) +
       ' disabled>';
-  } else if (param.url && param.url[j] !== '') {
+  } else if (hasUrl(j)) {
     return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
       '">' + itemField + '</a>';
   }
@@ -43,8 +49,7 @@ function generateManageTable() { // Legacy
   }, '');
   result += '<th>Action</th></tr>';
   var currentCategory = '';
-  for (var i = 0; i < param.currentItems.length; i += 1) {
-    var item = param.currentItems[i];
+  param.currentItems.forEach(function(item, i) {
     result += '<tr>';
     if (param.categoryField &&
         currentCategory !==
@@ -57,7 +62,7 @@ function generateManageTable() { // Legacy
     result += itemRow(item);
     result += '<td><span class="HelperTextLink" data-itemId="' + i +
       '" id="fshDel' + i + '">[Del]</span></td></tr>';
-  }
+  });
   result += doInputs();
   result += '<td><span class="HelperTextLink" id="fshAdd">' +
     '[Add]</span></td></tr></table>' +
@@ -69,12 +74,12 @@ function generateManageTable() { // Legacy
     '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
     'class="custombutton"></td></tr>' +
     '</tbody></table>';
-  document.getElementById(param.id).innerHTML = result;
+  getElementById(param.id).innerHTML = result;
   setValueJSON(param.gmname, param.currentItems);
 }
 
-function deleteQuickItem(evt) { // Legacy
-  var itemId = evt.target.getAttribute('data-itemId');
+function deleteQuickItem(self) { // Legacy
+  var itemId = self.getAttribute('data-itemId');
   param.currentItems.splice(itemId, 1);
   generateManageTable();
 }
@@ -84,10 +89,10 @@ function buildNewItem() { // Legacy
   for (var i = 0; i < param.fields.length; i += 1) {
     if (param.tags[i] === 'checkbox') {
       newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).checked;
+        getElementById('fshIn' + param.fields[i]).checked;
     } else {
       newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).value;
+        getElementById('fshIn' + param.fields[i]).value;
     }
   }
   return newItem;
@@ -97,7 +102,7 @@ function addQuickItem() { // Legacy
   var isArrayOnly = param.fields.length === 0;
   var newItem = {};
   if (isArrayOnly) {
-    newItem = document.getElementById('fshIn0').value;
+    newItem = getElementById('fshIn0').value;
   } else {
     newItem = buildNewItem();
   }
@@ -120,23 +125,14 @@ function resetRawEditor() { // Legacy
 }
 
 var listEvents = [
-  {test: function(e) {return e.target.id === 'fshReset';}, fn: resetRawEditor},
-  {test: function(e) {return e.target.id === 'fshSave';}, fn: saveRawEditor},
-  {test: function(e) {return e.target.id === 'fshAdd';}, fn: addQuickItem},
+  {test: function(self) {return self.id === 'fshReset';}, act: resetRawEditor},
+  {test: function(self) {return self.id === 'fshSave';}, act: saveRawEditor},
+  {test: function(self) {return self.id === 'fshAdd';}, act: addQuickItem},
   {
-    test: function(e) {return e.target.id.indexOf('fshDel') === 0;},
-    fn: deleteQuickItem
+    test: function(self) {return self.id.indexOf('fshDel') === 0;},
+    act: deleteQuickItem
   }
 ];
-
-function listEvtHnl(e) {
-  for (var i = 0; i < listEvents.length; i += 1) {
-    if (listEvents[i].test(e)) {
-      listEvents[i].fn(e);
-      return;
-    }
-  }
-}
 
 export function injectAuctionSearch(injector) { // Legacy
   var content = injector || pCC;
@@ -166,7 +162,7 @@ export function injectAuctionSearch(injector) { // Legacy
     categoryField: 'category',
   };
   generateManageTable();
-  content.addEventListener('click', listEvtHnl);
+  content.addEventListener('click', eventHandler(listEvents));
 }
 
 export function injectQuickLinkManager(injector) { // Legacy
@@ -186,5 +182,5 @@ export function injectQuickLinkManager(injector) { // Legacy
     gmname: 'quickLinks',
   };
   generateManageTable();
-  content.addEventListener('click', listEvtHnl);
+  content.addEventListener('click', eventHandler(listEvents));
 }

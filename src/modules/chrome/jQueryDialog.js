@@ -1,7 +1,8 @@
 import {createDiv} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 
 export default function jQueryDialog(fn) { // jQuery
-  var content = document.getElementById('content');
+  var content = getElementById('content');
   if (content) {content.innerHTML = '';} else {
     content = createDiv({
       id: 'content',

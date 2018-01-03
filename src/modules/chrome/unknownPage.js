@@ -1,4 +1,5 @@
 import {findNode} from '../support/system';
+import {getElementById} from '../common/getElement';
 import injectAdvisor from '../guildAdvisor';
 import {injectQuestBookFull} from '../questBook';
 import inventing from '../recipes';
@@ -8,7 +9,7 @@ import updateBuffLog from '../buffLog/updateBuffLog';
 var unknown = [
   {
     condition: function() {
-      return document.getElementById('quickbuff-report');
+      return getElementById('quickbuff-report');
     },
     result: function() {
       screenview('unknown.buffLog.updateBuffLog');

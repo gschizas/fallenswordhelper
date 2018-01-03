@@ -1,5 +1,6 @@
 import buffList from '../support/buffObj';
-import formatDateTime from '../common/formatDateTime';
+import formatLocalDateTime from '../common/formatLocalDateTime';
+import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import {getValue} from '../support/system';
 import setForage from '../ajax/setForage';
@@ -32,8 +33,8 @@ function successfull(timeStamp, buffCast, buffLog) {
 function buffResult(_buffLog) {
   var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
-  var timeStamp = formatDateTime(new Date());
-  var buffsAttempted = document.getElementById('quickbuff-report')
+  var timeStamp = formatLocalDateTime(new Date());
+  var buffsAttempted = getElementById('quickbuff-report')
     .innerHTML.split('<p>');
   var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
     ' higher level is currently active on \'(\\w*)\'');

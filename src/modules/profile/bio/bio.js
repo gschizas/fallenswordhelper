@@ -1,15 +1,21 @@
 import bioEvtHdl from './bioEvtHdl';
+import {getElementById} from '../../common/getElement';
 import {getValue} from '../../support/system';
 import renderBio from './render';
 
 function expandBio() {
-  var bioExpander = document.getElementById('fshBioExpander');
+  var bioExpander = getElementById('fshBioExpander');
   if (bioExpander.textContent === 'More ...') {
     bioExpander.textContent = 'Less ...';
   } else {
     bioExpander.textContent = 'More ...';
   }
-  document.getElementById('fshBioHidden').classList.toggle('fshHide');
+  getElementById('fshBioHidden').classList.toggle('fshHide');
+}
+
+function foundMatchingTags(closeTagIndex, openTagIndex) {
+  return closeTagIndex !== -1 &&
+    (openTagIndex > closeTagIndex || openTagIndex === -1);
 }
 
 function doCompression(bioCell, bioContents, maxCharactersToShow) {
@@ -29,8 +35,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
   tagList.forEach(function(tag) {
     var closeTagIndex = bioEnd.indexOf('</' + tag + '>');
     var openTagIndex = bioEnd.indexOf('<' + tag + '>');
-    if (closeTagIndex !== -1 && (openTagIndex > closeTagIndex ||
-        openTagIndex === -1)) {
+    if (foundMatchingTags(closeTagIndex, openTagIndex)) {
       extraOpenHTML += '<' + tag + '>';
       extraCloseHTML += '</' + tag + '>';
     }
@@ -39,7 +44,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
     '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
-  document.getElementById('fshBioExpander')
+  getElementById('fshBioExpander')
     .addEventListener('click', expandBio);
 }
 
@@ -53,14 +58,18 @@ function findStartPosition(bioContents, _maxRowsToShow) {
   return startIndex;
 }
 
+function bioIsTooSmall(bio, maxChar, lines, maxRows) {
+  return bio.length <= maxChar && lines < maxRows;
+}
+
 function compressBio(bioCell) {
   var bioContents = bioCell.innerHTML;
   var maxCharactersToShow = getValue('maxCompressedCharacters');
   var maxRowsToShow = getValue('maxCompressedLines');
   var numberOfLines = bioContents.substr(0, maxCharactersToShow)
     .split(/<br>\n/).length - 1;
-  if (bioContents.length <= maxCharactersToShow &&
-      numberOfLines < maxRowsToShow) {return;}
+  if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
+    maxRowsToShow)) {return;}
   if (numberOfLines >= maxRowsToShow) {
     maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
   }
@@ -75,15 +84,26 @@ function doRender(bioCell) {
   }
 }
 
+function selfRender(self) {
+  return self && getValue('renderSelfBio');
+}
+
+function otherRender(self) {
+  return !self && getValue('renderOtherBios');
+}
+
+function shouldRender(self) {
+  return selfRender(self) || otherRender(self);
+}
+
 function testForRender(self, bioCell) {
-  if (self && getValue('renderSelfBio') ||
-      !self && getValue('renderOtherBios')) {
+  if (shouldRender(self)) {
     doRender(bioCell);
   }
 }
 
 export default function profileRenderBio(self) {
-  var bioCell = document.getElementById('profile-bio');
+  var bioCell = getElementById('profile-bio');
   if (!bioCell) {return;}
   testForRender(self, bioCell);
   if (getValue('enableBioCompressor')) {compressBio(bioCell);}

@@ -1,4 +1,5 @@
 import calf from './support/calf';
+import {getElementById} from './common/getElement';
 import getGroupStats from './ajax/getGroupStats';
 import getMembrList from './ajax/getMembrList';
 import getMercStats from './ajax/getMercStats';
@@ -128,13 +129,13 @@ function groupButtons() { // Legacy
       maxGroupSizeToJoin + ' Members" class="custombutton">&nbsp;' +
       '<input id="fetchgroupstats" type="button" value="Fetch ' +
       'Group Stats" class="custombutton">';
-    document.getElementById('joinallgroupsundersize')
+    getElementById('joinallgroupsundersize')
       .addEventListener('click', joinAllGroupsUnderSize, true);
   } else {
     buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
       'type="button" value="Fetch Group Stats" class="custombutton">';
   }
-  document.getElementById('fetchgroupstats')
+  getElementById('fetchgroupstats')
     .addEventListener('click', fetchGroupData);
 
   if (calf.subcmd2 === 'joinallgroupsundersize') {

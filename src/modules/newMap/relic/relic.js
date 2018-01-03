@@ -1,5 +1,6 @@
 import assets from './assets';
 import {doBuffLinks} from '../../support/layout';
+import {getElementById} from '../../common/getElement';
 import getGroupStats from '../../ajax/getGroupStats';
 import getMembrList from '../../ajax/getMembrList';
 import getMercStats from '../../ajax/getMercStats';
@@ -14,7 +15,11 @@ import {
   getValue
 } from '../../support/system';
 import {createButton, createDiv} from '../../common/cElement';
-import {defenderMultiplier, nowSecs} from '../../support/dataObj';
+import {
+  def_suffixSuccessActionResponse,
+  defenderMultiplier,
+  nowSecs
+} from '../../support/dataObj';
 
 var relicData;
 var containerDiv;
@@ -197,7 +202,7 @@ function doCalculations() {
   hpBuffedElement.textContent = addCommas(defBuffedHp);
 
   if (leadDefender.cloakLevel !== 0) {
-    document.getElementById('LDCloaked').textContent = 'Yes';
+    getElementById('LDCloaked').textContent = 'Yes';
   }
 
   if (player.hasGroup) {
@@ -229,33 +234,33 @@ function missingMembers(membrList) {
 }
 
 function setDefVars() {
-  attackElement = document.getElementById('attackValue');
-  attackBuffedElement = document.getElementById('attackValueBuffed');
-  defenseElement = document.getElementById('defenseValue');
-  defenseBuffedElement = document.getElementById('defenseValueBuffed');
-  armorElement = document.getElementById('armorValue');
-  armorBuffedElement = document.getElementById('armorValueBuffed');
-  damageElement = document.getElementById('damageValue');
-  damageBuffedElement = document.getElementById('damageValueBuffed');
-  hpElement = document.getElementById('hpValue');
-  hpBuffedElement = document.getElementById('hpValueBuffed');
-  defCloakedElement = document.getElementById('defendersCloaked');
-  defProcessedElement = document.getElementById('defendersProcessed');
+  attackElement = getElementById('attackValue');
+  attackBuffedElement = getElementById('attackValueBuffed');
+  defenseElement = getElementById('defenseValue');
+  defenseBuffedElement = getElementById('defenseValueBuffed');
+  armorElement = getElementById('armorValue');
+  armorBuffedElement = getElementById('armorValueBuffed');
+  damageElement = getElementById('damageValue');
+  damageBuffedElement = getElementById('damageValueBuffed');
+  hpElement = getElementById('hpValue');
+  hpBuffedElement = getElementById('hpValueBuffed');
+  defCloakedElement = getElementById('defendersCloaked');
+  defProcessedElement = getElementById('defendersProcessed');
 }
 
 function setAtkVars() {
-  dc225Element = document.getElementById('DC225');
-  dc175Element = document.getElementById('DC175');
-  groupAttackElement = document.getElementById('GroupAttack');
-  groupAttackBuffedElement = document.getElementById('GroupAttackBuffed');
-  groupDefenseElement = document.getElementById('GroupDefense');
-  groupDefenseBuffedElement = document.getElementById('GroupDefenseBuffed');
-  groupArmorElement = document.getElementById('GroupArmor');
-  groupArmorBuffedElement = document.getElementById('GroupArmorBuffed');
-  groupDamageElement = document.getElementById('GroupDamage');
-  groupDamageBuffedElement = document.getElementById('GroupDamageBuffed');
-  groupHPElement = document.getElementById('GroupHP');
-  groupHPBuffedElement = document.getElementById('GroupHPBuffed');
+  dc225Element = getElementById('DC225');
+  dc175Element = getElementById('DC175');
+  groupAttackElement = getElementById('GroupAttack');
+  groupAttackBuffedElement = getElementById('GroupAttackBuffed');
+  groupDefenseElement = getElementById('GroupDefense');
+  groupDefenseBuffedElement = getElementById('GroupDefenseBuffed');
+  groupArmorElement = getElementById('GroupArmor');
+  groupArmorBuffedElement = getElementById('GroupArmorBuffed');
+  groupDamageElement = getElementById('GroupDamage');
+  groupDamageBuffedElement = getElementById('GroupDamageBuffed');
+  groupHPElement = getElementById('GroupHP');
+  groupHPBuffedElement = getElementById('GroupHPBuffed');
 }
 
 function prepareDivs() {
@@ -265,7 +270,7 @@ function prepareDivs() {
     getMembrList(false).done(missingMembers);
   }
   leftDiv.insertAdjacentHTML('beforeend', assets.proc);
-  processingStatus = document.getElementById('ProcessingStatus');
+  processingStatus = getElementById('ProcessingStatus');
   midDiv = createDiv({
     className: 'fshFloatLeft fshRelicMidDiv',
     innerHTML: assets.defStats
@@ -300,9 +305,9 @@ function parseGuild(html) {
   var doc = createDocument(html);
   var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
   relicCount = nodeList.length;
-  document.getElementById('relicCount').textContent = relicCount.toString();
+  getElementById('relicCount').textContent = relicCount.toString();
   relicMultiplier = calcRelicMultiplier(relicCount);
-  document.getElementById('LDPercentage').textContent =
+  getElementById('LDPercentage').textContent =
     (relicMultiplier * 100).toString() + '%';
 }
 
@@ -400,7 +405,7 @@ function setup() {
   });
   fetchStatsBtn.addEventListener('click', getStats);
   leftDiv.appendChild(fetchStatsBtn);
-  var dialogRelic = document.getElementById('dialog-relic');
+  var dialogRelic = getElementById('dialog-relic');
   dialogRelic.appendChild(containerDiv);
 }
 
@@ -410,5 +415,5 @@ function viewRelic(e, data) {
 }
 
 export default function injectRelic() {
-  $.subscribe('9-success.action-response', viewRelic);
+  $.subscribe('9' + def_suffixSuccessActionResponse, viewRelic);
 }

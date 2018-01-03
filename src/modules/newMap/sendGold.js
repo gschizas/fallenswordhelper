@@ -44,17 +44,20 @@ export function injectSendGoldOnWorld() { // jQuery
   $('#HelperSendGold').click(doSendGold);
 }
 
+function updateGoldValue(data) {
+  $('#HelperSendTotal')
+    .html(getValue('currentGoldSentTotal')
+      .toString()
+      .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
+  if (parseInt(data.player.gold, 10) > getValue('goldAmount')) {
+    $('#statbar-gold').css('background-color', 'red');
+  } else {
+    $('#statbar-gold').css('background-color', 'inherit');
+  }
+}
+
 export function updateSendGoldOnWorld(data) { // jQuery
   if (data.player && getValue('sendGoldonWorld')) {
-    $('#HelperSendTotal')
-      .html(getValue('currentGoldSentTotal')
-        .toString()
-        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
-    if (parseInt(data.player.gold, 10) >
-      getValue('goldAmount')) {
-      $('#statbar-gold').css('background-color', 'red');
-    } else {
-      $('#statbar-gold').css('background-color', 'inherit');
-    }
+    updateGoldValue(data);
   }
 }

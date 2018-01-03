@@ -1,24 +1,24 @@
-import formatDateTime from '../common/formatDateTime';
+import calf from '../support/calf';
+import formatUtcDateTime from '../common/formatUtcDateTime';
 import {pCC} from '../support/layout';
+import {setValue} from '../support/system';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import {createTBody, createTable} from '../common/cElement';
 import {
   disableBackgroundChecks,
   doBackgroundCheck,
-  getSeLog,
+  getFshSeLog,
   oldLog
 } from './seLog';
-import {getValue, setValue} from '../support/system';
 
 var enableSeTracker = 'enableSeTracker';
-var seTrackerEnabled;
 var trackerCell;
 
 function addRow(trackerTable, se) {
   trackerTable.insertAdjacentHTML('beforeend',
     '<tr><td class="fshCenter">' + se[0] + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
-    formatDateTime(new Date(se[1] * 1000)) + '</td></tr>');
+    formatUtcDateTime(new Date(se[1] * 1000)) + '</td></tr>');
 }
 
 function buildTrackerTable(seAry) {
@@ -46,32 +46,38 @@ function displayTracker(seAry) {
 }
 
 function gotSeLog() {
-  var seAry = Object.keys(oldLog.se).map(function(key) {
-    return [key, oldLog.se[key]];
-  }).sort(function(a, b) {
-    return a[1] - b[1];
-  });
-  displayTracker(seAry);
+  if (oldLog && oldLog.se) {
+    var seAry = Object.keys(oldLog.se).map(function(key) {
+      return [key, oldLog.se[key]];
+    }).sort(function(a, b) {
+      return a[1] - b[1];
+    });
+    displayTracker(seAry);
+  }
 }
 
 function killTable() {
-  if (!seTrackerEnabled) {
+  if (!calf.enableSeTracker) {
     if (trackerCell) {
       trackerCell.parentNode.remove();
       trackerCell = false;
     }
     disableBackgroundChecks();
   } else {
-    doBackgroundCheck().done(gotSeLog);
+    doBackgroundCheck().always(gotSeLog);
   }
 }
 
 function togglePref(evt) {
   if (evt.target.id === enableSeTracker) {
-    seTrackerEnabled = !seTrackerEnabled;
-    setValue(enableSeTracker, seTrackerEnabled);
+    calf.enableSeTracker = !calf.enableSeTracker;
+    setValue(enableSeTracker, calf.enableSeTracker);
     killTable();
   }
+}
+
+function waitForLog() {
+  doBackgroundCheck().always(gotSeLog);
 }
 
 export default function superelite() {
@@ -81,8 +87,7 @@ export default function superelite() {
   newCell.className = 'fshCenter';
   newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
   newCell.addEventListener('change', togglePref);
-  seTrackerEnabled = getValue(enableSeTracker);
-  if (seTrackerEnabled) {
-    getSeLog().done(gotSeLog);
+  if (calf.enableSeTracker) {
+    getFshSeLog().done(waitForLog);
   }
 }

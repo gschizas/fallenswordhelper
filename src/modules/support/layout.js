@@ -1,4 +1,6 @@
 import add from './task';
+import {getElementById} from '../common/getElement';
+import moreToDo from '../common/moreToDo';
 import {
   createButton,
   createDiv,
@@ -23,14 +25,7 @@ var offlineDot =
 var sevenDayDot =
   '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
 
-export var pCC = document.getElementById('pCC');
-
-export function buffAllHref(shortList) { // Bad Pattern
-  var _shortList = shortList.join(',').replace(/\s/g, '');
-  var j = 'java';
-  return j + 'script:openWindow(\'index.php?cmd=quickbuff&t=' + _shortList +
-    '\', \'fsQuickBuff\', 618, 1000, \',scrollbars\')';
-}
+export var pCC = getElementById('pCC');
 
 export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
   var passthru = '';
@@ -78,7 +73,7 @@ export function doBuffLinks(members) {
 export function infoBox(documentText) {
   var doc = createDocument(documentText);
   var result;
-  var infoMsg = doc.getElementById('info-msg');
+  var infoMsg = getElementById('info-msg', doc);
   if (infoMsg) {
     var infoMatch = infoMsg.innerHTML;
     result = '';
@@ -91,14 +86,14 @@ export function infoBox(documentText) {
 }
 
 export function playerId() {
-  var thePlayerId = parseInt(document.getElementById('holdtext')
+  var thePlayerId = parseInt(getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
   setValue('playerID', thePlayerId);
   return thePlayerId;
 }
 
 export function playerName() {
-  return document.getElementById('statbar-character').textContent;
+  return getElementById('statbar-character').textContent;
 }
 
 export function makePageHeader(title, comment, spanId, button) {
@@ -178,8 +173,7 @@ function changeOnlineDot(contactLink) {
 
 function batchDots() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      dotCount < dotList.length) {
+  while (moreToDo(limit, dotCount, dotList)) {
     changeOnlineDot(dotList[dotCount]);
     dotCount += 1;
   }
@@ -197,7 +191,7 @@ export function colouredDots() {
 }
 
 export function jConfirm(title, msgText, fn) { // jQuery
-  var fshMsg = document.getElementById('fshmsg');
+  var fshMsg = getElementById('fshmsg');
   if (!fshMsg) {
     fshMsg = createDiv({id: 'fshmsg'});
     document.body.appendChild(fshMsg);

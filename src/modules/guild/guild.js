@@ -1,5 +1,7 @@
 import add from '../support/task';
+import {getElementById} from '../common/getElement';
 import guildTracker from './guildTracker/guildTracker';
+import moreToDo from '../common/moreToDo';
 import retryAjax from '../ajax/retryAjax';
 import {
   colouredDots,
@@ -66,7 +68,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
 function conflictInfo() { // jQuery
   retryAjax('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
     gotConflictInfo(data,
-      {node: document.getElementById('statisticsControl')});
+      {node: getElementById('statisticsControl')});
   });
 }
 
@@ -81,7 +83,7 @@ function logoToggle() {
   if (getValue('guildLogoControl')) {
     guildLogoElement.classList.add('fshHide');
   }
-  document.getElementById('toggleGuildLogoControl')
+  getElementById('toggleGuildLogoControl')
     .addEventListener('click', toggleVisibilty);
 }
 
@@ -97,7 +99,7 @@ function statToggle() {
   if (getValue('statisticsControl')) {
     statisticsControlElement.classList.add('fshHide');
   }
-  document.getElementById('toggleStatisticsControl')
+  getElementById('toggleStatisticsControl')
     .addEventListener('click', toggleVisibilty);
 }
 
@@ -112,13 +114,13 @@ function structureToggle() {
   if (getValue('guildStructureControl')) {
     guildStructureControlElement.classList.add('fshHide');
   }
-  document.getElementById('toggleGuildStructureControl')
+  getElementById('toggleGuildStructureControl')
     .addEventListener('click', toggleVisibilty);
 }
 
 function batchBuffLinks() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit && memCount < members.length) {
+  while (moreToDo(limit, memCount, members)) {
     members[memCount].parentNode.insertAdjacentHTML('beforeend',
       ' <span class="smallLink">[b]</span>');
     memCount += 1;

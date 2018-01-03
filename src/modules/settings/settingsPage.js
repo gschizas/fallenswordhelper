@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {getElementById} from '../common/getElement';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import {jConfirm} from '../support/layout';
@@ -45,22 +46,21 @@ function hasNetwork(o) {
   return '';
 }
 
-function isOn(o) {
-  return isChecked(getValue(o.id));
+function isOn(name) {
+  return isChecked(getValue(name));
 }
 
-function justLabel(name) {
+export function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
-    '<label for="' + o.id + '">' + fallback(o.title, o.helpTitle) +
+    '<label for="' + name + '">' + fallback(o.title, o.helpTitle) +
     helpLink(o.helpTitle, o.helpText) +
     ':</label>';
 }
 
-function justCheckbox(name) {
-  var o = mySimpleCheckboxes[name];
-  return '<input id="' + o.id + '" name="' + o.id +
-    '" class="fshVMid" type="checkbox" value="on"' + isOn(o) + '>';
+export function justCheckbox(name) {
+  return '<input id="' + name + '" name="' + name +
+    '" class="fshVMid" type="checkbox" value="on"' + isOn(name) + '>';
 }
 
 export function simpleCheckboxHtml(name) {
@@ -175,42 +175,42 @@ function createEventListeners() {
     textContent: 'Tick all buffs'
   });
   tickAll.addEventListener('click', toggleTickAllBuffs);
-  var inject = document.getElementById('settingsTabs-4').firstElementChild
+  var inject = getElementById('settingsTabs-4').firstElementChild
     .rows[0].cells[0];
   inject.appendChild(createBr());
   inject.appendChild(tickAll);
 
-  document.getElementById('fshClearStorage')
+  getElementById('fshClearStorage')
     .addEventListener('click', clearStorage);
 
-  document.getElementById('Helper:SaveOptions')
+  getElementById('Helper:SaveOptions')
     .addEventListener('click', saveConfig);
-  document.getElementById('Helper:ShowLogs')
+  getElementById('Helper:ShowLogs')
     .addEventListener('click', showLogs);
-  document.getElementById('Helper:ShowMonsterLogs')
+  getElementById('Helper:ShowMonsterLogs')
     .addEventListener('click', showMonsterLogs);
 
-  document.getElementById('toggleShowGuildSelfMessage')
+  getElementById('toggleShowGuildSelfMessage')
     .addEventListener('click', toggleVisibilty);
-  document.getElementById('toggleShowGuildFrndMessage')
+  getElementById('toggleShowGuildFrndMessage')
     .addEventListener('click', toggleVisibilty);
-  document.getElementById('toggleShowGuildPastMessage')
+  getElementById('toggleShowGuildPastMessage')
     .addEventListener('click', toggleVisibilty);
-  document.getElementById('toggleShowGuildEnmyMessage')
+  getElementById('toggleShowGuildEnmyMessage')
     .addEventListener('click', toggleVisibilty);
 }
 
 export function injectSettings() { // jQuery.min
   getVars();
   setupConfigData();
-  var settingsTabs = document.getElementById('settingsTabs');
+  var settingsTabs = getElementById('settingsTabs');
   settingsTabs.insertAdjacentHTML('beforeend', '<div id="fshSettings">' +
     calf.configData + '</div>');
   if ($(settingsTabs).tabs('length') > 0) {
     $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
   }
   createEventListeners();
-  setValue('minGroupLevel', document.getElementById('settingsTabs-1')
+  setValue('minGroupLevel', getElementById('settingsTabs-1')
     .firstElementChild.lastElementChild.rows[1].cells[1].firstElementChild
     .value);
 }

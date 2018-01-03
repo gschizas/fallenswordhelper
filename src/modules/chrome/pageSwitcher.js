@@ -1,9 +1,9 @@
-import addHistoryWidgets from '../guild/addHistoryWidgets';
 import allowBack from '../guide/allowBack';
 import completedArenas from '../arena/completedArenas';
 import composingBreakdown from '../composing/breakdown';
 import craftForge from '../craftForge/craftForge';
 import globalQuest from '../topRated/globalQuest';
+import guildHall from '../guild/hall';
 import guildMailbox from '../mailbox/guildMailbox';
 import injectAdvisor from '../guildAdvisor';
 import injectArena from '../arena/arena';
@@ -115,13 +115,14 @@ export default {
       '-': {'-': {'-': injectAdvisor}},
       weekly: {'-': {'-': injectAdvisor}}
     },
-    history: {'-': {'-': {'-': addHistoryWidgets}}},
+    history: {'-': {'-': {'-': injectBioWidgets}}},
     view: {'-': {'-': {'-': injectViewGuild}}},
     scouttower: {'-': {'-': {'-': injectScouttower}}},
     mailbox: {'-': {'-': {'-': guildMailbox}}},
     ranks: {'-': {'-': {'-': injectGuildRanks}}},
     conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
-    bank: {'-': {'-': {'-': injectGuildBank}}}
+    bank: {'-': {'-': {'-': injectGuildBank}}},
+    hall: {'-': {'-': {'-': guildHall}}}
   },
   bank: {'-': {'-': {'-': {'-': injectBank}}}},
   log: {

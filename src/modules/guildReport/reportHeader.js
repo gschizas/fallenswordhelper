@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import moreToDo from '../common/moreToDo';
 import {onlineDot} from '../support/layout';
 
 var headerCount;
@@ -15,7 +16,8 @@ function memberHeader(oldhtml) {
 
 function paintHeader() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit && headerCount < headers.length) {
+  while (moreToDo(limit, headerCount, headers)) {
+    // while (performance.now() < limit && headerCount < headers.length) {
     var el = headers[headerCount];
     var oldhtml = el.textContent;
     el.innerHTML = memberHeader(oldhtml);

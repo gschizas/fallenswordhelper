@@ -1,4 +1,5 @@
 import {createDiv} from './cElement';
+import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
 import {pCC} from '../support/layout';
 
@@ -6,7 +7,7 @@ var inv;
 var target;
 
 function selectPerf() {
-  var items = document.getElementById(target + '-items')
+  var items = getElementById(target + '-items')
     .getElementsByClassName('selectable-item');
   if (items.length === 0) {return;}
   Array.prototype.forEach.call(items, function(e) {

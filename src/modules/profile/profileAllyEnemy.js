@@ -9,19 +9,22 @@ function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
     numberOfContacts + _c + '</span>');
 }
 
-function findAllyEnemy(el) {
-  var isAllies = el.textContent === 'Allies';
-  var isEnemies = el.textContent === 'Enemies';
-  if (!isAllies && !isEnemies) {return;}
+function countContacts(el, isAllies) {
   var target = el.parentNode;
   var numberOfContacts = target.nextSibling.nextSibling
     .getElementsByTagName('table').length - 1;
   if (isAllies) {
-    totalAllyEnemy(target, numberOfContacts,
-      getValue('alliestotal'));
+    totalAllyEnemy(target, numberOfContacts, getValue('alliestotal'));
   } else {
-    totalAllyEnemy(target, numberOfContacts,
-      getValue('enemiestotal'));
+    totalAllyEnemy(target, numberOfContacts, getValue('enemiestotal'));
+  }
+}
+
+function findAllyEnemy(el) {
+  var isAllies = el.textContent === 'Allies';
+  var isEnemies = el.textContent === 'Enemies';
+  if (isAllies || isEnemies) {
+    countContacts(el, isAllies);
   }
 }
 

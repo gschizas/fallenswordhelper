@@ -1,11 +1,12 @@
+import {getElementById} from '../common/getElement';
 import {intValue} from '../support/system';
 
 export default function groupViewStats(doc) {
-  var attackElement = doc.getElementById('stat-attack');
-  var defenseElement = doc.getElementById('stat-defense');
-  var armorElement = doc.getElementById('stat-armor');
-  var damageElement = doc.getElementById('stat-damage');
-  var hpElement = doc.getElementById('stat-hp');
+  var attackElement = getElementById('stat-attack', doc);
+  var defenseElement = getElementById('stat-defense', doc);
+  var armorElement = getElementById('stat-armor', doc);
+  var damageElement = getElementById('stat-damage', doc);
+  var hpElement = getElementById('stat-hp', doc);
   return {
     attack: intValue(attackElement.textContent),
     attackElement: attackElement,

@@ -1,8 +1,9 @@
 import {createAnchor} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 
 function statbarWrapper(href, id) {
   var myWrapper = createAnchor({href: href});
-  var character = document.getElementById(id);
+  var character = getElementById(id);
   var statWrapper = character.parentNode;
   myWrapper.appendChild(character);
   statWrapper.insertBefore(myWrapper, statWrapper.firstChild);

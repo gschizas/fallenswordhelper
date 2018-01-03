@@ -1,4 +1,5 @@
 import calf from './calf';
+import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';
 import {defaults, months, nowSecs} from './dataObj';
 
@@ -126,15 +127,6 @@ export function addCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-export function convertTextToHtml(inputText) {
-  return inputText
-    .replace(/</g, '&lt')
-    .replace(/>/g, '&gt')
-    .replace(/\n/g, '<br>')
-    .replace(/\[\/([a-z])\]/g, '</$1>')
-    .replace(/\[([a-z])\]/g, '<$1>');
-}
-
 export function parseDateAsTimestamp(textDate) {
   var dateAry = textDate.split(/[: /[]/);
   return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
@@ -147,7 +139,7 @@ export function parseDate(textDate) {
 
 export function toggleVisibilty(evt) {
   var anItemId = evt.target.getAttribute('linkto');
-  var anItem = document.getElementById(anItemId);
+  var anItem = getElementById(anItemId);
   var currentVisibility = anItem.classList.contains('fshHide');
   anItem.classList.toggle('fshHide');
   if (currentVisibility) {
@@ -233,9 +225,17 @@ function intFromString(val) {
   return val;
 }
 
+function aIsNotEquipment(a) {
+  return typeof a.type !== 'undefined' && a.type > 8;
+}
+
+function bIsNotEquipment(a, b) {
+  return typeof a.type !== 'undefined' && b.type > 8;
+}
+
 export function numberSort(a, b) {
-  if (typeof a.type !== 'undefined' && a.type > 8) {return 1;} // non equipment items
-  if (typeof a.type !== 'undefined' && b.type > 8) {return -1;}
+  if (aIsNotEquipment(a)) {return 1;} // non equipment items
+  if (bIsNotEquipment(a, b)) {return -1;}
   var valueA = path(a, calf.sortBy, 1);
   var valueB = path(b, calf.sortBy, 1);
   valueA = intFromString(valueA);
@@ -244,9 +244,13 @@ export function numberSort(a, b) {
   return sortDesc(result);
 }
 
+function theValueIsValid(theValue, min, max) {
+  return !isNaN(theValue) && theValue > min && theValue < max;
+}
+
 export function testRange(aValue, min, max) {
   var theValue = parseInt(aValue, 10);
-  if (!isNaN(theValue) && theValue > min && theValue < max) {
+  if (theValueIsValid(theValue, min, max)) {
     return theValue;
   }
 }

@@ -1,5 +1,6 @@
 import {createTd} from './common/cElement';
 import doinvent from './app/inventing/doinvent';
+import {getElementById} from './common/getElement';
 import {guideUrl} from './support/dataObj';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
@@ -19,7 +20,7 @@ var plantFromComponentHash = {
 };
 
 function quickInventDone(json) {
-  var inventResult = document.getElementById('invent_Result');
+  var inventResult = getElementById('invent_Result');
   if (jsonFail(json, inventResult)) {return;}
   if (json.r.success) {
     outputResult('<span class="fshGreen">' +
@@ -48,7 +49,7 @@ function injectInvent() { // Bad jQuery
     '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
     '</span><ol id="invent_Result"></ol></td></tr>';
   $('input[name="recipe_id"]').closest('tbody').append(selector);
-  document.getElementById('quickInvent').addEventListener('click',
+  getElementById('quickInvent').addEventListener('click',
     quickInvent, true);
 
 }

@@ -1,6 +1,8 @@
 import add from './support/task';
 import {createInput} from './common/cElement';
+import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
+import moreToDo from './common/moreToDo';
 import retryAjax from './ajax/retryAjax';
 import {createDocument, getValue} from './support/system';
 import {pCC, playerName} from './support/layout';
@@ -42,7 +44,7 @@ function parseRankData(linkElement, responseText) {
 }
 
 function fetchRankData() { // jQuery
-  var calcButton = document.getElementById('getrankweightings');
+  var calcButton = getElementById('getrankweightings');
   calcButton.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
   Array.prototype.forEach.call(allItems, function(anItem) {
@@ -69,9 +71,7 @@ function getPxScroll(val) {
   return 22;
 }
 
-function ajaxifyRankControls(evt) { // jQuery
-  var val = evt.target.getAttribute('value');
-  if (val !== 'Up' && val !== 'Down') {return;}
+function overrideUpDown(evt, val) {
   evt.stopPropagation();
   var onclickHREF = /window.location='(.*)';/
     .exec(evt.target.getAttribute('onclick'))[1];
@@ -87,6 +87,11 @@ function ajaxifyRankControls(evt) { // jQuery
   window.scrollBy(0, pxScroll);
 }
 
+function ajaxifyRankControls(evt) { // jQuery
+  var val = evt.target.getAttribute('value');
+  if (val === 'Up' || val === 'Down') {overrideUpDown(evt, val);}
+}
+
 function doButtons() {
   // gather rank info button
   var weightButton = createInput({
@@ -96,7 +101,7 @@ function doButtons() {
     value: 'Get Rank Weightings'
   });
   weightButton.addEventListener('click', fetchRankData);
-  var theTd = document.getElementById('show-guild-founder-rank-name')
+  var theTd = getElementById('show-guild-founder-rank-name')
     .parentNode;
   theTd.insertAdjacentHTML('beforeend', '&nbsp;');
   theTd.insertAdjacentElement('beforeend', weightButton);
@@ -121,8 +126,7 @@ function writeMembers(el) {
 
 function paintRanks() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit &&
-      rankCount < theRows.length) {
+  while (moreToDo(limit, rankCount, theRows)) {
     var el = theRows[rankCount];
 
     writeMembers(el);

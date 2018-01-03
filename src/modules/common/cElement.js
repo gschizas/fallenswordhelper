@@ -77,3 +77,7 @@ export function createTh(props) {
 export function createLabel(props) {
   return cElement('label', props);
 }
+
+export function textSpan(text) {
+  return createSpan({textContent: text});
+}

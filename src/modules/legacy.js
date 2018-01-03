@@ -1,5 +1,6 @@
 import calf from './support/calf';
 import {createDiv} from './common/cElement';
+import {getElementById} from './common/getElement';
 import {log} from './support/debug';
 import subscribes from './newMap/newMap';
 import {
@@ -131,17 +132,9 @@ function getTrackText(trackKillStreak) { // Legacy
   return 'off';
 }
 
-function doDeathDealer(impsRemaining) { // Legacy
-  var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
-  var lastKillStreak = getLastValue('lastKillStreak');
+function notMaxDd(lastDeathDealerPercentage, lastKillStreak) {
   var trackKillStreak = getValue('trackKillStreak');
   var trackText = getTrackText(trackKillStreak);
-  if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
-    return '<tr><td style="font-size:small; color:black"' +
-      '>Kill Streak: <span findme="killstreak">&gt;' +
-      addCommas(lastKillStreak) + '</span> Damage bonus: <' +
-      'span findme="damagebonus">20</span>%</td></tr>';
-  }
   if (!trackKillStreak) {
     return '<tr><td style="font-size:small; color:' +
       'navy" nowrap>KillStreak tracker disabled. <span style="' +
@@ -162,6 +155,18 @@ function doDeathDealer(impsRemaining) { // Legacy
     ' to toggle">' + trackText + '</span></span></td></tr>';
 }
 
+function doDeathDealer(impsRemaining) { // Legacy
+  var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
+  var lastKillStreak = getLastValue('lastKillStreak');
+  if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
+    return '<tr><td style="font-size:small; color:black"' +
+      '>Kill Streak: <span findme="killstreak">&gt;' +
+      addCommas(lastKillStreak) + '</span> Damage bonus: <' +
+      'span findme="damagebonus">20</span>%</td></tr>';
+  }
+  return notMaxDd(lastDeathDealerPercentage, lastKillStreak);
+}
+
 function recastImpAndRefresh(responseText) { // Legacy
   var doc = createDocument(responseText);
   if (doc) {
@@ -170,7 +175,7 @@ function recastImpAndRefresh(responseText) { // Legacy
 }
 
 function toggleKsTracker() { // Legacy
-  var trackKS = document.getElementById('Helper:toggleKStracker');
+  var trackKS = getElementById('Helper:toggleKStracker');
   if (trackKS) {
     trackKS.addEventListener('click', function() {
       setValue('trackKillStreak',
@@ -206,10 +211,13 @@ function findImps() { // Legacy - Old Map
   return '';
 }
 
+function canRecast() {
+  return (hasDeathDealer || hasShieldImp) && impsRemaining === 0;
+}
+
 function impRecast() { // Legacy - Old Map
-  if ((hasDeathDealer || hasShieldImp) && impsRemaining === 0) {
-    var _recastImpAndRefresh = document
-      .getElementById('Helper:recastImpAndRefresh');
+  if (canRecast()) {
+    var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
     var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
       'Players=' +
       $('dt.stat-name:first').next().text().replace(/,/g, '') +
@@ -272,7 +280,7 @@ export default function injectWorld() {
   // 15 = repair
   // 17 = login
   // 18 = username not found
-  if (document.getElementById('worldPage')) { // new map
+  if (getElementById('worldPage')) { // new map
     subscribes();
   } else {
     // not new map.

@@ -1,5 +1,6 @@
 import add from './support/task';
 import calf from './support/calf';
+import {getElementById} from './common/getElement';
 import getInventoryById from './ajax/getInventoryById';
 import {createDiv, createTr} from './common/cElement';
 import {fallback, getValue} from './support/system';
@@ -8,10 +9,10 @@ import {time, timeEnd} from './support/debug';
 var multiple;
 
 function getItemDiv() {
-  var itemDiv = document.getElementById('item-div');
+  var itemDiv = getElementById('item-div');
   if (!itemDiv) {
     itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
-    var itemList = document.getElementById('item-list');
+    var itemList = getElementById('item-list');
     var oldItems = itemList.getElementsByTagName('table');
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
@@ -20,6 +21,14 @@ function getItemDiv() {
     itemList.parentNode.insertBefore(itemDiv, itemList);
   }
   return itemDiv;
+}
+
+function shouldShow(hidden, all, hasFolder) {
+  return hidden && fallback(all, hasFolder);
+}
+
+function shouldHide(hidden, all, hasFolder) {
+  return !hidden && !all && !hasFolder;
 }
 
 function doHideFolder(evt) {
@@ -32,11 +41,11 @@ function doHideFolder(evt) {
     var hidden = el.classList.contains('fshHide');
     var all = folderid === 'folderid0';
     var hasFolder = el.classList.contains(folderid);
-    if (hidden && fallback(all, hasFolder)) {
+    if (shouldShow(hidden, all, hasFolder)) {
       el.classList.remove('fshHide');
       el.classList.add('fshBlock'); // show()
     }
-    if (!hidden && !all && !hasFolder) {
+    if (shouldHide(hidden, all, hasFolder)) {
       el.classList.remove('fshBlock');
       el.classList.add('fshHide'); // hide()
     }
@@ -94,7 +103,7 @@ function processTrade(data) {
 
   invItems = data.items;
   /* Highlight items in ST */
-  var nodeList = document.getElementById('item-list')
+  var nodeList = getElementById('item-list')
     .getElementsByTagName('table');
   Array.prototype.forEach.call(nodeList, forEachInvItem);
   doFolderHeaders(data.folders);
@@ -110,32 +119,40 @@ function inv() { // jQuery
 }
 
 function getHowMany(itemTables) {
-  var howMany = parseInt(document.getElementById('fshSendHowMany').value, 10);
+  var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
   if (isNaN(howMany)) {return itemTables.length;}
   // maximum of 100 items in an ST
   if (calf.subcmd !== '-') {return Math.min(100, howMany);}
   return howMany;
 }
 
+function itemType(itemid, checkbox) {
+  return itemid === 'itemid-2' && checkbox.classList.contains('itemtype12');
+}
+
 function shouldBeChecked(itemid, checkbox) {
   return itemid === 'itemid-1' ||
-    itemid === 'itemid-2' && checkbox.classList.contains('itemtype12') ||
+    itemType(itemid, checkbox) ||
     checkbox.classList.contains(itemid);
+}
+
+function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
+  return howMany &&
+    fallback(itemsInSt, !el.classList.contains('isInST')) &&
+    shouldBeChecked(itemid, checkbox);
 }
 
 function doCheckAll(evt) {
   var itemid = evt.target.id;
-  var itemList = document.getElementById('item-div') ||
-    document.getElementById('item-list');
+  var itemList = getElementById('item-div') ||
+    getElementById('item-list');
   var itemTables = itemList.querySelectorAll('table:not(.fshHide)');
   var howMany = getHowMany(itemTables);
-  var itemsInSt = document.getElementById('itemsInSt').checked;
+  var itemsInSt = getElementById('itemsInSt').checked;
   Array.prototype.forEach.call(itemTables, function(el) {
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
-    if (howMany &&
-        fallback(itemsInSt, !el.classList.contains('isInST')) &&
-        shouldBeChecked(itemid, checkbox)) {
+    if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;
       return;
@@ -166,7 +183,7 @@ function injectTradeOld() {
     innerHTML: myTd
   });
   multiple.addEventListener('click', toggleAllPlants);
-  var el = document.getElementById('item-list').parentNode.parentNode;
+  var el = getElementById('item-list').parentNode.parentNode;
   el.parentNode.insertBefore(multiple, el);
 }
 

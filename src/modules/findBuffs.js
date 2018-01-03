@@ -1,5 +1,6 @@
 import buffList from './support/buffObj';
 import calf from './support/calf';
+import {getElementById} from './common/getElement';
 import {helpLink} from './settings/settingsPage';
 import {lastActivityRE} from './support/dataObj';
 import {
@@ -181,7 +182,7 @@ function getBioLines(bioCellHtml) { // Legacy
 }
 
 function getSustain(doc) {
-  var aLinks = doc.getElementById('profileLeftColumn')
+  var aLinks = getElementById('profileLeftColumn', doc)
     .getElementsByTagName('a');
   var sustainLevel;
   Array.prototype.some.call(aLinks, function(el) {
@@ -197,11 +198,11 @@ function getSustain(doc) {
 }
 
 function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
-  var innerPlayerName = doc.getElementById('pCC')
+  var innerPlayerName = getElementById('pCC', doc)
     .getElementsByTagName('h1')[0].textContent;
-  var levelValue = intValue(doc.getElementById('profileLeftColumn')
+  var levelValue = intValue(getElementById('profileLeftColumn', doc)
     .children[4].children[0].rows[0].cells[1].textContent);
-  var virtualLevelValue = parseInt(doc.getElementById('stat-vl')
+  var virtualLevelValue = parseInt(getElementById('stat-vl', doc)
     .textContent, 10);
   var lastActivityMinutes = parseInt(lastActivity[1], 10);
   var lastActivityIMG = onlineDot({min: lastActivityMinutes});
@@ -235,14 +236,14 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
 function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
   var doc = createDocument(responseText);
   // name and level
-  var innerPcc = doc.getElementById('pCC');
+  var innerPcc = getElementById('pCC', doc);
   // last activity
   var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
   var lastActivity = /(\d+) mins, (\d+) secs/
     .exec(lastActivityElement.textContent);
   // buffs
-  var bioCellHtml = doc.getElementById('profile-bio').innerHTML;
-  var buffTable = document.getElementById('buffTable');
+  var bioCellHtml = getElementById('profile-bio', doc).innerHTML;
+  var buffTable = getElementById('buffTable');
   var textLineArray = getBioLines(bioCellHtml);
   // sustain
   var sustainLevel = getSustain(doc);
@@ -271,9 +272,9 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
       newCell.innerHTML += el + '<br>';
     });
   }
-  var processedBuffers = document.getElementById('buffersProcessed');
+  var processedBuffers = getElementById('buffersProcessed');
   var potentialBuffers =
-    parseInt(document.getElementById('potentialBuffers').textContent, 10);
+    parseInt(getElementById('potentialBuffers').textContent, 10);
   var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
   processedBuffers.innerHTML = processedBuffersCount + 1;
   if (potentialBuffers === processedBuffersCount + 1) {
@@ -285,7 +286,7 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
   // now need to parse player pages for buff ...
-  document.getElementById('potentialBuffers').innerHTML =
+  getElementById('potentialBuffers').innerHTML =
     onlinePlayers.length;
   if (onlinePlayers.length <= 0) {
     bufferProgress.innerHTML = 'Done.';
@@ -312,6 +313,25 @@ function calcNextPage(curPage, maxPage) { // Legacy
   return curPage + 1;
 }
 
+function addPlayerToSearchList(onlinePlayer, onlinePlayerName) {
+  // add online player to search list (all but self)
+  if (characterName !== onlinePlayerName.trim()) {
+    onlinePlayers.push(onlinePlayer);
+  }
+}
+
+function playerRow(i, e) {
+  var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
+  var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
+    .replace(/,/g, ''), 10);
+  var onlinePlayerName = $(e).find('td:eq(1) a').text();
+  var minPlayerVirtualLevel = calcMinLvl();
+  if (onlinePlayerLevel >= findBuffMinCastLevel &&
+      onlinePlayerLevel >= minPlayerVirtualLevel) {
+    addPlayerToSearchList(onlinePlayer, onlinePlayerName);
+  }
+}
+
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var doc = createDocument(responseText);
   var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has' +
@@ -321,20 +341,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var curPage = parseInt($(doc).find('input[name="page"]:last').val()
     .replace(/\D/g, ''), 10);
   if (curPage !== 1) {
-    playerRows.each(function(i, e) {
-      var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
-      var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
-        .replace(/,/g, ''), 10);
-      var onlinePlayerName = $(e).find('td:eq(1) a').text();
-      var minPlayerVirtualLevel = calcMinLvl();
-      if (onlinePlayerLevel >= findBuffMinCastLevel &&
-        onlinePlayerLevel >= minPlayerVirtualLevel) {
-        // add online player to search list (all but self)
-        if (characterName !== onlinePlayerName.trim()) {
-          onlinePlayers.push(onlinePlayer);
-        }
-      }
-    });
+    playerRows.each(playerRow);
   }
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
@@ -350,7 +357,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
 function findBuffsParseOnlinePlayersStart() { // Legacy
   // if option enabled then parse online players
   onlinePlayersSetting =
-    parseInt(document.getElementById('onlinePlayers').value, 10);
+    parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
     xmlhttp('index.php?cmd=onlineplayers&page=1',
       findBuffsParseOnlinePlayers, {page: 1});
@@ -366,20 +373,19 @@ function calcLastActMins(tipped) {
   return parseInt(lastActivity[3], 10) + lastActivityHours * 60;
 }
 
+function isValidPlayer(lastActivityMinutes, vlevel, minPlayerVirtualLevel) {
+  return lastActivityMinutes < 5 && vlevel >= findBuffMinCastLevel &&
+    vlevel >= minPlayerVirtualLevel;
+}
+
 function parsePlayerLink(el) {
   var tipped = el.dataset.tipped;
   var lastActivityMinutes = calcLastActMins(tipped);
   // check if they are high enough level to cast the buff
   var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
   var minPlayerVirtualLevel = calcMinLvl();
-  if (lastActivityMinutes < 5 &&
-    vlevel >= findBuffMinCastLevel &&
-    vlevel >= minPlayerVirtualLevel) {
-    // add online player to search list (all but self)
-    var onlinePlayer = el.href;
-    if (characterName !== el.textContent) {
-      onlinePlayers.push(onlinePlayer);
-    }
+  if (isValidPlayer(lastActivityMinutes, vlevel, minPlayerVirtualLevel)) {
+    addPlayerToSearchList(el.href, el.textContent);
   }
 }
 
@@ -407,7 +413,7 @@ function findBuffsParseProfilePageStart() { // Legacy
       '&search_username=' + el + '&search_show_first=1');
   });
   profilePagesToSearchProcessed = 0;
-  if (document.getElementById('alliesEnemies').checked) {
+  if (getElementById('alliesEnemies').checked) {
     profilePagesToSearch.forEach(function(el) {
       xmlhttp(el, findBuffsParseProfilePage);
     });
@@ -418,7 +424,7 @@ function findBuffsParseProfilePageStart() { // Legacy
 
 function findBuffsParseGuildManagePage(responseText) {
   var doc = createDocument(responseText);
-  if (document.getElementById('guildMembers').checked) {
+  if (getElementById('guildMembers').checked) {
     var memList = doc.querySelectorAll('#pCC a[data-tipped*="<td>VL:</td>"]');
     Array.prototype.forEach.call(memList, parsePlayerLink);
   }
@@ -427,29 +433,29 @@ function findBuffsParseGuildManagePage(responseText) {
 }
 
 function findBuffsClearResults() { // Legacy
-  var buffTable = document.getElementById('buffTable');
+  var buffTable = getElementById('buffTable');
   for (var j = buffTable.rows.length; j > 1; j -= 1) {
     buffTable.deleteRow(j - 1);
   }
-  document.getElementById('buffNicks').innerHTML = '';
-  // var bufferProgress = document.getElementById('bufferProgress');
+  getElementById('buffNicks').innerHTML = '';
+  // var bufferProgress = getElementById('bufferProgress');
   bufferProgress.innerHTML = 'Idle.';
   bufferProgress.style.color = 'black';
-  document.getElementById('potentialBuffers').innerHTML = '';
-  document.getElementById('buffersProcessed').innerHTML = 0;
+  getElementById('potentialBuffers').innerHTML = '';
+  getElementById('buffersProcessed').innerHTML = 0;
 }
 
 function findAnyStart(progMsg) {
   characterName = playerName();
-  document.getElementById('buffNicks').innerHTML = findBuffNicks;
-  bufferProgress = document.getElementById('bufferProgress');
+  getElementById('buffNicks').innerHTML = findBuffNicks;
+  bufferProgress = getElementById('bufferProgress');
   bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
   bufferProgress.style.color = 'green';
   findBuffsLevel175Only =
-    document.getElementById('level175').checked;
-  document.getElementById('buffersProcessed').innerHTML = 0;
+    getElementById('level175').checked;
+  getElementById('buffersProcessed').innerHTML = 0;
   onlinePlayers = [];
-  extraProfile = document.getElementById('extraProfile').value;
+  extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
   xmlhttp('index.php?cmd=guild&subcmd=manage',
@@ -482,17 +488,17 @@ export function injectFindBuffs(injector) { // Legacy
   calf.sortAsc = true;
   buffList.sort(stringSort);
   content.innerHTML = pageLayout(buffCustom);
-  document.getElementById('findbuffsbutton')
+  getElementById('findbuffsbutton')
     .addEventListener('click', findBuffsStart, true);
-  document.getElementById('clearresultsbutton')
+  getElementById('clearresultsbutton')
     .addEventListener('click', findBuffsClearResults, true);
 }
 
 export function injectFindOther(injector) { // Native - Bad
   var content = injector || pCC;
   content.innerHTML = pageLayout(otherCustom);
-  document.getElementById('findbuffsbutton')
+  getElementById('findbuffsbutton')
     .addEventListener('click', findOtherStart, true);
-  document.getElementById('clearresultsbutton')
+  getElementById('clearresultsbutton')
     .addEventListener('click', findBuffsClearResults, true);
 }

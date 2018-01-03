@@ -1,71 +1,13 @@
 (function () {
 'use strict';
 
-/*
- * DOMParser HTML extension
- * 2012-09-04
- *
- * By Eli Grey, http://eligrey.com
- * Public domain.
- * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
- */
-
-/* ! @source https://gist.github.com/1129031 */
-/* global document, DOMParser*/
-
-(function(DOMParser) {
-  var DOMParser_proto = DOMParser.prototype;
-  var real_parseFromString = DOMParser_proto.parseFromString;
-
-  // Firefox/Opera/IE throw errors on unsupported types
-  try {
-    // WebKit returns null on unsupported types
-    if ((new DOMParser()).parseFromString('', 'text/html')) {
-      // text/html parsing is natively supported
-      return;
-    }
-  } catch (ex) {
-    // Nothing
-  }
-
-  DOMParser_proto.parseFromString = function(markup, type) {
-    if (/^\s*text\/html\s*(?:;|$)/i.test(type)) {
-      var doc = document.implementation.createHTMLDocument('');
-      if (markup.toLowerCase().indexOf('<!doctype') > -1) {
-        doc.documentElement.innerHTML = markup;
-      } else {
-        doc.body.innerHTML = markup;
-      }
-      return doc;
-    }
-    return real_parseFromString.apply(this, arguments);
-  };
-}(DOMParser));
-
-/*
-// @license http://opensource.org/licenses/MIT
-// copyright Paul Irish 2015
-*/
-
-if ('performance' in window === false) {
-  window.performance = {};
-}
-
-if ('now' in window.performance === false) {
-
-  var nowOffset = Date.now();
-
-  if (performance.timing && performance.timing.navigationStart) {
-    nowOffset = performance.timing.navigationStart;
-  }
-
-  window.performance.now = function now() {
-    return Date.now() - nowOffset;
-  };
+function getElementById(id, doc) {
+  if (doc) {return doc.getElementById(id);}
+  return document.getElementById(id);
 }
 
 var timers = {};
-var footWrap = document.getElementById('foot-wrap');
+var footWrap = getElementById('foot-wrap');
 
 function log(text, value) {
   if (footWrap) {
@@ -224,7 +166,6 @@ if (needApiUpgrade) {
 
 var calf = {};
 
-var concurrent = 0;
 var paused$1 = true;
 var queue = [];
 
@@ -259,13 +200,9 @@ function taskRunner$1() {
     paused$1 = true;
   } else {
     paused$1 = false;
-    if (concurrent < 4) {
-      concurrent += 1;
+    if ($.active < 4) {
       var opts = queue.shift();
-      doAjax.apply(null, opts).always(function() {
-        concurrent -= 1;
-        taskRunner$1();
-      });
+      doAjax.apply(null, opts);
       taskRunner$1();
     }
   }
@@ -281,6 +218,10 @@ function retryAjax(options) {
   add$1(options, 10, dfr);
   return dfr;
 }
+
+$(document).ajaxComplete(function() {
+  taskRunner$1();
+});
 
 /* eslint-disable max-lines */
 var defaults = {
@@ -553,6 +494,7 @@ var defaults = {
   expandMenuOnKeyPress: false,
   disableBreakdownPrompts: false,
   collapseNewsArchive: false,
+  collapseHallPosts: false,
   lastmyGuildLogCheck: 0,
   hideSubLvlCreature: false,
   hidePlayerActions: false,
@@ -561,7 +503,8 @@ var defaults = {
   lastLadderReset: 0,
   disableQuickWearPrompts: false,
   enableGuildActivityTracker: false,
-  enableSeTracker: false
+  enableSeTracker: false,
+  showTitanInfo: false
 };
 
 var rarity = [
@@ -601,6 +544,24 @@ var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
 var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
+var def_afterUpdateActionlist = 'after-update.actionlist';
+var def_playerBuffs = 'buffs.player';
+var def_suffixSuccessActionResponse = '-success.action-response';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var def_fetch_worldRealmActions = 256;
 
 var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -720,15 +681,6 @@ function addCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function convertTextToHtml(inputText) {
-  return inputText
-    .replace(/</g, '&lt')
-    .replace(/>/g, '&gt')
-    .replace(/\n/g, '<br>')
-    .replace(/\[\/([a-z])\]/g, '</$1>')
-    .replace(/\[([a-z])\]/g, '<$1>');
-}
-
 function parseDateAsTimestamp(textDate) {
   var dateAry = textDate.split(/[: /[]/);
   return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
@@ -739,7 +691,7 @@ function parseDateAsTimestamp(textDate) {
 
 function toggleVisibilty(evt) {
   var anItemId = evt.target.getAttribute('linkto');
-  var anItem = document.getElementById(anItemId);
+  var anItem = getElementById(anItemId);
   var currentVisibility = anItem.classList.contains('fshHide');
   anItem.classList.toggle('fshHide');
   if (currentVisibility) {
@@ -825,9 +777,17 @@ function intFromString(val) {
   return val;
 }
 
+function aIsNotEquipment(a) {
+  return typeof a.type !== 'undefined' && a.type > 8;
+}
+
+function bIsNotEquipment(a, b) {
+  return typeof a.type !== 'undefined' && b.type > 8;
+}
+
 function numberSort(a, b) {
-  if (typeof a.type !== 'undefined' && a.type > 8) {return 1;} // non equipment items
-  if (typeof a.type !== 'undefined' && b.type > 8) {return -1;}
+  if (aIsNotEquipment(a)) {return 1;} // non equipment items
+  if (bIsNotEquipment(a, b)) {return -1;}
   var valueA = path(a, calf.sortBy, 1);
   var valueB = path(b, calf.sortBy, 1);
   valueA = intFromString(valueA);
@@ -836,9 +796,13 @@ function numberSort(a, b) {
   return sortDesc(result);
 }
 
+function theValueIsValid(theValue, min, max) {
+  return !isNaN(theValue) && theValue > min && theValue < max;
+}
+
 function testRange(aValue, min, max) {
   var theValue = parseInt(aValue, 10);
-  if (!isNaN(theValue) && theValue > min && theValue < max) {
+  if (theValueIsValid(theValue, min, max)) {
     return theValue;
   }
 }
@@ -1043,7 +1007,7 @@ function retOption(option, ifTrue, ifFalse) {
 
 function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
-    draggable(document.getElementById('fshQuickLinks'));
+    draggable(getElementById('fshQuickLinks'));
   }
 }
 
@@ -1068,7 +1032,7 @@ function haveNode(node, quickLinks) { // Native ?
 }
 
 function injectQuickLinks() { // Native ?
-  var node = document.getElementById('statbar-container');
+  var node = getElementById('statbar-container');
   if (!node) {return;}
   var quickLinks = fallback(getValueJSON('quickLinks'), []);
   if (quickLinks.length <= 0) {return;}
@@ -1225,6 +1189,10 @@ function createLabel(props) {
   return cElement('label', props);
 }
 
+function textSpan(text) {
+  return createSpan({textContent: text});
+}
+
 function callApp(data) {
   mixin(data, {app: 1});
   return retryAjax({
@@ -1356,6 +1324,10 @@ function guildActivity() {
   }
 }
 
+function moreToDo(limit, cntr, list) {
+  return performance.now() < limit && cntr < list.length;
+}
+
 var dotList;
 var dotCount;
 var redDot =
@@ -1371,9 +1343,7 @@ var offlineDot =
 var sevenDayDot =
   '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
 
-var pCC = document.getElementById('pCC');
-
-
+var pCC = getElementById('pCC');
 
 function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
   var passthru = '';
@@ -1418,7 +1388,7 @@ function doBuffLinks(members) {
 function infoBox(documentText) {
   var doc = createDocument(documentText);
   var result;
-  var infoMsg = doc.getElementById('info-msg');
+  var infoMsg = getElementById('info-msg', doc);
   if (infoMsg) {
     var infoMatch = infoMsg.innerHTML;
     result = '';
@@ -1431,14 +1401,14 @@ function infoBox(documentText) {
 }
 
 function playerId() {
-  var thePlayerId = parseInt(document.getElementById('holdtext')
+  var thePlayerId = parseInt(getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
   setValue('playerID', thePlayerId);
   return thePlayerId;
 }
 
 function playerName() {
-  return document.getElementById('statbar-character').textContent;
+  return getElementById('statbar-character').textContent;
 }
 
 function makePageHeader(title, comment, spanId, button) {
@@ -1518,8 +1488,7 @@ function changeOnlineDot(contactLink) {
 
 function batchDots() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      dotCount < dotList.length) {
+  while (moreToDo(limit, dotCount, dotList)) {
     changeOnlineDot(dotList[dotCount]);
     dotCount += 1;
   }
@@ -1537,7 +1506,7 @@ function colouredDots() {
 }
 
 function jConfirm(title, msgText, fn) { // jQuery
-  var fshMsg = document.getElementById('fshmsg');
+  var fshMsg = getElementById('fshmsg');
   if (!fshMsg) {
     fshMsg = createDiv({id: 'fshmsg'});
     document.body.appendChild(fshMsg);
@@ -1568,7 +1537,7 @@ var composeMsg =
   'Composing to do</p></a></li>';
 
 function displayComposeMsg() {
-  document.getElementById('notifications')
+  getElementById('notifications')
     .insertAdjacentHTML('afterbegin', composeMsg);
 }
 
@@ -1641,17 +1610,22 @@ function createPotion(temp) { // jQuery
   });
 }
 
-function quickCreateBailOut(target) {
-  return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
+function isOurTarget(target) {
+  return target.tagName === 'SPAN' && target.className === 'quickCreate';
+}
+
+function doQuickCreate(self) {
+  var temp = self.previousElementSibling.previousElementSibling;
+  if (temp && temp.value !== 'none') {
+    self.innerHTML = '';
+    self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
+    createPotion(temp);
+  }
 }
 
 function quickCreate(evt) {
-  var target = evt.target;
-  if (quickCreateBailOut(target)) {return;}
-  var temp = target.previousElementSibling.previousElementSibling;
-  if (temp && temp.value !== 'none') {
-    createPotion(temp);
-  }
+  var self = evt.target.parentNode;
+  if (isOurTarget(self)) {doQuickCreate(self);}
 }
 
 function checkLastCompose() { // jQuery
@@ -1677,7 +1651,7 @@ function injectComposeAlert() {
 
 function moveButtons() {
   if (getValue('moveComposingButtons')) {
-    var buttonDiv = document.getElementById('composing-error-dialog')
+    var buttonDiv = getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
     var top = pCC.getElementsByClassName('composing-level')[0]
@@ -1695,44 +1669,113 @@ function injectComposing() {
   var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
-    el.insertAdjacentHTML('afterend',
-      '&nbsp;[<span class="quickCreate">Quick Create</span>]');
+    el.insertAdjacentHTML('afterend', '<span class="quickCreate">' +
+      '[<span class="sendLink">Quick Create</span>]</span>');
   });
   pCC.addEventListener('click', quickCreate);
   moveButtons();
 }
 
 function composingCreate() {
-  document.getElementById('composing-add-skill')
+  getElementById('composing-add-skill')
     .addEventListener('click', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
+      getElementById('composing-skill-level-input').value =
+        getElementById('composing-skill-level-max').textContent;
     });
-  document.getElementById('composing-skill-select')
+  getElementById('composing-skill-select')
     .addEventListener('change', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
+      getElementById('composing-skill-level-input').value =
+        getElementById('composing-skill-level-max').textContent;
     });
 }
 
-function injectFindPlayer() { // Bad jQuery
-  var findPlayerButton = $('input[value="Find Player"]');
-  var levelToTest = intValue($('dt.stat-level:first').next()
-    .text());
+var pvpLowerLevel;
+var pvpUpperLevel;
+var gvgLowerLevel;
+var gvgUpperLevel;
+
+function calcLvlToTest() {
+  var levelToTest = intValue(document.getElementsByClassName(
+    'stat-level')[0].nextElementSibling.textContent);
   var characterVirtualLevel = getValue('characterVirtualLevel');
-  levelToTest = fallback(characterVirtualLevel, levelToTest);
-  var pvpLowerLevelModifier = 5;
-  if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
-  var pvpUpperLevelModifier = 5;
-  if (levelToTest >= 200) {pvpUpperLevelModifier = 10;}
+  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
+  return levelToTest;
+}
+
+var lowerPvpCalcs = [
+  {
+    a: function(levelToTest) {return levelToTest <= 205;},
+    b: function() {return 5;}
+  },
+  {
+    a: function(levelToTest) {return levelToTest >= 206 && levelToTest <= 209;},
+    b: function(levelToTest) {return levelToTest - 200;}
+  },
+  {a: function() {return true;}, b: function() {return 10;}}
+];
+
+function calcLowerPvpLevel(levelToTest) {
+  return levelToTest -
+    lowerPvpCalcs.find(function(e) {return e.a(levelToTest);}).b(levelToTest);
+}
+
+function calcUpperPvpLevel(levelToTest) {
+  var modifier = 10;
+  if (levelToTest < 200) {modifier = 5;}
+  return levelToTest + modifier;
+}
+
+var lowerGvgCalcs = [
+  {
+    a: function(levelToTest) {return levelToTest >= 801;},
+    b: function() {return 100;}
+  },
+  {
+    a: function(levelToTest) {return levelToTest >= 752;},
+    b: function(levelToTest) {return levelToTest - 701;}
+  },
+  {
+    a: function(levelToTest) {return levelToTest >= 351;},
+    b: function() {return 50;}
+  },
+  {
+    a: function(levelToTest) {return levelToTest >= 326;},
+    b: function(levelToTest) {return levelToTest - 301;}
+  },
+  {a: function() {return true;}, b: function() {return 25;}}
+];
+
+function calcLowerGvgLevel(levelToTest) {
+  return levelToTest -
+    lowerGvgCalcs.find(function(e) {return e.a(levelToTest);}).b(levelToTest);
+}
+
+function calcUpperGvgLevel(levelToTest) {
+  var modifier = 100;
+  if (levelToTest <= 700) {modifier = 50;}
+  if (levelToTest <= 300) {modifier = 25;}
+  return levelToTest + modifier;
+}
+
+function calculateBoundaries() {
+  var levelToTest = calcLvlToTest();
+  pvpLowerLevel = calcLowerPvpLevel(levelToTest);
+  pvpUpperLevel = calcUpperPvpLevel(levelToTest);
+  gvgLowerLevel = calcLowerGvgLevel(levelToTest);
+  gvgUpperLevel = calcUpperGvgLevel(levelToTest);
+}
+
+function injectFindPlayer() { // Bad jQuery
+  calculateBoundaries();
+  var findPlayerButton = $('input[value="Find Player"]');
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
     'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
-    (levelToTest - pvpLowerLevelModifier) + '&search_level_max=' +
-    (levelToTest + pvpUpperLevelModifier) + '&search_in_guild=0"><span ' +
+    pvpLowerLevel + '&search_level_max=' +
+    pvpUpperLevel + '&search_in_guild=0"><span ' +
     'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
     'index.php?cmd=findplayer&search_active=1&search_username=&' +
-    'search_level_min=' + (levelToTest - 25) + '&search_level_max=' +
-    (levelToTest + 25) + '&search_in_guild=0"><span style="color:blue;">' +
+    'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
+    gvgUpperLevel + '&search_in_guild=0"><span style="color:blue;">' +
     'Get GvG targets</span></a>');
 
   $('table[class="width_full"]').find('a[href*="player_id"]')
@@ -1783,9 +1826,9 @@ function addMarketplaceWidgets() { // Legacy
   newCell.colSpan = '2';
   newCell.align = 'center';
 
-  document.getElementById('price').addEventListener('keyup',
+  getElementById('price').addEventListener('keyup',
     addMarketplaceWarning, true);
-  document.getElementById('amount').addEventListener('keyup',
+  getElementById('amount').addEventListener('keyup',
     addMarketplaceWarning, true);
 }
 
@@ -1801,9 +1844,9 @@ function injectFsBoxContent(injector) { // jQuery
   content.innerHTML = makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
   getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
-    document.getElementById('fsboxdetail').innerHTML = fsboxcontent;
+    getElementById('fsboxdetail').innerHTML = fsboxcontent;
   });
-  document.getElementById('fsboxclear')
+  getElementById('fsboxclear')
     .addEventListener('click', function() {
       setForage('fsh_fsboxcontent', '');
       location.reload();
@@ -1811,7 +1854,7 @@ function injectFsBoxContent(injector) { // jQuery
 }
 
 function jQueryDialog(fn) { // jQuery
-  var content = document.getElementById('content');
+  var content = getElementById('content');
   if (content) {content.innerHTML = '';} else {
     content = createDiv({
       id: 'content',
@@ -1835,7 +1878,7 @@ function getBoxList(boxList) {
 
 function storeFSBox(_boxList) {
   var boxList = getBoxList(_boxList);
-  var fsbox = document.getElementById('minibox-fsbox')
+  var fsbox = getElementById('minibox-fsbox')
     .getElementsByClassName('message')[0].innerHTML;
   if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
   if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
@@ -1843,7 +1886,7 @@ function storeFSBox(_boxList) {
 }
 
 function injectFSBoxLog() {
-  var node = document.getElementById('minibox-fsbox');
+  var node = getElementById('minibox-fsbox');
   if (!node) {return;}
   var nodediv = node.lastElementChild;
   var playerName = nodediv.getElementsByTagName('a');
@@ -1863,7 +1906,7 @@ function injectFSBoxLog() {
 }
 
 function displayBuffLog(buffLog) {
-  document.getElementById('bufflog').innerHTML = buffLog;
+  getElementById('bufflog').innerHTML = buffLog;
 }
 
 function clearBuffLog() {
@@ -1874,8 +1917,20 @@ function injectBuffLog(injector) {
   var content = injector || pCC;
   content.innerHTML = makePageTemplate('Buff Log', '',
     'clearBuffs', 'Clear', 'bufflog');
-  document.getElementById('clearBuffs').addEventListener('click', clearBuffLog);
+  getElementById('clearBuffs').addEventListener('click', clearBuffLog);
   getForage('fsh_buffLog').done(displayBuffLog);
+}
+
+function reverseSort(headerClicked) {
+  return calf.sortBy && calf.sortBy === headerClicked;
+}
+
+function doSortParams(headerClicked) {
+  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
+  if (reverseSort(headerClicked)) {
+    calf.sortAsc = !calf.sortAsc;
+  }
+  calf.sortBy = headerClicked;
 }
 
 var content;
@@ -1905,7 +1960,7 @@ function mobRows() {
 }
 
 function drawMobs() {
-  var inject = document.getElementById('entityTableOutput');
+  var inject = getElementById('entityTableOutput');
   if (!monsterAry || !inject) {return;}
   inject.innerHTML = mobRows();
 }
@@ -1923,12 +1978,7 @@ function sortMonsterAry(sortType) {
 }
 
 function sortCol(target) {
-  var headerClicked = target.getAttribute('sortKey');
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
+  doSortParams(target.getAttribute('sortKey'));
   var sortType = findSortType(target);
   sortMonsterAry(sortType);
   drawMobs();
@@ -1967,6 +2017,10 @@ function drawTable() {
   content.addEventListener('click', doHandlers);
 }
 
+function hazEnhancements(enhancements) {
+  return enhancements && enhancements.length > 0;
+}
+
 function prepMonster(data) {
   monsterAry = Object.keys(data).reduce(function(prev, curr) {
     var tmpObj = data[curr];
@@ -1983,7 +2037,7 @@ function prepMonster(data) {
     tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
     var enhancements;
     if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-    if (enhancements && enhancements.length > 0) {
+    if (hazEnhancements(enhancements)) {
       var tmp = '<span class="fshXXSmall">';
       tmp += enhancements.reduce(function(_prev, _curr) {
         return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
@@ -2064,10 +2118,10 @@ function gotCombatLog(data) {
     'id="clearLog"></td>' +
     '</tr>' + yuuzParser + '</table></div>' +
     '</form>';
-  textArea = document.getElementById('combatLog');
-  document.getElementById('copyLog')
+  textArea = getElementById('combatLog');
+  getElementById('copyLog')
     .addEventListener('click', notepadCopyLog);
-  document.getElementById('clearLog')
+  getElementById('clearLog')
     .addEventListener('click', notepadClearLog);
 }
 
@@ -2080,8 +2134,6 @@ var context;
 var onlinePlayers;
 var onlineData;
 var highlightPlayersNearMyLvl;
-var lvlDiffToHighlight;
-var levelToTest;
 var onlinePages;
 var lastPage;
 var table;
@@ -2128,14 +2180,6 @@ function dataTableSearch(_settings, data) { // jQuery
 }
 
 function filterHeaderOnlinePlayers() { // jQuery
-  highlightPlayersNearMyLvl =
-    getValue('highlightPlayersNearMyLvl');
-  lvlDiffToHighlight = 10;
-  levelToTest = intValue($('dt.stat-level:first')
-    .next().text());
-  var characterVirtualLevel = getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  if (levelToTest <= 205) {lvlDiffToHighlight = 5;}
   $('#fshOutput', context).html( // context
     '<div align=right>' +
     'Min lvl:<input value="' + getValue('onlinePlayerMinLvl') +
@@ -2146,10 +2190,18 @@ function filterHeaderOnlinePlayers() { // jQuery
     '</div><table id="fshInv" class="allow stripe hover"></table>');
 }
 
+function pvpHighlight(data) {
+  return highlightPlayersNearMyLvl &&
+    intValue(data[2]) >= pvpLowerLevel &&
+    intValue(data[2]) <= pvpUpperLevel;
+}
+
 function gotOnlinePlayers() { // jQuery
   buildOnlinePlayerData();
   $.fn.dataTable.ext.search.push(dataTableSearch);
   filterHeaderOnlinePlayers();
+  highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
+  calculateBoundaries();
 
   table = $('#fshInv', context).dataTable({ // context
     data: onlineData,
@@ -2162,9 +2214,7 @@ function gotOnlinePlayers() { // jQuery
       {title: 'Page/Index', 'class': 'dt-center'}
     ],
     createdRow: function(row, data) {
-      if (highlightPlayersNearMyLvl &&
-        Math.abs(intValue(data[2]) - levelToTest) <=
-        lvlDiffToHighlight) {
+      if (pvpHighlight(data)) {
         $('td', row).eq(2).addClass('lvlHighlight');
       }
     },
@@ -2379,13 +2429,8 @@ function sortRecipeBook(sortType) {
 }
 
 function sortRecipeTable(evt) { // Legacy
-  var headerClicked = evt.target.getAttribute('sortKey');
+  doSortParams(evt.target.getAttribute('sortKey'));
   var sortType = testSortType(evt);
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
   sortRecipeBook(sortType);
   generateRecipeTable();
 }
@@ -2415,7 +2460,7 @@ function reduceItemOrComponent(bgGif, prev, el) {
 }
 
 function parseRecipeItemOrComponent(bgGif, doc) {
-  var tblCells = doc.getElementById('pCC').getElementsByTagName('td');
+  var tblCells = getElementById('pCC', doc).getElementsByTagName('td');
   return Array.prototype.reduce.call(tblCells,
     reduceItemOrComponent.bind(null, bgGif), []);
 }
@@ -2432,7 +2477,7 @@ function processRecipe(recipe, data) {
 
 function processFolderAnyPage(data) { // jQuery.min
   var doc = createDocument(data);
-  var innerPcc = doc.getElementById('pCC');
+  var innerPcc = getElementById('pCC', doc);
   var scope = innerPcc.firstElementChild.rows[6].cells[0]
     .firstElementChild.getElementsByTagName('a');
   var prm = Array.prototype.reduce.call(scope, function(prev, el) {
@@ -2454,7 +2499,7 @@ function processFolderAnyPage(data) { // jQuery.min
 function processFolderFirstPage(data) { // jQuery.min
   var prm = [];
   var doc = createDocument(data);
-  var innerPcc = doc.getElementById('pCC');
+  var innerPcc = getElementById('pCC', doc);
   var scope = innerPcc.firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var thisFolder = Array.prototype.filter.call(scope, function(el) {
@@ -2488,7 +2533,7 @@ function reduceFolders(prev, el) { // jQuery.min
 
 function processFirstPage(data) { // jQuery.min
   var doc = createDocument(data);
-  var scope = doc.getElementById('pCC').firstElementChild.rows[4].cells[0]
+  var scope = getElementById('pCC', doc).firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var prm = Array.prototype.reduce.call(scope, reduceFolders, []);
   prm.push($.when(data).pipe(processFolderFirstPage));
@@ -2544,6 +2589,19 @@ function injectRecipeManager(injector) { // jQuery.min
   content$2.addEventListener('click', rmEvtHdl);
 }
 
+function eventHandler$1(evtAry) {
+  return function(evt) {
+    var self = evt.target;
+    evtAry.some(function(el) {
+      if (el.test(self)) {
+        el.act(self);
+        return true;
+      }
+      return false;
+    });
+  };
+}
+
 function getInventory() {
   var subcmd = 'inventory';
   if (calf.subcmd === 'guildinvmgr') {
@@ -2562,8 +2620,12 @@ function outputResult(result, handle) {
 
 var lastMsg;
 
+function notSeenErrorMessage(json) {
+  return !json.s && lastMsg !== json.e.message;
+}
+
 function jsonFail(json, handle) {
-  if (!json.s && lastMsg !== json.e.message) {
+  if (notSeenErrorMessage(json)) {
     lastMsg = json.e.message;
     outputResult(json.e.message, handle);
   }
@@ -2612,16 +2674,23 @@ function doExtract(target) {
   }
 }
 
-function extractAllSimilar(evt) {
+function extractAllSimilar(self) {
   jConfirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
-    doExtract.bind(null, evt.target)
+    doExtract.bind(null, self)
   );
 }
 
+function inMain(item) {
+  return selectMain && item.folder_id !== '-1';
+}
+
+function inSt(item) {
+  return !selectST && item.is_in_st;
+}
+
 function checkFlags(item) {
-  return selectMain && item.folder_id !== '-1' ||
-    !selectST && item.is_in_st;
+  return inMain(item) || inSt(item);
 }
 
 function resources(prev, item) {
@@ -2656,7 +2725,7 @@ function showQuickExtract() {
     '<tr><td colspan="2"><ol id="qeresult"></ol></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
-  buyResult = document.getElementById('qeresult');
+  buyResult = getElementById('qeresult');
 }
 
 function isExtractable(curr) {
@@ -2676,35 +2745,24 @@ function prepInv(data) {
 
 var extractEvents = [
   {
-    test: function(e) {return e.target.id === 'fshInSt';},
-    fn: function() {
+    test: function(self) {return self.id === 'fshInSt';},
+    act: function() {
       selectST = !selectST;
       showQuickExtract();
     }
   },
   {
-    test: function(e) {return e.target.id === 'fshInMain';},
-    fn: function() {
+    test: function(self) {return self.id === 'fshInMain';},
+    act: function() {
       selectMain = !selectMain;
       showQuickExtract();
     }
   },
   {
-    test: function(e) {return e.target.id.indexOf('fshExtr') === 0;},
-    fn: function(e) {
-      extractAllSimilar(e);
-    }
+    test: function(self) {return self.id.indexOf('fshExtr') === 0;},
+    act: extractAllSimilar
   }
 ];
-
-function listen(e) {
-  for (var i = 0; i < extractEvents.length; i += 1) {
-    if (extractEvents[i].test(e)) {
-      extractEvents[i].fn(e);
-      return;
-    }
-  }
-}
 
 function insertQuickExtract(injector) { // jQuery.min
   var content = injector || pCC;
@@ -2719,7 +2777,7 @@ function insertQuickExtract(injector) { // jQuery.min
   content.appendChild(extTbl);
   selectST = true;
   selectMain = true;
-  content.addEventListener('click', listen);
+  content.addEventListener('click', eventHandler$1(extractEvents));
   getInventory().done(prepInv);
 }
 
@@ -2902,93 +2960,78 @@ function showAHInvManager(itemList) {
 /* eslint-disable max-lines */
 var mySimpleCheckboxes = {
   moveGuildList: {
-    id: 'moveGuildList',
     helpTitle: 'Move Guild Info List',
     helpText: 'This will Move the Guild Info List higher ' +
       'on the bar on the right'
   },
   moveOnlineAlliesList: {
-    id: 'moveOnlineAlliesList',
     helpTitle: 'Move Online Allies List',
     helpText: 'This will Move the Online Allies List higher ' +
       'on the bar on the right'
   },
   enableOnlineAlliesWidgets: {
-    id: 'enableOnlineAlliesWidgets',
     helpTitle: 'Enable Online Allies Widgets',
     helpText: 'Enabling this option will enable the Allies List ' +
       'Widgets (coloring on the Allies List panel)'
   },
   moveFSBox: {
-    id: 'moveFSBox',
     helpTitle: 'Move FS box',
     helpText: 'This will move the FS box to the left, under the menu, ' +
       'for better visibility (unless it is already hidden.)'
   },
   gameHelpLink: {
-    id: 'gameHelpLink',
     helpTitle: '&quot;Game Help&quot; Settings Link',
     helpText: 'This turns the Game Help text in the lower ' +
       'right box into a link to this settings page.'
   },
   enableTempleAlert: {
-    id: 'enableTempleAlert',
     helpTitle: 'Enable Temple Alert',
     helpText: 'Puts an alert on the LHS if you have not ' +
       'prayed at the temple today.',
     network: true
   },
   enableUpgradeAlert: {
-    id: 'enableUpgradeAlert',
     helpTitle: 'Enable Gold Upgrade Alert',
     helpText: 'Puts an alert on the LHS if you have not upgraded your ' +
       'stamina with gold today.',
     network: true
   },
   enableComposingAlert: {
-    id: 'enableComposingAlert',
     helpTitle: 'Enable Composing Alert',
     helpText: 'Puts an alert on the LHS if you have composing ' +
       'slots available.',
     network: true
   },
   enhanceOnlineDots: {
-    id: 'enhanceOnlineDots',
     helpTitle: 'Enhance Online Dots',
     helpText: 'Enhances the green/grey dots by player names to show ' +
       'online/offline status.'
   },
   hideBuffSelected: {
-    id: 'hideBuffSelected',
     helpTitle: 'Hide Buff Selected',
     helpText: 'Hides the buff selected functionality in the online allies ' +
       'and guild info section.'
   },
   hideHelperMenu: {
-    id: 'hideHelperMenu',
     helpTitle: 'Hide Helper Menu',
     helpText: 'Hides the helper menu from top left.'
   },
   keepHelperMenuOnScreen: {
-    id: 'keepHelperMenuOnScreen',
     helpTitle: 'Keep Helper Menu On Screen',
     helpText: 'Keeps helper menu on screen as you scroll (helper ' +
       'menu must be enabled to work). Also works with quick links.'
   },
   showAdmin: {
-    id: 'showAdmin',
     helpTitle: 'Show rank controls',
     helpText: 'Show ranking controls for guild managemenet in member ' +
       'profile page - this works for guild founders only'
   },
   ajaxifyRankControls: {
-    id: 'ajaxifyRankControls',
     helpTitle: 'AJAXify rank controls',
     helpText: 'Enables guild founders with ranking rights to change rank ' +
       'positions without a screen refresh.'
   },
   detailedConflictInfo: {
-    id: 'detailedConflictInfo',
     helpTitle: 'Show Conflict Details',
     helpText: 'Inserts detailed conflict information onto your guild\'s ' +
       'manage page. Currently displays the target guild as well as ' +
@@ -2996,100 +3039,84 @@ var mySimpleCheckboxes = {
     network: true
   },
   showCombatLog: {
-    id: 'showCombatLog',
     helpTitle: 'Show Combat Log',
     helpText: 'This will show the combat log for each automatic ' +
       'battle below the monster list.'
   },
   enableCreatureColoring: {
-    id: 'enableCreatureColoring',
     helpTitle: 'Color Special Creatures',
     helpText: 'Creatures will be colored according to their rarity. ' +
       'Champions will be colored green, Elites yellow and Super Elites red.'
   },
   showCreatureInfo: {
-    id: 'showCreatureInfo',
     helpTitle: 'Show Creature Info',
     helpText: 'This will show the information from the view creature ' +
       'link when you mouseover the link.',
     network: true
   },
   fsboxlog: {
-    id: 'fsboxlog',
     helpTitle: 'Enable FS Box Log',
     helpText: 'This enables the functionality to keep a log of ' +
       'recent seen FS Box message.'
   },
   keepBuffLog: {
-    id: 'keepBuffLog',
     helpTitle: 'Enable Buff Log',
     helpText: 'This enables the functionality to keep a log of ' +
       'recently casted buffs'
   },
   huntingMode: {
-    id: 'huntingMode',
     helpTitle: 'Enable Hunting Mode',
     helpText: 'This disable menu and some visual features to ' +
       'speed up the calf.'
   },
   hideNonPlayerGuildLogMessages: {
-    id: 'hideNonPlayerGuildLogMessages',
     helpTitle: 'Cleanup Guild Log',
     helpText: 'Any log messages not related to the current player ' +
       'will be dimmed (e.g. recall messages from guild store)'
   },
   useNewGuildLog: {
-    id: 'useNewGuildLog',
     helpTitle: 'Use New Guild Log',
     helpText: 'This will replace the standard guild log with the ' +
       'helper version of the guild log.'
   },
   enableLogColoring: {
-    id: 'enableLogColoring',
     helpTitle: 'Enable Log Coloring',
     helpText: 'Three logs will be colored if this is enabled, ' +
       'Guild Chat, Guild Log and Player Log. It will show any new ' +
       'messages in yellow and anything 20 minutes old ones in brown.'
   },
   enableChatParsing: {
-    id: 'enableChatParsing',
     helpTitle: 'Enable Chat Parsing',
     helpText: 'If this is checked, your character log will be parsed for ' +
       'chat messages and show the chat message on the screen if you reply ' +
       'to that message.'
   },
   addAttackLinkToLog: {
-    id: 'addAttackLinkToLog',
     helpTitle: 'Add attack link to log',
     helpText: 'If checked, this will add an Attack link to each message ' +
       'in your log.'
   },
   enhanceChatTextEntry: {
-    id: 'enhanceChatTextEntry',
     helpTitle: 'Enhance Chat Text Entry',
     helpText: 'If checked, this will enhance the entry field for entering ' +
       'chat text on the guild chat page.'
   },
   showExtraLinks: {
-    id: 'showExtraLinks',
     helpTitle: 'Show Extra Links',
     helpText: 'If checked, this will add AH and UFSG ' +
       'links to equipment screens.'
   },
   disableItemColoring: {
-    id: 'disableItemColoring',
     helpTitle: 'Disable Item Coloring',
     helpText: 'Disable the code that colors the item text based on the ' +
       'rarity of the item.'
   },
   showQuickDropLinks: {
-    id: 'showQuickDropLinks',
     helpTitle: 'Show Quick Drop Item',
     helpText: 'This will show a link beside each item which gives the ' +
       'option to drop the item.  WARNING: NO REFUNDS ON ERROR'
   },
   storeLastQuestPage: {
-    id: 'storeLastQuestPage',
     helpTitle: 'Store Last Quest Page',
     helpText: 'This will store the page and sort order of each of the ' +
       'three quest selection pages for next time you visit. If you need ' +
@@ -3097,74 +3124,62 @@ var mySimpleCheckboxes = {
       'wish to reset and then turn this option back on again.'
   },
   showNextQuestSteps: {
-    id: 'showNextQuestSteps',
     helpTitle: 'Show Next Quest Steps',
     helpText: 'Shows all quest steps in the UFSG.'
   },
   renderSelfBio: {
-    id: 'renderSelfBio',
     helpTitle: 'Render self bio',
     helpText: 'This determines if your own bio will render the FSH ' +
       'special bio tags.'
   },
   renderOtherBios: {
-    id: 'renderOtherBios',
     helpTitle: 'Render other players&#39; bios',
     helpText: 'This determines if other players bios will render the FSH ' +
       'special bio tags.'
   },
   showStatBonusTotal: {
-    id: 'showStatBonusTotal',
     helpTitle: 'Show Stat Bonus Total',
     helpText: 'This will show a total of the item stats when you ' +
       'mouseover an item on the profile screen.'
   },
   enableQuickDrink: {
-    id: 'enableQuickDrink',
     helpTitle: 'Enable Quick Drink/Wear',
     helpText: 'This enables the quick drink/wear functionality on the ' +
       'profile page.'
   },
   disableDeactivatePrompts: {
-    id: 'disableDeactivatePrompts',
     helpTitle: 'Disable Deactivate Prompts',
     helpText: 'This disables the prompts for deactivating buffs on ' +
       'the profile page.'
   },
   enableAttackHelper: {
-    id: 'enableAttackHelper',
     helpTitle: 'Show Attack Helper',
     helpText: 'This will show extra information on the attack player ' +
       'screen about stats and buffs on you and your target',
     network: true
   },
   showPvPSummaryInLog: {
-    id: 'showPvPSummaryInLog',
     helpTitle: 'Show PvP Summary in Log',
     helpText: 'This will show a summary of the PvP results in the log.',
     network: true
   },
   autoFillMinBidPrice: {
-    id: 'autoFillMinBidPrice',
     helpTitle: 'Auto Fill Min Bid Price',
     helpText: 'This enables the functionality to automatically fill in ' +
       'the min bid price so you just have to hit bid and your bid will ' +
       'be placed.'
   },
   hideRelicOffline: {
-    id: 'hideRelicOffline',
     helpTitle: 'Hide Relic Offline',
     helpText: 'This hides the relic offline defenders checker.'
   },
   enterForSendMessage: {
-    id: 'enterForSendMessage',
     helpTitle: 'Enter Sends Message',
     helpText: 'If enabled, will send a message from the Send Message ' +
       'screen if you press enter. You can still insert a new line by ' +
       'holding down shift when you press enter.'
   },
   navigateToLogAfterMsg: {
-    id: 'navigateToLogAfterMsg',
     helpTitle: 'Navigate After Message Sent',
     helpText: 'If enabled, will navigate to the referring page after a ' +
       'successful message is sent. Example:  if you are on the world ' +
@@ -3172,73 +3187,77 @@ var mySimpleCheckboxes = {
       'message, it will return you to the world screen.'
   },
   moveComposingButtons: {
-    id: 'moveComposingButtons',
     helpTitle: 'Move Composing Buttons',
     helpText: 'If enabled, will move composing buttons to the top of ' +
       'the composing screen.'
   },
   draggableHelperMenu: {
-    id: 'draggableHelperMenu',
     helpTitle: 'Draggable Helper Menu',
     helpText: 'If enabled, allows the helper menu to ' +
       'be dragged around the screen.'
   },
   draggableQuickLinks: {
-    id: 'draggableQuickLinks',
     helpTitle: 'Draggable Quick Links',
     helpText: 'If enabled, allows the quick link box to ' +
       'be dragged around the screen.'
   },
   expandMenuOnKeyPress: {
-    id: 'expandMenuOnKeyPress',
     helpTitle: 'Expand Menu on Key Press',
     helpText: 'If enabled, expands the left hand menu ' +
       'when you use hotkeys.'
   },
   disableBreakdownPrompts: {
-    id: 'disableBreakdownPrompts',
     helpTitle: 'Disable Breakdown Prompts',
     helpText: 'If enabled, will disable prompts when you breakdown items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
   },
   collapseNewsArchive: {
-    id: 'collapseNewsArchive',
     helpTitle: 'Collapse News Archive',
     helpText: 'If enabled, will collapse news archives.'
   },
+  collapseHallPosts: {
+    helpTitle: 'Collapse Hall Posts',
+    helpText: 'If enabled, will collapse hall posts.'
+  },
   hideSubLvlCreature: {
-    id: 'hideSubLvlCreature',
     helpTitle: 'Hide Sub Level Creatures',
     helpText: 'If enabled, will hide creatures that are ' +
       'lower than the current realm level.'
   },
   hidePlayerActions: {
-    id: 'hidePlayerActions',
     helpTitle: 'Hide Player Actions',
     helpText: 'If enabled, will hide player actions.'
   },
   disableQuickWearPrompts: {
-    id: 'disableQuickWearPrompts',
     helpTitle: 'Disable Use/Ext Prompts',
     helpText: 'If enabled, will disable prompts when you Use/Ext items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.',
     title: 'Disable Use/Ext<br>Prompts'
   },
   enableGuildActivityTracker: {
-    id: 'enableGuildActivityTracker',
     helpTitle: 'Enable Guild Activity Tracker',
     helpText: 'If enabled, will track guild member activity over time.',
     network: true,
     title: 'Enable Tracker'
   },
   enableSeTracker: {
-    id: 'enableSeTracker',
     helpTitle: 'Enable SE Tracker',
     helpText: 'If enabled, will track the last time each SE was killed.<br>' +
       'This is DIFFERENT from the usual FSH network activity.<br>' +
       'When this is enabled, if you have ANY game page open in a<br>' +
       'browser tab it will scan the SE Log every 10 minutes.<br>' +
       'You do not need auto-refresh for this to work.',
+    network: true
+  },
+  showMonsterLog: {
+    helpTitle: 'Keep Creature Log',
+    helpText: 'This will show the creature log for each creature you see ' +
+      'when you travel.',
+    network: true
+  },
+  showTitanInfo: {
+    helpTitle: 'Show Titan Info',
+    helpText: 'This will show titan info in the action list.',
     network: true
   }
 };
@@ -3744,12 +3763,8 @@ function prefs() {
 
     combatEvalBias() +
 
-    '<tr><td class="fshRight">' + networkIcon + 'Keep Creature Log' +
-      helpLink('Keep Creature Log',
-        'This will show the creature log for each creature you see when ' +
-        'you travel.') +
-      ':</td><td><input name="showMonsterLog" type="checkbox" value="on"' +
-      isChecked(getValue('showMonsterLog')) + '>' +
+    '<tr><td class="fshRight">' + justLabel('showMonsterLog') +
+      '</td><td>' + justCheckbox('showMonsterLog') +
       '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
       'value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 
@@ -3966,22 +3981,21 @@ function hasNetwork(o) {
   return '';
 }
 
-function isOn(o) {
-  return isChecked(getValue(o.id));
+function isOn(name) {
+  return isChecked(getValue(name));
 }
 
 function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
-    '<label for="' + o.id + '">' + fallback(o.title, o.helpTitle) +
+    '<label for="' + name + '">' + fallback(o.title, o.helpTitle) +
     helpLink(o.helpTitle, o.helpText) +
     ':</label>';
 }
 
 function justCheckbox(name) {
-  var o = mySimpleCheckboxes[name];
-  return '<input id="' + o.id + '" name="' + o.id +
-    '" class="fshVMid" type="checkbox" value="on"' + isOn(o) + '>';
+  return '<input id="' + name + '" name="' + name +
+    '" class="fshVMid" type="checkbox" value="on"' + isOn(name) + '>';
 }
 
 function simpleCheckboxHtml(name) {
@@ -4096,50 +4110,48 @@ function createEventListeners() {
     textContent: 'Tick all buffs'
   });
   tickAll.addEventListener('click', toggleTickAllBuffs);
-  var inject = document.getElementById('settingsTabs-4').firstElementChild
+  var inject = getElementById('settingsTabs-4').firstElementChild
     .rows[0].cells[0];
   inject.appendChild(createBr());
   inject.appendChild(tickAll);
 
-  document.getElementById('fshClearStorage')
+  getElementById('fshClearStorage')
     .addEventListener('click', clearStorage);
 
-  document.getElementById('Helper:SaveOptions')
+  getElementById('Helper:SaveOptions')
     .addEventListener('click', saveConfig);
-  document.getElementById('Helper:ShowLogs')
+  getElementById('Helper:ShowLogs')
     .addEventListener('click', showLogs);
-  document.getElementById('Helper:ShowMonsterLogs')
+  getElementById('Helper:ShowMonsterLogs')
     .addEventListener('click', showMonsterLogs);
 
-  document.getElementById('toggleShowGuildSelfMessage')
+  getElementById('toggleShowGuildSelfMessage')
     .addEventListener('click', toggleVisibilty);
-  document.getElementById('toggleShowGuildFrndMessage')
+  getElementById('toggleShowGuildFrndMessage')
     .addEventListener('click', toggleVisibilty);
-  document.getElementById('toggleShowGuildPastMessage')
+  getElementById('toggleShowGuildPastMessage')
     .addEventListener('click', toggleVisibilty);
-  document.getElementById('toggleShowGuildEnmyMessage')
+  getElementById('toggleShowGuildEnmyMessage')
     .addEventListener('click', toggleVisibilty);
 }
 
 function injectSettings() { // jQuery.min
   getVars();
   setupConfigData();
-  var settingsTabs = document.getElementById('settingsTabs');
+  var settingsTabs = getElementById('settingsTabs');
   settingsTabs.insertAdjacentHTML('beforeend', '<div id="fshSettings">' +
     calf.configData + '</div>');
   if ($(settingsTabs).tabs('length') > 0) {
     $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
   }
   createEventListeners();
-  setValue('minGroupLevel', document.getElementById('settingsTabs-1')
+  setValue('minGroupLevel', getElementById('settingsTabs-1')
     .firstElementChild.lastElementChild.rows[1].cells[1].firstElementChild
     .value);
 }
 
-function toggleForce(el, force) { // Polyfill UC
-  if (el.classList.contains('fshHide') !== force) {
-    el.classList.toggle('fshHide');
-  }
+function toggleForce(el, force) {
+  el.classList.toggle('fshHide', force);
 }
 
 var deferred = window.$ && $.when();
@@ -4333,42 +4345,30 @@ function togglePref() {
   setValue('disableQuickWearPrompts', disableQuickWearPrompts);
 }
 
-var evts = [
+var events = [
   {
-    condition: function(self) {
+    test: function(self) {
       return self.classList.contains('smallLink') &&
         self.classList.contains('fshEq');
     },
-    result: equipProfileInventoryItem
+    act: equipProfileInventoryItem
   },
   {
-    condition: function(self) {
+    test: function(self) {
       return self.classList.contains('smallLink') &&
         self.classList.contains('fshUse');
     },
-    result: useProfileInventoryItem
+    act: useProfileInventoryItem
   },
   {
-    condition: function(self) {return self.classList.contains('fshFolder');},
-    result: hideFolders
+    test: function(self) {return self.classList.contains('fshFolder');},
+    act: hideFolders
   },
   {
-    condition: function(self) {return self.id === 'disableQuickWearPrompts';},
-    result: togglePref
+    test: function(self) {return self.id === 'disableQuickWearPrompts';},
+    act: togglePref
   }
 ];
-
-function listen$1(evt) {
-  var self = evt.target;
-  evts.some(function(el) {
-    if (el.condition(self)) {
-      el.result(self);
-      return true;
-    }
-    return false;
-  });
-
-}
 
 function createInvTabs() {
   return createDiv({
@@ -4395,9 +4395,9 @@ function showQuickWear(appInv) {
   invTabs.appendChild(invTabsQw);
   content$3.innerHTML = '';
   content$3.appendChild(invTabs);
-  invTabs.addEventListener('click', listen$1);
+  invTabs.addEventListener('click', eventHandler$1(events));
   invTabs.appendChild(showAHInvManager(appInv));
-  document.getElementById('setPrompt').insertAdjacentHTML('beforeend',
+  getElementById('setPrompt').insertAdjacentHTML('beforeend',
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 
@@ -4489,11 +4489,15 @@ function screenview(funcName) {
 
 var param;
 
+function hasUrl(j) {
+  return param.url && param.url[j] !== '';
+}
+
 function detailRow(j, itemField) { // Legacy
   if (param.tags[j] === 'checkbox') {
     return '<input type="checkbox"' + isChecked(itemField) +
       ' disabled>';
-  } else if (param.url && param.url[j] !== '') {
+  } else if (hasUrl(j)) {
     return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
       '">' + itemField + '</a>';
   }
@@ -4528,8 +4532,7 @@ function generateManageTable() { // Legacy
   }, '');
   result += '<th>Action</th></tr>';
   var currentCategory = '';
-  for (var i = 0; i < param.currentItems.length; i += 1) {
-    var item = param.currentItems[i];
+  param.currentItems.forEach(function(item, i) {
     result += '<tr>';
     if (param.categoryField &&
         currentCategory !==
@@ -4542,7 +4545,7 @@ function generateManageTable() { // Legacy
     result += itemRow(item);
     result += '<td><span class="HelperTextLink" data-itemId="' + i +
       '" id="fshDel' + i + '">[Del]</span></td></tr>';
-  }
+  });
   result += doInputs();
   result += '<td><span class="HelperTextLink" id="fshAdd">' +
     '[Add]</span></td></tr></table>' +
@@ -4554,12 +4557,12 @@ function generateManageTable() { // Legacy
     '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
     'class="custombutton"></td></tr>' +
     '</tbody></table>';
-  document.getElementById(param.id).innerHTML = result;
+  getElementById(param.id).innerHTML = result;
   setValueJSON(param.gmname, param.currentItems);
 }
 
-function deleteQuickItem(evt) { // Legacy
-  var itemId = evt.target.getAttribute('data-itemId');
+function deleteQuickItem(self) { // Legacy
+  var itemId = self.getAttribute('data-itemId');
   param.currentItems.splice(itemId, 1);
   generateManageTable();
 }
@@ -4569,10 +4572,10 @@ function buildNewItem() { // Legacy
   for (var i = 0; i < param.fields.length; i += 1) {
     if (param.tags[i] === 'checkbox') {
       newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).checked;
+        getElementById('fshIn' + param.fields[i]).checked;
     } else {
       newItem[param.fields[i]] =
-        document.getElementById('fshIn' + param.fields[i]).value;
+        getElementById('fshIn' + param.fields[i]).value;
     }
   }
   return newItem;
@@ -4582,7 +4585,7 @@ function addQuickItem() { // Legacy
   var isArrayOnly = param.fields.length === 0;
   var newItem = {};
   if (isArrayOnly) {
-    newItem = document.getElementById('fshIn0').value;
+    newItem = getElementById('fshIn0').value;
   } else {
     newItem = buildNewItem();
   }
@@ -4605,23 +4608,14 @@ function resetRawEditor() { // Legacy
 }
 
 var listEvents = [
-  {test: function(e) {return e.target.id === 'fshReset';}, fn: resetRawEditor},
-  {test: function(e) {return e.target.id === 'fshSave';}, fn: saveRawEditor},
-  {test: function(e) {return e.target.id === 'fshAdd';}, fn: addQuickItem},
+  {test: function(self) {return self.id === 'fshReset';}, act: resetRawEditor},
+  {test: function(self) {return self.id === 'fshSave';}, act: saveRawEditor},
+  {test: function(self) {return self.id === 'fshAdd';}, act: addQuickItem},
   {
-    test: function(e) {return e.target.id.indexOf('fshDel') === 0;},
-    fn: deleteQuickItem
+    test: function(self) {return self.id.indexOf('fshDel') === 0;},
+    act: deleteQuickItem
   }
 ];
-
-function listEvtHnl(e) {
-  for (var i = 0; i < listEvents.length; i += 1) {
-    if (listEvents[i].test(e)) {
-      listEvents[i].fn(e);
-      return;
-    }
-  }
-}
 
 function injectAuctionSearch(injector) { // Legacy
   var content = injector || pCC;
@@ -4651,7 +4645,7 @@ function injectAuctionSearch(injector) { // Legacy
     categoryField: 'category',
   };
   generateManageTable();
-  content.addEventListener('click', listEvtHnl);
+  content.addEventListener('click', eventHandler$1(listEvents));
 }
 
 function injectQuickLinkManager(injector) { // Legacy
@@ -4671,7 +4665,7 @@ function injectQuickLinkManager(injector) { // Legacy
     gmname: 'quickLinks',
   };
   generateManageTable();
-  content.addEventListener('click', listEvtHnl);
+  content.addEventListener('click', eventHandler$1(listEvents));
 }
 
 /* eslint-disable no-multi-spaces, max-len */
@@ -4977,7 +4971,7 @@ function getBioLines(bioCellHtml) { // Legacy
 }
 
 function getSustain(doc) {
-  var aLinks = doc.getElementById('profileLeftColumn')
+  var aLinks = getElementById('profileLeftColumn', doc)
     .getElementsByTagName('a');
   var sustainLevel;
   Array.prototype.some.call(aLinks, function(el) {
@@ -4993,11 +4987,11 @@ function getSustain(doc) {
 }
 
 function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
-  var innerPlayerName = doc.getElementById('pCC')
+  var innerPlayerName = getElementById('pCC', doc)
     .getElementsByTagName('h1')[0].textContent;
-  var levelValue = intValue(doc.getElementById('profileLeftColumn')
+  var levelValue = intValue(getElementById('profileLeftColumn', doc)
     .children[4].children[0].rows[0].cells[1].textContent);
-  var virtualLevelValue = parseInt(doc.getElementById('stat-vl')
+  var virtualLevelValue = parseInt(getElementById('stat-vl', doc)
     .textContent, 10);
   var lastActivityMinutes = parseInt(lastActivity[1], 10);
   var lastActivityIMG = onlineDot({min: lastActivityMinutes});
@@ -5031,14 +5025,14 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
 function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
   var doc = createDocument(responseText);
   // name and level
-  var innerPcc = doc.getElementById('pCC');
+  var innerPcc = getElementById('pCC', doc);
   // last activity
   var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
   var lastActivity = /(\d+) mins, (\d+) secs/
     .exec(lastActivityElement.textContent);
   // buffs
-  var bioCellHtml = doc.getElementById('profile-bio').innerHTML;
-  var buffTable = document.getElementById('buffTable');
+  var bioCellHtml = getElementById('profile-bio', doc).innerHTML;
+  var buffTable = getElementById('buffTable');
   var textLineArray = getBioLines(bioCellHtml);
   // sustain
   var sustainLevel = getSustain(doc);
@@ -5067,9 +5061,9 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
       newCell.innerHTML += el + '<br>';
     });
   }
-  var processedBuffers = document.getElementById('buffersProcessed');
+  var processedBuffers = getElementById('buffersProcessed');
   var potentialBuffers =
-    parseInt(document.getElementById('potentialBuffers').textContent, 10);
+    parseInt(getElementById('potentialBuffers').textContent, 10);
   var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
   processedBuffers.innerHTML = processedBuffersCount + 1;
   if (potentialBuffers === processedBuffersCount + 1) {
@@ -5081,7 +5075,7 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
   // now need to parse player pages for buff ...
-  document.getElementById('potentialBuffers').innerHTML =
+  getElementById('potentialBuffers').innerHTML =
     onlinePlayers$1.length;
   if (onlinePlayers$1.length <= 0) {
     bufferProgress.innerHTML = 'Done.';
@@ -5108,6 +5102,25 @@ function calcNextPage(curPage, maxPage) { // Legacy
   return curPage + 1;
 }
 
+function addPlayerToSearchList(onlinePlayer, onlinePlayerName) {
+  // add online player to search list (all but self)
+  if (characterName !== onlinePlayerName.trim()) {
+    onlinePlayers$1.push(onlinePlayer);
+  }
+}
+
+function playerRow(i, e) {
+  var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
+  var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
+    .replace(/,/g, ''), 10);
+  var onlinePlayerName = $(e).find('td:eq(1) a').text();
+  var minPlayerVirtualLevel = calcMinLvl();
+  if (onlinePlayerLevel >= findBuffMinCastLevel &&
+      onlinePlayerLevel >= minPlayerVirtualLevel) {
+    addPlayerToSearchList(onlinePlayer, onlinePlayerName);
+  }
+}
+
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var doc = createDocument(responseText);
   var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has' +
@@ -5117,20 +5130,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var curPage = parseInt($(doc).find('input[name="page"]:last').val()
     .replace(/\D/g, ''), 10);
   if (curPage !== 1) {
-    playerRows.each(function(i, e) {
-      var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
-      var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
-        .replace(/,/g, ''), 10);
-      var onlinePlayerName = $(e).find('td:eq(1) a').text();
-      var minPlayerVirtualLevel = calcMinLvl();
-      if (onlinePlayerLevel >= findBuffMinCastLevel &&
-        onlinePlayerLevel >= minPlayerVirtualLevel) {
-        // add online player to search list (all but self)
-        if (characterName !== onlinePlayerName.trim()) {
-          onlinePlayers$1.push(onlinePlayer);
-        }
-      }
-    });
+    playerRows.each(playerRow);
   }
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
@@ -5146,7 +5146,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
 function findBuffsParseOnlinePlayersStart() { // Legacy
   // if option enabled then parse online players
   onlinePlayersSetting =
-    parseInt(document.getElementById('onlinePlayers').value, 10);
+    parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
     xmlhttp('index.php?cmd=onlineplayers&page=1',
       findBuffsParseOnlinePlayers, {page: 1});
@@ -5162,20 +5162,19 @@ function calcLastActMins(tipped) {
   return parseInt(lastActivity[3], 10) + lastActivityHours * 60;
 }
 
+function isValidPlayer(lastActivityMinutes, vlevel, minPlayerVirtualLevel) {
+  return lastActivityMinutes < 5 && vlevel >= findBuffMinCastLevel &&
+    vlevel >= minPlayerVirtualLevel;
+}
+
 function parsePlayerLink(el) {
   var tipped = el.dataset.tipped;
   var lastActivityMinutes = calcLastActMins(tipped);
   // check if they are high enough level to cast the buff
   var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
   var minPlayerVirtualLevel = calcMinLvl();
-  if (lastActivityMinutes < 5 &&
-    vlevel >= findBuffMinCastLevel &&
-    vlevel >= minPlayerVirtualLevel) {
-    // add online player to search list (all but self)
-    var onlinePlayer = el.href;
-    if (characterName !== el.textContent) {
-      onlinePlayers$1.push(onlinePlayer);
-    }
+  if (isValidPlayer(lastActivityMinutes, vlevel, minPlayerVirtualLevel)) {
+    addPlayerToSearchList(el.href, el.textContent);
   }
 }
 
@@ -5203,7 +5202,7 @@ function findBuffsParseProfilePageStart() { // Legacy
       '&search_username=' + el + '&search_show_first=1');
   });
   profilePagesToSearchProcessed = 0;
-  if (document.getElementById('alliesEnemies').checked) {
+  if (getElementById('alliesEnemies').checked) {
     profilePagesToSearch.forEach(function(el) {
       xmlhttp(el, findBuffsParseProfilePage);
     });
@@ -5214,7 +5213,7 @@ function findBuffsParseProfilePageStart() { // Legacy
 
 function findBuffsParseGuildManagePage(responseText) {
   var doc = createDocument(responseText);
-  if (document.getElementById('guildMembers').checked) {
+  if (getElementById('guildMembers').checked) {
     var memList = doc.querySelectorAll('#pCC a[data-tipped*="<td>VL:</td>"]');
     Array.prototype.forEach.call(memList, parsePlayerLink);
   }
@@ -5223,29 +5222,29 @@ function findBuffsParseGuildManagePage(responseText) {
 }
 
 function findBuffsClearResults() { // Legacy
-  var buffTable = document.getElementById('buffTable');
+  var buffTable = getElementById('buffTable');
   for (var j = buffTable.rows.length; j > 1; j -= 1) {
     buffTable.deleteRow(j - 1);
   }
-  document.getElementById('buffNicks').innerHTML = '';
-  // var bufferProgress = document.getElementById('bufferProgress');
+  getElementById('buffNicks').innerHTML = '';
+  // var bufferProgress = getElementById('bufferProgress');
   bufferProgress.innerHTML = 'Idle.';
   bufferProgress.style.color = 'black';
-  document.getElementById('potentialBuffers').innerHTML = '';
-  document.getElementById('buffersProcessed').innerHTML = 0;
+  getElementById('potentialBuffers').innerHTML = '';
+  getElementById('buffersProcessed').innerHTML = 0;
 }
 
 function findAnyStart(progMsg) {
   characterName = playerName();
-  document.getElementById('buffNicks').innerHTML = findBuffNicks;
-  bufferProgress = document.getElementById('bufferProgress');
+  getElementById('buffNicks').innerHTML = findBuffNicks;
+  bufferProgress = getElementById('bufferProgress');
   bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
   bufferProgress.style.color = 'green';
   findBuffsLevel175Only =
-    document.getElementById('level175').checked;
-  document.getElementById('buffersProcessed').innerHTML = 0;
+    getElementById('level175').checked;
+  getElementById('buffersProcessed').innerHTML = 0;
   onlinePlayers$1 = [];
-  extraProfile = document.getElementById('extraProfile').value;
+  extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
   xmlhttp('index.php?cmd=guild&subcmd=manage',
@@ -5278,18 +5277,18 @@ function injectFindBuffs(injector) { // Legacy
   calf.sortAsc = true;
   buffList.sort(stringSort);
   content.innerHTML = pageLayout(buffCustom);
-  document.getElementById('findbuffsbutton')
+  getElementById('findbuffsbutton')
     .addEventListener('click', findBuffsStart, true);
-  document.getElementById('clearresultsbutton')
+  getElementById('clearresultsbutton')
     .addEventListener('click', findBuffsClearResults, true);
 }
 
 function injectFindOther(injector) { // Native - Bad
   var content = injector || pCC;
   content.innerHTML = pageLayout(otherCustom);
-  document.getElementById('findbuffsbutton')
+  getElementById('findbuffsbutton')
     .addEventListener('click', findOtherStart, true);
-  document.getElementById('clearresultsbutton')
+  getElementById('clearresultsbutton')
     .addEventListener('click', findBuffsClearResults, true);
 }
 
@@ -5351,7 +5350,7 @@ function eventHandler(evt) {
 }
 
 function showHelperMenu() {
-  var helperMenu = document.getElementById('helperMenu');
+  var helperMenu = getElementById('helperMenu');
   helperMenu.removeEventListener('mouseenter', showHelperMenu);
 
   var helperMenuDiv = createDiv({
@@ -5391,7 +5390,7 @@ function haveNode$1(node) {
 
 function injectHelperMenu() {
   // don't put all the menu code here (but call if clicked) to minimize lag
-  var node = document.getElementById('statbar-container');
+  var node = getElementById('statbar-container');
   if (node) {haveNode$1(node);}
 }
 
@@ -5453,7 +5452,21 @@ function lookForPvPLadder() {
   });
 }
 
-function injectHomePageTwoLink() {
+function addUfsgLinks() {
+  var imgs = document.querySelectorAll(
+    '.news_body img[src^="https://cdn.fallensword.com/creatures/"]');
+  Array.prototype.forEach.call(imgs, function(img) {
+    var myName = encodeURIComponent(img.getAttribute('oldtitle'));
+    var myLink = createAnchor({
+      href: guideUrl + 'creatures&search_name=' + myName,
+      target: '_blank'
+    });
+    img.parentNode.insertBefore(myLink, img);
+    myLink.appendChild(img);
+  });
+}
+
+function injectHomePageTwoLink() { // Pref
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
   if (!archiveLink) {return;}
@@ -5464,14 +5477,15 @@ function injectHomePageTwoLink() {
     '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
   archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
     '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
-  fixCollapse();
-  lookForPvPLadder();
+  fixCollapse(); // Pref
+  lookForPvPLadder(); // Pref
+  addUfsgLinks(); // Pref
 }
 
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
-    document.getElementById('nav-character-questbook')
+    getElementById('nav-character-questbook')
       .setAttribute('href', lastActiveQuestPage);
   }
 }
@@ -5486,7 +5500,7 @@ function spanButton(navLvl, text, fn, target) {
     jQueryDialog(fn);
   });
   li.appendChild(sb);
-  document.getElementById(target).parentNode
+  getElementById(target).parentNode
     .insertAdjacentElement('afterend', li);
 }
 
@@ -5513,7 +5527,7 @@ function creatureLogLink() {
 function newGuildLogLink() {
   if (!getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    document.getElementById('nav-guild-ledger-guildlog').parentNode
+    getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
         '<li class="nav-level-2"><a class="nav-link" ' +
         'href="index.php' + newGuildLogUrl + '"' +
@@ -5523,14 +5537,14 @@ function newGuildLogLink() {
 
 function adjustHeight() { // jQuery
   // adjust the menu height for the newly added items
-  var theNav = document.getElementById('nav');
+  var theNav = getElementById('nav');
   var myNav = $(theNav).data('nav');
   // first the closed saved variables
   myNav.heights = [
     null,
     null,
     // Character
-    document.getElementById('nav-character').nextElementSibling.children
+    getElementById('nav-character').nextElementSibling.children
       .length * 22,
     660,
     // Guild
@@ -5548,11 +5562,11 @@ function adjustHeight() { // jQuery
 }
 
 function injectMenu() {
-  if (!document.getElementById('pCL')) {return;}
+  if (!getElementById('pCL')) {return;}
   updateQuestLink();
   // character
   spanButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  document.getElementById('nav-character-log').parentNode
+  getElementById('nav-character-log').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
       'character-medalguide" href="index.php?cmd=profile&subcmd=' +
@@ -5566,14 +5580,14 @@ function injectMenu() {
   spanButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
   // guild
-  document.getElementById('nav-guild-storehouse-inventory').parentNode
+  getElementById('nav-guild-storehouse-inventory').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
       '&subcmd=guildinvmgr">Guild Inventory</a></li>');
   newGuildLogLink();
   // top rated
-  document.getElementById('nav-toprated-players-level').parentNode
+  getElementById('nav-toprated-players-level').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
@@ -5667,7 +5681,7 @@ function keypress(evt) {
 
 function captureEnter() {
   if (enterForSendMessage) {
-    document.getElementById('quickMsgDialog_msg')
+    getElementById('quickMsgDialog_msg')
       .addEventListener('keypress', keypress);
   }
 }
@@ -5692,6 +5706,46 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
 function injectQuickMsgDialogJQ() {
   enterForSendMessage = getValue('enterForSendMessage');
   window.openQuickMsgDialog = openQuickMsgDialog;
+}
+
+function insertElement(parent, child) {
+  parent.appendChild(child);
+}
+
+function doServerNode(topbannerStats, miniboxList) {
+  var nodeName = miniboxList.children[7].textContent;
+  var serverDiv = createDiv({
+    className: 'tip-static',
+    dataset: {tipped: 'Server'},
+    textContent: 'Server: ' + nodeName
+  });
+  insertElement(topbannerStats, serverDiv);
+}
+
+function doOnlinePlayers(topbannerStats, miniboxList) {
+  var playersOnline = miniboxList.children[3].innerHTML;
+  var bannerPlayers = topbannerStats.children[0];
+  bannerPlayers.innerHTML = 'Online: ' + playersOnline;
+}
+
+function statBoxesExist(topbannerStats, gameStats) {
+  var miniboxList = gameStats.nextElementSibling.children[0];
+  if (miniboxList.children.length === 8) {
+    doServerNode(topbannerStats, miniboxList);
+    doOnlinePlayers(topbannerStats, miniboxList);
+    toggleForce(gameStats.parentNode, true);
+  }
+}
+
+function injectServerNode() {
+  var topbannerStats = getElementById('topbanner-stats');
+  var h3coll = document.querySelectorAll('#pCR h3');
+  var gameStats = Array.prototype.find.call(h3coll, function(el) {
+    return el.textContent === 'Game Stats';
+  });
+  if (topbannerStats && gameStats) {
+    statBoxesExist(topbannerStats, gameStats);
+  }
 }
 
 function getProfile(username) {
@@ -5843,10 +5897,18 @@ function addContact(contactList, type) {
   return output;
 }
 
+var noAlliesTests = [
+  function(allies, enemies) {return allies.length + enemies.length;},
+  function(allies, enemies) {
+    if (!calf.enableAllyOnlineList) {return enemies.length;}
+  },
+  function(allies) {
+    if (!calf.enableEnemyOnlineList) {return allies.length;}
+  }
+];
+
 function noAllies(allies, enemies) {
-  return allies.length + enemies.length === 0 ||
-    !calf.enableAllyOnlineList && enemies.length === 0 ||
-    !calf.enableEnemyOnlineList && allies.length === 0;
+  return noAlliesTests.every(function(e) {return e(allies, enemies) === 0;});
 }
 
 function hazAllies(allies, enemies) {
@@ -5857,7 +5919,7 @@ function hazAllies(allies, enemies) {
   if (calf.enableEnemyOnlineList) {
     output += addContact(enemies, false);
   }
-  var fshContactList = document.getElementById('fshContactList');
+  var fshContactList = getElementById('fshContactList');
   fshContactList.innerHTML = '';
   fshContactList.insertAdjacentHTML('beforeend', output);
 }
@@ -5889,7 +5951,7 @@ function buffPlayer(self) {
 }
 
 function selectedBuff() {
-  var buffBalls = document.getElementById('fshContactList')
+  var buffBalls = getElementById('fshContactList')
     .getElementsByClassName('enemy-buff-check-on');
   var sendstring = Array.prototype.reduce.call(buffBalls,
     function(prev, curr) {
@@ -5907,7 +5969,7 @@ var classEvt = [
   {className: 'enemy-quick-buff', handler: selectedBuff}
 ];
 
-function eventHandler$1(evt) {
+function eventHandler$2(evt) {
   var self = evt.target;
   if (self.id === 'fshResetEnemy') {
     resetList();
@@ -5935,9 +5997,9 @@ function makeDiv(data) {
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  document.getElementById('pCR')
+  getElementById('pCR')
     .insertAdjacentElement('afterbegin', fshAllyEnemy);
-  fshAllyEnemy.addEventListener('click', eventHandler$1);
+  fshAllyEnemy.addEventListener('click', eventHandler$2);
   injectAllyEnemyList(data);
 }
 
@@ -5965,8 +6027,7 @@ function resetBountyList() {
 
 function injectBountyList() {
   setValueJSON('bountyList', bountyList);
-  var injectHere = document
-    .getElementById('Helper:BountyListPlaceholder');
+  var injectHere = getElementById('Helper:BountyListPlaceholder');
   var displayList = createTable({cellPadding: 1, width: 125});
 
   var aRow = displayList.insertRow(0); // bountyList.rows.length
@@ -6008,7 +6069,7 @@ function injectBountyList() {
   var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-  document.getElementById('Helper:resetBountyList')
+  getElementById('Helper:resetBountyList')
     .addEventListener('click', resetBountyList, true);
 }
 
@@ -6031,8 +6092,7 @@ function acceptOrAttack(bounty) { // Legacy
 
 function injectWantedList() { // Legacy
   setValueJSON('wantedList', wantedList);
-  var injectHere = document
-    .getElementById('Helper:WantedListPlaceholder');
+  var injectHere = getElementById('Helper:WantedListPlaceholder');
   var displayList = createTable({cellPadding: 3, width: 125});
 
   var aRow = displayList.insertRow(0);
@@ -6073,7 +6133,7 @@ function injectWantedList() { // Legacy
   var breaker = createBr();
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-  document.getElementById('Helper:resetWantedList')
+  getElementById('Helper:resetWantedList')
     .addEventListener('click', resetWantedList);
 }
 
@@ -6175,13 +6235,17 @@ function getActiveBountyList(doc) { // Legacy
   activeBountyListPosted = true;
 }
 
-function parseBountyPageForWorld(details) {
-  var doc = createDocument(details);
-  getWantedBountyList(doc);
+function hazActiveBountyList(doc) {
   if (calf.enableActiveBountyList &&
       !activeBountyListPosted) {
     getActiveBountyList(doc);
   }
+}
+
+function parseBountyPageForWorld(details) {
+  var doc = createDocument(details);
+  getWantedBountyList(doc);
+  hazActiveBountyList(doc);
   if (curPage < maxPage) {
     xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
       parseBountyPageForWorld);
@@ -6190,11 +6254,18 @@ function parseBountyPageForWorld(details) {
   }
 }
 
-function testCacheInvalid() { // Legacy
+function testBountyList() {
   return bountyList &&
-    now - bountyList.lastUpdate.getTime() > bountyListRefreshTime ||
-    wantedList &&
+    now - bountyList.lastUpdate.getTime() > bountyListRefreshTime;
+}
+
+function testWantedList() {
+  return wantedList &&
     now - wantedList.lastUpdate.getTime() > bountyListRefreshTime;
+}
+
+function testCacheInvalid() { // Legacy
+  return testBountyList() || testWantedList();
 }
 
 function invalidateCache() { // Legacy
@@ -6256,7 +6327,7 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
 }
 
 function prepareBountyData() {
-  var pCR = document.getElementById('pCR');
+  var pCR = getElementById('pCR');
   if (calf.enableWantedList) {
     pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +
       '<span id="Helper:WantedListPlaceholder"></span></div>');
@@ -6312,18 +6383,21 @@ function injectSendGoldOnWorld() { // jQuery
   $('#HelperSendGold').click(doSendGold);
 }
 
+function updateGoldValue(data) {
+  $('#HelperSendTotal')
+    .html(getValue('currentGoldSentTotal')
+      .toString()
+      .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
+  if (parseInt(data.player.gold, 10) > getValue('goldAmount')) {
+    $('#statbar-gold').css('background-color', 'red');
+  } else {
+    $('#statbar-gold').css('background-color', 'inherit');
+  }
+}
+
 function updateSendGoldOnWorld(data) { // jQuery
   if (data.player && getValue('sendGoldonWorld')) {
-    $('#HelperSendTotal')
-      .html(getValue('currentGoldSentTotal')
-        .toString()
-        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
-    if (parseInt(data.player.gold, 10) >
-      getValue('goldAmount')) {
-      $('#statbar-gold').css('background-color', 'red');
-    } else {
-      $('#statbar-gold').css('background-color', 'inherit');
-    }
+    updateGoldValue(data);
   }
 }
 
@@ -6367,7 +6441,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
 
 function doRepair() {
   // do not use repair link for new map
-  if (!document.getElementById('worldPage')) {
+  if (!getElementById('worldPage')) {
     location.href = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
   }
 }
@@ -6404,7 +6478,9 @@ function backpack$1() {
 }
 
 function fastWearMgr() {
-  jQueryDialog(insertQuickWear);
+  if (!('dialogIsClosed' in calf) || calf.dialogIsClosed()) {
+    jQueryDialog(insertQuickWear);
+  }
 }
 
 function profile() {
@@ -6473,8 +6549,11 @@ function replaceKeyHandler() {
   document.onkeypress = keyPress;
 }
 
+// import failStub from './failStub';
+
 function superelite() {
   return callApp({cmd: 'superelite'});
+  // return failStub();
 }
 
 var oldLog;
@@ -6517,9 +6596,12 @@ function doBackgroundCheck() {
   return getSeLog();
 }
 
-function gotLog(data) {
-  if (data) {oldLog = data;}
-  var lastCheckSecs = nowSecs - fallback(oldLog.lastUpdate, 0);
+function whenWasLastCheck() {
+  return nowSecs - (oldLog && oldLog.lastUpdate || 0);
+}
+
+function setupBackgroundCheck() {
+  var lastCheckSecs = whenWasLastCheck();
   if (lastCheckSecs >= 600) {
     doBackgroundCheck();
   } else {
@@ -6528,15 +6610,23 @@ function gotLog(data) {
   }
 }
 
+function gotLog(data) {
+  if (data) {oldLog = data;}
+}
+
+function getFshSeLog() {
+  return getForage('fsh_seLog').done(gotLog);
+}
+
 function seLog() {
-  if (getValue('enableSeTracker')) {
-    getForage('fsh_seLog').done(gotLog);
+  if (calf.enableSeTracker && calf.cmd !== 'superelite') {
+    getFshSeLog().done(setupBackgroundCheck);
   }
 }
 
 function statbarWrapper(href, id) {
   var myWrapper = createAnchor({href: href});
-  var character = document.getElementById(id);
+  var character = getElementById(id);
   var statWrapper = character.parentNode;
   myWrapper.appendChild(character);
   statWrapper.insertBefore(myWrapper, statWrapper.firstChild);
@@ -6635,14 +6725,14 @@ function doHideBtn(context, selector) {
 }
 
 function addGuildInfoWidgets() {
-  var guildMembrList = document.getElementById('minibox-guild-members-list');
+  var guildMembrList = getElementById('minibox-guild-members-list');
   if (!guildMembrList) {return;} // list exists
   // hide guild info links
   doHideBtn(guildMembrList, 'guildSelector');
   if (calf.hideBuffSelected) {
     hideNodeList(
       guildMembrList.getElementsByClassName('guild-buff-check-on'));
-    document.getElementById('guild-quick-buff').classList.add('fshHide');
+    getElementById('guild-quick-buff').classList.add('fshHide');
   }
   // add coloring for offline time
   Array.prototype.forEach.call(
@@ -6658,13 +6748,13 @@ function addGuildInfoWidgets() {
 }
 
 function addOnlineAlliesWidgets() {
-  var onlineAlliesList = document.getElementById('minibox-allies-list');
+  var onlineAlliesList = getElementById('minibox-allies-list');
   if (!onlineAlliesList) {return;}
   doHideBtn(onlineAlliesList, 'allySelector');
   if (calf.hideBuffSelected) {
     hideNodeList(
       onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
-    document.getElementById('ally-quick-buff').classList.add('fshHide');
+    getElementById('ally-quick-buff').classList.add('fshHide');
   }
   // add coloring for offline time
   Array.prototype.forEach.call(
@@ -6699,7 +6789,7 @@ var goldUpgradeMsg =
   'grade stamina with gold</p></a></li>';
 
 function havePrayed() {
-  document.getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
+  getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
   setValue('needToPray', false);
   setValue('lastTempleCheck', new Date()
     .setUTCHours(23, 59, 59, 999) + 1); // Midnight
@@ -6708,7 +6798,7 @@ function havePrayed() {
 function prayToGods(e) { // jQuery
   var myGod = e.target.getAttribute('praytype');
   if (!myGod) {return;}
-  document.getElementById('helperPrayToGods').removeEventListener('click',
+  getElementById('helperPrayToGods').removeEventListener('click',
     prayToGods);
   retryAjax('index.php?cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
@@ -6716,15 +6806,15 @@ function prayToGods(e) { // jQuery
 }
 
 function displayDisconnectedFromGodsMessage() {
-  document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+  getElementById('notifications').insertAdjacentHTML('afterbegin',
     godsNotification);
-  document.getElementById('helperPrayToGods').addEventListener('click',
+  getElementById('helperPrayToGods').addEventListener('click',
     prayToGods);
 }
 
 function displayUpgradeMsg() {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
-    document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+    getElementById('notifications').insertAdjacentHTML('afterbegin',
       goldUpgradeMsg);
   }
 }
@@ -6801,7 +6891,7 @@ function findDoc(data) {
 function parseGoldUpgrades(data) {
   if (!calf.enableUpgradeAlert) {return;}
   var doc = findDoc(data);
-  var limit = doc.getElementById('pCC').getElementsByTagName('TABLE')[0]
+  var limit = getElementById('pCC', doc).getElementsByTagName('TABLE')[0]
     .rows[3].cells[2];
   var checkDoneUpgrade = limit.textContent.split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
@@ -6814,12 +6904,7 @@ function parseGoldUpgrades(data) {
   }
 }
 
-function notUpgradesPage() {
-  var needToDoUpgrade = getValue('needToDoUpgrade');
-  if (needToDoUpgrade) {
-    displayUpgradeMsg();
-    return;
-  }
+function checkLastUpgrade() {
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
   retryAjax('index.php?cmd=points&type=1').done(function(data) {
@@ -6827,12 +6912,20 @@ function notUpgradesPage() {
   });
 }
 
+function notUpgradesPage() {
+  if (getValue('needToDoUpgrade')) {
+    displayUpgradeMsg();
+    return;
+  }
+  checkLastUpgrade();
+}
+
 function injectUpgradeAlert() { // jQuery
   if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
 }
 
 function injectJoinAllLink() {
-  var nodeList = document.getElementById('pCL').getElementsByTagName('li');
+  var nodeList = getElementById('pCL').getElementsByTagName('li');
   Array.prototype.forEach.call(nodeList, findNewGroup);
 }
 
@@ -6861,7 +6954,7 @@ function injectStaminaCalculator() {
   var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
   if (!nextGain) {return;}
   var staminaMouseover =
-    document.getElementById('statbar-stamina-tooltip-stamina');
+    getElementById('statbar-stamina-tooltip-stamina');
   var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
     staminaMouseover.getElementsByClassName('stat-name')[0]
       .nextElementSibling.textContent
@@ -6886,7 +6979,7 @@ function injectStaminaCalculator() {
 function injectLevelupCalculator() {
   var nextGain = document.getElementsByClassName('stat-xp-nextGain');
   if (!nextGain) {return;}
-  document.getElementById('statbar-level-tooltip-general')
+  getElementById('statbar-level-tooltip-general')
     .insertAdjacentHTML('beforeend',
       '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
       timeBox(
@@ -6920,6 +7013,7 @@ function getEnvVars() {
   calf.enableGuildInfoWidgets = getValue('enableGuildInfoWidgets');
   calf.enableOnlineAlliesWidgets =
     getValue('enableOnlineAlliesWidgets');
+  calf.enableSeTracker = getValue('enableSeTracker');
   calf.hideGuildInfoTrade = getValue('hideGuildInfoTrade');
   calf.hideGuildInfoSecureTrade = getValue('hideGuildInfoSecureTrade');
   calf.hideGuildInfoBuff = getValue('hideGuildInfoBuff');
@@ -7001,14 +7095,14 @@ function navMenu() { // jQuery
 }
 
 function moveRHSBoxUpOnRHS(title) {
-  document.getElementById('pCR').insertAdjacentElement('afterbegin',
-    document.getElementById(title));
+  getElementById('pCR').insertAdjacentElement('afterbegin',
+    getElementById(title));
 }
 
 function moveRHSBoxToLHS(title) {
-  var boxDiv = document.getElementById(title);
+  var boxDiv = getElementById(title);
   boxDiv.classList.add('pCR');
-  document.getElementById('pCL').appendChild(boxDiv);
+  getElementById('pCL').appendChild(boxDiv);
 }
 
 function doMoveGuildList() {
@@ -7065,6 +7159,8 @@ function notHuntMode() {
 
   add(3, injectQuickMsgDialogJQ);
 
+  add(3, injectServerNode);
+
   add(4, guildActivity);
   add(4, seLog);
 }
@@ -7082,36 +7178,10 @@ function prepareEnv() {
 }
 
 function lookForHcsData() {
-  var hcsData = document.getElementById('html');
+  var hcsData = getElementById('html');
   if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
   }
-}
-
-function updateHistoryCharacters() { // Legacy
-  var textArea = findNode('//textarea[@id="textInputBox"]');
-  var previewArea = findNode('//span[@findme="biopreview"]');
-  var bioPreviewHTML = convertTextToHtml(textArea.value);
-  previewArea.innerHTML = bioPreviewHTML;
-}
-
-function addHistoryWidgets() { // Legacy
-  var textArea = findNode('//textarea[@name="history"]');
-  if (!textArea) {return;}
-  textArea.value = textArea.value.replace(/<br \/>/ig, '');
-  var textAreaDiv = textArea.parentNode;
-  var bioPreviewHTML = convertTextToHtml(textArea.value);
-  var newDiv = createDiv({
-    innerHTML: '<table align="center" width="325" border="1"><tbody>' +
-    '<tr><td style="text-align:center;color:#7D2252;' +
-    'background-color:#CD9E4B">Preview</td></tr>' +
-    '<tr><td align="left" width="325"><span style="font-size:small;" ' +
-    'findme="biopreview">' + bioPreviewHTML +
-    '</span></td></tr></tbody></table>'
-  });
-  textAreaDiv.appendChild(newDiv);
-  document.getElementById('textInputBox').addEventListener('keyup',
-    updateHistoryCharacters);
 }
 
 function allowBack() {
@@ -7215,7 +7285,7 @@ var inv;
 var target;
 
 function selectPerf() {
-  var items = document.getElementById(target + '-items')
+  var items = getElementById(target + '-items')
     .getElementsByClassName('selectable-item');
   if (items.length === 0) {return;}
   Array.prototype.forEach.call(items, function(e) {
@@ -7288,15 +7358,19 @@ function breakItems() { // jQuery.min
   });
 }
 
+function validBreakEvent(evt) {
+  evt.stopPropagation();
+  if (selectedList.length === 0) {
+    showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
+    return;
+  }
+  breakItems();
+}
+
 function breakEvt(evt) {
   if (disableBreakdownPrompts &&
       evt.target.id === 'breakdown-selected-items') {
-    evt.stopPropagation();
-    if (selectedList.length === 0) {
-      showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
-      return;
-    }
-    breakItems();
+    validBreakEvent(evt);
   }
 }
 
@@ -7319,15 +7393,15 @@ function togglePref$1() {
 function composingBreakdown() {
   perfFilter('composing');
   disableBreakdownPrompts = getValue('disableBreakdownPrompts');
-  document.getElementById('breakdown-selected-items').parentNode
+  getElementById('breakdown-selected-items').parentNode
     .addEventListener('click', breakEvt, true);
-  document.getElementById('composing-items')
+  getElementById('composing-items')
     .addEventListener('click', itemClick);
   pCC.insertAdjacentHTML('beforeend',
     '<table class="fshTblCenter"><tbody>' +
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
-  document.getElementById('disableBreakdownPrompts')
+  getElementById('disableBreakdownPrompts')
     .addEventListener('click', togglePref$1);
 }
 
@@ -7373,13 +7447,22 @@ function drawingNewItemTable() {
   }
 }
 
+function testFolder(item) {
+  return folderId !== '0' && item[2] !== folderId;
+}
+
+function testCraft(item) {
+  return perfBox.checked && item[3] !== 'Perfect';
+}
+
+function afn(item) {
+  var myDiv = item[0].parentNode.parentNode;
+  toggleForce(myDiv, testFolder(item) || testCraft(item));
+}
+
 function reDrawGrid() {
   drawingNewItemTable();
-  itemsAry.forEach(function(item) {
-    var myDiv = item[0].parentNode.parentNode;
-    toggleForce(myDiv, folderId !== '0' && item[2] !== folderId ||
-      perfBox.checked && item[3] !== 'Perfect');
-  });
+  itemsAry.forEach(afn);
 }
 
 function doHideFolders(evt) {
@@ -7461,6 +7544,156 @@ function globalQuest() {
       '&search_show_first=1&search_active=1&search_username=' +
       aCell.textContent + '">' + aCell.textContent + '</a>';
   }
+}
+
+var warehouse = [];
+var prefValue;
+var headerIndex;
+
+function collapseArt(article) {
+  article.rows.forEach(function(el) {
+    el.row.classList.add('fshHide');
+  });
+  article.open = false;
+}
+
+function collapseAll() {
+  warehouse.forEach(function(article) {
+    if (article.open) {collapseArt(article);}
+  });
+}
+
+function expandArt(article) {
+  article.rows.forEach(function(el) {
+    el.row.classList.remove('fshHide');
+  });
+  article.open = true;
+}
+
+function expandAll() {
+  warehouse.forEach(function(article) {
+    if (!article.open) {expandArt(article);}
+  });
+}
+
+function isHeader(el) {
+  if (el.rowIndex % headerIndex === 0) {return el;}
+}
+
+function closestTr(el) {
+  if (el.tagName === 'TR') {
+    return isHeader(el);
+  }
+  if (el.tagName === 'TABLE') {return;}
+  return closestTr(el.parentNode);
+}
+
+function evtEnabled(evt) {
+  var myRow = closestTr(evt.target);
+  if (!myRow) {return;}
+  var articleNo = myRow.rowIndex / headerIndex;
+  var article = warehouse[articleNo];
+  if (article.open === false) {
+    collapseAll();
+    expandArt(article);
+  } else {
+    collapseArt(article);
+  }
+}
+
+function evtHdl(evt) {
+  if (prefValue) {evtEnabled(evt);}
+}
+
+function makeHeaderClickable(row) {
+  if (prefValue) {row.classList.add('fshPoint');}
+}
+
+function collapseDuringAnalysis(row, thisArticle) {
+  if (prefValue) {
+    row.classList.add('fshHide');
+    thisArticle.open = false;
+  } else {
+    thisArticle.open = true;
+  }
+}
+
+function hasExtraFn(extraFn, row) {
+  if (typeof extraFn === 'function') {extraFn(row);}
+}
+
+function testRowType(row, rowType, thisArticle, articleTest, extraFn) {
+  if (rowType === 0) {
+    thisArticle.header = row;
+    makeHeaderClickable(row);
+    hasExtraFn(extraFn, row);
+  }
+  if (articleTest(rowType)) {
+    thisArticle.rows[rowType] =
+      fallback(thisArticle[rowType], {});
+    thisArticle.rows[rowType].row = row;
+    collapseDuringAnalysis(row, thisArticle);
+  }
+}
+
+function doTagging(articleTest, extraFn, row) {
+  var rowType = row.rowIndex % headerIndex;
+  var articleNo = (row.rowIndex - rowType) / headerIndex;
+  warehouse[articleNo] = fallback(warehouse[articleNo], {});
+  var thisArticle = warehouse[articleNo];
+  thisArticle.rows = thisArticle.rows || [];
+  testRowType(row, rowType, thisArticle, articleTest, extraFn);
+}
+
+function toggleHeaderClass() {
+  warehouse.forEach(function(article) {
+    article.header.classList.toggle('fshPoint');
+  });
+}
+
+function togglePref$2(prefName) {
+  prefValue = !prefValue;
+  setValue(prefName, prefValue);
+  if (prefValue) {collapseAll();} else {expandAll();}
+  toggleHeaderClass();
+}
+
+function setupPref$1(prefName) {
+  var prefEl = getElementById(prefName);
+  prefValue = prefEl.checked;
+  getElementById(prefName)
+    .addEventListener('change', togglePref$2.bind(null, prefName));
+}
+
+function collapse(param) {
+  headerIndex = param.headInd;
+  setupPref$1(param.prefName);
+  Array.prototype.forEach.call(param.theTable.rows,
+    doTagging.bind(null, param.articleTest, param.extraFn));
+  param.theTable.addEventListener('click', evtHdl);
+}
+
+function testArticle(rowType) {return rowType === 1;}
+
+function setupPref(prefName, injector) {
+  var flDiv = createDiv({
+    className: 'fshHallPref',
+    innerHTML: simpleCheckboxHtml(prefName)
+  });
+  injector.classList.add('fshRelative');
+  injector.appendChild(flDiv);
+}
+
+function guildHall() {
+  var prefName = 'collapseHallPosts';
+  var theTable = pCC.lastElementChild;
+  setupPref(prefName, theTable.previousElementSibling.previousElementSibling);
+  collapse({
+    prefName: prefName,
+    theTable: theTable,
+    headInd: 3,
+    articleTest: testArticle
+  });
 }
 
 function closestTable(el) {
@@ -7550,10 +7783,19 @@ function getGuildMembers(guildId) {
   });
 }
 
+var testList = [
+  function(guildId, membrList) {return typeof membrList === 'object';},
+  function(guildId, membrList) {return typeof membrList[guildId] === 'object';},
+  function(guildId, membrList) {
+    return typeof membrList[guildId].lastUpdate === 'number';
+  },
+  function(guildId, membrList) {
+    return membrList[guildId].lastUpdate > now - 300000;
+  }
+];
+
 function getMembrListFromForage(guildId, membrList) {
-  if (membrList && membrList[guildId] &&
-      membrList[guildId].lastUpdate &&
-      membrList[guildId].lastUpdate > now - 300000) {
+  if (testList.every(function(e) {return e(guildId, membrList);})) {
     return membrList;
   }
   return getGuildMembers(guildId).done(addMembrListToForage);
@@ -7672,9 +7914,10 @@ function returnAdvisorPage(e, response) {
 
   time('guildAdvisor.returnAdvisorPage' + e);
 
-  list.lastElementChild.insertAdjacentHTML('beforeend', ' day ' + e + ',');
+  list.lastElementChild.lastElementChild
+    .insertAdjacentHTML('beforeend', ' day ' + e + ',');
   var doc = createDocument(response);
-  var table = doc.getElementById('pCC').firstElementChild
+  var table = getElementById('pCC', doc).firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
   var tr = table.rows;
   Array.prototype.forEach.call(tr, function(el) {
@@ -7781,10 +8024,10 @@ function injectAdvisorWeekly() { // jQuery
   list = pCC.firstElementChild.firstElementChild
     .lastElementChild.firstElementChild.firstElementChild;
   if (!list) {return;}
-  list.innerHTML = '<span class="fshCurveBtn" style="background-image: ' +
-    'url(\'' + imageServer +
-    '/world/actionLoadingSpinner.gif\');"></span>' +
-    '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>';
+  list.innerHTML = '<span class="fshCurveContainer fshFlex">' +
+    '<span class="fshCurveEle fshCurveLbl fshOldSpinner"></span>' +
+    '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>' +
+    '</span>';
 
   $.when(
     getMembrList(false)
@@ -7817,16 +8060,22 @@ function injectAdvisor() {
   }
 }
 
+function isObject(e) {return typeof e === 'object';}
+
 var tabs;
 var theTables;
 var opts;
 var oldIds;
 
+function levelsAreNotNaN(minLvl, maxLvl) {
+  return !isNaN(minLvl) && !isNaN(maxLvl);
+}
+
 function changeLvls() { // jQuery
   var minLvl = parseInt($('#fshMinLvl').val(), 10);
   var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
-  if (!isNaN(minLvl) && !isNaN(maxLvl)) {
-    opts = opts || {};
+  if (levelsAreNotNaN(minLvl, maxLvl)) {
+    opts = fallback(opts, {});
     opts.minLvl = minLvl;
     opts.maxLvl = maxLvl;
     setForage('fsh_arena', opts);
@@ -7851,6 +8100,10 @@ function hideMoves(evt) { // jQuery
   $('.moveMax').toggle(!evt.target.checked);
 }
 
+function testIsNotDesc(test) {
+  return test && test[1] === '_desc';
+}
+
 function sortHandler(evt) { // jQuery
   var self = $(evt.target).closest('td');
   var table = self.closest('table').DataTable();
@@ -7858,7 +8111,7 @@ function sortHandler(evt) { // jQuery
   var classes = self.attr('class');
   var test = /sorting([^\s]+)/.exec(classes);
   var sortOrder = 'desc';
-  if (test && test[1] === '_desc') {sortOrder = 'asc';}
+  if (testIsNotDesc(test)) {sortOrder = 'asc';}
   if (myCol !== 3) {
     table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {
@@ -7949,13 +8202,17 @@ function hazMaxMoves(matches, row) { // jQuery
   }
 }
 
+function optsHazMoves(cell, row) { // jQuery
+  var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+  if (matches) {
+    hazMaxMoves(matches, row);
+    cell.attr('data-order', matches[1]);
+  }
+}
+
 function maxMoves(cell, row) { // jQuery
   if (opts && opts.moves) {
-    var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
-    if (matches) {
-      hazMaxMoves(matches, row);
-      cell.attr('data-order', matches[1]);
-    }
+    optsHazMoves(cell, row);
   }
 }
 
@@ -7964,21 +8221,26 @@ function reward(cell) { // jQuery
   cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
 }
 
-function orderData(i, e) { // jQuery
+function colourNewRow(row, id) { // jQuery
+  if (oldIds && !oldIds[id]) {
+    row.css('background-color', '#F5F298');
+    row.find('tr').css('background-color', '#F5F298');
+  }
+}
 
+function checkTournamentId(row, cell) { // jQuery
+  var matches = /#\s(\d+)/.exec(cell.text());
+  if ([matches, opts, opts.id].every(isObject)) {
+    opts.id[matches[1]] = matches[1];
+    colourNewRow(row, matches[1]);
+  }
+}
+
+function orderData(i, e) { // jQuery
   var row = $(e);
   var theCells = row.children();
-
   var cell = theCells.eq(0);
-  var matches = /#\s(\d+)/.exec(cell.text());
-  if (matches && opts && opts.id) {
-    opts.id[matches[1]] = matches[1];
-    if (oldIds && !oldIds[matches[1]]) {
-      row.css('background-color', '#F5F298');
-      row.find('tr').css('background-color', '#F5F298');
-    }
-  }
-
+  checkTournamentId(row, cell);
   players(theCells.eq(1));
   cell = theCells.eq(2);
   cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
@@ -7987,7 +8249,6 @@ function orderData(i, e) { // jQuery
   boolData(theCells.eq(6));
   maxMoves(theCells.eq(8), row);
   reward(theCells.eq(8));
-
 }
 
 function redoHead(i, e) { // jQuery
@@ -8054,7 +8315,7 @@ var bazaarItem =
   'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
 
 function testBuyAmount() {
-  return testQuant(document.getElementById('buy_amount').value);
+  return testQuant(getElementById('buy_amount').value);
 }
 
 function select(evt) {
@@ -8062,12 +8323,12 @@ function select(evt) {
   if (!target.classList.contains('bazaarButton')) {return;}
   var theValue = testBuyAmount();
   if (!theValue) {return;}
-  document.getElementById('quantity').textContent = theValue;
+  getElementById('quantity').textContent = theValue;
   ItemId = target.getAttribute('itemid');
-  document.getElementById('fshBazaarWarning').removeAttribute('class');
+  getElementById('fshBazaarWarning').removeAttribute('class');
   var dupNode = target.cloneNode(false);
   dupNode.className = 'bazaarSelected tip-dynamic';
-  var selected = document.getElementById('selectedItem');
+  var selected = getElementById('selectedItem');
   selected.innerHTML = '';
   selected.appendChild(dupNode);
 }
@@ -8075,21 +8336,21 @@ function select(evt) {
 function quantity() {
   var theValue = testBuyAmount();
   if (theValue) {
-    document.getElementById('quantity').textContent = theValue;
+    getElementById('quantity').textContent = theValue;
   }
 }
 
 function done(json) {
   if (json.success) {
-    document.getElementById('buy_result').insertAdjacentHTML('beforeend',
+    getElementById('buy_result').insertAdjacentHTML('beforeend',
       '<br>You purchased the item!');
   }
 }
 
-function buy() { // jQuery
+function buy() { // jQuery.min
   if (!ItemId) {return;}
-  var buyAmount = document.getElementById('quantity').textContent;
-  document.getElementById('buy_result').textContent =
+  var buyAmount = getElementById('quantity').textContent;
+  getElementById('buy_result').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
     buyitem(ItemId).done(done);
@@ -8111,9 +8372,9 @@ function injectBazaar() { // TODO stop using getElementById
   });
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);
-  document.getElementById('fshBazaar').addEventListener('click', select);
-  document.getElementById('buy_amount').addEventListener('input', quantity);
-  document.getElementById('fshBuy').addEventListener('click', buy);
+  getElementById('fshBazaar').addEventListener('click', select);
+  getElementById('buy_amount').addEventListener('input', quantity);
+  getElementById('fshBuy').addEventListener('click', buy);
 }
 
 var buffCost = {count: 0, buffs: {}};
@@ -8234,7 +8495,7 @@ function hazBuffs() { // Legacy
   var totalText = formatCost(total);
 
   html += '</table><b>Total: ' + totalText + '</b>';
-  document.getElementById('buffCost').innerHTML = '<br/><span ' +
+  getElementById('buffCost').innerHTML = '<br/><span ' +
     'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
     totalText + '</b></span>';
   buffCost.buffCostTotalText = totalText;
@@ -8244,7 +8505,7 @@ function updateBuffCost() { // Legacy
   if (buffCost.count > 0) {
     hazBuffs();
   } else {
-    document.getElementById('buffCost').innerHTML = '';
+    getElementById('buffCost').innerHTML = '';
     buffCost.buffCostTotalText = '';
   }
 }
@@ -8259,12 +8520,16 @@ function priceUnit(price) {
   return 'stam';
 }
 
+function thisLine(node) {
+  return node && node.nodeName.toLowerCase() !== 'br';
+}
+
 function priceBeforeName(buffNameNode, price) {
   if (!price) { // some players have prices BEFORE the buff names
     var newtext;
     var text = '';
     var node = buffNameNode;
-    while (node && node.nodeName.toLowerCase() !== 'br') {
+    while (thisLine(node)) {
       newtext = node.textContent;
       node = node.previousSibling;
       text = newtext + text;
@@ -8281,7 +8546,7 @@ function getBuffCost(buffNameNode) {
   var text = '';
   // get the whole line from the buff name towards the end (even after
   // the ',', in case of 'AL, Lib, Mer: 10k each'
-  while (node && node.nodeName.toLowerCase() !== 'br') {
+  while (thisLine(node)) {
     newtext = node.textContent;
     node = node.nextSibling;
     text += newtext;
@@ -8330,21 +8595,29 @@ function getBuffNameNode(e) {
   return buffNameNode;
 }
 
+function isBuffLink(buffNameNode) {
+  return buffNameNode.classList &&
+    buffNameNode.classList.contains('buffLink');
+}
+
 function bioEvtHdl(e) {
   var buffNameNode = getBuffNameNode(e);
-  if (buffNameNode.classList &&
-      buffNameNode.classList.contains('buffLink')) {
+  if (isBuffLink(buffNameNode)) {
     toggleBuffsToBuy(e);
   } else if (e.target.id === 'fshSendBuffMsg') {
     getBuffsToBuy(e);
   }
 }
 
+function isNaN$1(value) {
+  return Number.isNaN(value);
+}
+
 function renderBio(_bioContents) {
   var bioContents = _bioContents.replace(/\{b\}/g, '`~')
     .replace(/\{\/b\}/g, '~`');
   var buffs = bioContents.match(/`~([^~]|~(?!`))*~`/g);
-  if (!buffs) {return;}
+  if (!buffs) {return _bioContents;}
   buffs.forEach(function(buff, i) {
     var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
     var cbString = '<span id="fshBuff' + i + '" class="buffLink fshBlue">' +
@@ -8360,51 +8633,79 @@ function renderBio(_bioContents) {
 }
 
 var bioEditLines;
+var textArea$1;
+var previewArea;
+var theBox;
+
+function convertTextToHtml(inputText) {
+  var ret = inputText
+    .replace(/</g, '&lt')
+    .replace(/>/g, '&gt')
+    .replace(/\n/g, '<br>')
+    .replace(/\[(\/?)([biu])\]/g, '<$1$2>')
+    .replace(/\\\\/g, '&#92')
+    .replace(/\\/g, '');
+  if (calf.cmd === 'guild') {
+    ret = ret
+      .replace(/\[(\/?)block\]/g, '<$1blockquote>')
+      .replace(/\[list\]/g, '<ul class="list">')
+      .replace(/\[\/list\]/g, '</ul>')
+      .replace(/\[\*\](.*?)<br>/g, '<li>$1</li>');
+  }
+  return ret;
+}
 
 function bioPreview() {
-  var textArea = document.getElementById('textInputBox');
-  var bioPreviewHTML = convertTextToHtml(textArea.value);
-  textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
-    '<table align="center" width="325" border="1">' +
-    '<tbody><tr><td style="text-align:center;color:#7D2252;' +
-    'background-color:#CD9E4B">Preview</td></tr><tr>' +
-    '<td align="left" width="325"><span id="biopreview">' +
-    bioPreviewHTML + '</span></td></tr></tbody></table></div>');
+  var widthClass = 'fshBioProfile';
+  if (calf.cmd === 'guild') {widthClass = 'fshBioGuild';}
+  var previewContainer = createDiv({
+    className:
+      'fshBioContainer ' + widthClass
+  });
+  var previewHeader = createDiv({
+    className: 'fshBioHeader fshBioInner',
+    innerHTML: 'Preview'
+  });
+  previewContainer.appendChild(previewHeader);
+  previewArea = createDiv({className: 'fshBioPreview fshBioInner'});
+  previewContainer.appendChild(previewArea);
+  textArea$1.parentNode.appendChild(previewContainer);
 }
 
 function bioWords() {
-  // Add description text for the new tags
-  pCC.insertAdjacentHTML('beforeend', '<div>' +
-    '`~This will allow FSH Script users to ' +
-    'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
-    'determine where to put the "Ask For Buffs" button<br><br>' +
-    '&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same ' +
-    'key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br>' +
-    '&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special ' +
-    'characters (non-alphanumeric).<br>' +
-    '&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff ' +
-    'pack names in them to make buffing even easier!</div>');
+  if (calf.cmd === 'profile') {
+    // Add description text for the new tags
+    pCC.insertAdjacentHTML('beforeend', '<div>' +
+      '`~This will allow FSH Script users to select buffs from your bio~`<br>' +
+      'You can use the [cmd] tag as well to determine where to put the "Ask ' +
+      'For Buffs" button<br><br><blockquote><ul class="list">' +
+      '<li>Note 1: The ` and ~ characters are on the same key on US QWERTY ' +
+      'keyboards. ` is <b>NOT</b> an apostrophe.</li>' +
+      '<li>Note 2: Inner text will not contain special characters ' +
+      '(non-alphanumeric).</li>' +
+      '<li>P.S. Be creative with these! Wrap your buff pack names in ' +
+      'them to make buffing even easier!</li>' +
+      '</ul></blockquote></div>');
+  }
 }
 
-function testHeightValid(boxVal) {
-  return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
+function badHeight(boxVal) {
+  return isNaN$1(boxVal) || boxVal < '1' || boxVal > '99';
 }
 
 function changeHeight() {
-  var theBox = document.getElementById('fshLinesToShow');
   var boxVal = parseInt(theBox.value, 10);
-  if (testHeightValid(boxVal)) {return;}
+  if (badHeight(boxVal)) {return;}
   bioEditLines = boxVal;
   setValue('bioEditLines', boxVal);
-  document.getElementById('textInputBox').rows = bioEditLines;
+  textArea$1.rows = bioEditLines;
 }
 
 function bioHeight() {
-  var bioEditLinesDiv = createDiv({
-    innerHTML: ' Display <input id="fshLinesToShow"' +
-      ' type="number" min="1" max="99" value="' +
-      bioEditLines + '"/> Lines '
-  });
+  var bioEditLinesDiv = createDiv({innerHTML: '<br>Display '});
+  theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines});
+  bioEditLinesDiv.appendChild(theBox);
+  bioEditLinesDiv.insertAdjacentText('beforeend', ' Lines ');
   var saveLines = createInput({
     className: 'custombutton',
     value: 'Update Rows To Show',
@@ -8416,25 +8717,22 @@ function bioHeight() {
 }
 
 function updateBioCharacters() {
-  var textArea = document.getElementById('textInputBox');
-  var previewArea = document.getElementById('biopreview');
-  var bioContents = convertTextToHtml(textArea.value);
+  var bioContents = convertTextToHtml(textArea$1.value);
   bioContents = renderBio(bioContents);
-  if (bioContents) {
-    previewArea.innerHTML = bioContents;
-  }
+  previewArea.innerHTML = bioContents;
 }
 
 function injectBioWidgets() {
   bioEditLines = getValue('bioEditLines');
-  var textArea = document.getElementById('textInputBox');
+  textArea$1 = getElementById('textInputBox');
   bioPreview();
   bioWords();
   bioHeight();
-  textArea.rows = bioEditLines;
-
-  textArea.parentNode.addEventListener('click', bioEvtHdl);
-  textArea.addEventListener('keyup', updateBioCharacters);
+  textArea$1.rows = bioEditLines;
+  if (calf.cmd === 'profile') {
+    textArea$1.parentNode.addEventListener('click', bioEvtHdl);
+  }
+  textArea$1.addEventListener('keyup', updateBioCharacters);
   // Force the preview area to render
   updateBioCharacters();
 }
@@ -8445,7 +8743,7 @@ function alpha$1(a, b) {
   return 0;
 }
 
-function formatDateTime(aDate) {
+function formatLocalDateTime(aDate) {
   if (Object.prototype.toString.call(aDate) === '[object Date]' &&
       !isNaN(aDate.getTime())) {
     var yyyy = aDate.getFullYear().toString();
@@ -8477,29 +8775,35 @@ function toText(val) {
   return val.toLocaleString();
 }
 
+function memberFilter(memberKey) {
+  return selMember && selMember !== '- All -' && selMember !== memberKey;
+}
+
+function aMembersActivityRows(memberKey) {
+  return function(inside, activity) {
+    return inside + '<tr>' +
+      '<td>' +
+      formatLocalDateTime(new Date(activity[utc] * 1000)) +
+      '</td>' +
+      '<td>' + memberKey + '</td>' +
+      '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[max]) + '</td>' +
+      '<td class="fshRight">' +
+        Math.floor(activity[cur] / activity[max] * 100) +
+      '</td>' +
+      '<td class="fshRight">' + activity[act] + '</td>' +
+      '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
+      '</tr>';
+  };
+}
+
 function memberRows() {
   return Object.keys(myMembers).reduce(function(outside, memberKey) {
-    if (selMember &&
-        selMember !== '- All -' &&
-        selMember !== memberKey) {return outside;}
-    return outside + myMembers[memberKey].reduce(
-      function(inside, activity) {
-        return inside + '<tr>' +
-          '<td>' +
-          formatDateTime(new Date(activity[utc] * 1000)) +
-          '</td>' +
-          '<td>' + memberKey + '</td>' +
-          '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
-          '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
-          '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
-          '<td class="fshRight">' + toText(activity[max]) + '</td>' +
-          '<td class="fshRight">' +
-            Math.floor(activity[cur] / activity[max] * 100) +
-          '</td>' +
-          '<td class="fshRight">' + activity[act] + '</td>' +
-          '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
-          '</tr>';
-      }, '');
+    if (memberFilter(memberKey)) {return outside;}
+    return outside +
+      myMembers[memberKey].reduce(aMembersActivityRows(memberKey), '');
   }, '');
 }
 
@@ -8619,6 +8923,24 @@ var tracker;
 var trDialog;
 var acttab2;
 
+function isClosed() {
+  return !tracker.checked;
+}
+
+function isOpen() {
+  return tracker.checked;
+}
+
+function closeDialog() {
+  tracker.checked = false;
+}
+
+function keydownHandler(evt) {
+  if (isOpen() && evt.code === 'Escape') {
+    closeDialog();
+  }
+}
+
 function makeDragHandle() {
   return createUl({
     className: 'fshMove ui-tabs-nav ui-widget-header ui-corner-all ' +
@@ -8682,7 +9004,7 @@ function gotActivity$1(data) {
   }
 }
 
-function togglePref$2(evt) {
+function togglePref$3(evt) {
   if (evt.target.id === 'enableGuildActivityTracker') {
     setValue('enableGuildActivityTracker',
       !getValue('enableGuildActivityTracker'));
@@ -8692,6 +9014,7 @@ function togglePref$2(evt) {
 function openDialog() {
   getForage('fsh_guildActivity').done(gotActivity$1);
   tracker.removeEventListener('change', openDialog);
+  calf.dialogIsClosed = isClosed;
   addOverlay();
   makePopup();
 }
@@ -8705,7 +9028,7 @@ function guildTracker() {
   cellOne.appendChild(gs);
   cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
     '&nbsp;<label class="custombutton" for="tracker">Show</label>';
-  newTr.addEventListener('change', togglePref$2);
+  newTr.addEventListener('change', togglePref$3);
   oldTr.parentNode.replaceChild(newTr, oldTr);
   tracker = createInput({
     id: 'tracker',
@@ -8715,6 +9038,7 @@ function guildTracker() {
   tracker.addEventListener('change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   trDialog.appendChild(tracker);
+  document.body.addEventListener('keydown', keydownHandler);
   document.body.appendChild(trDialog);
 }
 
@@ -8788,7 +9112,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
 function conflictInfo() { // jQuery
   retryAjax('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
     gotConflictInfo(data,
-      {node: document.getElementById('statisticsControl')});
+      {node: getElementById('statisticsControl')});
   });
 }
 
@@ -8803,7 +9127,7 @@ function logoToggle() {
   if (getValue('guildLogoControl')) {
     guildLogoElement.classList.add('fshHide');
   }
-  document.getElementById('toggleGuildLogoControl')
+  getElementById('toggleGuildLogoControl')
     .addEventListener('click', toggleVisibilty);
 }
 
@@ -8819,7 +9143,7 @@ function statToggle() {
   if (getValue('statisticsControl')) {
     statisticsControlElement.classList.add('fshHide');
   }
-  document.getElementById('toggleStatisticsControl')
+  getElementById('toggleStatisticsControl')
     .addEventListener('click', toggleVisibilty);
 }
 
@@ -8834,13 +9158,13 @@ function structureToggle() {
   if (getValue('guildStructureControl')) {
     guildStructureControlElement.classList.add('fshHide');
   }
-  document.getElementById('toggleGuildStructureControl')
+  getElementById('toggleGuildStructureControl')
     .addEventListener('click', toggleVisibilty);
 }
 
 function batchBuffLinks() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit && memCount < members.length) {
+  while (moreToDo(limit, memCount, members)) {
     members[memCount].parentNode.insertAdjacentHTML('beforeend',
       ' <span class="smallLink">[b]</span>');
     memCount += 1;
@@ -8976,7 +9300,7 @@ function parseRankData(linkElement, responseText) {
 }
 
 function fetchRankData() { // jQuery
-  var calcButton = document.getElementById('getrankweightings');
+  var calcButton = getElementById('getrankweightings');
   calcButton.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
   Array.prototype.forEach.call(allItems, function(anItem) {
@@ -9003,9 +9327,7 @@ function getPxScroll(val) {
   return 22;
 }
 
-function ajaxifyRankControls(evt) { // jQuery
-  var val = evt.target.getAttribute('value');
-  if (val !== 'Up' && val !== 'Down') {return;}
+function overrideUpDown(evt, val) {
   evt.stopPropagation();
   var onclickHREF = /window.location='(.*)';/
     .exec(evt.target.getAttribute('onclick'))[1];
@@ -9021,6 +9343,11 @@ function ajaxifyRankControls(evt) { // jQuery
   window.scrollBy(0, pxScroll);
 }
 
+function ajaxifyRankControls(evt) { // jQuery
+  var val = evt.target.getAttribute('value');
+  if (val === 'Up' || val === 'Down') {overrideUpDown(evt, val);}
+}
+
 function doButtons() {
   // gather rank info button
   var weightButton = createInput({
@@ -9030,7 +9357,7 @@ function doButtons() {
     value: 'Get Rank Weightings'
   });
   weightButton.addEventListener('click', fetchRankData);
-  var theTd = document.getElementById('show-guild-founder-rank-name')
+  var theTd = getElementById('show-guild-founder-rank-name')
     .parentNode;
   theTd.insertAdjacentHTML('beforeend', '&nbsp;');
   theTd.insertAdjacentElement('beforeend', weightButton);
@@ -9055,8 +9382,7 @@ function writeMembers(el) {
 
 function paintRanks() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit &&
-      rankCount < theRows.length) {
+  while (moreToDo(limit, rankCount, theRows)) {
     var el = theRows[rankCount];
 
     writeMembers(el);
@@ -9091,6 +9417,15 @@ function injectGuildRanks() { // jQuery
   add(3, doButtons);
 }
 
+function userInvNotEquipped(row) {
+  return row.folder_id && !row.equipped;
+}
+
+function guidInvNotEquipped(row) {
+  return row.player_id && !row.equipped &&
+    row.player_id === theInv.current_player_id;
+}
+
 var locations = [
   {
     test: function(row) {return row.player_id && row.player_id === -1;},
@@ -9110,9 +9445,7 @@ var locations = [
   },
   {
     test: function(row) {
-      return row.folder_id && !row.equipped ||
-        row.player_id && !row.equipped &&
-        row.player_id === theInv.current_player_id;
+      return userInvNotEquipped(row) || guidInvNotEquipped(row);
     },
     res: function(row, act) {return act.c;}
   }
@@ -9273,6 +9606,10 @@ function player(invPlayer, rowPlayer, guild) {
   return guild;
 }
 
+function isPartOfSet(row) {
+  return row.stats && row.stats.set_name !== '';
+}
+
 function nameRenderDisplay(data, row) {
   var cur = fallback(theInv.player_id,
     theInv.current_player_id);
@@ -9284,7 +9621,7 @@ function nameRenderDisplay(data, row) {
   if (row.equipped) {bold = '<b>' + data + '</b>';}
 
   var _setName = '';
-  if (row.stats && row.stats.set_name !== '') {
+  if (isPartOfSet(row)) {
     _setName = ' (<span class="fshLink setName" set="' + row.stats.set_name +
       '">set</span>)';
   }
@@ -9393,16 +9730,23 @@ function bpRender(where, type, row) {
 function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
-    row.inv_id + '" playerid="' +
-    fallback(row.player_id, theInv.player_id) +
-    '" mode="1" action="recall">GS</span>';
+      row.inv_id + '" playerid="' +
+      fallback(row.player_id, theInv.player_id) +
+      '" mode="1" action="recall">GS</span>';
   }
   return 'GS';
 }
 
+function onGuildMember(row) {
+  return row.player_id && row.player_id !== -1;
+}
+
+function canStore(row) {
+  return row.folder_id && !row.bound && !row.equipped;
+}
+
 function gsRender(_data, type, row) {
-  if (row.player_id && row.player_id !== -1 ||
-      row.folder_id && row.guild_tag !== '-1') {
+  if (onGuildMember(row) || canStore(row)) {
     return gsDisplayType(_data, type, row);
   }
 }
@@ -9627,14 +9971,17 @@ function typeFilter() { // jQuery
   );
 }
 
+function testSetId(data) {
+  return options.checkedElements['-1'] &&
+    data.stats && data.stats.set_id !== '-1';
+}
+
 function setFilter() { // jQuery
   $.fn.dataTable.ext.search.push(
     function(_settings, _row, _index, data) {
       return !options.checkedElements ||
         !options.checkedElements['-1'] ||
-        options.checkedElements['-1'] &&
-        data.stats &&
-        data.stats.set_id !== '-1';
+        testSetId(data);
     }
   );
 }
@@ -9960,7 +10307,7 @@ function quickDoneTaken(data) { // jQuery
     $('#temp-inv-' + data.temp_id).remove();
     $('#qtip-' + qtipId).remove();
   }
-  outputResult('Item taken.', document.getElementById('take_result'));
+  outputResult('Item taken.', getElementById('take_result'));
 }
 
 function takeAllSimilar(evt) { // jQuery.min
@@ -10043,10 +10390,10 @@ function injectMailbox() { // Bad jQuery
       '<td><img src="' + titem.src +
       '" class="tip-dynamic" border="0" data-tipped="' +
       titem.tipped + '"></td></tr>');
-    document.getElementById('Helper:takeAllSimilar' + id)
+    getElementById('Helper:takeAllSimilar' + id)
       .addEventListener('click', takeAllSimilar, true);
   });
-  document.getElementById('mailboxSwitcher')
+  getElementById('mailboxSwitcher')
     .addEventListener('click', toggleQuickTake, true);
 }
 
@@ -10057,7 +10404,7 @@ function getPlayer(playerAry) { // Legacy
   return 0;
 }
 
-function findPlayers(aRow) { // Legacy
+function msgDoesNotIncludePlayer(aRow) {
   var messageHTML = aRow.cells[2].innerHTML;
   var doublerPlayerMessageRE =
     /member\s<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
@@ -10065,12 +10412,15 @@ function findPlayers(aRow) { // Legacy
   var singlePlayerMessageRE =
     /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
   var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
-
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);
+  return firstPlayer &&
+    firstPlayerID !== currentPlayerId$1 &&
+    secondPlayerID !== currentPlayerId$1;
+}
 
-  if (firstPlayer && firstPlayerID !== currentPlayerId$1 &&
-      secondPlayerID !== currentPlayerId$1) {
+function findPlayers(aRow) { // Legacy
+  if (msgDoesNotIncludePlayer(aRow)) {
     for (var j = 0; j < 3; j += 1) {
       aRow.cells[j].removeAttribute('class');
     }
@@ -10156,6 +10506,10 @@ function findChatTable() { // Legacy
   return chatTable;
 }
 
+function isOldRow(postAgeMins, postDateUtc) {
+  return postAgeMins > 20 && postDateUtc <= lastCheckUtc;
+}
+
 function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
   if (logScreen === 'Chat' && addBuffTag) {
     var playerIDRE = /player_id=(\d+)/;
@@ -10172,7 +10526,7 @@ function rowColor(aRow, logScreen, dateColumn) { // Legacy
   var postAgeMins = (nowUtc - postDateUtc) / (1000 * 60);
   if (postDateUtc > lastCheckUtc) {
     aRow.classList.add('fshNr');
-  } else if (postAgeMins > 20 && postDateUtc <= lastCheckUtc) {
+  } else if (isOldRow(postAgeMins, postDateUtc)) {
     aRow.classList.add('fshOr');
     addBuffTag = false;
   }
@@ -10529,7 +10883,7 @@ function findPageInput(prev, curr) {
 }
 
 function getPageInput() {
-  var inputList = doc.getElementById('pCC')
+  var inputList = getElementById('pCC', doc)
     .getElementsByClassName('custominput');
   return Array.prototype.reduce.call(inputList, findPageInput, null);
 }
@@ -10543,6 +10897,14 @@ function parsePage(data) {
   fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage$1 + '...';
 }
 
+function rowMatchesLog(timestamp, myMsg) {
+  return timestamp === options$1.log[0][0] && myMsg === options$1.log[0][2];
+}
+
+function seenRowBefore(timestamp, myMsg) {
+  return currPage === 1 && options$1.log && rowMatchesLog(timestamp, myMsg);
+}
+
 function getTableList(tableList) {
   var theTable = tableList[0];
   var limit = theTable.rows.length - 1;
@@ -10551,10 +10913,7 @@ function getTableList(tableList) {
     var myDate = myRow.cells[1].textContent;
     var timestamp = parseDateAsTimestamp(myDate);
     var myMsg = myRow.cells[2].innerHTML;
-    if (currPage === 1 &&
-        options$1.log &&
-        timestamp === options$1.log[0][0] &&
-        myMsg === options$1.log[0][2]) {
+    if (seenRowBefore(timestamp, myMsg)) {
       completeReload = false;
       break;
     }
@@ -10627,7 +10986,7 @@ function buildTable() {
     sep.colSpan = 3;
   });
 
-  var injector = document.getElementById('fshInjectHere');
+  var injector = getElementById('fshInjectHere');
   pCC.replaceChild(myTable, injector);
   addLogColoring('myGuildLog', 1);
   addGuildLogWidgets();
@@ -10663,10 +11022,11 @@ function toggleItem(self) {
   var item = Number(self.getAttribute('item'));
   options$1.checks[item] = !options$1.checks[item];
   storeOptions();
+  var hide = !options$1.checks[item];
   tmpGuildLog.forEach(function(r) {
     if (r[4] !== item) {return;}
-    r[5].classList.toggle('fshHide');
-    r[6].classList.toggle('fshHide');
+    toggleForce(r[5], hide);
+    toggleForce(r[6], hide);
   });
 }
 
@@ -10694,32 +11054,25 @@ function refresh$1() {
   fshOutput.textContent = 'Loading Page 1 ...';
   tmpGuildLog = [];
   completeReload = true;
-  document.getElementById('fshInjectHere').innerHTML = '';
+  getElementById('fshInjectHere').innerHTML = '';
   getGuildLogPage(1).done(processFirstPage$1);
 }
 
 var guildLogEvents = [
-  {test: function(self) {return self.tagName === 'INPUT';}, fn: toggleItem},
-  {test: function(self) {return self.id === 'fshAll';}, fn: selectAll},
-  {test: function(self) {return self.id === 'fshNone';}, fn: selectNone},
-  {test: function(self) {return self.id === 'rfsh';}, fn: refresh$1}
+  {test: function(self) {return self.tagName === 'INPUT';}, act: toggleItem},
+  {test: function(self) {return self.id === 'fshAll';}, act: selectAll},
+  {test: function(self) {return self.id === 'fshNone';}, act: selectNone},
+  {test: function(self) {return self.id === 'rfsh';}, act: refresh$1}
 ];
-
-function eventHandler$2(evt) {
-  var self = evt.target;
-  for (var i = 0; i < guildLogEvents.length; i += 1) {
-    if (guildLogEvents[i].test(self)) {guildLogEvents[i].fn(self);}
-  }
-}
 
 function gotOptions(guildLog) {
   options$1 = guildLog || options$1;
   options$1.checks = options$1.checks || defChecks.slice(0);
   pCC.innerHTML = guildLogFilter;
-  fshNewGuildLog = document.getElementById('fshNewGuildLog');
-  fshNewGuildLog.addEventListener('click', eventHandler$2);
+  fshNewGuildLog = getElementById('fshNewGuildLog');
+  fshNewGuildLog.addEventListener('click', eventHandler$1(guildLogEvents));
   setChecks$1();
-  fshOutput = document.getElementById('fshOutput');
+  fshOutput = getElementById('fshOutput');
   maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));
   maxPage$1 = maxPagesToFetch;
   getGuildLogPage(1).done(processFirstPage$1);
@@ -10729,11 +11082,15 @@ function injectNewGuildLog() {
   getForage('fsh_guildLog').done(gotOptions);
 }
 
+function cellOneHazText(curr) {
+  return curr.cells[1] && curr.cells[1].textContent;
+}
+
 function reduceStatTable(prev, curr, index) {
   var key = curr.cells[0].textContent.trim().replace(':', '');
   if (!key) {return prev;}
   prev[key] = {ind: index};
-  if (curr.cells[1] && curr.cells[1].textContent) {
+  if (cellOneHazText(curr)) {
     prev[key].value = Number(
       curr.cells[1].textContent.trim().replace('+', '')
     );
@@ -10842,12 +11199,12 @@ function interceptDebuff(e) { // jQuery
 }
 
 function fastDebuff() {
-  var profileRightColumn = document.getElementById('profileRightColumn')
+  var profileRightColumn = getElementById('profileRightColumn')
     .lastElementChild;
   profileRightColumn.addEventListener('click', interceptDebuff, true);
 }
 
-function backpackRemove$1(invId) { // jQuery
+function backpackRemove$1(invId) { // jQuery.min
   var _invId = parseInt(invId, 10);
   var theBackpack = $('#backpackContainer').data('backpack');
   // remove from srcData
@@ -10860,24 +11217,32 @@ function backpackRemove$1(invId) { // jQuery
   });
 }
 
-function fastWearUse(evt) { // jQuery
-  var InventoryItemID = evt.target.getAttribute('itemID');
-  useItem(InventoryItemID).done(function(data) {
-    if (data.r !== 0) {return;}
-    backpackRemove$1(InventoryItemID);
-    evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+function getInvId(self) {
+  return self.parentNode.parentNode.firstElementChild.dataset.inv;
+}
+
+function fastAction(evt, action, result) { // jQuery.min
+  var self = evt.target;
+  var invId = getInvId(self);
+  self.textContent = '';
+  self.className = 'fastAction fshSpinner fshSpinner12';
+  action(invId).done(function(data) {
+    if (data.r !== 0) {
+      self.remove();
+      return;
+    }
+    backpackRemove$1(invId);
+    self.classList.remove('fshSpinner');
+    self.parentNode.innerHTML = '<span class="fastWorn">' + result + '</span>';
   });
 }
 
-function fastWearEquip(e) { // jQuery
-  var self = e.target;
-  var invId = self.getAttribute('itemid');
-  equipItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    backpackRemove$1(invId);
-    // TODO Insert item from worn
-    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
+function fastWearUse(evt) {
+  fastAction(evt, useItem, 'Used');
+}
+
+function fastWearEquip(evt) {
+  fastAction(evt, equipItem, 'Worn');
 }
 
 function actionClass(usable) {
@@ -10894,9 +11259,8 @@ function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = createDiv({
     className: 'fastDiv',
-    innerHTML: '<span class="' + actionClass(toUse) +
-      '" itemid="' + theSpan.getAttribute('data-inv') + '">' +
-      actionText(toUse) + '</span>&nbsp;'
+    innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
+      actionText(toUse) + '</span>'
   });
   if (theSpan.parentNode.nextElementSibling) {
     myDiv.appendChild(theSpan.parentNode.nextElementSibling.nextElementSibling);
@@ -10905,9 +11269,8 @@ function drawButtons(theSpan) {
 }
 
 function fastWearLinks() {
-  var bpTabs = document.getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0]
-    .getAttribute('data-type');
+  var bpTabs = getElementById('backpack_tabs');
+  var type = bpTabs.getElementsByClassName('tab-selected')[0].dataset.type;
   var items = document.querySelectorAll('#backpackTab_' + type +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
   if (items.length === 0) {return;}
@@ -10920,7 +11283,7 @@ function foundBackpack(backpackContainer, theBackpack) {
     oldShow.call(theBackpack, type, page);
     fastWearLinks();
   };
-  if (document.getElementById('backpack_current').textContent.length !== 0) {
+  if (getElementById('backpack_current').textContent.length !== 0) {
     add(3, fastWearLinks);
   }
   backpackContainer.addEventListener('click', function(e) {
@@ -10931,10 +11294,10 @@ function foundBackpack(backpackContainer, theBackpack) {
 
 function injectFastWear() { // jQuery
   if (!getValue('enableQuickDrink')) {return;}
-  var bpBack = document.getElementById('backpack');
+  var bpBack = getElementById('backpack');
   bpBack.className = 'fshBackpack';
   bpBack.removeAttribute('style');
-  var backpackContainer = document.getElementById('backpackContainer');
+  var backpackContainer = getElementById('backpackContainer');
   var theBackpack = $(backpackContainer).data('backpack');
   if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
 }
@@ -10963,8 +11326,8 @@ function getNekid() { // jQuery
 }
 
 function nekidBtn() {
-  var profileRightColumn = document.getElementById('profileRightColumn');
-  profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
+  var profileRightColumn = getElementById('profileRightColumn');
+  profileCombatSetDiv = getElementById('profileCombatSetDiv');
   var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
   var nekidDiv = createDiv({className: 'fshCenter'});
   var theBtn = createButton({
@@ -10993,7 +11356,7 @@ var totalCount;
 var pageCount;
 
 function getInvTables(doc) {
-  return doc.getElementById('profileRightColumn')
+  return getElementById('profileRightColumn', doc)
     .getElementsByClassName('inventory-table');
 }
 
@@ -11127,7 +11490,7 @@ function delCompType(self) { // jQuery.min
   });
 }
 
-var evtHdl = [
+var evtHdl$1 = [
   {
     test: function(self) {return self === compDel;},
     act: enableDelComponent
@@ -11153,17 +11516,6 @@ var evtHdl = [
     act: delCompType
   }
 ];
-
-function compEvt(evt) {
-  var self = evt.target;
-  evtHdl.some(function(el) {
-    if (el.test(self)) {
-      el.act(self);
-      return true;
-    }
-    return false;
-  });
-}
 
 function decorateButton(parentDiv, label) {
   var innerSpan = createSpan(
@@ -11194,7 +11546,7 @@ function profileComponents() {
   cmDiv.appendChild(qeDiv);
   cmDiv.appendChild(delAllDiv);
   compDiv.appendChild(cmDiv);
-  compDiv.addEventListener('click', compEvt);
+  compDiv.addEventListener('click', eventHandler$1(evtHdl$1));
 }
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
@@ -11206,19 +11558,22 @@ function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
     numberOfContacts + _c + '</span>');
 }
 
-function findAllyEnemy(el) {
-  var isAllies = el.textContent === 'Allies';
-  var isEnemies = el.textContent === 'Enemies';
-  if (!isAllies && !isEnemies) {return;}
+function countContacts(el, isAllies) {
   var target = el.parentNode;
   var numberOfContacts = target.nextSibling.nextSibling
     .getElementsByTagName('table').length - 1;
   if (isAllies) {
-    totalAllyEnemy(target, numberOfContacts,
-      getValue('alliestotal'));
+    totalAllyEnemy(target, numberOfContacts, getValue('alliestotal'));
   } else {
-    totalAllyEnemy(target, numberOfContacts,
-      getValue('enemiestotal'));
+    totalAllyEnemy(target, numberOfContacts, getValue('enemiestotal'));
+  }
+}
+
+function findAllyEnemy(el) {
+  var isAllies = el.textContent === 'Allies';
+  var isEnemies = el.textContent === 'Enemies';
+  if (isAllies || isEnemies) {
+    countContacts(el, isAllies);
   }
 }
 
@@ -11229,13 +11584,18 @@ function profileParseAllyEnemy() {
 }
 
 function expandBio() {
-  var bioExpander = document.getElementById('fshBioExpander');
+  var bioExpander = getElementById('fshBioExpander');
   if (bioExpander.textContent === 'More ...') {
     bioExpander.textContent = 'Less ...';
   } else {
     bioExpander.textContent = 'More ...';
   }
-  document.getElementById('fshBioHidden').classList.toggle('fshHide');
+  getElementById('fshBioHidden').classList.toggle('fshHide');
+}
+
+function foundMatchingTags(closeTagIndex, openTagIndex) {
+  return closeTagIndex !== -1 &&
+    (openTagIndex > closeTagIndex || openTagIndex === -1);
 }
 
 function doCompression(bioCell, bioContents, maxCharactersToShow) {
@@ -11255,8 +11615,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
   tagList.forEach(function(tag) {
     var closeTagIndex = bioEnd.indexOf('</' + tag + '>');
     var openTagIndex = bioEnd.indexOf('<' + tag + '>');
-    if (closeTagIndex !== -1 && (openTagIndex > closeTagIndex ||
-        openTagIndex === -1)) {
+    if (foundMatchingTags(closeTagIndex, openTagIndex)) {
       extraOpenHTML += '<' + tag + '>';
       extraCloseHTML += '</' + tag + '>';
     }
@@ -11265,7 +11624,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
     '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
-  document.getElementById('fshBioExpander')
+  getElementById('fshBioExpander')
     .addEventListener('click', expandBio);
 }
 
@@ -11279,14 +11638,18 @@ function findStartPosition(bioContents, _maxRowsToShow) {
   return startIndex;
 }
 
+function bioIsTooSmall(bio, maxChar, lines, maxRows) {
+  return bio.length <= maxChar && lines < maxRows;
+}
+
 function compressBio(bioCell) {
   var bioContents = bioCell.innerHTML;
   var maxCharactersToShow = getValue('maxCompressedCharacters');
   var maxRowsToShow = getValue('maxCompressedLines');
   var numberOfLines = bioContents.substr(0, maxCharactersToShow)
     .split(/<br>\n/).length - 1;
-  if (bioContents.length <= maxCharactersToShow &&
-      numberOfLines < maxRowsToShow) {return;}
+  if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
+    maxRowsToShow)) {return;}
   if (numberOfLines >= maxRowsToShow) {
     maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
   }
@@ -11301,15 +11664,26 @@ function doRender(bioCell) {
   }
 }
 
+function selfRender(self) {
+  return self && getValue('renderSelfBio');
+}
+
+function otherRender(self) {
+  return !self && getValue('renderOtherBios');
+}
+
+function shouldRender(self) {
+  return selfRender(self) || otherRender(self);
+}
+
 function testForRender(self, bioCell) {
-  if (self && getValue('renderSelfBio') ||
-      !self && getValue('renderOtherBios')) {
+  if (shouldRender(self)) {
     doRender(bioCell);
   }
 }
 
 function profileRenderBio(self) {
-  var bioCell = document.getElementById('profile-bio');
+  var bioCell = getElementById('profile-bio');
   if (!bioCell) {return;}
   testForRender(self, bioCell);
   if (getValue('enableBioCompressor')) {compressBio(bioCell);}
@@ -11353,7 +11727,7 @@ function quickWearLink() {
 }
 
 function profileSelectAll() {
-  var bpTabs = document.getElementById('backpack_tabs');
+  var bpTabs = getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
   var items = document.querySelectorAll('#backpackTab_' + type +
@@ -11383,7 +11757,7 @@ function selectAllLink() {
 function storeVL() {
   // store the VL of the player
   var virtualLevel = parseInt(
-    document.getElementById('stat-vl').textContent, 10);
+    getElementById('stat-vl').textContent, 10);
   if (intValue(document.getElementsByClassName('stat-level')[0]
     .nextElementSibling.textContent) === virtualLevel) {
     setValue('characterVirtualLevel', ''); // ?
@@ -11430,6 +11804,10 @@ function profileInjectGuildRel() {
   if (aLink) {foundGuildLink(aLink);}
 }
 
+function showRankButton() {
+  return currentGuildRelationship === 'self' && getValue('showAdmin');
+}
+
 function profileInjectQuickButton(avyImg, playerid, playername) {
   var newhtml = '<div align="center">';
   newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
@@ -11466,8 +11844,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
     playername + '" data-tipped="Recall items from ' + playername +
     '" style="background-image: url(\'' + imageServer +
     '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-  if (currentGuildRelationship === 'self' &&
-      getValue('showAdmin')) {
+  if (showRankButton()) {
     newhtml += '<a class="quickButton buttonGuildRank tip-static" href="' +
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
@@ -11486,7 +11863,7 @@ function removeStatTable(el) {
 }
 
 function updateStatistics() {
-  var charStats = document.getElementById('profileLeftColumn')
+  var charStats = getElementById('profileLeftColumn')
     .getElementsByTagName('table')[0];
   var dodgyTables = charStats.getElementsByTagName('table');
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
@@ -11521,10 +11898,10 @@ function updateNmv() {
     '#profileRightColumn img[src$="/60_sm.gif"]');
   if (!nmvImg) {return;}
   var atkStat = Number(
-    document.getElementById('stat-attack').firstChild.textContent.trim());
+    getElementById('stat-attack').firstChild.textContent.trim());
   if (isNaN(atkStat)) {return;}
   var defStat = Number(
-    document.getElementById('stat-defense').firstChild.textContent.trim());
+    getElementById('stat-defense').firstChild.textContent.trim());
   var oldTipped = nmvImg.dataset.tipped;
   var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
   var nmvLvl = Number(lvlAry[1]);
@@ -11618,7 +11995,7 @@ function getBuff(doc, buff, inject) {
     inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
       'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
   } else {
-    var elem = document.getElementById('buff-outer')
+    var elem = getElementById('buff-outer')
       .querySelector('input[data-name="' + buff + '"]');
     if (elem) {
       inject.innerHTML = '<span class="quickbuffActivate" ' +
@@ -11629,6 +12006,13 @@ function getBuff(doc, buff, inject) {
   }
 }
 
+function itWorked(result) {
+  return result &&
+    (result.textContent.indexOf(
+      'current or higher level is currently active on') !== -1 ||
+    result.textContent.indexOf('was activated on') !== -1);
+}
+
 function quickActivate(evt) { // jQuery
   var trigger = evt.target;
   if (trigger.className !== 'quickbuffActivate') {return;}
@@ -11637,10 +12021,7 @@ function quickActivate(evt) { // jQuery
   retryAjax(buffHref).done(function(data) {
     var doc = createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
-    if (result &&
-        (result.textContent.indexOf(
-          'current or higher level is currently active on') !== -1 ||
-        result.textContent.indexOf('was activated on') !== -1)) {
+    if (itWorked(result)) {
       trigger.className = 'fshLime';
       trigger.innerHTML = 'On';
     }
@@ -11677,21 +12058,26 @@ function getBuffColor(myLvl, playerBuffLevel) {
   return 'fshGreen';
 }
 
-function hazBuff(playerData, el) {
-  var myBuffName = el.getAttribute('data-name');
-  var playerBuffLevel = playerData[myBuffName];
-  var playerSpan = el.nextElementSibling.nextElementSibling;
-  if (!playerBuffLevel && !playerSpan) {return;}
+function buffRunning(el, playerBuffLevel, playerSpan) {
   if (!playerBuffLevel) {
     playerSpan.innerHTML = '';
     return;
   }
   var lvlSpan = el.nextElementSibling.firstElementChild.firstElementChild;
   var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
-  playerSpan = newPlayerSpan(el, playerSpan);
+  var fshPlayerSpan = newPlayerSpan(el, playerSpan);
   var buffColor = getBuffColor(myLvl, playerBuffLevel);
-  playerSpan.innerHTML = ' <span class="' + buffColor +
+  fshPlayerSpan.innerHTML = ' <span class="' + buffColor +
     '">[' + playerBuffLevel + ']</span>';
+}
+
+function hazBuff(playerData, el) {
+  var myBuffName = el.getAttribute('data-name');
+  var playerBuffLevel = playerData[myBuffName];
+  var playerSpan = el.nextElementSibling.nextElementSibling;
+  if (playerBuffLevel || playerSpan) {
+    buffRunning(el, playerBuffLevel, playerSpan);
+  }
 }
 
 function addBuffLevels(evt) {
@@ -11702,13 +12088,13 @@ function addBuffLevels(evt) {
   var playerData = player.parentNode.lastElementChild.textContent.split(',');
   playerData = playerData.reduce(function(prev, curr) {
     if (curr.indexOf(' [') !== -1) {
-      var bob = curr.split(' [');
-      prev[bob[0].trim()] = parseInt(bob[1].replace(']', ''), 10);
+      var foo = curr.split(' [');
+      prev[foo[0].trim()] = parseInt(foo[1].replace(']', ''), 10);
     }
     return prev;
   }, {});
 
-  var buffOuter = document.getElementById('buff-outer');
+  var buffOuter = getElementById('buff-outer');
   var nodeList = buffOuter.querySelectorAll('input[name]');
 
   Array.prototype.forEach.call(nodeList, hazBuff.bind(null, playerData));
@@ -11728,10 +12114,14 @@ function doLabels(el) {
   }
 }
 
+function waitForPlayer(firstPlayer) {
+  return !firstPlayer && retries < 9;
+}
+
 function haveTargets() {
-  var firstPlayer = document.getElementById('players')
+  var firstPlayer = getElementById('players')
     .getElementsByTagName('h1')[0];
-  if (!firstPlayer && retries < 9) {
+  if (waitForPlayer(firstPlayer)) {
     retries += 1;
     setTimeout(haveTargets, 100);
     return;
@@ -11741,7 +12131,7 @@ function haveTargets() {
 }
 
 function firstPlayerStats() {
-  var targets = document.getElementById('targetPlayers')
+  var targets = getElementById('targetPlayers')
     .getAttribute('value');
   if (targets && targets !== '') {haveTargets();}
 }
@@ -11755,19 +12145,19 @@ function getSustain$1(responseText) {
     prev[curr.name] = curr.duration;
     return prev;
   }, {});
-  getEnhancement(enh, 'Sustain', document.getElementById('fshSus'));
-  getEnhancement(enh, 'Fury Caster', document.getElementById('fshFur'));
-  getBuff(skl, 'Guild Buffer', document.getElementById('fshGB'));
-  getBuff(skl, 'Buff Master', document.getElementById('fshBM'));
-  getBuff(skl, 'Extend', document.getElementById('fshExt'));
-  getBuff(skl, 'Reinforce', document.getElementById('fshRI'));
+  getEnhancement(enh, 'Sustain', getElementById('fshSus'));
+  getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
+  getBuff(skl, 'Guild Buffer', getElementById('fshGB'));
+  getBuff(skl, 'Buff Master', getElementById('fshBM'));
+  getBuff(skl, 'Extend', getElementById('fshExt'));
+  getBuff(skl, 'Reinforce', getElementById('fshRI'));
 
-  document.getElementById('helperQBheader')
+  getElementById('helperQBheader')
     .addEventListener('click', quickActivate);
-  document.getElementById('players')
+  getElementById('players')
     .addEventListener('click', addBuffLevels);
 
-  var labels = document.getElementById('buff-outer')
+  var labels = getElementById('buff-outer')
     .querySelectorAll('label[for^="skill-"]');
   Array.prototype.forEach.call(labels, doLabels);
 
@@ -11776,7 +12166,7 @@ function getSustain$1(responseText) {
 }
 
 function injectQuickBuff() { // jQuery
-  var quickbuffDiv = document.getElementById('quickbuff');
+  var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
   quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
     quickBuffHeader);
@@ -11853,7 +12243,7 @@ function wearItem$1(evt) { // jQuery
   theTd.innerHTML = spinner;
 }
 
-var events = [
+var events$1 = [
   {test: 'recall', fn: recallItem$2},
   {test: 'equip', fn: wearItem$1},
   {
@@ -11865,9 +12255,9 @@ var events = [
 ];
 
 function eventHandlers$1(evt) {
-  for (var i = 0; i < events.length; i += 1) {
-    if (evt.target.classList.contains(events[i].test)) {
-      events[i].fn(evt);
+  for (var i = 0; i < events$1.length; i += 1) {
+    if (evt.target.classList.contains(events$1[i].test)) {
+      events$1[i].fn(evt);
       return;
     }
   }
@@ -12019,7 +12409,7 @@ function saveState(self) {
   setForage(storeMap, potOpts);
 }
 
-var evtHdl$1 = [
+var evtHdl$2 = [
   {
     test: function(self) {return self.id === 'fshReset';},
     act: doReset$1
@@ -12031,17 +12421,6 @@ var evtHdl$1 = [
     act: saveState
   }
 ];
-
-function onClick(e) {
-  var self = e.target;
-  evtHdl$1.some(function(el) {
-    if (el.test(self)) {
-      el.act(self);
-      return true;
-    }
-    return false;
-  });
-}
 
 function onInput(e) {
   var self = e.target.id;
@@ -12074,7 +12453,7 @@ function gotMap(data) {
 
   var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   myCell.addEventListener('change', onChange);
-  myCell.addEventListener('click', onClick);
+  myCell.addEventListener('click', eventHandler$1(evtHdl$2));
   myCell.addEventListener('input', onInput);
   myCell.appendChild(container);
 }
@@ -12093,7 +12472,7 @@ var potObj;
 
 function paintChild() {
   var limit = performance.now() + 1;
-  while (performance.now() < limit && counter < nodeArray.length) {
+  while (moreToDo(limit, counter, nodeArray)) {
     var el = nodeList[counter];
     var inject = nodeArray[counter];
     el.appendChild(inject);
@@ -12160,7 +12539,7 @@ function doSpan(el) {
 
 function makeSpan() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit && counter < nodeList.length) {
+  while (moreToDo(limit, counter, nodeList)) {
     var el = nodeList[counter];
 
     doSpan(el);
@@ -12198,7 +12577,8 @@ function memberHeader(oldhtml) {
 
 function paintHeader() {
   var limit = performance.now() + 10;
-  while (performance.now() < limit && headerCount < headers$1.length) {
+  while (moreToDo(limit, headerCount, headers$1)) {
+    // while (performance.now() < limit && headerCount < headers.length) {
     var el = headers$1[headerCount];
     var oldhtml = el.textContent;
     el.innerHTML = memberHeader(oldhtml);
@@ -12232,7 +12612,7 @@ function hideOther(el) {
 
 function hideOthers() {
   var limit = performance.now() + 5;
-  while (performance.now() < limit && counter$1 < nodeList$1.length) {
+  while (moreToDo(limit, counter$1, nodeList$1)) {
     var el = nodeList$1[counter$1];
 
     hideOther(el);
@@ -12376,7 +12756,7 @@ function buffEvent(e) {
   }
 }
 
-function evtHdl$2(e) {
+function evtHdl$3(e) {
   if (e.target.classList.contains('fshBl')) {buffEvent(e);}
 }
 
@@ -12396,11 +12776,21 @@ function gotTables(titanTables) {
     if (titanTable.rows.length < 2) {continue;}
     doBuffLinks$1(titanTable);
   }
-  titanTables[1].addEventListener('click', evtHdl$2);
+  titanTables[1].addEventListener('click', evtHdl$3);
 }
 
 function injectScouttowerBuffLinks(titanTables) {
   if (titanTables.length > 2) {gotTables(titanTables);}
+}
+
+function round(number, precision) {
+  var factor = Math.pow(10, precision);
+  if (isNaN$1(factor)) {factor = 1;}
+  return Math.round(number * factor) / factor;
+}
+
+function roundToString(number, precision) {
+  return round(number, precision).toString();
 }
 
 function getTitanName(aRow) {
@@ -12467,11 +12857,11 @@ function getTitanString(guildKills, totalHP, currentHP) {
   if (guildKills >= numberOfKillsToSecure) {
     return 'Secured';
   }
-  if (numberOfKillsToSecure - guildKills > currentHP) {
+  var remainingKills = numberOfKillsToSecure - guildKills;
+  if (remainingKills > currentHP) {
     return '<span class="fshRed">Cannot Secure</span>';
   }
-  return '<span class="fshRed">' +
-    (numberOfKillsToSecure - guildKills) + '</span> to secure';
+  return '<span class="fshRed">' + remainingKills + '</span> to secure';
 }
 
 function getKillsPct(currentNumberOfKills, guildKills) {
@@ -12486,13 +12876,11 @@ function killsSummary(aRow) {
   var titanHPArray = titanHP.split('/');
   var currentHP = Number(titanHPArray[0]);
   var totalHP = Number(titanHPArray[1]);
-  var currentNumberOfKills = totalHP - currentHP;
-  var titanString = getTitanString(guildKills, totalHP, currentHP);
-  var killsTotPct = (guildKills * 100 / totalHP).toFixed(2);
   aRow.cells[3].insertAdjacentHTML('beforeend',
     '<br><span class="fshBlue"> (' +
-    getKillsPct(currentNumberOfKills, guildKills).toFixed(2) +
-    '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')');
+    roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
+    '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
+    '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
 }
 
 function guideLink(aRow) {
@@ -12526,25 +12914,28 @@ function injectScouttower() {
   getForage('fsh_titans').done(gotOldTitans); // Pref
 }
 
-function getScoutTowerDetails(responseText) { // Legacy
+function insertBr(el) {
+  el.insertAdjacentHTML('beforeend', '<br><br>');
+}
+
+function getScoutTowerDetails(responseText) {
   var doc = createDocument(responseText);
-  injectScouttowerBuffLinks(doc.getElementById('pCC')
-    .getElementsByTagName('table'));
-  var scoutTowerTable = findNode(
-    '//table[tbody/tr/td/img[contains(@src,"/banners/scouttower.png")]]',
-    doc);
+  var scoutPcc = getElementById('pCC', doc);
+  injectScouttowerBuffLinks(scoutPcc.getElementsByTagName('table'));
+  var scoutTowerTable = scoutPcc.children[0];
   if (scoutTowerTable) {
-    var titanTable = findNode(
-      '//table[tbody/tr/td/img[contains(@src,"/banners/titankilllog.png")]]');
-    var newRow = titanTable.insertRow(0);
+    var titanTable = pCC.children[0];
+    var newRow = titanTable.insertRow(-1);
+    insertBr(newRow);
+    newRow = titanTable.insertRow(-1);
     newRow.appendChild(scoutTowerTable.rows[1].cells[0])
       .insertAdjacentHTML('beforeend', '<br><br>');
-    newRow = titanTable.insertRow(1);
+    newRow = titanTable.insertRow(-1);
     newRow.appendChild(scoutTowerTable.rows[8].cells[0]);
   }
 }
 
-function injectTitan() { // jQuery
+function injectTitan() { // jQuery.min
   retryAjax('index.php?cmd=guild&subcmd=scouttower').done(getScoutTowerDetails);
 }
 
@@ -12597,6 +12988,10 @@ function updateForCloak(obj) {
   obj.hpValue = obj.hpBonus;
 }
 
+function attackValueIsNumber(atk) {
+  return typeof atk === 'number' && !isNaN(atk);
+}
+
 function playerDataString(responseText) {
   var doc = createDocument(responseText);
   var obj = {
@@ -12637,8 +13032,7 @@ function playerDataString(responseText) {
     obj.superEliteSlayerLevel * 100) / 100;
 
   if (obj.cloakLevel === 0 ||
-      typeof obj.attackValue === 'number' &&
-      !isNaN(obj.attackValue)) {
+      attackValueIsNumber(obj.attackValue)) {
     return obj;
   }
 
@@ -12691,19 +13085,21 @@ function playerDataObject(json) {
 }
 
 var highlightPlayersNearMyLvl$1;
-var lvlDiffToHighlight$1;
-var myVL;
 var spinner$1;
 var validPvP = nowSecs - 604800;
 var guilds;
 
+function pvpHighlight$1(data) {
+  return data.last_login >= validPvP &&
+    data.virtual_level >= pvpLowerLevel &&
+    data.virtual_level <= pvpUpperLevel;
+}
+
 function doOnlineDot(aTable, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (myVL &&
-      data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
-      data.virtual_level < myVL + lvlDiffToHighlight$1) {
+  if (highlightPlayersNearMyLvl$1 &&
+    pvpHighlight$1(data)) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
 }
@@ -12780,30 +13176,21 @@ function findOnlinePlayers() { // jQuery
   });
 }
 
-function gotMyVl(data) {
-  myVL = data.virtual_level;
-  lvlDiffToHighlight$1 = 11;
-  if (myVL <= 205) {lvlDiffToHighlight$1 = 6;}
-}
-
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
   spinner$1 = createSpan({
-    className: 'fshCurveBtn fshTopListSpinner',
-    style: {
-      backgroundImage: 'url(\'' + imageServer +
-        '/world/actionLoadingSpinner.gif\')'
-    }
+    className: 'fshCurveContainer fshTopListSpinner',
+    innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
   });
   e.target.parentNode.replaceChild(spinner$1, e.target);
+  highlightPlayersNearMyLvl$1 = getValue('highlightPlayersNearMyLvl');
   if (highlightPlayersNearMyLvl$1) {
-    myStats(false).done(gotMyVl).done(findOnlinePlayers);
-  } else {findOnlinePlayers();}
+    calculateBoundaries();
+  }
+  findOnlinePlayers();
 }
 
 function looksLikeTopRated() {
-  highlightPlayersNearMyLvl$1 =
-    getValue('highlightPlayersNearMyLvl');
   var theCell = pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({
@@ -12820,22 +13207,32 @@ function looksLikeTopRated() {
   findBtn.addEventListener('click', getMyVL);
 }
 
+var topRatedTests = [
+  function() {return isObject(pCC);},
+  function() {return isObject(pCC.firstElementChild);},
+  function() {return isObject(pCC.firstElementChild.rows);},
+  function() {return pCC.firstElementChild.rows.length > 2;},
+  function() {
+    return pCC.firstElementChild.rows[1].textContent.indexOf(
+      'Last Updated') === 0;
+  }
+];
+
+function testforTopRated() {
+  return topRatedTests.every(function(e) {return e();});
+}
+
 function injectTopRated() {
-  if (pCC &&
-      pCC.firstElementChild &&
-      pCC.firstElementChild.rows &&
-      pCC.firstElementChild.rows.length > 2 &&
-      pCC.firstElementChild.rows[1].textContent
-        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
+  if (testforTopRated()) {looksLikeTopRated();}
 }
 
 var multiple;
 
 function getItemDiv() {
-  var itemDiv = document.getElementById('item-div');
+  var itemDiv = getElementById('item-div');
   if (!itemDiv) {
     itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
-    var itemList = document.getElementById('item-list');
+    var itemList = getElementById('item-list');
     var oldItems = itemList.getElementsByTagName('table');
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
@@ -12844,6 +13241,14 @@ function getItemDiv() {
     itemList.parentNode.insertBefore(itemDiv, itemList);
   }
   return itemDiv;
+}
+
+function shouldShow(hidden, all, hasFolder) {
+  return hidden && fallback(all, hasFolder);
+}
+
+function shouldHide(hidden, all, hasFolder) {
+  return !hidden && !all && !hasFolder;
 }
 
 function doHideFolder(evt) {
@@ -12856,11 +13261,11 @@ function doHideFolder(evt) {
     var hidden = el.classList.contains('fshHide');
     var all = folderid === 'folderid0';
     var hasFolder = el.classList.contains(folderid);
-    if (hidden && fallback(all, hasFolder)) {
+    if (shouldShow(hidden, all, hasFolder)) {
       el.classList.remove('fshHide');
       el.classList.add('fshBlock'); // show()
     }
-    if (!hidden && !all && !hasFolder) {
+    if (shouldHide(hidden, all, hasFolder)) {
       el.classList.remove('fshBlock');
       el.classList.add('fshHide'); // hide()
     }
@@ -12918,7 +13323,7 @@ function processTrade(data) {
 
   invItems$1 = data.items;
   /* Highlight items in ST */
-  var nodeList = document.getElementById('item-list')
+  var nodeList = getElementById('item-list')
     .getElementsByTagName('table');
   Array.prototype.forEach.call(nodeList, forEachInvItem);
   doFolderHeaders(data.folders);
@@ -12934,32 +13339,40 @@ function inv$1() { // jQuery
 }
 
 function getHowMany(itemTables) {
-  var howMany = parseInt(document.getElementById('fshSendHowMany').value, 10);
+  var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
   if (isNaN(howMany)) {return itemTables.length;}
   // maximum of 100 items in an ST
   if (calf.subcmd !== '-') {return Math.min(100, howMany);}
   return howMany;
 }
 
+function itemType$1(itemid, checkbox) {
+  return itemid === 'itemid-2' && checkbox.classList.contains('itemtype12');
+}
+
 function shouldBeChecked(itemid, checkbox) {
   return itemid === 'itemid-1' ||
-    itemid === 'itemid-2' && checkbox.classList.contains('itemtype12') ||
+    itemType$1(itemid, checkbox) ||
     checkbox.classList.contains(itemid);
+}
+
+function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
+  return howMany &&
+    fallback(itemsInSt, !el.classList.contains('isInST')) &&
+    shouldBeChecked(itemid, checkbox);
 }
 
 function doCheckAll$1(evt) {
   var itemid = evt.target.id;
-  var itemList = document.getElementById('item-div') ||
-    document.getElementById('item-list');
+  var itemList = getElementById('item-div') ||
+    getElementById('item-list');
   var itemTables = itemList.querySelectorAll('table:not(.fshHide)');
   var howMany = getHowMany(itemTables);
-  var itemsInSt = document.getElementById('itemsInSt').checked;
+  var itemsInSt = getElementById('itemsInSt').checked;
   Array.prototype.forEach.call(itemTables, function(el) {
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
-    if (howMany &&
-        fallback(itemsInSt, !el.classList.contains('isInST')) &&
-        shouldBeChecked(itemid, checkbox)) {
+    if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;
       return;
@@ -12990,7 +13403,7 @@ function injectTradeOld() {
     innerHTML: myTd
   });
   multiple.addEventListener('click', toggleAllPlants);
-  var el = document.getElementById('item-list').parentNode.parentNode;
+  var el = getElementById('item-list').parentNode.parentNode;
   el.parentNode.insertBefore(multiple, el);
 }
 
@@ -12999,110 +13412,49 @@ function injectTrade() {
   add(3, injectTradeOld);
 }
 
-function calcLvlToTest() {
-  var levelToTest = intValue(document.getElementsByClassName(
-    'stat-level')[0].nextElementSibling.textContent);
-  var characterVirtualLevel = getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  return levelToTest;
+var highlightPlayersNearMyLvl$2;
+var highlightGvGPlayersNearMyLvl;
+
+function isPvpTarget(vlevel) {
+  return highlightPlayersNearMyLvl$2 &&
+    vlevel >= pvpLowerLevel &&
+    vlevel <= pvpUpperLevel;
 }
 
-function calcPvpRange(levelToTest) {
-  if (levelToTest <= 205) {return 5;}
-  return 10;
+function isGvgTarget(vlevel) {
+  return highlightGvGPlayersNearMyLvl &&
+    vlevel >= gvgLowerLevel &&
+    vlevel <= gvgUpperLevel;
 }
 
-function calcGvgRange(levelToTest) {
-  if (levelToTest <= 300) {
-    return 25;
+function isActive(el, tipped) {
+  var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
+  var aRow = el.parentNode.parentNode;
+  if (isPvpTarget(vlevel)) {
+    aRow.classList.add('lvlHighlight');
+  } else if (isGvgTarget(vlevel)) {
+    aRow.classList.add('lvlGvGHighlight');
   }
-  if (levelToTest <= 700) {
-    return 50;
-  }
-  return 100;
+}
+
+function highlightMembers(el) {
+  var tipped = el.dataset.tipped;
+  var lastActDays = lastActivityRE.exec(tipped)[1];
+  if (lastActDays < 7) {isActive(el, tipped);}
 }
 
 function injectViewGuild() {
   add(3, colouredDots);
   removeGuildAvyImgBorder();
   guildXPLock();
-  var highlightPlayersNearMyLvl =
-    getValue('highlightPlayersNearMyLvl');
-  var highlightGvGPlayersNearMyLvl =
-    getValue('highlightGvGPlayersNearMyLvl');
-  if (!highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl) {return;}
-  var levelToTest = calcLvlToTest();
-  var pvpRange = calcPvpRange(levelToTest);
-  var gvgRange = calcGvgRange(levelToTest);
+  highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
+  highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
+  if (!highlightPlayersNearMyLvl$2 && !highlightGvGPlayersNearMyLvl) {return;}
+  calculateBoundaries();
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
-  Array.prototype.forEach.call(memList, function(el) {
-    var tipped = el.dataset.tipped;
-    var lastActDays = lastActivityRE.exec(tipped)[1];
-    var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
-    var aRow = el.parentNode.parentNode;
-    if (lastActDays < 7 &&
-        highlightPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <= pvpRange) {
-      aRow.classList.add('lvlHighlight');
-    } else if (lastActDays < 7 &&
-        highlightGvGPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <= gvgRange) {
-      aRow.classList.add('lvlGvGHighlight');
-    }
-  });
+  Array.prototype.forEach.call(memList, highlightMembers);
 }
-
-var assets = {
-  colorHash: {
-    '0': 'red', // Should never see this.
-    '1': 'orange',
-    '2': 'yellow'
-  },
-  worldFormgroup:
-    '<a href="#" class="fshCurveBtn tip-static" ' +
-      'data-tipped="Quick Create Attack Group" ' +
-      'style="background-image: url(\'' + imageServer +
-      '/skin/realm/icon_action_formgroup.gif\');">' +
-    '</a>',
-  worldQuickBuff:
-    '<a href="#" class="fshCurveBtn tip-static" ' +
-      'data-tipped="Open Quick Buff Popup" ' +
-      'style="background-image: url(\'' + imageServer +
-      '/skin/realm/icon_action_quickbuff.gif\');">' +
-    '</a>',
-  worldMap:
-    '<a href="index.php?cmd=world&subcmd=map" target="fsWorldMap" ' +
-      'class="fshCurveBtn tip-static" data-tipped="Open Realm Map" ' +
-      'style="background-image: url(\'' + imageServer +
-      '/skin/realm/icon_action_map.gif\');">' +
-    '</a>',
-  searchMapUFSG:
-    '<a href="' + guideUrl + 'realms' +
-      '&subcmd=view&realm_id=@@realmId@@" target="mapUFSG" ' +
-      'class="fshCurveBtn tip-static" data-tipped="Search map in ' +
-      'Ultimate FSG" style="background-image: url(\'' +
-      imageServer + '/temple/1.gif\');">' +
-    '</a>',
-  bias: {
-    '0': {generalVariable: 1.1053, hpVariable: 1.1},
-    '1': {generalVariable: 1.1, hpVariable: 1.053},
-    '2': {generalVariable: 1.053, hpVariable: 1},
-    '3': {generalVariable: 1.1053, hpVariable: 1}
-  },
-  huntingOnImage: '<a href="#" id="HelperToggleHuntingMode" ' +
-    'class="huntOn fshCurveBtn tip-static" ' +
-    'data-tipped="Hunting mode is ON"></a>',
-  huntingOffImage: '<a href="#" id="HelperToggleHuntingMode" ' +
-    'class="huntOff fshCurveBtn tip-static" ' +
-    'data-tipped="Hunting mode is OFF"></a>',
-  soundMuteImage: '<a href="#" id="toggleSoundLink" ' +
-    'class="soundOn fshCurveBtn tip-static" ' +
-    'data-tipped="Turn Off Sound when you have a new log message"></a>',
-  soundImage: '<a href="#" id="toggleSoundLink" ' +
-    'class="soundOff fshCurveBtn tip-static" ' +
-    'data-tipped="Turn On Sound when you have a new log message"></a>'
-};
 
 // Taking the Not Save in case they add new enhancements.
 var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
@@ -13129,7 +13481,7 @@ function hazBuffs$1(data) {
   }
 }
 
-function hazEnhancements(data) {
+function hazEnhancements$1(data) {
   if (data.player.enhancements) {
     data.player.enhancements.forEach(storeEnhancements); // loop through enhancements
   }
@@ -13146,7 +13498,7 @@ function processCombatResponse(e, data) {
   combatData.player.buffs = {};
   combatData.player.enhancements = {};
   hazBuffs$1(data);
-  hazEnhancements(data);
+  hazEnhancements$1(data);
   combatData.time = data.time;
   combatLog$1.push(combatData);
   setForage('fsh_combatLog', combatLog$1);
@@ -13159,7 +13511,7 @@ function combatResponse(e, data) {
 
 function gotCombatLog$1(data) { // jQuery.min
   if (data) {combatLog$1 = data;}
-  $.subscribe('2-success.action-response', combatResponse);
+  $.subscribe('2' + def_suffixSuccessActionResponse, combatResponse);
 }
 
 function combatLogger() { // jQuery.min
@@ -13168,92 +13520,63 @@ function combatLogger() { // jQuery.min
   }
 }
 
-function doFormGroup(e) { // jQuery
-  e.preventDefault();
-  $(e.target).qtip('hide');
-  GameData.doAction(12, 401, {}, 0);
+var oldDoAction;
+
+function afterUpdateActionList() {
+  // color the critters in the do no kill list blue
+  var act = getElementById('actionList');
+  var creatures = act.getElementsByClassName('creature');
+  Array.prototype.forEach.call(creatures, function(el) {
+    el.classList.toggle('fshBlue',
+      calf.doNotKillList.indexOf(el.textContent) !== -1);
+  });
 }
 
-function openQuickBuff(e) {
-  e.preventDefault();
-  openQuickBuffByName(playerName());
+var actionsToIntercept = {
+  // def_creatureCombat
+  '2': function(action, fetch, data, attempts) {
+    // Do custom stuff e.g. do not kill list
+    var creatureName = GameData.actions()[data.passback].data.name;
+    if (calf.doNotKillList.indexOf(creatureName) !== -1) {
+      $('#actionList div.header').eq(data.passback)
+        .find('a.icon').removeClass('loading');
+      return;
+    }
+    // Call standard action
+    oldDoAction(action, fetch, data, attempts);
+  }
+};
+
+function firstAttempt(attempts) {
+  return typeof attempts === 'undefined' || attempts === 0;
 }
 
-function showQuickLinks(worldName, data) { // jQuery
-  worldName.append('<div class="fshFsty"><div>Min Lvl: ' + data.realm.minlevel +
-    '</div><div>Your Lvl: ' + data.player.level + '</div></div>');
-  var formgroup = $(assets.worldFormgroup);
-  worldName.append('&nbsp;&nbsp;').append(formgroup);
-  formgroup.click(doFormGroup);
-  var quickbuff = $(assets.worldQuickBuff);
-  worldName.append('&nbsp;').append(quickbuff);
-  quickbuff.click(openQuickBuff);
-  worldName.append('&nbsp;').append(assets.worldMap);
+function goodInterceptFunction(interceptFunction) {
+  return interceptFunction && typeof interceptFunction === 'function';
 }
 
-function showSearchButtons(worldName, data) { // jQuery
-  worldName.append('&nbsp;')
-    .append(assets.searchMapUFSG.replace('@@realmId@@', data.realm.id));
-}
-
-function toggleSound(e) { // jQuery
-  e.preventDefault();
-  if (getValue('playNewMessageSound') === false) {
-    $('#toggleSoundLink').qtip('hide')
-      .replaceWith(assets.soundMuteImage);
+function maybeIntercept(action, fetch, data, attempts) {
+  var interceptFunction = actionsToIntercept[action];
+  if (goodInterceptFunction(interceptFunction) && firstAttempt(attempts)) {
+    interceptFunction(action, fetch, data, attempts);
   } else {
-    $('#toggleSoundLink').qtip('hide')
-      .replaceWith(assets.soundImage);
+    oldDoAction(action, fetch, data, attempts);
   }
-  setValue('playNewMessageSound',
-    !getValue('playNewMessageSound'));
 }
 
-function showSpeakerOnWorld(worldName) { // jQuery
-  var img = assets.soundImage;
-  if (getValue('playNewMessageSound')) {img = assets.soundMuteImage;}
-  worldName.append('&nbsp;').append(img);
-  worldName.on('click', '#toggleSoundLink', toggleSound);
+function interceptDoAction() {
+  oldDoAction = GameData.doAction;
+  GameData.doAction = maybeIntercept;
 }
 
-function toggleHuntMode(e) { // jQuery
-  e.preventDefault();
-  if (!calf.huntingMode) {
-    $('#HelperToggleHuntingMode').qtip('hide')
-      .replaceWith(assets.huntingOnImage);
-  } else {
-    $('#HelperToggleHuntingMode').qtip('hide')
-      .replaceWith(assets.huntingOffImage);
-  }
-  calf.huntingMode = !calf.huntingMode;
-  setValue('huntingMode', calf.huntingMode);
+function doNotKill() {
+  $.subscribe(def_afterUpdateActionlist, afterUpdateActionList);
+  afterUpdateActionList();
+  // then intercept the action call
+  interceptDoAction();
 }
 
-function showHuntMode(worldName) { // jQuery
-  var img = assets.huntingOffImage;
-  if (calf.huntingMode) {img = assets.huntingOnImage;}
-  worldName.append('&nbsp;').append(img);
-  worldName.on('click', '#HelperToggleHuntingMode',
-    toggleHuntMode);
-}
-
-function injectButtons(data) { // jQuery
-  var worldName = $('#worldName');
-  // worldName.html(data.realm.name); // BUGFIX - incase of switchign between master realm and realm they dont replace teh realm name
-  GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
-  var oldButtonContainer = $('#fshWorldButtonContainer');
-  if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
-  var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});
-  showQuickLinks(buttonContainer, data);
-  showSearchButtons(buttonContainer, data);
-  if (getValue('showSpeakerOnWorld')) {
-    showSpeakerOnWorld(buttonContainer);
-  }
-  showHuntMode(buttonContainer);
-  worldName.after(buttonContainer);
-}
-
-var assets$1 = {
+var assets = {
   defStats: '<table class="relicT relicS"><thead>' +
     '<tr><th colspan="2">Defending Guild Stats</th></tr></thead><tbody>' +
     '<tr><td>Relic Count:</td><td id="relicCount">0</td></tr>' +
@@ -13310,11 +13633,11 @@ var assets$1 = {
 };
 
 function groupViewStats(doc) {
-  var attackElement = doc.getElementById('stat-attack');
-  var defenseElement = doc.getElementById('stat-defense');
-  var armorElement = doc.getElementById('stat-armor');
-  var damageElement = doc.getElementById('stat-damage');
-  var hpElement = doc.getElementById('stat-hp');
+  var attackElement = getElementById('stat-attack', doc);
+  var defenseElement = getElementById('stat-defense', doc);
+  var armorElement = getElementById('stat-armor', doc);
+  var damageElement = getElementById('stat-damage', doc);
+  var hpElement = getElementById('stat-hp', doc);
   return {
     attack: intValue(attackElement.textContent),
     attackElement: attackElement,
@@ -13554,7 +13877,7 @@ function doCalculations() {
   hpBuffedElement.textContent = addCommas(defBuffedHp);
 
   if (leadDefender.cloakLevel !== 0) {
-    document.getElementById('LDCloaked').textContent = 'Yes';
+    getElementById('LDCloaked').textContent = 'Yes';
   }
 
   if (player$1.hasGroup) {
@@ -13586,33 +13909,33 @@ function missingMembers(membrList) {
 }
 
 function setDefVars() {
-  attackElement = document.getElementById('attackValue');
-  attackBuffedElement = document.getElementById('attackValueBuffed');
-  defenseElement = document.getElementById('defenseValue');
-  defenseBuffedElement = document.getElementById('defenseValueBuffed');
-  armorElement = document.getElementById('armorValue');
-  armorBuffedElement = document.getElementById('armorValueBuffed');
-  damageElement = document.getElementById('damageValue');
-  damageBuffedElement = document.getElementById('damageValueBuffed');
-  hpElement = document.getElementById('hpValue');
-  hpBuffedElement = document.getElementById('hpValueBuffed');
-  defCloakedElement = document.getElementById('defendersCloaked');
-  defProcessedElement = document.getElementById('defendersProcessed');
+  attackElement = getElementById('attackValue');
+  attackBuffedElement = getElementById('attackValueBuffed');
+  defenseElement = getElementById('defenseValue');
+  defenseBuffedElement = getElementById('defenseValueBuffed');
+  armorElement = getElementById('armorValue');
+  armorBuffedElement = getElementById('armorValueBuffed');
+  damageElement = getElementById('damageValue');
+  damageBuffedElement = getElementById('damageValueBuffed');
+  hpElement = getElementById('hpValue');
+  hpBuffedElement = getElementById('hpValueBuffed');
+  defCloakedElement = getElementById('defendersCloaked');
+  defProcessedElement = getElementById('defendersProcessed');
 }
 
 function setAtkVars() {
-  dc225Element = document.getElementById('DC225');
-  dc175Element = document.getElementById('DC175');
-  groupAttackElement = document.getElementById('GroupAttack');
-  groupAttackBuffedElement = document.getElementById('GroupAttackBuffed');
-  groupDefenseElement = document.getElementById('GroupDefense');
-  groupDefenseBuffedElement = document.getElementById('GroupDefenseBuffed');
-  groupArmorElement = document.getElementById('GroupArmor');
-  groupArmorBuffedElement = document.getElementById('GroupArmorBuffed');
-  groupDamageElement = document.getElementById('GroupDamage');
-  groupDamageBuffedElement = document.getElementById('GroupDamageBuffed');
-  groupHPElement = document.getElementById('GroupHP');
-  groupHPBuffedElement = document.getElementById('GroupHPBuffed');
+  dc225Element = getElementById('DC225');
+  dc175Element = getElementById('DC175');
+  groupAttackElement = getElementById('GroupAttack');
+  groupAttackBuffedElement = getElementById('GroupAttackBuffed');
+  groupDefenseElement = getElementById('GroupDefense');
+  groupDefenseBuffedElement = getElementById('GroupDefenseBuffed');
+  groupArmorElement = getElementById('GroupArmor');
+  groupArmorBuffedElement = getElementById('GroupArmorBuffed');
+  groupDamageElement = getElementById('GroupDamage');
+  groupDamageBuffedElement = getElementById('GroupDamageBuffed');
+  groupHPElement = getElementById('GroupHP');
+  groupHPBuffedElement = getElementById('GroupHPBuffed');
 }
 
 function prepareDivs() {
@@ -13621,17 +13944,17 @@ function prepareDivs() {
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(false).done(missingMembers);
   }
-  leftDiv.insertAdjacentHTML('beforeend', assets$1.proc);
-  processingStatus = document.getElementById('ProcessingStatus');
+  leftDiv.insertAdjacentHTML('beforeend', assets.proc);
+  processingStatus = getElementById('ProcessingStatus');
   midDiv = createDiv({
     className: 'fshFloatLeft fshRelicMidDiv',
-    innerHTML: assets$1.defStats
+    innerHTML: assets.defStats
   });
   containerDiv.appendChild(midDiv);
   setDefVars();
   rightDiv = createDiv({
     className: 'fshFloatLeft fshRelicRightDiv',
-    innerHTML: assets$1.atkStats
+    innerHTML: assets.atkStats
   });
   containerDiv.appendChild(rightDiv);
   setAtkVars();
@@ -13657,9 +13980,9 @@ function parseGuild$1(html) {
   var doc = createDocument(html);
   var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
   relicCount = nodeList.length;
-  document.getElementById('relicCount').textContent = relicCount.toString();
+  getElementById('relicCount').textContent = relicCount.toString();
   relicMultiplier = calcRelicMultiplier(relicCount);
-  document.getElementById('LDPercentage').textContent =
+  getElementById('LDPercentage').textContent =
     (relicMultiplier * 100).toString() + '%';
 }
 
@@ -13757,7 +14080,7 @@ function setup$1() {
   });
   fetchStatsBtn.addEventListener('click', getStats);
   leftDiv.appendChild(fetchStatsBtn);
-  var dialogRelic = document.getElementById('dialog-relic');
+  var dialogRelic = getElementById('dialog-relic');
   dialogRelic.appendChild(containerDiv);
 }
 
@@ -13767,7 +14090,492 @@ function viewRelic(e, data) {
 }
 
 function injectRelic() {
-  $.subscribe('9-success.action-response', viewRelic);
+  $.subscribe('9' + def_suffixSuccessActionResponse, viewRelic);
+}
+
+var colorHash = {
+  '0': 'red', // Should never see this.
+  '1': 'orange',
+  '2': 'yellow'
+};
+
+var bias = {
+  '0': {generalVariable: 1.1053, hpVariable: 1.1},
+  '1': {generalVariable: 1.1, hpVariable: 1.053},
+  '2': {generalVariable: 1.053, hpVariable: 1},
+  '3': {generalVariable: 1.1053, hpVariable: 1}
+};
+
+/*
+  colSpan = attributes[0]
+  anElement = attributes[1]
+  isHeader = attributes[2]
+*/
+function addNextCell(row, attributes) {
+  var aCell = row.insertCell(-1);
+  aCell.colSpan = attributes[0];
+  if (attributes[2]) {aCell.className = 'header';}
+  insertElement(aCell, attributes[1]);
+  return aCell;
+}
+
+function addRowCells(aRow, someCells) {
+  someCells.forEach(function(cell) {
+    addNextCell(aRow, cell);
+  });
+}
+
+function addNextRow(tbl, cells, isBlue) {
+  var aRow = tbl.insertRow(-1);
+  if (isBlue) {aRow.className = 'fshBlue';}
+  addRowCells(aRow, cells);
+  return aRow;
+}
+
+function addRows(tbl, rows) {
+  rows.forEach(function(row) {
+    addNextRow(tbl, row[0], row[1]);
+  });
+}
+
+function insertElement$1(parent, text) {
+  parent.insertAdjacentText('beforeend', text);
+}
+
+function makeTitanHpWrapper() {
+  var titanHpWrapper = createSpan();
+  insertElement(titanHpWrapper, currentHp);
+  insertElement$1(titanHpWrapper, '/');
+  insertElement(titanHpWrapper, maxHp);
+  return titanHpWrapper;
+}
+
+function makePctWrapper(pct) {
+  var pctWrapper = createSpan();
+  insertElement(pctWrapper, pct);
+  insertElement$1(pctWrapper, '%');
+  return pctWrapper;
+}
+
+function buildTitanInfoTable() {
+  var titanTbl$$1 = createTable({className: 'fshCenter'});
+  addRows(titanTbl$$1, [
+    [[[2, textSpan('Titan HP'), true], [4, textSpan('Your Guild'), true]]],
+    [[[2, makeTitanHpWrapper()], [4, guildKills]]],
+    [[[2, textSpan('Current'), true], [4, makePctWrapper(currentPct)]], true],
+    [[[2, textSpan('Total'), true], [4, makePctWrapper(totalPct)]], true],
+    [[[2, textSpan('Status'), true], [4, statusText]], true],
+    [[[6, cooldownText]]],
+    [[[2, textSpan('Member'), true], [2, textSpan('Kills'), true],
+      [2, textSpan('% of Total'), true]]]
+  ]);
+  return titanTbl$$1;
+}
+
+function scouttower() {
+  return callApp({cmd: 'guild', subcmd: 'scouttower'});
+}
+
+function formatOffset(secs) {
+  var aDate = new Date(now + secs * 1000);
+  var yyyy = aDate.getFullYear();
+  var dd = padZ(aDate.getDate());
+  var month = months[aDate.getMonth()];
+  var hh = padZ(aDate.getHours());
+  var mm = padZ(aDate.getMinutes());
+  return hh + ':' + mm + ' ' + dd + '/' + month + '/' + yyyy;
+}
+
+function getCooldownHtml(cooldown) {
+  if (cooldown <= 0) {
+    return '<span class="fshGreen cooldown">No active cooldown</span>';
+  }
+  return '<span class="fshMaroon cooldown">Cooldown until: ' +
+    formatOffset(cooldown) +
+    '</span>';
+}
+
+function doTopLabels(ourTitan) {
+  currentHp.textContent = ourTitan.current_hp.toString();
+  maxHp.textContent = ourTitan.max_hp.toString();
+  guildKills.textContent = ourTitan.kills.toString();
+  currentPct.textContent = roundToString(getKillsPct(ourTitan.max_hp -
+    ourTitan.current_hp, ourTitan.kills), 2);
+  totalPct.textContent = roundToString(ourTitan.kills * 100 / ourTitan.max_hp,
+    2);
+  statusText.innerHTML = getTitanString(ourTitan.kills, ourTitan.max_hp,
+    ourTitan.current_hp);
+  cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
+}
+
+function clearMemberRows() {
+  if (titanTbl.rows.length > 7) {
+    for (var i = 7; i < titanTbl.rows.length; i += 1) {
+      titanTbl.deleteRow(i);
+    }
+  }
+}
+
+function doMemberRows(ourTitan) {
+  clearMemberRows();
+  var memberRows = ourTitan.members.map(function(member) {
+    return [[
+      [2, textSpan(member.player.name)],
+      [2, textSpan(member.kills.toString())],
+      [2, textSpan(roundToString(member.kills * 100 / ourTitan.kills, 2) + '%')]
+    ]];
+  });
+  addRows(titanTbl, memberRows);
+}
+
+function currentTitan(el) {
+  return el.alive && el.id === titanId && el.realm === realmName;
+}
+
+function processTitans(r) {
+  var ourTitan = r.find(currentTitan);
+  if (ourTitan) {
+    doTopLabels(ourTitan);
+    doMemberRows(ourTitan);
+  }
+}
+
+var realmName;
+var titanId;
+var titanDiv;
+var timeoutId$1;
+
+var titanTbl;
+var currentHp;
+var maxHp;
+var guildKills;
+var currentPct;
+var totalPct;
+var statusText;
+var cooldownText;
+
+function clearTitanDiv() {
+  currentHp.textContent = '';
+  maxHp.textContent = '';
+  guildKills.textContent = '';
+  currentPct.textContent = '';
+  totalPct.textContent = '';
+  statusText.innerHTML = '';
+  cooldownText.innerHTML = '';
+  clearMemberRows();
+}
+
+function hideTitanDiv() {
+  titanId = null;
+  if (titanDiv && !titanDiv.classList.contains('fshHide')) {
+    toggleForce(titanDiv, true);
+    clearTitanDiv();
+  }
+}
+
+function clearTheTimeout() {
+  if (timeoutId$1) {
+    window.clearTimeout(timeoutId$1);
+    timeoutId$1 = null;
+  }
+}
+
+function goodData(data) {
+  return data.s && Array.isArray(data.r);
+}
+
+function hasTitan(el) {
+  if (el.type === 0) {
+    titanId = el.base_creature_id;
+    return true;
+  }
+  return false;
+}
+
+function titanToShow(dynamic) {
+  return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
+}
+
+function ajaxScoutTower() {
+  scouttower().done(function processScoutTower(data) {
+    if (goodData(data)) {
+      processTitans(data.r);
+      if (titanToShow(GameData.realm().dynamic)) {
+        timeoutId$1 = window.setTimeout(ajaxScoutTower, 30000);
+      } else {
+        hideTitanDiv();
+      }
+    }
+  });
+}
+
+function initVars() {
+  currentHp = createSpan();
+  maxHp = createSpan();
+  guildKills = createSpan();
+  currentPct = createSpan();
+  totalPct = createSpan();
+  statusText = createSpan();
+  cooldownText = createSpan();
+}
+
+function setupTitanDiv() {
+  if (titanDiv) {
+    toggleForce(titanDiv, false);
+  } else {
+    var actCont = getElementById('actionContainer');
+    titanDiv = createDiv({className: 'titanInfo'});
+    initVars();
+    titanTbl = buildTitanInfoTable();
+    insertElement(titanDiv, titanTbl);
+    insertElement(actCont, titanDiv);
+  }
+}
+
+function testDynamics(dynamic) {
+  clearTheTimeout();
+  if (titanToShow(dynamic)) {
+    setupTitanDiv();
+    ajaxScoutTower();
+  } else {
+    hideTitanDiv();
+  }
+}
+
+function titanStats(data) {
+  if (data.realm.dynamic) {
+    realmName = data.realm.name;
+    testDynamics(data.realm.dynamic);
+  }
+}
+
+function toggleShowTitanInfo() {
+  calf.showTitanInfo = !calf.showTitanInfo;
+  setValue('showTitanInfo', calf.showTitanInfo);
+  testDynamics(GameData.realm().dynamic);
+}
+
+var buttonContainer;
+var yourLvl;
+var formGroup;
+var quickBuff;
+var realmMap;
+var ufsgMap;
+var soundCheck;
+var huntCheck;
+
+function doFormGroup(self) { // jQuery.min
+  $(self).qtip('hide');
+  GameData.doAction(12, 401, {}, 0);
+}
+
+function openQuickBuff() {
+  openQuickBuffByName(playerName());
+}
+
+function openRealmMap() {
+  window.open('index.php?cmd=world&subcmd=map', 'fsMap');
+}
+
+function openUfsgMap() {
+  var gameRealm = GameData.realm();
+  window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
+    'mapUfsg');
+}
+
+function toggleSound() {
+  // Doesn't actually work in New World...
+  setValue('playNewMessageSound', !getValue('playNewMessageSound'));
+}
+
+function toggleHuntMode() {
+  calf.huntingMode = !calf.huntingMode;
+  setValue('huntingMode', calf.huntingMode);
+}
+
+var changeHdl = [
+  {
+    test: function(self) {return self === soundCheck;},
+    act: toggleSound
+  },
+  {
+    test: function(self) {return self === huntCheck;},
+    act: toggleHuntMode
+  }
+];
+
+var clickHdl = [
+  {
+    test: function(self) {return self === formGroup;},
+    act: doFormGroup
+  },
+  {
+    test: function(self) {return self === quickBuff;},
+    act: openQuickBuff
+  },
+  {
+    test: function(self) {return self === realmMap;},
+    act: openRealmMap
+  },
+  {
+    test: function(self) {return self === ufsgMap;},
+    act: openUfsgMap
+  }
+];
+
+function fixTeleport() {
+  if (GameController && GameController.Realm) {
+    GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
+  }
+}
+
+function makeButtonContainer() {
+  if (buttonContainer) {buttonContainer.remove();}
+  return createDiv({
+    className: 'fshCurveContainer',
+    id: 'fshWorldButtonContainer'
+  });
+}
+
+function doLevels(data, worldName) {
+  var lvlDiv = createDiv({
+    className: 'fshFsty',
+    innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
+  });
+  var btmDiv = createDiv({textContent: 'Your Lvl: '});
+  yourLvl = textSpan(data.player.level.toString());
+  lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
+  worldName.appendChild(lvlDiv);
+}
+
+function doBtn(className, tip, worldName) {
+  var btn = createButton({
+    className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
+    dataset: {tipped: tip}
+  });
+  worldName.appendChild(btn);
+  return btn;
+}
+
+function showQuickLinks(worldName, data) {
+  doLevels(data, worldName);
+  formGroup = doBtn('fshFormGroup', 'Quick Create Attack Group', worldName);
+  quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
+  realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
+  ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
+}
+
+function createLbl(className, tip, htmlFor) {
+  return createLabel({
+    className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
+    dataset: {tipped: tip},
+    htmlFor: htmlFor
+  });
+}
+
+function makeToggleBtn(o) {
+  var btnDiv = createDiv({className: 'fshToggle'});
+  var btnCheck = createInput({
+    checked: o.prefVal,
+    id: o.checkId,
+    type: 'checkbox'
+  });
+  btnDiv.appendChild(btnCheck);
+  var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
+  btnDiv.appendChild(onLbl);
+  var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
+  btnDiv.appendChild(offLbl);
+  o.worldName.appendChild(btnDiv);
+  return btnCheck;
+}
+
+function showSpeakerOnWorld(worldName) {
+  if (getValue('showSpeakerOnWorld')) {
+    var msgSounds = getValue('playNewMessageSound');
+    soundCheck = makeToggleBtn({
+      prefVal: msgSounds,
+      checkId: 'fshSoundCheck',
+      onClass: 'soundOn',
+      onTip: 'Turn Off Sound when you have a new log message',
+      offClass: 'soundOff',
+      offTip: 'Turn On Sound when you have a new log message',
+      worldName: worldName
+    });
+  }
+}
+
+function showHuntMode(worldName) {
+  var inHuntMode = calf.huntingMode;
+  huntCheck = makeToggleBtn({
+    prefVal: inHuntMode,
+    checkId: 'fshHuntCheck',
+    onClass: 'huntOn',
+    onTip: 'Hunting mode is ON',
+    offClass: 'huntOff',
+    offTip: 'Hunting mode is OFF',
+    worldName: worldName
+  });
+}
+
+function injectButtons(data) {
+  fixTeleport();
+  buttonContainer = makeButtonContainer();
+  showQuickLinks(buttonContainer, data);
+  showSpeakerOnWorld(buttonContainer);
+  showHuntMode(buttonContainer);
+  buttonContainer.addEventListener('click', eventHandler$1(clickHdl));
+  buttonContainer.addEventListener('change', eventHandler$1(changeHdl));
+  getElementById('worldContainer')
+    .insertBefore(buttonContainer, getElementById('worldCoord'));
+}
+
+function levelStats(e, data) {
+  if (yourLvl) {
+    yourLvl.textContent = data.b;
+  }
+}
+
+function fixDebuffQTip(e) { // jQuery.min
+  $(e.target).qtip('hide');
+}
+
+function hazRealm(data) {
+  return data.realm && data.realm.name;
+}
+
+function injectWorldNewMap(data) {
+  updateSendGoldOnWorld(data);
+  if (hazRealm(data)) {
+    injectButtons(data);
+    titanStats(data);
+    getElementById('buffList')
+      .addEventListener('click', fixDebuffQTip);
+    if (calf.hideSubLvlCreature) {GameData.fetch(256);}
+  }
+}
+
+function impIconColour() { // jQuery
+  var imp = $('#actionlist-shield-imp');
+  if (imp.length === 1) {
+    imp.css('background-color',
+      colorHash[imp.text()] || '#ad8043');
+  }
+}
+
+function onWorld() {
+  injectSendGoldOnWorld();
+  if (window.initialGameData) {// HCS initial data
+    injectWorldNewMap(window.initialGameData);
+    impIconColour(null,
+      {b: window.initialGameData.player.buffs});
+  }
+  $.subscribe('-1' + def_suffixSuccessActionResponse +
+              ' 5' + def_suffixSuccessActionResponse,
+  function(e, data) { // change of information
+    injectWorldNewMap(data);
+  });
+  $.subscribe(def_playerBuffs, impIconColour);
+  $.subscribe('level.stats-player', levelStats);
 }
 
 var shoppingData;
@@ -13854,7 +14662,7 @@ function injectQuickBuy() {
 function worldDialogShop(e, data) {
   shoppingData = data;
   dialog$1 = fallback(dialog$1,
-    document.getElementById('shopDialogConfirm'));
+    getElementById('shopDialogConfirm'));
   if (!dialog$1) {return;}
   jDialog = fallback(jDialog, $(dialog$1).data('worldDialogShopConfirm'));
   if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}
@@ -14029,6 +14837,11 @@ function evalAttack(combat) {
   return combat;
 }
 
+function caIsRunning(combat) {
+  return combat.player.counterAttackLevel > 0 &&
+    combat.numberOfHitsRequired === 1;
+}
+
 function calcLowest(combat) {
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
@@ -14111,8 +14924,7 @@ function caResult(combat) {
 }
 
 function evalCA(combat) {
-  if (combat.player.counterAttackLevel > 0 &&
-      combat.numberOfHitsRequired === 1) {
+  if (caIsRunning(combat)) {
     caRunning(combat);
   }
   if (needCa(combat)) {
@@ -14364,15 +15176,15 @@ function evalHTML(combat) {
 }
 
 function getBiasGeneral(combat) {
-  if (assets.bias[combat.combatEvaluatorBias]) {
-    return assets.bias[combat.combatEvaluatorBias].generalVariable;
+  if (bias[combat.combatEvaluatorBias]) {
+    return bias[combat.combatEvaluatorBias].generalVariable;
   }
   return 1.1053;
 }
 
 function getBiasHp(combat) {
-  if (assets.bias[combat.combatEvaluatorBias]) {
-    return assets.bias[combat.combatEvaluatorBias].hpVariable;
+  if (bias[combat.combatEvaluatorBias]) {
+    return bias[combat.combatEvaluatorBias].hpVariable;
   }
   return 1.1;
 }
@@ -14502,7 +15314,7 @@ function addRemoveCreatureToDoNotKillList(evt) {
   }
   setValue('doNotKillList', calf.doNotKillList.join());
   // refresh the action list
-  window.GameData.doAction(-1);
+  afterUpdateActionList();
 }
 
 function readyViewCreature() { // Hybrid
@@ -14538,192 +15350,12 @@ function readyViewCreature() { // Hybrid
     extraText = 'Remove from do not kill list';
   }
   $('#addRemoveCreatureToDoNotKillList').html(extraText);
-  document.getElementById('addRemoveCreatureToDoNotKillList')
+  getElementById('addRemoveCreatureToDoNotKillList')
     .addEventListener('click',
       addRemoveCreatureToDoNotKillList, true);
 }
 
-var huntingBuffs$1;
-var huntingBuffsName;
-var hidePlayerActions;
-var missingBuffsDiv;
-
-function getPrefs() {
-  calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
-  hidePlayerActions = getValue('hidePlayerActions');
-  calf.showBuffs = getValue('showHuntingBuffs');
-  calf.enabledHuntingMode = getValue('enabledHuntingMode');
-  calf.buffs = shouldBeArray('huntingBuffs');
-  calf.buffsName = getValue('huntingBuffsName');
-  calf.buffs2 = shouldBeArray('huntingBuffs2');
-  calf.buffs2Name = getValue('huntingBuffs2Name');
-  calf.buffs3 = shouldBeArray('huntingBuffs3');
-  calf.buffs3Name = getValue('huntingBuffs3Name');
-  calf.doNotKillList = shouldBeArray('doNotKillList');
-}
-
-var buffLookup = {
-  '1': function() {
-    huntingBuffs$1 = calf.buffs;
-    huntingBuffsName = calf.buffsName;
-  },
-  '2': function() {
-    huntingBuffs$1 = calf.buffs2;
-    huntingBuffsName = calf.buffs2Name;
-  },
-  '3': function() {
-    huntingBuffs$1 = calf.buffs3;
-    huntingBuffsName = calf.buffs3Name;
-  }
-};
-
-function setCurrentBuffList() {
-  var tmpFn = buffLookup[calf.enabledHuntingMode];
-  if (typeof tmpFn === 'function') {
-    tmpFn();
-  }
-}
-
-function toggleSubLvlCreature() {
-  calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
-  setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
-  GameData.fetch(256);
-}
-
-function toggleHidePlayerActions() {
-  hidePlayerActions = !hidePlayerActions;
-  setValue('hidePlayerActions', hidePlayerActions);
-  GameData.fetch(256);
-}
-
-function toggleShowHuntingBuffs() {
-  calf.showBuffs = !calf.showBuffs;
-  setValue('showHuntingBuffs', calf.showBuffs);
-  GameData.fetch(16);
-}
-
-function toggleEnabledHuntingMode(e) {
-  if (e.target.name !== 'enabledHuntingMode') {return;}
-  calf.enabledHuntingMode = e.target.value;
-  setValue('enabledHuntingMode', calf.enabledHuntingMode);
-  setCurrentBuffList();
-  GameData.fetch(16);
-}
-
-var fshEvents = {
-  hideSubLvlCreature: toggleSubLvlCreature,
-  hidePlayerActions: toggleHidePlayerActions,
-  showHuntingBuffs: toggleShowHuntingBuffs
-};
-
-function prefsClickEvent(e) {
-  var tmpFn = fshEvents[e.target.name];
-  if (typeof tmpFn === 'function') {
-    e.target.blur();
-    tmpFn(e);
-  }
-}
-
-function buildFshDivs() {
-  var fshDiv = createDiv({className: 'fshCenter fshFten'});
-  var prefsDiv = createDiv({
-    innerHTML: simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-      huntingBuffsHtml()
-  });
-  prefsDiv.addEventListener('click', prefsClickEvent);
-  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  fshDiv.insertAdjacentElement('beforeend', prefsDiv);
-  missingBuffsDiv = createDiv();
-  fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
-  var worldContainerBelow = document.getElementById('worldContainerBelow');
-  worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);
-}
-
-function xhrDataFilter(data) {
-  var myData = JSON.parse(data);
-  if (!myData.actions || myData.actions.length === 0) {return data;}
-  var realm = GameData.realm();
-  myData.actions = myData.actions.filter(function(el) {
-    if (el.type === 6) {
-      return el.data.creature_type !== 0 || el.data.level >= realm.minlevel;
-    }
-    return true;
-  });
-  var ret = JSON.stringify(myData);
-  return ret;
-}
-
-function xhrPreFilter(options, originalOptions) {
-  if (!originalOptions.data || !calf.hideSubLvlCreature) {return;}
-  options.dataFilter = xhrDataFilter;
-}
-
-function interceptXHR() { // jQuery.min
-  $.ajaxPrefilter('JSON', xhrPreFilter);
-}
-
-function doHidePlayerActions() {
-  if (!hidePlayerActions) {return;}
-  var act = document.getElementById('actionList');
-  var players = act.getElementsByClassName('player');
-  Array.prototype.forEach.call(players, function(el) {
-    var verbs = el.getElementsByClassName('verbs');
-    if (verbs && verbs.length === 1) {
-      verbs[0].classList.add('fshHide');
-    }
-  });
-}
-
-function huntingBuffsEnabled(evt, data) {
-  if (!calf.showBuffs) {
-    missingBuffsDiv.innerHTML = '';
-    return;
-  }
-  var buffHash = data.b.reduce(function(prev, curr) {
-    prev[curr.name] = true;
-    return prev;
-  }, {});
-  var missingBuffs = huntingBuffs$1.reduce(function(prev, curr) {
-    if (!buffHash[curr.trim()]) {prev.push(curr);}
-    return prev;
-  }, []);
-  if (missingBuffs.length > 0) {
-    missingBuffsDiv.innerHTML = 'You are missing some ' +
-      huntingBuffsName + ' hunting buffs<br>(' +
-      missingBuffs.join(', ') + ')';
-  } else {missingBuffsDiv.innerHTML = '';}
-}
-
-function dataEventsPlayerBuffs(evt, data) {
-  if (huntingBuffs$1) {huntingBuffsEnabled(evt, data);}
-}
-
-function doHuntingBuffs() { // jQuery.min
-  setCurrentBuffList();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    dataEventsPlayerBuffs);
-  if (calf.showBuffs && window.initialGameData) { // HCS initial data
-    dataEventsPlayerBuffs(null,
-      {b: window.initialGameData.player.buffs});
-  }
-}
-
-function setupPref() {
-  getPrefs();
-  buildFshDivs();
-  interceptXHR();
-  doHuntingBuffs();
-  $.subscribe('after-update.actionlist', doHidePlayerActions);
-  doHidePlayerActions();
-}
-
 var showCreatureInfo;
-var showMonsterLog;
-var monsterLog;
-var actionData;
-var creature;
-var monster;
 var generalVariable = 1.1053;
 var hpVariable = 1.1;
 var statLevel;
@@ -14733,53 +15365,41 @@ var statDamage;
 var statArmor;
 var statHp;
 
-function updateMinMax(_logStat, creatureStat) {
-  var logStat = fallback(_logStat, {});
-  if (logStat.min) {
-    logStat.min = Math.min(logStat.min, creatureStat);
-  } else {
-    logStat.min = creatureStat;
-  }
-  if (logStat.max) {
-    logStat.max = Math.max(logStat.max, creatureStat);
-  } else {
-    logStat.max = creatureStat;
-  }
-  return logStat;
+function toggleShowCreatureInfo() {
+  showCreatureInfo = !showCreatureInfo;
+  setValue('showCreatureInfo', showCreatureInfo);
 }
 
-function processMonsterLog() {
-  if (!showMonsterLog) {return;}
-  monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
-  var logCreature = monsterLog[creature.name];
-  logCreature.creature_class = fallback(logCreature.creature_class,
-    creature.creature_class);
-  logCreature.image_id = fallback(logCreature.image_id,
-    creature.image_id);
-  logCreature.level = fallback(logCreature.level,
-    Number(creature.level));
-  logCreature.type = fallback(logCreature.type, creature.type);
-  logCreature.armor = updateMinMax(logCreature.armor,
-    Number(creature.armor));
-  logCreature.attack = updateMinMax(logCreature.attack,
-    Number(creature.attack));
-  logCreature.damage = updateMinMax(logCreature.damage,
-    Number(creature.damage));
-  logCreature.defense = updateMinMax(logCreature.defense,
-    Number(creature.defense));
-  logCreature.hp = updateMinMax(logCreature.hp,
-    Number(creature.hp));
-  if (creature.enhancements && creature.enhancements.length > 0) {
-    logCreature.enhancements = fallback(logCreature.enhancements, {});
-    var logEnh = logCreature.enhancements;
-    creature.enhancements.forEach(function(e) {
-      logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
-    });
-  }
-  setForage('fsh_monsterLog', monsterLog);
+function biasIsValid(combatEvaluatorBias) {
+  return combatEvaluatorBias &&
+    combatEvaluatorBias >= 0 && combatEvaluatorBias <= 3;
 }
 
-function doMouseOver() {
+function getBias() {
+  var combatEvaluatorBias = getValue('combatEvaluatorBias');
+  if (biasIsValid(combatEvaluatorBias)) {
+    generalVariable = bias[combatEvaluatorBias].generalVariable;
+    hpVariable = bias[combatEvaluatorBias].hpVariable;
+  }
+}
+
+function getStatText(statTooltip, statClassName) {
+  return statTooltip.getElementsByClassName(statClassName)[0]
+    .nextElementSibling.textContent;
+}
+
+function getMyStats() {
+  statLevel = intValue(getStatText(
+    getElementById('statbar-level-tooltip-general'), 'stat-level'));
+  var statTooltip = getElementById('statbar-character-tooltip-stats');
+  statDefense = getStatText(statTooltip, 'stat-defense');
+  statAttack = getStatText(statTooltip, 'stat-attack');
+  statDamage = getStatText(statTooltip, 'stat-damage');
+  statArmor = getStatText(statTooltip, 'stat-armor');
+  statHp = getStatText(statTooltip, 'stat-hp');
+}
+
+function doMouseOver(creature, monster) {
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
   var myLvlClas = 'fshYellow';
@@ -14836,83 +15456,335 @@ var bailOut$1 = [
     return actions.length - 1 < data.passback; // Not enough actions
   },
   function(data) {
-    return creature.id !== actionData[data.passback].data.id.toString(); // Different action list
+    return data.response.data.id !==
+      GameData.actions()[data.passback].data.id.toString(); // Different action list
   }
 ];
 
 function doCreatureInfo(data) {
-  var actions = document.getElementById('actionList').children;
+  var actions = getElementById('actionList').children;
   for (var i = 0; i < bailOut$1.length; i += 1) {
     if (bailOut$1[i](data, actions)) {return;}
   }
-  monster = actions[data.passback].firstElementChild.firstElementChild
-    .firstElementChild;
-  doMouseOver();
+  // monster = 0;
+  doMouseOver(data.response.data, actions[data.passback].firstElementChild
+    .firstElementChild.firstElementChild);
 }
 
 function processMouseOver(data) {
   if (showCreatureInfo) {doCreatureInfo(data);}
 }
 
-function processMonster(data) {
-  creature = data.response.data;
-  if (!creature) {return;} // creature is null
-  processMouseOver(data);
-  processMonsterLog();
+function getCreaturePrefs() {
+  showCreatureInfo = getValue('showCreatureInfo');
 }
 
-function loopActions(e, i) { // jQuery
+var showMonsterLog;
+var monsterLog;
+
+function toggleShowMonsterLog() {
+  showMonsterLog = !showMonsterLog;
+  setValue('showMonsterLog', showMonsterLog);
+}
+
+function updateMinMax(_logStat, creatureStat) {
+  var logStat = fallback(_logStat, {});
+  if (logStat.min) {
+    logStat.min = Math.min(logStat.min, creatureStat);
+  } else {
+    logStat.min = creatureStat;
+  }
+  if (logStat.max) {
+    logStat.max = Math.max(logStat.max, creatureStat);
+  } else {
+    logStat.max = creatureStat;
+  }
+  return logStat;
+}
+
+function creatureHazEnhancements(creature) {
+  return creature.enhancements && creature.enhancements.length > 0;
+}
+
+function doMonsterLog(creature) {
+  monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
+  var logCreature = monsterLog[creature.name];
+  logCreature.creature_class = fallback(logCreature.creature_class,
+    creature.creature_class);
+  logCreature.image_id = fallback(logCreature.image_id,
+    creature.image_id);
+  logCreature.level = fallback(logCreature.level,
+    Number(creature.level));
+  logCreature.type = fallback(logCreature.type, creature.type);
+  logCreature.armor = updateMinMax(logCreature.armor,
+    Number(creature.armor));
+  logCreature.attack = updateMinMax(logCreature.attack,
+    Number(creature.attack));
+  logCreature.damage = updateMinMax(logCreature.damage,
+    Number(creature.damage));
+  logCreature.defense = updateMinMax(logCreature.defense,
+    Number(creature.defense));
+  logCreature.hp = updateMinMax(logCreature.hp,
+    Number(creature.hp));
+  if (creatureHazEnhancements(creature)) {
+    logCreature.enhancements = fallback(logCreature.enhancements, {});
+    var logEnh = logCreature.enhancements;
+    creature.enhancements.forEach(function(e) {
+      logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
+    });
+  }
+  setForage('fsh_monsterLog', monsterLog);
+}
+
+function processMonsterLog(creature) {
+  if (showMonsterLog) {doMonsterLog(creature);}
+}
+
+function getMonsterPrefs() {
+  showMonsterLog = getValue('showMonsterLog');
+  getForage('fsh_monsterLog').done(function(data) {
+    monsterLog = data || {};
+  });
+}
+
+function processMonster(data) {
+  if (!data.response.data) {return;} // creature is null
+  processMouseOver(data);
+  processMonsterLog(data.response.data);
+}
+
+function loopActions(e, i) { // jQuery.min
   if (e.type !== 6) {return;}
   retryAjax({
-    url: 'fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i,
+    url: 'fetchdata.php?a=1&id=' + e.data.id + '&passback=' + i,
     dataType: 'json'
   }).done(processMonster);
 }
 
-function getStatText(statTooltip, statClassName) {
-  return statTooltip.getElementsByClassName(statClassName)[0]
-    .nextElementSibling.textContent;
-}
-
-function getMyStats() {
-  statLevel = intValue(getStatText(document
-    .getElementById('statbar-level-tooltip-general'), 'stat-level'));
-  var statTooltip = document.getElementById('statbar-character-tooltip-stats');
-  statDefense = getStatText(statTooltip, 'stat-defense');
-  statAttack = getStatText(statTooltip, 'stat-attack');
-  statDamage = getStatText(statTooltip, 'stat-damage');
-  statArmor = getStatText(statTooltip, 'stat-armor');
-  statHp = getStatText(statTooltip, 'stat-hp');
+function getCreatures() {
+  if (showCreatureInfo) {getMyStats();}
+  GameData.actions().forEach(loopActions);
 }
 
 function initMonsterLog() {
-  if (showCreatureInfo) {getMyStats();}
-  actionData = GameData.actions();
-  actionData.forEach(loopActions);
+  // if (!showCreatureInfo && !showMonsterLog) {return;}
+  if (showCreatureInfo || showMonsterLog) {
+    getCreatures();
+  }
 }
 
-var genVar = [0, 1.1, 1.053, 1.1053];
-var hpVar = [0, 1.053, 1, 1];
-
-function getBias() {
-  var combatEvaluatorBias = getValue('combatEvaluatorBias');
-  generalVariable = genVar[combatEvaluatorBias];
-  hpVariable = hpVar[combatEvaluatorBias];
-}
-
-function startMonsterLog() { // jQuery
-  showCreatureInfo = getValue('showCreatureInfo');
-  showMonsterLog = getValue('showMonsterLog');
-  if (!showCreatureInfo && !showMonsterLog) {return;}
-  if (showCreatureInfo) {getBias();}
-  $.subscribe('after-update.actionlist', initMonsterLog);
-  getForage('fsh_monsterLog').done(function(data) {
-    monsterLog = data || {};
-  });
+function startMonsterLog() { // jQuery.min
+  getCreaturePrefs();
+  getMonsterPrefs();
+  getBias();
+  $.subscribe(def_afterUpdateActionlist, initMonsterLog);
   initMonsterLog();
 }
 
-var def_afterUpdateActionlist = 'after-update.actionlist';
+function insertElementBefore(newNode, referenceNode) {
+  return referenceNode.parentNode.insertBefore(newNode, referenceNode);
+}
+
+var huntingBuffs$1;
+var huntingBuffsName;
+var buffLookup = {
+  '1': function() {
+    huntingBuffs$1 = calf.buffs;
+    huntingBuffsName = calf.buffsName;
+  },
+  '2': function() {
+    huntingBuffs$1 = calf.buffs2;
+    huntingBuffsName = calf.buffs2Name;
+  },
+  '3': function() {
+    huntingBuffs$1 = calf.buffs3;
+    huntingBuffsName = calf.buffs3Name;
+  }
+};
+
+function setCurrentBuffList() {
+  var tmpFn = buffLookup[calf.enabledHuntingMode];
+  if (typeof tmpFn === 'function') {
+    tmpFn();
+  }
+}
+
+function toggleShowHuntingBuffs() {
+  calf.showBuffs = !calf.showBuffs;
+  setValue('showHuntingBuffs', calf.showBuffs);
+  GameData.fetch(16);
+}
+
+function toggleEnabledHuntingMode(e) {
+  if (e.target.name !== 'enabledHuntingMode') {return;}
+  calf.enabledHuntingMode = e.target.value;
+  setValue('enabledHuntingMode', calf.enabledHuntingMode);
+  setCurrentBuffList();
+  GameData.fetch(16);
+}
+
+function huntingBuffsEnabled(evt, data) {
+  if (!calf.showBuffs) {
+    missingBuffsDiv.innerHTML = '';
+    return;
+  }
+  var buffHash = data.b.reduce(function(prev, curr) {
+    prev[curr.name] = true;
+    return prev;
+  }, {});
+  var missingBuffs = huntingBuffs$1.reduce(function(prev, curr) {
+    if (!buffHash[curr.trim()]) {prev.push(curr);}
+    return prev;
+  }, []);
+  if (missingBuffs.length > 0) {
+    missingBuffsDiv.innerHTML = 'You are missing some ' +
+      huntingBuffsName + ' hunting buffs<br>(' +
+      missingBuffs.join(', ') + ')';
+  } else {missingBuffsDiv.innerHTML = '';}
+}
+
+function dataEventsPlayerBuffs(evt, data) {
+  if (huntingBuffs$1) {huntingBuffsEnabled(evt, data);}
+}
+
+function doHuntingBuffs() { // jQuery.min
+  setCurrentBuffList();
+  $.subscribe(def_playerBuffs, dataEventsPlayerBuffs);
+  if (calf.showBuffs && window.initialGameData) { // HCS initial data
+    dataEventsPlayerBuffs(null,
+      {b: window.initialGameData.player.buffs});
+  }
+}
+
+function bitwiseAnd(a, b) {
+  /* jshint -W016 */
+  return a & b; // eslint-disable-line no-bitwise
+  /* jshint +W016 */
+}
+
+function toggleSubLvlCreature() {
+  calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
+  setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
+  GameData.fetch(256);
+}
+
+function xhrDataFilter(data) {
+  var myData = JSON.parse(data);
+  if (!myData.actions || myData.actions.length === 0) {return data;}
+  var realm = GameData.realm();
+  myData.actions = myData.actions.filter(function(el) {
+    if (el.type === 6) {
+      return el.data.creature_type !== 0 || el.data.level >= realm.minlevel;
+    }
+    return true;
+  });
+  var ret = JSON.stringify(myData);
+  return ret;
+}
+
+function isActionList(originalOptions) {
+  return originalOptions.data &&
+    originalOptions.data.d &&
+    bitwiseAnd(originalOptions.data.d, def_fetch_worldRealmActions);
+}
+
+function xhrPreFilter(options, originalOptions) {
+  if (calf.hideSubLvlCreature && isActionList(originalOptions)) {
+    options.dataFilter = xhrDataFilter;
+  }
+}
+
+function interceptXHR() { // jQuery.min
+  $.ajaxPrefilter('JSON', xhrPreFilter);
+}
+
+var hidePlayerActions;
+
+function toggleHidePlayerActions() {
+  hidePlayerActions = !hidePlayerActions;
+  setValue('hidePlayerActions', hidePlayerActions);
+  GameData.fetch(256);
+}
+
+function doHidePlayerActions() {
+  if (!hidePlayerActions) {return;}
+  var act = getElementById('actionList');
+  var players = act.getElementsByClassName('player');
+  Array.prototype.forEach.call(players, function(el) {
+    var verbs = el.getElementsByClassName('verbs');
+    if (verbs && verbs.length === 1) {
+      verbs[0].classList.add('fshHide');
+    }
+  });
+}
+
+function prepareHidePlayerActions() {
+  hidePlayerActions = getValue('hidePlayerActions');
+  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
+  doHidePlayerActions();
+}
+
+var missingBuffsDiv;
+
+function getPrefs() {
+  calf.buffs = shouldBeArray('huntingBuffs');
+  calf.buffsName = getValue('huntingBuffsName');
+  calf.buffs2 = shouldBeArray('huntingBuffs2');
+  calf.buffs2Name = getValue('huntingBuffs2Name');
+  calf.buffs3 = shouldBeArray('huntingBuffs3');
+  calf.buffs3Name = getValue('huntingBuffs3Name');
+  calf.doNotKillList = shouldBeArray('doNotKillList');
+  calf.enabledHuntingMode = getValue('enabledHuntingMode');
+  calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
+  calf.showBuffs = getValue('showHuntingBuffs');
+  calf.showTitanInfo = getValue('showTitanInfo');
+}
+
+var fshEvents = {
+  hideSubLvlCreature: toggleSubLvlCreature,
+  hidePlayerActions: toggleHidePlayerActions,
+  showCreatureInfo: toggleShowCreatureInfo,
+  showHuntingBuffs: toggleShowHuntingBuffs,
+  showMonsterLog: toggleShowMonsterLog,
+  showTitanInfo: toggleShowTitanInfo
+};
+
+function prefsClickEvent(e) {
+  var tmpFn = fshEvents[e.target.name];
+  if (typeof tmpFn === 'function') {
+    e.target.blur();
+    tmpFn(e);
+  }
+}
+
+function buildFshDivs() {
+  var fshDiv = createDiv({className: 'fshCenter fshFten'});
+  var prefsDiv = createDiv({
+    id: 'fshWorldPrefs',
+    innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
+      '<br>' +
+      simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+      huntingBuffsHtml()
+  });
+  prefsDiv.addEventListener('click', prefsClickEvent);
+  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
+  insertElement(fshDiv, prefsDiv);
+  missingBuffsDiv = createDiv();
+  insertElement(fshDiv, missingBuffsDiv);
+  var tempWorldButtons = getElementById('worldContainerBelow').children[0];
+  insertElementBefore(fshDiv, tempWorldButtons);
+}
+
+function worldPrefs() {
+  getPrefs();
+  buildFshDivs();
+  interceptXHR();
+  doHuntingBuffs();
+  prepareHidePlayerActions();
+}
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
@@ -14947,7 +15819,7 @@ function colorType(actionList, creatureClass, colorClass) {
 }
 
 function colorMonsters() {
-  var act = document.getElementById('actionList');
+  var act = getElementById('actionList');
   colorType(act, 'creature-1', 'fshGreen');
   colorType(act, 'creature-2', 'fshYellow');
   colorType(act, 'creature-3', 'fshRed');
@@ -14960,113 +15832,27 @@ function doMonsterColors() { // jQuery.min
   }
 }
 
-function afterUpdateActionList() {
-  // color the critters in the do no kill list blue
-  var act = document.getElementById('actionList');
-  var creatures = act.getElementsByClassName('creature');
-  Array.prototype.forEach.call(creatures, function(el) {
-    if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
-      el.classList.add('fshBlue');
-    }
-  });
-}
-
-function interceptDoAction() { // jQuery
-  var gameData = GameData;
-  var hcs = window.HCS;
-  var oldDoAction = gameData.doAction;
-  gameData.doAction = function(actionCode, fetchFlags, data) {
-    if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
-      // Do custom stuff e.g. do not kill list
-      var creatureIcon = $('#actionList div.header')
-        .eq(data.passback).find('a.icon');
-      if (calf.doNotKillList.indexOf(creatureIcon.data('name')) !== -1) {
-        creatureIcon.removeClass('loading');
-        return;
-      }
-    }
-    // Call standard action
-    oldDoAction(actionCode, fetchFlags, data);
-  };
-}
-
-function impIconColour() { // jQuery
-  var imp = $('#actionlist-shield-imp');
-  if (imp.length === 1) {
-    imp.css('background-color',
-      assets.colorHash[imp.text()] || '#ad8043');
-  }
-}
-
-function fixDebuffQTip(e) { // jQuery.min
-  $(e.target).qtip('hide');
-}
-
-function injectWorldNewMap(data) {
-  updateSendGoldOnWorld(data);
-  if (data.realm && data.realm.name) {
-    injectButtons(data);
-    document.getElementById('buffList')
-      .addEventListener('click', fixDebuffQTip);
-    if (calf.hideSubLvlCreature) {GameData.fetch(256);}
-  }
+function doRepair$1(e, key) {
+  if (key === 'ACT_REPAIR') {GameData.fetch(402);}
 }
 
 function subscribes() { // jQuery.min
-  setupPref();
-  injectSendGoldOnWorld();
+  worldPrefs();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
   hideGroupButton(); // Hide Create Group button
   doMonsterColors();
-  // add do-not-kill list functionality
-  $.subscribe(def_afterUpdateActionlist, afterUpdateActionList);
-  afterUpdateActionList();
-  // add monster log functionality
-  startMonsterLog();
-  // then intercept the action call
-  interceptDoAction();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    impIconColour);
-  $.subscribe('keydown.controls', function(e, key) {
-    if (key === 'ACT_REPAIR') {GameData.fetch(403);}
-  });
+  doNotKill(); // add do-not-kill list functionality
+  startMonsterLog(); // add monster log functionality
+  $.subscribe('keydown.controls', doRepair$1);
   combatLogger();
-  // on world
-  if (window.initialGameData) {// HCS initial data
-    injectWorldNewMap(window.initialGameData);
-    impIconColour(null,
-      {b: window.initialGameData.player.buffs});
-  }
-  $.subscribe('-1-success.action-response 5-success.action-response',
-    function(e, data) { // change of information
-      injectWorldNewMap(data);
-    }
-  );
+  onWorld(); // on world
   // somewhere near here will be multi buy on shop
   prepareShop();
   injectRelic();
-
-
+  $('#messageCenter').worldMessageCenter({offset: '0 60'});
+  $('#mapTooltip').qtip('hide');
 }
-
-/* fetchFlags = {
-  playerStats : 1,
-  playerBackpackCount : 2,
-  playerBackpackItems : 4,
-  playerPrefs : 8,
-
-  playerBuffs : 16,
-  worldDefines : 32,
-  worldRealmStatic : 64,
-  worldRealmDynamic : 128,
-
-  worldRealmActions : 256,
-  PLAYER_EQUIPMENT : 512,
-  PLAYER_NOTIFICATIONS : 1024,
-
-  all : 2047
-}; */
 
 var impStyles = [
   ' style="color:red; font-size:large; font-weight:bold"',
@@ -15186,17 +15972,9 @@ function getTrackText(trackKillStreak) { // Legacy
   return 'off';
 }
 
-function doDeathDealer(impsRemaining) { // Legacy
-  var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
-  var lastKillStreak = getLastValue('lastKillStreak');
+function notMaxDd(lastDeathDealerPercentage, lastKillStreak) {
   var trackKillStreak = getValue('trackKillStreak');
   var trackText = getTrackText(trackKillStreak);
-  if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
-    return '<tr><td style="font-size:small; color:black"' +
-      '>Kill Streak: <span findme="killstreak">&gt;' +
-      addCommas(lastKillStreak) + '</span> Damage bonus: <' +
-      'span findme="damagebonus">20</span>%</td></tr>';
-  }
   if (!trackKillStreak) {
     return '<tr><td style="font-size:small; color:' +
       'navy" nowrap>KillStreak tracker disabled. <span style="' +
@@ -15217,6 +15995,18 @@ function doDeathDealer(impsRemaining) { // Legacy
     ' to toggle">' + trackText + '</span></span></td></tr>';
 }
 
+function doDeathDealer(impsRemaining) { // Legacy
+  var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
+  var lastKillStreak = getLastValue('lastKillStreak');
+  if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
+    return '<tr><td style="font-size:small; color:black"' +
+      '>Kill Streak: <span findme="killstreak">&gt;' +
+      addCommas(lastKillStreak) + '</span> Damage bonus: <' +
+      'span findme="damagebonus">20</span>%</td></tr>';
+  }
+  return notMaxDd(lastDeathDealerPercentage, lastKillStreak);
+}
+
 function recastImpAndRefresh(responseText) { // Legacy
   var doc = createDocument(responseText);
   if (doc) {
@@ -15225,7 +16015,7 @@ function recastImpAndRefresh(responseText) { // Legacy
 }
 
 function toggleKsTracker() { // Legacy
-  var trackKS = document.getElementById('Helper:toggleKStracker');
+  var trackKS = getElementById('Helper:toggleKStracker');
   if (trackKS) {
     trackKS.addEventListener('click', function() {
       setValue('trackKillStreak',
@@ -15261,10 +16051,13 @@ function findImps() { // Legacy - Old Map
   return '';
 }
 
+function canRecast() {
+  return (hasDeathDealer || hasShieldImp) && impsRemaining === 0;
+}
+
 function impRecast() { // Legacy - Old Map
-  if ((hasDeathDealer || hasShieldImp) && impsRemaining === 0) {
-    var _recastImpAndRefresh = document
-      .getElementById('Helper:recastImpAndRefresh');
+  if (canRecast()) {
+    var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
     var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
       'Players=' +
       $('dt.stat-name:first').next().text().replace(/,/g, '') +
@@ -15327,7 +16120,7 @@ function injectWorld() {
   // 15 = repair
   // 17 = login
   // 18 = username not found
-  if (document.getElementById('worldPage')) { // new map
+  if (getElementById('worldPage')) { // new map
     subscribes();
   } else {
     // not new map.
@@ -15357,7 +16150,7 @@ var plantFromComponentHash = {
 };
 
 function quickInventDone(json) {
-  var inventResult = document.getElementById('invent_Result');
+  var inventResult = getElementById('invent_Result');
   if (jsonFail(json, inventResult)) {return;}
   if (json.r.success) {
     outputResult('<span class="fshGreen">' +
@@ -15386,7 +16179,7 @@ function injectInvent() { // Bad jQuery
     '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
     '</span><ol id="invent_Result"></ol></td></tr>';
   $('input[name="recipe_id"]').closest('tbody').append(selector);
-  document.getElementById('quickInvent').addEventListener('click',
+  getElementById('quickInvent').addEventListener('click',
     quickInvent, true);
 
 }
@@ -15590,7 +16383,7 @@ function showAllQuestSteps() {
   if (!getValue('showNextQuestSteps')) {return;}
   Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
     function(e) {e.style.display = 'block';});
-  document.getElementById('next_stage_button').style.display = 'none';
+  getElementById('next_stage_button').style.display = 'none';
 }
 
 function gotMoves(_arena) { // jQuery
@@ -15613,80 +16406,140 @@ function storeMoves() { // jQuery.min
   getForage('fsh_arena').done(gotMoves);
 }
 
+var upgrades;
 var currentFSP;
+var warehouse$1 = {};
 
-function updateStamCount(evt) { // jQuery
-  var target = $(evt.target);
-  var amount = target.attr('amount');
-  var cost = target.attr('cost');
-  var quantity = target.val();
+function findText(text) {
+  return Array.prototype.find.call(upgrades, function(el) {
+    return el.textContent.indexOf(text) !== -1;
+  });
+}
+
+function getInputCell(label) {
+  return findText(label).nextElementSibling.nextElementSibling
+    .nextElementSibling;
+}
+
+function getInputElement(el) {
+  return el.nextElementSibling.nextElementSibling
+    .nextElementSibling.children[0].rows[0].cells[0].children[0];
+}
+
+function getRe(type, label) {
+  if (label === 'amount') {
+    return new RegExp('\\+(\\d+) ' + type);
+  }
+  return /(\d+)\xA0/;
+}
+
+function getValue$1(type, element, label) {
+  if (!warehouse$1[type][label]) {
+    var valRe = getRe(type, label);
+    var value = element.textContent.match(valRe)[1];
+    warehouse$1[type][label] = value;
+  }
+  return warehouse$1[type][label];
+}
+
+function getAmount(type, upgrade) {
+  return getValue$1(type, upgrade, 'amount');
+}
+
+function getCost(type, upgrade) {
+  return getValue$1(type, upgrade.nextElementSibling, 'cost');
+}
+
+function getCell(type, upgrade) {
+  if (!warehouse$1[type]) {warehouse$1[type] = {};}
+  if (!warehouse$1[type].span) {
+    var span = createSpan();
+    insertElement$1(upgrade, ' ');
+    insertElement(upgrade, span);
+    warehouse$1[type].span = span;
+  }
+  return warehouse$1[type].span;
+}
+
+function doStamCount(type, upgrade, quantity, cell) {
+  var amount = getAmount(type, upgrade);
+  var cost = getCost(type, upgrade);
   // cap the value if the user goes over his current FSP
-  var color = 'red';
-  var extraStam = Math.floor(currentFSP / cost) * amount;
+  var extraStam;
   if (quantity * cost <= currentFSP) {
     extraStam = quantity * amount;
-    color = 'blue';
+    cell.className = 'fshBlue';
+  } else {
+    extraStam = Math.floor(currentFSP / cost) * amount;
+    cell.className = 'fshRed';
   }
-  $('#pCC span[id="totalStam"][type="' + target.attr('stamtype') + '"]')
-    .css('color', color)
-    .html('(+' + extraStam + ' stamina)');
+  cell.textContent = '(+' + extraStam + ' stamina)';
 }
 
-function injectUpgradeHelper(value, type) { // jQuery
-  var theCells = $('#pCC tr')
-    .has('input[name="upgrade_id"][value="' + value + '"]')
-    .find('td');
-  var cell = theCells.first();
-  cell.append(' <span style="color:blue" ' +
-    'id="totalStam" type="' + type + '"></span>');
-  var amountRE = new RegExp('\\+(\\d+) ' + type + ' Stamina');
-  var amount = cell.text().match(amountRE)[1];
-  $('input[name="quantity"]', theCells)
-    .attr('stamtype', type)
-    .attr('amount', amount)
-    .attr('cost', theCells.eq(1).text())
-    .keyup(updateStamCount);
+function updateStamCount(type, upgrade, evt) {
+  var self = evt.target;
+  var quantity = Number(self.value);
+  var cell = getCell(type, upgrade);
+  if (isNaN$1(quantity) || quantity === 0) {
+    cell.className = 'fshHide';
+    return;
+  }
+  doStamCount(type, upgrade, quantity, cell);
 }
 
-function injectPoints() { // jQuery
-  currentFSP = intValue($('#statbar-fsp').text());
-  injectUpgradeHelper(0, 'Current');
-  injectUpgradeHelper(1, 'Maximum');
-  $('#pCC td')
-    .has('input[name="upgrade_id"][value="3"]')
-    .html('<a href="' + server +
-      '?cmd=marketplace">Sell at Marketplace</a>');
+function injectUpgradeHelper(type) {
+  var upgrade = findText(type);
+  getInputElement(upgrade).addEventListener('keyup',
+    updateStamCount.bind(null, type, upgrade));
 }
 
-function storePlayerUpgrades() { // Legacy
-  var alliesText = findNode('//td[.="+1 Max Allies"]');
-  var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling
-    .nextSibling;
-  if (alliesRatio) {
-    var alliesValueRE = /(\d+) \/ 115/;
-    var alliesValue = Number(alliesValueRE.exec(alliesRatio.innerHTML)[1]);
-    setValue('alliestotal', alliesValue + 5);
+function injectPoints() {
+  currentFSP = intValue(getElementById('statbar-fsp').textContent);
+  injectUpgradeHelper('Current');
+  injectUpgradeHelper('Maximum');
+  getInputCell('Gold').innerHTML = '<a href="' + server +
+    'index.php?cmd=marketplace">Sell at Marketplace</a>';
+}
+
+function saveUpgradeValue(upgrade, key) {
+  var text = findText(upgrade);
+  var ratio = text.nextElementSibling.nextElementSibling;
+  if (ratio) {
+    var valueRE = /(\d+) \/ 115/;
+    var value = Number(valueRE.exec(ratio.innerHTML)[1]);
+    setValue(key, value + 5);
   }
-  var enemiesText = findNode('//td[.="+1 Max Enemies"]');
-  var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling
-    .nextSibling;
-  if (enemiesRatio) {
-    var enemiesValueRE = /(\d+) \/ 115/;
-    var enemiesValue = Number(enemiesValueRE.exec(enemiesRatio.innerHTML)[1]);
-    setValue('enemiestotal', enemiesValue + 5);
-  }
+}
+
+function storePlayerUpgrades() {
+  upgrades = document.querySelectorAll('#pCC > table:last-of-type > tbody > ' +
+    'tr:nth-child(even) > td:first-child');
+  saveUpgradeValue('+1 Max Allies', 'alliestotal');
+  saveUpgradeValue('+1 Max Enemies', 'enemiestotal');
   injectPoints();
 }
 
+function formatUtcDateTime(aDate) {
+  if (Object.prototype.toString.call(aDate) === '[object Date]' &&
+      !isNaN(aDate.getTime())) {
+    var yyyy = aDate.getUTCFullYear().toString();
+    var mon = padZ(aDate.getUTCMonth() + 1);
+    var dd = padZ(aDate.getUTCDate());
+    var hh = padZ(aDate.getUTCHours());
+    var mm = padZ(aDate.getUTCMinutes());
+    var ss = padZ(aDate.getUTCSeconds());
+    return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+  }
+}
+
 var enableSeTracker = 'enableSeTracker';
-var seTrackerEnabled;
 var trackerCell;
 
 function addRow$1(trackerTable, se) {
   trackerTable.insertAdjacentHTML('beforeend',
     '<tr><td class="fshCenter">' + se[0] + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
-    formatDateTime(new Date(se[1] * 1000)) + '</td></tr>');
+    formatUtcDateTime(new Date(se[1] * 1000)) + '</td></tr>');
 }
 
 function buildTrackerTable(seAry) {
@@ -15714,32 +16567,38 @@ function displayTracker$1(seAry) {
 }
 
 function gotSeLog() {
-  var seAry = Object.keys(oldLog.se).map(function(key) {
-    return [key, oldLog.se[key]];
-  }).sort(function(a, b) {
-    return a[1] - b[1];
-  });
-  displayTracker$1(seAry);
+  if (oldLog && oldLog.se) {
+    var seAry = Object.keys(oldLog.se).map(function(key) {
+      return [key, oldLog.se[key]];
+    }).sort(function(a, b) {
+      return a[1] - b[1];
+    });
+    displayTracker$1(seAry);
+  }
 }
 
 function killTable() {
-  if (!seTrackerEnabled) {
+  if (!calf.enableSeTracker) {
     if (trackerCell) {
       trackerCell.parentNode.remove();
       trackerCell = false;
     }
     disableBackgroundChecks();
   } else {
-    doBackgroundCheck().done(gotSeLog);
+    doBackgroundCheck().always(gotSeLog);
   }
 }
 
-function togglePref$3(evt) {
+function togglePref$4(evt) {
   if (evt.target.id === enableSeTracker) {
-    seTrackerEnabled = !seTrackerEnabled;
-    setValue(enableSeTracker, seTrackerEnabled);
+    calf.enableSeTracker = !calf.enableSeTracker;
+    setValue(enableSeTracker, calf.enableSeTracker);
     killTable();
   }
+}
+
+function waitForLog() {
+  doBackgroundCheck().always(gotSeLog);
 }
 
 function superelite$1() {
@@ -15748,10 +16607,9 @@ function superelite$1() {
   newCell = insertNewRow();
   newCell.className = 'fshCenter';
   newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
-  newCell.addEventListener('change', togglePref$3);
-  seTrackerEnabled = getValue(enableSeTracker);
-  if (seTrackerEnabled) {
-    getSeLog().done(gotSeLog);
+  newCell.addEventListener('change', togglePref$4);
+  if (calf.enableSeTracker) {
+    getFshSeLog().done(waitForLog);
   }
 }
 
@@ -15947,8 +16805,8 @@ function successfull(timeStamp, buffCast, buffLog) {
 function buffResult(_buffLog) {
   var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
-  var timeStamp = formatDateTime(new Date());
-  var buffsAttempted = document.getElementById('quickbuff-report')
+  var timeStamp = formatLocalDateTime(new Date());
+  var buffsAttempted = getElementById('quickbuff-report')
     .innerHTML.split('<p>');
   var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
     ' higher level is currently active on \'(\\w*)\'');
@@ -15971,7 +16829,7 @@ function updateBuffLog() {
 var unknown = [
   {
     condition: function() {
-      return document.getElementById('quickbuff-report');
+      return getElementById('quickbuff-report');
     },
     result: function() {
       screenview('unknown.buffLog.updateBuffLog');
@@ -16029,139 +16887,38 @@ function unknownPage() { // Legacy
   });
 }
 
-var warehouse = [];
-var collapseNewsArchive;
+var ladderResetPref = 'lastLadderReset';
 var lastLadderReset;
-
-function collapseArt(article) {
-  article.rows.forEach(function(el) {
-    el.row.classList.add('fshHide');
-  });
-  article.open = false;
-}
-
-function collapseAll() {
-  warehouse.forEach(function(article) {
-    if (article.open) {collapseArt(article);}
-  });
-}
-
-function expandArt(article) {
-  article.rows.forEach(function(el) {
-    el.row.classList.remove('fshHide');
-  });
-  article.open = true;
-}
-
-function expandAll() {
-  warehouse.forEach(function(article) {
-    if (!article.open) {expandArt(article);}
-  });
-}
-
-function isHeader(el) {
-  if (el.rowIndex % 6 === 0) {return el;}
-}
-
-function closestTr(el) {
-  if (el.tagName === 'TR') {
-    return isHeader(el);
-  }
-  if (el.tagName === 'TABLE') {return;}
-  return closestTr(el.parentNode);
-}
-
-function evtEnabled(evt) {
-  var myRow = closestTr(evt.target);
-  if (!myRow) {return;}
-  var articleNo = myRow.rowIndex / 6;
-  var article = warehouse[articleNo];
-  if (article.open === false) {
-    collapseAll();
-    expandArt(article);
-  } else {
-    collapseArt(article);
-  }
-}
-
-function evtHdl$3(evt) {
-  if (collapseNewsArchive) {evtEnabled(evt);}
-}
-
-function makeHeaderClickable(row) {
-  if (collapseNewsArchive) {row.classList.add('fshPoint');}
-}
-
-function collapseDuringAnalysis(row, thisArticle) {
-  if (collapseNewsArchive) {
-    row.classList.add('fshHide');
-    thisArticle.open = false;
-  } else {
-    thisArticle.open = true;
-  }
-}
 
 function checkForPvPLadder(row) {
   if (row.children[1].children[0].textContent === 'PvP Ladder') {
     var logTime = parseDateAsTimestamp(
       row.children[1].children[2].textContent.replace('Posted: ', ''));
     if (logTime > lastLadderReset) {
-      setValue('lastLadderReset', logTime);
+      setValue(ladderResetPref, logTime);
       lastLadderReset = logTime;
     }
   }
 }
 
-function testRowType(row, rowType, thisArticle) {
-  if (rowType === 0) {
-    thisArticle.header = row;
-    makeHeaderClickable(row);
-    checkForPvPLadder(row);
-  }
-  if (rowType > 1) {
-    thisArticle.rows[rowType] =
-      fallback(thisArticle[rowType], {});
-    thisArticle.rows[rowType].row = row;
-    collapseDuringAnalysis(row, thisArticle);
-  }
-}
+function testArticle$1(rowType) {return rowType > 1;}
 
-function doTagging(row) {
-  var rowType = row.rowIndex % 6;
-  var articleNo = (row.rowIndex - rowType) / 6;
-  warehouse[articleNo] = fallback(warehouse[articleNo], {});
-  var thisArticle = warehouse[articleNo];
-  thisArticle.rows = thisArticle.rows || [];
-  testRowType(row, rowType, thisArticle);
-}
-
-function toggleHeaderClass() {
-  warehouse.forEach(function(article) {
-    article.header.classList.toggle('fshPoint');
-  });
-}
-
-function togglePref$4() {
-  collapseNewsArchive = !collapseNewsArchive;
-  setValue('collapseNewsArchive', collapseNewsArchive);
-  if (collapseNewsArchive) {collapseAll();} else {expandAll();}
-  toggleHeaderClass();
-}
-
-function setupPref$1(rowInjector) {
-  collapseNewsArchive = getValue('collapseNewsArchive');
-  rowInjector.insertAdjacentHTML('afterend',
-    simpleCheckbox('collapseNewsArchive'));
-  document.getElementById('collapseNewsArchive')
-    .addEventListener('click', togglePref$4);
+function setupPref$2(prefName, rowInjector) {
+  rowInjector.insertAdjacentHTML('afterend', simpleCheckbox(prefName));
 }
 
 function viewArchive() {
-  lastLadderReset = getValue('lastLadderReset');
+  lastLadderReset = getValue(ladderResetPref);
+  var prefName = 'collapseNewsArchive';
   var theTables = pCC.getElementsByTagName('table');
-  setupPref$1(theTables[0].rows[2]);
-  Array.prototype.forEach.call(theTables[2].rows, doTagging);
-  theTables[2].addEventListener('click', evtHdl$3);
+  setupPref$2(prefName, theTables[0].rows[2]);
+  collapse({
+    prefName: prefName,
+    theTable: theTables[2],
+    headInd: 6,
+    articleTest: testArticle$1,
+    extraFn: checkForPvPLadder
+  });
 }
 
 function hasTextEntry() { // jQuery
@@ -16195,6 +16952,11 @@ function addChatTextArea() {
   hasTextEntry();
 }
 
+function getCombatStat(responseText, label) {
+  var statRe = new RegExp('var\\s+' + label + '=(-?[0-9]+);', 'i');
+  return getIntFromRegExp(responseText, statRe);
+}
+
 function result$1(stat, desc, color) {
   if (stat !== 0) {
     return desc + ':<span class="' + color + '">' +
@@ -16205,22 +16967,15 @@ function result$1(stat, desc, color) {
 
 function retrievePvPCombatSummary(responseText, callback) { // Legacy
   var winner = callback.winner;
-  var color;
+  var color = 'fshRed';
   if (winner === 1) {
     color = 'fshGreen';
-  } else {
-    color = 'fshRed';
   }
-  var xpGain = getIntFromRegExp(responseText,
-    /var\s+xpGain=(-?[0-9]+);/i);
-  var goldGain = getIntFromRegExp(responseText,
-    /var\s+goldGain=(-?[0-9]+);/i);
-  var prestigeGain = getIntFromRegExp(responseText,
-    /var\s+prestigeGain=(-?[0-9]+);/i);
-  var goldStolen = getIntFromRegExp(responseText,
-    /var\s+goldStolen=(-?[0-9]+);/i);
-  var pvpRatingChange = getIntFromRegExp(responseText,
-    /var\s+pvpRatingChange=(-?[0-9]+);/i);
+  var xpGain = getCombatStat(responseText, 'xpGain');
+  var goldGain = getCombatStat(responseText, 'goldGain');
+  var prestigeGain = getCombatStat(responseText, 'prestigeGain');
+  var goldStolen = getCombatStat(responseText, 'goldStolen');
+  var pvpRatingChange = getCombatStat(responseText, 'pvpRatingChange');
   var output = '<br> ';
   output += result$1(xpGain, 'XP stolen', color);
   output += result$1(goldGain, 'Gold lost', color);
@@ -16238,39 +16993,76 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   callback.target.innerHTML = output;
 }
 
-function addPvpSummary(aRow, messageType) { // Legacy
-  // add PvP combat log summary
-  if (messageType === 'Combat' &&
-      aRow.cells[2] &&
-      calf.showPvPSummaryInLog &&
-      /combat_id=/.test(aRow.cells[2].innerHTML) &&
-      !/\(Guild Conflict\)/.test(aRow.cells[2].textContent)) {
-    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-    var defeat = /You were defeated by/.test(aRow.cells[2].innerHTML);
-    var _winner = 1;
-    if (defeat) {_winner = 0;}
+function replaceLeadingText(msgCell, newHtml) {
+  var replaceText = createSpan({innerHTML: newHtml});
+  msgCell.replaceChild(replaceText, msgCell.firstChild);
+}
+
+function parseCombatWinner(msgCell) {
+  var victory = /You were victorious over/.test(msgCell.innerHTML);
+  if (victory) {
+    replaceLeadingText(msgCell,
+      'You were <span class="fshGreen">victorious</span> over ');
+    return 1;
+  }
+  var defeat = /You were defeated by/.test(msgCell.innerHTML);
+  if (defeat) {
+    replaceLeadingText(msgCell,
+      'You were <span class="fshRed">defeated</span> by ');
+    return 0;
+  }
+}
+
+var combatRowTests = [
+  function(aRow, messageType) {return messageType === 'Combat';},
+  function() {return calf.showPvPSummaryInLog;},
+  function(aRow) {
+    return aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML);
+  },
+  function(aRow) {
+    return !/\(Guild Conflict\)/.test(aRow.cells[2].textContent);
+  }
+];
+
+function isCombatRow(aRow, messageType) {
+  return combatRowTests.every(function(e) {return e(aRow, messageType);});
+}
+
+function processCombatRow(aRow) {
+  var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+  var _winner = parseCombatWinner(aRow.cells[2]);
+  if (_winner === 0 || _winner === 1) {
     var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
     xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,
-      {
-        target: combatSummarySpan,
-        winner: _winner
-      }
+      {target: combatSummarySpan, winner: _winner}
     );
   }
 }
 
+function addPvpSummary(aRow, messageType) { // Legacy
+  // add PvP combat log summary
+  if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
+}
+
+function isLadderReset(aRow) {
+  return aRow.cells[2].firstElementChild &&
+    aRow.cells[2].firstElementChild.tagName === 'IMG' &&
+    aRow.cells[2].firstElementChild.src.indexOf('pvp_icon.gif') !== -1;
+}
+
+function saveLastResetTime(aRow) {
+  var logTime = parseDateAsTimestamp(aRow.cells[1].textContent);
+  if (logTime > calf.lastLadderReset) {
+    setValue('lastLadderReset', logTime);
+    calf.lastLadderReset = logTime;
+  }
+}
+
 function processLadder(aRow, messageType) {
-  if (messageType === 'Notification' &&
-      aRow.cells[2].firstElementChild &&
-      aRow.cells[2].firstElementChild.tagName === 'IMG' &&
-      aRow.cells[2].firstElementChild.src.indexOf('pvp_icon.gif') !== -1) {
-    var logTime = parseDateAsTimestamp(aRow.cells[1].textContent);
-    if (logTime > calf.lastLadderReset) {
-      setValue('lastLadderReset', logTime);
-      calf.lastLadderReset = logTime;
-    }
+  if (messageType === 'Notification' && isLadderReset(aRow)) {
+    saveLastResetTime(aRow);
   }
 }
 
@@ -16437,6 +17229,11 @@ function hasPlayerLink(aRow) {
     /player_id/.test(aRow.cells[2].firstChild.nextSibling.href);
 }
 
+function otherMsgType(aRow, messageType) {
+  return fallback(messageType === 'General', messageType === 'Notification') &&
+    hasPlayerLink(aRow);
+}
+
 function doExtraStuff(aRow, messageType, playerName$$1, isGuildMate) {
   if (messageType === 'Notification' &&
       hasPlayerLink(aRow)) {
@@ -16453,9 +17250,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
     playerName$$1 = playerElement.innerHTML;
     colorPlayerName = true;
   }
-  if (fallback(messageType === 'General',
-    messageType === 'Notification') &&
-      hasPlayerLink(aRow)) {
+  if (otherMsgType(aRow, messageType)) {
     playerElement = aRow.cells[2].firstChild.nextSibling;
     playerName$$1 = playerElement.innerHTML;
     colorPlayerName = true;
@@ -16536,7 +17331,7 @@ function playerLog() {
 }
 
 function cancelAllAH() { // jQuery
-  var cancelButtons = document.getElementById('resultRows')
+  var cancelButtons = getElementById('resultRows')
     .getElementsByClassName('auctionCancel');
   if (cancelButtons.length === 0) {return;}
   var prm = [];
@@ -16554,21 +17349,21 @@ function cancelAllAH() { // jQuery
     );
   }
   $.when.apply($, prm).done(function() {
-    document.getElementById('refresh').click();
+    getElementById('refresh').click();
   });
 }
 
 function injectAuctionHouse() {
   if (!pCC) {return;}
   if (getValue('autoFillMinBidPrice')) {
-    document.getElementById('auto-fill').checked = true;
+    getElementById('auto-fill').checked = true;
   }
-  document.getElementById('sort0').click();
+  getElementById('sort0').click();
   var cancelAll = createSpan({
     className: 'smallLink',
     textContent: 'Cancel All'
   });
-  var fill = document.getElementById('fill').parentNode.parentNode
+  var fill = getElementById('fill').parentNode.parentNode
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');
   fill.insertAdjacentHTML('afterbegin', ']');
@@ -16833,13 +17628,13 @@ function groupButtons() { // Legacy
       maxGroupSizeToJoin + ' Members" class="custombutton">&nbsp;' +
       '<input id="fetchgroupstats" type="button" value="Fetch ' +
       'Group Stats" class="custombutton">';
-    document.getElementById('joinallgroupsundersize')
+    getElementById('joinallgroupsundersize')
       .addEventListener('click', joinAllGroupsUnderSize, true);
   } else {
     buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
       'type="button" value="Fetch Group Stats" class="custombutton">';
   }
-  document.getElementById('fetchgroupstats')
+  getElementById('fetchgroupstats')
     .addEventListener('click', fetchGroupData);
 
   if (calf.subcmd2 === 'joinallgroupsundersize') {
@@ -17072,7 +17867,7 @@ function injectMoveItems() {
 }
 
 function moveItemsToFolder(itemsAry) { // jQuery.min
-  var folderId = document.getElementById('selectFolderId').value;
+  var folderId = getElementById('selectFolderId').value;
   var batchNo;
   var counter = 0;
   var invList = [];
@@ -17158,33 +17953,39 @@ function afterbegin(o, item) {
   o.injectHere.insertAdjacentHTML('afterbegin', pattern);
 }
 
+function itemColouring(o, item) {
+  if (!colouring && !disableItemColoring) {
+    o.injectHere.classList.add(rarity[item.rarity].clas);
+  }
+}
+
 var buildTrailer = [
   {
-    condition: function(item) {
+    test: function(item) {
       return !checkAll && itemsHash[item.item_id] !== 1;
     },
-    result: function(o, item) {
+    act: function(o, item) {
       return ' [<span linkto="' + item.item_id +
         '" class="fshLink">Check all</span>]';
     }
   },
   {
-    condition: function(item) {
+    test: function(item) {
       return !sendLinks && showQuickSendLinks$1 &&
         !item.bound;
     },
-    result: function(o) {
+    act: function(o) {
       return ' <span class="quickAction sendLink tip-static" ' +
         'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
         'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
     }
   },
   {
-    condition: function(item) {
+    test: function(item) {
       return !dropLinks && showQuickDropLinks$1 &&
         item.guild_tag === '-1';
     },
-    result: function(o) {
+    act: function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
         o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
         'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
@@ -17193,13 +17994,11 @@ var buildTrailer = [
 ];
 
 function beforeend(o, item) {
-  if (!colouring && !disableItemColoring) {
-    o.injectHere.classList.add(rarity[item.rarity].clas);
-  }
+  itemColouring(o, item);
   var pattern = buildTrailer.reduce(function(prev, el) {
     var ret = prev;
-    if (el.condition(item)) {
-      ret += el.result(o, item);
+    if (el.test(item)) {
+      ret += el.act(o, item);
     }
     return ret;
   }, '');
@@ -17216,8 +18015,7 @@ function doneInvPaint() {
 
 function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      paintCount < itemsAry$1.length) {
+  while (moreToDo(limit, paintCount, itemsAry$1)) {
     var o = itemsAry$1[paintCount];
     var item = invItems$2[o.invid];
     afterbegin(o, item);
@@ -17241,7 +18039,7 @@ function toggleShowExtraLinks() {
   } else {
     itemsAry$1.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
-      el.classList.toggle('fshHide');
+      toggleForce(el, !showExtraLinks);
     });
   }
 }
@@ -17256,70 +18054,59 @@ function toggleShowQuickDropLinks() {
   } else {
     itemsAry$1.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
-      el.classList.toggle('fshHide');
+      toggleForce(el, !showQuickDropLinks$1);
     });
   }
 }
 
-var evts$1 = [
+var evts = [
   {
-    condition: function(self) {return self.id === 'fshShowExtraLinks';},
-    result: toggleShowExtraLinks
+    test: function(self) {return self.id === 'fshShowExtraLinks';},
+    act: toggleShowExtraLinks
   },
   {
-    condition: function(self) {return self.id === 'fshShowQuickDropLinks';},
-    result: toggleShowQuickDropLinks
+    test: function(self) {return self.id === 'fshShowQuickDropLinks';},
+    act: toggleShowQuickDropLinks
   },
   {
-    condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    result: function() {doCheckboxes(itemsAry$1, invItems$2, 'guild');}
+    test: function(self) {return self.id === 'fshSelectAllGuildLocked';},
+    act: function() {doCheckboxes(itemsAry$1, invItems$2, 'guild');}
   },
   {
-    condition: function(self) {return self.id === 'fshMove';},
-    result: function() {moveItemsToFolder(itemsAry$1);}
+    test: function(self) {return self.id === 'fshMove';},
+    act: function() {moveItemsToFolder(itemsAry$1);}
   },
   {
-    condition: function(self) {return self.hasAttribute('linkto');},
-    result: function(self) {
+    test: function(self) {return self.hasAttribute('linkto');},
+    act: function(self) {
       doCheckboxes(itemsAry$1, invItems$2, 'item', self.getAttribute('linkto'));
     }
   },
   {
-    condition: function(self) {return self.classList.contains('sendLink');},
-    result: function(self) {
+    test: function(self) {return self.classList.contains('sendLink');},
+    act: function(self) {
       quickAction(self, sendItem, 'Sent', '.dropLink');
     }
   },
   {
-    condition: function(self) {return self.classList.contains('dropLink');},
-    result: function(self) {
+    test: function(self) {return self.classList.contains('dropLink');},
+    act: function(self) {
       quickAction(self, dropItem, 'Dropped', '.sendLink');
     }
   },
   {
-    condition: function(self) {return self.classList.contains('fshFolder');},
-    result: function(self) {
+    test: function(self) {return self.classList.contains('fshFolder');},
+    act: function(self) {
       hideFolders$1(itemsAry$1, invItems$2, self);
     }
   },
   {
-    condition: function(self) {return self.id === 'fshChkAll';},
-    result: function() {
+    test: function(self) {return self.id === 'fshChkAll';},
+    act: function() {
       doCheckboxes(itemsAry$1, invItems$2, 'checkAll');
     }
   }
 ];
-
-function evtHandler(evt) {
-  var self = evt.target;
-  evts$1.some(function(el) {
-    if (el.condition(self)) {
-      el.result(self);
-      return true;
-    }
-    return false;
-  });
-}
 
 function getItems$1() {
   addStatTotalToMouseover();
@@ -17328,7 +18115,7 @@ function getItems$1() {
   showQuickDropLinks$1 = getValue('showQuickDropLinks');
   showQuickSendLinks$1 = getValue('showQuickSendLinks');
   doToggleButtons(showExtraLinks, showQuickDropLinks$1);
-  pCC.addEventListener('click', evtHandler);
+  pCC.addEventListener('click', eventHandler$1(evts));
   var imgList = getItemImg();
   itemsAry$1 = [];
   itemsHash = {};
@@ -17370,19 +18157,19 @@ function injectProfileDropItems() {
 }
 
 var maxcharacters;
-var textArea$1;
+var textArea$2;
 var shoutboxPreview;
 
 function updateShoutboxPreview() {
-  var textContent = textArea$1.value;
+  var textContent = textArea$2.value;
   var chars = textContent.length;
   if (chars > maxcharacters) {
     textContent = textContent.substring(0, maxcharacters);
-    textArea$1.value = textContent;
+    textArea$2.value = textContent;
     chars = maxcharacters;
   }
   if (!shoutboxPreview) {
-    shoutboxPreview = textArea$1.parentNode.parentNode.parentNode.parentNode
+    shoutboxPreview = textArea$2.parentNode.parentNode.parentNode.parentNode
       .insertRow().insertCell();
   }
   shoutboxPreview.innerHTML = '<table class="sbpTbl"><tbody><tr>' +
@@ -17392,8 +18179,8 @@ function updateShoutboxPreview() {
 }
 
 function injectShoutboxWidgets() {
-  textArea$1 = document.getElementById('textInputBox');
-  textArea$1.addEventListener('keyup', updateShoutboxPreview);
+  textArea$2 = getElementById('textInputBox');
+  textArea$2.addEventListener('keyup', updateShoutboxPreview);
 }
 
 function newsFsbox() {
@@ -17459,13 +18246,14 @@ var pageSwitcher = {
       '-': {'-': {'-': injectAdvisor}},
       weekly: {'-': {'-': injectAdvisor}}
     },
-    history: {'-': {'-': {'-': addHistoryWidgets}}},
+    history: {'-': {'-': {'-': injectBioWidgets}}},
     view: {'-': {'-': {'-': injectViewGuild}}},
     scouttower: {'-': {'-': {'-': injectScouttower}}},
     mailbox: {'-': {'-': {'-': guildMailbox}}},
     ranks: {'-': {'-': {'-': injectGuildRanks}}},
     conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
-    bank: {'-': {'-': {'-': injectGuildBank}}}
+    bank: {'-': {'-': {'-': injectGuildBank}}},
+    hall: {'-': {'-': {'-': guildHall}}}
   },
   bank: {'-': {'-': {'-': {'-': injectBank}}}},
   log: {
@@ -17568,12 +18356,19 @@ function newSelector(selector) {
   return test_cmd && test_cmd.value || '-';
 }
 
+var isValid = [
+  function(cmd) {return pageSwitcher[cmd];},
+  function(cmd, subcmd) {return pageSwitcher[cmd][subcmd];},
+  function(cmd, subcmd, subcmd2) {return pageSwitcher[cmd][subcmd][subcmd2];},
+  function(cmd, subcmd, subcmd2, type) {
+    return pageSwitcher[cmd][subcmd][subcmd2][type];
+  }
+];
+
 function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
-  if (pageSwitcher[cmd] &&
-      pageSwitcher[cmd][subcmd] &&
-      pageSwitcher[cmd][subcmd][subcmd2] &&
-      pageSwitcher[cmd][subcmd][subcmd2][type] &&
-      pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
+  if (isValid.every(function(e) {
+    return typeof e(cmd, subcmd, subcmd2, type) === 'object';
+  }) && pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
     return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
   }
 }
@@ -17619,8 +18414,11 @@ function asyncDispatcher() {
   }
 }
 
+window.FSH = window.FSH || {};
+window.FSH.calf = '1';
+
 // main event dispatcher
-FSH.dispatch = function dispatch() {
+window.FSH.dispatch = function dispatch() {
 
   setup();
   start('JS Perf', 'FSH.dispatch');
@@ -17640,8 +18438,5 @@ FSH.dispatch = function dispatch() {
   end('JS Perf', 'FSH.dispatch');
 
 };
-
-window.FSH = window.FSH || {};
-window.FSH.calf = '12';
 
 }());

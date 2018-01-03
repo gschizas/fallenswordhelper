@@ -143,7 +143,7 @@ module.exports = {
       ignoreUrls: true
     }],
     'max-lines': ['error', {
-      max: 447, // 200 ? 300
+      max: 451, // 200 ? 300
       skipBlankLines: true,
       skipComments: true
     }],

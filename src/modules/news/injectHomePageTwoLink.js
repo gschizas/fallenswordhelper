@@ -1,3 +1,5 @@
+import {createAnchor} from '../common/cElement';
+import {guideUrl} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import {getValue, parseDateAsTimestamp, setValue} from '../support/system';
 
@@ -59,7 +61,21 @@ function lookForPvPLadder() {
   });
 }
 
-export default function injectHomePageTwoLink() {
+function addUfsgLinks() {
+  var imgs = document.querySelectorAll(
+    '.news_body img[src^="https://cdn.fallensword.com/creatures/"]');
+  Array.prototype.forEach.call(imgs, function(img) {
+    var myName = encodeURIComponent(img.getAttribute('oldtitle'));
+    var myLink = createAnchor({
+      href: guideUrl + 'creatures&search_name=' + myName,
+      target: '_blank'
+    });
+    img.parentNode.insertBefore(myLink, img);
+    myLink.appendChild(img);
+  });
+}
+
+export default function injectHomePageTwoLink() { // Pref
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
   if (!archiveLink) {return;}
@@ -70,6 +86,7 @@ export default function injectHomePageTwoLink() {
     '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
   archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
     '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
-  fixCollapse();
-  lookForPvPLadder();
+  fixCollapse(); // Pref
+  lookForPvPLadder(); // Pref
+  addUfsgLinks(); // Pref
 }

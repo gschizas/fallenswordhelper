@@ -1,26 +1,33 @@
 import getProfile from '../ajax/getProfile';
+import {getValue} from '../support/system';
 import guildView from '../app/guild/view';
-import myStats from '../ajax/myStats';
+import isObject from '../common/isObject';
 import {nowSecs} from '../support/dataObj';
 import {playerDataObject} from '../common/common';
+import {
+  calculateBoundaries,
+  pvpLowerLevel,
+  pvpUpperLevel
+} from '../common/levelHighlight';
 import {createInput, createSpan} from '../common/cElement';
-import {getValue, imageServer} from '../support/system';
 import {onlineDot, pCC} from '../support/layout';
 
 var highlightPlayersNearMyLvl;
-var lvlDiffToHighlight;
-var myVL;
 var spinner;
 var validPvP = nowSecs - 604800;
 var guilds;
 
+function pvpHighlight(data) {
+  return data.last_login >= validPvP &&
+    data.virtual_level >= pvpLowerLevel &&
+    data.virtual_level <= pvpUpperLevel;
+}
+
 function doOnlineDot(aTable, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (myVL &&
-      data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight &&
-      data.virtual_level < myVL + lvlDiffToHighlight) {
+  if (highlightPlayersNearMyLvl &&
+    pvpHighlight(data)) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
 }
@@ -101,30 +108,21 @@ function findOnlinePlayers() { // jQuery
   });
 }
 
-function gotMyVl(data) {
-  myVL = data.virtual_level;
-  lvlDiffToHighlight = 11;
-  if (myVL <= 205) {lvlDiffToHighlight = 6;}
-}
-
 function getMyVL(e) { // jQuery
   $(e.target).qtip('hide');
   spinner = createSpan({
-    className: 'fshCurveBtn fshTopListSpinner',
-    style: {
-      backgroundImage: 'url(\'' + imageServer +
-        '/world/actionLoadingSpinner.gif\')'
-    }
+    className: 'fshCurveContainer fshTopListSpinner',
+    innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
   });
   e.target.parentNode.replaceChild(spinner, e.target);
+  highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   if (highlightPlayersNearMyLvl) {
-    myStats(false).done(gotMyVl).done(findOnlinePlayers);
-  } else {findOnlinePlayers();}
+    calculateBoundaries();
+  }
+  findOnlinePlayers();
 }
 
 function looksLikeTopRated() {
-  highlightPlayersNearMyLvl =
-    getValue('highlightPlayersNearMyLvl');
   var theCell = pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = createInput({
@@ -141,11 +139,21 @@ function looksLikeTopRated() {
   findBtn.addEventListener('click', getMyVL);
 }
 
+var topRatedTests = [
+  function() {return isObject(pCC);},
+  function() {return isObject(pCC.firstElementChild);},
+  function() {return isObject(pCC.firstElementChild.rows);},
+  function() {return pCC.firstElementChild.rows.length > 2;},
+  function() {
+    return pCC.firstElementChild.rows[1].textContent.indexOf(
+      'Last Updated') === 0;
+  }
+];
+
+function testforTopRated() {
+  return topRatedTests.every(function(e) {return e();});
+}
+
 export default function injectTopRated() {
-  if (pCC &&
-      pCC.firstElementChild &&
-      pCC.firstElementChild.rows &&
-      pCC.firstElementChild.rows.length > 2 &&
-      pCC.firstElementChild.rows[1].textContent
-        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
+  if (testforTopRated()) {looksLikeTopRated();}
 }

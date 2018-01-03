@@ -1,8 +1,8 @@
+import calf from '../support/calf';
 import getForage from '../ajax/getForage';
 import {nowSecs} from '../support/dataObj';
 import setForage from '../ajax/setForage';
 import superelite from '../app/superelite';
-import {fallback, getValue} from '../support/system';
 
 export var oldLog;
 var timeoutId;
@@ -34,7 +34,7 @@ function gotSe(data) {
   setForage('fsh_seLog', oldLog);
 }
 
-export function getSeLog() {
+function getSeLog() {
   return superelite().done(gotSe);
 }
 
@@ -44,9 +44,12 @@ export function doBackgroundCheck() {
   return getSeLog();
 }
 
-function gotLog(data) {
-  if (data) {oldLog = data;}
-  var lastCheckSecs = nowSecs - fallback(oldLog.lastUpdate, 0);
+function whenWasLastCheck() {
+  return nowSecs - (oldLog && oldLog.lastUpdate || 0);
+}
+
+function setupBackgroundCheck() {
+  var lastCheckSecs = whenWasLastCheck();
   if (lastCheckSecs >= 600) {
     doBackgroundCheck();
   } else {
@@ -55,8 +58,16 @@ function gotLog(data) {
   }
 }
 
-export default function seLog() {
-  if (getValue('enableSeTracker')) {
-    getForage('fsh_seLog').done(gotLog);
+function gotLog(data) {
+  if (data) {oldLog = data;}
+}
+
+export function getFshSeLog() {
+  return getForage('fsh_seLog').done(gotLog);
+}
+
+export function seLog() {
+  if (calf.enableSeTracker && calf.cmd !== 'superelite') {
+    getFshSeLog().done(setupBackgroundCheck);
   }
 }

@@ -1,3 +1,4 @@
+import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import setForage from './ajax/setForage';
 import {jConfirm, pCC} from './support/layout';
@@ -48,10 +49,10 @@ function gotCombatLog(data) {
     'id="clearLog"></td>' +
     '</tr>' + yuuzParser + '</table></div>' +
     '</form>';
-  textArea = document.getElementById('combatLog');
-  document.getElementById('copyLog')
+  textArea = getElementById('combatLog');
+  getElementById('copyLog')
     .addEventListener('click', notepadCopyLog);
-  document.getElementById('clearLog')
+  getElementById('clearLog')
     .addEventListener('click', notepadClearLog);
 }
 

@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import {getElementById} from '../common/getElement';
 import {now} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
@@ -18,7 +19,7 @@ var composeMsg =
   'Composing to do</p></a></li>';
 
 function displayComposeMsg() {
-  document.getElementById('notifications')
+  getElementById('notifications')
     .insertAdjacentHTML('afterbegin', composeMsg);
 }
 
@@ -91,17 +92,22 @@ function createPotion(temp) { // jQuery
   });
 }
 
-function quickCreateBailOut(target) {
-  return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
+function isOurTarget(target) {
+  return target.tagName === 'SPAN' && target.className === 'quickCreate';
+}
+
+function doQuickCreate(self) {
+  var temp = self.previousElementSibling.previousElementSibling;
+  if (temp && temp.value !== 'none') {
+    self.innerHTML = '';
+    self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
+    createPotion(temp);
+  }
 }
 
 function quickCreate(evt) {
-  var target = evt.target;
-  if (quickCreateBailOut(target)) {return;}
-  var temp = target.previousElementSibling.previousElementSibling;
-  if (temp && temp.value !== 'none') {
-    createPotion(temp);
-  }
+  var self = evt.target.parentNode;
+  if (isOurTarget(self)) {doQuickCreate(self);}
 }
 
 function checkLastCompose() { // jQuery
@@ -127,7 +133,7 @@ export function injectComposeAlert() {
 
 function moveButtons() {
   if (getValue('moveComposingButtons')) {
-    var buttonDiv = document.getElementById('composing-error-dialog')
+    var buttonDiv = getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
     var top = pCC.getElementsByClassName('composing-level')[0]
@@ -145,22 +151,22 @@ export function injectComposing() {
   var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
-    el.insertAdjacentHTML('afterend',
-      '&nbsp;[<span class="quickCreate">Quick Create</span>]');
+    el.insertAdjacentHTML('afterend', '<span class="quickCreate">' +
+      '[<span class="sendLink">Quick Create</span>]</span>');
   });
   pCC.addEventListener('click', quickCreate);
   moveButtons();
 }
 
 export function composingCreate() {
-  document.getElementById('composing-add-skill')
+  getElementById('composing-add-skill')
     .addEventListener('click', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
+      getElementById('composing-skill-level-input').value =
+        getElementById('composing-skill-level-max').textContent;
     });
-  document.getElementById('composing-skill-select')
+  getElementById('composing-skill-select')
     .addEventListener('change', function() {
-      document.getElementById('composing-skill-level-input').value =
-        document.getElementById('composing-skill-level-max').textContent;
+      getElementById('composing-skill-level-input').value =
+        getElementById('composing-skill-level-max').textContent;
     });
 }

@@ -2,6 +2,7 @@ import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import {createSpan} from '../common/cElement';
 import fastDebuff from './debuff';
+import {getElementById} from '../common/getElement';
 import injectFastWear from './fastWear';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from '../chrome/jQueryDialog';
@@ -63,7 +64,7 @@ function quickWearLink() {
 }
 
 function profileSelectAll() {
-  var bpTabs = document.getElementById('backpack_tabs');
+  var bpTabs = getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
   var items = document.querySelectorAll('#backpackTab_' + type +
@@ -93,7 +94,7 @@ function selectAllLink() {
 function storeVL() {
   // store the VL of the player
   var virtualLevel = parseInt(
-    document.getElementById('stat-vl').textContent, 10);
+    getElementById('stat-vl').textContent, 10);
   if (intValue(document.getElementsByClassName('stat-level')[0]
     .nextElementSibling.textContent) === virtualLevel) {
     setValue('characterVirtualLevel', ''); // ?
@@ -140,6 +141,10 @@ function profileInjectGuildRel() {
   if (aLink) {foundGuildLink(aLink);}
 }
 
+function showRankButton() {
+  return currentGuildRelationship === 'self' && getValue('showAdmin');
+}
+
 function profileInjectQuickButton(avyImg, playerid, playername) {
   var newhtml = '<div align="center">';
   newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
@@ -176,8 +181,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
     playername + '" data-tipped="Recall items from ' + playername +
     '" style="background-image: url(\'' + imageServer +
     '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-  if (currentGuildRelationship === 'self' &&
-      getValue('showAdmin')) {
+  if (showRankButton()) {
     newhtml += '<a class="quickButton buttonGuildRank tip-static" href="' +
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
@@ -196,7 +200,7 @@ function removeStatTable(el) {
 }
 
 function updateStatistics() {
-  var charStats = document.getElementById('profileLeftColumn')
+  var charStats = getElementById('profileLeftColumn')
     .getElementsByTagName('table')[0];
   var dodgyTables = charStats.getElementsByTagName('table');
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
@@ -231,10 +235,10 @@ function updateNmv() {
     '#profileRightColumn img[src$="/60_sm.gif"]');
   if (!nmvImg) {return;}
   var atkStat = Number(
-    document.getElementById('stat-attack').firstChild.textContent.trim());
+    getElementById('stat-attack').firstChild.textContent.trim());
   if (isNaN(atkStat)) {return;}
   var defStat = Number(
-    document.getElementById('stat-defense').firstChild.textContent.trim());
+    getElementById('stat-defense').firstChild.textContent.trim());
   var oldTipped = nmvImg.dataset.tipped;
   var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
   var nmvLvl = Number(lvlAry[1]);

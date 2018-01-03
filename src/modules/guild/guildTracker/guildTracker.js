@@ -1,3 +1,4 @@
+import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
 import {simpleCheckboxHtml} from '../../settings/settingsPage';
@@ -15,6 +16,24 @@ var trackerData;
 var tracker;
 var trDialog;
 var acttab2;
+
+function isClosed() {
+  return !tracker.checked;
+}
+
+function isOpen() {
+  return tracker.checked;
+}
+
+function closeDialog() {
+  tracker.checked = false;
+}
+
+function keydownHandler(evt) {
+  if (isOpen() && evt.code === 'Escape') {
+    closeDialog();
+  }
+}
 
 function makeDragHandle() {
   return createUl({
@@ -89,6 +108,7 @@ function togglePref(evt) {
 function openDialog() {
   getForage('fsh_guildActivity').done(gotActivity);
   tracker.removeEventListener('change', openDialog);
+  calf.dialogIsClosed = isClosed;
   addOverlay();
   makePopup();
 }
@@ -112,5 +132,6 @@ export default function guildTracker() {
   tracker.addEventListener('change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   trDialog.appendChild(tracker);
+  document.body.addEventListener('keydown', keydownHandler);
   document.body.appendChild(trDialog);
 }

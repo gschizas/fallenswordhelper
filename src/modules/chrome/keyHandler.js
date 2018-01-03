@@ -1,4 +1,6 @@
+import calf from '../support/calf';
 import {doSendGold} from '../newMap/sendGold';
+import {getElementById} from '../common/getElement';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
@@ -44,7 +46,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
 
 function doRepair() {
   // do not use repair link for new map
-  if (!document.getElementById('worldPage')) {
+  if (!getElementById('worldPage')) {
     location.href = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
   }
 }
@@ -81,7 +83,9 @@ function backpack() {
 }
 
 function fastWearMgr() {
-  jQueryDialog(insertQuickWear);
+  if (!('dialogIsClosed' in calf) || calf.dialogIsClosed()) {
+    jQueryDialog(insertQuickWear);
+  }
 }
 
 function profile() {

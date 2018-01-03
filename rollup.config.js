@@ -62,5 +62,6 @@ export default {
   },
   plugins: [
     jscc(opts)
-  ]
+  ],
+  watch: {include: 'src/**/*.js'}
 };

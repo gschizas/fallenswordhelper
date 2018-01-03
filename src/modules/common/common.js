@@ -46,6 +46,10 @@ function updateForCloak(obj) {
   obj.hpValue = obj.hpBonus;
 }
 
+function attackValueIsNumber(atk) {
+  return typeof atk === 'number' && !isNaN(atk);
+}
+
 export function playerDataString(responseText) {
   var doc = createDocument(responseText);
   var obj = {
@@ -86,8 +90,7 @@ export function playerDataString(responseText) {
     obj.superEliteSlayerLevel * 100) / 100;
 
   if (obj.cloakLevel === 0 ||
-      typeof obj.attackValue === 'number' &&
-      !isNaN(obj.attackValue)) {
+      attackValueIsNumber(obj.attackValue)) {
     return obj;
   }
 

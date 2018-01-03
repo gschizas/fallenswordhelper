@@ -15,7 +15,7 @@ Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of 
 
 To install:
 
-[Firefox](http://getfirefox.com) and [Greasemonkey](https://addons.mozilla.org/firefox/addon/748) are required or [Chrome](http://www.google.com/chrome/) and [TamperMonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+[Firefox](http://getfirefox.com) and [TamperMonkey](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/) are required or [Chrome](http://www.google.com/chrome/) and [TamperMonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
 
 **If you have what you need, you should be able to install the script by clicking here: [Install Script](https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js)**
 

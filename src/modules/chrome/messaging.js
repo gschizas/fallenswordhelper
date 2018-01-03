@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {
   fallback,
   getValue,
@@ -82,7 +83,7 @@ function keypress(evt) {
 
 function captureEnter() {
   if (enterForSendMessage) {
-    document.getElementById('quickMsgDialog_msg')
+    getElementById('quickMsgDialog_msg')
       .addEventListener('keypress', keypress);
   }
 }

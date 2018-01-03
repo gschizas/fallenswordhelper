@@ -1,6 +1,6 @@
 import {padZ} from '../support/system';
 
-export default function formatDateTime(aDate) {
+export default function formatLocalDateTime(aDate) {
   if (Object.prototype.toString.call(aDate) === '[object Date]' &&
       !isNaN(aDate.getTime())) {
     var yyyy = aDate.getFullYear().toString();

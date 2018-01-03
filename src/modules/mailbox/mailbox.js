@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {itemRE} from '../support/dataObj';
 import outputResult from '../common/outputResult';
 import retryAjax from '../ajax/retryAjax';
@@ -20,7 +21,7 @@ function quickDoneTaken(data) { // jQuery
     $('#temp-inv-' + data.temp_id).remove();
     $('#qtip-' + qtipId).remove();
   }
-  outputResult('Item taken.', document.getElementById('take_result'));
+  outputResult('Item taken.', getElementById('take_result'));
 }
 
 function takeAllSimilar(evt) { // jQuery.min
@@ -103,9 +104,9 @@ export default function injectMailbox() { // Bad jQuery
       '<td><img src="' + titem.src +
       '" class="tip-dynamic" border="0" data-tipped="' +
       titem.tipped + '"></td></tr>');
-    document.getElementById('Helper:takeAllSimilar' + id)
+    getElementById('Helper:takeAllSimilar' + id)
       .addEventListener('click', takeAllSimilar, true);
   });
-  document.getElementById('mailboxSwitcher')
+  getElementById('mailboxSwitcher')
     .addEventListener('click', toggleQuickTake, true);
 }

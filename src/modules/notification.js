@@ -1,5 +1,6 @@
 import add from './support/task';
 import calf from './support/calf';
+import {getElementById} from './common/getElement';
 import {now} from './support/dataObj';
 import retryAjax from './ajax/retryAjax';
 import {
@@ -37,7 +38,7 @@ var goldUpgradeMsg =
   'grade stamina with gold</p></a></li>';
 
 function havePrayed() {
-  document.getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
+  getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
   setValue('needToPray', false);
   setValue('lastTempleCheck', new Date()
     .setUTCHours(23, 59, 59, 999) + 1); // Midnight
@@ -46,7 +47,7 @@ function havePrayed() {
 function prayToGods(e) { // jQuery
   var myGod = e.target.getAttribute('praytype');
   if (!myGod) {return;}
-  document.getElementById('helperPrayToGods').removeEventListener('click',
+  getElementById('helperPrayToGods').removeEventListener('click',
     prayToGods);
   retryAjax('index.php?cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
@@ -54,15 +55,15 @@ function prayToGods(e) { // jQuery
 }
 
 function displayDisconnectedFromGodsMessage() {
-  document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+  getElementById('notifications').insertAdjacentHTML('afterbegin',
     godsNotification);
-  document.getElementById('helperPrayToGods').addEventListener('click',
+  getElementById('helperPrayToGods').addEventListener('click',
     prayToGods);
 }
 
 function displayUpgradeMsg() {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
-    document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+    getElementById('notifications').insertAdjacentHTML('afterbegin',
       goldUpgradeMsg);
   }
 }
@@ -139,7 +140,7 @@ function findDoc(data) {
 export function parseGoldUpgrades(data) {
   if (!calf.enableUpgradeAlert) {return;}
   var doc = findDoc(data);
-  var limit = doc.getElementById('pCC').getElementsByTagName('TABLE')[0]
+  var limit = getElementById('pCC', doc).getElementsByTagName('TABLE')[0]
     .rows[3].cells[2];
   var checkDoneUpgrade = limit.textContent.split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
@@ -152,12 +153,7 @@ export function parseGoldUpgrades(data) {
   }
 }
 
-function notUpgradesPage() {
-  var needToDoUpgrade = getValue('needToDoUpgrade');
-  if (needToDoUpgrade) {
-    displayUpgradeMsg();
-    return;
-  }
+function checkLastUpgrade() {
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
   retryAjax('index.php?cmd=points&type=1').done(function(data) {
@@ -165,11 +161,19 @@ function notUpgradesPage() {
   });
 }
 
+function notUpgradesPage() {
+  if (getValue('needToDoUpgrade')) {
+    displayUpgradeMsg();
+    return;
+  }
+  checkLastUpgrade();
+}
+
 export function injectUpgradeAlert() { // jQuery
   if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
 }
 
 export function injectJoinAllLink() {
-  var nodeList = document.getElementById('pCL').getElementsByTagName('li');
+  var nodeList = getElementById('pCL').getElementsByTagName('li');
   Array.prototype.forEach.call(nodeList, findNewGroup);
 }

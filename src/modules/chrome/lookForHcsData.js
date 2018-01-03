@@ -1,6 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
+import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import guildActivity from '../guild/guildActivity';
 import {injectComposeAlert} from '../composing/composing';
@@ -9,10 +10,11 @@ import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
 import injectMenu from './accordion';
 import injectQuickMsgDialogJQ from './messaging';
+import injectServerNode from './injectServerNode';
 import prepareAllyEnemyList from './allyEnemy';
 import prepareBountyData from './activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
-import seLog from '../seLog/seLog';
+import {seLog} from '../seLog/seLog';
 import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
@@ -38,6 +40,7 @@ function getEnvVars() {
   calf.enableGuildInfoWidgets = getValue('enableGuildInfoWidgets');
   calf.enableOnlineAlliesWidgets =
     getValue('enableOnlineAlliesWidgets');
+  calf.enableSeTracker = getValue('enableSeTracker');
   calf.hideGuildInfoTrade = getValue('hideGuildInfoTrade');
   calf.hideGuildInfoSecureTrade = getValue('hideGuildInfoSecureTrade');
   calf.hideGuildInfoBuff = getValue('hideGuildInfoBuff');
@@ -119,14 +122,14 @@ function navMenu() { // jQuery
 }
 
 function moveRHSBoxUpOnRHS(title) {
-  document.getElementById('pCR').insertAdjacentElement('afterbegin',
-    document.getElementById(title));
+  getElementById('pCR').insertAdjacentElement('afterbegin',
+    getElementById(title));
 }
 
 function moveRHSBoxToLHS(title) {
-  var boxDiv = document.getElementById(title);
+  var boxDiv = getElementById(title);
   boxDiv.classList.add('pCR');
-  document.getElementById('pCL').appendChild(boxDiv);
+  getElementById('pCL').appendChild(boxDiv);
 }
 
 function doMoveGuildList() {
@@ -183,6 +186,8 @@ function notHuntMode() {
 
   add(3, injectQuickMsgDialogJQ);
 
+  add(3, injectServerNode);
+
   add(4, guildActivity);
   add(4, seLog);
 }
@@ -200,7 +205,7 @@ function prepareEnv() {
 }
 
 export default function lookForHcsData() {
-  var hcsData = document.getElementById('html');
+  var hcsData = getElementById('html');
   if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
   }

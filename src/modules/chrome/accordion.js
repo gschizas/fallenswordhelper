@@ -1,3 +1,4 @@
+import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import injectMonsterLog from '../monstorLog';
@@ -13,7 +14,7 @@ import {injectFindBuffs, injectFindOther} from '../findBuffs';
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
-    document.getElementById('nav-character-questbook')
+    getElementById('nav-character-questbook')
       .setAttribute('href', lastActiveQuestPage);
   }
 }
@@ -28,7 +29,7 @@ function spanButton(navLvl, text, fn, target) {
     jQueryDialog(fn);
   });
   li.appendChild(sb);
-  document.getElementById(target).parentNode
+  getElementById(target).parentNode
     .insertAdjacentElement('afterend', li);
 }
 
@@ -55,7 +56,7 @@ function creatureLogLink() {
 function newGuildLogLink() {
   if (!getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    document.getElementById('nav-guild-ledger-guildlog').parentNode
+    getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
         '<li class="nav-level-2"><a class="nav-link" ' +
         'href="index.php' + newGuildLogUrl + '"' +
@@ -65,14 +66,14 @@ function newGuildLogLink() {
 
 function adjustHeight() { // jQuery
   // adjust the menu height for the newly added items
-  var theNav = document.getElementById('nav');
+  var theNav = getElementById('nav');
   var myNav = $(theNav).data('nav');
   // first the closed saved variables
   myNav.heights = [
     null,
     null,
     // Character
-    document.getElementById('nav-character').nextElementSibling.children
+    getElementById('nav-character').nextElementSibling.children
       .length * 22,
     660,
     // Guild
@@ -90,11 +91,11 @@ function adjustHeight() { // jQuery
 }
 
 export default function injectMenu() {
-  if (!document.getElementById('pCL')) {return;}
+  if (!getElementById('pCL')) {return;}
   updateQuestLink();
   // character
   spanButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  document.getElementById('nav-character-log').parentNode
+  getElementById('nav-character-log').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
       'character-medalguide" href="index.php?cmd=profile&subcmd=' +
@@ -108,14 +109,14 @@ export default function injectMenu() {
   spanButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
   // guild
-  document.getElementById('nav-guild-storehouse-inventory').parentNode
+  getElementById('nav-guild-storehouse-inventory').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
       '&subcmd=guildinvmgr">Guild Inventory</a></li>');
   newGuildLogLink();
   // top rated
-  document.getElementById('nav-toprated-players-level').parentNode
+  getElementById('nav-toprated-players-level').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +

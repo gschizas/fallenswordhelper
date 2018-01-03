@@ -1,4 +1,6 @@
 import calf from './support/calf';
+import doSortParams from './common/doSortParams';
+import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
@@ -31,7 +33,7 @@ function mobRows() {
 }
 
 function drawMobs() {
-  var inject = document.getElementById('entityTableOutput');
+  var inject = getElementById('entityTableOutput');
   if (!monsterAry || !inject) {return;}
   inject.innerHTML = mobRows();
 }
@@ -49,12 +51,7 @@ function sortMonsterAry(sortType) {
 }
 
 function sortCol(target) {
-  var headerClicked = target.getAttribute('sortKey');
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
+  doSortParams(target.getAttribute('sortKey'));
   var sortType = findSortType(target);
   sortMonsterAry(sortType);
   drawMobs();
@@ -93,6 +90,10 @@ function drawTable() {
   content.addEventListener('click', doHandlers);
 }
 
+function hazEnhancements(enhancements) {
+  return enhancements && enhancements.length > 0;
+}
+
 function prepMonster(data) {
   monsterAry = Object.keys(data).reduce(function(prev, curr) {
     var tmpObj = data[curr];
@@ -109,7 +110,7 @@ function prepMonster(data) {
     tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
     var enhancements;
     if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-    if (enhancements && enhancements.length > 0) {
+    if (hazEnhancements(enhancements)) {
       var tmp = '<span class="fshXXSmall">';
       tmp += enhancements.reduce(function(_prev, _curr) {
         return _prev + '<span class="fshNoWrap">' + _curr + ': ' +

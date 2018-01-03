@@ -1,4 +1,5 @@
 import {createSpan} from './common/cElement';
+import {getElementById} from './common/getElement';
 import getProfile from './ajax/getProfile';
 import retryAjax from './ajax/retryAjax';
 import {createDocument, fallback, formatLastActivity} from './support/system';
@@ -59,7 +60,7 @@ function getBuff(doc, buff, inject) {
     inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
       'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
   } else {
-    var elem = document.getElementById('buff-outer')
+    var elem = getElementById('buff-outer')
       .querySelector('input[data-name="' + buff + '"]');
     if (elem) {
       inject.innerHTML = '<span class="quickbuffActivate" ' +
@@ -70,6 +71,13 @@ function getBuff(doc, buff, inject) {
   }
 }
 
+function itWorked(result) {
+  return result &&
+    (result.textContent.indexOf(
+      'current or higher level is currently active on') !== -1 ||
+    result.textContent.indexOf('was activated on') !== -1);
+}
+
 function quickActivate(evt) { // jQuery
   var trigger = evt.target;
   if (trigger.className !== 'quickbuffActivate') {return;}
@@ -78,10 +86,7 @@ function quickActivate(evt) { // jQuery
   retryAjax(buffHref).done(function(data) {
     var doc = createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
-    if (result &&
-        (result.textContent.indexOf(
-          'current or higher level is currently active on') !== -1 ||
-        result.textContent.indexOf('was activated on') !== -1)) {
+    if (itWorked(result)) {
       trigger.className = 'fshLime';
       trigger.innerHTML = 'On';
     }
@@ -118,21 +123,26 @@ function getBuffColor(myLvl, playerBuffLevel) {
   return 'fshGreen';
 }
 
-function hazBuff(playerData, el) {
-  var myBuffName = el.getAttribute('data-name');
-  var playerBuffLevel = playerData[myBuffName];
-  var playerSpan = el.nextElementSibling.nextElementSibling;
-  if (!playerBuffLevel && !playerSpan) {return;}
+function buffRunning(el, playerBuffLevel, playerSpan) {
   if (!playerBuffLevel) {
     playerSpan.innerHTML = '';
     return;
   }
   var lvlSpan = el.nextElementSibling.firstElementChild.firstElementChild;
   var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
-  playerSpan = newPlayerSpan(el, playerSpan);
+  var fshPlayerSpan = newPlayerSpan(el, playerSpan);
   var buffColor = getBuffColor(myLvl, playerBuffLevel);
-  playerSpan.innerHTML = ' <span class="' + buffColor +
+  fshPlayerSpan.innerHTML = ' <span class="' + buffColor +
     '">[' + playerBuffLevel + ']</span>';
+}
+
+function hazBuff(playerData, el) {
+  var myBuffName = el.getAttribute('data-name');
+  var playerBuffLevel = playerData[myBuffName];
+  var playerSpan = el.nextElementSibling.nextElementSibling;
+  if (playerBuffLevel || playerSpan) {
+    buffRunning(el, playerBuffLevel, playerSpan);
+  }
 }
 
 function addBuffLevels(evt) {
@@ -143,13 +153,13 @@ function addBuffLevels(evt) {
   var playerData = player.parentNode.lastElementChild.textContent.split(',');
   playerData = playerData.reduce(function(prev, curr) {
     if (curr.indexOf(' [') !== -1) {
-      var bob = curr.split(' [');
-      prev[bob[0].trim()] = parseInt(bob[1].replace(']', ''), 10);
+      var foo = curr.split(' [');
+      prev[foo[0].trim()] = parseInt(foo[1].replace(']', ''), 10);
     }
     return prev;
   }, {});
 
-  var buffOuter = document.getElementById('buff-outer');
+  var buffOuter = getElementById('buff-outer');
   var nodeList = buffOuter.querySelectorAll('input[name]');
 
   Array.prototype.forEach.call(nodeList, hazBuff.bind(null, playerData));
@@ -169,10 +179,14 @@ function doLabels(el) {
   }
 }
 
+function waitForPlayer(firstPlayer) {
+  return !firstPlayer && retries < 9;
+}
+
 function haveTargets() {
-  var firstPlayer = document.getElementById('players')
+  var firstPlayer = getElementById('players')
     .getElementsByTagName('h1')[0];
-  if (!firstPlayer && retries < 9) {
+  if (waitForPlayer(firstPlayer)) {
     retries += 1;
     setTimeout(haveTargets, 100);
     return;
@@ -182,7 +196,7 @@ function haveTargets() {
 }
 
 function firstPlayerStats() {
-  var targets = document.getElementById('targetPlayers')
+  var targets = getElementById('targetPlayers')
     .getAttribute('value');
   if (targets && targets !== '') {haveTargets();}
 }
@@ -196,19 +210,19 @@ function getSustain(responseText) {
     prev[curr.name] = curr.duration;
     return prev;
   }, {});
-  getEnhancement(enh, 'Sustain', document.getElementById('fshSus'));
-  getEnhancement(enh, 'Fury Caster', document.getElementById('fshFur'));
-  getBuff(skl, 'Guild Buffer', document.getElementById('fshGB'));
-  getBuff(skl, 'Buff Master', document.getElementById('fshBM'));
-  getBuff(skl, 'Extend', document.getElementById('fshExt'));
-  getBuff(skl, 'Reinforce', document.getElementById('fshRI'));
+  getEnhancement(enh, 'Sustain', getElementById('fshSus'));
+  getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
+  getBuff(skl, 'Guild Buffer', getElementById('fshGB'));
+  getBuff(skl, 'Buff Master', getElementById('fshBM'));
+  getBuff(skl, 'Extend', getElementById('fshExt'));
+  getBuff(skl, 'Reinforce', getElementById('fshRI'));
 
-  document.getElementById('helperQBheader')
+  getElementById('helperQBheader')
     .addEventListener('click', quickActivate);
-  document.getElementById('players')
+  getElementById('players')
     .addEventListener('click', addBuffLevels);
 
-  var labels = document.getElementById('buff-outer')
+  var labels = getElementById('buff-outer')
     .querySelectorAll('label[for^="skill-"]');
   Array.prototype.forEach.call(labels, doLabels);
 
@@ -217,7 +231,7 @@ function getSustain(responseText) {
 }
 
 export default function injectQuickBuff() { // jQuery
-  var quickbuffDiv = document.getElementById('quickbuff');
+  var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
   quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
     quickBuffHeader);
