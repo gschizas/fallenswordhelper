@@ -55,6 +55,7 @@ export default function generalPrefs() {
 
     simpleCheckbox('enableOnlineAlliesWidgets') +
     simpleCheckbox('moveFSBox') +
+    simpleCheckbox('moveDailyQuest') +
     simpleCheckbox('fsboxlog') +
     simpleCheckbox('gameHelpLink') +
     simpleCheckbox('enableTempleAlert') +

@@ -51,6 +51,8 @@ export default function retryAjax(options) {
   return dfr;
 }
 
-$(document).ajaxComplete(function() {
-  taskRunner();
-});
+if (typeof $ !== 'undefined') {
+  $(document).ajaxComplete(function() {
+    taskRunner();
+  });
+}

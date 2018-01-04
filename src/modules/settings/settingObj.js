@@ -59,6 +59,7 @@ export var saveBoxes = [
   'moveGuildList',
   'moveOnlineAlliesList',
   'moveFSBox',
+  'moveDailyQuest',
   'hideQuests',
   'hideQuestNames',
   'hideRecipes',

@@ -219,9 +219,11 @@ function retryAjax(options) {
   return dfr;
 }
 
-$(document).ajaxComplete(function() {
-  taskRunner$1();
-});
+if (typeof $ !== 'undefined') {
+  $(document).ajaxComplete(function() {
+    taskRunner$1();
+  });
+}
 
 /* eslint-disable max-lines */
 var defaults = {
@@ -250,6 +252,7 @@ var defaults = {
   huntingBuffs3Name: 'SE',
   showHuntingBuffs: false,
   moveFSBox: false,
+  moveDailyQuest: false,
 
   guildSelf: '',
   guildSelfMessage: 'Member of your own guild!',
@@ -2979,6 +2982,11 @@ var mySimpleCheckboxes = {
     helpText: 'This will move the FS box to the left, under the menu, ' +
       'for better visibility (unless it is already hidden.)'
   },
+  moveDailyQuest: {
+    helpTitle: 'Move Daily Quest',
+    helpText: 'This will move the Daily Quest to the left, under the menu, ' +
+      'for better visibility (unless it is already hidden.)'
+  },
   gameHelpLink: {
     helpTitle: '&quot;Game Help&quot; Settings Link',
     helpText: 'This turns the Game Help text in the lower ' +
@@ -3323,6 +3331,7 @@ var saveBoxes = [
   'moveGuildList',
   'moveOnlineAlliesList',
   'moveFSBox',
+  'moveDailyQuest',
   'hideQuests',
   'hideQuestNames',
   'hideRecipes',
@@ -3505,6 +3514,7 @@ function generalPrefs() {
 
     simpleCheckbox('enableOnlineAlliesWidgets') +
     simpleCheckbox('moveFSBox') +
+    simpleCheckbox('moveDailyQuest') +
     simpleCheckbox('fsboxlog') +
     simpleCheckbox('gameHelpLink') +
     simpleCheckbox('enableTempleAlert') +
@@ -7101,8 +7111,10 @@ function moveRHSBoxUpOnRHS(title) {
 
 function moveRHSBoxToLHS(title) {
   var boxDiv = getElementById(title);
-  boxDiv.classList.add('pCR');
-  getElementById('pCL').appendChild(boxDiv);
+  if (boxDiv) {
+    boxDiv.classList.add('pCR');
+    getElementById('pCL').appendChild(boxDiv);
+  }
 }
 
 function doMoveGuildList() {
@@ -7123,6 +7135,12 @@ function doMoveFsBox() {
   }
 }
 
+function doMoveDailyQuest() {
+  if (getValue('moveDailyQuest')) {
+    add(3, moveRHSBoxToLHS, ['minibox-daily-quest']);
+  }
+}
+
 function fixOnlineGuildBuffLinks() {
   updateHCSQuickBuffLinks(
     '#minibox-guild-members-list #guild-minibox-action-quickbuff');
@@ -7135,6 +7153,7 @@ function notHuntMode() {
   // move boxes in opposite order that you want them to appear.
   doMoveGuildList();
   doMoveAllyList();
+  doMoveDailyQuest();
   doMoveFsBox();
 
   getEnvVars();
@@ -18415,7 +18434,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '1';
+window.FSH.calf = '2';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
