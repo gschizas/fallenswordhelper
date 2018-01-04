@@ -25,6 +25,7 @@ export var defaults = {
   huntingBuffs3Name: 'SE',
   showHuntingBuffs: false,
   moveFSBox: false,
+  moveDailyQuest: false,
 
   guildSelf: '',
   guildSelfMessage: 'Member of your own guild!',

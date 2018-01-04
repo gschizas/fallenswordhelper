@@ -150,6 +150,12 @@ function doMoveFsBox() {
   }
 }
 
+function doMoveDailyQuest() {
+  if (getValue('moveDailyQuest')) {
+    add(3, moveRHSBoxToLHS, ['minibox-daily-quest']);
+  }
+}
+
 function fixOnlineGuildBuffLinks() {
   updateHCSQuickBuffLinks(
     '#minibox-guild-members-list #guild-minibox-action-quickbuff');
@@ -162,6 +168,7 @@ function notHuntMode() {
   // move boxes in opposite order that you want them to appear.
   doMoveGuildList();
   doMoveAllyList();
+  doMoveDailyQuest();
   doMoveFsBox();
 
   getEnvVars();

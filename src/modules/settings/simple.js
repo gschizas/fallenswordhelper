@@ -20,6 +20,11 @@ export default {
     helpText: 'This will move the FS box to the left, under the menu, ' +
       'for better visibility (unless it is already hidden.)'
   },
+  moveDailyQuest: {
+    helpTitle: 'Move Daily Quest',
+    helpText: 'This will move the Daily Quest to the left, under the menu, ' +
+      'for better visibility (unless it is already hidden.)'
+  },
   gameHelpLink: {
     helpTitle: '&quot;Game Help&quot; Settings Link',
     helpText: 'This turns the Game Help text in the lower ' +
