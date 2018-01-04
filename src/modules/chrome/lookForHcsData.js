@@ -128,8 +128,10 @@ function moveRHSBoxUpOnRHS(title) {
 
 function moveRHSBoxToLHS(title) {
   var boxDiv = getElementById(title);
-  boxDiv.classList.add('pCR');
-  getElementById('pCL').appendChild(boxDiv);
+  if (boxDiv) {
+    boxDiv.classList.add('pCR');
+    getElementById('pCL').appendChild(boxDiv);
+  }
 }
 
 function doMoveGuildList() {
