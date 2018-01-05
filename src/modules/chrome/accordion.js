@@ -7,7 +7,7 @@ import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import jQueryDialog from './jQueryDialog';
 import {newGuildLogUrl} from '../support/dataObj';
-import {createLi, createSpan} from '../common/cElement';
+import {createAnchor, createLi} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs';
 
@@ -19,36 +19,36 @@ function updateQuestLink() {
   }
 }
 
-function spanButton(navLvl, text, fn, target) {
+function anchorButton(navLvl, text, fn, target) {
   var li = createLi({className: 'nav-level-' + navLvl});
-  var sb = createSpan({
+  var al = createAnchor({
     className: 'nav-link fshPoint',
     textContent: text
   });
-  sb.addEventListener('click', function() {
+  al.addEventListener('click', function() {
     jQueryDialog(fn);
   });
-  li.appendChild(sb);
+  li.appendChild(al);
   getElementById(target).parentNode
     .insertAdjacentElement('afterend', li);
 }
 
 function buffLogLink() {
   if (getValue('keepBuffLog')) {
-    spanButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
+    anchorButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
 function combatLogLink() {
   if (getValue('keepLogs')) {
-    spanButton('1', 'Combat Logs', injectNotepadShowLogs,
+    anchorButton('1', 'Combat Logs', injectNotepadShowLogs,
       'nav-character-notepad');
   }
 }
 
 function creatureLogLink() {
   if (getValue('showMonsterLog')) {
-    spanButton('1', 'Creature Logs', injectMonsterLog,
+    anchorButton('1', 'Creature Logs', injectMonsterLog,
       'nav-character-notepad');
   }
 }
@@ -94,7 +94,7 @@ export default function injectMenu() {
   if (!getElementById('pCL')) {return;}
   updateQuestLink();
   // character
-  spanButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
+  anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   getElementById('nav-character-log').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -106,7 +106,7 @@ export default function injectMenu() {
   buffLogLink();
   combatLogLink();
   creatureLogLink();
-  spanButton('1', 'Quick Links', injectQuickLinkManager,
+  anchorButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
   // guild
   getElementById('nav-guild-storehouse-inventory').parentNode
@@ -122,13 +122,13 @@ export default function injectMenu() {
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
       'Top 250 Players</a></li>');
   // actions
-  spanButton('2', 'AH Quick Search', injectAuctionSearch,
+  anchorButton('2', 'AH Quick Search', injectAuctionSearch,
     'nav-actions-trade-auctionhouse');
-  spanButton('2', 'Online Players', injectOnlinePlayers,
+  anchorButton('2', 'Online Players', injectOnlinePlayers,
     'nav-actions-interaction-findplayer');
-  spanButton('2', 'Find Other', injectFindOther,
+  anchorButton('2', 'Find Other', injectFindOther,
     'nav-actions-interaction-findplayer');
-  spanButton('2', 'Find Buffs', injectFindBuffs,
+  anchorButton('2', 'Find Buffs', injectFindBuffs,
     'nav-actions-interaction-findplayer');
   adjustHeight();
 }
