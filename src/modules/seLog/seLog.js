@@ -40,7 +40,7 @@ function getSeLog() {
 
 export function doBackgroundCheck() {
   disableBackgroundChecks();
-  intervalId = window.setInterval(getSeLog, 600000);
+  intervalId = window.setInterval(getSeLog, 300000);
   return getSeLog();
 }
 
