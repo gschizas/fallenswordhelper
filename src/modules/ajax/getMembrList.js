@@ -47,6 +47,7 @@ function getGuildMembers(guildId) {
 }
 
 var testList = [
+  function(guildId, membrList) {return membrList !== null;},
   function(guildId, membrList) {return typeof membrList === 'object';},
   function(guildId, membrList) {return typeof membrList[guildId] === 'object';},
   function(guildId, membrList) {

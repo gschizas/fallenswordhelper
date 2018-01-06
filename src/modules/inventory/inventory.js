@@ -1,14 +1,15 @@
 import add from '../support/task';
 import calf from '../support/calf';
-import {defaults} from '../support/dataObj';
 import doTable from './table';
 import dropItem from '../ajax/dropItem';
 import getForage from '../ajax/getForage';
 import getInventory from '../ajax/getInventory';
 import getMembrList from '../ajax/getMembrList';
+import {mixin} from '../common/cElement';
 import moveItem from '../ajax/moveItem';
 import sendItem from '../ajax/sendItem';
 import setForage from '../ajax/setForage';
+import {defaultOptions, invManFilter, inventoryCheckAll} from './assets';
 import {
   equipItem,
   queueRecallItem,
@@ -16,7 +17,6 @@ import {
   useItem
 } from '../support/ajax';
 import {fallback, getValue, imageServer} from '../support/system';
-import {invManFilter, inventoryCheckAll} from './assets';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
@@ -103,8 +103,8 @@ function changeLvls() { // jQuery
 }
 
 function resetLvls() { // jQuery
-  options.fshMinLvl = defaults.inventoryMinLvl;
-  options.fshMaxLvl = defaults.inventoryMaxLvl;
+  options.fshMinLvl = defaultOptions.fshMinLvl;
+  options.fshMaxLvl = defaultOptions.fshMaxLvl;
   setForage('fsh_inventory', options);
   $('#fshMinLvl').val(options.fshMinLvl);
   $('#fshMaxLvl').val(options.fshMaxLvl);
@@ -146,7 +146,7 @@ function clearChecks() { // jQuery
 }
 
 function resetChecks() { // jQuery
-  options.checkedElements = defaults.inventoryCheckedElements;
+  options.checkedElements = defaultOptions.checkedElements;
   setChecks();
   $('#fshInv').DataTable().draw(false);
 }
@@ -288,13 +288,8 @@ function getInvMan() {
 }
 
 function extendOptions(data) {
-  options = fallback(data, {});
-  options.fshMinLvl = fallback(options.fshMinLvl,
-    defaults.inventoryMinLvl);
-  options.fshMaxLvl = fallback(options.fshMaxLvl,
-    defaults.inventoryMaxLvl);
-  options.checkedElements = fallback(options.checkedElements,
-    defaults.inventoryCheckedElements);
+  options = defaultOptions;
+  mixin(options, fallback(data, {}));
 }
 
 function syncInvMan() { // jQuery

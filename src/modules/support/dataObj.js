@@ -1,3 +1,5 @@
+import {quickSearchList} from './defaultQuickSearchList';
+
 /* eslint-disable max-lines */
 export var defaults = {
   lastActiveQuestPage: '',
@@ -140,8 +142,6 @@ export var defaults = {
 
   showQuickDropLinks: false,
 
-  inventoryMinLvl: 1,
-  inventoryMaxLvl: 9999,
   onlinePlayerMinLvl: 1,
   onlinePlayerMaxLvl: 9999,
   arenaMinLvl: 1,
@@ -175,24 +175,6 @@ export var defaults = {
   lastOnlineCheck: 0,
   bountyList: '',
   wantedList: '',
-  inventoryCheckedElements: {
-    '0': 1,
-    '1': 1,
-    '2': 1,
-    '3': 1,
-    '4': 1,
-    '5': 1,
-    '6': 1,
-    '7': 1,
-    '8': 1,
-    '100': 1,
-    '101': 1,
-    '102': 1,
-    '103': 1,
-    '104': 1,
-    '105': 1,
-    '106': 1
-  },
   lowestLevelInTop250: 0,
 
   quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
@@ -207,55 +189,7 @@ export var defaults = {
     '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-  quickSearchList:
-    '[{"category":"Plants","searchname":"Amber","nickname":""},' +
-    '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
-    '{"category":"Plants","searchname":"Jademare","nickname":""},' +
-    '{"category":"Plants","searchname":"Dark Shade","nickname":""},' +
-    '{"category":"Plants","searchname":"Trinettle","nickname":""},' +
-    '{"category":"Plants","searchname":"Heffle Wart","nickname":""},' +
-    '{"category":"Potions","searchname":"Sludge Brew",' +
-      '"nickname":"DC 200","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Black Death",' +
-      '"nickname":"DC 225","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Aid",' +
-      '"nickname":"Assist","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Supreme Doubling",' +
-      '"nickname":"DB 450","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Acceleration",' +
-      '"nickname":"DB 500","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Lesser Death Dealer",' +
-      '"nickname":"DD","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Runic Potion",' +
-      '"nickname":"FI 250","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of the Bookworm",' +
-      '"nickname":"Lib 225","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Truth",' +
-      '"nickname":"EW 1k","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Dull Edge",' +
-      '"nickname":"DE 25","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Notched Blade",' +
-      '"nickname":"DE 80","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Death",' +
-      '"nickname":"DW 125","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Decay",' +
-      '"nickname":"WI 150","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Fatality",' +
-      '"nickname":"WI 350","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Annihilation",' +
-      '"nickname":"DW 150","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of the Wise",' +
-      '"nickname":"Lib 200","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Shattering",' +
-      '"nickname":"SA","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Dragons Blood Potion",' +
-      '"nickname":"ZK 200","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Berserkers Potion",' +
-      '"nickname":"ZK 300","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Fury",' +
-      '"nickname":"ZK 350","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
-      '"nickname":"FI 1k","displayOnAH":true}]',
+  quickSearchList: quickSearchList,
 
   arenaMoves: '[]',
   arenaMatches: '[]',

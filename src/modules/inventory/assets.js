@@ -1,3 +1,25 @@
+export var defaultOptions = {
+  checkedElements: {
+    '0': 1,
+    '1': 1,
+    '2': 1,
+    '3': 1,
+    '4': 1,
+    '5': 1,
+    '6': 1,
+    '7': 1,
+    '8': 1,
+    '100': 1,
+    '101': 1,
+    '102': 1,
+    '103': 1,
+    '104': 1,
+    '105': 1,
+    '106': 1
+  },
+  fshMinLvl: 1,
+  fshMaxLvl: 9999
+};
 export var invManFilter =
   '<table class="fshInvFilter">' +
   '<tr><th colspan="14">@@reportTitle@@</th>' +
