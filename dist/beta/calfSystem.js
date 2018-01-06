@@ -225,6 +225,56 @@ if (typeof $ !== 'undefined') {
   });
 }
 
+var quickSearchList =
+  '[{"category":"Plants","searchname":"Amber","nickname":""},' +
+  '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
+  '{"category":"Plants","searchname":"Jademare","nickname":""},' +
+  '{"category":"Plants","searchname":"Dark Shade","nickname":""},' +
+  '{"category":"Plants","searchname":"Trinettle","nickname":""},' +
+  '{"category":"Plants","searchname":"Heffle Wart","nickname":""},' +
+  '{"category":"Potions","searchname":"Sludge Brew",' +
+    '"nickname":"DC 200","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Black Death",' +
+    '"nickname":"DC 225","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Aid",' +
+    '"nickname":"Assist","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Supreme Doubling",' +
+    '"nickname":"DB 450","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Acceleration",' +
+    '"nickname":"DB 500","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Lesser Death Dealer",' +
+    '"nickname":"DD","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Runic Potion",' +
+    '"nickname":"FI 250","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of the Bookworm",' +
+    '"nickname":"Lib 225","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Truth",' +
+    '"nickname":"EW 1k","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Dull Edge",' +
+    '"nickname":"DE 25","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Notched Blade",' +
+    '"nickname":"DE 80","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Death",' +
+    '"nickname":"DW 125","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Decay",' +
+    '"nickname":"WI 150","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Fatality",' +
+    '"nickname":"WI 350","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Annihilation",' +
+    '"nickname":"DW 150","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of the Wise",' +
+    '"nickname":"Lib 200","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Shattering",' +
+    '"nickname":"SA","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Dragons Blood Potion",' +
+    '"nickname":"ZK 200","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Berserkers Potion",' +
+    '"nickname":"ZK 300","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Fury",' +
+    '"nickname":"ZK 350","displayOnAH":true},' +
+  '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
+    '"nickname":"FI 1k","displayOnAH":true}]';
+
 /* eslint-disable max-lines */
 var defaults = {
   lastActiveQuestPage: '',
@@ -367,8 +417,6 @@ var defaults = {
 
   showQuickDropLinks: false,
 
-  inventoryMinLvl: 1,
-  inventoryMaxLvl: 9999,
   onlinePlayerMinLvl: 1,
   onlinePlayerMaxLvl: 9999,
   arenaMinLvl: 1,
@@ -402,24 +450,6 @@ var defaults = {
   lastOnlineCheck: 0,
   bountyList: '',
   wantedList: '',
-  inventoryCheckedElements: {
-    '0': 1,
-    '1': 1,
-    '2': 1,
-    '3': 1,
-    '4': 1,
-    '5': 1,
-    '6': 1,
-    '7': 1,
-    '8': 1,
-    '100': 1,
-    '101': 1,
-    '102': 1,
-    '103': 1,
-    '104': 1,
-    '105': 1,
-    '106': 1
-  },
   lowestLevelInTop250: 0,
 
   quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
@@ -434,55 +464,7 @@ var defaults = {
     '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-  quickSearchList:
-    '[{"category":"Plants","searchname":"Amber","nickname":""},' +
-    '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
-    '{"category":"Plants","searchname":"Jademare","nickname":""},' +
-    '{"category":"Plants","searchname":"Dark Shade","nickname":""},' +
-    '{"category":"Plants","searchname":"Trinettle","nickname":""},' +
-    '{"category":"Plants","searchname":"Heffle Wart","nickname":""},' +
-    '{"category":"Potions","searchname":"Sludge Brew",' +
-      '"nickname":"DC 200","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Black Death",' +
-      '"nickname":"DC 225","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Aid",' +
-      '"nickname":"Assist","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Supreme Doubling",' +
-      '"nickname":"DB 450","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Acceleration",' +
-      '"nickname":"DB 500","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Lesser Death Dealer",' +
-      '"nickname":"DD","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Runic Potion",' +
-      '"nickname":"FI 250","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of the Bookworm",' +
-      '"nickname":"Lib 225","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Truth",' +
-      '"nickname":"EW 1k","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Dull Edge",' +
-      '"nickname":"DE 25","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Notched Blade",' +
-      '"nickname":"DE 80","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Death",' +
-      '"nickname":"DW 125","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Decay",' +
-      '"nickname":"WI 150","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Fatality",' +
-      '"nickname":"WI 350","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Annihilation",' +
-      '"nickname":"DW 150","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of the Wise",' +
-      '"nickname":"Lib 200","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Shattering",' +
-      '"nickname":"SA","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Dragons Blood Potion",' +
-      '"nickname":"ZK 200","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Berserkers Potion",' +
-      '"nickname":"ZK 300","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Fury",' +
-      '"nickname":"ZK 350","displayOnAH":true},' +
-    '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
-      '"nickname":"FI 1k","displayOnAH":true}]',
+  quickSearchList: quickSearchList,
 
   arenaMoves: '[]',
   arenaMatches: '[]',
@@ -5501,36 +5483,36 @@ function updateQuestLink() {
   }
 }
 
-function spanButton(navLvl, text, fn, target) {
+function anchorButton(navLvl, text, fn, target) {
   var li = createLi({className: 'nav-level-' + navLvl});
-  var sb = createSpan({
+  var al = createAnchor({
     className: 'nav-link fshPoint',
     textContent: text
   });
-  sb.addEventListener('click', function() {
+  al.addEventListener('click', function() {
     jQueryDialog(fn);
   });
-  li.appendChild(sb);
+  li.appendChild(al);
   getElementById(target).parentNode
     .insertAdjacentElement('afterend', li);
 }
 
 function buffLogLink() {
   if (getValue('keepBuffLog')) {
-    spanButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
+    anchorButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
 function combatLogLink() {
   if (getValue('keepLogs')) {
-    spanButton('1', 'Combat Logs', injectNotepadShowLogs,
+    anchorButton('1', 'Combat Logs', injectNotepadShowLogs,
       'nav-character-notepad');
   }
 }
 
 function creatureLogLink() {
   if (getValue('showMonsterLog')) {
-    spanButton('1', 'Creature Logs', injectMonsterLog,
+    anchorButton('1', 'Creature Logs', injectMonsterLog,
       'nav-character-notepad');
   }
 }
@@ -5576,7 +5558,7 @@ function injectMenu() {
   if (!getElementById('pCL')) {return;}
   updateQuestLink();
   // character
-  spanButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
+  anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   getElementById('nav-character-log').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -5588,7 +5570,7 @@ function injectMenu() {
   buffLogLink();
   combatLogLink();
   creatureLogLink();
-  spanButton('1', 'Quick Links', injectQuickLinkManager,
+  anchorButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
   // guild
   getElementById('nav-guild-storehouse-inventory').parentNode
@@ -5604,13 +5586,13 @@ function injectMenu() {
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
       'Top 250 Players</a></li>');
   // actions
-  spanButton('2', 'AH Quick Search', injectAuctionSearch,
+  anchorButton('2', 'AH Quick Search', injectAuctionSearch,
     'nav-actions-trade-auctionhouse');
-  spanButton('2', 'Online Players', injectOnlinePlayers,
+  anchorButton('2', 'Online Players', injectOnlinePlayers,
     'nav-actions-interaction-findplayer');
-  spanButton('2', 'Find Other', injectFindOther,
+  anchorButton('2', 'Find Other', injectFindOther,
     'nav-actions-interaction-findplayer');
-  spanButton('2', 'Find Buffs', injectFindBuffs,
+  anchorButton('2', 'Find Buffs', injectFindBuffs,
     'nav-actions-interaction-findplayer');
   adjustHeight();
 }
@@ -6603,7 +6585,7 @@ function getSeLog() {
 
 function doBackgroundCheck() {
   disableBackgroundChecks();
-  intervalId = window.setInterval(getSeLog, 600000);
+  intervalId = window.setInterval(getSeLog, 300000);
   return getSeLog();
 }
 
@@ -7804,6 +7786,7 @@ function getGuildMembers(guildId) {
 }
 
 var testList = [
+  function(guildId, membrList) {return membrList !== null;},
   function(guildId, membrList) {return typeof membrList === 'object';},
   function(guildId, membrList) {return typeof membrList[guildId] === 'object';},
   function(guildId, membrList) {
@@ -9500,6 +9483,28 @@ function wearUseRender(data, _type, row) {
   }
 }
 
+var defaultOptions = {
+  checkedElements: {
+    '0': 1,
+    '1': 1,
+    '2': 1,
+    '3': 1,
+    '4': 1,
+    '5': 1,
+    '6': 1,
+    '7': 1,
+    '8': 1,
+    '100': 1,
+    '101': 1,
+    '102': 1,
+    '103': 1,
+    '104': 1,
+    '105': 1,
+    '106': 1
+  },
+  fshMinLvl: 1,
+  fshMaxLvl: 9999
+};
 var invManFilter =
   '<table class="fshInvFilter">' +
   '<tr><th colspan="14">@@reportTitle@@</th>' +
@@ -10099,8 +10104,8 @@ function changeLvls$1() { // jQuery
 }
 
 function resetLvls$1() { // jQuery
-  options.fshMinLvl = defaults.inventoryMinLvl;
-  options.fshMaxLvl = defaults.inventoryMaxLvl;
+  options.fshMinLvl = defaultOptions.fshMinLvl;
+  options.fshMaxLvl = defaultOptions.fshMaxLvl;
   setForage('fsh_inventory', options);
   $('#fshMinLvl').val(options.fshMinLvl);
   $('#fshMaxLvl').val(options.fshMaxLvl);
@@ -10142,7 +10147,7 @@ function clearChecks() { // jQuery
 }
 
 function resetChecks() { // jQuery
-  options.checkedElements = defaults.inventoryCheckedElements;
+  options.checkedElements = defaultOptions.checkedElements;
   setChecks();
   $('#fshInv').DataTable().draw(false);
 }
@@ -10284,13 +10289,8 @@ function getInvMan() {
 }
 
 function extendOptions(data) {
-  options = fallback(data, {});
-  options.fshMinLvl = fallback(options.fshMinLvl,
-    defaults.inventoryMinLvl);
-  options.fshMaxLvl = fallback(options.fshMaxLvl,
-    defaults.inventoryMaxLvl);
-  options.checkedElements = fallback(options.checkedElements,
-    defaults.inventoryCheckedElements);
+  options = defaultOptions;
+  mixin(options, fallback(data, {}));
 }
 
 function syncInvMan() { // jQuery
@@ -18435,7 +18435,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '2';
+window.FSH.calf = '3';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
