@@ -43,7 +43,7 @@ function parseRankData(linkElement, responseText) {
     Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
 
-function fetchRankData() { // jQuery
+function fetchRankData() { // jQuery.min
   var calcButton = getElementById('getrankweightings');
   calcButton.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
@@ -72,7 +72,6 @@ function getPxScroll(val) {
 }
 
 function overrideUpDown(evt, val) {
-  evt.stopPropagation();
   var onclickHREF = /window.location='(.*)';/
     .exec(evt.target.getAttribute('onclick'))[1];
   var thisRankRow = evt.target.parentNode.parentNode.parentNode;
@@ -85,9 +84,10 @@ function overrideUpDown(evt, val) {
   parentTable.insertBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(val);
   window.scrollBy(0, pxScroll);
+  evt.stopPropagation();
 }
 
-function ajaxifyRankControls(evt) { // jQuery
+function ajaxifyRankControls(evt) {
   var val = evt.target.getAttribute('value');
   if (val === 'Up' || val === 'Down') {overrideUpDown(evt, val);}
 }
@@ -154,7 +154,7 @@ function getRanks(membrList) {
   add(3, paintRanks);
 }
 
-export default function injectGuildRanks() { // jQuery
+export default function injectGuildRanks() { // jQuery.min
   getMembrList(true).done(function(membrList) {
     add(3, getRanks, [membrList]);
   });
