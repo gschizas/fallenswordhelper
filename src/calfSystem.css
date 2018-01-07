@@ -1104,6 +1104,12 @@ textarea {resize: none;}
 /* topbanner-stats */
 #topbanner-stats a {color: #F7EAC9;}
 
+/* Spoils of War */
+#fshScoutTower {
+  height: 21px;
+  width: 21px;
+}
+
 /*
  * Table styles
  */
