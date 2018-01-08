@@ -5730,13 +5730,18 @@ function statBoxesExist(topbannerStats, gameStats) {
   }
 }
 
+function validStatBoxes(topbannerStats, gameStats) {
+  var hidden = topbannerStats.classList.contains('topbanner-stats-hidden');
+  return topbannerStats && !hidden && gameStats;
+}
+
 function injectServerNode() {
   var topbannerStats = getElementById('topbanner-stats');
   var h3coll = document.querySelectorAll('#pCR h3');
   var gameStats = Array.prototype.find.call(h3coll, function(el) {
     return el.textContent === 'Game Stats';
   });
-  if (topbannerStats && gameStats) {
+  if (validStatBoxes(topbannerStats, gameStats)) {
     statBoxesExist(topbannerStats, gameStats);
   }
 }
@@ -6542,6 +6547,18 @@ function replaceKeyHandler() {
   document.onkeypress = keyPress;
 }
 
+function scoutTowerLink() {
+  var spoils = getElementById('minibox-spoilsofwar');
+  if (spoils) {
+    var parent = spoils.children[1].children[0];
+    parent.insertAdjacentHTML('beforeend', '&nbsp;' +
+      '<a href="index.php?cmd=guild&subcmd=scouttower" ' +
+      'class="tip-static" data-tipped="View Scout Report">' +
+      '<img id="fshScoutTower" ' +
+      'src="https://cdn.fallensword.com/structures/27.gif"></a>');
+  }
+}
+
 // import failStub from './failStub';
 
 function superelite() {
@@ -7162,6 +7179,7 @@ function notHuntMode() {
   add(3, injectQuickMsgDialogJQ);
 
   add(3, injectServerNode);
+  add(3, scoutTowerLink);
 
   add(4, guildActivity);
   add(4, seLog);
@@ -7786,7 +7804,7 @@ function getGuildMembers(guildId) {
 }
 
 var testList = [
-  function(guildId, membrList) {return membrList !== null;},
+  function(guildId, membrList) {return Boolean(membrList);},
   function(guildId, membrList) {return typeof membrList === 'object';},
   function(guildId, membrList) {return typeof membrList[guildId] === 'object';},
   function(guildId, membrList) {
@@ -9302,7 +9320,7 @@ function parseRankData(linkElement, responseText) {
     Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
 
-function fetchRankData() { // jQuery
+function fetchRankData() { // jQuery.min
   var calcButton = getElementById('getrankweightings');
   calcButton.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
@@ -9331,7 +9349,6 @@ function getPxScroll(val) {
 }
 
 function overrideUpDown(evt, val) {
-  evt.stopPropagation();
   var onclickHREF = /window.location='(.*)';/
     .exec(evt.target.getAttribute('onclick'))[1];
   var thisRankRow = evt.target.parentNode.parentNode.parentNode;
@@ -9344,9 +9361,10 @@ function overrideUpDown(evt, val) {
   parentTable.insertBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(val);
   window.scrollBy(0, pxScroll);
+  evt.stopPropagation();
 }
 
-function ajaxifyRankControls(evt) { // jQuery
+function ajaxifyRankControls(evt) {
   var val = evt.target.getAttribute('value');
   if (val === 'Up' || val === 'Down') {overrideUpDown(evt, val);}
 }
@@ -9413,7 +9431,7 @@ function getRanks(membrList) {
   add(3, paintRanks);
 }
 
-function injectGuildRanks() { // jQuery
+function injectGuildRanks() { // jQuery.min
   getMembrList(true).done(function(membrList) {
     add(3, getRanks, [membrList]);
   });
@@ -12934,29 +12952,13 @@ function injectScouttower() {
   getForage('fsh_titans').done(gotOldTitans); // Pref
 }
 
-function insertBr(el) {
-  el.insertAdjacentHTML('beforeend', '<br><br>');
-}
-
-function getScoutTowerDetails(responseText) {
-  var doc = createDocument(responseText);
-  var scoutPcc = getElementById('pCC', doc);
-  injectScouttowerBuffLinks(scoutPcc.getElementsByTagName('table'));
-  var scoutTowerTable = scoutPcc.children[0];
-  if (scoutTowerTable) {
-    var titanTable = pCC.children[0];
-    var newRow = titanTable.insertRow(-1);
-    insertBr(newRow);
-    newRow = titanTable.insertRow(-1);
-    newRow.appendChild(scoutTowerTable.rows[1].cells[0])
-      .insertAdjacentHTML('beforeend', '<br><br>');
-    newRow = titanTable.insertRow(-1);
-    newRow.appendChild(scoutTowerTable.rows[8].cells[0]);
-  }
-}
-
-function injectTitan() { // jQuery.min
-  retryAjax('index.php?cmd=guild&subcmd=scouttower').done(getScoutTowerDetails);
+function injectTitan() {
+  var titanTable = pCC.children[0];
+  var newRow = titanTable.insertRow(2);
+  newRow.insertAdjacentHTML('beforeend', '<br>');
+  newRow = titanTable.insertRow(3);
+  newRow.insertAdjacentHTML('beforeend', '<td class="fshCenter fshBold">[ ' +
+    '<a href="index.php?cmd=guild&subcmd=scouttower">Scout Tower</a> ]</td>');
 }
 
 function guildView(guildId) {
@@ -18435,7 +18437,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '3';
+window.FSH.calf = '6';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
