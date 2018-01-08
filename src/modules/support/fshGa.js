@@ -11,8 +11,12 @@ function isAuto() {
   return refAry.indexOf(docRef) !== -1;
 }
 
+function noGa() {
+  return isAuto() || typeof ga === 'undefined';
+}
+
 export function start(category, variable, label) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
   times[category + ':' + variable + ':' + label] =
     performance.now() * 1000;
 }
@@ -30,7 +34,7 @@ function sendTiming(category, variable, label) {
 }
 
 export function end(category, variable, label) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
   sendTiming(category, variable, label);
 }
 
@@ -61,7 +65,7 @@ function fixupUrl() {
 }
 
 export function setup() {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
 
   ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
     userId: playerId(),
@@ -78,6 +82,11 @@ export function setup() {
 }
 
 export function screenview(funcName) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
   ga('fshApp.send', 'screenview', {screenName: funcName});
+}
+
+export function sendEvent(eventCategory, eventAction) {
+  if (noGa()) {return;}
+  ga('fshApp.send', 'event', eventCategory, eventAction);
 }

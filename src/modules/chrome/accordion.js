@@ -7,6 +7,7 @@ import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import jQueryDialog from './jQueryDialog';
 import {newGuildLogUrl} from '../support/dataObj';
+import {sendEvent} from '../support/fshGa';
 import {createAnchor, createLi} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs';
@@ -26,6 +27,7 @@ function anchorButton(navLvl, text, fn, target) {
     textContent: text
   });
   al.addEventListener('click', function() {
+    sendEvent('accordion', text);
     jQueryDialog(fn);
   });
   li.appendChild(al);
