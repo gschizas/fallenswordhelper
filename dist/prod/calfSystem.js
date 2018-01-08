@@ -4411,8 +4411,12 @@ function isAuto() {
   return refAry.indexOf(docRef) !== -1;
 }
 
+function noGa() {
+  return isAuto() || typeof ga === 'undefined';
+}
+
 function start(category, variable, label) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
   times[category + ':' + variable + ':' + label] =
     performance.now() * 1000;
 }
@@ -4427,7 +4431,7 @@ function sendTiming(category, variable, label) {
 }
 
 function end(category, variable, label) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
   sendTiming(category, variable, label);
 }
 
@@ -4458,7 +4462,7 @@ function fixupUrl() {
 }
 
 function setup() {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
 
   ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
     userId: playerId(),
@@ -4475,8 +4479,13 @@ function setup() {
 }
 
 function screenview(funcName) {
-  if (isAuto() || typeof ga === 'undefined') {return;}
+  if (noGa()) {return;}
   ga('fshApp.send', 'screenview', {screenName: funcName});
+}
+
+function sendEvent(eventCategory, eventAction) {
+  if (noGa()) {return;}
+  ga('fshApp.send', 'event', eventCategory, eventAction);
 }
 
 var param;
@@ -5489,6 +5498,7 @@ function anchorButton(navLvl, text, fn, target) {
     textContent: text
   });
   al.addEventListener('click', function() {
+    sendEvent('accordion', text);
     jQueryDialog(fn);
   });
   li.appendChild(al);
@@ -18436,7 +18446,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '6';
+window.FSH.calf = '7';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
