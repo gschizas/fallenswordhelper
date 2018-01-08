@@ -28,13 +28,18 @@ function statBoxesExist(topbannerStats, gameStats) {
   }
 }
 
+function validStatBoxes(topbannerStats, gameStats) {
+  var hidden = topbannerStats.classList.contains('topbanner-stats-hidden');
+  return topbannerStats && !hidden && gameStats;
+}
+
 export default function injectServerNode() {
   var topbannerStats = getElementById('topbanner-stats');
   var h3coll = document.querySelectorAll('#pCR h3');
   var gameStats = Array.prototype.find.call(h3coll, function(el) {
     return el.textContent === 'Game Stats';
   });
-  if (topbannerStats && gameStats) {
+  if (validStatBoxes(topbannerStats, gameStats)) {
     statBoxesExist(topbannerStats, gameStats);
   }
 }
