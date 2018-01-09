@@ -2,10 +2,10 @@ import add from '../support/task';
 import calf from '../support/calf';
 import doTable from './table';
 import dropItem from '../ajax/dropItem';
+import extend from '../common/extend';
 import getForage from '../ajax/getForage';
 import getInventory from '../ajax/getInventory';
 import getMembrList from '../ajax/getMembrList';
-import {mixin} from '../common/cElement';
 import moveItem from '../ajax/moveItem';
 import sendItem from '../ajax/sendItem';
 import setForage from '../ajax/setForage';
@@ -21,7 +21,7 @@ import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
 /* jshint latedef: nofunc */
-export var options;
+export var options = {};
 export var showQuickDropLinks;
 export var showQuickSendLinks;
 export var theInv;
@@ -288,8 +288,8 @@ function getInvMan() {
 }
 
 function extendOptions(data) {
-  options = defaultOptions;
-  mixin(options, fallback(data, {}));
+  extend(options, defaultOptions);
+  extend(options, fallback(data, {}));
 }
 
 function syncInvMan() { // jQuery

@@ -9962,6 +9962,17 @@ function dropItem(invIdList) {
   }).done(dialog);
 }
 
+function extend(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+      obj[key] = extend(mixins[key].constructor(), mixins[key]);
+    } else {
+      obj[key] = mixins[key];
+    }
+  });
+  return obj;
+}
+
 function moveItem(invIdList, folderId) {
   return retryAjax({
     url: 'index.php',
@@ -10049,7 +10060,7 @@ function rarityFilter() { // jQuery
 }
 
 /* jshint latedef: nofunc */
-var options;
+var options = {};
 var showQuickDropLinks;
 var showQuickSendLinks;
 var theInv;
@@ -10316,8 +10327,8 @@ function getInvMan() {
 }
 
 function extendOptions(data) {
-  options = defaultOptions;
-  mixin(options, fallback(data, {}));
+  extend(options, defaultOptions);
+  extend(options, fallback(data, {}));
 }
 
 function syncInvMan() { // jQuery
@@ -18446,7 +18457,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '7';
+window.FSH.calf = '8';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
