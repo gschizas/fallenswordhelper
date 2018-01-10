@@ -16,6 +16,7 @@ import {
   toggleVisibilty
 } from '../support/system';
 import {networkIcon, saveBoxes} from './settingObj';
+import { sendEvent } from '../support/fshGa';
 
 function getVars() {
   calf.showBuffs = getValue('showHuntingBuffs');
@@ -161,10 +162,12 @@ function saveConfig(evt) { // Legacy
 }
 
 function showLogs() {
+  sendEvent('settingsPage', 'injectNotepadShowLogs');
   jQueryDialog(injectNotepadShowLogs);
 }
 
 function showMonsterLogs() {
+  sendEvent('settingsPage', 'injectMonsterLog');
   jQueryDialog(injectMonsterLog);
 }
 

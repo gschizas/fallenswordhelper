@@ -4,6 +4,7 @@ import {infoBox} from '../support/layout';
 import insertQuickExtract from '../quickExtract';
 import jQueryDialog from '../chrome/jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
+import {sendEvent} from '../support/fshGa';
 import {
   createDiv,
   createSpan,
@@ -176,7 +177,10 @@ var evtHdl = [
   },
   {
     test: function(self) {return self === qe;},
-    act: function() {jQueryDialog(insertQuickExtract);}
+    act: function() {
+      sendEvent('components', 'insertQuickExtract');
+      jQueryDialog(insertQuickExtract);
+    }
   },
   {
     test: function(self) {return self.classList.contains('compDelBtn');},

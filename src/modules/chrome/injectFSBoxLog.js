@@ -3,6 +3,7 @@ import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import {injectFsBoxContent} from '../misc';
 import jQueryDialog from './jQueryDialog';
+import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
 
 function getBoxList(boxList) {
@@ -35,6 +36,9 @@ export default function injectFSBoxLog() {
     className: 'fshYellow',
     innerHTML: '[ <span class="fshLink">Log</span> ]'
   });
-  log.addEventListener('click', function() {jQueryDialog(injectFsBoxContent);});
+  log.addEventListener('click', function() {
+    sendEvent('injectFSBoxLog', 'injectFsBoxContent');
+    jQueryDialog(injectFsBoxContent);
+  });
   nodediv.appendChild(log);
 }

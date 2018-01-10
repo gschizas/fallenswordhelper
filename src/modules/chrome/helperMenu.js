@@ -10,7 +10,7 @@ import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
-import {screenview} from '../support/fshGa';
+import {sendEvent} from '../support/fshGa';
 import {getValue, imageServer} from '../support/system';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs';
@@ -53,11 +53,11 @@ var functionLookup = {
   'FS Box Log': injectFsBoxContent
 };
 
-function callHelperFunction(evt) { // jQuery
+function callHelperFunction(evt) {
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
   if (typeof fn === 'function') {
-    screenview(functionPath);
+    sendEvent('helperMenu', functionPath);
     jQueryDialog(fn);
   }
 }
