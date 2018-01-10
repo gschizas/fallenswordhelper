@@ -21,7 +21,7 @@ import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
 /* jshint latedef: nofunc */
-export var options = {};
+export var options;
 export var showQuickDropLinks;
 export var showQuickSendLinks;
 export var theInv;
@@ -288,7 +288,7 @@ function getInvMan() {
 }
 
 function extendOptions(data) {
-  extend(options, defaultOptions);
+  options = extend({}, defaultOptions);
   extend(options, fallback(data, {}));
 }
 

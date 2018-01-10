@@ -1,10 +1,11 @@
 import alpha from '../common/alpha';
+import {createDiv} from '../common/cElement';
 import eventHandler from '../common/eventHandler';
+import extend from '../common/extend';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
-import {createDiv, mixin} from '../common/cElement';
-import {isChecked, isSelected, testRange} from '../support/system';
+import {fallback, isChecked, isSelected, testRange} from '../support/system';
 
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
@@ -176,10 +177,8 @@ function onInput(e) {
 }
 
 function gotMap(data) {
-  potOpts = defaultOpts;
-  if (data) {
-    mixin(potOpts, data);
-  }
+  potOpts = extend({}, defaultOpts);
+  extend(potOpts, fallback(data, {}));
   buildMap(potObj);
   setForage(storeMap, potOpts);
   var container = createContainer();
