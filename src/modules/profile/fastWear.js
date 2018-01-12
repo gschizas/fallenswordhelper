@@ -2,6 +2,7 @@ import add from '../support/task';
 import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
+import {sendEvent} from '../support/fshGa';
 import {equipItem, useItem} from '../support/ajax';
 
 function backpackRemove(invId) { // jQuery.min
@@ -22,6 +23,7 @@ function getInvId(self) {
 }
 
 function fastAction(evt, action, result) { // jQuery.min
+  sendEvent('profile', 'fastAction');
   var self = evt.target;
   var invId = getInvId(self);
   self.textContent = '';

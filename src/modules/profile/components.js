@@ -92,6 +92,7 @@ function gotComponentsPage(data) {
 }
 
 function countComponent(self) { // jQuery.min
+  sendEvent('components', 'countComponent');
   self.parentNode.innerHTML = 'Retrieve page: 1, ';
   usedCount = 0;
   totalCount = 0;
@@ -108,6 +109,7 @@ function countComponent(self) { // jQuery.min
 }
 
 function delAllComponent() {
+  sendEvent('components', 'delAllComponent');
   var nodeList = thisInvTable.getElementsByClassName('compDelBtn');
   Array.prototype.forEach.call(nodeList, function(el) {
     el.click();
@@ -134,6 +136,7 @@ function addDelBtn(el) {
 }
 
 function enableDelComponent() {
+  sendEvent('components', 'enableDelComponent');
   quickDelDiv.classList.add('fshHide');
   delAllDiv.classList.remove('fshHide');
   var nodeList = thisInvTable.getElementsByTagName('IMG');

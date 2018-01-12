@@ -2,6 +2,7 @@ import {getElementById} from '../common/getElement';
 import {getValue} from '../support/system';
 import {jConfirm} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
+import {sendEvent} from '../support/fshGa';
 
 var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
@@ -18,6 +19,7 @@ function debuff(buffId) {
 }
 
 function doDebuff(aLink) { // jQuery
+  sendEvent('profile', 'doDebuff');
   var buffId = aLink.href.match(/(\d+)$/)[1];
   debuff(buffId)
     .done(function(data) {
