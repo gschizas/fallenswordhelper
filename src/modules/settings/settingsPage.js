@@ -5,6 +5,7 @@ import injectNotepadShowLogs from '../combatLog';
 import {jConfirm} from '../support/layout';
 import jQueryDialog from '../chrome/jQueryDialog';
 import mySimpleCheckboxes from './simple';
+import {sendEvent} from '../support/fshGa';
 import setupConfigData from './configData';
 import {createBr, createSpan} from '../common/cElement';
 import {
@@ -16,7 +17,6 @@ import {
   toggleVisibilty
 } from '../support/system';
 import {networkIcon, saveBoxes} from './settingObj';
-import { sendEvent } from '../support/fshGa';
 
 function getVars() {
   calf.showBuffs = getValue('showHuntingBuffs');
