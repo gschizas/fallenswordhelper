@@ -1,7 +1,7 @@
 import {infoBox} from './layout';
 import retryAjax from '../ajax/retryAjax';
 
-var deferred = window.$ && $.when();
+var deferred = window.jQuery && jQuery.when();
 
 export function dialog(data) {
   if (data.r === 0) {return;}
