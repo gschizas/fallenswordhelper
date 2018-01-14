@@ -12,8 +12,8 @@ function getNekid() {
   Array.prototype.forEach.call(aLinks, function(link) {
     var item = /inventory_id=(\d+)/.exec(link.href)[1];
     if (item) {
-      unequipitem(item).done(function() {
-        link.parentNode.innerHTML = '';
+      unequipitem(item).done(function(json) {
+        if (json.s) {link.parentNode.innerHTML = '';}
       });
     }
   });

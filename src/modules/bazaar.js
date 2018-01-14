@@ -1,5 +1,7 @@
 import buyitem from './app/potionbazaar/buyitem';
 import {getElementById} from './common/getElement';
+import jsonFail from './common/jsonFail';
+import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
 import {testQuant} from './support/system';
 
@@ -16,7 +18,9 @@ var bazaarTable =
   '<span id="fshBazaarWarning" class="fshHide">' +
   'Warning:<br>pressing [<span id="fshBuy" class="fshLink">This button' +
   '</span>] now will buy the <span id="quantity">1</span> item(s) WITHOUT ' +
-  'confirmation!</span></td></tr><tr><td id="buy_result" colspan="5"></td>' +
+  'confirmation!</span></td></tr><tr><td colspan="5">' +
+  '<span id="buyResultLabel"></span><ol id="buy_result"></ol>' +
+  '</td>' +
   '</tr></table>';
 var bazaarItem =
   '<span class="bazaarButton tip-dynamic" style="background-image: ' +
@@ -49,16 +53,17 @@ function quantity() {
 }
 
 function done(json) {
-  if (json.success) {
-    getElementById('buy_result').insertAdjacentHTML('beforeend',
-      '<br>You purchased the item!');
+  var buyResult = getElementById('buy_result');
+  if (jsonFail(json, buyResult)) {return;}
+  if (json.s) {
+    outputResult('You purchased the item!', buyResult);
   }
 }
 
 function buy() { // jQuery.min
   if (!ItemId) {return;}
   var buyAmount = getElementById('quantity').textContent;
-  getElementById('buy_result').textContent =
+  getElementById('buyResultLabel').textContent =
     'Buying ' + buyAmount + ' items';
   for (var i = 0; i < buyAmount; i += 1) {
     buyitem(ItemId).done(done);
