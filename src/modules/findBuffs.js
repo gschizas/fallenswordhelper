@@ -296,6 +296,10 @@ function findBuffsParsePlayersForBuffs() { // Legacy
   bufferProgress.innerHTML = 'Parsing player data ...';
   bufferProgress.style.color = 'green';
 
+  //#if _DEV  //  Find Buffs uglify bug
+  console.log('onlinePlayers', onlinePlayers); // eslint-disable-line no-console
+
+  //#endif
   for (var j = 0; j < onlinePlayers.length; j += 1) {
     xmlhttp(onlinePlayers[j],
       findBuffsParseProfileAndDisplay,
