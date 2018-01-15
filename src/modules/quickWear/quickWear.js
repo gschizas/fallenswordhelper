@@ -3,6 +3,7 @@ import createQuickWear from './createQuickWear';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import loadInventory from '../app/profile/loadInventory';
+import {sendEvent} from '../support/fshGa';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import toggleForce from '../common/toggleForce';
@@ -15,8 +16,11 @@ var content;
 var itemList;
 
 function doAction(self, fn, verb) { // jQuery.min
-  var invId = self.dataset.itemid;
-  fn(invId).done(function(data) {
+  sendEvent('QuickWear', 'doAction');
+  self.textContent = '';
+  self.classList.remove('smallLink');
+  self.classList.add('fshSpinner', 'fshSpin12');
+  fn(self.dataset.itemid).done(function(data) {
     if (data.r !== 0) {return;}
     self.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
   });
