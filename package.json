@@ -1,6 +1,6 @@
 {
   "name": "fallenswordhelper",
-  "version": "15.22.8",
+  "version": "15.22.9",
   "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
   "main": "index.js",
   "scripts": {
@@ -32,11 +32,11 @@
     "preuglify": "echo Starting uglify",
     "uglify": "npm run uglify:dev && npm run uglify:beta && npm run uglify:prod",
     "postuglify": "echo Finished uglify",
-    "uglify:beta": "uglifyjs dist/beta/calfSystem.js --stats -m -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -o dist/beta/calfSystem.min.js",
+    "uglify:beta": "uglifyjs dist/beta/calfSystem.js -c -m -o dist/beta/calfSystem.min.js",
     "postuglify:beta": "cost :max,unzip:dist/beta/calfSystem.min.js && cost :max:dist/beta/calfSystem.min.js",
-    "uglify:dev": "uglifyjs dist/dev/calfSystem.js -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -m --stats -o dist/dev/calfSystem.min.js",
+    "uglify:dev": "uglifyjs dist/dev/calfSystem.js  -c -m -o dist/dev/calfSystem.min.js",
     "postuglify:dev": "cost :max,unzip:dist/dev/calfSystem.min.js && cost :max:dist/dev/calfSystem.min.js",
-    "uglify:prod": "uglifyjs dist/prod/calfSystem.js --stats -m -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -o dist/prod/calfSystem.min.js",
+    "uglify:prod": "uglifyjs dist/prod/calfSystem.js -c -m -o dist/prod/calfSystem.min.js",
     "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
     "watch": "rollup -c -w -m inline --environment FOLDER:dev,SOURCE:calf",
     "ws": "http-server -p 9966 -c-1 -S -C cert.crt -K key.pem"
@@ -59,14 +59,14 @@
     "cost": "^1.2.3",
     "csscomb": "^4.2.0",
     "eslint": "^4.15.0",
-    "http-server": "^0.10.0",
+    "http-server": "^0.11.1",
     "ip": "^1.1.5",
     "jshint": "^2.9.5",
     "jsinspect": "^0.12.6",
     "jsonlint": "^1.6.2",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
-    "rollup": "^0.53.3",
+    "rollup": "^0.54.0",
     "rollup-plugin-jscc": "^0.3.3",
     "uglify-js": "^3.3.5"
   }

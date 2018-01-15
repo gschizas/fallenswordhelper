@@ -10,6 +10,7 @@ import nekidBtn from './nekidBtn';
 import profileComponents from './components';
 import profileParseAllyEnemy from './profileAllyEnemy';
 import profileRenderBio from './bio/bio';
+import {sendEvent} from '../support/fshGa';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {
   colouredDots,
@@ -59,6 +60,7 @@ function quickWearLink() {
   wrap.insertAdjacentText('beforeend', ']');
   node.parentNode.appendChild(wrap);
   qw.addEventListener('click', function() {
+    sendEvent('profile', 'insertQuickWear');
     jQueryDialog(insertQuickWear);
   });
 }

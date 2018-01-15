@@ -4,6 +4,7 @@ import {infoBox} from '../support/layout';
 import insertQuickExtract from '../quickExtract';
 import jQueryDialog from '../chrome/jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
+import {sendEvent} from '../support/fshGa';
 import {
   createDiv,
   createSpan,
@@ -91,6 +92,7 @@ function gotComponentsPage(data) {
 }
 
 function countComponent(self) { // jQuery.min
+  sendEvent('components', 'countComponent');
   self.parentNode.innerHTML = 'Retrieve page: 1, ';
   usedCount = 0;
   totalCount = 0;
@@ -107,6 +109,7 @@ function countComponent(self) { // jQuery.min
 }
 
 function delAllComponent() {
+  sendEvent('components', 'delAllComponent');
   var nodeList = thisInvTable.getElementsByClassName('compDelBtn');
   Array.prototype.forEach.call(nodeList, function(el) {
     el.click();
@@ -133,6 +136,7 @@ function addDelBtn(el) {
 }
 
 function enableDelComponent() {
+  sendEvent('components', 'enableDelComponent');
   quickDelDiv.classList.add('fshHide');
   delAllDiv.classList.remove('fshHide');
   var nodeList = thisInvTable.getElementsByTagName('IMG');
@@ -176,7 +180,10 @@ var evtHdl = [
   },
   {
     test: function(self) {return self === qe;},
-    act: function() {jQueryDialog(insertQuickExtract);}
+    act: function() {
+      sendEvent('components', 'insertQuickExtract');
+      jQueryDialog(insertQuickExtract);
+    }
   },
   {
     test: function(self) {return self.classList.contains('compDelBtn');},

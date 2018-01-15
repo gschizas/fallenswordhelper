@@ -1,11 +1,17 @@
+import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import {getValue} from '../../support/system';
+import {sendEvent} from '../../support/fshGa';
 import {pCC, playerName} from '../../support/layout';
 
 var buffCost = {count: 0, buffs: {}};
 var numRE = /[^a-zA-Z0-9.,+\- ]/g;
 var priceRE =
   /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
+
+function profileBuyBuffsEvent() {
+  if (calf.subcmd === '-') {sendEvent('profile', 'formatBuffsToBuy');}
+}
 
 function getTargetPlayer() {
   var targetPlayer = pCC
@@ -19,6 +25,7 @@ function getTargetPlayer() {
 }
 
 function formatBuffsToBuy() { // Legacy
+  profileBuyBuffsEvent();
   var targetPlayer = getTargetPlayer();
   var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
   var greetingText = getValue('buyBuffsGreeting').trim();

@@ -4,6 +4,7 @@ import {getElementById} from '../common/getElement';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
+import {sendEvent} from '../support/fshGa';
 import {createDocument, findNode, getValue} from '../support/system';
 
 var expandMenuOnKeyPress;
@@ -84,6 +85,7 @@ function backpack() {
 
 function fastWearMgr() {
   if (!('dialogIsClosed' in calf) || calf.dialogIsClosed()) {
+    sendEvent('keyHandler', 'insertQuickWear');
     jQueryDialog(insertQuickWear);
   }
 }

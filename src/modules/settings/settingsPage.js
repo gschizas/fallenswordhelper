@@ -5,6 +5,7 @@ import injectNotepadShowLogs from '../combatLog';
 import {jConfirm} from '../support/layout';
 import jQueryDialog from '../chrome/jQueryDialog';
 import mySimpleCheckboxes from './simple';
+import {sendEvent} from '../support/fshGa';
 import setupConfigData from './configData';
 import {createBr, createSpan} from '../common/cElement';
 import {
@@ -161,10 +162,12 @@ function saveConfig(evt) { // Legacy
 }
 
 function showLogs() {
+  sendEvent('settingsPage', 'injectNotepadShowLogs');
   jQueryDialog(injectNotepadShowLogs);
 }
 
 function showMonsterLogs() {
+  sendEvent('settingsPage', 'injectMonsterLog');
   jQueryDialog(injectMonsterLog);
 }
 

@@ -22,7 +22,7 @@ var plantFromComponentHash = {
 function quickInventDone(json) {
   var inventResult = getElementById('invent_Result');
   if (jsonFail(json, inventResult)) {return;}
-  if (json.r.success) {
+  if (json.s) {
     outputResult('<span class="fshGreen">' +
       'You successfully invented the item!</span>', inventResult);
   } else {
