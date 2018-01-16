@@ -1627,7 +1627,7 @@ function quickCreate(evt) {
 function checkLastCompose() { // jQuery
   var lastComposeCheck = getValue('lastComposeCheck');
   if (lastComposeCheck && now < lastComposeCheck) {return;}
-  retryAjax('index.php?cmd=composing').done(function(data) {
+  retryAjax('index.php?no_mobile=1&cmd=composing').done(function(data) {
     add$1(3, parseComposing, [data]);
   });
 }
@@ -2343,7 +2343,8 @@ function getOnlinePlayers(data) { // Bad jQuery
     input = input.parent().text();
     lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
     for (var i = 2; i <= lastPage; i += 1) {
-      retryAjax('index.php?cmd=onlineplayers&page=' + i).done(getOnlinePlayers);
+      retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' + i)
+        .done(getOnlinePlayers);
     }
   }
   checkLastPage();
@@ -2353,7 +2354,8 @@ function refreshEvt() { // Bad jQuery
   $('#fshRefresh', context).hide();
   onlinePages = 0;
   onlinePlayers = {};
-  retryAjax('index.php?cmd=onlineplayers&page=1').done(getOnlinePlayers);
+  retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
+    .done(getOnlinePlayers);
   setValue('lastOnlineCheck', now);
   $('#fshOutput', context).append('Parsing online players...'); // context
 }
@@ -2636,7 +2638,7 @@ function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
-  retryAjax('index.php?cmd=inventing').pipe(processFirstPage)
+  retryAjax('index.php?no_mobile=1&cmd=inventing').pipe(processFirstPage)
     .done(displayStuff);
 }
 
@@ -4280,6 +4282,7 @@ function useItem(backpackInvId) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'profile',
       subcmd: 'useitem',
       inventory_id: backpackInvId
@@ -4334,6 +4337,7 @@ function guildInvRecall(invId, playerId$$1, mode) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'inventory',
       subcmd2: 'recall',
@@ -4389,8 +4393,11 @@ var content$3;
 var itemList;
 
 function doAction(self, fn, verb) { // jQuery.min
-  var invId = self.dataset.itemid;
-  fn(invId).done(function(data) {
+  sendEvent('QuickWear', 'doAction');
+  self.textContent = '';
+  self.classList.remove('smallLink');
+  self.classList.add('fshSpinner', 'fshSpin12');
+  fn(self.dataset.itemid).done(function(data) {
     if (data.r !== 0) {return;}
     self.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
   });
@@ -5152,7 +5159,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
     bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
-    xmlhttp('index.php?cmd=onlineplayers&page=' + newPage,
+    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=' + newPage,
       findBuffsParseOnlinePlayers, {page: newPage});
   } else {
     // all done so moving on
@@ -5165,7 +5172,7 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   onlinePlayersSetting =
     parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
-    xmlhttp('index.php?cmd=onlineplayers&page=1',
+    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=1',
       findBuffsParseOnlinePlayers, {page: 1});
   } else {
     findBuffsParsePlayersForBuffs();
@@ -5211,10 +5218,10 @@ function findBuffsParseProfilePage(responseText) {
 function findBuffsParseProfilePageStart() { // Legacy
   // if option enabled then parse profiles
   profilePagesToSearch = [];
-  profilePagesToSearch.push('index.php?cmd=profile');
+  profilePagesToSearch.push('index.php?cmd=profile'); // ???
   var extraProfileArray = extraProfile.split(',');
   extraProfileArray.forEach(function(el) {
-    profilePagesToSearch.push('index.php?cmd=findplayer' +
+    profilePagesToSearch.push('index.php?cmd=findplayer' + // ???
       '&search_active=1&search_level_max=&search_level_min=' +
       '&search_username=' + el + '&search_show_first=1');
   });
@@ -5264,7 +5271,7 @@ function findAnyStart(progMsg) {
   extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
-  xmlhttp('index.php?cmd=guild&subcmd=manage',
+  xmlhttp('index.php?no_mobile=1&cmd=guild&subcmd=manage',
     findBuffsParseGuildManagePage);
 }
 
@@ -6270,7 +6277,7 @@ function parseBountyPageForWorld(details) {
   getWantedBountyList(doc);
   hazActiveBountyList(doc);
   if (curPage < maxPage) {
-    xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
+    xmlhttp('index.php?no_mobile=1&cmd=bounty&page=' + (curPage + 1),
       parseBountyPageForWorld);
   } else {
     injectWantedList();
@@ -6312,7 +6319,7 @@ function doRefresh() { // Legacy
   activeBountyListPosted = false;
   wantedNames = getValue('wantedNames');
   wantedArray = wantedNames.split(',');
-  xmlhttp('index.php?cmd=bounty&page=1', parseBountyPageForWorld);
+  xmlhttp('index.php?no_mobile=1&cmd=bounty&page=1', parseBountyPageForWorld);
   setValue('bwNeedsRefresh', false);
 }
 
@@ -6368,6 +6375,7 @@ function doSendGold() { // jQuery
   retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'trade',
       subcmd: 'sendgold',
       xc: window.ajaxXC,
@@ -6448,6 +6456,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
   retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'profile',
       subcmd: 'managecombatset',
       combatSetId: cbsIndex,
@@ -6513,7 +6522,7 @@ function profile() {
 }
 
 function combatSetKey(itemIndex) {
-  retryAjax('index.php?cmd=profile').done(function(data) {
+  retryAjax('index.php?no_mobile=1&cmd=profile').done(function(data) {
     changeCombatSet(data, itemIndex);
   });
 }
@@ -6836,7 +6845,7 @@ function prayToGods(e) { // jQuery
   if (!myGod) {return;}
   getElementById('helperPrayToGods').removeEventListener('click',
     prayToGods);
-  retryAjax('index.php?cmd=temple&subcmd=pray&type=' + myGod)
+  retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
   $(e.target).qtip('hide');
 }
@@ -6912,7 +6921,7 @@ function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
   if (doWeNeedToParse()) {
-    retryAjax('index.php?cmd=temple').done(parseTemplePage);
+    retryAjax('index.php?no_mobile=1&cmd=temple').done(parseTemplePage);
   }
 }
 
@@ -6943,7 +6952,7 @@ function parseGoldUpgrades(data) {
 function checkLastUpgrade() {
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
-  retryAjax('index.php?cmd=points&type=1').done(function(data) {
+  retryAjax('index.php?no_mobile=1&cmd=points&type=1').done(function(data) {
     add$1(3, parseGoldUpgrades, [data]);
   });
 }
@@ -7293,7 +7302,8 @@ function dontPost(e) { // jQuery
 }
 
 function gotoPage(pageId) {
-  window.location = 'index.php?cmd=arena&subcmd=completed&page=' + pageId;
+  window.location = 'index.php?cmd=arena&subcmd=completed&page=' +
+    pageId;
 }
 
 function completedArenas() { // jQuery
@@ -8003,6 +8013,7 @@ function getAdvisorPage(e) { // jQuery
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'advisor',
       period: e
@@ -9157,7 +9168,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
   activeConflicts(doc, curPage, callback.node);
   if (maxPage && parseInt(maxPage[1], 10) > curPage) {
     xmlhttp(
-      'index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=' +
+      'index.php?no_mobile=1&cmd=guild&subcmd=conflicts&subcmd2=&page=' +
       (curPage + 1) + '&search_text=',
       gotConflictInfo,
       {node: callback.node});
@@ -9165,10 +9176,11 @@ function gotConflictInfo(responseText, callback) { // Legacy
 }
 
 function conflictInfo() { // jQuery
-  retryAjax('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
-    gotConflictInfo(data,
-      {node: getElementById('statisticsControl')});
-  });
+  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
+    .done(function(data) {
+      gotConflictInfo(data,
+        {node: getElementById('statisticsControl')});
+    });
 }
 
 function logoToggle() {
@@ -10143,6 +10155,7 @@ function sendItem(invIdList) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'trade',
       subcmd: 'senditems',
       xc: window.ajaxXC,
@@ -10964,7 +10977,7 @@ var myTable;
 function getGuildLogPage(page) {
   return retryAjax({
     url: 'index.php',
-    data: {cmd: 'guild', subcmd: 'log', page: page},
+    data: {no_mobile: 1, cmd: 'guild', subcmd: 'log', page: page},
     datatype: 'html'
   });
 }
@@ -13778,7 +13791,8 @@ function parseMercStats(html) {
 }
 
 function getMercStats() {
-  return retryAjax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
+  return retryAjax(
+    'index.php?no_mobile=1&cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }
 
 var relicData;
@@ -14049,6 +14063,7 @@ function getGuild$1() {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'view',
       guild_id: relicData.controlled_by.guild_id
@@ -14091,6 +14106,7 @@ function getGroups() {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'groups'
     }
@@ -15365,7 +15381,7 @@ function getCreatureGroupData(responseText) { // Legacy
   var groupHPValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
+  xmlhttp('index.php?no_mobile=1&cmd=profile', getCreaturePlayerData, {
     groupExists: true,
     groupAttackValue: groupAttackValue,
     groupDefenseValue: groupDefenseValue,
@@ -15406,7 +15422,7 @@ function readyViewCreature() { // Hybrid
   $('#creatureEvaluator').html('');
   $('#creatureEvaluatorGroup').html('');
 
-  xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
+  xmlhttp('index.php?no_mobile=1&cmd=profile', getCreaturePlayerData, {
     groupExists: false,
     groupAttackValue: 0,
     groupDefenseValue: 0,
@@ -15415,7 +15431,7 @@ function readyViewCreature() { // Hybrid
     groupHPValue: 0,
     groupEvaluation: false
   });
-  xmlhttp('index.php?cmd=guild&subcmd=groups',
+  xmlhttp('index.php?no_mobile=1&cmd=guild&subcmd=groups',
     checkIfGroupExists);
 
   $('#addRemoveCreatureToDoNotKillList').html('');
@@ -16068,7 +16084,7 @@ function notMaxDd(lastDeathDealerPercentage, lastKillStreak) {
       'decoration:underline;" title="Click to toggle">' +
       trackText + '</span></span></td></tr>';
   }
-  xmlhttp('index.php?cmd=profile', getKillStreak);
+  xmlhttp('index.php?no_mobile=1&cmd=profile', getKillStreak);
   return '<tr><td style="font-size:small; color:' +
     'navy" nowrap>KillStreak: <span findme="killstreak">' +
     addCommas(lastKillStreak) + '</span> Damage bonus' +
@@ -16143,7 +16159,7 @@ function canRecast() {
 function impRecast() { // Legacy - Old Map
   if (canRecast()) {
     var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
-    var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
+    var impHref = 'index.php?no_mobile=1&cmd=quickbuff&subcmd=activate&target' +
       'Players=' +
       $('dt.stat-name:first').next().text().replace(/,/g, '') +
       '&skills%5B%5D=55';
@@ -16389,6 +16405,7 @@ function doPickMove(moveId, slotId) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'arena',
       subcmd: 'dopickmove',
       move_id: moveId,
@@ -17119,7 +17136,8 @@ function processCombatRow(aRow) {
   if (_winner === 0 || _winner === 1) {
     var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
-    xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
+    xmlhttp(
+      'index.php?no_mobile=1&cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,
       {target: combatSummarySpan, winner: _winner}
     );
@@ -17428,7 +17446,7 @@ function cancelAllAH() { // jQuery
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
       retryAjax({
-        url: 'index.php?cmd=auctionhouse&subcmd=cancel',
+        url: 'index.php?no_mobile=1&cmd=auctionhouse&subcmd=cancel',
         data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
       })
     );
@@ -17467,6 +17485,7 @@ var playerBank = {
   depoPos: 2,
   balPos: 1,
   data: {
+    no_mobile: 1,
     cmd: 'bank',
     subcmd: 'transaction'
   },
@@ -17478,6 +17497,7 @@ var guildBank = {
   depoPos: 3,
   balPos: 2,
   data: {
+    no_mobile: 1,
     cmd: 'guild',
     subcmd: 'bank',
     subcmd2: 'transaction'
@@ -17652,8 +17672,8 @@ function doJoinUnderSize(prev, joinButton) { // Legacy
   if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
     var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
       joinButton.parentNode.href)[1];
-    var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
-      '&group_id=' + groupID;
+    var groupJoinURL = 'index.php?no_mobile=1&cmd=guild&subcmd=groups' +
+      '&subcmd2=join&group_id=' + groupID;
     prev.push(joinGroup(groupJoinURL, joinButton));
   }
   return prev;
@@ -18500,7 +18520,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '9';
+window.FSH.calf = '10';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
