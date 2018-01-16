@@ -18,7 +18,7 @@ function cancelAllAH() { // jQuery
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
       retryAjax({
-        url: 'index.php?cmd=auctionhouse&subcmd=cancel',
+        url: 'index.php?no_mobile=1&cmd=auctionhouse&subcmd=cancel',
         data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
       })
     );

@@ -7,6 +7,7 @@ var playerBank = {
   depoPos: 2,
   balPos: 1,
   data: {
+    no_mobile: 1,
     cmd: 'bank',
     subcmd: 'transaction'
   },
@@ -18,6 +19,7 @@ var guildBank = {
   depoPos: 3,
   balPos: 2,
   data: {
+    no_mobile: 1,
     cmd: 'guild',
     subcmd: 'bank',
     subcmd2: 'transaction'

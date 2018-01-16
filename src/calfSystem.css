@@ -989,6 +989,10 @@ button::-moz-focus-inner {
   table-layout: fixed;
   overflow-wrap: break-word;
 }
+.fshGc td:nth-child(1) {width: 110px;}
+.fshGc td:nth-child(2) {width: 100px;}
+.fshGc td:nth-child(3) {width: 428px;}
+
 /* New Row */
 .fshNr {
   background-color: #F5F298;

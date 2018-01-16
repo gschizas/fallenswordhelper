@@ -34,5 +34,6 @@ function parseMercStats(html) {
 }
 
 export default function getMercStats() {
-  return retryAjax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
+  return retryAjax(
+    'index.php?no_mobile=1&cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }

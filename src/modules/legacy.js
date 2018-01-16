@@ -143,7 +143,7 @@ function notMaxDd(lastDeathDealerPercentage, lastKillStreak) {
       'decoration:underline;" title="Click to toggle">' +
       trackText + '</span></span></td></tr>';
   }
-  xmlhttp('index.php?cmd=profile', getKillStreak);
+  xmlhttp('index.php?no_mobile=1&cmd=profile', getKillStreak);
   return '<tr><td style="font-size:small; color:' +
     'navy" nowrap>KillStreak: <span findme="killstreak">' +
     addCommas(lastKillStreak) + '</span> Damage bonus' +
@@ -218,7 +218,7 @@ function canRecast() {
 function impRecast() { // Legacy - Old Map
   if (canRecast()) {
     var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
-    var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
+    var impHref = 'index.php?no_mobile=1&cmd=quickbuff&subcmd=activate&target' +
       'Players=' +
       $('dt.stat-name:first').next().text().replace(/,/g, '') +
       '&skills%5B%5D=55';

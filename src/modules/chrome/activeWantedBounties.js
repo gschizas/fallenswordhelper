@@ -250,7 +250,7 @@ function parseBountyPageForWorld(details) {
   getWantedBountyList(doc);
   hazActiveBountyList(doc);
   if (curPage < maxPage) {
-    xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
+    xmlhttp('index.php?no_mobile=1&cmd=bounty&page=' + (curPage + 1),
       parseBountyPageForWorld);
   } else {
     injectWantedList();
@@ -292,7 +292,7 @@ function doRefresh() { // Legacy
   activeBountyListPosted = false;
   wantedNames = getValue('wantedNames');
   wantedArray = wantedNames.split(',');
-  xmlhttp('index.php?cmd=bounty&page=1', parseBountyPageForWorld);
+  xmlhttp('index.php?no_mobile=1&cmd=bounty&page=1', parseBountyPageForWorld);
   setValue('bwNeedsRefresh', false);
 }
 

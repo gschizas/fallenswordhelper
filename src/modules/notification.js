@@ -49,7 +49,7 @@ function prayToGods(e) { // jQuery
   if (!myGod) {return;}
   getElementById('helperPrayToGods').removeEventListener('click',
     prayToGods);
-  retryAjax('index.php?cmd=temple&subcmd=pray&type=' + myGod)
+  retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
   $(e.target).qtip('hide');
 }
@@ -125,7 +125,7 @@ export function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
   if (doWeNeedToParse()) {
-    retryAjax('index.php?cmd=temple').done(parseTemplePage);
+    retryAjax('index.php?no_mobile=1&cmd=temple').done(parseTemplePage);
   }
 }
 
@@ -156,7 +156,7 @@ export function parseGoldUpgrades(data) {
 function checkLastUpgrade() {
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
-  retryAjax('index.php?cmd=points&type=1').done(function(data) {
+  retryAjax('index.php?no_mobile=1&cmd=points&type=1').done(function(data) {
     add(3, parseGoldUpgrades, [data]);
   });
 }

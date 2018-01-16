@@ -89,7 +89,8 @@ function processCombatRow(aRow) {
   if (_winner === 0 || _winner === 1) {
     var combatSummarySpan = createSpan({style: {color: 'gray'}});
     aRow.cells[2].appendChild(combatSummarySpan);
-    xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
+    xmlhttp(
+      'index.php?no_mobile=1&cmd=combat&subcmd=view&combat_id=' + combatID,
       retrievePvPCombatSummary,
       {target: combatSummarySpan, winner: _winner}
     );

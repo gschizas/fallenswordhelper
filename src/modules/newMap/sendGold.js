@@ -6,6 +6,7 @@ export function doSendGold() { // jQuery
   retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'trade',
       subcmd: 'sendgold',
       xc: window.ajaxXC,

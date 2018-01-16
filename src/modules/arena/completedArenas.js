@@ -1,7 +1,8 @@
 import {dontPost} from './assets';
 
 function gotoPage(pageId) {
-  window.location = 'index.php?cmd=arena&subcmd=completed&page=' + pageId;
+  window.location = 'index.php?cmd=arena&subcmd=completed&page=' +
+    pageId;
 }
 
 export default function completedArenas() { // jQuery
