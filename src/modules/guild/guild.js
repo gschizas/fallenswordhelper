@@ -58,7 +58,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
   activeConflicts(doc, curPage, callback.node);
   if (maxPage && parseInt(maxPage[1], 10) > curPage) {
     xmlhttp(
-      'index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=' +
+      'index.php?no_mobile=1&cmd=guild&subcmd=conflicts&subcmd2=&page=' +
       (curPage + 1) + '&search_text=',
       gotConflictInfo,
       {node: callback.node});
@@ -66,10 +66,11 @@ function gotConflictInfo(responseText, callback) { // Legacy
 }
 
 function conflictInfo() { // jQuery
-  retryAjax('index.php?cmd=guild&subcmd=conflicts').done(function(data) {
-    gotConflictInfo(data,
-      {node: getElementById('statisticsControl')});
-  });
+  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
+    .done(function(data) {
+      gotConflictInfo(data,
+        {node: getElementById('statisticsControl')});
+    });
 }
 
 function logoToggle() {

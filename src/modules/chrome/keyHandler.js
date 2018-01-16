@@ -31,6 +31,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
   retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'profile',
       subcmd: 'managecombatset',
       combatSetId: cbsIndex,
@@ -96,7 +97,7 @@ function profile() {
 }
 
 function combatSetKey(itemIndex) {
-  retryAjax('index.php?cmd=profile').done(function(data) {
+  retryAjax('index.php?no_mobile=1&cmd=profile').done(function(data) {
     changeCombatSet(data, itemIndex);
   });
 }

@@ -6,6 +6,7 @@ export default function sendItem(invIdList) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'trade',
       subcmd: 'senditems',
       xc: window.ajaxXC,

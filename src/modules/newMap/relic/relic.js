@@ -289,6 +289,7 @@ function getGuild() {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'view',
       guild_id: relicData.controlled_by.guild_id
@@ -331,6 +332,7 @@ function getGroups() {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'groups'
     }

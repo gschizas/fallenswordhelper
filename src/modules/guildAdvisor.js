@@ -149,6 +149,7 @@ function getAdvisorPage(e) { // jQuery
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'advisor',
       period: e

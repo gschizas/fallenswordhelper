@@ -32,6 +32,7 @@ export function useItem(backpackInvId) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'profile',
       subcmd: 'useitem',
       inventory_id: backpackInvId
@@ -86,6 +87,7 @@ function guildInvRecall(invId, playerId, mode) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'inventory',
       subcmd2: 'recall',

@@ -125,7 +125,7 @@ function getCreatureGroupData(responseText) { // Legacy
   var groupHPValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
+  xmlhttp('index.php?no_mobile=1&cmd=profile', getCreaturePlayerData, {
     groupExists: true,
     groupAttackValue: groupAttackValue,
     groupDefenseValue: groupDefenseValue,
@@ -166,7 +166,7 @@ export default function readyViewCreature() { // Hybrid
   $('#creatureEvaluator').html('');
   $('#creatureEvaluatorGroup').html('');
 
-  xmlhttp('index.php?cmd=profile', getCreaturePlayerData, {
+  xmlhttp('index.php?no_mobile=1&cmd=profile', getCreaturePlayerData, {
     groupExists: false,
     groupAttackValue: 0,
     groupDefenseValue: 0,
@@ -175,7 +175,7 @@ export default function readyViewCreature() { // Hybrid
     groupHPValue: 0,
     groupEvaluation: false
   });
-  xmlhttp('index.php?cmd=guild&subcmd=groups',
+  xmlhttp('index.php?no_mobile=1&cmd=guild&subcmd=groups',
     checkIfGroupExists);
 
   $('#addRemoveCreatureToDoNotKillList').html('');

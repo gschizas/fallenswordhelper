@@ -10,6 +10,7 @@ function doPickMove(moveId, slotId) {
   return retryAjax({
     url: 'index.php',
     data: {
+      no_mobile: 1,
       cmd: 'arena',
       subcmd: 'dopickmove',
       move_id: moveId,

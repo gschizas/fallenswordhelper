@@ -350,7 +350,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
     bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
-    xmlhttp('index.php?cmd=onlineplayers&page=' + newPage,
+    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=' + newPage,
       findBuffsParseOnlinePlayers, {page: newPage});
   } else {
     // all done so moving on
@@ -363,7 +363,7 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   onlinePlayersSetting =
     parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
-    xmlhttp('index.php?cmd=onlineplayers&page=1',
+    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=1',
       findBuffsParseOnlinePlayers, {page: 1});
   } else {
     findBuffsParsePlayersForBuffs();
@@ -409,10 +409,10 @@ function findBuffsParseProfilePage(responseText) {
 function findBuffsParseProfilePageStart() { // Legacy
   // if option enabled then parse profiles
   profilePagesToSearch = [];
-  profilePagesToSearch.push('index.php?cmd=profile');
+  profilePagesToSearch.push('index.php?cmd=profile'); // ???
   var extraProfileArray = extraProfile.split(',');
   extraProfileArray.forEach(function(el) {
-    profilePagesToSearch.push('index.php?cmd=findplayer' +
+    profilePagesToSearch.push('index.php?cmd=findplayer' + // ???
       '&search_active=1&search_level_max=&search_level_min=' +
       '&search_username=' + el + '&search_show_first=1');
   });
@@ -462,7 +462,7 @@ function findAnyStart(progMsg) {
   extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
-  xmlhttp('index.php?cmd=guild&subcmd=manage',
+  xmlhttp('index.php?no_mobile=1&cmd=guild&subcmd=manage',
     findBuffsParseGuildManagePage);
 }
 

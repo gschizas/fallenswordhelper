@@ -238,7 +238,7 @@ function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
-  retryAjax('index.php?cmd=inventing').pipe(processFirstPage)
+  retryAjax('index.php?no_mobile=1&cmd=inventing').pipe(processFirstPage)
     .done(displayStuff);
 }
 

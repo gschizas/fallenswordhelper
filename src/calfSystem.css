@@ -253,6 +253,10 @@
   margin-top: -6px;
   margin-left: -6px;
 }
+.fshSpin12:before {
+  width: 12px;
+  height: 12px;
+}
 .fshComposingSpinner:before {
   top: 75%;
 }
@@ -344,6 +348,13 @@
 
 #invTabs > #qwtab1:checked ~ #invTabs-qw,
 #invTabs > #qwtab2:checked ~ #invTabs-ah {display: block;}
+
+.fshEq {width: 25px;}
+.fshUse {width: 36px;}
+.fshEq, .fshUse {
+  display: inline-block;
+  position: relative;
+}
 
 /* Scout Tower Titan Tracker */
 .fshTTracker {
@@ -978,6 +989,10 @@ button::-moz-focus-inner {
   table-layout: fixed;
   overflow-wrap: break-word;
 }
+.fshGc td:nth-child(1) {width: 110px;}
+.fshGc td:nth-child(2) {width: 100px;}
+.fshGc td:nth-child(3) {width: 428px;}
+
 /* New Row */
 .fshNr {
   background-color: #F5F298;

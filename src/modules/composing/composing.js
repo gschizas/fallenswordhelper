@@ -113,7 +113,7 @@ function quickCreate(evt) {
 function checkLastCompose() { // jQuery
   var lastComposeCheck = getValue('lastComposeCheck');
   if (lastComposeCheck && now < lastComposeCheck) {return;}
-  retryAjax('index.php?cmd=composing').done(function(data) {
+  retryAjax('index.php?no_mobile=1&cmd=composing').done(function(data) {
     add(3, parseComposing, [data]);
   });
 }

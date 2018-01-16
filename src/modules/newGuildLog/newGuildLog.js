@@ -32,7 +32,7 @@ var myTable;
 function getGuildLogPage(page) {
   return retryAjax({
     url: 'index.php',
-    data: {cmd: 'guild', subcmd: 'log', page: page},
+    data: {no_mobile: 1, cmd: 'guild', subcmd: 'log', page: page},
     datatype: 'html'
   });
 }
