@@ -142,7 +142,8 @@ function getOnlinePlayers(data) { // Bad jQuery
     input = input.parent().text();
     lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
     for (var i = 2; i <= lastPage; i += 1) {
-      retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' + i).done(getOnlinePlayers);
+      retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' + i)
+        .done(getOnlinePlayers);
     }
   }
   checkLastPage();
@@ -152,7 +153,8 @@ function refreshEvt() { // Bad jQuery
   $('#fshRefresh', context).hide();
   onlinePages = 0;
   onlinePlayers = {};
-  retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1').done(getOnlinePlayers);
+  retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
+    .done(getOnlinePlayers);
   setValue('lastOnlineCheck', now);
   $('#fshOutput', context).append('Parsing online players...'); // context
 }
