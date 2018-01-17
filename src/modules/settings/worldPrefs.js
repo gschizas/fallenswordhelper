@@ -31,6 +31,17 @@ function worldGroup() {
     '</td></tr>';
 }
 
+function keepCombatLogs() {
+  return '<tr><td class="fshRight">Keep Combat Logs' +
+    helpLink('Keep Combat Logs',
+      'Save combat logs to a temporary variable. ' +
+      'Press <u>Show logs</u> on the right to display and copy them') +
+    ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
+    isChecked(getValue('keepLogs')) + '>&nbsp;&nbsp;' +
+    '<input type="button" class="custombutton" value="Show Logs" ' +
+    'id="Helper:ShowLogs"></td></tr>';
+}
+
 function combatEvalBias() {
   return '<tr><td class="fshRight">Combat Evaluator Bias' +
     helpLink('Combat Evaluator Bias',
@@ -54,6 +65,40 @@ function combatEvalBias() {
     '<option value="3"' +
     isSelected(calf.combatEvaluatorBias, 3) +
     '>Conservative+</option></select></td></tr>';
+}
+
+function keepCreatureLog() {
+  return '<tr><td class="fshRight">' + justLabel('showMonsterLog') +
+    '</td><td>' + justCheckbox('showMonsterLog') +
+    '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
+    'value="Show" id="Helper:ShowMonsterLogs"></td></tr>';
+}
+
+function showSendGold() {
+  return '<tr><td class="fshRight">Show Send Gold' +
+    helpLink('Show Gold on World Screen',
+      'This will show an icon below the world map to allow you to ' +
+      'quickly send gold to a Friend.') +
+    ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
+    isChecked(getValue('sendGoldonWorld')) + '>' +
+    '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
+    getValue('goldAmount') + '"> ' +
+    'gold to <input name="goldRecipient" size="10" value="' +
+    getValue('goldRecipient') + '">' +
+    ' Current total: <input name="currentGoldSentTotal" size="5" value="' +
+    getValue('currentGoldSentTotal') + '"></td></tr>';
+}
+
+function theDoNotKillList() {
+  return '<tr><td class="fshRight">Do Not Kill List' +
+    helpLink('Do Not Kill List',
+      'List of creatures that will not be killed by quick kill. ' +
+      'You must type the full name of each creature, separated by commas. ' +
+      'Creature name will show up in red color on world screen and will ' +
+      'not be killed by keyboard entry (but can still be killed by ' +
+      'mouseclick). Quick kill must be enabled for this function to work.') +
+    ':</td><td colspan="3"><input name="doNotKillList" size="60" value="' +
+    calf.doNotKillList + '"></td></tr>';
 }
 
 function huntBuff() {
@@ -93,80 +138,40 @@ function huntingBuffs() {
     huntBuffCheck() + ' ' + huntMode() + '</td></tr>';
 }
 
+function huntingBuffsList(modeLabel, modeName, buffsName, buffs) {
+  return '<tr><td class="fshRight">' + modeLabel + ' Hunting Buff List' +
+    helpLink(modeLabel + ' Hunting Buff List',
+      modeLabel + ' list of hunting buffs.') +
+    ':</td><td colspan="3"><input name="' + modeName +
+    '" title="Hunting mode name" size="7" value="' + modeLabel +
+    '"><input name="' + buffsName + '" size="49" value="' + buffs +
+    '"></td></tr>';
+}
+
 export function prefs() {
   // World Screen
   return '<tr><th colspan="2"><b>' +
     'World screen/Hunting preferences</b></th></tr>' +
 
     worldGroup() +
-
-    '<tr><td class="fshRight">Keep Combat Logs' +
-      helpLink('Keep Combat Logs',
-        'Save combat logs to a temporary variable. ' +
-        'Press <u>Show logs</u> on the right to display and copy them') +
-      ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
-      isChecked(getValue('keepLogs')) + '>&nbsp;&nbsp;' +
-      '<input type="button" class="custombutton" value="Show Logs" ' +
-      'id="Helper:ShowLogs"></td></tr>' +
+    keepCombatLogs() +
 
     simpleCheckbox('showCombatLog') +
     simpleCheckbox('enableCreatureColoring') +
     simpleCheckbox('showCreatureInfo') +
 
     combatEvalBias() +
-
-    '<tr><td class="fshRight">' + justLabel('showMonsterLog') +
-      '</td><td>' + justCheckbox('showMonsterLog') +
-      '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
-      'value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
-
-    '<tr><td class="fshRight">Show Send Gold' +
-      helpLink('Show Gold on World Screen',
-        'This will show an icon below the world map to allow you to ' +
-        'quickly send gold to a Friend.') +
-      ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
-      isChecked(getValue('sendGoldonWorld')) + '>' +
-      '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
-      getValue('goldAmount') + '"> ' +
-      'gold to <input name="goldRecipient" size="10" value="' +
-      getValue('goldRecipient') + '">' +
-      ' Current total: <input name="currentGoldSentTotal" size="5" value="' +
-      getValue('currentGoldSentTotal') + '">' +
-      '</td></tr>' +
-
-    '<tr><td class="fshRight">Do Not Kill List' +
-      helpLink('Do Not Kill List',
-        'List of creatures that will not be killed by quick kill. ' +
-        'You must type the full name of each creature, separated by commas. ' +
-        'Creature name will show up in red color on world screen and will ' +
-        'not be killed by keyboard entry (but can still be killed by ' +
-        'mouseclick). Quick kill must be enabled for this function to work.') +
-      ':</td><td colspan="3"><input name="doNotKillList" size="60" value="' +
-      calf.doNotKillList + '"></td></tr>' +
-
+    keepCreatureLog() +
+    showSendGold() +
+    theDoNotKillList() +
     huntingBuffs() +
 
-    '<tr><td class="fshRight">' + calf.buffsName + ' Hunting Buff List' +
-      helpLink(calf.buffsName + ' Hunting Buff List',
-        calf.buffsName + ' list of hunting buffs.') +
-      ':</td><td colspan="3"><input name="huntingBuffsName" ' +
-      'title="Hunting mode name" size="7" value="' + calf.buffsName +
-      '"><input name="huntingBuffs" size="49" value="' + calf.buffs +
-      '"></td></tr>' +
-    '<tr><td class="fshRight">' + calf.buffs2Name + ' Hunting Buff List' +
-      helpLink(calf.buffs2Name + ' Hunting Buff List',
-        'List of ' + calf.buffs2Name + ' hunting buffs.') +
-      ':</td><td colspan="3"><input name="huntingBuffs2Name" ' +
-      'title="Hunting mode name" size="7" value="' + calf.buffs2Name +
-      '"><input name="huntingBuffs2" size="49" value="' + calf.buffs2 +
-      '"></td></tr>' +
-    '<tr><td class="fshRight">' + calf.buffs3Name + ' Hunting Buff List' +
-      helpLink(calf.buffs3Name + ' Hunting Buff List',
-        'List of ' + calf.buffs3Name + ' hunting buffs.') +
-      ':</td><td colspan="3"><input name="huntingBuffs3Name" ' +
-      'title="Hunting mode name" size="7" value="' + calf.buffs3Name +
-      '"><input name="huntingBuffs3" size="49" value="' + calf.buffs3 +
-      '"></td></tr>' +
+    huntingBuffsList(calf.buffsName, 'huntingBuffsName', 'huntingBuffs',
+      calf.buffs) +
+    huntingBuffsList(calf.buffs2Name, 'huntingBuffs2Name', 'huntingBuffs2',
+      calf.buffs2) +
+    huntingBuffsList(calf.buffs3Name, 'huntingBuffs3Name', 'huntingBuffs3',
+      calf.buffs3) +
 
     simpleCheckbox('huntingMode');
 }
