@@ -1949,9 +1949,9 @@ function screenview(funcName) {
   ga('fshApp.send', 'screenview', {screenName: funcName});
 }
 
-function sendEvent(eventCategory, eventAction) {
+function sendEvent(eventCategory, eventAction, eventLabel) {
   if (noGa()) {return;}
-  ga('fshApp.send', 'event', eventCategory, eventAction);
+  ga('fshApp.send', 'event', eventCategory, eventAction, eventLabel);
 }
 
 function getBoxList(boxList) {
@@ -3547,55 +3547,62 @@ function equipPrefs() {
       escapeHtml(getValue('sendClasses')) + '">';
 }
 
+function guildInfoWidgets() {
+  return '<tr><td class="fshRight"><label for="enableGuildInfoWidgets">' +
+    'Enable Guild Info Widgets' +
+    helpLink('Enable Guild Info Widgets',
+      'Enabling this option will enable the Guild Info Widgets ' +
+      '(coloring on the Guild Info panel)') +
+    ':</label></td><td>' +
+    '<input id="enableGuildInfoWidgets" name="enableGuildInfoWidgets" ' +
+    'type="checkbox" value="on"' + isChecked(calf.enableGuildInfoWidgets) +
+    '>&nbsp;<label>Hide Message&gt;<input name="hideGuildInfoMessage" ' +
+    'type="checkbox" value="on"' + isChecked(calf.hideGuildInfoMessage) +
+    '></label>&nbsp;<label>Hide Buff&gt;<input name="hideGuildInfoBuff" ' +
+    'type="checkbox" value="on"' + isChecked(calf.hideGuildInfoBuff) +
+    '></label>&nbsp;<label>Hide ST&gt;<input name="hideGuildInfoSecureTrade" ' +
+    'type="checkbox" value="on"' + isChecked(calf.hideGuildInfoSecureTrade) +
+    '></label>&nbsp;<label>Hide Trade&gt;<input name="hideGuildInfoTrade" ' +
+    'type="checkbox" value="on"' + isChecked(calf.hideGuildInfoTrade) +
+    '></label></td></tr>';
+}
+
+function onlineAlliesEnemies() {
+  return '<tr><td class="fshRight">' + networkIcon +
+    'Show Online Allies/Enemies' +
+    helpLink('Show Online Allies/Enemies',
+      'This will show the allies/enemies online list on the right.') +
+    ':</td><td><label>Allies&nbsp;<input name="enableAllyOnlineList" ' +
+    'type="checkbox" value="on"' + isChecked(calf.enableAllyOnlineList) +
+    '></label>&nbsp;&nbsp;<label>Enemies&nbsp;' +
+    '<input name="enableEnemyOnlineList" type="checkbox" value="on"' +
+    isChecked(calf.enableEnemyOnlineList) + '></label>&nbsp;&nbsp;' +
+    '<input name="allyEnemyOnlineRefreshTime" size="3" value="' +
+    getValue('allyEnemyOnlineRefreshTime') + '"> seconds refresh</td></tr>';
+}
+
+function quickLinksLocation() {
+  return '<tr><td class="fshRight">Quick Links Screen Location' +
+    helpLink('Quick Links Screen Location',
+      'Determines where the quick links dialog shows on the screen. ' +
+      'Default is top 22, left 0.') +
+    ':</td><td>Top: <input name="quickLinksTopPx" size="3" value="' +
+    getValue('quickLinksTopPx') +
+    '"> Left: <input name="quickLinksLeftPx" size="3" value="' +
+    getValue('quickLinksLeftPx') + '"></td></tr>';
+}
+
 function generalPrefs() {
   // General Prefs
   return '<tr><th colspan="2"><b>General preferences ' +
       '(apply to most screens)</b></th></tr>' +
 
-    '<tr><td class="fshRight">' +
-      '<label for="enableGuildInfoWidgets">' +
-      'Enable Guild Info Widgets' +
-      helpLink('Enable Guild Info Widgets',
-        'Enabling this option will enable the Guild Info Widgets ' +
-        '(coloring on the Guild Info panel)') + ':</label></td><td>' +
-      '<input id="enableGuildInfoWidgets" name="enableGuildInfoWidgets" ' +
-      'type="checkbox" value="on"' +
-      isChecked(calf.enableGuildInfoWidgets) +
-      '>&nbsp;' +
-      '<label>Hide Message&gt;<input name="hideGuildInfoMessage" ' +
-      'type="checkbox" value="on"' +
-      isChecked(calf.hideGuildInfoMessage) +
-      '></label>&nbsp;' +
-      '<label>Hide Buff&gt;<input name="hideGuildInfoBuff" ' +
-      'type="checkbox" value="on"' +
-      isChecked(calf.hideGuildInfoBuff) +
-      '></label>&nbsp;' +
-      '<label>Hide ST&gt;<input name="hideGuildInfoSecureTrade" ' +
-      'type="checkbox" value="on"' +
-      isChecked(calf.hideGuildInfoSecureTrade) +
-      '></label>&nbsp;' +
-      '<label>Hide Trade&gt;<input name="hideGuildInfoTrade" ' +
-      'type="checkbox" value="on"' +
-      isChecked(calf.hideGuildInfoTrade) +
-      '></label></td></tr>' +
+    guildInfoWidgets() +
 
     simpleCheckbox('moveGuildList') +
     simpleCheckbox('moveOnlineAlliesList') +
 
-    '<tr><td class="fshRight">' + networkIcon +
-      'Show Online Allies/Enemies' +
-      helpLink('Show Online Allies/Enemies',
-        'This will show the allies/enemies online list on the right.') +
-      ':</td><td><label>Allies&nbsp;<input name="enableAllyOnlineList" ' +
-      'type="checkbox" value="on"' +
-      isChecked(calf.enableAllyOnlineList) +
-      '></label>&nbsp;&nbsp;<label>Enemies&nbsp;' +
-      '<input name="enableEnemyOnlineList" type="checkbox" value="on"' +
-      isChecked(calf.enableEnemyOnlineList) +
-      '></label>&nbsp;&nbsp;' +
-      '<input name="allyEnemyOnlineRefreshTime" size="3" value="' +
-      getValue('allyEnemyOnlineRefreshTime') +
-      '"> seconds refresh</td></tr>' +
+    onlineAlliesEnemies() +
 
     simpleCheckbox('enableOnlineAlliesWidgets') +
     simpleCheckbox('moveFSBox') +
@@ -3611,15 +3618,8 @@ function generalPrefs() {
     simpleCheckbox('keepHelperMenuOnScreen') +
     simpleCheckbox('draggableHelperMenu') +
 
-    '<tr><td class="fshRight">Quick Links Screen Location' +
-      helpLink('Quick Links Screen Location',
-        'Determines where the quick links dialog shows on the screen. ' +
-        'Default is top 22, left 0.') +
-      ':</td><td>Top: <input name="quickLinksTopPx" size="3" value="' +
-      getValue('quickLinksTopPx') +
-      '"> Left: <input name="quickLinksLeftPx" size="3" value="' +
-      getValue('quickLinksLeftPx') +
-      '"></td></tr>' +
+    quickLinksLocation() +
+
     simpleCheckbox('draggableQuickLinks') +
     simpleCheckbox('expandMenuOnKeyPress');
 }
@@ -3774,6 +3774,17 @@ function worldGroup() {
     '</td></tr>';
 }
 
+function keepCombatLogs() {
+  return '<tr><td class="fshRight">Keep Combat Logs' +
+    helpLink('Keep Combat Logs',
+      'Save combat logs to a temporary variable. ' +
+      'Press <u>Show logs</u> on the right to display and copy them') +
+    ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
+    isChecked(getValue('keepLogs')) + '>&nbsp;&nbsp;' +
+    '<input type="button" class="custombutton" value="Show Logs" ' +
+    'id="Helper:ShowLogs"></td></tr>';
+}
+
 function combatEvalBias() {
   return '<tr><td class="fshRight">Combat Evaluator Bias' +
     helpLink('Combat Evaluator Bias',
@@ -3797,6 +3808,40 @@ function combatEvalBias() {
     '<option value="3"' +
     isSelected(calf.combatEvaluatorBias, 3) +
     '>Conservative+</option></select></td></tr>';
+}
+
+function keepCreatureLog() {
+  return '<tr><td class="fshRight">' + justLabel('showMonsterLog') +
+    '</td><td>' + justCheckbox('showMonsterLog') +
+    '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
+    'value="Show" id="Helper:ShowMonsterLogs"></td></tr>';
+}
+
+function showSendGold() {
+  return '<tr><td class="fshRight">Show Send Gold' +
+    helpLink('Show Gold on World Screen',
+      'This will show an icon below the world map to allow you to ' +
+      'quickly send gold to a Friend.') +
+    ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
+    isChecked(getValue('sendGoldonWorld')) + '>' +
+    '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
+    getValue('goldAmount') + '"> ' +
+    'gold to <input name="goldRecipient" size="10" value="' +
+    getValue('goldRecipient') + '">' +
+    ' Current total: <input name="currentGoldSentTotal" size="5" value="' +
+    getValue('currentGoldSentTotal') + '"></td></tr>';
+}
+
+function theDoNotKillList() {
+  return '<tr><td class="fshRight">Do Not Kill List' +
+    helpLink('Do Not Kill List',
+      'List of creatures that will not be killed by quick kill. ' +
+      'You must type the full name of each creature, separated by commas. ' +
+      'Creature name will show up in red color on world screen and will ' +
+      'not be killed by keyboard entry (but can still be killed by ' +
+      'mouseclick). Quick kill must be enabled for this function to work.') +
+    ':</td><td colspan="3"><input name="doNotKillList" size="60" value="' +
+    calf.doNotKillList + '"></td></tr>';
 }
 
 function huntBuff() {
@@ -3836,80 +3881,40 @@ function huntingBuffs() {
     huntBuffCheck() + ' ' + huntMode() + '</td></tr>';
 }
 
+function huntingBuffsList(modeLabel, modeName, buffsName, buffs) {
+  return '<tr><td class="fshRight">' + modeLabel + ' Hunting Buff List' +
+    helpLink(modeLabel + ' Hunting Buff List',
+      modeLabel + ' list of hunting buffs.') +
+    ':</td><td colspan="3"><input name="' + modeName +
+    '" title="Hunting mode name" size="7" value="' + modeLabel +
+    '"><input name="' + buffsName + '" size="49" value="' + buffs +
+    '"></td></tr>';
+}
+
 function prefs() {
   // World Screen
   return '<tr><th colspan="2"><b>' +
     'World screen/Hunting preferences</b></th></tr>' +
 
     worldGroup() +
-
-    '<tr><td class="fshRight">Keep Combat Logs' +
-      helpLink('Keep Combat Logs',
-        'Save combat logs to a temporary variable. ' +
-        'Press <u>Show logs</u> on the right to display and copy them') +
-      ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
-      isChecked(getValue('keepLogs')) + '>&nbsp;&nbsp;' +
-      '<input type="button" class="custombutton" value="Show Logs" ' +
-      'id="Helper:ShowLogs"></td></tr>' +
+    keepCombatLogs() +
 
     simpleCheckbox('showCombatLog') +
     simpleCheckbox('enableCreatureColoring') +
     simpleCheckbox('showCreatureInfo') +
 
     combatEvalBias() +
-
-    '<tr><td class="fshRight">' + justLabel('showMonsterLog') +
-      '</td><td>' + justCheckbox('showMonsterLog') +
-      '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
-      'value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
-
-    '<tr><td class="fshRight">Show Send Gold' +
-      helpLink('Show Gold on World Screen',
-        'This will show an icon below the world map to allow you to ' +
-        'quickly send gold to a Friend.') +
-      ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
-      isChecked(getValue('sendGoldonWorld')) + '>' +
-      '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
-      getValue('goldAmount') + '"> ' +
-      'gold to <input name="goldRecipient" size="10" value="' +
-      getValue('goldRecipient') + '">' +
-      ' Current total: <input name="currentGoldSentTotal" size="5" value="' +
-      getValue('currentGoldSentTotal') + '">' +
-      '</td></tr>' +
-
-    '<tr><td class="fshRight">Do Not Kill List' +
-      helpLink('Do Not Kill List',
-        'List of creatures that will not be killed by quick kill. ' +
-        'You must type the full name of each creature, separated by commas. ' +
-        'Creature name will show up in red color on world screen and will ' +
-        'not be killed by keyboard entry (but can still be killed by ' +
-        'mouseclick). Quick kill must be enabled for this function to work.') +
-      ':</td><td colspan="3"><input name="doNotKillList" size="60" value="' +
-      calf.doNotKillList + '"></td></tr>' +
-
+    keepCreatureLog() +
+    showSendGold() +
+    theDoNotKillList() +
     huntingBuffs() +
 
-    '<tr><td class="fshRight">' + calf.buffsName + ' Hunting Buff List' +
-      helpLink(calf.buffsName + ' Hunting Buff List',
-        calf.buffsName + ' list of hunting buffs.') +
-      ':</td><td colspan="3"><input name="huntingBuffsName" ' +
-      'title="Hunting mode name" size="7" value="' + calf.buffsName +
-      '"><input name="huntingBuffs" size="49" value="' + calf.buffs +
-      '"></td></tr>' +
-    '<tr><td class="fshRight">' + calf.buffs2Name + ' Hunting Buff List' +
-      helpLink(calf.buffs2Name + ' Hunting Buff List',
-        'List of ' + calf.buffs2Name + ' hunting buffs.') +
-      ':</td><td colspan="3"><input name="huntingBuffs2Name" ' +
-      'title="Hunting mode name" size="7" value="' + calf.buffs2Name +
-      '"><input name="huntingBuffs2" size="49" value="' + calf.buffs2 +
-      '"></td></tr>' +
-    '<tr><td class="fshRight">' + calf.buffs3Name + ' Hunting Buff List' +
-      helpLink(calf.buffs3Name + ' Hunting Buff List',
-        'List of ' + calf.buffs3Name + ' hunting buffs.') +
-      ':</td><td colspan="3"><input name="huntingBuffs3Name" ' +
-      'title="Hunting mode name" size="7" value="' + calf.buffs3Name +
-      '"><input name="huntingBuffs3" size="49" value="' + calf.buffs3 +
-      '"></td></tr>' +
+    huntingBuffsList(calf.buffsName, 'huntingBuffsName', 'huntingBuffs',
+      calf.buffs) +
+    huntingBuffsList(calf.buffs2Name, 'huntingBuffs2Name', 'huntingBuffs2',
+      calf.buffs2) +
+    huntingBuffsList(calf.buffs3Name, 'huntingBuffs3Name', 'huntingBuffs3',
+      calf.buffs3) +
 
     simpleCheckbox('huntingMode');
 }
@@ -3965,85 +3970,87 @@ function questPrefs() {
     simpleCheckbox('showNextQuestSteps');
 }
 
+function storageDetails() {
+  return '<tr><td align=center><input id="fshClearStorage" type="button" ' +
+    'class="awesome magenta tip-static" value="Clear Storage" ' +
+    'data-tipped="<span class=\'fshHelpTitle\'>Clear Storage' +
+    '</span><br><br>This will clear all localStorage related to ' +
+    'fallensword.com<br>It will reset all your Helper settings to ' +
+    'defaults<br>Use it if your storage has overflowed or become ' +
+    'corrupt"></td><td align=center>' +
+    '<span style="font-size:x-small">(Current version: ' +
+    FSH.version + '(' + FSH.calf + ')) (Storage Used: ' +
+    calf.storage + '% Remaining: ' +
+    (100 - calf.storage).toFixed(2) + '%)</span></td></tr>';
+}
+
+function linkToWebsite() {
+  return '<tr><td colspan="2" align=center>' +
+  '<span style="font-weight:bold;">Visit the ' +
+  '<a href="https://github.com/fallenswordhelper/fallenswordhelper">' +
+  'Fallen Sword Helper web site</a> ' +
+  'for any suggestions, requests or bug reports</span></td></tr>';
+}
+
+function coderLink(prev, curr, ind, ary) {
+  var ret = prev + '<a href="index.php?cmd=profile&player_id=' + curr[0] +
+    '">' + curr[1] + '</a>';
+  if (ind === ary.length - 2) {
+    ret += ' and ';
+  } else if (ind !== ary.length - 1) {ret += ', ';}
+  return ret;
+}
+
+function listOfCoders(ary) {
+  return ary.reduce(coderLink, '');
+}
+
+function codedBy() {
+  return '<tr><td colspan="2" align=center>' +
+    '<span class="fshXXSmall">Fallen Sword Helper was coded by ' +
+    listOfCoders([['1393340', 'Coccinella'], ['1599987', 'yuuzhan'],
+      ['1963510', 'PointyHair'], ['1346893', 'Tangtop'],
+      ['2536682', 'dkwizard'], ['1570854', 'jesiegel'],
+      ['2156859', 'ByteBoy'], ['2169401', 'McBush']]) +
+    ', with valuable contributions by ' +
+    listOfCoders([['524660', 'Nabalac'], ['37905', 'Ananasii']]) +
+    '</span></td></tr>';
+}
+
 function setupConfigData() {
   calf.configData =
     '<form><table id="fshSettingsTable">' +
     '<thead><th colspan="2"><b>Fallen Sword Helper configuration ' +
       'Settings</b></th></thead>' +
-    '<tr><td align=center><input id="fshClearStorage" type="button" ' +
-      'class="awesome magenta tip-static" value="Clear Storage" ' +
-      'data-tipped="<span class=\'fshHelpTitle\'>Clear Storage' +
-      '</span><br><br>This will clear all localStorage related to ' +
-      'fallensword.com<br>It will reset all your Helper settings to ' +
-      'defaults<br>Use it if your storage has overflowed or become ' +
-      'corrupt"></td><td align=center>' +
-      '<span style="font-size:x-small">(Current version: ' +
-      FSH.version + '(' + FSH.calf + ')) (Storage Used: ' +
-      calf.storage + '% Remaining: ' +
-      (100 - calf.storage).toFixed(2) + '%)</span></td></tr>' +
-    '<tr><td colspan="2" align=center>' +
-      '<span style="font-weight:bold;">Visit the ' +
-      '<a href="https://github.com/fallenswordhelper/fallenswordhelper">' +
-      'Fallen Sword Helper web site</a> ' +
-      'for any suggestions, requests or bug reports</span></td></tr>' +
-
+    storageDetails() +
+    linkToWebsite() +
     // General Prefs
     generalPrefs() +
-
     // Guild Manage
     guildPrefs() +
-
     // World Screen
     prefs() +
-
     // Log screen prefs
     logPrefs() +
-
     // Equipment screen prefs
     equipPrefs() +
-
     // Quest Preferences
     questPrefs() +
-
     // profile prefs
     profilePrefs() +
-
     // Bounty hunting prefs
     bountyPrefs() +
-
     // Other prefs
     otherPrefs() +
-
     // save button
-    // http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
     '<tr><td colspan="2" align=center><input type="button" class=' +
       '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
-    '<tr><td colspan="2" align=center><a href="' + server +
-      'index.php?cmd=notepad&blank=1&subcmd=savesettings">Export or Load ' +
-      'Settings!</a></td></tr>' +
+    // Export or Load Settings
+    // http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
     '<tr><td colspan="2" align=center>' +
-      '<span style="font-size:xx-small">Fallen Sword Helper was coded by ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=1599987">yuuzhan</a>, ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=1963510">PointyHair</a>, ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=1346893">Tangtop</a>, ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=2156859">ByteBoy</a>, and ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=2169401">McBush</a>, ' +
-      'with valuable contributions by ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
-      '<a href="' + server +
-      'index.php?cmd=profile&player_id=37905">Ananasii</a></span></td></tr>' +
+      '<a href="index.php?cmd=notepad&blank=1&subcmd=savesettings">' +
+      'Export or Load Settings!</a></td></tr>' +
+    codedBy() +
     '</table></form>';
 }
 
@@ -4357,34 +4364,45 @@ function backpack() {
   });
 }
 
-function recallItem(o) {
-  return guildInvRecall(o.invId, o.playerId, o.mode)
-    .pipe(function recallItemStatus(data) {
-      if (data.r === 0 && o.action !== 'recall') {
-        return backpack().pipe(function gotBackpack(bpData) {
-          // TODO assuming backpack is successful...
-          if (o.action === 'wear') {
-            return equipItem(bpData.items[bpData.items.length - 1].a)
-              .pipe(function wearItemStatus() {return data;});
-            // Return recall status irrespective of the status of the equipitem
-          }
-          if (o.action === 'use') {
-            return useItem(
-              bpData.items[bpData.items.length - 1].a)
-              .pipe(function useItemStatus() {return data;});
-            // Return recall status irrespective of the status of the useitem
-          }
-        });
-      }
-      return data;
-    });
+function itemStatus(data) {
+  return function() {return data;};
+}
+
+function gotBackpack(o, data) {
+  return function(bpData) {
+    // TODO assuming backpack is successful...
+    if (o.action === 'wear') {
+      return equipItem(bpData.items[bpData.items.length - 1].a)
+        .pipe(itemStatus(data));
+      // Return recall status irrespective of the status of the equipitem
+    }
+    if (o.action === 'use') {
+      return useItem(bpData.items[bpData.items.length - 1].a)
+        .pipe(itemStatus(data));
+      // Return recall status irrespective of the status of the useitem
+    }
+  };
+}
+
+function recallItemStatus(o) {
+  return function(data) {
+    if (data.r === 0 && o.action !== 'recall') {
+      return backpack().pipe(gotBackpack(o, data));
+    }
+    return data;
+  };
+}
+
+function pipeRecallToQueue(o) {
+  return function() {
+    return guildInvRecall(o.invId, o.playerId, o.mode)
+      .pipe(recallItemStatus(o));
+  };
 }
 
 function queueRecallItem(o) {
   // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeRecallToQueue() {
-    return recallItem(o);
-  });
+  deferred = deferred.pipe(pipeRecallToQueue(o));
   return deferred;
 }
 
@@ -4827,72 +4845,39 @@ var buffList = [
   {name: 'Invigorate',          stam: 40, lvl: 3000, id: 169, nicks: 'invigorate'}
 ];
 
-var characterName;
-var sustainLevelRE = /Level<br>(\d+)%/;
-var buffCustom = {
-  header: 'Buff',
-  what: 'buff',
-  control: function() {
-    var ret = '<select style="width:140px;" id="selectedBuff">';
-    for (var j = 0; j < buffList.length; j += 1) {
-      ret += '<option value="' + buffList[j].id + '">' +
-        buffList[j].name + '</option>';
-    }
-    ret += '</select>';
-    return ret;
-  },
-  cutoff: '175 buff',
-  searched: 'Nicknames of buff searched',
-  potential: 'buff',
-  processed: 'Buff',
-  progress: 'buffers'
-};
-var otherCustom = {
-  header: 'Other',
-  what: 'text',
-  control: function() {
-    var textToSearchFor = getValue('textToSearchFor') || '';
-    return '<input style="width:140px;" class="custominput" ' +
-      'id="textToSearchFor" type="text" title="Text to search for" value="' +
-      textToSearchFor + '">';
-  },
-  cutoff: '500+ play',
-  searched: 'Text searched for',
-  potential: 'play',
-  processed: 'Play',
-  progress: 'Other'
-};
-var findBuffNicks;
-var findBuffMinCastLevel;
-var findBuffsLevel175Only;
-var onlinePlayers$1;
-var onlinePlayersSetting;
-var extraProfile;
-var profilePagesToSearch;
-var profilePagesToSearchProcessed;
-var bufferProgress;
+function outputTable(o) {
+  return '<br><h1>Potential ' + o.processed + 'ers and Bio Info</h1><br>' +
+    '<table class="fshResult" id="buffTable"><tbody>' +
+    '<tr><th class="nameCol">&nbsp;Name</th>' +
+    '<th class="infoCol">&nbsp;Player Info</th>' +
+    '<th>&nbsp;Notable Bio Text</th></tr>' +
+    '</tbody></table><br>';
+}
+
+function disclaimer() {
+  return '<div class="disclaim">Disclaimer: This ' +
+    'functionality does a simple text search for the terms above. ' +
+    'It is not as smart as you are, so please do not judge the results ' +
+    'too harshly. It does not search all online players, just a subset ' +
+    'of those that have been on recently. ' +
+    'The aim is to be fast and still return a good set of results. This ' +
+    'feature is a work in progress, so it may be tweaked and enhanced ' +
+    'over time.</div>';
+}
 
 function pageLayout(o) { // Legacy
-  extraProfile = getValue('extraProfile');
   return '<table class="fshFind"><tbody>' +
     '<tr><td rowspan="2" colspan="2" class="headCell">' +
     '<h1>Find ' + o.header + '</h1></td>' +
-    '<td class="findLabel">' +
-    'Select ' + o.what + ' to search for:</td>' +
-    '<td>' +
-    o.control() +
-    '</td></tr>' +
-    '<tr>' +
-    '<td class="findLabel">' +
-    'Level ' + o.cutoff + 'ers only:</td>' +
+    '<td class="findLabel">Select ' + o.what + ' to search for:</td>' +
+    '<td>' + o.control() + '</td></tr>' +
+    '<tr><td class="findLabel">Level ' + o.cutoff + 'ers only:</td>' +
     '<td><input id="level175" type="checkbox"></td></tr>' +
-    '<tr><td class="leftLabel">' +
-    o.searched +
+    '<tr><td class="leftLabel">' + o.searched +
     ':&nbsp;</td><td id="buffNicks">&nbsp;</td>' +
     '<td class="findLabel">Search guild members:</td>' +
-    '<td><input id="guildMembers" type="checkbox" checked>' +
-    '</td></tr><tr>' +
-    '<td class="findLabel">' +
+    '<td><input id="guildMembers" type="checkbox" checked></td></tr>' +
+    '<tr><td class="findLabel">' +
     '# potential ' + o.potential + 'ers to search:&nbsp;</td>' +
     '<td id="potentialBuffers"></td>' +
     '<td class="findLabel">Search allies/enemies:' +
@@ -4905,8 +4890,7 @@ function pageLayout(o) { // Legacy
     '<input class="extraProfile" class="custominput" id="extraProfile" ' +
     'type="text" title="Extra profiles to search" value="' +
     (extraProfile || '') + '"></td></tr>' +
-    '<tr><td class="findLabel">' +
-    '# ' + o.processed + 'ers processed:' +
+    '<tr><td class="findLabel"># ' + o.processed + 'ers processed:' +
     '&nbsp;</td><td id="buffersProcessed">0</td>' +
     '<td class="findLabel">Search online list:</td>' +
     '<td><select class="selectOnline" id="onlinePlayers">' +
@@ -4915,29 +4899,18 @@ function pageLayout(o) { // Legacy
       '<option value="47">Medium (medium)</option>' +
       '<option value="45">Long (slowest)</option>' +
     '</select></td></tr>' +
-    '<tr><td class="findLabel">' +
-    'Find ' + o.progress + ' progress:' +
+    '<tr><td class="findLabel">Find ' + o.progress + ' progress:' +
     '&nbsp;</td><td class="buffProg" id="bufferProgress">Idle</td>' +
     '<td align="center"><input id="clearresultsbutton" ' +
     'class="custombutton" type="button" value="Clear Results"></td>' +
     '<td align="center"><input id="findbuffsbutton" class="custombutton" ' +
     'type="button" value="Find Buffers"></td></tr>' +
-    '</tbody></table><br>' +
-    '<h1>Potential ' + o.processed + 'ers and Bio Info</h1><br>' +
-    '<table class="fshResult" id="buffTable"><tbody>' +
-    '<tr><th class="nameCol">&nbsp;Name</th>' +
-    '<th class="infoCol">&nbsp;Player Info</th>' +
-    '<th>&nbsp;Notable Bio Text</th></tr>' +
-    '</tbody></table><br>' +
-    '<div class="disclaim">Disclaimer: This ' +
-    'functionality does a simple text search for the terms above. ' +
-    'It is not as smart as you are, so please do not judge the results ' +
-    'too harshly. It does not search all online players, just a subset ' +
-    'of those that have been on recently. ' +
-    'The aim is to be fast and still return a good set of results. This ' +
-    'feature is a work in progress, so it may be tweaked and enhanced ' +
-    'over time.</div>';
+    '</tbody></table>' +
+    outputTable(o) +
+    disclaimer();
 }
+
+var sustainLevelRE = /Level<br>(\d+)%/;
 
 function uniq(arr, removeBy) {
   var seen = {};
@@ -5046,7 +5019,7 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
     '<td class="resVal">' + extend + '</td></tr>';
 }
 
-function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
+function parseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
   var doc = createDocument(responseText);
   // name and level
   var innerPcc = getElementById('pCC', doc);
@@ -5096,6 +5069,51 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
   }
 }
 
+var buffCustom = {
+  header: 'Buff',
+  what: 'buff',
+  control: function() {
+    var ret = '<select style="width:140px;" id="selectedBuff">';
+    for (var j = 0; j < buffList.length; j += 1) {
+      ret += '<option value="' + buffList[j].id + '">' +
+        buffList[j].name + '</option>';
+    }
+    ret += '</select>';
+    return ret;
+  },
+  cutoff: '175 buff',
+  searched: 'Nicknames of buff searched',
+  potential: 'buff',
+  processed: 'Buff',
+  progress: 'buffers'
+};
+var otherCustom = {
+  header: 'Other',
+  what: 'text',
+  control: function() {
+    var textToSearchFor = getValue('textToSearchFor') || '';
+    return '<input style="width:140px;" class="custominput" ' +
+      'id="textToSearchFor" type="text" title="Text to search for" value="' +
+      textToSearchFor + '">';
+  },
+  cutoff: '500+ play',
+  searched: 'Text searched for',
+  potential: 'play',
+  processed: 'Play',
+  progress: 'Other'
+};
+
+var characterName;
+var findBuffNicks;
+var findBuffMinCastLevel;
+var findBuffsLevel175Only;
+var onlinePlayers$1;
+var onlinePlayersSetting;
+var extraProfile;
+var profilePagesToSearch;
+var profilePagesToSearchProcessed;
+var bufferProgress;
+
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
   // now need to parse player pages for buff ...
@@ -5111,7 +5129,7 @@ function findBuffsParsePlayersForBuffs() { // Legacy
 
   for (var j = 0; j < onlinePlayers$1.length; j += 1) {
     xmlhttp(onlinePlayers$1[j],
-      findBuffsParseProfileAndDisplay,
+      parseProfileAndDisplay,
       {href: onlinePlayers$1[j]});
   }
 }
@@ -5300,6 +5318,7 @@ function injectFindBuffs(injector) { // Legacy
   calf.sortBy = 'name';
   calf.sortAsc = true;
   buffList.sort(stringSort);
+  extraProfile = getValue('extraProfile');
   content.innerHTML = pageLayout(buffCustom);
   getElementById('findbuffsbutton')
     .addEventListener('click', findBuffsStart, true);
@@ -5309,6 +5328,7 @@ function injectFindBuffs(injector) { // Legacy
 
 function injectFindOther(injector) { // Native - Bad
   var content = injector || pCC;
+  extraProfile = getValue('extraProfile');
   content.innerHTML = pageLayout(otherCustom);
   getElementById('findbuffsbutton')
     .addEventListener('click', findOtherStart, true);
@@ -10179,7 +10199,7 @@ function takeItem$1(e) { // jQuery
   );
 }
 
-function recallItem$1(e) { // jQuery
+function recallItem(e) { // jQuery
   var self = $(e.target);
   doAction$1(
     queueRecallItem.bind(null, {
@@ -10232,7 +10252,7 @@ function eventHandlers() { // jQuery
   $('#fshDefault').click(resetChecks);
   $('#fshInv').on('click', 'span.setName', setName);
   $('#fshInv').on('click', 'span.takeItem', takeItem$1);
-  $('#fshInv').on('click', 'span.recallItem', recallItem$1);
+  $('#fshInv').on('click', 'span.recallItem', recallItem);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
   $('#fshInv').on('click', 'span.useItem', doUseItem$1);
   $('#fshInv').on('change', 'select.fshMoveItem', doMoveItem);
@@ -12328,7 +12348,7 @@ function injectRPUpgrades() { // jQuery.min
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
   'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
 
-function recallItem$2(evt) { // jQuery
+function recallItem$1(evt) { // jQuery
   $(evt.target).qtip('hide');
   var mode = evt.target.getAttribute('mode');
   var theTd = evt.target.parentNode.parentNode;
@@ -12360,7 +12380,7 @@ function wearItem$1(evt) { // jQuery
 }
 
 var events$1 = [
-  {test: 'recall', fn: recallItem$2},
+  {test: 'recall', fn: recallItem$1},
   {test: 'equip', fn: wearItem$1},
   {
     test: 'a-reply',
@@ -17054,10 +17074,59 @@ function addChatTextArea() {
   hasTextEntry();
 }
 
-function getCombatStat(responseText, label) {
-  var statRe = new RegExp('var\\s+' + label + '=(-?[0-9]+);', 'i');
-  return getIntFromRegExp(responseText, statRe);
+function isLadderReset(aRow) {
+  return aRow.cells[2].firstElementChild &&
+    aRow.cells[2].firstElementChild.tagName === 'IMG' &&
+    aRow.cells[2].firstElementChild.src.indexOf('pvp_icon.gif') !== -1;
 }
+
+function saveLastResetTime(aRow) {
+  var logTime = parseDateAsTimestamp(aRow.cells[1].textContent);
+  if (logTime > calf.lastLadderReset) {
+    setValue('lastLadderReset', logTime);
+    calf.lastLadderReset = logTime;
+  }
+}
+
+function processLadder(aRow, messageType) {
+  if (messageType === 'Notification' && isLadderReset(aRow)) {
+    saveLastResetTime(aRow);
+  }
+}
+
+/* eslint-disable max-len */
+var specials = {
+  '2': '@0 was withered.',
+  '3': '@0\'s armor was shattered.',
+  '4': '@0 was infused with extra defense (Constitution).',
+  '5': '@0 was infused with extra armor (Sanctuary).',
+  '9': '@0 activated Shield Strike.',
+  '13': '@0 activated Conserve.',
+  '18': '@0 leeched the buff \'@1\'.',
+  '19': '@0\'s demoralize skill reduced the effectiveness of @1\'s enhancements.',
+  '21': '@0 was mesmerized by Spell Breaker, losing the \'@1\' buff.',
+  '23': '@0 activated High Guard.',
+  '24': '@0 was smote.',
+  '25': '@0 activated Barricade.',
+  '26': '@0 activated Ageless.',
+  '27': '@0 activated Severe Condition.',
+  '28': '@0 activated Golden Shield.',
+  '29': '@0 activated Anti Deflect.',
+  '30': '@0 activated Sealed. (Negated @1)',
+  '31': '@0 activated Fist Fight.',
+  '37': '@0 had their armor and defence Inverted.',
+  '38': '@0 had their attack reduced by Fumble.'
+};
+
+function viewCombat(id) {
+  return callApp({
+    cmd: 'combat',
+    subcmd: 'view',
+    combat_id: id
+  });
+}
+
+var combatCache = {};
 
 function result$1(stat, desc, color) {
   if (stat !== 0) {
@@ -17067,32 +17136,89 @@ function result$1(stat, desc, color) {
   return '';
 }
 
-function retrievePvPCombatSummary(responseText, callback) { // Legacy
-  var winner = callback.winner;
-  var color = 'fshRed';
-  if (winner === 1) {
-    color = 'fshGreen';
+function iDefended(json) {
+  return json.r.is_defender && json.r.winner === 1;
+}
+
+function iAttacked(json) {
+  return !json.r.is_defender && json.r.winner === 0;
+}
+
+function iWon(json) {
+  if (iDefended(json) || iAttacked(json)) {
+    return 'fshGreen';
   }
-  var xpGain = getCombatStat(responseText, 'xpGain');
-  var goldGain = getCombatStat(responseText, 'goldGain');
-  var prestigeGain = getCombatStat(responseText, 'prestigeGain');
-  var goldStolen = getCombatStat(responseText, 'goldStolen');
-  var pvpRatingChange = getCombatStat(responseText, 'pvpRatingChange');
-  var output = '<br> ';
+  return 'fshRed';
+}
+
+function parseCombat(combatSummary, json) {
+  if (!json.s) {return;}
+  var color = iWon(json);
+  var xpGain = json.r.xp_gain;
+  var goldGain = json.r.gold_gain;
+  var prestigeGain = json.r.pvp_prestige_gain;
+  var goldStolen = json.r.gold_stolen;
+  var pvpRatingChange = json.r.pvp_rating_change;
+  var output = '';
   output += result$1(xpGain, 'XP stolen', color);
   output += result$1(goldGain, 'Gold lost', color);
   output += result$1(goldStolen, 'Gold stolen', color);
   output += result$1(prestigeGain, 'Prestige gain', color);
   output += result$1(pvpRatingChange, 'PvP change', color);
-  // TODO did I initiate the attack?
-  var specials = createDocument(responseText)
-    .querySelectorAll('#specialsDiv');
-  Array.prototype.forEach.call(specials, function(el) {
-    if (/mesmerized|leeched/.test(el.textContent)) {
-      output += '<br>' + el.innerHTML;
+  json.r.specials.forEach(function(el) {
+    if (el.id === 18) {
+      output += '<br><span class="fshRed fshBold">' + el.params[0] +
+        ' leeched the buff \'' + el.params[1] + '\'.</span>';
+    }
+    if (el.id === 21) {
+      output += '<br><span class="fshRed fshBold">' + el.params[0] +
+        ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
+        '\' buff.</span>';
     }
   });
-  callback.target.innerHTML = output;
+  combatSummary.innerHTML = output;
+}
+
+function inSpecialsList(el) {
+  return el.id in specials;
+}
+
+function whatsMissing(json, html) {
+  var specialHtml = createDocument(html).querySelectorAll('#specialsDiv');
+  json.r.specials.forEach(function(el, i) {
+    if (!inSpecialsList(el)) {
+      sendEvent('Logs', 'Missing PvP Special',
+        JSON.stringify(el) + ' ' + specialHtml[i].textContent);
+    }
+  });
+}
+
+function unknownSpecials(json) {
+  if (!json.r.specials.every(inSpecialsList)) {
+    retryAjax('index.php?cmd=combat&subcmd=view&combat_id=' + json.r.id)
+      .done(whatsMissing.bind(null, json));
+  }
+}
+
+function cacheCombat(aRow, json) {
+  if (!json.s) {return;}
+  var cellContents = aRow.cells[1].textContent;
+  json.logTime = parseDateAsTimestamp(cellContents) / 1000;
+  combatCache[json.r.id] = json;
+  setForage('fsh_pvpCombat', combatCache);
+  unknownSpecials(json);
+}
+
+function processCombat(aRow) {
+  var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+  var combatSummary = createDiv({style: {color: 'gray'}});
+  aRow.cells[2].appendChild(combatSummary);
+  if (combatCache[combatID] && combatCache[combatID].logTime) {
+    parseCombat(combatSummary, combatCache[combatID]);
+  } else {
+    viewCombat(combatID).done(cacheCombat.bind(null, aRow))
+      .done(parseCombat.bind(null, combatSummary));
+  }
 }
 
 function replaceLeadingText(msgCell, newHtml) {
@@ -17115,6 +17241,11 @@ function parseCombatWinner(msgCell) {
   }
 }
 
+function processCombatRow(aRow) {
+  var winner = parseCombatWinner(aRow.cells[2]);
+  if ([0, 1].includes(winner)) {processCombat(aRow);}
+}
+
 var combatRowTests = [
   function(aRow, messageType) {return messageType === 'Combat';},
   function() {return calf.showPvPSummaryInLog;},
@@ -17130,43 +17261,43 @@ function isCombatRow(aRow, messageType) {
   return combatRowTests.every(function(e) {return e(aRow, messageType);});
 }
 
-function processCombatRow(aRow) {
-  var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-  var _winner = parseCombatWinner(aRow.cells[2]);
-  if (_winner === 0 || _winner === 1) {
-    var combatSummarySpan = createSpan({style: {color: 'gray'}});
-    aRow.cells[2].appendChild(combatSummarySpan);
-    xmlhttp(
-      'index.php?no_mobile=1&cmd=combat&subcmd=view&combat_id=' + combatID,
-      retrievePvPCombatSummary,
-      {target: combatSummarySpan, winner: _winner}
-    );
-  }
-}
-
-function addPvpSummary(aRow, messageType) { // Legacy
+function addPvpSummary(aRow, messageType) {
   // add PvP combat log summary
   if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
 }
 
-function isLadderReset(aRow) {
-  return aRow.cells[2].firstElementChild &&
-    aRow.cells[2].firstElementChild.tagName === 'IMG' &&
-    aRow.cells[2].firstElementChild.src.indexOf('pvp_icon.gif') !== -1;
+function currentCombatRecord(data, combatId, sevenDays) {
+  return combatId === 'lastCheck' || data[combatId].logTime &&
+    data[combatId].logTime > sevenDays;
 }
 
-function saveLastResetTime(aRow) {
-  var logTime = parseDateAsTimestamp(aRow.cells[1].textContent);
-  if (logTime > calf.lastLadderReset) {
-    setValue('lastLadderReset', logTime);
-    calf.lastLadderReset = logTime;
+function cleanCache(data) {
+  var sevenDays = nowSecs - 7 * 24 * 60 * 60;
+  combatCache = Object.keys(data).reduce(function(prev, combatId) {
+    if (currentCombatRecord(data, combatId, sevenDays)) {
+      prev[combatId] = data[combatId];
+    }
+    return prev;
+  }, {});
+  combatCache.lastCheck = nowSecs;
+  setForage('fsh_pvpCombat', combatCache);
+}
+
+function prepareCache(data) {
+  var oneDay = nowSecs - 24 * 60 * 60;
+  if (!data.lastCheck || data.lastCheck < oneDay) {
+    cleanCache(data);
+  } else {
+    combatCache = data;
   }
 }
 
-function processLadder(aRow, messageType) {
-  if (messageType === 'Notification' && isLadderReset(aRow)) {
-    saveLastResetTime(aRow);
-  }
+function checkCache(data) {
+  if (data) {prepareCache(data);}
+}
+
+function initCache() {
+  return getForage('fsh_pvpCombat').done(checkCache);
 }
 
 var myPlayer = {};
@@ -17410,7 +17541,8 @@ function addLogWidgets() { // jQuery
     getMembrList(false),
     myStats(false).done(function(data) {
       myPlayer = data;
-    })
+    }),
+    initCache()
   ).done(addLogWidgetsOld);
 }
 
@@ -18520,7 +18652,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '10';
+window.FSH.calf = '11';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
