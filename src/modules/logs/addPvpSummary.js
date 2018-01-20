@@ -38,32 +38,28 @@ function iWon(json) {
   return 'fshRed';
 }
 
+function highlightSpecials(prev, el) {
+  if (el.id === 18) {
+    return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
+      ' leeched the buff \'' + el.params[1] + '\'.</span>';
+  }
+  if (el.id === 21) {
+    return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
+      ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
+      '\' buff.</span>';
+  }
+  return prev;
+}
+
 function parseCombat(combatSummary, json) {
   if (!json.s) {return;}
   var color = iWon(json);
-  var xpGain = json.r.xp_gain;
-  var goldGain = json.r.gold_gain;
-  var prestigeGain = json.r.pvp_prestige_gain;
-  var goldStolen = json.r.gold_stolen;
-  var pvpRatingChange = json.r.pvp_rating_change;
-  var output = '';
-  output += result(xpGain, 'XP stolen', color);
-  output += result(goldGain, 'Gold lost', color);
-  output += result(goldStolen, 'Gold stolen', color);
-  output += result(prestigeGain, 'Prestige gain', color);
-  output += result(pvpRatingChange, 'PvP change', color);
-  json.r.specials.forEach(function(el) {
-    if (el.id === 18) {
-      output += '<br><span class="fshRed fshBold">' + el.params[0] +
-        ' leeched the buff \'' + el.params[1] + '\'.</span>';
-    }
-    if (el.id === 21) {
-      output += '<br><span class="fshRed fshBold">' + el.params[0] +
-        ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
-        '\' buff.</span>';
-    }
-  });
-  combatSummary.innerHTML = output;
+  combatSummary.innerHTML = result(json.r.xp_gain, 'XP stolen', color) +
+    result(json.r.gold_gain, 'Gold lost', color) +
+    result(json.r.gold_stolen, 'Gold stolen', color) +
+    result(json.r.pvp_prestige_gain, 'Prestige gain', color) +
+    result(json.r.pvp_rating_change, 'PvP change', color) +
+    json.r.specials.reduce(highlightSpecials, '');
 }
 
 function inSpecialsList(el) {
