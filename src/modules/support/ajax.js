@@ -107,33 +107,44 @@ function backpack() {
   });
 }
 
-function recallItem(o) {
-  return guildInvRecall(o.invId, o.playerId, o.mode)
-    .pipe(function recallItemStatus(data) {
-      if (data.r === 0 && o.action !== 'recall') {
-        return backpack().pipe(function gotBackpack(bpData) {
-          // TODO assuming backpack is successful...
-          if (o.action === 'wear') {
-            return equipItem(bpData.items[bpData.items.length - 1].a)
-              .pipe(function wearItemStatus() {return data;});
-            // Return recall status irrespective of the status of the equipitem
-          }
-          if (o.action === 'use') {
-            return useItem(
-              bpData.items[bpData.items.length - 1].a)
-              .pipe(function useItemStatus() {return data;});
-            // Return recall status irrespective of the status of the useitem
-          }
-        });
-      }
-      return data;
-    });
+function itemStatus(data) {
+  return function() {return data;};
+}
+
+function gotBackpack(o, data) {
+  return function(bpData) {
+    // TODO assuming backpack is successful...
+    if (o.action === 'wear') {
+      return equipItem(bpData.items[bpData.items.length - 1].a)
+        .pipe(itemStatus(data));
+      // Return recall status irrespective of the status of the equipitem
+    }
+    if (o.action === 'use') {
+      return useItem(bpData.items[bpData.items.length - 1].a)
+        .pipe(itemStatus(data));
+      // Return recall status irrespective of the status of the useitem
+    }
+  };
+}
+
+function recallItemStatus(o) {
+  return function(data) {
+    if (data.r === 0 && o.action !== 'recall') {
+      return backpack().pipe(gotBackpack(o, data));
+    }
+    return data;
+  };
+}
+
+function pipeRecallToQueue(o) {
+  return function() {
+    return guildInvRecall(o.invId, o.playerId, o.mode)
+      .pipe(recallItemStatus(o));
+  };
 }
 
 export function queueRecallItem(o) {
   // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeRecallToQueue() {
-    return recallItem(o);
-  });
+  deferred = deferred.pipe(pipeRecallToQueue(o));
   return deferred;
 }

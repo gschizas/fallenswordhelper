@@ -1,16 +1,19 @@
 import calf from '../support/calf';
-import {createSpan} from '../common/cElement';
+import getForage from '../ajax/getForage';
+import {nowSecs} from '../support/dataObj';
+import retryAjax from '../ajax/retryAjax';
+import {sendEvent} from '../support/fshGa';
+import setForage from '../ajax/setForage';
+import {specials} from '../support/specials';
+import viewCombat from '../app/combat/view';
 import {
   addCommas,
   createDocument,
-  getIntFromRegExp,
-  xmlhttp
+  parseDateAsTimestamp
 } from '../support/system';
+import {createDiv, createSpan} from '../common/cElement';
 
-function getCombatStat(responseText, label) {
-  var statRe = new RegExp('var\\s+' + label + '=(-?[0-9]+);', 'i');
-  return getIntFromRegExp(responseText, statRe);
-}
+var combatCache = {};
 
 function result(stat, desc, color) {
   if (stat !== 0) {
@@ -20,32 +23,92 @@ function result(stat, desc, color) {
   return '';
 }
 
-function retrievePvPCombatSummary(responseText, callback) { // Legacy
-  var winner = callback.winner;
-  var color = 'fshRed';
-  if (winner === 1) {
-    color = 'fshGreen';
+function iDefended(json) {
+  return json.r.is_defender && json.r.winner === 1;
+}
+
+function iAttacked(json) {
+  return !json.r.is_defender && json.r.winner === 0;
+}
+
+function iWon(json) {
+  if (iDefended(json) || iAttacked(json)) {
+    return 'fshGreen';
   }
-  var xpGain = getCombatStat(responseText, 'xpGain');
-  var goldGain = getCombatStat(responseText, 'goldGain');
-  var prestigeGain = getCombatStat(responseText, 'prestigeGain');
-  var goldStolen = getCombatStat(responseText, 'goldStolen');
-  var pvpRatingChange = getCombatStat(responseText, 'pvpRatingChange');
-  var output = '<br> ';
+  return 'fshRed';
+}
+
+function parseCombat(combatSummary, json) {
+  if (!json.s) {return;}
+  var color = iWon(json);
+  var xpGain = json.r.xp_gain;
+  var goldGain = json.r.gold_gain;
+  var prestigeGain = json.r.pvp_prestige_gain;
+  var goldStolen = json.r.gold_stolen;
+  var pvpRatingChange = json.r.pvp_rating_change;
+  var output = '';
   output += result(xpGain, 'XP stolen', color);
   output += result(goldGain, 'Gold lost', color);
   output += result(goldStolen, 'Gold stolen', color);
   output += result(prestigeGain, 'Prestige gain', color);
   output += result(pvpRatingChange, 'PvP change', color);
-  // TODO did I initiate the attack?
-  var specials = createDocument(responseText)
-    .querySelectorAll('#specialsDiv');
-  Array.prototype.forEach.call(specials, function(el) {
-    if (/mesmerized|leeched/.test(el.textContent)) {
-      output += '<br>' + el.innerHTML;
+  json.r.specials.forEach(function(el) {
+    if (el.id === 18) {
+      output += '<br><span class="fshRed fshBold">' + el.params[0] +
+        ' leeched the buff \'' + el.params[1] + '\'.</span>';
+    }
+    if (el.id === 21) {
+      output += '<br><span class="fshRed fshBold">' + el.params[0] +
+        ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
+        '\' buff.</span>';
     }
   });
-  callback.target.innerHTML = output;
+  combatSummary.innerHTML = output;
+}
+
+function inSpecialsList(el) {
+  return el.id in specials;
+}
+
+function whatsMissing(json, html) {
+  var specialHtml = createDocument(html).querySelectorAll('#specialsDiv');
+  json.r.specials.forEach(function(el, i) {
+    if (!inSpecialsList(el)) {
+      //#if _DEV  //  PvP missing Special
+      console.log(JSON.stringify(el) + ' ' + specialHtml[i].textContent); // eslint-disable-line no-console
+      //#endif
+      sendEvent('Logs', 'Missing PvP Special',
+        JSON.stringify(el) + ' ' + specialHtml[i].textContent);
+    }
+  });
+}
+
+function unknownSpecials(json) {
+  if (!json.r.specials.every(inSpecialsList)) {
+    retryAjax('index.php?cmd=combat&subcmd=view&combat_id=' + json.r.id)
+      .done(whatsMissing.bind(null, json));
+  }
+}
+
+function cacheCombat(aRow, json) {
+  if (!json.s) {return;}
+  var cellContents = aRow.cells[1].textContent;
+  json.logTime = parseDateAsTimestamp(cellContents) / 1000;
+  combatCache[json.r.id] = json;
+  setForage('fsh_pvpCombat', combatCache);
+  unknownSpecials(json);
+}
+
+function processCombat(aRow) {
+  var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+  var combatSummary = createDiv({style: {color: 'gray'}});
+  aRow.cells[2].appendChild(combatSummary);
+  if (combatCache[combatID] && combatCache[combatID].logTime) {
+    parseCombat(combatSummary, combatCache[combatID]);
+  } else {
+    viewCombat(combatID).done(cacheCombat.bind(null, aRow))
+      .done(parseCombat.bind(null, combatSummary));
+  }
 }
 
 function replaceLeadingText(msgCell, newHtml) {
@@ -68,6 +131,11 @@ function parseCombatWinner(msgCell) {
   }
 }
 
+function processCombatRow(aRow) {
+  var winner = parseCombatWinner(aRow.cells[2]);
+  if ([0, 1].includes(winner)) {processCombat(aRow);}
+}
+
 var combatRowTests = [
   function(aRow, messageType) {return messageType === 'Combat';},
   function() {return calf.showPvPSummaryInLog;},
@@ -83,21 +151,41 @@ function isCombatRow(aRow, messageType) {
   return combatRowTests.every(function(e) {return e(aRow, messageType);});
 }
 
-function processCombatRow(aRow) {
-  var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-  var _winner = parseCombatWinner(aRow.cells[2]);
-  if (_winner === 0 || _winner === 1) {
-    var combatSummarySpan = createSpan({style: {color: 'gray'}});
-    aRow.cells[2].appendChild(combatSummarySpan);
-    xmlhttp(
-      'index.php?no_mobile=1&cmd=combat&subcmd=view&combat_id=' + combatID,
-      retrievePvPCombatSummary,
-      {target: combatSummarySpan, winner: _winner}
-    );
+export function addPvpSummary(aRow, messageType) {
+  // add PvP combat log summary
+  if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
+}
+
+function currentCombatRecord(data, combatId, sevenDays) {
+  return combatId === 'lastCheck' || data[combatId].logTime &&
+    data[combatId].logTime > sevenDays;
+}
+
+function cleanCache(data) {
+  var sevenDays = nowSecs - 7 * 24 * 60 * 60;
+  combatCache = Object.keys(data).reduce(function(prev, combatId) {
+    if (currentCombatRecord(data, combatId, sevenDays)) {
+      prev[combatId] = data[combatId];
+    }
+    return prev;
+  }, {});
+  combatCache.lastCheck = nowSecs;
+  setForage('fsh_pvpCombat', combatCache);
+}
+
+function prepareCache(data) {
+  var oneDay = nowSecs - 24 * 60 * 60;
+  if (!data.lastCheck || data.lastCheck < oneDay) {
+    cleanCache(data);
+  } else {
+    combatCache = data;
   }
 }
 
-export default function addPvpSummary(aRow, messageType) { // Legacy
-  // add PvP combat log summary
-  if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
+function checkCache(data) {
+  if (data) {prepareCache(data);}
+}
+
+export function initCache() {
+  return getForage('fsh_pvpCombat').done(checkCache);
 }

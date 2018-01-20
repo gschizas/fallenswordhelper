@@ -55,7 +55,7 @@ import {guildChat, guildLog, outbox, playerLog} from '../logs/logs';
 import {injectAuctionHouse, quickCreate} from '../auctionHouse';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectBank, injectGuildBank} from '../bank';
-import {injectFindBuffs, injectFindOther} from '../findBuffs';
+import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 import {injectGroupStats, injectGroups} from '../groups';
 import {injectProfileDropItems, injectStoreItems} from '../dropItems/dropItems';
 import {injectQuestBookFull, injectQuestTracker} from '../questBook';

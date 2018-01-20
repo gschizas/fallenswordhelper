@@ -1,10 +1,10 @@
-import addPvpSummary from './addPvpSummary';
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
 import getMembrList from '../ajax/getMembrList';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import {quickBuffHref} from '../support/layout';
+import {addPvpSummary, initCache} from './addPvpSummary';
 import {fallback, findNode, getValue} from '../support/system';
 
 var myPlayer = {};
@@ -248,6 +248,7 @@ export default function addLogWidgets() { // jQuery
     getMembrList(false),
     myStats(false).done(function(data) {
       myPlayer = data;
-    })
+    }),
+    initCache()
   ).done(addLogWidgetsOld);
 }

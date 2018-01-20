@@ -86,7 +86,7 @@ export function screenview(funcName) {
   ga('fshApp.send', 'screenview', {screenName: funcName});
 }
 
-export function sendEvent(eventCategory, eventAction) {
+export function sendEvent(eventCategory, eventAction, eventLabel) {
   if (noGa()) {return;}
-  ga('fshApp.send', 'event', eventCategory, eventAction);
+  ga('fshApp.send', 'event', eventCategory, eventAction, eventLabel);
 }

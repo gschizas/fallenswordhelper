@@ -13,7 +13,7 @@ import jQueryDialog from './jQueryDialog';
 import {sendEvent} from '../support/fshGa';
 import {getValue, imageServer} from '../support/system';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
-import {injectFindBuffs, injectFindOther} from '../findBuffs';
+import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +

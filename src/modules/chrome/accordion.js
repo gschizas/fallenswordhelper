@@ -10,7 +10,7 @@ import {newGuildLogUrl} from '../support/dataObj';
 import {sendEvent} from '../support/fshGa';
 import {createAnchor, createLi} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
-import {injectFindBuffs, injectFindOther} from '../findBuffs';
+import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
