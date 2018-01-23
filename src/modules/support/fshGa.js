@@ -8,7 +8,7 @@ function isAuto() {
   var docRef = document.referrer
     .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
   if (docRef) {docRef = docRef[1];}
-  return refAry.indexOf(docRef) !== -1;
+  return refAry.includes(docRef);
 }
 
 function noGa() {
@@ -90,3 +90,13 @@ export function sendEvent(eventCategory, eventAction, eventLabel) {
   if (noGa()) {return;}
   ga('fshApp.send', 'event', eventCategory, eventAction, eventLabel);
 }
+
+export function sendException(desc, fatal) {
+  if (noGa()) {return;}
+  ga('fshApp.send', 'exception', {
+    exDescription: desc,
+    exFatal: fatal
+  });
+}
+
+window.addEventListener('error', function(e) {sendException(e, true);});
