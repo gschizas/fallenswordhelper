@@ -1,5 +1,6 @@
 import {fallback} from './system';
 import {log} from './debug';
+import {sendException} from './fshGa';
 import {getLength, pop, push} from './sch';
 
 var paused = true;
@@ -37,6 +38,7 @@ function asyncTask() {
   try {
     pop()();
   } catch (error) {
+    sendException(error, false);
     log('Unhandled Exception:', error);
     //#if _DEV  //  Unhandled Exception
     // eslint-disable-next-line no-console

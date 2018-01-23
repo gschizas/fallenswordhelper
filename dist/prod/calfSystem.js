@@ -837,6 +837,394 @@ function padZ(n) {
   return ret;
 }
 
+function moreToDo(limit, cntr, list) {
+  return performance.now() < limit && cntr < list.length;
+}
+
+function mixin(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+      mixin(obj[key], mixins[key]);
+    } else {
+      obj[key] = mixins[key];
+    }
+  });
+}
+
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {mixin(el, props);}
+  return el;
+}
+
+function createDiv(props) {
+  return cElement('div', props);
+}
+
+function createSpan(props) {
+  return cElement('span', props);
+}
+
+function createTable(props) {
+  return cElement('table', props);
+}
+
+function createTBody(props) {
+  return cElement('tbody', props);
+}
+
+function createTr(props) {
+  return cElement('tr', props);
+}
+
+function createTd(props) {
+  return cElement('td', props);
+}
+
+function createTFoot(props) {
+  return cElement('tfoot', props);
+}
+
+function createUl(props) {
+  return cElement('ul', props);
+}
+
+function createLi(props) {
+  return cElement('li', props);
+}
+
+function createButton(props) {
+  return cElement('button', props);
+}
+
+function createBr() {
+  return cElement('br');
+}
+
+function createAnchor(props) {
+  return cElement('a', props);
+}
+
+function createInput(props) {
+  return cElement('input', props);
+}
+
+function createTextArea(props) {
+  return cElement('textarea', props);
+}
+
+function createTh(props) {
+  return cElement('th', props);
+}
+
+function createLabel(props) {
+  return cElement('label', props);
+}
+
+function textSpan(text) {
+  return createSpan({textContent: text});
+}
+
+var dotList;
+var dotCount;
+var redDot =
+  '<span class="fshDot redDot tip-static" data-tipped="Offline"></span>';
+var greenDiamond =
+  '<span class="fshDot greenDiamond tip-static" data-tipped="Online"></span>';
+var yellowDiamond =
+  '<span class="fshDot yellowDiamond tip-static" data-tipped="Offline"></span>';
+var orangeDiamond =
+  '<span class="fshDot orangeDiamond tip-static" data-tipped="Offline"></span>';
+var offlineDot =
+  '<span class="fshDot offlineDot tip-static" data-tipped="Offline"></span>';
+var sevenDayDot =
+  '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
+
+var pCC = getElementById('pCC');
+
+function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
+  var passthru = '';
+  if (buffList) {passthru = '&blist=' + buffList;}
+  return 'href=\'javascript:window.openWindow("index.php?cmd=' +
+    'quickbuff&tid=' + aPlayerId + passthru +
+    '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
+}
+
+
+
+function openQuickBuffByName(aPlayerName) {
+  window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
+    'fsQuickBuff', 618, 1000, ',scrollbars');
+}
+
+function doBuffLinks(members) {
+  // quick buff only supports 16
+  var shortList = members.reduce(function(prev, curr, i) {
+    var slot = Math.floor(i / 16);
+    prev[slot] = fallback(prev[slot], []);
+    prev[slot].push(curr);
+    return prev;
+  }, []).reduce(function(prev, curr, i) {
+    var theNames = curr.join(',');
+    var modifierWord = places[i];
+    var li = createLi();
+    var btn = createButton({
+      className: 'fshBl fshBls tip-static',
+      dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
+      textContent: 'Buff ' + modifierWord + ' 16'
+    });
+    btn.addEventListener('click',
+      openQuickBuffByName.bind(null, theNames));
+    li.appendChild(btn);
+    prev.appendChild(li);
+    return prev;
+  }, createUl());
+  return shortList;
+}
+
+function infoBox(documentText) {
+  var doc = createDocument(documentText);
+  var result;
+  var infoMsg = getElementById('info-msg', doc);
+  if (infoMsg) {
+    var infoMatch = infoMsg.innerHTML;
+    result = '';
+    if (infoMatch) {
+      infoMatch = infoMatch.replace(/<br.*/, '');
+      result = infoMatch;
+    }
+  }
+  return result;
+}
+
+function playerId() {
+  var thePlayerId = parseInt(getElementById('holdtext')
+    .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
+  setValue('playerID', thePlayerId);
+  return thePlayerId;
+}
+
+function playerName() {
+  return getElementById('statbar-character').textContent;
+}
+
+function makePageHeader(title, comment, spanId, button) {
+  var _comment = '';
+  if (comment !== '') {_comment = '&nbsp;(' + comment + ')';}
+  var _span = '';
+  if (spanId) {
+    _span = '[<span class="fshLink" id="' +
+      spanId + '">' + button + '</span>]';
+  }
+  return '<table width=100%><tbody><tr class="fshHeader">' +
+    '<td width="90%"><b>&nbsp;' + title + '</b>' + _comment +
+    '<td width="10%" class="fshBtnBox">' + _span +
+    '</td></tr><tbody></table>';
+}
+
+function makePageTemplate(title, comment, spanId, button, divId) {
+  return makePageHeader(title, comment, spanId, button) +
+    '<div class="fshSmall" id="' + divId + '"></div>';
+}
+
+var getMins = [
+  function(obj, min) {
+    if (obj.day) {return min + parseInt(obj.day, 10) * 1440;}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.hour) {return min + parseInt(obj.hour, 10) * 60;}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.min) {return min + parseInt(obj.min, 10);}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.last_login) {
+      return Math.floor((nowSecs - obj.last_login) / 60);
+    }
+    return min;
+  },
+  function(obj, min) {
+    // last_login is 'false' over 30 days
+    if ('last_login' in obj && !obj.last_login) {return 99999;}
+    return min;
+  }
+];
+
+var getDot = [
+  {condition: 2, result: greenDiamond},
+  {condition: 5, result: yellowDiamond},
+  {condition: 30, result: orangeDiamond},
+  {condition: 10080, result: offlineDot},
+  {condition: 44640, result: sevenDayDot}
+];
+
+function onlineDot(obj) {
+  var min = getMins.reduce(function(prev, curr) {
+    return curr(obj, prev);
+  }, 0);
+  for (var i = 0; i < getDot.length; i += 1) {
+    var el = getDot[i];
+    if (min < el.condition) {return el.result;}
+  }
+  return redDot;
+}
+
+function changeOnlineDot(contactLink) {
+  var lastActivity = lastActivityRE
+    .exec(contactLink.dataset.tipped);
+  contactLink.parentNode.previousSibling.innerHTML =
+    onlineDot({
+      min: lastActivity[3],
+      hour: lastActivity[2],
+      day: lastActivity[1]
+    });
+}
+
+function batchDots() {
+  var limit = performance.now() + 5;
+  while (moreToDo(limit, dotCount, dotList)) {
+    changeOnlineDot(dotList[dotCount]);
+    dotCount += 1;
+  }
+  if (dotCount < dotList.length) {
+    add$1(3, batchDots);
+  }
+}
+
+function colouredDots() {
+  if (!getValue('enhanceOnlineDots')) {return;}
+  dotList = document.querySelectorAll(
+    '#pCC a[data-tipped*="Last Activity"]');
+  dotCount = 0;
+  add$1(3, batchDots);
+}
+
+function jConfirm(title, msgText, fn) { // jQuery
+  var fshMsg = getElementById('fshmsg');
+  if (!fshMsg) {
+    fshMsg = createDiv({id: 'fshmsg'});
+    document.body.appendChild(fshMsg);
+    $(fshMsg).dialog({
+      autoOpen: false,
+      dialogClass: 'no-close',
+      draggable: false,
+      modal: true,
+      resizable: false,
+    });
+  }
+  fshMsg.textContent = msgText;
+  $(fshMsg).dialog('option', {
+    buttons: {
+      Yes: function() {
+        fn();
+        $(this).dialog('close');
+      },
+      No: function() {$(this).dialog('close');}
+    },
+    title: title
+  }).dialog('open');
+}
+
+var times = {};
+var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
+
+function isAuto() {
+  var docRef = document.referrer
+    .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
+  if (docRef) {docRef = docRef[1];}
+  return refAry.includes(docRef);
+}
+
+function noGa() {
+  return isAuto() || typeof ga === 'undefined';
+}
+
+function start(category, variable, label) {
+  if (noGa()) {return;}
+  times[category + ':' + variable + ':' + label] =
+    performance.now() * 1000;
+}
+
+function sendTiming(category, variable, label) {
+  var myTime = Math.round(performance.now() * 1000 -
+    times[category + ':' + variable + ':' + label]) / 1000;
+  if (myTime > 10) {
+    ga('fshApp.send', 'timing', category, variable, Math.round(myTime),
+      label);
+  }
+}
+
+function end(category, variable, label) {
+  if (noGa()) {return;}
+  sendTiming(category, variable, label);
+}
+
+function fixupUrl() {
+  var origPath = window.location.pathname + window.location.search;
+  var page = origPath.replace(/&m=.*/, '')
+    .replace(/&subcmd=&.*/, '')
+    .replace(/&subcmd2=&.*/, '')
+    .replace(/&[a-z_]+_id=.+/, '')
+    .replace(/&id=.+/, '')
+    .replace(/&target_player=.+/, '')
+    .replace(/&[a-z]+_username=.+/, '')
+    .replace(/\?cmd=auctionhouse.+/, '?cmd=auctionhouse')
+    .replace(/&subcmd=[0-9a-f]{32}/, '')
+    .replace(/&search_active=.+/, '')
+    .replace(/&letter=.+/, '')
+    .replace(/&guild_name=.+/, '')
+    .replace(/&user=.+/, '')
+    .replace(/&[a-z_]*page=.+/, '')
+    .replace(/&prestige=.+/, '')
+    .replace(/&withdraw_amount=.+/, '')
+    .replace(/&tickets=.+/, '')
+    .replace(/&search=.+/, '')
+    .replace(/&target=.+/, '')
+    .replace(/&xcv=[0-9a-f]{32}/, '')
+    .replace(/\?ref=[0-9]+/, '');
+  ga('fsh.set', 'page', page);
+}
+
+function setup() {
+  if (noGa()) {return;}
+
+  ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
+    userId: playerId(),
+    siteSpeedSampleRate: 10
+  });
+  ga('fshApp.set', 'appName', 'fshApp');
+  ga('fshApp.set', 'appVersion', FSH.version + '(' + FSH.calf + ')');
+  ga('create', 'UA-76488113-2', 'auto', 'fsh', {
+    userId: playerId(),
+    siteSpeedSampleRate: 10
+  });
+  fixupUrl();
+  ga('fsh.send', 'pageview');
+}
+
+function screenview(funcName) {
+  if (noGa()) {return;}
+  ga('fshApp.send', 'screenview', {screenName: funcName});
+}
+
+function sendEvent(eventCategory, eventAction, eventLabel) {
+  if (noGa()) {return;}
+  ga('fshApp.send', 'event', eventCategory, eventAction, eventLabel);
+}
+
+function sendException(desc, fatal) {
+  if (noGa()) {return;}
+  ga('fshApp.send', 'exception', {
+    exDescription: desc,
+    exFatal: fatal
+  });
+}
+
+window.addEventListener('error', function(e) {sendException(e, true);});
+
 /*
 Based on
 fiddle.jshell.net/GRIFFnDOOR/r7tvg/
@@ -927,6 +1315,7 @@ function asyncTask() {
   try {
     pop()();
   } catch (error) {
+    sendException(error, false);
     log('Unhandled Exception:', error);
   }
   taskRunner$1();
@@ -1234,297 +1623,6 @@ function guildActivity() {
   if (getValue('enableGuildActivityTracker')) {
     getForage('fsh_guildActivity').done(gotActivity);
   }
-}
-
-function moreToDo(limit, cntr, list) {
-  return performance.now() < limit && cntr < list.length;
-}
-
-function mixin(obj, mixins) {
-  Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
-      mixin(obj[key], mixins[key]);
-    } else {
-      obj[key] = mixins[key];
-    }
-  });
-}
-
-function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {mixin(el, props);}
-  return el;
-}
-
-function createDiv(props) {
-  return cElement('div', props);
-}
-
-function createSpan(props) {
-  return cElement('span', props);
-}
-
-function createTable(props) {
-  return cElement('table', props);
-}
-
-function createTBody(props) {
-  return cElement('tbody', props);
-}
-
-function createTr(props) {
-  return cElement('tr', props);
-}
-
-function createTd(props) {
-  return cElement('td', props);
-}
-
-function createTFoot(props) {
-  return cElement('tfoot', props);
-}
-
-function createUl(props) {
-  return cElement('ul', props);
-}
-
-function createLi(props) {
-  return cElement('li', props);
-}
-
-function createButton(props) {
-  return cElement('button', props);
-}
-
-function createBr() {
-  return cElement('br');
-}
-
-function createAnchor(props) {
-  return cElement('a', props);
-}
-
-function createInput(props) {
-  return cElement('input', props);
-}
-
-function createTextArea(props) {
-  return cElement('textarea', props);
-}
-
-function createTh(props) {
-  return cElement('th', props);
-}
-
-function createLabel(props) {
-  return cElement('label', props);
-}
-
-function textSpan(text) {
-  return createSpan({textContent: text});
-}
-
-var dotList;
-var dotCount;
-var redDot =
-  '<span class="fshDot redDot tip-static" data-tipped="Offline"></span>';
-var greenDiamond =
-  '<span class="fshDot greenDiamond tip-static" data-tipped="Online"></span>';
-var yellowDiamond =
-  '<span class="fshDot yellowDiamond tip-static" data-tipped="Offline"></span>';
-var orangeDiamond =
-  '<span class="fshDot orangeDiamond tip-static" data-tipped="Offline"></span>';
-var offlineDot =
-  '<span class="fshDot offlineDot tip-static" data-tipped="Offline"></span>';
-var sevenDayDot =
-  '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
-
-var pCC = getElementById('pCC');
-
-function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
-  var passthru = '';
-  if (buffList) {passthru = '&blist=' + buffList;}
-  return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-    'quickbuff&tid=' + aPlayerId + passthru +
-    '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
-}
-
-
-
-function openQuickBuffByName(aPlayerName) {
-  window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
-    'fsQuickBuff', 618, 1000, ',scrollbars');
-}
-
-function doBuffLinks(members) {
-  // quick buff only supports 16
-  var shortList = members.reduce(function(prev, curr, i) {
-    var slot = Math.floor(i / 16);
-    prev[slot] = fallback(prev[slot], []);
-    prev[slot].push(curr);
-    return prev;
-  }, []).reduce(function(prev, curr, i) {
-    var theNames = curr.join(',');
-    var modifierWord = places[i];
-    var li = createLi();
-    var btn = createButton({
-      className: 'fshBl fshBls tip-static',
-      dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
-      textContent: 'Buff ' + modifierWord + ' 16'
-    });
-    btn.addEventListener('click',
-      openQuickBuffByName.bind(null, theNames));
-    li.appendChild(btn);
-    prev.appendChild(li);
-    return prev;
-  }, createUl());
-  return shortList;
-}
-
-function infoBox(documentText) {
-  var doc = createDocument(documentText);
-  var result;
-  var infoMsg = getElementById('info-msg', doc);
-  if (infoMsg) {
-    var infoMatch = infoMsg.innerHTML;
-    result = '';
-    if (infoMatch) {
-      infoMatch = infoMatch.replace(/<br.*/, '');
-      result = infoMatch;
-    }
-  }
-  return result;
-}
-
-function playerId() {
-  var thePlayerId = parseInt(getElementById('holdtext')
-    .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
-  setValue('playerID', thePlayerId);
-  return thePlayerId;
-}
-
-function playerName() {
-  return getElementById('statbar-character').textContent;
-}
-
-function makePageHeader(title, comment, spanId, button) {
-  var _comment = '';
-  if (comment !== '') {_comment = '&nbsp;(' + comment + ')';}
-  var _span = '';
-  if (spanId) {
-    _span = '[<span class="fshLink" id="' +
-      spanId + '">' + button + '</span>]';
-  }
-  return '<table width=100%><tbody><tr class="fshHeader">' +
-    '<td width="90%"><b>&nbsp;' + title + '</b>' + _comment +
-    '<td width="10%" class="fshBtnBox">' + _span +
-    '</td></tr><tbody></table>';
-}
-
-function makePageTemplate(title, comment, spanId, button, divId) {
-  return makePageHeader(title, comment, spanId, button) +
-    '<div class="fshSmall" id="' + divId + '"></div>';
-}
-
-var getMins = [
-  function(obj, min) {
-    if (obj.day) {return min + parseInt(obj.day, 10) * 1440;}
-    return min;
-  },
-  function(obj, min) {
-    if (obj.hour) {return min + parseInt(obj.hour, 10) * 60;}
-    return min;
-  },
-  function(obj, min) {
-    if (obj.min) {return min + parseInt(obj.min, 10);}
-    return min;
-  },
-  function(obj, min) {
-    if (obj.last_login) {
-      return Math.floor((nowSecs - obj.last_login) / 60);
-    }
-    return min;
-  },
-  function(obj, min) {
-    // last_login is 'false' over 30 days
-    if ('last_login' in obj && !obj.last_login) {return 99999;}
-    return min;
-  }
-];
-
-var getDot = [
-  {condition: 2, result: greenDiamond},
-  {condition: 5, result: yellowDiamond},
-  {condition: 30, result: orangeDiamond},
-  {condition: 10080, result: offlineDot},
-  {condition: 44640, result: sevenDayDot}
-];
-
-function onlineDot(obj) {
-  var min = getMins.reduce(function(prev, curr) {
-    return curr(obj, prev);
-  }, 0);
-  for (var i = 0; i < getDot.length; i += 1) {
-    var el = getDot[i];
-    if (min < el.condition) {return el.result;}
-  }
-  return redDot;
-}
-
-function changeOnlineDot(contactLink) {
-  var lastActivity = lastActivityRE
-    .exec(contactLink.dataset.tipped);
-  contactLink.parentNode.previousSibling.innerHTML =
-    onlineDot({
-      min: lastActivity[3],
-      hour: lastActivity[2],
-      day: lastActivity[1]
-    });
-}
-
-function batchDots() {
-  var limit = performance.now() + 5;
-  while (moreToDo(limit, dotCount, dotList)) {
-    changeOnlineDot(dotList[dotCount]);
-    dotCount += 1;
-  }
-  if (dotCount < dotList.length) {
-    add$1(3, batchDots);
-  }
-}
-
-function colouredDots() {
-  if (!getValue('enhanceOnlineDots')) {return;}
-  dotList = document.querySelectorAll(
-    '#pCC a[data-tipped*="Last Activity"]');
-  dotCount = 0;
-  add$1(3, batchDots);
-}
-
-function jConfirm(title, msgText, fn) { // jQuery
-  var fshMsg = getElementById('fshmsg');
-  if (!fshMsg) {
-    fshMsg = createDiv({id: 'fshmsg'});
-    document.body.appendChild(fshMsg);
-    $(fshMsg).dialog({
-      autoOpen: false,
-      dialogClass: 'no-close',
-      draggable: false,
-      modal: true,
-      resizable: false,
-    });
-  }
-  fshMsg.textContent = msgText;
-  $(fshMsg).dialog('option', {
-    buttons: {
-      Yes: function() {
-        fn();
-        $(this).dialog('close');
-      },
-      No: function() {$(this).dialog('close');}
-    },
-    title: title
-  }).dialog('open');
 }
 
 var composeMsg =
@@ -1865,93 +1963,6 @@ function jQueryDialog(fn) { // jQuery
     resizable: false
   });
   fn(content);
-}
-
-var times = {};
-var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
-
-function isAuto() {
-  var docRef = document.referrer
-    .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
-  if (docRef) {docRef = docRef[1];}
-  return refAry.indexOf(docRef) !== -1;
-}
-
-function noGa() {
-  return isAuto() || typeof ga === 'undefined';
-}
-
-function start(category, variable, label) {
-  if (noGa()) {return;}
-  times[category + ':' + variable + ':' + label] =
-    performance.now() * 1000;
-}
-
-function sendTiming(category, variable, label) {
-  var myTime = Math.round(performance.now() * 1000 -
-    times[category + ':' + variable + ':' + label]) / 1000;
-  if (myTime > 10) {
-    ga('fshApp.send', 'timing', category, variable, Math.round(myTime),
-      label);
-  }
-}
-
-function end(category, variable, label) {
-  if (noGa()) {return;}
-  sendTiming(category, variable, label);
-}
-
-function fixupUrl() {
-  var origPath = window.location.pathname + window.location.search;
-  var page = origPath.replace(/&m=.*/, '')
-    .replace(/&subcmd=&.*/, '')
-    .replace(/&subcmd2=&.*/, '')
-    .replace(/&[a-z_]+_id=.+/, '')
-    .replace(/&id=.+/, '')
-    .replace(/&target_player=.+/, '')
-    .replace(/&[a-z]+_username=.+/, '')
-    .replace(/\?cmd=auctionhouse.+/, '?cmd=auctionhouse')
-    .replace(/&subcmd=[0-9a-f]{32}/, '')
-    .replace(/&search_active=.+/, '')
-    .replace(/&letter=.+/, '')
-    .replace(/&guild_name=.+/, '')
-    .replace(/&user=.+/, '')
-    .replace(/&[a-z_]*page=.+/, '')
-    .replace(/&prestige=.+/, '')
-    .replace(/&withdraw_amount=.+/, '')
-    .replace(/&tickets=.+/, '')
-    .replace(/&search=.+/, '')
-    .replace(/&target=.+/, '')
-    .replace(/&xcv=[0-9a-f]{32}/, '')
-    .replace(/\?ref=[0-9]+/, '');
-  ga('fsh.set', 'page', page);
-}
-
-function setup() {
-  if (noGa()) {return;}
-
-  ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
-    userId: playerId(),
-    siteSpeedSampleRate: 10
-  });
-  ga('fshApp.set', 'appName', 'fshApp');
-  ga('fshApp.set', 'appVersion', FSH.version + '(' + FSH.calf + ')');
-  ga('create', 'UA-76488113-2', 'auto', 'fsh', {
-    userId: playerId(),
-    siteSpeedSampleRate: 10
-  });
-  fixupUrl();
-  ga('fsh.send', 'pageview');
-}
-
-function screenview(funcName) {
-  if (noGa()) {return;}
-  ga('fshApp.send', 'screenview', {screenName: funcName});
-}
-
-function sendEvent(eventCategory, eventAction, eventLabel) {
-  if (noGa()) {return;}
-  ga('fshApp.send', 'event', eventCategory, eventAction, eventLabel);
 }
 
 function getBoxList(boxList) {
@@ -17096,14 +17107,17 @@ function processLadder(aRow, messageType) {
 
 /* eslint-disable max-len */
 var specials = {
+  '0': 'Dull Edge was activated.',
   '2': '@0 was withered.',
   '3': '@0\'s armor was shattered.',
   '4': '@0 was infused with extra defense (Constitution).',
   '5': '@0 was infused with extra armor (Sanctuary).',
+  '8': '@0 activated Savagery.',
   '9': '@0 activated Shield Strike.',
   '13': '@0 activated Conserve.',
   '18': '@0 leeched the buff \'@1\'.',
   '19': '@0\'s demoralize skill reduced the effectiveness of @1\'s enhancements.',
+  '20': '@0\'s reckoning has improved their skill \'@1\'',
   '21': '@0 was mesmerized by Spell Breaker, losing the \'@1\' buff.',
   '23': '@0 activated High Guard.',
   '24': '@0 was smote.',
@@ -17114,6 +17128,7 @@ var specials = {
   '29': '@0 activated Anti Deflect.',
   '30': '@0 activated Sealed. (Negated @1)',
   '31': '@0 activated Fist Fight.',
+  '33': '@0 activated Dispel Curse.',
   '37': '@0 had their armor and defence Inverted.',
   '38': '@0 had their attack reduced by Fumble.'
 };
@@ -17151,32 +17166,28 @@ function iWon(json) {
   return 'fshRed';
 }
 
+function highlightSpecials(prev, el) {
+  if (el.id === 18) {
+    return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
+      ' leeched the buff \'' + el.params[1] + '\'.</span>';
+  }
+  if (el.id === 21) {
+    return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
+      ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
+      '\' buff.</span>';
+  }
+  return prev;
+}
+
 function parseCombat(combatSummary, json) {
   if (!json.s) {return;}
   var color = iWon(json);
-  var xpGain = json.r.xp_gain;
-  var goldGain = json.r.gold_gain;
-  var prestigeGain = json.r.pvp_prestige_gain;
-  var goldStolen = json.r.gold_stolen;
-  var pvpRatingChange = json.r.pvp_rating_change;
-  var output = '';
-  output += result$1(xpGain, 'XP stolen', color);
-  output += result$1(goldGain, 'Gold lost', color);
-  output += result$1(goldStolen, 'Gold stolen', color);
-  output += result$1(prestigeGain, 'Prestige gain', color);
-  output += result$1(pvpRatingChange, 'PvP change', color);
-  json.r.specials.forEach(function(el) {
-    if (el.id === 18) {
-      output += '<br><span class="fshRed fshBold">' + el.params[0] +
-        ' leeched the buff \'' + el.params[1] + '\'.</span>';
-    }
-    if (el.id === 21) {
-      output += '<br><span class="fshRed fshBold">' + el.params[0] +
-        ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
-        '\' buff.</span>';
-    }
-  });
-  combatSummary.innerHTML = output;
+  combatSummary.innerHTML = result$1(json.r.xp_gain, 'XP stolen', color) +
+    result$1(json.r.gold_gain, 'Gold lost', color) +
+    result$1(json.r.gold_stolen, 'Gold stolen', color) +
+    result$1(json.r.pvp_prestige_gain, 'Prestige gain', color) +
+    result$1(json.r.pvp_rating_change, 'PvP change', color) +
+    json.r.specials.reduce(highlightSpecials, '');
 }
 
 function inSpecialsList(el) {
@@ -18652,7 +18663,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '11';
+window.FSH.calf = '12';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
