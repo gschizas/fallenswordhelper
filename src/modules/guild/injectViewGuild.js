@@ -1,6 +1,6 @@
 import add from '../support/task';
 import {colouredDots} from '../support/layout';
-import {getValue} from '../support/system';
+import currentGuildId from '../common/currentGuildId';
 import {lastActivityRE} from '../support/dataObj';
 import {
   calculateBoundaries,
@@ -9,6 +9,7 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from '../common/levelHighlight';
+import {getUrlParameter, getValue} from '../support/system';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var highlightPlayersNearMyLvl;
@@ -42,13 +43,18 @@ function highlightMembers(el) {
   if (lastActDays < 7) {isActive(el, tipped);}
 }
 
+function dontHighlight() {
+  return Number(getUrlParameter('guild_id')) === currentGuildId() ||
+    !highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl;
+}
+
 export default function injectViewGuild() {
   add(3, colouredDots);
   removeGuildAvyImgBorder();
   guildXPLock();
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
-  if (!highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl) {return;}
+  if (dontHighlight()) {return;}
   calculateBoundaries();
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');

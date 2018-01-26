@@ -1,3 +1,4 @@
+import currentGuildId from './common/currentGuildId';
 import getForage from './ajax/getForage';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
@@ -22,6 +23,7 @@ var highlightPlayersNearMyLvl;
 var onlinePages;
 var lastPage;
 var table;
+var guildId;
 
 function buildOnlinePlayerData() { // jQuery
   onlineData = [];
@@ -75,10 +77,22 @@ function filterHeaderOnlinePlayers() { // jQuery
     '</div><table id="fshInv" class="allow stripe hover"></table>');
 }
 
+function guildNumber(html) {
+  var match = html.match(/;guild_id=([0-9]+)"/);
+  if (match) {return Number(match[1]);}
+}
+
+var highlightTests = [
+  function() {return highlightPlayersNearMyLvl;},
+  function(data) {return guildNumber(data[0]) !== guildId;},
+  function(data) {return intValue(data[2]) >= pvpLowerLevel;},
+  function(data) {return intValue(data[2]) <= pvpUpperLevel;}
+];
+
 function pvpHighlight(data) {
-  return highlightPlayersNearMyLvl &&
-    intValue(data[2]) >= pvpLowerLevel &&
-    intValue(data[2]) <= pvpUpperLevel;
+  return highlightTests.every(function(el) {
+    return el(data);
+  });
 }
 
 function gotOnlinePlayers() { // jQuery
@@ -87,6 +101,7 @@ function gotOnlinePlayers() { // jQuery
   filterHeaderOnlinePlayers();
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   calculateBoundaries();
+  guildId = currentGuildId();
 
   table = $('#fshInv', context).dataTable({ // context
     data: onlineData,

@@ -1,5 +1,6 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
+import ajaxifyProfileSections from './ajaxifyProfileSections';
 import {createSpan} from '../common/cElement';
 import fastDebuff from './debuff';
 import {getElementById} from '../common/getElement';
@@ -75,9 +76,7 @@ function profileSelectAll() {
   var checkboxes = document.querySelectorAll('#backpackTab_' + type +
     ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
   if (checkboxes.length > 0) {items = checkboxes;}
-  Array.prototype.forEach.call(items, function(el) {
-    el.click();
-  });
+  Array.prototype.forEach.call(items, function(el) {el.click();});
 }
 
 function selectAllLink() {
@@ -95,8 +94,7 @@ function selectAllLink() {
 
 function storeVL() {
   // store the VL of the player
-  var virtualLevel = parseInt(
-    getElementById('stat-vl').textContent, 10);
+  var virtualLevel = parseInt(getElementById('stat-vl').textContent, 10);
   if (intValue(document.getElementsByClassName('stat-level')[0]
     .nextElementSibling.textContent) === virtualLevel) {
     setValue('characterVirtualLevel', ''); // ?
@@ -197,8 +195,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
 function removeStatTable(el) {
   var tde = el.getElementsByTagName('td');
   el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
-    '<div class="profile-stat-bonus">' +
-    tde[1].textContent + '</div>';
+    '<div class="profile-stat-bonus">' + tde[1].textContent + '</div>';
 }
 
 function updateStatistics() {
@@ -208,7 +205,7 @@ function updateStatistics() {
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
 }
 
-function ifSelf(self) { // Legacy
+function ifSelf(self) {
   if (self) {
     // self inventory
     fastDebuff();
@@ -219,13 +216,13 @@ function ifSelf(self) { // Legacy
     selectAllLink();
     storeVL();
     nekidBtn();
+    ajaxifyProfileSections();
   }
 }
 
-function yuuzhan(playername, avyImg) { // Legacy
+function yuuzhan(playername, avyImg) {
   if (playername === 'yuuzhan') {
-    avyImg.setAttribute('src',
-      'http://evolutions.yvong.com/images/tumbler.gif');
+    avyImg.src = 'http://evolutions.yvong.com/images/tumbler.gif';
     avyImg.addEventListener('click', function() {
       $('#dialog_msg').text('Winner!').dialog('open');
     });
@@ -255,8 +252,7 @@ function highlightPvpProtection() {
   var pvpp = document
     .querySelector('#profileLeftColumn a[href="index.php?cmd=points"]');
   if (pvpp.parentNode.nextSibling.textContent.trim() !== 'N/A') {
-    pvpp.parentNode.parentNode.style.cssText =
-      'border: 3px solid red';
+    pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red';
   }
 }
 
@@ -264,15 +260,13 @@ export default function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
-  var playername = pCC
-    .getElementsByTagName('h1')[0].textContent;
+  var playername = pCC.getElementsByTagName('h1')[0].textContent;
   var self = playername === playerName();
   ifSelf(self);
   // Must be before profileInjectQuickButton
   profileInjectGuildRel();
   // It sets up guildId and currentGuildRelationship
-  var playerid = fallback(getUrlParameter('player_id'),
-    playerId());
+  var playerid = fallback(getUrlParameter('player_id'), playerId());
   profileInjectQuickButton(avyImg, playerid, playername);
 
   //* ************* yuuzhan having fun
