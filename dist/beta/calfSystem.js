@@ -225,55 +225,58 @@ if (typeof jQuery !== 'undefined') {
   });
 }
 
-var quickSearchList =
-  '[{"category":"Plants","searchname":"Amber","nickname":""},' +
-  '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
-  '{"category":"Plants","searchname":"Jademare","nickname":""},' +
-  '{"category":"Plants","searchname":"Dark Shade","nickname":""},' +
-  '{"category":"Plants","searchname":"Trinettle","nickname":""},' +
-  '{"category":"Plants","searchname":"Heffle Wart","nickname":""},' +
-  '{"category":"Potions","searchname":"Sludge Brew",' +
-    '"nickname":"DC 200","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Black Death",' +
-    '"nickname":"DC 225","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Aid",' +
-    '"nickname":"Assist","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Supreme Doubling",' +
-    '"nickname":"DB 450","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Acceleration",' +
-    '"nickname":"DB 500","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Lesser Death Dealer",' +
-    '"nickname":"DD","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Runic Potion",' +
-    '"nickname":"FI 250","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of the Bookworm",' +
-    '"nickname":"Lib 225","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Truth",' +
-    '"nickname":"EW 1k","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Dull Edge",' +
-    '"nickname":"DE 25","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Notched Blade",' +
-    '"nickname":"DE 80","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Death",' +
-    '"nickname":"DW 125","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Decay",' +
-    '"nickname":"WI 150","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Fatality",' +
-    '"nickname":"WI 350","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Annihilation",' +
-    '"nickname":"DW 150","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of the Wise",' +
-    '"nickname":"Lib 200","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Shattering",' +
-    '"nickname":"SA","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Dragons Blood Potion",' +
-    '"nickname":"ZK 200","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Berserkers Potion",' +
-    '"nickname":"ZK 300","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Fury",' +
-    '"nickname":"ZK 350","displayOnAH":true},' +
-  '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
-    '"nickname":"FI 1k","displayOnAH":true}]';
+var thePlants = [
+  'Amber',
+  'Blood Bloom',
+  'Jademare',
+  'Dark Shade',
+  'Trinettle',
+  'Heffle Wart'
+];
+var thePotions = [
+  ['Sludge Brew', 'DC 200'],
+  ['Potion of Black Death', 'DC 225'],
+  ['Potion of Aid', 'Assist'],
+  ['Potion of Supreme Doubling', 'DB 450'],
+  ['Potion of Acceleration', 'DB 500'],
+  ['Potion of Lesser Death Dealer', 'DD'],
+  ['Runic Potion', 'FI 250'],
+  ['Potion of the Bookworm', 'Lib 225'],
+  ['Potion of Truth', 'EW 1k'],
+  ['Dull Edge', 'DE 25'],
+  ['Notched Blade', 'DE 80'],
+  ['Potion of Death', 'DW 125'],
+  ['Potion of Decay', 'WI 150'],
+  ['Potion of Fatality', 'WI 350'],
+  ['Potion of Annihilation', 'DW 150'],
+  ['Potion of the Wise', 'Lib 200'],
+  ['Potion of Shattering', 'SA'],
+  ['Dragons Blood Potion', 'ZK 200'],
+  ['Berserkers Potion', 'ZK 300'],
+  ['Potion of Fury', 'ZK 350'],
+  ['Potion of Supreme Luck', 'FI 1k']
+];
+
+function plants() {
+  return thePlants.map(function(el) {
+    return {category: 'Plants', searchname: el, nickname: ''};
+  });
+}
+
+function potions() {
+  return thePotions.map(function(el) {
+    return {
+      category: 'Potions',
+      searchname: el[0],
+      nickname: el[1],
+      displayOnAH: true
+    };
+  });
+}
+
+function def_quickSearch() {
+  return JSON.stringify(plants().concat(potions()));
+}
 
 /* eslint-disable max-lines */
 var defaults = {
@@ -464,7 +467,7 @@ var defaults = {
     '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-  quickSearchList: quickSearchList,
+  quickSearchList: def_quickSearch,
 
   arenaMoves: '[]',
   arenaMatches: '[]',
@@ -2228,6 +2231,16 @@ function injectNotepadShowLogs(injector) { // jQuery.min
   getForage('fsh_combatLog').done(gotCombatLog);
 }
 
+function currentGuildId() {
+  var guildId;
+  var nodeList = document.body.getElementsByTagName('script');
+  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
+    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
+    if (match) {guildId = parseInt(match[1], 10);}
+  });
+  return guildId;
+}
+
 var context;
 var onlinePlayers;
 var onlineData;
@@ -2235,6 +2248,7 @@ var highlightPlayersNearMyLvl;
 var onlinePages;
 var lastPage;
 var table;
+var guildId;
 
 function buildOnlinePlayerData() { // jQuery
   onlineData = [];
@@ -2288,10 +2302,22 @@ function filterHeaderOnlinePlayers() { // jQuery
     '</div><table id="fshInv" class="allow stripe hover"></table>');
 }
 
+function guildNumber(html) {
+  var match = html.match(/;guild_id=([0-9]+)"/);
+  if (match) {return Number(match[1]);}
+}
+
+var highlightTests = [
+  function() {return highlightPlayersNearMyLvl;},
+  function(data) {return guildNumber(data[0]) !== guildId;},
+  function(data) {return intValue(data[2]) >= pvpLowerLevel;},
+  function(data) {return intValue(data[2]) <= pvpUpperLevel;}
+];
+
 function pvpHighlight(data) {
-  return highlightPlayersNearMyLvl &&
-    intValue(data[2]) >= pvpLowerLevel &&
-    intValue(data[2]) <= pvpUpperLevel;
+  return highlightTests.every(function(el) {
+    return el(data);
+  });
 }
 
 function gotOnlinePlayers() { // jQuery
@@ -2300,6 +2326,7 @@ function gotOnlinePlayers() { // jQuery
   filterHeaderOnlinePlayers();
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   calculateBoundaries();
+  guildId = currentGuildId();
 
   table = $('#fshInv', context).dataTable({ // context
     data: onlineData,
@@ -7829,16 +7856,6 @@ function guildMailbox() {
       '<span class="sendLink">Take All</span>');
 }
 
-function currentGuildId() {
-  var _guildId;
-  var nodeList = document.body.getElementsByTagName('script');
-  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
-    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-    if (match) {_guildId = parseInt(match[1], 10);}
-  });
-  return _guildId;
-}
-
 function getGuild(guildId) {
   return retryAjax({
     dataType: 'json',
@@ -11282,6 +11299,65 @@ function addStatTotalToMouseover() { // jQuery
   $.ajaxPrefilter(fshPreFilter);
 }
 
+var bpc;
+
+function bp() {
+  if (!bpc) {
+    bpc = getElementById('backpackContainer');
+  }
+  return bpc;
+}
+
+var elementTests = [
+  function(self) {return self.tagName === 'A';},
+  function(self) {return Boolean(self.href);},
+  function(self) {return self.href.includes('togglesection');}
+];
+
+function isSectionToggle(self) {
+  return elementTests.every(function(el) {
+    return el(self);
+  });
+}
+
+function oldStyleDiv(target) {
+  if (target.style.display === 'block') {
+    target.classList.add('fshHide');
+  }
+  target.removeAttribute('style');
+  return 0;
+}
+
+function toggleTarget(target) {
+  if (target.hasAttribute('style')) {
+    oldStyleDiv(target);
+  } else {
+    target.classList.toggle('fshHide');
+  }
+}
+
+function toggleSection(self) {
+  var sectionId = Number(getCustomUrlParameter(self.href, 'section_id'));
+  if (sectionId === 5) {
+    toggleTarget(bp());
+  } else {
+    toggleTarget(self.parentNode.parentNode.nextElementSibling);
+  }
+}
+
+function testForSection(evt) {
+  var self = evt.target;
+  if (isSectionToggle(self)) {
+    toggleSection(self);
+    retryAjax(self.href);
+    evt.preventDefault();
+  }
+}
+
+function ajaxifyProfileSections() {
+  pCC.addEventListener('click', testForSection);
+}
+
 var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
 function debuff(buffId) {
@@ -11837,7 +11913,7 @@ function profileRenderBio(self) {
   bioCell.addEventListener('click', bioEvtHdl);
 }
 
-var guildId;
+var guildId$1;
 var currentGuildRelationship;
 var guildMessages = {
   self: {
@@ -11884,9 +11960,7 @@ function profileSelectAll() {
   var checkboxes = document.querySelectorAll('#backpackTab_' + type +
     ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
   if (checkboxes.length > 0) {items = checkboxes;}
-  Array.prototype.forEach.call(items, function(el) {
-    el.click();
-  });
+  Array.prototype.forEach.call(items, function(el) {el.click();});
 }
 
 function selectAllLink() {
@@ -11904,8 +11978,7 @@ function selectAllLink() {
 
 function storeVL() {
   // store the VL of the player
-  var virtualLevel = parseInt(
-    getElementById('stat-vl').textContent, 10);
+  var virtualLevel = parseInt(getElementById('stat-vl').textContent, 10);
   if (intValue(document.getElementsByClassName('stat-level')[0]
     .nextElementSibling.textContent) === virtualLevel) {
     setValue('characterVirtualLevel', ''); // ?
@@ -11936,7 +12009,7 @@ function guildRelationship(_txt) {
 
 function foundGuildLink(aLink) {
   var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-  if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
+  if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
   if (currentGuildRelationship) {
     aLink.parentNode.classList.add(
@@ -11997,7 +12070,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
       '" style="background-image: url(\'' + imageServer +
-      '/guilds/' + guildId + '_mini.jpg\');"></a>&nbsp;&nbsp;';
+      '/guilds/' + guildId$1 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
   }
   newhtml += '</div>';
   avyImg.insertAdjacentHTML('afterend', newhtml);
@@ -12006,8 +12079,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
 function removeStatTable(el) {
   var tde = el.getElementsByTagName('td');
   el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
-    '<div class="profile-stat-bonus">' +
-    tde[1].textContent + '</div>';
+    '<div class="profile-stat-bonus">' + tde[1].textContent + '</div>';
 }
 
 function updateStatistics() {
@@ -12017,7 +12089,7 @@ function updateStatistics() {
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
 }
 
-function ifSelf(self) { // Legacy
+function ifSelf(self) {
   if (self) {
     // self inventory
     fastDebuff();
@@ -12028,13 +12100,13 @@ function ifSelf(self) { // Legacy
     selectAllLink();
     storeVL();
     nekidBtn();
+    ajaxifyProfileSections();
   }
 }
 
-function yuuzhan(playername, avyImg) { // Legacy
+function yuuzhan(playername, avyImg) {
   if (playername === 'yuuzhan') {
-    avyImg.setAttribute('src',
-      'http://evolutions.yvong.com/images/tumbler.gif');
+    avyImg.src = 'http://evolutions.yvong.com/images/tumbler.gif';
     avyImg.addEventListener('click', function() {
       $('#dialog_msg').text('Winner!').dialog('open');
     });
@@ -12064,15 +12136,13 @@ function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
-  var playername = pCC
-    .getElementsByTagName('h1')[0].textContent;
+  var playername = pCC.getElementsByTagName('h1')[0].textContent;
   var self = playername === playerName();
   ifSelf(self);
   // Must be before profileInjectQuickButton
   profileInjectGuildRel();
   // It sets up guildId and currentGuildRelationship
-  var playerid = fallback(getUrlParameter('player_id'),
-    playerId());
+  var playerid = fallback(getUrlParameter('player_id'), playerId());
   profileInjectQuickButton(avyImg, playerid, playername);
 
   //* ************* yuuzhan having fun
@@ -13218,25 +13288,35 @@ var highlightPlayersNearMyLvl$1;
 var spinner$1;
 var validPvP = nowSecs - 604800;
 var guilds;
+var myGuildId;
 
-function pvpHighlight$1(data) {
-  return data.last_login >= validPvP &&
-    data.virtual_level >= pvpLowerLevel &&
-    data.virtual_level <= pvpUpperLevel;
+var highlightTests$1 = [
+  function() {return highlightPlayersNearMyLvl$1;},
+  function(guildId) {
+    return typeof guildId === 'undefined' || guildId !== myGuildId;
+  },
+  function(guildId, data) {return data.last_login >= validPvP;},
+  function(guildId, data) {return data.virtual_level >= pvpLowerLevel;},
+  function(guildId, data) {return data.virtual_level <= pvpUpperLevel;}
+];
+
+function pvpHighlight$1(guildId, data) {
+  return highlightTests$1.every(function(el) {
+    return el(guildId, data);
+  });
 }
 
-function doOnlineDot(aTable, data) {
+function doOnlineDot(aTable, guildId, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (highlightPlayersNearMyLvl$1 &&
-    pvpHighlight$1(data)) {
+  if (pvpHighlight$1(guildId, data)) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
 }
 
-function parsePlayer(aTable, data, jqXhr) {
+function parsePlayer(aTable, guildId, data, jqXhr) {
   if (data) {
-    doOnlineDot(aTable, data);
+    doOnlineDot(aTable, guildId, data);
   } else {
     aTable.rows[0].insertAdjacentHTML('beforeend',
       '<td class="fshBkRed">' + jqXhr.status + '</td>');
@@ -13261,10 +13341,10 @@ function addPlayerToGuild(tbl, playerName$$1) {
   addPlayerObjectToGuild(guildId, {dom: tbl, player: playerName$$1});
 }
 
-function stackAjax(prm, playerName$$1, tbl) {
+function stackAjax(prm, playerName$$1, tbl, guildId) {
   prm.push(getProfile(playerName$$1)
     .pipe(null, failFilter)
-    .done(parsePlayer.bind(null, tbl))
+    .done(parsePlayer.bind(null, tbl, guildId))
   );
 }
 
@@ -13273,7 +13353,7 @@ function parseGuild(data) {
   data.r.members.forEach(function(member) {
     guilds[guildId].forEach(function(player) {
       if (member.name === player.player) {
-        doOnlineDot(player.dom, {
+        doOnlineDot(player.dom, guildId, {
           last_login: (nowSecs - member.last_activity).toString(),
           virtual_level: member.vl
         });
@@ -13296,7 +13376,8 @@ function findOnlinePlayers() { // jQuery
   });
   Object.keys(guilds).forEach(function(guildId) {
     if (guilds[guildId].length === 1) {
-      stackAjax(prm, guilds[guildId][0].player, guilds[guildId][0].dom);
+      stackAjax(prm, guilds[guildId][0].player, guilds[guildId][0].dom,
+        guildId);
     } else {
       guildView(guildId).done(parseGuild);
     }
@@ -13316,6 +13397,7 @@ function getMyVL(e) { // jQuery
   highlightPlayersNearMyLvl$1 = getValue('highlightPlayersNearMyLvl');
   if (highlightPlayersNearMyLvl$1) {
     calculateBoundaries();
+    myGuildId = currentGuildId();
   }
   findOnlinePlayers();
 }
@@ -13573,13 +13655,18 @@ function highlightMembers(el) {
   if (lastActDays < 7) {isActive(el, tipped);}
 }
 
+function dontHighlight() {
+  return Number(getUrlParameter('guild_id')) === currentGuildId() ||
+    !highlightPlayersNearMyLvl$2 && !highlightGvGPlayersNearMyLvl;
+}
+
 function injectViewGuild() {
   add$1(3, colouredDots);
   removeGuildAvyImgBorder();
   guildXPLock();
   highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
   highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
-  if (!highlightPlayersNearMyLvl$2 && !highlightGvGPlayersNearMyLvl) {return;}
+  if (dontHighlight()) {return;}
   calculateBoundaries();
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
@@ -18664,7 +18751,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '12';
+window.FSH.calf = '13';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
