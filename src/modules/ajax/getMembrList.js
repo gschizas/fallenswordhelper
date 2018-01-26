@@ -1,18 +1,9 @@
 import calf from '../support/calf';
+import currentGuildId from '../common/currentGuildId';
 import getForage from './getForage';
 import {now} from '../support/dataObj';
 import retryAjax from './retryAjax';
 import setForage from './setForage';
-
-function currentGuildId() {
-  var _guildId;
-  var nodeList = document.body.getElementsByTagName('script');
-  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
-    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-    if (match) {_guildId = parseInt(match[1], 10);}
-  });
-  return _guildId;
-}
 
 function getGuild(guildId) {
   return retryAjax({
