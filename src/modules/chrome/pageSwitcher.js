@@ -37,6 +37,7 @@ import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import inventing from '../recipes';
 import ladder from '../ladder';
+import marketplace from '../marketplace';
 import setupMoves from '../arena/setup';
 import showAllQuestSteps from '../guide/showAllQuestSteps';
 import storeMoves from '../arena/store';
@@ -44,18 +45,17 @@ import storePlayerUpgrades from '../upgrades';
 import superelite from '../seLog/superelite';
 import unknownPage from './unknownPage';
 import viewArchive from '../news/viewArchive';
-import {
-  addMarketplaceWidgets,
-  injectFindPlayer,
-  injectFsBoxContent,
-  injectNotepad
-} from '../misc';
 import {composingCreate, injectComposing} from '../composing/composing';
 import {guildChat, guildLog, outbox, playerLog} from '../logs/logs';
 import {injectAuctionHouse, quickCreate} from '../auctionHouse';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectBank, injectGuildBank} from '../bank';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
+import {
+  injectFindPlayer,
+  injectFsBoxContent,
+  injectNotepad
+} from '../misc';
 import {injectGroupStats, injectGroups} from '../groups';
 import {injectProfileDropItems, injectStoreItems} from '../dropItems/dropItems';
 import {injectQuestBookFull, injectQuestTracker} from '../questBook';
@@ -130,7 +130,7 @@ export default {
     outbox: {'-': {'-': {'-': outbox}}}
   },
   potionbazaar: {'-': {'-': {'-': {'-': injectBazaar}}}},
-  marketplace: {createreq: {'-': {'-': {'-': addMarketplaceWidgets}}}},
+  marketplace: {createreq: {'-': {'-': {'-': marketplace}}}},
   quickbuff: {'-': {'-': {'-': {'-': injectQuickBuff}}}}, // No ga
   notepad: {
     showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}}, // done
