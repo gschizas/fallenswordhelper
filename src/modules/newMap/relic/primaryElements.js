@@ -1,14 +1,21 @@
 import {doBuffLinks} from '../../support/layout';
 import {getElementById} from '../../common/getElement';
 import {getStats} from './relic';
-import {myDefenders} from './myDefenders';
 import {createButton, createDiv} from '../../common/cElement';
 
 export var containerDiv;
 export var leftDiv;
 export var fetchStatsBtn;
+export var myDefenders;
+
+export function defendersSetup(relicData) {
+  myDefenders = relicData.defenders.map(function(x) {
+    return x.player_name;
+  });
+}
 
 export function primaryElementsSetup(relicData) {
+  defendersSetup(relicData);
   if (containerDiv) {
     containerDiv.innerHTML = '';
   } else {

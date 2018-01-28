@@ -2,14 +2,15 @@ import {createDiv} from '../../common/cElement';
 import {getElementById} from '../../common/getElement';
 import getMembrList from '../../ajax/getMembrList';
 import {getValue} from '../../support/system';
-import {myDefenders} from './myDefenders';
 import {nowSecs} from '../../support/dataObj';
 import {atkStats, defStats, proc} from './assets';
-import {containerDiv, fetchStatsBtn, leftDiv} from './primaryElements';
+import {
+  containerDiv,
+  fetchStatsBtn,
+  leftDiv,
+  myDefenders
+} from './primaryElements';
 
-var midDiv;
-var rightDiv;
-var hideRelicOffline;
 var guildMemberList;
 var twoMinutes;
 var sevenDays;
@@ -28,6 +29,9 @@ var memberExclusions = [
       guildMemberList[key].level <= 450;
   }
 ];
+export var relicCountElement;
+export var lDPercentageElement;
+export var lDCloakedElement;
 export var attackElement;
 export var attackBuffedElement;
 export var defenseElement;
@@ -75,6 +79,9 @@ function missingMembers(membrList) {
 }
 
 function setDefVars() {
+  relicCountElement = getElementById('relicCount');
+  lDPercentageElement = getElementById('LDPercentage');
+  lDCloakedElement = getElementById('LDCloaked');
   attackElement = getElementById('attackValue');
   attackBuffedElement = getElementById('attackValueBuffed');
   defenseElement = getElementById('defenseValue');
@@ -106,19 +113,19 @@ function setAtkVars() {
 
 export function prepareSecondaryDivs(relicData) {
   fetchStatsBtn.classList.add('fshHide');
-  hideRelicOffline = getValue('hideRelicOffline');
+  var hideRelicOffline = getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(false).done(missingMembers);
   }
   leftDiv.insertAdjacentHTML('beforeend', proc);
   processingStatus = getElementById('ProcessingStatus');
-  midDiv = createDiv({
+  var midDiv = createDiv({
     className: 'fshFloatLeft fshRelicMidDiv',
     innerHTML: defStats
   });
   containerDiv.appendChild(midDiv);
   setDefVars();
-  rightDiv = createDiv({
+  var rightDiv = createDiv({
     className: 'fshFloatLeft fshRelicRightDiv',
     innerHTML: atkStats
   });

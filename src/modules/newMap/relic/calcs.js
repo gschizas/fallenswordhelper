@@ -1,5 +1,4 @@
 import {defenderMultiplier} from '../../support/dataObj';
-import {getElementById} from '../../common/getElement';
 import {playerDataObject} from '../../common/common';
 import reduceBuffArray from '../../common/reduceBuffArray';
 import {addCommas, fallback} from '../../support/system';
@@ -28,6 +27,7 @@ import {
   groupHPElement,
   hpBuffedElement,
   hpElement,
+  lDCloakedElement,
   processingStatus
 } from './secondaryElements';
 import {player, relicMultiplier} from './relic';
@@ -154,7 +154,7 @@ export function doCalculations() {
   hpBuffedElement.textContent = addCommas(defBuffedHp);
 
   if (leadDefender.cloakLevel !== 0) {
-    getElementById('LDCloaked').textContent = 'Yes';
+    lDCloakedElement.textContent = 'Yes';
   }
 
   if (player.hasGroup) {

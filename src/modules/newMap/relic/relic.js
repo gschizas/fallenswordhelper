@@ -1,12 +1,9 @@
 import {createDocument} from '../../support/system';
 import {def_suffixSuccessActionResponse} from '../../support/dataObj';
-import {getElementById} from '../../common/getElement';
 import getGroupStats from '../../ajax/getGroupStats';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';
-import {primaryElementsSetup} from './primaryElements';
 import retryAjax from '../../ajax/retryAjax';
-import {defendersSetup, myDefenders} from './myDefenders';
 import {
   doCalculations,
   parseDefender,
@@ -16,13 +13,15 @@ import {
   storeMercStats
 } from './calcs';
 import {
+  lDPercentageElement,
   prepareSecondaryDivs,
-  processingStatus
+  processingStatus,
+  relicCountElement,
 } from './secondaryElements';
+import {myDefenders, primaryElementsSetup} from './primaryElements';
 
 var relicData;
 export var player;
-var relicCount;
 export var relicMultiplier;
 
 function ajaxFailure(jqXHR) {
@@ -50,11 +49,10 @@ function calcRelicMultiplier(rels) {
 function parseGuild(html) {
   var doc = createDocument(html);
   var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
-  relicCount = nodeList.length;
-  getElementById('relicCount').textContent = relicCount.toString();
+  var relicCount = nodeList.length;
+  relicCountElement.textContent = relicCount.toString();
   relicMultiplier = calcRelicMultiplier(relicCount);
-  getElementById('LDPercentage').textContent =
-    (relicMultiplier * 100).toString() + '%';
+  lDPercentageElement.textContent = (relicMultiplier * 100).toString() + '%';
 }
 
 function getGroups() {
@@ -98,14 +96,9 @@ export function getStats() {
   $.when.apply($, prm).done(doCalculations);
 }
 
-function setup() {
-  defendersSetup(relicData);
-  primaryElementsSetup(relicData);
-}
-
 function viewRelic(e, data) {
   relicData = data.response.data;
-  if (relicData.defenders.length > 0) {setup();}
+  if (relicData.defenders.length > 0) {primaryElementsSetup(relicData);}
 }
 
 export default function injectRelic() {
