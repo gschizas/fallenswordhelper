@@ -1,13 +1,13 @@
 import dialog from './dialog';
 import retryAjax from './retryAjax';
 
-export default function dropItem(invIdList) {
+export default function equipItem(backpackInvId) {
   return retryAjax({
     url: 'index.php',
     data: {
       cmd: 'profile',
-      subcmd: 'dodropitems',
-      removeIndex: invIdList,
+      subcmd: 'equipitem',
+      inventory_id: backpackInvId,
       ajax: 1
     },
     dataType: 'json'

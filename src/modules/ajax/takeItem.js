@@ -1,13 +1,14 @@
 import dialog from './dialog';
 import retryAjax from './retryAjax';
 
-export default function dropItem(invIdList) {
+export default function takeItem(invId) {
   return retryAjax({
     url: 'index.php',
     data: {
-      cmd: 'profile',
-      subcmd: 'dodropitems',
-      removeIndex: invIdList,
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'takeitem',
+      guildstore_id: invId,
       ajax: 1
     },
     dataType: 'json'

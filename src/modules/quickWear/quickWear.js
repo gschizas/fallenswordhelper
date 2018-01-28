@@ -1,5 +1,6 @@
 import {createDiv} from '../common/cElement';
 import createQuickWear from './createQuickWear';
+import equipItem from '../ajax/equipItem';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import loadInventory from '../app/profile/loadInventory';
@@ -7,7 +8,7 @@ import {sendEvent} from '../support/fshGa';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import toggleForce from '../common/toggleForce';
-import {equipItem, useItem} from '../support/ajax';
+import useItem from '../ajax/useItem';
 import {getValue, setValue} from '../support/system';
 import {jConfirm, pCC} from '../support/layout';
 

@@ -1,7 +1,7 @@
 import {createInput} from '../common/cElement';
 import {imageServer} from '../support/system';
 import {pCC} from '../support/layout';
-import {takeItem} from '../support/ajax';
+import takeitem from '../app/guild/inventory/takeitem';
 
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
@@ -28,7 +28,7 @@ function takeResult(self, data) {
 function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
     .firstElementChild.value;
-  takeItem(itmId).done(takeResult.bind(null, el));
+  takeitem(itmId).done(takeResult.bind(null, el));
   el.textContent = '';
   el.className = 'guildTagSpinner';
   el.style.backgroundImage = 'url(\'' + imageServer +
