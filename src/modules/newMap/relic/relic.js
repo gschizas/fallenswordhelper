@@ -80,7 +80,7 @@ function parseGroups(html) {
 }
 
 export function getStats() {
-  prepareSecondaryDivs();
+  prepareSecondaryDivs(relicData);
   resetCounters();
   player = GameData.player();
   var prm = [];
