@@ -123,8 +123,10 @@ function navMenu() { // jQuery
 }
 
 function moveRHSBoxUpOnRHS(title) {
-  getElementById('pCR').insertAdjacentElement('afterbegin',
-    getElementById(title));
+  var box = getElementById(title);
+  if (box) {
+    pCR.insertAdjacentElement('afterbegin', box);
+  }
 }
 
 function moveRHSBoxToLHS(title) {
