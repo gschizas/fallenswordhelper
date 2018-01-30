@@ -8,9 +8,12 @@ import {injectComposeAlert} from '../composing/composing';
 import injectFSBoxLog from './injectFSBoxLog';
 import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
+import injectJoinAllLink from '../notification/injectJoinAllLink';
 import injectMenu from './accordion';
 import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
+import injectTempleAlert from '../notification/injectTempleAlert';
+import injectUpgradeAlert from '../notification/injectUpgradeAlert';
 import {pCR} from '../support/layout';
 import prepareAllyEnemyList from './allyEnemy';
 import prepareBountyData from './activeWantedBounties';
@@ -20,11 +23,6 @@ import {seLog} from '../seLog/seLog';
 import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
-import {
-  injectJoinAllLink,
-  injectTempleAlert,
-  injectUpgradeAlert
-} from '../notification';
 import {injectLevelupCalculator, injectStaminaCalculator} from './calc';
 
 function gameHelpLink() {

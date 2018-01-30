@@ -38,6 +38,8 @@ import insertQuickWear from '../quickWear/quickWear';
 import inventing from '../recipes';
 import ladder from '../ladder';
 import marketplace from '../marketplace';
+import parseGoldUpgrades from '../notification/parseGoldUpgrades';
+import {parseTemplePage} from '../notification/parseTemplePage';
 import setupMoves from '../arena/setup';
 import showAllQuestSteps from '../guide/showAllQuestSteps';
 import storeMoves from '../arena/store';
@@ -60,7 +62,6 @@ import {injectGroupStats, injectGroups} from '../groups';
 import {injectProfileDropItems, injectStoreItems} from '../dropItems/dropItems';
 import {injectQuestBookFull, injectQuestTracker} from '../questBook';
 import {newsFsbox, newsShoutbox} from '../news/news';
-import {parseGoldUpgrades, parseTemplePage} from '../notification';
 
 export default {
   settings: {'-': {'-': {'-': {'-': injectSettings}}}},
