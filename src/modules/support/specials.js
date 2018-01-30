@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 export var specials = {
   '0': 'Dull Edge was activated.',
+  '1': '@0 was afflicted by Super Elite Slayer.',
   '2': '@0 was withered.',
   '3': '@0\'s armor was shattered.',
   '4': '@0 was infused with extra defense (Constitution).',
