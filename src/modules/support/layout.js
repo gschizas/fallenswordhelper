@@ -26,6 +26,7 @@ var sevenDayDot =
   '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
 
 export var pCC = getElementById('pCC');
+export var pCR = getElementById('pCR');
 
 export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
   var passthru = '';

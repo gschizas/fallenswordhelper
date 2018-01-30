@@ -11,6 +11,7 @@ import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
 import injectMenu from './accordion';
 import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
+import {pCR} from '../support/layout';
 import prepareAllyEnemyList from './allyEnemy';
 import prepareBountyData from './activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
