@@ -1,6 +1,5 @@
 import calf from '../support/calf';
 import displayUpgradeMsg from './displayUpgradeMsg';
-import {getElementById} from '../common/getElement';
 import {createDocument, setValue} from '../support/system';
 
 function findDoc(data) {
@@ -11,11 +10,7 @@ function findDoc(data) {
   return document;
 }
 
-export default function parseGoldUpgrades(data) {
-  if (!calf.enableUpgradeAlert) {return;}
-  var doc = findDoc(data);
-  var limit = getElementById('pCC', doc).getElementsByTagName('TABLE')[0]
-    .rows[3].cells[2];
+function checkUpgrade(limit) {
   var checkDoneUpgrade = limit.textContent.split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
     displayUpgradeMsg();
@@ -24,5 +19,15 @@ export default function parseGoldUpgrades(data) {
     setValue('needToDoUpgrade', false);
     setValue('lastUpgradeCheck',
       Date.parse(limit.nextElementSibling.textContent + ' GMT'));
+  }
+}
+
+export default function parseGoldUpgrades(data) {
+  if (!calf.enableUpgradeAlert) {return;}
+  var doc = findDoc(data);
+  var tables = doc.querySelectorAll('#pCC > table');
+  if (tables.length > 0) {
+    var limit = tables[tables.length - 1].rows[3].cells[2];
+    checkUpgrade(limit);
   }
 }

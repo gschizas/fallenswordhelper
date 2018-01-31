@@ -36,7 +36,7 @@ export default function injectBountyList() { // Legacy
       output += '<a href="' + bountyList.bounty[i].link +
         '" class="tip-static" data-tipped="' +
         makeMouseOver(bountyList.bounty[i]) + '">' +
-        bountyList.bounty[i].target + '</a>';
+        bountyList.bounty[i].target + '</a><br>';
     }
   }
   bountyListDiv.insertAdjacentHTML('beforeend', output);

@@ -41,13 +41,23 @@ function evtHdlr(e) {
   if (self.className === 'sendLink') {fastBp(self);}
 }
 
+function paintTable() {
+  var nodeList = pCC.getElementsByTagName('table');
+  if (nodeList.length > 0) {
+    doItemTable(nodeList[nodeList.length - 1].rows);
+  }
+}
+
+function checkAllBtn() {
+  var checkAll = createInput({type: 'button', value: 'Check All'});
+  var formTags = pCC.getElementsByTagName('form');
+  if (formTags.length === 1) {
+    formTags[0].previousElementSibling.cells[0].appendChild(checkAll);
+  }
+}
+
 export default function injectGuildAddTagsWidgets() {
   pCC.addEventListener('click', evtHdlr);
-
-  var nodeList = pCC.getElementsByTagName('table');
-  var itemTable = nodeList[nodeList.length - 1];
-  if (itemTable) {doItemTable(itemTable.rows);}
-
-  var checkAll = createInput({type: 'button', value: 'Check All'});
-  nodeList[0].rows[5].cells[0].appendChild(checkAll);
+  paintTable();
+  checkAllBtn();
 }

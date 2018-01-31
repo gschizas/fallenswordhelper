@@ -148,8 +148,8 @@ function getRanks(membrList) {
     return prev;
   }, {});
   myRank = membrList[playerName()].rank_name;
-  theRows = pCC.firstElementChild
-    .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
+  theRows = pCC.lastElementChild.previousElementSibling.rows[13]
+    .firstElementChild.firstElementChild.rows;
   rankCount = 1;
   add(3, paintRanks);
 }
