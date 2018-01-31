@@ -5817,11 +5817,7 @@ function findDoc(data) {
   return document;
 }
 
-function parseGoldUpgrades(data) {
-  if (!calf.enableUpgradeAlert) {return;}
-  var doc = findDoc(data);
-  var limit = getElementById('pCC', doc).getElementsByTagName('TABLE')[0]
-    .rows[3].cells[2];
+function checkUpgrade(limit) {
   var checkDoneUpgrade = limit.textContent.split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
     displayUpgradeMsg();
@@ -5830,6 +5826,16 @@ function parseGoldUpgrades(data) {
     setValue('needToDoUpgrade', false);
     setValue('lastUpgradeCheck',
       Date.parse(limit.nextElementSibling.textContent + ' GMT'));
+  }
+}
+
+function parseGoldUpgrades(data) {
+  if (!calf.enableUpgradeAlert) {return;}
+  var doc = findDoc(data);
+  var tables = doc.querySelectorAll('#pCC > table');
+  if (tables.length > 0) {
+    var limit = tables[tables.length - 1].rows[3].cells[2];
+    checkUpgrade(limit);
   }
 }
 
@@ -6199,7 +6205,7 @@ function injectBountyList() { // Legacy
       output += '<a href="' + bountyList.bounty[i].link +
         '" class="tip-static" data-tipped="' +
         makeMouseOver(bountyList.bounty[i]) + '">' +
-        bountyList.bounty[i].target + '</a>';
+        bountyList.bounty[i].target + '</a><br>';
     }
   }
   bountyListDiv.insertAdjacentHTML('beforeend', output);
@@ -9197,15 +9203,25 @@ function evtHdlr(e) {
   if (self.className === 'sendLink') {fastBp(self);}
 }
 
+function paintTable() {
+  var nodeList = pCC.getElementsByTagName('table');
+  if (nodeList.length > 0) {
+    doItemTable(nodeList[nodeList.length - 1].rows);
+  }
+}
+
+function checkAllBtn() {
+  var checkAll = createInput({type: 'button', value: 'Check All'});
+  var formTags = pCC.getElementsByTagName('form');
+  if (formTags.length === 1) {
+    formTags[0].previousElementSibling.cells[0].appendChild(checkAll);
+  }
+}
+
 function injectGuildAddTagsWidgets() {
   pCC.addEventListener('click', evtHdlr);
-
-  var nodeList = pCC.getElementsByTagName('table');
-  var itemTable = nodeList[nodeList.length - 1];
-  if (itemTable) {doItemTable(itemTable.rows);}
-
-  var checkAll = createInput({type: 'button', value: 'Check All'});
-  nodeList[0].rows[5].cells[0].appendChild(checkAll);
+  paintTable();
+  checkAllBtn();
 }
 
 var ranks;
@@ -9349,8 +9365,8 @@ function getRanks(membrList) {
     return prev;
   }, {});
   myRank = membrList[playerName()].rank_name;
-  theRows = pCC.firstElementChild
-    .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
+  theRows = pCC.lastElementChild.previousElementSibling.rows[13]
+    .firstElementChild.firstElementChild.rows;
   rankCount = 1;
   add$1(3, paintRanks);
 }
@@ -18747,7 +18763,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '14';
+window.FSH.calf = '15';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
