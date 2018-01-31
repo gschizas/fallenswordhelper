@@ -364,6 +364,7 @@ var defaults = {
   bountyListRefreshTime: 300,
   enableWantedList: false,
   wantedNames: '',
+  wantedGuildMembers: false,
   bwNeedsRefresh: true,
 
   fsboxlog: false,
@@ -944,6 +945,7 @@ var sevenDayDot =
   '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
 
 var pCC = getElementById('pCC');
+var pCR = getElementById('pCR');
 
 function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
   var passthru = '';
@@ -1882,52 +1884,6 @@ function injectFindPlayer() { // Bad jQuery
       $(e).after('<a style="color:blue;font-size:10px;" ' +
         quickBuffHref(id[1]) + '>[b]</a>');
     });
-}
-
-function marketplaceWarning(sellPrice) { // Legacy
-  var warningColor = 'green';
-  var warningText =
-    '</b><br>This is probably an offer that will please someone.';
-  if (sellPrice < 100000) {
-    warningColor = 'brown';
-    warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
-  }
-  if (sellPrice > 250000) {
-    warningColor = 'red';
-    warningText = '</b><br>Hold up there ... this is way to high a ' +
-      'price ... you should reconsider.';
-  }
-  var amount = findNode('//input[@id="amount"]').value;
-  var warningField = findNode('//td[@id="warningfield"]');
-  warningField.innerHTML = '<span style="color:' + warningColor +
-    ';">You are offering to buy <b>' + amount +
-    '</b> FSP for >> <b>' + addCommas(sellPrice) +
-    warningText + ' (Total: ' +
-    addCommas(amount * sellPrice +
-    Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
-}
-
-function addMarketplaceWarning() { // Legacy
-  var goldPerPoint = findNode('//input[@id="price"]');
-  var sellPrice = goldPerPoint.value;
-  if (sellPrice.search(/^[0-9]*$/) !== -1) {
-    marketplaceWarning(sellPrice);
-  }
-}
-
-function addMarketplaceWidgets() { // Legacy
-  var requestTable = findNode(
-    '//table[tbody/tr/td/input[@value="Confirm Request"]]');
-  var newRow = requestTable.insertRow(2);
-  var newCell = newRow.insertCell(0);
-  newCell.id = 'warningfield';
-  newCell.colSpan = '2';
-  newCell.align = 'center';
-
-  getElementById('price').addEventListener('keyup',
-    addMarketplaceWarning, true);
-  getElementById('amount').addEventListener('keyup',
-    addMarketplaceWarning, true);
 }
 
 function injectNotepad() { // jQuery
@@ -2982,6 +2938,24 @@ function createQuickWear(appInv) {
   return qw;
 }
 
+function dialog(data) {
+  if (data.r === 0) {return;}
+  $('#dialog_msg').html(data.m).dialog('open');
+}
+
+function equipItem(backpackInvId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'equipitem',
+      inventory_id: backpackInvId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
 function loadInventory() {
   return callApp({cmd: 'profile', subcmd: 'loadinventory'});
 }
@@ -3391,6 +3365,10 @@ var mySimpleCheckboxes = {
     helpTitle: 'Show Titan Info',
     helpText: 'This will show titan info in the action list.',
     network: true
+  },
+  wantedGuildMembers: {
+    helpTitle: 'Show Guild Members',
+    helpText: 'If enabled, will show guild members in the wanted bounty list.'
   }
 };
 
@@ -3483,6 +3461,7 @@ var saveBoxes = [
   'bountyListRefreshTime',
   'enableWantedList',
   'wantedNames',
+  'wantedGuildMembers',
   'fsboxlog',
   'huntingMode',
   'enableAttackHelper',
@@ -3547,10 +3526,11 @@ function bountyPrefs() {
     '<tr><td align= "right">Wanted Names' +
       helpLink('Wanted Names',
         'The names of the people you want to see on the bounty board ' +
-        'separated by commas') + ':</td><td colspan="3">' +
+        'separated by commas (or * for all)') + ':</td><td colspan="3">' +
       '<input name="wantedNames" size="60" value="' + calf.wantedNames +
       '"></td></tr>' +
 
+    simpleCheckbox('wantedGuildMembers') +
     simpleCheckbox('enableAttackHelper') +
     simpleCheckbox('showPvPSummaryInLog');
 }
@@ -4297,152 +4277,20 @@ function toggleForce(el, force) {
   el.classList.toggle('fshHide', force);
 }
 
-var deferred = window.jQuery && jQuery.when();
-
-function dialog(data) {
-  if (data.r === 0) {return;}
-  $('#dialog_msg').html(data.m).dialog('open');
+function hasErrorMsg(json) {
+  return json.e && json.e.message;
 }
 
-function equipItem(backpackInvId) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'equipitem',
-      inventory_id: backpackInvId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function htmlResult(data) { // TODO change to app code to avoid 302 redirect
-  var info = infoBox(data);
-  var _r = 1;
-  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
-  return {r: _r, m: info};
+function errorDialog(json) {
+  if (!json.s && hasErrorMsg(json)) {
+    $('#dialog_msg').html(json.e.message).dialog('open');
+    json.r = 1;
+  } else {json.r = 0;}
+  return json;
 }
 
 function useItem(backpackInvId) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      no_mobile: 1,
-      cmd: 'profile',
-      subcmd: 'useitem',
-      inventory_id: backpackInvId
-    }
-  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
-    .done(dialog);
-}
-
-function additionalAction(action, data) {
-  if (action === 'wear') {
-    return equipItem(data.b)
-      .pipe(function equipItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the equipitem
-  }
-  if (action === 'use') {
-    return useItem(data.b)
-      .pipe(function useItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the useitem
-  }
-}
-
-function takeItemStatus(action, data) {
-  if (data.r === 0 && action !== 'take') {
-    return additionalAction(action, data);
-  }
-  return data;
-}
-
-function takeItem(invId) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'takeitem',
-      guildstore_id: invId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function queueTakeItem(invId, action) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeTakeToQueue() {
-    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
-  });
-  return deferred;
-}
-
-function guildInvRecall(invId, playerId$$1, mode) {
-  return retryAjax({
-    url: 'index.php',
-    data: {
-      no_mobile: 1,
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'recall',
-      id: invId,
-      player_id: playerId$$1,
-      mode: mode
-    }
-  }).pipe(htmlResult) // TODO change to app code to avoid 302 redirect
-    .done(dialog);
-}
-
-function backpack() {
-  return retryAjax({
-    url: 'index.php',
-    data: {cmd: 'profile', subcmd: 'fetchinv'},
-    dataType: 'json'
-  });
-}
-
-function itemStatus(data) {
-  return function() {return data;};
-}
-
-function gotBackpack(o, data) {
-  return function(bpData) {
-    // TODO assuming backpack is successful...
-    if (o.action === 'wear') {
-      return equipItem(bpData.items[bpData.items.length - 1].a)
-        .pipe(itemStatus(data));
-      // Return recall status irrespective of the status of the equipitem
-    }
-    if (o.action === 'use') {
-      return useItem(bpData.items[bpData.items.length - 1].a)
-        .pipe(itemStatus(data));
-      // Return recall status irrespective of the status of the useitem
-    }
-  };
-}
-
-function recallItemStatus(o) {
-  return function(data) {
-    if (data.r === 0 && o.action !== 'recall') {
-      return backpack().pipe(gotBackpack(o, data));
-    }
-    return data;
-  };
-}
-
-function pipeRecallToQueue(o) {
-  return function() {
-    return guildInvRecall(o.invId, o.playerId, o.mode)
-      .pipe(recallItemStatus(o));
-  };
-}
-
-function queueRecallItem(o) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(pipeRecallToQueue(o));
-  return deferred;
+  return useitem(backpackInvId).pipe(errorDialog);
 }
 
 var disableQuickWearPrompts;
@@ -5565,6 +5413,29 @@ function injectHomePageTwoLink() { // Pref
   addUfsgLinks(); // Pref
 }
 
+function findNewGroup(el) {
+  if (el.textContent.indexOf('New attack group created.') === -1) {return;}
+  var groupJoinHTML = '';
+  if (!getValue('enableMaxGroupSizeToJoin')) {
+    groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
+      'subcmd2=joinall"><span class="notification-icon"></span>' +
+      '<p class="notification-content">Join all attack groups.</p></a>';
+  } else {
+    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+    groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
+      'subcmd2=joinallgroupsundersize"><span class="notification-icon">' +
+      '</span><p class="notification-content">Join all attack groups ' +
+      'less than size ' + maxGroupSizeToJoin + '.</p></a>';
+  }
+  el.insertAdjacentHTML('afterend',
+    '<li class="notification">' + groupJoinHTML + '</li>');
+}
+
+function injectJoinAllLink() {
+  var nodeList = getElementById('pCL').getElementsByTagName('li');
+  Array.prototype.forEach.call(nodeList, findNewGroup);
+}
+
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
@@ -5837,6 +5708,152 @@ function injectServerNode() {
   }
 }
 
+var havePrayedMsg =
+  '<span class="notification-icon"></span><p class="notification-content">' +
+  'You are currently praying at the temple.</p>';
+var godsNotification =
+  '<li class="notification">' +
+  '<span id="helperPrayToGods" class="fastPray">' +
+  '<table><tbody><tr><td>' +
+  '<span class="tip-static" data-tipped="Pray to Sahria" ' +
+  'style="background-image: url(\'' + imageServer +
+  '/temple/0.gif\');" praytype="0"></span></td><td>' +
+  '<span class="tip-static" data-tipped="Pray to Osverin" ' +
+  'style="background-image: url(\'' + imageServer +
+  '/temple/1.gif\');" praytype="1"></span></td></tr><tr><td>' +
+  '<span class="tip-static" data-tipped="Pray to Gurgriss" ' +
+  'style="background-image: url(\'' + imageServer +
+  '/temple/2.gif\');" praytype="2"></span></td><td>' +
+  '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
+  'style="background-image: url(\'' + imageServer +
+  '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
+  '<a href="index.php?cmd=temple">' +
+  '<p class="notification-content">Bow down to the gods</p>' +
+  '</a></span></li>';
+
+function havePrayed() {
+  getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
+  setValue('needToPray', false);
+  setValue('lastTempleCheck', new Date()
+    .setUTCHours(23, 59, 59, 999) + 1); // Midnight
+}
+
+function prayToGods(e) { // jQuery
+  var myGod = e.target.getAttribute('praytype');
+  if (!myGod) {return;}
+  getElementById('helperPrayToGods').removeEventListener('click',
+    prayToGods);
+  retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
+    .done(havePrayed);
+  $(e.target).qtip('hide');
+}
+
+function displayDisconnectedFromGodsMessage() {
+  getElementById('notifications').insertAdjacentHTML('afterbegin',
+    godsNotification);
+  getElementById('helperPrayToGods').addEventListener('click',
+    prayToGods);
+}
+
+function templeAlertEnabled(responseText) {
+  var checkNeedToPray;
+  var doc;
+  if (calf.cmd !== 'temple') {
+    doc = createDocument(responseText);
+  } else {
+    doc = document;
+  }
+  checkNeedToPray = doc.querySelector('input[value="Pray to Osverin"]');
+  var needToPray = false;
+  if (checkNeedToPray) {
+    displayDisconnectedFromGodsMessage();
+    needToPray = true;
+  }
+  setValue('needToPray', needToPray);
+  setValue('lastTempleCheck', new Date()
+    .setUTCHours(23, 59, 59, 999) + 1); // midnight
+}
+
+function parseTemplePage(responseText) {
+  if (calf.enableTempleAlert) {templeAlertEnabled(responseText);}
+}
+
+function checkLastUpdate(templeAlertLastUpdate) {
+  return !templeAlertLastUpdate || now > templeAlertLastUpdate;
+}
+
+function doWeNeedToParse() {
+  if (checkLastUpdate(getValue('lastTempleCheck'))) {return true;}
+  if (getValue('needToPray')) {
+    displayDisconnectedFromGodsMessage();
+  }
+  return false;
+}
+
+function injectTempleAlert() { // jQuery
+  // Checks to see if the temple is open for business.
+  if (calf.cmd === 'temple') {return;}
+  if (doWeNeedToParse()) {
+    retryAjax('index.php?no_mobile=1&cmd=temple').done(parseTemplePage);
+  }
+}
+
+var goldUpgradeMsg =
+'<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
+' class="notification-icon"></span><p class="notification-content">Up' +
+'grade stamina with gold</p></a></li>';
+
+function displayUpgradeMsg() {
+  if (location.search.indexOf('cmd=points&type=1') === -1) {
+    getElementById('notifications').insertAdjacentHTML('afterbegin',
+      goldUpgradeMsg);
+  }
+}
+
+function findDoc(data) {
+  if (location.search.indexOf('cmd=points&type=1') === -1) {
+    return createDocument(data);
+  }
+  document.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
+  return document;
+}
+
+function parseGoldUpgrades(data) {
+  if (!calf.enableUpgradeAlert) {return;}
+  var doc = findDoc(data);
+  var limit = getElementById('pCC', doc).getElementsByTagName('TABLE')[0]
+    .rows[3].cells[2];
+  var checkDoneUpgrade = limit.textContent.split(' / ');
+  if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
+    displayUpgradeMsg();
+    setValue('needToDoUpgrade', true);
+  } else {
+    setValue('needToDoUpgrade', false);
+    setValue('lastUpgradeCheck',
+      Date.parse(limit.nextElementSibling.textContent + ' GMT'));
+  }
+}
+
+function checkLastUpgrade() {
+  var lastUpgradeCheck = getValue('lastUpgradeCheck');
+  if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
+  retryAjax('index.php?no_mobile=1&cmd=points&type=1').done(function(data) {
+    add$1(3, parseGoldUpgrades, [data]);
+  });
+}
+
+function notUpgradesPage() {
+  if (getValue('needToDoUpgrade')) {
+    displayUpgradeMsg();
+    return;
+  }
+  checkLastUpgrade();
+}
+
+function injectUpgradeAlert() { // jQuery
+  if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
+}
+
 function getProfile(username) {
   return retryAjax({
     url: 'index.php',
@@ -6086,8 +6103,7 @@ function makeDiv(data) {
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  getElementById('pCR')
-    .insertAdjacentElement('afterbegin', fshAllyEnemy);
+  pCR.insertAdjacentElement('afterbegin', fshAllyEnemy);
   fshAllyEnemy.addEventListener('click', eventHandler$2);
   injectAllyEnemyList(data);
 }
@@ -6099,166 +6115,46 @@ function prepareAllyEnemyList() { // jQuery.min
     });
 }
 
-var bountyList;
-var wantedList;
-var bountyListRefreshTime;
-var bwNeedsRefresh;
-var curPage;
-var maxPage;
-var activeBountyListPosted;
-var wantedNames;
-var wantedArray;
+var thisBounty;
 
-function resetBountyList() {
-  setValueJSON('bountyList', null);
-  location.reload();
-}
-
-function injectBountyList() {
-  setValueJSON('bountyList', bountyList);
-  var injectHere = getElementById('Helper:BountyListPlaceholder');
-  var displayList = createTable({cellPadding: 1, width: 125});
-
-  var aRow = displayList.insertRow(0); // bountyList.rows.length
-  var aCell = aRow.insertCell(0);
-  var output = '<h3>Active Bounties</h3><ol style="color:#FFF380;font-' +
-    'size:10px;list-style-type:decimal;margin-left:1px;margin-top:' +
-    '1px;margin-bottom:1px;padding-left:20px;"><nobr><span id="' +
-    'Helper:resetBountyList" style=" font-size:8px; cursor:pointer; ' +
-    'text-decoration:underline;">Reset</span><nobr><br>';
-
-  if (bountyList.activeBounties === false) {
-    output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
-      'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
-      'bottom:1px;padding-left:10px;">[No Active bounties]</ol>';
-  } else {
-    for (var i = 0; i < bountyList.bounty.length; i += 1) {
-      var mouseOverText = '<div>Level:  ' + bountyList.bounty[i].lvl +
-        '<br/>Reward: ' + bountyList.bounty[i].reward + ' ' +
-        bountyList.bounty[i].rewardType +
-        '<br/>XP Loss Remaining: ' + bountyList.bounty[i].xpLoss +
-        '<br/>Progress:  ' + bountyList.bounty[i].progress +
-        '</div>';
-
-      output += '<li style="padding-bottom:0px;"><a style="color:' +
-        'red;font-size:10px;"href="' + server +
-        'index.php?cmd=attackplayer&mode=bounty&target_username=' +
-        bountyList.bounty[i].target + '">[a]</a>&nbsp;<a style="' +
-        'color:#A0CFEC;font-size:10px;"href="' + server +
-        'index.php?cmd=message&target_player=' +
-        bountyList.bounty[i].target + '">[m]</a> &nbsp;<a href="' +
-        bountyList.bounty[i].link + '" class="tip-static" ' +
-        'data-tipped="' + mouseOverText + '" style="color:' +
-        '#FFF380;font-size:10px;">' + bountyList.bounty[i].target +
-        '</a></li>';
-    }
+function acceptBtn(action, cell) {
+  if (action !== '[n/a]') {
+    return cell.firstChild.firstChild.getAttribute('onclick');
   }
-
-  aCell.innerHTML = output;
-  var breaker = createBr();
-  injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-  injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-  getElementById('Helper:resetBountyList')
-    .addEventListener('click', resetBountyList, true);
-}
-
-function resetWantedList() { // Legacy
-  setValueJSON('wantedList', null);
-  location.reload();
-}
-
-function acceptOrAttack(bounty) { // Legacy
-  if (bounty.accept) {
-    return 'color:rgb(0,255,0); cursor:pointer; ' +
-      'text-decoration:underline blink;" title = "Accept ' +
-      'Bounty" onclick="' + bounty.accept +
-      '">[a]</a>&nbsp;';
-  }
-  return 'color:red;" href="' + server +
-    'index.php?cmd=attackplayer&target_username=' +
-    bounty.target + '">[a]</a>&nbsp;';
-}
-
-function injectWantedList() { // Legacy
-  setValueJSON('wantedList', wantedList);
-  var injectHere = getElementById('Helper:WantedListPlaceholder');
-  var displayList = createTable({cellPadding: 3, width: 125});
-
-  var aRow = displayList.insertRow(0);
-  var aCell = aRow.insertCell(0);
-  var output = '<h3>Wanted Bounties</h3><ol style="color:#FFF380;font-' +
-    'size:10px;list-style-type:decimal;margin-left:1px;margin-top:' +
-    '1px;margin-bottom:1px;padding-left:12px;"><nobr> <span id="' +
-    'Helper:resetWantedList" font-size:8px; cursor:pointer; text-' +
-    'decoration:underline;">Reset</span></nobr><br>';
-
-  if (wantedList.wantedBounties === false) {
-    output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
-      'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
-      'bottom:1px;padding-left:7px;">[No wanted bounties]</ol>';
-  } else {
-    for (var i = 0; i < wantedList.bounty.length; i += 1) {
-      var mouseOverText = '"<div style=\'text-align:center;width:' +
-        '205px;\'>Target Level:  ' + wantedList.bounty[i].lvl +
-        '<br/>Offerer: ' + wantedList.bounty[i].offerer +
-        '<br/>Reward: ' + wantedList.bounty[i].reward + ' ' +
-        wantedList.bounty[i].rewardType +
-        '<br/>XP Loss Remaining: ' + wantedList.bounty[i].xpLoss +
-        '<br/>Posted: ' + wantedList.bounty[i].posted +
-        '<br/>Tickets Req.:  ' + wantedList.bounty[i].tickets + '</div>" ';
-
-      output += '<li style="padding-bottom:0px;margin-left:5px;">' +
-        '<a style= "font-size:10px;' + acceptOrAttack(wantedList.bounty[i]) +
-        '<a style="color:#A0CFEC;font-size:10px;"href="j' +
-        'avascript:openQuickMsgDialog(\'' + wantedList.bounty[i].target +
-        '\');">[m]</a> &nbsp;<a class="tip-static" data-tipped=' +
-        mouseOverText + 'style="color:#FFF380;font-size:10px;" href="' +
-        wantedList.bounty[i].link + '">' +
-        wantedList.bounty[i].target + '</a></li>';
-    }
-  }
-
-  aCell.innerHTML = output;
-  var breaker = createBr();
-  injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-  injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-  getElementById('Helper:resetWantedList')
-    .addEventListener('click', resetWantedList);
+  return '';
 }
 
 function getTarget$1(target, theRow) {
-  wantedList.wantedBounties = true;
-  var bounty = {};
-  bounty.target = target;
-  bounty.link = theRow.cells[0]
-    .firstChild.firstChild.href;
-  bounty.lvl = theRow.cells[0]
-    .firstChild.firstChild.nextSibling.textContent
-    .replace(/\[/, '').replace(/\]/, '');
-  bounty.offerer = theRow.cells[1]
-    .firstChild.firstChild.firstChild.textContent;
-  bounty.reward = theRow.cells[2].textContent;
-  bounty.rewardType = theRow.cells[2]
-    .firstChild.firstChild.firstChild.firstChild
-    .nextSibling.firstChild.title;
-  bounty.xpLoss = theRow.cells[3].textContent;
-  bounty.posted = theRow.cells[4].textContent;
-  bounty.tickets = theRow.cells[5].textContent;
-  if (theRow.cells[6].textContent.trim() === '[active]') {
-    bounty.active = true;
-    bounty.accept = '';
-  } else if (theRow.cells[6].textContent.trim() !== '[n/a]') { // TODO
-    bounty.active = false;
-    bounty.accept = theRow.cells[6]
-      .firstChild.firstChild
-      .getAttribute('onclick');
-  }
-  wantedList.bounty.push(bounty);
+  thisBounty = {};
+  thisBounty.target = target;
+  thisBounty.link = theRow.cells[0].firstChild.firstChild.href;
+  thisBounty.lvl = theRow.cells[0].firstChild.firstChild.nextSibling
+    .textContent.replace(/\[/, '').replace(/\]/, '');
+  thisBounty.offerer = theRow.cells[1].firstChild.firstChild.firstChild
+    .textContent;
+  thisBounty.reward = theRow.cells[2].textContent;
+  thisBounty.rewardType = theRow.cells[2].firstChild.firstChild.firstChild
+    .firstChild.nextSibling.firstChild.title;
+  thisBounty.xpLoss = theRow.cells[3].textContent;
+  thisBounty.posted = theRow.cells[4].textContent;
+  thisBounty.tickets = theRow.cells[5].textContent;
+  thisBounty.accept = acceptBtn(theRow.cells[6].textContent.trim(),
+    theRow.cells[6]);
+  wantedList.bounty.push(thisBounty);
 }
 
-function wantedTarget(target, theRow, el) {
-  if (target === el.trim() ||
-      wantedArray.indexOf('*') !== -1) {
+var isWanted = [
+  function() {return wantedArray.includes('*');},
+  function(target) {return wantedArray.includes(target);},
+  function(target, theRow) {
+    return calf.wantedGuildMembers &&
+      theRow.cells[6].textContent.trim() === '[n/a]';
+  }
+];
+
+function wantedTarget(target, theRow) {
+  if (theRow.cells[6].textContent.trim() !== '[active]' &&
+      isWanted.some(function(el) {return el(target, theRow);})) {
     getTarget$1(target, theRow);
   }
 }
@@ -6269,64 +6165,153 @@ function findTarget(activeTable) {
     var target = theRow.cells[0].firstChild
       .firstChild.firstChild.textContent;
     if (target === '[ No bounties available. ]') {break;}
-    wantedArray.forEach(wantedTarget.bind(null, target, theRow));
+    wantedTarget(target, theRow);
   }
 }
 
-function getWantedBountyList(doc) { // Legacy
-  if (!calf.enableWantedList) {return;}
-  var page = findNode('//input[@name="page"]', doc);
-  curPage = parseInt(page.value, 10);
-  maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
-  var activeTable = findNode('//table[@width = "630" and ' +
-    'contains(.,"Target")]', doc);
-  if (activeTable) {findTarget(activeTable);}
+function resetBountyList() {
+  setValueJSON('bountyList', null);
+  retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
+}
+
+function makeMouseOver(el) {
+  return 'Level:  ' + el.lvl +
+    '<br>Reward: ' + el.reward + ' ' + el.rewardType +
+    '<br>XP Loss Remaining: ' + el.xpLoss +
+    '<br>Progress:  ' + el.progress;
+}
+
+function injectBountyList() { // Legacy
+  setValueJSON('bountyList', bountyList);
+
+  bountyListDiv.innerHTML = '';
+
+  var heading = createDiv({textContent: 'Active Bounties '});
+  var reset = createSpan({className: 'xxsLink', textContent: 'Reset'});
+  reset.addEventListener('click', resetBountyList);
+  insertElement(heading, reset);
+  insertElement(bountyListDiv, heading);
+
+  var output = '';
+  if (bountyList.bounty.length === 0) {
+    output += '<div class="xsOrange">[No active bounties]</div>';
+  } else {
+    for (var i = 0; i < bountyList.bounty.length; i += 1) {
+      output += '<a href="' + bountyList.bounty[i].link +
+        '" class="tip-static" data-tipped="' +
+        makeMouseOver(bountyList.bounty[i]) + '">' +
+        bountyList.bounty[i].target + '</a>';
+    }
+  }
+  bountyListDiv.insertAdjacentHTML('beforeend', output);
+}
+
+function resetWantedList() {
+  setValueJSON('wantedList', null);
+  retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
+}
+
+function makeMouseOver$1(el) {
+  return 'Target Level:  ' + el.lvl +
+    '<br>Offerer: ' + el.offerer +
+    '<br>Reward: ' + el.reward + ' ' + el.rewardType +
+    '<br>XP Loss Remaining: ' + el.xpLoss +
+    '<br>Posted: ' + el.posted +
+    '<br>Tickets Req.:  ' + el.tickets;
+}
+
+function acceptBtn$1(bounty) {
+  if (bounty.accept) {
+    return '<span class="xsGreen" onclick="' + bounty.accept +
+      '">[a]</span>&nbsp;';
+  }
+  return '';
+}
+
+function injectWantedList() { // Legacy
+  setValueJSON('wantedList', wantedList);
+
+  wantedListDiv.innerHTML = '';
+
+  var heading = createDiv({textContent: 'Wanted Bounties '});
+  var reset = createSpan({className: 'xxsLink', textContent: 'Reset'});
+  reset.addEventListener('click', resetWantedList);
+  insertElement(heading, reset);
+  insertElement(wantedListDiv, heading);
+
+  var output = '';
+  if (wantedList.bounty.length === 0) {
+    output += '<div class="xsOrange">[No wanted bounties]</div>';
+  } else {
+    for (var i = 0; i < wantedList.bounty.length; i += 1) {
+      output += acceptBtn$1(wantedList.bounty[i]) +
+        '<a class="xsKhaki tip-static" data-tipped="' +
+        makeMouseOver$1(wantedList.bounty[i]) +
+        '" href="' + wantedList.bounty[i].link + '">' +
+        wantedList.bounty[i].target + '</a><br>';
+    }
+  }
+  wantedListDiv.insertAdjacentHTML('beforeend', output);
 }
 
 function parseActiveBounty(activeTable) { // Legacy
   if (!/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML)) {
-    bountyList.activeBounties = true;
     for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
-      var bounty = {};
-      bounty.target = activeTable.rows[i].cells[0].firstChild
+      var theCells = activeTable.rows[i].cells;
+      var thisBounty = {};
+      thisBounty.target = theCells[0].firstChild
         .firstChild.firstChild.textContent;
-      bounty.link = activeTable.rows[i].cells[0].firstChild
-        .firstChild.href;
-      bounty.lvl = activeTable.rows[i].cells[0].firstChild
+      thisBounty.link = theCells[0].firstChild.firstChild.href;
+      thisBounty.lvl = theCells[0].firstChild
         .firstChild.nextSibling.textContent
         .replace(/\[/, '').replace(/\]/, '');
-      bounty.reward = activeTable.rows[i].cells[2]
-        .textContent;
-      bounty.rewardType = activeTable.rows[i].cells[2]
+      thisBounty.reward = theCells[2].textContent;
+      thisBounty.rewardType = theCells[2]
         .firstChild.firstChild.firstChild.firstChild
         .nextSibling.firstChild.title;
-      bounty.posted = activeTable.rows[i].cells[3]
-        .textContent;
-      bounty.xpLoss = activeTable.rows[i].cells[4]
-        .textContent;
-      bounty.progress = activeTable.rows[i].cells[5]
-        .textContent;
-      bountyList.bounty.push(bounty);
+      thisBounty.posted = theCells[3].textContent;
+      thisBounty.xpLoss = theCells[4].textContent;
+      thisBounty.progress = theCells[5].textContent;
+      bountyList.bounty.push(thisBounty);
     }
-  } else {
-    bountyList.activeBounties = false;
   }
 }
 
+var bountyList;
+var wantedList;
+var bountyListRefreshTime;
+var bwNeedsRefresh;
+var curPage;
+var maxPage;
+var activeBountyListPosted;
+var wantedNames;
+var wantedArray;
+var bountyUrl = 'index.php?no_mobile=1&cmd=bounty&page=';
+
+function getWantedBountyList(doc) {
+  if (!calf.enableWantedList) {return;}
+  var page = doc.querySelector('#pCC input[name="page"]');
+  curPage = Number(page.value);
+  maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
+  var activeTable = getElementById('bounty-info', doc).parentNode.parentNode
+    .nextElementSibling.children[0].children[0];
+  if (activeTable) {findTarget(activeTable);}
+}
+
 function getActiveBountyList(doc) { // Legacy
-  var activeTable = findNode('//table[@width = 620]', doc);
+  var activeTable = getElementById('bounty-info', doc).parentNode.parentNode
+    .previousElementSibling.children[0].children[0];
   bountyList = {};
   bountyList.bounty = [];
   bountyList.isRefreshed = true;
-  bountyList.lastUpdate = new Date();
+  bountyList.lastUpdate = nowSecs;
   if (activeTable) {parseActiveBounty(activeTable);}
   injectBountyList();
   activeBountyListPosted = true;
 }
 
 function hazActiveBountyList(doc) {
-  if (calf.enableActiveBountyList &&
-      !activeBountyListPosted) {
+  if (calf.enableActiveBountyList && !activeBountyListPosted) {
     getActiveBountyList(doc);
   }
 }
@@ -6336,8 +6321,8 @@ function parseBountyPageForWorld(details) {
   getWantedBountyList(doc);
   hazActiveBountyList(doc);
   if (curPage < maxPage) {
-    xmlhttp('index.php?no_mobile=1&cmd=bounty&page=' + (curPage + 1),
-      parseBountyPageForWorld);
+    retryAjax(bountyUrl + (curPage + 1).toString())
+      .done(parseBountyPageForWorld);
   } else {
     injectWantedList();
   }
@@ -6345,40 +6330,38 @@ function parseBountyPageForWorld(details) {
 
 function testBountyList() {
   return bountyList &&
-    now - bountyList.lastUpdate.getTime() > bountyListRefreshTime;
+    nowSecs - bountyList.lastUpdate > bountyListRefreshTime;
 }
 
 function testWantedList() {
   return wantedList &&
-    now - wantedList.lastUpdate.getTime() > bountyListRefreshTime;
+    nowSecs - wantedList.lastUpdate > bountyListRefreshTime;
 }
 
-function testCacheInvalid() { // Legacy
+function testCacheInvalid() {
   return testBountyList() || testWantedList();
 }
 
-function invalidateCache() { // Legacy
+function invalidateCache() {
   bountyList = getValueJSON('bountyList');
   wantedList = getValueJSON('wantedList');
   bountyListRefreshTime = getValue('bountyListRefreshTime');
   bwNeedsRefresh = getValue('bwNeedsRefresh');
-  bountyListRefreshTime *= 1000;
   if (bwNeedsRefresh) {return;}
   if (testCacheInvalid()) {
     bwNeedsRefresh = true; // invalidate cache
   }
 }
 
-function doRefresh() { // Legacy
+function doRefresh() {
   wantedList = {};
   wantedList.bounty = [];
   wantedList.isRefreshed = true;
-  wantedList.lastUpdate = new Date();
-  wantedList.wantedBounties = false;
+  wantedList.lastUpdate = nowSecs;
   activeBountyListPosted = false;
   wantedNames = getValue('wantedNames');
-  wantedArray = wantedNames.split(',');
-  xmlhttp('index.php?no_mobile=1&cmd=bounty&page=1', parseBountyPageForWorld);
+  wantedArray = wantedNames.split(/\s*,\s*/);
+  retryAjax(bountyUrl + '1').done(parseBountyPageForWorld);
   setValue('bwNeedsRefresh', false);
 }
 
@@ -6393,41 +6376,44 @@ function notRefreshed(enableActiveBountyList, enableWantedList) {
   }
 }
 
-var testConditions = [
+var refreshConditions = [
   function() {return !bountyList;},
   function() {return !wantedList;},
   function() {return bwNeedsRefresh;}
 ];
 
-function testForRefresh() {
-  for (var i = 0; i < testConditions.length; i += 1) {
-    if (testConditions[i]()) {return true;}
-  }
-  return false;
+function needsRefresh() {
+  return refreshConditions.some(function(el) {
+    return el();
+  });
 }
 
-function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legacy
+function retrieveBountyInfo(enableActiveList, enableWantedList) {
   invalidateCache();
-  if (testForRefresh()) {
+  if (needsRefresh()) {
     doRefresh();
   } else {
-    notRefreshed(enableActiveBountyList, enableWantedList);
+    notRefreshed(enableActiveList, enableWantedList);
   }
+}
+
+var bountyListDiv;
+var wantedListDiv;
+
+function createMiniBox() {
+  return createDiv({className: 'minibox'});
 }
 
 function prepareBountyData() {
-  var pCR = getElementById('pCR');
   if (calf.enableWantedList) {
-    pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +
-      '<span id="Helper:WantedListPlaceholder"></span></div>');
+    wantedListDiv = createMiniBox();
+    pCR.insertAdjacentElement('afterbegin', wantedListDiv);
   }
   if (calf.enableActiveBountyList) {
-    pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +
-      '<span id="Helper:BountyListPlaceholder"></span></div>');
+    bountyListDiv = createMiniBox();
+    pCR.insertAdjacentElement('afterbegin', bountyListDiv);
   }
-  retrieveBountyInfo(
-    calf.enableActiveBountyList,
-    calf.enableWantedList);
+  retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
 }
 
 function doSendGold() { // jQuery
@@ -6563,7 +6549,7 @@ function joinAllGroup() {
   }
 }
 
-function backpack$1() {
+function backpack() {
   if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
   location.href = 'index.php?cmd=profile&subcmd=dropitems';
 }
@@ -6601,7 +6587,7 @@ var keyDict = {
   '62': {fn: movePage, arg: '>'}, // move to next page [>]
   '71': {fn: createGroup}, // create group [G]
   '76': {fn: logPage}, // Log Page [L]
-  '98': {fn: backpack$1}, // backpack [b]
+  '98': {fn: backpack}, // backpack [b]
   '103': {fn: gotoGuild}, // go to guild [g]
   '106': {fn: joinAllGroup}, // join all group [j]
   '108': {fn: logPage}, // Log Page [l]
@@ -6865,174 +6851,6 @@ function addOnlineAlliesWidgets() {
     onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
 }
 
-var havePrayedMsg =
-  '<span class="notification-icon"></span><p class="notification-content">' +
-  'You are currently praying at the temple.</p>';
-var godsNotification =
-  '<li class="notification">' +
-  '<span id="helperPrayToGods" class="fastPray">' +
-  '<table><tbody><tr><td>' +
-  '<span class="tip-static" data-tipped="Pray to Sahria" ' +
-  'style="background-image: url(\'' + imageServer +
-  '/temple/0.gif\');" praytype="0"></span></td><td>' +
-  '<span class="tip-static" data-tipped="Pray to Osverin" ' +
-  'style="background-image: url(\'' + imageServer +
-  '/temple/1.gif\');" praytype="1"></span></td></tr><tr><td>' +
-  '<span class="tip-static" data-tipped="Pray to Gurgriss" ' +
-  'style="background-image: url(\'' + imageServer +
-  '/temple/2.gif\');" praytype="2"></span></td><td>' +
-  '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
-  'style="background-image: url(\'' + imageServer +
-  '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
-  '<a href="index.php?cmd=temple">' +
-  '<p class="notification-content">Bow down to the gods</p>' +
-  '</a></span></li>';
-var goldUpgradeMsg =
-  '<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
-  ' class="notification-icon"></span><p class="notification-content">Up' +
-  'grade stamina with gold</p></a></li>';
-
-function havePrayed() {
-  getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
-  setValue('needToPray', false);
-  setValue('lastTempleCheck', new Date()
-    .setUTCHours(23, 59, 59, 999) + 1); // Midnight
-}
-
-function prayToGods(e) { // jQuery
-  var myGod = e.target.getAttribute('praytype');
-  if (!myGod) {return;}
-  getElementById('helperPrayToGods').removeEventListener('click',
-    prayToGods);
-  retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
-    .done(havePrayed);
-  $(e.target).qtip('hide');
-}
-
-function displayDisconnectedFromGodsMessage() {
-  getElementById('notifications').insertAdjacentHTML('afterbegin',
-    godsNotification);
-  getElementById('helperPrayToGods').addEventListener('click',
-    prayToGods);
-}
-
-function displayUpgradeMsg() {
-  if (location.search.indexOf('cmd=points&type=1') === -1) {
-    getElementById('notifications').insertAdjacentHTML('afterbegin',
-      goldUpgradeMsg);
-  }
-}
-
-function findNewGroup(el) {
-  if (el.textContent.indexOf('New attack group created.') === -1) {return;}
-  var groupJoinHTML = '';
-  if (!getValue('enableMaxGroupSizeToJoin')) {
-    groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
-      'subcmd2=joinall"><span class="notification-icon"></span>' +
-      '<p class="notification-content">Join all attack groups.</p></a>';
-  } else {
-    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
-      'subcmd2=joinallgroupsundersize"><span class="notification-icon">' +
-      '</span><p class="notification-content">Join all attack groups ' +
-      'less than size ' + maxGroupSizeToJoin + '.</p></a>';
-  }
-  el.insertAdjacentHTML('afterend',
-    '<li class="notification">' + groupJoinHTML + '</li>');
-}
-
-function templeAlertEnabled(responseText) {
-  var checkNeedToPray;
-  var doc;
-  if (calf.cmd !== 'temple') {
-    doc = createDocument(responseText);
-  } else {
-    doc = document;
-  }
-  checkNeedToPray = doc.querySelector('input[value="Pray to Osverin"]');
-  var needToPray = false;
-  if (checkNeedToPray) {
-    displayDisconnectedFromGodsMessage();
-    needToPray = true;
-  }
-  setValue('needToPray', needToPray);
-  setValue('lastTempleCheck', new Date()
-    .setUTCHours(23, 59, 59, 999) + 1); // midnight
-}
-
-function parseTemplePage(responseText) {
-  if (calf.enableTempleAlert) {templeAlertEnabled(responseText);}
-}
-
-function checkLastUpdate(templeAlertLastUpdate) {
-  return !templeAlertLastUpdate || now > templeAlertLastUpdate;
-}
-
-function doWeNeedToParse() {
-  if (checkLastUpdate(getValue('lastTempleCheck'))) {return true;}
-  if (getValue('needToPray')) {
-    displayDisconnectedFromGodsMessage();
-  }
-  return false;
-}
-
-function injectTempleAlert() { // jQuery
-  // Checks to see if the temple is open for business.
-  if (calf.cmd === 'temple') {return;}
-  if (doWeNeedToParse()) {
-    retryAjax('index.php?no_mobile=1&cmd=temple').done(parseTemplePage);
-  }
-}
-
-function findDoc(data) {
-  if (location.search.indexOf('cmd=points&type=1') === -1) {
-    return createDocument(data);
-  }
-  document.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
-  return document;
-}
-
-function parseGoldUpgrades(data) {
-  if (!calf.enableUpgradeAlert) {return;}
-  var doc = findDoc(data);
-  var limit = getElementById('pCC', doc).getElementsByTagName('TABLE')[0]
-    .rows[3].cells[2];
-  var checkDoneUpgrade = limit.textContent.split(' / ');
-  if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
-    displayUpgradeMsg();
-    setValue('needToDoUpgrade', true);
-  } else {
-    setValue('needToDoUpgrade', false);
-    setValue('lastUpgradeCheck',
-      Date.parse(limit.nextElementSibling.textContent + ' GMT'));
-  }
-}
-
-function checkLastUpgrade() {
-  var lastUpgradeCheck = getValue('lastUpgradeCheck');
-  if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
-  retryAjax('index.php?no_mobile=1&cmd=points&type=1').done(function(data) {
-    add$1(3, parseGoldUpgrades, [data]);
-  });
-}
-
-function notUpgradesPage() {
-  if (getValue('needToDoUpgrade')) {
-    displayUpgradeMsg();
-    return;
-  }
-  checkLastUpgrade();
-}
-
-function injectUpgradeAlert() { // jQuery
-  if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
-}
-
-function injectJoinAllLink() {
-  var nodeList = getElementById('pCL').getElementsByTagName('li');
-  Array.prototype.forEach.call(nodeList, findNewGroup);
-}
-
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function formatShortDate(aDate) {
@@ -7128,6 +6946,7 @@ function getEnvVars() {
   calf.enableComposingAlert = getValue('enableComposingAlert');
   calf.enableActiveBountyList = getValue('enableActiveBountyList');
   calf.enableWantedList = getValue('enableWantedList');
+  calf.wantedGuildMembers = getValue('wantedGuildMembers');
   calf.allyEnemyOnlineRefreshTime =
     getValue('allyEnemyOnlineRefreshTime') * 1000;
 }
@@ -7199,8 +7018,10 @@ function navMenu() { // jQuery
 }
 
 function moveRHSBoxUpOnRHS(title) {
-  getElementById('pCR').insertAdjacentElement('afterbegin',
-    getElementById(title));
+  var box = getElementById(title);
+  if (box) {
+    pCR.insertAdjacentElement('afterbegin', box);
+  }
 }
 
 function moveRHSBoxToLHS(title) {
@@ -9330,6 +9151,15 @@ function injectGuild() {
   add$1(4, guildTracker);
 }
 
+function takeitem(invId) {
+  return callApp({
+    cmd: 'guild',
+    subcmd: 'inventory',
+    subcmd2: 'takeitem',
+    guildstore_id: invId, // + 10000000,
+  }).pipe(errorDialog);
+}
+
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
     rows[i].cells[2].insertAdjacentHTML('beforeend',
@@ -9355,7 +9185,7 @@ function takeResult$1(self, data) {
 function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
     .firstElementChild.value;
-  takeItem(itmId).done(takeResult$1.bind(null, el));
+  takeitem(itmId).done(takeResult$1.bind(null, el));
   el.textContent = '';
   el.className = 'guildTagSpinner';
   el.style.backgroundImage = 'url(\'' + imageServer +
@@ -10125,25 +9955,13 @@ function doAction$1(fn, self) { // jQuery
   anotherSpinner(self);
 }
 
-function hasErrorMsg(json) {
-  return json.e && json.e.message;
-}
-
-function handleFail(json) {
-  if (!json.s && hasErrorMsg(json)) {
-    $('#dialog_msg').html(json.e.message).dialog('open');
-    json.r = 1;
-  }
-  return json;
-}
-
-function dostoreitemsSingle(invId) {
+function dostoreitems(invIdAry) {
   return callApp({
     cmd: 'guild',
     subcmd: 'inventory',
     subcmd2: 'dostoreitems',
-    'storeIndex[]': invId
-  }).pipe(handleFail);
+    storeIndex: invIdAry
+  }).pipe(errorDialog);
 }
 
 function dropItem(invIdList) {
@@ -10200,6 +10018,14 @@ function resetLvls$1() { // jQuery
   $('#fshInv').DataTable().draw(false);
 }
 
+function htmlResult(data) { // TODO change to app code to avoid 302 redirect
+  var info = infoBox(data);
+  var _r = 1;
+  // if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
+  if (info.includes('successfully')) {_r = 0;}
+  return {r: _r, m: info};
+}
+
 function sendItem(invIdList) {
   return retryAjax({
     url: 'index.php',
@@ -10213,6 +10039,115 @@ function sendItem(invIdList) {
     }
   }).pipe(htmlResult)
     .done(dialog);
+}
+
+function backpack$1() {
+  return retryAjax({
+    url: 'index.php',
+    data: {cmd: 'profile', subcmd: 'fetchinv'},
+    dataType: 'json'
+  });
+}
+
+// import failStub from '../../failStub';
+
+function recall(invId, playerId, mode) {
+  // return failStub();
+  return callApp({
+    cmd: 'guild',
+    subcmd: 'inventory',
+    subcmd2: 'recall',
+    id: invId, // + 10000000,
+    player_id: playerId,
+    mode: mode
+  });
+}
+
+function takeItem(invId) {
+  return retryAjax({
+    url: 'index.php',
+    data: {
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'takeitem',
+      guildstore_id: invId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+var deferred = window.jQuery && jQuery.when();
+
+function itemStatus(data) {
+  return function() {return data;};
+}
+
+function doAction$2(fn, item, data) {
+  return fn(item).pipe(itemStatus(data));
+}
+
+function additionalAction(action, data) {
+  if (action === 'wear') {
+    return doAction$2(equipItem, data.b, data);
+    // Return takeitem status irrespective of the status of the equipitem
+  }
+  if (action === 'use') {
+    return doAction$2(useItem, data.b, data);
+    // Return takeitem status irrespective of the status of the useitem
+  }
+}
+
+function takeItemStatus(action, data) {
+  if (data.r === 0 && action !== 'take') {
+    return additionalAction(action, data);
+  }
+  return data;
+}
+
+function queueTakeItem(invId, action) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(function pipeTakeToQueue() {
+    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
+  });
+  return deferred;
+}
+
+function gotBackpack(o, data) {
+  return function(bpData) {
+    // TODO assuming backpack is successful...
+    var lastBackpackItem = bpData.items[bpData.items.length - 1].a;
+    if (o.action === 'wear') {
+      return doAction$2(equipItem, lastBackpackItem, data);
+      // Return recall status irrespective of the status of the equipitem
+    }
+    if (o.action === 'use') {
+      return doAction$2(useItem, lastBackpackItem, data);
+      // Return recall status irrespective of the status of the useitem
+    }
+  };
+}
+
+function recallItemStatus(o) {
+  return function(data) {
+    if (data.r === 0 && o.action !== 'recall') {
+      return backpack$1().pipe(gotBackpack(o, data));
+    }
+    return data;
+  };
+}
+
+function pipeRecallToQueue(o) {
+  return function() {
+    return recall(o.invId, o.playerId, o.mode).pipe(errorDialog)
+      .pipe(recallItemStatus(o));
+  };
+}
+
+function queueRecallItem(o) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(pipeRecallToQueue(o));
+  return deferred;
 }
 
 function setName(e) { // jQuery
@@ -10258,7 +10193,7 @@ function doMoveItem(e) { // jQuery
 
 function doStoreItem(e) { // jQuery
   var self = $(e.target);
-  doAction$1(dostoreitemsSingle.bind(null, self.attr('invid')), self);
+  doAction$1(dostoreitems.bind(null, [self.attr('invid')]), self);
 }
 
 function doDropItem(e) { // jQuery
@@ -13793,62 +13728,6 @@ function doNotKill() {
   interceptDoAction();
 }
 
-var assets = {
-  defStats: '<table class="relicT relicS"><thead>' +
-    '<tr><th colspan="2">Defending Guild Stats</th></tr></thead><tbody>' +
-    '<tr><td>Relic Count:</td><td id="relicCount">0</td></tr>' +
-    '<tr><td>Lead Defender Bonus:</td><td id="LDPercentage">0</td></tr>' +
-    '<tr><td>Lead Defender Cloaked:</td><td id="LDCloaked">No</td></tr>' +
-    '</tbody><thead><tr><th colspan="2">Other Defender Stats</th></tr>' +
-    '</thead><tbody>' +
-    '<tr><td>Raw Attack:</td><td class="fshGrey" id="attackValue">0</td></tr>' +
-    '<tr><td>Attack w/ buffs:</td><td id="attackValueBuffed">0</td></tr>' +
-    '<tr><td>Raw Defense:</td>' +
-      '<td class="fshGrey" id="defenseValue">0</td></tr>' +
-    '<tr><td>Defense w/buffs:</td><td id="defenseValueBuffed">0</td></tr>' +
-    '<tr><td>Raw Armor:</td><td class="fshGrey" id="armorValue">0</td></tr>' +
-    '<tr><td>Armor w/ buffs:</td><td id="armorValueBuffed">0</td></tr>' +
-    '<tr><td>Raw Damage:</td><td class="fshGrey" id="damageValue">0</td></tr>' +
-    '<tr><td>Damage w/ buffs:</td><td id="damageValueBuffed">0</td></tr>' +
-    '<tr><td>Raw HP:</td><td class="fshGrey" id="hpValue">0</td></tr>' +
-    '<tr><td>HP w/ buffs:</td><td id="hpValueBuffed">0</td></tr>' +
-    '<tr><td>Cloaked:</td><td id="defendersCloaked">0</td></tr>' +
-    '<tr><td>Processed:</td><td id="defendersProcessed">0</td></tr>' +
-    '</tbody></table>',
-  atkStats: '<table class="relicT relicS"><thead>' +
-    '<tr><th colspan="2">Adjusted defense values</th></tr></thead><tbody>' +
-    '<tr><td>DC225:</td><td id="DC225">0</td></tr>' +
-    '<tr><td>DC175:</td><td id="DC175">0</td></tr>' +
-    '<tr><td colspan="2">&nbsp;</td></tr></tbody><thead>' +
-    '<tr><th colspan="2">Attacking Group Stats</th></tr></thead><tbody>' +
-    '<tr><td>Raw Group Attack:</td>' +
-      '<td class="fshGrey" id="GroupAttack"></td></tr>' +
-    '<tr><td>Group Attack w/ buffs:</td><td id="GroupAttackBuffed"></td></tr>' +
-    '<tr><td>Raw Group Defense:</td>' +
-      '<td class="fshGrey" id="GroupDefense"></td></tr>' +
-    '<tr><td>Group Defense w/ buffs:</td>' +
-      '<td id="GroupDefenseBuffed"></td></tr>' +
-    '<tr><td>Raw Group Armor:</td>' +
-      '<td class="fshGrey" id="GroupArmor"></td></tr>' +
-    '<tr><td>Group Armor w/ buffs:</td><td id="GroupArmorBuffed"></td></tr>' +
-    '<tr><td>Raw Group Damage:</td>' +
-      '<td class="fshGrey" id="GroupDamage"></td></tr>' +
-    '<tr><td>Group Damage w/ buffs:</td><td id="GroupDamageBuffed"></td></tr>' +
-    '<tr><td>Raw Group HP:</td><td class="fshGrey" id="GroupHP"></td></tr>' +
-    '<tr><td>Group HP w/ buffs:</td><td id="GroupHPBuffed"></td></tr>' +
-    '</tbody></table>',
-  proc: '<table class="relicT">' +
-    '<thead><tr><th colspan="2">Processing</th></tr></thead><tbody>' +
-    '<tr><td class="fshGreen" colspan="2" id="ProcessingStatus">' +
-      'Parsing defending guild stats ...</td></tr>' +
-    '</tbody><thead><tr><th colspan="2">Assumptions</th></tr></thead><tbody>' +
-    '<tr><td colspan="2" class="fshGrey">Above calculations include ' +
-      'Constitution, Fortitude, Nightmare Visage, Chi Strike, Sanctuary, ' +
-      'Terrorize and Flinch bonus calculations (in that order) on both the ' +
-      'defending group and attacking group.</td></tr>' +
-    '</tbody></table>'
-};
-
 function groupViewStats(doc) {
   var attackElement = getElementById('stat-attack', doc);
   var defenseElement = getElementById('stat-defense', doc);
@@ -13914,16 +13793,94 @@ function getMercStats() {
     'index.php?no_mobile=1&cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }
 
-var relicData;
+var atkStats = '<table class="relicT relicS"><thead>' +
+  '<tr><th colspan="2">Adjusted defense values</th></tr></thead><tbody>' +
+  '<tr><td>DC225:</td><td id="DC225">0</td></tr>' +
+  '<tr><td>DC175:</td><td id="DC175">0</td></tr>' +
+  '<tr><td colspan="2">&nbsp;</td></tr></tbody><thead>' +
+  '<tr><th colspan="2">Attacking Group Stats</th></tr></thead><tbody>' +
+  '<tr><td>Raw Group Attack:</td>' +
+    '<td class="fshGrey" id="GroupAttack"></td></tr>' +
+  '<tr><td>Group Attack w/ buffs:</td><td id="GroupAttackBuffed"></td></tr>' +
+  '<tr><td>Raw Group Defense:</td>' +
+    '<td class="fshGrey" id="GroupDefense"></td></tr>' +
+  '<tr><td>Group Defense w/ buffs:</td>' +
+    '<td id="GroupDefenseBuffed"></td></tr>' +
+  '<tr><td>Raw Group Armor:</td>' +
+    '<td class="fshGrey" id="GroupArmor"></td></tr>' +
+  '<tr><td>Group Armor w/ buffs:</td><td id="GroupArmorBuffed"></td></tr>' +
+  '<tr><td>Raw Group Damage:</td>' +
+    '<td class="fshGrey" id="GroupDamage"></td></tr>' +
+  '<tr><td>Group Damage w/ buffs:</td><td id="GroupDamageBuffed"></td></tr>' +
+  '<tr><td>Raw Group HP:</td><td class="fshGrey" id="GroupHP"></td></tr>' +
+  '<tr><td>Group HP w/ buffs:</td><td id="GroupHPBuffed"></td></tr>' +
+  '</tbody></table>';
+var defStats = '<table class="relicT relicS"><thead>' +
+  '<tr><th colspan="2">Defending Guild Stats</th></tr></thead><tbody>' +
+  '<tr><td>Relic Count:</td><td id="relicCount">0</td></tr>' +
+  '<tr><td>Lead Defender Bonus:</td><td id="LDPercentage">0</td></tr>' +
+  '<tr><td>Lead Defender Cloaked:</td><td id="LDCloaked">No</td></tr>' +
+  '</tbody><thead><tr><th colspan="2">Other Defender Stats</th></tr>' +
+  '</thead><tbody>' +
+  '<tr><td>Raw Attack:</td><td class="fshGrey" id="attackValue">0</td></tr>' +
+  '<tr><td>Attack w/ buffs:</td><td id="attackValueBuffed">0</td></tr>' +
+  '<tr><td>Raw Defense:</td>' +
+    '<td class="fshGrey" id="defenseValue">0</td></tr>' +
+  '<tr><td>Defense w/buffs:</td><td id="defenseValueBuffed">0</td></tr>' +
+  '<tr><td>Raw Armor:</td><td class="fshGrey" id="armorValue">0</td></tr>' +
+  '<tr><td>Armor w/ buffs:</td><td id="armorValueBuffed">0</td></tr>' +
+  '<tr><td>Raw Damage:</td><td class="fshGrey" id="damageValue">0</td></tr>' +
+  '<tr><td>Damage w/ buffs:</td><td id="damageValueBuffed">0</td></tr>' +
+  '<tr><td>Raw HP:</td><td class="fshGrey" id="hpValue">0</td></tr>' +
+  '<tr><td>HP w/ buffs:</td><td id="hpValueBuffed">0</td></tr>' +
+  '<tr><td>Cloaked:</td><td id="defendersCloaked">0</td></tr>' +
+  '<tr><td>Processed:</td><td id="defendersProcessed">0</td></tr>' +
+  '</tbody></table>';
+var proc = '<table class="relicT">' +
+  '<thead><tr><th colspan="2">Processing</th></tr></thead><tbody>' +
+  '<tr><td class="fshGreen" colspan="2" id="ProcessingStatus">' +
+    'Parsing defending guild stats ...</td></tr>' +
+  '</tbody><thead><tr><th colspan="2">Assumptions</th></tr></thead><tbody>' +
+  '<tr><td colspan="2" class="fshGrey">Above calculations include ' +
+    'Constitution, Fortitude, Nightmare Visage, Chi Strike, Sanctuary, ' +
+    'Terrorize and Flinch bonus calculations (in that order) on both the ' +
+    'defending group and attacking group.</td></tr>' +
+  '</tbody></table>';
+
 var containerDiv;
 var leftDiv;
 var fetchStatsBtn;
-var midDiv;
-var rightDiv;
-var hideRelicOffline;
-var player$1;
-var guildMemberList;
 var myDefenders;
+
+function defendersSetup(relicData) {
+  myDefenders = relicData.defenders.map(function(x) {
+    return x.player_name;
+  });
+}
+
+function primaryElementsSetup(relicData) {
+  defendersSetup(relicData);
+  if (containerDiv) {
+    containerDiv.innerHTML = '';
+  } else {
+    containerDiv = createDiv({className: 'body'});
+  }
+  leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
+  containerDiv.appendChild(leftDiv);
+  if (relicData.is_owner) {
+    leftDiv.appendChild(doBuffLinks(myDefenders));
+  }
+  fetchStatsBtn = createButton({
+    className: 'custombutton',
+    textContent: 'Fetch Stats'
+  });
+  fetchStatsBtn.addEventListener('click', getStats);
+  leftDiv.appendChild(fetchStatsBtn);
+  var dialogRelic = getElementById('dialog-relic');
+  dialogRelic.appendChild(containerDiv);
+}
+
+var guildMemberList;
 var twoMinutes;
 var sevenDays;
 var memberExclusions = [
@@ -13941,30 +13898,21 @@ var memberExclusions = [
       guildMemberList[key].level <= 450;
   }
 ];
-var relicCount;
-var relicMultiplier;
-var processingStatus;
+var relicCountElement;
+var lDPercentageElement;
+var lDCloakedElement;
 var attackElement;
-var defRawAttack;
 var attackBuffedElement;
-var defBuffedAttack;
 var defenseElement;
-var defRawDefense;
 var defenseBuffedElement;
 var armorElement;
-var defRawArmor;
 var armorBuffedElement;
 var damageElement;
-var defRawDamage;
 var damageBuffedElement;
-var defBuffedDamage;
 var hpElement;
-var defRawHp;
 var hpBuffedElement;
-var defCloaked;
 var defCloakedElement;
 var defProcessedElement;
-var defProcessed;
 var dc225Element;
 var dc175Element;
 var groupAttackElement;
@@ -13977,13 +13925,102 @@ var groupDamageElement;
 var groupDamageBuffedElement;
 var groupHPElement;
 var groupHPBuffedElement;
+var processingStatus;
+
+function missingMembers(membrList) {
+  guildMemberList = membrList;
+  var myMembers = Object.keys(guildMemberList);
+  twoMinutes = nowSecs - 120;
+  sevenDays = nowSecs - 604800;
+  var filtered = myMembers.reduce(function(prev, key) {
+    for (var i = 0; i < memberExclusions.length; i += 1) {
+      if (memberExclusions[i](key)) {return prev;}
+    }
+    prev.push('<a href="index.php?cmd=profile&player_id=' +
+      guildMemberList[key].id + '">' + key + '</a>');
+    return prev;
+  }, []);
+  containerDiv.insertAdjacentHTML('beforeend',
+    '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
+    '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
+    '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
+    '</table></div>');
+}
+
+function setDefVars() {
+  relicCountElement = getElementById('relicCount');
+  lDPercentageElement = getElementById('LDPercentage');
+  lDCloakedElement = getElementById('LDCloaked');
+  attackElement = getElementById('attackValue');
+  attackBuffedElement = getElementById('attackValueBuffed');
+  defenseElement = getElementById('defenseValue');
+  defenseBuffedElement = getElementById('defenseValueBuffed');
+  armorElement = getElementById('armorValue');
+  armorBuffedElement = getElementById('armorValueBuffed');
+  damageElement = getElementById('damageValue');
+  damageBuffedElement = getElementById('damageValueBuffed');
+  hpElement = getElementById('hpValue');
+  hpBuffedElement = getElementById('hpValueBuffed');
+  defCloakedElement = getElementById('defendersCloaked');
+  defProcessedElement = getElementById('defendersProcessed');
+}
+
+function setAtkVars() {
+  dc225Element = getElementById('DC225');
+  dc175Element = getElementById('DC175');
+  groupAttackElement = getElementById('GroupAttack');
+  groupAttackBuffedElement = getElementById('GroupAttackBuffed');
+  groupDefenseElement = getElementById('GroupDefense');
+  groupDefenseBuffedElement = getElementById('GroupDefenseBuffed');
+  groupArmorElement = getElementById('GroupArmor');
+  groupArmorBuffedElement = getElementById('GroupArmorBuffed');
+  groupDamageElement = getElementById('GroupDamage');
+  groupDamageBuffedElement = getElementById('GroupDamageBuffed');
+  groupHPElement = getElementById('GroupHP');
+  groupHPBuffedElement = getElementById('GroupHPBuffed');
+}
+
+function prepareSecondaryDivs(relicData) {
+  fetchStatsBtn.classList.add('fshHide');
+  var hideRelicOffline = getValue('hideRelicOffline');
+  if (relicData.is_owner && !hideRelicOffline) {
+    getMembrList(false).done(missingMembers);
+  }
+  leftDiv.insertAdjacentHTML('beforeend', proc);
+  processingStatus = getElementById('ProcessingStatus');
+  var midDiv = createDiv({
+    className: 'fshFloatLeft fshRelicMidDiv',
+    innerHTML: defStats
+  });
+  containerDiv.appendChild(midDiv);
+  setDefVars();
+  var rightDiv = createDiv({
+    className: 'fshFloatLeft fshRelicRightDiv',
+    innerHTML: atkStats
+  });
+  containerDiv.appendChild(rightDiv);
+  setAtkVars();
+}
+
+var defRawAttack;
+var defBuffedAttack;
+var defRawDefense;
+var defRawArmor;
+var defRawDamage;
+var defBuffedDamage;
+var defRawHp;
+var defCloaked;
+var defProcessed;
 var leadDefender;
 var groupStats;
 var mercStats;
 
-function ajaxFailure(jqXHR) {
-  processingStatus.textContent = jqXHR.status.toString() + ' ' +
-    jqXHR.statusText;
+function deductMercStats() {
+  groupStats.attack -= mercStats.attack;
+  groupStats.defense -= mercStats.defense;
+  groupStats.armor -= mercStats.armor;
+  groupStats.damage -= mercStats.damage;
+  groupStats.hp -= mercStats.hp;
 }
 
 function updateDefValues() {
@@ -13995,14 +14032,6 @@ function updateDefValues() {
   defCloakedElement.textContent = defCloaked.toString();
   defProcessed += 1;
   defProcessedElement.textContent = defProcessed.toString();
-}
-
-function deductMercStats() {
-  groupStats.attack -= mercStats.attack;
-  groupStats.defense -= mercStats.defense;
-  groupStats.armor -= mercStats.armor;
-  groupStats.damage -= mercStats.damage;
-  groupStats.hp -= mercStats.hp;
 }
 
 function calculateGroup() {
@@ -14095,7 +14124,7 @@ function doCalculations() {
   hpBuffedElement.textContent = addCommas(defBuffedHp);
 
   if (leadDefender.cloakLevel !== 0) {
-    getElementById('LDCloaked').textContent = 'Yes';
+    lDCloakedElement.textContent = 'Yes';
   }
 
   if (player$1.hasGroup) {
@@ -14106,76 +14135,47 @@ function doCalculations() {
 
 }
 
-function missingMembers(membrList) {
-  guildMemberList = membrList;
-  var myMembers = Object.keys(guildMemberList);
-  twoMinutes = nowSecs - 120;
-  sevenDays = nowSecs - 604800;
-  var filtered = myMembers.reduce(function(prev, key) {
-    for (var i = 0; i < memberExclusions.length; i += 1) {
-      if (memberExclusions[i](key)) {return prev;}
-    }
-    prev.push('<a href="index.php?cmd=profile&player_id=' +
-      guildMemberList[key].id + '">' + key + '</a>');
-    return prev;
-  }, []);
-  containerDiv.insertAdjacentHTML('beforeend',
-    '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
-    '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
-    '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
-    '</table></div>');
+function parseDefender(json) {
+  var defender = playerDataObject(json);
+  defRawAttack += Math.round(defender.attackValue * defenderMultiplier);
+  defRawDefense += Math.round(defender.defenseValue *
+    defenderMultiplier);
+  defRawArmor += Math.round(defender.armorValue * defenderMultiplier);
+  defRawDamage += Math.round(defender.damageValue * defenderMultiplier);
+  defRawHp += Math.round(defender.hpValue * defenderMultiplier);
+  if (defender.cloakLevel !== 0) {defCloaked += 1;}
+  updateDefValues();
 }
 
-function setDefVars() {
-  attackElement = getElementById('attackValue');
-  attackBuffedElement = getElementById('attackValueBuffed');
-  defenseElement = getElementById('defenseValue');
-  defenseBuffedElement = getElementById('defenseValueBuffed');
-  armorElement = getElementById('armorValue');
-  armorBuffedElement = getElementById('armorValueBuffed');
-  damageElement = getElementById('damageValue');
-  damageBuffedElement = getElementById('damageValueBuffed');
-  hpElement = getElementById('hpValue');
-  hpBuffedElement = getElementById('hpValueBuffed');
-  defCloakedElement = getElementById('defendersCloaked');
-  defProcessedElement = getElementById('defendersProcessed');
+function storeLeadDefender(json) {
+  leadDefender = playerDataObject(json);
 }
 
-function setAtkVars() {
-  dc225Element = getElementById('DC225');
-  dc175Element = getElementById('DC175');
-  groupAttackElement = getElementById('GroupAttack');
-  groupAttackBuffedElement = getElementById('GroupAttackBuffed');
-  groupDefenseElement = getElementById('GroupDefense');
-  groupDefenseBuffedElement = getElementById('GroupDefenseBuffed');
-  groupArmorElement = getElementById('GroupArmor');
-  groupArmorBuffedElement = getElementById('GroupArmorBuffed');
-  groupDamageElement = getElementById('GroupDamage');
-  groupDamageBuffedElement = getElementById('GroupDamageBuffed');
-  groupHPElement = getElementById('GroupHP');
-  groupHPBuffedElement = getElementById('GroupHPBuffed');
+function storeGroupStats(obj) {
+  groupStats = obj;
 }
 
-function prepareDivs() {
-  fetchStatsBtn.classList.add('fshHide');
-  hideRelicOffline = getValue('hideRelicOffline');
-  if (relicData.is_owner && !hideRelicOffline) {
-    getMembrList(false).done(missingMembers);
-  }
-  leftDiv.insertAdjacentHTML('beforeend', assets.proc);
-  processingStatus = getElementById('ProcessingStatus');
-  midDiv = createDiv({
-    className: 'fshFloatLeft fshRelicMidDiv',
-    innerHTML: assets.defStats
-  });
-  containerDiv.appendChild(midDiv);
-  setDefVars();
-  rightDiv = createDiv({
-    className: 'fshFloatLeft fshRelicRightDiv',
-    innerHTML: assets.atkStats
-  });
-  containerDiv.appendChild(rightDiv);
-  setAtkVars();
+function storeMercStats(obj) {
+  mercStats = obj;
+}
+
+function resetCounters() {
+  defRawAttack = 0;
+  defRawDefense = 0;
+  defRawArmor = 0;
+  defRawDamage = 0;
+  defRawHp = 0;
+  defCloaked = 0;
+  defProcessed = 0;
+}
+
+var relicData;
+var player$1;
+var relicMultiplier;
+
+function ajaxFailure(jqXHR) {
+  processingStatus.textContent = jqXHR.status.toString() + ' ' +
+    jqXHR.statusText;
 }
 
 function getGuild$1() {
@@ -14198,27 +14198,10 @@ function calcRelicMultiplier(rels) {
 function parseGuild$1(html) {
   var doc = createDocument(html);
   var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
-  relicCount = nodeList.length;
-  getElementById('relicCount').textContent = relicCount.toString();
+  var relicCount = nodeList.length;
+  relicCountElement.textContent = relicCount.toString();
   relicMultiplier = calcRelicMultiplier(relicCount);
-  getElementById('LDPercentage').textContent =
-    (relicMultiplier * 100).toString() + '%';
-}
-
-function parseDefender(json) {
-  var defender = playerDataObject(json);
-  defRawAttack += Math.round(defender.attackValue * defenderMultiplier);
-  defRawDefense += Math.round(defender.defenseValue *
-    defenderMultiplier);
-  defRawArmor += Math.round(defender.armorValue * defenderMultiplier);
-  defRawDamage += Math.round(defender.damageValue * defenderMultiplier);
-  defRawHp += Math.round(defender.hpValue * defenderMultiplier);
-  if (defender.cloakLevel !== 0) {defCloaked += 1;}
-  updateDefValues();
-}
-
-function storeLeadDefender(json) {
-  leadDefender = playerDataObject(json);
+  lDPercentageElement.textContent = (relicMultiplier * 100).toString() + '%';
 }
 
 function getGroups() {
@@ -14230,14 +14213,6 @@ function getGroups() {
       subcmd: 'groups'
     }
   });
-}
-
-function storeGroupStats(obj) {
-  groupStats = obj;
-}
-
-function storeMercStats(obj) {
-  mercStats = obj;
 }
 
 function parseGroups(html) {
@@ -14253,18 +14228,8 @@ function parseGroups(html) {
   return $.when.apply($, prm);
 }
 
-function resetCounters() {
-  defRawAttack = 0;
-  defRawDefense = 0;
-  defRawArmor = 0;
-  defRawDamage = 0;
-  defRawHp = 0;
-  defCloaked = 0;
-  defProcessed = 0;
-}
-
 function getStats() {
-  prepareDivs();
+  prepareSecondaryDivs(relicData);
   resetCounters();
   player$1 = GameData.player();
   var prm = [];
@@ -14280,33 +14245,9 @@ function getStats() {
   $.when.apply($, prm).done(doCalculations);
 }
 
-function setup$1() {
-  myDefenders = relicData.defenders.map(function(x) {
-    return x.player_name;
-  });
-  if (containerDiv) {
-    containerDiv.innerHTML = '';
-  } else {
-    containerDiv = createDiv({className: 'body'});
-  }
-  leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
-  containerDiv.appendChild(leftDiv);
-  if (relicData.is_owner) {
-    leftDiv.appendChild(doBuffLinks(myDefenders));
-  }
-  fetchStatsBtn = createButton({
-    className: 'custombutton',
-    textContent: 'Fetch Stats'
-  });
-  fetchStatsBtn.addEventListener('click', getStats);
-  leftDiv.appendChild(fetchStatsBtn);
-  var dialogRelic = getElementById('dialog-relic');
-  dialogRelic.appendChild(containerDiv);
-}
-
 function viewRelic(e, data) {
   relicData = data.response.data;
-  if (relicData.defenders.length > 0) {setup$1();}
+  if (relicData.defenders.length > 0) {primaryElementsSetup(relicData);}
 }
 
 function injectRelic() {
@@ -16516,6 +16457,58 @@ function ladder() {
   lastReset();
 }
 
+var amt;
+var prc;
+var warn;
+
+function getAmount() {
+  if (!amt) {amt = getElementById('amount');}
+  return amt;
+}
+
+function getPrice() {
+  if (!prc) {prc = getElementById('price');}
+  return prc;
+}
+
+function getWarning() {
+  if (!warn) {
+    var requestTable = closestTable(getAmount());
+    var newRow = requestTable.insertRow(2);
+    warn = newRow.insertCell(0);
+    warn.colSpan = '2';
+    warn.className = 'fshCenter';
+  }
+  return warn;
+}
+
+function totalPrice(amount, sellPrice) {
+  var gross = amount * sellPrice;
+  return gross + Math.ceil(gross / 200);
+}
+
+function marketplaceWarning(sellPrice) {
+  var amount = getAmount().value;
+  getWarning().innerHTML = '<span class="fshBlue">You are offering to buy ' +
+    '<b>' + amount + '</b> FSP for >> <b>' + addCommas(sellPrice) +
+    '</b> (Total: ' + addCommas(totalPrice(amount, sellPrice)) + ')</span>';
+}
+
+function clearWarning() {
+  if (warn && warn.innerHTML !== '') {warn.innerHTML = '';}
+}
+
+function addMarketplaceWarning() {
+  var sellPrice = getPrice().value;
+  if (sellPrice.search(/^[0-9]+$/) !== -1) {
+    marketplaceWarning(sellPrice);
+  } else {clearWarning();}
+}
+
+function marketplace() {
+  pCC.addEventListener('keyup', addMarketplaceWarning);
+}
+
 var oldMoves = [];
 var nodes;
 var selectRow;
@@ -16663,7 +16656,7 @@ function getValue$1(type, element, label) {
   return warehouse$1[type][label];
 }
 
-function getAmount(type, upgrade) {
+function getAmount$1(type, upgrade) {
   return getValue$1(type, upgrade, 'amount');
 }
 
@@ -16683,7 +16676,7 @@ function getCell(type, upgrade) {
 }
 
 function doStamCount(type, upgrade, quantity, cell) {
-  var amount = getAmount(type, upgrade);
+  var amount = getAmount$1(type, upgrade);
   var cost = getCost(type, upgrade);
   // cap the value if the user goes over his current FSP
   var extraStam;
@@ -17196,17 +17189,21 @@ function processLadder(aRow, messageType) {
 /* eslint-disable max-len */
 var specials = {
   '0': 'Dull Edge was activated.',
+  '1': '@0 was afflicted by Super Elite Slayer.',
   '2': '@0 was withered.',
   '3': '@0\'s armor was shattered.',
   '4': '@0 was infused with extra defense (Constitution).',
   '5': '@0 was infused with extra armor (Sanctuary).',
+  '7': '@0 activated Spectral Knight reducing targets armor to zero.',
   '8': '@0 activated Savagery.',
   '9': '@0 activated Shield Strike.',
   '13': '@0 activated Conserve.',
   '18': '@0 leeched the buff \'@1\'.',
+  '17': '@0 activated Four Leaf.',
   '19': '@0\'s demoralize skill reduced the effectiveness of @1\'s enhancements.',
   '20': '@0\'s reckoning has improved their skill \'@1\'',
   '21': '@0 was mesmerized by Spell Breaker, losing the \'@1\' buff.',
+  '22': '@0 was turned Undead by Necrosis.',
   '23': '@0 activated High Guard.',
   '24': '@0 was smote.',
   '25': '@0 activated Barricade.',
@@ -18597,7 +18594,7 @@ var pageSwitcher = {
     outbox: {'-': {'-': {'-': outbox}}}
   },
   potionbazaar: {'-': {'-': {'-': {'-': injectBazaar}}}},
-  marketplace: {createreq: {'-': {'-': {'-': addMarketplaceWidgets}}}},
+  marketplace: {createreq: {'-': {'-': {'-': marketplace}}}},
   quickbuff: {'-': {'-': {'-': {'-': injectQuickBuff}}}}, // No ga
   notepad: {
     showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}}, // done
@@ -18751,7 +18748,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '13';
+window.FSH.calf = '14';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
