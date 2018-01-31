@@ -16,7 +16,7 @@ import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
 import {pCR} from '../support/layout';
 import prepareAllyEnemyList from './allyEnemy';
-import prepareBountyData from './activeWantedBounties';
+import {prepareBountyData} from '../activeWantedBounties/activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
 import scoutTowerLink from './scoutTowerLink';
 import {seLog} from '../seLog/seLog';
@@ -51,6 +51,7 @@ function getEnvVars() {
   calf.enableComposingAlert = getValue('enableComposingAlert');
   calf.enableActiveBountyList = getValue('enableActiveBountyList');
   calf.enableWantedList = getValue('enableWantedList');
+  calf.wantedGuildMembers = getValue('wantedGuildMembers');
   calf.allyEnemyOnlineRefreshTime =
     getValue('allyEnemyOnlineRefreshTime') * 1000;
 }

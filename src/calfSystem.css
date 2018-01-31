@@ -1,3 +1,25 @@
+/* Active/Wanted Bounties */
+.xxsLink {
+  color: yellow;
+  cursor: pointer;
+  font-size: xx-small;
+  text-decoration: underline;
+}
+.xsGreen {
+  color: lawngreen;
+  cursor: pointer;
+  font-size: x-small;
+  text-decoration: underline;
+}
+.xsOrange {
+  color: orange;
+  font-size: x-small;
+}
+.xsKhaki {
+  color: khaki;
+  font-size: x-small;
+}
+
 /* Titan Info */
 .cR .titanInfo {
   background: -webkit-linear-gradient(top, rgba(255,255,255,0.4) 0%,rgba(255,255,255,0.2) 100%);
