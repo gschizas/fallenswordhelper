@@ -99,4 +99,6 @@ export function sendException(desc, fatal) {
   });
 }
 
-window.addEventListener('error', function(e) {sendException(e, true);});
+window.addEventListener('error', function(e) {
+  sendException(e.error.stack, true);
+});

@@ -38,11 +38,11 @@ function asyncTask() {
   try {
     pop()();
   } catch (error) {
-    sendException(error, false);
-    log('Unhandled Exception:', error);
+    sendException(error.stack, false);
+    log('Unhandled Exception:', error.stack);
     //#if _DEV  //  Unhandled Exception
     // eslint-disable-next-line no-console
-    console.log('Unhandled Exception:', error);
+    console.log('Unhandled Exception:', error.stack);
     //#endif
   }
   taskRunner();
