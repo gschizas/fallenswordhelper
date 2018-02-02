@@ -14,6 +14,7 @@ import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
 import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
+import jsonParse from '../common/jsonParse';
 import {pCR} from '../support/layout';
 import prepareAllyEnemyList from './allyEnemy';
 import {prepareBountyData} from '../activeWantedBounties/activeWantedBounties';
@@ -219,7 +220,7 @@ function prepareEnv() {
 
 export default function lookForHcsData() {
   var hcsData = getElementById('html');
-  if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
+  if (hcsData && jsonParse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
   }
 }
