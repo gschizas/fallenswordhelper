@@ -39,7 +39,7 @@
     "uglify:prod": "uglifyjs dist/prod/calfSystem.js -c -m -o dist/prod/calfSystem.min.js",
     "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
     "watch": "rollup -c -w -m inline --environment FOLDER:dev,SOURCE:calf",
-    "ws": "http-server -p 9966 -c-1 -S -C cert.crt -K key.pem"
+    "ws": "http-server -p 9966 --cors -c-1 -S -C cert.crt -K key.pem"
   },
   "repository": {
     "type": "git",
