@@ -1,5 +1,4 @@
 import {fallback} from './system';
-import {log} from './debug';
 import {sendException} from './fshGa';
 import {getLength, pop, push} from './sch';
 
@@ -34,18 +33,37 @@ export default function add(priority, fn, args, scope) {
   }
 }
 
+function parseStack(e) {
+  var concatStack = e.stack.replace(/\n +/g, '|');
+  if (e.stack.includes(e.message)) {
+    //#if _DEV  //  Unhandled Exception
+    console.log('Unhandled Exception:', e.stack); // eslint-disable-line no-console
+    //#endif
+    return concatStack;
+  }
+  var stackMsg = e.message + '|' + concatStack;
+  //#if _DEV  //  Unhandled Exception
+  console.log('Unhandled Exception:', e.message, e.stack); // eslint-disable-line no-console
+  //#endif
+  return stackMsg;
+}
+
+function parseError(e) {
+  if (e.stack) {return parseStack(e);}
+  //#if _DEV  //  Unhandled Exception
+  console.log('Unhandled Exception:', e.message); // eslint-disable-line no-console
+  //#endif
+  return e.message;
+}
+
 function asyncTask() {
   try {
     pop()();
-  } catch (error) {
-    sendException(error.stack, false);
-    log('Unhandled Exception:', error.stack);
-    //#if _DEV  //  Unhandled Exception
-    // eslint-disable-next-line no-console
-    console.log('Unhandled Exception:', error.stack);
-    //#endif
+  } catch (e) {
+    sendException(parseError(e), false);
+  } finally {
+    taskRunner();
   }
-  taskRunner();
 }
 
 function callback(event) {
