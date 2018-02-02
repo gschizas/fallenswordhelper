@@ -53,6 +53,7 @@ function fshMain(ver) {
     scriptTag.type = 'text/javascript';
     scriptTag.onload = onPageLoad;
     scriptTag.src = s;
+    scriptTag.crossOrigin = 'anonymous';
     document.body.appendChild(scriptTag);
   });
 

@@ -166,6 +166,14 @@ if (needApiUpgrade) {
 
 var calf = {};
 
+function jsonParse(str, reviver) {
+  try {
+    return JSON.parse(str, reviver);
+  } catch (e) {
+    // Ignore bad json
+  }
+}
+
 var paused = true;
 var queue = [];
 
@@ -582,7 +590,7 @@ function reviver$1(key, value) {
 function getValueJSON(name) {
   var resultJSON = getValue(name);
   var result;
-  if (resultJSON) {result = JSON.parse(resultJSON, reviver$1);}
+  if (resultJSON) {result = jsonParse(resultJSON, reviver$1);}
   return result;
 }
 
@@ -1228,7 +1236,31 @@ function sendException(desc, fatal) {
   });
 }
 
-window.addEventListener('error', function(e) {sendException(e, true);});
+// TODO needs CORS
+
+// window.addEventListener('error', function(e) {
+//   // console.log('e.message', e.message);
+//   // console.log('e.filename', e.filename);
+//   // console.log('e.lineno', e.lineno);
+//   // console.log('e.colno', e.colno);
+//   console.log('error event', e);
+//   if (e.error) {
+//     console.log('error event message', e.error.message);
+//     console.log('error event stack', e.error.stack);
+//   }
+//   // sendException(e.error.stack, true);
+// });
+
+// var oldError = window.onerror;
+// window.onerror = function(message, source, lineno, colno, error) {
+//   console.log('onerror message', message);
+//   console.log('onerror source', source);
+//   console.log('onerror lineno', lineno);
+//   console.log('onerror colno', colno);
+//   console.log('onerror error', error);
+//   console.log('onerror error.message', error.message);
+//   console.log('onerror error.stack', error.stack);
+// };
 
 /*
 Based on
@@ -1316,14 +1348,28 @@ function add$1(priority, fn, args, scope) {
   }
 }
 
+function parseStack(e) {
+  var concatStack = e.stack.replace(/\n +/g, '|');
+  if (e.stack.includes(e.message)) {
+    return concatStack;
+  }
+  var stackMsg = e.message + '|' + concatStack;
+  return stackMsg;
+}
+
+function parseError(e) {
+  if (e.stack) {return parseStack(e);}
+  return e.message;
+}
+
 function asyncTask() {
   try {
     pop()();
-  } catch (error) {
-    sendException(error, false);
-    log('Unhandled Exception:', error);
+  } catch (e) {
+    sendException(parseError(e), false);
+  } finally {
+    taskRunner$1();
   }
-  taskRunner$1();
 }
 
 function callback(event) {
@@ -7119,7 +7165,7 @@ function prepareEnv() {
 
 function lookForHcsData() {
   var hcsData = getElementById('html');
-  if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
+  if (hcsData && jsonParse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
   }
 }
@@ -8791,14 +8837,6 @@ function makeTg() {
   tgCont = createDiv({className: 'tgCont fshSpinner64'});
   tgCont.appendChild(tg);
   return tgCont;
-}
-
-function jsonParse(str) {
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    // Ignore bad json
-  }
 }
 
 var ioText;
@@ -11704,7 +11742,6 @@ function profileComponents() {
   if (invTables.length !== 2) {return;}
   thisInvTable = invTables[1];
   var compDiv = thisInvTable.parentNode;
-  if (compDiv.style.display !== 'block') {return;}
   var cmDiv = createDiv({className: 'fshCenter'});
   quickDelDiv = createDiv();
   sumComp = createDiv();
@@ -13388,7 +13425,7 @@ function injectTopRated() {
   if (testforTopRated()) {looksLikeTopRated();}
 }
 
-var multiple;
+var invItems$1;
 
 function getItemDiv() {
   var itemDiv = getElementById('item-div');
@@ -13454,14 +13491,13 @@ function doFolderHeaders(folders) {
     innerHTML: folderCell
   });
   foldersRow.addEventListener('click', hideFolder);
-  multiple.insertAdjacentHTML('afterend', '<tr id="fshShowSTs">' +
+  var el = getElementById('item-list').parentNode.parentNode;
+  el.insertAdjacentHTML('beforebegin', '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
     'Select items in ST</label></td></tr>');
-  multiple.insertAdjacentElement('afterend', foldersRow);
+  el.insertAdjacentElement('beforebegin', foldersRow);
 }
-
-var invItems$1;
 
 function stColor(el, item) {
   if (item.is_in_st) {
@@ -13494,7 +13530,7 @@ function processTrade(data) {
 
 }
 
-function inv$1() { // jQuery
+function doFolders() { // jQuery.min
   getInventoryById().done(function(data) {
     add$1(3, processTrade, [data]);
   });
@@ -13547,20 +13583,26 @@ function toggleAllPlants(evt) {
   if (evt.target.classList.contains('fshCheckAll')) {doCheckAll$1(evt);}
 }
 
+function getItemList() {
+  var sendClasses = getValue('sendClasses');
+  var itemList = jsonParse('[' + sendClasses + ']');
+  if (itemList) {return itemList;}
+  return jsonParse('[' + defaults.sendClasses + ']');
+}
+
 function injectTradeOld() {
   var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
     'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
     '<span id="itemid-2" ' +
     'class="fshCheckAll fshLink fshNoWrap">All Resources</span>';
-  var sendClasses = getValue('sendClasses');
-  var itemList = JSON.parse('[' + sendClasses + ']');
+  var itemList = getItemList();
   itemList.forEach(function(el) {
     myTd += ' &ensp;<span id="itemid' + el[1] +
       '" class="fshCheckAll fshLink fshNoWrap">' + el[0] + '</span>';
   });
   myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
     'class="custominput" value="all" size=3></td>';
-  multiple = createTr({
+  var multiple = createTr({
     id: 'fshSelectMultiple',
     innerHTML: myTd
   });
@@ -13570,7 +13612,7 @@ function injectTradeOld() {
 }
 
 function injectTrade() {
-  add$1(3, inv$1);
+  add$1(3, doFolders);
   add$1(3, injectTradeOld);
 }
 
@@ -16328,7 +16370,7 @@ var plantFromComponentHash = {
 function quickInventDone(json) {
   var inventResult = getElementById('invent_Result');
   if (jsonFail(json, inventResult)) {return;}
-  if (json.s) {
+  if (json.r.success) {
     outputResult('<span class="fshGreen">' +
       'You successfully invented the item!</span>', inventResult);
   } else {
@@ -18763,7 +18805,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '15';
+window.FSH.calf = '16';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

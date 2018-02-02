@@ -1,6 +1,6 @@
 {
   "name": "fallenswordhelper",
-  "version": "15.22.15",
+  "version": "15.22.16",
   "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "rollup:dev": "npm run rollup:devcalf && npm run rollup:devfsh",
     "rollup:prod": "npm run rollup:prodcalf && npm run rollup:prodfsh",
     "rollup:betacalf": "rollup -c --environment FOLDER:beta,SOURCE:calf",
-    "rollup:devcalf": "rollup -c -m inline --environment FOLDER:dev,SOURCE:calf",
+    "rollup:devcalf": "rollup -c -m true --environment FOLDER:dev,SOURCE:calf",
     "rollup:prodcalf": "rollup -c --environment FOLDER:prod,SOURCE:calf",
     "rollup:betafsh": "rollup -c --environment FOLDER:beta,SOURCE:fsh",
     "rollup:devfsh": "rollup -c --environment FOLDER:dev,SOURCE:fsh",
@@ -32,11 +32,11 @@
     "preuglify": "echo Starting uglify",
     "uglify": "npm run uglify:dev && npm run uglify:beta && npm run uglify:prod",
     "postuglify": "echo Finished uglify",
-    "uglify:beta": "uglifyjs dist/beta/calfSystem.js -c -m -o dist/beta/calfSystem.min.js",
+    "uglify:beta": "uglifyjs dist/beta/calfSystem.js -c -m -b beautify=false -b semicolons=false -o dist/beta/calfSystem.min.js",
     "postuglify:beta": "cost :max,unzip:dist/beta/calfSystem.min.js && cost :max:dist/beta/calfSystem.min.js",
-    "uglify:dev": "uglifyjs dist/dev/calfSystem.js  -c -m -o dist/dev/calfSystem.min.js",
+    "uglify:dev": "uglifyjs dist/dev/calfSystem.js -c -m -b beautify=false -b semicolons=false -o dist/dev/calfSystem.min.js",
     "postuglify:dev": "cost :max,unzip:dist/dev/calfSystem.min.js && cost :max:dist/dev/calfSystem.min.js",
-    "uglify:prod": "uglifyjs dist/prod/calfSystem.js -c -m -o dist/prod/calfSystem.min.js",
+    "uglify:prod": "uglifyjs dist/prod/calfSystem.js -c -m -b beautify=false -b semicolons=false -o dist/prod/calfSystem.min.js",
     "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
     "watch": "rollup -c -w -m inline --environment FOLDER:dev,SOURCE:calf",
     "ws": "http-server -p 9966 --cors -c-1 -S -C cert.crt -K key.pem"
@@ -66,7 +66,7 @@
     "jsonlint": "^1.6.2",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
-    "rollup": "^0.55.1",
+    "rollup": "^0.55.3",
     "rollup-plugin-jscc": "^0.3.3",
     "uglify-js": "^3.3.9"
   }

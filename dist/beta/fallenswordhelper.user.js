@@ -11,7 +11,7 @@
 // @exclude        https://wiki.fallensword.com/*
 // @exclude        https://www.fallensword.com/app.php*
 // @exclude        https://www.fallensword.com/fetchdata.php*
-// @version        1522b15
+// @version        1522b16
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -53,6 +53,7 @@ function fshMain(ver) {
     scriptTag.type = 'text/javascript';
     scriptTag.onload = onPageLoad;
     scriptTag.src = s;
+    scriptTag.crossOrigin = 'anonymous';
     document.body.appendChild(scriptTag);
   });
 
@@ -74,7 +75,7 @@ var verTest = [
 ];
 
 function setVer() {
-  var ver = '1522b15';
+  var ver = '1522b16';
   return verTest.find(function(e) {return e[0]();})[1](ver);
 }
 
