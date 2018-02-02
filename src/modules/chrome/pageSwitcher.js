@@ -30,7 +30,7 @@ import injectScouttower from '../scoutTower/injectScouttower';
 import {injectSettings} from '../settings/settingsPage';
 import injectTitan from '../scoutTower/injectTitan';
 import injectTopRated from '../topRated/toprated';
-import injectTrade from '../trade';
+import injectTrade from '../trade/trade';
 import injectViewGuild from '../guild/injectViewGuild';
 import injectWorld from '../legacy';
 import insertQuickExtract from '../quickExtract';
