@@ -8,22 +8,22 @@ import {injectComposeAlert} from '../composing/composing';
 import injectFSBoxLog from './injectFSBoxLog';
 import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
+import injectJoinAllLink from '../notification/injectJoinAllLink';
 import injectMenu from './accordion';
 import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
+import injectTempleAlert from '../notification/injectTempleAlert';
+import injectUpgradeAlert from '../notification/injectUpgradeAlert';
+import jsonParse from '../common/jsonParse';
+import {pCR} from '../support/layout';
 import prepareAllyEnemyList from './allyEnemy';
-import prepareBountyData from './activeWantedBounties';
+import {prepareBountyData} from '../activeWantedBounties/activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
 import scoutTowerLink from './scoutTowerLink';
 import {seLog} from '../seLog/seLog';
 import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
-import {
-  injectJoinAllLink,
-  injectTempleAlert,
-  injectUpgradeAlert
-} from '../notification';
 import {injectLevelupCalculator, injectStaminaCalculator} from './calc';
 
 function gameHelpLink() {
@@ -52,6 +52,7 @@ function getEnvVars() {
   calf.enableComposingAlert = getValue('enableComposingAlert');
   calf.enableActiveBountyList = getValue('enableActiveBountyList');
   calf.enableWantedList = getValue('enableWantedList');
+  calf.wantedGuildMembers = getValue('wantedGuildMembers');
   calf.allyEnemyOnlineRefreshTime =
     getValue('allyEnemyOnlineRefreshTime') * 1000;
 }
@@ -123,8 +124,10 @@ function navMenu() { // jQuery
 }
 
 function moveRHSBoxUpOnRHS(title) {
-  getElementById('pCR').insertAdjacentElement('afterbegin',
-    getElementById(title));
+  var box = getElementById(title);
+  if (box) {
+    pCR.insertAdjacentElement('afterbegin', box);
+  }
 }
 
 function moveRHSBoxToLHS(title) {
@@ -217,7 +220,7 @@ function prepareEnv() {
 
 export default function lookForHcsData() {
   var hcsData = getElementById('html');
-  if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
+  if (hcsData && jsonParse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
   }
 }

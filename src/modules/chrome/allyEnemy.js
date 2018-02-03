@@ -4,8 +4,8 @@ import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
-import {openQuickBuffByName} from '../support/layout';
 import {fallback, formatLastActivity} from '../support/system';
+import {openQuickBuffByName, pCR} from '../support/layout';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
 var msgButton = '<span class="enemy-send-message guild-icon left ' +
@@ -214,8 +214,7 @@ function makeDiv(data) {
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  getElementById('pCR')
-    .insertAdjacentElement('afterbegin', fshAllyEnemy);
+  pCR.insertAdjacentElement('afterbegin', fshAllyEnemy);
   fshAllyEnemy.addEventListener('click', eventHandler);
   injectAllyEnemyList(data);
 }

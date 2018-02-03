@@ -2,20 +2,17 @@ import allChecks from './allChecks';
 import changeLvls from './changeLvls';
 import clearChecks from './clearChecks';
 import doAction from './doAction';
-import dostoreitemsSingle from '../../app/guild/inventory/dostoreitemsSingle';
+import dostoreitems from '../../app/guild/inventory/dostoreitems';
 import dropItem from '../../ajax/dropItem';
+import equipItem from '../../ajax/equipItem';
 import getChecks from './getChecks';
 import {injectInventoryManagerNew} from '../inventory';
 import moveItem from '../../ajax/moveItem';
 import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
 import sendItem from '../../ajax/sendItem';
-import {
-  equipItem,
-  queueRecallItem,
-  queueTakeItem,
-  useItem
-} from '../../support/ajax';
+import useItem from '../../ajax/useItem';
+import {queueRecallItem, queueTakeItem} from '../../ajaxQueue/queue';
 
 function setName(e) { // jQuery
   $('#fshInv').DataTable().search($(e.target).attr('set')).draw();
@@ -60,7 +57,7 @@ function doMoveItem(e) { // jQuery
 
 function doStoreItem(e) { // jQuery
   var self = $(e.target);
-  doAction(dostoreitemsSingle.bind(null, self.attr('invid')), self);
+  doAction(dostoreitems.bind(null, [self.attr('invid')]), self);
 }
 
 function doDropItem(e) { // jQuery

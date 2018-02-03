@@ -1,7 +1,6 @@
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import setForage from './ajax/setForage';
-import {addCommas, findNode} from './support/system';
 import {
   calculateBoundaries,
   gvgLowerLevel,
@@ -30,52 +29,6 @@ export function injectFindPlayer() { // Bad jQuery
       $(e).after('<a style="color:blue;font-size:10px;" ' +
         quickBuffHref(id[1]) + '>[b]</a>');
     });
-}
-
-function marketplaceWarning(sellPrice) { // Legacy
-  var warningColor = 'green';
-  var warningText =
-    '</b><br>This is probably an offer that will please someone.';
-  if (sellPrice < 100000) {
-    warningColor = 'brown';
-    warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
-  }
-  if (sellPrice > 250000) {
-    warningColor = 'red';
-    warningText = '</b><br>Hold up there ... this is way to high a ' +
-      'price ... you should reconsider.';
-  }
-  var amount = findNode('//input[@id="amount"]').value;
-  var warningField = findNode('//td[@id="warningfield"]');
-  warningField.innerHTML = '<span style="color:' + warningColor +
-    ';">You are offering to buy <b>' + amount +
-    '</b> FSP for >> <b>' + addCommas(sellPrice) +
-    warningText + ' (Total: ' +
-    addCommas(amount * sellPrice +
-    Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
-}
-
-function addMarketplaceWarning() { // Legacy
-  var goldPerPoint = findNode('//input[@id="price"]');
-  var sellPrice = goldPerPoint.value;
-  if (sellPrice.search(/^[0-9]*$/) !== -1) {
-    marketplaceWarning(sellPrice);
-  }
-}
-
-export function addMarketplaceWidgets() { // Legacy
-  var requestTable = findNode(
-    '//table[tbody/tr/td/input[@value="Confirm Request"]]');
-  var newRow = requestTable.insertRow(2);
-  var newCell = newRow.insertCell(0);
-  newCell.id = 'warningfield';
-  newCell.colSpan = '2';
-  newCell.align = 'center';
-
-  getElementById('price').addEventListener('keyup',
-    addMarketplaceWarning, true);
-  getElementById('amount').addEventListener('keyup',
-    addMarketplaceWarning, true);
 }
 
 export function injectNotepad() { // jQuery

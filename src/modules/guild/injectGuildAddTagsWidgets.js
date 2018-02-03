@@ -1,7 +1,7 @@
 import {createInput} from '../common/cElement';
 import {imageServer} from '../support/system';
 import {pCC} from '../support/layout';
-import {takeItem} from '../support/ajax';
+import takeitem from '../app/guild/inventory/takeitem';
 
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
@@ -28,7 +28,7 @@ function takeResult(self, data) {
 function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
     .firstElementChild.value;
-  takeItem(itmId).done(takeResult.bind(null, el));
+  takeitem(itmId).done(takeResult.bind(null, el));
   el.textContent = '';
   el.className = 'guildTagSpinner';
   el.style.backgroundImage = 'url(\'' + imageServer +
@@ -41,13 +41,23 @@ function evtHdlr(e) {
   if (self.className === 'sendLink') {fastBp(self);}
 }
 
+function paintTable() {
+  var nodeList = pCC.getElementsByTagName('table');
+  if (nodeList.length > 0) {
+    doItemTable(nodeList[nodeList.length - 1].rows);
+  }
+}
+
+function checkAllBtn() {
+  var checkAll = createInput({type: 'button', value: 'Check All'});
+  var formTags = pCC.getElementsByTagName('form');
+  if (formTags.length === 1) {
+    formTags[0].previousElementSibling.cells[0].appendChild(checkAll);
+  }
+}
+
 export default function injectGuildAddTagsWidgets() {
   pCC.addEventListener('click', evtHdlr);
-
-  var nodeList = pCC.getElementsByTagName('table');
-  var itemTable = nodeList[nodeList.length - 1];
-  if (itemTable) {doItemTable(itemTable.rows);}
-
-  var checkAll = createInput({type: 'button', value: 'Check All'});
-  nodeList[0].rows[5].cells[0].appendChild(checkAll);
+  paintTable();
+  checkAllBtn();
 }

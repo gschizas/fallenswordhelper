@@ -31,10 +31,11 @@ export default function bountyPrefs() {
     '<tr><td align= "right">Wanted Names' +
       helpLink('Wanted Names',
         'The names of the people you want to see on the bounty board ' +
-        'separated by commas') + ':</td><td colspan="3">' +
+        'separated by commas (or * for all)') + ':</td><td colspan="3">' +
       '<input name="wantedNames" size="60" value="' + calf.wantedNames +
       '"></td></tr>' +
 
+    simpleCheckbox('wantedGuildMembers') +
     simpleCheckbox('enableAttackHelper') +
     simpleCheckbox('showPvPSummaryInLog');
 }

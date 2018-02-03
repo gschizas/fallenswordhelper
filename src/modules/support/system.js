@@ -1,5 +1,6 @@
 import calf from './calf';
 import {getElementById} from '../common/getElement';
+import jsonParse from '../common/jsonParse';
 import retryAjax from '../ajax/retryAjax';
 import {defaults, months, nowSecs} from './dataObj';
 
@@ -39,7 +40,7 @@ function reviver(key, value) {
 export function getValueJSON(name) {
   var resultJSON = getValue(name);
   var result;
-  if (resultJSON) {result = JSON.parse(resultJSON, reviver);}
+  if (resultJSON) {result = jsonParse(resultJSON, reviver);}
   return result;
 }
 

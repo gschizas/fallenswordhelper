@@ -1,5 +1,6 @@
+import equipItem from '../ajax/equipItem';
 import {imageServer} from '../support/system';
-import {equipItem, queueRecallItem} from '../support/ajax';
+import {queueRecallItem} from '../ajaxQueue/queue';
 
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
   'url(\'' + imageServer + '/skin/loading.gif\');"></span>';

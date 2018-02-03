@@ -1,5 +1,5 @@
 import {closestTable} from '../common/closest';
-import {dialog} from '../support/ajax';
+import dialog from '../ajax/dialog';
 import retryAjax from '../ajax/retryAjax';
 import {infoBox, pCC} from '../support/layout';
 

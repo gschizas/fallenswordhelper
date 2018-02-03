@@ -87,6 +87,7 @@ export var saveBoxes = [
   'bountyListRefreshTime',
   'enableWantedList',
   'wantedNames',
+  'wantedGuildMembers',
   'fsboxlog',
   'huntingMode',
   'enableAttackHelper',

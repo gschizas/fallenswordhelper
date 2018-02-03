@@ -209,7 +209,6 @@ export default function profileComponents() {
   if (invTables.length !== 2) {return;}
   thisInvTable = invTables[1];
   var compDiv = thisInvTable.parentNode;
-  if (compDiv.style.display !== 'block') {return;}
   var cmDiv = createDiv({className: 'fshCenter'});
   quickDelDiv = createDiv();
   sumComp = createDiv();

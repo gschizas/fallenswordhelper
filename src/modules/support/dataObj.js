@@ -86,6 +86,7 @@ export var defaults = {
   bountyListRefreshTime: 300,
   enableWantedList: false,
   wantedNames: '',
+  wantedGuildMembers: false,
   bwNeedsRefresh: true,
 
   fsboxlog: false,

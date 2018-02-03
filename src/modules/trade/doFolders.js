@@ -1,12 +1,11 @@
-import add from './support/task';
-import calf from './support/calf';
-import {getElementById} from './common/getElement';
-import getInventoryById from './ajax/getInventoryById';
-import {createDiv, createTr} from './common/cElement';
-import {fallback, getValue} from './support/system';
-import {time, timeEnd} from './support/debug';
+import add from '../support/task';
+import {fallback} from '../support/system';
+import {getElementById} from '../common/getElement';
+import getInventoryById from '../ajax/getInventoryById';
+import {createDiv, createTr} from '../common/cElement';
+import {time, timeEnd} from '../support/debug';
 
-var multiple;
+var invItems;
 
 function getItemDiv() {
   var itemDiv = getElementById('item-div');
@@ -72,14 +71,13 @@ function doFolderHeaders(folders) {
     innerHTML: folderCell
   });
   foldersRow.addEventListener('click', hideFolder);
-  multiple.insertAdjacentHTML('afterend', '<tr id="fshShowSTs">' +
+  var el = getElementById('item-list').parentNode.parentNode;
+  el.insertAdjacentHTML('beforebegin', '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
     'Select items in ST</label></td></tr>');
-  multiple.insertAdjacentElement('afterend', foldersRow);
+  el.insertAdjacentElement('beforebegin', foldersRow);
 }
-
-var invItems;
 
 function stColor(el, item) {
   if (item.is_in_st) {
@@ -112,82 +110,8 @@ function processTrade(data) {
 
 }
 
-function inv() { // jQuery
+export default function doFolders() { // jQuery.min
   getInventoryById().done(function(data) {
     add(3, processTrade, [data]);
   });
-}
-
-function getHowMany(itemTables) {
-  var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
-  if (isNaN(howMany)) {return itemTables.length;}
-  // maximum of 100 items in an ST
-  if (calf.subcmd !== '-') {return Math.min(100, howMany);}
-  return howMany;
-}
-
-function itemType(itemid, checkbox) {
-  return itemid === 'itemid-2' && checkbox.classList.contains('itemtype12');
-}
-
-function shouldBeChecked(itemid, checkbox) {
-  return itemid === 'itemid-1' ||
-    itemType(itemid, checkbox) ||
-    checkbox.classList.contains(itemid);
-}
-
-function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
-  return howMany &&
-    fallback(itemsInSt, !el.classList.contains('isInST')) &&
-    shouldBeChecked(itemid, checkbox);
-}
-
-function doCheckAll(evt) {
-  var itemid = evt.target.id;
-  var itemList = getElementById('item-div') ||
-    getElementById('item-list');
-  var itemTables = itemList.querySelectorAll('table:not(.fshHide)');
-  var howMany = getHowMany(itemTables);
-  var itemsInSt = getElementById('itemsInSt').checked;
-  Array.prototype.forEach.call(itemTables, function(el) {
-    var checkbox = el.firstElementChild.lastElementChild.firstElementChild
-      .firstElementChild;
-    if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
-      checkbox.checked = true;
-      howMany -= 1;
-      return;
-    }
-    checkbox.checked = false;
-  });
-}
-
-function toggleAllPlants(evt) {
-  if (evt.target.classList.contains('fshCheckAll')) {doCheckAll(evt);}
-}
-
-function injectTradeOld() {
-  var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
-    'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
-    '<span id="itemid-2" ' +
-    'class="fshCheckAll fshLink fshNoWrap">All Resources</span>';
-  var sendClasses = getValue('sendClasses');
-  var itemList = JSON.parse('[' + sendClasses + ']');
-  itemList.forEach(function(el) {
-    myTd += ' &ensp;<span id="itemid' + el[1] +
-      '" class="fshCheckAll fshLink fshNoWrap">' + el[0] + '</span>';
-  });
-  myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
-    'class="custominput" value="all" size=3></td>';
-  multiple = createTr({
-    id: 'fshSelectMultiple',
-    innerHTML: myTd
-  });
-  multiple.addEventListener('click', toggleAllPlants);
-  var el = getElementById('item-list').parentNode.parentNode;
-  el.parentNode.insertBefore(multiple, el);
-}
-
-export default function injectTrade() {
-  add(3, inv);
-  add(3, injectTradeOld);
 }

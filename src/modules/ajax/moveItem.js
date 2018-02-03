@@ -1,4 +1,4 @@
-import {dialog} from '../support/ajax';
+import dialog from './dialog';
 import retryAjax from './retryAjax';
 
 export default function moveItem(invIdList, folderId) {

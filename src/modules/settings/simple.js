@@ -305,5 +305,9 @@ export default {
     helpTitle: 'Show Titan Info',
     helpText: 'This will show titan info in the action list.',
     network: true
+  },
+  wantedGuildMembers: {
+    helpTitle: 'Show Guild Members',
+    helpText: 'If enabled, will show guild members in the wanted bounty list.'
   }
 };
