@@ -6,8 +6,8 @@ import {formatLastActivity} from '../system/system';
 import {getElementById} from '../common/getElement';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
+import {sendException} from '../support/fshGa';
 import {openQuickBuffByName, pCR} from '../support/layout';
-import { sendException } from '../support/fshGa';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
 var msgButton = '<span class="enemy-send-message guild-icon left ' +
