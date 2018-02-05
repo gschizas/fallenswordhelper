@@ -10,11 +10,11 @@ import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHtml from './evalHtml';
 import {getElementById} from '../../common/getElement';
+import getValue from '../../system/getValue';
 import {playerDataString} from '../../common/common';
 import {
   createDocument,
   findNode,
-  getValue,
   intValue,
   setValue,
   xmlhttp

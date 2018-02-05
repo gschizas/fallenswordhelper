@@ -1,5 +1,6 @@
+import getValue from '../system/getValue';
+import {imageServer} from '../system/system';
 import {quickBuffHref} from '../support/layout';
-import {getValue, imageServer} from '../system/system';
 import {showRankButton, showRecallButton} from './profileInjectGuildRel';
 
 export default function profileInjectQuickButton(avyImg, playerid, playername) {

@@ -1,25 +1,16 @@
 import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
+import getValue from './getValue';
 import jsonParse from '../common/jsonParse';
 import retryAjax from '../ajax/retryAjax';
-import {defaults, months, nowSecs} from '../support/dataObj';
+import {months, nowSecs} from '../support/dataObj';
 
 export var server = document.location.protocol + '//' +
   document.location.host + '/';
 export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
-
-export function getValue(name) {
-  //#if _DEV  //  No default setting available
-  if (typeof defaults[name] === 'undefined') {
-    // eslint-disable-next-line no-console
-    console.log(name, defaults[name]);
-  }
-  //#endif
-  return GM_getValue(name, defaults[name]);
-}
 
 function reviver(key, value) {
   if (typeof value === 'string') {

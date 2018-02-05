@@ -3,9 +3,9 @@ import calf from '../support/calf';
 import draggable from '../common/dragStart';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import {
   escapeHtml,
-  getValue,
   getValueJSON,
   imageServer
 } from '../system/system';

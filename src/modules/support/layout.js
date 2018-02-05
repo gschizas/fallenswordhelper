@@ -1,6 +1,7 @@
 import add from './task';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import moreToDo from '../common/moreToDo';
 import {
   createButton,
@@ -8,7 +9,7 @@ import {
   createLi,
   createUl
 } from '../common/cElement';
-import {createDocument, getValue, setValue} from '../system/system';
+import {createDocument, setValue} from '../system/system';
 import {lastActivityRE, nowSecs, places} from './dataObj';
 
 var dotList;

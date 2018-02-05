@@ -1,4 +1,5 @@
-import {getValue, intValue} from '../system/system';
+import getValue from '../system/getValue';
+import {intValue} from '../system/system';
 
 export var pvpLowerLevel;
 export var pvpUpperLevel;

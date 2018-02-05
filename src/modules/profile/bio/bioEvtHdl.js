@@ -1,6 +1,6 @@
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
-import {getValue} from '../../system/system';
+import getValue from '../../system/getValue';
 import {sendEvent} from '../../support/fshGa';
 import {pCC, playerName} from '../../support/layout';
 

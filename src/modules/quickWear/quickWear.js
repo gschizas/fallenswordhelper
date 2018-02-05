@@ -3,13 +3,14 @@ import createQuickWear from './createQuickWear';
 import equipItem from '../ajax/equipItem';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import loadInventory from '../app/profile/loadInventory';
 import {sendEvent} from '../support/fshGa';
+import {setValue} from '../system/system';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import toggleForce from '../common/toggleForce';
 import useItem from '../ajax/useItem';
-import {getValue, setValue} from '../system/system';
 import {jConfirm, pCC} from '../support/layout';
 
 var disableQuickWearPrompts;

@@ -1,9 +1,11 @@
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import {huntingBuffsHtml} from '../settings/worldPrefs';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
+import {shouldBeArray} from '../system/system';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import {toggleShowCreatureInfo} from './monsterLog/creatureInfo';
 import {toggleShowMonsterLog} from './monsterLog/processMonsterLog';
@@ -13,7 +15,6 @@ import {
   toggleEnabledHuntingMode,
   toggleShowHuntingBuffs
 } from './doHuntingBuffs';
-import {getValue, shouldBeArray} from '../system/system';
 import {interceptXHR, toggleSubLvlCreature} from './interceptXHR';
 import {
   prepareHidePlayerActions,

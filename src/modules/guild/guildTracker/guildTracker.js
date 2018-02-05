@@ -1,6 +1,8 @@
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
+import getValue from '../../system/getValue';
+import {setValue} from '../../system/system';
 import {simpleCheckboxHtml} from '../../settings/settingsPage';
 import {
   createDiv,
@@ -8,7 +10,6 @@ import {
   createTr,
   createUl
 } from '../../common/cElement';
-import {getValue, setValue} from '../../system/system';
 import {initTable, makeTg} from './trackerTable';
 import {makeInOut, queueRawData} from './rawData';
 

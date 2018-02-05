@@ -1,6 +1,6 @@
 import {def_suffixSuccessActionResponse} from '../support/dataObj';
 import getForage from '../ajax/getForage';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 import setForage from '../ajax/setForage';
 
 // Taking the Not Save in case they add new enhancements.

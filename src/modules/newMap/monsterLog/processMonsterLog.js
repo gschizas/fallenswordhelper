@@ -1,7 +1,8 @@
 import fallback from '../../system/fallback';
 import getForage from '../../ajax/getForage';
+import getValue from '../../system/getValue';
 import setForage from '../../ajax/setForage';
-import {getValue, setValue} from '../../system/system';
+import {setValue} from '../../system/system';
 
 export var showMonsterLog;
 var monsterLog;

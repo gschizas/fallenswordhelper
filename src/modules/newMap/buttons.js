@@ -1,7 +1,9 @@
 import calf from '../support/calf';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import {guideUrl} from '../support/dataObj';
+import {setValue} from '../system/system';
 import {
   createButton,
   createDiv,
@@ -9,7 +11,6 @@ import {
   createLabel,
   textSpan
 } from '../common/cElement';
-import {getValue, setValue} from '../system/system';
 import {openQuickBuffByName, playerName} from '../support/layout';
 
 var buttonContainer;

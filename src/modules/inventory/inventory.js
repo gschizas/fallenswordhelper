@@ -10,10 +10,11 @@ import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import getInventory from '../ajax/getInventory';
 import getMembrList from '../ajax/getMembrList';
+import getValue from '../system/getValue';
 import headers from './headers';
+import {imageServer} from '../system/system';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
-import {getValue, imageServer} from '../system/system';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 

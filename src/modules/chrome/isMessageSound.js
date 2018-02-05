@@ -1,5 +1,5 @@
 import add from '../support/task';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 
 function doMsgSound() { // jQuery
   var soundLocation = getValue('defaultMessageSound');

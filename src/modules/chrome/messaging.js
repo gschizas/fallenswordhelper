@@ -1,7 +1,7 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import {
-  getValue,
   getValueJSON,
   setValueJSON
 } from '../system/system';

@@ -1,6 +1,7 @@
 import {createTr} from './common/cElement';
+import getValue from './system/getValue';
 import {now} from './support/dataObj';
-import {getValue, outputFormat} from './system/system';
+import {outputFormat} from './system/system';
 
 function dontPost() {
   var submitButton = document.querySelector('#pCC input[type="submit"]');
