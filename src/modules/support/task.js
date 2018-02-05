@@ -36,23 +36,13 @@ export default function add(priority, fn, args, scope) {
 function parseStack(e) {
   var concatStack = e.stack.replace(/\n +/g, '|');
   if (e.stack.includes(e.message)) {
-    //#if _DEV  //  Unhandled Exception
-    console.log('Unhandled Exception:', e.stack); // eslint-disable-line no-console
-    //#endif
     return concatStack;
   }
-  var stackMsg = e.message + '|' + concatStack;
-  //#if _DEV  //  Unhandled Exception
-  console.log('Unhandled Exception:', e.message, e.stack); // eslint-disable-line no-console
-  //#endif
-  return stackMsg;
+  return e.message + '|' + concatStack;
 }
 
 function parseError(e) {
   if (e.stack) {return parseStack(e);}
-  //#if _DEV  //  Unhandled Exception
-  console.log('Unhandled Exception:', e.message); // eslint-disable-line no-console
-  //#endif
   return e.message;
 }
 
