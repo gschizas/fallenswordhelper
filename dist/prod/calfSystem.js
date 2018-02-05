@@ -168,163 +168,6 @@ function fallback(a, b) {
   return a || b;
 }
 
-function moreToDo(limit, cntr, list) {
-  return performance.now() < limit && cntr < list.length;
-}
-
-function mixin(obj, mixins) {
-  Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
-      mixin(obj[key], mixins[key]);
-    } else {
-      obj[key] = mixins[key];
-    }
-  });
-}
-
-function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {mixin(el, props);}
-  return el;
-}
-
-function createDiv(props) {
-  return cElement('div', props);
-}
-
-function createSpan(props) {
-  return cElement('span', props);
-}
-
-function createTable(props) {
-  return cElement('table', props);
-}
-
-function createTBody(props) {
-  return cElement('tbody', props);
-}
-
-function createTr(props) {
-  return cElement('tr', props);
-}
-
-function createTd(props) {
-  return cElement('td', props);
-}
-
-function createTFoot(props) {
-  return cElement('tfoot', props);
-}
-
-function createUl(props) {
-  return cElement('ul', props);
-}
-
-function createLi(props) {
-  return cElement('li', props);
-}
-
-function createButton(props) {
-  return cElement('button', props);
-}
-
-function createBr() {
-  return cElement('br');
-}
-
-function createAnchor(props) {
-  return cElement('a', props);
-}
-
-function createInput(props) {
-  return cElement('input', props);
-}
-
-function createTextArea(props) {
-  return cElement('textarea', props);
-}
-
-function createTh(props) {
-  return cElement('th', props);
-}
-
-function createLabel(props) {
-  return cElement('label', props);
-}
-
-function textSpan(text) {
-  return createSpan({textContent: text});
-}
-
-var calf = {};
-
-function jsonParse(str, reviver) {
-  try {
-    return JSON.parse(str, reviver);
-  } catch (e) {
-    // Ignore bad json
-  }
-}
-
-var paused = true;
-var queue = [];
-
-function beforeSend(xhr) {
-  window.addEventListener('beforeunload', function() {
-    xhr.abort();
-    queue = [];
-  });
-}
-
-function doAjax(options, retries, dfr) {
-  var opt;
-  if (typeof options === 'string') {
-    opt = {url: options};
-  } else {
-    opt = options;
-  }
-  opt.beforeSend = beforeSend;
-  return $.ajax(opt).pipe(dfr.resolve,
-    function(jqXhr, textStatus, errorThrown) {
-      if (retries > 0 && jqXhr.status === 503) {
-        setTimeout(doAjax, 100, opt, retries - 1, dfr);
-      } else {
-        dfr.reject(jqXhr, textStatus, errorThrown);
-      }
-    }
-  );
-}
-
-function taskRunner() {
-  if (queue.length === 0) {
-    paused = true;
-  } else {
-    paused = false;
-    if ($.active < 4) {
-      var opts = queue.shift();
-      doAjax.apply(null, opts);
-      taskRunner();
-    }
-  }
-}
-
-function add(options, retries, dfr) {
-  queue.push([options, retries, dfr]);
-  if (paused) {taskRunner();}
-}
-
-function retryAjax(options) {
-  var dfr = $.Deferred();
-  add(options, 10, dfr);
-  return dfr;
-}
-
-if (typeof jQuery !== 'undefined') {
-  $(document).ajaxComplete(function() {
-    taskRunner();
-  });
-}
-
 var thePlants = [
   'Amber',
   'Blood Bloom',
@@ -652,39 +495,164 @@ var def_suffixSuccessActionResponse = '-success.action-response';
 
 var def_fetch_worldRealmActions = 256;
 
+function getValue(name) {
+  return GM_getValue(name, defaults[name]);
+}
+
+function moreToDo(limit, cntr, list) {
+  return performance.now() < limit && cntr < list.length;
+}
+
+function mixin(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+      mixin(obj[key], mixins[key]);
+    } else {
+      obj[key] = mixins[key];
+    }
+  });
+}
+
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {mixin(el, props);}
+  return el;
+}
+
+function createDiv(props) {
+  return cElement('div', props);
+}
+
+function createSpan(props) {
+  return cElement('span', props);
+}
+
+function createTable(props) {
+  return cElement('table', props);
+}
+
+function createTBody(props) {
+  return cElement('tbody', props);
+}
+
+function createTr(props) {
+  return cElement('tr', props);
+}
+
+function createTd(props) {
+  return cElement('td', props);
+}
+
+function createTFoot(props) {
+  return cElement('tfoot', props);
+}
+
+function createUl(props) {
+  return cElement('ul', props);
+}
+
+function createLi(props) {
+  return cElement('li', props);
+}
+
+function createButton(props) {
+  return cElement('button', props);
+}
+
+function createBr() {
+  return cElement('br');
+}
+
+function createAnchor(props) {
+  return cElement('a', props);
+}
+
+function createInput(props) {
+  return cElement('input', props);
+}
+
+function createTextArea(props) {
+  return cElement('textarea', props);
+}
+
+function createTh(props) {
+  return cElement('th', props);
+}
+
+function createLabel(props) {
+  return cElement('label', props);
+}
+
+function textSpan(text) {
+  return createSpan({textContent: text});
+}
+
+var calf = {};
+
+var paused = true;
+var queue = [];
+
+function beforeSend(xhr) {
+  window.addEventListener('beforeunload', function() {
+    xhr.abort();
+    queue = [];
+  });
+}
+
+function doAjax(options, retries, dfr) {
+  var opt;
+  if (typeof options === 'string') {
+    opt = {url: options};
+  } else {
+    opt = options;
+  }
+  opt.beforeSend = beforeSend;
+  return $.ajax(opt).pipe(dfr.resolve,
+    function(jqXhr, textStatus, errorThrown) {
+      if (retries > 0 && jqXhr.status === 503) {
+        setTimeout(doAjax, 100, opt, retries - 1, dfr);
+      } else {
+        dfr.reject(jqXhr, textStatus, errorThrown);
+      }
+    }
+  );
+}
+
+function taskRunner() {
+  if (queue.length === 0) {
+    paused = true;
+  } else {
+    paused = false;
+    if ($.active < 4) {
+      var opts = queue.shift();
+      doAjax.apply(null, opts);
+      taskRunner();
+    }
+  }
+}
+
+function add(options, retries, dfr) {
+  queue.push([options, retries, dfr]);
+  if (paused) {taskRunner();}
+}
+
+function retryAjax(options) {
+  var dfr = $.Deferred();
+  add(options, 10, dfr);
+  return dfr;
+}
+
+if (typeof jQuery !== 'undefined') {
+  $(document).ajaxComplete(function() {
+    taskRunner();
+  });
+}
+
 var server = document.location.protocol + '//' +
   document.location.host + '/';
 var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
-
-function getValue(name) {
-  return GM_getValue(name, defaults[name]);
-}
-
-function reviver$1(key, value) {
-  if (typeof value === 'string') {
-    var a =
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/
-        .exec(value);
-    if (a) {
-      return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]),
-        Number(a[4]), Number(a[5]), Number(a[6])));
-    }
-  }
-  return value;
-}
-
-function getValueJSON(name) {
-  var resultJSON = getValue(name);
-  var result;
-  if (resultJSON) {result = jsonParse(resultJSON, reviver$1);}
-  return result;
-}
-
-function setValueJSON(name, value) {
-  GM_setValue(name, JSON.stringify(value));
-}
 
 function setValue(name, value) {
   GM_setValue(name, value);
@@ -929,12 +897,6 @@ function shouldBeArray(pref) {
 function isChecked(pref) {
   if (pref) {return ' checked';}
   return '';
-}
-
-function padZ(n) {
-  var ret = n.toString();
-  if (n < 10) {ret = '0' + ret;}
-  return ret;
 }
 
 var dotList;
@@ -1416,6 +1378,34 @@ function dragStart(parent, event) {
 function draggable(element, parent) {
   element.draggable = true;
   element.addEventListener('dragstart', dragStart.bind(null, parent));
+}
+
+function jsonParse(str, reviver) {
+  try {
+    return JSON.parse(str, reviver);
+  } catch (e) {
+    // Ignore bad json
+  }
+}
+
+function reviver$1(key, value) {
+  if (typeof value === 'string') {
+    var a =
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/
+        .exec(value);
+    if (a) {
+      return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]),
+        Number(a[4]), Number(a[5]), Number(a[6])));
+    }
+  }
+  return value;
+}
+
+function getValueJSON(name) {
+  var resultJSON = getValue(name);
+  var result;
+  if (resultJSON) {result = jsonParse(resultJSON, reviver$1);}
+  return result;
 }
 
 function retBool(bool, ifTrue, ifFalse) {
@@ -4468,6 +4458,10 @@ function insertQuickWear(injector) {
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
 }
 
+function setValueJSON(name, value) {
+  GM_setValue(name, JSON.stringify(value));
+}
+
 var param;
 
 function hasUrl(j) {
@@ -5556,18 +5550,16 @@ function creatureLogLink() {
 function newGuildLogLink() {
   if (!getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    getElementById('nav-guild-ledger-guildlog').parentNode
-      .insertAdjacentHTML('beforebegin',
-        '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="index.php' + newGuildLogUrl + '"' +
-        '>New Guild Log</a></li>');
+    // getElementById('nav-guild-ledger-guildlog').parentNode
+    //   .insertAdjacentHTML('beforebegin',
+    insertAfterParent('nav-guild-ledger-guildlog', insertAdjHtml,
+      '<li class="nav-level-2"><a class="nav-link" ' +
+      'href="index.php' + newGuildLogUrl + '"' +
+      '>New Guild Log</a></li>');
   }
 }
 
-function adjustHeight() { // jQuery
-  // adjust the menu height for the newly added items
-  var theNav = getElementById('nav');
-  var myNav = $(theNav).data('nav');
+function navHeightsIsArray(theNav, myNav) {
   // first the closed saved variables
   myNav.heights = [
     null,
@@ -5587,6 +5579,41 @@ function adjustHeight() { // jQuery
     // and now the open one
     theNav.children[myNav.state].children[1].style.height =
       myNav.heights[myNav.state] + 'px';
+  }
+}
+
+function navHeightExists(theNav, myNav) {
+  if (Array.isArray(myNav.heights)) {
+    navHeightsIsArray(theNav, myNav);
+  } else {
+    sendException('$(\'#nav\').data(\'nav\').heights is not an Array', false);
+  }
+}
+
+function navDataExists(theNav, myNav) {
+  if ('heights' in myNav) {
+    navHeightExists(theNav, myNav);
+  } else {
+    sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
+  }
+}
+
+function navExists(theNav) {
+  var myNav = $(theNav).data('nav');
+  if (typeof myNav === 'object') {
+    navDataExists(theNav, myNav);
+  } else {
+    sendException('$(\'#nav\').data(\'nav\') is not an object', false);
+  }
+}
+
+function adjustHeight() { // jQuery
+  // adjust the menu height for the newly added items
+  var theNav = getElementById('nav');
+  if (theNav instanceof Element) {
+    navExists(theNav);
+  } else {
+    sendException('#nav is not an Element', false);
   }
 }
 
@@ -6936,6 +6963,12 @@ function addOnlineAlliesWidgets() {
   // add coloring for offline time
   Array.prototype.forEach.call(
     onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
+}
+
+function padZ(n) {
+  var ret = n.toString();
+  if (n < 10) {ret = '0' + ret;}
+  return ret;
 }
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -18837,7 +18870,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '17';
+window.FSH.calf = '18';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
