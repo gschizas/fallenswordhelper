@@ -1,8 +1,6 @@
+import getValue from '../system/getValue';
 import {playerId} from '../support/layout';
-import {
-  getValue,
-  shouldBeArray
-} from '../system/system';
+import {shouldBeArray} from '../system/system';
 import {output, recipebook, storeRecipeBook} from './parseInventing';
 
 var currentPlayerId;

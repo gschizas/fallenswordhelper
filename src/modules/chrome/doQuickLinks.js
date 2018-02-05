@@ -3,12 +3,9 @@ import calf from '../support/calf';
 import draggable from '../common/dragStart';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
-import {
-  escapeHtml,
-  getValue,
-  getValueJSON,
-  imageServer
-} from '../system/system';
+import getValue from '../system/getValue';
+import getValueJSON from '../system/getValueJSON';
+import {escapeHtml, imageServer} from '../system/system';
 
 function retBool(bool, ifTrue, ifFalse) {
   if (bool) {

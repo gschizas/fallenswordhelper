@@ -5,7 +5,7 @@ import {defaults} from '../support/dataObj';
 import doFolders from './doFolders';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 import jsonParse from '../common/jsonParse';
 
 function getHowMany(itemTables) {

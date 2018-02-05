@@ -1,4 +1,5 @@
-import {getValue, isChecked} from '../system/system';
+import getValue from '../system/getValue';
+import {isChecked} from '../system/system';
 import {helpLink, simpleCheckbox} from './settingsPage';
 
 export default function otherPrefs() {

@@ -1,6 +1,6 @@
 import calf from '../support/calf';
 import insertElement from '../common/insertElement';
-import {setValueJSON} from '../system/system';
+import setValueJSON from '../system/setValueJSON';
 import {wantedListDiv} from './activeWantedBounties';
 import {createDiv, createSpan} from '../common/cElement';
 import {retrieveBountyInfo, wantedList} from './retrieveBountyInfo';

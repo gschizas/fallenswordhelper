@@ -1,6 +1,8 @@
 import add from '../support/task';
 import {colouredDots} from '../support/layout';
 import currentGuildId from '../common/currentGuildId';
+import {getUrlParameter} from '../system/system';
+import getValue from '../system/getValue';
 import {lastActivityRE} from '../support/dataObj';
 import {
   calculateBoundaries,
@@ -9,7 +11,6 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from '../common/levelHighlight';
-import {getUrlParameter, getValue} from '../system/system';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var highlightPlayersNearMyLvl;

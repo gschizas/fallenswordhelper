@@ -4,6 +4,7 @@ import {createTable} from '../common/cElement';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
+import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import {rowProfile} from './profiler';
@@ -11,7 +12,6 @@ import setForage from '../ajax/setForage';
 import toggleForce from '../common/toggleForce';
 import {
   createDocument,
-  getValue,
   imageServer,
   parseDateAsTimestamp
 } from '../system/system';

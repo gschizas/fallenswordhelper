@@ -2,7 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
 import {getElementById} from '../common/getElement';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 import guildActivity from '../guild/guildActivity';
 import {injectComposeAlert} from '../composing/composing';
 import injectFSBoxLog from './injectFSBoxLog';

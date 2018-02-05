@@ -1,49 +1,15 @@
 import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
-import jsonParse from '../common/jsonParse';
+import getValue from './getValue';
 import retryAjax from '../ajax/retryAjax';
-import {defaults, months, nowSecs} from '../support/dataObj';
+import {months, nowSecs} from '../support/dataObj';
 
 export var server = document.location.protocol + '//' +
   document.location.host + '/';
 export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
-
-export function getValue(name) {
-  //#if _DEV  //  No default setting available
-  if (typeof defaults[name] === 'undefined') {
-    // eslint-disable-next-line no-console
-    console.log(name, defaults[name]);
-  }
-  //#endif
-  return GM_getValue(name, defaults[name]);
-}
-
-function reviver(key, value) {
-  if (typeof value === 'string') {
-    var a =
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/
-        .exec(value);
-    if (a) {
-      return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]),
-        Number(a[4]), Number(a[5]), Number(a[6])));
-    }
-  }
-  return value;
-}
-
-export function getValueJSON(name) {
-  var resultJSON = getValue(name);
-  var result;
-  if (resultJSON) {result = jsonParse(resultJSON, reviver);}
-  return result;
-}
-
-export function setValueJSON(name, value) {
-  GM_setValue(name, JSON.stringify(value));
-}
 
 export function setValue(name, value) {
   GM_setValue(name, value);
@@ -290,10 +256,4 @@ export function shouldBeArray(pref) {
 export function isChecked(pref) {
   if (pref) {return ' checked';}
   return '';
-}
-
-export function padZ(n) {
-  var ret = n.toString();
-  if (n < 10) {ret = '0' + ret;}
-  return ret;
 }

@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import {jConfirm} from '../support/layout';
@@ -11,7 +12,6 @@ import setupConfigData from './configData';
 import {createBr, createSpan} from '../common/cElement';
 import {
   findNode,
-  getValue,
   isChecked,
   setValue,
   toggleVisibilty

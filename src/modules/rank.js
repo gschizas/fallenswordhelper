@@ -1,10 +1,11 @@
 import add from './support/task';
+import {createDocument} from './system/system';
 import {createInput} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
+import getValue from './system/getValue';
 import moreToDo from './common/moreToDo';
 import retryAjax from './ajax/retryAjax';
-import {createDocument, getValue} from './system/system';
 import {pCC, playerName} from './support/layout';
 
 var ranks;

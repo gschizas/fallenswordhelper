@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 
 function findNewGroup(el) {
   if (el.textContent.indexOf('New attack group created.') === -1) {return;}

@@ -1,7 +1,9 @@
 import {defaults} from './support/dataObj';
 import eventHandler from './common/eventHandler';
 import {getElementById} from './common/getElement';
-import {getValueJSON, isChecked, setValueJSON} from './system/system';
+import getValueJSON from './system/getValueJSON';
+import {isChecked} from './system/system';
+import setValueJSON from './system/setValueJSON';
 import {makePageHeader, makePageTemplate, pCC} from './support/layout';
 
 var param;

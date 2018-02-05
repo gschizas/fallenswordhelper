@@ -1,4 +1,4 @@
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   var _c = '';

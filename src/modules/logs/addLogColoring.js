@@ -1,7 +1,7 @@
+import getValue from '../system/getValue';
 import {quickBuffHref} from '../support/layout';
 import {
   findNode,
-  getValue,
   parseDateAsTimestamp,
   setValue
 } from '../system/system';

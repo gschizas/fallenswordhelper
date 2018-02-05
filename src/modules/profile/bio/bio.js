@@ -1,6 +1,6 @@
 import bioEvtHdl from './bioEvtHdl';
 import {getElementById} from '../../common/getElement';
-import {getValue} from '../../system/system';
+import getValue from '../../system/getValue';
 import renderBio from './render';
 
 function expandBio() {

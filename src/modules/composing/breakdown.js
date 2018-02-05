@@ -1,9 +1,10 @@
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
 import perfFilter from '../common/perfFilter';
 import retryAjax from '../ajax/retryAjax';
+import {setValue} from '../system/system';
 import {simpleCheckbox} from '../settings/settingsPage';
-import {getValue, setValue} from '../system/system';
 
 var disableBreakdownPrompts;
 var selectedList = [];

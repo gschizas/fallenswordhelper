@@ -3,6 +3,7 @@ import {getElementById} from './common/getElement';
 import getGroupStats from './ajax/getGroupStats';
 import getMembrList from './ajax/getMembrList';
 import getMercStats from './ajax/getMercStats';
+import getValue from './system/getValue';
 import groupViewStats from './ajax/groupViewStats';
 import {months} from './support/dataObj';
 import retryAjax from './ajax/retryAjax';
@@ -10,7 +11,6 @@ import {
   addCommas,
   findNode,
   findNodes,
-  getValue,
   server
 } from './system/system';
 import {doBuffLinks, onlineDot} from './support/layout';

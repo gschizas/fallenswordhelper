@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 import {jConfirm} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';

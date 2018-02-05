@@ -1,6 +1,6 @@
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 import guildManage from '../app/guild/manage';
 import {nowSecs} from '../support/dataObj';
 import setForage from '../ajax/setForage';

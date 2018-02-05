@@ -1,6 +1,7 @@
 import {def_afterUpdateActionlist} from '../support/dataObj';
 import {getElementById} from '../common/getElement';
-import {getValue, setValue} from '../system/system';
+import getValue from '../system/getValue';
+import {setValue} from '../system/system';
 
 var hidePlayerActions;
 

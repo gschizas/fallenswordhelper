@@ -1,17 +1,14 @@
 import calf from '../support/calf';
 import findTarget from './findTarget';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
+import getValueJSON from '../system/getValueJSON';
 import injectBountyList from './injectBountyList';
 import injectWantedList from './injectWantedList';
 import {nowSecs} from '../support/dataObj';
 import parseActiveBounty from './parseActiveBounty';
 import retryAjax from '../ajax/retryAjax';
-import {
-  createDocument,
-  getValue,
-  getValueJSON,
-  setValue,
-} from '../system/system';
+import {createDocument, setValue} from '../system/system';
 
 export var bountyList;
 export var wantedList;

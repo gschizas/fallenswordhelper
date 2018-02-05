@@ -1,5 +1,6 @@
 import add from '../support/task';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
 import moreToDo from '../common/moreToDo';
 import retryAjax from '../ajax/retryAjax';
@@ -12,7 +13,6 @@ import {
 import {
   createDocument,
   findNode,
-  getValue,
   toggleVisibilty,
   xmlhttp
 } from '../system/system';

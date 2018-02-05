@@ -1,4 +1,4 @@
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 import {pCC, playerId, playerName} from '../support/layout';
 
 var currentPlayerId;

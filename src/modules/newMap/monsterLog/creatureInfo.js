@@ -1,6 +1,7 @@
 import {bias} from '../assets';
 import {getElementById} from '../../common/getElement';
-import {getValue, intValue, setValue} from '../../system/system';
+import getValue from '../../system/getValue';
+import {intValue, setValue} from '../../system/system';
 
 export var showCreatureInfo;
 var generalVariable = 1.1053;

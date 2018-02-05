@@ -1,4 +1,5 @@
-import {getValue, imageServer} from '../system/system';
+import getValue from '../system/getValue';
+import {imageServer} from '../system/system';
 
 var guildId;
 var currentGuildRelationship;

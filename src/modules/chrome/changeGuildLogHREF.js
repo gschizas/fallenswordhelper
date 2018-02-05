@@ -1,4 +1,4 @@
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 import {newGuildLogLoc, newGuildLogUrl} from '../support/dataObj';
 
 function testForGuildLogMsg(guildLogNode) {

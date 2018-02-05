@@ -1,5 +1,5 @@
 import buffList from '../support/buffObj';
-import {getValue} from '../system/system';
+import getValue from '../system/getValue';
 
 export var buffCustom = {
   header: 'Buff',

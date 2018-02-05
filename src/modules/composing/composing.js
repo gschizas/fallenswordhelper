@@ -1,13 +1,13 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import {now} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import {
   createDocument,
   getRandomInt,
-  getValue,
   imageServer,
   rnd,
   setValue

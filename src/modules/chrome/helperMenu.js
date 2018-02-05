@@ -1,6 +1,8 @@
 import {createDiv} from '../common/cElement';
 import draggable from '../common/dragStart';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
+import {imageServer} from '../system/system';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import {injectFsBoxContent} from '../misc';
 import injectMonsterLog from '../monstorLog';
@@ -11,7 +13,6 @@ import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import {sendEvent} from '../support/fshGa';
-import {getValue, imageServer} from '../system/system';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 

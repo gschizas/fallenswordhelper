@@ -1,13 +1,13 @@
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
 import {getElementById} from '../common/getElement';
+import getValue from '../system/getValue';
 import {lastActivityRE} from '../support/dataObj';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
 import {buffCustom, otherCustom} from './assets';
 import {
   createDocument,
-  getValue,
   setValue,
   stringSort,
   xmlhttp
