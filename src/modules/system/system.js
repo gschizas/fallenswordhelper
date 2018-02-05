@@ -2,7 +2,6 @@ import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
 import getValue from './getValue';
-import jsonParse from '../common/jsonParse';
 import retryAjax from '../ajax/retryAjax';
 import {months, nowSecs} from '../support/dataObj';
 
@@ -11,26 +10,6 @@ export var server = document.location.protocol + '//' +
 export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
-
-function reviver(key, value) {
-  if (typeof value === 'string') {
-    var a =
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/
-        .exec(value);
-    if (a) {
-      return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]),
-        Number(a[4]), Number(a[5]), Number(a[6])));
-    }
-  }
-  return value;
-}
-
-export function getValueJSON(name) {
-  var resultJSON = getValue(name);
-  var result;
-  if (resultJSON) {result = jsonParse(resultJSON, reviver);}
-  return result;
-}
 
 export function setValueJSON(name, value) {
   GM_setValue(name, JSON.stringify(value));

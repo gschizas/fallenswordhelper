@@ -1,10 +1,8 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import {
-  getValueJSON,
-  setValueJSON
-} from '../system/system';
+import getValueJSON from '../system/getValueJSON';
+import {setValueJSON} from '../system/system';
 
 var enterForSendMessage;
 var fshTemplate;

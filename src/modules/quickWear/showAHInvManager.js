@@ -1,5 +1,5 @@
 import {createDiv} from '../common/cElement';
-import {getValueJSON} from '../system/system';
+import getValueJSON from '../system/getValueJSON';
 
 function ahLink(searchname, nickname) {
   return '<a href="index.php?cmd=auctionhouse&search_text=' + searchname +

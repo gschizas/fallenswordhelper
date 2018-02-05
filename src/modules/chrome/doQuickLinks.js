@@ -4,11 +4,8 @@ import draggable from '../common/dragStart';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import {
-  escapeHtml,
-  getValueJSON,
-  imageServer
-} from '../system/system';
+import getValueJSON from '../system/getValueJSON';
+import {escapeHtml, imageServer} from '../system/system';
 
 function retBool(bool, ifTrue, ifFalse) {
   if (bool) {
