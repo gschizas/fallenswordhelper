@@ -11,7 +11,7 @@ import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import {sendEvent} from '../support/fshGa';
-import {getValue, imageServer} from '../support/system';
+import {getValue, imageServer} from '../system/system';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 

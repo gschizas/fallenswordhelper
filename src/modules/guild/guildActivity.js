@@ -1,9 +1,10 @@
+import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
+import {getValue} from '../system/system';
 import guildManage from '../app/guild/manage';
 import {nowSecs} from '../support/dataObj';
 import setForage from '../ajax/setForage';
 import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';
-import {fallback, getValue} from '../support/system';
 
 var oldArchive;
 var guild;

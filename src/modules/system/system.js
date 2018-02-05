@@ -1,18 +1,15 @@
-import calf from './calf';
+import calf from '../support/calf';
+import fallback from './fallback';
 import {getElementById} from '../common/getElement';
 import jsonParse from '../common/jsonParse';
 import retryAjax from '../ajax/retryAjax';
-import {defaults, months, nowSecs} from './dataObj';
+import {defaults, months, nowSecs} from '../support/dataObj';
 
 export var server = document.location.protocol + '//' +
   document.location.host + '/';
 export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
-
-export function fallback(a, b) {
-  return a || b;
-}
 
 export function getValue(name) {
   //#if _DEV  //  No default setting available

@@ -1,10 +1,11 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
+import fallback from '../system/fallback';
+import {formatLastActivity} from '../system/system';
 import {getElementById} from '../common/getElement';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
-import {fallback, formatLastActivity} from '../support/system';
 import {openQuickBuffByName, pCR} from '../support/layout';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';

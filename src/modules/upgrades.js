@@ -3,7 +3,7 @@ import {getElementById} from './common/getElement';
 import insertElement from './common/insertElement';
 import insertTextBeforeEnd from './common/insertTextBeforeEnd';
 import isNaN from './common/isNaN';
-import {intValue, server, setValue} from './support/system';
+import {intValue, server, setValue} from './system/system';
 
 var upgrades;
 var currentFSP;

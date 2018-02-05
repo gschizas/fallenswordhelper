@@ -2,7 +2,7 @@ import combatLogger from './combatLogger';
 import {def_afterUpdateActionlist} from '../support/dataObj';
 import doNotKill from './doNotKill';
 import {getElementById} from '../common/getElement';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import injectRelic from './relic/relic';
 import onWorld from './onWorld';
 import prepareShop from './shop';

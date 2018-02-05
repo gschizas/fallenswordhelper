@@ -1,4 +1,4 @@
-import {imageServer} from '../support/system';
+import {imageServer} from '../system/system';
 import {moveOptions} from './assets';
 import retryAjax from '../ajax/retryAjax';
 

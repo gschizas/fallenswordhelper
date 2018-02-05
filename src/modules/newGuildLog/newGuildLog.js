@@ -14,7 +14,7 @@ import {
   getValue,
   imageServer,
   parseDateAsTimestamp
-} from '../support/system';
+} from '../system/system';
 import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
 
 var options = {};

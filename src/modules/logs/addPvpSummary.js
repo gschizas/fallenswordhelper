@@ -10,7 +10,7 @@ import {
   addCommas,
   createDocument,
   parseDateAsTimestamp
-} from '../support/system';
+} from '../system/system';
 import {createDiv, createSpan} from '../common/cElement';
 
 var combatCache = {};

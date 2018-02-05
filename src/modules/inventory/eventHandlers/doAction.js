@@ -1,4 +1,4 @@
-import {imageServer} from '../../support/system';
+import {imageServer} from '../../system/system';
 
 function removeClass(self) {
   self.closest('tr')

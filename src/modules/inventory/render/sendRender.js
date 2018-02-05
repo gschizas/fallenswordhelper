@@ -1,4 +1,4 @@
-import {fallback} from '../../support/system';
+import fallback from '../../system/fallback';
 
 export default function sendRender(data, type, row) {
   if (fallback(row.bound, row.equipped)) {return;}

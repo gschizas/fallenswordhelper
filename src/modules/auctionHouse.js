@@ -3,7 +3,7 @@ import {getElementById} from './common/getElement';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 import retryAjax from './ajax/retryAjax';
-import {getValue, imageServer} from './support/system';
+import {getValue, imageServer} from './system/system';
 
 function cancelAllAH() { // jQuery
   var cancelButtons = getElementById('resultRows')

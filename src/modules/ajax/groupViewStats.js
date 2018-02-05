@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {intValue} from '../support/system';
+import {intValue} from '../system/system';
 
 export default function groupViewStats(doc) {
   var attackElement = getElementById('stat-attack', doc);

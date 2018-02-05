@@ -3,7 +3,7 @@ import retryAjax from '../ajax/retryAjax';
 import {
   imageServer,
   setValue
-} from '../support/system';
+} from '../system/system';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +

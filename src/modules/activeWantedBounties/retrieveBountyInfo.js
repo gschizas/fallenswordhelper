@@ -11,7 +11,7 @@ import {
   getValue,
   getValueJSON,
   setValue,
-} from '../support/system';
+} from '../system/system';
 
 export var bountyList;
 export var wantedList;

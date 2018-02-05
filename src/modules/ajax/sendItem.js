@@ -1,5 +1,5 @@
 import dialog from './dialog';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import {infoBox} from '../support/layout';
 import retryAjax from './retryAjax';
 

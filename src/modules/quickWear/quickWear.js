@@ -9,7 +9,7 @@ import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/settingsPage';
 import toggleForce from '../common/toggleForce';
 import useItem from '../ajax/useItem';
-import {getValue, setValue} from '../support/system';
+import {getValue, setValue} from '../system/system';
 import {jConfirm, pCC} from '../support/layout';
 
 var disableQuickWearPrompts;

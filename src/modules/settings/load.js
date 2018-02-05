@@ -1,5 +1,5 @@
 import {pCC} from '../support/layout';
-import {getValue, setValue} from '../support/system';
+import {getValue, setValue} from '../system/system';
 
 export default function injectSaveSettings() { // Hybrid
   var content = pCC;

@@ -1,4 +1,4 @@
-import {findNode} from '../support/system';
+import {findNode} from '../system/system';
 import {getElementById} from '../common/getElement';
 import injectAdvisor from '../guildAdvisor';
 import {injectQuestBookFull} from '../questBook';

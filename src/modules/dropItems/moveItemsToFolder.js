@@ -1,4 +1,4 @@
-import {fallback} from '../support/system';
+import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import moveItem from '../ajax/moveItem';
 

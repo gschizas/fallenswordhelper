@@ -1,5 +1,5 @@
 import add from '../support/task';
-import {getUrlParameter} from '../support/system';
+import {getUrlParameter} from '../system/system';
 import moreToDo from '../common/moreToDo';
 
 var counter;

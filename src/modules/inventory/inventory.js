@@ -6,13 +6,14 @@ import {defaultOptions} from './assets';
 import doTable from './table';
 import eventHandlers from './eventHandlers/eventHandlers';
 import extend from '../common/extend';
+import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import getInventory from '../ajax/getInventory';
 import getMembrList from '../ajax/getMembrList';
 import headers from './headers';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
-import {fallback, getValue, imageServer} from '../support/system';
+import {getValue, imageServer} from '../system/system';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 

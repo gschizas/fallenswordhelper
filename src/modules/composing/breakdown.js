@@ -3,7 +3,7 @@ import {pCC} from '../support/layout';
 import perfFilter from '../common/perfFilter';
 import retryAjax from '../ajax/retryAjax';
 import {simpleCheckbox} from '../settings/settingsPage';
-import {getValue, setValue} from '../support/system';
+import {getValue, setValue} from '../system/system';
 
 var disableBreakdownPrompts;
 var selectedList = [];

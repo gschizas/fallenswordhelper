@@ -11,7 +11,7 @@ import {
   setValue,
   stringSort,
   xmlhttp
-} from '../support/system';
+} from '../system/system';
 import {pCC, playerName} from '../support/layout';
 
 var characterName;

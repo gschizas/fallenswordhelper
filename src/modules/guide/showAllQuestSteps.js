@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 
 export default function showAllQuestSteps() {
   if (!getValue('showNextQuestSteps')) {return;}

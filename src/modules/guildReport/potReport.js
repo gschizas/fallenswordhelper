@@ -2,10 +2,11 @@ import alpha from '../common/alpha';
 import {createDiv} from '../common/cElement';
 import eventHandler from '../common/eventHandler';
 import extend from '../common/extend';
+import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
-import {fallback, isChecked, isSelected, testRange} from '../support/system';
+import {isChecked, isSelected, testRange} from '../system/system';
 
 var storeMap = 'fsh_potMap';
 var defaultOpts = {

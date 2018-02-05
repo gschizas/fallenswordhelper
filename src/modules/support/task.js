@@ -1,4 +1,4 @@
-import {fallback} from './system';
+import fallback from '../system/fallback';
 import {sendException} from './fshGa';
 import {getLength, pop, push} from './sch';
 

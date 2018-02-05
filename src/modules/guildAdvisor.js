@@ -1,6 +1,7 @@
 import add from './support/task';
 import calf from './support/calf';
 import {createTFoot} from './common/cElement';
+import fallback from './system/fallback';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import {pCC} from './support/layout';
@@ -8,9 +9,8 @@ import retryAjax from './ajax/retryAjax';
 import {
   addCommas,
   createDocument,
-  fallback,
   intValue
-} from './support/system';
+} from './system/system';
 import {time, timeEnd} from './support/debug';
 
 var newSummary = {};

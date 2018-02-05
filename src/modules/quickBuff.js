@@ -1,8 +1,9 @@
 import {createSpan} from './common/cElement';
+import fallback from './system/fallback';
 import {getElementById} from './common/getElement';
 import getProfile from './ajax/getProfile';
 import retryAjax from './ajax/retryAjax';
-import {createDocument, fallback, formatLastActivity} from './support/system';
+import {createDocument, formatLastActivity} from './system/system';
 
 var retries = 0;
 var quickBuffHeader =

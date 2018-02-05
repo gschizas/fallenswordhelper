@@ -13,7 +13,7 @@ import {
   toggleEnabledHuntingMode,
   toggleShowHuntingBuffs
 } from './doHuntingBuffs';
-import {getValue, shouldBeArray} from '../support/system';
+import {getValue, shouldBeArray} from '../system/system';
 import {interceptXHR, toggleSubLvlCreature} from './interceptXHR';
 import {
   prepareHidePlayerActions,

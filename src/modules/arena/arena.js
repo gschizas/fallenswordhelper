@@ -1,9 +1,10 @@
 import {defaults} from '../support/dataObj';
+import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
+import {intValue} from '../system/system';
 import isObject from '../common/isObject';
 import setForage from '../ajax/setForage';
 import {arenaFilter, dontPost, tableOpts} from './assets';
-import {fallback, intValue} from '../support/system';
 import {time, timeEnd} from '../support/debug';
 
 var tabs;

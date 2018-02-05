@@ -1,7 +1,7 @@
 import {createAnchor} from '../common/cElement';
 import {guideUrl} from '../support/dataObj';
 import {pCC} from '../support/layout';
-import {getValue, parseDateAsTimestamp, setValue} from '../support/system';
+import {getValue, parseDateAsTimestamp, setValue} from '../system/system';
 
 function containsNewsHead(el) {
   return el.classList.contains('news_head') ||

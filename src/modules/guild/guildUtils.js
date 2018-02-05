@@ -1,4 +1,4 @@
-import {addCommas, getIntFromRegExp} from '../support/system';
+import {addCommas, getIntFromRegExp} from '../system/system';
 
 export function removeGuildAvyImgBorder() {
   document.querySelector('#pCC img[oldtitle$="\'s Logo"]')

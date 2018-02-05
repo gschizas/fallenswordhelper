@@ -5,6 +5,7 @@ import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
 import dropItem from '../ajax/dropItem';
 import eventHandler from '../common/eventHandler';
+import fallback from '../system/fallback';
 import getInventoryById from '../ajax/getInventoryById';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
@@ -14,7 +15,7 @@ import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
 import toggleForce from '../common/toggleForce';
-import {fallback, getValue, setValue} from '../support/system';
+import {getValue, setValue} from '../system/system';
 import {guideUrl, itemRE, rarity} from '../support/dataObj';
 
 var disableItemColoring;

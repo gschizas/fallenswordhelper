@@ -1,7 +1,7 @@
 import calf from '../support/calf';
 import displayDisconnectedFromGodsMessage
   from './displayDisconnectedFromGodsMessage';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import {now} from '../support/dataObj';
 import {parseTemplePage} from './parseTemplePage';
 import retryAjax from '../ajax/retryAjax';

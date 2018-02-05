@@ -1,4 +1,4 @@
-import {fallback} from '../../support/system';
+import fallback from '../../system/fallback';
 import {theInv} from '../inventory';
 
 function gsRecall(row) {

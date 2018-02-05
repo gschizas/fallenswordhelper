@@ -1,11 +1,12 @@
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
+import fallback from '../system/fallback';
 import getMembrList from '../ajax/getMembrList';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import {quickBuffHref} from '../support/layout';
 import {addPvpSummary, initCache} from './addPvpSummary';
-import {fallback, findNode, getValue} from '../support/system';
+import {findNode, getValue} from '../system/system';
 
 var myPlayer = {};
 var addAttackLinkToLog;

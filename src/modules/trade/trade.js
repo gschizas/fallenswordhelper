@@ -3,9 +3,10 @@ import calf from '../support/calf';
 import {createTr} from '../common/cElement';
 import {defaults} from '../support/dataObj';
 import doFolders from './doFolders';
+import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import {getValue} from '../system/system';
 import jsonParse from '../common/jsonParse';
-import {fallback, getValue} from '../support/system';
 
 function getHowMany(itemTables) {
   var howMany = parseInt(getElementById('fshSendHowMany').value, 10);

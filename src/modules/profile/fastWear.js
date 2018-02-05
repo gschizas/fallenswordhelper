@@ -2,7 +2,7 @@ import add from '../support/task';
 import {createDiv} from '../common/cElement';
 import equipItem from '../ajax/equipItem';
 import {getElementById} from '../common/getElement';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import {sendEvent} from '../support/fshGa';
 import useItem from '../ajax/useItem';
 

@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';

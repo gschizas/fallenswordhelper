@@ -1,7 +1,8 @@
+import {addCommas} from '../../system/system';
 import {defenderMultiplier} from '../../support/dataObj';
+import fallback from '../../system/fallback';
 import {playerDataObject} from '../../common/common';
 import reduceBuffArray from '../../common/reduceBuffArray';
-import {addCommas, fallback} from '../../support/system';
 import {
   armorBuffedElement,
   armorElement,

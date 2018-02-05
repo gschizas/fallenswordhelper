@@ -1,4 +1,4 @@
-import {imageServer} from '../support/system';
+import {imageServer} from '../system/system';
 
 function anotherSpinner(self) {
   self.innerHTML = '<img class="quickActionSpinner" src="' +

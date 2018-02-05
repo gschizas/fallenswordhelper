@@ -3,7 +3,7 @@ import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import scouttower from '../../app/guild/scouttower';
-import {setValue} from '../../support/system';
+import {setValue} from '../../system/system';
 import toggleForce from '../../common/toggleForce';
 import {clearMemberRows, processTitans} from './processTitans';
 import {createDiv, createSpan} from '../../common/cElement';

@@ -1,6 +1,6 @@
 import currentGuildId from '../common/currentGuildId';
 import getProfile from '../ajax/getProfile';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import guildView from '../app/guild/view';
 import isObject from '../common/isObject';
 import {nowSecs} from '../support/dataObj';

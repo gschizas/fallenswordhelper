@@ -1,5 +1,5 @@
 import {createInput} from '../common/cElement';
-import {imageServer} from '../support/system';
+import {imageServer} from '../system/system';
 import {pCC} from '../support/layout';
 import takeitem from '../app/guild/inventory/takeitem';
 

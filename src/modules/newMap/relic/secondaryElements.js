@@ -1,7 +1,7 @@
 import {createDiv} from '../../common/cElement';
 import {getElementById} from '../../common/getElement';
 import getMembrList from '../../ajax/getMembrList';
-import {getValue} from '../../support/system';
+import {getValue} from '../../system/system';
 import {nowSecs} from '../../support/dataObj';
 import {atkStats, defStats, proc} from './assets';
 import {

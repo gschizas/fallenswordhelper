@@ -12,7 +12,7 @@ import {
   intValue,
   setValue,
   xmlhttp
-} from './support/system';
+} from './system/system';
 
 var impStyles = [
   ' style="color:red; font-size:large; font-weight:bold"',

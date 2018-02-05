@@ -1,5 +1,5 @@
 import {beginFolderSpanElement} from '../support/dataObj';
-import {imageServer} from '../support/system';
+import {imageServer} from '../system/system';
 import {playerId} from '../support/layout';
 import {createDiv, createTBody, createTable} from '../common/cElement';
 

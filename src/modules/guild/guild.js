@@ -15,7 +15,7 @@ import {
   getValue,
   toggleVisibilty,
   xmlhttp
-} from '../support/system';
+} from '../system/system';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var leftHandSideColumnTable;

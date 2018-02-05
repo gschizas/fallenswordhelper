@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import {isChecked} from '../support/system';
+import {isChecked} from '../system/system';
 import {networkIcon} from './settingObj';
 import {helpLink, simpleCheckbox} from './settingsPage';
 

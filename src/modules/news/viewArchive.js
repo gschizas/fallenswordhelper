@@ -5,7 +5,7 @@ import {
   getValue,
   parseDateAsTimestamp,
   setValue
-} from '../support/system';
+} from '../system/system';
 
 var ladderResetPref = 'lastLadderReset';
 var lastLadderReset;

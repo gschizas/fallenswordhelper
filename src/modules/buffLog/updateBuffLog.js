@@ -2,7 +2,7 @@ import buffList from '../support/buffObj';
 import formatLocalDateTime from '../common/formatLocalDateTime';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import setForage from '../ajax/setForage';
 
 function rejected(timeStamp, buffsNotCast, buffLog) {
