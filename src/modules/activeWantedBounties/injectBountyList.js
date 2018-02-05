@@ -1,7 +1,7 @@
 import {bountyListDiv} from './activeWantedBounties';
 import calf from '../support/calf';
 import insertElement from '../common/insertElement';
-import {setValueJSON} from '../system/system';
+import setValueJSON from '../system/setValueJSON';
 import {bountyList, retrieveBountyInfo} from './retrieveBountyInfo';
 import {createDiv, createSpan} from '../common/cElement';
 

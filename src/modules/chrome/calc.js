@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
-import {intValue, padZ} from '../system/system';
+import {intValue} from '../system/system';
+import padZ from '../system/padZ';
 import {months, now} from '../support/dataObj';
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

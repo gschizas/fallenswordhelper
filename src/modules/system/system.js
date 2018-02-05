@@ -11,10 +11,6 @@ export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
 
-export function setValueJSON(name, value) {
-  GM_setValue(name, JSON.stringify(value));
-}
-
 export function setValue(name, value) {
   GM_setValue(name, value);
 }
@@ -260,10 +256,4 @@ export function shouldBeArray(pref) {
 export function isChecked(pref) {
   if (pref) {return ' checked';}
   return '';
-}
-
-export function padZ(n) {
-  var ret = n.toString();
-  if (n < 10) {ret = '0' + ret;}
-  return ret;
 }
