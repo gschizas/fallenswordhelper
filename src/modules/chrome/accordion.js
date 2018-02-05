@@ -80,18 +80,16 @@ function creatureLogLink() {
 function newGuildLogLink() {
   if (!getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    getElementById('nav-guild-ledger-guildlog').parentNode
-      .insertAdjacentHTML('beforebegin',
-        '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="index.php' + newGuildLogUrl + '"' +
-        '>New Guild Log</a></li>');
+    // getElementById('nav-guild-ledger-guildlog').parentNode
+    //   .insertAdjacentHTML('beforebegin',
+    insertAfterParent('nav-guild-ledger-guildlog', insertAdjHtml,
+      '<li class="nav-level-2"><a class="nav-link" ' +
+      'href="index.php' + newGuildLogUrl + '"' +
+      '>New Guild Log</a></li>');
   }
 }
 
-function adjustHeight() { // jQuery
-  // adjust the menu height for the newly added items
-  var theNav = getElementById('nav');
-  var myNav = $(theNav).data('nav');
+function navHeightsIsArray(theNav, myNav) {
   // first the closed saved variables
   myNav.heights = [
     null,
@@ -111,6 +109,41 @@ function adjustHeight() { // jQuery
     // and now the open one
     theNav.children[myNav.state].children[1].style.height =
       myNav.heights[myNav.state] + 'px';
+  }
+}
+
+function navHeightExists(theNav, myNav) {
+  if (Array.isArray(myNav.heights)) {
+    navHeightsIsArray(theNav, myNav);
+  } else {
+    sendException('$(\'#nav\').data(\'nav\').heights is not an Array', false);
+  }
+}
+
+function navDataExists(theNav, myNav) {
+  if ('heights' in myNav) {
+    navHeightExists(theNav, myNav);
+  } else {
+    sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
+  }
+}
+
+function navExists(theNav) {
+  var myNav = $(theNav).data('nav');
+  if (typeof myNav === 'object') {
+    navDataExists(theNav, myNav);
+  } else {
+    sendException('$(\'#nav\').data(\'nav\') is not an object', false);
+  }
+}
+
+function adjustHeight() { // jQuery
+  // adjust the menu height for the newly added items
+  var theNav = getElementById('nav');
+  if (theNav instanceof Element) {
+    navExists(theNav);
+  } else {
+    sendException('#nav is not an Element', false);
   }
 }
 
