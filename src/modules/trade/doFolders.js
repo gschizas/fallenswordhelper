@@ -1,5 +1,5 @@
 import add from '../support/task';
-import {fallback} from '../support/system';
+import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
 import {createDiv, createTr} from '../common/cElement';

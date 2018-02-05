@@ -3,7 +3,7 @@ import {getElementById} from './common/getElement';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
-import {testQuant} from './support/system';
+import {testQuant} from './system/system';
 
 var ItemId;
 var bazaarTable =

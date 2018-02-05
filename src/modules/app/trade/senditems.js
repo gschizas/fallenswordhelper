@@ -1,5 +1,5 @@
 import callApp from '../callApp';
-import {getValue} from '../../support/system';
+import {getValue} from '../../system/system';
 
 export default function senditems(invIdAry) {
   return callApp({

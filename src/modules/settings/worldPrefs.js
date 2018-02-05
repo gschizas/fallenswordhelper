@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import {getValue, isChecked, isSelected} from '../support/system';
+import {getValue, isChecked, isSelected} from '../system/system';
 import {
   helpLink,
   justCheckbox,

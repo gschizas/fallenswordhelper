@@ -12,7 +12,7 @@ import {
   findNodes,
   getValue,
   server
-} from './support/system';
+} from './system/system';
 import {doBuffLinks, onlineDot} from './support/layout';
 import {time, timeEnd} from './support/debug';
 

@@ -1,7 +1,7 @@
 import calf from '../support/calf';
 import {def_playerBuffs} from '../support/dataObj';
 import {missingBuffsDiv} from './worldPrefs';
-import {setValue} from '../support/system';
+import {setValue} from '../system/system';
 
 var huntingBuffs;
 var huntingBuffsName;

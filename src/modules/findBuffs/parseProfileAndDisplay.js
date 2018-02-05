@@ -1,11 +1,11 @@
+import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import {onlineDot} from '../support/layout';
 import {bufferProgress, findBuffNicks} from './findBuffs';
 import {
   createDocument,
-  fallback,
   intValue
-} from '../support/system';
+} from '../system/system';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
 

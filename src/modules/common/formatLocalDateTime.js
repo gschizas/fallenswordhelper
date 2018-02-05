@@ -1,4 +1,4 @@
-import {padZ} from '../support/system';
+import {padZ} from '../system/system';
 
 export default function formatLocalDateTime(aDate) {
   if (Object.prototype.toString.call(aDate) === '[object Date]' &&

@@ -5,7 +5,7 @@ import {
   getValue,
   imageServer,
   setValue
-} from './support/system';
+} from './system/system';
 
 var normalLink;
 var seasonLink;

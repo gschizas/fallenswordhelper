@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
@@ -9,13 +10,12 @@ import {sendEvent} from '../support/fshGa';
 import setupConfigData from './configData';
 import {createBr, createSpan} from '../common/cElement';
 import {
-  fallback,
   findNode,
   getValue,
   isChecked,
   setValue,
   toggleVisibilty
-} from '../support/system';
+} from '../system/system';
 import {networkIcon, saveBoxes} from './settingObj';
 
 function getVars() {

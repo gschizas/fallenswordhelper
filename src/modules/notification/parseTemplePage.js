@@ -4,7 +4,7 @@ import displayDisconnectedFromGodsMessage
 import {
   createDocument,
   setValue
-} from '../support/system';
+} from '../system/system';
 
 function templeAlertEnabled(responseText) {
   var checkNeedToPray;

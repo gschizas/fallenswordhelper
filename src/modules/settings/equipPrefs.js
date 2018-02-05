@@ -1,4 +1,4 @@
-import {escapeHtml, getValue, isChecked} from '../support/system';
+import {escapeHtml, getValue, isChecked} from '../system/system';
 import {helpLink, simpleCheckbox} from './settingsPage';
 
 export default function equipPrefs() {

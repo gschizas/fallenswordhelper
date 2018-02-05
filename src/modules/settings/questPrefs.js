@@ -1,4 +1,4 @@
-import {getValue, isChecked} from '../support/system';
+import {getValue, isChecked} from '../system/system';
 import {helpLink, simpleCheckbox} from './settingsPage';
 
 export default function questPrefs() {

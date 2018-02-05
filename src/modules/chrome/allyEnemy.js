@@ -1,10 +1,12 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
+import fallback from '../system/fallback';
+import {formatLastActivity} from '../system/system';
 import {getElementById} from '../common/getElement';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
-import {fallback, formatLastActivity} from '../support/system';
+import {sendException} from '../support/fshGa';
 import {openQuickBuffByName, pCR} from '../support/layout';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
@@ -214,9 +216,13 @@ function makeDiv(data) {
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  pCR.insertAdjacentElement('afterbegin', fshAllyEnemy);
-  fshAllyEnemy.addEventListener('click', eventHandler);
-  injectAllyEnemyList(data);
+  if (pCR instanceof Element) {
+    pCR.insertAdjacentElement('afterbegin', fshAllyEnemy);
+    fshAllyEnemy.addEventListener('click', eventHandler);
+    injectAllyEnemyList(data);
+  } else {
+    sendException('pCR is not an Element', false);
+  }
 }
 
 export default function prepareAllyEnemyList() { // jQuery.min

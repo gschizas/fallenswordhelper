@@ -5,7 +5,7 @@ import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
-import {createDocument, findNode, getValue} from '../support/system';
+import {createDocument, findNode, getValue} from '../system/system';
 
 var expandMenuOnKeyPress;
 

@@ -11,7 +11,7 @@ import {
   imageServer,
   rnd,
   setValue
-} from '../support/system';
+} from '../system/system';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +

@@ -1,4 +1,4 @@
-import {getCustomUrlParameter} from '../support/system';
+import {getCustomUrlParameter} from '../system/system';
 import {getElementById} from '../common/getElement';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';

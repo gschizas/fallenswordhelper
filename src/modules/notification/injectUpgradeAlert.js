@@ -1,6 +1,6 @@
 import add from '../support/task';
 import displayUpgradeMsg from './displayUpgradeMsg';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import {now} from '../support/dataObj';
 import parseGoldUpgrades from './parseGoldUpgrades';
 import retryAjax from '../ajax/retryAjax';

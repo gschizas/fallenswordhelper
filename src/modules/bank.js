@@ -1,4 +1,4 @@
-import {createDocument} from './support/system';
+import {createDocument} from './system/system';
 import retryAjax from './ajax/retryAjax';
 
 var playerBank = {

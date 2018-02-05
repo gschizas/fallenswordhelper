@@ -1,4 +1,4 @@
-import {isSelected} from '../../support/system';
+import {isSelected} from '../../system/system';
 import playerName from './playerName';
 import {theInv} from '../inventory';
 

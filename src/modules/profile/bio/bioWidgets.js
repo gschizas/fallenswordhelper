@@ -5,7 +5,7 @@ import isNaN from '../../common/isNaN';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
 import {createDiv, createInput} from '../../common/cElement';
-import {getValue, setValue} from '../../support/system';
+import {getValue, setValue} from '../../system/system';
 
 var bioEditLines;
 var textArea;

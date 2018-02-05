@@ -1,6 +1,6 @@
 import calf from '../support/calf';
 import displayUpgradeMsg from './displayUpgradeMsg';
-import {createDocument, setValue} from '../support/system';
+import {createDocument, setValue} from '../system/system';
 
 function findDoc(data) {
   if (location.search.indexOf('cmd=points&type=1') === -1) {

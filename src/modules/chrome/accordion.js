@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
@@ -7,10 +7,10 @@ import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import jQueryDialog from './jQueryDialog';
 import {newGuildLogUrl} from '../support/dataObj';
-import {sendEvent} from '../support/fshGa';
 import {createAnchor, createLi} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
+import {sendEvent, sendException} from '../support/fshGa';
 
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
@@ -18,6 +18,27 @@ function updateQuestLink() {
     getElementById('nav-character-questbook')
       .setAttribute('href', lastActiveQuestPage);
   }
+}
+
+function insertAdjElement(parent, listItem) {
+  parent.insertAdjacentElement('afterend', listItem);
+}
+
+function insertAdjHtml(parent, listItem) {
+  parent.insertAdjacentHTML('afterend', listItem);
+}
+
+function insertAfterParent(target, fn, listItem) {
+  var tgt = getElementById(target);
+  if (tgt instanceof Node) {
+    var parent = tgt.parentNode;
+    if (parent instanceof Element) {
+      // parent.insertAdjacentElement('afterend', listItem);
+      fn(parent, listItem);
+    } else {
+      sendException('#' + target + '.parentNode is not an Element', false);
+    }
+  } else {sendException('#' + target + ' is not a Node', false);}
 }
 
 function anchorButton(navLvl, text, fn, target) {
@@ -31,8 +52,9 @@ function anchorButton(navLvl, text, fn, target) {
     jQueryDialog(fn);
   });
   li.appendChild(al);
-  getElementById(target).parentNode
-    .insertAdjacentElement('afterend', li);
+  // getElementById(target).parentNode
+  //   .insertAdjacentElement('afterend', li);
+  insertAfterParent(target, insertAdjElement, li);
 }
 
 function buffLogLink() {
@@ -97,32 +119,35 @@ export default function injectMenu() {
   updateQuestLink();
   // character
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  getElementById('nav-character-log').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-medalguide" href="index.php?cmd=profile&subcmd=' +
-      'medalguide">Medal Guide</a></li>' +
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=invmanagernew">Inventory Manager</a></li>');
+  // getElementById('nav-character-log').parentNode
+  //   .insertAdjacentHTML('afterend',
+  insertAfterParent('nav-character-log', insertAdjHtml,
+    '<li class="nav-level-1"><a class="nav-link" id="nav-' +
+    'character-medalguide" href="index.php?cmd=profile&subcmd=' +
+    'medalguide">Medal Guide</a></li>' +
+    '<li class="nav-level-1"><a class="nav-link" id="nav-' +
+    'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
+    'subcmd=invmanagernew">Inventory Manager</a></li>');
   buffLogLink();
   combatLogLink();
   creatureLogLink();
   anchorButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
   // guild
-  getElementById('nav-guild-storehouse-inventory').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=guildinvmgr">Guild Inventory</a></li>');
+  // getElementById('nav-guild-storehouse-inventory').parentNode
+  //   .insertAdjacentHTML('afterend',
+  insertAfterParent('nav-guild-storehouse-inventory', insertAdjHtml,
+    '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+    'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
+    '&subcmd=guildinvmgr">Guild Inventory</a></li>');
   newGuildLogLink();
   // top rated
-  getElementById('nav-toprated-players-level').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
-      'Top 250 Players</a></li>');
+  // getElementById('nav-toprated-players-level').parentNode
+  //   .insertAdjacentHTML('afterend',
+  insertAfterParent('nav-toprated-players-level', insertAdjHtml,
+    '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+    'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
+    'Top 250 Players</a></li>');
   // actions
   anchorButton('2', 'AH Quick Search', injectAuctionSearch,
     'nav-actions-trade-auctionhouse');

@@ -4,7 +4,7 @@ import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
-import {addCommas, imageServer, numberSort, stringSort} from './support/system';
+import {addCommas, imageServer, numberSort, stringSort} from './system/system';
 
 var content;
 var monsterAry;

@@ -11,7 +11,7 @@ import {
   createTBody,
   createTable
 } from '../common/cElement';
-import {createDocument, imageServer} from '../support/system';
+import {createDocument, imageServer} from '../system/system';
 
 var quickDelDiv;
 var sumComp;

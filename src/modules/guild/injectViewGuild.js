@@ -9,7 +9,7 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from '../common/levelHighlight';
-import {getUrlParameter, getValue} from '../support/system';
+import {getUrlParameter, getValue} from '../system/system';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var highlightPlayersNearMyLvl;

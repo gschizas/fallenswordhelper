@@ -164,6 +164,98 @@ if (needApiUpgrade) {
   };
 }
 
+function fallback(a, b) {
+  return a || b;
+}
+
+function moreToDo(limit, cntr, list) {
+  return performance.now() < limit && cntr < list.length;
+}
+
+function mixin(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+      mixin(obj[key], mixins[key]);
+    } else {
+      obj[key] = mixins[key];
+    }
+  });
+}
+
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {mixin(el, props);}
+  return el;
+}
+
+function createDiv(props) {
+  return cElement('div', props);
+}
+
+function createSpan(props) {
+  return cElement('span', props);
+}
+
+function createTable(props) {
+  return cElement('table', props);
+}
+
+function createTBody(props) {
+  return cElement('tbody', props);
+}
+
+function createTr(props) {
+  return cElement('tr', props);
+}
+
+function createTd(props) {
+  return cElement('td', props);
+}
+
+function createTFoot(props) {
+  return cElement('tfoot', props);
+}
+
+function createUl(props) {
+  return cElement('ul', props);
+}
+
+function createLi(props) {
+  return cElement('li', props);
+}
+
+function createButton(props) {
+  return cElement('button', props);
+}
+
+function createBr() {
+  return cElement('br');
+}
+
+function createAnchor(props) {
+  return cElement('a', props);
+}
+
+function createInput(props) {
+  return cElement('input', props);
+}
+
+function createTextArea(props) {
+  return cElement('textarea', props);
+}
+
+function createTh(props) {
+  return cElement('th', props);
+}
+
+function createLabel(props) {
+  return cElement('label', props);
+}
+
+function textSpan(text) {
+  return createSpan({textContent: text});
+}
+
 var calf = {};
 
 function jsonParse(str, reviver) {
@@ -566,10 +658,6 @@ var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
 
-function fallback(a, b) {
-  return a || b;
-}
-
 function getValue(name) {
   if (typeof defaults[name] === 'undefined') {
     // eslint-disable-next-line no-console
@@ -851,94 +939,6 @@ function padZ(n) {
   var ret = n.toString();
   if (n < 10) {ret = '0' + ret;}
   return ret;
-}
-
-function moreToDo(limit, cntr, list) {
-  return performance.now() < limit && cntr < list.length;
-}
-
-function mixin(obj, mixins) {
-  Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
-      mixin(obj[key], mixins[key]);
-    } else {
-      obj[key] = mixins[key];
-    }
-  });
-}
-
-function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {mixin(el, props);}
-  return el;
-}
-
-function createDiv(props) {
-  return cElement('div', props);
-}
-
-function createSpan(props) {
-  return cElement('span', props);
-}
-
-function createTable(props) {
-  return cElement('table', props);
-}
-
-function createTBody(props) {
-  return cElement('tbody', props);
-}
-
-function createTr(props) {
-  return cElement('tr', props);
-}
-
-function createTd(props) {
-  return cElement('td', props);
-}
-
-function createTFoot(props) {
-  return cElement('tfoot', props);
-}
-
-function createUl(props) {
-  return cElement('ul', props);
-}
-
-function createLi(props) {
-  return cElement('li', props);
-}
-
-function createButton(props) {
-  return cElement('button', props);
-}
-
-function createBr() {
-  return cElement('br');
-}
-
-function createAnchor(props) {
-  return cElement('a', props);
-}
-
-function createInput(props) {
-  return cElement('input', props);
-}
-
-function createTextArea(props) {
-  return cElement('textarea', props);
-}
-
-function createTh(props) {
-  return cElement('th', props);
-}
-
-function createLabel(props) {
-  return cElement('label', props);
-}
-
-function textSpan(text) {
-  return createSpan({textContent: text});
 }
 
 var dotList;
@@ -1234,6 +1234,7 @@ function sendEvent(eventCategory, eventAction, eventLabel) {
 }
 
 function sendException(desc, fatal) {
+  console.log('sendException', desc); // eslint-disable-line no-console
   if (noGa()) {return;}
   ga('fshApp.send', 'exception', {
     exDescription: desc,
@@ -1364,17 +1365,13 @@ function add$1(priority, fn, args, scope) {
 function parseStack(e) {
   var concatStack = e.stack.replace(/\n +/g, '|');
   if (e.stack.includes(e.message)) {
-    console.log('Unhandled Exception:', e.stack); // eslint-disable-line no-console
     return concatStack;
   }
-  var stackMsg = e.message + '|' + concatStack;
-  console.log('Unhandled Exception:', e.message, e.stack); // eslint-disable-line no-console
-  return stackMsg;
+  return e.message + '|' + concatStack;
 }
 
 function parseError(e) {
   if (e.stack) {return parseStack(e);}
-  console.log('Unhandled Exception:', e.message); // eslint-disable-line no-console
   return e.message;
 }
 
@@ -2470,114 +2467,8 @@ function injectOnlinePlayers(content) { // jQuery
   injectOnlinePlayersNew();
 }
 
-var content$2;
-var recipebook;
-var hideRecipes = [];
-var output;
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
-var currentPlayerId;
-
-function storeRecipeBook() {
-  setForage('fsh_recipeBook', recipebook);
-}
-
-function getRecipeItems(recipe) {
-  if (recipe.items) {
-    return recipe.items.reduce(function(prev, itm) {
-      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
-        'data-tipped="fetchitem.php?item_id=' +
-        itm.id + '&inv_id=-1&t=2&p=' +
-        currentPlayerId + '&vcode=' +
-        itm.verify + '" src="' +
-        itm.img + '" height="20px" width="20px"><p>' +
-        itm.amountPresent + '/' +
-        itm.amountNeeded + '</p></div>';
-    }, '');
-  }
-  return '';
-}
-
-function getComponents(recipe) {
-  if (recipe.components) {
-    return recipe.components.reduce(function(prev, comp) {
-      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
-        'data-tipped="fetchitem.php?item_id=' +
-        comp.id + '&inv_id=-1&t=2&p=' +
-        currentPlayerId + '&vcode=' +
-        comp.verify + '" src="' +
-        comp.img + '" height="20px" width="20px"><p>' +
-        comp.amountPresent + '/' +
-        comp.amountNeeded + '</p></div>';
-    }, '');
-  }
-  return '';
-}
-
-function getImg(recipe) {
-  if (recipe.target) {
-    return ' <img class="tip-dynamic" ' +
-      'data-tipped="fetchitem.php?item_id=' +
-      recipe.target.id + '&inv_id=-1&t=2&p=' + currentPlayerId +
-      '&vcode=' + recipe.target.verify + '" ' +
-      'src="' + recipe.target.img +
-      '" height="30px" width="30px"><br/>';
-  }
-  return '';
-}
-
-function drawRecipeTable() { // Legacy
-  currentPlayerId = playerId();
-  var i;
-  var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
-    '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
-    '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
-  var recipe;
-  for (i = 0; i < recipebook.recipe.length; i += 1) {
-    recipe = recipebook.recipe[i];
-    if (hideRecipes.indexOf(recipe.name) !== -1) {continue;}
-    result += '<tr class="rmTr"><td class="rmTd"><a href="' + recipe.link +
-      '"><img src="' + recipe.img +
-      '" height="30px" width="30px"></a></td><td class="rmTd"><a href="' +
-      recipe.link + '">' + recipe.name + '</a></td><td class="rmTd">';
-    result += getRecipeItems(recipe);
-    result += '</td><td class="rmTd">';
-    result += getComponents(recipe);
-    result += '</td><td class="rmTd">';
-    result += getImg(recipe);
-    result += '</td></tr>';
-  }
-  result += '</table>';
-  output.innerHTML = result;
-  recipebook.lastUpdate = new Date();
-  storeRecipeBook();
-}
-
-function generateRecipeTable() { // Legacy
-  if (recipebook) {drawRecipeTable();}
-}
-
-function testSortType(evt) {
-  var sortType = evt.target.getAttribute('sorttype');
-  if (!sortType) {sortType = 'string';}
-  sortType = sortType.toLowerCase();
-  return sortType;
-}
-
-function sortRecipeBook(sortType) {
-  if (sortType === 'number') {
-    recipebook.recipe.sort(numberSort);
-  } else {
-    recipebook.recipe.sort(stringSort);
-  }
-}
-
-function sortRecipeTable(evt) { // Legacy
-  doSortParams(evt.target.getAttribute('sortKey'));
-  var sortType = testSortType(evt);
-  sortRecipeBook(sortType);
-  generateRecipeTable();
-}
 
 function hasAmounts(result, amounts) {
   if (amounts) {
@@ -2684,6 +2575,13 @@ function processFirstPage(data) { // jQuery.min
   return $.when.apply($, prm);
 }
 
+var recipebook;
+var output;
+
+function storeRecipeBook() {
+  setForage('fsh_recipeBook', recipebook);
+}
+
 function displayStuff() {
   output.insertAdjacentHTML('beforeend', 'Finished parsing ... formatting ...');
   storeRecipeBook();
@@ -2700,9 +2598,9 @@ function parseInventingStart() { // jQuery.min
 
 function gotRecipeBook(data) {
   recipebook = data;
-  if (getValue('hideRecipes')) {
-    hideRecipes = shouldBeArray('hideRecipeNames');
-  }
+  // if (getValue('hideRecipes')) {
+  //   hideRecipes = shouldBeArray('hideRecipeNames');
+  // }
   content$2.innerHTML = '<table class="fshInvFilter"><thead><tr>' +
     '<th width="90%"><b>&nbsp;Recipe Manager</b></th>' +
     '<th width="10%" class="fshBtnBox">[' +
@@ -2716,6 +2614,113 @@ function gotRecipeBook(data) {
   } else {
     generateRecipeTable();
   }
+}
+
+var currentPlayerId;
+var hideRecipes = [];
+
+function getRecipeItems(recipe) {
+  if (recipe.items) {
+    return recipe.items.reduce(function(prev, itm) {
+      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
+        'data-tipped="fetchitem.php?item_id=' +
+        itm.id + '&inv_id=-1&t=2&p=' +
+        currentPlayerId + '&vcode=' +
+        itm.verify + '" src="' +
+        itm.img + '" height="20px" width="20px"><p>' +
+        itm.amountPresent + '/' +
+        itm.amountNeeded + '</p></div>';
+    }, '');
+  }
+  return '';
+}
+
+function getComponents(recipe) {
+  if (recipe.components) {
+    return recipe.components.reduce(function(prev, comp) {
+      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
+        'data-tipped="fetchitem.php?item_id=' +
+        comp.id + '&inv_id=-1&t=2&p=' +
+        currentPlayerId + '&vcode=' +
+        comp.verify + '" src="' +
+        comp.img + '" height="20px" width="20px"><p>' +
+        comp.amountPresent + '/' +
+        comp.amountNeeded + '</p></div>';
+    }, '');
+  }
+  return '';
+}
+
+function getImg(recipe) {
+  if (recipe.target) {
+    return ' <img class="tip-dynamic" ' +
+      'data-tipped="fetchitem.php?item_id=' +
+      recipe.target.id + '&inv_id=-1&t=2&p=' + currentPlayerId +
+      '&vcode=' + recipe.target.verify + '" ' +
+      'src="' + recipe.target.img +
+      '" height="30px" width="30px"><br/>';
+  }
+  return '';
+}
+
+function drawRecipeTable() { // Legacy
+  currentPlayerId = playerId();
+  var i;
+  var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
+    '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
+    '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
+  var recipe;
+  for (i = 0; i < recipebook.recipe.length; i += 1) {
+    recipe = recipebook.recipe[i];
+    if (hideRecipes.indexOf(recipe.name) !== -1) {continue;}
+    result += '<tr class="rmTr"><td class="rmTd"><a href="' + recipe.link +
+      '"><img src="' + recipe.img +
+      '" height="30px" width="30px"></a></td><td class="rmTd"><a href="' +
+      recipe.link + '">' + recipe.name + '</a></td><td class="rmTd">';
+    result += getRecipeItems(recipe);
+    result += '</td><td class="rmTd">';
+    result += getComponents(recipe);
+    result += '</td><td class="rmTd">';
+    result += getImg(recipe);
+    result += '</td></tr>';
+  }
+  result += '</table>';
+  output.innerHTML = result;
+  recipebook.lastUpdate = new Date();
+  storeRecipeBook();
+}
+
+function generateRecipeTable() { // Legacy
+  if (recipebook) {
+    if (getValue('hideRecipes')) {
+      hideRecipes = shouldBeArray('hideRecipeNames');
+    }
+    drawRecipeTable();
+  }
+}
+
+var content$2;
+
+function testSortType(evt) {
+  var sortType = evt.target.getAttribute('sorttype');
+  if (!sortType) {sortType = 'string';}
+  sortType = sortType.toLowerCase();
+  return sortType;
+}
+
+function sortRecipeBook(sortType) {
+  if (sortType === 'number') {
+    recipebook.recipe.sort(numberSort);
+  } else {
+    recipebook.recipe.sort(stringSort);
+  }
+}
+
+function sortRecipeTable(evt) { // Legacy
+  doSortParams(evt.target.getAttribute('sortKey'));
+  var sortType = testSortType(evt);
+  sortRecipeBook(sortType);
+  generateRecipeTable();
 }
 
 function rmEvtHdl(evt) {
@@ -5507,6 +5512,27 @@ function updateQuestLink() {
   }
 }
 
+function insertAdjElement(parent, listItem) {
+  parent.insertAdjacentElement('afterend', listItem);
+}
+
+function insertAdjHtml(parent, listItem) {
+  parent.insertAdjacentHTML('afterend', listItem);
+}
+
+function insertAfterParent(target, fn, listItem) {
+  var tgt = getElementById(target);
+  if (tgt instanceof Node) {
+    var parent = tgt.parentNode;
+    if (parent instanceof Element) {
+      // parent.insertAdjacentElement('afterend', listItem);
+      fn(parent, listItem);
+    } else {
+      sendException('#' + target + '.parentNode is not an Element', false);
+    }
+  } else {sendException('#' + target + ' is not a Node', false);}
+}
+
 function anchorButton(navLvl, text, fn, target) {
   var li = createLi({className: 'nav-level-' + navLvl});
   var al = createAnchor({
@@ -5518,8 +5544,9 @@ function anchorButton(navLvl, text, fn, target) {
     jQueryDialog(fn);
   });
   li.appendChild(al);
-  getElementById(target).parentNode
-    .insertAdjacentElement('afterend', li);
+  // getElementById(target).parentNode
+  //   .insertAdjacentElement('afterend', li);
+  insertAfterParent(target, insertAdjElement, li);
 }
 
 function buffLogLink() {
@@ -5584,32 +5611,35 @@ function injectMenu() {
   updateQuestLink();
   // character
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  getElementById('nav-character-log').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-medalguide" href="index.php?cmd=profile&subcmd=' +
-      'medalguide">Medal Guide</a></li>' +
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=invmanagernew">Inventory Manager</a></li>');
+  // getElementById('nav-character-log').parentNode
+  //   .insertAdjacentHTML('afterend',
+  insertAfterParent('nav-character-log', insertAdjHtml,
+    '<li class="nav-level-1"><a class="nav-link" id="nav-' +
+    'character-medalguide" href="index.php?cmd=profile&subcmd=' +
+    'medalguide">Medal Guide</a></li>' +
+    '<li class="nav-level-1"><a class="nav-link" id="nav-' +
+    'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
+    'subcmd=invmanagernew">Inventory Manager</a></li>');
   buffLogLink();
   combatLogLink();
   creatureLogLink();
   anchorButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
   // guild
-  getElementById('nav-guild-storehouse-inventory').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=guildinvmgr">Guild Inventory</a></li>');
+  // getElementById('nav-guild-storehouse-inventory').parentNode
+  //   .insertAdjacentHTML('afterend',
+  insertAfterParent('nav-guild-storehouse-inventory', insertAdjHtml,
+    '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+    'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
+    '&subcmd=guildinvmgr">Guild Inventory</a></li>');
   newGuildLogLink();
   // top rated
-  getElementById('nav-toprated-players-level').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
-      'Top 250 Players</a></li>');
+  // getElementById('nav-toprated-players-level').parentNode
+  //   .insertAdjacentHTML('afterend',
+  insertAfterParent('nav-toprated-players-level', insertAdjHtml,
+    '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+    'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
+    'Top 250 Players</a></li>');
   // actions
   anchorButton('2', 'AH Quick Search', injectAuctionSearch,
     'nav-actions-trade-auctionhouse');
@@ -6172,9 +6202,13 @@ function makeDiv(data) {
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  pCR.insertAdjacentElement('afterbegin', fshAllyEnemy);
-  fshAllyEnemy.addEventListener('click', eventHandler$2);
-  injectAllyEnemyList(data);
+  if (pCR instanceof Element) {
+    pCR.insertAdjacentElement('afterbegin', fshAllyEnemy);
+    fshAllyEnemy.addEventListener('click', eventHandler$2);
+    injectAllyEnemyList(data);
+  } else {
+    sendException('pCR is not an Element', false);
+  }
 }
 
 function prepareAllyEnemyList() { // jQuery.min
@@ -11425,6 +11459,14 @@ function fastDebuff() {
   profileRightColumn.addEventListener('click', interceptDebuff, true);
 }
 
+function highlightPvpProtection() {
+  var pvpp = document
+    .querySelector('#profileLeftColumn a[href="index.php?cmd=points"]');
+  if (pvpp.parentNode.nextSibling.textContent.trim() !== 'N/A') {
+    pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red';
+  }
+}
+
 function backpackRemove$1(invId) { // jQuery.min
   var _invId = parseInt(invId, 10);
   var theBackpack = $('#backpackContainer').data('backpack');
@@ -11777,6 +11819,112 @@ function profileComponents() {
   compDiv.addEventListener('click', eventHandler(evtHdl$1));
 }
 
+var guildId$1;
+var currentGuildRelationship;
+var guildMessages = {
+  self: {color: 'fshGreen', message: getValue('guildSelfMessage')},
+  friendly: {color: 'fshOliveDrab', message: getValue('guildFrndMessage')},
+  old: {color: 'fshDarkCyan', message: getValue('guildPastMessage')},
+  enemy: {color: 'fshRed', message: getValue('guildEnmyMessage')}
+};
+
+function showRecallButton(playername) {
+  if (currentGuildRelationship === 'self') {
+    return '<a class="quickButton tip-static" ' +
+      'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
+      playername + '" data-tipped="Recall items from ' + playername +
+      '" style="background-image: url(\'' + imageServer +
+      '/temple/3.gif\');"></a>&nbsp;&nbsp;';
+  }
+  return '';
+}
+
+function showRankButton(playerid, playername) {
+  if (currentGuildRelationship === 'self' && getValue('showAdmin')) {
+    return '<a class="quickButton buttonGuildRank tip-static" href="' +
+      'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
+      playerid + '" data-tipped="Rank ' + playername +
+      '" style="background-image: url(\'' + imageServer +
+      '/guilds/' + guildId$1 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
+  }
+  return '';
+}
+
+function guildAry(val) {
+  if (val) {
+    return val.toLowerCase().replace(/\s\s*/g, ' ').split(/\s*,\s*/);
+  }
+  return [];
+}
+
+function guildRelationship(_txt) {
+  var scenario = [
+    {test: guildAry(getValue('guildSelf')), type: 'self'},
+    {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
+    {test: guildAry(getValue('guildPast')), type: 'old'},
+    {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
+  ];
+  var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
+  for (var i = 0; i < scenario.length; i += 1) {
+    if (scenario[i].test.indexOf(txt) !== -1) {return scenario[i].type;}
+  }
+}
+
+function foundGuildLink(aLink) {
+  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
+  if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
+  currentGuildRelationship = guildRelationship(aLink.text);
+  if (currentGuildRelationship) {
+    aLink.parentNode.classList.add(
+      guildMessages[currentGuildRelationship].color);
+    aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
+      guildMessages[currentGuildRelationship].message);
+  }
+}
+
+function profileInjectGuildRel() {
+  var aLink = document.querySelector(
+    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
+  if (aLink) {foundGuildLink(aLink);}
+}
+
+function profileInjectQuickButton(avyImg, playerid, playername) {
+  var newhtml = '<div align="center">';
+  newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
+    quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
+    '" style="background-image: url(\'' + imageServer +
+    '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
+  if (!getValue('enableMaxGroupSizeToJoin')) {
+    newhtml += '<a class="quickButton buttonJoinAll tip-static" ' +
+      'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
+      'data-tipped="Join All Groups" style="background-image: url(\'' +
+      imageServer +
+      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+  } else {
+    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+    newhtml += '<a class="quickButton buttonJoinUnder tip-static" ' +
+      'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
+      'joinallgroupsundersize" data-tipped="Join All Groups < ' +
+      maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
+      imageServer +
+      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+  }
+  newhtml += '<a class="quickButton tip-static" ' +
+    'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid +
+    '" data-tipped="Go to ' + playername +
+    '\'s auctions" style="background-image: url(\'' +
+    imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
+  newhtml += '<a class="quickButton tip-static" ' +
+    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+    playername + '" data-tipped="Create Secure Trade to ' + playername +
+    '" style="background-image: url(\'' + imageServer +
+    '/temple/2.gif\');"></a>&nbsp;&nbsp;';
+  newhtml += showRecallButton(playername);
+  newhtml += showRankButton(playerid, playername);
+  newhtml += '</div>';
+  avyImg.insertAdjacentHTML('afterend', newhtml);
+}
+
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   var _c = '';
   if (contactsTotal && contactsTotal >= numberOfContacts) {
@@ -11918,27 +12066,6 @@ function profileRenderBio(self) {
   bioCell.addEventListener('click', bioEvtHdl);
 }
 
-var guildId$1;
-var currentGuildRelationship;
-var guildMessages = {
-  self: {
-    color: 'fshGreen',
-    message: getValue('guildSelfMessage')
-  },
-  friendly: {
-    color: 'fshOliveDrab',
-    message: getValue('guildFrndMessage')
-  },
-  old: {
-    color: 'fshDarkCyan',
-    message: getValue('guildPastMessage')
-  },
-  enemy: {
-    color: 'fshRed',
-    message: getValue('guildEnmyMessage')
-  }
-};
-
 function quickWearLink() {
   // quick wear manager link
   var node = document.querySelector('#profileRightColumn ' +
@@ -11992,93 +12119,23 @@ function storeVL() {
   }
 }
 
-function guildAry(val) {
-  if (val) {
-    return val.toLowerCase().replace(/\s\s*/g, ' ').split(/\s*,\s*/);
-  }
-  return [];
-}
-
-function guildRelationship(_txt) {
-  var scenario = [
-    {test: guildAry(getValue('guildSelf')), type: 'self'},
-    {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
-    {test: guildAry(getValue('guildPast')), type: 'old'},
-    {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
-  ];
-  var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
-  for (var i = 0; i < scenario.length; i += 1) {
-    if (scenario[i].test.indexOf(txt) !== -1) {return scenario[i].type;}
-  }
-}
-
-function foundGuildLink(aLink) {
-  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-  if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
-  currentGuildRelationship = guildRelationship(aLink.text);
-  if (currentGuildRelationship) {
-    aLink.parentNode.classList.add(
-      guildMessages[currentGuildRelationship].color);
-    aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
-      guildMessages[currentGuildRelationship].message);
-  }
-}
-
-function profileInjectGuildRel() {
-  var aLink = document.querySelector(
-    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
-  if (aLink) {foundGuildLink(aLink);}
-}
-
-function showRankButton() {
-  return currentGuildRelationship === 'self' && getValue('showAdmin');
-}
-
-function profileInjectQuickButton(avyImg, playerid, playername) {
-  var newhtml = '<div align="center">';
-  newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
-    quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
-    '" style="background-image: url(\'' + imageServer +
-    '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
-  if (!getValue('enableMaxGroupSizeToJoin')) {
-    newhtml += '<a class="quickButton buttonJoinAll tip-static" ' +
-      'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
-      'data-tipped="Join All Groups" style="background-image: url(\'' +
-      imageServer +
-      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-  } else {
-    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    newhtml += '<a class="quickButton buttonJoinUnder tip-static" ' +
-      'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
-      'joinallgroupsundersize" data-tipped="Join All Groups < ' +
-      maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
-      imageServer +
-      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-  }
-  newhtml += '<a class="quickButton tip-static" ' +
-    'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid +
-    '" data-tipped="Go to ' + playername +
-    '\'s auctions" style="background-image: url(\'' +
-    imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
-  newhtml += '<a class="quickButton tip-static" ' +
-    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
-    playername + '" data-tipped="Create Secure Trade to ' + playername +
-    '" style="background-image: url(\'' + imageServer +
-    '/temple/2.gif\');"></a>&nbsp;&nbsp;';
-  newhtml += '<a class="quickButton tip-static" ' +
-    'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
-    playername + '" data-tipped="Recall items from ' + playername +
-    '" style="background-image: url(\'' + imageServer +
-    '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-  if (showRankButton()) {
-    newhtml += '<a class="quickButton buttonGuildRank tip-static" href="' +
-      'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
-      playerid + '" data-tipped="Rank ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/guilds/' + guildId$1 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
-  }
-  newhtml += '</div>';
-  avyImg.insertAdjacentHTML('afterend', newhtml);
+function updateNmv() {
+  var nmvImg = document.querySelector(
+    '#profileRightColumn img[src$="/60_sm.gif"]');
+  if (!nmvImg) {return;}
+  var atkStat = Number(
+    getElementById('stat-attack').firstChild.textContent.trim());
+  if (isNaN(atkStat)) {return;}
+  var defStat = Number(
+    getElementById('stat-defense').firstChild.textContent.trim());
+  var oldTipped = nmvImg.dataset.tipped;
+  var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
+  var nmvLvl = Number(lvlAry[1]);
+  var nmvEffect = Math.floor(atkStat * nmvLvl * 0.0025);
+  nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
+    '<br>Attack: ' + (atkStat - nmvEffect).toString() +
+    '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
+    '</center></div>';
 }
 
 function removeStatTable(el) {
@@ -12115,33 +12172,6 @@ function yuuzhan(playername, avyImg) {
     avyImg.addEventListener('click', function() {
       $('#dialog_msg').text('Winner!').dialog('open');
     });
-  }
-}
-
-function updateNmv() {
-  var nmvImg = document.querySelector(
-    '#profileRightColumn img[src$="/60_sm.gif"]');
-  if (!nmvImg) {return;}
-  var atkStat = Number(
-    getElementById('stat-attack').firstChild.textContent.trim());
-  if (isNaN(atkStat)) {return;}
-  var defStat = Number(
-    getElementById('stat-defense').firstChild.textContent.trim());
-  var oldTipped = nmvImg.dataset.tipped;
-  var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
-  var nmvLvl = Number(lvlAry[1]);
-  var nmvEffect = Math.floor(atkStat * nmvLvl * 0.0025);
-  nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
-    '<br>Attack: ' + (atkStat - nmvEffect).toString() +
-    '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
-    '</center></div>';
-}
-
-function highlightPvpProtection() {
-  var pvpp = document
-    .querySelector('#profileLeftColumn a[href="index.php?cmd=points"]');
-  if (pvpp.parentNode.nextSibling.textContent.trim() !== 'N/A') {
-    pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red';
   }
 }
 
@@ -18854,7 +18884,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '16';
+window.FSH.calf = '17';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

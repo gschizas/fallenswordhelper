@@ -1,10 +1,10 @@
+import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import {
-  fallback,
   getValue,
   getValueJSON,
   setValueJSON
-} from '../support/system';
+} from '../system/system';
 
 var enterForSendMessage;
 var fshTemplate;

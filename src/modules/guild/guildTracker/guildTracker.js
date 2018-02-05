@@ -8,7 +8,7 @@ import {
   createTr,
   createUl
 } from '../../common/cElement';
-import {getValue, setValue} from '../../support/system';
+import {getValue, setValue} from '../../system/system';
 import {initTable, makeTg} from './trackerTable';
 import {makeInOut, queueRawData} from './rawData';
 

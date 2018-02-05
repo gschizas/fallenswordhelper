@@ -9,7 +9,7 @@ import {
   createLabel,
   textSpan
 } from '../common/cElement';
-import {getValue, setValue} from '../support/system';
+import {getValue, setValue} from '../system/system';
 import {openQuickBuffByName, playerName} from '../support/layout';
 
 var buttonContainer;

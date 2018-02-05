@@ -18,7 +18,7 @@ import {
   intValue,
   setValue,
   xmlhttp
-} from '../../support/system';
+} from '../../system/system';
 
 function getBiasGeneral(combat) {
   if (bias[combat.combatEvaluatorBias]) {

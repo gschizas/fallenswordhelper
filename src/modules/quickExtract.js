@@ -2,7 +2,7 @@ import {createTable} from './common/cElement';
 import eventHandler from './common/eventHandler';
 import {getElementById} from './common/getElement';
 import getInventory from './ajax/getInventory';
-import {imageServer} from './support/system';
+import {imageServer} from './system/system';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import useitem from './app/profile/useitem';

@@ -1,11 +1,12 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
+import fallback from '../system/fallback';
+import {getUrlParameter} from '../system/system';
 import isMessageSound from './isMessageSound';
 import lookForHcsData from './lookForHcsData';
 import pageSwitcher from './pageSwitcher';
 import {end, screenview, setup, start} from '../support/fshGa';
-import {fallback, getUrlParameter} from '../support/system';
 
 var coreFunction;
 var functionPath;

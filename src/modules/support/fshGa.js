@@ -92,6 +92,9 @@ export function sendEvent(eventCategory, eventAction, eventLabel) {
 }
 
 export function sendException(desc, fatal) {
+  //#if _DEV  //  sendException
+  console.log('sendException', desc); // eslint-disable-line no-console
+  //#endif
   if (noGa()) {return;}
   ga('fshApp.send', 'exception', {
     exDescription: desc,

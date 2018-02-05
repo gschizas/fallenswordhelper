@@ -1,4 +1,4 @@
-import {getValue} from '../support/system';
+import {getValue} from '../system/system';
 import {pCC} from '../support/layout';
 
 function hasTextEntry() { // jQuery

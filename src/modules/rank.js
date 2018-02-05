@@ -4,7 +4,7 @@ import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import moreToDo from './common/moreToDo';
 import retryAjax from './ajax/retryAjax';
-import {createDocument, getValue} from './support/system';
+import {createDocument, getValue} from './system/system';
 import {pCC, playerName} from './support/layout';
 
 var ranks;

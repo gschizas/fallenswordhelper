@@ -1,4 +1,5 @@
 import currentGuildId from './common/currentGuildId';
+import fallback from './system/fallback';
 import getForage from './ajax/getForage';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
@@ -9,11 +10,10 @@ import {
 } from './common/levelHighlight';
 import {
   createDocument,
-  fallback,
   getValue,
   intValue,
   setValue
-} from './support/system';
+} from './system/system';
 import {defaults, now} from './support/dataObj';
 
 var context;

@@ -1,5 +1,6 @@
+import fallback from '../system/fallback';
 import reduceBuffArray from './reduceBuffArray';
-import {createDocument, fallback, intValue} from '../support/system';
+import {createDocument, intValue} from '../system/system';
 
 function getStat(stat, doc) { // jQuery
   // 'Hidden' returns NaN

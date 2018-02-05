@@ -1,4 +1,4 @@
-import {createDocument} from '../../support/system';
+import {createDocument} from '../../system/system';
 import {def_suffixSuccessActionResponse} from '../../support/dataObj';
 import getGroupStats from '../../ajax/getGroupStats';
 import getMercStats from '../../ajax/getMercStats';

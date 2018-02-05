@@ -1,4 +1,4 @@
-import {fallback} from '../../support/system';
+import fallback from '../../system/fallback';
 import {rarity} from '../../support/dataObj';
 import {theInv} from '../inventory';
 

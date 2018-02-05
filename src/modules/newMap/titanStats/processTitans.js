@@ -1,5 +1,5 @@
 import {addRows} from './common';
-import {padZ} from '../../support/system';
+import {padZ} from '../../system/system';
 import roundToString from '../../common/roundToString';
 import {textSpan} from '../../common/cElement';
 import {

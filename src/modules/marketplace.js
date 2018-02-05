@@ -1,4 +1,4 @@
-import {addCommas} from './support/system';
+import {addCommas} from './system/system';
 import {closestTable} from './common/closest';
 import {getElementById} from './common/getElement';
 import {pCC} from './support/layout';
