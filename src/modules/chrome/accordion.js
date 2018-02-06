@@ -21,11 +21,19 @@ function updateQuestLink() {
 }
 
 function insertAdjElement(parent, listItem) {
-  parent.insertAdjacentElement('afterend', listItem);
+  if (typeof parent.insertAdjacentElement === 'function') {
+    parent.insertAdjacentElement('afterend', listItem);
+  } else {
+    sendException('insertAdjacentElement is not a function', false);
+  }
 }
 
 function insertAdjHtml(parent, listItem) {
-  parent.insertAdjacentHTML('afterend', listItem);
+  if (typeof parent.insertAdjacentHTML === 'function') {
+    parent.insertAdjacentHTML('afterend', listItem);
+  } else {
+    sendException('insertAdjacentHTML is not a function', false);
+  }
 }
 
 function insertAfterParent(target, fn, listItem) {
