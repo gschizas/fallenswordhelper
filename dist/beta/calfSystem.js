@@ -5492,11 +5492,19 @@ function updateQuestLink() {
 }
 
 function insertAdjElement(parent, listItem) {
-  parent.insertAdjacentElement('afterend', listItem);
+  if (typeof parent.insertAdjacentElement === 'function') {
+    parent.insertAdjacentElement('afterend', listItem);
+  } else {
+    sendException('insertAdjacentElement is not a function', false);
+  }
 }
 
 function insertAdjHtml(parent, listItem) {
-  parent.insertAdjacentHTML('afterend', listItem);
+  if (typeof parent.insertAdjacentHTML === 'function') {
+    parent.insertAdjacentHTML('afterend', listItem);
+  } else {
+    sendException('insertAdjacentHTML is not a function', false);
+  }
 }
 
 function insertAfterParent(target, fn, listItem) {
@@ -7235,7 +7243,7 @@ function prepareEnv() {
 
 function lookForHcsData() {
   var hcsData = getElementById('html');
-  if (hcsData && jsonParse(hcsData.getAttribute('data-hcs'))['new-ui']) {
+  if (hcsData && jsonParse(hcsData.dataset.hcs)['new-ui']) {
     prepareEnv();
   }
 }
@@ -18871,7 +18879,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '18';
+window.FSH.calf = '19';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

@@ -220,7 +220,7 @@ function prepareEnv() {
 
 export default function lookForHcsData() {
   var hcsData = getElementById('html');
-  if (hcsData && jsonParse(hcsData.getAttribute('data-hcs'))['new-ui']) {
+  if (hcsData && jsonParse(hcsData.dataset.hcs)['new-ui']) {
     prepareEnv();
   }
 }
