@@ -48,7 +48,7 @@ function add(options, retries, dfr) {
 export default function retryAjax(options) {
   var dfr = $.Deferred();
   add(options, 10, dfr);
-  return dfr;
+  return dfr.promise();
 }
 
 if (typeof jQuery !== 'undefined') {
