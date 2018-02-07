@@ -26,6 +26,7 @@ export var specials = {
   '30': '@0 activated Sealed. (Negated @1)',
   '31': '@0 activated Fist Fight.',
   '33': '@0 activated Dispel Curse.',
+  '35': '@0 activated Heavy Weight.',
   '37': '@0 had their armor and defence Inverted.',
   '38': '@0 had their attack reduced by Fumble.'
 };
