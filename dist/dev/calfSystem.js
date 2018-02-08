@@ -643,7 +643,7 @@ function add(options, retries, dfr) {
 function retryAjax(options) {
   var dfr = $.Deferred();
   add(options, 10, dfr);
-  return dfr;
+  return dfr.promise();
 }
 
 if (typeof jQuery !== 'undefined') {
@@ -1339,7 +1339,11 @@ function parseError(e) {
 
 function asyncTask() {
   try {
-    pop()();
+    var testFn = pop();
+    if (typeof testFn === 'function') {
+      testFn();
+    } else {sendException('pop() was not a function', false);}
+    // pop()();
   } catch (e) {
     sendException(parseError(e), false);
   } finally {
@@ -5507,12 +5511,16 @@ function updateQuestLink() {
 }
 
 function insertAdjElement(parent, listItem) {
-  if (typeof parent.insertAdjacentElement === 'function') {
-    parent.insertAdjacentElement('afterend', listItem);
-  } else {
-    sendException('insertAdjacentElement is not a function', false);
-  }
+  parent.parentNode.insertBefore(listItem, parent.nextElementSibling);
 }
+
+// function insertAdjElement(parent, listItem) {
+//   if (typeof parent.insertAdjacentElement === 'function') {
+//     parent.insertAdjacentElement('afterend', listItem);
+//   } else {
+//     sendException('insertAdjacentElement is not a function', false);
+//   }
+// }
 
 function insertAdjHtml(parent, listItem) {
   if (typeof parent.insertAdjacentHTML === 'function') {
@@ -17378,6 +17386,7 @@ var specials = {
   '30': '@0 activated Sealed. (Negated @1)',
   '31': '@0 activated Fist Fight.',
   '33': '@0 activated Dispel Curse.',
+  '35': '@0 activated Heavy Weight.',
   '37': '@0 had their armor and defence Inverted.',
   '38': '@0 had their attack reduced by Fumble.'
 };
@@ -18925,7 +18934,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '19';
+window.FSH.calf = '20';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
