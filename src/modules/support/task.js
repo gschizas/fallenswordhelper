@@ -48,7 +48,11 @@ function parseError(e) {
 
 function asyncTask() {
   try {
-    pop()();
+    var testFn = pop();
+    if (typeof testFn === 'function') {
+      testFn();
+    } else {sendException('pop() was not a function', false);}
+    // pop()();
   } catch (e) {
     sendException(parseError(e), false);
   } finally {
