@@ -20,7 +20,12 @@ let github = 'https://fallenswordhelper.github.io/fallenswordhelper/';
 
 // rollup options
 let entry = 'src/' + filename;
-let dest = 'dist/' + folder + '/' + filename;
+let dest;
+if (source === 'fsh' || folder === 'dev') {
+  dest = 'dist/' + folder + '/' + filename;
+} else {
+  dest = 'src/' + folder + '_' + filename;
+}
 
 // jscc options
 let opts = {values: {}};
