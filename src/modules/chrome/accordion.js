@@ -21,12 +21,16 @@ function updateQuestLink() {
 }
 
 function insertAdjElement(parent, listItem) {
-  if (typeof parent.insertAdjacentElement === 'function') {
-    parent.insertAdjacentElement('afterend', listItem);
-  } else {
-    sendException('insertAdjacentElement is not a function', false);
-  }
+  parent.parentNode.insertBefore(listItem, parent.nextElementSibling);
 }
+
+// function insertAdjElement(parent, listItem) {
+//   if (typeof parent.insertAdjacentElement === 'function') {
+//     parent.insertAdjacentElement('afterend', listItem);
+//   } else {
+//     sendException('insertAdjacentElement is not a function', false);
+//   }
+// }
 
 function insertAdjHtml(parent, listItem) {
   if (typeof parent.insertAdjacentHTML === 'function') {
