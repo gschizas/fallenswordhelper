@@ -1,3 +1,4 @@
+import afterBegin from './common/afterBegin';
 import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
@@ -43,7 +44,7 @@ export function injectAuctionHouse() {
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');
   fill.insertAdjacentHTML('afterbegin', ']');
-  fill.insertAdjacentElement('afterbegin', cancelAll);
+  afterBegin(fill, cancelAll);
   fill.insertAdjacentHTML('afterbegin', '[');
   cancelAll.addEventListener('click', cancelAllAH);
 }
