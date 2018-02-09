@@ -1,6 +1,7 @@
 import {content} from './recipeMgr';
 import {createDiv} from '../common/cElement';
 import generateRecipeTable from './generateRecipeTable';
+import insertElement from '../common/insertElement';
 import processFirstPage from './processFirstPage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
@@ -38,7 +39,7 @@ export function gotRecipeBook(data) {
     'Refresh</span>]</th>' +
     '</tr></thead></table>';
   output = createDiv();
-  content.insertAdjacentElement('beforeend', output);
+  insertElement(content, output);
   if (!recipebook) {
     parseInventingStart();
   } else {

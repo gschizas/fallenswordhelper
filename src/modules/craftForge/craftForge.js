@@ -1,4 +1,5 @@
 import add from '../support/task';
+import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import getInventoryById from '../ajax/getInventoryById';
 import {itemRE} from '../support/dataObj';
@@ -30,8 +31,7 @@ function drawingNewItemTable() {
       itemDiv.appendChild(aLink);
       drawingNewItemTable.itemGrid.appendChild(itemDiv);
     });
-    itemTable.parentNode.insertAdjacentElement('afterbegin',
-      drawingNewItemTable.itemGrid);
+    afterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
     itemTable.classList.add('fshHide');
   }
 }

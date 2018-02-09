@@ -2,6 +2,7 @@ import {createSpan} from './common/cElement';
 import fallback from './system/fallback';
 import {getElementById} from './common/getElement';
 import getProfile from './ajax/getProfile';
+import insertElementAfter from './common/insertElementAfter';
 import retryAjax from './ajax/retryAjax';
 import {createDocument, formatLastActivity} from './system/system';
 
@@ -101,7 +102,7 @@ function addStatsQuickBuff(data) {
   if (!activity) {
     activity = createSpan({className: 'fshLastActivity'});
     var player = myPlayer.getElementsByTagName('h1')[0];
-    player.insertAdjacentElement('afterend', activity);
+    insertElementAfter(activity, player);
   }
   activity.innerHTML = 'Last Activity: ' +
     formatLastActivity(data.last_login) +
@@ -113,7 +114,7 @@ function addStatsQuickBuff(data) {
 function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
     var ret = createSpan({className: 'fshPlayer'});
-    el.nextElementSibling.insertAdjacentElement('afterend', ret);
+    insertElementAfter(ret, el.nextElementSibling);
     return ret;
   }
   return playerSpan;

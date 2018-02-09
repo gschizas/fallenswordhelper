@@ -4,6 +4,7 @@ import {createInput} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import getValue from './system/getValue';
+import insertElement from './common/insertElement';
 import moreToDo from './common/moreToDo';
 import retryAjax from './ajax/retryAjax';
 import {pCC, playerName} from './support/layout';
@@ -105,7 +106,7 @@ function doButtons() {
   var theTd = getElementById('show-guild-founder-rank-name')
     .parentNode;
   theTd.insertAdjacentHTML('beforeend', '&nbsp;');
-  theTd.insertAdjacentElement('beforeend', weightButton);
+  insertElement(theTd, weightButton);
 
   if (getValue('ajaxifyRankControls')) {
     pCC.addEventListener('click',

@@ -1,3 +1,4 @@
+import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import {pCR} from '../support/layout';
@@ -13,11 +14,11 @@ function createMiniBox() {
 export function prepareBountyData() {
   if (calf.enableWantedList) {
     wantedListDiv = createMiniBox();
-    pCR.insertAdjacentElement('afterbegin', wantedListDiv);
+    afterBegin(pCR, wantedListDiv);
   }
   if (calf.enableActiveBountyList) {
     bountyListDiv = createMiniBox();
-    pCR.insertAdjacentElement('afterbegin', bountyListDiv);
+    afterBegin(pCR, bountyListDiv);
   }
   retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
 }

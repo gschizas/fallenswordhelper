@@ -5,6 +5,7 @@ import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
+import insertElementAfter from '../common/insertElementAfter';
 import jQueryDialog from './jQueryDialog';
 import {newGuildLogUrl} from '../support/dataObj';
 import {createAnchor, createLi} from '../common/cElement';
@@ -21,7 +22,8 @@ function updateQuestLink() {
 }
 
 function insertAdjElement(parent, listItem) {
-  parent.parentNode.insertBefore(listItem, parent.nextElementSibling);
+  // parent.parentNode.insertBefore(listItem, parent.nextElementSibling);
+  insertElementAfter(listItem, parent);
 }
 
 // function insertAdjElement(parent, listItem) {

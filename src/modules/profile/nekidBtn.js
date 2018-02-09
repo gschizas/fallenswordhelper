@@ -1,4 +1,6 @@
 import {getElementById} from '../common/getElement';
+import insertElement from '../common/insertElement';
+import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import {sendEvent} from '../support/fshGa';
 import unequipitem from '../app/profile/unequipitem';
 import {createButton, createDiv} from '../common/cElement';
@@ -28,9 +30,9 @@ export default function nekidBtn() {
     className: 'fshBl fshBls',
     textContent: 'Nekid'
   });
-  nekidDiv.insertAdjacentText('beforeend', '[ ');
-  nekidDiv.insertAdjacentElement('beforeend', theBtn);
-  nekidDiv.insertAdjacentText('beforeend', ' ]');
+  insertTextBeforeEnd(nekidDiv, '[ ');
+  insertElement(nekidDiv, theBtn);
+  insertTextBeforeEnd(nekidDiv, ' ]');
   profileRightColumn.replaceChild(nekidDiv, targetBr);
   theBtn.addEventListener('click', getNekid);
 }

@@ -1481,6 +1481,12 @@ function isMessageSound() {
   }
 }
 
+function afterBegin(parentNode, newNode) {
+  if (parentNode instanceof Element) {
+    parentNode.insertBefore(newNode, parentNode.firstChild);
+  }
+}
+
 function testForGuildLogMsg(guildLogNode) {
   return location.search !== newGuildLogLoc ||
     guildLogNode.parentNode.id !== 'notification-guild-log';
@@ -1669,6 +1675,13 @@ function guildActivity() {
   }
 }
 
+function insertElementBefore(newNode, referenceNode) {
+  if (referenceNode instanceof Node &&
+      referenceNode.parentNode instanceof Node) {
+    return referenceNode.parentNode.insertBefore(newNode, referenceNode);
+  }
+}
+
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
   ' class="notification-icon"></span><p class="notification-content">' +
@@ -1794,7 +1807,7 @@ function moveButtons() {
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
     var top = pCC.getElementsByClassName('composing-level')[0]
       .parentNode;
-    top.insertAdjacentElement('beforebegin', buttonDiv);
+    insertElementBefore(buttonDiv, top);
   }
 }
 
@@ -2447,6 +2460,12 @@ function injectOnlinePlayers(content) { // jQuery
   injectOnlinePlayersNew();
 }
 
+function insertElement(parent, child) {
+  if (parent instanceof Node) {
+    parent.appendChild(child);
+  }
+}
+
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
 
@@ -2588,7 +2607,7 @@ function gotRecipeBook(data) {
     'Refresh</span>]</th>' +
     '</tr></thead></table>';
   output = createDiv();
-  content$2.insertAdjacentElement('beforeend', output);
+  insertElement(content$2, output);
   if (!recipebook) {
     parseInventingStart();
   } else {
@@ -5486,6 +5505,14 @@ function injectJoinAllLink() {
   Array.prototype.forEach.call(nodeList, findNewGroup);
 }
 
+function insertElementAfter(newNode, referenceNode) {
+  if (referenceNode instanceof Node &&
+      referenceNode.parentNode instanceof Node) {
+    return referenceNode.parentNode.insertBefore(newNode,
+      referenceNode.nextSibling);
+  }
+}
+
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
@@ -5495,7 +5522,8 @@ function updateQuestLink() {
 }
 
 function insertAdjElement(parent, listItem) {
-  parent.parentNode.insertBefore(listItem, parent.nextElementSibling);
+  // parent.parentNode.insertBefore(listItem, parent.nextElementSibling);
+  insertElementAfter(listItem, parent);
 }
 
 // function insertAdjElement(parent, listItem) {
@@ -5781,10 +5809,6 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
 function injectQuickMsgDialogJQ() {
   enterForSendMessage = getValue('enterForSendMessage');
   window.openQuickMsgDialog = openQuickMsgDialog;
-}
-
-function insertElement(parent, child) {
-  parent.appendChild(child);
 }
 
 function doServerNode(topbannerStats, miniboxList) {
@@ -6229,13 +6253,9 @@ function makeDiv(data) {
   }
   wrapper += '</div></div>';
   fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  if (pCR instanceof Element) {
-    pCR.insertAdjacentElement('afterbegin', fshAllyEnemy);
-    fshAllyEnemy.addEventListener('click', eventHandler$2);
-    injectAllyEnemyList(data);
-  } else {
-    sendException('pCR is not an Element', false);
-  }
+  afterBegin(pCR, fshAllyEnemy);
+  fshAllyEnemy.addEventListener('click', eventHandler$2);
+  injectAllyEnemyList(data);
 }
 
 function prepareAllyEnemyList() { // jQuery.min
@@ -6537,11 +6557,11 @@ function createMiniBox() {
 function prepareBountyData() {
   if (calf.enableWantedList) {
     wantedListDiv = createMiniBox();
-    pCR.insertAdjacentElement('afterbegin', wantedListDiv);
+    afterBegin(pCR, wantedListDiv);
   }
   if (calf.enableActiveBountyList) {
     bountyListDiv = createMiniBox();
-    pCR.insertAdjacentElement('afterbegin', bountyListDiv);
+    afterBegin(pCR, bountyListDiv);
   }
   retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
 }
@@ -7156,7 +7176,7 @@ function navMenu() { // jQuery
 function moveRHSBoxUpOnRHS(title) {
   var box = getElementById(title);
   if (box) {
-    pCR.insertAdjacentElement('afterbegin', box);
+    afterBegin(pCR, box);
   }
 }
 
@@ -7513,8 +7533,7 @@ function drawingNewItemTable() {
       itemDiv.appendChild(aLink);
       drawingNewItemTable.itemGrid.appendChild(itemDiv);
     });
-    itemTable.parentNode.insertAdjacentElement('afterbegin',
-      drawingNewItemTable.itemGrid);
+    afterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
     itemTable.classList.add('fshHide');
   }
 }
@@ -7951,7 +7970,7 @@ function injectAdvisorNew() {
   totalCell.className = 'fshRight';
   totalCell.setAttribute('colspan', '3');
   var tfoot = createTFoot();
-  tfoot.insertAdjacentElement('beforeend', totalRow);
+  insertElement(tfoot, totalRow);
   list.className = 'fshXSmall hover';
   list.firstElementChild
     .removeChild(list.firstElementChild.firstElementChild);
@@ -7965,7 +7984,7 @@ function injectAdvisorNew() {
     tdOne.insertAdjacentHTML('afterend', '<td>' + playerLevel(username) +
       '</td><td>' + playerRank(username) + '</td>');
   });
-  list.insertAdjacentElement('beforeend', tfoot);
+  insertElement(list, tfoot);
   add$1(3, doTable);
   summaryLink();
 
@@ -8681,6 +8700,12 @@ function bioEvtHdl(e) {
   }
 }
 
+function insertTextBeforeEnd(parent, text) {
+  if (parent instanceof Element) {
+    parent.insertAdjacentHTML('beforeend', text);
+  }
+}
+
 function isNaN$1(value) {
   return Number.isNaN(value);
 }
@@ -8777,7 +8802,7 @@ function bioHeight() {
   var bioEditLinesDiv = createDiv({innerHTML: '<br>Display '});
   theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines});
   bioEditLinesDiv.appendChild(theBox);
-  bioEditLinesDiv.insertAdjacentText('beforeend', ' Lines ');
+  insertTextBeforeEnd(bioEditLinesDiv, ' Lines ');
   var saveLines = createInput({
     className: 'custombutton',
     value: 'Update Rows To Show',
@@ -9444,7 +9469,7 @@ function doButtons() {
   var theTd = getElementById('show-guild-founder-rank-name')
     .parentNode;
   theTd.insertAdjacentHTML('beforeend', '&nbsp;');
-  theTd.insertAdjacentElement('beforeend', weightButton);
+  insertElement(theTd, weightButton);
 
   if (getValue('ajaxifyRankControls')) {
     pCC.addEventListener('click',
@@ -11624,9 +11649,9 @@ function nekidBtn() {
     className: 'fshBl fshBls',
     textContent: 'Nekid'
   });
-  nekidDiv.insertAdjacentText('beforeend', '[ ');
-  nekidDiv.insertAdjacentElement('beforeend', theBtn);
-  nekidDiv.insertAdjacentText('beforeend', ' ]');
+  insertTextBeforeEnd(nekidDiv, '[ ');
+  insertElement(nekidDiv, theBtn);
+  insertTextBeforeEnd(nekidDiv, ' ]');
   profileRightColumn.replaceChild(nekidDiv, targetBr);
   theBtn.addEventListener('click', getNekid);
 }
@@ -11698,7 +11723,7 @@ function displayComponentTally() {
   usedCountDom = createSpan();
   usedCountDom.innerHTML = usedCount.toString();
   totCell.appendChild(usedCountDom);
-  totCell.insertAdjacentText('beforeend', ' / ' + totalCount.toString());
+  insertTextBeforeEnd(totCell, ' / ' + totalCount.toString());
   sumComp.innerHTML = '';
   sumComp.appendChild(tbl);
 }
@@ -12099,7 +12124,7 @@ function quickWearLink() {
   var wrap = createSpan({innerHTML: '&nbsp;['});
   var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});
   wrap.appendChild(qw);
-  wrap.insertAdjacentText('beforeend', ']');
+  insertTextBeforeEnd(wrap, ']');
   node.parentNode.appendChild(wrap);
   qw.addEventListener('click', function() {
     sendEvent('profile', 'insertQuickWear');
@@ -12321,7 +12346,7 @@ function addStatsQuickBuff(data) {
   if (!activity) {
     activity = createSpan({className: 'fshLastActivity'});
     var player = myPlayer.getElementsByTagName('h1')[0];
-    player.insertAdjacentElement('afterend', activity);
+    insertElementAfter(activity, player);
   }
   activity.innerHTML = 'Last Activity: ' +
     formatLastActivity(data.last_login) +
@@ -12333,7 +12358,7 @@ function addStatsQuickBuff(data) {
 function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
     var ret = createSpan({className: 'fshPlayer'});
-    el.nextElementSibling.insertAdjacentElement('afterend', ret);
+    insertElementAfter(ret, el.nextElementSibling);
     return ret;
   }
   return playerSpan;
@@ -13577,7 +13602,7 @@ function doFolderHeaders(folders) {
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
     'Select items in ST</label></td></tr>');
-  el.insertAdjacentElement('beforebegin', foldersRow);
+  insertElementBefore(foldersRow, el);
 }
 
 function stColor(el, item) {
@@ -14437,14 +14462,10 @@ function addRows(tbl, rows) {
   });
 }
 
-function insertElement$1(parent, text) {
-  parent.insertAdjacentText('beforeend', text);
-}
-
 function makeTitanHpWrapper() {
   var titanHpWrapper = createSpan();
   insertElement(titanHpWrapper, currentHp);
-  insertElement$1(titanHpWrapper, '/');
+  insertTextBeforeEnd(titanHpWrapper, '/');
   insertElement(titanHpWrapper, maxHp);
   return titanHpWrapper;
 }
@@ -14452,7 +14473,7 @@ function makeTitanHpWrapper() {
 function makePctWrapper(pct) {
   var pctWrapper = createSpan();
   insertElement(pctWrapper, pct);
-  insertElement$1(pctWrapper, '%');
+  insertTextBeforeEnd(pctWrapper, '%');
   return pctWrapper;
 }
 
@@ -15880,10 +15901,6 @@ function startMonsterLog() { // jQuery.min
   initMonsterLog();
 }
 
-function insertElementBefore(newNode, referenceNode) {
-  return referenceNode.parentNode.insertBefore(newNode, referenceNode);
-}
-
 var huntingBuffs$1;
 var huntingBuffsName;
 var buffLookup = {
@@ -16806,7 +16823,7 @@ function getCell(type, upgrade) {
   if (!warehouse$1[type]) {warehouse$1[type] = {};}
   if (!warehouse$1[type].span) {
     var span = createSpan();
-    insertElement$1(upgrade, ' ');
+    insertTextBeforeEnd(upgrade, ' ');
     insertElement(upgrade, span);
     warehouse$1[type].span = span;
   }
@@ -17837,7 +17854,7 @@ function injectAuctionHouse() {
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');
   fill.insertAdjacentHTML('afterbegin', ']');
-  fill.insertAdjacentElement('afterbegin', cancelAll);
+  afterBegin(fill, cancelAll);
   fill.insertAdjacentHTML('afterbegin', '[');
   cancelAll.addEventListener('click', cancelAllAH);
 }
@@ -18887,7 +18904,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '20';
+window.FSH.calf = '21';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
@@ -18912,4 +18929,4 @@ window.FSH.dispatch = function dispatch() {
 };
 
 }());
-//# sourceMappingURL=calfSystem.js.map
+//# sourceMappingURL=prod_calfSystem.js.map

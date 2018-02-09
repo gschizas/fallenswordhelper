@@ -2,6 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import insertElementBefore from '../common/insertElementBefore';
 import {now} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
@@ -138,7 +139,7 @@ function moveButtons() {
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
     var top = pCC.getElementsByClassName('composing-level')[0]
       .parentNode;
-    top.insertAdjacentElement('beforebegin', buttonDiv);
+    insertElementBefore(buttonDiv, top);
   }
 }
 

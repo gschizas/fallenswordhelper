@@ -1,4 +1,5 @@
 import add from '../support/task';
+import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
 import {getElementById} from '../common/getElement';
@@ -126,7 +127,7 @@ function navMenu() { // jQuery
 function moveRHSBoxUpOnRHS(title) {
   var box = getElementById(title);
   if (box) {
-    pCR.insertAdjacentElement('afterbegin', box);
+    afterBegin(pCR, box);
   }
 }
 
