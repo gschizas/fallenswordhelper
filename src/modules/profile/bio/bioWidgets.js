@@ -2,6 +2,7 @@ import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
 import isNaN from '../../common/isNaN';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
@@ -81,7 +82,7 @@ function bioHeight() {
   var bioEditLinesDiv = createDiv({innerHTML: '<br>Display '});
   theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines});
   bioEditLinesDiv.appendChild(theBox);
-  bioEditLinesDiv.insertAdjacentText('beforeend', ' Lines ');
+  insertTextBeforeEnd(bioEditLinesDiv, ' Lines ');
   var saveLines = createInput({
     className: 'custombutton',
     value: 'Update Rows To Show',

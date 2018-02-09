@@ -1,3 +1,5 @@
 export default function insertElement(parent, child) {
-  parent.appendChild(child);
+  if (parent instanceof Node) {
+    parent.appendChild(child);
+  }
 }

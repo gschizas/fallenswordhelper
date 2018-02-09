@@ -1,5 +1,6 @@
 import {createSpan} from '../common/cElement';
 import insertQuickWear from '../quickWear/quickWear';
+import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
 import {sendEvent} from '../support/fshGa';
 
@@ -11,7 +12,7 @@ export default function quickWearLink() {
   var wrap = createSpan({innerHTML: '&nbsp;['});
   var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});
   wrap.appendChild(qw);
-  wrap.insertAdjacentText('beforeend', ']');
+  insertTextBeforeEnd(wrap, ']');
   node.parentNode.appendChild(wrap);
   qw.addEventListener('click', function() {
     sendEvent('profile', 'insertQuickWear');

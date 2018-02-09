@@ -4,6 +4,7 @@ import {createTFoot} from './common/cElement';
 import fallback from './system/fallback';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
+import insertElement from './common/insertElement';
 import {pCC} from './support/layout';
 import retryAjax from './ajax/retryAjax';
 import {
@@ -81,7 +82,7 @@ function injectAdvisorNew() {
   totalCell.className = 'fshRight';
   totalCell.setAttribute('colspan', '3');
   var tfoot = createTFoot();
-  tfoot.insertAdjacentElement('beforeend', totalRow);
+  insertElement(tfoot, totalRow);
   list.className = 'fshXSmall hover';
   list.firstElementChild
     .removeChild(list.firstElementChild.firstElementChild);
@@ -95,7 +96,7 @@ function injectAdvisorNew() {
     tdOne.insertAdjacentHTML('afterend', '<td>' + playerLevel(username) +
       '</td><td>' + playerRank(username) + '</td>');
   });
-  list.insertAdjacentElement('beforeend', tfoot);
+  insertElement(list, tfoot);
   add(3, doTable);
   summaryLink();
 

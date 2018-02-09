@@ -2,6 +2,7 @@ import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import {infoBox} from '../support/layout';
 import insertQuickExtract from '../quickExtract';
+import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
@@ -80,7 +81,7 @@ function displayComponentTally() {
   usedCountDom = createSpan();
   usedCountDom.innerHTML = usedCount.toString();
   totCell.appendChild(usedCountDom);
-  totCell.insertAdjacentText('beforeend', ' / ' + totalCount.toString());
+  insertTextBeforeEnd(totCell, ' / ' + totalCount.toString());
   sumComp.innerHTML = '';
   sumComp.appendChild(tbl);
 }

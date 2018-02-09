@@ -1,3 +1,5 @@
-export default function insertElement(parent, text) {
-  parent.insertAdjacentText('beforeend', text);
+export default function insertTextBeforeEnd(parent, text) {
+  if (parent instanceof Element) {
+    parent.insertAdjacentHTML('beforeend', text);
+  }
 }

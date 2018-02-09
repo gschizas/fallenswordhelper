@@ -2,6 +2,7 @@ import add from '../support/task';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
+import insertElementBefore from '../common/insertElementBefore';
 import {createDiv, createTr} from '../common/cElement';
 import {time, timeEnd} from '../support/debug';
 
@@ -76,7 +77,7 @@ function doFolderHeaders(folders) {
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
     'Select items in ST</label></td></tr>');
-  el.insertAdjacentElement('beforebegin', foldersRow);
+  insertElementBefore(foldersRow, el);
 }
 
 function stColor(el, item) {
