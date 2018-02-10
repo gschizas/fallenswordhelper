@@ -8,7 +8,7 @@ import onWorld from './onWorld';
 import prepareShop from './shop';
 import readyViewCreature from './viewCreature/viewCreature';
 import startMonsterLog from './monsterLog/monsterLog';
-import worldPrefs from './worldPrefs';
+import worldPrefs from './worldPrefs/worldPrefs';
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
