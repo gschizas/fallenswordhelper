@@ -4,6 +4,8 @@ import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
 import isObject from '../common/isObject';
 import {nowSecs} from '../support/dataObj';
+import {onlineDot} from '../support/colouredDots';
+import {pCC} from '../support/layout';
 import {playerDataObject} from '../common/common';
 import {
   calculateBoundaries,
@@ -11,7 +13,6 @@ import {
   pvpUpperLevel
 } from '../common/levelHighlight';
 import {createInput, createSpan} from '../common/cElement';
-import {onlineDot, pCC} from '../support/layout';
 
 var highlightPlayersNearMyLvl;
 var spinner;

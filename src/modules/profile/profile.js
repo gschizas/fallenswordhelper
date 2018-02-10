@@ -1,6 +1,7 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
+import {colouredDots} from '../support/colouredDots';
 import fallback from '../system/fallback';
 import fastDebuff from './debuff';
 import {getUrlParameter} from '../system/system';
@@ -19,7 +20,6 @@ import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import updateNmv from './updateNmv';
 import updateStatistics from './updateStatistics';
 import {
-  colouredDots,
   pCC,
   playerId,
   playerName

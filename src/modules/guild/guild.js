@@ -1,15 +1,10 @@
 import add from '../support/task';
+import {colouredDots} from '../support/colouredDots';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
 import moreToDo from '../common/moreToDo';
 import retryAjax from '../ajax/retryAjax';
-import {
-  colouredDots,
-  openQuickBuffByName,
-  pCC,
-  playerName
-} from '../support/layout';
 import {
   createDocument,
   findNode,
@@ -17,6 +12,11 @@ import {
   xmlhttp
 } from '../system/system';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
+import {
+  openQuickBuffByName,
+  pCC,
+  playerName
+} from '../support/layout';
 
 var leftHandSideColumnTable;
 var members;
