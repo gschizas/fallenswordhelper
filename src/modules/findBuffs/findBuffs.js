@@ -5,6 +5,7 @@ import getValue from '../system/getValue';
 import {lastActivityRE} from '../support/dataObj';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
+import retryAjax from '../ajax/retryAjax';
 import {buffCustom, otherCustom} from './assets';
 import {
   createDocument,
@@ -15,7 +16,7 @@ import {
 import {pCC, playerName} from '../support/layout';
 
 var characterName;
-export var findBuffNicks;
+var findBuffNicks;
 var findBuffMinCastLevel;
 var findBuffsLevel175Only;
 var onlinePlayers;
@@ -23,7 +24,7 @@ var onlinePlayersSetting;
 export var extraProfile;
 var profilePagesToSearch;
 var profilePagesToSearchProcessed;
-export var bufferProgress;
+var bufferProgress;
 
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
@@ -40,13 +41,22 @@ function findBuffsParsePlayersForBuffs() { // Legacy
 
   //#if _DEV  //  Find Buffs uglify bug
   console.log('onlinePlayers', onlinePlayers); // eslint-disable-line no-console
-
   //#endif
-  for (var j = 0; j < onlinePlayers.length; j += 1) {
-    xmlhttp(onlinePlayers[j],
-      parseProfileAndDisplay,
-      {href: onlinePlayers[j]});
-  }
+
+  onlinePlayers.forEach(function(j) {
+    retryAjax(j).done(function(html) {
+      parseProfileAndDisplay(html, {
+        href: onlinePlayers[j],
+        bufferProgress: bufferProgress,
+        findBuffNicks: findBuffNicks
+      });
+    });
+  });
+  // for (var j = 0; j < onlinePlayers.length; j += 1) {
+  //   xmlhttp(onlinePlayers[j],
+  //     parseProfileAndDisplay,
+  //     {href: onlinePlayers[j]});
+  // }
 }
 
 function calcMinLvl() { // Legacy
@@ -234,7 +244,7 @@ export function injectFindBuffs(injector) { // Legacy
   calf.sortAsc = true;
   buffList.sort(stringSort);
   extraProfile = getValue('extraProfile');
-  content.innerHTML = pageLayout(buffCustom);
+  content.innerHTML = pageLayout(buffCustom, extraProfile);
   getElementById('findbuffsbutton')
     .addEventListener('click', findBuffsStart, true);
   getElementById('clearresultsbutton')
@@ -244,7 +254,7 @@ export function injectFindBuffs(injector) { // Legacy
 export function injectFindOther(injector) { // Native - Bad
   var content = injector || pCC;
   extraProfile = getValue('extraProfile');
-  content.innerHTML = pageLayout(otherCustom);
+  content.innerHTML = pageLayout(otherCustom, extraProfile);
   getElementById('findbuffsbutton')
     .addEventListener('click', findOtherStart, true);
   getElementById('clearresultsbutton')

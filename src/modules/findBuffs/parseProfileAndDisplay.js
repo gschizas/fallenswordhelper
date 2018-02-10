@@ -1,7 +1,6 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import {onlineDot} from '../support/layout';
-import {bufferProgress, findBuffNicks} from './findBuffs';
 import {
   createDocument,
   intValue
@@ -39,7 +38,7 @@ function getNextBr(bioCellHtml, runningTotalPosition) { // Legacy
   return nextBR;
 }
 
-function getBioLines(bioCellHtml) { // Legacy
+function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
   var res = [];
   var buffPosition = 0;
   var startingPosition = 0;
@@ -127,7 +126,7 @@ export default function parseProfileAndDisplay(responseText, callback) { // Hybr
   // buffs
   var bioCellHtml = getElementById('profile-bio', doc).innerHTML;
   var buffTable = getElementById('buffTable');
-  var textLineArray = getBioLines(bioCellHtml);
+  var textLineArray = getBioLines(bioCellHtml, callback.findBuffNicks);
   // sustain
   var sustainLevel = getSustain(doc);
   // extend
@@ -161,7 +160,7 @@ export default function parseProfileAndDisplay(responseText, callback) { // Hybr
   var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
   processedBuffers.innerHTML = processedBuffersCount + 1;
   if (potentialBuffers === processedBuffersCount + 1) {
-    bufferProgress.innerHTML = 'Done.';
-    bufferProgress.style.color = 'blue';
+    callback.bufferProgress.innerHTML = 'Done.';
+    callback.bufferProgress.style.color = 'blue';
   }
 }

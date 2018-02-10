@@ -1,4 +1,3 @@
-import {extraProfile} from './findBuffs';
 import {helpLink} from '../settings/settingsPage';
 
 function outputTable(o) {
@@ -21,7 +20,7 @@ function disclaimer() {
     'over time.</div>';
 }
 
-export default function pageLayout(o) { // Legacy
+export default function pageLayout(o, extraProfile) { // Legacy
   return '<table class="fshFind"><tbody>' +
     '<tr><td rowspan="2" colspan="2" class="headCell">' +
     '<h1>Find ' + o.header + '</h1></td>' +
