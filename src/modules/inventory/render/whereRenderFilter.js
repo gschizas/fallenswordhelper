@@ -1,5 +1,5 @@
 import playerName from './playerName';
-import {theInv} from '../inventory';
+import {theInv} from '../options';
 
 function whereRenderGuildFilter(row) {
   if (row.player_id === -1) {return 'GS';}

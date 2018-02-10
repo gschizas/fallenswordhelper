@@ -1,6 +1,6 @@
 import {isSelected} from '../../system/system';
 import playerName from './playerName';
-import {theInv} from '../inventory';
+import {theInv} from '../options';
 
 function whereRenderGuildDisplay(row) {
   if (row.player_id === -1) {return 'GS';}

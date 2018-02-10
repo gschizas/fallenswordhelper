@@ -1,4 +1,4 @@
-import {theInv} from '../inventory';
+import {theInv} from '../options';
 
 function bpDisplayType(type, row) {
   if (type !== 'display') {return 'BP';}

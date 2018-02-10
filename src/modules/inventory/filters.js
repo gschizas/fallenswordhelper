@@ -1,5 +1,5 @@
 import {intValue} from '../system/system';
-import {options} from './inventory';
+import {options} from './options';
 
 var lvlTests = [
   function(level) {return level === 0;},

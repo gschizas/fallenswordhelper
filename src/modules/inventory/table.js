@@ -12,7 +12,7 @@ import whereRender from './render/whereRender';
 import whereRenderDisplay from './render/whereRenderDisplay';
 import whereRenderFilter from './render/whereRenderFilter';
 import {craftHash, itemType} from './assets';
-import {showQuickDropLinks, showQuickSendLinks, theInv} from './inventory';
+import {showQuickDropLinks, showQuickSendLinks, theInv} from './options';
 
 var tblCols = [
   {title: 'Name', data: 'item_name', render: nameRender},

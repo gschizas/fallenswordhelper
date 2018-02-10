@@ -6,7 +6,7 @@ import dostoreitems from '../../app/guild/inventory/dostoreitems';
 import dropItem from '../../ajax/dropItem';
 import equipItem from '../../ajax/equipItem';
 import getChecks from './getChecks';
-import {injectInventoryManagerNew} from '../inventory';
+// import {injectInventoryManagerNew} from '../inventory';
 import moveItem from '../../ajax/moveItem';
 import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
@@ -71,7 +71,7 @@ function doSendItem(e) { // jQuery
 }
 
 export default function eventHandlers() { // jQuery
-  $('#fshRefresh').click(injectInventoryManagerNew);
+  // $('#fshRefresh').click(injectInventoryManagerNew);
   $('#fshMinLvl, #fshMaxLvl').keyup(changeLvls);
   $('#fshReset').click(resetLvls);
   $('table.fshInvFilter').on('click', 'input[type="checkbox"]', getChecks);

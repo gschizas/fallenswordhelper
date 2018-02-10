@@ -1,4 +1,4 @@
-import {theInv} from '../inventory';
+import {theInv} from '../options';
 
 function userInvNotEquipped(row) {
   return row.folder_id && !row.equipped;

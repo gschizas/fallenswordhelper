@@ -1,5 +1,5 @@
 import fallback from '../../system/fallback';
-import {theInv} from '../inventory';
+import {theInv} from '../options';
 
 function gsRecall(row) {
   return '<span class="fshLink recallItem" invid="' +

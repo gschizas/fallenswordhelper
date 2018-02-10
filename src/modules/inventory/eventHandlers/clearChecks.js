@@ -1,4 +1,4 @@
-import {options} from '../inventory';
+import {options} from '../options';
 import setChecks from '../setChecks';
 
 function clearGearOnly(checkedElements) {
