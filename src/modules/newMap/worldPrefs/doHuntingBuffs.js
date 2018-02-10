@@ -1,7 +1,11 @@
 import calf from '../../support/calf';
 import {def_playerBuffs} from '../../support/dataObj';
 import {missingBuffsDiv} from './buildFshDivs';
-import {setCurrentBuffList} from './setCurrentBuffList';
+import {
+  huntingBuffs,
+  huntingBuffsName,
+  setCurrentBuffList
+} from './setCurrentBuffList';
 
 function huntingBuffsEnabled(evt, data) {
   if (!calf.showBuffs) {
