@@ -1,14 +1,10 @@
-import {bountyListDiv} from './activeWantedBounties';
-import calf from '../support/calf';
+import {bountyList} from './lists';
+import {bountyListDiv} from './createDivs';
 import insertElement from '../common/insertElement';
 import setValueJSON from '../system/setValueJSON';
-import {bountyList, retrieveBountyInfo} from './retrieveBountyInfo';
 import {createDiv, createSpan} from '../common/cElement';
 
-function resetBountyList() {
-  setValueJSON('bountyList', null);
-  retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
-}
+export var bountyListReset;
 
 function makeMouseOver(el) {
   return 'Level:  ' + el.lvl +
@@ -17,15 +13,14 @@ function makeMouseOver(el) {
     '<br>Progress:  ' + el.progress;
 }
 
-export default function injectBountyList() { // Legacy
+export function injectBountyList() { // Legacy
   setValueJSON('bountyList', bountyList);
 
   bountyListDiv.innerHTML = '';
 
   var heading = createDiv({textContent: 'Active Bounties '});
-  var reset = createSpan({className: 'xxsLink', textContent: 'Reset'});
-  reset.addEventListener('click', resetBountyList);
-  insertElement(heading, reset);
+  bountyListReset = createSpan({className: 'xxsLink', textContent: 'Reset'});
+  insertElement(heading, bountyListReset);
   insertElement(bountyListDiv, heading);
 
   var output = '';
