@@ -2,13 +2,16 @@ import doSortParams from '../common/doSortParams';
 import generateRecipeTable from './generateRecipeTable';
 import getForage from '../ajax/getForage';
 import {pCC} from '../support/layout';
-import {gotRecipeBook, parseInventingStart, recipebook} from './parseInventing';
+import {
+  gotRecipeBook,
+  output,
+  parseInventingStart,
+  recipebook
+} from './parseInventing';
 import {
   numberSort,
   stringSort
 } from '../system/system';
-
-export var content;
 
 function testSortType(evt) {
   var sortType = evt.target.getAttribute('sorttype');
@@ -29,7 +32,7 @@ function sortRecipeTable(evt) { // Legacy
   doSortParams(evt.target.getAttribute('sortKey'));
   var sortType = testSortType(evt);
   sortRecipeBook(sortType);
-  generateRecipeTable();
+  generateRecipeTable(output, recipebook);
 }
 
 function rmEvtHdl(evt) {
@@ -42,7 +45,7 @@ function rmEvtHdl(evt) {
 }
 
 export default function injectRecipeManager(injector) { // jQuery.min
-  content = injector || pCC;
-  getForage('fsh_recipeBook').done(gotRecipeBook);
+  var content = injector || pCC;
+  getForage('fsh_recipeBook').done(gotRecipeBook.bind(null, content));
   content.addEventListener('click', rmEvtHdl);
 }

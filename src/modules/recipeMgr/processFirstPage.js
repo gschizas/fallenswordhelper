@@ -1,7 +1,6 @@
 import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';
 import {createDocument, getCustomUrlParameter} from '../system/system';
-import {output, recipebook} from './parseInventing';
 
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
@@ -36,7 +35,7 @@ function parseRecipeItemOrComponent(bgGif, doc) {
     reduceItemOrComponent.bind(null, bgGif), []);
 }
 
-function processRecipe(recipe, data) {
+function processRecipe(output, recipebook, recipe, data) {
   var doc = createDocument(data);
   output.insertAdjacentHTML('beforeend',
     'Parsing blueprint ' + recipe.name + '...<br>');
@@ -46,7 +45,7 @@ function processRecipe(recipe, data) {
   recipebook.recipe.push(recipe);
 }
 
-function processFolderAnyPage(data) { // jQuery.min
+function processFolderAnyPage(output, recipebook, data) { // jQuery.min
   var doc = createDocument(data);
   var innerPcc = getElementById('pCC', doc);
   var scope = innerPcc.firstElementChild.rows[6].cells[0]
@@ -61,13 +60,14 @@ function processFolderAnyPage(data) { // jQuery.min
       name: el.textContent,
       id: getCustomUrlParameter(el.href, 'recipe_id')
     };
-    prev.push(retryAjax(el.href).pipe(processRecipe.bind(null, recipe)));
+    prev.push(retryAjax(el.href)
+      .pipe(processRecipe.bind(null, output, recipebook, recipe)));
     return prev;
   }, []);
   return $.when.apply($, prm);
 }
 
-function processFolderFirstPage(data) { // jQuery.min
+function processFolderFirstPage(output, recipebook, data) { // jQuery.min
   var prm = [];
   var doc = createDocument(data);
   var innerPcc = getElementById('pCC', doc);
@@ -80,13 +80,14 @@ function processFolderFirstPage(data) { // jQuery.min
     .getElementsByTagName('option').length;
   for (var i = 1; i < pages; i += 1) {
     prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
-      .pipe(processFolderAnyPage));
+      .pipe(processFolderAnyPage.bind(null, output, recipebook)));
   }
-  prm.push($.when(data).pipe(processFolderAnyPage));
+  prm.push($.when(data)
+    .pipe(processFolderAnyPage.bind(null, output, recipebook)));
   return $.when.apply($, prm);
 }
 
-function reduceFolders(prev, el) { // jQuery.min
+function reduceFolders(output, recipebook, prev, el) { // jQuery.min
   var href = el.parentNode.href;
   var folderName = el.parentNode.nextElementSibling.nextElementSibling
     .firstChild.textContent;
@@ -98,15 +99,18 @@ function reduceFolders(prev, el) { // jQuery.min
       folderName + '"  as it has the word "quest" in folder name.<br>');
     return prev;
   }
-  prev.push(retryAjax(href).pipe(processFolderFirstPage));
+  prev.push(retryAjax(href)
+    .pipe(processFolderFirstPage.bind(null, output, recipebook)));
   return prev;
 }
 
-export default function processFirstPage(data) { // jQuery.min
+export default function processFirstPage(output, recipebook, data) { // jQuery.min
   var doc = createDocument(data);
   var scope = getElementById('pCC', doc).firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
-  var prm = Array.prototype.reduce.call(scope, reduceFolders, []);
-  prm.push($.when(data).pipe(processFolderFirstPage));
+  var prm = Array.prototype.reduce.call(scope,
+    reduceFolders.bind(null, output, recipebook), []);
+  prm.push($.when(data)
+    .pipe(processFolderFirstPage.bind(null, output, recipebook)));
   return $.when.apply($, prm);
 }

@@ -1,4 +1,3 @@
-import {content} from './recipeMgr';
 import {createDiv} from '../common/cElement';
 import generateRecipeTable from './generateRecipeTable';
 import insertElement from '../common/insertElement';
@@ -9,25 +8,22 @@ import setForage from '../ajax/setForage';
 export var recipebook;
 export var output;
 
-export function storeRecipeBook() {
-  setForage('fsh_recipeBook', recipebook);
-}
-
 function displayStuff() {
   output.insertAdjacentHTML('beforeend', 'Finished parsing ... formatting ...');
-  storeRecipeBook();
-  generateRecipeTable();
+  setForage('fsh_recipeBook', recipebook);
+  generateRecipeTable(output, recipebook);
 }
 
 export function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
-  retryAjax('index.php?no_mobile=1&cmd=inventing').pipe(processFirstPage)
+  retryAjax('index.php?no_mobile=1&cmd=inventing')
+    .pipe(processFirstPage.bind(null, output, recipebook))
     .done(displayStuff);
 }
 
-export function gotRecipeBook(data) {
+export function gotRecipeBook(content, data) {
   recipebook = data;
   // if (getValue('hideRecipes')) {
   //   hideRecipes = shouldBeArray('hideRecipeNames');
@@ -43,6 +39,6 @@ export function gotRecipeBook(data) {
   if (!recipebook) {
     parseInventingStart();
   } else {
-    generateRecipeTable();
+    generateRecipeTable(output, recipebook);
   }
 }
