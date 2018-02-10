@@ -9,8 +9,18 @@ import {
   maxHp,
   statusText,
   totalPct
-} from './titanStats';
+} from './placeholders';
 import {createSpan, createTable, textSpan} from '../../common/cElement';
+
+export var titanTbl;
+
+export function clearMemberRows() {
+  if (titanTbl.rows.length > 7) {
+    for (var i = 7; i < titanTbl.rows.length; i += 1) {
+      titanTbl.deleteRow(i);
+    }
+  }
+}
 
 function makeTitanHpWrapper() {
   var titanHpWrapper = createSpan();
@@ -27,8 +37,8 @@ function makePctWrapper(pct) {
   return pctWrapper;
 }
 
-export default function buildTitanInfoTable() {
-  var titanTbl = createTable({className: 'fshCenter'});
+export function buildTitanInfoTable() {
+  titanTbl = createTable({className: 'fshCenter'});
   addRows(titanTbl, [
     [[[2, textSpan('Titan HP'), true], [4, textSpan('Your Guild'), true]]],
     [[[2, makeTitanHpWrapper()], [4, guildKills]]],
@@ -39,5 +49,4 @@ export default function buildTitanInfoTable() {
     [[[2, textSpan('Member'), true], [2, textSpan('Kills'), true],
       [2, textSpan('% of Total'), true]]]
   ]);
-  return titanTbl;
 }
