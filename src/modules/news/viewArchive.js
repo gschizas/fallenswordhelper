@@ -1,7 +1,7 @@
 import collapse from '../common/collapse';
 import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
-import {simpleCheckbox} from '../settings/settingsPage';
+import {simpleCheckbox} from '../settings/simpleCheckbox';
 import {
   parseDateAsTimestamp,
   setValue

@@ -1,7 +1,7 @@
 import calf from '../support/calf';
 import {isChecked} from '../system/system';
 import {networkIcon} from './settingObj';
-import {helpLink, simpleCheckbox} from './settingsPage';
+import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 export default function bountyPrefs() {
   // Bounty hunting prefs

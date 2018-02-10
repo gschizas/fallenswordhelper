@@ -1,6 +1,6 @@
 import getValue from '../system/getValue';
 import {isChecked} from '../system/system';
-import {helpLink, simpleCheckbox} from './settingsPage';
+import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function injectSettingsGuildData(guildType) {
   return '<input name="guild' + guildType + '" size="60" value="' +

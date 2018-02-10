@@ -27,7 +27,7 @@ import injectReportPaint from '../guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
 import injectScavenging from '../scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';
-import {injectSettings} from '../settings/settingsPage';
+import injectSettings from '../settings/injectSettings';
 import injectTitan from '../scoutTower/injectTitan';
 import injectTopRated from '../topRated/toprated';
 import injectTrade from '../trade/trade';

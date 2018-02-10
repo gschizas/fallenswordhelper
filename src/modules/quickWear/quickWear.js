@@ -8,7 +8,7 @@ import loadInventory from '../app/profile/loadInventory';
 import {sendEvent} from '../support/fshGa';
 import {setValue} from '../system/system';
 import showAHInvManager from './showAHInvManager';
-import {simpleCheckboxHtml} from '../settings/settingsPage';
+import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 import toggleForce from '../common/toggleForce';
 import useItem from '../ajax/useItem';
 import {jConfirm, pCC} from '../support/layout';

@@ -1,4 +1,4 @@
-import {helpLink} from '../settings/settingsPage';
+import {helpLink} from '../settings/simpleCheckbox';
 
 function outputTable(o) {
   return '<br><h1>Potential ' + o.processed + 'ers and Bio Info</h1><br>' +

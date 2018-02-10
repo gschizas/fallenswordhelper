@@ -1,6 +1,6 @@
 import getValue from '../system/getValue';
 import {isChecked} from '../system/system';
-import {helpLink, simpleCheckbox} from './settingsPage';
+import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 export default function otherPrefs() {
   // Other prefs

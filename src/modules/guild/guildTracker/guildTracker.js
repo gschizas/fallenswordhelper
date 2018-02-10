@@ -3,7 +3,7 @@ import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
 import {setValue} from '../../system/system';
-import {simpleCheckboxHtml} from '../../settings/settingsPage';
+import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
   createDiv,
   createInput,

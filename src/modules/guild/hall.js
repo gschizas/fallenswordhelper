@@ -1,7 +1,7 @@
 import collapse from '../common/collapse';
 import {createDiv} from '../common/cElement';
 import {pCC} from '../support/layout';
-import {simpleCheckboxHtml} from '../settings/settingsPage';
+import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 
 function testArticle(rowType) {return rowType === 1;}
 

@@ -5,7 +5,7 @@ import {
   justCheckbox,
   justLabel,
   simpleCheckbox
-} from './settingsPage';
+} from './simpleCheckbox';
 import {isChecked, isSelected} from '../system/system';
 
 function worldGroup() {

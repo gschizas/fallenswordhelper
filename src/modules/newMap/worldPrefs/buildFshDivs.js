@@ -3,7 +3,7 @@ import {getElementById} from '../../common/getElement';
 import {huntingBuffsHtml} from '../../settings/worldPrefs';
 import insertElement from '../../common/insertElement';
 import insertElementBefore from '../../common/insertElementBefore';
-import {simpleCheckboxHtml} from '../../settings/settingsPage';
+import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import toggleEnabledHuntingMode from './toggleEnabledHuntingMode';
 import {toggleHidePlayerActions} from '../prepareHidePlayerActions';
 import {toggleShowCreatureInfo} from '../monsterLog/creatureInfo';

@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import formatUtcDateTime from '../common/formatUtcDateTime';
 import {pCC} from '../support/layout';
 import {setValue} from '../system/system';
-import {simpleCheckboxHtml} from '../settings/settingsPage';
+import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 import {createTBody, createTable} from '../common/cElement';
 import {
   disableBackgroundChecks,
