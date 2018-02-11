@@ -1,11 +1,9 @@
 import getUrlParameter from './system/getUrlParameter';
 import getValue from './system/getValue';
 import {guideUrl} from './support/dataObj';
+import {imageServer} from './system/system';
 import {pCC} from './support/layout';
-import {
-  imageServer,
-  setValue
-} from './system/system';
+import setValue from './system/setValue';
 
 var normalLink;
 var seasonLink;

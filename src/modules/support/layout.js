@@ -2,7 +2,7 @@ import createDocument from '../system/createDocument';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import {places} from './dataObj';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import {
   createButton,
   createDiv,

@@ -1,7 +1,7 @@
 import bitwiseAnd from '../common/bitwiseAnd';
 import calf from '../support/calf';
 import {def_fetch_worldRealmActions} from '../support/dataObj';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 export function toggleSubLvlCreature() {
   calf.hideSubLvlCreature = !calf.hideSubLvlCreature;

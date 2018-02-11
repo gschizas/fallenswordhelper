@@ -2,7 +2,7 @@ import calf from '../../support/calf';
 import {processTitans} from './processTitans';
 import scouttower from '../../app/guild/scouttower';
 import {setRealm} from './realm';
-import {setValue} from '../../system/system';
+import setValue from '../../system/setValue';
 import {hasTitan, hideTitanDiv, setupTitanDiv} from './hasTitan';
 
 var timeoutId;

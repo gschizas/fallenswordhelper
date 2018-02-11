@@ -16,7 +16,7 @@ import getValue from '../../system/getValue';
 import intValue from '../../system/intValue';
 import {playerDataString} from '../../common/common';
 import retryAjax from '../../ajax/retryAjax';
-import {setValue} from '../../system/system';
+import setValue from '../../system/setValue';
 
 function getBiasGeneral(combat) {
   if (bias[combat.combatEvaluatorBias]) {

@@ -1,6 +1,6 @@
 import {getElementById} from '../common/getElement';
 import intValue from '../system/intValue';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 export default function storeVL() {
   // store the VL of the player

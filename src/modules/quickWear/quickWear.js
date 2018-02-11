@@ -6,7 +6,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import loadInventory from '../app/profile/loadInventory';
 import {sendEvent} from '../support/fshGa';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 import toggleForce from '../common/toggleForce';

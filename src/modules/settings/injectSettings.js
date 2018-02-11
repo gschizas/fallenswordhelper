@@ -8,7 +8,7 @@ import {jConfirm} from '../support/layout';
 import jQueryDialog from '../chrome/jQueryDialog';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import setupConfigData from './configData';
 import toggleVisibilty from '../common/toggleVisibilty';
 import {createBr, createSpan} from '../common/cElement';

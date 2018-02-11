@@ -3,7 +3,7 @@ import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/dataObj';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import {
   createButton,
   createDiv,

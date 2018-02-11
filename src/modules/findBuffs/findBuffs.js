@@ -7,7 +7,7 @@ import {lastActivityRE} from '../support/dataObj';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
 import retryAjax from '../ajax/retryAjax';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import stringSort from '../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
 import {pCC, playerName} from '../support/layout';

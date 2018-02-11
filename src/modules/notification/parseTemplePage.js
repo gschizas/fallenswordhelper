@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import createDocument from '../system/createDocument';
 import displayDisconnectedFromGodsMessage
   from './displayDisconnectedFromGodsMessage';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 function templeAlertEnabled(responseText) {
   var checkNeedToPray;

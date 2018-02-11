@@ -6,7 +6,7 @@ import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
 import isNaN from '../../common/isNaN';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
-import {setValue} from '../../system/system';
+import setValue from '../../system/setValue';
 import {createDiv, createInput} from '../../common/cElement';
 
 var bioEditLines;

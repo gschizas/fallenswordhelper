@@ -1,5 +1,5 @@
 import {getElementById} from './getElement';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 export default function toggleVisibilty(evt) {
   var anItemId = evt.target.getAttribute('linkto');

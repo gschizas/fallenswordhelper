@@ -2,7 +2,7 @@ import collapse from '../common/collapse';
 import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import {simpleCheckbox} from '../settings/simpleCheckbox';
 
 var ladderResetPref = 'lastLadderReset';

@@ -2,7 +2,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
 import {nowSecs} from '../support/dataObj';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 export var bountyList;
 export var wantedList;

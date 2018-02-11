@@ -6,7 +6,7 @@ import getValue from './system/getValue';
 import intValue from './system/intValue';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
-import {setValue} from './system/system';
+import setValue from './system/setValue';
 import {
   calculateBoundaries,
   pvpLowerLevel,

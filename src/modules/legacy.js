@@ -5,11 +5,12 @@ import createDocument from './system/createDocument';
 import findNode from './system/findNode';
 import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
+import {imageServer} from './system/system';
 import intValue from './system/intValue';
 import {log} from './support/debug';
 import retryAjax from './ajax/retryAjax';
+import setValue from './system/setValue';
 import subscribes from './newMap/newMap';
-import {imageServer, setValue} from './system/system';
 
 var impStyles = [
   ' style="color:red; font-size:large; font-weight:bold"',

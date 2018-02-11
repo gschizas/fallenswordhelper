@@ -15,7 +15,7 @@ import moveItemsToFolder from './moveItemsToFolder';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import toggleForce from '../common/toggleForce';
 import {guideUrl, itemRE, rarity} from '../support/dataObj';
 

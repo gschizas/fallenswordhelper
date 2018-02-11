@@ -3,7 +3,7 @@ import getValue from '../system/getValue';
 import {guideUrl} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 function containsNewsHead(el) {
   return el.classList.contains('news_head') ||
