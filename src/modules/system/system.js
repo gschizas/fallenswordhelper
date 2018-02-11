@@ -1,4 +1,5 @@
 import fallback from './fallback';
+import getCustomUrlParameter from './getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
 import {months} from '../support/dataObj';
 import retryAjax from '../ajax/retryAjax';
@@ -108,22 +109,6 @@ export function toggleVisibilty(evt) {
     setValue(anItemId, '');
   } else {
     setValue(anItemId, 'ON');
-  }
-}
-
-function outputParamVal(param) {
-  if (typeof param === 'undefined') {return true;}
-  return param;
-}
-
-export function getCustomUrlParameter(sPageURL, sParam) {
-  var sURLVariables = sPageURL.split('&');
-  var sParameterName;
-  for (var i = 0; i < sURLVariables.length; i += 1) {
-    sParameterName = sURLVariables[i].split('=');
-    if (sParameterName[0] === sParam) {
-      return outputParamVal(sParameterName[1]);
-    }
   }
 }
 

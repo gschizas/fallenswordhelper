@@ -1,6 +1,7 @@
+import {createDocument} from '../system/system';
+import getCustomUrlParameter from '../system/getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';
-import {createDocument, getCustomUrlParameter} from '../system/system';
 
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
