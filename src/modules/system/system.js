@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
+import path from './path';
 import retryAjax from '../ajax/retryAjax';
 import {months, nowSecs} from '../support/dataObj';
 
@@ -148,23 +149,6 @@ export function formatLastActivity(last_login) {
   h %= 24;
   return outputFormat(d, ' days, ') + outputFormat(h, ' hours, ') +
     outputFormat(m, ' mins, ') + s + ' secs';
-}
-
-function getPath(obj, aPath, def) {
-  var _obj = obj;
-  var _path = aPath.split('.');
-  var len = _path.length;
-  for (var i = 0; i < len; i += 1) {
-    if (fallback(!_obj, typeof _obj !== 'object')) {return def;}
-    _obj = _obj[_path[i]];
-  }
-  return _obj;
-}
-
-function path(obj, aPath, def) {
-  var _obj = getPath(obj, aPath, def);
-  if (typeof _obj === 'undefined') {return def;}
-  return _obj;
 }
 
 function sortDesc(result) {
