@@ -1,4 +1,4 @@
-import {escapeHtml} from '../system/system';
+import escapeHtml from '../system/escapeHtml';
 import getValue from '../system/getValue';
 import isChecked from '../system/isChecked';
 import {helpLink, simpleCheckbox} from './simpleCheckbox';

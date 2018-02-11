@@ -1,11 +1,12 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import draggable from '../common/dragStart';
+import escapeHtml from '../system/escapeHtml';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
-import {escapeHtml, imageServer} from '../system/system';
+import {imageServer} from '../system/system';
 
 function retBool(bool, ifTrue, ifFalse) {
   if (bool) {

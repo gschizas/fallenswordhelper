@@ -231,12 +231,3 @@ export function getRandomInt(_min, _max) {
 export function rnd() {
   return getRandomInt(1000000000, 9999999998);
 }
-
-export function escapeHtml(unsafe) {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
