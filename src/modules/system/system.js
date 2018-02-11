@@ -71,14 +71,3 @@ export function intValue(theText) {
   if (!theText) {return 0;}
   return parseInt(theText.replace(/,/g, ''), 10);
 }
-
-export function getIntFromRegExp(theText, rxSearch) {
-  var result;
-  var matches = theText.replace(/,/g, '').match(rxSearch);
-  if (matches) {
-    result = parseInt(matches[1], 10);
-  } else {
-    result = 0;
-  }
-  return result;
-}
