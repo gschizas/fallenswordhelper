@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import createDocument from '../system/createDocument';
 import {getElementById} from '../common/getElement';
 import getRandomInt from '../system/getRandomInt';
 import getValue from '../system/getValue';
@@ -8,11 +9,7 @@ import {now} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import rnd from '../system/rnd';
-import {
-  createDocument,
-  imageServer,
-  setValue
-} from '../system/system';
+import {imageServer, setValue} from '../system/system';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +

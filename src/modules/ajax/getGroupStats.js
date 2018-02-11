@@ -1,4 +1,4 @@
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import groupViewStats from './groupViewStats';
 import retryAjax from './retryAjax';
 

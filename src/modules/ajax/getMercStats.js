@@ -1,4 +1,4 @@
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import retryAjax from './retryAjax';
 import {defenderMultiplier, mercRE} from '../support/dataObj';
 

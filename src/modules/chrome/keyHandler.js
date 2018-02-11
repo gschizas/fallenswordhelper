@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import {doSendGold} from '../newMap/sendGold';
 import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';

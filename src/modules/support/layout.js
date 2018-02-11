@@ -1,13 +1,14 @@
+import createDocument from '../system/createDocument';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import {places} from './dataObj';
+import {setValue} from '../system/system';
 import {
   createButton,
   createDiv,
   createLi,
   createUl
 } from '../common/cElement';
-import {createDocument, setValue} from '../system/system';
 
 export var pCC = getElementById('pCC');
 export var pCR = getElementById('pCR');

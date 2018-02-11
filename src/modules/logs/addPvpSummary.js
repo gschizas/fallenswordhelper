@@ -1,6 +1,6 @@
 import addCommas from '../system/addCommas';
 import calf from '../support/calf';
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import getForage from '../ajax/getForage';
 import {nowSecs} from '../support/dataObj';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';

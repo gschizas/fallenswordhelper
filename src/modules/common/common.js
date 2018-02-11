@@ -1,4 +1,4 @@
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import fallback from '../system/fallback';
 import intValue from '../system/intValue';
 import reduceBuffArray from './reduceBuffArray';

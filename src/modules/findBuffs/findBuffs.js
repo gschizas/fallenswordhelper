@@ -1,14 +1,15 @@
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
+import createDocument from '../system/createDocument';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import {lastActivityRE} from '../support/dataObj';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
 import retryAjax from '../ajax/retryAjax';
+import {setValue} from '../system/system';
 import stringSort from '../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
-import {createDocument, setValue} from '../system/system';
 import {pCC, playerName} from '../support/layout';
 
 var characterName;

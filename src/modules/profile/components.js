@@ -1,5 +1,7 @@
+import createDocument from '../system/createDocument';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
+import {imageServer} from '../system/system';
 import {infoBox} from '../support/layout';
 import insertQuickExtract from '../quickExtract';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
@@ -12,7 +14,6 @@ import {
   createTBody,
   createTable
 } from '../common/cElement';
-import {createDocument, imageServer} from '../system/system';
 
 var quickDelDiv;
 var sumComp;

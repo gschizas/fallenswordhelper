@@ -1,4 +1,4 @@
-import {createDocument} from './system/system';
+import createDocument from './system/createDocument';
 import {createSpan} from './common/cElement';
 import fallback from './system/fallback';
 import formatLastActivity from './system/formatLastActivity';

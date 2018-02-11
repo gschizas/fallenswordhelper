@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import findTarget from './findTarget';
 import {getElementById} from '../common/getElement';
 import {injectBountyList} from './injectBountyList';

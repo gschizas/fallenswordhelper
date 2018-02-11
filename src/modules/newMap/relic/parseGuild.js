@@ -1,4 +1,4 @@
-import {createDocument} from '../../system/system';
+import createDocument from '../../system/createDocument';
 import {lDPercentageElement, relicCountElement} from './secondaryElements';
 
 export var relicMultiplier;

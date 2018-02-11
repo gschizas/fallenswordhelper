@@ -1,4 +1,4 @@
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import intValue from '../system/intValue';

@@ -1,6 +1,7 @@
 import {afterUpdateActionList} from '../doNotKill';
 import {bias} from '../assets';
 import calf from '../../support/calf';
+import createDocument from '../../system/createDocument';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
 import evalAttack from './evalAttack';
@@ -15,7 +16,7 @@ import getValue from '../../system/getValue';
 import intValue from '../../system/intValue';
 import {playerDataString} from '../../common/common';
 import retryAjax from '../../ajax/retryAjax';
-import {createDocument, setValue} from '../../system/system';
+import {setValue} from '../../system/system';
 
 function getBiasGeneral(combat) {
   if (bias[combat.combatEvaluatorBias]) {

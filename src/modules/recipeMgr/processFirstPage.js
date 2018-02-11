@@ -1,4 +1,4 @@
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';

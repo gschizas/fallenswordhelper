@@ -1,6 +1,6 @@
 import add from '../support/task';
 import {colouredDots} from '../common/colouredDots';
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';

@@ -1,5 +1,5 @@
 import add from './support/task';
-import {createDocument} from './system/system';
+import createDocument from './system/createDocument';
 import {createInput} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';

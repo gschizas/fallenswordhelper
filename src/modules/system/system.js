@@ -7,10 +7,3 @@ export var imageServer = window.HCS && window.HCS.defines &&
 export function setValue(name, value) {
   GM_setValue(name, value);
 }
-
-export function createDocument(details) {
-  // Use DOMParser to prevent img src tags downloading
-  var parser = new DOMParser();
-  var doc = parser.parseFromString(details, 'text/html');
-  return doc;
-}
