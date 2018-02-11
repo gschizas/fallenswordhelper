@@ -1,7 +1,6 @@
 import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
-import getRandomInt from './getRandomInt';
 import retryAjax from '../ajax/retryAjax';
 import {months, nowSecs} from '../support/dataObj';
 
@@ -221,8 +220,4 @@ export function testRange(aValue, min, max) {
 
 export function testQuant(aValue) {
   return testRange(aValue, 0, 100);
-}
-
-export function rnd() {
-  return getRandomInt(1000000000, 9999999998);
 }

@@ -7,10 +7,10 @@ import insertElementBefore from '../common/insertElementBefore';
 import {now} from '../support/dataObj';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
+import rnd from '../system/rnd';
 import {
   createDocument,
   imageServer,
-  rnd,
   setValue
 } from '../system/system';
 
