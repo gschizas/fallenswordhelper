@@ -5,7 +5,8 @@ import {getElementById} from './common/getElement';
 import {guideUrl} from './support/dataObj';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
-import {findNode, findNodes, server, xmlhttp} from './system/system';
+import retryAjax from './ajax/retryAjax';
+import {findNode, findNodes, server} from './system/system';
 
 var itemRE = /<b>([^<]+)<\/b>/i;
 var plantFromComponentHash = {
@@ -105,15 +106,16 @@ function injectViewRecipe() { // Legacy
   var components = findNodes(
     '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
   if (components) {
-    for (var i = 0; i < components.length; i += 1) {
-      var mo = components[i].dataset.tipped;
-      xmlhttp(linkFromMouseoverCustom(mo),
-        injectViewRecipeLinks, components[i]);
-      var componentCountElement = components[i].parentNode.parentNode
+    components.forEach(function(compI) {
+      var mo = compI.dataset.tipped;
+      retryAjax(linkFromMouseoverCustom(mo)).done(function(html) {
+        injectViewRecipeLinks(html, compI);
+      });
+      var componentCountElement = compI.parentNode.parentNode
         .parentNode.nextSibling.firstChild;
       componentCountElement.innerHTML = '<nobr>' +
         componentCountElement.innerHTML + '</nobr>';
-    }
+    });
   }
 }
 
