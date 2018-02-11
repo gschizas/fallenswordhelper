@@ -1,4 +1,4 @@
-import {doBuffLinks} from '../../support/layout';
+import doBuffLinks from '../../common/doBuffLinks';
 import {getElementById} from '../../common/getElement';
 import {createButton, createDiv} from '../../common/cElement';
 

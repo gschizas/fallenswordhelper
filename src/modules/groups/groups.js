@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import {doBuffLinks} from '../support/layout';
+import doBuffLinks from '../common/doBuffLinks';
 import findNode from '../system/findNode';
 import findNodes from '../system/findNodes';
 import {getElementById} from '../common/getElement';
