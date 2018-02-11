@@ -5,13 +5,13 @@ import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
 import intValue from './system/intValue';
 import {log} from './support/debug';
+import retryAjax from './ajax/retryAjax';
 import subscribes from './newMap/newMap';
 import {
   createDocument,
   findNode,
   imageServer,
-  setValue,
-  xmlhttp
+  setValue
 } from './system/system';
 
 var impStyles = [
@@ -143,7 +143,7 @@ function notMaxDd(lastDeathDealerPercentage, lastKillStreak) {
       'decoration:underline;" title="Click to toggle">' +
       trackText + '</span></span></td></tr>';
   }
-  xmlhttp('index.php?no_mobile=1&cmd=profile', getKillStreak);
+  retryAjax('index.php?no_mobile=1&cmd=profile').done(getKillStreak);
   return '<tr><td style="font-size:small; color:' +
     'navy" nowrap>KillStreak: <span findme="killstreak">' +
     addCommas(lastKillStreak) + '</span> Damage bonus' +
@@ -223,7 +223,7 @@ function impRecast() { // Legacy - Old Map
       $('dt.stat-name:first').next().text().replace(/,/g, '') +
       '&skills%5B%5D=55';
     _recastImpAndRefresh.addEventListener('click', function() {
-      xmlhttp(impHref, recastImpAndRefresh, true);
+      retryAjax(impHref).done(recastImpAndRefresh);
     }, true);
   }
 }
