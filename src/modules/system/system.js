@@ -1,5 +1,4 @@
 import fallback from './fallback';
-import retryAjax from '../ajax/retryAjax';
 
 export var server = document.location.protocol + '//' +
   document.location.host + '/';
@@ -57,12 +56,4 @@ export function createDocument(details) {
   var parser = new DOMParser();
   var doc = parser.parseFromString(details, 'text/html');
   return doc;
-}
-
-export function xmlhttp(theUrl, func, theCallback) {
-  return retryAjax(theUrl).done(function(responseDetails) {
-    if (func) {
-      func(responseDetails, theCallback);
-    }
-  });
 }
