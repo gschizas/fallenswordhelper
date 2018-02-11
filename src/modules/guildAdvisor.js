@@ -1,4 +1,5 @@
 import add from './support/task';
+import addCommas from './system/addCommas';
 import calf from './support/calf';
 import {createTFoot} from './common/cElement';
 import fallback from './system/fallback';
@@ -8,7 +9,6 @@ import insertElement from './common/insertElement';
 import {pCC} from './support/layout';
 import retryAjax from './ajax/retryAjax';
 import {
-  addCommas,
   createDocument,
   intValue
 } from './system/system';

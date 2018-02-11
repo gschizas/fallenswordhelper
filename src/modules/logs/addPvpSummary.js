@@ -1,4 +1,6 @@
+import addCommas from '../system/addCommas';
 import calf from '../support/calf';
+import {createDocument} from '../system/system';
 import getForage from '../ajax/getForage';
 import {nowSecs} from '../support/dataObj';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
@@ -7,10 +9,6 @@ import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
 import {specials} from '../support/specials';
 import viewCombat from '../app/combat/view';
-import {
-  addCommas,
-  createDocument
-} from '../system/system';
 import {createDiv, createSpan} from '../common/cElement';
 
 var combatCache = {};

@@ -1,3 +1,4 @@
+import addCommas from './system/addCommas';
 import calf from './support/calf';
 import {createDiv} from './common/cElement';
 import {getElementById} from './common/getElement';
@@ -5,7 +6,6 @@ import getValue from './system/getValue';
 import {log} from './support/debug';
 import subscribes from './newMap/newMap';
 import {
-  addCommas,
   createDocument,
   findNode,
   imageServer,

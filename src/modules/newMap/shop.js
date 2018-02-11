@@ -1,4 +1,4 @@
-import {addCommas} from '../system/system';
+import addCommas from '../system/addCommas';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';

@@ -1,12 +1,13 @@
+import addCommas from './system/addCommas';
 import calf from './support/calf';
 import doSortParams from './common/doSortParams';
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
+import {imageServer} from './system/system';
 import numberSort from './system/numberSort';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
 import stringSort from './system/stringSort';
-import {addCommas, imageServer} from './system/system';
 
 var content;
 var monsterAry;

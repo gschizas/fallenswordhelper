@@ -1,4 +1,4 @@
-import {addCommas} from '../../system/system';
+import addCommas from '../../system/addCommas';
 import {defenderMultiplier} from '../../support/dataObj';
 import fallback from '../../system/fallback';
 import {playerDataObject} from '../../common/common';

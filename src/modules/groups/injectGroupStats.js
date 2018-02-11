@@ -1,4 +1,4 @@
-import {addCommas} from '../system/system';
+import addCommas from '../system/addCommas';
 import getMercStats from '../ajax/getMercStats';
 import groupViewStats from '../ajax/groupViewStats';
 
