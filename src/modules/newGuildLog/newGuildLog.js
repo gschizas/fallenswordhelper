@@ -6,14 +6,14 @@ import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
 import {rowProfile} from './profiler';
 import setForage from '../ajax/setForage';
 import toggleForce from '../common/toggleForce';
 import {
   createDocument,
-  imageServer,
-  parseDateAsTimestamp
+  imageServer
 } from '../system/system';
 import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
 

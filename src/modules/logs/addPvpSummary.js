@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import getForage from '../ajax/getForage';
 import {nowSecs} from '../support/dataObj';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
@@ -8,8 +9,7 @@ import {specials} from '../support/specials';
 import viewCombat from '../app/combat/view';
 import {
   addCommas,
-  createDocument,
-  parseDateAsTimestamp
+  createDocument
 } from '../system/system';
 import {createDiv, createSpan} from '../common/cElement';
 

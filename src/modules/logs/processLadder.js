@@ -1,5 +1,6 @@
 import calf from '../support/calf';
-import {parseDateAsTimestamp, setValue} from '../system/system';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import {setValue} from '../system/system';
 
 function isLadderReset(aRow) {
   return aRow.cells[2].firstElementChild &&

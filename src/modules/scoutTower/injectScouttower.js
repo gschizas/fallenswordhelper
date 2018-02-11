@@ -1,7 +1,7 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import {pCC} from '../support/layout';
-import {parseDateAsTimestamp} from '../system/system';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import roundToString from '../common/roundToString';
 import setForage from '../ajax/setForage';
 import {createAnchor, createTBody, createTable} from '../common/cElement';

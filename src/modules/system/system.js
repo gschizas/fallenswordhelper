@@ -1,5 +1,5 @@
 import fallback from './fallback';
-import {months} from '../support/dataObj';
+import parseDateAsTimestamp from './parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
 
 export var server = document.location.protocol + '//' +
@@ -86,12 +86,6 @@ export function getIntFromRegExp(theText, rxSearch) {
 
 export function addCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-
-export function parseDateAsTimestamp(textDate) {
-  var dateAry = textDate.split(/[: /[]/);
-  return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
-    Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
 }
 
 export function parseDate(textDate) {
