@@ -8,8 +8,7 @@ import retryAjax from '../ajax/retryAjax';
 import toggleVisibilty from '../common/toggleVisibilty';
 import {
   createDocument,
-  findNode,
-  xmlhttp
+  findNode
 } from '../system/system';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 import {
@@ -57,11 +56,11 @@ function gotConflictInfo(responseText, callback) { // Legacy
   var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
   activeConflicts(doc, curPage, callback.node);
   if (maxPage && parseInt(maxPage[1], 10) > curPage) {
-    xmlhttp(
-      'index.php?no_mobile=1&cmd=guild&subcmd=conflicts&subcmd2=&page=' +
-      (curPage + 1) + '&search_text=',
-      gotConflictInfo,
-      {node: callback.node});
+    retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts&page=' +
+      (curPage + 1).toString()
+    ).done(function(html) {
+      gotConflictInfo(html, {node: callback.node});
+    });
   }
 }
 
