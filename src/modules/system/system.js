@@ -1,7 +1,6 @@
 import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
-import getValue from './getValue';
 import retryAjax from '../ajax/retryAjax';
 import {months, nowSecs} from '../support/dataObj';
 
@@ -245,10 +244,4 @@ export function escapeHtml(unsafe) {
 export function isSelected(val, test) {
   if (val === test) {return ' selected';}
   return '';
-}
-
-export function shouldBeArray(pref) {
-  var stored = getValue(pref);
-  if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
-  return [];
 }

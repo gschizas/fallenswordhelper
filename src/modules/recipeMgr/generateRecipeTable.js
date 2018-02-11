@@ -1,7 +1,7 @@
 import getValue from '../system/getValue';
 import {playerId} from '../support/layout';
 import setForage from '../ajax/setForage';
-import {shouldBeArray} from '../system/system';
+import shouldBeArray from '../system/shouldBeArray';
 
 var currentPlayerId;
 var hideRecipes = [];

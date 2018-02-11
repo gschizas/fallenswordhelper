@@ -4,7 +4,7 @@ import {doHuntingBuffs} from './doHuntingBuffs';
 import getValue from '../../system/getValue';
 import {interceptXHR} from '../interceptXHR';
 import {prepareHidePlayerActions} from '../prepareHidePlayerActions';
-import {shouldBeArray} from '../../system/system';
+import shouldBeArray from '../../system/shouldBeArray';
 
 function getPrefs() {
   calf.buffs = shouldBeArray('huntingBuffs');

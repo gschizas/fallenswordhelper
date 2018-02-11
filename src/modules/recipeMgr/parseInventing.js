@@ -25,9 +25,6 @@ export function parseInventingStart() { // jQuery.min
 
 export function gotRecipeBook(content, data) {
   recipebook = data;
-  // if (getValue('hideRecipes')) {
-  //   hideRecipes = shouldBeArray('hideRecipeNames');
-  // }
   content.innerHTML = '<table class="fshInvFilter"><thead><tr>' +
     '<th width="90%"><b>&nbsp;Recipe Manager</b></th>' +
     '<th width="10%" class="fshBtnBox">[' +
