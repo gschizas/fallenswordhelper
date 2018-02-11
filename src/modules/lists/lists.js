@@ -1,10 +1,12 @@
-import {defaults} from './support/dataObj';
-import eventHandler from './common/eventHandler';
-import {getElementById} from './common/getElement';
-import getValueJSON from './system/getValueJSON';
-import isChecked from './system/isChecked';
-import setValueJSON from './system/setValueJSON';
-import {makePageHeader, makePageTemplate, pCC} from './support/layout';
+import {defaults} from '../support/dataObj';
+import eventHandler from '../common/eventHandler';
+import {getElementById} from '../common/getElement';
+import getValueJSON from '../system/getValueJSON';
+import isChecked from '../system/isChecked';
+import makePageHeader from './makePageHeader';
+import makePageTemplate from './makePageTemplate';
+import {pCC} from '../support/layout';
+import setValueJSON from '../system/setValueJSON';
 
 var param;
 
@@ -169,8 +171,13 @@ export function injectAuctionSearch(injector) { // Legacy
 
 export function injectQuickLinkManager(injector) { // Legacy
   var content = injector || pCC;
-  content.innerHTML =
-    makePageTemplate('Quick Links', '', '', '', 'qla');
+  content.innerHTML = makePageTemplate({
+    title: 'Quick Links',
+    comment: '',
+    spanId: '',
+    button: '',
+    divId: 'qla'
+  });
 
   // global parameters for the meta function generateManageTable
   param = {

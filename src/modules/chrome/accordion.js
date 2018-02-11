@@ -10,7 +10,7 @@ import insertElementAfter from '../common/insertElementAfter';
 import jQueryDialog from './jQueryDialog';
 import {newGuildLogUrl} from '../support/dataObj';
 import {createAnchor, createLi} from '../common/cElement';
-import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 import {sendEvent, sendException} from '../support/fshGa';
 

@@ -52,7 +52,7 @@ import viewArchive from '../news/viewArchive';
 import {composingCreate, injectComposing} from '../composing/composing';
 import {guildChat, guildLog, outbox, playerLog} from '../logs/logs';
 import {injectAuctionHouse, quickCreate} from '../auctionHouse';
-import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectBank, injectGuildBank} from '../bank';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 import {

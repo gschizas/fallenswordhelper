@@ -1,5 +1,6 @@
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
+import makePageTemplate from './lists/makePageTemplate';
 import setForage from './ajax/setForage';
 import {
   calculateBoundaries,
@@ -8,7 +9,7 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from './common/levelHighlight';
-import {makePageTemplate, pCC, quickBuffHref} from './support/layout';
+import {pCC, quickBuffHref} from './support/layout';
 
 export function injectFindPlayer() { // Bad jQuery
   calculateBoundaries();
@@ -40,8 +41,13 @@ export function injectNotepad() { // jQuery
 
 export function injectFsBoxContent(injector) { // jQuery
   var content = injector || pCC;
-  content.innerHTML = makePageTemplate('FS Box Log', '',
-    'fsboxclear', 'Clear', 'fsboxdetail');
+  content.innerHTML = makePageTemplate({
+    title: 'FS Box Log',
+    comment: '',
+    spanId: 'fsboxclear',
+    button: 'Clear',
+    divId: 'fsboxdetail'
+  });
   getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
     getElementById('fsboxdetail').innerHTML = fsboxcontent;
   });

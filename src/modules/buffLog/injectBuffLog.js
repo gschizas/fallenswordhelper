@@ -1,7 +1,8 @@
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
+import makePageTemplate from '../lists/makePageTemplate';
+import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
-import {makePageTemplate, pCC} from '../support/layout';
 
 function displayBuffLog(buffLog) {
   getElementById('bufflog').innerHTML = buffLog;
@@ -13,8 +14,13 @@ function clearBuffLog() {
 
 export default function injectBuffLog(injector) {
   var content = injector || pCC;
-  content.innerHTML = makePageTemplate('Buff Log', '',
-    'clearBuffs', 'Clear', 'bufflog');
+  content.innerHTML = makePageTemplate({
+    title: 'Buff Log',
+    comment: '',
+    spanId: 'clearBuffs',
+    button: 'Clear',
+    divId: 'bufflog'
+  });
   getElementById('clearBuffs').addEventListener('click', clearBuffLog);
   getForage('fsh_buffLog').done(displayBuffLog);
 }
