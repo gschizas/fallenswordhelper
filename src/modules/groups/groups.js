@@ -1,47 +1,20 @@
-import calf from './support/calf';
-import {doBuffLinks} from './support/layout';
-import {getElementById} from './common/getElement';
-import getGroupStats from './ajax/getGroupStats';
-import getMembrList from './ajax/getMembrList';
-import getMercStats from './ajax/getMercStats';
-import getValue from './system/getValue';
-import groupViewStats from './ajax/groupViewStats';
-import {months} from './support/dataObj';
-import {onlineDot} from './support/colouredDots';
-import retryAjax from './ajax/retryAjax';
+import calf from '../support/calf';
+import {doBuffLinks} from '../support/layout';
+import {getElementById} from '../common/getElement';
+import getGroupStats from '../ajax/getGroupStats';
+import getMembrList from '../ajax/getMembrList';
+import getValue from '../system/getValue';
+import {months} from '../support/dataObj';
+import {onlineDot} from '../support/colouredDots';
+import retryAjax from '../ajax/retryAjax';
 import {
-  addCommas,
   findNode,
   findNodes,
   server
-} from './system/system';
-import {time, timeEnd} from './support/debug';
+} from '../system/system';
+import {time, timeEnd} from '../support/debug';
 
 var maxGroupSizeToJoin;
-var groupStats;
-
-function parseMercStats(mercStats) {
-  groupStats.attackElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats.attack) + '</span>' +
-    ' ( ' + addCommas(groupStats.attack - mercStats.attack) + ' )';
-  groupStats.defenseElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats.defense) + '</span>' +
-    ' ( ' + addCommas(groupStats.defense - mercStats.defense) + ' )';
-  groupStats.armorElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats.armor) + '</span>' +
-    ' ( ' + addCommas(groupStats.armor - mercStats.armor) + ' )';
-  groupStats.damageElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats.damage) + '</span>' +
-    ' ( ' + addCommas(groupStats.damage - mercStats.damage) + ' )';
-  groupStats.hpElement.innerHTML = '<span class="fshBlue">' +
-    addCommas(groupStats.hp) + '</span>' +
-    ' ( ' + addCommas(groupStats.hp - mercStats.hp) + ' )';
-}
-
-export function injectGroupStats() { // jQuery
-  groupStats = groupViewStats(document);
-  getMercStats().done(parseMercStats);
-}
 
 function displayMinGroupLevel() { // jQuery
   var minGroupLevel = getValue('minGroupLevel');
@@ -223,7 +196,7 @@ function doGroupPaint(m) { // jQuery
 
 }
 
-export function injectGroups() { // jQuery
+export default function injectGroups() { // jQuery
   getMembrList(false)
     .done(doGroupPaint);
   displayMinGroupLevel();

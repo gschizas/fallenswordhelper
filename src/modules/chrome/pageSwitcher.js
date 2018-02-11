@@ -10,6 +10,8 @@ import injectArena from '../arena/arena';
 import injectBazaar from '../bazaar';
 import injectBioWidgets from '../profile/bio/bioWidgets';
 import injectBuffLog from '../buffLog/injectBuffLog';
+import injectGroupStats from '../groups/injectGroupStats';
+import injectGroups from '../groups/groups';
 import injectGuild from '../guild/guild';
 import injectGuildAddTagsWidgets from '../guild/injectGuildAddTagsWidgets';
 import injectGuildRanks from '../rank';
@@ -58,7 +60,6 @@ import {
   injectFsBoxContent,
   injectNotepad
 } from '../misc';
-import {injectGroupStats, injectGroups} from '../groups';
 import {injectProfileDropItems, injectStoreItems} from '../dropItems/dropItems';
 import {injectQuestBookFull, injectQuestTracker} from '../questBook';
 import {newsFsbox, newsShoutbox} from '../news/news';
