@@ -8,11 +8,11 @@ import jQueryDialog from '../chrome/jQueryDialog';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';
 import setupConfigData from './configData';
+import toggleVisibilty from '../common/toggleVisibilty';
 import {createBr, createSpan} from '../common/cElement';
 import {
   findNode,
-  setValue,
-  toggleVisibilty
+  setValue
 } from '../system/system';
 
 function getVars() {

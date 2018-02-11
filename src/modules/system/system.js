@@ -1,5 +1,4 @@
 import fallback from './fallback';
-import {getElementById} from '../common/getElement';
 import {months} from '../support/dataObj';
 import retryAjax from '../ajax/retryAjax';
 
@@ -97,16 +96,4 @@ export function parseDateAsTimestamp(textDate) {
 
 export function parseDate(textDate) {
   return new Date(parseDateAsTimestamp(textDate));
-}
-
-export function toggleVisibilty(evt) {
-  var anItemId = evt.target.getAttribute('linkto');
-  var anItem = getElementById(anItemId);
-  var currentVisibility = anItem.classList.contains('fshHide');
-  anItem.classList.toggle('fshHide');
-  if (currentVisibility) {
-    setValue(anItemId, '');
-  } else {
-    setValue(anItemId, 'ON');
-  }
 }
