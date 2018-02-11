@@ -1,6 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import {getElementById} from '../common/getElement';
+import getRandomInt from '../system/getRandomInt';
 import getValue from '../system/getValue';
 import insertElementBefore from '../common/insertElementBefore';
 import {now} from '../support/dataObj';
@@ -8,7 +9,6 @@ import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import {
   createDocument,
-  getRandomInt,
   imageServer,
   rnd,
   setValue
