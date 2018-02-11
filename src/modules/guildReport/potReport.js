@@ -8,7 +8,7 @@ import isChecked from '../system/isChecked';
 import isSelected from '../system/isSelected';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
-import {testRange} from '../system/system';
+import testRange from '../system/testRange';
 
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
