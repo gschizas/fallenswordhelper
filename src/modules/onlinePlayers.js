@@ -2,6 +2,7 @@ import currentGuildId from './common/currentGuildId';
 import fallback from './system/fallback';
 import getForage from './ajax/getForage';
 import getValue from './system/getValue';
+import intValue from './system/intValue';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
 import {
@@ -11,7 +12,6 @@ import {
 } from './common/levelHighlight';
 import {
   createDocument,
-  intValue,
   setValue
 } from './system/system';
 import {defaults, now} from './support/dataObj';

@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {intValue} from '../system/system';
+import intValue from '../system/intValue';
 
 function statAsNumber(el) {
   if (el) {

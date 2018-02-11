@@ -1,17 +1,15 @@
 import add from './support/task';
 import addCommas from './system/addCommas';
 import calf from './support/calf';
+import {createDocument} from './system/system';
 import {createTFoot} from './common/cElement';
 import fallback from './system/fallback';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import insertElement from './common/insertElement';
+import intValue from './system/intValue';
 import {pCC} from './support/layout';
 import retryAjax from './ajax/retryAjax';
-import {
-  createDocument,
-  intValue
-} from './system/system';
 import {time, timeEnd} from './support/debug';
 
 var newSummary = {};

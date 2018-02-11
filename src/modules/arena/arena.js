@@ -1,7 +1,7 @@
 import {defaults} from '../support/dataObj';
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
-import {intValue} from '../system/system';
+import intValue from '../system/intValue';
 import isObject from '../common/isObject';
 import setForage from '../ajax/setForage';
 import {arenaFilter, dontPost, tableOpts} from './assets';

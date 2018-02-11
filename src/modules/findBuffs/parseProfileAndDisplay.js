@@ -1,10 +1,8 @@
+import {createDocument} from '../system/system';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import intValue from '../system/intValue';
 import {onlineDot} from '../common/colouredDots';
-import {
-  createDocument,
-  intValue
-} from '../system/system';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
 

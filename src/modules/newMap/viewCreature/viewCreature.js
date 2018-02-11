@@ -11,11 +11,11 @@ import evalExtraBuffs from './evalExtraBuffs';
 import evalHtml from './evalHtml';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import intValue from '../../system/intValue';
 import {playerDataString} from '../../common/common';
 import {
   createDocument,
   findNode,
-  intValue,
   setValue,
   xmlhttp
 } from '../../system/system';

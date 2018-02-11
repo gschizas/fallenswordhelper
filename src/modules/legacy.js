@@ -3,13 +3,13 @@ import calf from './support/calf';
 import {createDiv} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
+import intValue from './system/intValue';
 import {log} from './support/debug';
 import subscribes from './newMap/newMap';
 import {
   createDocument,
   findNode,
   imageServer,
-  intValue,
   setValue,
   xmlhttp
 } from './system/system';

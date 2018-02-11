@@ -1,4 +1,4 @@
-import {intValue} from '../system/system';
+import intValue from '../system/intValue';
 import {options} from './options';
 
 var lvlTests = [

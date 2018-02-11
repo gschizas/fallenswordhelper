@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {intValue} from '../system/system';
+import intValue from '../system/intValue';
 import padZ from '../system/padZ';
 import {months, now} from '../support/dataObj';
 
