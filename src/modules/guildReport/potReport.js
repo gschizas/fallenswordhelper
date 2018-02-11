@@ -5,9 +5,10 @@ import extend from '../common/extend';
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import isChecked from '../system/isChecked';
+import isSelected from '../system/isSelected';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
-import {isSelected, testRange} from '../system/system';
+import {testRange} from '../system/system';
 
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
