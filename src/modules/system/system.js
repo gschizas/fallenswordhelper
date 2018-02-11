@@ -1,5 +1,6 @@
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
+import outputFormat from './outputFormat';
 import retryAjax from '../ajax/retryAjax';
 import {months, nowSecs} from '../support/dataObj';
 
@@ -130,11 +131,6 @@ export function getCustomUrlParameter(sPageURL, sParam) {
 export function getUrlParameter(sParam) {
   var sPageURL = decodeURIComponent(window.location.search.substring(1));
   return getCustomUrlParameter(sPageURL, sParam);
-}
-
-export function outputFormat(value, suffix) {
-  if (value === 0) {return '';}
-  return value.toString() + suffix;
 }
 
 export function formatLastActivity(last_login) {
