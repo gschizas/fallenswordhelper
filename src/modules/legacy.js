@@ -1,6 +1,7 @@
 import addCommas from './system/addCommas';
 import calf from './support/calf';
 import {createDiv} from './common/cElement';
+import findNode from './system/findNode';
 import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
 import intValue from './system/intValue';
@@ -9,7 +10,6 @@ import retryAjax from './ajax/retryAjax';
 import subscribes from './newMap/newMap';
 import {
   createDocument,
-  findNode,
   imageServer,
   setValue
 } from './system/system';

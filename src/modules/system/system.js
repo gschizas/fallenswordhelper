@@ -1,5 +1,3 @@
-import findNodes from './findNodes';
-
 export var server = document.location.protocol + '//' +
   document.location.host + '/';
 export var imageServer = window.HCS && window.HCS.defines &&
@@ -8,12 +6,6 @@ export var imageServer = window.HCS && window.HCS.defines &&
 
 export function setValue(name, value) {
   GM_setValue(name, value);
-}
-
-export function findNode(xpath, doc) {
-  var nodes = findNodes(xpath, doc);
-  if (!nodes) {return null;}
-  return nodes[0];
 }
 
 export function createDocument(details) {

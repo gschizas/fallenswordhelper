@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../monstorLog';
@@ -7,13 +8,10 @@ import {jConfirm} from '../support/layout';
 import jQueryDialog from '../chrome/jQueryDialog';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';
+import {setValue} from '../system/system';
 import setupConfigData from './configData';
 import toggleVisibilty from '../common/toggleVisibilty';
 import {createBr, createSpan} from '../common/cElement';
-import {
-  findNode,
-  setValue
-} from '../system/system';
 
 function getVars() {
   calf.showBuffs = getValue('showHuntingBuffs');

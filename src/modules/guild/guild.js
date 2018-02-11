@@ -1,15 +1,13 @@
 import add from '../support/task';
 import {colouredDots} from '../common/colouredDots';
+import {createDocument} from '../system/system';
+import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
 import moreToDo from '../common/moreToDo';
 import retryAjax from '../ajax/retryAjax';
 import toggleVisibilty from '../common/toggleVisibilty';
-import {
-  createDocument,
-  findNode
-} from '../system/system';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 import {
   openQuickBuffByName,
