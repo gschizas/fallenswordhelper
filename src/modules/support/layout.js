@@ -20,11 +20,6 @@ export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
     '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
 }
 
-export function openQuickBuffById(aPlayerId) {
-  window.openWindow('index.php?cmd=quickbuff&tid=' + aPlayerId,
-    'fsQuickBuff', 618, 1000, ',scrollbars');
-}
-
 export function openQuickBuffByName(aPlayerName) {
   window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
     'fsQuickBuff', 618, 1000, ',scrollbars');
