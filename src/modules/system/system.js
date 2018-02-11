@@ -1,5 +1,4 @@
 import fallback from './fallback';
-import parseDateAsTimestamp from './parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
 
 export var server = document.location.protocol + '//' +
@@ -86,8 +85,4 @@ export function getIntFromRegExp(theText, rxSearch) {
 
 export function addCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-
-export function parseDate(textDate) {
-  return new Date(parseDateAsTimestamp(textDate));
 }
