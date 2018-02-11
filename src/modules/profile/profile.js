@@ -4,7 +4,7 @@ import ajaxifyProfileSections from './ajaxifyProfileSections';
 import {colouredDots} from '../common/colouredDots';
 import fallback from '../system/fallback';
 import fastDebuff from './debuff';
-import {getUrlParameter} from '../system/system';
+import getUrlParameter from '../system/getUrlParameter';
 import highlightPvpProtection from './highlightPvpProtection';
 import injectFastWear from './fastWear';
 import nekidBtn from './nekidBtn';

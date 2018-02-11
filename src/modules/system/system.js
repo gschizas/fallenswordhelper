@@ -1,5 +1,4 @@
 import fallback from './fallback';
-import getCustomUrlParameter from './getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
 import {months} from '../support/dataObj';
 import retryAjax from '../ajax/retryAjax';
@@ -110,9 +109,4 @@ export function toggleVisibilty(evt) {
   } else {
     setValue(anItemId, 'ON');
   }
-}
-
-export function getUrlParameter(sParam) {
-  var sPageURL = decodeURIComponent(window.location.search.substring(1));
-  return getCustomUrlParameter(sPageURL, sParam);
 }

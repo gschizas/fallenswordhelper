@@ -2,7 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import fallback from '../system/fallback';
-import {getUrlParameter} from '../system/system';
+import getUrlParameter from '../system/getUrlParameter';
 import isMessageSound from './isMessageSound';
 import lookForHcsData from './lookForHcsData';
 import pageSwitcher from './pageSwitcher';
