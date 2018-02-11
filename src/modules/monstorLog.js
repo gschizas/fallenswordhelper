@@ -5,7 +5,8 @@ import getForage from './ajax/getForage';
 import numberSort from './system/numberSort';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
-import {addCommas, imageServer, stringSort} from './system/system';
+import stringSort from './system/stringSort';
+import {addCommas, imageServer} from './system/system';
 
 var content;
 var monsterAry;

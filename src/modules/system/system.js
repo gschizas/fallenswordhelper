@@ -1,9 +1,6 @@
-import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
-import path from './path';
 import retryAjax from '../ajax/retryAjax';
-import sortDesc from './sortDesc';
 import {months, nowSecs} from '../support/dataObj';
 
 export var server = document.location.protocol + '//' +
@@ -150,13 +147,4 @@ export function formatLastActivity(last_login) {
   h %= 24;
   return outputFormat(d, ' days, ') + outputFormat(h, ' hours, ') +
     outputFormat(m, ' mins, ') + s + ' secs';
-}
-
-export function stringSort(a, b) {
-  var result = 0;
-  var _a = path(a, calf.sortBy, 'a');
-  var _b = path(b, calf.sortBy, 'a');
-  if (_a.toLowerCase() < _b.toLowerCase()) {result = -1;}
-  if (_a.toLowerCase() > _b.toLowerCase()) {result = 1;}
-  return sortDesc(result);
 }

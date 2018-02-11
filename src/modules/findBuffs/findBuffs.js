@@ -6,11 +6,11 @@ import {lastActivityRE} from '../support/dataObj';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
 import retryAjax from '../ajax/retryAjax';
+import stringSort from '../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
 import {
   createDocument,
   setValue,
-  stringSort,
   xmlhttp
 } from '../system/system';
 import {pCC, playerName} from '../support/layout';

@@ -3,7 +3,7 @@ import generateRecipeTable from './generateRecipeTable';
 import getForage from '../ajax/getForage';
 import numberSort from '../system/numberSort';
 import {pCC} from '../support/layout';
-import {stringSort} from '../system/system';
+import stringSort from '../system/stringSort';
 import {
   gotRecipeBook,
   output,
