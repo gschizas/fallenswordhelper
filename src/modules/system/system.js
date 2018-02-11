@@ -252,8 +252,3 @@ export function shouldBeArray(pref) {
   if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
   return [];
 }
-
-export function isChecked(pref) {
-  if (pref) {return ' checked';}
-  return '';
-}

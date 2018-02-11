@@ -1,5 +1,5 @@
 import getValue from '../system/getValue';
-import {isChecked} from '../system/system';
+import isChecked from '../system/isChecked';
 import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function injectSettingsGuildData(guildType) {

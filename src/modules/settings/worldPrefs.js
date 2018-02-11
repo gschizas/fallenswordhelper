@@ -1,12 +1,13 @@
 import calf from '../support/calf';
 import getValue from '../system/getValue';
+import isChecked from '../system/isChecked';
+import {isSelected} from '../system/system';
 import {
   helpLink,
   justCheckbox,
   justLabel,
   simpleCheckbox
 } from './simpleCheckbox';
-import {isChecked, isSelected} from '../system/system';
 
 function worldGroup() {
   // World Screen

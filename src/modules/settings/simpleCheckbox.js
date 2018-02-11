@@ -1,6 +1,6 @@
 import fallback from '../system/fallback';
 import getValue from '../system/getValue';
-import {isChecked} from '../system/system';
+import isChecked from '../system/isChecked';
 import mySimpleCheckboxes from './simple';
 import {networkIcon} from './settingObj';
 

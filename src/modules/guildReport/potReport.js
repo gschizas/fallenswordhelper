@@ -4,9 +4,10 @@ import eventHandler from '../common/eventHandler';
 import extend from '../common/extend';
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
+import isChecked from '../system/isChecked';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
-import {isChecked, isSelected, testRange} from '../system/system';
+import {isSelected, testRange} from '../system/system';
 
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
