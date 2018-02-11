@@ -2,7 +2,6 @@ import calf from '../support/calf';
 import fallback from './fallback';
 import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';
-import testRange from './testRange';
 import {months, nowSecs} from '../support/dataObj';
 
 export var server = document.location.protocol + '//' +
@@ -206,8 +205,4 @@ export function numberSort(a, b) {
   valueB = intFromString(valueB);
   var result = valueA - valueB;
   return sortDesc(result);
-}
-
-export function testQuant(aValue) {
-  return testRange(aValue, 0, 100);
 }

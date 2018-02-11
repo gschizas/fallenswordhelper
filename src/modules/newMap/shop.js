@@ -1,8 +1,9 @@
+import {addCommas} from '../system/system';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import retryAjax from '../ajax/retryAjax';
 import rnd from '../system/rnd';
-import {addCommas, testQuant} from '../system/system';
+import testQuant from '../system/testQuant';
 import {createButton, createDiv, createInput} from '../common/cElement';
 
 var shoppingData;
