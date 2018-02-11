@@ -4,7 +4,7 @@ import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
 import isObject from '../common/isObject';
 import {nowSecs} from '../support/dataObj';
-import {onlineDot} from '../support/colouredDots';
+import {onlineDot} from '../common/colouredDots';
 import {pCC} from '../support/layout';
 import {playerDataObject} from '../common/common';
 import {

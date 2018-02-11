@@ -1,5 +1,5 @@
 import add from '../support/task';
-import {colouredDots} from '../support/colouredDots';
+import {colouredDots} from '../common/colouredDots';
 import currentGuildId from '../common/currentGuildId';
 import {getUrlParameter} from '../system/system';
 import getValue from '../system/getValue';

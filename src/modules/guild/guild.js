@@ -1,5 +1,5 @@
 import add from '../support/task';
-import {colouredDots} from '../support/colouredDots';
+import {colouredDots} from '../common/colouredDots';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';

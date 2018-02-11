@@ -5,7 +5,7 @@ import getGroupStats from '../ajax/getGroupStats';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
 import {months} from '../support/dataObj';
-import {onlineDot} from '../support/colouredDots';
+import {onlineDot} from '../common/colouredDots';
 import retryAjax from '../ajax/retryAjax';
 import {
   findNode,

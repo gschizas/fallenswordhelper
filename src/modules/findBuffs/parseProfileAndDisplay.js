@@ -1,6 +1,6 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
-import {onlineDot} from '../support/colouredDots';
+import {onlineDot} from '../common/colouredDots';
 import {
   createDocument,
   intValue

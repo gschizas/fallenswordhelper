@@ -1,7 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import moreToDo from '../common/moreToDo';
-import {onlineDot} from '../support/colouredDots';
+import {onlineDot} from '../common/colouredDots';
 
 var headerCount;
 var headers;
