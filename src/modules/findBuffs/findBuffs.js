@@ -8,11 +8,7 @@ import parseProfileAndDisplay from './parseProfileAndDisplay';
 import retryAjax from '../ajax/retryAjax';
 import stringSort from '../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
-import {
-  createDocument,
-  setValue,
-  xmlhttp
-} from '../system/system';
+import {createDocument, setValue} from '../system/system';
 import {pCC, playerName} from '../support/layout';
 
 var characterName;
@@ -52,11 +48,6 @@ function findBuffsParsePlayersForBuffs() { // Legacy
       });
     });
   });
-  // for (var j = 0; j < onlinePlayers.length; j += 1) {
-  //   xmlhttp(onlinePlayers[j],
-  //     parseProfileAndDisplay,
-  //     {href: onlinePlayers[j]});
-  // }
 }
 
 function calcMinLvl() { // Legacy
@@ -102,8 +93,8 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
     bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
-    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=' + newPage,
-      findBuffsParseOnlinePlayers, {page: newPage});
+    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
+      newPage.toString()).done(findBuffsParseOnlinePlayers);
   } else {
     // all done so moving on
     findBuffsParsePlayersForBuffs();
@@ -115,8 +106,8 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   onlinePlayersSetting =
     parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
-    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=1',
-      findBuffsParseOnlinePlayers, {page: 1});
+    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
+      .done(findBuffsParseOnlinePlayers);
   } else {
     findBuffsParsePlayersForBuffs();
   }
@@ -171,7 +162,7 @@ function findBuffsParseProfilePageStart() { // Legacy
   profilePagesToSearchProcessed = 0;
   if (getElementById('alliesEnemies').checked) {
     profilePagesToSearch.forEach(function(el) {
-      xmlhttp(el, findBuffsParseProfilePage);
+      retryAjax(el).done(findBuffsParseProfilePage);
     });
   } else {
     findBuffsParseOnlinePlayersStart();
@@ -214,8 +205,8 @@ function findAnyStart(progMsg) {
   extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
-  xmlhttp('index.php?no_mobile=1&cmd=guild&subcmd=manage',
-    findBuffsParseGuildManagePage);
+  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=manage')
+    .done(findBuffsParseGuildManagePage);
 }
 
 function findBuffsStart() { // Legacy
