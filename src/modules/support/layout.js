@@ -1,6 +1,7 @@
 import createDocument from '../system/createDocument';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import openQuickBuffByName from '../common/openQuickBuffByName';
 import {places} from './dataObj';
 import setValue from '../system/setValue';
 import {
@@ -18,11 +19,6 @@ export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
   return 'href=\'javascript:window.openWindow("index.php?cmd=' +
     'quickbuff&tid=' + aPlayerId + passthru +
     '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
-}
-
-export function openQuickBuffByName(aPlayerName) {
-  window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
-    'fsQuickBuff', 618, 1000, ',scrollbars');
 }
 
 export function doBuffLinks(members) {

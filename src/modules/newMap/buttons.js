@@ -3,6 +3,8 @@ import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/dataObj';
+import openQuickBuffByName from '../common/openQuickBuffByName';
+import {playerName} from '../support/layout';
 import setValue from '../system/setValue';
 import {
   createButton,
@@ -11,7 +13,6 @@ import {
   createLabel,
   textSpan
 } from '../common/cElement';
-import {openQuickBuffByName, playerName} from '../support/layout';
 
 var buttonContainer;
 var yourLvl;

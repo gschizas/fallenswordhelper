@@ -6,14 +6,11 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
 import moreToDo from '../common/moreToDo';
+import openQuickBuffByName from '../common/openQuickBuffByName';
 import retryAjax from '../ajax/retryAjax';
 import toggleVisibilty from '../common/toggleVisibilty';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
-import {
-  openQuickBuffByName,
-  pCC,
-  playerName
-} from '../support/layout';
+import {pCC, playerName} from '../support/layout';
 
 var leftHandSideColumnTable;
 var members;
