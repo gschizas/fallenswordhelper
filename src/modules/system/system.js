@@ -3,6 +3,7 @@ import fallback from './fallback';
 import {getElementById} from '../common/getElement';
 import path from './path';
 import retryAjax from '../ajax/retryAjax';
+import sortDesc from './sortDesc';
 import {months, nowSecs} from '../support/dataObj';
 
 export var server = document.location.protocol + '//' +
@@ -149,11 +150,6 @@ export function formatLastActivity(last_login) {
   h %= 24;
   return outputFormat(d, ' days, ') + outputFormat(h, ' hours, ') +
     outputFormat(m, ' mins, ') + s + ' secs';
-}
-
-function sortDesc(result) {
-  if (calf.sortAsc) {return result;}
-  return -result;
 }
 
 export function stringSort(a, b) {
