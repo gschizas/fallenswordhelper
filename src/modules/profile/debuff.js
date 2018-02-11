@@ -1,6 +1,6 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import {jConfirm} from '../support/layout';
+import jConfirm from '../common/jConfirm';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
 

@@ -4,7 +4,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
-import {jConfirm} from '../support/layout';
+import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';

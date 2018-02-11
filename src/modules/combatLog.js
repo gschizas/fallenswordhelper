@@ -1,7 +1,8 @@
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
+import jConfirm from './common/jConfirm';
+import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
-import {jConfirm, pCC} from './support/layout';
 
 var content;
 var combatLog = [];

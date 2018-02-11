@@ -3,10 +3,11 @@ import eventHandler from './common/eventHandler';
 import {getElementById} from './common/getElement';
 import getInventory from './ajax/getInventory';
 import {imageServer} from './system/system';
+import jConfirm from './common/jConfirm';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
+import {pCC} from './support/layout';
 import useitem from './app/profile/useitem';
-import {jConfirm, pCC} from './support/layout';
 
 var extTbl;
 var playerId;

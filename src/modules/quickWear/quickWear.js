@@ -4,14 +4,15 @@ import equipItem from '../ajax/equipItem';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import jConfirm from '../common/jConfirm';
 import loadInventory from '../app/profile/loadInventory';
+import {pCC} from '../support/layout';
 import {sendEvent} from '../support/fshGa';
 import setValue from '../system/setValue';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 import toggleForce from '../common/toggleForce';
 import useItem from '../ajax/useItem';
-import {jConfirm, pCC} from '../support/layout';
 
 var disableQuickWearPrompts;
 var content;
