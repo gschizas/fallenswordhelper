@@ -1,12 +1,13 @@
 import {createTd} from './common/cElement';
 import doinvent from './app/inventing/doinvent';
 import fallback from './system/fallback';
+import findNodes from './system/findNodes';
 import {getElementById} from './common/getElement';
 import {guideUrl} from './support/dataObj';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import retryAjax from './ajax/retryAjax';
-import {findNode, findNodes, server} from './system/system';
+import {findNode, server} from './system/system';
 
 var itemRE = /<b>([^<]+)<\/b>/i;
 var plantFromComponentHash = {

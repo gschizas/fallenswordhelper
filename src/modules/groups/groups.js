@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import {doBuffLinks} from '../support/layout';
+import findNodes from '../system/findNodes';
 import {getElementById} from '../common/getElement';
 import getGroupStats from '../ajax/getGroupStats';
 import getMembrList from '../ajax/getMembrList';
@@ -7,11 +8,7 @@ import getValue from '../system/getValue';
 import {months} from '../support/dataObj';
 import {onlineDot} from '../common/colouredDots';
 import retryAjax from '../ajax/retryAjax';
-import {
-  findNode,
-  findNodes,
-  server
-} from '../system/system';
+import {findNode, server} from '../system/system';
 import {time, timeEnd} from '../support/debug';
 
 var maxGroupSizeToJoin;
