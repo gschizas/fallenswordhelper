@@ -3,7 +3,7 @@ import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import fallback from '../system/fallback';
-import {formatLastActivity} from '../system/system';
+import formatLastActivity from '../system/formatLastActivity';
 import {getElementById} from '../common/getElement';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';

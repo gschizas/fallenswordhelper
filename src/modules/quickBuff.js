@@ -1,10 +1,11 @@
+import {createDocument} from './system/system';
 import {createSpan} from './common/cElement';
 import fallback from './system/fallback';
+import formatLastActivity from './system/formatLastActivity';
 import {getElementById} from './common/getElement';
 import getProfile from './ajax/getProfile';
 import insertElementAfter from './common/insertElementAfter';
 import retryAjax from './ajax/retryAjax';
-import {createDocument, formatLastActivity} from './system/system';
 
 var retries = 0;
 var quickBuffHeader =
