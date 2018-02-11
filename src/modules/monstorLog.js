@@ -2,9 +2,10 @@ import calf from './support/calf';
 import doSortParams from './common/doSortParams';
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
+import numberSort from './system/numberSort';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
-import {addCommas, imageServer, numberSort, stringSort} from './system/system';
+import {addCommas, imageServer, stringSort} from './system/system';
 
 var content;
 var monsterAry;

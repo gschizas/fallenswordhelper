@@ -1,17 +1,15 @@
 import doSortParams from '../common/doSortParams';
 import generateRecipeTable from './generateRecipeTable';
 import getForage from '../ajax/getForage';
+import numberSort from '../system/numberSort';
 import {pCC} from '../support/layout';
+import {stringSort} from '../system/system';
 import {
   gotRecipeBook,
   output,
   parseInventingStart,
   recipebook
 } from './parseInventing';
-import {
-  numberSort,
-  stringSort
-} from '../system/system';
 
 function testSortType(evt) {
   var sortType = evt.target.getAttribute('sorttype');
