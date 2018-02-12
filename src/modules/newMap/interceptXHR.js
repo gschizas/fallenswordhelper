@@ -1,6 +1,7 @@
 import bitwiseAnd from '../common/bitwiseAnd';
 import calf from '../support/calf';
 import {def_fetch_worldRealmActions} from '../support/dataObj';
+import jsonParse from '../common/jsonParse';
 import setValue from '../system/setValue';
 
 export function toggleSubLvlCreature() {
@@ -9,9 +10,15 @@ export function toggleSubLvlCreature() {
   GameData.fetch(256);
 }
 
+var testActions = [
+  function(myData) {return !myData;},
+  function(myData) {return !myData.actions;},
+  function(myData) {return myData.actions.length === 0;}
+];
+
 function xhrDataFilter(data) {
-  var myData = JSON.parse(data);
-  if (!myData.actions || myData.actions.length === 0) {return data;}
+  var myData = jsonParse(data);
+  if (testActions.some(function(el) {return el();})) {return data;}
   var realm = GameData.realm();
   myData.actions = myData.actions.filter(function(el) {
     if (el.type === 6) {
