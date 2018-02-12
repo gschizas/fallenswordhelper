@@ -50,6 +50,7 @@ function yuuzhan(playername, avyImg) {
 }
 
 export default function injectProfile() { // Legacy
+  if (typeof $ !== 'function') {return;}
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
