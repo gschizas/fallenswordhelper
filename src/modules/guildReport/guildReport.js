@@ -7,6 +7,7 @@ import reportHeader from './reportHeader';
 import searchUser from './searchUser';
 
 export default function injectReportPaint() { // jQuery
+  if (typeof $ !== 'function') {return;}
   getMembrList(false).done(function() {
     add(3, reportHeader);
   });
