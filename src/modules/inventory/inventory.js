@@ -74,6 +74,7 @@ function syncInvMan() { // jQuery
 }
 
 export function injectInventoryManagerNew() {
+  if (typeof $ !== 'function') {return;}
   doSpinner();
   syncInvMan();
 }
