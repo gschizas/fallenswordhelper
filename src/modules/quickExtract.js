@@ -134,6 +134,7 @@ var extractEvents = [
 ];
 
 export default function insertQuickExtract(injector) { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   var content = injector || pCC;
   content.innerHTML = '<div class="qeHead"><b>Quick Extract</b></div>' +
     'Select which type of plants you wish to extract all of. Only ' +
