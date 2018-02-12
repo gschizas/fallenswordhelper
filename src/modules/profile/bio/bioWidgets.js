@@ -3,10 +3,10 @@ import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
-import isNaN from '../../common/isNaN';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
 import setValue from '../../system/setValue';
+import testQuant from '../../system/testQuant';
 import {createDiv, createInput} from '../../common/cElement';
 
 var bioEditLines;
@@ -66,16 +66,13 @@ function bioWords() {
   }
 }
 
-function badHeight(boxVal) {
-  return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
-}
-
 function changeHeight() {
-  var boxVal = parseInt(theBox.value, 10);
-  if (badHeight(boxVal)) {return;}
-  bioEditLines = boxVal;
-  setValue('bioEditLines', boxVal);
-  textArea.rows = bioEditLines;
+  var boxVal = testQuant(theBox.value);
+  if (boxVal) {
+    bioEditLines = boxVal;
+    setValue('bioEditLines', boxVal);
+    textArea.rows = bioEditLines;
+  }
 }
 
 function bioHeight() {
