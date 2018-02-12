@@ -26,8 +26,13 @@ function hasTextEntry() { // jQuery
   });
 }
 
+var tests = [
+  function() {return !getValue('enhanceChatTextEntry');},
+  function() {return !pCC;},
+  function() {return typeof $ !== 'function';}
+];
+
 export default function addChatTextArea() {
-  if (!getValue('enhanceChatTextEntry') ||
-      !pCC) {return;}
+  if (tests.some(function(el) {return el();})) {return;}
   hasTextEntry();
 }
