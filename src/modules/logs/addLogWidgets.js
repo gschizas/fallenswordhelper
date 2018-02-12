@@ -245,7 +245,8 @@ function addLogWidgetsOld() { // Legacy
   if (logTable) {foundLogTable(logTable);}
 }
 
-export default function addLogWidgets() { // jQuery
+export default function addLogWidgets() { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   $.when(
     getMembrList(false),
     myStats(false).done(function(data) {
