@@ -248,6 +248,7 @@ function inventory(data) {
 }
 
 export function injectStoreItems() {
+  if (typeof $ !== 'function') {return;}
   getInventoryById().done(inventory);
   add(3, getItems);
 }
