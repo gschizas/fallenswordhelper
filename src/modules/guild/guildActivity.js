@@ -52,7 +52,7 @@ var type2tests = [
   }
 ];
 
-function doMerge() {
+function doMerge() { // jQuery.min
   var newArchive = {lastUpdate: nowSecs, members: {}};
   guild.r.members.forEach(function(member) {
     initMember(member);
@@ -84,7 +84,7 @@ function gotGuild(data) {
   doMerge();
 }
 
-function gotActivity(data) {
+function gotActivity(data) { // jQuery.min
   if (data) {
     oldArchive = data;
   } else {
@@ -95,8 +95,8 @@ function gotActivity(data) {
   }
 }
 
-export default function guildActivity() {
-  if (getValue('enableGuildActivityTracker')) {
+export default function guildActivity() { // jQuery.min
+  if ($ && getValue('enableGuildActivityTracker')) {
     getForage('fsh_guildActivity').done(gotActivity);
   }
 }
