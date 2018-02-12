@@ -71,6 +71,7 @@ function buy() { // jQuery.min
 }
 
 export default function injectBazaar() { // TODO stop using getElementById
+  if (typeof $ !== 'function') {return;}
   var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = pCC.getElementsByTagName('A');
