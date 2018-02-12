@@ -12,7 +12,8 @@ function clearBuffLog() {
   setForage('fsh_buffLog', '').done(displayBuffLog);
 }
 
-export default function injectBuffLog(injector) {
+export default function injectBuffLog(injector) { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   var content = injector || pCC;
   content.innerHTML = makePageTemplate({
     title: 'Buff Log',
