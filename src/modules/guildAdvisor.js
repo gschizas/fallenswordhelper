@@ -243,6 +243,7 @@ function injectAdvisorWeekly() { // jQuery
 }
 
 export default function injectAdvisor() {
+  if (typeof $ !== 'function') {return;}
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
