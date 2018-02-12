@@ -28,5 +28,6 @@ function parseProfile(data) {
 }
 
 export default function injectRPUpgrades() { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   myStats().done(parseProfile);
 }
