@@ -12,6 +12,7 @@ import {
 import {pCC, quickBuffHref} from './support/layout';
 
 export function injectFindPlayer() { // Bad jQuery
+  if (typeof $ !== 'function') {return;}
   calculateBoundaries();
   var findPlayerButton = $('input[value="Find Player"]');
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
@@ -33,6 +34,7 @@ export function injectFindPlayer() { // Bad jQuery
 }
 
 export function injectNotepad() { // jQuery
+  if (typeof $ !== 'function') {return;}
   $('#notepad_notes')
     .attr('cols', '90')
     .attr('rows', '30')
