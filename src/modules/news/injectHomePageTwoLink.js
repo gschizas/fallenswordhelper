@@ -45,7 +45,7 @@ function newsEvt(evt) {
 
 function fixCollapse() {
   var newsCol = document.getElementsByClassName('news_left_column');
-  if (newsCol.length !== 1) {return;}
+  if (!$ || newsCol.length !== 1) {return;}
   newsCol[0].addEventListener('click', newsEvt, true);
 }
 
