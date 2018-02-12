@@ -5,6 +5,7 @@ import {pCC} from '../support/layout';
 import setValue from '../system/setValue';
 
 export default function injectSaveSettings() { // Hybrid
+  if (typeof $ !== 'function') {return;}
   var content = pCC;
   var fshSettings = {};
   var list = GM_listValues();
