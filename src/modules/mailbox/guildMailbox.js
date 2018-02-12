@@ -23,7 +23,7 @@ function takeResult(self, data) {
   }
 }
 
-function guildMailboxEvent(e) {
+function guildMailboxEvent(e) { // jQuery.min
   var self = e.target;
   if (self.tagName === 'IMG') {
     e.preventDefault();
@@ -37,6 +37,7 @@ function guildMailboxEvent(e) {
 }
 
 export default function guildMailbox() {
+  if (typeof $ !== 'function') {return;}
   pCC.addEventListener('click', guildMailboxEvent);
   document.querySelector('#pCC td[height="25"]')
     .insertAdjacentHTML('beforeend',
