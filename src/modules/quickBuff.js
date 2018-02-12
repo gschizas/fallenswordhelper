@@ -234,6 +234,7 @@ function getSustain(responseText) {
 }
 
 export default function injectQuickBuff() { // jQuery
+  if (typeof $ !== 'function') {return;}
   var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
   quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
