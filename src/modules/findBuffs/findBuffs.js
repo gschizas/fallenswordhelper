@@ -193,7 +193,8 @@ function findBuffsClearResults() { // Legacy
   getElementById('buffersProcessed').innerHTML = 0;
 }
 
-function findAnyStart(progMsg) {
+function findAnyStart(progMsg) { // jQuery.min // jQuery
+  if (typeof $ !== 'function') {return;}
   characterName = playerName();
   getElementById('buffNicks').innerHTML = findBuffNicks;
   bufferProgress = getElementById('bufferProgress');
