@@ -59,7 +59,7 @@ function gotConflictInfo(responseText, callback) { // Legacy
   }
 }
 
-function conflictInfo() { // jQuery
+function conflictInfo() { // jQuery.min
   retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
     .done(function(data) {
       gotConflictInfo(data,
@@ -158,6 +158,7 @@ export default function injectGuild() {
   add(3, structureToggle);
   add(3, buffLinks);
   add(3, selfRecallLink);
+  if (typeof $ !== 'function') {return;}
   // Detailed conflict information
   if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo);
