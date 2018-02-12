@@ -127,7 +127,7 @@ function composeAlert() {
 }
 
 export function injectComposeAlert() {
-  if (calf.cmd !== 'composing') {composeAlert();}
+  if ($ && calf.cmd !== 'composing') {composeAlert();}
 }
 
 function moveButtons() {
