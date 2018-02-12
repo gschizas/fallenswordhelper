@@ -30,12 +30,7 @@ function cancelAllAH() { // jQuery
   });
 }
 
-export function injectAuctionHouse() {
-  if (!pCC) {return;}
-  if (getValue('autoFillMinBidPrice')) {
-    getElementById('auto-fill').checked = true;
-  }
-  getElementById('sort0').click();
+function makeCancelAll() {
   var cancelAll = createSpan({
     className: 'smallLink',
     textContent: 'Cancel All'
@@ -47,6 +42,19 @@ export function injectAuctionHouse() {
   afterBegin(fill, cancelAll);
   fill.insertAdjacentHTML('afterbegin', '[');
   cancelAll.addEventListener('click', cancelAllAH);
+}
+
+function autoFill() {
+  if (getValue('autoFillMinBidPrice')) {
+    getElementById('auto-fill').checked = true;
+  }
+}
+
+export function injectAuctionHouse() {
+  if (typeof $ !== 'function' || !pCC) {return;}
+  makeCancelAll();
+  autoFill();
+  getElementById('sort0').click();
 }
 
 export function quickCreate() {
