@@ -124,12 +124,16 @@ function appLink(o, bank) { // jQuery
   captureButtons(o, depo, withdraw);
 }
 
-function ajaxifyBank() { // jQuery
+function hasJquery() { // jQuery
   var o = bankSettings;
   var bank = $('#pCC b');
   if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
     appLink(o, bank);
   }
+}
+
+function ajaxifyBank() {
+  if (typeof $ === 'function') {hasJquery();}
 }
 
 export function injectGuildBank() {
