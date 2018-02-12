@@ -169,7 +169,7 @@ function getRanks(membrList) {
 }
 
 export default function injectGuildRanks() { // jQuery.min
-  if (!$) {return;}
+  if (typeof $ !== 'function') {return;}
   getMembrList(true).done(function(membrList) {
     add(3, getRanks, [membrList]);
   });
