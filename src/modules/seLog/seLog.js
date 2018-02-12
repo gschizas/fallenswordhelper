@@ -19,7 +19,7 @@ export function disableBackgroundChecks() {
   }
 }
 
-function gotSe(data) {
+function gotSe(data) { // jQuery.min
   var serverTime = Number(data.t.split(' ')[1]);
   if (!oldLog) {oldLog = {lastUpdate: 0, se: {}};}
   oldLog.lastUpdate = serverTime;
@@ -34,7 +34,7 @@ function gotSe(data) {
   setForage('fsh_seLog', oldLog);
 }
 
-function getSeLog() {
+function getSeLog() { // jQuery.min
   return superelite().done(gotSe);
 }
 
@@ -62,12 +62,16 @@ function gotLog(data) {
   if (data) {oldLog = data;}
 }
 
-export function getFshSeLog() {
+export function getFshSeLog() { // jQuery.min
   return getForage('fsh_seLog').done(gotLog);
 }
 
-export function seLog() {
-  if (calf.enableSeTracker && calf.cmd !== 'superelite') {
+function shouldLog() {
+  return $ && calf.enableSeTracker && calf.cmd !== 'superelite';
+}
+
+export function seLog() { // jQuery.min
+  if (shouldLog()) {
     getFshSeLog().done(setupBackgroundCheck);
   }
 }
