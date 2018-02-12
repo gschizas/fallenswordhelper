@@ -57,7 +57,7 @@ var functionLookup = {
 function callHelperFunction(evt) {
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
-  if (typeof fn === 'function') {
+  if ($ && typeof fn === 'function') {
     sendEvent('helperMenu', functionPath);
     jQueryDialog(fn);
   }
