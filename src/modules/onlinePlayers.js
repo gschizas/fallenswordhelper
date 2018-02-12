@@ -218,6 +218,7 @@ function injectOnlinePlayersNew() { // jQuery
 }
 
 export default function injectOnlinePlayers(content) { // jQuery
+  if (typeof $ !== 'function') {return;}
   if (content) {
     context = $(content);
   } else {
