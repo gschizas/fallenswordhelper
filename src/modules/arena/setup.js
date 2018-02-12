@@ -80,6 +80,7 @@ function selectMoves(evt) { // jQuery
 }
 
 export default function setupMoves() { // jQuery
+  if (typeof $ !== 'function') {return;}
   var node = $('#pCC b:contains("Setup Combat Moves")');
   if (node.length !== 1) {return;}
   node.addClass('fshLink fshGreen');
