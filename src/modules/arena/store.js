@@ -18,5 +18,6 @@ function gotMoves(_arena) { // jQuery
 }
 
 export default function storeMoves() { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   getForage('fsh_arena').done(gotMoves);
 }
