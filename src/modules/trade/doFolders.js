@@ -111,7 +111,8 @@ function processTrade(data) {
 
 }
 
-export default function doFolders() { // jQuery.min
+export default function doFolders() { // jQuery.min // jQuery
+  if (typeof $ !== 'function') {return;}
   getInventoryById().done(function(data) {
     add(3, processTrade, [data]);
   });
