@@ -132,7 +132,7 @@ function navDataExists(theNav, myNav) {
   }
 }
 
-function navExists(theNav) {
+function navExists(theNav) { // jQuery
   var myNav = $(theNav).data('nav');
   if (typeof myNav === 'object') {
     navDataExists(theNav, myNav);
@@ -141,7 +141,7 @@ function navExists(theNav) {
   }
 }
 
-function adjustHeight() { // jQuery
+function adjustHeight() {
   // adjust the menu height for the newly added items
   var theNav = getElementById('nav');
   if (theNav instanceof Element) {
@@ -152,7 +152,7 @@ function adjustHeight() { // jQuery
 }
 
 export default function injectMenu() {
-  if (!getElementById('pCL')) {return;}
+  if (!getElementById('pCL') || !$) {return;}
   guildId = currentGuildId();
   updateQuestLink();
   // character
