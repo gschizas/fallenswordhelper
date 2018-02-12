@@ -39,7 +39,8 @@ export function injectNotepad() { // jQuery
     .css('resize', 'none');
 }
 
-export function injectFsBoxContent(injector) { // jQuery
+export function injectFsBoxContent(injector) { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   var content = injector || pCC;
   content.innerHTML = makePageTemplate({
     title: 'FS Box Log',
