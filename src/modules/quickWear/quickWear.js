@@ -129,10 +129,14 @@ function showQuickWear(appInv) {
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 
-export default function insertQuickWear(injector) {
+function hasJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
   content.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
+}
+
+export default function insertQuickWear(injector) {
+  if (typeof $ !== 'function') {hasJquery(injector);}
 }
