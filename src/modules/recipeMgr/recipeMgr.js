@@ -43,6 +43,7 @@ function rmEvtHdl(evt) {
 }
 
 export default function injectRecipeManager(injector) { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   var content = injector || pCC;
   getForage('fsh_recipeBook').done(gotRecipeBook.bind(null, content));
   content.addEventListener('click', rmEvtHdl);
