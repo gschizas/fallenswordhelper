@@ -124,6 +124,7 @@ function gotOldTitans(oldTitans) {
   setForage('fsh_titans', newTitans); // Pref
 }
 
-export default function injectScouttower() {
+export default function injectScouttower() { // jQuery.min
+  if (typeof $ !== 'function') {return;}
   getForage('fsh_titans').done(gotOldTitans); // Pref
 }
