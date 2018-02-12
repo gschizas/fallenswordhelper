@@ -59,6 +59,7 @@ function resetList(e) {
 }
 
 export function prepareBountyData() {
+  if (!$) {return;}
   createDivs();
   bountyListDiv.addEventListener('click', resetList);
   wantedListDiv.addEventListener('click', resetList);
