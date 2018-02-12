@@ -18,6 +18,7 @@ function parseMercStats(mercStats) {
 }
 
 export default function injectGroupStats() { // jQuery
+  if (typeof $ !== 'function') {return;}
   groupStats = groupViewStats(document);
   if (groupStats.attackElement) {
     getMercStats().done(parseMercStats);
