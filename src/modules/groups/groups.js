@@ -195,6 +195,7 @@ function doGroupPaint(m) { // jQuery
 }
 
 export default function injectGroups() { // jQuery
+  if (typeof $ !== 'function') {return;}
   getMembrList(false)
     .done(doGroupPaint);
   displayMinGroupLevel();
