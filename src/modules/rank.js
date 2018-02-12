@@ -96,17 +96,21 @@ function ajaxifyRankControls(evt) {
 
 function doButtons() {
   // gather rank info button
-  var weightButton = createInput({
-    id: 'getrankweightings',
-    className: 'custombutton',
-    type: 'button',
-    value: 'Get Rank Weightings'
-  });
-  weightButton.addEventListener('click', fetchRankData);
-  var theTd = getElementById('show-guild-founder-rank-name')
-    .parentNode;
-  theTd.insertAdjacentHTML('beforeend', '&nbsp;');
-  insertElement(theTd, weightButton);
+  var founder = getElementById('show-guild-founder-rank-name');
+  if (founder) {
+    var weightButton = createInput({
+      id: 'getrankweightings',
+      className: 'custombutton',
+      type: 'button',
+      value: 'Get Rank Weightings'
+    });
+    weightButton.addEventListener('click', fetchRankData);
+    var theTd = founder.parentNode;
+    theTd.insertAdjacentHTML('beforeend', '&nbsp;');
+    insertElement(theTd, weightButton);
+  }
+  // var theTd = getElementById('show-guild-founder-rank-name') // TODO why wouldn't you be able to see this?
+  //   .parentNode;
 
   if (getValue('ajaxifyRankControls')) {
     pCC.addEventListener('click',
@@ -140,6 +144,13 @@ function paintRanks() {
   }
 }
 
+function findTheRows() {
+  var outerTable = pCC.lastElementChild.previousElementSibling;
+  if (outerTable.rows && outerTable.rows.length > 13) {
+    return outerTable.rows[13].firstElementChild.firstElementChild.rows;
+  }
+}
+
 function getRanks(membrList) {
   ranks = Object.keys(membrList).reduce(function(prev, curr) {
     if (curr !== 'lastUpdate') {
@@ -150,13 +161,15 @@ function getRanks(membrList) {
     return prev;
   }, {});
   myRank = membrList[playerName()].rank_name;
-  theRows = pCC.lastElementChild.previousElementSibling.rows[13]
-    .firstElementChild.firstElementChild.rows;
-  rankCount = 1;
-  add(3, paintRanks);
+  theRows = findTheRows();
+  if (theRows) {
+    rankCount = 1;
+    add(3, paintRanks);
+  }
 }
 
 export default function injectGuildRanks() { // jQuery.min
+  if (!$) {return;}
   getMembrList(true).done(function(membrList) {
     add(3, getRanks, [membrList]);
   });
