@@ -20,9 +20,7 @@ function storeFSBox(_boxList) {
   setForage('fsh_fsboxcontent', boxList);
 }
 
-export default function injectFSBoxLog() {
-  var node = getElementById('minibox-fsbox');
-  if (!node) {return;}
+function fSBoxExists(node) { // jQuery.min
   var nodediv = node.lastElementChild;
   var playerName = nodediv.getElementsByTagName('a');
   if (playerName.length === 0) {return;}
@@ -41,4 +39,9 @@ export default function injectFSBoxLog() {
     jQueryDialog(injectFsBoxContent);
   });
   nodediv.appendChild(log);
+}
+
+export default function injectFSBoxLog() {
+  var node = getElementById('minibox-fsbox');
+  if ($ && node) {fSBoxExists(node);}
 }
