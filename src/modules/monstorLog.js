@@ -60,7 +60,7 @@ function sortCol(target) {
   drawMobs();
 }
 
-function doHandlers(evt) {
+function doHandlers(evt) { // jQuery.min
   var target = evt.target;
   if (target.id === 'clearEntityLog') {
     setForage('fsh_monsterLog', '');
@@ -142,8 +142,12 @@ function prepAry(data) {
   drawMobs();
 }
 
-export default function injectMonsterLog(injector) {
+function haveJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
   getForage('fsh_monsterLog').done(prepAry);
+}
+
+export default function injectMonsterLog(injector) {
+  if (typeof $ === 'function') {haveJquery(injector);}
 }
