@@ -1,10 +1,12 @@
+import createDocument from './system/createDocument';
 import {createSpan} from './common/cElement';
 import fallback from './system/fallback';
+import formatLastActivity from './system/formatLastActivity';
 import {getElementById} from './common/getElement';
 import getProfile from './ajax/getProfile';
 import insertElementAfter from './common/insertElementAfter';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import retryAjax from './ajax/retryAjax';
-import {createDocument, formatLastActivity} from './system/system';
 
 var retries = 0;
 var quickBuffHeader =
@@ -233,6 +235,7 @@ function getSustain(responseText) {
 }
 
 export default function injectQuickBuff() { // jQuery
+  if (jQueryNotPresent()) {return;}
   var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
   quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',

@@ -1,8 +1,9 @@
 import calf from '../support/calf';
 import formatUtcDateTime from '../common/formatUtcDateTime';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
-import {setValue} from '../system/system';
-import {simpleCheckboxHtml} from '../settings/settingsPage';
+import setValue from '../system/setValue';
+import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 import {createTBody, createTable} from '../common/cElement';
 import {
   disableBackgroundChecks,
@@ -81,6 +82,7 @@ function waitForLog() {
 }
 
 export default function superelite() {
+  if (jQueryNotPresent) {return;}
   var newCell = insertNewRow();
   newCell.height = 20;
   newCell = insertNewRow();

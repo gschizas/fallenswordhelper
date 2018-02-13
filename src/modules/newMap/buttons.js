@@ -2,8 +2,10 @@ import calf from '../support/calf';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import {guideUrl} from '../support/dataObj';
-import {setValue} from '../system/system';
+import {guideUrl} from '../support/constants';
+import openQuickBuffByName from '../common/openQuickBuffByName';
+import playerName from '../common/playerName';
+import setValue from '../system/setValue';
 import {
   createButton,
   createDiv,
@@ -11,7 +13,6 @@ import {
   createLabel,
   textSpan
 } from '../common/cElement';
-import {openQuickBuffByName, playerName} from '../support/layout';
 
 var buttonContainer;
 var yourLvl;

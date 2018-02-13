@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import {wantedArray, wantedList} from './retrieveBountyInfo';
+import {wantedArray, wantedList} from './lists';
 
 var thisBounty;
 

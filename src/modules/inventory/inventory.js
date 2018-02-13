@@ -2,27 +2,21 @@ import add from '../support/task';
 import calf from '../support/calf';
 import clearButton from './clearButton';
 import decorate from './decorate';
-import {defaultOptions} from './assets';
 import doTable from './table';
 import eventHandlers from './eventHandlers/eventHandlers';
-import extend from '../common/extend';
-import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import getInventory from '../ajax/getInventory';
 import getMembrList from '../ajax/getMembrList';
-import getValue from '../system/getValue';
 import headers from './headers';
 import {imageServer} from '../system/system';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
+import {extendOptions, storeTheInv} from './options';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
 /* jshint latedef: nofunc */
-export var options;
-export var showQuickDropLinks;
-export var showQuickSendLinks;
-export var theInv;
 
 function doSpinner() { // jQuery
   $('#pCC').html('<span id="fshInvMan"><img src = "' +
@@ -42,18 +36,9 @@ function rekeyMembrList() {
     }, {});
 }
 
-function refresh() {
-  doSpinner();
-  // eslint-disable-next-line no-use-before-define
-  syncInvMan();
-}
-
 function getInvMan() {
 
   time('inventory.getInvMan');
-
-  showQuickDropLinks = getValue('showQuickDropLinks');
-  showQuickSendLinks = getValue('showQuickSendLinks');
 
   if (calf.membrList) {rekeyMembrList();}
 
@@ -67,22 +52,17 @@ function getInvMan() {
   setLvls();
   doTable();
   eventHandlers();
+  // eslint-disable-next-line no-use-before-define
+  $('#fshRefresh').click(injectInventoryManagerNew);
   clearButton();
 
   timeEnd('inventory.getInvMan');
 
 }
 
-function extendOptions(data) {
-  options = extend({}, defaultOptions);
-  extend(options, fallback(data, {}));
-}
-
 function syncInvMan() { // jQuery
   var prm = [];
-  prm.push(getInventory().done(function(data) {
-    theInv = data;
-  }));
+  prm.push(getInventory().done(storeTheInv));
   if (calf.subcmd === 'guildinvmgr') {
     prm.push(getMembrList(false));
   }
@@ -94,4 +74,8 @@ function syncInvMan() { // jQuery
   });
 }
 
-export {refresh as injectInventoryManagerNew};
+export function injectInventoryManagerNew() {
+  if (jQueryNotPresent()) {return;}
+  doSpinner();
+  syncInvMan();
+}

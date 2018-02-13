@@ -1,5 +1,12 @@
 import {getElementById} from '../common/getElement';
-import {intValue} from '../system/system';
+import intValue from '../system/intValue';
+
+function statAsNumber(el) {
+  if (el) {
+    return intValue(el.textContent);
+  }
+  return 0;
+}
 
 export default function groupViewStats(doc) {
   var attackElement = getElementById('stat-attack', doc);
@@ -8,15 +15,15 @@ export default function groupViewStats(doc) {
   var damageElement = getElementById('stat-damage', doc);
   var hpElement = getElementById('stat-hp', doc);
   return {
-    attack: intValue(attackElement.textContent),
+    attack: statAsNumber(attackElement),
     attackElement: attackElement,
-    defense: intValue(defenseElement.textContent),
+    defense: statAsNumber(defenseElement),
     defenseElement: defenseElement,
-    armor: intValue(armorElement.textContent),
+    armor: statAsNumber(armorElement),
     armorElement: armorElement,
-    damage: intValue(damageElement.textContent),
+    damage: statAsNumber(damageElement),
     damageElement: damageElement,
-    hp: intValue(hpElement.textContent),
+    hp: statAsNumber(hpElement),
     hpElement: hpElement
   };
 }

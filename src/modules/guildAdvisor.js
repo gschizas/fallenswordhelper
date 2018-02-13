@@ -1,17 +1,16 @@
 import add from './support/task';
+import addCommas from './system/addCommas';
 import calf from './support/calf';
+import createDocument from './system/createDocument';
 import {createTFoot} from './common/cElement';
 import fallback from './system/fallback';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import insertElement from './common/insertElement';
+import intValue from './system/intValue';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import {pCC} from './support/layout';
 import retryAjax from './ajax/retryAjax';
-import {
-  addCommas,
-  createDocument,
-  intValue
-} from './system/system';
 import {time, timeEnd} from './support/debug';
 
 var newSummary = {};
@@ -245,6 +244,7 @@ function injectAdvisorWeekly() { // jQuery
 }
 
 export default function injectAdvisor() {
+  if (jQueryNotPresent()) {return;}
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {

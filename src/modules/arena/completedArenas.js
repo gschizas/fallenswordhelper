@@ -1,11 +1,12 @@
 import {dontPost} from './assets';
+import jQueryPresent from '../common/jQueryPresent';
 
 function gotoPage(pageId) {
   window.location = 'index.php?cmd=arena&subcmd=completed&page=' +
     pageId;
 }
 
-export default function completedArenas() { // jQuery
+function overrideButtons() {
   var prevButton = $('#pCC input[value="<"]');
   var nextButton = $('#pCC input[value=">"]');
   if (prevButton.length === 1) {
@@ -21,4 +22,8 @@ export default function completedArenas() { // jQuery
     finishButton.click(function() {gotoPage(lastPage);});
   }
   $('#pCC input[value="View"]').click(dontPost);
+}
+
+export default function completedArenas() { // jQuery
+  if (jQueryPresent()) {overrideButtons();}
 }

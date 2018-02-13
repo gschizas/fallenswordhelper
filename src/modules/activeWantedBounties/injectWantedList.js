@@ -1,14 +1,10 @@
-import calf from '../support/calf';
 import insertElement from '../common/insertElement';
 import setValueJSON from '../system/setValueJSON';
-import {wantedListDiv} from './activeWantedBounties';
+import {wantedList} from './lists';
+import {wantedListDiv} from './createDivs';
 import {createDiv, createSpan} from '../common/cElement';
-import {retrieveBountyInfo, wantedList} from './retrieveBountyInfo';
 
-function resetWantedList() {
-  setValueJSON('wantedList', null);
-  retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
-}
+export var wantedListReset;
 
 function makeMouseOver(el) {
   return 'Target Level:  ' + el.lvl +
@@ -27,15 +23,14 @@ function acceptBtn(bounty) {
   return '';
 }
 
-export default function injectWantedList() { // Legacy
+export function injectWantedList() { // Legacy
   setValueJSON('wantedList', wantedList);
 
   wantedListDiv.innerHTML = '';
 
   var heading = createDiv({textContent: 'Wanted Bounties '});
-  var reset = createSpan({className: 'xxsLink', textContent: 'Reset'});
-  reset.addEventListener('click', resetWantedList);
-  insertElement(heading, reset);
+  wantedListReset = createSpan({className: 'xxsLink', textContent: 'Reset'});
+  insertElement(heading, wantedListReset);
   insertElement(wantedListDiv, heading);
 
   var output = '';

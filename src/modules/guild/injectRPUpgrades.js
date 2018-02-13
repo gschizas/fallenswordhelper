@@ -1,3 +1,4 @@
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import {pCC} from '../support/layout';
 import reduceBuffArray from '../common/reduceBuffArray';
@@ -28,5 +29,6 @@ function parseProfile(data) {
 }
 
 export default function injectRPUpgrades() { // jQuery.min
+  if (jQueryNotPresent()) {return;}
   myStats().done(parseProfile);
 }

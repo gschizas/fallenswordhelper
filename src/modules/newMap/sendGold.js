@@ -1,7 +1,7 @@
 import getValue from '../system/getValue';
-import {infoBox} from '../support/layout';
+import infoBox from '../common/infoBox';
 import retryAjax from '../ajax/retryAjax';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 export function doSendGold() { // jQuery
   retryAjax({

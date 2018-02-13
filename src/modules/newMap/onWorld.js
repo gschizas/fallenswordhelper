@@ -1,11 +1,11 @@
 import calf from '../support/calf';
 import {colorHash} from './assets';
 import {getElementById} from '../common/getElement';
-import titanStats from './titanStats/titanStats';
+import {titanStats} from './titanStats/titanStats';
 import {
   def_playerBuffs,
   def_suffixSuccessActionResponse
-} from '../support/dataObj';
+} from '../support/constants';
 import {injectButtons, levelStats} from './buttons';
 import {injectSendGoldOnWorld, updateSendGoldOnWorld} from './sendGold';
 

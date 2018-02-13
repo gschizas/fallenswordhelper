@@ -1,7 +1,9 @@
 import {closestTable} from '../common/closest';
 import dialog from '../ajax/dialog';
+import infoBox from '../common/infoBox';
+import jQueryNotPresent from '../common/jQueryNotPresent';
+import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
-import {infoBox, pCC} from '../support/layout';
 
 function translateReturnInfo(data) {
   var info = infoBox(data);
@@ -23,7 +25,7 @@ function takeResult(self, data) {
   }
 }
 
-function guildMailboxEvent(e) {
+function guildMailboxEvent(e) { // jQuery.min
   var self = e.target;
   if (self.tagName === 'IMG') {
     e.preventDefault();
@@ -37,6 +39,7 @@ function guildMailboxEvent(e) {
 }
 
 export default function guildMailbox() {
+  if (jQueryNotPresent()) {return;}
   pCC.addEventListener('click', guildMailboxEvent);
   document.querySelector('#pCC td[height="25"]')
     .insertAdjacentHTML('beforeend',

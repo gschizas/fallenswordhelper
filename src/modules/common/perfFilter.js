@@ -1,6 +1,7 @@
 import {createDiv} from './cElement';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
+import jQueryNotPresent from './jQueryNotPresent';
 import {pCC} from '../support/layout';
 
 var inv;
@@ -26,6 +27,7 @@ function drawFilters(data) {
 }
 
 export default function perfFilter(loc) { // jQuery.min
+  if (jQueryNotPresent()) {return;}
   target = loc;
   getInventoryById().done(drawFilters);
 }

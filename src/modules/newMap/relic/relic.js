@@ -1,8 +1,9 @@
-import {createDocument} from '../../system/system';
-import {def_suffixSuccessActionResponse} from '../../support/dataObj';
+import createDocument from '../../system/createDocument';
+import {def_suffixSuccessActionResponse} from '../../support/constants';
 import getGroupStats from '../../ajax/getGroupStats';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';
+import {parseGuild} from './parseGuild';
 import retryAjax from '../../ajax/retryAjax';
 import {
   doCalculations,
@@ -13,16 +14,16 @@ import {
   storeMercStats
 } from './calcs';
 import {
-  lDPercentageElement,
+  fetchStatsBtn,
+  myDefenders,
+  primaryElementsSetup
+} from './primaryElements';
+import {
   prepareSecondaryDivs,
-  processingStatus,
-  relicCountElement,
+  processingStatus
 } from './secondaryElements';
-import {myDefenders, primaryElementsSetup} from './primaryElements';
 
 var relicData;
-export var player;
-export var relicMultiplier;
 
 function ajaxFailure(jqXHR) {
   processingStatus.textContent = jqXHR.status.toString() + ' ' +
@@ -39,20 +40,6 @@ function getGuild() {
       guild_id: relicData.controlled_by.guild_id
     }
   });
-}
-
-function calcRelicMultiplier(rels) {
-  if (rels === 1) {return 1.5;}
-  return Math.round((1 - rels / 10) * 100) / 100;
-}
-
-function parseGuild(html) {
-  var doc = createDocument(html);
-  var nodeList = doc.querySelectorAll('#pCC img[src*="/relics/"]');
-  var relicCount = nodeList.length;
-  relicCountElement.textContent = relicCount.toString();
-  relicMultiplier = calcRelicMultiplier(relicCount);
-  lDPercentageElement.textContent = (relicMultiplier * 100).toString() + '%';
 }
 
 function getGroups() {
@@ -82,10 +69,9 @@ function parseGroups(html) {
 export function getStats() {
   prepareSecondaryDivs(relicData);
   resetCounters();
-  player = GameData.player();
   var prm = [];
   prm.push(getGuild().done(parseGuild));
-  if (player.hasGroup) {
+  if (GameData.player().hasGroup) {
     prm.push(getGroups().pipe(parseGroups));
   }
   for (var i = 1; i < myDefenders.length; i += 1) {
@@ -98,7 +84,10 @@ export function getStats() {
 
 function viewRelic(e, data) {
   relicData = data.response.data;
-  if (relicData.defenders.length > 0) {primaryElementsSetup(relicData);}
+  if (relicData.defenders.length > 0) {
+    primaryElementsSetup(relicData);
+    fetchStatsBtn.addEventListener('click', getStats);
+  }
 }
 
 export default function injectRelic() {

@@ -1,4 +1,4 @@
-import {theInv} from './inventory';
+import {theInv} from './options';
 
 export default function decorate() {
   if (theInv.folders) {

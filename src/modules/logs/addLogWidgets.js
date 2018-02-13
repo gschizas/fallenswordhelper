@@ -1,12 +1,13 @@
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
 import fallback from '../system/fallback';
-import {findNode} from '../system/system';
+import findNode from '../system/findNode';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
-import {quickBuffHref} from '../support/layout';
+import quickBuffHref from '../common/quickBuffHref';
 import {addPvpSummary, initCache} from './addPvpSummary';
 
 var myPlayer = {};
@@ -245,7 +246,8 @@ function addLogWidgetsOld() { // Legacy
   if (logTable) {foundLogTable(logTable);}
 }
 
-export default function addLogWidgets() { // jQuery
+export default function addLogWidgets() { // jQuery.min
+  if (jQueryNotPresent()) {return;}
   $.when(
     getMembrList(false),
     myStats(false).done(function(data) {

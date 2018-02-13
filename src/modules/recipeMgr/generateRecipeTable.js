@@ -1,7 +1,7 @@
 import getValue from '../system/getValue';
-import {playerId} from '../support/layout';
-import {shouldBeArray} from '../system/system';
-import {output, recipebook, storeRecipeBook} from './parseInventing';
+import playerId from '../common/playerId';
+import setForage from '../ajax/setForage';
+import shouldBeArray from '../system/shouldBeArray';
 
 var currentPlayerId;
 var hideRecipes = [];
@@ -50,7 +50,7 @@ function getImg(recipe) {
   return '';
 }
 
-function drawRecipeTable() { // Legacy
+function drawRecipeTable(output, recipebook) { // Legacy
   currentPlayerId = playerId();
   var i;
   var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
@@ -74,14 +74,14 @@ function drawRecipeTable() { // Legacy
   result += '</table>';
   output.innerHTML = result;
   recipebook.lastUpdate = new Date();
-  storeRecipeBook();
+  setForage('fsh_recipeBook', recipebook);
 }
 
-export default function generateRecipeTable() { // Legacy
+export default function generateRecipeTable(output, recipebook) { // Legacy
   if (recipebook) {
     if (getValue('hideRecipes')) {
       hideRecipes = shouldBeArray('hideRecipeNames');
     }
-    drawRecipeTable();
+    drawRecipeTable(output, recipebook);
   }
 }

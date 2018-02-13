@@ -1,10 +1,8 @@
+import findNode from '../system/findNode';
 import getValue from '../system/getValue';
-import {quickBuffHref} from '../support/layout';
-import {
-  findNode,
-  parseDateAsTimestamp,
-  setValue
-} from '../system/system';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import quickBuffHref from '../common/quickBuffHref';
+import setValue from '../system/setValue';
 
 var nowUtc;
 var lastCheckUtc;

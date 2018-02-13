@@ -1,3 +1,4 @@
+import currentGuildId from '../common/currentGuildId';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectBuffLog from '../buffLog/injectBuffLog';
@@ -7,11 +8,14 @@ import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertElementAfter from '../common/insertElementAfter';
 import jQueryDialog from './jQueryDialog';
-import {newGuildLogUrl} from '../support/dataObj';
+import jQueryNotPresent from '../common/jQueryNotPresent';
+import {newGuildLogUrl} from '../support/constants';
 import {createAnchor, createLi} from '../common/cElement';
-import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 import {sendEvent, sendException} from '../support/fshGa';
+
+var guildId;
 
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
@@ -22,36 +26,18 @@ function updateQuestLink() {
 }
 
 function insertAdjElement(parent, listItem) {
-  // parent.parentNode.insertBefore(listItem, parent.nextElementSibling);
   insertElementAfter(listItem, parent);
 }
 
-// function insertAdjElement(parent, listItem) {
-//   if (typeof parent.insertAdjacentElement === 'function') {
-//     parent.insertAdjacentElement('afterend', listItem);
-//   } else {
-//     sendException('insertAdjacentElement is not a function', false);
-//   }
-// }
-
 function insertAdjHtml(parent, listItem) {
-  if (typeof parent.insertAdjacentHTML === 'function') {
-    parent.insertAdjacentHTML('afterend', listItem);
-  } else {
-    sendException('insertAdjacentHTML is not a function', false);
-  }
+  parent.insertAdjacentHTML('afterend', listItem);
 }
 
 function insertAfterParent(target, fn, listItem) {
   var tgt = getElementById(target);
   if (tgt instanceof Node) {
     var parent = tgt.parentNode;
-    if (parent instanceof Element) {
-      // parent.insertAdjacentElement('afterend', listItem);
-      fn(parent, listItem);
-    } else {
-      sendException('#' + target + '.parentNode is not an Element', false);
-    }
+    fn(parent, listItem);
   } else {sendException('#' + target + ' is not a Node', false);}
 }
 
@@ -66,8 +52,6 @@ function anchorButton(navLvl, text, fn, target) {
     jQueryDialog(fn);
   });
   li.appendChild(al);
-  // getElementById(target).parentNode
-  //   .insertAdjacentElement('afterend', li);
   insertAfterParent(target, insertAdjElement, li);
 }
 
@@ -92,14 +76,21 @@ function creatureLogLink() {
 }
 
 function newGuildLogLink() {
-  if (!getValue('useNewGuildLog')) {
+  if (guildId && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    // getElementById('nav-guild-ledger-guildlog').parentNode
-    //   .insertAdjacentHTML('beforebegin',
     insertAfterParent('nav-guild-ledger-guildlog', insertAdjHtml,
       '<li class="nav-level-2"><a class="nav-link" ' +
       'href="index.php' + newGuildLogUrl + '"' +
       '>New Guild Log</a></li>');
+  }
+}
+
+function guildInventory() {
+  if (guildId) {
+    insertAfterParent('nav-guild-storehouse-inventory', insertAdjHtml,
+      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+      'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
+      '&subcmd=guildinvmgr">Guild Inventory</a></li>');
   }
 }
 
@@ -142,7 +133,7 @@ function navDataExists(theNav, myNav) {
   }
 }
 
-function navExists(theNav) {
+function navExists(theNav) { // jQuery
   var myNav = $(theNav).data('nav');
   if (typeof myNav === 'object') {
     navDataExists(theNav, myNav);
@@ -151,7 +142,7 @@ function navExists(theNav) {
   }
 }
 
-function adjustHeight() { // jQuery
+function adjustHeight() {
   // adjust the menu height for the newly added items
   var theNav = getElementById('nav');
   if (theNav instanceof Element) {
@@ -162,12 +153,11 @@ function adjustHeight() { // jQuery
 }
 
 export default function injectMenu() {
-  if (!getElementById('pCL')) {return;}
+  if (!getElementById('pCL') || jQueryNotPresent()) {return;}
+  guildId = currentGuildId();
   updateQuestLink();
   // character
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  // getElementById('nav-character-log').parentNode
-  //   .insertAdjacentHTML('afterend',
   insertAfterParent('nav-character-log', insertAdjHtml,
     '<li class="nav-level-1"><a class="nav-link" id="nav-' +
     'character-medalguide" href="index.php?cmd=profile&subcmd=' +
@@ -181,16 +171,9 @@ export default function injectMenu() {
   anchorButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
   // guild
-  // getElementById('nav-guild-storehouse-inventory').parentNode
-  //   .insertAdjacentHTML('afterend',
-  insertAfterParent('nav-guild-storehouse-inventory', insertAdjHtml,
-    '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-    'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
-    '&subcmd=guildinvmgr">Guild Inventory</a></li>');
+  guildInventory();
   newGuildLogLink();
   // top rated
-  // getElementById('nav-toprated-players-level').parentNode
-  //   .insertAdjacentHTML('afterend',
   insertAfterParent('nav-toprated-players-level', insertAdjHtml,
     '<li class="nav-level-2"><a class="nav-link" id="nav-' +
     'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +

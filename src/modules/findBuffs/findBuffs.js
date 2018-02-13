@@ -1,21 +1,21 @@
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
+import createDocument from '../system/createDocument';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import {lastActivityRE} from '../support/dataObj';
+import jQueryNotPresent from '../common/jQueryNotPresent';
+import {lastActivityRE} from '../support/constants';
+import {pCC} from '../support/layout';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
+import playerName from '../common/playerName';
+import retryAjax from '../ajax/retryAjax';
+import setValue from '../system/setValue';
+import stringSort from '../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
-import {
-  createDocument,
-  setValue,
-  stringSort,
-  xmlhttp
-} from '../system/system';
-import {pCC, playerName} from '../support/layout';
 
 var characterName;
-export var findBuffNicks;
+var findBuffNicks;
 var findBuffMinCastLevel;
 var findBuffsLevel175Only;
 var onlinePlayers;
@@ -23,7 +23,7 @@ var onlinePlayersSetting;
 export var extraProfile;
 var profilePagesToSearch;
 var profilePagesToSearchProcessed;
-export var bufferProgress;
+var bufferProgress;
 
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
@@ -40,13 +40,17 @@ function findBuffsParsePlayersForBuffs() { // Legacy
 
   //#if _DEV  //  Find Buffs uglify bug
   console.log('onlinePlayers', onlinePlayers); // eslint-disable-line no-console
-
   //#endif
-  for (var j = 0; j < onlinePlayers.length; j += 1) {
-    xmlhttp(onlinePlayers[j],
-      parseProfileAndDisplay,
-      {href: onlinePlayers[j]});
-  }
+
+  onlinePlayers.forEach(function(j) {
+    retryAjax(j).done(function(html) {
+      parseProfileAndDisplay(html, {
+        href: onlinePlayers[j],
+        bufferProgress: bufferProgress,
+        findBuffNicks: findBuffNicks
+      });
+    });
+  });
 }
 
 function calcMinLvl() { // Legacy
@@ -92,8 +96,8 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
     bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
-    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=' + newPage,
-      findBuffsParseOnlinePlayers, {page: newPage});
+    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
+      newPage.toString()).done(findBuffsParseOnlinePlayers);
   } else {
     // all done so moving on
     findBuffsParsePlayersForBuffs();
@@ -105,8 +109,8 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   onlinePlayersSetting =
     parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
-    xmlhttp('index.php?no_mobile=1&cmd=onlineplayers&page=1',
-      findBuffsParseOnlinePlayers, {page: 1});
+    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
+      .done(findBuffsParseOnlinePlayers);
   } else {
     findBuffsParsePlayersForBuffs();
   }
@@ -161,7 +165,7 @@ function findBuffsParseProfilePageStart() { // Legacy
   profilePagesToSearchProcessed = 0;
   if (getElementById('alliesEnemies').checked) {
     profilePagesToSearch.forEach(function(el) {
-      xmlhttp(el, findBuffsParseProfilePage);
+      retryAjax(el).done(findBuffsParseProfilePage);
     });
   } else {
     findBuffsParseOnlinePlayersStart();
@@ -191,7 +195,8 @@ function findBuffsClearResults() { // Legacy
   getElementById('buffersProcessed').innerHTML = 0;
 }
 
-function findAnyStart(progMsg) {
+function findAnyStart(progMsg) { // jQuery.min // jQuery
+  if (jQueryNotPresent()) {return;}
   characterName = playerName();
   getElementById('buffNicks').innerHTML = findBuffNicks;
   bufferProgress = getElementById('bufferProgress');
@@ -204,8 +209,8 @@ function findAnyStart(progMsg) {
   extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
-  xmlhttp('index.php?no_mobile=1&cmd=guild&subcmd=manage',
-    findBuffsParseGuildManagePage);
+  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=manage')
+    .done(findBuffsParseGuildManagePage);
 }
 
 function findBuffsStart() { // Legacy
@@ -234,7 +239,7 @@ export function injectFindBuffs(injector) { // Legacy
   calf.sortAsc = true;
   buffList.sort(stringSort);
   extraProfile = getValue('extraProfile');
-  content.innerHTML = pageLayout(buffCustom);
+  content.innerHTML = pageLayout(buffCustom, extraProfile);
   getElementById('findbuffsbutton')
     .addEventListener('click', findBuffsStart, true);
   getElementById('clearresultsbutton')
@@ -244,7 +249,7 @@ export function injectFindBuffs(injector) { // Legacy
 export function injectFindOther(injector) { // Native - Bad
   var content = injector || pCC;
   extraProfile = getValue('extraProfile');
-  content.innerHTML = pageLayout(otherCustom);
+  content.innerHTML = pageLayout(otherCustom, extraProfile);
   getElementById('findbuffsbutton')
     .addEventListener('click', findOtherStart, true);
   getElementById('clearresultsbutton')

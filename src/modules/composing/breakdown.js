@@ -1,10 +1,11 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import perfFilter from '../common/perfFilter';
 import retryAjax from '../ajax/retryAjax';
-import {setValue} from '../system/system';
-import {simpleCheckbox} from '../settings/settingsPage';
+import setValue from '../system/setValue';
+import {simpleCheckbox} from '../settings/simpleCheckbox';
 
 var disableBreakdownPrompts;
 var selectedList = [];
@@ -89,6 +90,7 @@ function togglePref() {
 }
 
 export default function composingBreakdown() {
+  if (jQueryNotPresent()) {return;}
   perfFilter('composing');
   disableBreakdownPrompts = getValue('disableBreakdownPrompts');
   getElementById('breakdown-selected-items').parentNode

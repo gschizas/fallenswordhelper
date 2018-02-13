@@ -2,7 +2,8 @@ import calf from '../support/calf';
 import displayDisconnectedFromGodsMessage
   from './displayDisconnectedFromGodsMessage';
 import getValue from '../system/getValue';
-import {now} from '../support/dataObj';
+import jQueryNotPresent from '../common/jQueryNotPresent';
+import {now} from '../support/constants';
 import {parseTemplePage} from './parseTemplePage';
 import retryAjax from '../ajax/retryAjax';
 
@@ -11,17 +12,15 @@ function checkLastUpdate(templeAlertLastUpdate) {
 }
 
 function doWeNeedToParse() {
-  if (checkLastUpdate(getValue('lastTempleCheck'))) {return true;}
-  if (getValue('needToPray')) {
+  if (checkLastUpdate(getValue('lastTempleCheck'))) {
+    retryAjax('index.php?no_mobile=1&cmd=temple').done(parseTemplePage);
+  } else if (getValue('needToPray')) {
     displayDisconnectedFromGodsMessage();
   }
-  return false;
 }
 
 export default function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
-  if (calf.cmd === 'temple') {return;}
-  if (doWeNeedToParse()) {
-    retryAjax('index.php?no_mobile=1&cmd=temple').done(parseTemplePage);
-  }
+  if (calf.cmd === 'temple' || jQueryNotPresent()) {return;}
+  doWeNeedToParse();
 }

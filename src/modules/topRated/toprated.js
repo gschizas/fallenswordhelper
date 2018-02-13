@@ -3,7 +3,10 @@ import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
 import isObject from '../common/isObject';
-import {nowSecs} from '../support/dataObj';
+import jQueryPresent from '../common/jQueryPresent';
+import {nowSecs} from '../support/constants';
+import {onlineDot} from '../common/colouredDots';
+import {pCC} from '../support/layout';
 import {playerDataObject} from '../common/common';
 import {
   calculateBoundaries,
@@ -11,7 +14,6 @@ import {
   pvpUpperLevel
 } from '../common/levelHighlight';
 import {createInput, createSpan} from '../common/cElement';
-import {onlineDot, pCC} from '../support/layout';
 
 var highlightPlayersNearMyLvl;
 var spinner;
@@ -153,6 +155,7 @@ function looksLikeTopRated() {
 }
 
 var topRatedTests = [
+  function() {return jQueryPresent();},
   function() {return isObject(pCC);},
   function() {return isObject(pCC.firstElementChild);},
   function() {return isObject(pCC.firstElementChild.rows);},

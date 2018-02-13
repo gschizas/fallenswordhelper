@@ -1,3 +1,5 @@
+import jQueryPresent from './common/jQueryPresent';
+
 // var system = require('./support/system');
 
 // Legacy - Bad, could be repurposed
@@ -56,5 +58,7 @@ function dontPost(e) { // jQuery
 }
 
 export default function injectScavenging() { // jQuery
-  $('#pCC input[value="Scavenge"]').click(dontPost);
+  if (jQueryPresent()) {
+    $('#pCC input[value="Scavenge"]').click(dontPost);
+  }
 }

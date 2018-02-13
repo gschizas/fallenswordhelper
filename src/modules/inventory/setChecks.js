@@ -1,4 +1,4 @@
-import {options} from './inventory';
+import {options} from './options';
 import setForage from '../ajax/setForage';
 
 export default function setChecks() {

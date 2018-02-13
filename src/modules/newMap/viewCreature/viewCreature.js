@@ -1,6 +1,7 @@
 import {afterUpdateActionList} from '../doNotKill';
 import {bias} from '../assets';
 import calf from '../../support/calf';
+import createDocument from '../../system/createDocument';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
 import evalAttack from './evalAttack';
@@ -9,16 +10,13 @@ import evalDamage from './evalDamage';
 import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHtml from './evalHtml';
+import findNode from '../../system/findNode';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import intValue from '../../system/intValue';
 import {playerDataString} from '../../common/common';
-import {
-  createDocument,
-  findNode,
-  intValue,
-  setValue,
-  xmlhttp
-} from '../../system/system';
+import retryAjax from '../../ajax/retryAjax';
+import setValue from '../../system/setValue';
 
 function getBiasGeneral(combat) {
   if (bias[combat.combatEvaluatorBias]) {
@@ -125,14 +123,16 @@ function getCreatureGroupData(responseText) { // Legacy
   var groupHPValue = Number(findNode('//table[@width="400"]/tbody' +
     '/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
     .replace(/,/, ''));
-  xmlhttp('index.php?no_mobile=1&cmd=profile', getCreaturePlayerData, {
-    groupExists: true,
-    groupAttackValue: groupAttackValue,
-    groupDefenseValue: groupDefenseValue,
-    groupArmorValue: groupArmorValue,
-    groupDamageValue: groupDamageValue,
-    groupHPValue: groupHPValue,
-    groupEvaluation: true
+  retryAjax('index.php?no_mobile=1&cmd=profile').done(function(html) {
+    getCreaturePlayerData(html, {
+      groupExists: true,
+      groupAttackValue: groupAttackValue,
+      groupDefenseValue: groupDefenseValue,
+      groupArmorValue: groupArmorValue,
+      groupDamageValue: groupDamageValue,
+      groupHPValue: groupHPValue,
+      groupEvaluation: true
+    });
   });
 }
 
@@ -143,7 +143,7 @@ function checkIfGroupExists(responseText) { // Hybrid
   if (groupExistsIMG.length > 0) {
     var groupHref = groupExistsIMG.parents('td:first').find('a:first')
       .attr('href');
-    xmlhttp(groupHref, getCreatureGroupData);
+    retryAjax(groupHref).done(getCreatureGroupData);
   }
 }
 
@@ -166,17 +166,19 @@ export default function readyViewCreature() { // Hybrid
   $('#creatureEvaluator').html('');
   $('#creatureEvaluatorGroup').html('');
 
-  xmlhttp('index.php?no_mobile=1&cmd=profile', getCreaturePlayerData, {
-    groupExists: false,
-    groupAttackValue: 0,
-    groupDefenseValue: 0,
-    groupArmorValue: 0,
-    groupDamageValue: 0,
-    groupHPValue: 0,
-    groupEvaluation: false
+  retryAjax('index.php?no_mobile=1&cmd=profile').done(function(html) {
+    getCreaturePlayerData(html, {
+      groupExists: false,
+      groupAttackValue: 0,
+      groupDefenseValue: 0,
+      groupArmorValue: 0,
+      groupDamageValue: 0,
+      groupHPValue: 0,
+      groupEvaluation: false
+    });
   });
-  xmlhttp('index.php?no_mobile=1&cmd=guild&subcmd=groups',
-    checkIfGroupExists);
+  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=groups')
+    .done(checkIfGroupExists);
 
   $('#addRemoveCreatureToDoNotKillList').html('');
   if ($('#addRemoveCreatureToDoNotKillList').length === 0) {

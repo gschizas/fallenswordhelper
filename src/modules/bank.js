@@ -1,4 +1,5 @@
-import {createDocument} from './system/system';
+import createDocument from './system/createDocument';
+import jQueryPresent from './common/jQueryPresent';
 import retryAjax from './ajax/retryAjax';
 
 var playerBank = {
@@ -124,12 +125,16 @@ function appLink(o, bank) { // jQuery
   captureButtons(o, depo, withdraw);
 }
 
-function ajaxifyBank() { // jQuery
+function hasJquery() { // jQuery
   var o = bankSettings;
   var bank = $('#pCC b');
   if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
     appLink(o, bank);
   }
+}
+
+function ajaxifyBank() {
+  if (jQueryPresent()) {hasJquery();}
 }
 
 export function injectGuildBank() {

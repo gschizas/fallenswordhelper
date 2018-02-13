@@ -1,10 +1,13 @@
-import {defaults} from './support/dataObj';
-import eventHandler from './common/eventHandler';
-import {getElementById} from './common/getElement';
-import getValueJSON from './system/getValueJSON';
-import {isChecked} from './system/system';
-import setValueJSON from './system/setValueJSON';
-import {makePageHeader, makePageTemplate, pCC} from './support/layout';
+import {defaults} from '../support/dataObj';
+import eventHandler from '../common/eventHandler';
+import {getElementById} from '../common/getElement';
+import getValueJSON from '../system/getValueJSON';
+import isChecked from '../system/isChecked';
+import jsonParse from '../common/jsonParse';
+import makePageHeader from './makePageHeader';
+import makePageTemplate from './makePageTemplate';
+import {pCC} from '../support/layout';
+import setValueJSON from '../system/setValueJSON';
 
 var param;
 
@@ -69,7 +72,7 @@ function generateManageTable() { // Legacy
   result += '<td><span class="HelperTextLink" id="fshAdd">' +
     '[Add]</span></td></tr></table>' +
     '<table width="100%"><tr><td class="fshCenter">' +
-    '<textarea cols=70 rows=20 name="fshEd">' +
+    '<textarea cols=70 rows=20 id="fshEd">' +
     JSON.stringify(param.currentItems) + '</textarea></td></tr>' +
     '<tr><td class="fshCenter"><input id="fshSave" ' +
     'type="button" value="Save" class="custombutton">' +
@@ -112,16 +115,18 @@ function addQuickItem() { // Legacy
   generateManageTable();
 }
 
-function saveRawEditor() { // jQuery
-  param.currentItems =
-    JSON.parse($('textarea[name="fshEd"]').val());
-  generateManageTable();
+function saveRawEditor() { // Legacy
+  var userInput = jsonParse(getElementById('fshEd').value);
+  if (Array.isArray(userInput)) {
+    param.currentItems = userInput;
+    generateManageTable();
+  }
 }
 
 function resetRawEditor() { // Legacy
   if (param.id === 'fshAso') {
     param.currentItems =
-      JSON.parse(defaults.quickSearchList);
+      jsonParse(defaults.quickSearchList);
   } else {param.currentItems = [];}
   generateManageTable();
 }
@@ -169,8 +174,13 @@ export function injectAuctionSearch(injector) { // Legacy
 
 export function injectQuickLinkManager(injector) { // Legacy
   var content = injector || pCC;
-  content.innerHTML =
-    makePageTemplate('Quick Links', '', '', '', 'qla');
+  content.innerHTML = makePageTemplate({
+    title: 'Quick Links',
+    comment: '',
+    spanId: '',
+    button: '',
+    divId: 'qla'
+  });
 
   // global parameters for the meta function generateManageTable
   param = {

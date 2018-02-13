@@ -4,14 +4,16 @@ import equipItem from '../ajax/equipItem';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import jConfirm from '../common/jConfirm';
+import jQueryPresent from '../common/jQueryPresent';
 import loadInventory from '../app/profile/loadInventory';
+import {pCC} from '../support/layout';
 import {sendEvent} from '../support/fshGa';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import showAHInvManager from './showAHInvManager';
-import {simpleCheckboxHtml} from '../settings/settingsPage';
+import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 import toggleForce from '../common/toggleForce';
 import useItem from '../ajax/useItem';
-import {jConfirm, pCC} from '../support/layout';
 
 var disableQuickWearPrompts;
 var content;
@@ -128,10 +130,14 @@ function showQuickWear(appInv) {
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 
-export default function insertQuickWear(injector) {
+function hasJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
   content.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
+}
+
+export default function insertQuickWear(injector) {
+  if (jQueryPresent()) {hasJquery(injector);}
 }

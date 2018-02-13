@@ -1,4 +1,5 @@
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 
 function hasTextEntry() { // jQuery
@@ -26,8 +27,13 @@ function hasTextEntry() { // jQuery
   });
 }
 
+var tests = [
+  function() {return !getValue('enhanceChatTextEntry');},
+  function() {return !pCC;},
+  function() {return jQueryNotPresent();}
+];
+
 export default function addChatTextArea() {
-  if (!getValue('enhanceChatTextEntry') ||
-      !pCC) {return;}
+  if (tests.some(function(el) {return el();})) {return;}
   hasTextEntry();
 }

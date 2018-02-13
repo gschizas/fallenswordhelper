@@ -1,6 +1,6 @@
-import {createDocument} from '../system/system';
+import createDocument from '../system/createDocument';
 import retryAjax from './retryAjax';
-import {defenderMultiplier, mercRE} from '../support/dataObj';
+import {defenderMultiplier, mercRE} from '../support/constants';
 
 function addMercStat(mouseover, stat, i) {
   return stat +

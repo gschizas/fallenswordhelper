@@ -1,11 +1,12 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
-import {parseDateAsTimestamp} from '../system/system';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import roundToString from '../common/roundToString';
 import setForage from '../ajax/setForage';
 import {createAnchor, createTBody, createTable} from '../common/cElement';
-import {guideUrl, now} from '../support/dataObj';
+import {guideUrl, now} from '../support/constants';
 
 function getTitanName(aRow) {
   return aRow.cells[0].firstElementChild.getAttribute('oldtitle');
@@ -124,6 +125,7 @@ function gotOldTitans(oldTitans) {
   setForage('fsh_titans', newTitans); // Pref
 }
 
-export default function injectScouttower() {
+export default function injectScouttower() { // jQuery.min
+  if (jQueryNotPresent()) {return;}
   getForage('fsh_titans').done(gotOldTitans); // Pref
 }

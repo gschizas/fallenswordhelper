@@ -1,6 +1,5 @@
-import {doBuffLinks} from '../../support/layout';
+import doBuffLinks from '../../common/doBuffLinks';
 import {getElementById} from '../../common/getElement';
-import {getStats} from './relic';
 import {createButton, createDiv} from '../../common/cElement';
 
 export var containerDiv;
@@ -30,7 +29,6 @@ export function primaryElementsSetup(relicData) {
     className: 'custombutton',
     textContent: 'Fetch Stats'
   });
-  fetchStatsBtn.addEventListener('click', getStats);
   leftDiv.appendChild(fetchStatsBtn);
   var dialogRelic = getElementById('dialog-relic');
   dialogRelic.appendChild(containerDiv);

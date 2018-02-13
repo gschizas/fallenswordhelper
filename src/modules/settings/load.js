@@ -1,8 +1,12 @@
+import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
+import jsonParse from '../common/jsonParse';
 import {pCC} from '../support/layout';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 export default function injectSaveSettings() { // Hybrid
+  if (jQueryNotPresent()) {return;}
   var content = pCC;
   var fshSettings = {};
   var list = GM_listValues();
@@ -21,10 +25,13 @@ export default function injectSaveSettings() { // Hybrid
     '<br><input id="HelperLoadSettings" class="custombutton" ' +
     'type="submit" value="Load Settings!" /></center>';
   $('#HelperLoadSettings').click(function() {
-    var settings = JSON.parse($('#HelperfshSettings').val());
-    Object.keys(settings).forEach(function(id) {
-      setValue(id, settings[id]);
-    });
-    $('#dialog_msg').text('Settings loaded successfully!').dialog('open');
+    var userInput = jsonParse(getElementById('HelperfshSettings').value);
+    if (typeof userInput === 'object') {
+      var settings = userInput;
+      Object.keys(settings).forEach(function(id) {
+        setValue(id, settings[id]);
+      });
+      $('#dialog_msg').text('Settings loaded successfully!').dialog('open');
+    }
   });
 }

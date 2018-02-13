@@ -1,5 +1,9 @@
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
+import jQueryNotPresent from './common/jQueryNotPresent';
+import makePageTemplate from './lists/makePageTemplate';
+import {pCC} from './support/layout';
+import quickBuffHref from './common/quickBuffHref';
 import setForage from './ajax/setForage';
 import {
   calculateBoundaries,
@@ -8,9 +12,9 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from './common/levelHighlight';
-import {makePageTemplate, pCC, quickBuffHref} from './support/layout';
 
 export function injectFindPlayer() { // Bad jQuery
+  if (jQueryNotPresent()) {return;}
   calculateBoundaries();
   var findPlayerButton = $('input[value="Find Player"]');
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
@@ -32,16 +36,23 @@ export function injectFindPlayer() { // Bad jQuery
 }
 
 export function injectNotepad() { // jQuery
+  if (jQueryNotPresent()) {return;}
   $('#notepad_notes')
     .attr('cols', '90')
     .attr('rows', '30')
     .css('resize', 'none');
 }
 
-export function injectFsBoxContent(injector) { // jQuery
+export function injectFsBoxContent(injector) { // jQuery.min
+  if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
-  content.innerHTML = makePageTemplate('FS Box Log', '',
-    'fsboxclear', 'Clear', 'fsboxdetail');
+  content.innerHTML = makePageTemplate({
+    title: 'FS Box Log',
+    comment: '',
+    spanId: 'fsboxclear',
+    button: 'Clear',
+    divId: 'fsboxdetail'
+  });
   getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
     getElementById('fsboxdetail').innerHTML = fsboxcontent;
   });

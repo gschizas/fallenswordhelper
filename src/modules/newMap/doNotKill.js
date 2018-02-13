@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import {def_afterUpdateActionlist} from '../support/dataObj';
+import {def_afterUpdateActionlist} from '../support/constants';
 import {getElementById} from '../common/getElement';
 
 var oldDoAction;

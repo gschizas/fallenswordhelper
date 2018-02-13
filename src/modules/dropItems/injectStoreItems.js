@@ -9,15 +9,15 @@ import fallback from '../system/fallback';
 import getInventoryById from '../ajax/getInventoryById';
 import getValue from '../system/getValue';
 import hideFolders from './hideFolders';
-import injectMoveItems from './injectMoveItems';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
 import moveItemsToFolder from './moveItemsToFolder';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 import toggleForce from '../common/toggleForce';
-import {guideUrl, itemRE, rarity} from '../support/dataObj';
+import {guideUrl, itemRE, rarity} from '../support/constants';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -247,12 +247,8 @@ function inventory(data) {
   doFolderButtons(data.folders);
 }
 
-export function injectStoreItems() {
+export default function injectStoreItems() {
+  if (jQueryNotPresent()) {return;}
   getInventoryById().done(inventory);
   add(3, getItems);
-}
-
-export function injectProfileDropItems() {
-  injectStoreItems();
-  injectMoveItems();
 }

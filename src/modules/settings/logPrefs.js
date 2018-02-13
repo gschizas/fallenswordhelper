@@ -1,6 +1,6 @@
 import getValue from '../system/getValue';
-import {isChecked} from '../system/system';
-import {helpLink, simpleCheckbox} from './settingsPage';
+import isChecked from '../system/isChecked';
+import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 export default function logPrefs() {
   // Log screen prefs

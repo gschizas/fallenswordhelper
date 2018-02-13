@@ -3,6 +3,7 @@ import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
 import {imageServer} from './system/system';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 import retryAjax from './ajax/retryAjax';
@@ -30,12 +31,7 @@ function cancelAllAH() { // jQuery
   });
 }
 
-export function injectAuctionHouse() {
-  if (!pCC) {return;}
-  if (getValue('autoFillMinBidPrice')) {
-    getElementById('auto-fill').checked = true;
-  }
-  getElementById('sort0').click();
+function makeCancelAll() {
   var cancelAll = createSpan({
     className: 'smallLink',
     textContent: 'Cancel All'
@@ -47,6 +43,19 @@ export function injectAuctionHouse() {
   afterBegin(fill, cancelAll);
   fill.insertAdjacentHTML('afterbegin', '[');
   cancelAll.addEventListener('click', cancelAllAH);
+}
+
+function autoFill() {
+  if (getValue('autoFillMinBidPrice')) {
+    getElementById('auto-fill').checked = true;
+  }
+}
+
+export function injectAuctionHouse() {
+  if (jQueryNotPresent() || !pCC) {return;}
+  makeCancelAll();
+  autoFill();
+  getElementById('sort0').click();
 }
 
 export function quickCreate() {

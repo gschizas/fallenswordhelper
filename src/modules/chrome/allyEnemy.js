@@ -3,11 +3,13 @@ import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import fallback from '../system/fallback';
-import {formatLastActivity} from '../system/system';
+import formatLastActivity from '../system/formatLastActivity';
 import {getElementById} from '../common/getElement';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
-import {nowSecs} from '../support/dataObj';
-import {openQuickBuffByName, pCR} from '../support/layout';
+import {nowSecs} from '../support/constants';
+import openQuickBuffByName from '../common/openQuickBuffByName';
+import {pCR} from '../support/layout';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
 var msgButton = '<span class="enemy-send-message guild-icon left ' +
@@ -150,7 +152,7 @@ function injectAllyEnemyList(data) {
   hazAllies(allies, enemies);
 }
 
-function resetList() { // jQuery
+function resetList() { // jQuery.min
   myStats(true).done(injectAllyEnemyList);
 }
 
@@ -222,6 +224,7 @@ function makeDiv(data) {
 }
 
 export default function prepareAllyEnemyList() { // jQuery.min
+  if (jQueryNotPresent()) {return;}
   myStats(false)
     .done(function(data) {
       add(3, makeDiv, [data]);

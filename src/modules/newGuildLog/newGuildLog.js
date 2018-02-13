@@ -1,20 +1,19 @@
 import addGuildLogWidgets from '../logs/addGuildLogWidgets';
 import addLogColoring from '../logs/addLogColoring';
+import createDocument from '../system/createDocument';
 import {createTable} from '../common/cElement';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
+import {imageServer} from '../system/system';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
 import {rowProfile} from './profiler';
 import setForage from '../ajax/setForage';
 import toggleForce from '../common/toggleForce';
-import {
-  createDocument,
-  imageServer,
-  parseDateAsTimestamp
-} from '../system/system';
 import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
 
 var options = {};
@@ -239,6 +238,7 @@ function gotOptions(guildLog) {
   getGuildLogPage(1).done(processFirstPage);
 }
 
-export default function injectNewGuildLog() {
+export default function injectNewGuildLog() { // jQuery.min
+  if (jQueryNotPresent()) {return;}
   getForage('fsh_guildLog').done(gotOptions);
 }

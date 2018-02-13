@@ -1,6 +1,6 @@
 import fallback from '../../system/fallback';
-import {rarity} from '../../support/dataObj';
-import {theInv} from '../inventory';
+import {rarity} from '../../support/constants';
+import {theInv} from '../options';
 
 function getT(player_id) {
   if (player_id === -1) {return 4;}

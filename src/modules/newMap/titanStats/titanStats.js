@@ -1,45 +1,11 @@
-import buildTitanInfoTable from './buildTitanInfoTable';
 import calf from '../../support/calf';
-import {getElementById} from '../../common/getElement';
-import insertElement from '../../common/insertElement';
+import {processTitans} from './processTitans';
 import scouttower from '../../app/guild/scouttower';
-import {setValue} from '../../system/system';
-import toggleForce from '../../common/toggleForce';
-import {clearMemberRows, processTitans} from './processTitans';
-import {createDiv, createSpan} from '../../common/cElement';
+import {setRealm} from './realm';
+import setValue from '../../system/setValue';
+import {hasTitan, hideTitanDiv, setupTitanDiv} from './hasTitan';
 
-export var realmName;
-export var titanId;
-var titanDiv;
 var timeoutId;
-
-export var titanTbl;
-export var currentHp;
-export var maxHp;
-export var guildKills;
-export var currentPct;
-export var totalPct;
-export var statusText;
-export var cooldownText;
-
-function clearTitanDiv() {
-  currentHp.textContent = '';
-  maxHp.textContent = '';
-  guildKills.textContent = '';
-  currentPct.textContent = '';
-  totalPct.textContent = '';
-  statusText.innerHTML = '';
-  cooldownText.innerHTML = '';
-  clearMemberRows();
-}
-
-function hideTitanDiv() {
-  titanId = null;
-  if (titanDiv && !titanDiv.classList.contains('fshHide')) {
-    toggleForce(titanDiv, true);
-    clearTitanDiv();
-  }
-}
 
 function clearTheTimeout() {
   if (timeoutId) {
@@ -50,14 +16,6 @@ function clearTheTimeout() {
 
 function goodData(data) {
   return data.s && Array.isArray(data.r);
-}
-
-function hasTitan(el) {
-  if (el.type === 0) {
-    titanId = el.base_creature_id;
-    return true;
-  }
-  return false;
 }
 
 function titanToShow(dynamic) {
@@ -77,29 +35,6 @@ function ajaxScoutTower() {
   });
 }
 
-function initVars() {
-  currentHp = createSpan();
-  maxHp = createSpan();
-  guildKills = createSpan();
-  currentPct = createSpan();
-  totalPct = createSpan();
-  statusText = createSpan();
-  cooldownText = createSpan();
-}
-
-function setupTitanDiv() {
-  if (titanDiv) {
-    toggleForce(titanDiv, false);
-  } else {
-    var actCont = getElementById('actionContainer');
-    titanDiv = createDiv({className: 'titanInfo'});
-    initVars();
-    titanTbl = buildTitanInfoTable();
-    insertElement(titanDiv, titanTbl);
-    insertElement(actCont, titanDiv);
-  }
-}
-
 function testDynamics(dynamic) {
   clearTheTimeout();
   if (titanToShow(dynamic)) {
@@ -110,9 +45,9 @@ function testDynamics(dynamic) {
   }
 }
 
-export default function titanStats(data) {
+export function titanStats(data) {
   if (data.realm.dynamic) {
-    realmName = data.realm.name;
+    setRealm(data.realm.name);
     testDynamics(data.realm.dynamic);
   }
 }

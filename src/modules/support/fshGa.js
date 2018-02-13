@@ -1,5 +1,5 @@
 import {log} from './debug';
-import {playerId} from './layout';
+import playerId from '../common/playerId';
 
 var times = {};
 var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];

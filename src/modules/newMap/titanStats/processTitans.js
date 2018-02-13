@@ -1,21 +1,21 @@
 import {addRows} from './common';
 import padZ from '../../system/padZ';
+import {realmName} from './realm';
 import roundToString from '../../common/roundToString';
 import {textSpan} from '../../common/cElement';
+import {titanId} from './hasTitan';
+import {clearMemberRows, titanTbl} from './buildTitanInfoTable';
 import {
   cooldownText,
   currentHp,
   currentPct,
   guildKills,
   maxHp,
-  realmName,
   statusText,
-  titanId,
-  titanTbl,
   totalPct
-} from './titanStats';
+} from './placeholders';
 import {getKillsPct, getTitanString} from '../../scoutTower/injectScouttower';
-import {months, now} from '../../support/dataObj';
+import {months, now} from '../../support/constants';
 
 function formatOffset(secs) {
   var aDate = new Date(now + secs * 1000);
@@ -47,14 +47,6 @@ function doTopLabels(ourTitan) {
   statusText.innerHTML = getTitanString(ourTitan.kills, ourTitan.max_hp,
     ourTitan.current_hp);
   cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
-}
-
-export function clearMemberRows() {
-  if (titanTbl.rows.length > 7) {
-    for (var i = 7; i < titanTbl.rows.length; i += 1) {
-      titanTbl.deleteRow(i);
-    }
-  }
 }
 
 function doMemberRows(ourTitan) {

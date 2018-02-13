@@ -1,5 +1,5 @@
 import {inventoryCheckAll} from '../assets';
-import {options} from '../inventory';
+import {options} from '../options';
 import setChecks from '../setChecks';
 
 export default function allChecks() { // jQuery

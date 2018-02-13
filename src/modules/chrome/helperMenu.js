@@ -13,7 +13,7 @@ import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import {sendEvent} from '../support/fshGa';
-import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 
 var helperMenuBlob =
@@ -57,7 +57,7 @@ var functionLookup = {
 function callHelperFunction(evt) {
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
-  if (typeof fn === 'function') {
+  if ($ && typeof fn === 'function') {
     sendEvent('helperMenu', functionPath);
     jQueryDialog(fn);
   }

@@ -1,9 +1,7 @@
 import {getElementById} from '../common/getElement';
+import {imageServer} from '../system/system';
 import retryAjax from '../ajax/retryAjax';
-import {
-  imageServer,
-  setValue
-} from '../system/system';
+import setValue from '../system/setValue';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +

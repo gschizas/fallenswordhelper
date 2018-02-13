@@ -1,11 +1,9 @@
 import collapse from '../common/collapse';
 import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
-import {simpleCheckbox} from '../settings/settingsPage';
-import {
-  parseDateAsTimestamp,
-  setValue
-} from '../system/system';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import setValue from '../system/setValue';
+import {simpleCheckbox} from '../settings/simpleCheckbox';
 
 var ladderResetPref = 'lastLadderReset';
 var lastLadderReset;

@@ -1,8 +1,9 @@
-import {addCommas} from '../../system/system';
-import {defenderMultiplier} from '../../support/dataObj';
+import addCommas from '../../system/addCommas';
+import {defenderMultiplier} from '../../support/constants';
 import fallback from '../../system/fallback';
 import {playerDataObject} from '../../common/common';
 import reduceBuffArray from '../../common/reduceBuffArray';
+import {relicMultiplier} from './parseGuild';
 import {
   armorBuffedElement,
   armorElement,
@@ -31,7 +32,6 @@ import {
   lDCloakedElement,
   processingStatus
 } from './secondaryElements';
-import {player, relicMultiplier} from './relic';
 
 var defRawAttack;
 var defBuffedAttack;
@@ -74,7 +74,7 @@ function calculateGroup() {
   groupDamageElement.textContent = addCommas(groupStats.damage);
   groupHPElement.textContent = addCommas(groupStats.hp);
 
-  var buffs = reduceBuffArray(player.buffs);
+  var buffs = reduceBuffArray(GameData.player().buffs);
 
   var nightmareVisageEffect = Math.ceil(groupStats.attack *
     (fallback(buffs['Nightmare Visage'], 0) * 0.0025));
@@ -158,7 +158,7 @@ export function doCalculations() {
     lDCloakedElement.textContent = 'Yes';
   }
 
-  if (player.hasGroup) {
+  if (GameData.player().hasGroup) {
     calculateGroup();
   } else {
     processingStatus.textContent = 'Done.';

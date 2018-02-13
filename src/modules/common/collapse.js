@@ -1,6 +1,6 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
-import {setValue} from '../system/system';
+import setValue from '../system/setValue';
 
 var warehouse = [];
 var prefValue;

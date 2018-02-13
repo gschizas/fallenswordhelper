@@ -1,8 +1,10 @@
 import {createAnchor} from '../common/cElement';
 import getValue from '../system/getValue';
-import {guideUrl} from '../support/dataObj';
+import {guideUrl} from '../support/constants';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
-import {parseDateAsTimestamp, setValue} from '../system/system';
+import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import setValue from '../system/setValue';
 
 function containsNewsHead(el) {
   return el.classList.contains('news_head') ||
@@ -44,7 +46,7 @@ function newsEvt(evt) {
 
 function fixCollapse() {
   var newsCol = document.getElementsByClassName('news_left_column');
-  if (newsCol.length !== 1) {return;}
+  if (jQueryNotPresent() || newsCol.length !== 1) {return;}
   newsCol[0].addEventListener('click', newsEvt, true);
 }
 

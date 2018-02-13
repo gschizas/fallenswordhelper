@@ -1,21 +1,17 @@
 import add from '../support/task';
+import {colouredDots} from '../common/colouredDots';
+import createDocument from '../system/createDocument';
+import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
+import openQuickBuffByName from '../common/openQuickBuffByName';
+import {pCC} from '../support/layout';
+import playerName from '../common/playerName';
 import retryAjax from '../ajax/retryAjax';
-import {
-  colouredDots,
-  openQuickBuffByName,
-  pCC,
-  playerName
-} from '../support/layout';
-import {
-  createDocument,
-  findNode,
-  toggleVisibilty,
-  xmlhttp
-} from '../system/system';
+import toggleVisibilty from '../common/toggleVisibilty';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var leftHandSideColumnTable;
@@ -57,15 +53,15 @@ function gotConflictInfo(responseText, callback) { // Legacy
   var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
   activeConflicts(doc, curPage, callback.node);
   if (maxPage && parseInt(maxPage[1], 10) > curPage) {
-    xmlhttp(
-      'index.php?no_mobile=1&cmd=guild&subcmd=conflicts&subcmd2=&page=' +
-      (curPage + 1) + '&search_text=',
-      gotConflictInfo,
-      {node: callback.node});
+    retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts&page=' +
+      (curPage + 1).toString()
+    ).done(function(html) {
+      gotConflictInfo(html, {node: callback.node});
+    });
   }
 }
 
-function conflictInfo() { // jQuery
+function conflictInfo() { // jQuery.min
   retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
     .done(function(data) {
       gotConflictInfo(data,
@@ -164,6 +160,7 @@ export default function injectGuild() {
   add(3, structureToggle);
   add(3, buffLinks);
   add(3, selfRecallLink);
+  if (jQueryNotPresent()) {return;}
   // Detailed conflict information
   if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo);

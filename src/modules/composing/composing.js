@@ -1,18 +1,17 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import createDocument from '../system/createDocument';
 import {getElementById} from '../common/getElement';
+import getRandomInt from '../system/getRandomInt';
 import getValue from '../system/getValue';
+import {imageServer} from '../system/system';
 import insertElementBefore from '../common/insertElementBefore';
-import {now} from '../support/dataObj';
+import jQueryPresent from '../common/jQueryPresent';
+import {now} from '../support/constants';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
-import {
-  createDocument,
-  getRandomInt,
-  imageServer,
-  rnd,
-  setValue
-} from '../system/system';
+import rnd from '../system/rnd';
+import setValue from '../system/setValue';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
@@ -129,7 +128,7 @@ function composeAlert() {
 }
 
 export function injectComposeAlert() {
-  if (calf.cmd !== 'composing') {composeAlert();}
+  if (jQueryPresent() && calf.cmd !== 'composing') {composeAlert();}
 }
 
 function moveButtons() {
@@ -143,8 +142,7 @@ function moveButtons() {
   }
 }
 
-export function injectComposing() {
-  if (!pCC) {return;}
+function hasJQuery() {
   if (calf.enableComposingAlert) {
     parseComposing();
   }
@@ -157,6 +155,10 @@ export function injectComposing() {
   });
   pCC.addEventListener('click', quickCreate);
   moveButtons();
+}
+
+export function injectComposing() {
+  if (jQueryPresent() && pCC) {hasJQuery();}
 }
 
 export function composingCreate() {

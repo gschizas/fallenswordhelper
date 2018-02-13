@@ -1,8 +1,8 @@
 import calf from '../support/calf';
 import getValue from '../system/getValue';
-import {isChecked} from '../system/system';
+import isChecked from '../system/isChecked';
 import {networkIcon} from './settingObj';
-import {helpLink, simpleCheckbox} from './settingsPage';
+import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function guildInfoWidgets() {
   return '<tr><td class="fshRight"><label for="enableGuildInfoWidgets">' +

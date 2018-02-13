@@ -1,7 +1,7 @@
 import {getElementById} from '../common/getElement';
-import {intValue} from '../system/system';
+import intValue from '../system/intValue';
 import padZ from '../system/padZ';
-import {months, now} from '../support/dataObj';
+import {months, now} from '../support/constants';
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

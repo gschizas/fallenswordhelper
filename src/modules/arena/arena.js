@@ -1,8 +1,9 @@
 import {defaults} from '../support/dataObj';
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
-import {intValue} from '../system/system';
+import intValue from '../system/intValue';
 import isObject from '../common/isObject';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import setForage from '../ajax/setForage';
 import {arenaFilter, dontPost, tableOpts} from './assets';
 import {time, timeEnd} from '../support/debug';
@@ -226,6 +227,7 @@ function process(arena) { // jQuery
 }
 
 export default function injectArena() { // jQuery
+  if (jQueryNotPresent()) {return;}
   tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) {return;} // Join error screen
   theTables = $('table[width="635"]', tabs);

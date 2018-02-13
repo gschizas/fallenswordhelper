@@ -1,12 +1,13 @@
 import calf from '../support/calf';
+import createDocument from '../system/createDocument';
 import {doSendGold} from '../newMap/sendGold';
+import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
-import {createDocument, findNode} from '../system/system';
 
 var expandMenuOnKeyPress;
 

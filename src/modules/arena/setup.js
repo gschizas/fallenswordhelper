@@ -1,4 +1,5 @@
 import {imageServer} from '../system/system';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {moveOptions} from './assets';
 import retryAjax from '../ajax/retryAjax';
 
@@ -80,6 +81,7 @@ function selectMoves(evt) { // jQuery
 }
 
 export default function setupMoves() { // jQuery
+  if (jQueryNotPresent()) {return;}
   var node = $('#pCC b:contains("Setup Combat Moves")');
   if (node.length !== 1) {return;}
   node.addClass('fshLink fshGreen');

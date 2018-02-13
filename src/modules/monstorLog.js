@@ -1,10 +1,14 @@
+import addCommas from './system/addCommas';
 import calf from './support/calf';
 import doSortParams from './common/doSortParams';
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
+import {imageServer} from './system/system';
+import jQueryPresent from './common/jQueryPresent';
+import numberSort from './system/numberSort';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
-import {addCommas, imageServer, numberSort, stringSort} from './system/system';
+import stringSort from './system/stringSort';
 
 var content;
 var monsterAry;
@@ -57,7 +61,7 @@ function sortCol(target) {
   drawMobs();
 }
 
-function doHandlers(evt) {
+function doHandlers(evt) { // jQuery.min
   var target = evt.target;
   if (target.id === 'clearEntityLog') {
     setForage('fsh_monsterLog', '');
@@ -139,8 +143,12 @@ function prepAry(data) {
   drawMobs();
 }
 
-export default function injectMonsterLog(injector) {
+function haveJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
   getForage('fsh_monsterLog').done(prepAry);
+}
+
+export default function injectMonsterLog(injector) {
+  if (jQueryPresent()) {haveJquery(injector);}
 }

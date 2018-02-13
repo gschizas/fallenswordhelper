@@ -1,12 +1,17 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
+import {colouredDots} from '../common/colouredDots';
 import fallback from '../system/fallback';
 import fastDebuff from './debuff';
-import {getUrlParameter} from '../system/system';
+import getUrlParameter from '../system/getUrlParameter';
 import highlightPvpProtection from './highlightPvpProtection';
 import injectFastWear from './fastWear';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import nekidBtn from './nekidBtn';
+import {pCC} from '../support/layout';
+import playerId from '../common/playerId';
+import playerName from '../common/playerName';
 import profileComponents from './components';
 import {profileInjectGuildRel} from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
@@ -18,12 +23,6 @@ import storeVL from './storeVL';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import updateNmv from './updateNmv';
 import updateStatistics from './updateStatistics';
-import {
-  colouredDots,
-  pCC,
-  playerId,
-  playerName
-} from '../support/layout';
 
 function ifSelf(self) {
   if (self) {
@@ -50,6 +49,7 @@ function yuuzhan(playername, avyImg) {
 }
 
 export default function injectProfile() { // Legacy
+  if (jQueryNotPresent()) {return;}
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}

@@ -1,6 +1,7 @@
+import escapeHtml from '../system/escapeHtml';
 import getValue from '../system/getValue';
-import {escapeHtml, isChecked} from '../system/system';
-import {helpLink, simpleCheckbox} from './settingsPage';
+import isChecked from '../system/isChecked';
+import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 export default function equipPrefs() {
   // Equipment screen prefs

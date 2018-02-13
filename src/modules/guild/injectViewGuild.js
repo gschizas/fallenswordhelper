@@ -1,9 +1,9 @@
 import add from '../support/task';
-import {colouredDots} from '../support/layout';
+import {colouredDots} from '../common/colouredDots';
 import currentGuildId from '../common/currentGuildId';
-import {getUrlParameter} from '../system/system';
+import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
-import {lastActivityRE} from '../support/dataObj';
+import {lastActivityRE} from '../support/constants';
 import {
   calculateBoundaries,
   gvgLowerLevel,

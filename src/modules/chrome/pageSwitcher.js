@@ -10,6 +10,8 @@ import injectArena from '../arena/arena';
 import injectBazaar from '../bazaar';
 import injectBioWidgets from '../profile/bio/bioWidgets';
 import injectBuffLog from '../buffLog/injectBuffLog';
+import injectGroupStats from '../groups/injectGroupStats';
+import injectGroups from '../groups/groups';
 import injectGuild from '../guild/guild';
 import injectGuildAddTagsWidgets from '../guild/injectGuildAddTagsWidgets';
 import injectGuildRanks from '../rank';
@@ -20,6 +22,7 @@ import injectNewGuildLog from '../newGuildLog/newGuildLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectProfile from '../profile/profile';
+import injectProfileDropItems from '../dropItems/injectProfileDropItems';
 import injectQuickBuff from '../quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
@@ -27,12 +30,13 @@ import injectReportPaint from '../guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
 import injectScavenging from '../scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';
-import {injectSettings} from '../settings/settingsPage';
+import injectSettings from '../settings/injectSettings';
+import injectStoreItems from '../dropItems/injectStoreItems';
 import injectTitan from '../scoutTower/injectTitan';
 import injectTopRated from '../topRated/toprated';
 import injectTrade from '../trade/trade';
 import injectViewGuild from '../guild/injectViewGuild';
-import injectWorld from '../legacy';
+import injectWorld from '../legacy/legacy';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import inventing from '../recipes';
@@ -50,7 +54,7 @@ import viewArchive from '../news/viewArchive';
 import {composingCreate, injectComposing} from '../composing/composing';
 import {guildChat, guildLog, outbox, playerLog} from '../logs/logs';
 import {injectAuctionHouse, quickCreate} from '../auctionHouse';
-import {injectAuctionSearch, injectQuickLinkManager} from '../lists';
+import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectBank, injectGuildBank} from '../bank';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
 import {
@@ -58,8 +62,6 @@ import {
   injectFsBoxContent,
   injectNotepad
 } from '../misc';
-import {injectGroupStats, injectGroups} from '../groups';
-import {injectProfileDropItems, injectStoreItems} from '../dropItems/dropItems';
 import {injectQuestBookFull, injectQuestTracker} from '../questBook';
 import {newsFsbox, newsShoutbox} from '../news/news';
 

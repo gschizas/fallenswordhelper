@@ -1,8 +1,9 @@
-import {findNode} from '../system/system';
+import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import injectAdvisor from '../guildAdvisor';
 import {injectQuestBookFull} from '../questBook';
 import inventing from '../recipes';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {screenview} from '../support/fshGa';
 import updateBuffLog from '../buffLog/updateBuffLog';
 
@@ -63,7 +64,7 @@ var unknown = [
 ];
 
 export default function unknownPage() { // Legacy
-  if (typeof window.jQuery === 'undefined') {return;}
+  if (jQueryNotPresent) {return;}
   //#if _DEV  //  unknownPage
   console.log('unknownPage'); // eslint-disable-line no-console
   //#endif

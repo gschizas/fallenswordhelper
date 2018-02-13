@@ -1,4 +1,4 @@
-import {def_afterUpdateActionlist} from '../../support/dataObj';
+import {def_afterUpdateActionlist} from '../../support/constants';
 import retryAjax from '../../ajax/retryAjax';
 import {
   getBias,

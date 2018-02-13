@@ -1,24 +1,68 @@
-import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
-import {createDiv} from '../common/cElement';
-import {pCR} from '../support/layout';
-import {retrieveBountyInfo} from './retrieveBountyInfo';
+import jQueryNotPresent from '../common/jQueryNotPresent';
+import {parseBountyPageForWorld} from './parseBountyPageForWorld';
+import retryAjax from '../ajax/retryAjax';
+import setValueJSON from '../system/setValueJSON';
+import {
+  bountyList,
+  bountyUrl,
+  bwNeedsRefresh,
+  doRefresh,
+  invalidateCache,
+  wantedList
+} from './lists';
+import {bountyListDiv, createDivs, wantedListDiv} from './createDivs';
+import {bountyListReset, injectBountyList} from './injectBountyList';
+import {injectWantedList, wantedListReset} from './injectWantedList';
 
-export var bountyListDiv;
-export var wantedListDiv;
+function notRefreshed(enableActiveBountyList, enableWantedList) {
+  if (enableWantedList) {
+    wantedList.isRefreshed = false;
+    injectWantedList(wantedList);
+  }
+  if (enableActiveBountyList) {
+    bountyList.isRefreshed = false;
+    injectBountyList(bountyList);
+  }
+}
 
-function createMiniBox() {
-  return createDiv({className: 'minibox'});
+var refreshConditions = [
+  function() {return !bountyList;},
+  function() {return !wantedList;},
+  function() {return bwNeedsRefresh;}
+];
+
+function needsRefresh() {
+  return refreshConditions.some(function(el) {
+    return el();
+  });
+}
+
+function retrieveBountyInfo(enableActiveList, enableWantedList) {
+  invalidateCache();
+  if (needsRefresh()) {
+    doRefresh();
+    retryAjax(bountyUrl + '1').done(parseBountyPageForWorld);
+  } else {
+    notRefreshed(enableActiveList, enableWantedList);
+  }
+}
+
+function resetList(e) {
+  if (e.target === bountyListReset) {
+    setValueJSON('bountyList', null);
+    retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
+  }
+  if (e.target === wantedListReset) {
+    setValueJSON('wantedList', null);
+    retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
+  }
 }
 
 export function prepareBountyData() {
-  if (calf.enableWantedList) {
-    wantedListDiv = createMiniBox();
-    afterBegin(pCR, wantedListDiv);
-  }
-  if (calf.enableActiveBountyList) {
-    bountyListDiv = createMiniBox();
-    afterBegin(pCR, bountyListDiv);
-  }
+  if (jQueryNotPresent()) {return;}
+  createDivs();
+  bountyListDiv.addEventListener('click', resetList);
+  wantedListDiv.addEventListener('click', resetList);
   retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
 }

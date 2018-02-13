@@ -1,5 +1,5 @@
 import {invManFilter} from './assets';
-import {theInv} from './inventory';
+import {theInv} from './options';
 
 export default function headers() { // jQuery
   var reportTitle;

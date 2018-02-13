@@ -2,8 +2,8 @@ import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
-import {setValue} from '../../system/system';
-import {simpleCheckboxHtml} from '../../settings/settingsPage';
+import setValue from '../../system/setValue';
+import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
   createDiv,
   createInput,

@@ -1,4 +1,4 @@
-import {beginFolderSpanElement} from '../support/dataObj';
+import {beginFolderSpanElement} from '../support/constants';
 
 export default function makeFolderSpans(folders, needsWorn) {
   var wornSelector = '';

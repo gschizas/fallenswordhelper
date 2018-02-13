@@ -1,4 +1,4 @@
-import {openQuickBuffByName} from '../support/layout';
+import openQuickBuffByName from '../common/openQuickBuffByName';
 
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;

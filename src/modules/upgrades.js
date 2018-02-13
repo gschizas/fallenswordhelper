@@ -2,8 +2,10 @@ import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
 import insertElement from './common/insertElement';
 import insertTextBeforeEnd from './common/insertTextBeforeEnd';
+import intValue from './system/intValue';
 import isNaN from './common/isNaN';
-import {intValue, server, setValue} from './system/system';
+import {server} from './system/system';
+import setValue from './system/setValue';
 
 var upgrades;
 var currentFSP;

@@ -2,7 +2,7 @@ import {createDiv} from '../../common/cElement';
 import {getElementById} from '../../common/getElement';
 import getMembrList from '../../ajax/getMembrList';
 import getValue from '../../system/getValue';
-import {nowSecs} from '../../support/dataObj';
+import {nowSecs} from '../../support/constants';
 import {atkStats, defStats, proc} from './assets';
 import {
   containerDiv,

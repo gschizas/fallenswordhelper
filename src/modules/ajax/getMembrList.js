@@ -1,7 +1,7 @@
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
 import getForage from './getForage';
-import {now} from '../support/dataObj';
+import {now} from '../support/constants';
 import retryAjax from './retryAjax';
 import setForage from './setForage';
 
