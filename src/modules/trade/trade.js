@@ -37,6 +37,9 @@ function doCheckAll(evt) {
   var itemList = getElementById('item-div') ||
     getElementById('item-list');
   var itemTables = itemList.querySelectorAll('table:not(.fshHide)');
+  //#if _BETA  //  sendClasses
+  console.log('itemTables', itemTables); // eslint-disable-line no-console
+  //#endif
   var howMany = getHowMany(itemTables);
   var itemsInSt = getElementById('itemsInSt').checked;
   Array.prototype.forEach.call(itemTables, function(el) {
@@ -52,6 +55,9 @@ function doCheckAll(evt) {
 }
 
 function toggleAllPlants(evt) {
+  //#if _BETA  //  sendClasses
+  console.log('toggleAllPlants', evt.target.className); // eslint-disable-line no-console
+  //#endif
   if (evt.target.classList.contains('fshCheckAll')) {doCheckAll(evt);}
 }
 
