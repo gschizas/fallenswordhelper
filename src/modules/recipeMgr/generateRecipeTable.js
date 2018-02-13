@@ -1,5 +1,5 @@
 import getValue from '../system/getValue';
-import {playerId} from '../support/layout';
+import playerId from '../common/playerId';
 import setForage from '../ajax/setForage';
 import shouldBeArray from '../system/shouldBeArray';
 

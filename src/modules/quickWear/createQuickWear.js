@@ -1,6 +1,6 @@
 import {beginFolderSpanElement} from '../support/dataObj';
 import {imageServer} from '../system/system';
-import {playerId} from '../support/layout';
+import playerId from '../common/playerId';
 import {createDiv, createTBody, createTable} from '../common/cElement';
 
 function alpha(a, b) {
