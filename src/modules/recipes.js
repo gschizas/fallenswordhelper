@@ -5,6 +5,7 @@ import findNode from './system/findNode';
 import findNodes from './system/findNodes';
 import {getElementById} from './common/getElement';
 import {guideUrl} from './support/dataObj';
+import jQueryPresent from './common/jQueryPresent';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import retryAjax from './ajax/retryAjax';
@@ -122,6 +123,8 @@ function injectViewRecipe() { // Legacy
 }
 
 export default function inventing() {
-  injectViewRecipe();
-  injectInvent();
+  if (jQueryPresent()) {
+    injectViewRecipe();
+    injectInvent();
+  }
 }

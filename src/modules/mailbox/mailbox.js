@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import {itemRE} from '../support/dataObj';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import outputResult from '../common/outputResult';
 import retryAjax from '../ajax/retryAjax';
 
@@ -58,6 +59,7 @@ function toggleQuickTake() { // jQuery
 }
 
 export default function injectMailbox() { // Bad jQuery
+  if (jQueryNotPresent()) {return;}
   var items = $('#pCC a');
   if (items.length === 0) {return;} // Empty mailbox
   $('#pCC').wrapInner('<div id="regularMailbox" />');

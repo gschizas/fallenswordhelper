@@ -3,6 +3,7 @@ import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import getInventoryById from '../ajax/getInventoryById';
 import {itemRE} from '../support/dataObj';
+import jQueryPresent from '../common/jQueryPresent';
 import makeFolderSpans from '../common/makeFolderSpans';
 import {pCC} from '../support/layout';
 import toggleForce from '../common/toggleForce';
@@ -121,6 +122,8 @@ function getItems() {
 }
 
 export default function craftForge() {
-  getInventoryById().done(inventory);
-  add(3, getItems);
+  if (jQueryPresent()) {
+    getInventoryById().done(inventory);
+    add(3, getItems);
+  }
 }

@@ -3,6 +3,7 @@ import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
 import isObject from '../common/isObject';
+import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/dataObj';
 import {onlineDot} from '../common/colouredDots';
 import {pCC} from '../support/layout';
@@ -154,6 +155,7 @@ function looksLikeTopRated() {
 }
 
 var topRatedTests = [
+  function() {return jQueryPresent();},
   function() {return isObject(pCC);},
   function() {return isObject(pCC.firstElementChild);},
   function() {return isObject(pCC.firstElementChild.rows);},
