@@ -138,5 +138,5 @@ function hasJquery(injector) { // jQuery.min
 }
 
 export default function insertQuickWear(injector) {
-  if (typeof $ !== 'function') {hasJquery(injector);}
+  if (typeof $ === 'function') {hasJquery(injector);}
 }
