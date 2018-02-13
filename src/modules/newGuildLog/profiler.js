@@ -31,14 +31,15 @@ var lookup = [
 ];
 
 export function rowProfile(data) {
-  var myIndex = lookup.findIndex(function(ary) {
-    return ary.some(function(el) {
-      if (isType(el, 'string')) {
-        return data.includes(el);
-      }
-      return el.test(data);
-    });
-  });
+
+  function isMatch(el) {
+    if (isType(el, 'string')) {
+      return data.includes(el);
+    }
+    return el.test(data);
+  }
+
+  var myIndex = lookup.findIndex(function(ary) {return ary.some(isMatch);});
   if (myIndex === -1) {return 0;}
   return myIndex;
 }
