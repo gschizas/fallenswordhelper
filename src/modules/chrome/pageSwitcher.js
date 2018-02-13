@@ -22,6 +22,7 @@ import injectNewGuildLog from '../newGuildLog/newGuildLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectProfile from '../profile/profile';
+import injectProfileDropItems from '../dropItems/injectProfileDropItems';
 import injectQuickBuff from '../quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
@@ -30,6 +31,7 @@ import injectSaveSettings from '../settings/load';
 import injectScavenging from '../scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';
 import injectSettings from '../settings/injectSettings';
+import injectStoreItems from '../dropItems/injectStoreItems';
 import injectTitan from '../scoutTower/injectTitan';
 import injectTopRated from '../topRated/toprated';
 import injectTrade from '../trade/trade';
@@ -60,7 +62,6 @@ import {
   injectFsBoxContent,
   injectNotepad
 } from '../misc';
-import {injectProfileDropItems, injectStoreItems} from '../dropItems/dropItems';
 import {injectQuestBookFull, injectQuestTracker} from '../questBook';
 import {newsFsbox, newsShoutbox} from '../news/news';
 
