@@ -1,4 +1,4 @@
-import {beginFolderSpanElement} from '../support/dataObj';
+import {beginFolderSpanElement} from '../support/constants';
 import {imageServer} from '../system/system';
 import playerId from '../common/playerId';
 import {createDiv, createTBody, createTable} from '../common/cElement';

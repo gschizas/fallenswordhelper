@@ -1,6 +1,6 @@
 import getUrlParameter from './system/getUrlParameter';
 import getValue from './system/getValue';
-import {guideUrl} from './support/dataObj';
+import {guideUrl} from './support/constants';
 import {imageServer} from './system/system';
 import {pCC} from './support/layout';
 import setValue from './system/setValue';

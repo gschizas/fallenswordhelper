@@ -7,7 +7,7 @@ import formatLastActivity from '../system/formatLastActivity';
 import {getElementById} from '../common/getElement';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
-import {nowSecs} from '../support/dataObj';
+import {nowSecs} from '../support/constants';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import {pCR} from '../support/layout';
 

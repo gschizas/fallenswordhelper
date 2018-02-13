@@ -1,4 +1,4 @@
-import {months} from '../support/dataObj';
+import {months} from '../support/constants';
 
 export default function parseDateAsTimestamp(textDate) {
   var dateAry = textDate.split(/[: /[]/);

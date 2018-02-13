@@ -1,6 +1,6 @@
 import {createTr} from './common/cElement';
 import getValue from './system/getValue';
-import {now} from './support/dataObj';
+import {now} from './support/constants';
 import outputFormat from './system/outputFormat';
 
 function dontPost() {

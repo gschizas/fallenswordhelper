@@ -1,6 +1,6 @@
 import bitwiseAnd from '../common/bitwiseAnd';
 import calf from '../support/calf';
-import {def_fetch_worldRealmActions} from '../support/dataObj';
+import {def_fetch_worldRealmActions} from '../support/constants';
 import jsonParse from '../common/jsonParse';
 import setValue from '../system/setValue';
 

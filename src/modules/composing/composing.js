@@ -7,7 +7,7 @@ import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import insertElementBefore from '../common/insertElementBefore';
 import jQueryPresent from '../common/jQueryPresent';
-import {now} from '../support/dataObj';
+import {now} from '../support/constants';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import rnd from '../system/rnd';

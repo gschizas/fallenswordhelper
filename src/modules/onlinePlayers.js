@@ -1,10 +1,12 @@
 import createDocument from './system/createDocument';
 import currentGuildId from './common/currentGuildId';
+import {defaults} from './support/dataObj';
 import fallback from './system/fallback';
 import getForage from './ajax/getForage';
 import getValue from './system/getValue';
 import intValue from './system/intValue';
 import jQueryNotPresent from './common/jQueryNotPresent';
+import {now} from './support/constants';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
 import setValue from './system/setValue';
@@ -13,7 +15,6 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from './common/levelHighlight';
-import {defaults, now} from './support/dataObj';
 
 var context;
 var onlinePlayers;

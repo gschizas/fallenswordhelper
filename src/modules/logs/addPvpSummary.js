@@ -2,7 +2,7 @@ import addCommas from '../system/addCommas';
 import calf from '../support/calf';
 import createDocument from '../system/createDocument';
 import getForage from '../ajax/getForage';
-import {nowSecs} from '../support/dataObj';
+import {nowSecs} from '../support/constants';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';

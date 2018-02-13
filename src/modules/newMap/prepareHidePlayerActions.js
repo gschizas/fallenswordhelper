@@ -1,4 +1,4 @@
-import {def_afterUpdateActionlist} from '../support/dataObj';
+import {def_afterUpdateActionlist} from '../support/constants';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import setValue from '../system/setValue';

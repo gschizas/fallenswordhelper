@@ -1,6 +1,6 @@
 import fallback from '../system/fallback';
 import openQuickBuffByName from './openQuickBuffByName';
-import {places} from '../support/dataObj';
+import {places} from '../support/constants';
 import {createButton, createLi, createUl} from './cElement';
 
 export default function doBuffLinks(members) {

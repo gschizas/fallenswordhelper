@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import {guideUrl} from '../support/dataObj';
+import {guideUrl} from '../support/constants';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import playerName from '../common/playerName';
 import setValue from '../system/setValue';

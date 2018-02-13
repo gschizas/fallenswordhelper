@@ -1,5 +1,5 @@
 import addCommas from '../../system/addCommas';
-import {defenderMultiplier} from '../../support/dataObj';
+import {defenderMultiplier} from '../../support/constants';
 import fallback from '../../system/fallback';
 import {playerDataObject} from '../../common/common';
 import reduceBuffArray from '../../common/reduceBuffArray';

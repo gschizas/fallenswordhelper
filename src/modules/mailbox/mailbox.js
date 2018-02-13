@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import {itemRE} from '../support/dataObj';
+import {itemRE} from '../support/constants';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import outputResult from '../common/outputResult';
 import retryAjax from '../ajax/retryAjax';

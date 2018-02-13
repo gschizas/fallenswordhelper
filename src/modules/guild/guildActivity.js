@@ -2,7 +2,7 @@ import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import guildManage from '../app/guild/manage';
-import {nowSecs} from '../support/dataObj';
+import {nowSecs} from '../support/constants';
 import setForage from '../ajax/setForage';
 import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';
 

@@ -6,7 +6,7 @@ import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import roundToString from '../common/roundToString';
 import setForage from '../ajax/setForage';
 import {createAnchor, createTBody, createTable} from '../common/cElement';
-import {guideUrl, now} from '../support/dataObj';
+import {guideUrl, now} from '../support/constants';
 
 function getTitanName(aRow) {
   return aRow.cells[0].firstElementChild.getAttribute('oldtitle');

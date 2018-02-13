@@ -1,5 +1,5 @@
 import getValue from '../system/getValue';
-import {newGuildLogLoc, newGuildLogUrl} from '../support/dataObj';
+import {newGuildLogLoc, newGuildLogUrl} from '../support/constants';
 
 function testForGuildLogMsg(guildLogNode) {
   return location.search !== newGuildLogLoc ||

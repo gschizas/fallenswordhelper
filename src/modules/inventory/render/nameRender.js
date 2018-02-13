@@ -1,5 +1,5 @@
 import fallback from '../../system/fallback';
-import {rarity} from '../../support/dataObj';
+import {rarity} from '../../support/constants';
 import {theInv} from '../options';
 
 function getT(player_id) {

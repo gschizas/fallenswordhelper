@@ -1,7 +1,7 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
-import {nowSecs} from '../support/dataObj';
+import {nowSecs} from '../support/constants';
 import setValue from '../system/setValue';
 
 export var bountyList;

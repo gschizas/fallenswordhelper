@@ -4,7 +4,7 @@ import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
 import isObject from '../common/isObject';
 import jQueryPresent from '../common/jQueryPresent';
-import {nowSecs} from '../support/dataObj';
+import {nowSecs} from '../support/constants';
 import {onlineDot} from '../common/colouredDots';
 import {pCC} from '../support/layout';
 import {playerDataObject} from '../common/common';

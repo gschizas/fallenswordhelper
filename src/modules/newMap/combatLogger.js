@@ -1,4 +1,4 @@
-import {def_suffixSuccessActionResponse} from '../support/dataObj';
+import {def_suffixSuccessActionResponse} from '../support/constants';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import setForage from '../ajax/setForage';

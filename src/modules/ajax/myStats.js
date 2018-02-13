@@ -1,7 +1,7 @@
 import calf from '../support/calf';
 import getForage from './getForage';
 import getProfile from './getProfile';
-import {now} from '../support/dataObj';
+import {now} from '../support/constants';
 import playerName from '../common/playerName';
 import setForage from './setForage';
 

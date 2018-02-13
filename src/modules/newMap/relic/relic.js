@@ -1,5 +1,5 @@
 import createDocument from '../../system/createDocument';
-import {def_suffixSuccessActionResponse} from '../../support/dataObj';
+import {def_suffixSuccessActionResponse} from '../../support/constants';
 import getGroupStats from '../../ajax/getGroupStats';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';

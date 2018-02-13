@@ -15,7 +15,7 @@ import {
   totalPct
 } from './placeholders';
 import {getKillsPct, getTitanString} from '../../scoutTower/injectScouttower';
-import {months, now} from '../../support/dataObj';
+import {months, now} from '../../support/constants';
 
 function formatOffset(secs) {
   var aDate = new Date(now + secs * 1000);

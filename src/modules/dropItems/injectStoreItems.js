@@ -17,7 +17,7 @@ import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
 import setValue from '../system/setValue';
 import toggleForce from '../common/toggleForce';
-import {guideUrl, itemRE, rarity} from '../support/dataObj';
+import {guideUrl, itemRE, rarity} from '../support/constants';
 
 var disableItemColoring;
 var showExtraLinks;

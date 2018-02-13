@@ -1,5 +1,5 @@
 import combatLogger from './combatLogger';
-import {def_afterUpdateActionlist} from '../support/dataObj';
+import {def_afterUpdateActionlist} from '../support/constants';
 import doNotKill from './doNotKill';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';

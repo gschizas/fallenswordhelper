@@ -1,5 +1,5 @@
 import calf from '../../support/calf';
-import {def_playerBuffs} from '../../support/dataObj';
+import {def_playerBuffs} from '../../support/constants';
 import {missingBuffsDiv} from './buildFshDivs';
 import {
   huntingBuffs,

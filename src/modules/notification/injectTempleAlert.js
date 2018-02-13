@@ -3,7 +3,7 @@ import displayDisconnectedFromGodsMessage
   from './displayDisconnectedFromGodsMessage';
 import getValue from '../system/getValue';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import {now} from '../support/dataObj';
+import {now} from '../support/constants';
 import {parseTemplePage} from './parseTemplePage';
 import retryAjax from '../ajax/retryAjax';
 

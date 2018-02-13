@@ -1,7 +1,7 @@
 import add from '../support/task';
 import getValue from '../system/getValue';
 import moreToDo from '../common/moreToDo';
-import {lastActivityRE, nowSecs} from '../support/dataObj';
+import {lastActivityRE, nowSecs} from '../support/constants';
 
 var dotList;
 var dotCount;

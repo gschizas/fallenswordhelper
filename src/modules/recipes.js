@@ -4,7 +4,7 @@ import fallback from './system/fallback';
 import findNode from './system/findNode';
 import findNodes from './system/findNodes';
 import {getElementById} from './common/getElement';
-import {guideUrl} from './support/dataObj';
+import {guideUrl} from './support/constants';
 import jQueryPresent from './common/jQueryPresent';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';

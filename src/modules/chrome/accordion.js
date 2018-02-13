@@ -9,7 +9,7 @@ import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertElementAfter from '../common/insertElementAfter';
 import jQueryDialog from './jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import {newGuildLogUrl} from '../support/dataObj';
+import {newGuildLogUrl} from '../support/constants';
 import {createAnchor, createLi} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';

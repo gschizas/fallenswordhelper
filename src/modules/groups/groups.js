@@ -7,7 +7,7 @@ import getGroupStats from '../ajax/getGroupStats';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import {months} from '../support/dataObj';
+import {months} from '../support/constants';
 import {onlineDot} from '../common/colouredDots';
 import retryAjax from '../ajax/retryAjax';
 import {server} from '../system/system';

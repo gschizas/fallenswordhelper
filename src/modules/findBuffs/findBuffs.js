@@ -4,7 +4,7 @@ import createDocument from '../system/createDocument';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import {lastActivityRE} from '../support/dataObj';
+import {lastActivityRE} from '../support/constants';
 import {pCC} from '../support/layout';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';

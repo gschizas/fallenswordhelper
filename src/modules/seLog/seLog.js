@@ -1,6 +1,6 @@
 import calf from '../support/calf';
 import getForage from '../ajax/getForage';
-import {nowSecs} from '../support/dataObj';
+import {nowSecs} from '../support/constants';
 import setForage from '../ajax/setForage';
 import superelite from '../app/superelite';
 

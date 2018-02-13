@@ -2,7 +2,7 @@ import add from '../support/task';
 import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import getInventoryById from '../ajax/getInventoryById';
-import {itemRE} from '../support/dataObj';
+import {itemRE} from '../support/constants';
 import jQueryPresent from '../common/jQueryPresent';
 import makeFolderSpans from '../common/makeFolderSpans';
 import {pCC} from '../support/layout';
