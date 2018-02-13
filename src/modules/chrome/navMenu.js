@@ -1,5 +1,5 @@
 export default function navMenu() { // jQuery
-  if (!$) {return;}
+  if (typeof $ !== 'function') {return;}
   var myNav = $('#nav').data('nav');
   if (!myNav) {return;}
   var oldSave = myNav._saveState;

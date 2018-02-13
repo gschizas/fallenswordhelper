@@ -20,6 +20,6 @@ function doWeNeedToParse() {
 
 export default function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
-  if (calf.cmd === 'temple' || !$) {return;}
+  if (calf.cmd === 'temple' || typeof $ !== 'function') {return;}
   doWeNeedToParse();
 }

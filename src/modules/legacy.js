@@ -261,7 +261,7 @@ function injectOldMap() {
 }
 
 export default function injectWorld() {
-  if (!$) {return;}
+  if (typeof $ !== 'function') {return;}
   // -1 = world page
   // 0 = quest responce
   // 1 = view creature

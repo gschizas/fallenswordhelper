@@ -162,7 +162,7 @@ function createEventListeners() {
 }
 
 export default function injectSettings() { // jQuery.min
-  if (!$) {return;}
+  if (typeof $ !== 'function') {return;}
   getVars();
   setupConfigData();
   var settingsTabs = getElementById('settingsTabs');

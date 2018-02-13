@@ -104,7 +104,7 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
 }
 
 export default function injectQuickMsgDialogJQ() {
-  if (!$) {return;}
+  if (typeof $ !== 'function') {return;}
   enterForSendMessage = getValue('enterForSendMessage');
   window.openQuickMsgDialog = openQuickMsgDialog;
 }

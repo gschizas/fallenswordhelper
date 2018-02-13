@@ -223,7 +223,7 @@ function makeDiv(data) {
 }
 
 export default function prepareAllyEnemyList() { // jQuery.min
-  if (!$) {return;}
+  if (typeof $ !== 'function') {return;}
   myStats(false)
     .done(function(data) {
       add(3, makeDiv, [data]);

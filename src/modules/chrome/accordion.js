@@ -152,7 +152,7 @@ function adjustHeight() {
 }
 
 export default function injectMenu() {
-  if (!getElementById('pCL') || !$) {return;}
+  if (!getElementById('pCL') || typeof $ !== 'function') {return;}
   guildId = currentGuildId();
   updateQuestLink();
   // character
