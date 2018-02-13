@@ -1,8 +1,9 @@
 import {closestTable} from '../common/closest';
 import dialog from '../ajax/dialog';
+import infoBox from '../common/infoBox';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
-import {infoBox, pCC} from '../support/layout';
 
 function translateReturnInfo(data) {
   var info = infoBox(data);

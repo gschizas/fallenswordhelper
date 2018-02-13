@@ -7,7 +7,7 @@ import getValue from '../system/getValue';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
-import {quickBuffHref} from '../support/layout';
+import quickBuffHref from '../common/quickBuffHref';
 import {addPvpSummary, initCache} from './addPvpSummary';
 
 var myPlayer = {};

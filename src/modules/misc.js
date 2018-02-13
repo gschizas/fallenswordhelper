@@ -2,6 +2,8 @@ import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
+import {pCC} from './support/layout';
+import quickBuffHref from './common/quickBuffHref';
 import setForage from './ajax/setForage';
 import {
   calculateBoundaries,
@@ -10,7 +12,6 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from './common/levelHighlight';
-import {pCC, quickBuffHref} from './support/layout';
 
 export function injectFindPlayer() { // Bad jQuery
   if (jQueryNotPresent()) {return;}

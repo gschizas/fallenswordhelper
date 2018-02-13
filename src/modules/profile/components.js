@@ -2,7 +2,7 @@ import createDocument from '../system/createDocument';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
-import {infoBox} from '../support/layout';
+import infoBox from '../common/infoBox';
 import insertQuickExtract from '../quickExtract';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';

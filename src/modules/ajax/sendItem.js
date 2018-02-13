@@ -1,6 +1,6 @@
 import dialog from './dialog';
 import getValue from '../system/getValue';
-import {infoBox} from '../support/layout';
+import infoBox from '../common/infoBox';
 import retryAjax from './retryAjax';
 
 function htmlResult(data) { // TODO change to app code to avoid 302 redirect
