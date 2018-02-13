@@ -5,6 +5,7 @@ import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import retryAjax from '../ajax/retryAjax';
@@ -158,7 +159,7 @@ export default function injectGuild() {
   add(3, structureToggle);
   add(3, buffLinks);
   add(3, selfRecallLink);
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   // Detailed conflict information
   if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo);

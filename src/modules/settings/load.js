@@ -1,11 +1,12 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonParse from '../common/jsonParse';
 import {pCC} from '../support/layout';
 import setValue from '../system/setValue';
 
 export default function injectSaveSettings() { // Hybrid
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var content = pCC;
   var fshSettings = {};
   var list = GM_listValues();

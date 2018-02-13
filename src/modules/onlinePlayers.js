@@ -4,6 +4,7 @@ import fallback from './system/fallback';
 import getForage from './ajax/getForage';
 import getValue from './system/getValue';
 import intValue from './system/intValue';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
 import setValue from './system/setValue';
@@ -218,7 +219,7 @@ function injectOnlinePlayersNew() { // jQuery
 }
 
 export default function injectOnlinePlayers(content) { // jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   if (content) {
     context = $(content);
   } else {

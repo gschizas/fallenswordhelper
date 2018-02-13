@@ -3,6 +3,7 @@ import calf from '../support/calf';
 import createDocument from '../system/createDocument';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {lastActivityRE} from '../support/dataObj';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
@@ -194,7 +195,7 @@ function findBuffsClearResults() { // Legacy
 }
 
 function findAnyStart(progMsg) { // jQuery.min // jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   characterName = playerName();
   getElementById('buffNicks').innerHTML = findBuffNicks;
   bufferProgress = getElementById('bufferProgress');

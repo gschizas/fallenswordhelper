@@ -1,6 +1,7 @@
 import doSortParams from '../common/doSortParams';
 import generateRecipeTable from './generateRecipeTable';
 import getForage from '../ajax/getForage';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import numberSort from '../system/numberSort';
 import {pCC} from '../support/layout';
 import stringSort from '../system/stringSort';
@@ -43,7 +44,7 @@ function rmEvtHdl(evt) {
 }
 
 export default function injectRecipeManager(injector) { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
   getForage('fsh_recipeBook').done(gotRecipeBook.bind(null, content));
   content.addEventListener('click', rmEvtHdl);

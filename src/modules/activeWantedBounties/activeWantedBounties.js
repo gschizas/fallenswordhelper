@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {parseBountyPageForWorld} from './parseBountyPageForWorld';
 import retryAjax from '../ajax/retryAjax';
 import setValueJSON from '../system/setValueJSON';
@@ -59,7 +60,7 @@ function resetList(e) {
 }
 
 export function prepareBountyData() {
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   createDivs();
   bountyListDiv.addEventListener('click', resetList);
   wantedListDiv.addEventListener('click', resetList);

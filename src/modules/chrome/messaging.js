@@ -2,6 +2,7 @@ import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import setValueJSON from '../system/setValueJSON';
 
 var enterForSendMessage;
@@ -104,7 +105,7 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
 }
 
 export default function injectQuickMsgDialogJQ() {
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   enterForSendMessage = getValue('enterForSendMessage');
   window.openQuickMsgDialog = openQuickMsgDialog;
 }

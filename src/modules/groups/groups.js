@@ -6,6 +6,7 @@ import {getElementById} from '../common/getElement';
 import getGroupStats from '../ajax/getGroupStats';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {months} from '../support/dataObj';
 import {onlineDot} from '../common/colouredDots';
 import retryAjax from '../ajax/retryAjax';
@@ -195,7 +196,7 @@ function doGroupPaint(m) { // jQuery
 }
 
 export default function injectGroups() { // jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   getMembrList(false)
     .done(doGroupPaint);
   displayMinGroupLevel();

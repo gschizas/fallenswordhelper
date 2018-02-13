@@ -7,6 +7,7 @@ import fastDebuff from './debuff';
 import getUrlParameter from '../system/getUrlParameter';
 import highlightPvpProtection from './highlightPvpProtection';
 import injectFastWear from './fastWear';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import nekidBtn from './nekidBtn';
 import profileComponents from './components';
 import {profileInjectGuildRel} from './profileInjectGuildRel';
@@ -50,7 +51,7 @@ function yuuzhan(playername, avyImg) {
 }
 
 export default function injectProfile() { // Legacy
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}

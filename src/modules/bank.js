@@ -1,4 +1,5 @@
 import createDocument from './system/createDocument';
+import jQueryPresent from './common/jQueryPresent';
 import retryAjax from './ajax/retryAjax';
 
 var playerBank = {
@@ -133,7 +134,7 @@ function hasJquery() { // jQuery
 }
 
 function ajaxifyBank() {
-  if (typeof $ === 'function') {hasJquery();}
+  if (jQueryPresent()) {hasJquery();}
 }
 
 export function injectGuildBank() {

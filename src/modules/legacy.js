@@ -7,6 +7,7 @@ import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
 import {imageServer} from './system/system';
 import intValue from './system/intValue';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import {log} from './support/debug';
 import retryAjax from './ajax/retryAjax';
 import setValue from './system/setValue';
@@ -261,7 +262,7 @@ function injectOldMap() {
 }
 
 export default function injectWorld() {
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   // -1 = world page
   // 0 = quest responce
   // 1 = view creature

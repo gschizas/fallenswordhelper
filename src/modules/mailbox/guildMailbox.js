@@ -1,5 +1,6 @@
 import {closestTable} from '../common/closest';
 import dialog from '../ajax/dialog';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import retryAjax from '../ajax/retryAjax';
 import {infoBox, pCC} from '../support/layout';
 
@@ -37,7 +38,7 @@ function guildMailboxEvent(e) { // jQuery.min
 }
 
 export default function guildMailbox() {
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   pCC.addEventListener('click', guildMailboxEvent);
   document.querySelector('#pCC td[height="25"]')
     .insertAdjacentHTML('beforeend',

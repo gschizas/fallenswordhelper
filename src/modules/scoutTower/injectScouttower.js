@@ -1,5 +1,6 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import roundToString from '../common/roundToString';
@@ -125,6 +126,6 @@ function gotOldTitans(oldTitans) {
 }
 
 export default function injectScouttower() { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   getForage('fsh_titans').done(gotOldTitans); // Pref
 }

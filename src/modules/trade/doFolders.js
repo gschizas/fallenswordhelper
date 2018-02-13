@@ -3,6 +3,7 @@ import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
 import insertElementBefore from '../common/insertElementBefore';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {createDiv, createTr} from '../common/cElement';
 import {time, timeEnd} from '../support/debug';
 
@@ -112,7 +113,7 @@ function processTrade(data) {
 }
 
 export default function doFolders() { // jQuery.min // jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   getInventoryById().done(function(data) {
     add(3, processTrade, [data]);
   });

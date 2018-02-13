@@ -9,6 +9,7 @@ import getInventory from '../ajax/getInventory';
 import getMembrList from '../ajax/getMembrList';
 import headers from './headers';
 import {imageServer} from '../system/system';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
 import {extendOptions, storeTheInv} from './options';
@@ -74,7 +75,7 @@ function syncInvMan() { // jQuery
 }
 
 export function injectInventoryManagerNew() {
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   doSpinner();
   syncInvMan();
 }

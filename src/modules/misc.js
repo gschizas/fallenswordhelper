@@ -1,5 +1,6 @@
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
 import setForage from './ajax/setForage';
 import {
@@ -12,7 +13,7 @@ import {
 import {pCC, quickBuffHref} from './support/layout';
 
 export function injectFindPlayer() { // Bad jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   calculateBoundaries();
   var findPlayerButton = $('input[value="Find Player"]');
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
@@ -34,7 +35,7 @@ export function injectFindPlayer() { // Bad jQuery
 }
 
 export function injectNotepad() { // jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   $('#notepad_notes')
     .attr('cols', '90')
     .attr('rows', '30')
@@ -42,7 +43,7 @@ export function injectNotepad() { // jQuery
 }
 
 export function injectFsBoxContent(injector) { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
   content.innerHTML = makePageTemplate({
     title: 'FS Box Log',

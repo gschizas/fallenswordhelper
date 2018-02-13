@@ -5,6 +5,7 @@ import {createDiv} from '../common/cElement';
 import fallback from '../system/fallback';
 import formatLastActivity from '../system/formatLastActivity';
 import {getElementById} from '../common/getElement';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/dataObj';
 import openQuickBuffByName from '../common/openQuickBuffByName';
@@ -223,7 +224,7 @@ function makeDiv(data) {
 }
 
 export default function prepareAllyEnemyList() { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   myStats(false)
     .done(function(data) {
       add(3, makeDiv, [data]);

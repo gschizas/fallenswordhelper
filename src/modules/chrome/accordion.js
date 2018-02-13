@@ -8,6 +8,7 @@ import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertElementAfter from '../common/insertElementAfter';
 import jQueryDialog from './jQueryDialog';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {newGuildLogUrl} from '../support/dataObj';
 import {createAnchor, createLi} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
@@ -152,7 +153,7 @@ function adjustHeight() {
 }
 
 export default function injectMenu() {
-  if (!getElementById('pCL') || typeof $ !== 'function') {return;}
+  if (!getElementById('pCL') || jQueryNotPresent()) {return;}
   guildId = currentGuildId();
   updateQuestLink();
   // character

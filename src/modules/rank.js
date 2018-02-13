@@ -5,6 +5,7 @@ import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import getValue from './system/getValue';
 import insertElement from './common/insertElement';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import moreToDo from './common/moreToDo';
 import retryAjax from './ajax/retryAjax';
 import {pCC, playerName} from './support/layout';
@@ -169,7 +170,7 @@ function getRanks(membrList) {
 }
 
 export default function injectGuildRanks() { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   getMembrList(true).done(function(membrList) {
     add(3, getRanks, [membrList]);
   });

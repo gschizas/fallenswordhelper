@@ -4,6 +4,7 @@ import {getElementById} from './common/getElement';
 import getInventory from './ajax/getInventory';
 import {imageServer} from './system/system';
 import jConfirm from './common/jConfirm';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
@@ -134,7 +135,7 @@ var extractEvents = [
 ];
 
 export default function insertQuickExtract(injector) { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
   content.innerHTML = '<div class="qeHead"><b>Quick Extract</b></div>' +
     'Select which type of plants you wish to extract all of. Only ' +

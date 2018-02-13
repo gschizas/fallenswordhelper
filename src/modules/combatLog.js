@@ -1,6 +1,7 @@
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import jConfirm from './common/jConfirm';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
 
@@ -58,7 +59,7 @@ function gotCombatLog(data) {
 }
 
 export default function injectNotepadShowLogs(injector) { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   content = injector || pCC;
   getForage('fsh_combatLog').done(gotCombatLog);
 }

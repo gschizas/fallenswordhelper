@@ -5,6 +5,7 @@ import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jConfirm from '../common/jConfirm';
+import jQueryPresent from '../common/jQueryPresent';
 import loadInventory from '../app/profile/loadInventory';
 import {pCC} from '../support/layout';
 import {sendEvent} from '../support/fshGa';
@@ -138,5 +139,5 @@ function hasJquery(injector) { // jQuery.min
 }
 
 export default function insertQuickWear(injector) {
-  if (typeof $ === 'function') {hasJquery(injector);}
+  if (jQueryPresent()) {hasJquery(injector);}
 }

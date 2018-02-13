@@ -1,5 +1,7 @@
+import jQueryNotPresent from '../common/jQueryNotPresent';
+
 export default function navMenu() { // jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var myNav = $('#nav').data('nav');
   if (!myNav) {return;}
   var oldSave = myNav._saveState;

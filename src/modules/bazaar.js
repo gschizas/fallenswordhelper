@@ -1,5 +1,6 @@
 import buyitem from './app/potionbazaar/buyitem';
 import {getElementById} from './common/getElement';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
@@ -71,7 +72,7 @@ function buy() { // jQuery.min
 }
 
 export default function injectBazaar() { // TODO stop using getElementById
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = pCC.getElementsByTagName('A');

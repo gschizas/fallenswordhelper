@@ -4,6 +4,7 @@ import doSortParams from './common/doSortParams';
 import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import {imageServer} from './system/system';
+import jQueryPresent from './common/jQueryPresent';
 import numberSort from './system/numberSort';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
@@ -149,5 +150,5 @@ function haveJquery(injector) { // jQuery.min
 }
 
 export default function injectMonsterLog(injector) {
-  if (typeof $ === 'function') {haveJquery(injector);}
+  if (jQueryPresent()) {haveJquery(injector);}
 }

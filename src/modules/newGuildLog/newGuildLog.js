@@ -7,6 +7,7 @@ import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
@@ -238,6 +239,6 @@ function gotOptions(guildLog) {
 }
 
 export default function injectNewGuildLog() { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   getForage('fsh_guildLog').done(gotOptions);
 }

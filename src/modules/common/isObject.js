@@ -1,1 +1,3 @@
-export default function isObject(e) {return typeof e === 'object';}
+import isType from './isType';
+
+export default function isObject(e) {return isType(e, 'object');}

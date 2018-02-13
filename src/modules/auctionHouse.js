@@ -3,6 +3,7 @@ import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
 import {imageServer} from './system/system';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 import retryAjax from './ajax/retryAjax';
@@ -51,7 +52,7 @@ function autoFill() {
 }
 
 export function injectAuctionHouse() {
-  if (typeof $ !== 'function' || !pCC) {return;}
+  if (jQueryNotPresent() || !pCC) {return;}
   makeCancelAll();
   autoFill();
   getElementById('sort0').click();

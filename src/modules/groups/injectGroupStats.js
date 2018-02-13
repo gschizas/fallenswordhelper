@@ -1,6 +1,7 @@
 import addCommas from '../system/addCommas';
 import getMercStats from '../ajax/getMercStats';
 import groupViewStats from '../ajax/groupViewStats';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 
 var groupStats;
 
@@ -18,7 +19,7 @@ function parseMercStats(mercStats) {
 }
 
 export default function injectGroupStats() { // jQuery
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   groupStats = groupViewStats(document);
   if (groupStats.attackElement) {
     getMercStats().done(parseMercStats);

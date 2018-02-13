@@ -8,6 +8,7 @@ import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import insertElement from './common/insertElement';
 import intValue from './system/intValue';
+import jQueryNotPresent from './common/jQueryNotPresent';
 import {pCC} from './support/layout';
 import retryAjax from './ajax/retryAjax';
 import {time, timeEnd} from './support/debug';
@@ -243,7 +244,7 @@ function injectAdvisorWeekly() { // jQuery
 }
 
 export default function injectAdvisor() {
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {

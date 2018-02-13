@@ -10,6 +10,7 @@ import getInventoryById from '../ajax/getInventoryById';
 import getValue from '../system/getValue';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
 import moveItemsToFolder from './moveItemsToFolder';
 import {pCC} from '../support/layout';
@@ -248,7 +249,7 @@ function inventory(data) {
 }
 
 export function injectStoreItems() {
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   getInventoryById().done(inventory);
   add(3, getItems);
 }

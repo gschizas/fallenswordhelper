@@ -4,6 +4,7 @@ import fallback from '../system/fallback';
 import findNode from '../system/findNode';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import {quickBuffHref} from '../support/layout';
@@ -246,7 +247,7 @@ function addLogWidgetsOld() { // Legacy
 }
 
 export default function addLogWidgets() { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   $.when(
     getMembrList(false),
     myStats(false).done(function(data) {

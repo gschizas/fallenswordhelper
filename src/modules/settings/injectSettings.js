@@ -6,6 +6,7 @@ import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';
 import setValue from '../system/setValue';
@@ -162,7 +163,7 @@ function createEventListeners() {
 }
 
 export default function injectSettings() { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   getVars();
   setupConfigData();
   var settingsTabs = getElementById('settingsTabs');

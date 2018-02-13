@@ -1,4 +1,5 @@
 import {dontPost} from './assets';
+import jQueryPresent from '../common/jQueryPresent';
 
 function gotoPage(pageId) {
   window.location = 'index.php?cmd=arena&subcmd=completed&page=' +
@@ -24,5 +25,5 @@ function overrideButtons() {
 }
 
 export default function completedArenas() { // jQuery
-  if (typeof $ === 'function') {overrideButtons();}
+  if (jQueryPresent()) {overrideButtons();}
 }

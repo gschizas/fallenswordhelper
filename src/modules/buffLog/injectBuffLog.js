@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import makePageTemplate from '../lists/makePageTemplate';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
@@ -13,7 +14,7 @@ function clearBuffLog() {
 }
 
 export default function injectBuffLog(injector) { // jQuery.min
-  if (typeof $ !== 'function') {return;}
+  if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
   content.innerHTML = makePageTemplate({
     title: 'Buff Log',
