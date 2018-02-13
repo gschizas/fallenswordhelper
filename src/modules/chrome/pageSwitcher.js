@@ -36,7 +36,7 @@ import injectTitan from '../scoutTower/injectTitan';
 import injectTopRated from '../topRated/toprated';
 import injectTrade from '../trade/trade';
 import injectViewGuild from '../guild/injectViewGuild';
-import injectWorld from '../legacy';
+import injectWorld from '../legacy/legacy';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import inventing from '../recipes';
