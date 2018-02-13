@@ -4,7 +4,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/dataObj';
 import openQuickBuffByName from '../common/openQuickBuffByName';
-import {playerName} from '../support/layout';
+import playerName from '../common/playerName';
 import setValue from '../system/setValue';
 import {
   createButton,

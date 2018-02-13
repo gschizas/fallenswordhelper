@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import getForage from './getForage';
 import getProfile from './getProfile';
 import {now} from '../support/dataObj';
-import {playerName} from '../support/layout';
+import playerName from '../common/playerName';
 import setForage from './setForage';
 
 function sendMyProfileToForage(data) {

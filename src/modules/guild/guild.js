@@ -8,10 +8,11 @@ import guildTracker from './guildTracker/guildTracker';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
 import openQuickBuffByName from '../common/openQuickBuffByName';
+import {pCC} from '../support/layout';
+import playerName from '../common/playerName';
 import retryAjax from '../ajax/retryAjax';
 import toggleVisibilty from '../common/toggleVisibilty';
 import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
-import {pCC, playerName} from '../support/layout';
 
 var leftHandSideColumnTable;
 var members;

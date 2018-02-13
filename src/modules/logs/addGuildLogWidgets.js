@@ -1,6 +1,7 @@
 import getValue from '../system/getValue';
+import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
-import {pCC, playerName} from '../support/layout';
+import playerName from '../common/playerName';
 
 var currentPlayerId;
 

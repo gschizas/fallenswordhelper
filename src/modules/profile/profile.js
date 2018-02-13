@@ -9,7 +9,9 @@ import highlightPvpProtection from './highlightPvpProtection';
 import injectFastWear from './fastWear';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import nekidBtn from './nekidBtn';
+import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
+import playerName from '../common/playerName';
 import profileComponents from './components';
 import {profileInjectGuildRel} from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
@@ -21,7 +23,6 @@ import storeVL from './storeVL';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import updateNmv from './updateNmv';
 import updateStatistics from './updateStatistics';
-import {pCC, playerName} from '../support/layout';
 
 function ifSelf(self) {
   if (self) {

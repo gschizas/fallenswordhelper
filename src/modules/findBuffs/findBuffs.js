@@ -5,13 +5,14 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {lastActivityRE} from '../support/dataObj';
+import {pCC} from '../support/layout';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
+import playerName from '../common/playerName';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 import stringSort from '../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
-import {pCC, playerName} from '../support/layout';
 
 var characterName;
 var findBuffNicks;

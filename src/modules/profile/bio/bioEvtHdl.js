@@ -1,8 +1,9 @@
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import {pCC} from '../../support/layout';
+import playerName from '../../common/playerName';
 import {sendEvent} from '../../support/fshGa';
-import {pCC, playerName} from '../../support/layout';
 
 var buffCost = {count: 0, buffs: {}};
 var numRE = /[^a-zA-Z0-9.,+\- ]/g;

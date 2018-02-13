@@ -7,8 +7,9 @@ import getValue from './system/getValue';
 import insertElement from './common/insertElement';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import moreToDo from './common/moreToDo';
+import {pCC} from './support/layout';
+import playerName from './common/playerName';
 import retryAjax from './ajax/retryAjax';
-import {pCC, playerName} from './support/layout';
 
 var ranks;
 var myRank;
