@@ -7,18 +7,23 @@ import {createButton, createDiv} from '../common/cElement';
 
 var profileCombatSetDiv;
 
+function removeItem(link) {
+  function clearBox(json) {
+    if (json.s) {
+      link.parentNode.innerHTML = '';
+    }
+  }
+  var item = /inventory_id=(\d+)/.exec(link.href)[1];
+  if (item) {
+    unequipitem(item).done(clearBox);
+  }
+}
+
 function getNekid() {
   sendEvent('profile', 'nekidBtn');
   var profileBlock = profileCombatSetDiv.nextElementSibling;
   var aLinks = profileBlock.getElementsByTagName('a');
-  Array.prototype.forEach.call(aLinks, function(link) {
-    var item = /inventory_id=(\d+)/.exec(link.href)[1];
-    if (item) {
-      unequipitem(item).done(function(json) {
-        if (json.s) {link.parentNode.innerHTML = '';}
-      });
-    }
-  });
+  Array.prototype.forEach.call(aLinks, removeItem);
 }
 
 export default function nekidBtn() {
