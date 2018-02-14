@@ -135,7 +135,7 @@ module.exports = {
     'linebreak-style': ['error', 'windows'],
     'lines-around-comment': ['off'],
     'lines-around-directive': ['off'],
-    'max-depth': ['error', 3],
+    'max-depth': ['error', 2],
     'max-len': ['error', {
       code: 80,
       ignoreComments: true,
@@ -147,7 +147,7 @@ module.exports = {
       skipBlankLines: true,
       skipComments: true
     }],
-    'max-nested-callbacks': ['error', 3],
+    'max-nested-callbacks': ['error', 2],
     'max-params': ['error', 5],
     'max-statements': ['error', 27],
     'max-statements-per-line': ['error', {max: 3}],
