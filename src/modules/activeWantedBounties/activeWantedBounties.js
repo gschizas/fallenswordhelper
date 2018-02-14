@@ -59,10 +59,14 @@ function resetList(e) {
   }
 }
 
+function doHandlers() {
+  if (bountyListDiv) {bountyListDiv.addEventListener('click', resetList);}
+  if (wantedListDiv) {wantedListDiv.addEventListener('click', resetList);}
+}
+
 export function prepareBountyData() {
   if (jQueryNotPresent()) {return;}
   createDivs();
-  bountyListDiv.addEventListener('click', resetList);
-  wantedListDiv.addEventListener('click', resetList);
+  doHandlers();
   retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);
 }
