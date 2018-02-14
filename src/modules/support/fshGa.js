@@ -13,7 +13,7 @@ function isAuto() {
 }
 
 function noGa() {
-  return isAuto() || isUndefined(ga);
+  return isAuto() || isUndefined(window.ga);
 }
 
 export function start(category, variable, label) {

@@ -110,7 +110,7 @@ if (needApiUpgrade) {
         }
       }
     };
-  } else if (!gvar.isOpera || isUndefined(GM_setValue)) {
+  } else if (!gvar.isOpera || isUndefined(window.GM_setValue)) {
     gvar.temporarilyStorage = [];
     window.GM_getValue = function(name, defValue) {
       if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
