@@ -97,7 +97,7 @@ function gotActivity(data) { // jQuery.min
 }
 
 export default function guildActivity() { // jQuery.min
-  if (jQueryPresent && getValue('enableGuildActivityTracker')) {
+  if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
     getForage('fsh_guildActivity').done(gotActivity);
   }
 }

@@ -68,7 +68,7 @@ export function getFshSeLog() { // jQuery.min
 }
 
 function shouldLog() {
-  return jQueryPresent && calf.enableSeTracker && calf.cmd !== 'superelite';
+  return jQueryPresent() && calf.enableSeTracker && calf.cmd !== 'superelite';
 }
 
 export function seLog() { // jQuery.min

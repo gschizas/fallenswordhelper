@@ -64,7 +64,7 @@ var unknown = [
 ];
 
 export default function unknownPage() { // Legacy
-  if (jQueryNotPresent) {return;}
+  if (jQueryNotPresent()) {return;}
   //#if _DEV  //  unknownPage
   console.log('unknownPage'); // eslint-disable-line no-console
   //#endif

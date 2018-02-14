@@ -44,5 +44,5 @@ function fSBoxExists(node) { // jQuery.min
 
 export default function injectFSBoxLog() {
   var node = getElementById('minibox-fsbox');
-  if (jQueryPresent && node) {fSBoxExists(node);}
+  if (jQueryPresent() && node) {fSBoxExists(node);}
 }

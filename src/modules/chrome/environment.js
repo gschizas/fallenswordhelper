@@ -112,7 +112,7 @@ window.FSH.dispatch = function dispatch() {
   lookForHcsData();
   add(3, asyncDispatcher);
 
-  if (jQueryNotPresent) {return;}
+  if (jQueryNotPresent()) {return;}
 
   isMessageSound();
 

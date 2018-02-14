@@ -82,7 +82,7 @@ function waitForLog() {
 }
 
 export default function superelite() {
-  if (jQueryNotPresent) {return;}
+  if (jQueryNotPresent()) {return;}
   var newCell = insertNewRow();
   newCell.height = 20;
   newCell = insertNewRow();

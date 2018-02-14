@@ -23,7 +23,7 @@ function notUpgradesPage() {
 }
 
 export default function injectUpgradeAlert() { // jQuery
-  if (jQueryPresent && location.search.indexOf('cmd=points&type=1') === -1) {
+  if (jQueryPresent() && location.search.indexOf('cmd=points&type=1') === -1) {
     notUpgradesPage();
   }
 }
