@@ -10,6 +10,17 @@ import {simpleCheckbox} from '../settings/simpleCheckbox';
 var disableBreakdownPrompts;
 var selectedList = [];
 
+function disappearance(self) {return function() {self.hide();};}
+
+function goDown(self, disappear) {
+  return function() {self.animate({height: 0}, 500, disappear);};
+}
+
+function fadeAway() {
+  var self = $('#composingMessageContainer');
+  self.animate({opacity: 0}, 500, goDown(self, disappearance(self)));
+}
+
 function showComposingMessage(message, bgcolor) { // jQuery
   $('#composingMessageContainer').remove();
 
@@ -33,14 +44,7 @@ function showComposingMessage(message, bgcolor) { // jQuery
         )
     );
 
-  setTimeout(function() {
-    var self = $('#composingMessageContainer');
-    self.animate({opacity: 0}, 500, function() {
-      self.animate({height: 0}, 500, function() {
-        self.hide();
-      });
-    });
-  }, 5000);
+  setTimeout(fadeAway, 5000);
 }
 
 function breakItems() { // jQuery.min
