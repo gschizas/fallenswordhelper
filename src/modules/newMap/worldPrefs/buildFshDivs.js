@@ -3,6 +3,7 @@ import {getElementById} from '../../common/getElement';
 import {huntingBuffsHtml} from '../../settings/worldPrefs';
 import insertElement from '../../common/insertElement';
 import insertElementBefore from '../../common/insertElementBefore';
+import isFunction from '../../common/isFunction';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import toggleEnabledHuntingMode from './toggleEnabledHuntingMode';
 import {toggleHidePlayerActions} from '../prepareHidePlayerActions';
@@ -25,7 +26,7 @@ var fshEvents = {
 
 function prefsClickEvent(e) {
   var tmpFn = fshEvents[e.target.name];
-  if (typeof tmpFn === 'function') {
+  if (isFunction(tmpFn)) {
     e.target.blur();
     tmpFn(e);
   }

@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import isObject from '../common/isObject';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonParse from '../common/jsonParse';
 import {pCC} from '../support/layout';
@@ -26,7 +27,7 @@ export default function injectSaveSettings() { // Hybrid
     'type="submit" value="Load Settings!" /></center>';
   $('#HelperLoadSettings').click(function() {
     var userInput = jsonParse(getElementById('HelperfshSettings').value);
-    if (typeof userInput === 'object') {
+    if (isObject(userInput)) {
       var settings = userInput;
       Object.keys(settings).forEach(function(id) {
         setValue(id, settings[id]);

@@ -11,7 +11,9 @@ import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
+import isFunction from '../common/isFunction';
 import jQueryDialog from './jQueryDialog';
+import jQueryPresent from '../common/jQueryPresent';
 import {sendEvent} from '../support/fshGa';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
@@ -57,7 +59,7 @@ var functionLookup = {
 function callHelperFunction(evt) {
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
-  if ($ && typeof fn === 'function') {
+  if (jQueryPresent && isFunction(fn)) {
     sendEvent('helperMenu', functionPath);
     jQueryDialog(fn);
   }

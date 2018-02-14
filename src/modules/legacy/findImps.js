@@ -3,6 +3,7 @@ import createDocument from '../system/createDocument';
 import findNode from '../system/findNode';
 import getValue from '../system/getValue';
 import intValue from '../system/intValue';
+import isUndefined from '../common/isUndefined';
 import {log} from '../support/debug';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
@@ -62,7 +63,7 @@ function getKillStreak(responseText) { // Hybrid
 
 function getLastValue(pref) {
   var val = getValue(pref);
-  if (typeof val === 'undefined') {
+  if (isUndefined(val)) {
     setValue(pref, 0);
     val = 0;
   }

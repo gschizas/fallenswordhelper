@@ -7,6 +7,7 @@ import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertElementAfter from '../common/insertElementAfter';
+import isObject from '../common/isObject';
 import jQueryDialog from './jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {newGuildLogUrl} from '../support/constants';
@@ -135,7 +136,7 @@ function navDataExists(theNav, myNav) {
 
 function navExists(theNav) { // jQuery
   var myNav = $(theNav).data('nav');
-  if (typeof myNav === 'object') {
+  if (isObject(myNav)) {
     navDataExists(theNav, myNav);
   } else {
     sendException('$(\'#nav\').data(\'nav\') is not an object', false);

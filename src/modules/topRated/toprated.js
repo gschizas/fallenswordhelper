@@ -3,6 +3,7 @@ import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
 import isObject from '../common/isObject';
+import isUndefined from '../common/isUndefined';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
 import {onlineDot} from '../common/colouredDots';
@@ -23,9 +24,7 @@ var myGuildId;
 
 var highlightTests = [
   function() {return highlightPlayersNearMyLvl;},
-  function(guildId) {
-    return typeof guildId === 'undefined' || guildId !== myGuildId;
-  },
+  function(guildId) {return isUndefined(guildId) || guildId !== myGuildId;},
   function(guildId, data) {return data.last_login >= validPvP;},
   function(guildId, data) {return data.virtual_level >= pvpLowerLevel;},
   function(guildId, data) {return data.virtual_level <= pvpUpperLevel;}

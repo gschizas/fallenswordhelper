@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
 import getForage from './getForage';
+import isObject from '../common/isObject';
 import {now} from '../support/constants';
 import retryAjax from './retryAjax';
 import setForage from './setForage';
@@ -39,8 +40,8 @@ function getGuildMembers(guildId) {
 
 var testList = [
   function(guildId, membrList) {return Boolean(membrList);},
-  function(guildId, membrList) {return typeof membrList === 'object';},
-  function(guildId, membrList) {return typeof membrList[guildId] === 'object';},
+  function(guildId, membrList) {return isObject(membrList);},
+  function(guildId, membrList) {return isObject(membrList[guildId]);},
   function(guildId, membrList) {
     return typeof membrList[guildId].lastUpdate === 'number';
   },

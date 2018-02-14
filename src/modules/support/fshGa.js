@@ -1,3 +1,4 @@
+import isUndefined from '../common/isUndefined';
 import {log} from './debug';
 import playerId from '../common/playerId';
 
@@ -12,7 +13,7 @@ function isAuto() {
 }
 
 function noGa() {
-  return isAuto() || typeof ga === 'undefined';
+  return isAuto() || isUndefined(ga);
 }
 
 export function start(category, variable, label) {

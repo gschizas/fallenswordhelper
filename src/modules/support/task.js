@@ -1,4 +1,5 @@
 import fallback from '../system/fallback';
+import isFunction from '../common/isFunction';
 import {sendException} from './fshGa';
 import {getLength, pop, push} from './sch';
 
@@ -25,7 +26,7 @@ export default function add(priority, fn, args, scope) {
   //#if _DEV  //  Not sending args as Array
   devLog(args);
   //#endif
-  if (typeof fn === 'function') {
+  if (isFunction(fn)) {
     var _scope = fallback(scope, window);
     var _args = fallback(args, []);
     push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
@@ -49,7 +50,7 @@ function parseError(e) {
 function asyncTask() {
   try {
     var testFn = pop();
-    if (typeof testFn === 'function') {
+    if (isFunction(testFn)) {
       testFn();
     } else {sendException('pop() was not a function', false);}
     // pop()();

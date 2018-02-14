@@ -3,6 +3,7 @@ import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import {injectFsBoxContent} from '../misc';
 import jQueryDialog from './jQueryDialog';
+import jQueryPresent from '../common/jQueryPresent';
 import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
 
@@ -43,5 +44,5 @@ function fSBoxExists(node) { // jQuery.min
 
 export default function injectFSBoxLog() {
   var node = getElementById('minibox-fsbox');
-  if ($ && node) {fSBoxExists(node);}
+  if (jQueryPresent && node) {fSBoxExists(node);}
 }

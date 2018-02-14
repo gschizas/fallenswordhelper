@@ -1,5 +1,6 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import isFunction from './isFunction';
 import setValue from '../system/setValue';
 
 var warehouse = [];
@@ -75,7 +76,7 @@ function collapseDuringAnalysis(row, thisArticle) {
 }
 
 function hasExtraFn(extraFn, row) {
-  if (typeof extraFn === 'function') {extraFn(row);}
+  if (isFunction(extraFn)) {extraFn(row);}
 }
 
 function testRowType(row, rowType, thisArticle, articleTest, extraFn) {

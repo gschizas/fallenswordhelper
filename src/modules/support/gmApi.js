@@ -1,3 +1,4 @@
+import isUndefined from '../common/isUndefined';
 import {log} from './debug';
 
 // GM_ApiBrowserCheck
@@ -98,7 +99,7 @@ if (needApiUpgrade) {
   if (ws === 'object') {
     window.GM_getValue = function(name, defValue) {
       var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
-      if (value === null || typeof value === 'undefined') {return defValue;}
+      if (value === null || isUndefined(value)) {return defValue;}
       return retrieve(value);
     };
     window.GM_setValue = function(name, value) {
@@ -109,7 +110,7 @@ if (needApiUpgrade) {
         }
       }
     };
-  } else if (!gvar.isOpera || typeof GM_setValue === 'undefined') {
+  } else if (!gvar.isOpera || isUndefined(GM_setValue)) {
     gvar.temporarilyStorage = [];
     window.GM_getValue = function(name, defValue) {
       if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===

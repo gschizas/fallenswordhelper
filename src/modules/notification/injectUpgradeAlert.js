@@ -1,6 +1,7 @@
 import add from '../support/task';
 import displayUpgradeMsg from './displayUpgradeMsg';
 import getValue from '../system/getValue';
+import jQueryPresent from '../common/jQueryPresent';
 import {now} from '../support/constants';
 import parseGoldUpgrades from './parseGoldUpgrades';
 import retryAjax from '../ajax/retryAjax';
@@ -22,7 +23,7 @@ function notUpgradesPage() {
 }
 
 export default function injectUpgradeAlert() { // jQuery
-  if ($ && location.search.indexOf('cmd=points&type=1') === -1) {
+  if (jQueryPresent && location.search.indexOf('cmd=points&type=1') === -1) {
     notUpgradesPage();
   }
 }

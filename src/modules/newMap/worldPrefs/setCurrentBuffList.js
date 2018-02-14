@@ -1,4 +1,5 @@
 import calf from '../../support/calf';
+import isFunction from '../../common/isFunction';
 
 export var huntingBuffs;
 export var huntingBuffsName;
@@ -19,7 +20,7 @@ var buffLookup = {
 
 export function setCurrentBuffList() {
   var tmpFn = buffLookup[calf.enabledHuntingMode];
-  if (typeof tmpFn === 'function') {
+  if (isFunction(tmpFn)) {
     tmpFn();
   }
 }

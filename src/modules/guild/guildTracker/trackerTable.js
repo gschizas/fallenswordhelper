@@ -1,6 +1,7 @@
 import add from '../../support/task';
 import alpha from '../../common/alpha';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
+import isUndefined from '../../common/isUndefined';
 import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
 import {
   createDiv,
@@ -24,7 +25,7 @@ function buildOptions(ourMembers) {
 }
 
 function toText(val) {
-  if (typeof val === 'undefined') {return '#DEF';}
+  if (isUndefined(val)) {return '#DEF';}
   return val.toLocaleString();
 }
 

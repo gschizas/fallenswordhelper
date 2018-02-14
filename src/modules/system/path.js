@@ -1,4 +1,5 @@
 import fallback from './fallback';
+import isUndefined from '../common/isUndefined';
 
 function getPath(obj, aPath, def) {
   var _obj = obj;
@@ -13,6 +14,6 @@ function getPath(obj, aPath, def) {
 
 export default function path(obj, aPath, def) {
   var _obj = getPath(obj, aPath, def);
-  if (typeof _obj === 'undefined') {return def;}
+  if (isUndefined(_obj)) {return def;}
   return _obj;
 }
