@@ -83,7 +83,7 @@ var clickHdl = [
 ];
 
 function fixTeleport() {
-  if (GameController && GameController.Realm) {
+  if (window.GameController && GameController.Realm) {
     GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
   }
 }

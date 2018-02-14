@@ -1,5 +1,5 @@
 import isUndefined from '../common/isUndefined';
-import {log} from './debug';
+import {sendException} from './fshGa';
 
 // GM_ApiBrowserCheck
 // @author        GIJoe
@@ -88,8 +88,8 @@ if (needApiUpgrade) {
     if (result) {
       ws = typeof window.localStorage;
     } else {
-      log('There is a problem with your local storage. ' +
-        'FSH cannot persist your settings.');
+      sendException('There is a problem with your local storage. ' +
+        'FSH cannot persist your settings.', false);
       ws = null;
     }
   } catch (e) {

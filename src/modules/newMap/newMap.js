@@ -77,3 +77,21 @@ export default function subscribes() { // jQuery.min
   $('#messageCenter').worldMessageCenter({offset: '0 60'});
   $('#mapTooltip').qtip('hide');
 }
+
+// -1 = world page
+// 0 = quest responce
+// 1 = view creature
+// 2 = attack creature
+// 3 = attack player
+// 4 = move
+// 5 = use stair
+// 6 = use chest
+// 7 = take portal
+// 10 = problaby view relic
+// 11 = take relic
+// 12 = create group
+// 13 = view shop
+// 14 = purchase item
+// 15 = repair
+// 17 = login
+// 18 = username not found
