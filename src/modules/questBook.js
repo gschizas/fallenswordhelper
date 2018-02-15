@@ -2,6 +2,7 @@ import getUrlParameter from './system/getUrlParameter';
 import getValue from './system/getValue';
 import {guideUrl} from './support/constants';
 import {imageServer} from './system/system';
+import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import {pCC} from './support/layout';
 import setValue from './system/setValue';
 
@@ -166,5 +167,5 @@ export function injectQuestTracker() {
   var injectHere = pCC.getElementsByTagName('td')[0];
   var questName = injectHere.getElementsByTagName('font')[1].textContent
     .replace(/"/g, '');
-  injectHere.insertAdjacentHTML('beforeend', guideButtons(questID, questName));
+  insertHtmlBeforeEnd(injectHere, guideButtons(questID, questName));
 }

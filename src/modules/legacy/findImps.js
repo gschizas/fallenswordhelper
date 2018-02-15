@@ -3,7 +3,7 @@ import createDocument from '../system/createDocument';
 import findNode from '../system/findNode';
 import getValue from '../system/getValue';
 import intValue from '../system/intValue';
-import {log} from '../support/debug';
+import isUndefined from '../common/isUndefined';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 
@@ -35,7 +35,9 @@ function impWarning(impsRem) { // Legacy
 function getKillStreak(responseText) { // Hybrid
   var doc = createDocument(responseText);
   var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
-  log('killStreakLocation', killStreakLocation); // TODO WTF?
+  //#if _DEV  //  killStreakLocation TODO WTF?
+  console.log('killStreakLocation', killStreakLocation); // eslint-disable-line no-console
+  //#endif
   var playerKillStreakValue;
   if (killStreakLocation.length > 0) {
     playerKillStreakValue = intValue(killStreakLocation.text());
@@ -62,7 +64,7 @@ function getKillStreak(responseText) { // Hybrid
 
 function getLastValue(pref) {
   var val = getValue(pref);
-  if (typeof val === 'undefined') {
+  if (isUndefined(val)) {
     setValue(pref, 0);
     val = 0;
   }

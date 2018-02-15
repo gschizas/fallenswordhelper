@@ -1,6 +1,7 @@
 import {createAnchor} from '../common/cElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
+import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
@@ -82,12 +83,12 @@ export default function injectHomePageTwoLink() { // Pref
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
   if (!archiveLink) {return;}
-  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
+  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
     '&subcmd=viewupdatearchive&subcmd2=&page=2&search_text=">' +
     'View Updates Page 2</a>');
   archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
-  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
+  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
     '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
   fixCollapse(); // Pref
   lookForPvPLadder(); // Pref

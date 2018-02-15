@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import intValue from '../system/intValue';
 import padZ from '../system/padZ';
 import {months, now} from '../support/constants';
@@ -26,14 +27,14 @@ function timeBox(nextGainTime, hrsToGo) {
 
 export function injectStaminaCalculator() {
   var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
-  if (!nextGain) {return;}
+  if (nextGain.length === 0) {return;}
   var staminaMouseover =
     getElementById('statbar-stamina-tooltip-stamina');
   var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
     staminaMouseover.getElementsByClassName('stat-name')[0]
       .nextElementSibling.textContent
   );
-  staminaMouseover.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(staminaMouseover,
     '<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
     timeBox(
       nextGain[0].nextElementSibling.textContent,
@@ -52,22 +53,21 @@ export function injectStaminaCalculator() {
 
 export function injectLevelupCalculator() {
   var nextGain = document.getElementsByClassName('stat-xp-nextGain');
-  if (!nextGain) {return;}
-  getElementById('statbar-level-tooltip-general')
-    .insertAdjacentHTML('beforeend',
-      '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
-      timeBox(
-        nextGain[0].nextElementSibling.textContent,
-        Math.ceil(
-          intValue(
-            document.getElementsByClassName('stat-xp-remaining')[0]
-              .nextElementSibling.textContent
-          ) /
-          intValue(
-            document.getElementsByClassName('stat-xp-gainPerHour')[0]
-              .nextElementSibling.textContent
-          )
+  if (nextGain.length === 0) {return;}
+  insertHtmlBeforeEnd(getElementById('statbar-level-tooltip-general'),
+    '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
+    timeBox(
+      nextGain[0].nextElementSibling.textContent,
+      Math.ceil(
+        intValue(
+          document.getElementsByClassName('stat-xp-remaining')[0]
+            .nextElementSibling.textContent
+        ) /
+        intValue(
+          document.getElementsByClassName('stat-xp-gainPerHour')[0]
+            .nextElementSibling.textContent
         )
       )
-    );
+    )
+  );
 }

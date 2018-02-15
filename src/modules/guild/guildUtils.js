@@ -1,5 +1,6 @@
 import addCommas from '../system/addCommas';
 import getIntFromRegExp from '../system/getIntFromRegExp';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 export function removeGuildAvyImgBorder() {
   document.querySelector('#pCC img[oldtitle$="\'s Logo"]')
@@ -16,7 +17,7 @@ export function guildXPLock() {
   var actualXP = getIntFromRegExp(xpLockmouseover,
     /XP: <b>(\d*)/);
   if (actualXP < xpLockXP) {
-    xpLock.parentNode.nextElementSibling.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
       ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
   }
 }

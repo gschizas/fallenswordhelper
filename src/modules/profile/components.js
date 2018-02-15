@@ -3,6 +3,7 @@ import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
 import infoBox from '../common/infoBox';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../quickExtract';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
@@ -72,11 +73,11 @@ function displayComponentTally() {
   var tbl = createTable({className: 'fshTblCenter'});
   var tBody = createTBody();
   tbl.appendChild(tBody);
-  tBody.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(tBody,
     '<tr><td colspan="3">Component Summary</td></tr>' +
     Object.keys(componentList).reduce(tallyTableRow, ''));
   var totRow = tbl.insertRow(-1);
-  totRow.insertAdjacentHTML('beforeend', '<td>Total:</td>');
+  insertHtmlBeforeEnd(totRow, '<td>Total:</td>');
   var totCell = totRow.insertCell(-1);
   totCell.colSpan = 2;
   usedCountDom = createSpan();
@@ -89,7 +90,7 @@ function displayComponentTally() {
 
 function gotComponentsPage(data) {
   pageCount += 1;
-  sumComp.insertAdjacentHTML('beforeend', pageCount + ', ');
+  insertHtmlBeforeEnd(sumComp, pageCount + ', ');
   retriveComponent(createDocument(data));
 }
 
@@ -133,7 +134,7 @@ function delComponent(self) { // jQuery.min
 }
 
 function addDelBtn(el) {
-  el.parentNode.parentNode.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(el.parentNode.parentNode,
     '<span class="compDelBtn">Del</span>');
 }
 
@@ -202,7 +203,7 @@ function decorateButton(parentDiv, label) {
     {className: 'sendLink', textContent: label});
   parentDiv.textContent = '[';
   parentDiv.appendChild(innerSpan);
-  parentDiv.insertAdjacentHTML('beforeend', ']');
+  insertHtmlBeforeEnd(parentDiv, ']');
   return innerSpan;
 }
 

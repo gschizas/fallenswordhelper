@@ -1,4 +1,5 @@
-import {log} from './debug';
+import isUndefined from '../common/isUndefined';
+import {sendException} from './fshGa';
 
 // GM_ApiBrowserCheck
 // @author        GIJoe
@@ -87,8 +88,8 @@ if (needApiUpgrade) {
     if (result) {
       ws = typeof window.localStorage;
     } else {
-      log('There is a problem with your local storage. ' +
-        'FSH cannot persist your settings.');
+      sendException('There is a problem with your local storage. ' +
+        'FSH cannot persist your settings.', false);
       ws = null;
     }
   } catch (e) {
@@ -98,7 +99,7 @@ if (needApiUpgrade) {
   if (ws === 'object') {
     window.GM_getValue = function(name, defValue) {
       var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
-      if (value === null || typeof value === 'undefined') {return defValue;}
+      if (value === null || isUndefined(value)) {return defValue;}
       return retrieve(value);
     };
     window.GM_setValue = function(name, value) {
@@ -109,7 +110,7 @@ if (needApiUpgrade) {
         }
       }
     };
-  } else if (!gvar.isOpera || typeof GM_setValue === 'undefined') {
+  } else if (!gvar.isOpera || isUndefined(window.GM_setValue)) {
     gvar.temporarilyStorage = [];
     window.GM_getValue = function(name, defValue) {
       if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===

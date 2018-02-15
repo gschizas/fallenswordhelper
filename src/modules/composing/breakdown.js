@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import perfFilter from '../common/perfFilter';
@@ -101,7 +102,7 @@ export default function composingBreakdown() {
     .addEventListener('click', breakEvt, true);
   getElementById('composing-items')
     .addEventListener('click', itemClick);
-  pCC.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(pCC,
     '<table class="fshTblCenter"><tbody>' +
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');

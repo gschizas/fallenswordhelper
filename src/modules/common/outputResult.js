@@ -1,4 +1,6 @@
+import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
+
 export default function outputResult(result, handle) {
-  handle.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(handle,
     '<li class="fshNbrList">' + result + '</li>');
 }

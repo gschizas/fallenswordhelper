@@ -5,6 +5,7 @@ import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
 import openQuickBuffByName from '../common/openQuickBuffByName';
@@ -71,7 +72,7 @@ function conflictInfo() { // jQuery.min
 
 function logoToggle() {
   var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
-  changeLogoCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink' +
+  insertHtmlBeforeEnd(changeLogoCell, '[ <span class="fshLink' +
     ' tip-static" id="toggleGuildLogoControl" ' +
     'linkto="guildLogoControl" data-tipped="Toggle Section">X</span> ]');
   var guildLogoElement = leftHandSideColumnTable.rows[2].cells[0]
@@ -86,7 +87,7 @@ function logoToggle() {
 
 function statToggle() {
   var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
-  leaveGuildCell.insertAdjacentHTML('beforeend', '<span class="fshNoWrap">' +
+  insertHtmlBeforeEnd(leaveGuildCell, '<span class="fshNoWrap">' +
     '[ <span class="fshLink tip-static" id="toggleStatisticsControl" ' +
     'linkto="statisticsControl" data-tipped="Toggle Section">X</span> ]' +
     '</span>');
@@ -102,7 +103,7 @@ function statToggle() {
 
 function structureToggle() {
   var buildCell = leftHandSideColumnTable.rows[15].cells[1].firstChild;
-  buildCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink ' +
+  insertHtmlBeforeEnd(buildCell, '[ <span class="fshLink ' +
     'tip-static" id="toggleGuildStructureControl" ' +
     'linkto="guildStructureControl" data-tipped="Toggle Section">X</span> ]');
   var guildStructureControlElement = leftHandSideColumnTable.rows[17]
@@ -118,7 +119,7 @@ function structureToggle() {
 function batchBuffLinks() {
   var limit = performance.now() + 5;
   while (moreToDo(limit, memCount, members)) {
-    members[memCount].parentNode.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(members[memCount].parentNode,
       ' <span class="smallLink">[b]</span>');
     memCount += 1;
   }
@@ -143,7 +144,7 @@ function selfRecallLink() {
   // self recall
   var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
   var selfRecall = getLi[getLi.length - 1].parentNode;
-  selfRecall.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(selfRecall,
     '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
     'user=' + playerName() +
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');

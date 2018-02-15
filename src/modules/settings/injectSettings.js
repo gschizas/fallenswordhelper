@@ -4,6 +4,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -167,7 +168,7 @@ export default function injectSettings() { // jQuery.min
   getVars();
   setupConfigData();
   var settingsTabs = getElementById('settingsTabs');
-  settingsTabs.insertAdjacentHTML('beforeend', '<div id="fshSettings">' +
+  insertHtmlBeforeEnd(settingsTabs, '<div id="fshSettings">' +
     calf.configData + '</div>');
   if ($(settingsTabs).tabs('length') > 0) {
     $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');

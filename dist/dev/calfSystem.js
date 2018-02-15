@@ -1,9 +1,23 @@
 (function () {
 'use strict';
 
+function isType(e, t) {return typeof e === t;}
+
+function isUndefined(e) {return isType(e, 'undefined');}
+
 function getElementById(id, doc) {
   if (doc) {return doc.getElementById(id);}
   return document.getElementById(id);
+}
+
+function insertHtml(parent, where, html) {
+  if (parent instanceof Element) {
+    parent.insertAdjacentHTML(where, html);
+  }
+}
+
+function insertHtmlBeforeEnd(parent, html) {
+  insertHtml(parent, 'beforeend', html);
 }
 
 var timers = {};
@@ -11,7 +25,7 @@ var footWrap = getElementById('foot-wrap');
 
 function log(text, value) {
   if (footWrap) {
-    footWrap.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(footWrap,
       '<br>' + text + ': ' + value + ' (' + typeof value + ')');
   }
 }
@@ -26,146 +40,6 @@ function timeEnd(name) {
       timers[name]) / 1000 + 'ms');
     delete timers[name];
   }
-}
-
-// GM_ApiBrowserCheck
-// @author        GIJoe
-// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
-// Global variables
-var gvar = {};
-var GMSTORAGE_PATH = 'GM_';
-
-function storItem(name, type, value) {
-  window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
-}
-
-var reviver = [
-  {
-    condition: 'S]',
-    result: function(value) {return value.substr(2);}
-  },
-  {
-    condition: 'N]',
-    result: function(value) {return parseInt(value.substr(2), 10);}
-  },
-  {
-    condition: 'B]',
-    result: function(value) {return value.substr(2) === 'true';}
-  }
-];
-var cold = [
-  {
-    condition: 'string',
-    result: function(name, value) {storItem(name, 'S]', value);}
-  },
-  {
-    condition: 'number',
-    result: function(name, value) {
-      if (value.toString().indexOf('.') < 0) {storItem(name, 'N]', value);}
-    }
-  },
-  {
-    condition: 'boolean',
-    result: function(name, value) {storItem(name, 'B]', value);}
-  }
-];
-
-function retrieve(value) {
-  for (var i = 0; i < reviver.length; i += 1) {
-    var test = reviver[i];
-    if (value.substr(0, 2) === test.condition) {return test.result(value);}
-  }
-  return value;
-}
-
-// You can change it to avoid conflict with others scripts
-var needApiUpgrade = false;
-if (window.navigator.appName.match(/^opera/i) &&
-    typeof window.opera !== 'undefined') {
-  needApiUpgrade = true;
-  gvar.isOpera = true;
-  window.GM_log = window.opera.postError;
-}
-if (typeof GM_setValue !== 'undefined') {
-  var gsv;
-  try {
-    gsv = window.GM_setValue.toString();
-  } catch (e) {
-    gsv = 'staticArgs';
-  }
-  if (gsv.indexOf('staticArgs') > 0) {
-    gvar.isGreaseMonkey = true;
-  // test GM_hitch
-  } else if (gsv.match(/not\s+supported/)) {
-    needApiUpgrade = true;
-    gvar.isBuggedChrome = true;
-  }
-} else {
-  needApiUpgrade = true;
-}
-
-if (needApiUpgrade) {
-  var ws = null;
-  var uid = new Date().toString();
-  var result;
-  try {
-    window.localStorage.setItem(uid, uid);
-    result = window.localStorage.getItem(uid) === uid;
-    window.localStorage.removeItem(uid);
-    if (result) {
-      ws = typeof window.localStorage;
-    } else {
-      log('There is a problem with your local storage. ' +
-        'FSH cannot persist your settings.');
-      ws = null;
-    }
-  } catch (e) {
-    ws = null;
-  }
-  // Catch Security error
-  if (ws === 'object') {
-    window.GM_getValue = function(name, defValue) {
-      var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
-      if (value === null || typeof value === 'undefined') {return defValue;}
-      return retrieve(value);
-    };
-    window.GM_setValue = function(name, value) {
-      for (var i = 0; i < cold.length; i += 1) {
-        var storType = cold[i];
-        if (typeof value === storType.condition) {
-          storType.result(name, value);
-        }
-      }
-    };
-  } else if (!gvar.isOpera || typeof GM_setValue === 'undefined') {
-    gvar.temporarilyStorage = [];
-    window.GM_getValue = function(name, defValue) {
-      if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
-        'undefined') {return defValue;}
-      return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
-    };
-    window.GM_setValue = function(name, value) {
-      if (['string', 'boolean', 'number'].indexOf(typeof value) !== -1) {
-        gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
-      }
-    };
-  }
-
-  window.GM_listValues = function() {
-    var list = [];
-    var reKey = new RegExp('^' + GMSTORAGE_PATH);
-    for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
-      var key = window.localStorage.key(i);
-      if (key.match(reKey)) {
-        list.push(key.replace(GMSTORAGE_PATH, ''));
-      }
-    }
-    return list;
-  };
-}
-
-function fallback(a, b) {
-  return a || b;
 }
 
 function setValue(name, value) {
@@ -190,7 +64,7 @@ function isAuto() {
 }
 
 function noGa() {
-  return isAuto() || typeof ga === 'undefined';
+  return isAuto() || isUndefined(window.ga);
 }
 
 function start(category, variable, label) {
@@ -302,6 +176,148 @@ function sendException(desc, fatal) {
 //   console.log('onerror error.stack', error.stack);
 // };
 
+// GM_ApiBrowserCheck
+// @author        GIJoe
+// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
+// Global variables
+var gvar = {};
+var GMSTORAGE_PATH = 'GM_';
+
+function storItem(name, type, value) {
+  window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
+}
+
+var reviver = [
+  {
+    condition: 'S]',
+    result: function(value) {return value.substr(2);}
+  },
+  {
+    condition: 'N]',
+    result: function(value) {return parseInt(value.substr(2), 10);}
+  },
+  {
+    condition: 'B]',
+    result: function(value) {return value.substr(2) === 'true';}
+  }
+];
+var cold = [
+  {
+    condition: 'string',
+    result: function(name, value) {storItem(name, 'S]', value);}
+  },
+  {
+    condition: 'number',
+    result: function(name, value) {
+      if (value.toString().indexOf('.') < 0) {storItem(name, 'N]', value);}
+    }
+  },
+  {
+    condition: 'boolean',
+    result: function(name, value) {storItem(name, 'B]', value);}
+  }
+];
+
+function retrieve(value) {
+  for (var i = 0; i < reviver.length; i += 1) {
+    var test = reviver[i];
+    if (value.substr(0, 2) === test.condition) {return test.result(value);}
+  }
+  return value;
+}
+
+// You can change it to avoid conflict with others scripts
+var needApiUpgrade = false;
+if (window.navigator.appName.match(/^opera/i) &&
+    typeof window.opera !== 'undefined') {
+  needApiUpgrade = true;
+  gvar.isOpera = true;
+  window.GM_log = window.opera.postError;
+}
+if (typeof GM_setValue !== 'undefined') {
+  var gsv;
+  try {
+    gsv = window.GM_setValue.toString();
+  } catch (e) {
+    gsv = 'staticArgs';
+  }
+  if (gsv.indexOf('staticArgs') > 0) {
+    gvar.isGreaseMonkey = true;
+  // test GM_hitch
+  } else if (gsv.match(/not\s+supported/)) {
+    needApiUpgrade = true;
+    gvar.isBuggedChrome = true;
+  }
+} else {
+  needApiUpgrade = true;
+}
+
+if (needApiUpgrade) {
+  var ws = null;
+  var uid = new Date().toString();
+  var result;
+  try {
+    window.localStorage.setItem(uid, uid);
+    result = window.localStorage.getItem(uid) === uid;
+    window.localStorage.removeItem(uid);
+    if (result) {
+      ws = typeof window.localStorage;
+    } else {
+      sendException('There is a problem with your local storage. ' +
+        'FSH cannot persist your settings.', false);
+      ws = null;
+    }
+  } catch (e) {
+    ws = null;
+  }
+  // Catch Security error
+  if (ws === 'object') {
+    window.GM_getValue = function(name, defValue) {
+      var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
+      if (value === null || isUndefined(value)) {return defValue;}
+      return retrieve(value);
+    };
+    window.GM_setValue = function(name, value) {
+      for (var i = 0; i < cold.length; i += 1) {
+        var storType = cold[i];
+        if (typeof value === storType.condition) {
+          storType.result(name, value);
+        }
+      }
+    };
+  } else if (!gvar.isOpera || isUndefined(window.GM_setValue)) {
+    gvar.temporarilyStorage = [];
+    window.GM_getValue = function(name, defValue) {
+      if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
+        'undefined') {return defValue;}
+      return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
+    };
+    window.GM_setValue = function(name, value) {
+      if (['string', 'boolean', 'number'].indexOf(typeof value) !== -1) {
+        gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
+      }
+    };
+  }
+
+  window.GM_listValues = function() {
+    var list = [];
+    var reKey = new RegExp('^' + GMSTORAGE_PATH);
+    for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
+      var key = window.localStorage.key(i);
+      if (key.match(reKey)) {
+        list.push(key.replace(GMSTORAGE_PATH, ''));
+      }
+    }
+    return list;
+  };
+}
+
+function fallback(a, b) {
+  return a || b;
+}
+
+function isFunction(e) {return isType(e, 'function');}
+
 /*
 Based on
 fiddle.jshell.net/GRIFFnDOOR/r7tvg/
@@ -388,7 +404,7 @@ function devLog(args) {
 
 function add(priority, fn, args, scope) {
   devLog(args);
-  if (typeof fn === 'function') {
+  if (isFunction(fn)) {
     var _scope = fallback(scope, window);
     var _args = fallback(args, []);
     push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
@@ -412,7 +428,7 @@ function parseError(e) {
 function asyncTask() {
   try {
     var testFn = pop();
-    if (typeof testFn === 'function') {
+    if (isFunction(testFn)) {
       testFn();
     } else {sendException('pop() was not a function', false);}
     // pop()();
@@ -753,7 +769,7 @@ var defaults = {
 };
 
 function getValue(name) {
-  if (typeof defaults[name] === 'undefined') {
+  if (isUndefined(defaults[name])) {
     // eslint-disable-next-line no-console
     console.log(name, defaults[name]);
   }
@@ -827,7 +843,7 @@ function haveNode(node, quickLinks) { // Native ?
       newWindow + '>' + quickLinks[i].name + '</a></li>';
   }
   html += '</div>';
-  document.body.insertAdjacentHTML('beforeend', html);
+  insertHtmlBeforeEnd(document.body, html);
   isDraggable(draggableQuickLinks);
 }
 
@@ -846,7 +862,7 @@ function doQuickLinks() {
 }
 
 function outputParamVal(param) {
-  if (typeof param === 'undefined') {return true;}
+  if (isUndefined(param)) {return true;}
   return param;
 }
 
@@ -884,11 +900,9 @@ function isMessageSound() {
   }
 }
 
-function afterBegin(parentNode, newNode) {
-  if (parentNode instanceof Element) {
-    parentNode.insertBefore(newNode, parentNode.firstChild);
-  }
-}
+function isObject(e) {return isType(e, 'object');}
+
+function jQueryNotPresent() {return !isFunction(window.$);}
 
 var rarity = [
   {colour: '#ffffff', clas: 'fshCommon'},
@@ -931,19 +945,6 @@ var def_afterUpdateActionlist = 'after-update.actionlist';
 var def_playerBuffs = 'buffs.player';
 var def_suffixSuccessActionResponse = '-success.action-response';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 var def_fetch_worldRealmActions = 256;
 
 function testForGuildLogMsg(guildLogNode) {
@@ -976,25 +977,31 @@ function changeGuildLogHREF() {
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
 }
 
-function getForage(forage) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
+function forageGet(forage, dfr) {
   localforage.getItem(forage, function getItemCallback(err, data) {
     if (err) {
-      log(forage + ' forage error', err);
+      sendException(forage + ' forage error' + err, false);
       dfr.reject(err);
     } else {
       // returns null if key does not exist
       dfr.resolve(data);
     }
   });
+}
+
+function getForage(forage) {
+  // Wrap in jQuery Deferred because we're using 1.7
+  // rather than using ES6 promise
+  var dfr = $.Deferred();
+  if (window.localforage) {
+    forageGet(forage, dfr);
+  }
   return dfr.promise();
 }
 
 function extend(obj, mixins) {
   Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+    if (isObject(mixins[key]) && mixins[key] !== null) {
       obj[key] = extend(mixins[key].constructor(), mixins[key]);
     } else {
       obj[key] = mixins[key];
@@ -1075,18 +1082,26 @@ function guildManage() {
   return callApp({cmd: 'guild', subcmd: 'manage'});
 }
 
-function setForage(forage, data) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
+function jQueryPresent() {return isFunction(window.$);}
+
+function forageSet(forage, data, dfr) {
   localforage.setItem(forage, data, function setItemCallback(err, _data) {
     if (err) {
-      log(forage + ' forage error', err);
+      sendException(forage + ' forage error' + err, false);
       dfr.reject(err);
     } else {
       dfr.resolve(_data);
     }
   });
+}
+
+function setForage(forage, data) {
+  // Wrap in jQuery Deferred because we're using 1.7
+  // rather than using ES6 promise
+  var dfr = $.Deferred();
+  if (window.localforage) {
+    forageSet(forage, data, dfr);
+  }
   return dfr.promise();
 }
 
@@ -1188,7 +1203,7 @@ function gotActivity(data) { // jQuery.min
 }
 
 function guildActivity() { // jQuery.min
-  if ($ && getValue('enableGuildActivityTracker')) {
+  if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
     getForage('fsh_guildActivity').done(gotActivity);
   }
 }
@@ -1213,11 +1228,13 @@ function insertElementBefore(newNode, referenceNode) {
   }
 }
 
-function isType(e, t) {return typeof e === t;}
+function insertHtmlAfterBegin(parent, html) {
+  insertHtml(parent, 'afterbegin', html);
+}
 
-function isFunction(e) {return isType(e, 'function');}
-
-function jQueryPresent() {return isFunction($);}
+function insertHtmlAfterEnd(parent, html) {
+  insertHtml(parent, 'afterend', html);
+}
 
 var pCC = getElementById('pCC');
 var pCR = getElementById('pCR');
@@ -1232,8 +1249,7 @@ var composeMsg =
   'Composing to do</p></a></li>';
 
 function displayComposeMsg() {
-  getElementById('notifications')
-    .insertAdjacentHTML('afterbegin', composeMsg);
+  insertHtmlAfterBegin(getElementById('notifications'), composeMsg);
 }
 
 function getDoc(data) {
@@ -1363,7 +1379,7 @@ function hasJQuery() {
   var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
-    el.insertAdjacentHTML('afterend', '<span class="quickCreate">' +
+    insertHtmlAfterEnd(el, '<span class="quickCreate">' +
       '[<span class="sendLink">Quick Create</span>]</span>');
   });
   pCC.addEventListener('click', quickCreate);
@@ -1389,7 +1405,7 @@ function composingCreate() {
 
 function mixin(obj, mixins) {
   Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+    if (isObject(mixins[key]) && mixins[key] !== null) {
       mixin(obj[key], mixins[key]);
     } else {
       obj[key] = mixins[key];
@@ -1470,8 +1486,6 @@ function createLabel(props) {
 function textSpan(text) {
   return createSpan({textContent: text});
 }
-
-function jQueryNotPresent() {return !isFunction($);}
 
 function makePageHeader(title, comment, spanId, button) {
   var _comment = '';
@@ -1670,7 +1684,7 @@ function fSBoxExists(node) { // jQuery.min
   if (playerName.length === 0) {return;}
   getForage('fsh_fsboxcontent').done(storeFSBox);
   playerName = playerName[0].textContent;
-  nodediv.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(nodediv,
     '<br><span class="fshPaleVioletRed">' +
     '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
     playerName + '">Ignore</a> ]</span> ');
@@ -1687,7 +1701,7 @@ function fSBoxExists(node) { // jQuery.min
 
 function injectFSBoxLog() {
   var node = getElementById('minibox-fsbox');
-  if ($ && node) {fSBoxExists(node);}
+  if (jQueryPresent() && node) {fSBoxExists(node);}
 }
 
 function displayBuffLog(buffLog) {
@@ -1721,7 +1735,7 @@ function reverseSort(headerClicked) {
 }
 
 function doSortParams(headerClicked) {
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
+  if (isUndefined(calf.sortAsc)) {calf.sortAsc = true;}
   if (reverseSort(headerClicked)) {
     calf.sortAsc = !calf.sortAsc;
   }
@@ -1741,7 +1755,7 @@ function getPath(obj, aPath, def) {
 
 function path(obj, aPath, def) {
   var _obj = getPath(obj, aPath, def);
-  if (typeof _obj === 'undefined') {return def;}
+  if (isUndefined(_obj)) {return def;}
   return _obj;
 }
 
@@ -2366,7 +2380,7 @@ function parseRecipeItemOrComponent(bgGif, doc) {
 
 function processRecipe(output, recipebook, recipe, data) {
   var doc = createDocument(data);
-  output.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(output,
     'Parsing blueprint ' + recipe.name + '...<br>');
   recipe.items = parseRecipeItemOrComponent('/inventory/2x3.gif', doc);
   recipe.components = parseRecipeItemOrComponent('/inventory/1x1mini.gif', doc);
@@ -2380,7 +2394,7 @@ function processFolderAnyPage(output, recipebook, data) { // jQuery.min
   var scope = innerPcc.firstElementChild.rows[6].cells[0]
     .firstElementChild.getElementsByTagName('a');
   var prm = Array.prototype.reduce.call(scope, function(prev, el) {
-    output.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(output,
       'Found blueprint "' + el.textContent + '".<br>');
     var recipe = {
       img: el.parentNode.previousElementSibling.firstElementChild
@@ -2424,7 +2438,7 @@ function reduceFolders(output, recipebook, prev, el) { // jQuery.min
     return prev;
   }
   if (/quest/i.test(folderName)) {
-    output.insertAdjacentHTML('beforeend', 'Skipping folder "' +
+    insertHtmlBeforeEnd(output, 'Skipping folder "' +
       folderName + '"  as it has the word "quest" in folder name.<br>');
     return prev;
   }
@@ -2448,7 +2462,7 @@ var recipebook;
 var output;
 
 function displayStuff() {
-  output.insertAdjacentHTML('beforeend', 'Finished parsing ... formatting ...');
+  insertHtmlBeforeEnd(output, 'Finished parsing ... formatting ...');
   setForage('fsh_recipeBook', recipebook);
   generateRecipeTable(output, recipebook);
 }
@@ -2542,7 +2556,7 @@ function getInventory() {
 }
 
 function outputResult(result, handle) {
-  handle.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(handle,
     '<li class="fshNbrList">' + result + '</li>');
 }
 
@@ -2900,7 +2914,7 @@ function showAHInvManager(itemList) {
     id: 'invTabs-ah',
     className: 'ui-tabs-panel ui-corner-bottom'
   });
-  im.insertAdjacentHTML('beforeend', buildHTML(invCount, quickSL));
+  insertHtmlBeforeEnd(im, buildHTML(invCount, quickSL));
   return im;
 }
 
@@ -3517,14 +3531,14 @@ function showQuickWear(appInv) {
   content$2.appendChild(invTabs);
   invTabs.addEventListener('click', eventHandler(events));
   invTabs.appendChild(showAHInvManager(appInv));
-  getElementById('setPrompt').insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(getElementById('setPrompt'),
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 
 function hasJquery(injector) { // jQuery.min
   content$2 = injector || pCC;
   if (!content$2) {return;}
-  content$2.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
+  insertHtmlBeforeEnd(content$2, 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
 }
@@ -4497,7 +4511,7 @@ var functionLookup = {
 function callHelperFunction(evt) {
   var functionPath = evt.target.textContent;
   var fn = functionLookup[functionPath];
-  if ($ && typeof fn === 'function') {
+  if (jQueryPresent() && isFunction(fn)) {
     sendEvent('helperMenu', functionPath);
     jQueryDialog(fn);
   }
@@ -4525,7 +4539,7 @@ function showHelperMenu() {
         '/skin/inner_bg.jpg)'
     }
   });
-  helperMenuDiv.insertAdjacentHTML('beforeend', helperMenuBlob);
+  insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
   helperMenu.appendChild(helperMenuDiv);
   helperMenu.addEventListener('click', function(evt) {
     if (evt.target.id !== 'helperMenu') {return;}
@@ -4640,12 +4654,12 @@ function injectHomePageTwoLink() { // Pref
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
   if (!archiveLink) {return;}
-  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
+  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
     '&subcmd=viewupdatearchive&subcmd2=&page=2&search_text=">' +
     'View Updates Page 2</a>');
   archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
-  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
+  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
     '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
   fixCollapse(); // Pref
   lookForPvPLadder(); // Pref
@@ -4666,8 +4680,7 @@ function findNewGroup(el) {
       '</span><p class="notification-content">Join all attack groups ' +
       'less than size ' + maxGroupSizeToJoin + '.</p></a>';
   }
-  el.insertAdjacentHTML('afterend',
-    '<li class="notification">' + groupJoinHTML + '</li>');
+  insertHtmlAfterEnd(el, '<li class="notification">' + groupJoinHTML + '</li>');
 }
 
 function injectJoinAllLink() {
@@ -4695,10 +4708,6 @@ function updateQuestLink() {
 
 function insertAdjElement(parent, listItem) {
   insertElementAfter(listItem, parent);
-}
-
-function insertAdjHtml(parent, listItem) {
-  parent.insertAdjacentHTML('afterend', listItem);
 }
 
 function insertAfterParent(target, fn, listItem) {
@@ -4746,7 +4755,7 @@ function creatureLogLink() {
 function newGuildLogLink() {
   if (guildId$1 && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    insertAfterParent('nav-guild-ledger-guildlog', insertAdjHtml,
+    insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" ' +
       'href="index.php' + newGuildLogUrl + '"' +
       '>New Guild Log</a></li>');
@@ -4755,7 +4764,7 @@ function newGuildLogLink() {
 
 function guildInventory() {
   if (guildId$1) {
-    insertAfterParent('nav-guild-storehouse-inventory', insertAdjHtml,
+    insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
       '&subcmd=guildinvmgr">Guild Inventory</a></li>');
@@ -4803,7 +4812,7 @@ function navDataExists(theNav, myNav) {
 
 function navExists(theNav) { // jQuery
   var myNav = $(theNav).data('nav');
-  if (typeof myNav === 'object') {
+  if (isObject(myNav)) {
     navDataExists(theNav, myNav);
   } else {
     sendException('$(\'#nav\').data(\'nav\') is not an object', false);
@@ -4826,7 +4835,7 @@ function injectMenu() {
   updateQuestLink();
   // character
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  insertAfterParent('nav-character-log', insertAdjHtml,
+  insertAfterParent('nav-character-log', insertHtmlAfterEnd,
     '<li class="nav-level-1"><a class="nav-link" id="nav-' +
     'character-medalguide" href="index.php?cmd=profile&subcmd=' +
     'medalguide">Medal Guide</a></li>' +
@@ -4842,7 +4851,7 @@ function injectMenu() {
   guildInventory();
   newGuildLogLink();
   // top rated
-  insertAfterParent('nav-toprated-players-level', insertAdjHtml,
+  insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
     '<li class="nav-level-2"><a class="nav-link" id="nav-' +
     'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
     'Top 250 Players</a></li>');
@@ -5045,8 +5054,7 @@ function prayToGods(e) { // jQuery
 }
 
 function displayDisconnectedFromGodsMessage() {
-  getElementById('notifications').insertAdjacentHTML('afterbegin',
-    godsNotification);
+  insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
   getElementById('helperPrayToGods').addEventListener('click',
     prayToGods);
 }
@@ -5099,8 +5107,7 @@ var goldUpgradeMsg =
 
 function displayUpgradeMsg() {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
-    getElementById('notifications').insertAdjacentHTML('afterbegin',
-      goldUpgradeMsg);
+    insertHtmlAfterBegin(getElementById('notifications'), goldUpgradeMsg);
   }
 }
 
@@ -5151,8 +5158,14 @@ function notUpgradesPage() {
 }
 
 function injectUpgradeAlert() { // jQuery
-  if ($ && location.search.indexOf('cmd=points&type=1') === -1) {
+  if (jQueryPresent() && location.search.indexOf('cmd=points&type=1') === -1) {
     notUpgradesPage();
+  }
+}
+
+function insertElementAfterBegin(parentNode, newNode) {
+  if (parentNode instanceof Element) {
+    parentNode.insertBefore(newNode, parentNode.firstChild);
   }
 }
 
@@ -5364,7 +5377,7 @@ function hazAllies(allies, enemies) {
   }
   var fshContactList = getElementById('fshContactList');
   fshContactList.innerHTML = '';
-  fshContactList.insertAdjacentHTML('beforeend', output);
+  insertHtmlBeforeEnd(fshContactList, output);
 }
 
 function injectAllyEnemyList(data) {
@@ -5439,8 +5452,8 @@ function makeDiv(data) {
     wrapper += '<ul class="enemy-quick-buff">Quick Buff Selected</ul>';
   }
   wrapper += '</div></div>';
-  fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  afterBegin(pCR, fshAllyEnemy);
+  insertHtmlBeforeEnd(fshAllyEnemy, wrapper);
+  insertElementAfterBegin(pCR, fshAllyEnemy);
   fshAllyEnemy.addEventListener('click', eventHandler$2);
   injectAllyEnemyList(data);
 }
@@ -5596,11 +5609,11 @@ function createMiniBox() {
 function createDivs() {
   if (calf.enableWantedList) {
     wantedListDiv = createMiniBox();
-    afterBegin(pCR, wantedListDiv);
+    insertElementAfterBegin(pCR, wantedListDiv);
   }
   if (calf.enableActiveBountyList) {
     bountyListDiv = createMiniBox();
-    afterBegin(pCR, bountyListDiv);
+    insertElementAfterBegin(pCR, bountyListDiv);
   }
 }
 
@@ -5634,7 +5647,7 @@ function injectBountyList() { // Legacy
         bountyList.bounty[i].target + '</a><br>';
     }
   }
-  bountyListDiv.insertAdjacentHTML('beforeend', output);
+  insertHtmlBeforeEnd(bountyListDiv, output);
 }
 
 var wantedListReset;
@@ -5678,7 +5691,7 @@ function injectWantedList() { // Legacy
         wantedList.bounty[i].target + '</a><br>';
     }
   }
-  wantedListDiv.insertAdjacentHTML('beforeend', output);
+  insertHtmlBeforeEnd(wantedListDiv, output);
 }
 
 var curPage;
@@ -6040,7 +6053,7 @@ function scoutTowerLink() {
   var spoils = getElementById('minibox-spoilsofwar');
   if (spoils) {
     var parent = spoils.children[1].children[0];
-    parent.insertAdjacentHTML('beforeend', '&nbsp;' +
+    insertHtmlBeforeEnd(parent, '&nbsp;' +
       '<a href="index.php?cmd=guild&subcmd=scouttower" ' +
       'class="tip-static" data-tipped="View Scout Report">' +
       '<img id="fshScoutTower" ' +
@@ -6118,7 +6131,7 @@ function getFshSeLog() { // jQuery.min
 }
 
 function shouldLog() {
-  return $ && calf.enableSeTracker && calf.cmd !== 'superelite';
+  return jQueryPresent() && calf.enableSeTracker && calf.cmd !== 'superelite';
 }
 
 function seLog() { // jQuery.min
@@ -6293,14 +6306,14 @@ function timeBox(nextGainTime, hrsToGo) {
 
 function injectStaminaCalculator() {
   var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
-  if (!nextGain) {return;}
+  if (nextGain.length === 0) {return;}
   var staminaMouseover =
     getElementById('statbar-stamina-tooltip-stamina');
   var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
     staminaMouseover.getElementsByClassName('stat-name')[0]
       .nextElementSibling.textContent
   );
-  staminaMouseover.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(staminaMouseover,
     '<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
     timeBox(
       nextGain[0].nextElementSibling.textContent,
@@ -6319,24 +6332,23 @@ function injectStaminaCalculator() {
 
 function injectLevelupCalculator() {
   var nextGain = document.getElementsByClassName('stat-xp-nextGain');
-  if (!nextGain) {return;}
-  getElementById('statbar-level-tooltip-general')
-    .insertAdjacentHTML('beforeend',
-      '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
-      timeBox(
-        nextGain[0].nextElementSibling.textContent,
-        Math.ceil(
-          intValue(
-            document.getElementsByClassName('stat-xp-remaining')[0]
-              .nextElementSibling.textContent
-          ) /
-          intValue(
-            document.getElementsByClassName('stat-xp-gainPerHour')[0]
-              .nextElementSibling.textContent
-          )
+  if (nextGain.length === 0) {return;}
+  insertHtmlBeforeEnd(getElementById('statbar-level-tooltip-general'),
+    '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
+    timeBox(
+      nextGain[0].nextElementSibling.textContent,
+      Math.ceil(
+        intValue(
+          document.getElementsByClassName('stat-xp-remaining')[0]
+            .nextElementSibling.textContent
+        ) /
+        intValue(
+          document.getElementsByClassName('stat-xp-gainPerHour')[0]
+            .nextElementSibling.textContent
         )
       )
-    );
+    )
+  );
 }
 
 function gameHelpLink() {
@@ -6427,7 +6439,7 @@ function conditional() {
 function moveRHSBoxUpOnRHS(title) {
   var box = getElementById(title);
   if (box) {
-    afterBegin(pCR, box);
+    insertElementAfterBegin(pCR, box);
   }
 }
 
@@ -6644,7 +6656,7 @@ function selectPerf() {
 function drawFilters(data) {
   inv = data.items;
   var buttonDiv = createDiv({className: 'fshAC'});
-  buttonDiv.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(buttonDiv,
     '<button class="fshBl">Perfect</button>');
   pCC.appendChild(buttonDiv);
   buttonDiv.addEventListener('click', selectPerf);
@@ -6750,7 +6762,7 @@ function composingBreakdown() {
     .addEventListener('click', breakEvt, true);
   getElementById('composing-items')
     .addEventListener('click', itemClick);
-  pCC.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(pCC,
     '<table class="fshTblCenter"><tbody>' +
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
@@ -6794,7 +6806,7 @@ function drawingNewItemTable() {
       itemDiv.appendChild(aLink);
       drawingNewItemTable.itemGrid.appendChild(itemDiv);
     });
-    afterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
+    insertElementAfterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
     itemTable.classList.add('fshHide');
   }
 }
@@ -6843,7 +6855,7 @@ function doFolderButtons(folders) {
     .previousElementSibling.firstElementChild;
   inject.classList.add('fshCenter');
   inject.addEventListener('click', doHideFolders);
-  inject.insertAdjacentHTML('beforeend', makeFolderSpans$1(folders, true));
+  insertHtmlBeforeEnd(inject, makeFolderSpans$1(folders, true));
   return inject;
 }
 
@@ -6862,7 +6874,7 @@ function doPerfSwitch(inject) {
   });
   perfBox.addEventListener('change', reDrawGrid);
   perfLabel.appendChild(perfBox);
-  inject.insertAdjacentHTML('beforeend', ' &ensp;');
+  insertHtmlBeforeEnd(inject, ' &ensp;');
   inject.appendChild(perfLabel);
 }
 
@@ -6973,7 +6985,7 @@ function collapseDuringAnalysis(row, thisArticle) {
 }
 
 function hasExtraFn(extraFn, row) {
-  if (typeof extraFn === 'function') {extraFn(row);}
+  if (isFunction(extraFn)) {extraFn(row);}
 }
 
 function testRowType(row, rowType, thisArticle, articleTest, extraFn) {
@@ -7091,9 +7103,8 @@ function guildMailboxEvent(e) { // jQuery.min
 function guildMailbox() {
   if (jQueryNotPresent()) {return;}
   pCC.addEventListener('click', guildMailboxEvent);
-  document.querySelector('#pCC td[height="25"]')
-    .insertAdjacentHTML('beforeend',
-      '<span class="sendLink">Take All</span>');
+  insertHtmlBeforeEnd(document.querySelector('#pCC td[height="25"]'),
+    '<span class="sendLink">Take All</span>');
 }
 
 function getGuild(guildId) {
@@ -7130,8 +7141,8 @@ function getGuildMembers(guildId) {
 
 var testList = [
   function(guildId, membrList) {return Boolean(membrList);},
-  function(guildId, membrList) {return typeof membrList === 'object';},
-  function(guildId, membrList) {return typeof membrList[guildId] === 'object';},
+  function(guildId, membrList) {return isObject(membrList);},
+  function(guildId, membrList) {return isObject(membrList[guildId]);},
   function(guildId, membrList) {
     return typeof membrList[guildId].lastUpdate === 'number';
   },
@@ -7201,8 +7212,8 @@ function doTable() { // jQuery
 
 function summaryLink() {
   var updateInput = pCC.getElementsByClassName('custombutton');
-  if (!updateInput) {return;}
-  updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
+  if (updateInput.length === 0) {return;}
+  insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
 }
 
@@ -7245,7 +7256,7 @@ function injectAdvisorNew() {
     var tdOne = tr.cells[0];
     var username = tdOne.textContent.trim();
     tdOne.innerHTML = playerName$2(username);
-    tdOne.insertAdjacentHTML('afterend', '<td>' + playerLevel(username) +
+    insertHtmlAfterEnd(tdOne, '<td>' + playerLevel(username) +
       '</td><td>' + playerRank(username) + '</td>');
   });
   insertElement(list, tfoot);
@@ -7260,8 +7271,8 @@ function returnAdvisorPage(e, response) {
 
   time('guildAdvisor.returnAdvisorPage' + e);
 
-  list.lastElementChild.lastElementChild
-    .insertAdjacentHTML('beforeend', ' day ' + e + ',');
+  insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
+    ' day ' + e + ',');
   var doc = createDocument(response);
   var table = getElementById('pCC', doc).firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
@@ -7407,8 +7418,6 @@ function injectAdvisor() {
     });
   }
 }
-
-function isObject(e) {return isType(e, 'object');}
 
 var tabs;
 var theTables;
@@ -7739,7 +7748,7 @@ function injectBazaar() { // TODO stop using getElementById
       .replace('@tipped@', tipped);
   });
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
-  pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);
+  insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);
   getElementById('fshBazaar').addEventListener('click', select);
   getElementById('buy_amount').addEventListener('input', quantity);
   getElementById('fshBuy').addEventListener('click', buy);
@@ -7983,9 +7992,7 @@ function bioEvtHdl(e) {
 }
 
 function insertTextBeforeEnd(parent, text) {
-  if (parent instanceof Element) {
-    parent.insertAdjacentHTML('beforeend', text);
-  }
+  insertHtmlBeforeEnd(parent, text);
 }
 
 function renderBio(_bioContents) {
@@ -8050,7 +8057,7 @@ function bioPreview() {
 function bioWords() {
   if (calf.cmd === 'profile') {
     // Add description text for the new tags
-    pCC.insertAdjacentHTML('beforeend', '<div>' +
+    insertHtmlBeforeEnd(pCC, '<div>' +
       '`~This will allow FSH Script users to select buffs from your bio~`<br>' +
       'You can use the [cmd] tag as well to determine where to put the "Ask ' +
       'For Buffs" button<br><br><blockquote><ul class="list">' +
@@ -8240,7 +8247,7 @@ function displayMinGroupLevel() { // jQuery
   }
 }
 
-function filterMercs(e) {return e.search('#000099') === -1;}
+function filterMercs(e) {return !e.includes('#000099');}
 
 function joinGroup(groupJoinURL, joinButton) { // jQuery
   return retryAjax(groupJoinURL).done(function() {
@@ -8293,7 +8300,7 @@ function parseGroupData(linkElement, obj) {
     '</tr></table>';
   var expiresLocation = linkElement.parentNode.parentNode
     .previousElementSibling;
-  expiresLocation.insertAdjacentHTML('beforeend', extraText);
+  insertHtmlBeforeEnd(expiresLocation, extraText);
 }
 
 function fetchGroupData(evt) {
@@ -8454,7 +8461,7 @@ function buildOptions(ourMembers) {
 }
 
 function toText(val) {
-  if (typeof val === 'undefined') {return '#DEF';}
+  if (isUndefined(val)) {return '#DEF';}
   return val.toLocaleString();
 }
 
@@ -8516,16 +8523,16 @@ function initTable(theMembers) {
 function makeTg() {
   var tg = createTable({id: 'tg'});
   var hrow = tg.createTHead().insertRow(-1);
-  hrow.insertAdjacentHTML('beforeend', '<th>Date</th>');
+  insertHtmlBeforeEnd(hrow, '<th>Date</th>');
 
   var memberHead = createTh({textContent: 'Member'});
   memberSelect = createDiv();
   memberHead.appendChild(memberSelect);
   hrow.appendChild(memberHead);
 
-  hrow.insertAdjacentHTML('beforeend', '<th>Level</th><th>VL</th>' +
-  '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
-  '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
+  insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
+    '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
+    '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
 
   actBody = createTBody();
   tg.appendChild(actBody);
@@ -8666,7 +8673,7 @@ function makePopup() {
 }
 
 function addOverlay() {
-  trDialog.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(trDialog,
     '<div class="fsh-dialog-overlay">' +
     '<label class="fsh-dialog-cancel" for="tracker"></label>' +
     '</div>');
@@ -8755,7 +8762,7 @@ function guildXPLock() {
   var actualXP = getIntFromRegExp(xpLockmouseover,
     /XP: <b>(\d*)/);
   if (actualXP < xpLockXP) {
-    xpLock.parentNode.nextElementSibling.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
       ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
   }
 }
@@ -8817,7 +8824,7 @@ function conflictInfo() { // jQuery.min
 
 function logoToggle() {
   var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
-  changeLogoCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink' +
+  insertHtmlBeforeEnd(changeLogoCell, '[ <span class="fshLink' +
     ' tip-static" id="toggleGuildLogoControl" ' +
     'linkto="guildLogoControl" data-tipped="Toggle Section">X</span> ]');
   var guildLogoElement = leftHandSideColumnTable.rows[2].cells[0]
@@ -8832,7 +8839,7 @@ function logoToggle() {
 
 function statToggle() {
   var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
-  leaveGuildCell.insertAdjacentHTML('beforeend', '<span class="fshNoWrap">' +
+  insertHtmlBeforeEnd(leaveGuildCell, '<span class="fshNoWrap">' +
     '[ <span class="fshLink tip-static" id="toggleStatisticsControl" ' +
     'linkto="statisticsControl" data-tipped="Toggle Section">X</span> ]' +
     '</span>');
@@ -8848,7 +8855,7 @@ function statToggle() {
 
 function structureToggle() {
   var buildCell = leftHandSideColumnTable.rows[15].cells[1].firstChild;
-  buildCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink ' +
+  insertHtmlBeforeEnd(buildCell, '[ <span class="fshLink ' +
     'tip-static" id="toggleGuildStructureControl" ' +
     'linkto="guildStructureControl" data-tipped="Toggle Section">X</span> ]');
   var guildStructureControlElement = leftHandSideColumnTable.rows[17]
@@ -8864,7 +8871,7 @@ function structureToggle() {
 function batchBuffLinks() {
   var limit = performance.now() + 5;
   while (moreToDo(limit, memCount, members)) {
-    members[memCount].parentNode.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(members[memCount].parentNode,
       ' <span class="smallLink">[b]</span>');
     memCount += 1;
   }
@@ -8889,7 +8896,7 @@ function selfRecallLink() {
   // self recall
   var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
   var selfRecall = getLi[getLi.length - 1].parentNode;
-  selfRecall.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(selfRecall,
     '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
     'user=' + playerName() +
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
@@ -8925,7 +8932,7 @@ function takeitem(invId) {
 
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
-    rows[i].cells[2].insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(rows[i].cells[2],
       '&nbsp;<span class="sendLink">Fast BP</span>');
   }
 }
@@ -9014,7 +9021,7 @@ function parseRankData(linkElement, responseText) {
     } else {count += 1;}
   });
   var taxRate = doc.querySelector('#pCC input[name="rank_tax"]').value;
-  linkElement.insertAdjacentHTML('afterbegin', '<span class="fshBlue">(' +
+  insertHtmlAfterBegin(linkElement, '<span class="fshBlue">(' +
     Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
 
@@ -9079,7 +9086,7 @@ function doButtons() {
     });
     weightButton.addEventListener('click', fetchRankData);
     var theTd = founder.parentNode;
-    theTd.insertAdjacentHTML('beforeend', '&nbsp;');
+    insertHtmlBeforeEnd(theTd, '&nbsp;');
     insertElement(theTd, weightButton);
   }
   // var theTd = getElementById('show-guild-founder-rank-name') // TODO why wouldn't you be able to see this?
@@ -9098,7 +9105,7 @@ function writeMembers(el) {
     if (rankName === myRank) {
       characterRow = rankCount; // limit for ajaxify later
     }
-    rankCell.insertAdjacentHTML('beforeend', ' <span class="fshBlue">- ' +
+    insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
       ranks[rankName].join(', ') + '</span>');
   }
 }
@@ -9957,7 +9964,6 @@ function queueRecallItem(o) {
   return deferred;
 }
 
-// import {injectInventoryManagerNew} from '../inventory';
 function setName(e) { // jQuery
   $('#fshInv').DataTable().search($(e.target).attr('set')).draw();
   $('#fshInv_filter input').focus();
@@ -10537,7 +10543,6 @@ var headerRow = '<tbody><tr>' +
   '<td class="header" width="16">&nbsp;</td>' +
   '<td class="header" width="20%">Date</td>' +
   '<td class="header" width="80%">Message</td></tr></tbody>';
-
 var defChecks = [true, true, true, true, true, true,
   true, true, true, true, true];
 var noChecks = [false, false, false, false, false, false,
@@ -10651,7 +10656,7 @@ function updateOptionsLog() {
 
 function buildTable() {
   myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
-  myTable.insertAdjacentHTML('beforeend', headerRow);
+  insertHtmlBeforeEnd(myTable, headerRow);
 
   tmpGuildLog.forEach(function(r) {
     var myRow = myTable.insertRow(-1);
@@ -10770,6 +10775,10 @@ function injectNewGuildLog() { // jQuery.min
   getForage('fsh_guildLog').done(gotOptions);
 }
 
+function insertHtmlBeforeBegin(parent, html) {
+  insertHtml(parent, 'beforebegin', html);
+}
+
 function cellOneHazText(curr) {
   return curr.cells[1] && curr.cells[1].textContent;
 }
@@ -10807,14 +10816,14 @@ function addStats$1(el) {
   var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
     getVal('Armor', statObj) + getVal('Damage', statObj) +
     getVal('HP', statObj);
-  getLastIndex(statObj, statTable).insertAdjacentHTML('beforebegin',
+  insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
     '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
     totalStats + '&nbsp;</td></tr>');
 }
 
 function fshDataFilter(data) {
   var container = createDiv();
-  container.insertAdjacentHTML('beforeend', data);
+  insertHtmlBeforeEnd(container, data);
   var bonus = container.getElementsByTagName('font');
   bonus = Array.prototype.filter.call(bonus, function(el) {
     return el.textContent === 'Bonuses';
@@ -11161,11 +11170,11 @@ function displayComponentTally() {
   var tbl = createTable({className: 'fshTblCenter'});
   var tBody = createTBody();
   tbl.appendChild(tBody);
-  tBody.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(tBody,
     '<tr><td colspan="3">Component Summary</td></tr>' +
     Object.keys(componentList).reduce(tallyTableRow, ''));
   var totRow = tbl.insertRow(-1);
-  totRow.insertAdjacentHTML('beforeend', '<td>Total:</td>');
+  insertHtmlBeforeEnd(totRow, '<td>Total:</td>');
   var totCell = totRow.insertCell(-1);
   totCell.colSpan = 2;
   usedCountDom = createSpan();
@@ -11178,7 +11187,7 @@ function displayComponentTally() {
 
 function gotComponentsPage(data) {
   pageCount += 1;
-  sumComp.insertAdjacentHTML('beforeend', pageCount + ', ');
+  insertHtmlBeforeEnd(sumComp, pageCount + ', ');
   retriveComponent(createDocument(data));
 }
 
@@ -11222,7 +11231,7 @@ function delComponent(self) { // jQuery.min
 }
 
 function addDelBtn(el) {
-  el.parentNode.parentNode.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(el.parentNode.parentNode,
     '<span class="compDelBtn">Del</span>');
 }
 
@@ -11291,7 +11300,7 @@ function decorateButton(parentDiv, label) {
     {className: 'sendLink', textContent: label});
   parentDiv.textContent = '[';
   parentDiv.appendChild(innerSpan);
-  parentDiv.insertAdjacentHTML('beforeend', ']');
+  insertHtmlBeforeEnd(parentDiv, ']');
   return innerSpan;
 }
 
@@ -11375,7 +11384,7 @@ function foundGuildLink(aLink) {
   if (currentGuildRelationship) {
     aLink.parentNode.classList.add(
       guildMessages[currentGuildRelationship].color);
-    aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
+    insertHtmlBeforeEnd(aLink.parentNode, '<br>' +
       guildMessages[currentGuildRelationship].message);
   }
 }
@@ -11420,7 +11429,7 @@ function profileInjectQuickButton(avyImg, playerid, playername) {
   newhtml += showRecallButton(playername);
   newhtml += showRankButton(playerid, playername);
   newhtml += '</div>';
-  avyImg.insertAdjacentHTML('afterend', newhtml);
+  insertHtmlAfterEnd(avyImg, newhtml);
 }
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
@@ -11428,7 +11437,7 @@ function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   if (contactsTotal && contactsTotal >= numberOfContacts) {
     _c = '/' + contactsTotal;
   }
-  target.insertAdjacentHTML('beforeend', '<span class="fshBlue">&nbsp;' +
+  insertHtmlBeforeEnd(target, '<span class="fshBlue">&nbsp;' +
     numberOfContacts + _c + '</span>');
 }
 
@@ -11602,7 +11611,7 @@ function selectAllLink() {
   allSpan.addEventListener('click', profileSelectAll);
   var wrapper = createSpan({innerHTML: '[&nbsp;'});
   wrapper.appendChild(allSpan);
-  wrapper.insertAdjacentHTML('beforeend', '&nbsp;]&nbsp;');
+  insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');
   node.parentNode.appendChild(wrapper);
 }
 
@@ -11721,7 +11730,7 @@ function injectMoveItems() {
   if (!flrEnabled || !oFlr) {return;}
   options += '</select>&nbsp;<input type="button" class="custombutton" ' +
     'id="fshMove" value="Move"></td></tr>';
-  flrRow.insertAdjacentHTML('afterend', options);
+  insertHtmlAfterEnd(flrRow, options);
 }
 
 var invItems$1;
@@ -11776,7 +11785,7 @@ function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
 
 function extraButtons() {
   var tRows = pCC.getElementsByTagName('table')[0].rows;
-  tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
+  insertHtmlAfterBegin(tRows[tRows.length - 2].cells[0],
     '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
 }
 
@@ -11910,18 +11919,15 @@ function getItemImg() {
 }
 
 function afterbegin(o, item) {
-  if (fallback(extraLinks, !showExtraLinks)) {
-    return;
-  }
+  if (fallback(extraLinks, !showExtraLinks)) {return;}
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
     pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
-  pattern += '</span>[<a href="' + guideUrl +
-    'items&subcmd=view&item_id=' + item.item_id +
-    '" target="_blank">UFSG</a>]</span>';
-  o.injectHere.insertAdjacentHTML('afterbegin', pattern);
+  pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +
+    item.item_id + '" target="_blank">UFSG</a>]</span>';
+  insertHtmlAfterBegin(o.injectHere, pattern);
 }
 
 function itemColouring(o, item) {
@@ -11973,7 +11979,7 @@ function beforeend(o, item) {
     }
     return ret;
   }, '');
-  if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
+  if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
 }
 
 function doneInvPaint() {
@@ -12358,8 +12364,7 @@ function injectQuickBuff() { // jQuery
   if (jQueryNotPresent()) {return;}
   var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
-  quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
-    quickBuffHeader);
+  insertHtmlAfterEnd(quickbuffDiv.firstElementChild, quickBuffHeader);
   getProfile(window.self).done(getSustain$1);
 }
 
@@ -12380,7 +12385,7 @@ function postWarnings(myBuffs) {
     var packBuffs;
     while ((packBuffs = packRE.exec(tipped)) !== null) {
       if (myBuffs[packBuffs[1]] === Number(packBuffs[2])) {
-        el.parentNode.insertAdjacentHTML('beforeend',
+        insertHtmlBeforeEnd(el.parentNode,
           '<br><span class="fshRed fshNoWrap">' + packBuffs[1] + ' ' +
           packBuffs[2] + ' active</span>');
       }
@@ -12859,7 +12864,7 @@ function injectSaveSettings() { // Hybrid
     'type="submit" value="Load Settings!" /></center>';
   $('#HelperLoadSettings').click(function() {
     var userInput = jsonParse(getElementById('HelperfshSettings').value);
-    if (typeof userInput === 'object') {
+    if (isObject(userInput)) {
       var settings = userInput;
       Object.keys(settings).forEach(function(id) {
         setValue(id, settings[id]);
@@ -12959,10 +12964,10 @@ function evtHdl$3(e) {
 function doBuffLinks$1(titanTable) {
   for (var j = 1; j < titanTable.rows.length; j += 2) {
     var firstCell = titanTable.rows[j].cells[0];
-    firstCell.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(firstCell,
       ' <button class="fshBl fshXSmall">[b]</button>');
   }
-  titanTable.rows[0].cells[0].insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
     ' <button class="fshBl fshXSmall">all</button>');
 }
 
@@ -13016,7 +13021,7 @@ function cooldownTracker(aRow, theTitans) {
 
 function addRow(theTitans, trackerTable, titan) {
   if (theTitans[titan].coolTime < now) {return;}
-  trackerTable.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(trackerTable,
     '<tr><td class="fshCenter">' + titan + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
     theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
@@ -13076,7 +13081,7 @@ function killsSummary(aRow) {
   var titanHPArray = titanHP.split('/');
   var currentHP = Number(titanHPArray[0]);
   var totalHP = Number(titanHPArray[1]);
-  aRow.cells[3].insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(aRow.cells[3],
     '<br><span class="fshBlue"> (' +
     roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
     '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
@@ -13843,7 +13848,7 @@ function injectSettings() { // jQuery.min
   getVars();
   setupConfigData();
   var settingsTabs = getElementById('settingsTabs');
-  settingsTabs.insertAdjacentHTML('beforeend', '<div id="fshSettings">' +
+  insertHtmlBeforeEnd(settingsTabs, '<div id="fshSettings">' +
     calf.configData + '</div>');
   if ($(settingsTabs).tabs('length') > 0) {
     $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
@@ -13857,9 +13862,9 @@ function injectSettings() { // jQuery.min
 function injectTitan() {
   var titanTable = pCC.children[0];
   var newRow = titanTable.insertRow(2);
-  newRow.insertAdjacentHTML('beforeend', '<br>');
+  insertHtmlBeforeEnd(newRow, '<br>');
   newRow = titanTable.insertRow(3);
-  newRow.insertAdjacentHTML('beforeend', '<td class="fshCenter fshBold">[ ' +
+  insertHtmlBeforeEnd(newRow, '<td class="fshCenter fshBold">[ ' +
     '<a href="index.php?cmd=guild&subcmd=scouttower">Scout Tower</a> ]</td>');
 }
 
@@ -14016,9 +14021,7 @@ var myGuildId;
 
 var highlightTests$1 = [
   function() {return highlightPlayersNearMyLvl$1;},
-  function(guildId) {
-    return typeof guildId === 'undefined' || guildId !== myGuildId;
-  },
+  function(guildId) {return isUndefined(guildId) || guildId !== myGuildId;},
   function(guildId, data) {return data.last_login >= validPvP;},
   function(guildId, data) {return data.virtual_level >= pvpLowerLevel;},
   function(guildId, data) {return data.virtual_level <= pvpUpperLevel;}
@@ -14031,7 +14034,7 @@ function pvpHighlight$1(guildId, data) {
 }
 
 function doOnlineDot(aTable, guildId, data) {
-  aTable.rows[0].insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(aTable.rows[0],
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
   if (pvpHighlight$1(guildId, data)) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
@@ -14044,7 +14047,7 @@ function parsePlayer(aTable, guildId, data, jqXhr) {
     var defender = playerDataObject(data);
     if (defender.cloakLevel !== 0) {console.log('Cloaked Player', data);} // eslint-disable-line no-console
   } else {
-    aTable.rows[0].insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(aTable.rows[0],
       '<td class="fshBkRed">' + jqXhr.status + '</td>');
   }
 }
@@ -14232,7 +14235,7 @@ function doFolderHeaders(folders) {
   });
   foldersRow.addEventListener('click', hideFolder);
   var el = getElementById('item-list').parentNode.parentNode;
-  el.insertAdjacentHTML('beforebegin', '<tr id="fshShowSTs">' +
+  insertHtmlBeforeBegin(el, '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
     'Select items in ST</label></td></tr>');
@@ -14436,7 +14439,7 @@ function impWarning(impsRem) { // Legacy
 function getKillStreak(responseText) { // Hybrid
   var doc = createDocument(responseText);
   var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
-  log('killStreakLocation', killStreakLocation); // TODO WTF?
+  console.log('killStreakLocation', killStreakLocation); // eslint-disable-line no-console
   var playerKillStreakValue;
   if (killStreakLocation.length > 0) {
     playerKillStreakValue = intValue(killStreakLocation.text());
@@ -14463,7 +14466,7 @@ function getKillStreak(responseText) { // Hybrid
 
 function getLastValue(pref) {
   var val = getValue(pref);
-  if (typeof val === 'undefined') {
+  if (isUndefined(val)) {
     setValue(pref, 0);
     val = 0;
   }
@@ -14680,11 +14683,11 @@ var actionsToIntercept = {
 };
 
 function firstAttempt(attempts) {
-  return typeof attempts === 'undefined' || attempts === 0;
+  return isUndefined(attempts) || attempts === 0;
 }
 
 function goodInterceptFunction(interceptFunction) {
-  return interceptFunction && typeof interceptFunction === 'function';
+  return interceptFunction && isFunction(interceptFunction);
 }
 
 function maybeIntercept(action, fetch, data, attempts) {
@@ -14854,7 +14857,7 @@ function missingMembers(membrList) {
       guildMemberList[key].id + '">' + key + '</a>');
     return prev;
   }, []);
-  containerDiv.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(containerDiv,
     '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
     '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
     '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
@@ -14900,7 +14903,7 @@ function prepareSecondaryDivs(relicData) {
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(false).done(missingMembers);
   }
-  leftDiv.insertAdjacentHTML('beforeend', proc);
+  insertHtmlBeforeEnd(leftDiv, proc);
   processingStatus = getElementById('ProcessingStatus');
   var midDiv = createDiv({
     className: 'fshFloatLeft fshRelicMidDiv',
@@ -15503,7 +15506,7 @@ var clickHdl = [
 ];
 
 function fixTeleport() {
-  if (GameController && GameController.Realm) {
+  if (window.GameController && GameController.Realm) {
     GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
   }
 }
@@ -15697,7 +15700,7 @@ function quickDone(data) {
     msg = 'You purchased ' + data.response.data.name +
       ' for ' + addCommas(data.response.data.cost) + ' gold.';
   }
-  resultDiv.insertAdjacentHTML('beforeend', msg + '<br>');
+  insertHtmlBeforeEnd(resultDiv, msg + '<br>');
 }
 
 function normalBuy() {
@@ -16685,7 +16688,7 @@ var buffLookup = {
 
 function setCurrentBuffList() {
   var tmpFn = buffLookup[calf.enabledHuntingMode];
-  if (typeof tmpFn === 'function') {
+  if (isFunction(tmpFn)) {
     tmpFn();
   }
 }
@@ -16712,7 +16715,7 @@ function doHidePlayerActions() {
   var players = act.getElementsByClassName('player');
   Array.prototype.forEach.call(players, function(el) {
     var verbs = el.getElementsByClassName('verbs');
-    if (verbs && verbs.length === 1) {
+    if (verbs.length === 1) {
       verbs[0].classList.add('fshHide');
     }
   });
@@ -16791,7 +16794,7 @@ var fshEvents = {
 
 function prefsClickEvent(e) {
   var tmpFn = fshEvents[e.target.name];
-  if (typeof tmpFn === 'function') {
+  if (isFunction(tmpFn)) {
     e.target.blur();
     tmpFn(e);
   }
@@ -16941,6 +16944,24 @@ function subscribes() { // jQuery.min
   $('#mapTooltip').qtip('hide');
 }
 
+// -1 = world page
+// 0 = quest responce
+// 1 = view creature
+// 2 = attack creature
+// 3 = attack player
+// 4 = move
+// 5 = use stair
+// 6 = use chest
+// 7 = take portal
+// 10 = problaby view relic
+// 11 = take relic
+// 12 = create group
+// 13 = view shop
+// 14 = purchase item
+// 15 = repair
+// 17 = login
+// 18 = username not found
+
 function recastImpAndRefresh(responseText) { // Legacy
   var doc = createDocument(responseText);
   if (doc) {
@@ -17007,31 +17028,16 @@ function injectOldMap() { // Legacy - Old Map
   toggleKsTracker();
 }
 
-function injectWorld() {
-  if (jQueryNotPresent()) {return;}
-  // -1 = world page
-  // 0 = quest responce
-  // 1 = view creature
-  // 2 = attack creature
-  // 3 = attack player
-  // 4 = move
-  // 5 = use stair
-  // 6 = use chest
-  // 7 = take portal
-  // 10 = problaby view relic
-  // 11 = take relic
-  // 12 = create group
-  // 13 = view shop
-  // 14 = purchase item
-  // 15 = repair
-  // 17 = login
-  // 18 = username not found
-  if (getElementById('worldPage')) { // new map
+function oldOrNew() {
+  if (getElementById('worldPage') && window.GameData) { // new map
     subscribes();
-  } else {
-    // not new map.
+  } else { // not new map.
     injectOldMap();
   }
+}
+
+function injectWorld() {
+  if (jQueryPresent()) {oldOrNew();}
 }
 
 function doinvent(recipe) {
@@ -17500,7 +17506,7 @@ var enableSeTracker = 'enableSeTracker';
 var trackerCell;
 
 function addRow$1(trackerTable, se) {
-  trackerTable.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(trackerTable,
     '<tr><td class="fshCenter">' + se[0] + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
     formatUtcDateTime(new Date(se[1] * 1000)) + '</td></tr>');
@@ -17566,7 +17572,7 @@ function waitForLog() {
 }
 
 function superelite$1() {
-  if (jQueryNotPresent) {return;}
+  if (jQueryNotPresent()) {return;}
   var newCell = insertNewRow();
   newCell.height = 20;
   newCell = insertNewRow();
@@ -17739,7 +17745,7 @@ function injectQuestTracker() {
   var injectHere = pCC.getElementsByTagName('td')[0];
   var questName = injectHere.getElementsByTagName('font')[1].textContent
     .replace(/"/g, '');
-  injectHere.insertAdjacentHTML('beforeend', guideButtons(questID, questName));
+  insertHtmlBeforeEnd(injectHere, guideButtons(questID, questName));
 }
 
 function rejected(timeStamp, buffsNotCast, buffLog) {
@@ -17846,7 +17852,7 @@ var unknown = [
 ];
 
 function unknownPage() { // Legacy
-  if (jQueryNotPresent) {return;}
+  if (jQueryNotPresent()) {return;}
   console.log('unknownPage'); // eslint-disable-line no-console
   unknown.some(function(el) {
     if (el.condition()) {
@@ -17874,7 +17880,7 @@ function checkForPvPLadder(row) {
 function testArticle$1(rowType) {return rowType > 1;}
 
 function setupPref$2(prefName, rowInjector) {
-  rowInjector.insertAdjacentHTML('afterend', simpleCheckbox(prefName));
+  insertHtmlAfterEnd(rowInjector, simpleCheckbox(prefName));
 }
 
 function viewArchive() {
@@ -18374,7 +18380,7 @@ function foundLogTable(logTable) { // Legacy
   enableChatParsing = getValue('enableChatParsing');
   var messageHeader = logTable.rows[0].cells[2];
   if (messageHeader) {
-    messageHeader.insertAdjacentHTML('beforeend', '&nbsp;&nbsp;' +
+    insertHtmlBeforeEnd(messageHeader, '&nbsp;&nbsp;' +
       '<span class="fshWhite">(Guild mates show up in ' +
       '<span class="fshGreen">green</span>)</span>');
   }
@@ -18456,9 +18462,9 @@ function makeCancelAll() {
   var fill = getElementById('fill').parentNode.parentNode
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');
-  fill.insertAdjacentHTML('afterbegin', ']');
-  afterBegin(fill, cancelAll);
-  fill.insertAdjacentHTML('afterbegin', '[');
+  insertHtmlAfterBegin(fill, ']');
+  insertElementAfterBegin(fill, cancelAll);
+  insertHtmlAfterBegin(fill, '[');
   cancelAll.addEventListener('click', cancelAllAH);
 }
 
@@ -18835,7 +18841,7 @@ var isValid = [
 
 function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
   if (isValid.every(function(e) {
-    return typeof e(cmd, subcmd, subcmd2, type) === 'object';
+    return isObject(e(cmd, subcmd, subcmd2, type));
   }) && pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
     return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
   }
@@ -18886,7 +18892,7 @@ function devHooks() {
 
 function asyncDispatcher() {
   devHooks();
-  if (typeof coreFunction === 'function') {
+  if (isFunction(coreFunction)) {
     screenview(functionPath);
     start('JS Perf', functionPath);
     coreFunction();
@@ -18895,7 +18901,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '26';
+window.FSH.calf = '27';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
@@ -18907,7 +18913,7 @@ window.FSH.dispatch = function dispatch() {
   lookForHcsData();
   add(3, asyncDispatcher);
 
-  if (typeof window.jQuery === 'undefined') {return;}
+  if (jQueryNotPresent()) {return;}
 
   isMessageSound();
 

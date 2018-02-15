@@ -1,5 +1,6 @@
 import {createDiv} from '../common/cElement';
 import getValueJSON from '../system/getValueJSON';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 function ahLink(searchname, nickname) {
   return '<a href="index.php?cmd=auctionhouse&search_text=' + searchname +
@@ -95,6 +96,6 @@ export default function showAHInvManager(itemList) {
     id: 'invTabs-ah',
     className: 'ui-tabs-panel ui-corner-bottom'
   });
-  im.insertAdjacentHTML('beforeend', buildHTML(invCount, quickSL));
+  insertHtmlBeforeEnd(im, buildHTML(invCount, quickSL));
   return im;
 }

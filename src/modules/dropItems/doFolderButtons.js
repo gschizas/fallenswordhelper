@@ -1,11 +1,12 @@
 import calf from '../support/calf';
+import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 import makeFolderSpans from '../common/makeFolderSpans';
 import {pCC} from '../support/layout';
 import {createTd, createTr} from '../common/cElement';
 
 function extraButtons() {
   var tRows = pCC.getElementsByTagName('table')[0].rows;
-  tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
+  insertHtmlAfterBegin(tRows[tRows.length - 2].cells[0],
     '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
 }
 

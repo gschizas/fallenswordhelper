@@ -1,3 +1,4 @@
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import {pCC} from '../support/layout';
@@ -13,7 +14,7 @@ function postWarnings(myBuffs) {
     var packBuffs;
     while ((packBuffs = packRE.exec(tipped)) !== null) {
       if (myBuffs[packBuffs[1]] === Number(packBuffs[2])) {
-        el.parentNode.insertAdjacentHTML('beforeend',
+        insertHtmlBeforeEnd(el.parentNode,
           '<br><span class="fshRed fshNoWrap">' + packBuffs[1] + ' ' +
           packBuffs[2] + ' active</span>');
       }

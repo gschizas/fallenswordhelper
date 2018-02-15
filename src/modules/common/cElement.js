@@ -1,6 +1,8 @@
+import isObject from './isObject';
+
 export function mixin(obj, mixins) {
   Object.keys(mixins).forEach(function(key) {
-    if (typeof mixins[key] === 'object' && mixins[key] !== null) {
+    if (isObject(mixins[key]) && mixins[key] !== null) {
       mixin(obj[key], mixins[key]);
     } else {
       obj[key] = mixins[key];

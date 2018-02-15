@@ -9,7 +9,7 @@ import getValue from '../system/getValue';
 import hasCA from './hasCA';
 import hasDblr from './hasDblr';
 import {imageServer} from '../system/system';
-import jQueryNotPresent from '../common/jQueryNotPresent';
+import jQueryPresent from '../common/jQueryPresent';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 import subscribes from '../newMap/newMap';
@@ -80,29 +80,14 @@ function injectOldMap() { // Legacy - Old Map
   toggleKsTracker();
 }
 
-export default function injectWorld() {
-  if (jQueryNotPresent()) {return;}
-  // -1 = world page
-  // 0 = quest responce
-  // 1 = view creature
-  // 2 = attack creature
-  // 3 = attack player
-  // 4 = move
-  // 5 = use stair
-  // 6 = use chest
-  // 7 = take portal
-  // 10 = problaby view relic
-  // 11 = take relic
-  // 12 = create group
-  // 13 = view shop
-  // 14 = purchase item
-  // 15 = repair
-  // 17 = login
-  // 18 = username not found
-  if (getElementById('worldPage')) { // new map
+function oldOrNew() {
+  if (getElementById('worldPage') && window.GameData) { // new map
     subscribes();
-  } else {
-    // not new map.
+  } else { // not new map.
     injectOldMap();
   }
+}
+
+export default function injectWorld() {
+  if (jQueryPresent()) {oldOrNew();}
 }

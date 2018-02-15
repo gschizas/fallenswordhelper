@@ -1,5 +1,6 @@
 import collapse from '../common/collapse';
 import getValue from '../system/getValue';
+import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import setValue from '../system/setValue';
@@ -22,7 +23,7 @@ function checkForPvPLadder(row) {
 function testArticle(rowType) {return rowType > 1;}
 
 function setupPref(prefName, rowInjector) {
-  rowInjector.insertAdjacentHTML('afterend', simpleCheckbox(prefName));
+  insertHtmlAfterEnd(rowInjector, simpleCheckbox(prefName));
 }
 
 export default function viewArchive() {

@@ -3,7 +3,10 @@ import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import fallback from '../system/fallback';
 import getUrlParameter from '../system/getUrlParameter';
+import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
+import isObject from '../common/isObject';
+import jQueryNotPresent from '../common/jQueryNotPresent';
 import lookForHcsData from './lookForHcsData';
 import pageSwitcher from './pageSwitcher';
 import {end, screenview, setup, start} from '../support/fshGa';
@@ -35,7 +38,7 @@ var isValid = [
 
 function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
   if (isValid.every(function(e) {
-    return typeof e(cmd, subcmd, subcmd2, type) === 'object';
+    return isObject(e(cmd, subcmd, subcmd2, type));
   }) && pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
     return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
   }
@@ -88,7 +91,7 @@ function asyncDispatcher() {
   //#if _DEV  //  asyncDispatcher messages
   devHooks();
   //#endif
-  if (typeof coreFunction === 'function') {
+  if (isFunction(coreFunction)) {
     screenview(functionPath);
     start('JS Perf', functionPath);
     coreFunction();
@@ -109,7 +112,7 @@ window.FSH.dispatch = function dispatch() {
   lookForHcsData();
   add(3, asyncDispatcher);
 
-  if (typeof window.jQuery === 'undefined') {return;}
+  if (jQueryNotPresent()) {return;}
 
   isMessageSound();
 

@@ -6,6 +6,7 @@ import {getElementById} from '../common/getElement';
 import getGroupStats from '../ajax/getGroupStats';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {months} from '../support/constants';
 import {onlineDot} from '../common/colouredDots';
@@ -24,7 +25,7 @@ function displayMinGroupLevel() { // jQuery
   }
 }
 
-function filterMercs(e) {return e.search('#000099') === -1;}
+function filterMercs(e) {return !e.includes('#000099');}
 
 function joinGroup(groupJoinURL, joinButton) { // jQuery
   return retryAjax(groupJoinURL).done(function() {
@@ -77,7 +78,7 @@ function parseGroupData(linkElement, obj) {
     '</tr></table>';
   var expiresLocation = linkElement.parentNode.parentNode
     .previousElementSibling;
-  expiresLocation.insertAdjacentHTML('beforeend', extraText);
+  insertHtmlBeforeEnd(expiresLocation, extraText);
 }
 
 function fetchGroupData(evt) {

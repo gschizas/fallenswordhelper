@@ -1,6 +1,7 @@
 import addCommas from '../system/addCommas';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import retryAjax from '../ajax/retryAjax';
 import rnd from '../system/rnd';
 import testQuant from '../system/testQuant';
@@ -44,7 +45,7 @@ function quickDone(data) {
     msg = 'You purchased ' + data.response.data.name +
       ' for ' + addCommas(data.response.data.cost) + ' gold.';
   }
-  resultDiv.insertAdjacentHTML('beforeend', msg + '<br>');
+  insertHtmlBeforeEnd(resultDiv, msg + '<br>');
 }
 
 function normalBuy() {

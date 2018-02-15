@@ -1,5 +1,7 @@
+import isUndefined from '../common/isUndefined';
+
 function outputParamVal(param) {
-  if (typeof param === 'undefined') {return true;}
+  if (isUndefined(param)) {return true;}
   return param;
 }
 

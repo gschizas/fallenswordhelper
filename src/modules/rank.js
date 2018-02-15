@@ -5,6 +5,8 @@ import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import getValue from './system/getValue';
 import insertElement from './common/insertElement';
+import insertHtmlAfterBegin from './common/insertHtmlAfterBegin';
+import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import moreToDo from './common/moreToDo';
 import {pCC} from './support/layout';
@@ -43,7 +45,7 @@ function parseRankData(linkElement, responseText) {
     } else {count += 1;}
   });
   var taxRate = doc.querySelector('#pCC input[name="rank_tax"]').value;
-  linkElement.insertAdjacentHTML('afterbegin', '<span class="fshBlue">(' +
+  insertHtmlAfterBegin(linkElement, '<span class="fshBlue">(' +
     Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
 
@@ -108,7 +110,7 @@ function doButtons() {
     });
     weightButton.addEventListener('click', fetchRankData);
     var theTd = founder.parentNode;
-    theTd.insertAdjacentHTML('beforeend', '&nbsp;');
+    insertHtmlBeforeEnd(theTd, '&nbsp;');
     insertElement(theTd, weightButton);
   }
   // var theTd = getElementById('show-guild-founder-rank-name') // TODO why wouldn't you be able to see this?
@@ -127,7 +129,7 @@ function writeMembers(el) {
     if (rankName === myRank) {
       characterRow = rankCount; // limit for ajaxify later
     }
-    rankCell.insertAdjacentHTML('beforeend', ' <span class="fshBlue">- ' +
+    insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
       ranks[rankName].join(', ') + '</span>');
   }
 }

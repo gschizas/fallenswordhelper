@@ -2,7 +2,9 @@ import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import {injectFsBoxContent} from '../misc';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';
+import jQueryPresent from '../common/jQueryPresent';
 import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
 
@@ -26,7 +28,7 @@ function fSBoxExists(node) { // jQuery.min
   if (playerName.length === 0) {return;}
   getForage('fsh_fsboxcontent').done(storeFSBox);
   playerName = playerName[0].textContent;
-  nodediv.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(nodediv,
     '<br><span class="fshPaleVioletRed">' +
     '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
     playerName + '">Ignore</a> ]</span> ');
@@ -43,5 +45,5 @@ function fSBoxExists(node) { // jQuery.min
 
 export default function injectFSBoxLog() {
   var node = getElementById('minibox-fsbox');
-  if ($ && node) {fSBoxExists(node);}
+  if (jQueryPresent() && node) {fSBoxExists(node);}
 }

@@ -1,6 +1,8 @@
 import calf from '../support/calf';
 import {def_afterUpdateActionlist} from '../support/constants';
 import {getElementById} from '../common/getElement';
+import isFunction from '../common/isFunction';
+import isUndefined from '../common/isUndefined';
 
 var oldDoAction;
 
@@ -30,11 +32,11 @@ var actionsToIntercept = {
 };
 
 function firstAttempt(attempts) {
-  return typeof attempts === 'undefined' || attempts === 0;
+  return isUndefined(attempts) || attempts === 0;
 }
 
 function goodInterceptFunction(interceptFunction) {
-  return interceptFunction && typeof interceptFunction === 'function';
+  return interceptFunction && isFunction(interceptFunction);
 }
 
 function maybeIntercept(action, fetch, data, attempts) {

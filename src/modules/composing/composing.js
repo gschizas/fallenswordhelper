@@ -6,6 +6,8 @@ import getRandomInt from '../system/getRandomInt';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import insertElementBefore from '../common/insertElementBefore';
+import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
+import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryPresent from '../common/jQueryPresent';
 import {now} from '../support/constants';
 import {pCC} from '../support/layout';
@@ -19,8 +21,7 @@ var composeMsg =
   'Composing to do</p></a></li>';
 
 function displayComposeMsg() {
-  getElementById('notifications')
-    .insertAdjacentHTML('afterbegin', composeMsg);
+  insertHtmlAfterBegin(getElementById('notifications'), composeMsg);
 }
 
 function getDoc(data) {
@@ -150,7 +151,7 @@ function hasJQuery() {
   var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
-    el.insertAdjacentHTML('afterend', '<span class="quickCreate">' +
+    insertHtmlAfterEnd(el, '<span class="quickCreate">' +
       '[<span class="sendLink">Quick Create</span>]</span>');
   });
   pCC.addEventListener('click', quickCreate);

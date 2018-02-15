@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 
 var goldUpgradeMsg =
 '<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
@@ -7,7 +8,6 @@ var goldUpgradeMsg =
 
 export default function displayUpgradeMsg() {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
-    getElementById('notifications').insertAdjacentHTML('afterbegin',
-      goldUpgradeMsg);
+    insertHtmlAfterBegin(getElementById('notifications'), goldUpgradeMsg);
   }
 }

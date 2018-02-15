@@ -1,3 +1,4 @@
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 
 function buffAll(self) {
@@ -27,10 +28,10 @@ function evtHdl(e) {
 function doBuffLinks(titanTable) {
   for (var j = 1; j < titanTable.rows.length; j += 2) {
     var firstCell = titanTable.rows[j].cells[0];
-    firstCell.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(firstCell,
       ' <button class="fshBl fshXSmall">[b]</button>');
   }
-  titanTable.rows[0].cells[0].insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
     ' <button class="fshBl fshXSmall">all</button>');
 }
 

@@ -2,7 +2,9 @@ import currentGuildId from '../common/currentGuildId';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import isObject from '../common/isObject';
+import isUndefined from '../common/isUndefined';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
 import {onlineDot} from '../common/colouredDots';
@@ -23,9 +25,7 @@ var myGuildId;
 
 var highlightTests = [
   function() {return highlightPlayersNearMyLvl;},
-  function(guildId) {
-    return typeof guildId === 'undefined' || guildId !== myGuildId;
-  },
+  function(guildId) {return isUndefined(guildId) || guildId !== myGuildId;},
   function(guildId, data) {return data.last_login >= validPvP;},
   function(guildId, data) {return data.virtual_level >= pvpLowerLevel;},
   function(guildId, data) {return data.virtual_level <= pvpUpperLevel;}
@@ -38,7 +38,7 @@ function pvpHighlight(guildId, data) {
 }
 
 function doOnlineDot(aTable, guildId, data) {
-  aTable.rows[0].insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(aTable.rows[0],
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
   if (pvpHighlight(guildId, data)) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
@@ -53,7 +53,7 @@ function parsePlayer(aTable, guildId, data, jqXhr) {
     if (defender.cloakLevel !== 0) {console.log('Cloaked Player', data);} // eslint-disable-line no-console
     //#endif
   } else {
-    aTable.rows[0].insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(aTable.rows[0],
       '<td class="fshBkRed">' + jqXhr.status + '</td>');
   }
 }

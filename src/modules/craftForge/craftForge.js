@@ -1,7 +1,8 @@
 import add from '../support/task';
-import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import getInventoryById from '../ajax/getInventoryById';
+import insertElementAfterBegin from '../common/insertElementAfterBegin';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {itemRE} from '../support/constants';
 import jQueryPresent from '../common/jQueryPresent';
 import makeFolderSpans from '../common/makeFolderSpans';
@@ -32,7 +33,7 @@ function drawingNewItemTable() {
       itemDiv.appendChild(aLink);
       drawingNewItemTable.itemGrid.appendChild(itemDiv);
     });
-    afterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
+    insertElementAfterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
     itemTable.classList.add('fshHide');
   }
 }
@@ -81,7 +82,7 @@ function doFolderButtons(folders) {
     .previousElementSibling.firstElementChild;
   inject.classList.add('fshCenter');
   inject.addEventListener('click', doHideFolders);
-  inject.insertAdjacentHTML('beforeend', makeFolderSpans(folders, true));
+  insertHtmlBeforeEnd(inject, makeFolderSpans(folders, true));
   return inject;
 }
 
@@ -100,7 +101,7 @@ function doPerfSwitch(inject) {
   });
   perfBox.addEventListener('change', reDrawGrid);
   perfLabel.appendChild(perfBox);
-  inject.insertAdjacentHTML('beforeend', ' &ensp;');
+  insertHtmlBeforeEnd(inject, ' &ensp;');
   inject.appendChild(perfLabel);
 }
 

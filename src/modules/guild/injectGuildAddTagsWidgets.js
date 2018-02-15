@@ -1,11 +1,12 @@
 import {createInput} from '../common/cElement';
 import {imageServer} from '../system/system';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {pCC} from '../support/layout';
 import takeitem from '../app/guild/inventory/takeitem';
 
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
-    rows[i].cells[2].insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(rows[i].cells[2],
       '&nbsp;<span class="sendLink">Fast BP</span>');
   }
 }

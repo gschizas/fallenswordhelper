@@ -1,5 +1,7 @@
 import {closestTable} from './closest';
 import {createDiv} from './cElement';
+import insertHtmlBeforeBegin from './insertHtmlBeforeBegin';
+import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
 
 function cellOneHazText(curr) {
   return curr.cells[1] && curr.cells[1].textContent;
@@ -38,14 +40,14 @@ function addStats(el) {
   var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
     getVal('Armor', statObj) + getVal('Damage', statObj) +
     getVal('HP', statObj);
-  getLastIndex(statObj, statTable).insertAdjacentHTML('beforebegin',
+  insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
     '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
     totalStats + '&nbsp;</td></tr>');
 }
 
 function fshDataFilter(data) {
   var container = createDiv();
-  container.insertAdjacentHTML('beforeend', data);
+  insertHtmlBeforeEnd(container, data);
   var bonus = container.getElementsByTagName('font');
   bonus = Array.prototype.filter.call(bonus, function(el) {
     return el.textContent === 'Bonuses';

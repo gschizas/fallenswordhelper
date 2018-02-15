@@ -2,6 +2,7 @@ import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
@@ -52,7 +53,7 @@ function bioPreview() {
 function bioWords() {
   if (calf.cmd === 'profile') {
     // Add description text for the new tags
-    pCC.insertAdjacentHTML('beforeend', '<div>' +
+    insertHtmlBeforeEnd(pCC, '<div>' +
       '`~This will allow FSH Script users to select buffs from your bio~`<br>' +
       'You can use the [cmd] tag as well to determine where to put the "Ask ' +
       'For Buffs" button<br><br><blockquote><ul class="list">' +

@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import formatUtcDateTime from '../common/formatUtcDateTime';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import setValue from '../system/setValue';
@@ -16,7 +17,7 @@ var enableSeTracker = 'enableSeTracker';
 var trackerCell;
 
 function addRow(trackerTable, se) {
-  trackerTable.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(trackerTable,
     '<tr><td class="fshCenter">' + se[0] + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
     formatUtcDateTime(new Date(se[1] * 1000)) + '</td></tr>');
@@ -82,7 +83,7 @@ function waitForLog() {
 }
 
 export default function superelite() {
-  if (jQueryNotPresent) {return;}
+  if (jQueryNotPresent()) {return;}
   var newCell = insertNewRow();
   newCell.height = 20;
   newCell = insertNewRow();

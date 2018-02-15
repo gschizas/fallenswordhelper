@@ -1,10 +1,11 @@
 import add from '../support/task';
-import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import fallback from '../system/fallback';
 import formatLastActivity from '../system/formatLastActivity';
 import {getElementById} from '../common/getElement';
+import insertElementAfterBegin from '../common/insertElementAfterBegin';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/constants';
@@ -142,7 +143,7 @@ function hazAllies(allies, enemies) {
   }
   var fshContactList = getElementById('fshContactList');
   fshContactList.innerHTML = '';
-  fshContactList.insertAdjacentHTML('beforeend', output);
+  insertHtmlBeforeEnd(fshContactList, output);
 }
 
 function injectAllyEnemyList(data) {
@@ -217,8 +218,8 @@ function makeDiv(data) {
     wrapper += '<ul class="enemy-quick-buff">Quick Buff Selected</ul>';
   }
   wrapper += '</div></div>';
-  fshAllyEnemy.insertAdjacentHTML('beforeend', wrapper);
-  afterBegin(pCR, fshAllyEnemy);
+  insertHtmlBeforeEnd(fshAllyEnemy, wrapper);
+  insertElementAfterBegin(pCR, fshAllyEnemy);
   fshAllyEnemy.addEventListener('click', eventHandler);
   injectAllyEnemyList(data);
 }

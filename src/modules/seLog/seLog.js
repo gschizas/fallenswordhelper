@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import getForage from '../ajax/getForage';
+import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
 import setForage from '../ajax/setForage';
 import superelite from '../app/superelite';
@@ -67,7 +68,7 @@ export function getFshSeLog() { // jQuery.min
 }
 
 function shouldLog() {
-  return $ && calf.enableSeTracker && calf.cmd !== 'superelite';
+  return jQueryPresent() && calf.enableSeTracker && calf.cmd !== 'superelite';
 }
 
 export function seLog() { // jQuery.min

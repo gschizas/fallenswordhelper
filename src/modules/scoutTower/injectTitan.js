@@ -1,10 +1,11 @@
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {pCC} from '../support/layout';
 
 export default function injectTitan() {
   var titanTable = pCC.children[0];
   var newRow = titanTable.insertRow(2);
-  newRow.insertAdjacentHTML('beforeend', '<br>');
+  insertHtmlBeforeEnd(newRow, '<br>');
   newRow = titanTable.insertRow(3);
-  newRow.insertAdjacentHTML('beforeend', '<td class="fshCenter fshBold">[ ' +
+  insertHtmlBeforeEnd(newRow, '<td class="fshCenter fshBold">[ ' +
     '<a href="index.php?cmd=guild&subcmd=scouttower">Scout Tower</a> ]</td>');
 }

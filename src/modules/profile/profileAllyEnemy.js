@@ -1,11 +1,12 @@
 import getValue from '../system/getValue';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   var _c = '';
   if (contactsTotal && contactsTotal >= numberOfContacts) {
     _c = '/' + contactsTotal;
   }
-  target.insertAdjacentHTML('beforeend', '<span class="fshBlue">&nbsp;' +
+  insertHtmlBeforeEnd(target, '<span class="fshBlue">&nbsp;' +
     numberOfContacts + _c + '</span>');
 }
 

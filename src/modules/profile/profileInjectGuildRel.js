@@ -1,5 +1,6 @@
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 var guildId;
 var currentGuildRelationship;
@@ -59,7 +60,7 @@ function foundGuildLink(aLink) {
   if (currentGuildRelationship) {
     aLink.parentNode.classList.add(
       guildMessages[currentGuildRelationship].color);
-    aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
+    insertHtmlBeforeEnd(aLink.parentNode, '<br>' +
       guildMessages[currentGuildRelationship].message);
   }
 }

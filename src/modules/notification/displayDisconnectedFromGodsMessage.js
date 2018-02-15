@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
+import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 
@@ -44,8 +45,7 @@ function prayToGods(e) { // jQuery
 }
 
 export default function displayDisconnectedFromGodsMessage() {
-  getElementById('notifications').insertAdjacentHTML('afterbegin',
-    godsNotification);
+  insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
   getElementById('helperPrayToGods').addEventListener('click',
     prayToGods);
 }

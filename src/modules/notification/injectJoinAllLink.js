@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 
 function findNewGroup(el) {
   if (el.textContent.indexOf('New attack group created.') === -1) {return;}
@@ -15,8 +16,7 @@ function findNewGroup(el) {
       '</span><p class="notification-content">Join all attack groups ' +
       'less than size ' + maxGroupSizeToJoin + '.</p></a>';
   }
-  el.insertAdjacentHTML('afterend',
-    '<li class="notification">' + groupJoinHTML + '</li>');
+  insertHtmlAfterEnd(el, '<li class="notification">' + groupJoinHTML + '</li>');
 }
 
 export default function injectJoinAllLink() {
