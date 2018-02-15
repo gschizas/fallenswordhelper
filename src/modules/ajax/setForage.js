@@ -3,7 +3,7 @@ import {sendException} from '../support/fshGa';
 function forageSet(forage, data, dfr) {
   localforage.setItem(forage, data, function setItemCallback(err, _data) {
     if (err) {
-      sendException(forage + ' forage error' + err, false);
+      sendException(forage + ' localforage.setItem error ' + err, false);
       dfr.reject(err);
     } else {
       dfr.resolve(_data);

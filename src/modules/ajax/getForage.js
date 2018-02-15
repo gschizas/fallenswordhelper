@@ -3,7 +3,7 @@ import {sendException} from '../support/fshGa';
 function forageGet(forage, dfr) {
   localforage.getItem(forage, function getItemCallback(err, data) {
     if (err) {
-      sendException(forage + ' forage error' + err, false);
+      sendException(forage + ' localforage.getItem error ' + err, false);
       dfr.reject(err);
     } else {
       // returns null if key does not exist
