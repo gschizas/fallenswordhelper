@@ -17,7 +17,7 @@ function doHidePlayerActions() {
   var players = act.getElementsByClassName('player');
   Array.prototype.forEach.call(players, function(el) {
     var verbs = el.getElementsByClassName('verbs');
-    if (verbs && verbs.length === 1) {
+    if (verbs.length === 1) {
       verbs[0].classList.add('fshHide');
     }
   });

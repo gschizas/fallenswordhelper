@@ -5,6 +5,7 @@ import formatLastActivity from './system/formatLastActivity';
 import {getElementById} from './common/getElement';
 import getProfile from './ajax/getProfile';
 import insertElementAfter from './common/insertElementAfter';
+import insertHtmlAfterEnd from './common/insertHtmlAfterEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import retryAjax from './ajax/retryAjax';
 
@@ -238,7 +239,6 @@ export default function injectQuickBuff() { // jQuery
   if (jQueryNotPresent()) {return;}
   var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
-  quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
-    quickBuffHeader);
+  insertHtmlAfterEnd(quickbuffDiv.firstElementChild, quickBuffHeader);
   getProfile(window.self).done(getSustain);
 }

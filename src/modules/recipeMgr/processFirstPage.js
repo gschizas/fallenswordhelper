@@ -1,6 +1,7 @@
 import createDocument from '../system/createDocument';
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import retryAjax from '../ajax/retryAjax';
 
 var itmRE =
@@ -38,7 +39,7 @@ function parseRecipeItemOrComponent(bgGif, doc) {
 
 function processRecipe(output, recipebook, recipe, data) {
   var doc = createDocument(data);
-  output.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(output,
     'Parsing blueprint ' + recipe.name + '...<br>');
   recipe.items = parseRecipeItemOrComponent('/inventory/2x3.gif', doc);
   recipe.components = parseRecipeItemOrComponent('/inventory/1x1mini.gif', doc);
@@ -52,7 +53,7 @@ function processFolderAnyPage(output, recipebook, data) { // jQuery.min
   var scope = innerPcc.firstElementChild.rows[6].cells[0]
     .firstElementChild.getElementsByTagName('a');
   var prm = Array.prototype.reduce.call(scope, function(prev, el) {
-    output.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(output,
       'Found blueprint "' + el.textContent + '".<br>');
     var recipe = {
       img: el.parentNode.previousElementSibling.firstElementChild
@@ -96,7 +97,7 @@ function reduceFolders(output, recipebook, prev, el) { // jQuery.min
     return prev;
   }
   if (/quest/i.test(folderName)) {
-    output.insertAdjacentHTML('beforeend', 'Skipping folder "' +
+    insertHtmlBeforeEnd(output, 'Skipping folder "' +
       folderName + '"  as it has the word "quest" in folder name.<br>');
     return prev;
   }

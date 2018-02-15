@@ -1,6 +1,7 @@
 import {createDiv} from '../common/cElement';
 import generateRecipeTable from './generateRecipeTable';
 import insertElement from '../common/insertElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import processFirstPage from './processFirstPage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
@@ -9,7 +10,7 @@ export var recipebook;
 export var output;
 
 function displayStuff() {
-  output.insertAdjacentHTML('beforeend', 'Finished parsing ... formatting ...');
+  insertHtmlBeforeEnd(output, 'Finished parsing ... formatting ...');
   setForage('fsh_recipeBook', recipebook);
   generateRecipeTable(output, recipebook);
 }

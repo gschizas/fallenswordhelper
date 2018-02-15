@@ -1,6 +1,7 @@
 import {closestTable} from '../common/closest';
 import dialog from '../ajax/dialog';
 import infoBox from '../common/infoBox';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
@@ -41,7 +42,6 @@ function guildMailboxEvent(e) { // jQuery.min
 export default function guildMailbox() {
   if (jQueryNotPresent()) {return;}
   pCC.addEventListener('click', guildMailboxEvent);
-  document.querySelector('#pCC td[height="25"]')
-    .insertAdjacentHTML('beforeend',
-      '<span class="sendLink">Take All</span>');
+  insertHtmlBeforeEnd(document.querySelector('#pCC td[height="25"]'),
+    '<span class="sendLink">Take All</span>');
 }

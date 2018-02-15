@@ -1,5 +1,6 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
@@ -31,7 +32,7 @@ function cooldownTracker(aRow, theTitans) {
 
 function addRow(theTitans, trackerTable, titan) {
   if (theTitans[titan].coolTime < now) {return;}
-  trackerTable.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(trackerTable,
     '<tr><td class="fshCenter">' + titan + '</td>' +
     '<td class="fshBold fshCenter fshCooldown">' +
     theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
@@ -91,7 +92,7 @@ function killsSummary(aRow) {
   var titanHPArray = titanHP.split('/');
   var currentHP = Number(titanHPArray[0]);
   var totalHP = Number(titanHPArray[1]);
-  aRow.cells[3].insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(aRow.cells[3],
     '<br><span class="fshBlue"> (' +
     roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
     '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +

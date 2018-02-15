@@ -1,6 +1,7 @@
 import add from '../../support/task';
 import alpha from '../../common/alpha';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isUndefined from '../../common/isUndefined';
 import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
 import {
@@ -87,16 +88,16 @@ export function initTable(theMembers) {
 export function makeTg() {
   var tg = createTable({id: 'tg'});
   var hrow = tg.createTHead().insertRow(-1);
-  hrow.insertAdjacentHTML('beforeend', '<th>Date</th>');
+  insertHtmlBeforeEnd(hrow, '<th>Date</th>');
 
   var memberHead = createTh({textContent: 'Member'});
   memberSelect = createDiv();
   memberHead.appendChild(memberSelect);
   hrow.appendChild(memberHead);
 
-  hrow.insertAdjacentHTML('beforeend', '<th>Level</th><th>VL</th>' +
-  '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
-  '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
+  insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
+    '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
+    '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
 
   actBody = createTBody();
   tg.appendChild(actBody);

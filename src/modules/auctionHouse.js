@@ -1,8 +1,9 @@
-import afterBegin from './common/afterBegin';
 import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
 import getValue from './system/getValue';
 import {imageServer} from './system/system';
+import insertElementAfterBegin from './common/insertElementAfterBegin';
+import insertHtmlAfterBegin from './common/insertHtmlAfterBegin';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
@@ -39,9 +40,9 @@ function makeCancelAll() {
   var fill = getElementById('fill').parentNode.parentNode
     .nextElementSibling.firstElementChild;
   fill.classList.add('fshCenter');
-  fill.insertAdjacentHTML('afterbegin', ']');
-  afterBegin(fill, cancelAll);
-  fill.insertAdjacentHTML('afterbegin', '[');
+  insertHtmlAfterBegin(fill, ']');
+  insertElementAfterBegin(fill, cancelAll);
+  insertHtmlAfterBegin(fill, '[');
   cancelAll.addEventListener('click', cancelAllAH);
 }
 

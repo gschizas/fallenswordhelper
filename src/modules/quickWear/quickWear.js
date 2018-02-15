@@ -4,6 +4,7 @@ import equipItem from '../ajax/equipItem';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';
 import jQueryPresent from '../common/jQueryPresent';
 import loadInventory from '../app/profile/loadInventory';
@@ -126,14 +127,14 @@ function showQuickWear(appInv) {
   content.appendChild(invTabs);
   invTabs.addEventListener('click', eventHandler(events));
   invTabs.appendChild(showAHInvManager(appInv));
-  getElementById('setPrompt').insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(getElementById('setPrompt'),
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 
 function hasJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
-  content.insertAdjacentHTML('beforeend', 'Getting item list from backpack...');
+  insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
   loadInventory().done(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
 }

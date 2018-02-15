@@ -4,6 +4,7 @@ import fallback from '../system/fallback';
 import findNode from '../system/findNode';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
@@ -225,7 +226,7 @@ function foundLogTable(logTable) { // Legacy
   enableChatParsing = getValue('enableChatParsing');
   var messageHeader = logTable.rows[0].cells[2];
   if (messageHeader) {
-    messageHeader.insertAdjacentHTML('beforeend', '&nbsp;&nbsp;' +
+    insertHtmlBeforeEnd(messageHeader, '&nbsp;&nbsp;' +
       '<span class="fshWhite">(Guild mates show up in ' +
       '<span class="fshGreen">green</span>)</span>');
   }

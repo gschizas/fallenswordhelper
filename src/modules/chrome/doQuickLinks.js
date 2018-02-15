@@ -7,6 +7,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
 import {imageServer} from '../system/system';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 function retBool(bool, ifTrue, ifFalse) {
   if (bool) {
@@ -41,7 +42,7 @@ function haveNode(node, quickLinks) { // Native ?
       newWindow + '>' + quickLinks[i].name + '</a></li>';
   }
   html += '</div>';
-  document.body.insertAdjacentHTML('beforeend', html);
+  insertHtmlBeforeEnd(document.body, html);
   isDraggable(draggableQuickLinks);
 }
 

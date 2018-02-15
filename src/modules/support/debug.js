@@ -1,11 +1,12 @@
 import {getElementById} from '../common/getElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 var timers = {};
 var footWrap = getElementById('foot-wrap');
 
 export function log(text, value) {
   if (footWrap) {
-    footWrap.insertAdjacentHTML('beforeend',
+    insertHtmlBeforeEnd(footWrap,
       '<br>' + text + ': ' + value + ' (' + typeof value + ')');
   }
 }

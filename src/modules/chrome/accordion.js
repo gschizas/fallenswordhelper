@@ -7,6 +7,7 @@ import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertElementAfter from '../common/insertElementAfter';
+import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import isObject from '../common/isObject';
 import jQueryDialog from './jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -28,10 +29,6 @@ function updateQuestLink() {
 
 function insertAdjElement(parent, listItem) {
   insertElementAfter(listItem, parent);
-}
-
-function insertAdjHtml(parent, listItem) {
-  parent.insertAdjacentHTML('afterend', listItem);
 }
 
 function insertAfterParent(target, fn, listItem) {
@@ -79,7 +76,7 @@ function creatureLogLink() {
 function newGuildLogLink() {
   if (guildId && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    insertAfterParent('nav-guild-ledger-guildlog', insertAdjHtml,
+    insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" ' +
       'href="index.php' + newGuildLogUrl + '"' +
       '>New Guild Log</a></li>');
@@ -88,7 +85,7 @@ function newGuildLogLink() {
 
 function guildInventory() {
   if (guildId) {
-    insertAfterParent('nav-guild-storehouse-inventory', insertAdjHtml,
+    insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
       '&subcmd=guildinvmgr">Guild Inventory</a></li>');
@@ -159,7 +156,7 @@ export default function injectMenu() {
   updateQuestLink();
   // character
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  insertAfterParent('nav-character-log', insertAdjHtml,
+  insertAfterParent('nav-character-log', insertHtmlAfterEnd,
     '<li class="nav-level-1"><a class="nav-link" id="nav-' +
     'character-medalguide" href="index.php?cmd=profile&subcmd=' +
     'medalguide">Medal Guide</a></li>' +
@@ -175,7 +172,7 @@ export default function injectMenu() {
   guildInventory();
   newGuildLogLink();
   // top rated
-  insertAfterParent('nav-toprated-players-level', insertAdjHtml,
+  insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
     '<li class="nav-level-2"><a class="nav-link" id="nav-' +
     'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
     'Top 250 Players</a></li>');

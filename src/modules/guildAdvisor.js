@@ -7,6 +7,8 @@ import fallback from './system/fallback';
 import {getElementById} from './common/getElement';
 import getMembrList from './ajax/getMembrList';
 import insertElement from './common/insertElement';
+import insertHtmlAfterEnd from './common/insertHtmlAfterEnd';
+import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import intValue from './system/intValue';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import {pCC} from './support/layout';
@@ -48,8 +50,8 @@ function doTable() { // jQuery
 
 function summaryLink() {
   var updateInput = pCC.getElementsByClassName('custombutton');
-  if (!updateInput) {return;}
-  updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
+  if (updateInput.length === 0) {return;}
+  insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
 }
 
@@ -92,7 +94,7 @@ function injectAdvisorNew() {
     var tdOne = tr.cells[0];
     var username = tdOne.textContent.trim();
     tdOne.innerHTML = playerName(username);
-    tdOne.insertAdjacentHTML('afterend', '<td>' + playerLevel(username) +
+    insertHtmlAfterEnd(tdOne, '<td>' + playerLevel(username) +
       '</td><td>' + playerRank(username) + '</td>');
   });
   insertElement(list, tfoot);
@@ -107,8 +109,8 @@ function returnAdvisorPage(e, response) {
 
   time('guildAdvisor.returnAdvisorPage' + e);
 
-  list.lastElementChild.lastElementChild
-    .insertAdjacentHTML('beforeend', ' day ' + e + ',');
+  insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
+    ' day ' + e + ',');
   var doc = createDocument(response);
   var table = getElementById('pCC', doc).firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;

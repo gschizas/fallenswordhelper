@@ -7,6 +7,7 @@ import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
@@ -124,7 +125,7 @@ function updateOptionsLog() {
 
 function buildTable() {
   myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
-  myTable.insertAdjacentHTML('beforeend', headerRow);
+  insertHtmlBeforeEnd(myTable, headerRow);
 
   tmpGuildLog.forEach(function(r) {
     var myRow = myTable.insertRow(-1);

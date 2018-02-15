@@ -2,6 +2,7 @@ import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
@@ -86,7 +87,7 @@ function makePopup() {
 }
 
 function addOverlay() {
-  trDialog.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(trDialog,
     '<div class="fsh-dialog-overlay">' +
     '<label class="fsh-dialog-cancel" for="tracker"></label>' +
     '</div>');

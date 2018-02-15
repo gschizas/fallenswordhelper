@@ -1,10 +1,11 @@
 import {getElementById} from '../common/getElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 export default function scoutTowerLink() {
   var spoils = getElementById('minibox-spoilsofwar');
   if (spoils) {
     var parent = spoils.children[1].children[0];
-    parent.insertAdjacentHTML('beforeend', '&nbsp;' +
+    insertHtmlBeforeEnd(parent, '&nbsp;' +
       '<a href="index.php?cmd=guild&subcmd=scouttower" ' +
       'class="tip-static" data-tipped="View Scout Report">' +
       '<img id="fshScoutTower" ' +

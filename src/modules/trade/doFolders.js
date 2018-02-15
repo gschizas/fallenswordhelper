@@ -3,6 +3,7 @@ import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
 import insertElementBefore from '../common/insertElementBefore';
+import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {createDiv, createTr} from '../common/cElement';
 import {time, timeEnd} from '../support/debug';
@@ -74,7 +75,7 @@ function doFolderHeaders(folders) {
   });
   foldersRow.addEventListener('click', hideFolder);
   var el = getElementById('item-list').parentNode.parentNode;
-  el.insertAdjacentHTML('beforebegin', '<tr id="fshShowSTs">' +
+  insertHtmlBeforeBegin(el, '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +
     '<label><input type="checkbox" id="itemsInSt" checked> ' +
     'Select items in ST</label></td></tr>');

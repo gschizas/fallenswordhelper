@@ -1,4 +1,5 @@
 import insertElement from '../common/insertElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import setValueJSON from '../system/setValueJSON';
 import {wantedList} from './lists';
 import {wantedListDiv} from './createDivs';
@@ -45,5 +46,5 @@ export function injectWantedList() { // Legacy
         wantedList.bounty[i].target + '</a><br>';
     }
   }
-  wantedListDiv.insertAdjacentHTML('beforeend', output);
+  insertHtmlBeforeEnd(wantedListDiv, output);
 }

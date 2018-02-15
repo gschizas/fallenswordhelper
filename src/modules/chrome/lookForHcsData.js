@@ -1,5 +1,4 @@
 import add from '../support/task';
-import afterBegin from '../common/afterBegin';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
 import {getElementById} from '../common/getElement';
@@ -15,6 +14,7 @@ import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
 import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
+import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import jsonParse from '../common/jsonParse';
 import navMenu from './navMenu';
 import {pCR} from '../support/layout';
@@ -116,7 +116,7 @@ function conditional() {
 function moveRHSBoxUpOnRHS(title) {
   var box = getElementById(title);
   if (box) {
-    afterBegin(pCR, box);
+    insertElementAfterBegin(pCR, box);
   }
 }
 

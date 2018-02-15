@@ -9,6 +9,7 @@ import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
 import isFunction from '../common/isFunction';
@@ -87,7 +88,7 @@ function showHelperMenu() {
         '/skin/inner_bg.jpg)'
     }
   });
-  helperMenuDiv.insertAdjacentHTML('beforeend', helperMenuBlob);
+  insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
   helperMenu.appendChild(helperMenuDiv);
   helperMenu.addEventListener('click', function(evt) {
     if (evt.target.id !== 'helperMenu') {return;}

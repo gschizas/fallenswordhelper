@@ -1,5 +1,6 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 function profileSelectAll() {
   var bpTabs = getElementById('backpack_tabs');
@@ -23,6 +24,6 @@ export default function selectAllLink() {
   allSpan.addEventListener('click', profileSelectAll);
   var wrapper = createSpan({innerHTML: '[&nbsp;'});
   wrapper.appendChild(allSpan);
-  wrapper.insertAdjacentHTML('beforeend', '&nbsp;]&nbsp;');
+  insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');
   node.parentNode.appendChild(wrapper);
 }

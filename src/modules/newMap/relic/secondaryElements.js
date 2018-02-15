@@ -2,6 +2,7 @@ import {createDiv} from '../../common/cElement';
 import {getElementById} from '../../common/getElement';
 import getMembrList from '../../ajax/getMembrList';
 import getValue from '../../system/getValue';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import {nowSecs} from '../../support/constants';
 import {atkStats, defStats, proc} from './assets';
 import {
@@ -71,7 +72,7 @@ function missingMembers(membrList) {
       guildMemberList[key].id + '">' + key + '</a>');
     return prev;
   }, []);
-  containerDiv.insertAdjacentHTML('beforeend',
+  insertHtmlBeforeEnd(containerDiv,
     '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
     '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
     '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
@@ -117,7 +118,7 @@ export function prepareSecondaryDivs(relicData) {
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(false).done(missingMembers);
   }
-  leftDiv.insertAdjacentHTML('beforeend', proc);
+  insertHtmlBeforeEnd(leftDiv, proc);
   processingStatus = getElementById('ProcessingStatus');
   var midDiv = createDiv({
     className: 'fshFloatLeft fshRelicMidDiv',

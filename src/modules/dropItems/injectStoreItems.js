@@ -9,6 +9,8 @@ import fallback from '../system/fallback';
 import getInventoryById from '../ajax/getInventoryById';
 import getValue from '../system/getValue';
 import hideFolders from './hideFolders';
+import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
 import moveItemsToFolder from './moveItemsToFolder';
@@ -40,18 +42,15 @@ function getItemImg() {
 }
 
 function afterbegin(o, item) {
-  if (fallback(extraLinks, !showExtraLinks)) {
-    return;
-  }
+  if (fallback(extraLinks, !showExtraLinks)) {return;}
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
     pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
-  pattern += '</span>[<a href="' + guideUrl +
-    'items&subcmd=view&item_id=' + item.item_id +
-    '" target="_blank">UFSG</a>]</span>';
-  o.injectHere.insertAdjacentHTML('afterbegin', pattern);
+  pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +
+    item.item_id + '" target="_blank">UFSG</a>]</span>';
+  insertHtmlAfterBegin(o.injectHere, pattern);
 }
 
 function itemColouring(o, item) {
@@ -103,7 +102,7 @@ function beforeend(o, item) {
     }
     return ret;
   }, '');
-  if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
+  if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
 }
 
 function doneInvPaint() {

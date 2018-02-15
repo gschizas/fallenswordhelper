@@ -1,6 +1,7 @@
 import {bountyList} from './lists';
 import {bountyListDiv} from './createDivs';
 import insertElement from '../common/insertElement';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import setValueJSON from '../system/setValueJSON';
 import {createDiv, createSpan} from '../common/cElement';
 
@@ -34,5 +35,5 @@ export function injectBountyList() { // Legacy
         bountyList.bounty[i].target + '</a><br>';
     }
   }
-  bountyListDiv.insertAdjacentHTML('beforeend', output);
+  insertHtmlBeforeEnd(bountyListDiv, output);
 }

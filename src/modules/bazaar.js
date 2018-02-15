@@ -1,5 +1,6 @@
 import buyitem from './app/potionbazaar/buyitem';
 import {getElementById} from './common/getElement';
+import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
@@ -86,7 +87,7 @@ export default function injectBazaar() { // TODO stop using getElementById
       .replace('@tipped@', tipped);
   });
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
-  pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);
+  insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);
   getElementById('fshBazaar').addEventListener('click', select);
   getElementById('buy_amount').addEventListener('input', quantity);
   getElementById('fshBuy').addEventListener('click', buy);

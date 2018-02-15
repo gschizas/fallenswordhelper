@@ -1,5 +1,6 @@
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
+import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import quickBuffHref from '../common/quickBuffHref';
 import {showRankButton, showRecallButton} from './profileInjectGuildRel';
 
@@ -37,5 +38,5 @@ export default function profileInjectQuickButton(avyImg, playerid, playername) {
   newhtml += showRecallButton(playername);
   newhtml += showRankButton(playerid, playername);
   newhtml += '</div>';
-  avyImg.insertAdjacentHTML('afterend', newhtml);
+  insertHtmlAfterEnd(avyImg, newhtml);
 }

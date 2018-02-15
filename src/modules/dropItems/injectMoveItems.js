@@ -1,3 +1,4 @@
+import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import {pCC} from '../support/layout';
 
 export default function injectMoveItems() {
@@ -21,5 +22,5 @@ export default function injectMoveItems() {
   if (!flrEnabled || !oFlr) {return;}
   options += '</select>&nbsp;<input type="button" class="custombutton" ' +
     'id="fshMove" value="Move"></td></tr>';
-  flrRow.insertAdjacentHTML('afterend', options);
+  insertHtmlAfterEnd(flrRow, options);
 }
