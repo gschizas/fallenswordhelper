@@ -740,7 +740,7 @@ var defaults = {
     '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-  quickSearchList: def_quickSearch,
+  quickSearchList: def_quickSearch(),
 
   arenaMoves: '[]',
   arenaMatches: '[]',
@@ -977,10 +977,12 @@ function changeGuildLogHREF() {
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
 }
 
+// import localforage from
+
 function forageGet(forage, dfr) {
   localforage.getItem(forage, function getItemCallback(err, data) {
     if (err) {
-      sendException(forage + ' forage error' + err, false);
+      sendException(forage + ' localforage.getItem error ' + err, false);
       dfr.reject(err);
     } else {
       // returns null if key does not exist
@@ -1084,14 +1086,135 @@ function guildManage() {
 
 function jQueryPresent() {return isFunction(window.$);}
 
-function forageSet(forage, data, dfr) {
-  localforage.setItem(forage, data, function setItemCallback(err, _data) {
-    if (err) {
-      sendException(forage + ' forage error' + err, false);
-      dfr.reject(err);
+function mixin(obj, mixins) {
+  Object.keys(mixins).forEach(function(key) {
+    if (isObject(mixins[key]) && mixins[key] !== null) {
+      mixin(obj[key], mixins[key]);
     } else {
-      dfr.resolve(_data);
+      obj[key] = mixins[key];
     }
+  });
+}
+
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {mixin(el, props);}
+  return el;
+}
+
+function createDiv(props) {
+  return cElement('div', props);
+}
+
+function createSpan(props) {
+  return cElement('span', props);
+}
+
+function createTable(props) {
+  return cElement('table', props);
+}
+
+function createTBody(props) {
+  return cElement('tbody', props);
+}
+
+function createTr(props) {
+  return cElement('tr', props);
+}
+
+function createTd(props) {
+  return cElement('td', props);
+}
+
+function createTFoot(props) {
+  return cElement('tfoot', props);
+}
+
+function createUl(props) {
+  return cElement('ul', props);
+}
+
+function createLi(props) {
+  return cElement('li', props);
+}
+
+function createButton(props) {
+  return cElement('button', props);
+}
+
+function createBr() {
+  return cElement('br');
+}
+
+function createAnchor(props) {
+  return cElement('a', props);
+}
+
+function createInput(props) {
+  return cElement('input', props);
+}
+
+function createTextArea(props) {
+  return cElement('textarea', props);
+}
+
+function createTh(props) {
+  return cElement('th', props);
+}
+
+function createLabel(props) {
+  return cElement('label', props);
+}
+
+function textSpan(text) {
+  return createSpan({textContent: text});
+}
+
+function jConfirm(title, msgText, fn) { // jQuery
+  var fshMsg = getElementById('fshmsg');
+  if (!fshMsg) {
+    fshMsg = createDiv({id: 'fshmsg'});
+    document.body.appendChild(fshMsg);
+    $(fshMsg).dialog({
+      autoOpen: false,
+      dialogClass: 'no-close',
+      draggable: false,
+      modal: true,
+      resizable: false,
+    });
+  }
+  fshMsg.textContent = msgText;
+  $(fshMsg).dialog('option', {
+    buttons: {
+      Yes: function() {
+        fn();
+        $(this).dialog('close');
+      },
+      No: function() {$(this).dialog('close');}
+    },
+    title: title
+  }).dialog('open');
+}
+
+function clearForage() {
+  localforage.clear().catch(function(err) {
+    sendException('localforage.clear error ' + err, false);
+  });
+}
+
+function forageSet(forage, data, dfr) {
+  localforage.setItem(forage, data).then(function(value) {
+    dfr.resolve(value);
+  }).catch(function(err) {
+    if (err === 'QuotaExceededError') {
+      jConfirm('IndexedDB Quota Exceeded Error',
+        'Would you like to clear IndexedDB?',
+        clearForage()
+      );
+    } else {
+      sendException(forage + ' localforage.setItem error ' + err, false);
+    }
+    dfr.reject(err);
   });
 }
 
@@ -1401,90 +1524,6 @@ function composingCreate() {
       getElementById('composing-skill-level-input').value =
         getElementById('composing-skill-level-max').textContent;
     });
-}
-
-function mixin(obj, mixins) {
-  Object.keys(mixins).forEach(function(key) {
-    if (isObject(mixins[key]) && mixins[key] !== null) {
-      mixin(obj[key], mixins[key]);
-    } else {
-      obj[key] = mixins[key];
-    }
-  });
-}
-
-function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {mixin(el, props);}
-  return el;
-}
-
-function createDiv(props) {
-  return cElement('div', props);
-}
-
-function createSpan(props) {
-  return cElement('span', props);
-}
-
-function createTable(props) {
-  return cElement('table', props);
-}
-
-function createTBody(props) {
-  return cElement('tbody', props);
-}
-
-function createTr(props) {
-  return cElement('tr', props);
-}
-
-function createTd(props) {
-  return cElement('td', props);
-}
-
-function createTFoot(props) {
-  return cElement('tfoot', props);
-}
-
-function createUl(props) {
-  return cElement('ul', props);
-}
-
-function createLi(props) {
-  return cElement('li', props);
-}
-
-function createButton(props) {
-  return cElement('button', props);
-}
-
-function createBr() {
-  return cElement('br');
-}
-
-function createAnchor(props) {
-  return cElement('a', props);
-}
-
-function createInput(props) {
-  return cElement('input', props);
-}
-
-function createTextArea(props) {
-  return cElement('textarea', props);
-}
-
-function createTh(props) {
-  return cElement('th', props);
-}
-
-function createLabel(props) {
-  return cElement('label', props);
-}
-
-function textSpan(text) {
-  return createSpan({textContent: text});
 }
 
 function makePageHeader(title, comment, spanId, button) {
@@ -1942,32 +1981,6 @@ function injectMonsterLog(injector) {
   if (jQueryPresent()) {haveJquery(injector);}
 }
 
-function jConfirm(title, msgText, fn) { // jQuery
-  var fshMsg = getElementById('fshmsg');
-  if (!fshMsg) {
-    fshMsg = createDiv({id: 'fshmsg'});
-    document.body.appendChild(fshMsg);
-    $(fshMsg).dialog({
-      autoOpen: false,
-      dialogClass: 'no-close',
-      draggable: false,
-      modal: true,
-      resizable: false,
-    });
-  }
-  fshMsg.textContent = msgText;
-  $(fshMsg).dialog('option', {
-    buttons: {
-      Yes: function() {
-        fn();
-        $(this).dialog('close');
-      },
-      No: function() {$(this).dialog('close');}
-    },
-    title: title
-  }).dialog('open');
-}
-
 var content$1;
 var combatLog = [];
 var textArea;
@@ -2340,7 +2353,7 @@ function generateRecipeTable(output, recipebook) { // Legacy
 }
 
 function insertElement(parent, child) {
-  if (parent instanceof Node) {
+  if (parent instanceof Node && child instanceof Node) {
     parent.appendChild(child);
   }
 }
@@ -10318,7 +10331,7 @@ function findPlayers(aRow) { // Legacy
       aRow.cells[j].removeAttribute('class');
     }
     aRow.classList.add('fshGrey');
-    aRow.classList.add('fshXXSmall');
+    aRow.classList.add('fshXSmall');
   }
 }
 
@@ -10969,27 +10982,23 @@ function highlightPvpProtection() {
   }
 }
 
-function backpackRemove$1(invId) { // jQuery.min
-  var _invId = parseInt(invId, 10);
-  var theBackpack = $('#backpackContainer').data('backpack');
+function restyleBackpack() {
+  var bpBack = getElementById('backpack');
+  bpBack.className = 'fshBackpack';
+  bpBack.removeAttribute('style');
+}
+
+function backpackRemove$1(theBackpack, invId) { // jQuery.min
+  var _invId = Number(invId);
   // remove from srcData
-  theBackpack.srcData.some(function(el, i, ary) {
-    if (el.a === _invId) {
-      ary.splice(i, 1);
-      return true;
-    }
-    return false;
-  });
+  var i = theBackpack.srcData.findIndex(function(el) {return el.a === _invId;});
+  if (i !== -1) {theBackpack.srcData.splice(i, 1);}
 }
 
-function getInvId(self) {
-  return self.parentNode.parentNode.firstElementChild.dataset.inv;
-}
-
-function fastAction(evt, action, result) { // jQuery.min
+function fastAction(theBackpack, evt, action, result) { // jQuery.min
   sendEvent('profile', 'fastAction');
   var self = evt.target;
-  var invId = getInvId(self);
+  var invId = self.parentNode.parentNode.firstElementChild.dataset.inv;
   self.textContent = '';
   self.className = 'fastAction fshSpinner fshSpinner12';
   action(invId).done(function(data) {
@@ -10997,18 +11006,19 @@ function fastAction(evt, action, result) { // jQuery.min
       self.remove();
       return;
     }
-    backpackRemove$1(invId);
+    backpackRemove$1(theBackpack, invId);
     self.classList.remove('fshSpinner');
     self.parentNode.innerHTML = '<span class="fastWorn">' + result + '</span>';
   });
 }
 
-function fastWearUse(evt) {
-  fastAction(evt, useItem, 'Used');
-}
-
-function fastWearEquip(evt) {
-  fastAction(evt, equipItem, 'Worn');
+function evtHdl$1(theBackpack, evt) {
+  if (evt.target.classList.contains('fastWear')) {
+    fastAction(theBackpack, evt, equipItem, 'Worn');
+  }
+  if (evt.target.classList.contains('fastUse')) {
+    fastAction(theBackpack, evt, useItem, 'Used');
+  }
 }
 
 function actionClass(usable) {
@@ -11021,51 +11031,50 @@ function actionText(usable) {
   return 'Wear';
 }
 
-function drawButtons(theSpan) {
+function drawButtons(self, theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = createDiv({
     className: 'fastDiv',
     innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
       actionText(toUse) + '</span>'
   });
-  if (theSpan.parentNode.nextElementSibling) {
-    myDiv.appendChild(theSpan.parentNode.nextElementSibling.nextElementSibling);
+  if (self.options.checkboxesEnabled) {
+    insertElement(myDiv,
+      theSpan.parentNode.nextElementSibling.nextElementSibling);
   }
-  theSpan.parentNode.parentNode.appendChild(myDiv);
+  insertElement(theSpan.parentNode.parentNode, myDiv);
 }
 
-function fastWearLinks() {
-  var bpTabs = getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0].dataset.type;
-  var items = document.querySelectorAll('#backpackTab_' + type +
+function fastWearLinks(self) {
+  var items = document.querySelectorAll(
+    '#backpackTab_' + self.type.toString() +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
   if (items.length === 0) {return;}
-  Array.prototype.forEach.call(items, drawButtons);
+  Array.prototype.forEach.call(items, drawButtons.bind(null, self));
 }
 
 function foundBackpack(backpackContainer, theBackpack) {
   var oldShow = theBackpack._showPage;
   theBackpack._showPage = function(type, page) {
-    oldShow.call(theBackpack, type, page);
-    fastWearLinks();
+    oldShow.call(this, type, page);
+    fastWearLinks(this);
   };
   if (getElementById('backpack_current').textContent.length !== 0) {
-    add(3, fastWearLinks);
+    add(3, fastWearLinks, [theBackpack]);
   }
-  backpackContainer.addEventListener('click', function(e) {
-    if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}
-    if (e.target.classList.contains('fastUse')) {fastWearUse(e);}
-  });
+  backpackContainer.addEventListener('click', evtHdl$1.bind(null, theBackpack));
+}
+
+function initialiseFastWear() {
+  var backpackContainer = getElementById('backpackContainer');
+  var theBackpack = $(backpackContainer).data('backpack');
+  if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
 }
 
 function injectFastWear() { // jQuery
   if (!getValue('enableQuickDrink')) {return;}
-  var bpBack = getElementById('backpack');
-  bpBack.className = 'fshBackpack';
-  bpBack.removeAttribute('style');
-  var backpackContainer = getElementById('backpackContainer');
-  var theBackpack = $(backpackContainer).data('backpack');
-  if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
+  restyleBackpack();
+  initialiseFastWear();
 }
 
 function unequipitem(item) {
@@ -11265,7 +11274,7 @@ function delCompType(self) { // jQuery.min
   });
 }
 
-var evtHdl$1 = [
+var evtHdl$2 = [
   {
     test: function(self) {return self === compDel;},
     act: enableDelComponent
@@ -11323,7 +11332,7 @@ function profileComponents() {
   cmDiv.appendChild(qeDiv);
   cmDiv.appendChild(delAllDiv);
   compDiv.appendChild(cmDiv);
-  compDiv.addEventListener('click', eventHandler(evtHdl$1));
+  compDiv.addEventListener('click', eventHandler(evtHdl$2));
 }
 
 var guildId$2;
@@ -12112,6 +12121,7 @@ function getItems$1() {
 }
 
 function inventory$1(data) {
+  if (!data) {return;}
   extraLinks = false;
   checkAll = false;
   invItems$2 = data.items;
@@ -12605,7 +12615,7 @@ function saveState(self) {
   setForage(storeMap, potOpts);
 }
 
-var evtHdl$2 = [
+var evtHdl$3 = [
   {
     test: function(self) {return self.id === 'fshReset';},
     act: doReset$1
@@ -12647,7 +12657,7 @@ function gotMap(data) {
 
   var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   myCell.addEventListener('change', onChange);
-  myCell.addEventListener('click', eventHandler(evtHdl$2));
+  myCell.addEventListener('click', eventHandler(evtHdl$3));
   myCell.addEventListener('input', onInput);
   myCell.appendChild(container);
 }
@@ -12957,7 +12967,7 @@ function buffEvent(e) {
   }
 }
 
-function evtHdl$3(e) {
+function evtHdl$4(e) {
   if (e.target.classList.contains('fshBl')) {buffEvent(e);}
 }
 
@@ -12977,7 +12987,7 @@ function gotTables(titanTables) {
     if (titanTable.rows.length < 2) {continue;}
     doBuffLinks$1(titanTable);
   }
-  titanTables[1].addEventListener('click', evtHdl$3);
+  titanTables[1].addEventListener('click', evtHdl$4);
 }
 
 function injectScouttowerBuffLinks(titanTables) {
@@ -18901,7 +18911,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '27';
+window.FSH.calf = '28';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
