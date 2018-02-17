@@ -31,7 +31,7 @@ function findPlayers(aRow) { // Legacy
       aRow.cells[j].removeAttribute('class');
     }
     aRow.classList.add('fshGrey');
-    aRow.classList.add('fshXXSmall');
+    aRow.classList.add('fshXSmall');
   }
 }
 

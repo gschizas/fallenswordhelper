@@ -235,6 +235,7 @@ function getItems() {
 }
 
 function inventory(data) {
+  if (!data) {return;}
   extraLinks = false;
   checkAll = false;
   invItems = data.items;

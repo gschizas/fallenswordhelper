@@ -3,30 +3,27 @@ import {createDiv} from '../common/cElement';
 import equipItem from '../ajax/equipItem';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import insertElement from '../common/insertElement';
 import {sendEvent} from '../support/fshGa';
 import useItem from '../ajax/useItem';
 
-function backpackRemove(invId) { // jQuery.min
-  var _invId = parseInt(invId, 10);
-  var theBackpack = $('#backpackContainer').data('backpack');
+function restyleBackpack() {
+  var bpBack = getElementById('backpack');
+  bpBack.className = 'fshBackpack';
+  bpBack.removeAttribute('style');
+}
+
+function backpackRemove(theBackpack, invId) { // jQuery.min
+  var _invId = Number(invId);
   // remove from srcData
-  theBackpack.srcData.some(function(el, i, ary) {
-    if (el.a === _invId) {
-      ary.splice(i, 1);
-      return true;
-    }
-    return false;
-  });
+  var i = theBackpack.srcData.findIndex(function(el) {return el.a === _invId;});
+  if (i !== -1) {theBackpack.srcData.splice(i, 1);}
 }
 
-function getInvId(self) {
-  return self.parentNode.parentNode.firstElementChild.dataset.inv;
-}
-
-function fastAction(evt, action, result) { // jQuery.min
+function fastAction(theBackpack, evt, action, result) { // jQuery.min
   sendEvent('profile', 'fastAction');
   var self = evt.target;
-  var invId = getInvId(self);
+  var invId = self.parentNode.parentNode.firstElementChild.dataset.inv;
   self.textContent = '';
   self.className = 'fastAction fshSpinner fshSpinner12';
   action(invId).done(function(data) {
@@ -34,18 +31,19 @@ function fastAction(evt, action, result) { // jQuery.min
       self.remove();
       return;
     }
-    backpackRemove(invId);
+    backpackRemove(theBackpack, invId);
     self.classList.remove('fshSpinner');
     self.parentNode.innerHTML = '<span class="fastWorn">' + result + '</span>';
   });
 }
 
-function fastWearUse(evt) {
-  fastAction(evt, useItem, 'Used');
-}
-
-function fastWearEquip(evt) {
-  fastAction(evt, equipItem, 'Worn');
+function evtHdl(theBackpack, evt) {
+  if (evt.target.classList.contains('fastWear')) {
+    fastAction(theBackpack, evt, equipItem, 'Worn');
+  }
+  if (evt.target.classList.contains('fastUse')) {
+    fastAction(theBackpack, evt, useItem, 'Used');
+  }
 }
 
 function actionClass(usable) {
@@ -58,49 +56,48 @@ function actionText(usable) {
   return 'Wear';
 }
 
-function drawButtons(theSpan) {
+function drawButtons(self, theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = createDiv({
     className: 'fastDiv',
     innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
       actionText(toUse) + '</span>'
   });
-  if (theSpan.parentNode.nextElementSibling) {
-    myDiv.appendChild(theSpan.parentNode.nextElementSibling.nextElementSibling);
+  if (self.options.checkboxesEnabled) {
+    insertElement(myDiv,
+      theSpan.parentNode.nextElementSibling.nextElementSibling);
   }
-  theSpan.parentNode.parentNode.appendChild(myDiv);
+  insertElement(theSpan.parentNode.parentNode, myDiv);
 }
 
-function fastWearLinks() {
-  var bpTabs = getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0].dataset.type;
-  var items = document.querySelectorAll('#backpackTab_' + type +
+function fastWearLinks(self) {
+  var items = document.querySelectorAll(
+    '#backpackTab_' + self.type.toString() +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
   if (items.length === 0) {return;}
-  Array.prototype.forEach.call(items, drawButtons);
+  Array.prototype.forEach.call(items, drawButtons.bind(null, self));
 }
 
 function foundBackpack(backpackContainer, theBackpack) {
   var oldShow = theBackpack._showPage;
   theBackpack._showPage = function(type, page) {
-    oldShow.call(theBackpack, type, page);
-    fastWearLinks();
+    oldShow.call(this, type, page);
+    fastWearLinks(this);
   };
   if (getElementById('backpack_current').textContent.length !== 0) {
-    add(3, fastWearLinks);
+    add(3, fastWearLinks, [theBackpack]);
   }
-  backpackContainer.addEventListener('click', function(e) {
-    if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}
-    if (e.target.classList.contains('fastUse')) {fastWearUse(e);}
-  });
+  backpackContainer.addEventListener('click', evtHdl.bind(null, theBackpack));
+}
+
+function initialiseFastWear() {
+  var backpackContainer = getElementById('backpackContainer');
+  var theBackpack = $(backpackContainer).data('backpack');
+  if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
 }
 
 export default function injectFastWear() { // jQuery
   if (!getValue('enableQuickDrink')) {return;}
-  var bpBack = getElementById('backpack');
-  bpBack.className = 'fshBackpack';
-  bpBack.removeAttribute('style');
-  var backpackContainer = getElementById('backpackContainer');
-  var theBackpack = $(backpackContainer).data('backpack');
-  if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
+  restyleBackpack();
+  initialiseFastWear();
 }
