@@ -1,3 +1,5 @@
+// import localforage from
+//   '../../../node_modules/localforage/dist/localforage.nopromises';
 import {sendException} from '../support/fshGa';
 
 function forageGet(forage, dfr) {

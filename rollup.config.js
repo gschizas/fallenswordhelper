@@ -1,4 +1,5 @@
 import jscc from 'rollup-plugin-jscc';
+// import legacy from 'rollup-plugin-legacy';
 
 let source = process.env.SOURCE;
 let folder = process.env.FOLDER;
@@ -66,6 +67,10 @@ export default {
     format: format
   },
   plugins: [
+    // legacy({
+    //   'node_modules/localforage/dist/localforage.nopromises.js':
+    //     'localforage'
+    // }),
     jscc(opts)
   ],
   watch: {include: 'src/**/*.js'}
