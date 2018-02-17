@@ -62,7 +62,7 @@
   "devDependencies": {
     "cost": "^1.2.3",
     "csscomb": "^4.2.0",
-    "eslint": "^4.17.0",
+    "eslint": "^4.18.0",
     "http-server": "^0.11.1",
     "husky": "^0.14.3",
     "ip": "^1.1.5",
@@ -71,8 +71,8 @@
     "ncp": "^2.0.0",
     "npm-run-all": "^4.1.2",
     "rimraf": "^2.6.2",
-    "rollup": "^0.56.0",
+    "rollup": "^0.56.1",
     "rollup-plugin-jscc": "^0.3.3",
-    "uglify-js": "^3.3.10"
+    "uglify-js": "^3.3.11"
   }
 }
