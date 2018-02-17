@@ -1,13 +1,25 @@
+import jConfirm from '../common/jConfirm';
 import {sendException} from '../support/fshGa';
 
+function clearForage() {
+  localforage.clear().catch(function(err) {
+    sendException('localforage.clear error ' + err, false);
+  });
+}
+
 function forageSet(forage, data, dfr) {
-  localforage.setItem(forage, data, function setItemCallback(err, _data) {
-    if (err) {
-      sendException(forage + ' localforage.setItem error ' + err, false);
-      dfr.reject(err);
+  localforage.setItem(forage, data).then(function(value) {
+    dfr.resolve(value);
+  }).catch(function(err) {
+    if (err === 'QuotaExceededError') {
+      jConfirm('IndexedDB Quota Exceeded Error',
+        'Would you like to clear IndexedDB?',
+        clearForage()
+      );
     } else {
-      dfr.resolve(_data);
+      sendException(forage + ' localforage.setItem error ' + err, false);
     }
+    dfr.reject(err);
   });
 }
 
