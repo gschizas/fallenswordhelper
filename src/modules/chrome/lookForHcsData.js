@@ -14,6 +14,7 @@ import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
 import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
+import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import jsonParse from '../common/jsonParse';
 import navMenu from './navMenu';
@@ -27,7 +28,6 @@ import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
 import {injectLevelupCalculator, injectStaminaCalculator} from './calc';
-import insertElement from '../common/insertElement';
 
 function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');
