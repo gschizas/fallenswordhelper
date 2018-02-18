@@ -1199,15 +1199,14 @@ function forageSet(forage, data, dfr) {
   localforage.setItem(forage, data).then(function(value) {
     dfr.resolve(value);
   }).catch(function(err) {
-    if (err === 'QuotaExceededError') {
+    if (err.name === 'QuotaExceededError') {
       jConfirm('IndexedDB Quota Exceeded Error',
         'Would you like to clear IndexedDB?',
         clearForage()
       );
-    } else {
-      sendException(forage + ' localforage.setItem error ' +
-        JSON.stringify(err), false);
     }
+    sendException('localforage.setItem error (' + err.name + ' : ' +
+      err.message + ')', false);
     dfr.reject(err);
   });
 }
@@ -11889,21 +11888,63 @@ var disableItemColoring;
 var showExtraLinks;
 var showQuickDropLinks$1;
 var showQuickSendLinks$1;
-var extraLinks;
-var paintCount;
+
+function setShowExtraLinks() {
+  showExtraLinks = !showExtraLinks;
+  setValue('showExtraLinks', showExtraLinks);
+}
+
+function setShowQuickDropLinks() {
+  showQuickDropLinks$1 = !showQuickDropLinks$1;
+  setValue('showQuickDropLinks', showQuickDropLinks$1);
+}
+
+function getPrefs() {
+  disableItemColoring = getValue('disableItemColoring');
+  showExtraLinks = getValue('showExtraLinks');
+  showQuickDropLinks$1 = getValue('showQuickDropLinks');
+  showQuickSendLinks$1 = getValue('showQuickSendLinks');
+}
+
 var itemsAry$1;
-var checkAll;
 var itemsHash;
-var dropLinks;
-var invItems$2;
-var colouring;
-var sendLinks;
 
 function getItemImg() {
   var allTables = pCC.getElementsByTagName('table');
   var lastTable = allTables[allTables.length - 1];
   return lastTable.getElementsByTagName('img');
 }
+
+function getItems$1() {
+  addStatTotalToMouseover();
+  getPrefs();
+  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
+  // pCC.addEventListener('click', eventHandler(evts));
+  var imgList = getItemImg();
+  itemsAry$1 = [];
+  itemsHash = {};
+  Array.prototype.forEach.call(imgList, function(el) {
+    var tipped = el.dataset.tipped;
+    var matches = tipped.match(itemRE);
+    itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
+    var injectHere = el.parentNode.parentNode.nextElementSibling;
+    itemsAry$1.push({
+      el: el,
+      invid: matches[2],
+      injectHere: injectHere
+    });
+  });
+  // Exclude composed pots
+  itemsHash[13699] = 1;
+}
+
+var extraLinks;
+var paintCount;
+var checkAll;
+var dropLinks;
+var invItems$2;
+var colouring;
+var sendLinks;
 
 function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {return;}
@@ -11925,9 +11966,7 @@ function itemColouring(o, item) {
 
 var buildTrailer = [
   {
-    test: function(item) {
-      return !checkAll && itemsHash[item.item_id] !== 1;
-    },
+    test: function(item) {return !checkAll && itemsHash[item.item_id] !== 1;},
     act: function(o, item) {
       return ' [<span linkto="' + item.item_id +
         '" class="fshLink">Check all</span>]';
@@ -11935,8 +11974,7 @@ var buildTrailer = [
   },
   {
     test: function(item) {
-      return !sendLinks && showQuickSendLinks$1 &&
-        !item.bound;
+      return !sendLinks && showQuickSendLinks$1 && !item.bound;
     },
     act: function(o) {
       return ' <span class="quickAction sendLink tip-static" ' +
@@ -11946,8 +11984,7 @@ var buildTrailer = [
   },
   {
     test: function(item) {
-      return !dropLinks && showQuickDropLinks$1 &&
-        item.guild_tag === '-1';
+      return !dropLinks && showQuickDropLinks$1 && item.guild_tag === '-1';
     },
     act: function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
@@ -11969,6 +12006,13 @@ function beforeend(o, item) {
   if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
 }
 
+function itemWidgets(o, item) {
+  if (item) {
+    afterbegin(o, item);
+    beforeend(o, item);
+  }
+}
+
 function doneInvPaint() {
   if (showExtraLinks) {extraLinks = true;}
   checkAll = true;
@@ -11982,8 +12026,7 @@ function invPaint() { // Native - abstract this pattern
   while (moreToDo(limit, paintCount, itemsAry$1)) {
     var o = itemsAry$1[paintCount];
     var item = invItems$2[o.invid];
-    afterbegin(o, item);
-    beforeend(o, item);
+    itemWidgets(o, item);
     paintCount += 1;
   }
   if (paintCount < itemsAry$1.length) {
@@ -11994,8 +12037,7 @@ function invPaint() { // Native - abstract this pattern
 }
 
 function toggleShowExtraLinks() {
-  showExtraLinks = !showExtraLinks;
-  setValue('showExtraLinks', showExtraLinks);
+  setShowExtraLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks$1);
   if (!extraLinks) {
     paintCount = 0;
@@ -12009,8 +12051,7 @@ function toggleShowExtraLinks() {
 }
 
 function toggleShowQuickDropLinks() {
-  showQuickDropLinks$1 = !showQuickDropLinks$1;
-  setValue('showQuickDropLinks', showQuickDropLinks$1);
+  setShowQuickDropLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks$1);
   if (!dropLinks) {
     paintCount = 0;
@@ -12048,55 +12089,21 @@ var evts = [
   },
   {
     test: function(self) {return self.classList.contains('sendLink');},
-    act: function(self) {
-      quickAction(self, sendItem, 'Sent', '.dropLink');
-    }
+    act: function(self) {quickAction(self, sendItem, 'Sent', '.dropLink');}
   },
   {
     test: function(self) {return self.classList.contains('dropLink');},
-    act: function(self) {
-      quickAction(self, dropItem, 'Dropped', '.sendLink');
-    }
+    act: function(self) {quickAction(self, dropItem, 'Dropped', '.sendLink');}
   },
   {
     test: function(self) {return self.classList.contains('fshFolder');},
-    act: function(self) {
-      hideFolders$1(itemsAry$1, invItems$2, self);
-    }
+    act: function(self) {hideFolders$1(itemsAry$1, invItems$2, self);}
   },
   {
     test: function(self) {return self.id === 'fshChkAll';},
-    act: function() {
-      doCheckboxes(itemsAry$1, invItems$2, 'checkAll');
-    }
+    act: function() {doCheckboxes(itemsAry$1, invItems$2, 'checkAll');}
   }
 ];
-
-function getItems$1() {
-  addStatTotalToMouseover();
-  disableItemColoring = getValue('disableItemColoring');
-  showExtraLinks = getValue('showExtraLinks');
-  showQuickDropLinks$1 = getValue('showQuickDropLinks');
-  showQuickSendLinks$1 = getValue('showQuickSendLinks');
-  doToggleButtons(showExtraLinks, showQuickDropLinks$1);
-  pCC.addEventListener('click', eventHandler(evts));
-  var imgList = getItemImg();
-  itemsAry$1 = [];
-  itemsHash = {};
-  Array.prototype.forEach.call(imgList, function(el) {
-    var tipped = el.dataset.tipped;
-    var matches = tipped.match(itemRE);
-    itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
-    var injectHere = el.parentNode.parentNode.nextElementSibling;
-    itemsAry$1.push({
-      el: el,
-      invid: matches[2],
-      injectHere: injectHere
-    });
-  });
-  // Exclude composed pots
-  itemsHash[13699] = 1;
-}
 
 function inventory$1(data) {
   if (!data) {return;}
@@ -12115,6 +12122,7 @@ function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
   getInventoryById().done(inventory$1);
   add(3, getItems$1);
+  pCC.addEventListener('click', eventHandler(evts));
 }
 
 function injectProfileDropItems() {
@@ -16836,7 +16844,7 @@ function doHuntingBuffs() { // jQuery.min
   }
 }
 
-function getPrefs() {
+function getPrefs$1() {
   calf.buffs = shouldBeArray('huntingBuffs');
   calf.buffsName = getValue('huntingBuffsName');
   calf.buffs2 = shouldBeArray('huntingBuffs2');
@@ -16851,7 +16859,7 @@ function getPrefs() {
 }
 
 function worldPrefs() {
-  getPrefs();
+  getPrefs$1();
   buildFshDivs();
   interceptXHR();
   doHuntingBuffs();
@@ -18865,7 +18873,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '29';
+window.FSH.calf = '30';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
