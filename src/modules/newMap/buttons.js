@@ -3,6 +3,7 @@ import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
+import insertElement from '../common/insertElement';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import playerName from '../common/playerName';
 import setValue from '../system/setValue';
@@ -103,8 +104,9 @@ function doLevels(data, worldName) {
   });
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
   yourLvl = textSpan(data.player.level.toString());
-  lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
-  worldName.appendChild(lvlDiv);
+  insertElement(btmDiv, yourLvl);
+  insertElement(lvlDiv, btmDiv);
+  insertElement(worldName, lvlDiv);
 }
 
 function doBtn(className, tip, worldName) {
@@ -112,7 +114,7 @@ function doBtn(className, tip, worldName) {
     className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
     dataset: {tipped: tip}
   });
-  worldName.appendChild(btn);
+  insertElement(worldName, btn);
   return btn;
 }
 
@@ -139,12 +141,12 @@ function makeToggleBtn(o) {
     id: o.checkId,
     type: 'checkbox'
   });
-  btnDiv.appendChild(btnCheck);
+  insertElement(btnDiv, btnCheck);
   var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
-  btnDiv.appendChild(onLbl);
+  insertElement(btnDiv, onLbl);
   var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
-  btnDiv.appendChild(offLbl);
-  o.worldName.appendChild(btnDiv);
+  insertElement(btnDiv, offLbl);
+  insertElement(o.worldName, btnDiv);
   return btnCheck;
 }
 

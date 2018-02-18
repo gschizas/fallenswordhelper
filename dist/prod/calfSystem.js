@@ -1156,11 +1156,18 @@ function textSpan(text) {
   return createSpan({textContent: text});
 }
 
+function insertElement(parent, child) {
+  if (parent instanceof Node && child instanceof Node) {
+    parent.appendChild(child);
+  }
+  return child;
+}
+
 function jConfirm(title, msgText, fn) { // jQuery
   var fshMsg = getElementById('fshmsg');
   if (!fshMsg) {
     fshMsg = createDiv({id: 'fshmsg'});
-    document.body.appendChild(fshMsg);
+    insertElement(document.body, fshMsg);
     $(fshMsg).dialog({
       autoOpen: false,
       dialogClass: 'no-close',
@@ -1198,7 +1205,8 @@ function forageSet(forage, data, dfr) {
         clearForage()
       );
     } else {
-      sendException(forage + ' localforage.setItem error ' + err, false);
+      sendException(forage + ' localforage.setItem error ' +
+        JSON.stringify(err), false);
     }
     dfr.reject(err);
   });
@@ -1678,7 +1686,7 @@ function jQueryDialog(fn) { // jQuery
       id: 'content',
       style: {display: 'none'}
     });
-    document.body.appendChild(content);
+    insertElement(document.body, content);
   }
   $(content).dialog({
     width: 640,
@@ -1721,7 +1729,7 @@ function fSBoxExists(node) { // jQuery.min
     sendEvent('injectFSBoxLog', 'injectFsBoxContent');
     jQueryDialog(injectFsBoxContent);
   });
-  nodediv.appendChild(log);
+  insertElement(nodediv, log);
 }
 
 function injectFSBoxLog() {
@@ -2338,12 +2346,6 @@ function generateRecipeTable(output, recipebook) { // Legacy
   }
 }
 
-function insertElement(parent, child) {
-  if (parent instanceof Node && child instanceof Node) {
-    parent.appendChild(child);
-  }
-}
-
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
 
@@ -2716,7 +2718,7 @@ function insertQuickExtract(injector) { // jQuery.min
     '<label><input type="checkbox" id="fshInMain" checked>' +
     ' Only extract items in Main Folder</label>';
   extTbl = createTable({width: '100%'});
-  content.appendChild(extTbl);
+  insertElement(content, extTbl);
   selectST = true;
   selectMain = true;
   content.addEventListener('click', eventHandler(extractEvents));
@@ -2784,7 +2786,7 @@ function createQuickWear(appInv) {
       '<th colspan="2">Items</th></tr></thead>'
   });
   var tbody = createTBody();
-  tbl.appendChild(tbody);
+  insertElement(tbl, tbody);
   appInv.r.forEach(function(aFolder) {
     aFolder.items.sort(alpha);
     aFolder.items.forEach(tableRows$1.bind(null, tbody, currentPlayerId));
@@ -2793,7 +2795,7 @@ function createQuickWear(appInv) {
     id: 'invTabs-qw',
     className: 'ui-tabs-panel ui-corner-bottom'
   });
-  qw.appendChild(tbl);
+  insertElement(qw, tbl);
   return qw;
 }
 
@@ -3525,11 +3527,11 @@ function showQuickWear(appInv) {
   itemList = appInv;
   var invTabs = createInvTabs();
   var invTabsQw = createQuickWear(appInv);
-  invTabs.appendChild(invTabsQw);
+  insertElement(invTabs, invTabsQw);
   content$2.innerHTML = '';
-  content$2.appendChild(invTabs);
+  insertElement(content$2, invTabs);
   invTabs.addEventListener('click', eventHandler(events));
-  invTabs.appendChild(showAHInvManager(appInv));
+  insertElement(invTabs, showAHInvManager(appInv));
   insertHtmlBeforeEnd(getElementById('setPrompt'),
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }
@@ -4538,7 +4540,7 @@ function showHelperMenu() {
     }
   });
   insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
-  helperMenu.appendChild(helperMenuDiv);
+  insertElement(helperMenu, helperMenuDiv);
   helperMenu.addEventListener('click', function(evt) {
     if (evt.target.id !== 'helperMenu') {return;}
     var menu = evt.target.firstElementChild;
@@ -4644,7 +4646,7 @@ function addUfsgLinks() {
       target: '_blank'
     });
     img.parentNode.insertBefore(myLink, img);
-    myLink.appendChild(img);
+    insertElement(myLink, img);
   });
 }
 
@@ -4726,7 +4728,7 @@ function anchorButton(navLvl, text, fn, target) {
     sendEvent('accordion', text);
     jQueryDialog(fn);
   });
-  li.appendChild(al);
+  insertElement(li, al);
   insertAfterParent(target, insertAdjElement, li);
 }
 
@@ -6142,7 +6144,7 @@ function statbarWrapper(href, id) {
   var myWrapper = createAnchor({href: href});
   var character = getElementById(id);
   var statWrapper = character.parentNode;
-  myWrapper.appendChild(character);
+  insertElement(myWrapper, character);
   statWrapper.insertBefore(myWrapper, statWrapper.firstChild);
   myWrapper.addEventListener('click', function(evt) {
     evt.stopPropagation();
@@ -6445,7 +6447,7 @@ function moveRHSBoxToLHS(title) {
   var boxDiv = getElementById(title);
   if (boxDiv) {
     boxDiv.classList.add('pCR');
-    getElementById('pCL').appendChild(boxDiv);
+    insertElement(getElementById('pCL'), boxDiv);
   }
 }
 
@@ -6656,7 +6658,7 @@ function drawFilters(data) {
   var buttonDiv = createDiv({className: 'fshAC'});
   insertHtmlBeforeEnd(buttonDiv,
     '<button class="fshBl">Perfect</button>');
-  pCC.appendChild(buttonDiv);
+  insertElement(pCC, buttonDiv);
   buttonDiv.addEventListener('click', selectPerf);
 }
 
@@ -6801,8 +6803,8 @@ function drawingNewItemTable() {
     itemsAry.forEach(function(item) {
       var itemDiv = createDiv();
       var aLink = item[0].parentNode;
-      itemDiv.appendChild(aLink);
-      drawingNewItemTable.itemGrid.appendChild(itemDiv);
+      insertElement(itemDiv, aLink);
+      insertElement(drawingNewItemTable.itemGrid, itemDiv);
     });
     insertElementAfterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
     itemTable.classList.add('fshHide');
@@ -6871,9 +6873,9 @@ function doPerfSwitch(inject) {
     type: 'checkbox'
   });
   perfBox.addEventListener('change', reDrawGrid);
-  perfLabel.appendChild(perfBox);
+  insertElement(perfLabel, perfBox);
   insertHtmlBeforeEnd(inject, ' &ensp;');
-  inject.appendChild(perfLabel);
+  insertElement(inject, perfLabel);
 }
 
 function inventory(data) {
@@ -7045,7 +7047,7 @@ function setupPref$1(prefName, injector) {
     innerHTML: simpleCheckboxHtml(prefName)
   });
   injector.classList.add('fshRelative');
-  injector.appendChild(flDiv);
+  insertElement(injector, flDiv);
 }
 
 function guildHall() {
@@ -7703,7 +7705,7 @@ function select(evt) {
   dupNode.className = 'bazaarSelected tip-dynamic';
   var selected = getElementById('selectedItem');
   selected.innerHTML = '';
-  selected.appendChild(dupNode);
+  insertElement(selected, dupNode);
 }
 
 function quantity() {
@@ -8046,10 +8048,10 @@ function bioPreview() {
     className: 'fshBioHeader fshBioInner',
     innerHTML: 'Preview'
   });
-  previewContainer.appendChild(previewHeader);
+  insertElement(previewContainer, previewHeader);
   previewArea = createDiv({className: 'fshBioPreview fshBioInner'});
-  previewContainer.appendChild(previewArea);
-  textArea$1.parentNode.appendChild(previewContainer);
+  insertElement(previewContainer, previewArea);
+  insertElement(textArea$1.parentNode, previewContainer);
 }
 
 function bioWords() {
@@ -8081,7 +8083,7 @@ function changeHeight() {
 function bioHeight() {
   var bioEditLinesDiv = createDiv({innerHTML: '<br>Display '});
   theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines});
-  bioEditLinesDiv.appendChild(theBox);
+  insertElement(bioEditLinesDiv, theBox);
   insertTextBeforeEnd(bioEditLinesDiv, ' Lines ');
   var saveLines = createInput({
     className: 'custombutton',
@@ -8089,8 +8091,8 @@ function bioHeight() {
     type: 'button'
   });
   saveLines.addEventListener('click', changeHeight);
-  bioEditLinesDiv.appendChild(saveLines);
-  pCC.appendChild(bioEditLinesDiv);
+  insertElement(bioEditLinesDiv, saveLines);
+  insertElement(pCC, bioEditLinesDiv);
 }
 
 function updateBioCharacters() {
@@ -8218,8 +8220,8 @@ function doBuffLinks(members) {
     });
     btn.addEventListener('click',
       openQuickBuffByName.bind(null, theNames));
-    li.appendChild(btn);
-    prev.appendChild(li);
+    insertElement(li, btn);
+    insertElement(prev, li);
     return prev;
   }, createUl());
   return shortList;
@@ -8525,18 +8527,18 @@ function makeTg() {
 
   var memberHead = createTh({textContent: 'Member'});
   memberSelect = createDiv();
-  memberHead.appendChild(memberSelect);
-  hrow.appendChild(memberHead);
+  insertElement(memberHead, memberSelect);
+  insertElement(hrow, memberHead);
 
   insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
     '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
     '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
 
   actBody = createTBody();
-  tg.appendChild(actBody);
+  insertElement(tg, actBody);
   tg.addEventListener('change', myChange);
   tgCont = createDiv({className: 'tgCont fshSpinner64'});
-  tgCont.appendChild(tg);
+  insertElement(tgCont, tg);
   return tgCont;
 }
 
@@ -8591,10 +8593,10 @@ function makeInOut() {
   ioText.setAttribute('spellcheck', 'false');
   saveBtn = customButton('Save', doSave);
   resetBtn = customButton('Reset', doReset);
-  io.appendChild(ioText);
-  io.appendChild(createBr());
-  io.appendChild(saveBtn);
-  io.appendChild(resetBtn);
+  insertElement(io, ioText);
+  insertElement(io, createBr());
+  insertElement(io, saveBtn);
+  insertElement(io, resetBtn);
   return io;
 }
 
@@ -8654,20 +8656,20 @@ function makeInnerPopup() {
     type: 'radio'
   });
   acttab2.addEventListener('change', updateRawData);
-  dialogPopup.appendChild(acttab2);
+  insertElement(dialogPopup, acttab2);
   return dialogPopup;
 }
 
 function makePopup() {
   var ret = makeInnerPopup();
   var hdl = makeDragHandle();
-  ret.appendChild(hdl);
+  insertElement(ret, hdl);
   var container = createDiv({className: 'fsh-dialog-content'});
-  container.appendChild(makeTg());
-  container.appendChild(makeInOut());
-  ret.appendChild(container);
+  insertElement(container, makeTg());
+  insertElement(container, makeInOut());
+  insertElement(ret, container);
   draggable(hdl, ret);
-  trDialog.appendChild(ret);
+  insertElement(trDialog, ret);
 }
 
 function addOverlay() {
@@ -8705,7 +8707,7 @@ function guildTracker() {
   var newTr = createTr();
   var cellOne = newTr.insertCell(-1);
   var cellTwo = newTr.insertCell(-1);
-  cellOne.appendChild(gs);
+  insertElement(cellOne, gs);
   cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
     '&nbsp;<label class="custombutton" for="tracker">Show</label>';
   newTr.addEventListener('change', togglePref$3);
@@ -8717,9 +8719,9 @@ function guildTracker() {
   });
   tracker.addEventListener('change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
-  trDialog.appendChild(tracker);
+  insertElement(trDialog, tracker);
   document.body.addEventListener('keydown', keydownHandler);
-  document.body.appendChild(trDialog);
+  insertElement(document.body, trDialog);
 }
 
 function toggleVisibilty(evt) {
@@ -8977,7 +8979,7 @@ function checkAllBtn() {
   var checkAll = createInput({type: 'button', value: 'Check All'});
   var formTags = pCC.getElementsByTagName('form');
   if (formTags.length === 1) {
-    formTags[0].previousElementSibling.cells[0].appendChild(checkAll);
+    insertElement(formTags[0].previousElementSibling.cells[0], checkAll);
   }
 }
 
@@ -11155,7 +11157,7 @@ function tallyTableRow(prev, id) {
 function displayComponentTally() {
   var tbl = createTable({className: 'fshTblCenter'});
   var tBody = createTBody();
-  tbl.appendChild(tBody);
+  insertElement(tbl, tBody);
   insertHtmlBeforeEnd(tBody,
     '<tr><td colspan="3">Component Summary</td></tr>' +
     Object.keys(componentList).reduce(tallyTableRow, ''));
@@ -11165,10 +11167,10 @@ function displayComponentTally() {
   totCell.colSpan = 2;
   usedCountDom = createSpan();
   usedCountDom.innerHTML = usedCount.toString();
-  totCell.appendChild(usedCountDom);
+  insertElement(totCell, usedCountDom);
   insertTextBeforeEnd(totCell, ' / ' + totalCount.toString());
   sumComp.innerHTML = '';
-  sumComp.appendChild(tbl);
+  insertElement(sumComp, tbl);
 }
 
 function gotComponentsPage(data) {
@@ -11285,7 +11287,7 @@ function decorateButton(parentDiv, label) {
   var innerSpan = createSpan(
     {className: 'sendLink', textContent: label});
   parentDiv.textContent = '[';
-  parentDiv.appendChild(innerSpan);
+  insertElement(parentDiv, innerSpan);
   insertHtmlBeforeEnd(parentDiv, ']');
   return innerSpan;
 }
@@ -11304,11 +11306,11 @@ function profileComponents() {
   compSum = decorateButton(sumComp, 'Count Components');
   compDelAll = decorateButton(delAllDiv, 'Delete All Visible');
   qe = decorateButton(qeDiv, 'Quick Extract Components');
-  cmDiv.appendChild(quickDelDiv);
-  cmDiv.appendChild(sumComp);
-  cmDiv.appendChild(qeDiv);
-  cmDiv.appendChild(delAllDiv);
-  compDiv.appendChild(cmDiv);
+  insertElement(cmDiv, quickDelDiv);
+  insertElement(cmDiv, sumComp);
+  insertElement(cmDiv, qeDiv);
+  insertElement(cmDiv, delAllDiv);
+  insertElement(compDiv, cmDiv);
   compDiv.addEventListener('click', eventHandler(evtHdl$2));
 }
 
@@ -11566,9 +11568,9 @@ function quickWearLink() {
   if (!node) {return;}
   var wrap = createSpan({innerHTML: '&nbsp;['});
   var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});
-  wrap.appendChild(qw);
+  insertElement(wrap, qw);
   insertTextBeforeEnd(wrap, ']');
-  node.parentNode.appendChild(wrap);
+  insertElement(node.parentNode, wrap);
   qw.addEventListener('click', function() {
     sendEvent('profile', 'insertQuickWear');
     jQueryDialog(insertQuickWear);
@@ -11596,9 +11598,9 @@ function selectAllLink() {
   var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
   allSpan.addEventListener('click', profileSelectAll);
   var wrapper = createSpan({innerHTML: '[&nbsp;'});
-  wrapper.appendChild(allSpan);
+  insertElement(wrapper, allSpan);
   insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');
-  node.parentNode.appendChild(wrapper);
+  insertElement(node.parentNode, wrapper);
 }
 
 function storeVL() {
@@ -11779,7 +11781,7 @@ function doFolderButtons$1(folders) {
     var formNode = pCC.getElementsByTagName('form')[0];
     var tr = createTr({className: 'fshCenter'});
     var insertHere = createTd({colSpan: 3});
-    tr.appendChild(insertHere);
+    insertElement(tr, insertHere);
     formNode.parentNode.insertBefore(tr, formNode);
     insertHere.innerHTML = makeFolderSpans$1(folders);
     extraButtons();
@@ -12621,21 +12623,21 @@ function gotMap(data) {
   setForage(storeMap, potOpts);
   var container = createContainer();
   var panels = createDiv({id: 'panels'});
-  container.appendChild(panels);
+  insertElement(container, panels);
   inventory$2 = createDiv({id: 'inventory'});
   drawInventory();
-  panels.appendChild(inventory$2);
+  insertElement(panels, inventory$2);
   mapping = createDiv({id: 'mapping'});
   drawMapping();
-  panels.appendChild(mapping);
+  insertElement(panels, mapping);
   thresholds = createThresholds();
-  panels.appendChild(thresholds);
+  insertElement(panels, thresholds);
 
   var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   myCell.addEventListener('change', onChange);
   myCell.addEventListener('click', eventHandler(evtHdl$3));
   myCell.addEventListener('input', onInput);
-  myCell.appendChild(container);
+  insertElement(myCell, container);
 }
 
 function potReport(potObj_) {
@@ -12655,7 +12657,7 @@ function paintChild() {
   while (moreToDo(limit, counter, nodeArray)) {
     var el = nodeList[counter];
     var inject = nodeArray[counter];
-    el.appendChild(inject);
+    insertElement(el, inject);
     counter += 1;
   }
   if (counter < nodeArray.length) {
@@ -12873,7 +12875,7 @@ function injectSaveSettings() { // Hybrid
     injectHere=system.findNode(
       '//b[contains(.,"Multiple Scavenging Results")]/..');
   }
-  injectHere.appendChild(bp);
+  insertElement(injectHere, bp);
 }
 */
 
@@ -13021,13 +13023,13 @@ function displayTracker(parentTable, theTitans) {
       '<td class="header fshCenter">Cooldown</td>' +
       '<td class="header fshCenter">Visible</td></tr>'
   });
-  trackerTable.appendChild(tBody);
+  insertElement(trackerTable, tBody);
   Object.keys(theTitans).forEach(addRow.bind(null, theTitans, tBody));
 
   var newRow = parentTable.insertRow(5);
   var newCell = newRow.insertCell(-1);
   newCell.colSpan = 3;
-  newCell.appendChild(trackerTable);
+  insertElement(newCell, trackerTable);
 }
 
 function addMissingTitansFromOld(oldTitans, newTitans) {
@@ -13081,8 +13083,8 @@ function guideLink(aRow) {
     href: guideUrl + 'creatures&search_name=' + myName,
     target: '_blank'
   });
-  myLink.appendChild(myImg);
-  aRow.cells[0].appendChild(myLink);
+  insertElement(myLink, myImg);
+  insertElement(aRow.cells[0], myLink);
 }
 
 function gotOldTitans(oldTitans) {
@@ -13806,8 +13808,8 @@ function createEventListeners() {
   tickAll.addEventListener('click', toggleTickAllBuffs);
   var inject = getElementById('settingsTabs-4').firstElementChild
     .rows[0].cells[0];
-  inject.appendChild(createBr());
-  inject.appendChild(tickAll);
+  insertElement(inject, createBr());
+  insertElement(inject, tickAll);
 
   getElementById('fshClearStorage')
     .addEventListener('click', clearStorage);
@@ -14162,7 +14164,7 @@ function getItemDiv() {
     var oldItems = itemList.getElementsByTagName('table');
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
-      itemDiv.appendChild(oldItems[0]);
+      insertElement(itemDiv, oldItems[0]);
     }
     itemList.parentNode.insertBefore(itemDiv, itemList);
   }
@@ -14765,17 +14767,17 @@ function primaryElementsSetup(relicData) {
     containerDiv = createDiv({className: 'body'});
   }
   leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
-  containerDiv.appendChild(leftDiv);
+  insertElement(containerDiv, leftDiv);
   if (relicData.is_owner) {
-    leftDiv.appendChild(doBuffLinks(myDefenders));
+    insertElement(leftDiv, doBuffLinks(myDefenders));
   }
   fetchStatsBtn = createButton({
     className: 'custombutton',
     textContent: 'Fetch Stats'
   });
-  leftDiv.appendChild(fetchStatsBtn);
+  insertElement(leftDiv, fetchStatsBtn);
   var dialogRelic = getElementById('dialog-relic');
-  dialogRelic.appendChild(containerDiv);
+  insertElement(dialogRelic, containerDiv);
 }
 
 var guildMemberList;
@@ -14890,13 +14892,13 @@ function prepareSecondaryDivs(relicData) {
     className: 'fshFloatLeft fshRelicMidDiv',
     innerHTML: defStats
   });
-  containerDiv.appendChild(midDiv);
+  insertElement(containerDiv, midDiv);
   setDefVars();
   var rightDiv = createDiv({
     className: 'fshFloatLeft fshRelicRightDiv',
     innerHTML: atkStats
   });
-  containerDiv.appendChild(rightDiv);
+  insertElement(containerDiv, rightDiv);
   setAtkVars();
 }
 
@@ -15507,8 +15509,9 @@ function doLevels(data, worldName) {
   });
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
   yourLvl = textSpan(data.player.level.toString());
-  lvlDiv.appendChild(btmDiv).appendChild(yourLvl);
-  worldName.appendChild(lvlDiv);
+  insertElement(btmDiv, yourLvl);
+  insertElement(lvlDiv, btmDiv);
+  insertElement(worldName, lvlDiv);
 }
 
 function doBtn(className, tip, worldName) {
@@ -15516,7 +15519,7 @@ function doBtn(className, tip, worldName) {
     className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
     dataset: {tipped: tip}
   });
-  worldName.appendChild(btn);
+  insertElement(worldName, btn);
   return btn;
 }
 
@@ -15543,12 +15546,12 @@ function makeToggleBtn(o) {
     id: o.checkId,
     type: 'checkbox'
   });
-  btnDiv.appendChild(btnCheck);
+  insertElement(btnDiv, btnCheck);
   var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
-  btnDiv.appendChild(onLbl);
+  insertElement(btnDiv, onLbl);
   var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
-  btnDiv.appendChild(offLbl);
-  o.worldName.appendChild(btnDiv);
+  insertElement(btnDiv, offLbl);
+  insertElement(o.worldName, btnDiv);
   return btnCheck;
 }
 
@@ -15713,13 +15716,13 @@ function injectQuickBuy() {
     value: 1,
     type: 'number'
   });
-  fshDiv.appendChild(numInput);
+  insertElement(fshDiv, numInput);
   qbBtn = createButton({textContent: 'Quick-buy'});
   qbBtn.addEventListener('click', qBuy);
-  fshDiv.appendChild(qbBtn);
+  insertElement(fshDiv, qbBtn);
   resultDiv = createDiv();
-  fshDiv.appendChild(resultDiv);
-  dialog$1.appendChild(fshDiv);
+  insertElement(fshDiv, resultDiv);
+  insertElement(dialog$1, fshDiv);
 }
 
 function worldDialogShop(e, data) {
@@ -17001,7 +17004,7 @@ function injectOldMap() { // Legacy - Old Map
   if (!injectHere) {return;}
   // insert after kill all monsters image and text
   var newSpan = createDiv({innerHTML: replacementText});
-  injectHere.appendChild(newSpan);
+  insertElement(injectHere, newSpan);
 
   impRecast(hasDeathDealer, hasShieldImp, impsRemaining);
   toggleKsTracker();
@@ -17092,7 +17095,7 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
     });
     var counter = findNode('../../../../tr[2]/td', callback);
     counter.setAttribute('colspan', '2');
-    callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
+    insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
   }
 }
 
@@ -17182,7 +17185,7 @@ function lastReset() {
   var rightCell = newRow.insertCell(-1);
   rightCell.align = 'right';
   rightCell.innerHTML = formatTime();
-  topTable.appendChild(newRow);
+  insertElement(topTable, newRow);
 }
 
 function ladder() {
@@ -17497,7 +17500,7 @@ function buildTrackerTable(seAry) {
     innerHTML: '<tr><td class="header fshCenter">Creature</td>' +
       '<td class="header fshCenter">Last Kill</td></tr>'
   });
-  trackerTable.appendChild(tBody);
+  insertElement(trackerTable, tBody);
   seAry.forEach(addRow$1.bind(null, tBody));
   return trackerTable;
 }
@@ -17512,7 +17515,7 @@ function insertNewRow() {
 function displayTracker$1(seAry) {
   var trackerTable = buildTrackerTable(seAry);
   trackerCell = insertNewRow();
-  trackerCell.appendChild(trackerTable);
+  insertElement(trackerCell, trackerTable);
 }
 
 function gotSeLog() {
@@ -18050,7 +18053,7 @@ function cacheCombat(aRow, json) {
 function processCombat(aRow) {
   var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
   var combatSummary = createDiv({style: {color: 'gray'}});
-  aRow.cells[2].appendChild(combatSummary);
+  insertElement(aRow.cells[2], combatSummary);
   if (combatCache[combatID] && combatCache[combatID].logTime) {
     parseCombat(combatSummary, combatCache[combatID]);
   } else {
@@ -18862,7 +18865,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '28';
+window.FSH.calf = '29';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

@@ -1,6 +1,7 @@
 import add from '../../support/task';
 import alpha from '../../common/alpha';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
+import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isUndefined from '../../common/isUndefined';
 import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
@@ -92,17 +93,17 @@ export function makeTg() {
 
   var memberHead = createTh({textContent: 'Member'});
   memberSelect = createDiv();
-  memberHead.appendChild(memberSelect);
-  hrow.appendChild(memberHead);
+  insertElement(memberHead, memberSelect);
+  insertElement(hrow, memberHead);
 
   insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
     '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
     '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
 
   actBody = createTBody();
-  tg.appendChild(actBody);
+  insertElement(tg, actBody);
   tg.addEventListener('change', myChange);
   tgCont = createDiv({className: 'tgCont fshSpinner64'});
-  tgCont.appendChild(tg);
+  insertElement(tgCont, tg);
   return tgCont;
 }

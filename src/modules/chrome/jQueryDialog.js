@@ -1,5 +1,6 @@
 import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import insertElement from '../common/insertElement';
 
 export default function jQueryDialog(fn) { // jQuery
   var content = getElementById('content');
@@ -8,7 +9,7 @@ export default function jQueryDialog(fn) { // jQuery
       id: 'content',
       style: {display: 'none'}
     });
-    document.body.appendChild(content);
+    insertElement(document.body, content);
   }
   $(content).dialog({
     width: 640,

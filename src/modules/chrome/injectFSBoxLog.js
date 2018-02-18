@@ -2,6 +2,7 @@ import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import {injectFsBoxContent} from '../misc';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
@@ -40,7 +41,7 @@ function fSBoxExists(node) { // jQuery.min
     sendEvent('injectFSBoxLog', 'injectFsBoxContent');
     jQueryDialog(injectFsBoxContent);
   });
-  nodediv.appendChild(log);
+  insertElement(nodediv, log);
 }
 
 export default function injectFSBoxLog() {

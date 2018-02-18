@@ -1,6 +1,7 @@
 import {createDiv} from './cElement';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
+import insertElement from './insertElement';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
 import jQueryNotPresent from './jQueryNotPresent';
 import {pCC} from '../support/layout';
@@ -23,7 +24,7 @@ function drawFilters(data) {
   var buttonDiv = createDiv({className: 'fshAC'});
   insertHtmlBeforeEnd(buttonDiv,
     '<button class="fshBl">Perfect</button>');
-  pCC.appendChild(buttonDiv);
+  insertElement(pCC, buttonDiv);
   buttonDiv.addEventListener('click', selectPerf);
 }
 

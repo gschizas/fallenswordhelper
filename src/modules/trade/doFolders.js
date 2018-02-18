@@ -2,6 +2,7 @@ import add from '../support/task';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
+import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -18,7 +19,7 @@ function getItemDiv() {
     var oldItems = itemList.getElementsByTagName('table');
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
-      itemDiv.appendChild(oldItems[0]);
+      insertElement(itemDiv, oldItems[0]);
     }
     itemList.parentNode.insertBefore(itemDiv, itemList);
   }

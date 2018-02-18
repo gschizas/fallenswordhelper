@@ -9,6 +9,7 @@ import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
@@ -89,7 +90,7 @@ function showHelperMenu() {
     }
   });
   insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
-  helperMenu.appendChild(helperMenuDiv);
+  insertElement(helperMenu, helperMenuDiv);
   helperMenu.addEventListener('click', function(evt) {
     if (evt.target.id !== 'helperMenu') {return;}
     var menu = evt.target.firstElementChild;

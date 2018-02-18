@@ -2,6 +2,7 @@ import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
 import {pCC} from '../../support/layout';
@@ -44,10 +45,10 @@ function bioPreview() {
     className: 'fshBioHeader fshBioInner',
     innerHTML: 'Preview'
   });
-  previewContainer.appendChild(previewHeader);
+  insertElement(previewContainer, previewHeader);
   previewArea = createDiv({className: 'fshBioPreview fshBioInner'});
-  previewContainer.appendChild(previewArea);
-  textArea.parentNode.appendChild(previewContainer);
+  insertElement(previewContainer, previewArea);
+  insertElement(textArea.parentNode, previewContainer);
 }
 
 function bioWords() {
@@ -79,7 +80,7 @@ function changeHeight() {
 function bioHeight() {
   var bioEditLinesDiv = createDiv({innerHTML: '<br>Display '});
   theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines});
-  bioEditLinesDiv.appendChild(theBox);
+  insertElement(bioEditLinesDiv, theBox);
   insertTextBeforeEnd(bioEditLinesDiv, ' Lines ');
   var saveLines = createInput({
     className: 'custombutton',
@@ -87,8 +88,8 @@ function bioHeight() {
     type: 'button'
   });
   saveLines.addEventListener('click', changeHeight);
-  bioEditLinesDiv.appendChild(saveLines);
-  pCC.appendChild(bioEditLinesDiv);
+  insertElement(bioEditLinesDiv, saveLines);
+  insertElement(pCC, bioEditLinesDiv);
 }
 
 function updateBioCharacters() {

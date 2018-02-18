@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import insertElement from '../common/insertElement';
 import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 import makeFolderSpans from '../common/makeFolderSpans';
 import {pCC} from '../support/layout';
@@ -15,7 +16,7 @@ export default function doFolderButtons(folders) {
     var formNode = pCC.getElementsByTagName('form')[0];
     var tr = createTr({className: 'fshCenter'});
     var insertHere = createTd({colSpan: 3});
-    tr.appendChild(insertHere);
+    insertElement(tr, insertHere);
     formNode.parentNode.insertBefore(tr, formNode);
     insertHere.innerHTML = makeFolderSpans(folders);
     extraButtons();

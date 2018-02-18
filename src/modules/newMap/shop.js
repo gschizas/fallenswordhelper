@@ -1,6 +1,7 @@
 import addCommas from '../system/addCommas';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import retryAjax from '../ajax/retryAjax';
 import rnd from '../system/rnd';
@@ -79,13 +80,13 @@ function injectQuickBuy() {
     value: 1,
     type: 'number'
   });
-  fshDiv.appendChild(numInput);
+  insertElement(fshDiv, numInput);
   qbBtn = createButton({textContent: 'Quick-buy'});
   qbBtn.addEventListener('click', qBuy);
-  fshDiv.appendChild(qbBtn);
+  insertElement(fshDiv, qbBtn);
   resultDiv = createDiv();
-  fshDiv.appendChild(resultDiv);
-  dialog.appendChild(fshDiv);
+  insertElement(fshDiv, resultDiv);
+  insertElement(dialog, fshDiv);
 }
 
 function worldDialogShop(e, data) {

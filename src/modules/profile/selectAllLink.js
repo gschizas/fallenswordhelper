@@ -1,5 +1,6 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 function profileSelectAll() {
@@ -23,7 +24,7 @@ export default function selectAllLink() {
   var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
   allSpan.addEventListener('click', profileSelectAll);
   var wrapper = createSpan({innerHTML: '[&nbsp;'});
-  wrapper.appendChild(allSpan);
+  insertElement(wrapper, allSpan);
   insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');
-  node.parentNode.appendChild(wrapper);
+  insertElement(node.parentNode, wrapper);
 }

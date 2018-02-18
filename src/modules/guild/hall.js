@@ -1,5 +1,6 @@
 import collapse from '../common/collapse';
 import {createDiv} from '../common/cElement';
+import insertElement from '../common/insertElement';
 import {pCC} from '../support/layout';
 import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 
@@ -11,7 +12,7 @@ function setupPref(prefName, injector) {
     innerHTML: simpleCheckboxHtml(prefName)
   });
   injector.classList.add('fshRelative');
-  injector.appendChild(flDiv);
+  insertElement(injector, flDiv);
 }
 
 export default function guildHall() {

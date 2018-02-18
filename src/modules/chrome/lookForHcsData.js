@@ -14,6 +14,7 @@ import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
 import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
+import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import jsonParse from '../common/jsonParse';
 import navMenu from './navMenu';
@@ -124,7 +125,7 @@ function moveRHSBoxToLHS(title) {
   var boxDiv = getElementById(title);
   if (boxDiv) {
     boxDiv.classList.add('pCR');
-    getElementById('pCL').appendChild(boxDiv);
+    insertElement(getElementById('pCL'), boxDiv);
   }
 }
 

@@ -5,6 +5,7 @@ import findNode from './system/findNode';
 import findNodes from './system/findNodes';
 import {getElementById} from './common/getElement';
 import {guideUrl} from './support/constants';
+import insertElement from './common/insertElement';
 import jQueryPresent from './common/jQueryPresent';
 import jsonFail from './common/jsonFail';
 import outputResult from './common/outputResult';
@@ -76,7 +77,7 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
     });
     var counter = findNode('../../../../tr[2]/td', callback);
     counter.setAttribute('colspan', '2');
-    callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
+    insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
   }
 }
 

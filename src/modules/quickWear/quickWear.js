@@ -4,6 +4,7 @@ import equipItem from '../ajax/equipItem';
 import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';
 import jQueryPresent from '../common/jQueryPresent';
@@ -122,11 +123,11 @@ function showQuickWear(appInv) {
   itemList = appInv;
   var invTabs = createInvTabs();
   var invTabsQw = createQuickWear(appInv);
-  invTabs.appendChild(invTabsQw);
+  insertElement(invTabs, invTabsQw);
   content.innerHTML = '';
-  content.appendChild(invTabs);
+  insertElement(content, invTabs);
   invTabs.addEventListener('click', eventHandler(events));
-  invTabs.appendChild(showAHInvManager(appInv));
+  insertElement(invTabs, showAHInvManager(appInv));
   insertHtmlBeforeEnd(getElementById('setPrompt'),
     simpleCheckboxHtml('disableQuickWearPrompts'));
 }

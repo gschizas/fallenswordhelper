@@ -3,6 +3,7 @@ import eventHandler from '../common/eventHandler';
 import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
 import infoBox from '../common/infoBox';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../quickExtract';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
@@ -72,7 +73,7 @@ function tallyTableRow(prev, id) {
 function displayComponentTally() {
   var tbl = createTable({className: 'fshTblCenter'});
   var tBody = createTBody();
-  tbl.appendChild(tBody);
+  insertElement(tbl, tBody);
   insertHtmlBeforeEnd(tBody,
     '<tr><td colspan="3">Component Summary</td></tr>' +
     Object.keys(componentList).reduce(tallyTableRow, ''));
@@ -82,10 +83,10 @@ function displayComponentTally() {
   totCell.colSpan = 2;
   usedCountDom = createSpan();
   usedCountDom.innerHTML = usedCount.toString();
-  totCell.appendChild(usedCountDom);
+  insertElement(totCell, usedCountDom);
   insertTextBeforeEnd(totCell, ' / ' + totalCount.toString());
   sumComp.innerHTML = '';
-  sumComp.appendChild(tbl);
+  insertElement(sumComp, tbl);
 }
 
 function gotComponentsPage(data) {
@@ -202,7 +203,7 @@ function decorateButton(parentDiv, label) {
   var innerSpan = createSpan(
     {className: 'sendLink', textContent: label});
   parentDiv.textContent = '[';
-  parentDiv.appendChild(innerSpan);
+  insertElement(parentDiv, innerSpan);
   insertHtmlBeforeEnd(parentDiv, ']');
   return innerSpan;
 }
@@ -221,10 +222,10 @@ export default function profileComponents() {
   compSum = decorateButton(sumComp, 'Count Components');
   compDelAll = decorateButton(delAllDiv, 'Delete All Visible');
   qe = decorateButton(qeDiv, 'Quick Extract Components');
-  cmDiv.appendChild(quickDelDiv);
-  cmDiv.appendChild(sumComp);
-  cmDiv.appendChild(qeDiv);
-  cmDiv.appendChild(delAllDiv);
-  compDiv.appendChild(cmDiv);
+  insertElement(cmDiv, quickDelDiv);
+  insertElement(cmDiv, sumComp);
+  insertElement(cmDiv, qeDiv);
+  insertElement(cmDiv, delAllDiv);
+  insertElement(compDiv, cmDiv);
   compDiv.addEventListener('click', eventHandler(evtHdl));
 }
