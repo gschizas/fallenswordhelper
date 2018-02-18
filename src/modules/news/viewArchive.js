@@ -30,12 +30,14 @@ export default function viewArchive() {
   lastLadderReset = getValue(ladderResetPref);
   var prefName = 'collapseNewsArchive';
   var theTables = pCC.getElementsByTagName('table');
-  setupPref(prefName, theTables[0].rows[2]);
-  collapse({
-    prefName: prefName,
-    theTable: theTables[2],
-    headInd: 6,
-    articleTest: testArticle,
-    extraFn: checkForPvPLadder
-  });
+  if (theTables.length > 2) {
+    setupPref(prefName, theTables[0].rows[2]);
+    collapse({
+      prefName: prefName,
+      theTable: theTables[2],
+      headInd: 6,
+      articleTest: testArticle,
+      extraFn: checkForPvPLadder
+    });
+  }
 }
