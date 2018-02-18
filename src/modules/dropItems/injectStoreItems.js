@@ -1,5 +1,4 @@
 import add from '../support/task';
-import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
@@ -7,7 +6,6 @@ import dropItem from '../ajax/dropItem';
 import eventHandler from '../common/eventHandler';
 import fallback from '../system/fallback';
 import getInventoryById from '../ajax/getInventoryById';
-import getValue from '../system/getValue';
 import hideFolders from './hideFolders';
 import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -17,29 +15,25 @@ import moveItemsToFolder from './moveItemsToFolder';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
-import setValue from '../system/setValue';
 import toggleForce from '../common/toggleForce';
-import {guideUrl, itemRE, rarity} from '../support/constants';
+import {
+  disableItemColoring,
+  setShowExtraLinks,
+  setShowQuickDropLinks,
+  showExtraLinks,
+  showQuickDropLinks,
+  showQuickSendLinks
+} from './getPrefs';
+import {getItems, itemsAry, itemsHash} from './getItems';
+import {guideUrl, rarity} from '../support/constants';
 
-var disableItemColoring;
-var showExtraLinks;
-var showQuickDropLinks;
-var showQuickSendLinks;
 var extraLinks;
 var paintCount;
-var itemsAry;
 var checkAll;
-var itemsHash;
 var dropLinks;
 var invItems;
 var colouring;
 var sendLinks;
-
-function getItemImg() {
-  var allTables = pCC.getElementsByTagName('table');
-  var lastTable = allTables[allTables.length - 1];
-  return lastTable.getElementsByTagName('img');
-}
 
 function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {return;}
@@ -61,9 +55,7 @@ function itemColouring(o, item) {
 
 var buildTrailer = [
   {
-    test: function(item) {
-      return !checkAll && itemsHash[item.item_id] !== 1;
-    },
+    test: function(item) {return !checkAll && itemsHash[item.item_id] !== 1;},
     act: function(o, item) {
       return ' [<span linkto="' + item.item_id +
         '" class="fshLink">Check all</span>]';
@@ -71,8 +63,7 @@ var buildTrailer = [
   },
   {
     test: function(item) {
-      return !sendLinks && showQuickSendLinks &&
-        !item.bound;
+      return !sendLinks && showQuickSendLinks && !item.bound;
     },
     act: function(o) {
       return ' <span class="quickAction sendLink tip-static" ' +
@@ -82,8 +73,7 @@ var buildTrailer = [
   },
   {
     test: function(item) {
-      return !dropLinks && showQuickDropLinks &&
-        item.guild_tag === '-1';
+      return !dropLinks && showQuickDropLinks && item.guild_tag === '-1';
     },
     act: function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
@@ -105,6 +95,13 @@ function beforeend(o, item) {
   if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
 }
 
+function itemWidgets(o, item) {
+  if (item) {
+    afterbegin(o, item);
+    beforeend(o, item);
+  }
+}
+
 function doneInvPaint() {
   if (showExtraLinks) {extraLinks = true;}
   checkAll = true;
@@ -118,8 +115,7 @@ function invPaint() { // Native - abstract this pattern
   while (moreToDo(limit, paintCount, itemsAry)) {
     var o = itemsAry[paintCount];
     var item = invItems[o.invid];
-    afterbegin(o, item);
-    beforeend(o, item);
+    itemWidgets(o, item);
     paintCount += 1;
   }
   if (paintCount < itemsAry.length) {
@@ -130,8 +126,7 @@ function invPaint() { // Native - abstract this pattern
 }
 
 function toggleShowExtraLinks() {
-  showExtraLinks = !showExtraLinks;
-  setValue('showExtraLinks', showExtraLinks);
+  setShowExtraLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
     paintCount = 0;
@@ -145,8 +140,7 @@ function toggleShowExtraLinks() {
 }
 
 function toggleShowQuickDropLinks() {
-  showQuickDropLinks = !showQuickDropLinks;
-  setValue('showQuickDropLinks', showQuickDropLinks);
+  setShowQuickDropLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
     paintCount = 0;
@@ -184,55 +178,21 @@ var evts = [
   },
   {
     test: function(self) {return self.classList.contains('sendLink');},
-    act: function(self) {
-      quickAction(self, sendItem, 'Sent', '.dropLink');
-    }
+    act: function(self) {quickAction(self, sendItem, 'Sent', '.dropLink');}
   },
   {
     test: function(self) {return self.classList.contains('dropLink');},
-    act: function(self) {
-      quickAction(self, dropItem, 'Dropped', '.sendLink');
-    }
+    act: function(self) {quickAction(self, dropItem, 'Dropped', '.sendLink');}
   },
   {
     test: function(self) {return self.classList.contains('fshFolder');},
-    act: function(self) {
-      hideFolders(itemsAry, invItems, self);
-    }
+    act: function(self) {hideFolders(itemsAry, invItems, self);}
   },
   {
     test: function(self) {return self.id === 'fshChkAll';},
-    act: function() {
-      doCheckboxes(itemsAry, invItems, 'checkAll');
-    }
+    act: function() {doCheckboxes(itemsAry, invItems, 'checkAll');}
   }
 ];
-
-function getItems() {
-  addStatTotalToMouseover();
-  disableItemColoring = getValue('disableItemColoring');
-  showExtraLinks = getValue('showExtraLinks');
-  showQuickDropLinks = getValue('showQuickDropLinks');
-  showQuickSendLinks = getValue('showQuickSendLinks');
-  doToggleButtons(showExtraLinks, showQuickDropLinks);
-  pCC.addEventListener('click', eventHandler(evts));
-  var imgList = getItemImg();
-  itemsAry = [];
-  itemsHash = {};
-  Array.prototype.forEach.call(imgList, function(el) {
-    var tipped = el.dataset.tipped;
-    var matches = tipped.match(itemRE);
-    itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
-    var injectHere = el.parentNode.parentNode.nextElementSibling;
-    itemsAry.push({
-      el: el,
-      invid: matches[2],
-      injectHere: injectHere
-    });
-  });
-  // Exclude composed pots
-  itemsHash[13699] = 1;
-}
 
 function inventory(data) {
   if (!data) {return;}
@@ -251,4 +211,5 @@ export default function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
   getInventoryById().done(inventory);
   add(3, getItems);
+  pCC.addEventListener('click', eventHandler(evts));
 }
