@@ -1,5 +1,6 @@
 import {createInput} from '../common/cElement';
 import {imageServer} from '../system/system';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {pCC} from '../support/layout';
 import takeitem from '../app/guild/inventory/takeitem';
@@ -53,7 +54,7 @@ function checkAllBtn() {
   var checkAll = createInput({type: 'button', value: 'Check All'});
   var formTags = pCC.getElementsByTagName('form');
   if (formTags.length === 1) {
-    formTags[0].previousElementSibling.cells[0].appendChild(checkAll);
+    insertElement(formTags[0].previousElementSibling.cells[0], checkAll);
   }
 }
 

@@ -6,6 +6,7 @@ import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
+import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import isObject from '../common/isObject';
@@ -49,7 +50,7 @@ function anchorButton(navLvl, text, fn, target) {
     sendEvent('accordion', text);
     jQueryDialog(fn);
   });
-  li.appendChild(al);
+  insertElement(li, al);
   insertAfterParent(target, insertAdjElement, li);
 }
 

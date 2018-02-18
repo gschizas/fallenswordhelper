@@ -1,5 +1,6 @@
 import {createTr} from './common/cElement';
 import getValue from './system/getValue';
+import insertElement from './common/insertElement';
 import {now} from './support/constants';
 import outputFormat from './system/outputFormat';
 
@@ -40,7 +41,7 @@ function lastReset() {
   var rightCell = newRow.insertCell(-1);
   rightCell.align = 'right';
   rightCell.innerHTML = formatTime();
-  topTable.appendChild(newRow);
+  insertElement(topTable, newRow);
 }
 
 export default function ladder() {

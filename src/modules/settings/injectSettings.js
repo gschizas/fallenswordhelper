@@ -4,6 +4,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
@@ -140,8 +141,8 @@ function createEventListeners() {
   tickAll.addEventListener('click', toggleTickAllBuffs);
   var inject = getElementById('settingsTabs-4').firstElementChild
     .rows[0].cells[0];
-  inject.appendChild(createBr());
-  inject.appendChild(tickAll);
+  insertElement(inject, createBr());
+  insertElement(inject, tickAll);
 
   getElementById('fshClearStorage')
     .addEventListener('click', clearStorage);

@@ -9,6 +9,7 @@ import getValue from '../system/getValue';
 import hasCA from './hasCA';
 import hasDblr from './hasDblr';
 import {imageServer} from '../system/system';
+import insertElement from '../common/insertElement';
 import jQueryPresent from '../common/jQueryPresent';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
@@ -74,7 +75,7 @@ function injectOldMap() { // Legacy - Old Map
   if (!injectHere) {return;}
   // insert after kill all monsters image and text
   var newSpan = createDiv({innerHTML: replacementText});
-  injectHere.appendChild(newSpan);
+  insertElement(injectHere, newSpan);
 
   impRecast(hasDeathDealer, hasShieldImp, impsRemaining);
   toggleKsTracker();

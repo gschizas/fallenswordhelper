@@ -27,6 +27,7 @@ import statbar from './statBar';
 import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
 import {injectLevelupCalculator, injectStaminaCalculator} from './calc';
+import insertElement from '../common/insertElement';
 
 function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');
@@ -124,7 +125,7 @@ function moveRHSBoxToLHS(title) {
   var boxDiv = getElementById(title);
   if (boxDiv) {
     boxDiv.classList.add('pCR');
-    getElementById('pCL').appendChild(boxDiv);
+    insertElement(getElementById('pCL'), boxDiv);
   }
 }
 

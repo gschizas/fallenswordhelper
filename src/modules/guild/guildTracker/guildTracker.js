@@ -2,6 +2,7 @@ import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
+import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
@@ -70,20 +71,20 @@ function makeInnerPopup() {
     type: 'radio'
   });
   acttab2.addEventListener('change', updateRawData);
-  dialogPopup.appendChild(acttab2);
+  insertElement(dialogPopup, acttab2);
   return dialogPopup;
 }
 
 function makePopup() {
   var ret = makeInnerPopup();
   var hdl = makeDragHandle();
-  ret.appendChild(hdl);
+  insertElement(ret, hdl);
   var container = createDiv({className: 'fsh-dialog-content'});
-  container.appendChild(makeTg());
-  container.appendChild(makeInOut());
-  ret.appendChild(container);
+  insertElement(container, makeTg());
+  insertElement(container, makeInOut());
+  insertElement(ret, container);
   draggable(hdl, ret);
-  trDialog.appendChild(ret);
+  insertElement(trDialog, ret);
 }
 
 function addOverlay() {
@@ -121,7 +122,7 @@ export default function guildTracker() {
   var newTr = createTr();
   var cellOne = newTr.insertCell(-1);
   var cellTwo = newTr.insertCell(-1);
-  cellOne.appendChild(gs);
+  insertElement(cellOne, gs);
   cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
     '&nbsp;<label class="custombutton" for="tracker">Show</label>';
   newTr.addEventListener('change', togglePref);
@@ -133,7 +134,7 @@ export default function guildTracker() {
   });
   tracker.addEventListener('change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
-  trDialog.appendChild(tracker);
+  insertElement(trDialog, tracker);
   document.body.addEventListener('keydown', keydownHandler);
-  document.body.appendChild(trDialog);
+  insertElement(document.body, trDialog);
 }

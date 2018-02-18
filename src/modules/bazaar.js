@@ -1,5 +1,6 @@
 import buyitem from './app/potionbazaar/buyitem';
 import {getElementById} from './common/getElement';
+import insertElement from './common/insertElement';
 import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
@@ -44,7 +45,7 @@ function select(evt) {
   dupNode.className = 'bazaarSelected tip-dynamic';
   var selected = getElementById('selectedItem');
   selected.innerHTML = '';
-  selected.appendChild(dupNode);
+  insertElement(selected, dupNode);
 }
 
 function quantity() {

@@ -1,6 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import getInventoryById from '../ajax/getInventoryById';
+import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {itemRE} from '../support/constants';
@@ -30,8 +31,8 @@ function drawingNewItemTable() {
     itemsAry.forEach(function(item) {
       var itemDiv = createDiv();
       var aLink = item[0].parentNode;
-      itemDiv.appendChild(aLink);
-      drawingNewItemTable.itemGrid.appendChild(itemDiv);
+      insertElement(itemDiv, aLink);
+      insertElement(drawingNewItemTable.itemGrid, itemDiv);
     });
     insertElementAfterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
     itemTable.classList.add('fshHide');
@@ -100,9 +101,9 @@ function doPerfSwitch(inject) {
     type: 'checkbox'
   });
   perfBox.addEventListener('change', reDrawGrid);
-  perfLabel.appendChild(perfBox);
+  insertElement(perfLabel, perfBox);
   insertHtmlBeforeEnd(inject, ' &ensp;');
-  inject.appendChild(perfLabel);
+  insertElement(inject, perfLabel);
 }
 
 function inventory(data) {

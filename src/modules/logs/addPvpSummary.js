@@ -2,6 +2,7 @@ import addCommas from '../system/addCommas';
 import calf from '../support/calf';
 import createDocument from '../system/createDocument';
 import getForage from '../ajax/getForage';
+import insertElement from '../common/insertElement';
 import {nowSecs} from '../support/constants';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
@@ -96,7 +97,7 @@ function cacheCombat(aRow, json) {
 function processCombat(aRow) {
   var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
   var combatSummary = createDiv({style: {color: 'gray'}});
-  aRow.cells[2].appendChild(combatSummary);
+  insertElement(aRow.cells[2], combatSummary);
   if (combatCache[combatID] && combatCache[combatID].logTime) {
     parseCombat(combatSummary, combatCache[combatID]);
   } else {

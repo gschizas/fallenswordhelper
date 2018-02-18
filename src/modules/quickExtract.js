@@ -3,6 +3,7 @@ import eventHandler from './common/eventHandler';
 import {getElementById} from './common/getElement';
 import getInventory from './ajax/getInventory';
 import {imageServer} from './system/system';
+import insertElement from './common/insertElement';
 import jConfirm from './common/jConfirm';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
@@ -145,7 +146,7 @@ export default function insertQuickExtract(injector) { // jQuery.min
     '<label><input type="checkbox" id="fshInMain" checked>' +
     ' Only extract items in Main Folder</label>';
   extTbl = createTable({width: '100%'});
-  content.appendChild(extTbl);
+  insertElement(content, extTbl);
   selectST = true;
   selectMain = true;
   content.addEventListener('click', eventHandler(extractEvents));

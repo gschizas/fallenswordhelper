@@ -13,7 +13,7 @@ import jQueryPresent from './common/jQueryPresent';
     injectHere=system.findNode(
       '//b[contains(.,"Multiple Scavenging Results")]/..');
   }
-  injectHere.appendChild(bp);
+  insertElement(injectHere, bp);
 }
 */
 

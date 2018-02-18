@@ -1,5 +1,6 @@
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
@@ -46,13 +47,13 @@ function displayTracker(parentTable, theTitans) {
       '<td class="header fshCenter">Cooldown</td>' +
       '<td class="header fshCenter">Visible</td></tr>'
   });
-  trackerTable.appendChild(tBody);
+  insertElement(trackerTable, tBody);
   Object.keys(theTitans).forEach(addRow.bind(null, theTitans, tBody));
 
   var newRow = parentTable.insertRow(5);
   var newCell = newRow.insertCell(-1);
   newCell.colSpan = 3;
-  newCell.appendChild(trackerTable);
+  insertElement(newCell, trackerTable);
 }
 
 function addMissingTitansFromOld(oldTitans, newTitans) {
@@ -106,8 +107,8 @@ function guideLink(aRow) {
     href: guideUrl + 'creatures&search_name=' + myName,
     target: '_blank'
   });
-  myLink.appendChild(myImg);
-  aRow.cells[0].appendChild(myLink);
+  insertElement(myLink, myImg);
+  insertElement(aRow.cells[0], myLink);
 }
 
 function gotOldTitans(oldTitans) {

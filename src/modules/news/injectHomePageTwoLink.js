@@ -1,6 +1,7 @@
 import {createAnchor} from '../common/cElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
+import insertElement from '../common/insertElement';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
@@ -75,7 +76,7 @@ function addUfsgLinks() {
       target: '_blank'
     });
     img.parentNode.insertBefore(myLink, img);
-    myLink.appendChild(img);
+    insertElement(myLink, img);
   });
 }
 

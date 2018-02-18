@@ -1,5 +1,6 @@
 import add from '../../support/task';
 import {initTable} from './trackerTable';
+import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
 import setForage from '../../ajax/setForage';
 import {
@@ -60,9 +61,9 @@ export function makeInOut() {
   ioText.setAttribute('spellcheck', 'false');
   saveBtn = customButton('Save', doSave);
   resetBtn = customButton('Reset', doReset);
-  io.appendChild(ioText);
-  io.appendChild(createBr());
-  io.appendChild(saveBtn);
-  io.appendChild(resetBtn);
+  insertElement(io, ioText);
+  insertElement(io, createBr());
+  insertElement(io, saveBtn);
+  insertElement(io, resetBtn);
   return io;
 }

@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import formatUtcDateTime from '../common/formatUtcDateTime';
+import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
@@ -29,7 +30,7 @@ function buildTrackerTable(seAry) {
     innerHTML: '<tr><td class="header fshCenter">Creature</td>' +
       '<td class="header fshCenter">Last Kill</td></tr>'
   });
-  trackerTable.appendChild(tBody);
+  insertElement(trackerTable, tBody);
   seAry.forEach(addRow.bind(null, tBody));
   return trackerTable;
 }
@@ -44,7 +45,7 @@ function insertNewRow() {
 function displayTracker(seAry) {
   var trackerTable = buildTrackerTable(seAry);
   trackerCell = insertNewRow();
-  trackerCell.appendChild(trackerTable);
+  insertElement(trackerCell, trackerTable);
 }
 
 function gotSeLog() {

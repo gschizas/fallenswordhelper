@@ -4,6 +4,7 @@ import eventHandler from '../common/eventHandler';
 import extend from '../common/extend';
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
+import insertElement from '../common/insertElement';
 import isChecked from '../system/isChecked';
 import isSelected from '../system/isSelected';
 import {pCC} from '../support/layout';
@@ -186,21 +187,21 @@ function gotMap(data) {
   setForage(storeMap, potOpts);
   var container = createContainer();
   var panels = createDiv({id: 'panels'});
-  container.appendChild(panels);
+  insertElement(container, panels);
   inventory = createDiv({id: 'inventory'});
   drawInventory();
-  panels.appendChild(inventory);
+  insertElement(panels, inventory);
   mapping = createDiv({id: 'mapping'});
   drawMapping();
-  panels.appendChild(mapping);
+  insertElement(panels, mapping);
   thresholds = createThresholds();
-  panels.appendChild(thresholds);
+  insertElement(panels, thresholds);
 
   var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   myCell.addEventListener('change', onChange);
   myCell.addEventListener('click', eventHandler(evtHdl));
   myCell.addEventListener('input', onInput);
-  myCell.appendChild(container);
+  insertElement(myCell, container);
 }
 
 export default function potReport(potObj_) {

@@ -1,4 +1,5 @@
 import fallback from '../system/fallback';
+import insertElement from './insertElement';
 import openQuickBuffByName from './openQuickBuffByName';
 import {places} from '../support/constants';
 import {createButton, createLi, createUl} from './cElement';
@@ -21,8 +22,8 @@ export default function doBuffLinks(members) {
     });
     btn.addEventListener('click',
       openQuickBuffByName.bind(null, theNames));
-    li.appendChild(btn);
-    prev.appendChild(li);
+    insertElement(li, btn);
+    insertElement(prev, li);
     return prev;
   }, createUl());
   return shortList;

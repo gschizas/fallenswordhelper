@@ -1,5 +1,6 @@
 import doBuffLinks from '../../common/doBuffLinks';
 import {getElementById} from '../../common/getElement';
+import insertElement from '../../common/insertElement';
 import {createButton, createDiv} from '../../common/cElement';
 
 export var containerDiv;
@@ -21,15 +22,15 @@ export function primaryElementsSetup(relicData) {
     containerDiv = createDiv({className: 'body'});
   }
   leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
-  containerDiv.appendChild(leftDiv);
+  insertElement(containerDiv, leftDiv);
   if (relicData.is_owner) {
-    leftDiv.appendChild(doBuffLinks(myDefenders));
+    insertElement(leftDiv, doBuffLinks(myDefenders));
   }
   fetchStatsBtn = createButton({
     className: 'custombutton',
     textContent: 'Fetch Stats'
   });
-  leftDiv.appendChild(fetchStatsBtn);
+  insertElement(leftDiv, fetchStatsBtn);
   var dialogRelic = getElementById('dialog-relic');
-  dialogRelic.appendChild(containerDiv);
+  insertElement(dialogRelic, containerDiv);
 }

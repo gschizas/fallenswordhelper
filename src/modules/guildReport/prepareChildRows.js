@@ -1,5 +1,6 @@
 import add from '../support/task';
 import {createSpan} from '../common/cElement';
+import insertElement from '../common/insertElement';
 import moreToDo from '../common/moreToDo';
 import potReport from './potReport';
 
@@ -15,7 +16,7 @@ function paintChild() {
   while (moreToDo(limit, counter, nodeArray)) {
     var el = nodeList[counter];
     var inject = nodeArray[counter];
-    el.appendChild(inject);
+    insertElement(el, inject);
     counter += 1;
   }
   if (counter < nodeArray.length) {

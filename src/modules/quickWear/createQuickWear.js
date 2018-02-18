@@ -1,5 +1,6 @@
 import {beginFolderSpanElement} from '../support/constants';
 import {imageServer} from '../system/system';
+import insertElement from '../common/insertElement';
 import playerId from '../common/playerId';
 import {createDiv, createTBody, createTable} from '../common/cElement';
 
@@ -64,7 +65,7 @@ export default function createQuickWear(appInv) {
       '<th colspan="2">Items</th></tr></thead>'
   });
   var tbody = createTBody();
-  tbl.appendChild(tbody);
+  insertElement(tbl, tbody);
   appInv.r.forEach(function(aFolder) {
     aFolder.items.sort(alpha);
     aFolder.items.forEach(tableRows.bind(null, tbody, currentPlayerId));
@@ -73,6 +74,6 @@ export default function createQuickWear(appInv) {
     id: 'invTabs-qw',
     className: 'ui-tabs-panel ui-corner-bottom'
   });
-  qw.appendChild(tbl);
+  insertElement(qw, tbl);
   return qw;
 }

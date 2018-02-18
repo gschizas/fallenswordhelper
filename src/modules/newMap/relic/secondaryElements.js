@@ -2,6 +2,7 @@ import {createDiv} from '../../common/cElement';
 import {getElementById} from '../../common/getElement';
 import getMembrList from '../../ajax/getMembrList';
 import getValue from '../../system/getValue';
+import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import {nowSecs} from '../../support/constants';
 import {atkStats, defStats, proc} from './assets';
@@ -124,12 +125,12 @@ export function prepareSecondaryDivs(relicData) {
     className: 'fshFloatLeft fshRelicMidDiv',
     innerHTML: defStats
   });
-  containerDiv.appendChild(midDiv);
+  insertElement(containerDiv, midDiv);
   setDefVars();
   var rightDiv = createDiv({
     className: 'fshFloatLeft fshRelicRightDiv',
     innerHTML: atkStats
   });
-  containerDiv.appendChild(rightDiv);
+  insertElement(containerDiv, rightDiv);
   setAtkVars();
 }
