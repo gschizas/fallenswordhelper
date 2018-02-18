@@ -1,9 +1,10 @@
 import jConfirm from '../common/jConfirm';
 import {sendException} from '../support/fshGa';
+import stringifyError from '../common/stringifyError';
 
 function clearForage() {
   localforage.clear().catch(function(err) {
-    sendException('localforage.clear error ' + err, false);
+    sendException('localforage.clear error ' + stringifyError(err), false);
   });
 }
 
@@ -16,9 +17,8 @@ function forageSet(forage, data, dfr) {
         'Would you like to clear IndexedDB?',
         clearForage()
       );
-    } else {
-      sendException('localforage.setItem error (' + err.name + ')', false);
     }
+    sendException('localforage.setItem error ' + stringifyError(err), false);
     dfr.reject(err);
   });
 }
