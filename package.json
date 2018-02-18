@@ -6,9 +6,8 @@
   "scripts": {
     "prebuild": "npm run test || exit 0",
     "build": "npm run clean && npm run rollup && npm run uglify",
-    "postbuild": "rimraf src/*_*",
     "preclean": "echo Starting clean",
-    "clean": "rimraf dist/dev/* && rimraf dist/beta/* && rimraf dist/prod/*",
+    "clean": "shx rm -rf dist/dev/* && shx rm -rf dist/beta/* && shx rm -rf dist/prod/*",
     "postclean": "echo Finished clean",
     "precommit": "npm run eslint",
     "eslint": "echo Starting eslint && eslint . --cache && echo Finished eslint",
@@ -23,10 +22,10 @@
     "rollup:dev": "npm run rollup:devcalf && npm run rollup:devfsh",
     "rollup:prod": "npm run rollup:prodcalf && npm run rollup:prodfsh",
     "rollup:betacalf": "rollup -c -m true --environment FOLDER:beta,SOURCE:calf",
-    "postrollup:betacalf": "ncp src/beta_calfSystem.js dist/beta/calfSystem.js && ncp src/beta_calfSystem.js.map dist/beta/calfSystem.js.map",
+    "postrollup:betacalf": "shx mv src/beta_calfSystem.js dist/beta/calfSystem.js && shx mv src/beta_calfSystem.js.map dist/beta/calfSystem.js.map",
     "rollup:devcalf": "rollup -c -m true --environment FOLDER:dev,SOURCE:calf",
     "rollup:prodcalf": "rollup -c -m true --environment FOLDER:prod,SOURCE:calf",
-    "postrollup:prodcalf": "ncp src/prod_calfSystem.js dist/prod/calfSystem.js && ncp src/prod_calfSystem.js.map dist/prod/calfSystem.js.map",
+    "postrollup:prodcalf": "shx mv src/prod_calfSystem.js dist/prod/calfSystem.js && shx mv src/prod_calfSystem.js.map dist/prod/calfSystem.js.map",
     "rollup:betafsh": "rollup -c --environment FOLDER:beta,SOURCE:fsh",
     "rollup:devfsh": "rollup -c --environment FOLDER:dev,SOURCE:fsh",
     "rollup:prodfsh": "rollup -c --environment FOLDER:prod,SOURCE:fsh",
@@ -68,11 +67,10 @@
     "ip": "^1.1.5",
     "jsinspect": "^0.12.7",
     "jsonlint": "^1.6.2",
-    "ncp": "^2.0.0",
     "npm-run-all": "^4.1.2",
-    "rimraf": "^2.6.2",
     "rollup": "^0.56.1",
     "rollup-plugin-jscc": "^0.3.3",
+    "shx": "^0.2.2",
     "uglify-js": "^3.3.11"
   }
 }
