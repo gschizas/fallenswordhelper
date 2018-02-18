@@ -11,15 +11,14 @@ function forageSet(forage, data, dfr) {
   localforage.setItem(forage, data).then(function(value) {
     dfr.resolve(value);
   }).catch(function(err) {
-    if (err === 'QuotaExceededError') {
+    if (err.name === 'QuotaExceededError') {
       jConfirm('IndexedDB Quota Exceeded Error',
         'Would you like to clear IndexedDB?',
         clearForage()
       );
-    } else {
-      sendException(forage + ' localforage.setItem error ' +
-        JSON.stringify(err), false);
     }
+    sendException('localforage.setItem error (' + err.name + ' : ' +
+      err.message + ')', false);
     dfr.reject(err);
   });
 }
