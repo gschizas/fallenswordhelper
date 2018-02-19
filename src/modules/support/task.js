@@ -1,5 +1,6 @@
 import fallback from '../system/fallback';
 import isFunction from '../common/isFunction';
+import isUndefined from '../common/isUndefined';
 import {sendException} from './fshGa';
 import {getLength, pop, push} from './sch';
 
@@ -47,13 +48,24 @@ function parseError(e) {
   return e.message;
 }
 
+function popError(fn) {
+  if (isUndefined(fn)) {
+    sendException('pop() was undefined', false);
+  } else {
+    sendException('pop() was not a function', false);
+  }
+}
+
+function testPop() {
+  var testFn = pop();
+  if (isFunction(testFn)) {
+    testFn();
+  } else {popError(testFn);}
+}
+
 function asyncTask() {
   try {
-    var testFn = pop();
-    if (isFunction(testFn)) {
-      testFn();
-    } else {sendException('pop() was not a function', false);}
-    // pop()();
+    testPop();
   } catch (e) {
     sendException(parseError(e), false);
   } finally {
