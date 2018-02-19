@@ -415,13 +415,24 @@ function parseError(e) {
   return e.message;
 }
 
+function popError(fn) {
+  if (isUndefined(fn)) {
+    sendException('pop() was undefined', false);
+  } else {
+    sendException('pop() was not a function', false);
+  }
+}
+
+function testPop() {
+  var testFn = pop();
+  if (isFunction(testFn)) {
+    testFn();
+  } else {popError(testFn);}
+}
+
 function asyncTask() {
   try {
-    var testFn = pop();
-    if (isFunction(testFn)) {
-      testFn();
-    } else {sendException('pop() was not a function', false);}
-    // pop()();
+    testPop();
   } catch (e) {
     sendException(parseError(e), false);
   } finally {
@@ -964,11 +975,8 @@ function changeGuildLogHREF() {
 }
 
 function stringifyError(err) {
-  var plainObject = {};
-  Object.getOwnPropertyNames(err).forEach(function(key) {
-    plainObject[key] = err[key];
-  });
-  return JSON.stringify(plainObject);
+  return JSON.stringify(err,
+    Object.getOwnPropertyNames(Object.getPrototypeOf(err)), '|');
 }
 
 // import localforage from
@@ -18883,7 +18891,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '32';
+window.FSH.calf = '33';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
