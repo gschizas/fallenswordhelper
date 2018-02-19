@@ -46,7 +46,7 @@ export function buildFshDivs() {
   });
   prefsDiv.addEventListener('click', prefsClickEvent);
   prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  insertElementBefore(fshDiv, prefsDiv);
+  insertElement(fshDiv, prefsDiv);
   missingBuffsDiv = createDiv();
   insertElement(fshDiv, missingBuffsDiv);
   var tempWorldButtons = getElementById('worldContainerBelow').children[0];
