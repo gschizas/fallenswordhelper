@@ -16,8 +16,6 @@ import {extendOptions, storeTheInv} from './options';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
-/* jshint latedef: nofunc */
-
 function doSpinner() { // jQuery
   $('#pCC').html('<span id="fshInvMan"><img src = "' +
   imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
