@@ -977,12 +977,17 @@ function changeGuildLogHREF() {
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
 }
 
+function stringifyError(err) {
+  return JSON.stringify(err, Object.getOwnPropertyNames(err), '|');
+}
+
 // import localforage from
 
 function forageGet(forage, dfr) {
   localforage.getItem(forage, function getItemCallback(err, data) {
     if (err) {
-      sendException(forage + ' localforage.getItem error ' + err, false);
+      sendException(forage + ' localforage.getItem error ' +
+        stringifyError(err), false);
       dfr.reject(err);
     } else {
       // returns null if key does not exist
@@ -1205,7 +1210,7 @@ function jConfirm(title, msgText, fn) { // jQuery
 
 function clearForage() {
   localforage.clear().catch(function(err) {
-    sendException('localforage.clear error ' + err, false);
+    sendException('localforage.clear error ' + stringifyError(err), false);
   });
 }
 
@@ -1219,8 +1224,7 @@ function forageSet(forage, data, dfr) {
         clearForage()
       );
     }
-    sendException('localforage.setItem error (' + err.name + ' : ' +
-      err.message + ')', false);
+    sendException('localforage.setItem error ' + stringifyError(err), false);
     dfr.reject(err);
   });
 }
@@ -7067,13 +7071,15 @@ function setupPref$1(prefName, injector) {
 function guildHall() {
   var prefName = 'collapseHallPosts';
   var theTable = pCC.lastElementChild;
-  setupPref$1(prefName, theTable.previousElementSibling.previousElementSibling);
-  collapse({
-    prefName: prefName,
-    theTable: theTable,
-    headInd: 3,
-    articleTest: testArticle
-  });
+  if (theTable instanceof HTMLTableElement) {
+    setupPref$1(prefName, theTable.previousElementSibling.previousElementSibling);
+    collapse({
+      prefName: prefName,
+      theTable: theTable,
+      headInd: 3,
+      articleTest: testArticle
+    });
+  }
 }
 
 function closestTable(el) {
@@ -17908,14 +17914,16 @@ function viewArchive() {
   lastLadderReset = getValue(ladderResetPref);
   var prefName = 'collapseNewsArchive';
   var theTables = pCC.getElementsByTagName('table');
-  setupPref$2(prefName, theTables[0].rows[2]);
-  collapse({
-    prefName: prefName,
-    theTable: theTables[2],
-    headInd: 6,
-    articleTest: testArticle$1,
-    extraFn: checkForPvPLadder
-  });
+  if (theTables.length > 2) {
+    setupPref$2(prefName, theTables[0].rows[2]);
+    collapse({
+      prefName: prefName,
+      theTable: theTables[2],
+      headInd: 6,
+      articleTest: testArticle$1,
+      extraFn: checkForPvPLadder
+    });
+  }
 }
 
 function hasTextEntry() { // jQuery
@@ -18922,7 +18930,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '30';
+window.FSH.calf = '31';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

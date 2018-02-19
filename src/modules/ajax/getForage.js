@@ -1,11 +1,13 @@
 // import localforage from
 //   '../../../node_modules/localforage/dist/localforage.nopromises';
 import {sendException} from '../support/fshGa';
+import stringifyError from '../common/stringifyError';
 
 function forageGet(forage, dfr) {
   localforage.getItem(forage, function getItemCallback(err, data) {
     if (err) {
-      sendException(forage + ' localforage.getItem error ' + err, false);
+      sendException(forage + ' localforage.getItem error ' +
+        stringifyError(err), false);
       dfr.reject(err);
     } else {
       // returns null if key does not exist

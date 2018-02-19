@@ -18,11 +18,13 @@ function setupPref(prefName, injector) {
 export default function guildHall() {
   var prefName = 'collapseHallPosts';
   var theTable = pCC.lastElementChild;
-  setupPref(prefName, theTable.previousElementSibling.previousElementSibling);
-  collapse({
-    prefName: prefName,
-    theTable: theTable,
-    headInd: 3,
-    articleTest: testArticle
-  });
+  if (theTable instanceof HTMLTableElement) {
+    setupPref(prefName, theTable.previousElementSibling.previousElementSibling);
+    collapse({
+      prefName: prefName,
+      theTable: theTable,
+      headInd: 3,
+      articleTest: testArticle
+    });
+  }
 }
