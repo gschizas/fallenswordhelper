@@ -16816,7 +16816,7 @@ function buildFshDivs() {
   });
   prefsDiv.addEventListener('click', prefsClickEvent);
   prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  insertElementBefore(fshDiv, prefsDiv);
+  insertElement(fshDiv, prefsDiv);
   missingBuffsDiv = createDiv();
   insertElement(fshDiv, missingBuffsDiv);
   var tempWorldButtons = getElementById('worldContainerBelow').children[0];
@@ -18887,7 +18887,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '33';
+window.FSH.calf = '34';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
