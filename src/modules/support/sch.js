@@ -34,10 +34,8 @@ function sink(j) {
 function bubble(j) {
   var i = j;
   while (i > 1) {
-    /* jshint -W016 */
     // eslint-disable-next-line no-bitwise
     var parentIndex = i >> 1;
-    /* jshint +W016 */
     if (!cmp(i, parentIndex)) {break;}
     swp(i, parentIndex);
     i = parentIndex;

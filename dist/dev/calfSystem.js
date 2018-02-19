@@ -354,10 +354,8 @@ function sink(j) {
 function bubble(j) {
   var i = j;
   while (i > 1) {
-    /* jshint -W016 */
     // eslint-disable-next-line no-bitwise
     var parentIndex = i >> 1;
-    /* jshint +W016 */
     if (!cmp(i, parentIndex)) {break;}
     swp(i, parentIndex);
     i = parentIndex;
@@ -978,7 +976,11 @@ function changeGuildLogHREF() {
 }
 
 function stringifyError(err) {
-  return JSON.stringify(err, Object.getOwnPropertyNames(err), '|');
+  var plainObject = {};
+  Object.getOwnPropertyNames(err).forEach(function(key) {
+    plainObject[key] = err[key];
+  });
+  return JSON.stringify(plainObject);
 }
 
 // import localforage from
@@ -9553,7 +9555,7 @@ function wuRender(row, act) {
 function wearUseRender(data, _type, row) {
   //            0  1  2  3  4  5  6  7  8 9 10 11121314 15
   // eslint-disable-next-line no-sparse-arrays
-  var action = [1, 1, 1, 1, 1, 1, 1, 1, 1, , 2, 2, , , , 2][data]; // jshint ignore:line
+  var action = [1, 1, 1, 1, 1, 1, 1, 1, 1, , 2, 2, , , , 2][data];
   if (action === 1) {
     return wuRender(row, {
       a: 'wear',
@@ -10136,8 +10138,6 @@ function rarityFilter() { // jQuery
     }
   );
 }
-
-/* jshint latedef: nofunc */
 
 function doSpinner() { // jQuery
   $('#pCC').html('<span id="fshInvMan"><img src = "' +
@@ -16761,9 +16761,7 @@ function toggleShowHuntingBuffs() {
 }
 
 function bitwiseAnd(a, b) {
-  /* jshint -W016 */
   return a & b; // eslint-disable-line no-bitwise
-  /* jshint +W016 */
 }
 
 function toggleSubLvlCreature() {
@@ -18930,7 +18928,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '31';
+window.FSH.calf = '32';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

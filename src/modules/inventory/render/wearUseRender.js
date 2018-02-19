@@ -47,7 +47,7 @@ function wuRender(row, act) {
 export default function wearUseRender(data, _type, row) {
   //            0  1  2  3  4  5  6  7  8 9 10 11121314 15
   // eslint-disable-next-line no-sparse-arrays
-  var action = [1, 1, 1, 1, 1, 1, 1, 1, 1, , 2, 2, , , , 2][data]; // jshint ignore:line
+  var action = [1, 1, 1, 1, 1, 1, 1, 1, 1, , 2, 2, , , , 2][data];
   if (action === 1) {
     return wuRender(row, {
       a: 'wear',
