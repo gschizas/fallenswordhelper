@@ -1,12 +1,6 @@
 import {getElementById} from '../common/getElement';
 
-export default function updateNmv() {
-  var nmvImg = document.querySelector(
-    '#profileRightColumn img[src$="/60_sm.gif"]');
-  if (!nmvImg) {return;}
-  var atkStat = Number(
-    getElementById('stat-attack').firstChild.textContent.trim());
-  if (isNaN(atkStat)) {return;}
+function gotAtk(nmvImg, atkStat) {
   var defStat = Number(
     getElementById('stat-defense').firstChild.textContent.trim());
   var oldTipped = nmvImg.dataset.tipped;
@@ -17,4 +11,17 @@ export default function updateNmv() {
     '<br>Attack: ' + (atkStat - nmvEffect).toString() +
     '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
     '</center></div>';
+}
+
+function gotImg(nmvImg) {
+  var atkEl = getElementById('stat-attack');
+  if (!atkEl) {return;}
+  var atkStat = Number(atkEl.firstChild.textContent.trim());
+  if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
+}
+
+export default function updateNmv() {
+  var nmvImg = document.querySelector(
+    '#profileRightColumn img[src$="/60_sm.gif"]');
+  if (nmvImg) {gotImg(nmvImg);}
 }
