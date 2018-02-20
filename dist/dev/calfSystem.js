@@ -424,9 +424,7 @@ function parseError(e) {
 }
 
 function popError(fn) {
-  if (isUndefined(fn)) {
-    sendException('pop() was undefined', false);
-  } else {
+  if (!isUndefined(fn)) {
     sendException('pop() was not a function', false);
   }
 }
@@ -983,12 +981,12 @@ function changeGuildLogHREF() {
   if (!getValue('useNewGuildLog')) {return;}
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
-  if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
+  if (guildLogNodes.length > 0) {gotGuildLogNodes(guildLogNodes);}
 }
 
 function stringifyError(err) {
   return JSON.stringify(err,
-    Object.getOwnPropertyNames(Object.getPrototypeOf(err)), '|');
+    Object.getOwnPropertyNames(Object.getPrototypeOf(err)));
 }
 
 // import localforage from
@@ -1233,8 +1231,9 @@ function forageSet(forage, data, dfr) {
         'Would you like to clear IndexedDB?',
         clearForage()
       );
+    } else {
+      sendException('localforage.setItem error ' + stringifyError(err), false);
     }
-    sendException('localforage.setItem error ' + stringifyError(err), false);
     dfr.reject(err);
   });
 }
@@ -11650,13 +11649,7 @@ function storeVL() {
   }
 }
 
-function updateNmv() {
-  var nmvImg = document.querySelector(
-    '#profileRightColumn img[src$="/60_sm.gif"]');
-  if (!nmvImg) {return;}
-  var atkStat = Number(
-    getElementById('stat-attack').firstChild.textContent.trim());
-  if (isNaN(atkStat)) {return;}
+function gotAtk(nmvImg, atkStat) {
   var defStat = Number(
     getElementById('stat-defense').firstChild.textContent.trim());
   var oldTipped = nmvImg.dataset.tipped;
@@ -11667,6 +11660,19 @@ function updateNmv() {
     '<br>Attack: ' + (atkStat - nmvEffect).toString() +
     '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
     '</center></div>';
+}
+
+function gotImg(nmvImg) {
+  var atkEl = getElementById('stat-attack');
+  if (!atkEl) {return;}
+  var atkStat = Number(atkEl.firstChild.textContent.trim());
+  if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
+}
+
+function updateNmv() {
+  var nmvImg = document.querySelector(
+    '#profileRightColumn img[src$="/60_sm.gif"]');
+  if (nmvImg) {gotImg(nmvImg);}
 }
 
 function removeStatTable(el) {
@@ -18936,7 +18942,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '34';
+window.FSH.calf = '35';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

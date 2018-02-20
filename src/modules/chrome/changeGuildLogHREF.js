@@ -28,5 +28,5 @@ export default function changeGuildLogHREF() {
   if (!getValue('useNewGuildLog')) {return;}
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
-  if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
+  if (guildLogNodes.length > 0) {gotGuildLogNodes(guildLogNodes);}
 }

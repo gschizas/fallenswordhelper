@@ -49,9 +49,7 @@ function parseError(e) {
 }
 
 function popError(fn) {
-  if (isUndefined(fn)) {
-    sendException('pop() was undefined', false);
-  } else {
+  if (!isUndefined(fn)) {
     sendException('pop() was not a function', false);
   }
 }

@@ -17,8 +17,9 @@ function forageSet(forage, data, dfr) {
         'Would you like to clear IndexedDB?',
         clearForage()
       );
+    } else {
+      sendException('localforage.setItem error ' + stringifyError(err), false);
     }
-    sendException('localforage.setItem error ' + stringifyError(err), false);
     dfr.reject(err);
   });
 }
