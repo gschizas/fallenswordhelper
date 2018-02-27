@@ -20,7 +20,6 @@ import profileRenderBio from './bio/bio';
 import quickWearLink from './quickWearLink';
 import selectAllLink from './selectAllLink';
 import storeVL from './storeVL';
-import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import updateNmv from './updateNmv';
 import updateStatistics from './updateStatistics';
 
@@ -66,7 +65,6 @@ export default function injectProfile() { // Legacy
   yuuzhan(playername, avyImg);
   //* *************
 
-  updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateNmv();
   updateStatistics();
   //#if _DEV  //  highlightPvpProtection
