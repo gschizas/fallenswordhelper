@@ -2840,7 +2840,7 @@ function loadInventory() {
 }
 
 function ahLink(searchname, nickname) {
-  return '<a href="index.php?cmd=auctionhouse&search_text=' + searchname +
+  return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
     '">' + nickname + '</a>';
 }
 
@@ -3724,7 +3724,7 @@ function injectAuctionSearch(injector) { // Legacy
     fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
     tags: ['text', 'text', 'text', 'checkbox'],
     url: ['', '',
-      'index.php?cmd=auctionhouse&amp;type=-1&amp;search_text=@replaceme@', ''],
+      'index.php?cmd=auctionhouse&amp;type=-1&amp;search=@replaceme@', ''],
     currentItems: getValueJSON('quickSearchList'),
     gmname: 'quickSearchList',
     categoryField: 'category',
@@ -9542,7 +9542,7 @@ function nameRenderDisplay(data, row) {
       '">set</span>)';
   }
 
-  return '<a href="index.php?cmd=auctionhouse&search_text=' + data +
+  return '<a href="index.php?cmd=auctionhouse&search=' + data +
     '" class="fshInvItem tip-dynamic ' +
     rarity[row.rarity].clas + '" ' +
     'data-tipped="fetchitem.php?item_id=' + row.item_id +
@@ -12033,7 +12033,7 @@ function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {return;}
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
-    pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
+    pattern += '[<a href="index.php?cmd=auctionhouse&search=' +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
   pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +
@@ -17181,7 +17181,7 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
   if (itemName !== plantFromComponent) {
     var itemLinks = createTd({
       innerHTML: '<a href="' + server +
-        '?cmd=auctionhouse&search_text=' +
+        '?cmd=auctionhouse&search=' +
         encodeURI(plantFromComponent) + '">AH</a>'
     });
     var counter = findNode('../../../../tr[2]/td', callback);
@@ -18958,7 +18958,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '36';
+window.FSH.calf = '37';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
