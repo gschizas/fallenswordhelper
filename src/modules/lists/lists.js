@@ -163,7 +163,7 @@ export function injectAuctionSearch(injector) { // Legacy
     fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
     tags: ['text', 'text', 'text', 'checkbox'],
     url: ['', '',
-      'index.php?cmd=auctionhouse&amp;type=-1&amp;search_text=@replaceme@', ''],
+      'index.php?cmd=auctionhouse&amp;type=-1&amp;search=@replaceme@', ''],
     currentItems: getValueJSON('quickSearchList'),
     gmname: 'quickSearchList',
     categoryField: 'category',

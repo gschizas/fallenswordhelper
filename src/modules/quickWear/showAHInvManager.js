@@ -3,7 +3,7 @@ import getValueJSON from '../system/getValueJSON';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 function ahLink(searchname, nickname) {
-  return '<a href="index.php?cmd=auctionhouse&search_text=' + searchname +
+  return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
     '">' + nickname + '</a>';
 }
 
