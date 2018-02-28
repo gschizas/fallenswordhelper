@@ -72,7 +72,7 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
   if (itemName !== plantFromComponent) {
     var itemLinks = createTd({
       innerHTML: '<a href="' + server +
-        '?cmd=auctionhouse&search_text=' +
+        '?cmd=auctionhouse&search=' +
         encodeURI(plantFromComponent) + '">AH</a>'
     });
     var counter = findNode('../../../../tr[2]/td', callback);

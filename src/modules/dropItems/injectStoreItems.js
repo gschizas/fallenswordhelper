@@ -39,7 +39,7 @@ function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {return;}
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
-    pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
+    pattern += '[<a href="index.php?cmd=auctionhouse&search=' +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
   pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +

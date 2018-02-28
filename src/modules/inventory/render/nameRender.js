@@ -33,7 +33,7 @@ function nameRenderDisplay(data, row) {
       '">set</span>)';
   }
 
-  return '<a href="index.php?cmd=auctionhouse&search_text=' + data +
+  return '<a href="index.php?cmd=auctionhouse&search=' + data +
     '" class="fshInvItem tip-dynamic ' +
     rarity[row.rarity].clas + '" ' +
     'data-tipped="fetchitem.php?item_id=' + row.item_id +
