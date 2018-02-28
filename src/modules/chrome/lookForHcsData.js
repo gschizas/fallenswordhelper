@@ -16,6 +16,7 @@ import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
 import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
+import interceptQuickBuff from './interceptQuickBuff';
 import jsonParse from '../common/jsonParse';
 import navMenu from './navMenu';
 import {pCR} from '../support/layout';
@@ -25,7 +26,6 @@ import replaceKeyHandler from './keyHandler';
 import scoutTowerLink from './scoutTowerLink';
 import {seLog} from '../seLog/seLog';
 import statbar from './statBar';
-import updateHCSQuickBuffLinks from '../common/updateHCSQuickBuffLinks';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
 import {injectLevelupCalculator, injectStaminaCalculator} from './calc';
 
@@ -153,13 +153,6 @@ function doMoveDailyQuest() {
   }
 }
 
-function fixOnlineGuildBuffLinks() {
-  updateHCSQuickBuffLinks(
-    '#minibox-guild-members-list #guild-minibox-action-quickbuff');
-  updateHCSQuickBuffLinks(
-    '#minibox-allies-list #online-allies-action-quickbuff');
-}
-
 function notHuntMode() {
   if (calf.huntingMode) {return;}
   // move boxes in opposite order that you want them to appear.
@@ -182,7 +175,7 @@ function notHuntMode() {
   if (getValue('fsboxlog')) {
     add(3, injectFSBoxLog);
   }
-  add(3, fixOnlineGuildBuffLinks);
+  add(3, interceptQuickBuff);
 
   add(3, injectJoinAllLink);
   add(3, changeGuildLogHREF);
