@@ -11828,19 +11828,16 @@ var types = [
 ];
 
 function testType(o, el) {
-  types.some(function(test) {
-    if (test.c(o)) {
-      test.r(o, el);
-      return true;
-    }
-    return false;
+  var match = types.find(function(test) {
+    return test.c(o);
   });
+  if (match) {match.r(o, el);}
 }
 
 function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
   invItems$1 = invItems_;
   type = type_;
-  itemId = itemId_;
+  itemId = Number(itemId_);
   itemsAry.forEach(function(o) {
     var tr = o.injectHere.parentNode;
     if (tr.classList.contains('fshHide')) {return;}
@@ -18954,7 +18951,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '37';
+window.FSH.calf = '38';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
