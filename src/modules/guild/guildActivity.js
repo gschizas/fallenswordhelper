@@ -53,29 +53,33 @@ var type2tests = [
   }
 ];
 
+function processMemberRecord(newArchive, member) {
+  initMember(member);
+  var archiveMember = oldArchive.members[member.name];
+  var archiveLength = archiveMember.length;
+  var archiveRecord = archiveMember[archiveLength - 1];
+  var archiveAge = nowSecs - archiveRecord[utc];
+  if (archiveAge >= 86100) {
+    var type2change = type2tests.some(function(test) {
+      if (test(archiveRecord, member)) {
+        return true;
+      }
+      return false;
+    });
+    if (type2change) {
+      pushNewRecord(member);
+    } else {
+      archiveRecord[act] = Math.floor(member.last_activity / 86400);
+      archiveRecord[utc] = nowSecs;
+    }
+  }
+  newArchive.members[member.name] = oldArchive.members[member.name];
+}
+
 function doMerge() { // jQuery.min
   var newArchive = {lastUpdate: nowSecs, members: {}};
-  guild.r.members.forEach(function(member) {
-    initMember(member);
-    var archiveMember = oldArchive.members[member.name];
-    var archiveLength = archiveMember.length;
-    var archiveRecord = archiveMember[archiveLength - 1];
-    var archiveAge = nowSecs - archiveRecord[utc];
-    if (archiveAge >= 86100) {
-      var type2change = type2tests.some(function(test) {
-        if (test(archiveRecord, member)) {
-          return true;
-        }
-        return false;
-      });
-      if (type2change) {
-        pushNewRecord(member);
-      } else {
-        archiveRecord[act] = Math.floor(member.last_activity / 86400);
-        archiveRecord[utc] = nowSecs;
-      }
-    }
-    newArchive.members[member.name] = oldArchive.members[member.name];
+  guild.r.ranks.forEach(function(rank) {
+    rank.members.forEach(processMemberRecord.bind(null, newArchive));
   });
   setForage('fsh_guildActivity', newArchive);
 }
