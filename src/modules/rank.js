@@ -122,16 +122,29 @@ function doButtons() {
   }
 }
 
-function writeMembers(el) {
-  var rankCell = el.firstElementChild;
-  var rankName = rankCell.textContent;
+function isMyRank(rankName) {
+  if (rankName === myRank) {
+    characterRow = rankCount; // limit for ajaxify later
+  }
+}
+
+function hasMembers(rankCell, rankName) {
   if (ranks[rankName]) { // has members
-    if (rankName === myRank) {
-      characterRow = rankCount; // limit for ajaxify later
-    }
+    isMyRank(rankName);
     insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
       ranks[rankName].join(', ') + '</span>');
   }
+}
+
+function getRankName(rankCell) {
+  if (rankCount === 1) {return 'Guild Founder';}
+  return rankCell.textContent;
+}
+
+function writeMembers(el) {
+  var rankCell = el.firstElementChild;
+  var rankName = getRankName(rankCell);
+  hasMembers(rankCell, rankName);
 }
 
 function paintRanks() {
@@ -150,8 +163,8 @@ function paintRanks() {
 
 function findTheRows() {
   var outerTable = pCC.lastElementChild.previousElementSibling;
-  if (outerTable.rows && outerTable.rows.length > 13) {
-    return outerTable.rows[13].firstElementChild.firstElementChild.rows;
+  if (outerTable.rows && outerTable.rows.length > 7) {
+    return outerTable.rows[7].firstElementChild.firstElementChild.rows;
   }
 }
 
