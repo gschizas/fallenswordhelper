@@ -425,7 +425,7 @@ function parseError(e) {
 
 function popError(fn) {
   if (!isUndefined(fn)) {
-    sendException('pop() was not a function', false);
+    sendException('pop() was not a function (' + typeof fn + ')', false);
   }
 }
 
@@ -1302,29 +1302,33 @@ var type2tests = [
   }
 ];
 
+function processMemberRecord(newArchive, member) {
+  initMember(member);
+  var archiveMember = oldArchive.members[member.name];
+  var archiveLength = archiveMember.length;
+  var archiveRecord = archiveMember[archiveLength - 1];
+  var archiveAge = nowSecs - archiveRecord[utc];
+  if (archiveAge >= 86100) {
+    var type2change = type2tests.some(function(test) {
+      if (test(archiveRecord, member)) {
+        return true;
+      }
+      return false;
+    });
+    if (type2change) {
+      pushNewRecord(member);
+    } else {
+      archiveRecord[act] = Math.floor(member.last_activity / 86400);
+      archiveRecord[utc] = nowSecs;
+    }
+  }
+  newArchive.members[member.name] = oldArchive.members[member.name];
+}
+
 function doMerge() { // jQuery.min
   var newArchive = {lastUpdate: nowSecs, members: {}};
-  guild.r.members.forEach(function(member) {
-    initMember(member);
-    var archiveMember = oldArchive.members[member.name];
-    var archiveLength = archiveMember.length;
-    var archiveRecord = archiveMember[archiveLength - 1];
-    var archiveAge = nowSecs - archiveRecord[utc];
-    if (archiveAge >= 86100) {
-      var type2change = type2tests.some(function(test) {
-        if (test(archiveRecord, member)) {
-          return true;
-        }
-        return false;
-      });
-      if (type2change) {
-        pushNewRecord(member);
-      } else {
-        archiveRecord[act] = Math.floor(member.last_activity / 86400);
-        archiveRecord[utc] = nowSecs;
-      }
-    }
-    newArchive.members[member.name] = oldArchive.members[member.name];
+  guild.r.ranks.forEach(function(rank) {
+    rank.members.forEach(processMemberRecord.bind(null, newArchive));
   });
   setForage('fsh_guildActivity', newArchive);
 }
@@ -5196,6 +5200,66 @@ function insertElementAfterBegin(parentNode, newNode) {
   }
 }
 
+function getPos(available, desired, offset) {
+  return Math.floor(Math.max(available - desired, 0) / 2 + offset);
+}
+
+function fshOpen(url, title, w, _h, features) {
+  var h = _h;
+  if (_h === 500) {h = 1000;}
+  var top = getPos(window.screen.availHeight, h, window.screenY);
+  var left = getPos(document.documentElement.clientWidth, w, window.screenX);
+  window.open(url, title, 'width=' + w + ', height=' + h + ', left=' + left +
+    ', top=' + top + features);
+}
+
+function interceptQuickBuff() {
+  window.openWindow = fshOpen;
+}
+
+// export default function interceptQuickBuff() {
+//   window.openWindow = fshOpen;
+//   export default function interceptQuickBuff(url, title, w, h, features) {
+
+//   var pixelRatio = window.devicePixelRatio;
+
+//   var chrome = 1;
+//   if (navigator.userAgent.includes('Chrome')) {
+//     chrome = pixelRatio;
+//   }
+
+//   var docHeightInCss = document.documentElement.clientHeight;
+//   var screenYInCss = Math.floor(window.screenY / chrome);
+//   var desiredHeightInCss = Math.min(h, window.screen.availHeight);
+
+//   var docWidthInCss = document.documentElement.clientWidth;
+//   var screenXInCss = Math.floor(window.screenX / chrome);
+//   var desiredWidthInCss = w;
+
+//   console.log('pixelRatio', pixelRatio);
+//   console.log('docHeightInCss', docHeightInCss);
+//   console.log('screenYInCss', screenYInCss);
+//   console.log('desiredHeightInCss', desiredHeightInCss);
+//   console.log('docWidthInCss', docWidthInCss);
+//   console.log('screenXInCss', screenXInCss);
+//   console.log('desiredWidthInCss', desiredWidthInCss);
+
+//   var topInCss = Math.floor(
+//     (docHeightInCss - desiredHeightInCss) / 2 + screenYInCss
+//   );
+
+//   var leftInCss = Math.floor(
+//     (docWidthInCss - desiredWidthInCss) / 2 + screenXInCss
+//   );
+
+//   window.open(url, title,
+//     'width=' + Math.floor(desiredWidthInCss * chrome) +
+//     ', height=' + Math.floor(desiredHeightInCss * chrome) +
+//     ', top=' + Math.floor(topInCss * chrome) +
+//     ', left=' + Math.floor(leftInCss * chrome) +
+//     features);
+// }
+
 function navMenu() { // jQuery
   if (jQueryNotPresent()) {return;}
   var myNav = $('#nav').data('nav');
@@ -6187,14 +6251,6 @@ function statbar() {
   statbarWrapper('index.php?cmd=bank', 'statbar-gold');
 }
 
-function updateHCSQuickBuffLinks(selector) {
-  Array.prototype.forEach.call(document.querySelectorAll(selector),
-    function(el) {
-      el.href = el.getAttribute('href').replace(/, 500/g, ', 1000'); // getAttribute neccessary for FF
-    }
-  );
-}
-
 function hideElement(el) {
   el.classList.add('fshHide');
 }
@@ -6502,13 +6558,6 @@ function doMoveDailyQuest() {
   }
 }
 
-function fixOnlineGuildBuffLinks() {
-  updateHCSQuickBuffLinks(
-    '#minibox-guild-members-list #guild-minibox-action-quickbuff');
-  updateHCSQuickBuffLinks(
-    '#minibox-allies-list #online-allies-action-quickbuff');
-}
-
 function notHuntMode() {
   if (calf.huntingMode) {return;}
   // move boxes in opposite order that you want them to appear.
@@ -6531,7 +6580,7 @@ function notHuntMode() {
   if (getValue('fsboxlog')) {
     add(3, injectFSBoxLog);
   }
-  add(3, fixOnlineGuildBuffLinks);
+  add(3, interceptQuickBuff);
 
   add(3, injectJoinAllLink);
   add(3, changeGuildLogHREF);
@@ -9127,16 +9176,29 @@ function doButtons() {
   }
 }
 
-function writeMembers(el) {
-  var rankCell = el.firstElementChild;
-  var rankName = rankCell.textContent;
+function isMyRank(rankName) {
+  if (rankName === myRank) {
+    characterRow = rankCount; // limit for ajaxify later
+  }
+}
+
+function hasMembers(rankCell, rankName) {
   if (ranks[rankName]) { // has members
-    if (rankName === myRank) {
-      characterRow = rankCount; // limit for ajaxify later
-    }
+    isMyRank(rankName);
     insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
       ranks[rankName].join(', ') + '</span>');
   }
+}
+
+function getRankName(rankCell) {
+  if (rankCount === 1) {return 'Guild Founder';}
+  return rankCell.textContent;
+}
+
+function writeMembers(el) {
+  var rankCell = el.firstElementChild;
+  var rankName = getRankName(rankCell);
+  hasMembers(rankCell, rankName);
 }
 
 function paintRanks() {
@@ -9155,8 +9217,8 @@ function paintRanks() {
 
 function findTheRows() {
   var outerTable = pCC.lastElementChild.previousElementSibling;
-  if (outerTable.rows && outerTable.rows.length > 13) {
-    return outerTable.rows[13].firstElementChild.firstElementChild.rows;
+  if (outerTable.rows && outerTable.rows.length > 7) {
+    return outerTable.rows[7].firstElementChild.firstElementChild.rows;
   }
 }
 
@@ -11730,7 +11792,6 @@ function injectProfile() { // Legacy
   yuuzhan(playername, avyImg);
   //* *************
 
-  updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateNmv();
   updateStatistics();
   highlightPvpProtection();
@@ -18942,7 +19003,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '35';
+window.FSH.calf = '36';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
