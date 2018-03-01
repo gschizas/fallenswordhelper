@@ -73,7 +73,7 @@ var buildTrailer = [
   },
   {
     test: function(item) {
-      return !dropLinks && showQuickDropLinks && item.guild_tag === '-1';
+      return !dropLinks && showQuickDropLinks && item.guild_tag === -1;
     },
     act: function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
