@@ -2655,7 +2655,7 @@ function extractAllSimilar(self) {
 }
 
 function inMain(item) {
-  return selectMain && item.folder_id !== '-1';
+  return selectMain && item.folder_id !== -1;
 }
 
 function inSt(item) {
@@ -6862,7 +6862,7 @@ function makeFolderSpans$1(folders, needsWorn) {
 var itemTable;
 var itemsAry;
 var invItems;
-var folderId = '0';
+var folderId = 0;
 var perfBox;
 
 function whichTableHasItems() {
@@ -6888,7 +6888,7 @@ function drawingNewItemTable() {
 }
 
 function testFolder(item) {
-  return folderId !== '0' && item[2] !== folderId;
+  return folderId !== 0 && item[2] !== folderId;
 }
 
 function testCraft(item) {
@@ -6907,7 +6907,7 @@ function reDrawGrid() {
 
 function doHideFolders(evt) {
   if (!evt.target.classList.contains('fshFolder')) {return;}
-  var evtFid = evt.target.dataset.folder;
+  var evtFid = Number(evt.target.dataset.folder);
   if (evtFid !== folderId) {
     folderId = evtFid;
     reDrawGrid();
@@ -6915,7 +6915,7 @@ function doHideFolders(evt) {
 }
 
 function getFolderId(item) {
-  if (item.equipped) {return '-2';}
+  if (item.equipped) {return -2;}
   return item.folder_id;
 }
 
@@ -9467,7 +9467,7 @@ function createdRow(row, data) {
 }
 
 function taggedOrEquipped(row) {
-  return row.guild_tag !== '-1' || row.equipped;
+  return row.guild_tag !== -1 || row.equipped;
 }
 
 function dropRender(data, type, row) {
@@ -9508,7 +9508,7 @@ function onGuildMember(row) {
 }
 
 function isTagged(row) {
-  return row.folder_id && row.guild_tag !== '-1';
+  return row.folder_id && row.guild_tag !== -1;
 }
 
 function canRecall(row) {
@@ -9651,7 +9651,7 @@ function playerName$3(f) {
 
 function whereRenderUserFolder(row) {
   if (row.equipped) {return -2;}
-  return parseInt(row.folder_id, 10);
+  return row.folder_id;
 }
 
 function whereRender(data, type, row) {
@@ -9684,7 +9684,7 @@ function whereRenderDisplay(data, type, row) {
     .sort(function(a, b) {return a - b;});
   keysArray.forEach(function(value) {
     folderSelect += '<option value="' + value + '"' +
-      isSelected(value, row.folder_id) + '>' +
+      isSelected(Number(value), row.folder_id) + '>' +
       theInv.folders[value] + '</option>';
   });
   folderSelect += '</select>';
@@ -9755,7 +9755,7 @@ var tblCols = [
     title: 'Tag',
     data: 'guild_tag',
     render: function(tag) {
-      if (tag === '-1') {return 'No';}
+      if (tag === -1) {return 'No';}
       return 'Yes';
     }
   },
@@ -11836,7 +11836,7 @@ var types = [
   {
     c: function() {return type === 'guild';},
     r: function(o, el) {
-      el.checked = !el.disabled && invItems$1[o.invid].guild_tag !== '-1';
+      el.checked = !el.disabled && invItems$1[o.invid].guild_tag !== -1;
     }
   },
   {
@@ -11916,13 +11916,13 @@ function doToggleButtons(showExtraLinks, showQuickDropLinks) {
 }
 
 function hideFolders$1(itemsAry, invItems, self) {
-  var folderId = self.dataset.folder;
+  var folderId = Number(self.dataset.folder);
   itemsAry.forEach(function(o) {
     o.el.parentNode.parentNode.previousElementSibling.firstElementChild
       .checked = false;
     var tr = o.injectHere.parentNode;
     var separator = tr.nextElementSibling;
-    if (folderId === '0') {
+    if (folderId === 0) {
       tr.classList.remove('fshHide');
       separator.classList.remove('fshHide');
     } else {
@@ -12086,7 +12086,7 @@ var buildTrailer = [
   },
   {
     test: function(item) {
-      return !dropLinks && showQuickDropLinks$1 && item.guild_tag === '-1';
+      return !dropLinks && showQuickDropLinks$1 && item.guild_tag === -1;
     },
     act: function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
@@ -19000,7 +19000,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '38';
+window.FSH.calf = '39';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
