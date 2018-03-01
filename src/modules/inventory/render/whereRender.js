@@ -2,7 +2,7 @@ import playerName from './playerName';
 
 function whereRenderUserFolder(row) {
   if (row.equipped) {return -2;}
-  return parseInt(row.folder_id, 10);
+  return row.folder_id;
 }
 
 export default function whereRender(data, type, row) {

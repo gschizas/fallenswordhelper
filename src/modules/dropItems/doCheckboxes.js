@@ -10,7 +10,7 @@ var types = [
   {
     c: function() {return type === 'guild';},
     r: function(o, el) {
-      el.checked = !el.disabled && invItems[o.invid].guild_tag !== '-1';
+      el.checked = !el.disabled && invItems[o.invid].guild_tag !== -1;
     }
   },
   {

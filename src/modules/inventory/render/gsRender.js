@@ -25,7 +25,7 @@ function onGuildMember(row) {
 }
 
 function isTagged(row) {
-  return row.folder_id && row.guild_tag !== '-1';
+  return row.folder_id && row.guild_tag !== -1;
 }
 
 function canRecall(row) {

@@ -1,5 +1,5 @@
 function taggedOrEquipped(row) {
-  return row.guild_tag !== '-1' || row.equipped;
+  return row.guild_tag !== -1 || row.equipped;
 }
 
 export default function dropRender(data, type, row) {

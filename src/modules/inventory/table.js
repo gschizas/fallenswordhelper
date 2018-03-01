@@ -65,7 +65,7 @@ var tblCols = [
     title: 'Tag',
     data: 'guild_tag',
     render: function(tag) {
-      if (tag === '-1') {return 'No';}
+      if (tag === -1) {return 'No';}
       return 'Yes';
     }
   },

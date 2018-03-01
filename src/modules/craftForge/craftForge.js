@@ -14,7 +14,7 @@ import {createDiv, createInput, createLabel} from '../common/cElement';
 var itemTable;
 var itemsAry;
 var invItems;
-var folderId = '0';
+var folderId = 0;
 var perfBox;
 
 function whichTableHasItems() {
@@ -40,7 +40,7 @@ function drawingNewItemTable() {
 }
 
 function testFolder(item) {
-  return folderId !== '0' && item[2] !== folderId;
+  return folderId !== 0 && item[2] !== folderId;
 }
 
 function testCraft(item) {
@@ -59,7 +59,7 @@ function reDrawGrid() {
 
 function doHideFolders(evt) {
   if (!evt.target.classList.contains('fshFolder')) {return;}
-  var evtFid = evt.target.dataset.folder;
+  var evtFid = Number(evt.target.dataset.folder);
   if (evtFid !== folderId) {
     folderId = evtFid;
     reDrawGrid();
@@ -67,7 +67,7 @@ function doHideFolders(evt) {
 }
 
 function getFolderId(item) {
-  if (item.equipped) {return '-2';}
+  if (item.equipped) {return -2;}
   return item.folder_id;
 }
 
