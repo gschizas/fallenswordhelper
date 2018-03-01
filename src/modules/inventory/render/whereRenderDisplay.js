@@ -19,7 +19,7 @@ export default function whereRenderDisplay(data, type, row) {
     .sort(function(a, b) {return a - b;});
   keysArray.forEach(function(value) {
     folderSelect += '<option value="' + value + '"' +
-      isSelected(value, row.folder_id) + '>' +
+      isSelected(Number(value), row.folder_id) + '>' +
       theInv.folders[value] + '</option>';
   });
   folderSelect += '</select>';

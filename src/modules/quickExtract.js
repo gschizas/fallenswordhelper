@@ -53,7 +53,7 @@ function extractAllSimilar(self) {
 }
 
 function inMain(item) {
-  return selectMain && item.folder_id !== '-1';
+  return selectMain && item.folder_id !== -1;
 }
 
 function inSt(item) {
