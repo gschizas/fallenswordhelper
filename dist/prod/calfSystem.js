@@ -3957,7 +3957,7 @@ function pageLayout(o, extraProfile) { // Legacy
 }
 
 function moreToDo(limit, cntr, list) {
-  return performance.now() < limit && cntr < list.length;
+  return list && performance.now() < limit && cntr < list.length;
 }
 
 var dotList;
@@ -11867,6 +11867,15 @@ function doFolderButtons$1(folders) {
 
 var insertHere;
 
+function setInsertHere() {
+  if (!insertHere) {
+    var cltn = pCC.getElementsByTagName('form');
+    if (cltn.length > 0) {
+      insertHere = cltn[0].previousElementSibling.firstElementChild;
+    }
+  }
+}
+
 function showHideLabel(pref) {
   if (pref) {return 'Hide';}
   return 'Show';
@@ -11874,21 +11883,18 @@ function showHideLabel(pref) {
 
 function doToggleButtons(showExtraLinks, showQuickDropLinks) {
   // Option toggle buttons for both screens
-  if (!insertHere) {
-    insertHere = pCC.getElementsByTagName('form')[0]
-      .previousElementSibling.firstElementChild;
+  setInsertHere();
+  if (insertHere) {
+    var inject = '[<span id="fshShowExtraLinks" class="sendLink">' +
+      showHideLabel(showExtraLinks) + ' AH and UFSG links</span>]&nbsp;' +
+      '[<span id="fshShowQuickDropLinks" class="sendLink">' +
+      showHideLabel(showQuickDropLinks) + ' Quick Drop links</span>]&nbsp;';
+    if (calf.subcmd2 === 'storeitems') {
+      inject += '[<span id="fshSelectAllGuildLocked" class="sendLink">' +
+        ' Select All Guild Locked</span>]&nbsp;';
+    }
+    insertHere.innerHTML = inject;
   }
-  var inject = '[<span id="fshShowExtraLinks" class="sendLink">' +
-    showHideLabel(showExtraLinks) +
-    ' AH and UFSG links</span>]&nbsp;' +
-    '[<span id="fshShowQuickDropLinks" class="sendLink">' +
-    showHideLabel(showQuickDropLinks) +
-    ' Quick Drop links</span>]&nbsp;';
-  if (calf.subcmd2 === 'storeitems') {
-    inject += '[<span id="fshSelectAllGuildLocked" class="sendLink">' +
-      ' Select All Guild Locked</span>]&nbsp;';
-  }
-  insertHere.innerHTML = inject;
 }
 
 function hideFolders$1(itemsAry, invItems, self) {
@@ -14324,10 +14330,12 @@ function forEachInvItem(el) {
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
   var item = invItems$3[checkbox.getAttribute('value')];
-  el.classList.add('folderid' + item.folder_id);
-  if (invItems$3.fshHasST) {stColor(el, item);}
-  checkbox.classList.add('itemid' + item.item_id);
-  checkbox.classList.add('itemtype' + item.type);
+  if (item) {
+    el.classList.add('folderid' + item.folder_id);
+    if (invItems$3.fshHasST) {stColor(el, item);}
+    checkbox.classList.add('itemid' + item.item_id);
+    checkbox.classList.add('itemtype' + item.type);
+  }
 }
 
 function processTrade(data) {
@@ -14345,7 +14353,7 @@ function processTrade(data) {
 
 }
 
-function doFolders() { // jQuery.min // jQuery
+function doFolders() { // jQuery.min
   if (jQueryNotPresent()) {return;}
   getInventoryById().done(function(data) {
     add(3, processTrade, [data]);
@@ -18951,7 +18959,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '39';
+window.FSH.calf = '40';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
