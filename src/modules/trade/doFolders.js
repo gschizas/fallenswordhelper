@@ -93,10 +93,12 @@ function forEachInvItem(el) {
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
   var item = invItems[checkbox.getAttribute('value')];
-  el.classList.add('folderid' + item.folder_id);
-  if (invItems.fshHasST) {stColor(el, item);}
-  checkbox.classList.add('itemid' + item.item_id);
-  checkbox.classList.add('itemtype' + item.type);
+  if (item) {
+    el.classList.add('folderid' + item.folder_id);
+    if (invItems.fshHasST) {stColor(el, item);}
+    checkbox.classList.add('itemid' + item.item_id);
+    checkbox.classList.add('itemtype' + item.type);
+  }
 }
 
 function processTrade(data) {
@@ -114,7 +116,7 @@ function processTrade(data) {
 
 }
 
-export default function doFolders() { // jQuery.min // jQuery
+export default function doFolders() { // jQuery.min
   if (jQueryNotPresent()) {return;}
   getInventoryById().done(function(data) {
     add(3, processTrade, [data]);
