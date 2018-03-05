@@ -51,7 +51,7 @@ function doTopLabels(ourTitan) {
 
 function doMemberRows(ourTitan) {
   clearMemberRows();
-  var memberRows = ourTitan.members.map(function(member) {
+  var memberRows = ourTitan.contributors.map(function(member) {
     return [[
       [2, textSpan(member.player.name)],
       [2, textSpan(member.kills.toString())],
@@ -62,7 +62,7 @@ function doMemberRows(ourTitan) {
 }
 
 function currentTitan(el) {
-  return el.alive && el.id === titanId && el.realm === realmName;
+  return el.realm && el.creature.base_id === titanId && el.realm === realmName;
 }
 
 export function processTitans(r) {
