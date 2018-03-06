@@ -194,8 +194,12 @@ var evts = [
   }
 ];
 
+function badData(data) {
+  return !data || !data.items || !data.folders;
+}
+
 function inventory(data) {
-  if (!data) {return;}
+  if (badData(data)) {return;}
   extraLinks = false;
   checkAll = false;
   invItems = data.items;
