@@ -79,3 +79,9 @@ function callback(event) {
 }
 
 window.addEventListener('message', callback);
+
+window.addEventListener('error', function(e) {
+  if (e.error) {
+    sendException(parseError(e.error), true);
+  }
+});
