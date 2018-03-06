@@ -445,6 +445,12 @@ function callback(event) {
 
 window.addEventListener('message', callback);
 
+window.addEventListener('error', function(e) {
+  if (e.error) {
+    sendException(parseError(e.error), true);
+  }
+});
+
 var calf = {};
 
 var dragTarget;
@@ -12186,8 +12192,12 @@ var evts = [
   }
 ];
 
+function badData(data) {
+  return !data || !data.items || !data.folders;
+}
+
 function inventory$1(data) {
-  if (!data) {return;}
+  if (badData(data)) {return;}
   extraLinks = false;
   checkAll = false;
   invItems$2 = data.items;
@@ -18956,7 +18966,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '42';
+window.FSH.calf = '43';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
