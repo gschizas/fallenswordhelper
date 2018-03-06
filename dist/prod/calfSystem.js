@@ -9139,8 +9139,8 @@ function ajaxifyRankControls(evt) {
 
 function doButtons() {
   // gather rank info button
-  var founder = getElementById('show-guild-founder-rank-name');
-  if (founder) {
+  var addNewRank = document.querySelector('#pCC a[href*="=ranks&subcmd2=add"]');
+  if (addNewRank) {
     var weightButton = createInput({
       id: 'getrankweightings',
       className: 'custombutton',
@@ -9148,13 +9148,10 @@ function doButtons() {
       value: 'Get Rank Weightings'
     });
     weightButton.addEventListener('click', fetchRankData);
-    var theTd = founder.parentNode;
+    var theTd = addNewRank.parentNode.parentNode;
     insertHtmlBeforeEnd(theTd, '&nbsp;');
     insertElement(theTd, weightButton);
   }
-  // var theTd = getElementById('show-guild-founder-rank-name') // TODO why wouldn't you be able to see this?
-  //   .parentNode;
-
   if (getValue('ajaxifyRankControls')) {
     pCC.addEventListener('click',
       ajaxifyRankControls, true);
@@ -18959,7 +18956,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '41';
+window.FSH.calf = '42';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
