@@ -2695,8 +2695,8 @@ function showQuickExtract() {
 
 function isExtractable(curr) {
   return curr.item_name === 'Zombie Coffin' ||
-    curr.type === '12' ||
-    curr.type === '16';
+    curr.type === 12 ||
+    curr.type === 16;
 }
 
 function prepInv(data) {
@@ -18966,7 +18966,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '43';
+window.FSH.calf = '44';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
