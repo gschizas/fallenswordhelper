@@ -41,7 +41,7 @@
     "postuglify:dev": "cost :max,unzip:dist/dev/calfSystem.min.js && cost :max:dist/dev/calfSystem.min.js",
     "uglify:prod": "uglifyjs dist/prod/calfSystem.js -o dist/prod/calfSystem.min.js -c -m -b \"beautify=false,semicolons=false\" --source-map \"content='dist/prod/calfSystem.js.map',root='sourceMap',url='calfSystem.min.js.map'\"",
     "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
-    "watch": "rollup -c -w -m inline --environment FOLDER:dev,SOURCE:calf",
+    "watch": "rollup -c -w -m true --environment FOLDER:dev,SOURCE:calf",
     "ws": "http-server -p 9966 --cors -c-1 -S -C cert.crt -K key.pem"
   },
   "repository": {
