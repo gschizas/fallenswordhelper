@@ -95,16 +95,23 @@ function gotComponentsPage(data) {
   retriveComponent(createDocument(data));
 }
 
-function countComponent(self) { // jQuery.min
-  sendEvent('components', 'countComponent');
-  self.parentNode.innerHTML = 'Retrieve page: 1, ';
+function initCounters() {
   usedCount = 0;
   totalCount = 0;
   pageCount = 1;
+}
+
+function getPageLinks() {
+  var pager = thisInvTable.nextElementSibling;
+  return pager.rows[1].children[0].children;
+}
+
+function countComponent(self) { // jQuery.min
+  sendEvent('components', 'countComponent');
+  self.parentNode.innerHTML = 'Retrieve page: 1, ';
+  initCounters();
   var prm = [$.when(document).done(retriveComponent)];
-  var lastRowIndex = thisInvTable.rows.length - 1;
-  var pageLinks = thisInvTable.rows[lastRowIndex].firstChild.children;
-  Array.prototype.forEach.call(pageLinks, function(el) {
+  Array.prototype.forEach.call(getPageLinks(), function(el) {
     if (el.children.length === 0) {
       prm.push(retryAjax(el.href).done(gotComponentsPage));
     }
