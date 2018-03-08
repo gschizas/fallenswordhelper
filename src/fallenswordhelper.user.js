@@ -26,7 +26,7 @@ function fshMain(ver) {
 
   var cssFiles = ['$_CALFCSS'];
   var scriptFiles = [
-    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.3/localforage.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.6.0/localforage.nopromises.min.js',
     '$_CALFJS'
   ];
   if (typeof window.jQuery !== 'undefined') {
