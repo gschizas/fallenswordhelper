@@ -9407,7 +9407,7 @@ function decorate() {
   // Hide composed potions until Zorg fixes the feed
   theInv.items =
     theInv.items.filter(function(obj) {
-      return obj.type !== '15';
+      return obj.type !== 15;
     });
   //
 }
@@ -18966,7 +18966,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '44';
+window.FSH.calf = '0';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
