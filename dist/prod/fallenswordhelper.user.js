@@ -11,7 +11,7 @@
 // @exclude        https://wiki.fallensword.com/*
 // @exclude        https://www.fallensword.com/app.php*
 // @exclude        https://www.fallensword.com/fetchdata.php*
-// @version        1522
+// @version        1523
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -24,10 +24,10 @@ function fshMain(ver) {
   window.FSH = window.FSH || {};
   window.FSH.version = ver;
 
-  var cssFiles = ['https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1522/calfSystem.css'];
+  var cssFiles = ['https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1523/calfSystem.css'];
   var scriptFiles = [
-    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.3/localforage.min.js',
-    'https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1522/calfSystem.min.js'
+    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.6.0/localforage.nopromises.min.js',
+    'https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1523/calfSystem.min.js'
   ];
   if (typeof window.jQuery !== 'undefined') {
     scriptFiles.push('https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
@@ -75,7 +75,7 @@ var verTest = [
 ];
 
 function setVer() {
-  var ver = '1522';
+  var ver = '1523';
   return verTest.find(function(e) {return e[0]();})[1](ver);
 }
 

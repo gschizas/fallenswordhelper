@@ -7,7 +7,7 @@ export default function decorate() {
   // Hide composed potions until Zorg fixes the feed
   theInv.items =
     theInv.items.filter(function(obj) {
-      return obj.type !== '15';
+      return obj.type !== 15;
     });
   //
 }

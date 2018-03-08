@@ -11,7 +11,7 @@
 // @exclude        https://wiki.fallensword.com/*
 // @exclude        https://www.fallensword.com/app.php*
 // @exclude        https://www.fallensword.com/fetchdata.php*
-// @version        1522a44
+// @version        1523a0
 // @downloadURL    https://192.168.137.1:9966/dist/dev/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -26,7 +26,7 @@ function fshMain(ver) {
 
   var cssFiles = ['https://192.168.137.1:9966/src/calfSystem.css'];
   var scriptFiles = [
-    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.3/localforage.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.6.0/localforage.nopromises.min.js',
     'https://192.168.137.1:9966/dist/dev/calfSystem.js'
   ];
   if (typeof window.jQuery !== 'undefined') {
@@ -75,7 +75,7 @@ var verTest = [
 ];
 
 function setVer() {
-  var ver = '1522a44';
+  var ver = '1523a0';
   return verTest.find(function(e) {return e[0]();})[1](ver);
 }
 
