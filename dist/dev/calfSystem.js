@@ -5795,7 +5795,6 @@ var curPage;
 var maxPage;
 
 function getWantedBountyList(doc) {
-  if (!calf.enableWantedList) {return;}
   var page = doc.querySelector('#pCC input[name="page"]');
   curPage = Number(page.value);
   maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
@@ -5813,13 +5812,15 @@ function hazActiveBountyList(doc) {
 
 function parseBountyPageForWorld(details) {
   var doc = createDocument(details);
-  getWantedBountyList(doc);
   hazActiveBountyList(doc);
-  if (curPage < maxPage) {
-    retryAjax(bountyUrl + (curPage + 1).toString())
-      .done(parseBountyPageForWorld);
-  } else {
-    injectWantedList();
+  if (calf.enableWantedList) {
+    getWantedBountyList(doc);
+    if (curPage < maxPage) {
+      retryAjax(bountyUrl + (curPage + 1).toString())
+        .done(parseBountyPageForWorld);
+    } else {
+      injectWantedList();
+    }
   }
 }
 
@@ -11279,16 +11280,23 @@ function gotComponentsPage(data) {
   retriveComponent(createDocument(data));
 }
 
-function countComponent(self) { // jQuery.min
-  sendEvent('components', 'countComponent');
-  self.parentNode.innerHTML = 'Retrieve page: 1, ';
+function initCounters() {
   usedCount = 0;
   totalCount = 0;
   pageCount = 1;
+}
+
+function getPageLinks() {
+  var pager = thisInvTable.nextElementSibling;
+  return pager.rows[1].children[0].children;
+}
+
+function countComponent(self) { // jQuery.min
+  sendEvent('components', 'countComponent');
+  self.parentNode.innerHTML = 'Retrieve page: 1, ';
+  initCounters();
   var prm = [$.when(document).done(retriveComponent)];
-  var lastRowIndex = thisInvTable.rows.length - 1;
-  var pageLinks = thisInvTable.rows[lastRowIndex].firstChild.children;
-  Array.prototype.forEach.call(pageLinks, function(el) {
+  Array.prototype.forEach.call(getPageLinks(), function(el) {
     if (el.children.length === 0) {
       prm.push(retryAjax(el.href).done(gotComponentsPage));
     }
@@ -19015,7 +19023,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '0';
+window.FSH.calf = '1';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
