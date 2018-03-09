@@ -37,7 +37,7 @@ switch (true) {
 case folder === 'dev':
   values._DEV = true;
   values._BETA = true;
-  values._VER = core + 'a' + varAry[2];
+  values._VER = core + 'a';
   values._DLURL = local + 'dist/dev/fallenswordhelper.user.js';
   values._CALFJS = local + 'dist/dev/calfSystem.js';
   values._CALFCSS = local + 'src/calfSystem.css';
@@ -45,7 +45,7 @@ case folder === 'dev':
 case folder === 'beta':
   values._DEV = false;
   values._BETA = true;
-  values._VER = core + 'b' + varAry[2];
+  values._VER = core + 'b';
   values._DLURL = github + 'Releases/Beta/fallenswordhelper.user.js';
   values._CALFJS = github + 'resources/beta/' + core + '/calfSystem.min.js';
   values._CALFCSS = github + 'resources/beta/' + core + '/calfSystem.css';
