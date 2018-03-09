@@ -3,7 +3,10 @@ import infoBox from '../common/infoBox';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 
+var sendGoldonWorld;
+
 export function doSendGold() { // jQuery
+  if (!sendGoldonWorld) {return;}
   retryAjax({
     url: 'index.php',
     data: {
@@ -26,7 +29,8 @@ export function doSendGold() { // jQuery
 }
 
 export function injectSendGoldOnWorld() { // jQuery
-  if (!getValue('sendGoldonWorld')) {return;}
+  sendGoldonWorld = getValue('sendGoldonWorld');
+  if (!sendGoldonWorld) {return;}
   $('#statbar-gold-tooltip-general').append(
     '<dt class="stat-gold-sendTo">Send To:</dt>' +
     '<dd id="HelperSendTo">' + getValue('goldRecipient') +
@@ -59,7 +63,7 @@ function updateGoldValue(data) {
 }
 
 export function updateSendGoldOnWorld(data) { // jQuery
-  if (data.player && getValue('sendGoldonWorld')) {
+  if (data.player && sendGoldonWorld) {
     updateGoldValue(data);
   }
 }
