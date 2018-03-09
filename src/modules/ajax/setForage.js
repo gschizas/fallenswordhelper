@@ -15,7 +15,7 @@ function forageSet(forage, data, dfr) {
     if (err.name === 'QuotaExceededError') {
       jConfirm('IndexedDB Quota Exceeded Error',
         'Would you like to clear IndexedDB?',
-        clearForage()
+        clearForage
       );
     } else {
       sendException('localforage.setItem error ' + stringifyError(err), false);
