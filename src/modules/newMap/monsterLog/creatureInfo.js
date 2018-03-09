@@ -105,6 +105,9 @@ var bailOut = [
     return actions.length - 1 < data.passback; // Not enough actions
   },
   function(data) {
+    return !GameData.actions()[data.passback];
+  },
+  function(data) {
     return data.response.data.id !==
       GameData.actions()[data.passback].data.id.toString(); // Different action list
   }

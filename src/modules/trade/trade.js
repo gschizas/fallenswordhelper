@@ -32,6 +32,11 @@ function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
     shouldBeChecked(itemid, checkbox);
 }
 
+function findStCheck() {
+  var cbox = getElementById('itemsInSt');
+  if (cbox) {return cbox.checked;}
+}
+
 function doCheckAll(evt) {
   var itemid = evt.target.id;
   var itemList = getElementById('item-div') ||
@@ -41,7 +46,7 @@ function doCheckAll(evt) {
   console.log('itemTables', itemTables); // eslint-disable-line no-console
   //#endif
   var howMany = getHowMany(itemTables);
-  var itemsInSt = getElementById('itemsInSt').checked;
+  var itemsInSt = findStCheck();
   Array.prototype.forEach.call(itemTables, function(el) {
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;

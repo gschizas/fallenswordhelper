@@ -1223,7 +1223,7 @@ function forageSet(forage, data, dfr) {
     if (err.name === 'QuotaExceededError') {
       jConfirm('IndexedDB Quota Exceeded Error',
         'Would you like to clear IndexedDB?',
-        clearForage()
+        clearForage
       );
     } else {
       sendException('localforage.setItem error ' + stringifyError(err), false);
@@ -6173,14 +6173,16 @@ function gotSe(data) { // jQuery.min
   if (!oldLog) {oldLog = {lastUpdate: 0, se: {}};}
   oldLog.lastUpdate = serverTime;
   var resultAry = data.r;
-  resultAry.forEach(function(element) {
-    var myTime = serverTime - element.time;
-    var mobName = element.creature.name.replace(' (Super Elite)', '');
-    if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
-      oldLog.se[mobName] = myTime;
-    }
-  });
-  setForage('fsh_seLog', oldLog);
+  if (resultAry) {
+    resultAry.forEach(function(element) {
+      var myTime = serverTime - element.time;
+      var mobName = element.creature.name.replace(' (Super Elite)', '');
+      if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
+        oldLog.se[mobName] = myTime;
+      }
+    });
+    setForage('fsh_seLog', oldLog);
+  }
 }
 
 function getSeLog() { // jQuery.min
@@ -13034,6 +13036,12 @@ function injectScavenging() { // jQuery
   }
 }
 
+function buffIndividual(self) {
+  if (self.previousElementSibling) {
+    openQuickBuffByName(self.previousElementSibling.textContent);
+  }
+}
+
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;
   var shortList = [];
@@ -13047,7 +13055,7 @@ function buffAll(self) {
 function buffEvent(e) {
   var self = e.target;
   if (self.textContent === '[b]') {
-    openQuickBuffByName(self.previousElementSibling.textContent);
+    buffIndividual(self);
   }
   if (self.textContent === 'all') {
     buffAll(self);
@@ -14401,6 +14409,11 @@ function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
     shouldBeChecked(itemid, checkbox);
 }
 
+function findStCheck() {
+  var cbox = getElementById('itemsInSt');
+  if (cbox) {return cbox.checked;}
+}
+
 function doCheckAll$1(evt) {
   var itemid = evt.target.id;
   var itemList = getElementById('item-div') ||
@@ -14408,7 +14421,7 @@ function doCheckAll$1(evt) {
   var itemTables = itemList.querySelectorAll('table:not(.fshHide)');
   console.log('itemTables', itemTables); // eslint-disable-line no-console
   var howMany = getHowMany(itemTables);
-  var itemsInSt = getElementById('itemsInSt').checked;
+  var itemsInSt = findStCheck();
   Array.prototype.forEach.call(itemTables, function(el) {
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
@@ -16637,6 +16650,9 @@ var bailOut$1 = [
   },
   function(data, actions) {
     return actions.length - 1 < data.passback; // Not enough actions
+  },
+  function(data) {
+    return !GameData.actions()[data.passback];
   },
   function(data) {
     return data.response.data.id !==
@@ -18978,7 +18994,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '1';
+window.FSH.calf = '2';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

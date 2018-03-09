@@ -1,6 +1,12 @@
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 
+function buffIndividual(self) {
+  if (self.previousElementSibling) {
+    openQuickBuffByName(self.previousElementSibling.textContent);
+  }
+}
+
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;
   var shortList = [];
@@ -14,7 +20,7 @@ function buffAll(self) {
 function buffEvent(e) {
   var self = e.target;
   if (self.textContent === '[b]') {
-    openQuickBuffByName(self.previousElementSibling.textContent);
+    buffIndividual(self);
   }
   if (self.textContent === 'all') {
     buffAll(self);

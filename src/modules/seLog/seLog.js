@@ -25,14 +25,16 @@ function gotSe(data) { // jQuery.min
   if (!oldLog) {oldLog = {lastUpdate: 0, se: {}};}
   oldLog.lastUpdate = serverTime;
   var resultAry = data.r;
-  resultAry.forEach(function(element) {
-    var myTime = serverTime - element.time;
-    var mobName = element.creature.name.replace(' (Super Elite)', '');
-    if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
-      oldLog.se[mobName] = myTime;
-    }
-  });
-  setForage('fsh_seLog', oldLog);
+  if (resultAry) {
+    resultAry.forEach(function(element) {
+      var myTime = serverTime - element.time;
+      var mobName = element.creature.name.replace(' (Super Elite)', '');
+      if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
+        oldLog.se[mobName] = myTime;
+      }
+    });
+    setForage('fsh_seLog', oldLog);
+  }
 }
 
 function getSeLog() { // jQuery.min
