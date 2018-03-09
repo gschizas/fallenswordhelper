@@ -107,10 +107,12 @@ function doPerfSwitch(inject) {
 }
 
 function inventory(data) {
-  invItems = data.items;
-  add(4, enhanceWarehouse);
-  var inject = doFolderButtons(data.folders);
-  doPerfSwitch(inject);
+  if (data.items && itemTable) {
+    invItems = data.items;
+    add(4, enhanceWarehouse);
+    var inject = doFolderButtons(data.folders);
+    doPerfSwitch(inject);
+  }
 }
 
 function getItems() {
