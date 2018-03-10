@@ -32,6 +32,7 @@ function creatureHazEnhancements(creature) {
 }
 
 function doMonsterLog(creature) {
+  if (!monsterLog) {monsterLog = {};}
   monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
   var logCreature = monsterLog[creature.name];
   logCreature.creature_class = fallback(logCreature.creature_class,
