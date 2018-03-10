@@ -106,23 +106,20 @@ function getCreaturePlayerData(responseText, callback) { // Legacy
   }
 }
 
+function getStatValue(stat, doc) { // Legacy
+  var node = findNode('//table[@width="400"]/tbody/tr/td[contains(.,"' +
+    stat + ':")]', doc);
+  if (node) {return Number(node.nextSibling.textContent.replace(/,/, ''));}
+  return 0;
+}
+
 function getCreatureGroupData(responseText) { // Legacy
   var doc = createDocument(responseText);
-  var groupAttackValue = Number(findNode('//table[@width="400"]/tbody' +
-    '/tr/td[contains(.,"Attack:")]', doc).nextSibling.textContent
-    .replace(/,/, ''));
-  var groupDefenseValue = Number(findNode('//table[@width="400"]/tbody' +
-    '/tr/td[contains(.,"Defense:")]', doc).nextSibling.textContent
-    .replace(/,/, ''));
-  var groupArmorValue = Number(findNode('//table[@width="400"]/tbody' +
-    '/tr/td[contains(.,"Armor:")]', doc).nextSibling.textContent
-    .replace(/,/, ''));
-  var groupDamageValue = Number(findNode('//table[@width="400"]/tbody' +
-    '/tr/td[contains(.,"Damage:")]', doc).nextSibling.textContent
-    .replace(/,/, ''));
-  var groupHPValue = Number(findNode('//table[@width="400"]/tbody' +
-    '/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
-    .replace(/,/, ''));
+  var groupAttackValue = getStatValue('Attack', doc);
+  var groupDefenseValue = getStatValue('Defense', doc);
+  var groupArmorValue = getStatValue('Armor', doc);
+  var groupDamageValue = getStatValue('Damage', doc);
+  var groupHPValue = getStatValue('HP', doc);
   retryAjax('index.php?no_mobile=1&cmd=profile').done(function(html) {
     getCreaturePlayerData(html, {
       groupExists: true,
