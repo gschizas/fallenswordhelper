@@ -14,7 +14,7 @@ import {
 } from './processMonsterLog';
 
 function processMonster(data) {
-  if (!data.response.data) {return;} // creature is null
+  if (!data || !data.response.data) {return;} // creature is null
   processMouseOver(data);
   processMonsterLog(data.response.data);
 }
