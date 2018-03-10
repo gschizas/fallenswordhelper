@@ -16752,7 +16752,7 @@ function getMonsterPrefs() {
 }
 
 function processMonster(data) {
-  if (!data.response.data) {return;} // creature is null
+  if (!data || !data.response.data) {return;} // creature is null
   processMouseOver(data);
   processMonsterLog(data.response.data);
 }
@@ -18999,7 +18999,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '4';
+window.FSH.calf = '5';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
