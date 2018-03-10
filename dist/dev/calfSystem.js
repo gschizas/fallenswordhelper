@@ -5895,7 +5895,10 @@ function infoBox(documentText) {
   return result;
 }
 
+var sendGoldonWorld;
+
 function doSendGold() { // jQuery
+  if (!sendGoldonWorld) {return;}
   retryAjax({
     url: 'index.php',
     data: {
@@ -5918,7 +5921,8 @@ function doSendGold() { // jQuery
 }
 
 function injectSendGoldOnWorld() { // jQuery
-  if (!getValue('sendGoldonWorld')) {return;}
+  sendGoldonWorld = getValue('sendGoldonWorld');
+  if (!sendGoldonWorld) {return;}
   $('#statbar-gold-tooltip-general').append(
     '<dt class="stat-gold-sendTo">Send To:</dt>' +
     '<dd id="HelperSendTo">' + getValue('goldRecipient') +
@@ -5951,7 +5955,7 @@ function updateGoldValue(data) {
 }
 
 function updateSendGoldOnWorld(data) { // jQuery
-  if (data.player && getValue('sendGoldonWorld')) {
+  if (data.player && sendGoldonWorld) {
     updateGoldValue(data);
   }
 }
@@ -6964,10 +6968,12 @@ function doPerfSwitch(inject) {
 }
 
 function inventory(data) {
-  invItems = data.items;
-  add(4, enhanceWarehouse);
-  var inject = doFolderButtons(data.folders);
-  doPerfSwitch(inject);
+  if (data.items && itemTable) {
+    invItems = data.items;
+    add(4, enhanceWarehouse);
+    var inject = doFolderButtons(data.folders);
+    doPerfSwitch(inject);
+  }
 }
 
 function getItems() {
@@ -16733,6 +16739,7 @@ function creatureHazEnhancements(creature) {
 }
 
 function doMonsterLog(creature) {
+  if (!monsterLog) {monsterLog = {};}
   monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
   var logCreature = monsterLog[creature.name];
   logCreature.creature_class = fallback(logCreature.creature_class,
@@ -19039,7 +19046,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '2';
+window.FSH.calf = '3';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
