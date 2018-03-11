@@ -85,8 +85,10 @@ function doMerge() { // jQuery.min
 }
 
 function gotGuild(data) {
-  guild = data;
-  doMerge();
+  if (data && data.r) {
+    guild = data;
+    doMerge();
+  }
 }
 
 function gotActivity(data) { // jQuery.min
