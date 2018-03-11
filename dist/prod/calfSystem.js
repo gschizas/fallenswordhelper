@@ -42,14 +42,15 @@ function timeEnd(name) {
   }
 }
 
-function setValue(name, value) {
-  GM_setValue(name, value);
-}
+var thePlayerId;
 
 function playerId() {
-  var thePlayerId = parseInt(getElementById('holdtext')
-    .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
-  setValue('playerID', thePlayerId);
+  if (!thePlayerId) {
+    thePlayerId = Number(
+      getElementById('holdtext')
+        .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1]
+    );
+  }
   return thePlayerId;
 }
 
@@ -1385,6 +1386,10 @@ function rnd() {
   return getRandomInt(1000000000, 9999999998);
 }
 
+function setValue(name, value) {
+  GM_setValue(name, value);
+}
+
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
   ' class="notification-icon"></span><p class="notification-content">' +
@@ -2059,13 +2064,16 @@ function injectNotepadShowLogs(injector) { // jQuery.min
   getForage('fsh_combatLog').done(gotCombatLog);
 }
 
+var guildId;
+
 function currentGuildId() {
-  var guildId;
-  var nodeList = document.body.getElementsByTagName('script');
-  Array.prototype.forEach.call(nodeList, function getGuildId(el) {
-    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-    if (match) {guildId = parseInt(match[1], 10);}
-  });
+  if (!guildId) {
+    var nodeList = document.body.getElementsByTagName('script');
+    Array.prototype.forEach.call(nodeList, function getGuildId(el) {
+      var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
+      if (match) {guildId = Number(match[1]);}
+    });
+  }
   return guildId;
 }
 
@@ -2076,7 +2084,7 @@ var highlightPlayersNearMyLvl;
 var onlinePages;
 var lastPage;
 var table;
-var guildId;
+var guildId$1;
 
 function buildOnlinePlayerData() { // jQuery
   onlineData = [];
@@ -2137,7 +2145,7 @@ function guildNumber(html) {
 
 var highlightTests = [
   function() {return highlightPlayersNearMyLvl;},
-  function(data) {return guildNumber(data[0]) !== guildId;},
+  function(data) {return guildNumber(data[0]) !== guildId$1;},
   function(data) {return intValue(data[2]) >= pvpLowerLevel;},
   function(data) {return intValue(data[2]) <= pvpUpperLevel;}
 ];
@@ -2154,7 +2162,7 @@ function gotOnlinePlayers() { // jQuery
   filterHeaderOnlinePlayers();
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   calculateBoundaries();
-  guildId = currentGuildId();
+  guildId$1 = currentGuildId();
 
   table = $('#fshInv', context).dataTable({ // context
     data: onlineData,
@@ -4218,8 +4226,13 @@ function parseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
   }
 }
 
+var thisPlayerName;
+
 function playerName() {
-  return getElementById('statbar-character').textContent;
+  if (!thisPlayerName) {
+    thisPlayerName = getElementById('statbar-character').textContent;
+  }
+  return thisPlayerName;
 }
 
 var buffCustom = {
@@ -4721,7 +4734,7 @@ function insertElementAfter(newNode, referenceNode) {
   }
 }
 
-var guildId$1;
+var guildId$2;
 
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
@@ -4778,7 +4791,7 @@ function creatureLogLink() {
 }
 
 function newGuildLogLink() {
-  if (guildId$1 && !getValue('useNewGuildLog')) {
+  if (guildId$2 && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
     insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" ' +
@@ -4788,7 +4801,7 @@ function newGuildLogLink() {
 }
 
 function guildInventory() {
-  if (guildId$1) {
+  if (guildId$2) {
     insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
@@ -4856,7 +4869,7 @@ function adjustHeight() {
 
 function injectMenu() {
   if (!getElementById('pCL') || jQueryNotPresent()) {return;}
-  guildId$1 = currentGuildId();
+  guildId$2 = currentGuildId();
   updateQuestLink();
   // character
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
@@ -11410,7 +11423,7 @@ function profileComponents() {
   compDiv.addEventListener('click', eventHandler(evtHdl$2));
 }
 
-var guildId$2;
+var guildId$3;
 var currentGuildRelationship;
 var guildMessages = {
   self: {color: 'fshGreen', message: getValue('guildSelfMessage')},
@@ -11436,7 +11449,7 @@ function showRankButton(playerid, playername) {
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
       '" style="background-image: url(\'' + imageServer +
-      '/guilds/' + guildId$2 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
+      '/guilds/' + guildId$3 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
   }
   return '';
 }
@@ -11448,23 +11461,37 @@ function guildAry(val) {
   return [];
 }
 
-function guildRelationship(_txt) {
+function hasRelationship(txt) {
+  return function(el) {return el.test.includes(txt);};
+}
+
+function externalRelationship(_txt) {
   var scenario = [
-    {test: guildAry(getValue('guildSelf')), type: 'self'},
     {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
     {test: guildAry(getValue('guildPast')), type: 'old'},
     {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
   ];
   var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
-  for (var i = 0; i < scenario.length; i += 1) {
-    if (scenario[i].test.indexOf(txt) !== -1) {return scenario[i].type;}
+  var relObj = scenario.find(hasRelationship(txt));
+  if (relObj) {return relObj.type;}
+}
+
+function thisGuildId(aLink) {
+  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
+  if (guildIdResult) {return Number(guildIdResult[1]);}
+}
+
+function guildRelationship(aLink) {
+  guildId$3 = thisGuildId(aLink);
+  if (guildId$3 && guildId$3 === currentGuildId()) {
+    setValue('guildSelf', aLink.text);
+    return 'self';
   }
+  return externalRelationship(aLink.text);
 }
 
 function foundGuildLink(aLink) {
-  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-  if (guildIdResult) {guildId$2 = parseInt(guildIdResult[1], 10);}
-  currentGuildRelationship = guildRelationship(aLink.text);
+  currentGuildRelationship = guildRelationship(aLink);
   if (currentGuildRelationship) {
     aLink.parentNode.classList.add(
       guildMessages[currentGuildRelationship].color);
@@ -11473,10 +11500,12 @@ function foundGuildLink(aLink) {
   }
 }
 
-function profileInjectGuildRel() {
+function profileInjectGuildRel(self) {
   var aLink = document.querySelector(
     '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
-  if (aLink) {foundGuildLink(aLink);}
+  if (aLink) {foundGuildLink(aLink);} else if (self) {
+    setValue('guildSelf', '');
+  }
 }
 
 function profileInjectQuickButton(avyImg, playerid, playername) {
@@ -11782,7 +11811,7 @@ function injectProfile() { // Legacy
   var self = playername === playerName();
   ifSelf(self);
   // Must be before profileInjectQuickButton
-  profileInjectGuildRel();
+  profileInjectGuildRel(self);
   // It sets up guildId and currentGuildRelationship
   var playerid = fallback(getUrlParameter('player_id'), playerId());
   profileInjectQuickButton(avyImg, playerid, playername);
@@ -13378,11 +13407,19 @@ function generalPrefs() {
 }
 
 function injectSettingsGuildData(guildType) {
-  return '<input name="guild' + guildType + '" size="60" value="' +
-    getValue('guild' + guildType) + '">' +
+  var title = '';
+  var disabled = '';
+  if (guildType === 'Self') {
+    title = ' title="This is automatically detected"';
+    disabled = ' disabled';
+  }
+  return '<input' + title + ' name="guild' + guildType + '" size="60" value="' +
+    getValue('guild' + guildType) + '"' + disabled + '>' +
+
     '<span class="fshPoint" ' +
     'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
     guildType + 'Message"> &#x00bb;</span>' +
+
     '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
     '<input name="guild' + guildType + 'Message" size="60" value="' +
     getValue('guild' + guildType + 'Message') + '">' +
@@ -18998,7 +19035,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '6';
+window.FSH.calf = '7';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
