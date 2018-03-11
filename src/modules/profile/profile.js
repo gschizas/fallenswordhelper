@@ -56,7 +56,7 @@ export default function injectProfile() { // Legacy
   var self = playername === playerName();
   ifSelf(self);
   // Must be before profileInjectQuickButton
-  profileInjectGuildRel();
+  profileInjectGuildRel(self);
   // It sets up guildId and currentGuildRelationship
   var playerid = fallback(getUrlParameter('player_id'), playerId());
   profileInjectQuickButton(avyImg, playerid, playername);
