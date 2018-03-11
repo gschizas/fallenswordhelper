@@ -1327,8 +1327,10 @@ function doMerge() { // jQuery.min
 }
 
 function gotGuild(data) {
-  guild = data;
-  doMerge();
+  if (data && data.r) {
+    guild = data;
+    doMerge();
+  }
 }
 
 function gotActivity(data) { // jQuery.min
@@ -15470,6 +15472,7 @@ function doTopLabels(ourTitan) {
 
 function doMemberRows(ourTitan) {
   clearMemberRows();
+  if (!ourTitan.contributors) {return;}
   var memberRows = ourTitan.contributors.map(function(member) {
     return [[
       [2, textSpan(member.player.name)],
@@ -18995,7 +18998,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '5';
+window.FSH.calf = '6';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
