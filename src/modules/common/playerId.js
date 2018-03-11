@@ -1,9 +1,13 @@
 import {getElementById} from '../common/getElement';
-import setValue from '../system/setValue';
+
+var thePlayerId;
 
 export default function playerId() {
-  var thePlayerId = parseInt(getElementById('holdtext')
-    .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
-  setValue('playerID', thePlayerId);
+  if (!thePlayerId) {
+    thePlayerId = Number(
+      getElementById('holdtext')
+        .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1]
+    );
+  }
   return thePlayerId;
 }

@@ -1,5 +1,10 @@
 import {getElementById} from '../common/getElement';
 
+var thisPlayerName;
+
 export default function playerName() {
-  return getElementById('statbar-character').textContent;
+  if (!thisPlayerName) {
+    thisPlayerName = getElementById('statbar-character').textContent;
+  }
+  return thisPlayerName;
 }

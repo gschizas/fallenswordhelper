@@ -1,6 +1,8 @@
+import currentGuildId from '../common/currentGuildId';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import setValue from '../system/setValue';
 
 var guildId;
 var currentGuildRelationship;
@@ -40,23 +42,37 @@ function guildAry(val) {
   return [];
 }
 
-function guildRelationship(_txt) {
+function hasRelationship(txt) {
+  return function(el) {return el.test.includes(txt);};
+}
+
+function externalRelationship(_txt) {
   var scenario = [
-    {test: guildAry(getValue('guildSelf')), type: 'self'},
     {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
     {test: guildAry(getValue('guildPast')), type: 'old'},
     {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
   ];
   var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
-  for (var i = 0; i < scenario.length; i += 1) {
-    if (scenario[i].test.indexOf(txt) !== -1) {return scenario[i].type;}
+  var relObj = scenario.find(hasRelationship(txt));
+  if (relObj) {return relObj.type;}
+}
+
+function thisGuildId(aLink) {
+  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
+  if (guildIdResult) {return Number(guildIdResult[1]);}
+}
+
+function guildRelationship(aLink) {
+  guildId = thisGuildId(aLink);
+  if (guildId && guildId === currentGuildId()) {
+    setValue('guildSelf', aLink.text);
+    return 'self';
   }
+  return externalRelationship(aLink.text);
 }
 
 function foundGuildLink(aLink) {
-  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-  if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
-  currentGuildRelationship = guildRelationship(aLink.text);
+  currentGuildRelationship = guildRelationship(aLink);
   if (currentGuildRelationship) {
     aLink.parentNode.classList.add(
       guildMessages[currentGuildRelationship].color);
@@ -65,8 +81,10 @@ function foundGuildLink(aLink) {
   }
 }
 
-export function profileInjectGuildRel() {
+export function profileInjectGuildRel(self) {
   var aLink = document.querySelector(
     '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
-  if (aLink) {foundGuildLink(aLink);}
+  if (aLink) {foundGuildLink(aLink);} else if (self) {
+    setValue('guildSelf', '');
+  }
 }

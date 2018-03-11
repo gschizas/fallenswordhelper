@@ -3,11 +3,19 @@ import isChecked from '../system/isChecked';
 import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function injectSettingsGuildData(guildType) {
-  return '<input name="guild' + guildType + '" size="60" value="' +
-    getValue('guild' + guildType) + '">' +
+  var title = '';
+  var disabled = '';
+  if (guildType === 'Self') {
+    title = ' title="This is automatically detected"';
+    disabled = ' disabled';
+  }
+  return '<input' + title + ' name="guild' + guildType + '" size="60" value="' +
+    getValue('guild' + guildType) + '"' + disabled + '>' +
+
     '<span class="fshPoint" ' +
     'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
     guildType + 'Message"> &#x00bb;</span>' +
+
     '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
     '<input name="guild' + guildType + 'Message" size="60" value="' +
     getValue('guild' + guildType + 'Message') + '">' +
