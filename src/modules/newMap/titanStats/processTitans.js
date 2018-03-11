@@ -51,6 +51,7 @@ function doTopLabels(ourTitan) {
 
 function doMemberRows(ourTitan) {
   clearMemberRows();
+  if (!ourTitan.contributors) {return;}
   var memberRows = ourTitan.contributors.map(function(member) {
     return [[
       [2, textSpan(member.player.name)],
