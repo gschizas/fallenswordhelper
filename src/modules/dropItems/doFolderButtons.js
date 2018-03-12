@@ -14,11 +14,13 @@ function extraButtons() {
 export default function doFolderButtons(folders) {
   if (calf.subcmd2 === 'storeitems') {
     var formNode = pCC.getElementsByTagName('form')[0];
-    var tr = createTr({className: 'fshCenter'});
-    var insertHere = createTd({colSpan: 3});
-    insertElement(tr, insertHere);
-    formNode.parentNode.insertBefore(tr, formNode);
-    insertHere.innerHTML = makeFolderSpans(folders);
-    extraButtons();
+    if (formNode) {
+      var tr = createTr({className: 'fshCenter'});
+      var insertHere = createTd({colSpan: 3});
+      insertElement(tr, insertHere);
+      formNode.parentNode.insertBefore(tr, formNode);
+      insertHere.innerHTML = makeFolderSpans(folders);
+      extraButtons();
+    }
   }
 }
