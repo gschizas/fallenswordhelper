@@ -11909,12 +11909,14 @@ function extraButtons() {
 function doFolderButtons$1(folders) {
   if (calf.subcmd2 === 'storeitems') {
     var formNode = pCC.getElementsByTagName('form')[0];
-    var tr = createTr({className: 'fshCenter'});
-    var insertHere = createTd({colSpan: 3});
-    insertElement(tr, insertHere);
-    formNode.parentNode.insertBefore(tr, formNode);
-    insertHere.innerHTML = makeFolderSpans$1(folders);
-    extraButtons();
+    if (formNode) {
+      var tr = createTr({className: 'fshCenter'});
+      var insertHere = createTd({colSpan: 3});
+      insertElement(tr, insertHere);
+      formNode.parentNode.insertBefore(tr, formNode);
+      insertHere.innerHTML = makeFolderSpans$1(folders);
+      extraButtons();
+    }
   }
 }
 
@@ -12062,14 +12064,16 @@ function getItems$1() {
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
     var tipped = el.dataset.tipped;
-    var matches = tipped.match(itemRE);
-    itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
-    var injectHere = el.parentNode.parentNode.nextElementSibling;
-    itemsAry$1.push({
-      el: el,
-      invid: matches[2],
-      injectHere: injectHere
-    });
+    if (tipped) {
+      var matches = tipped.match(itemRE);
+      itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
+      var injectHere = el.parentNode.parentNode.nextElementSibling;
+      itemsAry$1.push({
+        el: el,
+        invid: matches[2],
+        injectHere: injectHere
+      });
+    }
   });
   // Exclude composed pots
   itemsHash[13699] = 1;
@@ -16791,8 +16795,12 @@ function getMonsterPrefs() {
   });
 }
 
+function badData$1(data) {
+  return !data || !data.response || !data.response.data;
+}
+
 function processMonster(data) {
-  if (!data || !data.response.data) {return;} // creature is null
+  if (badData$1(data)) {return;} // creature is null
   processMouseOver(data);
   processMonsterLog(data.response.data);
 }
@@ -19039,7 +19047,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '7';
+window.FSH.calf = '8';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
