@@ -13,8 +13,12 @@ import {
   showMonsterLog
 } from './processMonsterLog';
 
+function badData(data) {
+  return !data || !data.response || !data.response.data;
+}
+
 function processMonster(data) {
-  if (!data || !data.response.data) {return;} // creature is null
+  if (badData(data)) {return;} // creature is null
   processMouseOver(data);
   processMonsterLog(data.response.data);
 }

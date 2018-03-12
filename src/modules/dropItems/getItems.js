@@ -27,14 +27,16 @@ export function getItems() {
   itemsHash = {};
   Array.prototype.forEach.call(imgList, function(el) {
     var tipped = el.dataset.tipped;
-    var matches = tipped.match(itemRE);
-    itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
-    var injectHere = el.parentNode.parentNode.nextElementSibling;
-    itemsAry.push({
-      el: el,
-      invid: matches[2],
-      injectHere: injectHere
-    });
+    if (tipped) {
+      var matches = tipped.match(itemRE);
+      itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
+      var injectHere = el.parentNode.parentNode.nextElementSibling;
+      itemsAry.push({
+        el: el,
+        invid: matches[2],
+        injectHere: injectHere
+      });
+    }
   });
   // Exclude composed pots
   itemsHash[13699] = 1;
