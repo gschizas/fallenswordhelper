@@ -130,7 +130,8 @@ function delAllComponent() {
 function compDeleted(self, data) {
   var response = infoBox(data);
   if (response === 'Component destroyed.') {
-    self.parentNode.innerHTML = '';
+    var parent = self.parentNode;
+    if (parent) {self.parentNode.innerHTML = '';}
   } else {
     $('#dialog_msg').html(response).dialog('open');
   }

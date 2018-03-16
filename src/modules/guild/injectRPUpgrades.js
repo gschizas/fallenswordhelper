@@ -7,8 +7,9 @@ import reduceBuffArray from '../common/reduceBuffArray';
 var packRE = />([ a-zA-Z]+) Level (\d+)/g;
 
 function postWarnings(myBuffs) {
-  var nodeList = pCC.firstElementChild.rows[9]
-    .cells[0].firstElementChild.getElementsByTagName('A');
+  var packsRow = pCC.firstElementChild.rows[9];
+  if (!packsRow) {return;}
+  var nodeList = packsRow.cells[0].firstElementChild.getElementsByTagName('A');
   Array.prototype.forEach.call(nodeList, function(el) {
     var tipped = el.dataset.tipped;
     var packBuffs;

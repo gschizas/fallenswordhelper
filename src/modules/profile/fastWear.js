@@ -81,6 +81,7 @@ function fastWearLinks(self) {
 function foundBackpack(backpackContainer, theBackpack) {
   var oldShow = theBackpack._showPage;
   theBackpack._showPage = function(type, page) {
+    if (!this.tabData) {return;}
     oldShow.call(this, type, page);
     fastWearLinks(this);
   };
