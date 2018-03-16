@@ -36,7 +36,11 @@ function convertTextToHtml(inputText) {
 
 function bioPreview() {
   var widthClass = 'fshBioProfile';
-  if (calf.cmd === 'guild') {widthClass = 'fshBioGuild';}
+  if (calf.cmd === 'guild') {
+    if (calf.subcmd === 'hall') {widthClass = 'fshBioHall';} else {
+      widthClass = 'fshBioGuild';
+    }
+  }
   var previewContainer = createDiv({
     className:
       'fshBioContainer ' + widthClass
