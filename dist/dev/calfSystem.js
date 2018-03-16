@@ -3449,7 +3449,9 @@ function simpleCheckbox(name) {
 }
 
 function toggleForce(el, force) {
-  el.classList.toggle('fshHide', force);
+  if (el instanceof Element) {
+    el.classList.toggle('fshHide', force);
+  }
 }
 
 function hasErrorMsg(json) {
@@ -8148,7 +8150,11 @@ function convertTextToHtml(inputText) {
 
 function bioPreview() {
   var widthClass = 'fshBioProfile';
-  if (calf.cmd === 'guild') {widthClass = 'fshBioGuild';}
+  if (calf.cmd === 'guild') {
+    if (calf.subcmd === 'hall') {widthClass = 'fshBioHall';} else {
+      widthClass = 'fshBioGuild';
+    }
+  }
   var previewContainer = createDiv({
     className:
       'fshBioContainer ' + widthClass
@@ -11160,6 +11166,7 @@ function fastWearLinks(self) {
 function foundBackpack(backpackContainer, theBackpack) {
   var oldShow = theBackpack._showPage;
   theBackpack._showPage = function(type, page) {
+    if (!this.tabData) {return;}
     oldShow.call(this, type, page);
     fastWearLinks(this);
   };
@@ -11339,7 +11346,8 @@ function delAllComponent() {
 function compDeleted(self, data) {
   var response = infoBox(data);
   if (response === 'Component destroyed.') {
-    self.parentNode.innerHTML = '';
+    var parent = self.parentNode;
+    if (parent) {self.parentNode.innerHTML = '';}
   } else {
     $('#dialog_msg').html(response).dialog('open');
   }
@@ -12541,8 +12549,9 @@ function reduceBuffArray(buffAry) {
 var packRE = />([ a-zA-Z]+) Level (\d+)/g;
 
 function postWarnings(myBuffs) {
-  var nodeList = pCC.firstElementChild.rows[9]
-    .cells[0].firstElementChild.getElementsByTagName('A');
+  var packsRow = pCC.firstElementChild.rows[9];
+  if (!packsRow) {return;}
+  var nodeList = packsRow.cells[0].firstElementChild.getElementsByTagName('A');
   Array.prototype.forEach.call(nodeList, function(el) {
     var tipped = el.dataset.tipped;
     var packBuffs;
@@ -18918,7 +18927,10 @@ var pageSwitcher = {
     ranks: {'-': {'-': {'-': injectGuildRanks}}},
     conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
     bank: {'-': {'-': {'-': injectGuildBank}}},
-    hall: {'-': {'-': {'-': guildHall}}}
+    hall: {
+      '-': {'-': {'-': guildHall}},
+      post: {'-': {'-': injectBioWidgets}}
+    }
   },
   bank: {'-': {'-': {'-': {'-': injectBank}}}},
   log: {
@@ -19092,7 +19104,7 @@ function asyncDispatcher() {
 }
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '8';
+window.FSH.calf = '9';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {

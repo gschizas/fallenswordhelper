@@ -125,7 +125,10 @@ export default {
     ranks: {'-': {'-': {'-': injectGuildRanks}}},
     conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
     bank: {'-': {'-': {'-': injectGuildBank}}},
-    hall: {'-': {'-': {'-': guildHall}}}
+    hall: {
+      '-': {'-': {'-': guildHall}},
+      post: {'-': {'-': injectBioWidgets}}
+    }
   },
   bank: {'-': {'-': {'-': {'-': injectBank}}}},
   log: {

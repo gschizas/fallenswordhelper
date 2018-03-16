@@ -43,12 +43,16 @@
   border: 1px solid;
   border-color: grey black black grey;
   margin: 1em auto 0;
+  overflow-wrap: break-word;
 }
 .fshBioProfile {
   width: 327px;
 }
 .fshBioGuild {
   width: 334px;
+}
+.fshBioHall {
+  max-width: 609px;
 }
 .fshBioHeader {
   background-color: #CD9E4B;
