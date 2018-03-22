@@ -1,5 +1,6 @@
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
+import doChat from './doChat';
 import fallback from '../system/fallback';
 import findNode from '../system/findNode';
 import getMembrList from '../ajax/getMembrList';
@@ -12,35 +13,12 @@ import quickBuffHref from '../common/quickBuffHref';
 import {addPvpSummary, initCache} from './addPvpSummary';
 
 var myPlayer = {};
-var addAttackLinkToLog;
 var memberNameString;
 var listOfAllies;
 var listOfEnemies;
-var nickList;
-var enableChatParsing;
-
-function removeHTML(buffName) {
-  return buffName.replace(/<\/?[^>]+(>|$)/g, '');
-}
-
-function reportIgnore(aRow, isGuildMate, playerName) { // Legacy
-  var extraPart = '';
-  var dateHTML = aRow.cells[1].innerHTML;
-  var dateFirstPart = dateHTML
-    .substring(0, dateHTML.indexOf('>Report') + 7);
-  var dateLastPart = dateHTML
-    .substring(dateHTML.indexOf('Message</a>') + 11, dateHTML.length);
-  if (!isGuildMate) {
-    extraPart = ' | <a title="Add to Ignore List" href="index.php?cmd' +
-      '=log&subcmd=doaddignore&ignore_username=' + playerName +
-      '">Ignore</a>';
-  }
-  aRow.cells[1].innerHTML = dateFirstPart + '</a>' + extraPart +
-    dateLastPart;
-}
 
 function buildNickList() {// Native
-  nickList = buffList.reduce(function(prev, curr) {
+  calf.nickList = buffList.reduce(function(prev, curr) {
     var ret = prev;
     var nicks = curr.nicks.split(',');
     nicks.forEach(function(el) {
@@ -49,68 +27,6 @@ function buildNickList() {// Native
     });
     return ret;
   }, {});
-}
-
-function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
-  var quickBuff = '';
-  var buffsSent = _buffsSent[0].replace('`~', '').replace('~`', '')
-    .split(/\s*,\s*/);
-  buffsSent.reduce(function(prev, el) {
-    var ret = prev;
-    var nick = el.toLowerCase();
-    if (nickList[nick]) {
-      ret += nickList[nick].toString() + ';';
-    }
-    return ret;
-  }, '');
-  return ' | <a ' + quickBuffHref(targetPlayerID, quickBuff) +
-      '>Buff</a></span>';
-}
-
-function getAttackPart(playerName) { // Legacy
-  if (addAttackLinkToLog) {
-    return ' | <a href="index.php?cmd=attackplayer&target_username=' +
-      playerName + '">Attack</a>';
-  }
-  return '';
-}
-
-function isChat(aRow, isGuildMate, playerName) { // Legacy
-  var extraPart = '';
-  reportIgnore(aRow, isGuildMate, playerName);
-  var messageHTML = aRow.cells[2].innerHTML;
-  var firstPart = messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
-  var thirdPart = messageHTML.substring(messageHTML.indexOf('>Reply</a>') + 10,
-    messageHTML.indexOf('>Buff</a>') + 9);
-  var targetPlayerID = /quickBuff\((\d+)\)/.exec(thirdPart)[1];
-  thirdPart = ' | <a ' + quickBuffHref(targetPlayerID) +
-    '>Buff</a></span>';
-  var fourthPart = messageHTML.substring(messageHTML
-    .indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
-  var lastPart = messageHTML.substring(messageHTML.indexOf('</small>'),
-    messageHTML.length);
-  extraPart = ' | <a href="index.php?cmd=trade&target_player=' + playerName +
-    '">Trade</a> | <a title="Secure Trade" href="index.php?cmd=trade' +
-    '&subcmd=createsecure&target_username=' + playerName + '">ST</a>';
-  var attackPart = getAttackPart(playerName);
-  var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
-  if (buffsSent) {
-    thirdPart = doBuffLink(buffsSent, targetPlayerID);
-  }
-  var replyTo = '';
-  if (enableChatParsing) {
-    replyTo = removeHTML(firstPart.replace(/&nbsp;/g, ' ')).substr(0, 140);
-  }
-  var msgReplyTo = '[ <span style="cursor:pointer;text-' +
-    'decoration:underline"class="a-reply" target_player="' + playerName +
-    '" replyTo="' + replyTo + '...">Reply</span>';
-  aRow.cells[2].innerHTML = firstPart + '<nobr>' + msgReplyTo +
-    extraPart + thirdPart + attackPart + fourthPart +
-    '</nobr>' + lastPart;
-}
-
-function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
-  if (messageType === 'Chat') {isChat(aRow, isGuildMate, playerName);}
 }
 
 function isEnemy(playerName, playerElement) { // Legacy
@@ -159,7 +75,7 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
     buffingPlayerName + '">ST</a>';
   extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
     '>Buff</a>';
-  if (addAttackLinkToLog) {
+  if (calf.addAttackLinkToLog) {
     extraText += ' | <a href="index.php?cmd=attackplayer' +
       '&target_username=' + buffingPlayerName + '">Attack</a>';
   }
@@ -223,7 +139,7 @@ function foundLogTable(logTable) { // Legacy
   });
   calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
   calf.lastLadderReset = getValue('lastLadderReset');
-  enableChatParsing = getValue('enableChatParsing');
+  calf.enableChatParsing = getValue('enableChatParsing');
   var messageHeader = logTable.rows[0].cells[2];
   if (messageHeader) {
     insertHtmlBeforeEnd(messageHeader, '&nbsp;&nbsp;' +
@@ -241,7 +157,7 @@ function foundLogTable(logTable) { // Legacy
 
 function addLogWidgetsOld() { // Legacy
   buildNickList();
-  addAttackLinkToLog = getValue('addAttackLinkToLog');
+  calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
   var logTable = findNode('//table[tbody/tr/td/span[contains' +
     '(.,"Currently showing:")]]');
   if (logTable) {foundLogTable(logTable);}
