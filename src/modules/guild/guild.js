@@ -63,11 +63,15 @@ function gotConflictInfo(responseText, callback) { // Legacy
 }
 
 function conflictInfo() { // jQuery.min
-  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
-    .done(function(data) {
-      gotConflictInfo(data,
-        {node: getElementById('statisticsControl')});
-    });
+  var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
+    .firstChild.nextSibling;
+  if (statCtrl) {
+    retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
+      .done(function(data) {
+        gotConflictInfo(data,
+          {node: statCtrl});
+      });
+  }
 }
 
 function logoToggle() {
