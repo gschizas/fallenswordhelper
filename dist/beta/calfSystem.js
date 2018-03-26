@@ -8917,11 +8917,15 @@
   }
 
   function conflictInfo() { // jQuery.min
-    retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
-      .done(function(data) {
-        gotConflictInfo(data,
-          {node: getElementById('statisticsControl')});
-      });
+    var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
+      .firstChild.nextSibling;
+    if (statCtrl) {
+      retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
+        .done(function(data) {
+          gotConflictInfo(data,
+            {node: statCtrl});
+        });
+    }
   }
 
   function logoToggle() {
@@ -14839,11 +14843,14 @@
     // def_creatureCombat
     '2': function(action, fetch, data, attempts) {
       // Do custom stuff e.g. do not kill list
-      var creatureName = GameData.actions()[data.passback].data.name;
-      if (calf.doNotKillList.indexOf(creatureName) !== -1) {
-        $('#actionList div.header').eq(data.passback)
-          .find('a.icon').removeClass('loading');
-        return;
+      var creature = GameData.actions()[data.passback];
+      if (creature) {
+        var creatureName = creature.data.name;
+        if (calf.doNotKillList.indexOf(creatureName) !== -1) {
+          $('#actionList div.header').eq(data.passback)
+            .find('a.icon').removeClass('loading');
+          return;
+        }
       }
       // Call standard action
       oldDoAction(action, fetch, data, attempts);
@@ -19063,7 +19070,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '10';
+  window.FSH.calf = '11';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

@@ -20,11 +20,14 @@ var actionsToIntercept = {
   // def_creatureCombat
   '2': function(action, fetch, data, attempts) {
     // Do custom stuff e.g. do not kill list
-    var creatureName = GameData.actions()[data.passback].data.name;
-    if (calf.doNotKillList.indexOf(creatureName) !== -1) {
-      $('#actionList div.header').eq(data.passback)
-        .find('a.icon').removeClass('loading');
-      return;
+    var creature = GameData.actions()[data.passback];
+    if (creature) {
+      var creatureName = creature.data.name;
+      if (calf.doNotKillList.indexOf(creatureName) !== -1) {
+        $('#actionList div.header').eq(data.passback)
+          .find('a.icon').removeClass('loading');
+        return;
+      }
     }
     // Call standard action
     oldDoAction(action, fetch, data, attempts);
