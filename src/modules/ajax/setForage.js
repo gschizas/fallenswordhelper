@@ -14,7 +14,7 @@ function forageSet(forage, data, dfr) {
   }).catch(function(err) {
     if (err.name === 'QuotaExceededError') {
       jConfirm('IndexedDB Quota Exceeded Error',
-        'Would you like to clear IndexedDB?',
+        'Not enough disk space. Would you like to clear IndexedDB?',
         clearForage
       );
     } else {
