@@ -15,7 +15,7 @@ function selectPerf() {
   if (items.length === 0) {return;}
   Array.prototype.forEach.call(items, function(e) {
     var thisItem = e.id.replace(target + '-item-', '');
-    if (inv[thisItem].craft === 'Perfect') {e.click();}
+    if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {e.click();}
   });
 }
 

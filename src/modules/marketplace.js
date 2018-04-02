@@ -45,10 +45,13 @@ function clearWarning() {
 }
 
 function addMarketplaceWarning() {
-  var sellPrice = getPrice().value;
-  if (sellPrice.search(/^[0-9]+$/) !== -1) {
-    marketplaceWarning(sellPrice);
-  } else {clearWarning();}
+  var price = getPrice();
+  if (price) {
+    var sellPrice = price.value;
+    if (sellPrice.search(/^[0-9]+$/) !== -1) {
+      marketplaceWarning(sellPrice);
+    } else {clearWarning();}
+  }
 }
 
 export default function marketplace() {
