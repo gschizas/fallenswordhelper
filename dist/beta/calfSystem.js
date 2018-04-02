@@ -988,15 +988,20 @@
   // import localforage from
 
   function forageGet(forage, dfr) {
-    localforage.getItem(forage, function getItemCallback(err, data) {
-      if (err) {
+    localforage.getItem(forage).then(function(data) {
+      // returns null if key does not exist
+      dfr.resolve(data);
+    }).catch(function(err) {
+      if (err.name === 'UnknownError') {
+        $('#dialog_msg').html('Firefox IndexedDB - UnknownError<br>' +
+          err.message + '<br>' +
+          '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
+          'More Info</a>').dialog('open');
+      } else {
         sendException(forage + ' localforage.getItem error ' +
           stringifyError(err), false);
-        dfr.reject(err);
-      } else {
-        // returns null if key does not exist
-        dfr.resolve(data);
       }
+      dfr.reject(err);
     });
   }
 
@@ -1224,7 +1229,7 @@
     }).catch(function(err) {
       if (err.name === 'QuotaExceededError') {
         jConfirm('IndexedDB Quota Exceeded Error',
-          'Would you like to clear IndexedDB?',
+          'Not enough disk space. Would you like to clear IndexedDB?',
           clearForage
         );
       } else {
@@ -6743,7 +6748,7 @@
     if (items.length === 0) {return;}
     Array.prototype.forEach.call(items, function(e) {
       var thisItem = e.id.replace(target + '-item-', '');
-      if (inv[thisItem].craft === 'Perfect') {e.click();}
+      if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {e.click();}
     });
   }
 
@@ -17431,10 +17436,13 @@
   }
 
   function addMarketplaceWarning() {
-    var sellPrice = getPrice().value;
-    if (sellPrice.search(/^[0-9]+$/) !== -1) {
-      marketplaceWarning(sellPrice);
-    } else {clearWarning();}
+    var price = getPrice();
+    if (price) {
+      var sellPrice = price.value;
+      if (sellPrice.search(/^[0-9]+$/) !== -1) {
+        marketplaceWarning(sellPrice);
+      } else {clearWarning();}
+    }
   }
 
   function marketplace() {
@@ -19070,7 +19078,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '11';
+  window.FSH.calf = '12';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
