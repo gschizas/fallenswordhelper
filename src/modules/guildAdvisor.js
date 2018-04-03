@@ -112,8 +112,10 @@ function returnAdvisorPage(e, response) {
   insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
     ' day ' + e + ',');
   var doc = createDocument(response);
-  var table = getElementById('pCC', doc).firstElementChild
-    .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
+  var pcc = getElementById('pCC', doc);
+  if (!pcc) {return;}
+  var table = pcc.firstElementChild.firstElementChild.lastElementChild
+    .firstElementChild.firstElementChild;
   var tr = table.rows;
   Array.prototype.forEach.call(tr, function(el) {
     var tds = el.cells;
