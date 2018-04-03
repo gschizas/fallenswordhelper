@@ -12,6 +12,7 @@ var maxPage;
 
 function getWantedBountyList(doc) {
   var page = doc.querySelector('#pCC input[name="page"]');
+  if (!page) {return;}
   curPage = Number(page.value);
   maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
   var activeTable = getElementById('bounty-info', doc).parentNode.parentNode

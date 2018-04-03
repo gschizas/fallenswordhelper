@@ -5806,6 +5806,7 @@
 
   function getWantedBountyList(doc) {
     var page = doc.querySelector('#pCC input[name="page"]');
+    if (!page) {return;}
     curPage = Number(page.value);
     maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
     var activeTable = getElementById('bounty-info', doc).parentNode.parentNode
@@ -7377,8 +7378,10 @@
     insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
       ' day ' + e + ',');
     var doc = createDocument(response);
-    var table = getElementById('pCC', doc).firstElementChild
-      .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
+    var pcc = getElementById('pCC', doc);
+    if (!pcc) {return;}
+    var table = pcc.firstElementChild.firstElementChild.lastElementChild
+      .firstElementChild.firstElementChild;
     var tr = table.rows;
     Array.prototype.forEach.call(tr, function(el) {
       var tds = el.cells;
@@ -19078,7 +19081,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '12';
+  window.FSH.calf = '13';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
