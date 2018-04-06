@@ -82,6 +82,9 @@ window.addEventListener('message', callback);
 
 window.addEventListener('error', function(e) {
   if (e.error) {
-    sendException(parseError(e.error), true);
+    var msg = parseError(e.error);
+    if (msg.includes('calfSystem')) {
+      sendException(msg, true);
+    }
   }
 });
