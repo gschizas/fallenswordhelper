@@ -18,7 +18,8 @@ function forageSet(forage, data, dfr) {
         clearForage
       );
     } else {
-      sendException('localforage.setItem error ' + stringifyError(err), false);
+      sendException(forage + ' localforage.setItem error ' +
+        stringifyError(err), false);
     }
     dfr.reject(err);
   });

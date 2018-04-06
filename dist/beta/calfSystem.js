@@ -450,7 +450,10 @@
 
   window.addEventListener('error', function(e) {
     if (e.error) {
-      sendException(parseError(e.error), true);
+      var msg = parseError(e.error);
+      if (msg.includes('calfSystem')) {
+        sendException(msg, true);
+      }
     }
   });
 
@@ -1233,7 +1236,8 @@
           clearForage
         );
       } else {
-        sendException('localforage.setItem error ' + stringifyError(err), false);
+        sendException(forage + ' localforage.setItem error ' +
+          stringifyError(err), false);
       }
       dfr.reject(err);
     });
@@ -19081,7 +19085,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '13';
+  window.FSH.calf = '14';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
