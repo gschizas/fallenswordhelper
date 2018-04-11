@@ -1002,21 +1002,27 @@
 
   // import localforage from
 
+  function getForageError(forage, err) {
+    if (err.name === 'UnknownError') {
+      $('#dialog_msg').html('Firefox IndexedDB - UnknownError<br>' +
+        err.message + '<br>' +
+        '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
+        'More Info</a>').dialog('open');
+    } else {
+      sendException(forage + ' localforage.getItem error ' +
+        stringifyError(err), false);
+    }
+  }
+
   function forageGet(forage, dfr) {
-    localforage.getItem(forage).then(function(data) {
-      // returns null if key does not exist
-      dfr.resolve(data);
-    }).catch(function(err) {
-      if (err.name === 'UnknownError') {
-        $('#dialog_msg').html('Firefox IndexedDB - UnknownError<br>' +
-          err.message + '<br>' +
-          '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
-          'More Info</a>').dialog('open');
+    localforage.getItem(forage, function getItemCallback(err, data) {
+      if (err) {
+        getForageError(forage, err);
+        dfr.reject(err);
       } else {
-        sendException(forage + ' localforage.getItem error ' +
-          stringifyError(err), false);
+        // returns null if key does not exist
+        dfr.resolve(data);
       }
-      dfr.reject(err);
     });
   }
 
@@ -1238,20 +1244,26 @@
     });
   }
 
+  function setForageError(forage, err) {
+    if (err.name === 'QuotaExceededError') {
+      jConfirm('IndexedDB Quota Exceeded Error',
+        'Not enough disk space. Would you like to clear IndexedDB?',
+        clearForage
+      );
+    } else {
+      sendException(forage + ' localforage.setItem error ' +
+        stringifyError(err), false);
+    }
+  }
+
   function forageSet(forage, data, dfr) {
-    localforage.setItem(forage, data).then(function(value) {
-      dfr.resolve(value);
-    }).catch(function(err) {
-      if (err.name === 'QuotaExceededError') {
-        jConfirm('IndexedDB Quota Exceeded Error',
-          'Not enough disk space. Would you like to clear IndexedDB?',
-          clearForage
-        );
+    localforage.setItem(forage, data, function setItemCallback(err, _data) {
+      if (err) {
+        setForageError(forage, err);
+        dfr.reject(err);
       } else {
-        sendException(forage + ' localforage.setItem error ' +
-          stringifyError(err), false);
+        dfr.resolve(_data);
       }
-      dfr.reject(err);
     });
   }
 
@@ -2591,13 +2603,8 @@
   function eventHandler(evtAry) {
     return function(evt) {
       var self = evt.target;
-      evtAry.some(function(el) {
-        if (el.test(self)) {
-          el.act(self);
-          return true;
-        }
-        return false;
-      });
+      var hdl = evtAry.find(function(el) {return el.test(self);});
+      if (hdl) {hdl.act(self);}
     };
   }
 
@@ -4932,71 +4939,40 @@
   }
 
   var enterForSendMessage;
+  var quickMsgDialog;
+  var $quickMessageDialog;
   var fshTemplate;
+  var msgTbl;
   var sendMessage;
+  var targetPlayer;
+  var dialogMsg;
+  var validateTips;
+  var showingTemplates;
 
-  function showMsgTemplate() { // jQuery
-    var targetPlayer = $('#quickMsgDialog_targetUsername').text();
-    $('#msgTemplateDialog').remove();
-
-    // template displayed
-    var html = '<div id=msgTemplateDialog title="Choose Msg Template" ' +
-      'style="display:none"><style>#msgTemplate .ui-selecting { ' +
-      'background: #FECA40; };</style><ol id=msgTemplate valign=center>';
-    for (var i = 0; i < fshTemplate.length; i += 1) {
-      html += '<li class="ui-widget-content">' +
-        fshTemplate[i].replace(/\{playername\}/g, targetPlayer) + '</li>';
+  function getQuickMessageDialog() { // jQuery
+    if (!quickMsgDialog) {
+      quickMsgDialog = getElementById('quickMessageDialog');
     }
-    html += '</ol></div>';
-    $('body').append(html);
+    if (!$quickMessageDialog) {
+      $quickMessageDialog = $(quickMsgDialog);
+    }
+  }
 
-    // template manager
-    $('#msgTemplate li').prepend('<input type=button class="del-button" ' +
-      'value=Del style="display:none">');
-    $('#msgTemplate').append('<li class="add-button" style="display:none">' +
-      '<input type=button id=newTmplAdd value=Add><input id=newTmpl ' +
-      'class=ui-widget-content></li>');
-    $(':button', '#msgTemplate').button();
-    $('.del-button').click(function(evt) {
-      fshTemplate.splice($('#msgTemplate li')
-        .index(evt.target.parentNode), 1);
-      setValueJSON('quickMsg', fshTemplate);
-      $('#msgTemplateDialog').dialog('close');
-      showMsgTemplate();
-    });
-    $('#newTmplAdd').click(function() {
-      if ($('#newTmpl').val() === '') {return;}
-      fshTemplate.push($('#newTmpl').val());
-      setValueJSON('quickMsg', fshTemplate);
-      $('#msgTemplateDialog').dialog('close');
-      showMsgTemplate();
-    });
+  function getTable() {
+    if (!msgTbl) {
+      msgTbl = quickMsgDialog.lastElementChild;
+    }
+  }
 
-    // enable selectable template
-    $('#msgTemplate').selectable({
-      filter: 'li.ui-widget-content',
-      stop: function() {
-        if ($('.add-button.ui-selected').length > 0) {return;} // click on add row
-        if ($('.ui-selected').length === 0) {return;} // nothing selected yet
-        $('#quickMsgDialog_msg').val($('#quickMsgDialog_msg').val() +
-          $('#msgTemplate .ui-selected').text() + '\n');
-        $('#msgTemplateDialog').dialog('close');
-      }
-    });
+  function setName(name) {
+    targetPlayer = name;
+    getElementById('quickMsgDialog_targetUsername').textContent = name;
+  }
 
-    // show the template form
-    $('#msgTemplateDialog').dialog({
-      buttons: {
-        Manage: function() {
-          $('.del-button').toggle();
-          $('.add-button').toggle();
-        },
-        Cancel: function() {
-          $('#msgTemplateDialog').dialog('close');
-          $('#msgTemplateDialog').remove();
-        }
-      }
-    });
+  function setMsg(msg) {
+    dialogMsg = getElementById('quickMsgDialog_msg');
+    dialogMsg.value = fallback(msg, '');
+    dialogMsg.disabled = false;
   }
 
   function keypress(evt) {
@@ -5008,26 +4984,115 @@
 
   function captureEnter() {
     if (enterForSendMessage) {
-      getElementById('quickMsgDialog_msg')
-        .addEventListener('keypress', keypress);
+      dialogMsg.addEventListener('keypress', keypress);
+    }
+  }
+
+  function getValidateTips() {
+    if (!validateTips) {
+      var nodes = quickMsgDialog.getElementsByClassName('validateTips');
+      if (nodes.length === 1) {
+        validateTips = nodes[0];
+      }
+    }
+  }
+
+  function doValidateTip(text) {
+    getValidateTips();
+    if (validateTips) {
+      validateTips.textContent = text;
+    }
+  }
+
+  function addRow(index, myBtn, html) {
+    var newRow = msgTbl.insertRow(index);
+    var newCell = newRow.insertCell(-1);
+    insertHtmlBeforeEnd(newCell, myBtn);
+    newCell = newRow.insertCell(-1);
+    insertHtmlBeforeEnd(newCell, html);
+  }
+
+  function fshButton(classPrefix, label) {
+    return '<button class="fshButton ui-corner-all ' + classPrefix +
+      '-button">' + label + '</button>';
+  }
+
+  function addTemplateRow(index, text) {
+    addRow(index, fshButton('del', 'Del'),
+      '<span class="ui-widget-content fshBlck add-template">' +
+      text + '</span>');
+  }
+
+  function deleteTemplate(self) {
+    var myRow = self.parentNode.parentNode.rowIndex;
+    msgTbl.deleteRow(myRow);
+    fshTemplate.splice(myRow - 2, 1);
+    setValueJSON('quickMsg', fshTemplate);
+  }
+
+  function addNewTemplate(self) {
+    var templateInput = self.parentNode.nextElementSibling.children[0];
+    var templateValue = templateInput.value;
+    if (templateValue !== '') {
+      var myRow = self.parentNode.parentNode.rowIndex;
+      addTemplateRow(myRow, templateValue);
+      templateInput.value = '';
+      fshTemplate.push(templateValue);
+      setValueJSON('quickMsg', fshTemplate);
+    }
+  }
+
+  function insertTemplate(self) {
+    dialogMsg.value += self.textContent
+      .replace(/\{playername\}/g, targetPlayer) + '\n';
+  }
+
+  var myEvents = [
+    {
+      test: function(self) {return self.classList.contains('del-button');},
+      act: deleteTemplate
+    },
+    {
+      test: function(self) {return self.classList.contains('add-button');},
+      act: addNewTemplate
+    },
+    {
+      test: function(self) {return self.classList.contains('add-template');},
+      act: insertTemplate
+    }
+  ];
+
+  function showMsgTemplate() {
+    if (!showingTemplates) {
+      getTable();
+      fshTemplate.forEach(function(text) {
+        addTemplateRow(-1, text);
+      });
+      addRow(-1,
+        fshButton('add', 'Add'),
+        '<input id="newTmpl" class="ui-widget-content fshTmpl">');
+      showingTemplates = true;
+      msgTbl.addEventListener('click', eventHandler(myEvents));
+    }
+  }
+
+  function getFshTemplate() { // jQuery
+    if (!fshTemplate) {
+      fshTemplate = getValueJSON('quickMsg');
+      var buttons = $quickMessageDialog.dialog('option', 'buttons');
+      sendMessage = buttons['Send Message'];
     }
   }
 
   function openQuickMsgDialog(name, msg, tip) { // jQuery
-    if (!fshTemplate) {
-      fshTemplate = getValueJSON('quickMsg');
-      var buttons = $('#quickMessageDialog').dialog('option', 'buttons');
-      sendMessage = buttons['Send Message'];
-      buttons.Template = showMsgTemplate;
-      $('#quickMessageDialog').dialog('option', 'buttons', buttons);
-    }
-    $('#quickMsgDialog_targetUsername').html(name);
-    $('#quickMsgDialog_targetPlayer').val(name);
-    $('#quickMsgDialog_msg').val(fallback(msg, ''));
-    $('#quickMsgDialog_msg').removeAttr('disabled');
+    getQuickMessageDialog();
+    getFshTemplate();
+    showMsgTemplate();
+    setName(name);
+    setMsg(msg);
     captureEnter();
-    $('.validateTips').text(fallback(tip, ''));
-    $('#quickMessageDialog').dialog('open');
+    doValidateTip(fallback(tip, ''));
+    $quickMessageDialog.dialog('open');
   }
 
   function injectQuickMsgDialogJQ() {
@@ -10105,7 +10170,7 @@
     return deferred;
   }
 
-  function setName(e) { // jQuery
+  function setName$1(e) { // jQuery
     $('#fshInv').DataTable().search($(e.target).attr('set')).draw();
     $('#fshInv_filter input').focus();
   }
@@ -10169,7 +10234,7 @@
     $('#fshAll').click(allChecks);
     $('#fshNone').click(clearChecks);
     $('#fshDefault').click(resetChecks);
-    $('#fshInv').on('click', 'span.setName', setName);
+    $('#fshInv').on('click', 'span.setName', setName$1);
     $('#fshInv').on('click', 'span.takeItem', takeItem$1);
     $('#fshInv').on('click', 'span.recallItem', recallItem);
     $('#fshInv').on('click', 'span.wearItem', wearItem);
@@ -13213,7 +13278,7 @@
     }
   }
 
-  function addRow(theTitans, trackerTable, titan) {
+  function addRow$1(theTitans, trackerTable, titan) {
     if (theTitans[titan].coolTime < now) {return;}
     insertHtmlBeforeEnd(trackerTable,
       '<tr><td class="fshCenter">' + titan + '</td>' +
@@ -13230,7 +13295,7 @@
         '<td class="header fshCenter">Visible</td></tr>'
     });
     insertElement(trackerTable, tBody);
-    Object.keys(theTitans).forEach(addRow.bind(null, theTitans, tBody));
+    Object.keys(theTitans).forEach(addRow$1.bind(null, theTitans, tBody));
 
     var newRow = parentTable.insertRow(5);
     var newCell = newRow.insertCell(-1);
@@ -17355,10 +17420,12 @@
   function injectViewRecipe() { // Legacy
     var recipe = $('#pCC table table b').first();
     var name = recipe.html();
-    var searchName = recipe.html().replace(/ /g, '%20');
-    recipe.html('<a href="' + guideUrl +
-      'items&subcmd=view&search_name=' + searchName + '">' + name +
-      '</a>');
+    if (name) {
+      var searchName = name.replace(/ /g, '%20');
+      recipe.html('<a href="' + guideUrl +
+        'items&subcmd=view&search_name=' + searchName + '">' + name +
+        '</a>');
+    }
 
     var components = findNodes(
       '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
@@ -17725,7 +17792,7 @@
   var enableSeTracker = 'enableSeTracker';
   var trackerCell;
 
-  function addRow$1(trackerTable, se) {
+  function addRow$2(trackerTable, se) {
     insertHtmlBeforeEnd(trackerTable,
       '<tr><td class="fshCenter">' + se[0] + '</td>' +
       '<td class="fshBold fshCenter fshCooldown">' +
@@ -17739,7 +17806,7 @@
         '<td class="header fshCenter">Last Kill</td></tr>'
     });
     insertElement(trackerTable, tBody);
-    seAry.forEach(addRow$1.bind(null, tBody));
+    seAry.forEach(addRow$2.bind(null, tBody));
     return trackerTable;
   }
 
@@ -18316,11 +18383,11 @@
   }
 
   function iDefended(json) {
-    return json.r.is_defender && json.r.winner === 1;
+    return json.r.defender.id === playerId() && json.r.winner === 1;
   }
 
   function iAttacked(json) {
-    return !json.r.is_defender && json.r.winner === 0;
+    return json.r.attacker.id === playerId() && json.r.winner === 0;
   }
 
   function iWon(json) {
@@ -19130,7 +19197,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '14';
+  window.FSH.calf = '15';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

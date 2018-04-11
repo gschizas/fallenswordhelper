@@ -1,76 +1,47 @@
+import eventHandler from '../common/eventHandler';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import setValueJSON from '../system/setValueJSON';
 
 var enterForSendMessage;
+var quickMsgDialog;
+var $quickMessageDialog;
 var fshTemplate;
+var msgTbl;
 var sendMessage;
+var targetPlayer;
+var dialogMsg;
+var validateTips;
+var showingTemplates;
 
-function showMsgTemplate() { // jQuery
-  var targetPlayer = $('#quickMsgDialog_targetUsername').text();
-  $('#msgTemplateDialog').remove();
-
-  // template displayed
-  var html = '<div id=msgTemplateDialog title="Choose Msg Template" ' +
-    'style="display:none"><style>#msgTemplate .ui-selecting { ' +
-    'background: #FECA40; };</style><ol id=msgTemplate valign=center>';
-  for (var i = 0; i < fshTemplate.length; i += 1) {
-    html += '<li class="ui-widget-content">' +
-      fshTemplate[i].replace(/\{playername\}/g, targetPlayer) + '</li>';
+function getQuickMessageDialog() { // jQuery
+  if (!quickMsgDialog) {
+    quickMsgDialog = getElementById('quickMessageDialog');
   }
-  html += '</ol></div>';
-  $('body').append(html);
+  if (!$quickMessageDialog) {
+    $quickMessageDialog = $(quickMsgDialog);
+  }
+}
 
-  // template manager
-  $('#msgTemplate li').prepend('<input type=button class="del-button" ' +
-    'value=Del style="display:none">');
-  $('#msgTemplate').append('<li class="add-button" style="display:none">' +
-    '<input type=button id=newTmplAdd value=Add><input id=newTmpl ' +
-    'class=ui-widget-content></li>');
-  $(':button', '#msgTemplate').button();
-  $('.del-button').click(function(evt) {
-    fshTemplate.splice($('#msgTemplate li')
-      .index(evt.target.parentNode), 1);
-    setValueJSON('quickMsg', fshTemplate);
-    $('#msgTemplateDialog').dialog('close');
-    showMsgTemplate();
-  });
-  $('#newTmplAdd').click(function() {
-    if ($('#newTmpl').val() === '') {return;}
-    fshTemplate.push($('#newTmpl').val());
-    setValueJSON('quickMsg', fshTemplate);
-    $('#msgTemplateDialog').dialog('close');
-    showMsgTemplate();
-  });
+function getTable() {
+  if (!msgTbl) {
+    msgTbl = quickMsgDialog.lastElementChild;
+  }
+}
 
-  // enable selectable template
-  $('#msgTemplate').selectable({
-    filter: 'li.ui-widget-content',
-    stop: function() {
-      if ($('.add-button.ui-selected').length > 0) {return;} // click on add row
-      if ($('.ui-selected').length === 0) {return;} // nothing selected yet
-      $('#quickMsgDialog_msg').val($('#quickMsgDialog_msg').val() +
-        $('#msgTemplate .ui-selected').text() + '\n');
-      $('#msgTemplateDialog').dialog('close');
-    }
-  });
+function setName(name) {
+  targetPlayer = name;
+  getElementById('quickMsgDialog_targetUsername').textContent = name;
+}
 
-  // show the template form
-  $('#msgTemplateDialog').dialog({
-    buttons: {
-      Manage: function() {
-        $('.del-button').toggle();
-        $('.add-button').toggle();
-      },
-      Cancel: function() {
-        $('#msgTemplateDialog').dialog('close');
-        $('#msgTemplateDialog').remove();
-      }
-    }
-  });
+function setMsg(msg) {
+  dialogMsg = getElementById('quickMsgDialog_msg');
+  dialogMsg.value = fallback(msg, '');
+  dialogMsg.disabled = false;
 }
 
 function keypress(evt) {
@@ -82,26 +53,115 @@ function keypress(evt) {
 
 function captureEnter() {
   if (enterForSendMessage) {
-    getElementById('quickMsgDialog_msg')
-      .addEventListener('keypress', keypress);
+    dialogMsg.addEventListener('keypress', keypress);
+  }
+}
+
+function getValidateTips() {
+  if (!validateTips) {
+    var nodes = quickMsgDialog.getElementsByClassName('validateTips');
+    if (nodes.length === 1) {
+      validateTips = nodes[0];
+    }
+  }
+}
+
+function doValidateTip(text) {
+  getValidateTips();
+  if (validateTips) {
+    validateTips.textContent = text;
+  }
+}
+
+function addRow(index, myBtn, html) {
+  var newRow = msgTbl.insertRow(index);
+  var newCell = newRow.insertCell(-1);
+  insertHtmlBeforeEnd(newCell, myBtn);
+  newCell = newRow.insertCell(-1);
+  insertHtmlBeforeEnd(newCell, html);
+}
+
+function fshButton(classPrefix, label) {
+  return '<button class="fshButton ui-corner-all ' + classPrefix +
+    '-button">' + label + '</button>';
+}
+
+function addTemplateRow(index, text) {
+  addRow(index, fshButton('del', 'Del'),
+    '<span class="ui-widget-content fshBlck add-template">' +
+    text + '</span>');
+}
+
+function deleteTemplate(self) {
+  var myRow = self.parentNode.parentNode.rowIndex;
+  msgTbl.deleteRow(myRow);
+  fshTemplate.splice(myRow - 2, 1);
+  setValueJSON('quickMsg', fshTemplate);
+}
+
+function addNewTemplate(self) {
+  var templateInput = self.parentNode.nextElementSibling.children[0];
+  var templateValue = templateInput.value;
+  if (templateValue !== '') {
+    var myRow = self.parentNode.parentNode.rowIndex;
+    addTemplateRow(myRow, templateValue);
+    templateInput.value = '';
+    fshTemplate.push(templateValue);
+    setValueJSON('quickMsg', fshTemplate);
+  }
+}
+
+function insertTemplate(self) {
+  dialogMsg.value += self.textContent
+    .replace(/\{playername\}/g, targetPlayer) + '\n';
+}
+
+var myEvents = [
+  {
+    test: function(self) {return self.classList.contains('del-button');},
+    act: deleteTemplate
+  },
+  {
+    test: function(self) {return self.classList.contains('add-button');},
+    act: addNewTemplate
+  },
+  {
+    test: function(self) {return self.classList.contains('add-template');},
+    act: insertTemplate
+  }
+];
+
+function showMsgTemplate() {
+  if (!showingTemplates) {
+    getTable();
+    fshTemplate.forEach(function(text) {
+      addTemplateRow(-1, text);
+    });
+    addRow(-1,
+      fshButton('add', 'Add'),
+      '<input id="newTmpl" class="ui-widget-content fshTmpl">');
+    showingTemplates = true;
+    msgTbl.addEventListener('click', eventHandler(myEvents));
+  }
+}
+
+function getFshTemplate() { // jQuery
+  if (!fshTemplate) {
+    fshTemplate = getValueJSON('quickMsg');
+    var buttons = $quickMessageDialog.dialog('option', 'buttons');
+    sendMessage = buttons['Send Message'];
   }
 }
 
 function openQuickMsgDialog(name, msg, tip) { // jQuery
-  if (!fshTemplate) {
-    fshTemplate = getValueJSON('quickMsg');
-    var buttons = $('#quickMessageDialog').dialog('option', 'buttons');
-    sendMessage = buttons['Send Message'];
-    buttons.Template = showMsgTemplate;
-    $('#quickMessageDialog').dialog('option', 'buttons', buttons);
-  }
-  $('#quickMsgDialog_targetUsername').html(name);
-  $('#quickMsgDialog_targetPlayer').val(name);
-  $('#quickMsgDialog_msg').val(fallback(msg, ''));
-  $('#quickMsgDialog_msg').removeAttr('disabled');
+  getQuickMessageDialog();
+  getFshTemplate();
+  showMsgTemplate();
+  setName(name);
+  setMsg(msg);
   captureEnter();
-  $('.validateTips').text(fallback(tip, ''));
-  $('#quickMessageDialog').dialog('open');
+  doValidateTip(fallback(tip, ''));
+  $quickMessageDialog.dialog('open');
 }
 
 export default function injectQuickMsgDialogJQ() {

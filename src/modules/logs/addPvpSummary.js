@@ -5,6 +5,7 @@ import getForage from '../ajax/getForage';
 import insertElement from '../common/insertElement';
 import {nowSecs} from '../support/constants';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import playerId from '../common/playerId';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
@@ -23,11 +24,11 @@ function result(stat, desc, color) {
 }
 
 function iDefended(json) {
-  return json.r.is_defender && json.r.winner === 1;
+  return json.r.defender.id === playerId() && json.r.winner === 1;
 }
 
 function iAttacked(json) {
-  return !json.r.is_defender && json.r.winner === 0;
+  return json.r.attacker.id === playerId() && json.r.winner === 0;
 }
 
 function iWon(json) {
