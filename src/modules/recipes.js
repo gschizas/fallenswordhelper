@@ -102,10 +102,12 @@ function linkFromMouseoverCustom(mouseOver) { // Legacy
 function injectViewRecipe() { // Legacy
   var recipe = $('#pCC table table b').first();
   var name = recipe.html();
-  var searchName = recipe.html().replace(/ /g, '%20');
-  recipe.html('<a href="' + guideUrl +
-    'items&subcmd=view&search_name=' + searchName + '">' + name +
-    '</a>');
+  if (name) {
+    var searchName = name.replace(/ /g, '%20');
+    recipe.html('<a href="' + guideUrl +
+      'items&subcmd=view&search_name=' + searchName + '">' + name +
+      '</a>');
+  }
 
   var components = findNodes(
     '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
