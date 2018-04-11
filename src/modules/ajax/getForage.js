@@ -3,21 +3,27 @@
 import {sendException} from '../support/fshGa';
 import stringifyError from '../common/stringifyError';
 
+function getForageError(forage, err) {
+  if (err.name === 'UnknownError') {
+    $('#dialog_msg').html('Firefox IndexedDB - UnknownError<br>' +
+      err.message + '<br>' +
+      '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
+      'More Info</a>').dialog('open');
+  } else {
+    sendException(forage + ' localforage.getItem error ' +
+      stringifyError(err), false);
+  }
+}
+
 function forageGet(forage, dfr) {
-  localforage.getItem(forage).then(function(data) {
-    // returns null if key does not exist
-    dfr.resolve(data);
-  }).catch(function(err) {
-    if (err.name === 'UnknownError') {
-      $('#dialog_msg').html('Firefox IndexedDB - UnknownError<br>' +
-        err.message + '<br>' +
-        '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
-        'More Info</a>').dialog('open');
+  localforage.getItem(forage, function getItemCallback(err, data) {
+    if (err) {
+      getForageError(forage, err);
+      dfr.reject(err);
     } else {
-      sendException(forage + ' localforage.getItem error ' +
-        stringifyError(err), false);
+      // returns null if key does not exist
+      dfr.resolve(data);
     }
-    dfr.reject(err);
   });
 }
 
