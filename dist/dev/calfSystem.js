@@ -10385,113 +10385,159 @@
     syncInvMan();
   }
 
-  function showError(data) { // jQuery
-    var $tempError = $('#temp_error');
-    $tempError.html('<span style="color: red">Error:</span> ' + data.m);
-    $tempError.show().delay(5000).hide(400);
-  }
-
-  function failHndlr(jqXHR) {
-    showError({m: jqXHR.status + ' ' + jqXHR.statusText});
-  }
-
-  function quickDoneTaken(data) { // jQuery
-    if (data.r !== 0) {
-      showError(data);
-    } else {
-      var qtipId = $('#temp-inv-img-' + data.temp_id).data('hasqtip');
-      $('#temp-inv-' + data.temp_id).remove();
-      $('#qtip-' + qtipId).remove();
-    }
-    outputResult('Item taken.', getElementById('take_result'));
-  }
-
-  function takeAllSimilar(evt) { // jQuery.min
-    var invIds = evt.target.getAttribute('invIDs').split(',');
-    evt.target.parentNode.innerHTML = 'taking all ' +
-      invIds.length + ' items';
-    invIds.forEach(function(invId) {
-      retryAjax({
-        type: 'POST',
-        url: 'index.php',
-        data: {
-          cmd: 'tempinv',
-          subcmd: 'takeitem',
-          temp_id: invId,
-          ajax: '1'
-        },
-        dataType: 'json'
-      }).done(quickDoneTaken).fail(failHndlr);
+  function takeitems(invIdAry) {
+    return callApp({
+      cmd: 'tempinv',
+      subcmd: 'takeitems',
+      item: invIdAry
     });
   }
 
-  function toggleQuickTake() { // jQuery
-    if ($('#currentMBDisplay').attr('value') === 'mailbox') {
-      $('#mailboxSwitcher').html('Toggle Mailbox');
-      $('#quickTake').css('display', 'block');
-      $('#regularMailbox').css('display', 'none');
-      $('#currentMBDisplay').attr('value', 'quicktake');
+  function makeQtLabel(id, text, injector) {
+    var lbl = createLabel({
+      id: id,
+      className: 'sendLink',
+      htmlFor: 'fshQuickTake',
+      textContent: 'Toggle ' + text
+    });
+    insertElementBefore(lbl, injector);
+    return lbl;
+  }
+
+  function reduceItems(prev, curr) {
+    var img = curr.children[0];
+    var tipped = img.dataset.tipped;
+    var itemIDs = itemRE.exec(tipped);
+    if (!itemIDs) {return prev;}
+    var itemId = itemIDs[1];
+    var invId = itemIDs[2];
+    if (prev[itemId]) {
+      prev[itemId].invIds.push(invId);
     } else {
-      $('#mailboxSwitcher').html('Toggle Quick Take');
-      $('#quickTake').css('display', 'none');
-      $('#regularMailbox').css('display', 'block');
-      $('#currentMBDisplay').attr('value', 'mailbox');
+      prev[itemId] = {
+        invIds: [invId],
+        tipped: tipped.replace(/&extra=\d/, ''),
+        src: img.src
+      };
+    }
+    return prev;
+  }
+
+  function basicQt() {
+    return createDiv({
+      id: 'quickTake',
+      innerHTML: '<div class="fshCenter">' +
+        '<br><font size="3"><b>Quick Take</b></font><br><br>' +
+        'Select which item to take all similar items from your Mailbox.' +
+      '</div><div></div>'
+    });
+  }
+
+  function makeTakeResult(qt) {
+    var takeContainer = createDiv();
+    var takeResult = createUl();
+    insertElement(takeContainer, takeResult);
+    insertElement(qt, takeContainer);
+    return takeResult;
+  }
+
+  function makeItemBox(itemTbl, id, item) {
+    var container = createDiv();
+    var itemDiv = createDiv({
+      innerHTML: '<img src="' + item.src + '" class="tip-dynamic" ' +
+        'data-tipped="' + item.tipped + '">'
+    });
+    insertElement(container, itemDiv);
+    var buttonDiv = createDiv({
+      innerHTML: '<button class="fshBl fshBls" data-id="' + id +
+        '">Take All ' + item.invIds.length + '</button>'
+    });
+    insertElement(container, buttonDiv);
+    insertElement(itemTbl, container);
+  }
+
+  function makeItemBoxes(itemTbl, itemList) {
+    Object.entries(itemList).forEach(function(pair) {
+      makeItemBox(itemTbl, pair[0], pair[1]);
+    });
+  }
+
+  function removeImg(itemId) { // jQuery
+    var qtipApi = $('#temp-inv-img-' + itemId).qtip('api');
+    if (qtipApi) {qtipApi.destroy(true);}
+    var thisCell = getElementById('temp-inv-' + itemId);
+    while (thisCell.firstChild) {thisCell.removeChild(thisCell.firstChild);}
+  }
+
+  function takeSuccess(takeResult, json) {
+    json.r.forEach(removeImg);
+    outputResult(json.r.length.toString() + ' item(s) taken.', takeResult);
+  }
+
+  function doneTake(takeResult) {
+    return function(json) {
+      if (jsonFail(json, takeResult)) {return;}
+      takeSuccess(takeResult, json);
+    };
+  }
+
+  function takeSimilar(itemList, takeResult, self) { // jQuery.min
+    var type = self.dataset.id;
+    var invIds = itemList[type].invIds;
+    self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
+    for (var i = 0; i < invIds.length; i += 50) {
+      takeitems(invIds.slice(i, i + 50)).done(doneTake(takeResult));
     }
   }
 
-  function injectMailbox() { // Bad jQuery
-    if (jQueryNotPresent()) {return;}
-    var items = $('#pCC a');
-    if (items.length === 0) {return;} // Empty mailbox
-    $('#pCC').wrapInner('<div id="regularMailbox" />');
-    var quickTakeDiv = '<div id="quickTake" style="display:none"><br />' +
-      '<br /><center><font size="3"><b>Quick Take</b></font>' +
-      '<br />Select which item to take all similar items from your ' +
-      'Mailbox.<br /></center>' +
-      '<table id="quickTakeTable" align="left"><tr><th width=20%>' +
-      'Actions</th><th>Items</th></tr><tr><td id="take_result" ' +
-      'colspan=2></td></tr></table>' +
-      '</div>';
-    $('#pCC').prepend('<span id="mailboxSwitcher" ' +
-      'style="cursor:pointer; text-decoration:underline; ' +
-      'color:blue;">Toggle Quick Take</span><input type="hidden" ' +
-      'id="currentMBDisplay" value="mailbox" />' + quickTakeDiv);
-    var itemList = {};
-    $('#regularMailbox img[data-tipped*="t=5"]').each(function(i, e) {
-      var itemIDs = itemRE.exec($(e).attr('data-tipped'));
-      if (!itemIDs) {return;}
-      var itemId = itemIDs[1];
-      var invId = itemIDs[2];
-      var tipped = $(e).attr('data-tipped');
-      var src = $(e).attr('src');
-      if (!itemList[itemId]) {
-        var invIds = [];
-        invIds.push(invId);
-        itemList[itemId] = {
-          invIds: invIds,
-          tipped: tipped,
-          src: src
-        };
-      } else {
-        itemList[itemId].invIds.push(invId);
+  function clickEvt(itemList, takeResult) {
+    return function(evt) {
+      if (evt.target.classList.contains('fshBls')) {
+        takeSimilar(itemList, takeResult, evt.target);
       }
+    };
+  }
+
+  function makeQtDiv(itemList) {
+    var qt = basicQt();
+    var takeResult = makeTakeResult(qt);
+    insertElement(qt, createDiv());
+    var itemTbl = createDiv({className: 'fshTakeGrid'});
+    makeItemBoxes(itemTbl, itemList);
+    insertElement(qt, itemTbl);
+    itemTbl.addEventListener('click', clickEvt(itemList, takeResult));
+    insertElement(pCC, qt);
+  }
+
+  function toggleQuickTake(items, injector) {
+    makeQtLabel('qtOn', 'Mailbox', injector);
+    var itemList = Array.prototype.reduce.call(items, reduceItems, {});
+    makeQtDiv(itemList);
+  }
+
+  function onchange(qtCheckbox, items, injector) {
+    return function changeHdl() {
+      qtCheckbox.removeEventListener('change', changeHdl);
+      toggleQuickTake(items, injector);
+    };
+  }
+
+  function makeQtCheckbox(items, injector) {
+    var qtCheckbox = createInput({
+      id: 'fshQuickTake',
+      type: 'checkbox'
     });
-    var quickTakeTable = $('#quickTakeTable');
-    Object.keys(itemList).forEach(function(id) {
-      var titem = itemList[id];
-      quickTakeTable.append('<tr><td align=center>' +
-        '<span style="cursor:pointer; text-decoration:underline; ' +
-        'color:blue; font-size:x-small;" ' +
-        'id="Helper:takeAllSimilar' + id + '" invIDs="' + titem.invIds.join() +
-        '">Take All ' + titem.invIds.length + '</span></td>' +
-        '<td><img src="' + titem.src +
-        '" class="tip-dynamic" border="0" data-tipped="' +
-        titem.tipped + '"></td></tr>');
-      getElementById('Helper:takeAllSimilar' + id)
-        .addEventListener('click', takeAllSimilar, true);
-    });
-    getElementById('mailboxSwitcher')
-      .addEventListener('click', toggleQuickTake, true);
+    insertElementBefore(qtCheckbox, injector);
+    qtCheckbox.addEventListener('change', onchange(qtCheckbox, items, injector));
+  }
+
+  function injectMailbox() {
+    if (jQueryNotPresent()) {return;}
+    var items = pCC.getElementsByTagName('a');
+    if (items.length === 0) {return;} // Empty mailbox
+    var injector = pCC.lastElementChild;
+    makeQtCheckbox(items, injector);
+    makeQtLabel('qtOff', 'Quick Take', injector);
   }
 
   var currentPlayerId$1;
@@ -19197,7 +19243,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '15';
+  window.FSH.calf = '16';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
