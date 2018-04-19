@@ -1,3 +1,19 @@
+/* Mailbox */
+#fshQuickTake,
+#fshQuickTake:checked ~ form,
+#fshQuickTake ~ #qtOn,
+#fshQuickTake:checked ~ #qtOff,
+#fshQuickTake ~ #quickTake {
+  display: none;
+}
+#fshQuickTake:checked ~ #qtOn,
+#fshQuickTake:checked ~ #quickTake {
+  display: block;
+}
+#quickTake > div:nth-child(2),
+#quickTake > div:nth-child(4) {height: 10px;}
+.fshTakeGrid > div > div:nth-child(2) {text-align: center;}
+
 /* Messaging */
 .fshButton {
   background: #fece2f url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_60_fece2f_500x100.png) 50% 50% repeat-x;
@@ -95,6 +111,7 @@
 }
 
 /* Crafting & Forging */
+.fshTakeGrid,
 .fshItemGrid {
   display: grid;
   grid-gap: 2px;
@@ -102,6 +119,7 @@
   justify-content: center;
 }
 
+.fshTakeGrid div div:nth-child(1),
 .fshItemGrid div {
   align-items: center;
   background: url('https://cdn.fallensword.com/inventory/2x3.gif');
