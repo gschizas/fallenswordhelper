@@ -1,6 +1,7 @@
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
+import isFunction from '../common/isFunction';
 import {itemRE} from '../support/constants';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonFail from '../common/jsonFail';
@@ -123,10 +124,14 @@ function makeQtDiv(itemList) {
   var qt = basicQt();
   var takeResult = makeTakeResult(qt);
   insertElement(qt, createDiv());
-  var itemTbl = createDiv({className: 'fshTakeGrid'});
-  makeItemBoxes(itemTbl, itemList);
-  insertElement(qt, itemTbl);
-  itemTbl.addEventListener('click', clickEvt(itemList, takeResult));
+  if (isFunction(Object.entries)) {
+    var itemTbl = createDiv({className: 'fshTakeGrid'});
+    makeItemBoxes(itemTbl, itemList);
+    insertElement(qt, itemTbl);
+    itemTbl.addEventListener('click', clickEvt(itemList, takeResult));
+  } else {
+    takeResult.textContent = 'Your browser is not supported.';
+  }
   insertElement(pCC, qt);
 }
 
