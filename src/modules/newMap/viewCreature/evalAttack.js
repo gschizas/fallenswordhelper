@@ -1,4 +1,3 @@
-
 function calcAttack(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupAttackValue;
@@ -36,5 +35,4 @@ export default function evalAttack(combat) {
     combat.counterAttackBonusAttack -
     combat.nightmareVisageAttackMovedToDefense;
   combat.hitByHowMuch = calcHitByHowMuch(combat);
-  return combat;
 }

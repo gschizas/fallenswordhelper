@@ -95,7 +95,7 @@ function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
     'data-tipped="' + bioTip + '">' + innerPlayerName + '</a>' +
     '&nbsp;<span class="fshBlue">[<span class="a-reply fshLink" ' +
     'target_player="' + innerPlayerName + '">m</span>]</span></nobr><br>' +
-    '<span class="fshGray">Level:&nbsp;</span>' + levelValue +
+    '<span class="fshGrey">Level:&nbsp;</span>' + levelValue +
     '&nbsp;(' + virtualLevelValue + ')';
 }
 

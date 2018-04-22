@@ -1101,8 +1101,12 @@
     });
   }
 
+  function guild(data) {
+    return callApp(extend({cmd: 'guild'}, data));
+  }
+
   function guildManage() {
-    return callApp({cmd: 'guild', subcmd: 'manage'});
+    return guild({subcmd: 'manage'});
   }
 
   function jQueryPresent() {return isFunction(window.$);}
@@ -1272,7 +1276,7 @@
   var gxp = 6;
 
   var oldArchive;
-  var guild;
+  var guild$1;
 
   function pushNewRecord(member) {
     oldArchive.members[member.name].push([
@@ -1342,7 +1346,7 @@
 
   function doMerge() { // jQuery.min
     var newArchive = {lastUpdate: nowSecs, members: {}};
-    guild.r.ranks.forEach(function(rank) {
+    guild$1.r.ranks.forEach(function(rank) {
       rank.members.forEach(processMemberRecord.bind(null, newArchive));
     });
     setForage('fsh_guildActivity', newArchive);
@@ -1350,7 +1354,7 @@
 
   function gotGuild(data) {
     if (data && data.r) {
-      guild = data;
+      guild$1 = data;
       doMerge();
     }
   }
@@ -2624,9 +2628,12 @@
     if (!json.s) {return true;}
   }
 
+  function profile(data) {
+    return callApp(extend({cmd: 'profile'}, data));
+  }
+
   function useitem(item) {
-    return callApp({
-      cmd: 'profile',
+    return profile({
       subcmd: 'useitem',
       inventory_id: item
     });
@@ -2867,7 +2874,7 @@
   }
 
   function loadInventory() {
-    return callApp({cmd: 'profile', subcmd: 'loadinventory'});
+    return profile({subcmd: 'loadinventory'});
   }
 
   function ahLink(searchname, nickname) {
@@ -4176,7 +4183,7 @@
       'data-tipped="' + bioTip + '">' + innerPlayerName + '</a>' +
       '&nbsp;<span class="fshBlue">[<span class="a-reply fshLink" ' +
       'target_player="' + innerPlayerName + '">m</span>]</span></nobr><br>' +
-      '<span class="fshGray">Level:&nbsp;</span>' + levelValue +
+      '<span class="fshGrey">Level:&nbsp;</span>' + levelValue +
       '&nbsp;(' + virtualLevelValue + ')';
   }
 
@@ -6163,7 +6170,7 @@
     }
   }
 
-  function profile() {
+  function profile$1() {
     if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
     location.href = 'index.php?cmd=profile';
   }
@@ -6193,7 +6200,7 @@
     '103': {fn: gotoGuild}, // go to guild [g]
     '106': {fn: joinAllGroup}, // join all group [j]
     '108': {fn: logPage}, // Log Page [l]
-    '112': {fn: profile}, // profile [p]
+    '112': {fn: profile$1}, // profile [p]
     '114': {fn: doRepair}, // repair [r]
     '118': {fn: fastWearMgr}, // fast wear manager [v]
     '121': {fn: doSendGold}, // fast send gold [y]
@@ -9102,10 +9109,12 @@
     add(4, guildTracker);
   }
 
+  function guildInventory$1(data) {
+    return guild(extend({subcmd: 'inventory'}, data));
+  }
+
   function takeitem(invId) {
-    return callApp({
-      cmd: 'guild',
-      subcmd: 'inventory',
+    return guildInventory$1({
       subcmd2: 'takeitem',
       guildstore_id: invId, // + 10000000,
     }).pipe(errorDialog);
@@ -9961,9 +9970,7 @@
   }
 
   function dostoreitems(invIdAry) {
-    return callApp({
-      cmd: 'guild',
-      subcmd: 'inventory',
+    return guildInventory$1({
       subcmd2: 'dostoreitems',
       storeIndex: invIdAry
     }).pipe(errorDialog);
@@ -10058,9 +10065,7 @@
 
   function recall(invId, playerId, mode) {
     // return failStub();
-    return callApp({
-      cmd: 'guild',
-      subcmd: 'inventory',
+    return guildInventory$1({
       subcmd2: 'recall',
       id: invId, // + 10000000,
       player_id: playerId,
@@ -11293,8 +11298,7 @@
   }
 
   function unequipitem(item) {
-    return callApp({
-      cmd: 'profile',
+    return profile({
       subcmd: 'unequipitem',
       inventory_id: item
     });
@@ -14158,36 +14162,7 @@
   }
 
   function guildView(guildId) {
-    return callApp({cmd: 'guild', subcmd: 'view', guild_id: guildId});
-  }
-
-  function getStat(stat, doc) { // jQuery
-    // 'Hidden' returns NaN
-    return intValue(
-      $(stat, doc)
-        .contents()
-        .filter(function(i, e) {
-          return e.nodeType === 3;
-        })[0].nodeValue
-    );
-  }
-
-  function getBuffLevel(doc, buff) { // jQuery
-    var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
-      .data('tipped');
-    // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
-    var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
-    if (test) {return intValue(test[1]);}
-    return 0;
-  }
-
-  function getBonus(stat, doc) { // jQuery
-    var target = $(stat, doc);
-    var children = target.children();
-    if (children.length === 0) {
-      children = target.next();
-    }
-    return intValue(children.text().slice(2, -1));
+    return guild({subcmd: 'view', guild_id: guildId});
   }
 
   function cloakGuess(bonus, level) {
@@ -14206,98 +14181,50 @@
     obj.hpValue = obj.hpBonus;
   }
 
-  function attackValueIsNumber(atk) {
-    return typeof atk === 'number' && !isNaN(atk);
+  function importStats(obj, json) {
+    obj.levelValue = json.level;
+    obj.attackValue = json.attack;
+    obj.attackBonus = json.bonus_attack;
+    obj.defenseValue = json.defense;
+    obj.defenseBonus = json.bonus_defense;
+    obj.armorValue = json.armor;
+    obj.armorBonus = json.bonus_armor;
+    obj.damageValue = json.damage;
+    obj.damageBonus = json.bonus_damage;
+    obj.hpValue = json.hp;
+    obj.hpBonus = json.bonus_hp;
+    obj.killStreakValue = Number(json.killstreak);
   }
 
-  function playerDataString(responseText) {
-    var doc = createDocument(responseText);
-    var obj = {
-      levelValue: getStat('#stat-vl', doc),
-      attackValue: getStat('#stat-attack', doc),
-      attackBonus: getBonus('#stat-attack', doc),
-      defenseValue: getStat('#stat-defense', doc),
-      defenseBonus: getBonus('#stat-defense', doc),
-      armorValue: getStat('#stat-armor', doc),
-      armorBonus: getBonus('#stat-armor', doc),
-      damageValue: getStat('#stat-damage', doc),
-      damageBonus: getBonus('#stat-damage', doc),
-      hpValue: getStat('#stat-hp', doc),
-      hpBonus: getBonus('#stat-hp', doc),
-      killStreakValue: getStat('#stat-kill-streak', doc),
-      // get buffs here later ... DD, CA, DC, Constitution, etc
-      counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
-      doublerLevel: getBuffLevel(doc, 'Doubler'),
-      deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
-      darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
-      holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
-      constitutionLevel: getBuffLevel(doc, 'Constitution'),
-      sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
-      flinchLevel: getBuffLevel(doc, 'Flinch'),
-      nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
-      superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
-      fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
-      chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
-      terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
-      barricadeLevel: getBuffLevel(doc, 'Barricade'),
-      reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
-      anchoredLevel: getBuffLevel(doc, 'Anchored'),
-      severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
-      entrenchLevel: getBuffLevel(doc, 'Entrench'),
-      cloakLevel: getBuffLevel(doc, 'Cloak')
-    };
-    obj.superEliteSlayerMultiplier = Math.round(0.002 *
-      obj.superEliteSlayerLevel * 100) / 100;
-
-    if (obj.cloakLevel === 0 ||
-        attackValueIsNumber(obj.attackValue)) {
-      return obj;
-    }
-
-    updateForCloak(obj);
-    return obj;
-  }
-
-  function getBuffLvl(buffs, buff) {
-    return fallback(buffs[buff], 0);
+  function importBuffs(obj, buffs) {
+    obj.counterAttackLevel = fallback(buffs['Counter Attack'], 0);
+    obj.doublerLevel = fallback(buffs.Doubler, 0);
+    obj.deathDealerLevel = fallback(buffs['Death Dealer'], 0);
+    obj.darkCurseLevel = fallback(buffs['Dark Curse'], 0);
+    obj.holyFlameLevel = fallback(buffs['Holy Flame'], 0);
+    obj.constitutionLevel = fallback(buffs.Constitution, 0);
+    obj.sanctuaryLevel = fallback(buffs.Sanctuary, 0);
+    obj.flinchLevel = fallback(buffs.Flinch, 0);
+    obj.nightmareVisageLevel = fallback(buffs['Nightmare Visage'], 0);
+    obj.superEliteSlayerLevel = fallback(buffs['Super Elite Slayer'], 0);
+    obj.fortitudeLevel = fallback(buffs.Fortitude, 0);
+    obj.chiStrikeLevel = fallback(buffs['Chi Strike'], 0);
+    obj.terrorizeLevel = fallback(buffs.Terrorize, 0);
+    obj.barricadeLevel = fallback(buffs.Barricade, 0);
+    obj.reignOfTerrorLevel = fallback(buffs['Reign Of Terror'], 0);
+    obj.anchoredLevel = fallback(buffs.Anchored, 0);
+    obj.severeConditionLevel = fallback(buffs['Severe Condition'], 0);
+    obj.entrenchLevel = fallback(buffs.Entrench, 0);
+    obj.cloakLevel = fallback(buffs.Cloak, 0);
   }
 
   function playerDataObject(json) {
     var buffs = reduceBuffArray(json._skills);
-    var obj = {
-      levelValue: json.level,
-      attackValue: json.attack,
-      attackBonus: json.bonus_attack,
-      defenseValue: json.defense,
-      defenseBonus: json.bonus_defense,
-      armorValue: json.armor,
-      armorBonus: json.bonus_armor,
-      damageValue: json.damage,
-      damageBonus: json.bonus_damage,
-      hpValue: json.hp,
-      hpBonus: json.bonus_hp,
-      killStreakValue: intValue(json.killstreak),
-      // get buffs here later ... DD, CA, DC, Constitution, etc
-      counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
-      doublerLevel: getBuffLvl(buffs, 'Doubler'),
-      deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
-      darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
-      holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
-      constitutionLevel: getBuffLvl(buffs, 'Constitution'),
-      sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
-      flinchLevel: getBuffLvl(buffs, 'Flinch'),
-      nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
-      superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
-      fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
-      chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
-      terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
-      barricadeLevel: getBuffLvl(buffs, 'Barricade'),
-      reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
-      anchoredLevel: getBuffLvl(buffs, 'Anchored'),
-      severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
-      entrenchLevel: getBuffLvl(buffs, 'Entrench'),
-      cloakLevel: getBuffLvl(buffs, 'Cloak')
-    };
+    var obj = {};
+    importStats(obj, json);
+    importBuffs(obj, buffs);
+    obj.superEliteSlayerMultiplier = Math.round(0.002 *
+      obj.superEliteSlayerLevel * 100) / 100;
     if (obj.cloakLevel !== 0) {updateForCloak(obj);}
     return obj;
   }
@@ -15676,7 +15603,7 @@
   }
 
   function scouttower() {
-    return callApp({cmd: 'guild', subcmd: 'scouttower'});
+    return guild({subcmd: 'scouttower'});
   }
 
   var timeoutId$1;
@@ -16050,693 +15977,7 @@
     $.subscribe('prompt.worldDialogShop', worldDialogShop);
   }
 
-  function evalMiss(combat) {
-    if (combat.numberOfCreatureHitsTillDead - combat.numberOfHitsRequired <= 1) {
-      return ', dies on miss';
-    }
-    return ', survives a miss';
-  }
-
-  function canIHit(combat) {
-    return combat.numberOfHitsRequired === '-' ||
-      combat.numberOfHitsRequired > combat.numberOfCreatureHitsTillDead;
-  }
-
-  function evalPlayerHits(combat) {
-    if (combat.numberOfCreatureHitsTillDead === '-') {
-      return combat.numberOfHitsRequired;
-    } else if (canIHit(combat)) {
-      return '-';
-    }
-    return combat.numberOfHitsRequired;
-  }
-
-  function canCreatureHit(combat) {
-    return combat.numberOfCreatureHitsTillDead === '-' ||
-      combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired;
-  }
-
-  function evalCreatureHits(combat) {
-    if (combat.numberOfHitsRequired === '-') {
-      return combat.numberOfCreatureHitsTillDead;
-    } else if (canCreatureHit(combat)) {
-      return '-';
-    }
-    return combat.numberOfCreatureHitsTillDead;
-  }
-
-  var evalFightStatus = [
-    {
-      test: function(combat) {
-        return combat.playerHits === '-' && combat.creatureHits === '-';
-      },
-      fStatus: function() {return 'Unresolved';}
-    },
-    {
-      test: function(combat) {return combat.playerHits === '-';},
-      fStatus: function() {return 'Player dies';}
-    },
-    {
-      test: function(combat) {return combat.playerHits === 1;},
-      fStatus: function(combat) {return 'Player 1 hits' + evalMiss(combat);}
-    },
-    {
-      test: function(combat) {return combat.playerHits > 1;},
-      fStatus: function(combat) {return 'Player > 1 hits' + evalMiss(combat);}
-    }
-  ];
-
-  function evalAnalysis(combat) {
-    // Analysis:
-    combat.playerHits = evalPlayerHits(combat);
-    combat.creatureHits = evalCreatureHits(combat);
-    for (var i = 0; i < evalFightStatus.length; i += 1) {
-      if (evalFightStatus[i].test(combat)) {
-        combat.fightStatus = evalFightStatus[i].fStatus(combat);
-        return combat;
-      }
-    }
-    combat.fightStatus = 'Unknown';
-    return combat;
-  }
-
-  function calcArm(combat) {
-    if (combat.callback.groupExists) {
-      return combat.callback.groupArmorValue;
-    }
-    return combat.player.armorValue;
-  }
-
-  function evalSanctuary(combat) {
-    if (combat.player.sanctuaryLevel > 0) {
-      combat.extraNotes += 'Sanc Bonus Armor = ' +
-        Math.floor(combat.player.armorValue *
-        combat.player.sanctuaryLevel * 0.001) + '<br>';
-    }
-  }
-
-  function evalTerrorize(combat) {
-    if (combat.player.terrorizeLevel > 0) {
-      combat.extraNotes += 'Terrorize Creature Damage Effect = ' +
-        combat.terrorizeEffect * -1 + '<br>';
-    }
-  }
-
-  function evalArmour(combat) {
-    var armorVal = calcArm(combat);
-    combat.overallArmorValue = armorVal +
-      Math.floor(combat.player.armorValue *
-      combat.player.sanctuaryLevel * 0.001);
-
-    evalSanctuary(combat);
-
-    combat.terrorizeEffect = Math.floor(combat.creature.damage *
-      combat.player.terrorizeLevel * 0.001);
-
-    evalTerrorize(combat);
-
-    combat.creature.damage -= combat.terrorizeEffect;
-    combat.creatureDamageDone = Math.ceil(combat.generalVariable *
-      combat.creature.damage - combat.overallArmorValue +
-      combat.overallHPValue);
-
-    if (combat.creatureHitByHowMuch >= 0) {
-      var approxDmg = combat.generalVariable * combat.creature.damage;
-      if (approxDmg < combat.overallArmorValue) {
-        combat.numberOfCreatureHitsTillDead = combat.overallHPValue;
-      } else {
-        combat.numberOfCreatureHitsTillDead = Math.ceil(
-          combat.overallHPValue / (approxDmg - combat.overallArmorValue));
-      }
-    } else {
-      combat.numberOfCreatureHitsTillDead = '-';
-    }
-
-    return combat;
-  }
-
-  function calcAttack(combat) {
-    if (combat.callback.groupExists) {
-      return combat.callback.groupAttackValue;
-    }
-    return combat.player.attackValue;
-  }
-
-  function calcHitByHowMuch(combat) {
-    var remainingDef = combat.creature.defense - combat.creature.defense *
-      combat.player.darkCurseLevel * 0.002;
-    if (combat.combatEvaluatorBias === 3) {
-      return combat.overallAttackValue - Math.ceil(remainingDef) - 50;
-    }
-    return combat.overallAttackValue -
-      Math.ceil(combat.attackVariable * remainingDef);
-  }
-
-  function evalAttack(combat) {
-    var atkValue = calcAttack(combat);
-    // Attack:
-    if (combat.player.darkCurseLevel > 0) {
-      combat.extraNotes += 'DC Bonus Attack = ' +
-        Math.floor(combat.creature.defense *
-        combat.player.darkCurseLevel * 0.002) + '<br>';
-    }
-    combat.nightmareVisageAttackMovedToDefense =
-      Math.floor((atkValue +
-      combat.counterAttackBonusAttack) *
-      combat.player.nightmareVisageLevel * 0.0025);
-    if (combat.player.nightmareVisageLevel > 0) {
-      combat.extraNotes += 'NMV Attack moved to Defense = ' +
-        combat.nightmareVisageAttackMovedToDefense + '<br>';
-    }
-    combat.overallAttackValue = atkValue +
-      combat.counterAttackBonusAttack -
-      combat.nightmareVisageAttackMovedToDefense;
-    combat.hitByHowMuch = calcHitByHowMuch(combat);
-    return combat;
-  }
-
-  function caIsRunning(combat) {
-    return combat.player.counterAttackLevel > 0 &&
-      combat.numberOfHitsRequired === 1;
-  }
-
-  function calcLowest(combat) {
-    combat.lowestCALevelToStillHit = Math.max(Math.ceil((
-      combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
-      combat.player.attackValue / 0.0025), 0);
-    combat.lowestCALevelToStillKill = Math.max(Math.ceil((
-      combat.counterAttackBonusDamage - combat.damageDone + 1) /
-      combat.player.damageValue / 0.0025), 0);
-  }
-
-  function stamAtLowestCa(combat) {
-    if (combat.player.counterAttackLevel > 0) {
-      return Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
-        combat.lowestFeasibleCALevel);
-    }
-    return 0;
-  }
-
-  function caRunning(combat) {
-    calcLowest(combat);
-    combat.lowestFeasibleCALevel =
-      Math.max(combat.lowestCALevelToStillHit,
-        combat.lowestCALevelToStillKill);
-    combat.extraNotes += 'Lowest CA to still 1-hit this creature = ' +
-      combat.lowestFeasibleCALevel + '<br>';
-    if (combat.lowestFeasibleCALevel !== 0) {
-      combat.extraAttackAtLowestFeasibleCALevel =
-        Math.floor(combat.player.attackValue * 0.0025 *
-        combat.lowestFeasibleCALevel);
-      combat.extraDamageAtLowestFeasibleCALevel =
-        Math.floor(combat.player.damageValue * 0.0025 *
-        combat.lowestFeasibleCALevel);
-      combat.extraNotes +=
-        'Extra CA Att/Dam at this lowered CA level = ' +
-        combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
-        combat.extraDamageAtLowestFeasibleCALevel + '<br>';
-    }
-    combat.extraStaminaPerHitAtLowestFeasibleCALevel = stamAtLowestCa(combat);
-    if (combat.extraStaminaPerHitAtLowestFeasibleCALevel <
-      combat.extraStaminaPerHit) {
-      combat.extraNotes +=
-        'Extra Stam Used at this lowered CA level = ' +
-        combat.extraStaminaPerHitAtLowestFeasibleCALevel + '<br>';
-    } else {
-      combat.extraNotes +=
-        'No reduction of stam used at the lower CA level<br>';
-    }
-  }
-
-  function needCa(combat) {
-    return combat.numberOfHitsRequired === '-' ||
-      combat.numberOfHitsRequired !== 1;
-  }
-
-  function evalCaKill(combat) {
-    if (combat.lowestCALevelToStillHit > 175) {
-      combat.extraNotes +=
-        'Even with CA175 you cannot hit this creature<br>';
-    } else if (combat.lowestCALevelToStillHit !== 0) {
-      combat.extraNotes += 'You need a minimum of CA' +
-        combat.lowestCALevelToStillHit +
-        ' to hit this creature<br>';
-    }
-  }
-
-  function evalCaOneHit(combat) {
-    if (combat.lowestCALevelToStillKill > 175) {
-      combat.extraNotes +=
-        'Even with CA175 you cannot 1-hit kill this creature<br>';
-    } else if (combat.lowestCALevelToStillKill !== 0) {
-      combat.extraNotes += 'You need a minimum of CA' +
-        combat.lowestCALevelToStillKill +
-        ' to 1-hit kill this creature<br>';
-    }
-  }
-
-  function caResult(combat) {
-    calcLowest(combat);
-    evalCaKill(combat);
-    evalCaOneHit(combat);
-  }
-
-  function evalCA(combat) {
-    if (caIsRunning(combat)) {
-      caRunning(combat);
-    }
-    if (needCa(combat)) {
-      caResult(combat);
-    }
-    return combat;
-  }
-
-  function calcHp(combat) {
-    if (combat.callback.groupExists) {
-      return combat.callback.groupHPValue;
-    }
-    return combat.player.hpValue;
-  }
-
-  function calcDmg(combat) {
-    if (combat.callback.groupExists) {
-      return combat.callback.groupDamageValue;
-    }
-    return combat.player.damageValue;
-  }
-
-  function evalFortitude(combat) {
-    var hpValue = calcHp(combat);
-    var fortitudeLevel = combat.player.fortitudeLevel;
-    combat.fortitudeExtraHPs = Math.floor(hpValue * fortitudeLevel * 0.001);
-    if (fortitudeLevel > 0) {
-      combat.extraNotes += 'Fortitude Bonus HP = ' + combat.fortitudeExtraHPs +
-        '<br>';
-    }
-    combat.overallHPValue = hpValue + combat.fortitudeExtraHPs;
-  }
-
-  function evalChiStrike(combat) {
-    var chiStrikeLevel = combat.player.chiStrikeLevel;
-    combat.chiStrikeExtraDamage = Math.floor(combat.overallHPValue *
-      chiStrikeLevel * 0.001);
-    if (chiStrikeLevel > 0) {
-      combat.extraNotes += 'Chi Strike Bonus Damage = ' +
-        combat.chiStrikeExtraDamage + '<br>';
-    }
-  }
-
-  function evalDamage(combat) {
-    // Damage:
-    evalFortitude(combat);
-    evalChiStrike(combat);
-
-    var damageValue = calcDmg(combat);
-    combat.overallDamageValue = damageValue +
-      combat.deathDealerBonusDamage + combat.counterAttackBonusDamage +
-      combat.holyFlameBonusDamage + combat.chiStrikeExtraDamage;
-    combat.damageDone = Math.floor(combat.overallDamageValue - (
-      combat.generalVariable * combat.creature.armor +
-      combat.hpVariable * combat.creature.hp));
-
-    if (combat.hitByHowMuch > 0) {
-      var dmgLessArmor = 1;
-      if (combat.overallDamageValue >=
-          combat.generalVariable * combat.creature.armor) {
-        dmgLessArmor = combat.overallDamageValue - combat.generalVariable *
-          combat.creature.armor;
-      }
-      combat.numberOfHitsRequired = Math.ceil(combat.hpVariable *
-        combat.creature.hp / dmgLessArmor);
-    } else {
-      combat.numberOfHitsRequired = '-';
-    }
-    return combat;
-  }
-
-  function calcDef(combat) {
-    if (combat.callback.groupExists) {
-      return combat.callback.groupDefenseValue;
-    }
-    return combat.player.defenseValue;
-  }
-
-  function evalConstitution(combat) {
-    if (combat.player.constitutionLevel > 0) {
-      combat.extraNotes += 'Constitution Bonus Defense = ' +
-      Math.floor(calcDef(combat) *
-      combat.player.constitutionLevel * 0.001) + '<br>';
-    }
-  }
-
-  function evalFlinch(combat) {
-    if (combat.player.flinchLevel > 0) {
-      combat.extraNotes += 'Flinch Bonus Attack Reduction = ' +
-      Math.floor(combat.creature.attack * combat.player.flinchLevel *
-      0.001) + '<br>';
-    }
-  }
-
-  function evalDefence(combat) {
-    combat.overallDefenseValue = calcDef(combat) +
-      Math.floor(calcDef(combat) *
-      combat.player.constitutionLevel * 0.001) +
-      combat.nightmareVisageAttackMovedToDefense;
-
-    evalConstitution(combat);
-    evalFlinch(combat);
-
-    combat.creatureHitByHowMuch = Math.floor(combat.attackVariable *
-      combat.creature.attack - combat.creature.attack *
-      combat.player.flinchLevel * 0.001 - combat.overallDefenseValue);
-
-    if (combat.combatEvaluatorBias === 3) {
-      combat.creatureHitByHowMuch = Math.floor(combat.creature.attack -
-        combat.creature.attack * combat.player.flinchLevel * 0.001 -
-        combat.overallDefenseValue - 50);
-    }
-
-    return combat;
-  }
-
-  function evalSes(combat) {
-    if (combat.player.superEliteSlayerLevel > 0) {
-      combat.extraNotes += 'SES Stat Reduction Multiplier = ' +
-      combat.player.superEliteSlayerMultiplier + '<br>';
-    }
-  }
-
-  function evalHolyFlame(combat) {
-    combat.holyFlameBonusDamage = 0;
-    if (combat.creature.class !== 'Undead') {return;}
-    combat.holyFlameBonusDamage = Math.max(Math.floor(
-      (combat.player.damageValue - combat.creature.armor) *
-      combat.player.holyFlameLevel * 0.002), 0);
-    if (combat.player.holyFlameLevel > 0) {
-      combat.extraNotes += 'HF Bonus Damage = ' + combat.holyFlameBonusDamage +
-      '<br>';
-    }
-  }
-
-  function evalExtraStam(combat) {
-    combat.extraStaminaPerHit = 0;
-    if (combat.player.counterAttackLevel > 0) {
-      combat.extraStaminaPerHit = Math.ceil(
-        (1 + combat.player.doublerLevel / 50) *
-        0.0025 * combat.player.counterAttackLevel
-      );
-    }
-  }
-
-  function evalDeathDealer(combat) {
-    if (combat.player.deathDealerLevel > 0) {
-      combat.extraNotes += 'DD Bonus Damage = ' +
-        combat.deathDealerBonusDamage + '<br>';
-    }
-  }
-
-  function evalCounterAttack(combat) {
-    if (combat.player.counterAttackLevel > 0) {
-      combat.extraNotes += 'CA Bonus Attack/Damage = ' +
-        combat.counterAttackBonusAttack + ' / ' +
-        combat.counterAttackBonusDamage + '<br>' +
-        'CA Extra Stam Used = ' + combat.extraStaminaPerHit + '<br>';
-    }
-  }
-
-  function evalExtraBuffs(combat) {
-    combat.extraNotes = '';
-    evalSes(combat);
-    // math section ... analysis
-    // Holy Flame adds its bonus after the
-    // armor of the creature has been taken off.
-    evalHolyFlame(combat);
-    // Death Dealer and Counter Attack both applied at the same time
-    combat.deathDealerBonusDamage =
-      Math.floor(combat.player.damageValue * (Math.min(Math.floor(
-        combat.player.killStreakValue / 5) * 0.01 *
-        combat.player.deathDealerLevel, 20) / 100));
-    combat.counterAttackBonusAttack =
-      Math.floor(combat.player.attackValue * 0.0025 *
-      combat.player.counterAttackLevel);
-    combat.counterAttackBonusDamage =
-      Math.floor(combat.player.damageValue * 0.0025 *
-      combat.player.counterAttackLevel);
-    evalExtraStam(combat);
-    evalDeathDealer(combat);
-    evalCounterAttack(combat);
-    return combat;
-  }
-
-  function doesGroupExist(combat) {
-    if (combat.callback.groupExists) {return 'Group ';}
-    return '';
-  }
-
-  function canIHitIt(combat) {
-    if (combat.hitByHowMuch > 0) {return 'Yes';}
-    return 'No';
-  }
-
-  function willIBeHit(combat) {
-    if (combat.creatureHitByHowMuch >= 0) {return 'Yes';}
-    return 'No';
-  }
-
-  function evalHTML(combat) {
-    return '<table width="100%"><tbody>' +
-      '<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
-      doesGroupExist(combat) +
-      'Combat Evaluation</td></tr>' +
-      '<tr><td align="right"><span style="color:#333333">' +
-      'Will I hit it? </td><td align="left">' +
-      canIHitIt(combat) +
-      '</td><td align="right"><span style="color:#333333">' +
-      'Extra Attack: </td><td align="left">( ' +
-      combat.hitByHowMuch + ' )</td></tr>' +
-      '<tr><td align="right"><span style="color:#333333">' +
-      '# Hits to kill it? </td><td align="left">' +
-      combat.numberOfHitsRequired +
-      '</td><td align="right"><span style="color:#333333">' +
-      'Extra Damage: </td><td align="left">( ' + combat.damageDone +
-      ' )</td></tr>' +
-      '<tr><td align="right"><span style="color:#333333">' +
-      'Will I be hit? </td><td align="left">' +
-      willIBeHit(combat) +
-      '</td><td align="right"><span style="color:#333333">' +
-      'Extra Defense: </td><td align="left">( ' + -1 *
-      combat.creatureHitByHowMuch + ' )</td></tr>' +
-      '<tr><td align="right"><span style="color:#333333">' +
-      '# Hits to kill me? </td><td align="left">' +
-      combat.numberOfCreatureHitsTillDead +
-      '</td><td align="right"><span style="color:#333333">' +
-      'Extra Armor + HP: </td><td align="left">( ' + -1 *
-      combat.creatureDamageDone + ' )</td></tr>' +
-      '<tr><td align="right"><span style="color:#333333">' +
-      '# Player Hits? </td><td align="left">' + combat.playerHits +
-      '</td><td align="right"><span style="color:#333333">' +
-      '# Creature Hits? </td><td align="left">' + combat.creatureHits +
-      '</td></tr>' +
-      '<tr><td align="right"><span style="color:#333333">' +
-      'Fight Status: </span></td><td align="left" colspan="3"><span>' +
-      combat.fightStatus + '</span></td></tr>' +
-      '<tr><td align="right"><span style="color:#333333">' +
-      'Notes: </span></td><td align="left" colspan="3">' +
-      '<span style="font-size:x-small;">' + combat.extraNotes +
-      '</span></td></tr>' +
-      '<tr><td colspan="4"><span style="font-size:x-small; ' +
-      'color:gray">*Does include CA, DD, HF, DC, Flinch, Super Elite ' +
-      'Slayer, NMV, Sanctuary, Constitution, Fortitude, Chi Strike ' +
-      'and Terrorize (if active) and allow for randomness (1.1053). ' +
-      'Constitution, NMV, Fortitude and Chi Strike apply to group ' +
-      'stats.</span></td></tr>' +
-      '</tbody></table>';
-  }
-
-  function getBiasGeneral(combat) {
-    if (bias[combat.combatEvaluatorBias]) {
-      return bias[combat.combatEvaluatorBias].generalVariable;
-    }
-    return 1.1053;
-  }
-
-  function getBiasHp(combat) {
-    if (bias[combat.combatEvaluatorBias]) {
-      return bias[combat.combatEvaluatorBias].hpVariable;
-    }
-    return 1.1;
-  }
-
-  function creatureData(ses) { // jQuery
-    var obj = {};
-    obj.name = $('#dialog-viewcreature').find('h2.name').text();
-    obj.class = $('#dialog-viewcreature')
-      .find('span.classification')
-      .text();
-    obj.attack = intValue($('#dialog-viewcreature')
-      .find('dd.attribute-atk').text());
-    obj.defense = intValue($('#dialog-viewcreature')
-      .find('dd.attribute-def').text());
-    obj.armor = intValue($('#dialog-viewcreature')
-      .find('dd.attribute-arm').text());
-    obj.damage = intValue($('#dialog-viewcreature')
-      .find('dd.attribute-dmg').text());
-    obj.hp = intValue($('#dialog-viewcreature')
-      .find('p.health-max').text());
-    // reduce stats if critter is a SE and player has SES cast on them.
-    if (obj.name.search('Super Elite') !== -1) {
-      obj.attack -= Math.ceil(obj.attack * ses);
-      obj.defense -= Math.ceil(obj.defense * ses);
-      obj.armor -= Math.ceil(obj.armor * ses);
-      obj.damage -= Math.ceil(obj.damage * ses);
-      obj.hp -= Math.ceil(obj.hp * ses);
-    }
-    return obj;
-  }
-
-  function checkForCreatureEvaluatorGroup() { // Legacy
-    if ($('#creatureEvaluatorGroup').length === 0) {
-      $('#dialog-viewcreature')
-        .append('<div id="creatureEvaluatorGroup" ' +
-          'style="clear:both;"></div>');
-    }
-  }
-
-  function checkForCreatureEvaluator() { // Legacy
-    if ($('#creatureEvaluator').length === 0) {
-      $('#dialog-viewcreature')
-        .append('<div id="creatureEvaluator" ' +
-          'style="clear:both;"></div>');
-    }
-  }
-
-  function getCreaturePlayerData(responseText, callback) { // Legacy
-    var combat = {};
-    combat.callback = callback;
-    // playerdata
-    combat.player = playerDataString(responseText);
-    combat.combatEvaluatorBias = getValue('combatEvaluatorBias');
-    combat.attackVariable = 1.1053;
-    combat.generalVariable = getBiasGeneral(combat);
-    combat.hpVariable = getBiasHp(combat);
-    combat.creature =
-      creatureData(combat.player.superEliteSlayerMultiplier);
-    combat = evalExtraBuffs(combat);
-    combat = evalAttack(combat);
-    combat = evalDamage(combat);
-    combat = evalDefence(combat);
-    combat = evalArmour(combat);
-    combat = evalAnalysis(combat);
-    combat = evalCA(combat);
-    combat.evaluatorHTML = evalHTML(combat);
-    var tempdata;
-    if (callback.groupEvaluation) {
-      checkForCreatureEvaluatorGroup();
-      tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
-      $('#creatureEvaluatorGroup').html(tempdata);
-    } else {
-      checkForCreatureEvaluator();
-      tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
-      $('#creatureEvaluator').html(tempdata);
-    }
-  }
-
-  function getStatValue(stat, doc) { // Legacy
-    var node = findNode('//table[@width="400"]/tbody/tr/td[contains(.,"' +
-      stat + ':")]', doc);
-    if (node) {return Number(node.nextSibling.textContent.replace(/,/, ''));}
-    return 0;
-  }
-
-  function getCreatureGroupData(responseText) { // Legacy
-    var doc = createDocument(responseText);
-    var groupAttackValue = getStatValue('Attack', doc);
-    var groupDefenseValue = getStatValue('Defense', doc);
-    var groupArmorValue = getStatValue('Armor', doc);
-    var groupDamageValue = getStatValue('Damage', doc);
-    var groupHPValue = getStatValue('HP', doc);
-    retryAjax('index.php?no_mobile=1&cmd=profile').done(function(html) {
-      getCreaturePlayerData(html, {
-        groupExists: true,
-        groupAttackValue: groupAttackValue,
-        groupDefenseValue: groupDefenseValue,
-        groupArmorValue: groupArmorValue,
-        groupDamageValue: groupDamageValue,
-        groupHPValue: groupHPValue,
-        groupEvaluation: true
-      });
-    });
-  }
-
-  function checkIfGroupExists(responseText) { // Hybrid
-    var doc = createDocument(responseText);
-    var groupExistsIMG = $(doc)
-      .find('img[title="Disband Group (Cancel Attack)"]');
-    if (groupExistsIMG.length > 0) {
-      var groupHref = groupExistsIMG.parents('td:first').find('a:first')
-        .attr('href');
-      retryAjax(groupHref).done(getCreatureGroupData);
-    }
-  }
-
-  function addRemoveCreatureToDoNotKillList(evt) {
-    var creatureName = evt.target.getAttribute('creatureName');
-    var ind = calf.doNotKillList.indexOf(creatureName);
-    if (ind !== -1) {
-      calf.doNotKillList.splice(ind, 1);
-      evt.target.innerHTML = 'Add to the do not kill list';
-    } else {
-      calf.doNotKillList.push(creatureName);
-      evt.target.innerHTML = 'Remove from do not kill list';
-    }
-    setValue('doNotKillList', calf.doNotKillList.join());
-    // refresh the action list
-    afterUpdateActionList();
-  }
-
-  function readyViewCreature() { // Hybrid
-    $('#creatureEvaluator').html('');
-    $('#creatureEvaluatorGroup').html('');
-
-    retryAjax('index.php?no_mobile=1&cmd=profile').done(function(html) {
-      getCreaturePlayerData(html, {
-        groupExists: false,
-        groupAttackValue: 0,
-        groupDefenseValue: 0,
-        groupArmorValue: 0,
-        groupDamageValue: 0,
-        groupHPValue: 0,
-        groupEvaluation: false
-      });
-    });
-    retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=groups')
-      .done(checkIfGroupExists);
-
-    $('#addRemoveCreatureToDoNotKillList').html('');
-    if ($('#addRemoveCreatureToDoNotKillList').length === 0) {
-      var doNotKillElement = '<div id="addRemoveCreatureToDo' +
-        'NotKillList"" class="description" style="cursor:' +
-        'pointer;text-decoration:underline;color:blue;"></div>';
-      $(doNotKillElement).insertAfter($('#dialog-viewcreature')
-        .find('p.description'));
-    }
-    var creatureName = $('#dialog-viewcreature').find('h2.name')
-      .text();
-    $('#addRemoveCreatureToDoNotKillList')
-      .attr('creatureName', creatureName);
-    var extraText = 'Add to the do not kill list';
-    if (calf.doNotKillList.indexOf(creatureName) !== -1) {
-      extraText = 'Remove from do not kill list';
-    }
-    $('#addRemoveCreatureToDoNotKillList').html(extraText);
-    getElementById('addRemoveCreatureToDoNotKillList')
-      .addEventListener('click',
-        addRemoveCreatureToDoNotKillList, true);
-  }
-
   var showCreatureInfo;
-  var generalVariable = 1.1053;
-  var hpVariable = 1.1;
   var statLevel;
   var statDefense;
   var statAttack;
@@ -16747,19 +15988,6 @@
   function toggleShowCreatureInfo() {
     showCreatureInfo = !showCreatureInfo;
     setValue('showCreatureInfo', showCreatureInfo);
-  }
-
-  function biasIsValid(combatEvaluatorBias) {
-    return combatEvaluatorBias &&
-      combatEvaluatorBias >= 0 && combatEvaluatorBias <= 3;
-  }
-
-  function getBias() {
-    var combatEvaluatorBias = getValue('combatEvaluatorBias');
-    if (biasIsValid(combatEvaluatorBias)) {
-      generalVariable = bias[combatEvaluatorBias].generalVariable;
-      hpVariable = bias[combatEvaluatorBias].hpVariable;
-    }
   }
 
   function getStatText(statTooltip, statClassName) {
@@ -16779,8 +16007,8 @@
   }
 
   function doMouseOver(creature, monster) {
-    var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
-      generalVariable);
+    var oneHitNumber = Math.ceil(creature.hp * calf.hpVariable + creature.armor *
+      calf.generalVariable);
     var myLvlClas = 'fshYellow';
     if (statLevel > creature.level) {myLvlClas = 'fshRed';}
     var monsterTip = '<table><tr><td>' +
@@ -16954,7 +16182,6 @@
   }
 
   function initMonsterLog() {
-    // if (!showCreatureInfo && !showMonsterLog) {return;}
     if (showCreatureInfo || showMonsterLog) {
       getCreatures();
     }
@@ -16963,9 +16190,737 @@
   function startMonsterLog() { // jQuery.min
     getCreaturePrefs();
     getMonsterPrefs();
-    getBias();
     $.subscribe(def_afterUpdateActionlist, initMonsterLog);
     initMonsterLog();
+  }
+
+  function evalMiss(combat) {
+    if (combat.numberOfCreatureHitsTillDead - combat.numberOfHitsRequired <= 1) {
+      return ', dies on miss';
+    }
+    return ', survives a miss';
+  }
+
+  function canIHit(combat) {
+    return combat.numberOfHitsRequired === '-' ||
+      combat.numberOfHitsRequired > combat.numberOfCreatureHitsTillDead;
+  }
+
+  function evalPlayerHits(combat) {
+    if (combat.numberOfCreatureHitsTillDead === '-') {
+      return combat.numberOfHitsRequired;
+    } else if (canIHit(combat)) {
+      return '-';
+    }
+    return combat.numberOfHitsRequired;
+  }
+
+  function canCreatureHit(combat) {
+    return combat.numberOfCreatureHitsTillDead === '-' ||
+      combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired;
+  }
+
+  function evalCreatureHits(combat) {
+    if (combat.numberOfHitsRequired === '-') {
+      return combat.numberOfCreatureHitsTillDead;
+    } else if (canCreatureHit(combat)) {
+      return '-';
+    }
+    return combat.numberOfCreatureHitsTillDead;
+  }
+
+  var evalFightStatus = [
+    {
+      test: function(combat) {
+        return combat.playerHits === '-' && combat.creatureHits === '-';
+      },
+      fStatus: function() {return 'Unresolved';}
+    },
+    {
+      test: function(combat) {return combat.playerHits === '-';},
+      fStatus: function() {return 'Player dies';}
+    },
+    {
+      test: function(combat) {return combat.playerHits === 1;},
+      fStatus: function(combat) {return 'Player 1 hits' + evalMiss(combat);}
+    },
+    {
+      test: function(combat) {return combat.playerHits > 1;},
+      fStatus: function(combat) {return 'Player > 1 hits' + evalMiss(combat);}
+    }
+  ];
+
+  function evalAnalysis(combat) {
+    // Analysis:
+    combat.playerHits = evalPlayerHits(combat);
+    combat.creatureHits = evalCreatureHits(combat);
+    for (var i = 0; i < evalFightStatus.length; i += 1) {
+      if (evalFightStatus[i].test(combat)) {
+        combat.fightStatus = evalFightStatus[i].fStatus(combat);
+        return combat;
+      }
+    }
+    combat.fightStatus = 'Unknown';
+  }
+
+  function calcArm(combat) {
+    if (combat.callback.groupExists) {
+      return combat.callback.groupArmorValue;
+    }
+    return combat.player.armorValue;
+  }
+
+  function evalSanctuary(combat) {
+    if (combat.player.sanctuaryLevel > 0) {
+      combat.extraNotes += 'Sanc Bonus Armor = ' +
+        Math.floor(combat.player.armorValue *
+        combat.player.sanctuaryLevel * 0.001) + '<br>';
+    }
+  }
+
+  function evalTerrorize(combat) {
+    if (combat.player.terrorizeLevel > 0) {
+      combat.extraNotes += 'Terrorize Creature Damage Effect = ' +
+        combat.terrorizeEffect * -1 + '<br>';
+    }
+  }
+
+  function evalArmour(combat) {
+    var armorVal = calcArm(combat);
+    combat.overallArmorValue = armorVal +
+      Math.floor(combat.player.armorValue *
+      combat.player.sanctuaryLevel * 0.001);
+    evalSanctuary(combat);
+    combat.terrorizeEffect = Math.floor(combat.creature.damage *
+      combat.player.terrorizeLevel * 0.001);
+    evalTerrorize(combat);
+    combat.creature.damage -= combat.terrorizeEffect;
+    combat.creatureDamageDone = Math.ceil(combat.generalVariable *
+      combat.creature.damage - combat.overallArmorValue +
+      combat.overallHPValue);
+    if (combat.creatureHitByHowMuch >= 0) {
+      var approxDmg = combat.generalVariable * combat.creature.damage;
+      if (approxDmg < combat.overallArmorValue) {
+        combat.numberOfCreatureHitsTillDead = combat.overallHPValue;
+      } else {
+        combat.numberOfCreatureHitsTillDead = Math.ceil(
+          combat.overallHPValue / (approxDmg - combat.overallArmorValue));
+      }
+    } else {
+      combat.numberOfCreatureHitsTillDead = '-';
+    }
+  }
+
+  function calcAttack(combat) {
+    if (combat.callback.groupExists) {
+      return combat.callback.groupAttackValue;
+    }
+    return combat.player.attackValue;
+  }
+
+  function calcHitByHowMuch(combat) {
+    var remainingDef = combat.creature.defense - combat.creature.defense *
+      combat.player.darkCurseLevel * 0.002;
+    if (combat.combatEvaluatorBias === 3) {
+      return combat.overallAttackValue - Math.ceil(remainingDef) - 50;
+    }
+    return combat.overallAttackValue -
+      Math.ceil(combat.attackVariable * remainingDef);
+  }
+
+  function evalAttack(combat) {
+    var atkValue = calcAttack(combat);
+    // Attack:
+    if (combat.player.darkCurseLevel > 0) {
+      combat.extraNotes += 'DC Bonus Attack = ' +
+        Math.floor(combat.creature.defense *
+        combat.player.darkCurseLevel * 0.002) + '<br>';
+    }
+    combat.nightmareVisageAttackMovedToDefense =
+      Math.floor((atkValue +
+      combat.counterAttackBonusAttack) *
+      combat.player.nightmareVisageLevel * 0.0025);
+    if (combat.player.nightmareVisageLevel > 0) {
+      combat.extraNotes += 'NMV Attack moved to Defense = ' +
+        combat.nightmareVisageAttackMovedToDefense + '<br>';
+    }
+    combat.overallAttackValue = atkValue +
+      combat.counterAttackBonusAttack -
+      combat.nightmareVisageAttackMovedToDefense;
+    combat.hitByHowMuch = calcHitByHowMuch(combat);
+  }
+
+  function caIsRunning(combat) {
+    return combat.player.counterAttackLevel > 0 &&
+      combat.numberOfHitsRequired === 1;
+  }
+
+  function calcLowest(combat) {
+    combat.lowestCALevelToStillHit = Math.max(Math.ceil((
+      combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
+      combat.player.attackValue / 0.0025), 0);
+    combat.lowestCALevelToStillKill = Math.max(Math.ceil((
+      combat.counterAttackBonusDamage - combat.damageDone + 1) /
+      combat.player.damageValue / 0.0025), 0);
+  }
+
+  function stamAtLowestCa(combat) {
+    if (combat.player.counterAttackLevel > 0) {
+      return Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
+        combat.lowestFeasibleCALevel);
+    }
+    return 0;
+  }
+
+  function caRunning(combat) {
+    calcLowest(combat);
+    combat.lowestFeasibleCALevel =
+      Math.max(combat.lowestCALevelToStillHit,
+        combat.lowestCALevelToStillKill);
+    combat.extraNotes += 'Lowest CA to still 1-hit this creature = ' +
+      combat.lowestFeasibleCALevel + '<br>';
+    if (combat.lowestFeasibleCALevel !== 0) {
+      combat.extraAttackAtLowestFeasibleCALevel =
+        Math.floor(combat.player.attackValue * 0.0025 *
+        combat.lowestFeasibleCALevel);
+      combat.extraDamageAtLowestFeasibleCALevel =
+        Math.floor(combat.player.damageValue * 0.0025 *
+        combat.lowestFeasibleCALevel);
+      combat.extraNotes +=
+        'Extra CA Att/Dam at this lowered CA level = ' +
+        combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
+        combat.extraDamageAtLowestFeasibleCALevel + '<br>';
+    }
+    combat.extraStaminaPerHitAtLowestFeasibleCALevel = stamAtLowestCa(combat);
+    if (combat.extraStaminaPerHitAtLowestFeasibleCALevel <
+      combat.extraStaminaPerHit) {
+      combat.extraNotes +=
+        'Extra Stam Used at this lowered CA level = ' +
+        combat.extraStaminaPerHitAtLowestFeasibleCALevel + '<br>';
+    } else {
+      combat.extraNotes +=
+        'No reduction of stam used at the lower CA level<br>';
+    }
+  }
+
+  function needCa(combat) {
+    return combat.numberOfHitsRequired === '-' ||
+      combat.numberOfHitsRequired !== 1;
+  }
+
+  function evalCaKill(combat) {
+    if (combat.lowestCALevelToStillHit > 175) {
+      combat.extraNotes +=
+        'Even with CA175 you cannot hit this creature<br>';
+    } else if (combat.lowestCALevelToStillHit !== 0) {
+      combat.extraNotes += 'You need a minimum of CA' +
+        combat.lowestCALevelToStillHit +
+        ' to hit this creature<br>';
+    }
+  }
+
+  function evalCaOneHit(combat) {
+    if (combat.lowestCALevelToStillKill > 175) {
+      combat.extraNotes +=
+        'Even with CA175 you cannot 1-hit kill this creature<br>';
+    } else if (combat.lowestCALevelToStillKill !== 0) {
+      combat.extraNotes += 'You need a minimum of CA' +
+        combat.lowestCALevelToStillKill +
+        ' to 1-hit kill this creature<br>';
+    }
+  }
+
+  function caResult(combat) {
+    calcLowest(combat);
+    evalCaKill(combat);
+    evalCaOneHit(combat);
+  }
+
+  function evalCA(combat) {
+    if (caIsRunning(combat)) {
+      caRunning(combat);
+    }
+    if (needCa(combat)) {
+      caResult(combat);
+    }
+  }
+
+  function calcHp(combat) {
+    if (combat.callback.groupExists) {
+      return combat.callback.groupHPValue;
+    }
+    return combat.player.hpValue;
+  }
+
+  function calcDmg(combat) {
+    if (combat.callback.groupExists) {
+      return combat.callback.groupDamageValue;
+    }
+    return combat.player.damageValue;
+  }
+
+  function evalFortitude(combat) {
+    var hpValue = calcHp(combat);
+    var fortitudeLevel = combat.player.fortitudeLevel;
+    combat.fortitudeExtraHPs = Math.floor(hpValue * fortitudeLevel * 0.001);
+    if (fortitudeLevel > 0) {
+      combat.extraNotes += 'Fortitude Bonus HP = ' + combat.fortitudeExtraHPs +
+        '<br>';
+    }
+    combat.overallHPValue = hpValue + combat.fortitudeExtraHPs;
+  }
+
+  function evalChiStrike(combat) {
+    var chiStrikeLevel = combat.player.chiStrikeLevel;
+    combat.chiStrikeExtraDamage = Math.floor(combat.overallHPValue *
+      chiStrikeLevel * 0.001);
+    if (chiStrikeLevel > 0) {
+      combat.extraNotes += 'Chi Strike Bonus Damage = ' +
+        combat.chiStrikeExtraDamage + '<br>';
+    }
+  }
+
+  function evalDamage(combat) {
+    // Damage:
+    evalFortitude(combat);
+    evalChiStrike(combat);
+
+    var damageValue = calcDmg(combat);
+    combat.overallDamageValue = damageValue +
+      combat.deathDealerBonusDamage + combat.counterAttackBonusDamage +
+      combat.holyFlameBonusDamage + combat.chiStrikeExtraDamage;
+    combat.damageDone = Math.floor(combat.overallDamageValue - (
+      combat.generalVariable * combat.creature.armor +
+      combat.hpVariable * combat.creature.hp));
+
+    if (combat.hitByHowMuch > 0) {
+      var dmgLessArmor = 1;
+      if (combat.overallDamageValue >=
+          combat.generalVariable * combat.creature.armor) {
+        dmgLessArmor = combat.overallDamageValue - combat.generalVariable *
+          combat.creature.armor;
+      }
+      combat.numberOfHitsRequired = Math.ceil(combat.hpVariable *
+        combat.creature.hp / dmgLessArmor);
+    } else {
+      combat.numberOfHitsRequired = '-';
+    }
+  }
+
+  function calcDef(combat) {
+    if (combat.callback.groupExists) {
+      return combat.callback.groupDefenseValue;
+    }
+    return combat.player.defenseValue;
+  }
+
+  function evalConstitution(combat) {
+    if (combat.player.constitutionLevel > 0) {
+      combat.extraNotes += 'Constitution Bonus Defense = ' +
+      Math.floor(calcDef(combat) *
+      combat.player.constitutionLevel * 0.001) + '<br>';
+    }
+  }
+
+  function evalFlinch(combat) {
+    if (combat.player.flinchLevel > 0) {
+      combat.extraNotes += 'Flinch Bonus Attack Reduction = ' +
+      Math.floor(combat.creature.attack * combat.player.flinchLevel *
+      0.001) + '<br>';
+    }
+  }
+
+  function evalDefence(combat) {
+    combat.overallDefenseValue = calcDef(combat) +
+      Math.floor(calcDef(combat) *
+      combat.player.constitutionLevel * 0.001) +
+      combat.nightmareVisageAttackMovedToDefense;
+    evalConstitution(combat);
+    evalFlinch(combat);
+    combat.creatureHitByHowMuch = Math.floor(combat.attackVariable *
+      combat.creature.attack - combat.creature.attack *
+      combat.player.flinchLevel * 0.001 - combat.overallDefenseValue);
+    if (combat.combatEvaluatorBias === 3) {
+      combat.creatureHitByHowMuch = Math.floor(combat.creature.attack -
+        combat.creature.attack * combat.player.flinchLevel * 0.001 -
+        combat.overallDefenseValue - 50);
+    }
+  }
+
+  function evalSes(combat) {
+    if (combat.player.superEliteSlayerLevel > 0) {
+      combat.extraNotes += 'SES Stat Reduction Multiplier = ' +
+      combat.player.superEliteSlayerMultiplier + '<br>';
+    }
+  }
+
+  function evalHolyFlame(combat) {
+    combat.holyFlameBonusDamage = 0;
+    if (combat.creature.class !== 'Undead') {return;}
+    combat.holyFlameBonusDamage = Math.max(Math.floor(
+      (combat.player.damageValue - combat.creature.armor) *
+      combat.player.holyFlameLevel * 0.002), 0);
+    if (combat.player.holyFlameLevel > 0) {
+      combat.extraNotes += 'HF Bonus Damage = ' + combat.holyFlameBonusDamage +
+      '<br>';
+    }
+  }
+
+  function evalExtraStam(combat) {
+    combat.extraStaminaPerHit = 0;
+    if (combat.player.counterAttackLevel > 0) {
+      combat.extraStaminaPerHit = Math.ceil(
+        (1 + combat.player.doublerLevel / 50) *
+        0.0025 * combat.player.counterAttackLevel
+      );
+    }
+  }
+
+  function evalDeathDealer(combat) {
+    if (combat.player.deathDealerLevel > 0) {
+      combat.extraNotes += 'DD Bonus Damage = ' +
+        combat.deathDealerBonusDamage + '<br>';
+    }
+  }
+
+  function evalCounterAttack(combat) {
+    if (combat.player.counterAttackLevel > 0) {
+      combat.extraNotes += 'CA Bonus Attack/Damage = ' +
+        combat.counterAttackBonusAttack + ' / ' +
+        combat.counterAttackBonusDamage + '<br>' +
+        'CA Extra Stam Used = ' + combat.extraStaminaPerHit + '<br>';
+    }
+  }
+
+  function evalExtraBuffs(combat) {
+    combat.extraNotes = '';
+    evalSes(combat);
+    // math section ... analysis
+    // Holy Flame adds its bonus after the
+    // armor of the creature has been taken off.
+    evalHolyFlame(combat);
+    // Death Dealer and Counter Attack both applied at the same time
+    combat.deathDealerBonusDamage =
+      Math.floor(combat.player.damageValue * (Math.min(Math.floor(
+        combat.player.killStreakValue / 5) * 0.01 *
+        combat.player.deathDealerLevel, 20) / 100));
+    combat.counterAttackBonusAttack =
+      Math.floor(combat.player.attackValue * 0.0025 *
+      combat.player.counterAttackLevel);
+    combat.counterAttackBonusDamage =
+      Math.floor(combat.player.damageValue * 0.0025 *
+      combat.player.counterAttackLevel);
+    evalExtraStam(combat);
+    evalDeathDealer(combat);
+    evalCounterAttack(combat);
+  }
+
+  function doesGroupExist(combat) {
+    if (combat.callback.groupExists) {return 'Group ';}
+    return '';
+  }
+
+  function headerRow$1(combat) {
+    return '<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
+      doesGroupExist(combat) + 'Combat Evaluation</td></tr>';
+  }
+
+  function canIHitIt(combat) {
+    if (combat.hitByHowMuch > 0) {return 'Yes';}
+    return 'No';
+  }
+
+  function willIHitItRow(combat) {
+    return '<tr><td align="right"><span style="color:#333333">' +
+      'Will I hit it? </td><td align="left">' + canIHitIt(combat) +
+      '</td><td align="right"><span style="color:#333333">' +
+      'Extra Attack: </td><td align="left">( ' +
+      combat.hitByHowMuch + ' )</td></tr>';
+  }
+
+  function numberOfHitsRequiredRow(combat) {
+    return '<tr><td align="right"><span style="color:#333333">' +
+      '# Hits to kill it? </td><td align="left">' +
+      combat.numberOfHitsRequired +
+      '</td><td align="right"><span style="color:#333333">' +
+      'Extra Damage: </td><td align="left">( ' + combat.damageDone +
+      ' )</td></tr>';
+  }
+
+  function willIBeHit(combat) {
+    if (combat.creatureHitByHowMuch >= 0) {return 'Yes';}
+    return 'No';
+  }
+
+  function willIBeHitRow(combat) {
+    return '<tr><td align="right"><span style="color:#333333">' +
+      'Will I be hit? </td><td align="left">' + willIBeHit(combat) +
+      '</td><td align="right"><span style="color:#333333">' +
+      'Extra Defense: </td><td align="left">( ' + -1 *
+      combat.creatureHitByHowMuch + ' )</td></tr>';
+  }
+
+  function hitsToKillMeRow(combat) {
+    return '<tr><td align="right"><span style="color:#333333">' +
+      '# Hits to kill me? </td><td align="left">' +
+      combat.numberOfCreatureHitsTillDead +
+      '</td><td align="right"><span style="color:#333333">' +
+      'Extra Armor + HP: </td><td align="left">( ' + -1 *
+      combat.creatureDamageDone + ' )</td></tr>';
+  }
+
+  function numberOfHitsRow(combat) {
+    return '<tr><td align="right"><span style="color:#333333">' +
+      '# Player Hits? </td><td align="left">' + combat.playerHits +
+      '</td><td align="right"><span style="color:#333333">' +
+      '# Creature Hits? </td><td align="left">' + combat.creatureHits +
+      '</td></tr>';
+  }
+
+  function fightStatusRow(combat) {
+    return '<tr><td align="right"><span style="color:#333333">' +
+      'Fight Status: </span></td><td align="left" colspan="3"><span>' +
+      combat.fightStatus + '</span></td></tr>';
+  }
+
+  function notesRow(combat) {
+    return '<tr><td align="right"><span style="color:#333333">' +
+      'Notes: </span></td><td align="left" colspan="3">' +
+      '<span style="font-size:x-small;">' + combat.extraNotes +
+      '</span></td></tr>';
+  }
+
+  function evalHTML(combat) {
+    return '<table width="100%"><tbody>' +
+      headerRow$1(combat) +
+      willIHitItRow(combat) +
+      numberOfHitsRequiredRow(combat) +
+      willIBeHitRow(combat) +
+      hitsToKillMeRow(combat) +
+      numberOfHitsRow(combat) +
+      fightStatusRow(combat) +
+      notesRow(combat) +
+      '</tbody></table>';
+  }
+
+  function guildGroups(data) {
+    return guild(extend({subcmd: 'groups'}, data));
+  }
+
+  function groupsView() {
+    return guildGroups({subcmd2: 'view'});
+  }
+
+  function groupsViewStats(groupId) {
+    return guildGroups({subcmd2: 'viewstats', group_id: groupId});
+  }
+
+  var creatureBody;
+  var dnkName;
+  var doNotKillBtn;
+
+  function getCreatureBody(dialogViewCreature) {
+    if (!creatureBody) {
+      var bodyCollection = dialogViewCreature.getElementsByClassName('body');
+      if (bodyCollection.length === 1) {
+        creatureBody = bodyCollection[0];
+      }
+    }
+  }
+
+  function doNotKillText() {
+    if (calf.doNotKillList.includes(dnkName)) {
+      return 'Remove from do not kill list';
+    }
+    return 'Add to the do not kill list';
+  }
+
+  function addRemoveCreature() {
+    var index = calf.doNotKillList.indexOf(dnkName);
+    if (index === -1) {
+      calf.doNotKillList.push(dnkName);
+    } else {
+      calf.doNotKillList.splice(index, 1);
+    }
+    doNotKillBtn.textContent = doNotKillText();
+    setValue('doNotKillList', calf.doNotKillList.join());
+    afterUpdateActionList(); // refresh the action list
+  }
+
+  function makeDnkBtn() {
+    doNotKillBtn = createButton({
+      className: 'fshBl',
+      textContent: doNotKillText(),
+      type: 'button'
+    });
+    var btnContainer = createDiv({
+      className: 'description',
+      innerHTML: '<span class="ui-helper-hidden-accessible">' +
+        '<input type="text"></span>'
+    });
+    insertElement(btnContainer, doNotKillBtn);
+    insertElement(creatureBody, btnContainer);
+    doNotKillBtn.addEventListener('click', addRemoveCreature);
+  }
+
+  function doNotKillLink() {
+    if (!doNotKillBtn) {
+      makeDnkBtn();
+    } else {
+      doNotKillBtn.textContent = doNotKillText();
+    }
+  }
+
+  function makeDoNotKillLink(thisName, dialogViewCreature) {
+    getCreatureBody(dialogViewCreature);
+    if (creatureBody) {
+      dnkName = thisName;
+      doNotKillLink();
+    }
+  }
+
+  var dialogViewCreature;
+  var combatEvalContainer;
+  var combatEvaluator;
+  var groupEvaluator;
+
+  function getDialogViewCreature() {
+    if (!dialogViewCreature) {
+      dialogViewCreature = getElementById('dialog-viewcreature');
+    }
+  }
+
+  function getCombatEvalContainer() {
+    if (!combatEvalContainer) {
+      combatEvalContainer = createDiv();
+      insertElement(dialogViewCreature, combatEvalContainer);
+      insertElement(dialogViewCreature, createDiv({
+        innerHTML: '<span class="fshFooter">' +
+          '*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NMV, ' +
+          'Sanctuary, Constitution, Fortitude, Chi Strike and ' +
+          'Terrorize (if active) and allow for randomness (1.1053). ' +
+          'Constitution, NMV, Fortitude and Chi Strike apply to group ' +
+          'stats.</span>'
+      }));
+    }
+  }
+
+  function getCombatEvaluator() {
+    if (!combatEvaluator) {
+      getCombatEvalContainer();
+      combatEvaluator = createDiv();
+      insertElement(combatEvalContainer, combatEvaluator);
+    }
+  }
+
+  function getGroupEvaluator() {
+    if (!groupEvaluator) {
+      getCombatEvaluator();
+      groupEvaluator = createDiv();
+      insertElement(combatEvalContainer, groupEvaluator);
+    }
+  }
+
+  function setCombatEvaluator(html) {
+    getCombatEvaluator();
+    combatEvaluator.innerHTML = html;
+  }
+
+  function setGroupEvalalutor(html) {
+    getGroupEvaluator();
+    groupEvaluator.innerHTML = html;
+  }
+
+  function creatureData(creature, ses) {
+    var obj = {};
+    obj.name = creature.name;
+    obj.class = creature.creature_class;
+    obj.attack = Number(creature.attack);
+    obj.defense = Number(creature.defense);
+    obj.armor = Number(creature.armor);
+    obj.damage = Number(creature.damage);
+    obj.hp = Number(creature.hp);
+    // reduce stats if critter is a SE and player has SES cast on them.
+    if (obj.name.search('Super Elite') !== -1) { // TODO type
+      obj.attack -= Math.ceil(obj.attack * ses);
+      obj.defense -= Math.ceil(obj.defense * ses);
+      obj.armor -= Math.ceil(obj.armor * ses);
+      obj.damage -= Math.ceil(obj.damage * ses);
+      obj.hp -= Math.ceil(obj.hp * ses);
+    }
+    return obj;
+  }
+
+  function doCombatEval(data, playerJson, groupData) {
+    var combat = {};
+    combat.callback = groupData;
+    // playerdata
+    combat.player = playerDataObject(playerJson);
+    combat.combatEvaluatorBias = calf.combatEvaluatorBias;
+    combat.attackVariable = 1.1053;
+    combat.generalVariable = calf.generalVariable;
+    combat.hpVariable = calf.hpVariable;
+    combat.creature = creatureData(data.response.data,
+      combat.player.superEliteSlayerMultiplier);
+    evalExtraBuffs(combat);
+    evalAttack(combat);
+    evalDamage(combat);
+    evalDefence(combat);
+    evalArmour(combat);
+    evalAnalysis(combat);
+    evalCA(combat);
+    combat.evaluatorHTML = evalHTML(combat);
+    if (groupData.groupExists) {
+      setGroupEvalalutor(combat.evaluatorHTML);
+    } else {
+      setCombatEvaluator(combat.evaluatorHTML);
+    }
+  }
+
+  function myGroup(el) {
+    return el.members[0].name === playerName();
+  }
+
+  function getGroupId(json) {
+    return json.r.find(myGroup).id;
+  }
+
+  function getGroupStats$1(data, playerJson, groupId) {
+    groupsViewStats(groupId).done(function(groupJson) {
+      var attr = groupJson.r.attributes;
+      doCombatEval(data, playerJson, {
+        groupExists: true,
+        groupAttackValue: attr[0].value,
+        groupDefenseValue: attr[1].value,
+        groupArmorValue: attr[2].value,
+        groupDamageValue: attr[3].value,
+        groupHPValue: attr[4].value
+      });
+    });
+  }
+
+  function processGroup(data, playerJson) {
+    groupsView().pipe(getGroupId).done(function(groupId) {
+      getGroupStats$1(data, playerJson, groupId);
+    });
+  }
+
+  function processPlayer(data, playerJson) {
+    if (data.player.hasGroup) {processGroup(data, playerJson);}
+    doCombatEval(data, playerJson, {groupExists: false});
+  }
+
+  function processCreature(e, data) {
+    getDialogViewCreature();
+    if (!dialogViewCreature) {return;}
+    setCombatEvaluator('');
+    setGroupEvalalutor('');
+    makeDoNotKillLink(data.response.data.name, dialogViewCreature);
+    myStats(true).done(function(playerJson) {processPlayer(data, playerJson);});
+  }
+
+  function viewCreature() {
+    $.subscribe('1' + def_suffixSuccessActionResponse, processCreature);
   }
 
   var huntingBuffs$1;
@@ -17151,6 +17106,26 @@
     }
   }
 
+  function getBiasGeneral(combatEvaluatorBias) {
+    if (bias[combatEvaluatorBias]) {
+      return bias[combatEvaluatorBias].generalVariable;
+    }
+    return 1.1053;
+  }
+
+  function getBiasHp(combatEvaluatorBias) {
+    if (bias[combatEvaluatorBias]) {
+      return bias[combatEvaluatorBias].hpVariable;
+    }
+    return 1.1;
+  }
+
+  function getCombatBias() {
+    calf.combatEvaluatorBias = getValue('combatEvaluatorBias');
+    calf.generalVariable = getBiasGeneral(calf.combatEvaluatorBias);
+    calf.hpVariable = getBiasHp(calf.combatEvaluatorBias);
+  }
+
   function getPrefs$1() {
     calf.buffs = shouldBeArray('huntingBuffs');
     calf.buffsName = getValue('huntingBuffsName');
@@ -17166,6 +17141,7 @@
   }
 
   function worldPrefs() {
+    getCombatBias();
     getPrefs$1();
     buildFshDivs();
     interceptXHR();
@@ -17225,8 +17201,7 @@
 
   function subscribes() { // jQuery.min
     worldPrefs();
-    // subscribe to view creature events on the new map.
-    $.subscribe('ready.view-creature', readyViewCreature);
+    viewCreature();
     hideGroupButton(); // Hide Create Group button
     doMonsterColors();
     doNotKill(); // add do-not-kill list functionality
@@ -17234,7 +17209,6 @@
     $.subscribe('keydown.controls', doRepair$1);
     combatLogger();
     onWorld(); // on world
-    // somewhere near here will be multi buy on shop
     prepareShop();
     injectRelic();
     $('#messageCenter').worldMessageCenter({offset: '0 60'});
@@ -17250,7 +17224,8 @@
   // 5 = use stair
   // 6 = use chest
   // 7 = take portal
-  // 10 = problaby view relic
+  // 9 = view relic
+  // 10 = empower relic
   // 11 = take relic
   // 12 = create group
   // 13 = view shop
@@ -19194,7 +19169,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '16';
+  window.FSH.calf = '17';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

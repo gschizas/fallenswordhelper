@@ -1,55 +1,86 @@
-import {afterUpdateActionList} from '../doNotKill';
-import {bias} from '../assets';
 import calf from '../../support/calf';
-import createDocument from '../../system/createDocument';
+import {createDiv} from '../../common/cElement';
+import {def_suffixSuccessActionResponse} from '../../support/constants';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
 import evalAttack from './evalAttack';
-import evalCa from './evalCa';
+import evalCA from './evalCa';
 import evalDamage from './evalDamage';
 import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
-import evalHtml from './evalHtml';
-import findNode from '../../system/findNode';
+import evalHTML from './evalHtml';
 import {getElementById} from '../../common/getElement';
-import getValue from '../../system/getValue';
-import intValue from '../../system/intValue';
-import {playerDataString} from '../../common/common';
-import retryAjax from '../../ajax/retryAjax';
-import setValue from '../../system/setValue';
+import groupsView from '../../app/guild/groups/view';
+import groupsViewStats from '../../app/guild/groups/viewStats';
+import insertElement from '../../common/insertElement';
+import makeDoNotKillLink from './makeDoNotKillLink';
+import myStats from '../../ajax/myStats';
+import {playerDataObject} from '../../common/common';
+import playerName from '../../common/playerName';
 
-function getBiasGeneral(combat) {
-  if (bias[combat.combatEvaluatorBias]) {
-    return bias[combat.combatEvaluatorBias].generalVariable;
+var dialogViewCreature;
+var combatEvalContainer;
+var combatEvaluator;
+var groupEvaluator;
+
+function getDialogViewCreature() {
+  if (!dialogViewCreature) {
+    dialogViewCreature = getElementById('dialog-viewcreature');
   }
-  return 1.1053;
 }
 
-function getBiasHp(combat) {
-  if (bias[combat.combatEvaluatorBias]) {
-    return bias[combat.combatEvaluatorBias].hpVariable;
+function getCombatEvalContainer() {
+  if (!combatEvalContainer) {
+    combatEvalContainer = createDiv();
+    insertElement(dialogViewCreature, combatEvalContainer);
+    insertElement(dialogViewCreature, createDiv({
+      innerHTML: '<span class="fshFooter">' +
+        '*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NMV, ' +
+        'Sanctuary, Constitution, Fortitude, Chi Strike and ' +
+        'Terrorize (if active) and allow for randomness (1.1053). ' +
+        'Constitution, NMV, Fortitude and Chi Strike apply to group ' +
+        'stats.</span>'
+    }));
   }
-  return 1.1;
 }
 
-function creatureData(ses) { // jQuery
+function getCombatEvaluator() {
+  if (!combatEvaluator) {
+    getCombatEvalContainer();
+    combatEvaluator = createDiv();
+    insertElement(combatEvalContainer, combatEvaluator);
+  }
+}
+
+function getGroupEvaluator() {
+  if (!groupEvaluator) {
+    getCombatEvaluator();
+    groupEvaluator = createDiv();
+    insertElement(combatEvalContainer, groupEvaluator);
+  }
+}
+
+function setCombatEvaluator(html) {
+  getCombatEvaluator();
+  combatEvaluator.innerHTML = html;
+}
+
+function setGroupEvalalutor(html) {
+  getGroupEvaluator();
+  groupEvaluator.innerHTML = html;
+}
+
+function creatureData(creature, ses) {
   var obj = {};
-  obj.name = $('#dialog-viewcreature').find('h2.name').text();
-  obj.class = $('#dialog-viewcreature')
-    .find('span.classification')
-    .text();
-  obj.attack = intValue($('#dialog-viewcreature')
-    .find('dd.attribute-atk').text());
-  obj.defense = intValue($('#dialog-viewcreature')
-    .find('dd.attribute-def').text());
-  obj.armor = intValue($('#dialog-viewcreature')
-    .find('dd.attribute-arm').text());
-  obj.damage = intValue($('#dialog-viewcreature')
-    .find('dd.attribute-dmg').text());
-  obj.hp = intValue($('#dialog-viewcreature')
-    .find('p.health-max').text());
+  obj.name = creature.name;
+  obj.class = creature.creature_class;
+  obj.attack = Number(creature.attack);
+  obj.defense = Number(creature.defense);
+  obj.armor = Number(creature.armor);
+  obj.damage = Number(creature.damage);
+  obj.hp = Number(creature.hp);
   // reduce stats if critter is a SE and player has SES cast on them.
-  if (obj.name.search('Super Elite') !== -1) {
+  if (obj.name.search('Super Elite') !== -1) { // TODO type
     obj.attack -= Math.ceil(obj.attack * ses);
     obj.defense -= Math.ceil(obj.defense * ses);
     obj.armor -= Math.ceil(obj.armor * ses);
@@ -59,142 +90,74 @@ function creatureData(ses) { // jQuery
   return obj;
 }
 
-function checkForCreatureEvaluatorGroup() { // Legacy
-  if ($('#creatureEvaluatorGroup').length === 0) {
-    $('#dialog-viewcreature')
-      .append('<div id="creatureEvaluatorGroup" ' +
-        'style="clear:both;"></div>');
-  }
-}
-
-function checkForCreatureEvaluator() { // Legacy
-  if ($('#creatureEvaluator').length === 0) {
-    $('#dialog-viewcreature')
-      .append('<div id="creatureEvaluator" ' +
-        'style="clear:both;"></div>');
-  }
-}
-
-function getCreaturePlayerData(responseText, callback) { // Legacy
+function doCombatEval(data, playerJson, groupData) {
   var combat = {};
-  combat.callback = callback;
+  combat.callback = groupData;
   // playerdata
-  combat.player = playerDataString(responseText);
-  combat.combatEvaluatorBias = getValue('combatEvaluatorBias');
+  combat.player = playerDataObject(playerJson);
+  combat.combatEvaluatorBias = calf.combatEvaluatorBias;
   combat.attackVariable = 1.1053;
-  combat.generalVariable = getBiasGeneral(combat);
-  combat.hpVariable = getBiasHp(combat);
-  combat.creature =
-    creatureData(combat.player.superEliteSlayerMultiplier);
-  combat = evalExtraBuffs(combat);
-  combat = evalAttack(combat);
-  combat = evalDamage(combat);
-  combat = evalDefence(combat);
-  combat = evalArmour(combat);
-  combat = evalAnalysis(combat);
-  combat = evalCa(combat);
-  combat.evaluatorHTML = evalHtml(combat);
-  var tempdata;
-  if (callback.groupEvaluation) {
-    checkForCreatureEvaluatorGroup();
-    tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
-    $('#creatureEvaluatorGroup').html(tempdata);
+  combat.generalVariable = calf.generalVariable;
+  combat.hpVariable = calf.hpVariable;
+  combat.creature = creatureData(data.response.data,
+    combat.player.superEliteSlayerMultiplier);
+  evalExtraBuffs(combat);
+  evalAttack(combat);
+  evalDamage(combat);
+  evalDefence(combat);
+  evalArmour(combat);
+  evalAnalysis(combat);
+  evalCA(combat);
+  combat.evaluatorHTML = evalHTML(combat);
+  if (groupData.groupExists) {
+    setGroupEvalalutor(combat.evaluatorHTML);
   } else {
-    checkForCreatureEvaluator();
-    tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
-    $('#creatureEvaluator').html(tempdata);
+    setCombatEvaluator(combat.evaluatorHTML);
   }
 }
 
-function getStatValue(stat, doc) { // Legacy
-  var node = findNode('//table[@width="400"]/tbody/tr/td[contains(.,"' +
-    stat + ':")]', doc);
-  if (node) {return Number(node.nextSibling.textContent.replace(/,/, ''));}
-  return 0;
+function myGroup(el) {
+  return el.members[0].name === playerName();
 }
 
-function getCreatureGroupData(responseText) { // Legacy
-  var doc = createDocument(responseText);
-  var groupAttackValue = getStatValue('Attack', doc);
-  var groupDefenseValue = getStatValue('Defense', doc);
-  var groupArmorValue = getStatValue('Armor', doc);
-  var groupDamageValue = getStatValue('Damage', doc);
-  var groupHPValue = getStatValue('HP', doc);
-  retryAjax('index.php?no_mobile=1&cmd=profile').done(function(html) {
-    getCreaturePlayerData(html, {
+function getGroupId(json) {
+  return json.r.find(myGroup).id;
+}
+
+function getGroupStats(data, playerJson, groupId) {
+  groupsViewStats(groupId).done(function(groupJson) {
+    var attr = groupJson.r.attributes;
+    doCombatEval(data, playerJson, {
       groupExists: true,
-      groupAttackValue: groupAttackValue,
-      groupDefenseValue: groupDefenseValue,
-      groupArmorValue: groupArmorValue,
-      groupDamageValue: groupDamageValue,
-      groupHPValue: groupHPValue,
-      groupEvaluation: true
+      groupAttackValue: attr[0].value,
+      groupDefenseValue: attr[1].value,
+      groupArmorValue: attr[2].value,
+      groupDamageValue: attr[3].value,
+      groupHPValue: attr[4].value
     });
   });
 }
 
-function checkIfGroupExists(responseText) { // Hybrid
-  var doc = createDocument(responseText);
-  var groupExistsIMG = $(doc)
-    .find('img[title="Disband Group (Cancel Attack)"]');
-  if (groupExistsIMG.length > 0) {
-    var groupHref = groupExistsIMG.parents('td:first').find('a:first')
-      .attr('href');
-    retryAjax(groupHref).done(getCreatureGroupData);
-  }
-}
-
-function addRemoveCreatureToDoNotKillList(evt) {
-  var creatureName = evt.target.getAttribute('creatureName');
-  var ind = calf.doNotKillList.indexOf(creatureName);
-  if (ind !== -1) {
-    calf.doNotKillList.splice(ind, 1);
-    evt.target.innerHTML = 'Add to the do not kill list';
-  } else {
-    calf.doNotKillList.push(creatureName);
-    evt.target.innerHTML = 'Remove from do not kill list';
-  }
-  setValue('doNotKillList', calf.doNotKillList.join());
-  // refresh the action list
-  afterUpdateActionList();
-}
-
-export default function readyViewCreature() { // Hybrid
-  $('#creatureEvaluator').html('');
-  $('#creatureEvaluatorGroup').html('');
-
-  retryAjax('index.php?no_mobile=1&cmd=profile').done(function(html) {
-    getCreaturePlayerData(html, {
-      groupExists: false,
-      groupAttackValue: 0,
-      groupDefenseValue: 0,
-      groupArmorValue: 0,
-      groupDamageValue: 0,
-      groupHPValue: 0,
-      groupEvaluation: false
-    });
+function processGroup(data, playerJson) {
+  groupsView().pipe(getGroupId).done(function(groupId) {
+    getGroupStats(data, playerJson, groupId);
   });
-  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=groups')
-    .done(checkIfGroupExists);
+}
 
-  $('#addRemoveCreatureToDoNotKillList').html('');
-  if ($('#addRemoveCreatureToDoNotKillList').length === 0) {
-    var doNotKillElement = '<div id="addRemoveCreatureToDo' +
-      'NotKillList"" class="description" style="cursor:' +
-      'pointer;text-decoration:underline;color:blue;"></div>';
-    $(doNotKillElement).insertAfter($('#dialog-viewcreature')
-      .find('p.description'));
-  }
-  var creatureName = $('#dialog-viewcreature').find('h2.name')
-    .text();
-  $('#addRemoveCreatureToDoNotKillList')
-    .attr('creatureName', creatureName);
-  var extraText = 'Add to the do not kill list';
-  if (calf.doNotKillList.indexOf(creatureName) !== -1) {
-    extraText = 'Remove from do not kill list';
-  }
-  $('#addRemoveCreatureToDoNotKillList').html(extraText);
-  getElementById('addRemoveCreatureToDoNotKillList')
-    .addEventListener('click',
-      addRemoveCreatureToDoNotKillList, true);
+function processPlayer(data, playerJson) {
+  if (data.player.hasGroup) {processGroup(data, playerJson);}
+  doCombatEval(data, playerJson, {groupExists: false});
+}
+
+function processCreature(e, data) {
+  getDialogViewCreature();
+  if (!dialogViewCreature) {return;}
+  setCombatEvaluator('');
+  setGroupEvalalutor('');
+  makeDoNotKillLink(data.response.data.name, dialogViewCreature);
+  myStats(true).done(function(playerJson) {processPlayer(data, playerJson);});
+}
+
+export default function viewCreature() {
+  $.subscribe('1' + def_suffixSuccessActionResponse, processCreature);
 }

@@ -1,12 +1,10 @@
-import {bias} from '../assets';
+import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import intValue from '../../system/intValue';
 import setValue from '../../system/setValue';
 
 export var showCreatureInfo;
-var generalVariable = 1.1053;
-var hpVariable = 1.1;
 var statLevel;
 var statDefense;
 var statAttack;
@@ -17,19 +15,6 @@ var statHp;
 export function toggleShowCreatureInfo() {
   showCreatureInfo = !showCreatureInfo;
   setValue('showCreatureInfo', showCreatureInfo);
-}
-
-function biasIsValid(combatEvaluatorBias) {
-  return combatEvaluatorBias &&
-    combatEvaluatorBias >= 0 && combatEvaluatorBias <= 3;
-}
-
-export function getBias() {
-  var combatEvaluatorBias = getValue('combatEvaluatorBias');
-  if (biasIsValid(combatEvaluatorBias)) {
-    generalVariable = bias[combatEvaluatorBias].generalVariable;
-    hpVariable = bias[combatEvaluatorBias].hpVariable;
-  }
 }
 
 function getStatText(statTooltip, statClassName) {
@@ -49,8 +34,8 @@ export function getMyStats() {
 }
 
 function doMouseOver(creature, monster) {
-  var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
-    generalVariable);
+  var oneHitNumber = Math.ceil(creature.hp * calf.hpVariable + creature.armor *
+    calf.generalVariable);
   var myLvlClas = 'fshYellow';
   if (statLevel > creature.level) {myLvlClas = 'fshRed';}
   var monsterTip = '<table><tr><td>' +

@@ -1,8 +1,7 @@
-import callApp from '../callApp';
+import profile from './profile';
 
 export default function useitem(item) {
-  return callApp({
-    cmd: 'profile',
+  return profile({
     subcmd: 'useitem',
     inventory_id: item
   });

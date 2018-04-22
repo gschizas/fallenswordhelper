@@ -1,4 +1,3 @@
-
 function evalMiss(combat) {
   if (combat.numberOfCreatureHitsTillDead - combat.numberOfHitsRequired <= 1) {
     return ', dies on miss';
@@ -66,5 +65,4 @@ export default function evalAnalysis(combat) {
     }
   }
   combat.fightStatus = 'Unknown';
-  return combat;
 }
