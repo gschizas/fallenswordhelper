@@ -15981,11 +15981,7 @@
     $.subscribe('prompt.worldDialogShop', worldDialogShop);
   }
 
-  // import {bias} from '../assets';
-
   var showCreatureInfo;
-  // var generalVariable = 1.1053;
-  // var hpVariable = 1.1;
   var statLevel;
   var statDefense;
   var statAttack;
@@ -15997,19 +15993,6 @@
     showCreatureInfo = !showCreatureInfo;
     setValue('showCreatureInfo', showCreatureInfo);
   }
-
-  // function biasIsValid(combatEvaluatorBias) {
-  //   return combatEvaluatorBias &&
-  //     combatEvaluatorBias >= 0 && combatEvaluatorBias <= 3;
-  // }
-
-  // export function getBias() {
-  //   var combatEvaluatorBias = getValue('combatEvaluatorBias');
-  //   if (biasIsValid(combatEvaluatorBias)) {
-  //     generalVariable = bias[combatEvaluatorBias].generalVariable;
-  //     hpVariable = bias[combatEvaluatorBias].hpVariable;
-  //   }
-  // }
 
   function getStatText(statTooltip, statClassName) {
     return statTooltip.getElementsByClassName(statClassName)[0]
@@ -16203,7 +16186,6 @@
   }
 
   function initMonsterLog() {
-    // if (!showCreatureInfo && !showMonsterLog) {return;}
     if (showCreatureInfo || showMonsterLog) {
       getCreatures();
     }
@@ -16212,7 +16194,6 @@
   function startMonsterLog() { // jQuery.min
     getCreaturePrefs();
     getMonsterPrefs();
-    // getBias();
     $.subscribe(def_afterUpdateActionlist, initMonsterLog);
     initMonsterLog();
   }
