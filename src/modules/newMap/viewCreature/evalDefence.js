@@ -26,19 +26,14 @@ export default function evalDefence(combat) {
     Math.floor(calcDef(combat) *
     combat.player.constitutionLevel * 0.001) +
     combat.nightmareVisageAttackMovedToDefense;
-
   evalConstitution(combat);
   evalFlinch(combat);
-
   combat.creatureHitByHowMuch = Math.floor(combat.attackVariable *
     combat.creature.attack - combat.creature.attack *
     combat.player.flinchLevel * 0.001 - combat.overallDefenseValue);
-
   if (combat.combatEvaluatorBias === 3) {
     combat.creatureHitByHowMuch = Math.floor(combat.creature.attack -
       combat.creature.attack * combat.player.flinchLevel * 0.001 -
       combat.overallDefenseValue - 50);
   }
-
-  return combat;
 }

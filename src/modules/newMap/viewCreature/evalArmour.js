@@ -1,4 +1,3 @@
-
 function calcArm(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupArmorValue;
@@ -26,19 +25,14 @@ export default function evalArmour(combat) {
   combat.overallArmorValue = armorVal +
     Math.floor(combat.player.armorValue *
     combat.player.sanctuaryLevel * 0.001);
-
   evalSanctuary(combat);
-
   combat.terrorizeEffect = Math.floor(combat.creature.damage *
     combat.player.terrorizeLevel * 0.001);
-
   evalTerrorize(combat);
-
   combat.creature.damage -= combat.terrorizeEffect;
   combat.creatureDamageDone = Math.ceil(combat.generalVariable *
     combat.creature.damage - combat.overallArmorValue +
     combat.overallHPValue);
-
   if (combat.creatureHitByHowMuch >= 0) {
     var approxDmg = combat.generalVariable * combat.creature.damage;
     if (approxDmg < combat.overallArmorValue) {
@@ -50,6 +44,4 @@ export default function evalArmour(combat) {
   } else {
     combat.numberOfCreatureHitsTillDead = '-';
   }
-
-  return combat;
 }

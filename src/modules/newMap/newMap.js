@@ -6,8 +6,8 @@ import getValue from '../system/getValue';
 import injectRelic from './relic/relic';
 import onWorld from './onWorld';
 import prepareShop from './shop';
-import readyViewCreature from './viewCreature/viewCreature';
 import startMonsterLog from './monsterLog/monsterLog';
+import viewCreature from './viewCreature/viewCreature';
 import worldPrefs from './worldPrefs/worldPrefs';
 
 function hideGroupByType(type) { // jQuery
@@ -62,8 +62,7 @@ function doRepair(e, key) {
 
 export default function subscribes() { // jQuery.min
   worldPrefs();
-  // subscribe to view creature events on the new map.
-  $.subscribe('ready.view-creature', readyViewCreature);
+  viewCreature();
   hideGroupButton(); // Hide Create Group button
   doMonsterColors();
   doNotKill(); // add do-not-kill list functionality
@@ -71,7 +70,6 @@ export default function subscribes() { // jQuery.min
   $.subscribe('keydown.controls', doRepair);
   combatLogger();
   onWorld(); // on world
-  // somewhere near here will be multi buy on shop
   prepareShop();
   injectRelic();
   $('#messageCenter').worldMessageCenter({offset: '0 60'});
@@ -87,7 +85,8 @@ export default function subscribes() { // jQuery.min
 // 5 = use stair
 // 6 = use chest
 // 7 = take portal
-// 10 = problaby view relic
+// 9 = view relic
+// 10 = empower relic
 // 11 = take relic
 // 12 = create group
 // 13 = view shop

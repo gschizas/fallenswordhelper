@@ -1,7 +1,6 @@
 import {def_afterUpdateActionlist} from '../../support/constants';
 import retryAjax from '../../ajax/retryAjax';
 import {
-  getBias,
   getCreaturePrefs,
   getMyStats,
   processMouseOver,
@@ -37,7 +36,6 @@ function getCreatures() {
 }
 
 function initMonsterLog() {
-  // if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo || showMonsterLog) {
     getCreatures();
   }
@@ -46,7 +44,6 @@ function initMonsterLog() {
 export default function startMonsterLog() { // jQuery.min
   getCreaturePrefs();
   getMonsterPrefs();
-  getBias();
   $.subscribe(def_afterUpdateActionlist, initMonsterLog);
   initMonsterLog();
 }

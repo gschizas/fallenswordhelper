@@ -1,6 +1,7 @@
 import {buildFshDivs} from './buildFshDivs';
 import calf from '../../support/calf';
 import {doHuntingBuffs} from './doHuntingBuffs';
+import getCombatBias from '../getCombatBias';
 import getValue from '../../system/getValue';
 import {interceptXHR} from '../interceptXHR';
 import {prepareHidePlayerActions} from '../prepareHidePlayerActions';
@@ -21,6 +22,7 @@ function getPrefs() {
 }
 
 export default function worldPrefs() {
+  getCombatBias();
   getPrefs();
   buildFshDivs();
   interceptXHR();

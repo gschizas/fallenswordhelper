@@ -1,4 +1,3 @@
-
 function calcHp(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupHPValue;
@@ -59,5 +58,4 @@ export default function evalDamage(combat) {
   } else {
     combat.numberOfHitsRequired = '-';
   }
-  return combat;
 }

@@ -1,4 +1,3 @@
-
 function evalSes(combat) {
   if (combat.player.superEliteSlayerLevel > 0) {
     combat.extraNotes += 'SES Stat Reduction Multiplier = ' +
@@ -65,5 +64,4 @@ export default function evalExtraBuffs(combat) {
   evalExtraStam(combat);
   evalDeathDealer(combat);
   evalCounterAttack(combat);
-  return combat;
 }

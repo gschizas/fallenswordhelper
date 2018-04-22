@@ -91,5 +91,4 @@ export default function evalCA(combat) {
   if (needCa(combat)) {
     caResult(combat);
   }
-  return combat;
 }
