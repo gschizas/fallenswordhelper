@@ -1,5 +1,5 @@
-import callApp from '../callApp';
+import guild from './guild';
 
 export default function scouttower() {
-  return callApp({cmd: 'guild', subcmd: 'scouttower'});
+  return guild({subcmd: 'scouttower'});
 }

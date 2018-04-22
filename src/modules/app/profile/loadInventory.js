@@ -1,5 +1,5 @@
-import callApp from '../callApp';
+import profile from './profile';
 
 export default function loadInventory() {
-  return callApp({cmd: 'profile', subcmd: 'loadinventory'});
+  return profile({subcmd: 'loadinventory'});
 }

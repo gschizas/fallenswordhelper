@@ -1,5 +1,5 @@
-import callApp from '../callApp';
+import guild from './guild';
 
 export default function guildView(guildId) {
-  return callApp({cmd: 'guild', subcmd: 'view', guild_id: guildId});
+  return guild({subcmd: 'view', guild_id: guildId});
 }

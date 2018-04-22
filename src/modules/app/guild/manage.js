@@ -1,5 +1,5 @@
-import callApp from '../callApp';
+import guild from './guild';
 
 export default function guildManage() {
-  return callApp({cmd: 'guild', subcmd: 'manage'});
+  return guild({subcmd: 'manage'});
 }

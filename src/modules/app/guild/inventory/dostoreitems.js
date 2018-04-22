@@ -1,10 +1,8 @@
-import callApp from '../../callApp';
 import errorDialog from '../../errorDialog';
+import guildInventory from './guildInventory';
 
 export default function dostoreitems(invIdAry) {
-  return callApp({
-    cmd: 'guild',
-    subcmd: 'inventory',
+  return guildInventory({
     subcmd2: 'dostoreitems',
     storeIndex: invIdAry
   }).pipe(errorDialog);

@@ -1,8 +1,7 @@
-import callApp from '../callApp';
+import profile from './profile';
 
 export default function unequipitem(item) {
-  return callApp({
-    cmd: 'profile',
+  return profile({
     subcmd: 'unequipitem',
     inventory_id: item
   });
