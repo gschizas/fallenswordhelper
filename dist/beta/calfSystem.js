@@ -3935,6 +3935,65 @@
     {name: 'Invigorate',          stam: 40, lvl: 3000, id: 169, nicks: 'invigorate'}
   ];
 
+  function header(o) {
+    return '<tr><td rowspan="2" colspan="2" class="headCell"><h1>Find ' +
+      o.header + '</h1></td><td class="findLabel">Select ' + o.what +
+      ' to search for:</td><td>' + o.control() + '</td></tr>';
+  }
+
+  function cutoff(o) {
+    return '<tr><td class="findLabel">Level ' + o.cutoff +
+      'ers only:</td><td><input id="level175" type="checkbox"></td></tr>';
+  }
+
+  function searchGuildMembers(o) {
+    return '<tr><td class="leftLabel">' + o.searched +
+      ':&nbsp;</td><td id="buffNicks">&nbsp;</td>' +
+      '<td class="findLabel">Search guild members:</td>' +
+      '<td><input id="guildMembers" type="checkbox" checked></td></tr>';
+  }
+
+  function allyHelpLink() {
+    return helpLink('Search Allies/Enemies',
+      'The checkbox enables searching your own personal ' +
+      'allies/enemies list for buffs.<br><br>' +
+      'Additional profiles to search can be added in the text ' +
+      'field to the right, separated by commas.');
+  }
+
+  function searchAlly(o, extraProfile) {
+    return '<tr><td class="findLabel">' +
+      '# potential ' + o.potential + 'ers to search:&nbsp;</td>' +
+      '<td id="potentialBuffers"></td>' +
+      '<td class="findLabel">Search allies/enemies:' +
+      allyHelpLink() + '</td>' +
+      '<td><input id="alliesEnemies" type="checkbox" checked>' +
+      '<input class="extraProfile" class="custominput" id="extraProfile" ' +
+      'type="text" title="Extra profiles to search" value="' +
+      (extraProfile || '') + '"></td></tr>';
+  }
+
+  function onlineList(o) {
+    return '<tr><td class="findLabel"># ' + o.processed + 'ers processed:' +
+      '&nbsp;</td><td id="buffersProcessed">0</td>' +
+      '<td class="findLabel">Search online list:</td>' +
+      '<td><select class="selectOnline" id="onlinePlayers">' +
+        '<option value="0">Disabled</option>' +
+        '<option value="49">Short (fastest)</option>' +
+        '<option value="47">Medium (medium)</option>' +
+        '<option value="45">Long (slowest)</option>' +
+      '</select></td></tr>';
+  }
+
+  function progress(o) {
+    return '<tr><td class="findLabel">Find ' + o.progress + ' progress:' +
+      '&nbsp;</td><td class="buffProg" id="bufferProgress">Idle</td>' +
+      '<td align="center"><input id="clearresultsbutton" ' +
+      'class="custombutton" type="button" value="Clear Results"></td>' +
+      '<td align="center"><input id="findbuffsbutton" class="custombutton" ' +
+      'type="button" value="Find Buffers"></td></tr>';
+  }
+
   function outputTable(o) {
     return '<br><h1>Potential ' + o.processed + 'ers and Bio Info</h1><br>' +
       '<table class="fshResult" id="buffTable"><tbody>' +
@@ -3957,44 +4016,12 @@
 
   function pageLayout(o, extraProfile) { // Legacy
     return '<table class="fshFind"><tbody>' +
-      '<tr><td rowspan="2" colspan="2" class="headCell">' +
-      '<h1>Find ' + o.header + '</h1></td>' +
-      '<td class="findLabel">Select ' + o.what + ' to search for:</td>' +
-      '<td>' + o.control() + '</td></tr>' +
-      '<tr><td class="findLabel">Level ' + o.cutoff + 'ers only:</td>' +
-      '<td><input id="level175" type="checkbox"></td></tr>' +
-      '<tr><td class="leftLabel">' + o.searched +
-      ':&nbsp;</td><td id="buffNicks">&nbsp;</td>' +
-      '<td class="findLabel">Search guild members:</td>' +
-      '<td><input id="guildMembers" type="checkbox" checked></td></tr>' +
-      '<tr><td class="findLabel">' +
-      '# potential ' + o.potential + 'ers to search:&nbsp;</td>' +
-      '<td id="potentialBuffers"></td>' +
-      '<td class="findLabel">Search allies/enemies:' +
-      helpLink('Search Allies/Enemies',
-        'The checkbox enables searching your own personal ' +
-        'allies/enemies list for buffs.<br><br>' +
-        'Additional profiles to search can be added in the text ' +
-        'field to the right, separated by commas.') + '</td>' +
-      '<td><input id="alliesEnemies" type="checkbox" checked>' +
-      '<input class="extraProfile" class="custominput" id="extraProfile" ' +
-      'type="text" title="Extra profiles to search" value="' +
-      (extraProfile || '') + '"></td></tr>' +
-      '<tr><td class="findLabel"># ' + o.processed + 'ers processed:' +
-      '&nbsp;</td><td id="buffersProcessed">0</td>' +
-      '<td class="findLabel">Search online list:</td>' +
-      '<td><select class="selectOnline" id="onlinePlayers">' +
-        '<option value="0">Disabled</option>' +
-        '<option value="49">Short (fastest)</option>' +
-        '<option value="47">Medium (medium)</option>' +
-        '<option value="45">Long (slowest)</option>' +
-      '</select></td></tr>' +
-      '<tr><td class="findLabel">Find ' + o.progress + ' progress:' +
-      '&nbsp;</td><td class="buffProg" id="bufferProgress">Idle</td>' +
-      '<td align="center"><input id="clearresultsbutton" ' +
-      'class="custombutton" type="button" value="Clear Results"></td>' +
-      '<td align="center"><input id="findbuffsbutton" class="custombutton" ' +
-      'type="button" value="Find Buffers"></td></tr>' +
+      header(o) +
+      cutoff(o) +
+      searchGuildMembers(o) +
+      searchAlly(o, extraProfile) +
+      onlineList(o) +
+      progress(o) +
       '</tbody></table>' +
       outputTable(o) +
       disclaimer();
@@ -4189,6 +4216,16 @@
       '&nbsp;(' + virtualLevelValue + ')';
   }
 
+  function doNameCell(o) {
+    var newCell = o.newRow.insertCell(0);
+    newCell.style.verticalAlign = 'top';
+    newCell.innerHTML = nameCell(o.doc, o.callback, o.lastActivity,
+      o.bioCellHtml);
+    $('.a-reply').click(function(evt) {
+      window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+    });
+  }
+
   function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
     var sustain = 'fshRed';
     if (sustainLevel >= 100) {sustain = 'fshGreen';}
@@ -4201,6 +4238,31 @@
       '</td><td class="resVal ' + sustain + '">' + sustainLevel + '%</td>' +
       '<td class="resLbl">Extend:</td>' +
       '<td class="resVal">' + extend + '</td></tr>';
+  }
+
+  function playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff) {
+    var newCell = newRow.insertCell(1);
+    newCell.innerHTML = playerInfo(lastActivity, sustainLevel, hasExtendBuff);
+    newCell.style.verticalAlign = 'top';
+  }
+
+  function buffCell(newRow, textLineArray) {
+    var newCell = newRow.insertCell(2);
+    textLineArray.forEach(function(el) {
+      newCell.innerHTML += el + '<br>';
+    });
+  }
+
+  function updateProcessed(callback) {
+    var processedBuffers = getElementById('buffersProcessed');
+    var potentialBuffers =
+      parseInt(getElementById('potentialBuffers').textContent, 10);
+    var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
+    processedBuffers.innerHTML = processedBuffersCount + 1;
+    if (potentialBuffers === processedBuffersCount + 1) {
+      callback.bufferProgress.innerHTML = 'Done.';
+      callback.bufferProgress.style.color = 'blue';
+    }
   }
 
   function parseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
@@ -4224,33 +4286,17 @@
     // add row to table
     if (textLineArray.length > 0) {
       var newRow = buffTable.insertRow(-1);
-      // name cell
-      var newCell = newRow.insertCell(0);
-      newCell.style.verticalAlign = 'top';
-      newCell.innerHTML = nameCell(doc, callback, lastActivity, bioCellHtml);
-      $('.a-reply').click(function(evt) {
-        window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+      doNameCell({
+        newRow: newRow,
+        doc: doc,
+        callback: callback,
+        lastActivity: lastActivity,
+        bioCellHtml: bioCellHtml
       });
-
-      // player info cell
-      newCell = newRow.insertCell(1);
-      newCell.innerHTML = playerInfo(lastActivity, sustainLevel, hasExtendBuff);
-      newCell.style.verticalAlign = 'top';
-      // buff cell
-      newCell = newRow.insertCell(2);
-      textLineArray.forEach(function(el) {
-        newCell.innerHTML += el + '<br>';
-      });
+      playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff);
+      buffCell(newRow, textLineArray);
     }
-    var processedBuffers = getElementById('buffersProcessed');
-    var potentialBuffers =
-      parseInt(getElementById('potentialBuffers').textContent, 10);
-    var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
-    processedBuffers.innerHTML = processedBuffersCount + 1;
-    if (potentialBuffers === processedBuffersCount + 1) {
-      callback.bufferProgress.innerHTML = 'Done.';
-      callback.bufferProgress.style.color = 'blue';
-    }
+    updateProcessed(callback);
   }
 
   var thisPlayerName;
@@ -14187,41 +14233,53 @@
     obj.hpValue = obj.hpBonus;
   }
 
+  var statList = [
+    ['levelValue', 'level'],
+    ['attackValue', 'attack'],
+    ['attackBonus', 'bonus_attack'],
+    ['defenseValue', 'defense'],
+    ['defenseBonus', 'bonus_defense'],
+    ['armorValue', 'armor'],
+    ['armorBonus', 'bonus_armor'],
+    ['damageValue', 'damage'],
+    ['damageBonus', 'bonus_damage'],
+    ['hpValue', 'hp'],
+    ['hpBonus', 'bonus_hp'],
+    ['killStreakValue', 'killstreak']
+  ];
+
   function importStats(obj, json) {
-    obj.levelValue = json.level;
-    obj.attackValue = json.attack;
-    obj.attackBonus = json.bonus_attack;
-    obj.defenseValue = json.defense;
-    obj.defenseBonus = json.bonus_defense;
-    obj.armorValue = json.armor;
-    obj.armorBonus = json.bonus_armor;
-    obj.damageValue = json.damage;
-    obj.damageBonus = json.bonus_damage;
-    obj.hpValue = json.hp;
-    obj.hpBonus = json.bonus_hp;
-    obj.killStreakValue = Number(json.killstreak);
+    statList.forEach(function(el) {
+      obj[el[0]] = Number(json[el[1]]);
+    });
   }
 
+  var buffList$1 = [
+    ['counterAttackLevel', 'Counter Attack'],
+    ['doublerLevel', 'Doubler'],
+    ['deathDealerLevel', 'Death Dealer'],
+    ['darkCurseLevel', 'Dark Curse'],
+    ['holyFlameLevel', 'Holy Flame'],
+    ['constitutionLevel', 'Constitution'],
+    ['sanctuaryLevel', 'Sanctuary'],
+    ['flinchLevel', 'Flinch'],
+    ['nightmareVisageLevel', 'Nightmare Visage'],
+    ['superEliteSlayerLevel', 'Super Elite Slayer'],
+    ['fortitudeLevel', 'Fortitude'],
+    ['chiStrikeLevel', 'Chi Strike'],
+    ['terrorizeLevel', 'Terrorize'],
+    ['barricadeLevel', 'Barricade'],
+    ['reignOfTerrorLevel', 'Reign Of Terror'],
+    ['anchoredLevel', 'Anchored'],
+    ['severeConditionLevel', 'Severe Condition'],
+    ['entrenchLevel', 'Entrench'],
+    ['cloakLevel', 'Cloak']
+  ];
+
   function importBuffs(obj, buffs) {
-    obj.counterAttackLevel = fallback(buffs['Counter Attack'], 0);
-    obj.doublerLevel = fallback(buffs.Doubler, 0);
-    obj.deathDealerLevel = fallback(buffs['Death Dealer'], 0);
-    obj.darkCurseLevel = fallback(buffs['Dark Curse'], 0);
-    obj.holyFlameLevel = fallback(buffs['Holy Flame'], 0);
-    obj.constitutionLevel = fallback(buffs.Constitution, 0);
-    obj.sanctuaryLevel = fallback(buffs.Sanctuary, 0);
-    obj.flinchLevel = fallback(buffs.Flinch, 0);
-    obj.nightmareVisageLevel = fallback(buffs['Nightmare Visage'], 0);
-    obj.superEliteSlayerLevel = fallback(buffs['Super Elite Slayer'], 0);
-    obj.fortitudeLevel = fallback(buffs.Fortitude, 0);
-    obj.chiStrikeLevel = fallback(buffs['Chi Strike'], 0);
-    obj.terrorizeLevel = fallback(buffs.Terrorize, 0);
-    obj.barricadeLevel = fallback(buffs.Barricade, 0);
-    obj.reignOfTerrorLevel = fallback(buffs['Reign Of Terror'], 0);
-    obj.anchoredLevel = fallback(buffs.Anchored, 0);
-    obj.severeConditionLevel = fallback(buffs['Severe Condition'], 0);
-    obj.entrenchLevel = fallback(buffs.Entrench, 0);
-    obj.cloakLevel = fallback(buffs.Cloak, 0);
+    buffList$1.forEach(function(el) {
+      obj[el[0]] = fallback(buffs[el[1]], 0);
+    });
   }
 
   function playerDataObject(json) {
@@ -16895,6 +16953,7 @@
 
   function getGroupStats$1(data, playerJson, groupId) {
     groupsViewStats(groupId).done(function(groupJson) {
+      if (!groupJson.r.attributes) {return;}
       var attr = groupJson.r.attributes;
       doCombatEval(data, playerJson, {
         groupExists: true,
@@ -19177,7 +19236,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '18';
+  window.FSH.calf = '19';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
