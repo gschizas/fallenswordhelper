@@ -99,6 +99,16 @@ function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
     '&nbsp;(' + virtualLevelValue + ')';
 }
 
+function doNameCell(o) {
+  var newCell = o.newRow.insertCell(0);
+  newCell.style.verticalAlign = 'top';
+  newCell.innerHTML = nameCell(o.doc, o.callback, o.lastActivity,
+    o.bioCellHtml);
+  $('.a-reply').click(function(evt) {
+    window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+  });
+}
+
 function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
   var sustain = 'fshRed';
   if (sustainLevel >= 100) {sustain = 'fshGreen';}
@@ -111,6 +121,31 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
     '</td><td class="resVal ' + sustain + '">' + sustainLevel + '%</td>' +
     '<td class="resLbl">Extend:</td>' +
     '<td class="resVal">' + extend + '</td></tr>';
+}
+
+function playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff) {
+  var newCell = newRow.insertCell(1);
+  newCell.innerHTML = playerInfo(lastActivity, sustainLevel, hasExtendBuff);
+  newCell.style.verticalAlign = 'top';
+}
+
+function buffCell(newRow, textLineArray) {
+  var newCell = newRow.insertCell(2);
+  textLineArray.forEach(function(el) {
+    newCell.innerHTML += el + '<br>';
+  });
+}
+
+function updateProcessed(callback) {
+  var processedBuffers = getElementById('buffersProcessed');
+  var potentialBuffers =
+    parseInt(getElementById('potentialBuffers').textContent, 10);
+  var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
+  processedBuffers.innerHTML = processedBuffersCount + 1;
+  if (potentialBuffers === processedBuffersCount + 1) {
+    callback.bufferProgress.innerHTML = 'Done.';
+    callback.bufferProgress.style.color = 'blue';
+  }
 }
 
 export default function parseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
@@ -134,31 +169,15 @@ export default function parseProfileAndDisplay(responseText, callback) { // Hybr
   // add row to table
   if (textLineArray.length > 0) {
     var newRow = buffTable.insertRow(-1);
-    // name cell
-    var newCell = newRow.insertCell(0);
-    newCell.style.verticalAlign = 'top';
-    newCell.innerHTML = nameCell(doc, callback, lastActivity, bioCellHtml);
-    $('.a-reply').click(function(evt) {
-      window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+    doNameCell({
+      newRow: newRow,
+      doc: doc,
+      callback: callback,
+      lastActivity: lastActivity,
+      bioCellHtml: bioCellHtml
     });
-
-    // player info cell
-    newCell = newRow.insertCell(1);
-    newCell.innerHTML = playerInfo(lastActivity, sustainLevel, hasExtendBuff);
-    newCell.style.verticalAlign = 'top';
-    // buff cell
-    newCell = newRow.insertCell(2);
-    textLineArray.forEach(function(el) {
-      newCell.innerHTML += el + '<br>';
-    });
+    playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff);
+    buffCell(newRow, textLineArray);
   }
-  var processedBuffers = getElementById('buffersProcessed');
-  var potentialBuffers =
-    parseInt(getElementById('potentialBuffers').textContent, 10);
-  var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
-  processedBuffers.innerHTML = processedBuffersCount + 1;
-  if (potentialBuffers === processedBuffersCount + 1) {
-    callback.bufferProgress.innerHTML = 'Done.';
-    callback.bufferProgress.style.color = 'blue';
-  }
+  updateProcessed(callback);
 }
