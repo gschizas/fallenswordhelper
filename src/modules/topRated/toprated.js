@@ -9,7 +9,7 @@ import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
 import {onlineDot} from '../common/colouredDots';
 import {pCC} from '../support/layout';
-import {playerDataObject} from '../common/common';
+import playerDataObject from '../common/playerDataObject';
 import {
   calculateBoundaries,
   pvpLowerLevel,

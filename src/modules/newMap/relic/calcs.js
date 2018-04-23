@@ -1,7 +1,7 @@
 import addCommas from '../../system/addCommas';
 import {defenderMultiplier} from '../../support/constants';
 import fallback from '../../system/fallback';
-import {playerDataObject} from '../../common/common';
+import playerDataObject from '../../common/playerDataObject';
 import reduceBuffArray from '../../common/reduceBuffArray';
 import {relicMultiplier} from './parseGuild';
 import {

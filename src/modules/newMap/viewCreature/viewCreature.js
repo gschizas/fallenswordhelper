@@ -15,7 +15,7 @@ import groupsViewStats from '../../app/guild/groups/viewStats';
 import insertElement from '../../common/insertElement';
 import makeDoNotKillLink from './makeDoNotKillLink';
 import myStats from '../../ajax/myStats';
-import {playerDataObject} from '../../common/common';
+import playerDataObject from '../../common/playerDataObject';
 import playerName from '../../common/playerName';
 
 var dialogViewCreature;
