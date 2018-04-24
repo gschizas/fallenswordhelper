@@ -61,7 +61,7 @@ export default function evalAnalysis(combat) {
   for (var i = 0; i < evalFightStatus.length; i += 1) {
     if (evalFightStatus[i].test(combat)) {
       combat.fightStatus = evalFightStatus[i].fStatus(combat);
-      return combat;
+      return;
     }
   }
   combat.fightStatus = 'Unknown';
