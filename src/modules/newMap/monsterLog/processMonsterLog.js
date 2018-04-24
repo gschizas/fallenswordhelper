@@ -12,6 +12,14 @@ export function toggleShowMonsterLog() {
   setValue('showMonsterLog', showMonsterLog);
 }
 
+function storeDescription(creature, logCreature) {
+  logCreature.creature_class = fallback(logCreature.creature_class,
+    creature.creature_class);
+  logCreature.image_id = fallback(logCreature.image_id, creature.image_id);
+  logCreature.level = fallback(logCreature.level, Number(creature.level));
+  logCreature.type = fallback(logCreature.type, creature.type);
+}
+
 function updateMinMax(_logStat, creatureStat) {
   var logStat = fallback(_logStat, {});
   if (logStat.min) {
@@ -27,31 +35,19 @@ function updateMinMax(_logStat, creatureStat) {
   return logStat;
 }
 
+var stats = ['attack', 'armor', 'damage', 'defense', 'hp'];
+
+function storeStats(creature, logCreature) {
+  stats.forEach(function(stat) {
+    logCreature[stat] = updateMinMax(logCreature[stat], Number(creature[stat]));
+  });
+}
+
 function creatureHazEnhancements(creature) {
   return creature.enhancements && creature.enhancements.length > 0;
 }
 
-function doMonsterLog(creature) {
-  if (!monsterLog) {monsterLog = {};}
-  monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
-  var logCreature = monsterLog[creature.name];
-  logCreature.creature_class = fallback(logCreature.creature_class,
-    creature.creature_class);
-  logCreature.image_id = fallback(logCreature.image_id,
-    creature.image_id);
-  logCreature.level = fallback(logCreature.level,
-    Number(creature.level));
-  logCreature.type = fallback(logCreature.type, creature.type);
-  logCreature.armor = updateMinMax(logCreature.armor,
-    Number(creature.armor));
-  logCreature.attack = updateMinMax(logCreature.attack,
-    Number(creature.attack));
-  logCreature.damage = updateMinMax(logCreature.damage,
-    Number(creature.damage));
-  logCreature.defense = updateMinMax(logCreature.defense,
-    Number(creature.defense));
-  logCreature.hp = updateMinMax(logCreature.hp,
-    Number(creature.hp));
+function storeEnhancements(creature, logCreature) {
   if (creatureHazEnhancements(creature)) {
     logCreature.enhancements = fallback(logCreature.enhancements, {});
     var logEnh = logCreature.enhancements;
@@ -59,6 +55,15 @@ function doMonsterLog(creature) {
       logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
     });
   }
+}
+
+function doMonsterLog(creature) {
+  if (!monsterLog) {monsterLog = {};}
+  monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
+  var logCreature = monsterLog[creature.name];
+  storeDescription(creature, logCreature);
+  storeStats(creature, logCreature);
+  storeEnhancements(creature, logCreature);
   setForage('fsh_monsterLog', monsterLog);
 }
 

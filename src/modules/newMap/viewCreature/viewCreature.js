@@ -150,13 +150,19 @@ function processPlayer(data, playerJson) {
   doCombatEval(data, playerJson, {groupExists: false});
 }
 
+function isValidData(data) {
+  return data.response && data.response.data;
+}
+
 function processCreature(e, data) {
   getDialogViewCreature();
   if (!dialogViewCreature) {return;}
   setCombatEvaluator('');
   setGroupEvalalutor('');
-  makeDoNotKillLink(data.response.data.name, dialogViewCreature);
-  myStats(true).done(function(playerJson) {processPlayer(data, playerJson);});
+  if (isValidData(data)) {
+    makeDoNotKillLink(data.response.data.name, dialogViewCreature);
+    myStats(true).done(function(playerJson) {processPlayer(data, playerJson);});
+  }
 }
 
 export default function viewCreature() {
