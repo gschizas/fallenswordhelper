@@ -16068,52 +16068,86 @@
     statHp = getStatText(statTooltip, 'stat-hp');
   }
 
+  function tipHeader(creature) {
+    return '<table><tr><td>' +
+      '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
+      '.jpg" height="200" width="200"></td><td rowspan="2">' +
+      '<table width="400"><tr>' +
+      '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>';
+  }
+
+  function tipClassLevel(creature, myLvlClas) {
+    return '<tr><td>Class:&nbsp;</td><td width="40%">' + creature.creature_class +
+      '</td><td>Level:&nbsp;</td><td width="40%">' + creature.level +
+      ' (your level:<span class="' + myLvlClas + '">' + statLevel +
+      '</span>)</td></tr>';
+  }
+
+  function tipAttackDefense(creature) {
+    return '<tr><td>Attack:&nbsp;</td><td width="40%">' + creature.attack +
+      ' (your defense:<span class="fshYellow">' + statDefense +
+      '</span>)</td><td>Defense:&nbsp;</td><td width="40%">' + creature.defense +
+      ' (your attack:<span class="fshYellow">' + statAttack +
+      '</span>)</td></tr>';
+  }
+
+  function tipArmorDamage(creature) {
+    return '<tr><td>Armor:&nbsp;</td><td width="40%">' + creature.armor +
+      ' (your damage:<span class="fshYellow">' + statDamage +
+      '</span>)</td><td>Damage:&nbsp;</td><td width="40%">' + creature.damage +
+      ' (your armor:<span class="fshYellow">' + statArmor + '</span>)</td></tr>';
+  }
+
+  function tipHp(creature, oneHitNumber) {
+    return '<tr><td>HP:&nbsp;</td><td width="40%">' + creature.hp +
+      ' (your HP:<span class="fshYellow">' + statHp +
+      '</span>)(1H: <span class="fshRed">' + oneHitNumber +
+      '</span>)</td><td>Gold:&nbsp;</td><td width="40%">' + creature.gold +
+      '</td></tr>';
+  }
+
+  var tipSpacer = '<tr><td colspan="4" height="5"></td></tr><tr>' +
+    '<td class="header" colspan="4" class="fshCenter">Enhancements</td></tr>';
+
+  function tipEnhancements(creature) {
+    var ret = '';
+    if (creature.enhancements.length === 0) {
+      ret += '<tr><td colspan="4">[no enhancements]</td></tr>';
+    } else {
+      creature.enhancements.forEach(function(e) {
+        ret += '<tr><td colspan="2">' + e.name +
+          ':</td><td colspan="2">' + e.value + '</td></tr>';
+      });
+    }
+    return ret;
+  }
+
+  function tipFooter(creature) {
+    return '<tr><td colspan="4" height="5"></td></tr><tr>' +
+    '<td class="header" colspan="4" class="fshCenter">Description</td>' +
+    '</tr><tr><td colspan="4">' + creature.description + '</td></tr>' +
+    '<tr><td colspan="4" height="5"></td></tr></table></td></tr>' +
+    '<tr><td class="fshCenter"><b>' + creature.name + '</b></td></tr>' +
+    '</table>';
+  }
+
+  function makeMonsterTip(creature, oneHitNumber, myLvlClas) {
+    return tipHeader(creature) +
+      tipClassLevel(creature, myLvlClas) +
+      tipAttackDefense(creature) +
+      tipArmorDamage(creature) +
+      tipHp(creature, oneHitNumber) +
+      tipSpacer +
+      tipEnhancements(creature) +
+      tipFooter(creature);
+  }
+
   function doMouseOver(creature, monster) {
     var oneHitNumber = Math.ceil(creature.hp * calf.hpVariable + creature.armor *
       calf.generalVariable);
     var myLvlClas = 'fshYellow';
     if (statLevel > creature.level) {myLvlClas = 'fshRed';}
-    var monsterTip = '<table><tr><td>' +
-      '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
-      '.jpg" height="200" width="200"></td><td rowspan="2">' +
-      '<table width="400"><tr>' +
-      '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>' +
-      '<tr><td>Class:&nbsp;</td><td width="40%">' + creature.creature_class +
-      '</td><td>Level:&nbsp;</td><td width="40%">' + creature.level +
-      ' (your level:<span class="' + myLvlClas + '">' +
-      statLevel + '</span>)</td>' +
-      '</tr><tr><td>Attack:&nbsp;</td><td width="40%">' + creature.attack +
-      ' (your defense:<span class="fshYellow">' + statDefense + '</span>)</td>' +
-      '<td>Defense:&nbsp;</td><td width="40%">' + creature.defense +
-      ' (your attack:<span class="fshYellow">' + statAttack + '</span>)</td>' +
-      '</tr><tr><td>Armor:&nbsp;</td><td width="40%">' + creature.armor +
-      ' (your damage:<span class="fshYellow">' + statDamage + '</span>)</td>' +
-      '<td>Damage:&nbsp;</td><td width="40%">' + creature.damage +
-      ' (your armor:<span class="fshYellow">' + statArmor + '</span>)</td>' +
-      '</tr><tr><td>HP:&nbsp;</td><td width="40%">' + creature.hp +
-      ' (your HP:<span class="fshYellow">' + statHp + '</span>)' +
-      '(1H: <span class="fshRed">' + oneHitNumber + '</span>)</td>' +
-      '<td>Gold:&nbsp;</td><td width="40%">' + creature.gold + '</td></tr>' +
-      '<tr><td colspan="4" height="5"></td></tr><tr>' +
-      '<td class="header" colspan="4" class="fshCenter">Enhancements</td></tr>';
-
-    if (!creature.enhancements) {
-      monsterTip += '<tr><td colspan="4">[no enhancements]</td></tr>';
-    } else {
-      creature.enhancements.forEach(function(e) {
-        monsterTip += '<tr><td colspan="2">' + e.name +
-          ':</td><td colspan="2">' + e.value + '</td></tr>';
-      });
-    }
-
-    monsterTip += '<tr><td colspan="4" height="5"></td></tr><tr>' +
-      '<td class="header" colspan="4" class="fshCenter">Description</td>' +
-      '</tr><tr><td colspan="4">' + creature.description + '</td></tr>' +
-      '<tr><td colspan="4" height="5"></td></tr></table></td></tr>' +
-      '<tr><td class="fshCenter"><b>' + creature.name + '</b></td></tr>' +
-      '</table>';
-
-    monster.dataset.tipped = monsterTip;
+    monster.dataset.tipped = makeMonsterTip(creature, oneHitNumber, myLvlClas);
   }
 
   var bailOut$1 = [
@@ -16159,6 +16193,14 @@
     setValue('showMonsterLog', showMonsterLog);
   }
 
+  function storeDescription(creature, logCreature) {
+    logCreature.creature_class = fallback(logCreature.creature_class,
+      creature.creature_class);
+    logCreature.image_id = fallback(logCreature.image_id, creature.image_id);
+    logCreature.level = fallback(logCreature.level, Number(creature.level));
+    logCreature.type = fallback(logCreature.type, creature.type);
+  }
+
   function updateMinMax(_logStat, creatureStat) {
     var logStat = fallback(_logStat, {});
     if (logStat.min) {
@@ -16174,31 +16216,19 @@
     return logStat;
   }
 
+  var stats = ['attack', 'armor', 'damage', 'defense', 'hp'];
+
+  function storeStats(creature, logCreature) {
+    stats.forEach(function(stat) {
+      logCreature[stat] = updateMinMax(logCreature[stat], Number(creature[stat]));
+    });
+  }
+
   function creatureHazEnhancements(creature) {
     return creature.enhancements && creature.enhancements.length > 0;
   }
 
-  function doMonsterLog(creature) {
-    if (!monsterLog) {monsterLog = {};}
-    monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
-    var logCreature = monsterLog[creature.name];
-    logCreature.creature_class = fallback(logCreature.creature_class,
-      creature.creature_class);
-    logCreature.image_id = fallback(logCreature.image_id,
-      creature.image_id);
-    logCreature.level = fallback(logCreature.level,
-      Number(creature.level));
-    logCreature.type = fallback(logCreature.type, creature.type);
-    logCreature.armor = updateMinMax(logCreature.armor,
-      Number(creature.armor));
-    logCreature.attack = updateMinMax(logCreature.attack,
-      Number(creature.attack));
-    logCreature.damage = updateMinMax(logCreature.damage,
-      Number(creature.damage));
-    logCreature.defense = updateMinMax(logCreature.defense,
-      Number(creature.defense));
-    logCreature.hp = updateMinMax(logCreature.hp,
-      Number(creature.hp));
+  function storeEnhancements$1(creature, logCreature) {
     if (creatureHazEnhancements(creature)) {
       logCreature.enhancements = fallback(logCreature.enhancements, {});
       var logEnh = logCreature.enhancements;
@@ -16206,6 +16236,15 @@
         logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
       });
     }
+  }
+
+  function doMonsterLog(creature) {
+    if (!monsterLog) {monsterLog = {};}
+    monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
+    var logCreature = monsterLog[creature.name];
+    storeDescription(creature, logCreature);
+    storeStats(creature, logCreature);
+    storeEnhancements$1(creature, logCreature);
     setForage('fsh_monsterLog', monsterLog);
   }
 
@@ -16319,7 +16358,7 @@
     for (var i = 0; i < evalFightStatus.length; i += 1) {
       if (evalFightStatus[i].test(combat)) {
         combat.fightStatus = evalFightStatus[i].fStatus(combat);
-        return combat;
+        return;
       }
     }
     combat.fightStatus = 'Unknown';
@@ -16973,13 +17012,19 @@
     doCombatEval(data, playerJson, {groupExists: false});
   }
 
+  function isValidData(data) {
+    return data.response && data.response.data;
+  }
+
   function processCreature(e, data) {
     getDialogViewCreature();
     if (!dialogViewCreature) {return;}
     setCombatEvaluator('');
     setGroupEvalalutor('');
-    makeDoNotKillLink(data.response.data.name, dialogViewCreature);
-    myStats(true).done(function(playerJson) {processPlayer(data, playerJson);});
+    if (isValidData(data)) {
+      makeDoNotKillLink(data.response.data.name, dialogViewCreature);
+      myStats(true).done(function(playerJson) {processPlayer(data, playerJson);});
+    }
   }
 
   function viewCreature() {
@@ -19232,7 +19277,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '19';
+  window.FSH.calf = '20';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
