@@ -126,7 +126,7 @@ function getGroupId(json) {
 
 function getGroupStats(data, playerJson, groupId) {
   groupsViewStats(groupId).done(function(groupJson) {
-    if (!groupJson.r.attributes) {return;}
+    if (!groupJson.r || !groupJson.r.attributes) {return;}
     var attr = groupJson.r.attributes;
     doCombatEval(data, playerJson, {
       groupExists: true,
