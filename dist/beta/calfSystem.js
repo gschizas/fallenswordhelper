@@ -7068,7 +7068,9 @@
   function enhanceWarehouse() {
     itemsAry.forEach(function(item) {
       var invItem = invItems[item[1]];
-      item.push(getFolderId(invItem), invItem.craft);
+      if (invItem) {
+        item.push(getFolderId(invItem), invItem.craft);
+      }
     });
   }
 
@@ -10523,8 +10525,8 @@
     var type = self.dataset.id;
     var invIds = itemList[type].invIds;
     self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
-    for (var i = 0; i < invIds.length; i += 50) {
-      takeitems(invIds.slice(i, i + 50)).done(doneTake(takeResult));
+    for (var i = 0; i < invIds.length; i += 40) {
+      takeitems(invIds.slice(i, i + 40)).done(doneTake(takeResult));
     }
   }
 
@@ -13051,13 +13053,17 @@
     });
   }
 
+  function removeWidth(el) {
+    if (el instanceof Element) {el.removeAttribute('width');}
+  }
+
   function doSpan(el) {
     if (counter === 0) {
       el.previousSibling.setAttribute('width', '200px');
       el.setAttribute('width', '370px');
     } else {
-      el.previousSibling.removeAttribute('width');
-      el.removeAttribute('width');
+      removeWidth(el.previousSibling);
+      removeWidth(el);
     }
     nodeArray.push(mySpan(el));
   }
@@ -13082,7 +13088,7 @@
 
   function prepareChildRows() {
     nodeList = document.querySelectorAll('#pCC table table ' +
-      'tr:not(.fshHide) td:nth-of-type(3n+0)');
+      'tr:not(.fshHide) td:nth-of-type(3n)');
     potObj$1 = {};
     nodeArray = [];
     counter = 0;
@@ -16359,13 +16365,12 @@
     // Analysis:
     combat.playerHits = evalPlayerHits(combat);
     combat.creatureHits = evalCreatureHits(combat);
-    for (var i = 0; i < evalFightStatus.length; i += 1) {
-      if (evalFightStatus[i].test(combat)) {
-        combat.fightStatus = evalFightStatus[i].fStatus(combat);
-        return;
-      }
+    var status = evalFightStatus.find(function(el) {return el.test(combat);});
+    if (status) {
+      combat.fightStatus = status.fStatus(combat);
+    } else {
+      combat.fightStatus = 'Unknown';
     }
-    combat.fightStatus = 'Unknown';
   }
 
   function calcArm(combat) {
@@ -16992,7 +16997,7 @@
 
   function getGroupStats$1(data, playerJson, groupId) {
     groupsViewStats(groupId).done(function(groupJson) {
-      if (!groupJson.r.attributes) {return;}
+      if (!groupJson.r || !groupJson.r.attributes) {return;}
       var attr = groupJson.r.attributes;
       doCombatEval(data, playerJson, {
         groupExists: true,
@@ -19281,7 +19286,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '20';
+  window.FSH.calf = '21';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

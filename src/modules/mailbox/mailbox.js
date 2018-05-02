@@ -107,8 +107,8 @@ function takeSimilar(itemList, takeResult, self) { // jQuery.min
   var type = self.dataset.id;
   var invIds = itemList[type].invIds;
   self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
-  for (var i = 0; i < invIds.length; i += 50) {
-    takeitems(invIds.slice(i, i + 50)).done(doneTake(takeResult));
+  for (var i = 0; i < invIds.length; i += 40) {
+    takeitems(invIds.slice(i, i + 40)).done(doneTake(takeResult));
   }
 }
 

@@ -58,11 +58,10 @@ export default function evalAnalysis(combat) {
   // Analysis:
   combat.playerHits = evalPlayerHits(combat);
   combat.creatureHits = evalCreatureHits(combat);
-  for (var i = 0; i < evalFightStatus.length; i += 1) {
-    if (evalFightStatus[i].test(combat)) {
-      combat.fightStatus = evalFightStatus[i].fStatus(combat);
-      return;
-    }
+  var status = evalFightStatus.find(function(el) {return el.test(combat);});
+  if (status) {
+    combat.fightStatus = status.fStatus(combat);
+  } else {
+    combat.fightStatus = 'Unknown';
   }
-  combat.fightStatus = 'Unknown';
 }

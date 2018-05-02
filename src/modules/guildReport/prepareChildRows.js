@@ -67,13 +67,17 @@ function mySpan(el) {
   });
 }
 
+function removeWidth(el) {
+  if (el instanceof Element) {el.removeAttribute('width');}
+}
+
 function doSpan(el) {
   if (counter === 0) {
     el.previousSibling.setAttribute('width', '200px');
     el.setAttribute('width', '370px');
   } else {
-    el.previousSibling.removeAttribute('width');
-    el.removeAttribute('width');
+    removeWidth(el.previousSibling);
+    removeWidth(el);
   }
   nodeArray.push(mySpan(el));
 }
@@ -98,7 +102,7 @@ function makeSpan() {
 
 export default function prepareChildRows() {
   nodeList = document.querySelectorAll('#pCC table table ' +
-    'tr:not(.fshHide) td:nth-of-type(3n+0)');
+    'tr:not(.fshHide) td:nth-of-type(3n)');
   potObj = {};
   nodeArray = [];
   counter = 0;

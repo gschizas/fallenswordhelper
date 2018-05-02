@@ -74,7 +74,9 @@ function getFolderId(item) {
 function enhanceWarehouse() {
   itemsAry.forEach(function(item) {
     var invItem = invItems[item[1]];
-    item.push(getFolderId(invItem), invItem.craft);
+    if (invItem) {
+      item.push(getFolderId(invItem), invItem.craft);
+    }
   });
 }
 
