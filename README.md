@@ -3,9 +3,6 @@
 [![Build Status](https://travis-ci.org/fallenswordhelper/fallenswordhelper.svg?branch=master)](https://travis-ci.org/fallenswordhelper/fallenswordhelper)
 [![Build status](https://ci.appveyor.com/api/projects/status/715kmqrhqvuna3aa/branch/master?svg=true)](https://ci.appveyor.com/project/atompkins/fallenswordhelper/branch/master)
 [![devDependencies Status](https://david-dm.org/fallenswordhelper/fallenswordhelper/dev-status.svg)](https://david-dm.org/fallenswordhelper/fallenswordhelper?type=dev)
-
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3e8c12d5e2ef4a8a89b8cca8f23b8dbd)](https://www.codacy.com/app/atompkins/fallenswordhelper?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=fallenswordhelper/fallenswordhelper&amp;utm_campaign=Badge_Grade)
-[![CodeFactor](https://www.codefactor.io/repository/github/fallenswordhelper/fallenswordhelper/badge)](https://www.codefactor.io/repository/github/fallenswordhelper/fallenswordhelper)
 [![codebeat badge](https://codebeat.co/badges/63cac31b-413a-4f54-b445-025c94033b49)](https://codebeat.co/projects/github-com-fallenswordhelper-fallenswordhelper-master)
 [![Code Climate](https://codeclimate.com/github/fallenswordhelper/fallenswordhelper/badges/gpa.svg)](https://codeclimate.com/github/fallenswordhelper/fallenswordhelper)
 
