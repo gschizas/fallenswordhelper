@@ -191,12 +191,20 @@ function toggleItem(self) {
   });
 }
 
+function addHide(el) {
+  if (el.classList) {el.classList.add('fshHide');}
+}
+
+function removeHide(el) {
+  if (el.classList) {el.classList.remove('fshHide');}
+}
+
 function selectAll() {
   options.checks = defChecks.slice(0);
   setChecks();
   tmpGuildLog.forEach(function(r) {
-    r[5].classList.remove('fshHide');
-    r[6].classList.remove('fshHide');
+    removeHide(r[5]);
+    removeHide(r[6]);
   });
 }
 
@@ -204,8 +212,8 @@ function selectNone() {
   options.checks = noChecks.slice(0);
   setChecks();
   tmpGuildLog.forEach(function(r) {
-    r[5].classList.add('fshHide');
-    r[6].classList.add('fshHide');
+    addHide(r[5]);
+    addHide(r[6]);
   });
 }
 
