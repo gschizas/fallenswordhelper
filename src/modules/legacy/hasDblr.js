@@ -1,4 +1,4 @@
-import findNode from '../system/findNode';
+import findNode from './findNode';
 
 var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
 

@@ -15,7 +15,8 @@ var types = [
   },
   {
     c: function(o) {
-      return type === 'item' && invItems[o.invid].item_id === itemId;
+      return type === 'item' && invItems[o.invid] &&
+        invItems[o.invid].item_id === itemId;
     },
     r: tickElement
   },

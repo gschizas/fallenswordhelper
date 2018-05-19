@@ -1,4 +1,4 @@
-import fallback from './fallback';
+import fallback from '../system/fallback';
 
 function getTarget(doc) {
   if (doc instanceof HTMLDocument) {return doc;}

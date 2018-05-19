@@ -1,18 +1,18 @@
 import calf from '../support/calf';
 import createDocument from '../system/createDocument';
 import {doSendGold} from '../newMap/sendGold';
-import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertQuickWear from '../quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
+import xPath from '../common/xPath';
 
 var expandMenuOnKeyPress;
 
 function movePage(dir) { // Legacy
-  var dirButton = findNode('//input[@value="' + dir + '"]');
+  var dirButton = xPath('//input[@value="' + dir + '"]');
   if (!dirButton) {return;}
   var url = dirButton.getAttribute('onClick');
   url = url.replace(/^[^']*'/m, '').replace(/';$/m, '');

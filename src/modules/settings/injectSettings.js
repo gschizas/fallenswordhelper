@@ -1,5 +1,4 @@
 import calf from '../support/calf';
-import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../monstorLog';
@@ -15,6 +14,19 @@ import setValue from '../system/setValue';
 import setupConfigData from './configData';
 import toggleVisibilty from '../common/toggleVisibilty';
 import {createBr, createSpan} from '../common/cElement';
+
+function findEl(el, name) {
+  return document.querySelector(
+    '#fshSettingsTable ' + el + '[name="' + name + '"]');
+}
+
+function findInput(name) {
+  return findEl('input', name);
+}
+
+function findSelect(name) {
+  return findEl('select', name);
+}
 
 function getVars() {
   calf.showBuffs = getValue('showHuntingBuffs');
@@ -53,72 +65,41 @@ function clearStorage() {
   );
 }
 
-function saveValueForm(oForm, name) { // Legacy
-  var formElement =
-    findNode('//input[@name="' + name + '"]', oForm);
-  if (formElement.getAttribute('type') === 'checkbox') {
+function saveValueForm(name) {
+  var formElement = findInput(name);
+  if (formElement.type === 'checkbox') {
     setValue(name, formElement.checked);
   } else {
     setValue(name, formElement.value);
   }
 }
 
-function setMaxCompressedCharacters(oForm) { // Legacy
-  var maxCompressedCharacters =
-    findNode('//input[@name="maxCompressedCharacters"]', oForm);
-  var maxCompressedCharactersValue = Number(maxCompressedCharacters.value);
-  if (isNaN(maxCompressedCharactersValue) ||
-      maxCompressedCharactersValue <= 50) {
-    maxCompressedCharacters.value = 1500;
+function saveNumeric(name) {
+  var formElement = findSelect(name);
+  setValue(name, Number(formElement.value));
+}
+
+function saveOther(name) {
+  var formElement = findSelect(name);
+  setValue(name, formElement.value);
+}
+
+function checkNumeric(name, min, def) {
+  var myInput = findInput(name);
+  var inputValue = Number(myInput.value);
+  if (isNaN(inputValue) || inputValue <= min) {
+    myInput.value = def;
   }
 }
 
-function setMaxCompressedLines(oForm) { // Legacy
-  var maxCompressedLines =
-    findNode('//input[@name="maxCompressedLines"]', oForm);
-  var maxCompressedLinesValue = Number(maxCompressedLines.value);
-  if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue <= 1) {
-    maxCompressedLines.value = 25;
-  }
-}
-
-function setGuildLogHistoryPages(oForm) { // Legacy
-  var newGuildLogHistoryPages =
-    findNode('//input[@name="newGuildLogHistoryPages"]', oForm);
-  var newGuildLogHistoryPagesValue = Number(newGuildLogHistoryPages.value);
-  if (isNaN(newGuildLogHistoryPagesValue) ||
-      newGuildLogHistoryPagesValue <= 1) {
-    newGuildLogHistoryPages.value = 25;
-  }
-}
-
-function setMaxGroupSizeToJoin(oForm) { // Legacy
-  var maxGroupSizeToJoin =
-    findNode('//input[@name="maxGroupSizeToJoin"]', oForm);
-  var maxGroupSizeToJoinValue = Number(maxGroupSizeToJoin.value);
-  if (isNaN(maxGroupSizeToJoinValue) || maxGroupSizeToJoinValue <= 1) {
-    maxGroupSizeToJoin.value = 11;
-  }
-}
-
-function saveConfig(evt) { // Legacy
-  var oForm = evt.target.form;
-  // bio compressor validation logic
-  setMaxCompressedCharacters(oForm);
-  setMaxCompressedLines(oForm);
-  setGuildLogHistoryPages(oForm);
-  setMaxGroupSizeToJoin(oForm);
-  var combatEvaluatorBiasElement =
-    findNode('//select[@name="combatEvaluatorBias"]', oForm);
-  var combatEvaluatorBias = Number(combatEvaluatorBiasElement.value);
-  setValue('combatEvaluatorBias', combatEvaluatorBias);
-  var enabledHuntingModeElement =
-    findNode('//select[@name="enabledHuntingMode"]', oForm);
-  var enabledHuntingMode = enabledHuntingModeElement.value;
-  setValue('enabledHuntingMode', enabledHuntingMode);
-
-  saveBoxes.forEach(saveValueForm.bind(null, oForm));
-
+function saveConfig() { // jQuery
+  checkNumeric('maxCompressedCharacters', 50, 1500);
+  checkNumeric('maxCompressedLines', 1, 25);
+  checkNumeric('newGuildLogHistoryPages', 1, 25);
+  checkNumeric('maxGroupSizeToJoin', 1, 11);
+  saveNumeric('combatEvaluatorBias');
+  saveOther('enabledHuntingMode');
+  saveBoxes.forEach(saveValueForm);
   $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
 }
 
@@ -132,7 +113,7 @@ function showMonsterLogs() {
   jQueryDialog(injectMonsterLog);
 }
 
-function createEventListeners() {
+function createEventListeners() { // Legacy
   var tickAll = createSpan({
     id: 'fshAllBuffs',
     className: 'fshLink',
@@ -144,13 +125,10 @@ function createEventListeners() {
   insertElement(inject, createBr());
   insertElement(inject, tickAll);
 
-  getElementById('fshClearStorage')
-    .addEventListener('click', clearStorage);
+  getElementById('fshClearStorage').addEventListener('click', clearStorage);
 
-  getElementById('Helper:SaveOptions')
-    .addEventListener('click', saveConfig);
-  getElementById('Helper:ShowLogs')
-    .addEventListener('click', showLogs);
+  getElementById('Helper:SaveOptions').addEventListener('click', saveConfig);
+  getElementById('Helper:ShowLogs').addEventListener('click', showLogs);
   getElementById('Helper:ShowMonsterLogs')
     .addEventListener('click', showMonsterLogs);
 
@@ -164,7 +142,7 @@ function createEventListeners() {
     .addEventListener('click', toggleVisibilty);
 }
 
-export default function injectSettings() { // jQuery.min
+export default function injectSettings() { // jQuery
   if (jQueryNotPresent()) {return;}
   getVars();
   setupConfigData();
@@ -174,8 +152,9 @@ export default function injectSettings() { // jQuery.min
   if ($(settingsTabs).tabs('length') > 0) {
     $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
   }
+
   createEventListeners();
-  setValue('minGroupLevel', getElementById('settingsTabs-1')
-    .firstElementChild.lastElementChild.rows[1].cells[1].firstElementChild
-    .value);
+
+  setValue('minGroupLevel',
+    document.querySelector('input[name="min_group_level"]').value);
 }

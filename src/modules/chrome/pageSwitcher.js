@@ -28,7 +28,7 @@ import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import injectReportPaint from '../guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
-import injectScavenging from '../scavenging';
+import injectScavenging from '../legacy/scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';
 import injectSettings from '../settings/injectSettings';
 import injectStoreItems from '../dropItems/injectStoreItems';
@@ -39,7 +39,7 @@ import injectViewGuild from '../guild/injectViewGuild';
 import injectWorld from '../legacy/legacy';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
-import inventing from '../recipes';
+import inventing from '../recipes/inventing';
 import ladder from '../ladder';
 import marketplace from '../marketplace';
 import parseGoldUpgrades from '../notification/parseGoldUpgrades';
@@ -70,7 +70,9 @@ export default {
   world: {'-': {'-': {'-': {'-': injectWorld}}}},
   news: {
     fsbox: {'-': {'-': {'-': newsFsbox}}},
-    shoutbox: {'-': {'-': {'-': newsShoutbox}}}
+    shoutbox: {'-': {'-': {'-': newsShoutbox}}},
+    viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
+    viewarchive: {'-': {'-': {'-': viewArchive}}}
   },
   blacksmith: {repairall: {'-': {'-': {'1': injectWorld}}}},
   arena: {

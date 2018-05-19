@@ -1,4 +1,3 @@
-import findNode from '../system/findNode';
 import getValue from '../system/getValue';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import quickBuffHref from '../common/quickBuffHref';
@@ -7,14 +6,10 @@ import setValue from '../system/setValue';
 var nowUtc;
 var lastCheckUtc;
 
-function findChatTable() { // Legacy
-  var chatTable = findNode('//table[@class="width_full"]'); // Guild Log
+function findChatTable() {
+  var chatTable = document.querySelector('#pCC table table table table'); // Guild Chat
   if (!chatTable) {
-    chatTable = findNode('//table[tbody/tr/td[.="Message"]]'); // Outbox & Guild Chat
-  }
-  if (!chatTable) {
-    chatTable = findNode('//table[tbody/tr/td/span[' +
-      'contains(.,"Currently showing:")]]'); // personal log
+    chatTable = document.querySelector('#pCC > table:last-of-type'); // Outbox, Guild Log & personal log
   }
   return chatTable;
 }
@@ -57,7 +52,6 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   var increment = 2;
   if (logScreen === 'Chat') {
     increment = 4;
-    chatTable.classList.add('fshGc');
   }
   for (var i = 1; i < chatTable.rows.length; i += increment) {
     rowColor(chatTable.rows[i], logScreen, dateColumn);

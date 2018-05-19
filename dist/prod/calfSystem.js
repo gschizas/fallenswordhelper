@@ -284,6 +284,17 @@
           }
         }
       };
+      window.GM_listValues = function() {
+        var list = [];
+        var reKey = new RegExp('^' + GMSTORAGE_PATH);
+        for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
+          var key = window.localStorage.key(i);
+          if (key.match(reKey)) {
+            list.push(key.replace(GMSTORAGE_PATH, ''));
+          }
+        }
+        return list;
+      };
     } else if (!gvar.isOpera || isUndefined(window.GM_setValue)) {
       gvar.temporarilyStorage = [];
       window.GM_getValue = function(name, defValue) {
@@ -296,19 +307,9 @@
           gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
         }
       };
+      window.GM_listValues = function() {return [];};
     }
 
-    window.GM_listValues = function() {
-      var list = [];
-      var reKey = new RegExp('^' + GMSTORAGE_PATH);
-      for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
-        var key = window.localStorage.key(i);
-        if (key.match(reKey)) {
-          list.push(key.replace(GMSTORAGE_PATH, ''));
-        }
-      }
-      return list;
-    };
   }
 
   function fallback(a, b) {
@@ -4511,18 +4512,17 @@
       buffTable.deleteRow(j - 1);
     }
     getElementById('buffNicks').innerHTML = '';
-    // var bufferProgress = getElementById('bufferProgress');
     bufferProgress.innerHTML = 'Idle.';
     bufferProgress.style.color = 'black';
     getElementById('potentialBuffers').innerHTML = '';
     getElementById('buffersProcessed').innerHTML = 0;
   }
 
-  function findAnyStart(progMsg) { // jQuery.min // jQuery
+  function findAnyStart(progMsg) { // jQuery
     if (jQueryNotPresent()) {return;}
     characterName = playerName();
     getElementById('buffNicks').innerHTML = findBuffNicks;
-    bufferProgress = getElementById('bufferProgress');
+    if (jQueryNotPresent()) {return;}
     bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
     bufferProgress.style.color = 'green';
     findBuffsLevel175Only =
@@ -4556,27 +4556,42 @@
     findAnyStart('profiles to search');
   }
 
+  function getExtraProfile() {
+    extraProfile = getValue('extraProfile');
+  }
+
+  function getBufferProgress() {
+    bufferProgress = getElementById('bufferProgress');
+  }
+
+  function setupFindEvent(fn) {
+    getElementById('findbuffsbutton').addEventListener('click', fn, true);
+  }
+
+  function setupClearEvent() {
+    getElementById('clearresultsbutton')
+      .addEventListener('click', findBuffsClearResults, true);
+  }
+
   function injectFindBuffs(injector) { // Legacy
     var content = injector || pCC;
     calf.sortBy = 'name';
     calf.sortAsc = true;
     buffList.sort(stringSort);
-    extraProfile = getValue('extraProfile');
+    getExtraProfile();
     content.innerHTML = pageLayout(buffCustom, extraProfile);
-    getElementById('findbuffsbutton')
-      .addEventListener('click', findBuffsStart, true);
-    getElementById('clearresultsbutton')
-      .addEventListener('click', findBuffsClearResults, true);
+    getBufferProgress();
+    setupFindEvent(findBuffsStart);
+    setupClearEvent();
   }
 
   function injectFindOther(injector) { // Native - Bad
     var content = injector || pCC;
-    extraProfile = getValue('extraProfile');
+    getExtraProfile();
     content.innerHTML = pageLayout(otherCustom, extraProfile);
-    getElementById('findbuffsbutton')
-      .addEventListener('click', findOtherStart, true);
-    getElementById('clearresultsbutton')
-      .addEventListener('click', findBuffsClearResults, true);
+    getBufferProgress();
+    setupFindEvent(findOtherStart);
+    setupClearEvent();
   }
 
   var helperMenuBlob =
@@ -6091,51 +6106,27 @@
     }
   }
 
-  function getTarget$1(doc) {
+  function getDoc$1(doc, context) {
     if (doc instanceof HTMLDocument) {return doc;}
+    if (context) {return context.ownerDocument;}
     return document;
   }
 
-  function patchXPath(xpath) {
-    if (xpath.indexOf('/') === 0) {
-      return '.' + xpath;
-      // TODO this is likely to be bad
-      // this is a chrome fix - needs a .// for xpath
-      // where as firefox can function without it.
-      // firefox still works with .//
-    }
-    return xpath;
+  function xPathEvaluate(type, expr, _doc, _context) {
+    var doc = getDoc$1(_doc, _context);
+    var context = fallback(_context, doc);
+    return doc.evaluate(expr, context, null, type, null);
   }
 
-  function findNodes(xpath, doc) {
-    var _xpath = patchXPath(xpath);
-    var nodes = [];
-    var target;
-    // We may have passed in a HTMLDocument object as the context
-    // See createDocument with DOMParser
-    // This only matters in Firefox. evaluate will fail silently if
-    // the context is not part of the calling object.
-    var _doc = fallback(doc, document);
-    target = getTarget$1(_doc);
-    var findQ = target.evaluate(_xpath, _doc, null,
-      XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-    if (findQ.snapshotLength === 0) {return null;}
-    for (var i = 0; i < findQ.snapshotLength; i += 1) {
-      nodes.push(findQ.snapshotItem(i));
-    }
-    return nodes;
-  }
-
-  function findNode(xpath, doc) {
-    var nodes = findNodes(xpath, doc);
-    if (!nodes) {return null;}
-    return nodes[0];
+  function xPath(expr, doc, context) {
+    return xPathEvaluate(XPathResult.ANY_UNORDERED_NODE_TYPE,
+      expr, doc, context).singleNodeValue;
   }
 
   var expandMenuOnKeyPress;
 
   function movePage(dir) { // Legacy
-    var dirButton = findNode('//input[@value="' + dir + '"]');
+    var dirButton = xPath('//input[@value="' + dir + '"]');
     if (!dirButton) {return;}
     var url = dirButton.getAttribute('onClick');
     url = url.replace(/^[^']*'/m, '').replace(/';$/m, '');
@@ -6751,9 +6742,14 @@
     }
   }
 
+  function findHcsData() {
+    var hcsHtml = getElementById('html');
+    if (hcsHtml) {return hcsHtml.dataset.hcs;}
+  }
+
   function lookForHcsData() {
-    var hcsData = getElementById('html');
-    if (hcsData && jsonParse(hcsData.dataset.hcs)['new-ui']) {
+    var hcsData = findHcsData();
+    if (hcsData && jsonParse(hcsData)['new-ui']) {
       prepareEnv();
     }
   }
@@ -8468,6 +8464,21 @@
     return retryAjax(viewStats).pipe(parseGroupStats);
   }
 
+  function invalidResult(result) {
+    return !result || !result.snapshotLength || result.snapshotLength === 0;
+  }
+
+  function xPathAll(expr, doc, context) {
+    var result = xPathEvaluate(XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
+      expr, doc, context);
+    if (invalidResult(result)) {return;}
+    var a = [];
+    for (var i = 0; i < result.snapshotLength; i += 1) {
+      a.push(result.snapshotItem(i));
+    }
+    return a;
+  }
+
   var maxGroupSizeToJoin;
 
   function displayMinGroupLevel() { // jQuery
@@ -8504,8 +8515,8 @@
   }
 
   function joinAllGroupsUnderSize() { // Legacy
-    var joinButtons = findNodes(
-      '//img[contains(@src,"skin/icon_action_join.gif")]');
+    var joinButtons = xPathAll(
+      './/img[contains(@src,"skin/icon_action_join.gif")]', document, pCC);
     if (!joinButtons) {return;}
     var prm = joinButtons.reduce(doJoinUnderSize, []);
     $.when.apply($, prm).done(function() {
@@ -8544,8 +8555,8 @@
   }
 
   function groupButtons() { // Legacy
-    var buttonElement = findNode('//td[input[@value="Join All ' +
-      'Available Groups"]]');
+    var buttonElement = xPath('.//td[input[@value="Join All Available Groups"]]',
+      document, pCC);
     var enableMaxGroupSizeToJoin =
       getValue('enableMaxGroupSizeToJoin');
     if (enableMaxGroupSizeToJoin) {
@@ -8554,15 +8565,13 @@
       joinAllInput.classList.add('fshHide');
       buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
         'size" type="button" value="Join All Groups < ' +
-        maxGroupSizeToJoin + ' Members" class="custombutton">&nbsp;' +
-        '<input id="fetchgroupstats" type="button" value="Fetch ' +
-        'Group Stats" class="custombutton">';
+        maxGroupSizeToJoin + ' Members" class="custombutton">';
       getElementById('joinallgroupsundersize')
         .addEventListener('click', joinAllGroupsUnderSize, true);
-    } else {
-      buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
-        'type="button" value="Fetch Group Stats" class="custombutton">';
     }
+    buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
+      'type="button" value="Fetch Group Stats" class="custombutton">';
+
     getElementById('fetchgroupstats')
       .addEventListener('click', fetchGroupData);
 
@@ -8657,6 +8666,85 @@
     displayMinGroupLevel();
     groupButtons();
     fixTable();
+  }
+
+  var members;
+  var memCount;
+
+  function batchBuffLinks() {
+    var limit = performance.now() + 5;
+    while (moreToDo(limit, memCount, members)) {
+      insertHtmlBeforeEnd(members[memCount].parentNode,
+        ' <span class="smallLink">[b]</span>');
+      memCount += 1;
+    }
+    if (memCount < members.length) {
+      add(3, batchBuffLinks);
+    }
+  }
+
+  function buffLinks() {
+    // TODO preference
+    memCount = 0;
+    members = document.querySelectorAll(
+      '#pCC a[href^="index.php?cmd=profile&player_id="]');
+    add(3, batchBuffLinks);
+    pCC.addEventListener('click', function(evt) {
+      if (evt.target.className !== 'smallLink') {return;}
+      openQuickBuffByName(evt.target.previousElementSibling.text);
+    });
+  }
+
+  var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
+  var ajaxUrl = conflictUrl + '&no_mobile=1';
+
+  function hazConflict(conflictTable, curPage, insertHere) { // Legacy
+    if (curPage === 1) {
+      var newNode = insertHere.insertRow(insertHere.rows.length - 2);
+      newNode.insertCell(0);
+      newNode.insertCell(0);
+      newNode.cells[0].innerHTML =
+        '<a href="' + conflictUrl + '">Active Conflicts</a>';
+      newNode.cells[1].innerHTML = 'Score';
+    }
+    for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
+      var newRow = insertHere.insertRow(insertHere.rows.length - 2);
+      newRow.insertCell(0);
+      newRow.insertCell(0);
+      newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
+      newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
+        .innerHTML + '</b>';
+    }
+  }
+
+  function activeConflicts(doc, curPage, insertHere) { // Legacy
+    var conflictTable = doc.querySelector(
+      '#pCC > table > tbody > tr > td > table');
+    if (conflictTable && conflictTable.rows.length > 3) {
+      hazConflict(conflictTable, curPage, insertHere);
+    }
+  }
+
+  function gotConflictInfo(responseText, callback) { // Legacy
+    var doc = createDocument(responseText);
+    var page = doc.querySelector('#pCC input[name="page"]');
+    if (!page) {return;}
+    var curPage = Number(page.value);
+    var maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
+    activeConflicts(doc, curPage, callback.node);
+    if (maxPage > curPage) {
+      retryAjax(ajaxUrl + 'page=' + (curPage + 1).toString())
+        .done(function(html) {gotConflictInfo(html, callback);});
+    }
+  }
+
+  function conflictInfo(leftHandSideColumnTable) { // jQuery.min
+    var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
+      .firstChild.nextSibling;
+    if (statCtrl) {
+      retryAjax(ajaxUrl)
+        .done(function(data) {gotConflictInfo(data, {node: statCtrl});});
+    }
   }
 
   function alpha$1(a, b) {
@@ -8956,18 +9044,6 @@
     insertElement(document.body, trDialog);
   }
 
-  function toggleVisibilty(evt) {
-    var anItemId = evt.target.getAttribute('linkto');
-    var anItem = getElementById(anItemId);
-    var currentVisibility = anItem.classList.contains('fshHide');
-    anItem.classList.toggle('fshHide');
-    if (currentVisibility) {
-      setValue(anItemId, '');
-    } else {
-      setValue(anItemId, 'ON');
-    }
-  }
-
   function getIntFromRegExp(theText, rxSearch) {
     var result;
     var matches = theText.replace(/,/g, '').match(rxSearch);
@@ -8999,66 +9075,19 @@
     }
   }
 
-  var leftHandSideColumnTable;
-  var members;
-  var memCount;
-
-  function hazConflict(conflictTable, curPage, insertHere) { // Legacy
-    if (curPage === 1) {
-      var newNode = insertHere.insertRow(insertHere.rows.length - 2);
-      newNode.insertCell(0);
-      newNode.insertCell(0);
-      newNode.cells[0].innerHTML =
-        '<a href="index.php?cmd=guild&subcmd=conflicts">Active Conflicts</a>';
-      newNode.cells[1].innerHTML = 'Score';
-    }
-    for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
-      var newRow = insertHere.insertRow(insertHere.rows.length - 2);
-      newRow.insertCell(0);
-      newRow.insertCell(0);
-      newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
-      newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
-        .innerHTML + '</b>';
+  function toggleVisibilty(evt) {
+    var anItemId = evt.target.getAttribute('linkto');
+    var anItem = getElementById(anItemId);
+    var currentVisibility = anItem.classList.contains('fshHide');
+    anItem.classList.toggle('fshHide');
+    if (currentVisibility) {
+      setValue(anItemId, '');
+    } else {
+      setValue(anItemId, 'ON');
     }
   }
 
-  function activeConflicts(doc, curPage, insertHere) { // Legacy
-    var conflictTable = findNode(
-      '//font[contains(.,"Participants")]/ancestor::table[1]', doc);
-    if (conflictTable && conflictTable.rows.length > 3) {
-      hazConflict(conflictTable, curPage, insertHere);
-    }
-  }
-
-  function gotConflictInfo(responseText, callback) { // Legacy
-    var doc = createDocument(responseText);
-    var page = findNode('//td[contains(.,"Page:")]', doc);
-    var curPage = parseInt(findNode('//input[@name="page"]',
-      doc).value, 10);
-    var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
-    activeConflicts(doc, curPage, callback.node);
-    if (maxPage && parseInt(maxPage[1], 10) > curPage) {
-      retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts&page=' +
-        (curPage + 1).toString()
-      ).done(function(html) {
-        gotConflictInfo(html, {node: callback.node});
-      });
-    }
-  }
-
-  function conflictInfo() { // jQuery.min
-    var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
-      .firstChild.nextSibling;
-    if (statCtrl) {
-      retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=conflicts')
-        .done(function(data) {
-          gotConflictInfo(data,
-            {node: statCtrl});
-        });
-    }
-  }
-
-  function logoToggle() {
+  function logoToggle(leftHandSideColumnTable) { // Legacy
     var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
     insertHtmlBeforeEnd(changeLogoCell, '[ <span class="fshLink' +
       ' tip-static" id="toggleGuildLogoControl" ' +
@@ -9073,7 +9102,7 @@
       .addEventListener('click', toggleVisibilty);
   }
 
-  function statToggle() {
+  function statToggle(leftHandSideColumnTable) { // Legacy
     var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
     insertHtmlBeforeEnd(leaveGuildCell, '<span class="fshNoWrap">' +
       '[ <span class="fshLink tip-static" id="toggleStatisticsControl" ' +
@@ -9089,7 +9118,7 @@
       .addEventListener('click', toggleVisibilty);
   }
 
-  function structureToggle() {
+  function structureToggle(leftHandSideColumnTable) { // Legacy
     var buildCell = leftHandSideColumnTable.rows[15].cells[1].firstChild;
     insertHtmlBeforeEnd(buildCell, '[ <span class="fshLink ' +
       'tip-static" id="toggleGuildStructureControl" ' +
@@ -9104,31 +9133,7 @@
       .addEventListener('click', toggleVisibilty);
   }
 
-  function batchBuffLinks() {
-    var limit = performance.now() + 5;
-    while (moreToDo(limit, memCount, members)) {
-      insertHtmlBeforeEnd(members[memCount].parentNode,
-        ' <span class="smallLink">[b]</span>');
-      memCount += 1;
-    }
-    if (memCount < members.length) {
-      add(3, batchBuffLinks);
-    }
-  }
-
-  function buffLinks() {
-    // TODO preference
-    memCount = 0;
-    members = document.querySelectorAll(
-      '#pCC a[href^="index.php?cmd=profile&player_id="]');
-    add(3, batchBuffLinks);
-    pCC.addEventListener('click', function(evt) {
-      if (evt.target.className !== 'smallLink') {return;}
-      openQuickBuffByName(evt.target.previousElementSibling.text);
-    });
-  }
-
-  function selfRecallLink() {
+  function selfRecallLink(leftHandSideColumnTable) {
     // self recall
     var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
     var selfRecall = getLi[getLi.length - 1].parentNode;
@@ -9142,17 +9147,17 @@
     add(3, colouredDots);
     add(3, removeGuildAvyImgBorder);
     add(3, guildXPLock);
-    leftHandSideColumnTable = pCC
+    var leftHandSideColumnTable = pCC
       .lastElementChild.rows[2].cells[0].firstElementChild;
-    add(3, logoToggle);
-    add(3, statToggle);
-    add(3, structureToggle);
+    add(3, logoToggle, [leftHandSideColumnTable]);
+    add(3, statToggle, [leftHandSideColumnTable]);
+    add(3, structureToggle, [leftHandSideColumnTable]);
     add(3, buffLinks);
-    add(3, selfRecallLink);
+    add(3, selfRecallLink, [leftHandSideColumnTable]);
     if (jQueryNotPresent()) {return;}
     // Detailed conflict information
     if (getValue('detailedConflictInfo')) {
-      add(3, conflictInfo);
+      add(3, conflictInfo, [leftHandSideColumnTable]);
     }
     add(4, guildTracker);
   }
@@ -10679,14 +10684,10 @@
   var nowUtc;
   var lastCheckUtc;
 
-  function findChatTable() { // Legacy
-    var chatTable = findNode('//table[@class="width_full"]'); // Guild Log
+  function findChatTable() {
+    var chatTable = document.querySelector('#pCC table table table table'); // Guild Chat
     if (!chatTable) {
-      chatTable = findNode('//table[tbody/tr/td[.="Message"]]'); // Outbox & Guild Chat
-    }
-    if (!chatTable) {
-      chatTable = findNode('//table[tbody/tr/td/span[' +
-        'contains(.,"Currently showing:")]]'); // personal log
+      chatTable = document.querySelector('#pCC > table:last-of-type'); // Outbox, Guild Log & personal log
     }
     return chatTable;
   }
@@ -10729,7 +10730,6 @@
     var increment = 2;
     if (logScreen === 'Chat') {
       increment = 4;
-      chatTable.classList.add('fshGc');
     }
     for (var i = 1; i < chatTable.rows.length; i += increment) {
       rowColor(chatTable.rows[i], logScreen, dateColumn);
@@ -11014,12 +11014,20 @@
     });
   }
 
+  function addHide(el) {
+    if (el.classList) {el.classList.add('fshHide');}
+  }
+
+  function removeHide(el) {
+    if (el.classList) {el.classList.remove('fshHide');}
+  }
+
   function selectAll() {
     options$1.checks = defChecks.slice(0);
     setChecks$1();
     tmpGuildLog.forEach(function(r) {
-      r[5].classList.remove('fshHide');
-      r[6].classList.remove('fshHide');
+      removeHide(r[5]);
+      removeHide(r[6]);
     });
   }
 
@@ -11027,8 +11035,8 @@
     options$1.checks = noChecks.slice(0);
     setChecks$1();
     tmpGuildLog.forEach(function(r) {
-      r[5].classList.add('fshHide');
-      r[6].classList.add('fshHide');
+      addHide(r[5]);
+      addHide(r[6]);
     });
   }
 
@@ -12059,7 +12067,8 @@
     },
     {
       c: function(o) {
-        return type === 'item' && invItems$1[o.invid].item_id === itemId;
+        return type === 'item' && invItems$1[o.invid] &&
+          invItems$1[o.invid].item_id === itemId;
       },
       r: tickElement
     },
@@ -14044,6 +14053,19 @@
       '</table></form>';
   }
 
+  function findEl(el, name) {
+    return document.querySelector(
+      '#fshSettingsTable ' + el + '[name="' + name + '"]');
+  }
+
+  function findInput(name) {
+    return findEl('input', name);
+  }
+
+  function findSelect(name) {
+    return findEl('select', name);
+  }
+
   function getVars() {
     calf.showBuffs = getValue('showHuntingBuffs');
     calf.buffs = getValue('huntingBuffs');
@@ -14081,72 +14103,41 @@
     );
   }
 
-  function saveValueForm(oForm, name) { // Legacy
-    var formElement =
-      findNode('//input[@name="' + name + '"]', oForm);
-    if (formElement.getAttribute('type') === 'checkbox') {
+  function saveValueForm(name) {
+    var formElement = findInput(name);
+    if (formElement.type === 'checkbox') {
       setValue(name, formElement.checked);
     } else {
       setValue(name, formElement.value);
     }
   }
 
-  function setMaxCompressedCharacters(oForm) { // Legacy
-    var maxCompressedCharacters =
-      findNode('//input[@name="maxCompressedCharacters"]', oForm);
-    var maxCompressedCharactersValue = Number(maxCompressedCharacters.value);
-    if (isNaN(maxCompressedCharactersValue) ||
-        maxCompressedCharactersValue <= 50) {
-      maxCompressedCharacters.value = 1500;
+  function saveNumeric(name) {
+    var formElement = findSelect(name);
+    setValue(name, Number(formElement.value));
+  }
+
+  function saveOther(name) {
+    var formElement = findSelect(name);
+    setValue(name, formElement.value);
+  }
+
+  function checkNumeric(name, min, def) {
+    var myInput = findInput(name);
+    var inputValue = Number(myInput.value);
+    if (isNaN(inputValue) || inputValue <= min) {
+      myInput.value = def;
     }
   }
 
-  function setMaxCompressedLines(oForm) { // Legacy
-    var maxCompressedLines =
-      findNode('//input[@name="maxCompressedLines"]', oForm);
-    var maxCompressedLinesValue = Number(maxCompressedLines.value);
-    if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue <= 1) {
-      maxCompressedLines.value = 25;
-    }
-  }
-
-  function setGuildLogHistoryPages(oForm) { // Legacy
-    var newGuildLogHistoryPages =
-      findNode('//input[@name="newGuildLogHistoryPages"]', oForm);
-    var newGuildLogHistoryPagesValue = Number(newGuildLogHistoryPages.value);
-    if (isNaN(newGuildLogHistoryPagesValue) ||
-        newGuildLogHistoryPagesValue <= 1) {
-      newGuildLogHistoryPages.value = 25;
-    }
-  }
-
-  function setMaxGroupSizeToJoin(oForm) { // Legacy
-    var maxGroupSizeToJoin =
-      findNode('//input[@name="maxGroupSizeToJoin"]', oForm);
-    var maxGroupSizeToJoinValue = Number(maxGroupSizeToJoin.value);
-    if (isNaN(maxGroupSizeToJoinValue) || maxGroupSizeToJoinValue <= 1) {
-      maxGroupSizeToJoin.value = 11;
-    }
-  }
-
-  function saveConfig(evt) { // Legacy
-    var oForm = evt.target.form;
-    // bio compressor validation logic
-    setMaxCompressedCharacters(oForm);
-    setMaxCompressedLines(oForm);
-    setGuildLogHistoryPages(oForm);
-    setMaxGroupSizeToJoin(oForm);
-    var combatEvaluatorBiasElement =
-      findNode('//select[@name="combatEvaluatorBias"]', oForm);
-    var combatEvaluatorBias = Number(combatEvaluatorBiasElement.value);
-    setValue('combatEvaluatorBias', combatEvaluatorBias);
-    var enabledHuntingModeElement =
-      findNode('//select[@name="enabledHuntingMode"]', oForm);
-    var enabledHuntingMode = enabledHuntingModeElement.value;
-    setValue('enabledHuntingMode', enabledHuntingMode);
-
-    saveBoxes.forEach(saveValueForm.bind(null, oForm));
-
+  function saveConfig() { // jQuery
+    checkNumeric('maxCompressedCharacters', 50, 1500);
+    checkNumeric('maxCompressedLines', 1, 25);
+    checkNumeric('newGuildLogHistoryPages', 1, 25);
+    checkNumeric('maxGroupSizeToJoin', 1, 11);
+    saveNumeric('combatEvaluatorBias');
+    saveOther('enabledHuntingMode');
+    saveBoxes.forEach(saveValueForm);
     $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
   }
 
@@ -14160,7 +14151,7 @@
     jQueryDialog(injectMonsterLog);
   }
 
-  function createEventListeners() {
+  function createEventListeners() { // Legacy
     var tickAll = createSpan({
       id: 'fshAllBuffs',
       className: 'fshLink',
@@ -14172,13 +14163,10 @@
     insertElement(inject, createBr());
     insertElement(inject, tickAll);
 
-    getElementById('fshClearStorage')
-      .addEventListener('click', clearStorage);
+    getElementById('fshClearStorage').addEventListener('click', clearStorage);
 
-    getElementById('Helper:SaveOptions')
-      .addEventListener('click', saveConfig);
-    getElementById('Helper:ShowLogs')
-      .addEventListener('click', showLogs);
+    getElementById('Helper:SaveOptions').addEventListener('click', saveConfig);
+    getElementById('Helper:ShowLogs').addEventListener('click', showLogs);
     getElementById('Helper:ShowMonsterLogs')
       .addEventListener('click', showMonsterLogs);
 
@@ -14192,7 +14180,7 @@
       .addEventListener('click', toggleVisibilty);
   }
 
-  function injectSettings() { // jQuery.min
+  function injectSettings() { // jQuery
     if (jQueryNotPresent()) {return;}
     getVars();
     setupConfigData();
@@ -14202,10 +14190,11 @@
     if ($(settingsTabs).tabs('length') > 0) {
       $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
     }
+
     createEventListeners();
-    setValue('minGroupLevel', getElementById('settingsTabs-1')
-      .firstElementChild.lastElementChild.rows[1].cells[1].firstElementChild
-      .value);
+
+    setValue('minGroupLevel',
+      document.querySelector('input[name="min_group_level"]').value);
   }
 
   function injectTitan() {
@@ -14696,6 +14685,47 @@
     var memList = document.querySelectorAll(
       '#pCC a[data-tipped*="<td>VL:</td>"]');
     Array.prototype.forEach.call(memList, highlightMembers);
+  }
+
+  function getTarget$1(doc) {
+    if (doc instanceof HTMLDocument) {return doc;}
+    return document;
+  }
+
+  function patchXPath(xpath) {
+    if (xpath.indexOf('/') === 0) {
+      return '.' + xpath;
+      // TODO this is likely to be bad
+      // this is a chrome fix - needs a .// for xpath
+      // where as firefox can function without it.
+      // firefox still works with .//
+    }
+    return xpath;
+  }
+
+  function findNodes(xpath, doc) {
+    var _xpath = patchXPath(xpath);
+    var nodes = [];
+    var target;
+    // We may have passed in a HTMLDocument object as the context
+    // See createDocument with DOMParser
+    // This only matters in Firefox. evaluate will fail silently if
+    // the context is not part of the calling object.
+    var _doc = fallback(doc, document);
+    target = getTarget$1(_doc);
+    var findQ = target.evaluate(_xpath, _doc, null,
+      XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+    if (findQ.snapshotLength === 0) {return null;}
+    for (var i = 0; i < findQ.snapshotLength; i += 1) {
+      nodes.push(findQ.snapshotItem(i));
+    }
+    return nodes;
+  }
+
+  function findNode(xpath, doc) {
+    var nodes = findNodes(xpath, doc);
+    if (!nodes) {return null;}
+    return nodes[0];
   }
 
   var impStyles = [
@@ -17433,19 +17463,6 @@
     });
   }
 
-  var itemRE$1 = /<b>([^<]+)<\/b>/i;
-  var plantFromComponentHash = {
-    'Amber Essense': 'Amber Plant',
-    'Blood Bloom Flower': 'Blood Bloom Plant',
-    'Dark Shade ': 'Dark Shade Plant',
-    'Snake Eye': 'Elya Snake Head',
-    'Snake Venom Fang': 'Elya Snake Head',
-    'Heffle Wart': 'Heffle Wart Plant',
-    'Jademare Blossom': 'Jademare Plant',
-    'Trinettle Leaf': 'Trinettle Plant',
-    'Purplet Flower': 'Purplet Plant',
-  };
-
   function quickInventDone(json) {
     var inventResult = getElementById('invent_Result');
     if (jsonFail(json, inventResult)) {return;}
@@ -17478,8 +17495,20 @@
     $('input[name="recipe_id"]').closest('tbody').append(selector);
     getElementById('quickInvent').addEventListener('click',
       quickInvent, true);
-
   }
+
+  var itemRE$1 = /<b>([^<]+)<\/b>/i;
+  var plantFromComponentHash = {
+    'Amber Essense': 'Amber Plant',
+    'Blood Bloom Flower': 'Blood Bloom Plant',
+    'Dark Shade ': 'Dark Shade Plant',
+    'Snake Eye': 'Elya Snake Head',
+    'Snake Venom Fang': 'Elya Snake Head',
+    'Heffle Wart': 'Heffle Wart Plant',
+    'Jademare Blossom': 'Jademare Plant',
+    'Trinettle Leaf': 'Trinettle Plant',
+    'Purplet Flower': 'Purplet Plant',
+  };
 
   function getItemName(responseText) { // Legacy
     var itemName = itemRE$1.exec(responseText);
@@ -17496,7 +17525,7 @@
           '?cmd=auctionhouse&search=' +
           encodeURI(plantFromComponent) + '">AH</a>'
       });
-      var counter = findNode('../../../../tr[2]/td', callback);
+      var counter = xPath('../../../../tr[2]/td', document, callback);
       counter.setAttribute('colspan', '2');
       insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
     }
@@ -17530,8 +17559,9 @@
         '</a>');
     }
 
-    var components = findNodes(
-      '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
+    var components = xPathAll(
+      './/b[.="Components Required"]/../../following-sibling::tr[2]//img',
+      document, pCC);
     if (components) {
       components.forEach(function(compI) {
         var mo = compI.dataset.tipped;
@@ -18199,7 +18229,7 @@
     },
     {
       condition: function() {
-        return findNode('//td[.="Quest Name"]');
+        return xPath('//td[.="Quest Name"]');
       },
       result: function() {
         screenview('unknown.questBook.injectQuestBookFull');
@@ -18208,8 +18238,8 @@
     },
     {
       condition: function() {
-        return findNode('//font[@size=2 and .="Advisor"]') &&
-          findNode('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
+        return xPath('//font[@size=2 and .="Advisor"]') &&
+        xPath('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
             'and .="Back to Guild Management"]');
       },
       result: function() {
@@ -18219,7 +18249,7 @@
     },
     // {
     //   condition: function() {
-    //     return findNode('//a[.="Back to Scavenging"]');
+    //     return xPath('//a[.="Back to Scavenging"]');
     //   },
     //   result: function() {
     //     screenview('unknown.scavenging.injectScavenging');
@@ -18786,8 +18816,7 @@
   function addLogWidgetsOld() { // Legacy
     buildNickList();
     calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
-    var logTable = findNode('//table[tbody/tr/td/span[contains' +
-      '(.,"Currently showing:")]]');
+    var logTable = document.querySelector('#pCC > table:last-of-type');
     if (logTable) {foundLogTable(logTable);}
   }
 
@@ -18802,8 +18831,15 @@
     ).done(addLogWidgetsOld);
   }
 
+  function guildChatStyling() {
+    var chatTable = document.querySelector('#pCC table table table table');
+    if (!chatTable) {return;}
+    chatTable.classList.add('fshGc');
+  }
+
   function guildChat() {
     addChatTextArea();
+    guildChatStyling();
     addLogColoring('Chat', 0);
   }
 
@@ -19062,7 +19098,9 @@
     world: {'-': {'-': {'-': {'-': injectWorld}}}},
     news: {
       fsbox: {'-': {'-': {'-': newsFsbox}}},
-      shoutbox: {'-': {'-': {'-': newsShoutbox}}}
+      shoutbox: {'-': {'-': {'-': newsShoutbox}}},
+      viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
+      viewarchive: {'-': {'-': {'-': viewArchive}}}
     },
     blacksmith: {repairall: {'-': {'-': {'1': injectWorld}}}},
     arena: {
@@ -19282,7 +19320,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '21';
+  window.FSH.calf = '22';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

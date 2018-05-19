@@ -188,18 +188,17 @@ function findBuffsClearResults() { // Legacy
     buffTable.deleteRow(j - 1);
   }
   getElementById('buffNicks').innerHTML = '';
-  // var bufferProgress = getElementById('bufferProgress');
   bufferProgress.innerHTML = 'Idle.';
   bufferProgress.style.color = 'black';
   getElementById('potentialBuffers').innerHTML = '';
   getElementById('buffersProcessed').innerHTML = 0;
 }
 
-function findAnyStart(progMsg) { // jQuery.min // jQuery
+function findAnyStart(progMsg) { // jQuery
   if (jQueryNotPresent()) {return;}
   characterName = playerName();
   getElementById('buffNicks').innerHTML = findBuffNicks;
-  bufferProgress = getElementById('bufferProgress');
+  if (jQueryNotPresent()) {return;}
   bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
   bufferProgress.style.color = 'green';
   findBuffsLevel175Only =
@@ -233,25 +232,40 @@ function findOtherStart() { // Legacy
   findAnyStart('profiles to search');
 }
 
+function getExtraProfile() {
+  extraProfile = getValue('extraProfile');
+}
+
+function getBufferProgress() {
+  bufferProgress = getElementById('bufferProgress');
+}
+
+function setupFindEvent(fn) {
+  getElementById('findbuffsbutton').addEventListener('click', fn, true);
+}
+
+function setupClearEvent() {
+  getElementById('clearresultsbutton')
+    .addEventListener('click', findBuffsClearResults, true);
+}
+
 export function injectFindBuffs(injector) { // Legacy
   var content = injector || pCC;
   calf.sortBy = 'name';
   calf.sortAsc = true;
   buffList.sort(stringSort);
-  extraProfile = getValue('extraProfile');
+  getExtraProfile();
   content.innerHTML = pageLayout(buffCustom, extraProfile);
-  getElementById('findbuffsbutton')
-    .addEventListener('click', findBuffsStart, true);
-  getElementById('clearresultsbutton')
-    .addEventListener('click', findBuffsClearResults, true);
+  getBufferProgress();
+  setupFindEvent(findBuffsStart);
+  setupClearEvent();
 }
 
 export function injectFindOther(injector) { // Native - Bad
   var content = injector || pCC;
-  extraProfile = getValue('extraProfile');
+  getExtraProfile();
   content.innerHTML = pageLayout(otherCustom, extraProfile);
-  getElementById('findbuffsbutton')
-    .addEventListener('click', findOtherStart, true);
-  getElementById('clearresultsbutton')
-    .addEventListener('click', findBuffsClearResults, true);
+  getBufferProgress();
+  setupFindEvent(findOtherStart);
+  setupClearEvent();
 }

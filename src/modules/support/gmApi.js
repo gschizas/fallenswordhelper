@@ -110,6 +110,17 @@ if (needApiUpgrade) {
         }
       }
     };
+    window.GM_listValues = function() {
+      var list = [];
+      var reKey = new RegExp('^' + GMSTORAGE_PATH);
+      for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
+        var key = window.localStorage.key(i);
+        if (key.match(reKey)) {
+          list.push(key.replace(GMSTORAGE_PATH, ''));
+        }
+      }
+      return list;
+    };
   } else if (!gvar.isOpera || isUndefined(window.GM_setValue)) {
     gvar.temporarilyStorage = [];
     window.GM_getValue = function(name, defValue) {
@@ -122,17 +133,7 @@ if (needApiUpgrade) {
         gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
       }
     };
+    window.GM_listValues = function() {return [];};
   }
 
-  window.GM_listValues = function() {
-    var list = [];
-    var reKey = new RegExp('^' + GMSTORAGE_PATH);
-    for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
-      var key = window.localStorage.key(i);
-      if (key.match(reKey)) {
-        list.push(key.replace(GMSTORAGE_PATH, ''));
-      }
-    }
-    return list;
-  };
 }

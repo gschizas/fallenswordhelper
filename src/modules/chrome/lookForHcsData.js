@@ -202,9 +202,14 @@ function prepareEnv() {
   }
 }
 
+function findHcsData() {
+  var hcsHtml = getElementById('html');
+  if (hcsHtml) {return hcsHtml.dataset.hcs;}
+}
+
 export default function lookForHcsData() {
-  var hcsData = getElementById('html');
-  if (hcsData && jsonParse(hcsData.dataset.hcs)['new-ui']) {
+  var hcsData = findHcsData();
+  if (hcsData && jsonParse(hcsData)['new-ui']) {
     prepareEnv();
   }
 }
