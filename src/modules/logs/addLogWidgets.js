@@ -2,7 +2,6 @@ import buffList from '../support/buffObj';
 import calf from '../support/calf';
 import doChat from './doChat';
 import fallback from '../system/fallback';
-import findNode from '../system/findNode';
 import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -158,8 +157,7 @@ function foundLogTable(logTable) { // Legacy
 function addLogWidgetsOld() { // Legacy
   buildNickList();
   calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
-  var logTable = findNode('//table[tbody/tr/td/span[contains' +
-    '(.,"Currently showing:")]]');
+  var logTable = document.querySelector('#pCC > table:last-of-type');
   if (logTable) {foundLogTable(logTable);}
 }
 
