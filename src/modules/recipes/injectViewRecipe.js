@@ -1,16 +1,12 @@
-import {createTd} from './common/cElement';
-import doinvent from './app/inventing/doinvent';
-import fallback from './system/fallback';
-import findNode from './system/findNode';
-import findNodes from './system/findNodes';
-import {getElementById} from './common/getElement';
-import {guideUrl} from './support/constants';
-import insertElement from './common/insertElement';
-import jQueryPresent from './common/jQueryPresent';
-import jsonFail from './common/jsonFail';
-import outputResult from './common/outputResult';
-import retryAjax from './ajax/retryAjax';
-import {server} from './system/system';
+import {createTd} from '../common/cElement';
+import fallback from '../system/fallback';
+import {guideUrl} from '../support/constants';
+import insertElement from '../common/insertElement';
+import {pCC} from '../support/layout';
+import retryAjax from '../ajax/retryAjax';
+import {server} from '../system/system';
+import xPath from '../common/xPath';
+import xPathAll from '../common/xPathAll';
 
 var itemRE = /<b>([^<]+)<\/b>/i;
 var plantFromComponentHash = {
@@ -24,41 +20,6 @@ var plantFromComponentHash = {
   'Trinettle Leaf': 'Trinettle Plant',
   'Purplet Flower': 'Purplet Plant',
 };
-
-function quickInventDone(json) {
-  var inventResult = getElementById('invent_Result');
-  if (jsonFail(json, inventResult)) {return;}
-  if (json.r.success) {
-    outputResult('<span class="fshGreen">' +
-      'You successfully invented the item!</span>', inventResult);
-  } else {
-    outputResult('<span class="fshRed">' +
-      'You have failed to invent the item.</span>', inventResult);
-  }
-}
-
-function quickInvent() { // Legacy
-  var amountToInvent = $('#invent_amount').attr('value');
-  var recipeID = $('input[name="recipe_id"]').attr('value');
-  $('#invet_Result_label').html('Inventing ' + amountToInvent + ' Items');
-  for (var i = 0; i < amountToInvent; i += 1) {
-    doinvent(recipeID).done(quickInventDone);
-  }
-}
-
-function injectInvent() { // Bad jQuery
-  var selector = '<tr><td align="center">Select how many to quick ' +
-    'invent<input value=1 id="invent_amount" name="invent_amount" ' +
-    'size=3 class="custominput"></td></tr>' +
-    '<tr><td align="center"><input id="quickInvent" value="Quick ' +
-    'invent items" class="custombutton" type="submit"></td></tr>' + // button to invent
-    '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
-    '</span><ol id="invent_Result"></ol></td></tr>';
-  $('input[name="recipe_id"]').closest('tbody').append(selector);
-  getElementById('quickInvent').addEventListener('click',
-    quickInvent, true);
-
-}
 
 function getItemName(responseText) { // Legacy
   var itemName = itemRE.exec(responseText);
@@ -75,7 +36,7 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
         '?cmd=auctionhouse&search=' +
         encodeURI(plantFromComponent) + '">AH</a>'
     });
-    var counter = findNode('../../../../tr[2]/td', callback);
+    var counter = xPath('../../../../tr[2]/td', document, callback);
     counter.setAttribute('colspan', '2');
     insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
   }
@@ -99,7 +60,7 @@ function linkFromMouseoverCustom(mouseOver) { // Legacy
   return theUrl;
 }
 
-function injectViewRecipe() { // Legacy
+export default function injectViewRecipe() { // Legacy
   var recipe = $('#pCC table table b').first();
   var name = recipe.html();
   if (name) {
@@ -109,8 +70,9 @@ function injectViewRecipe() { // Legacy
       '</a>');
   }
 
-  var components = findNodes(
-    '//b[.="Components Required"]/../../following-sibling::tr[2]//img');
+  var components = xPathAll(
+    './/b[.="Components Required"]/../../following-sibling::tr[2]//img',
+    document, pCC);
   if (components) {
     components.forEach(function(compI) {
       var mo = compI.dataset.tipped;
@@ -122,12 +84,5 @@ function injectViewRecipe() { // Legacy
       componentCountElement.innerHTML = '<nobr>' +
         componentCountElement.innerHTML + '</nobr>';
     });
-  }
-}
-
-export default function inventing() {
-  if (jQueryPresent()) {
-    injectViewRecipe();
-    injectInvent();
   }
 }

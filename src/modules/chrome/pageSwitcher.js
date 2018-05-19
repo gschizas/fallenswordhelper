@@ -39,7 +39,7 @@ import injectViewGuild from '../guild/injectViewGuild';
 import injectWorld from '../legacy/legacy';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
-import inventing from '../recipes';
+import inventing from '../recipes/inventing';
 import ladder from '../ladder';
 import marketplace from '../marketplace';
 import parseGoldUpgrades from '../notification/parseGoldUpgrades';
