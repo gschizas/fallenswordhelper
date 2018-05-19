@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import createDocument from '../system/createDocument';
 import findImps from './findImps';
-import findNode from '../system/findNode';
+import findNode from './findNode';
 import {getElementById} from '../common/getElement';
 import getImpsRemaining from './getImpsRemaining';
 import getValue from '../system/getValue';

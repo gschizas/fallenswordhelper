@@ -1,4 +1,4 @@
-import findNode from '../system/findNode';
+import findNode from './findNode';
 
 function getCaLvl(hasCounterAttack) { // Legacy
   var counterAttackLevel;

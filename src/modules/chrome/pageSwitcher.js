@@ -28,7 +28,7 @@ import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import injectReportPaint from '../guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
-import injectScavenging from '../scavenging';
+import injectScavenging from '../legacy/scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';
 import injectSettings from '../settings/injectSettings';
 import injectStoreItems from '../dropItems/injectStoreItems';

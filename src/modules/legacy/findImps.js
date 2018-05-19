@@ -1,6 +1,6 @@
 import addCommas from '../system/addCommas';
 import createDocument from '../system/createDocument';
-import findNode from '../system/findNode';
+import findNode from './findNode';
 import getValue from '../system/getValue';
 import intValue from '../system/intValue';
 import isUndefined from '../common/isUndefined';

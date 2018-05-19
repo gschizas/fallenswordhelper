@@ -1,4 +1,4 @@
-import jQueryPresent from './common/jQueryPresent';
+import jQueryPresent from '../common/jQueryPresent';
 
 // var system = require('./support/system');
 
