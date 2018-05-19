@@ -1,11 +1,11 @@
-import findNode from '../system/findNode';
 import {getElementById} from '../common/getElement';
 import injectAdvisor from '../guildAdvisor';
 import {injectQuestBookFull} from '../questBook';
-import inventing from '../recipes';
+import inventing from '../recipes/inventing';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {screenview} from '../support/fshGa';
 import updateBuffLog from '../buffLog/updateBuffLog';
+import xPath from '../common/xPath';
 
 var unknown = [
   {
@@ -19,7 +19,7 @@ var unknown = [
   },
   {
     condition: function() {
-      return findNode('//td[.="Quest Name"]');
+      return xPath('//td[.="Quest Name"]');
     },
     result: function() {
       screenview('unknown.questBook.injectQuestBookFull');
@@ -28,8 +28,8 @@ var unknown = [
   },
   {
     condition: function() {
-      return findNode('//font[@size=2 and .="Advisor"]') &&
-        findNode('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
+      return xPath('//font[@size=2 and .="Advisor"]') &&
+      xPath('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
           'and .="Back to Guild Management"]');
     },
     result: function() {
@@ -39,7 +39,7 @@ var unknown = [
   },
   // {
   //   condition: function() {
-  //     return findNode('//a[.="Back to Scavenging"]');
+  //     return xPath('//a[.="Back to Scavenging"]');
   //   },
   //   result: function() {
   //     screenview('unknown.scavenging.injectScavenging');
