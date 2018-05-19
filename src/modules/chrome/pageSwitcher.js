@@ -70,7 +70,9 @@ export default {
   world: {'-': {'-': {'-': {'-': injectWorld}}}},
   news: {
     fsbox: {'-': {'-': {'-': newsFsbox}}},
-    shoutbox: {'-': {'-': {'-': newsShoutbox}}}
+    shoutbox: {'-': {'-': {'-': newsShoutbox}}},
+    viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
+    viewarchive: {'-': {'-': {'-': viewArchive}}}
   },
   blacksmith: {repairall: {'-': {'-': {'1': injectWorld}}}},
   arena: {
