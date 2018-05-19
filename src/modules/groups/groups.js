@@ -1,7 +1,5 @@
 import calf from '../support/calf';
 import doBuffLinks from '../common/doBuffLinks';
-import findNode from '../system/findNode';
-import findNodes from '../system/findNodes';
 import {getElementById} from '../common/getElement';
 import getGroupStats from '../ajax/getGroupStats';
 import getMembrList from '../ajax/getMembrList';
@@ -10,8 +8,11 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {months} from '../support/constants';
 import {onlineDot} from '../common/colouredDots';
+import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 import {server} from '../system/system';
+import xPath from '../common/xPath';
+import xPathAll from '../common/xPathAll';
 import {time, timeEnd} from '../support/debug';
 
 var maxGroupSizeToJoin;
@@ -50,8 +51,8 @@ function doJoinUnderSize(prev, joinButton) { // Legacy
 }
 
 function joinAllGroupsUnderSize() { // Legacy
-  var joinButtons = findNodes(
-    '//img[contains(@src,"skin/icon_action_join.gif")]');
+  var joinButtons = xPathAll(
+    './/img[contains(@src,"skin/icon_action_join.gif")]', document, pCC);
   if (!joinButtons) {return;}
   var prm = joinButtons.reduce(doJoinUnderSize, []);
   $.when.apply($, prm).done(function() {
@@ -90,8 +91,8 @@ function fetchGroupData(evt) {
 }
 
 function groupButtons() { // Legacy
-  var buttonElement = findNode('//td[input[@value="Join All ' +
-    'Available Groups"]]');
+  var buttonElement = xPath('.//td[input[@value="Join All Available Groups"]]',
+    document, pCC);
   var enableMaxGroupSizeToJoin =
     getValue('enableMaxGroupSizeToJoin');
   if (enableMaxGroupSizeToJoin) {
@@ -100,15 +101,13 @@ function groupButtons() { // Legacy
     joinAllInput.classList.add('fshHide');
     buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
       'size" type="button" value="Join All Groups < ' +
-      maxGroupSizeToJoin + ' Members" class="custombutton">&nbsp;' +
-      '<input id="fetchgroupstats" type="button" value="Fetch ' +
-      'Group Stats" class="custombutton">';
+      maxGroupSizeToJoin + ' Members" class="custombutton">';
     getElementById('joinallgroupsundersize')
       .addEventListener('click', joinAllGroupsUnderSize, true);
-  } else {
-    buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
-      'type="button" value="Fetch Group Stats" class="custombutton">';
   }
+  buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
+    'type="button" value="Fetch Group Stats" class="custombutton">';
+
   getElementById('fetchgroupstats')
     .addEventListener('click', fetchGroupData);
 
