@@ -3,8 +3,9 @@ import getIntFromRegExp from '../system/getIntFromRegExp';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 export function removeGuildAvyImgBorder() {
-  document.querySelector('#pCC img[oldtitle$="\'s Logo"]')
-    .removeAttribute('style');
+  var guildLogo = document.querySelector('#pCC img[oldtitle$="\'s Logo"]');
+  guildLogo.removeAttribute('style');
+  guildLogo.nextElementSibling.nextElementSibling.classList.add('fshBreakAll');
 }
 
 export function guildXPLock() {
