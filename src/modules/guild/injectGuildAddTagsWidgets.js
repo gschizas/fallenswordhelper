@@ -1,5 +1,7 @@
 import {createInput} from '../common/cElement';
+import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
+import injectGuild from './guild';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {pCC} from '../support/layout';
@@ -58,8 +60,16 @@ function checkAllBtn() {
   }
 }
 
-export default function injectGuildAddTagsWidgets() {
+function doItemTagging() {
   pCC.addEventListener('click', evtHdlr);
   paintTable();
   checkAllBtn();
+}
+
+export default function injectGuildAddTagsWidgets() {
+  if (getElementById('tagging_cost')) {
+    doItemTagging();
+  } else {
+    injectGuild();
+  }
 }

@@ -21,10 +21,10 @@ function selfRecallLink(leftHandSideColumnTable) {
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
-export default function injectGuild() {
+function guildWidgets(xpLock) {
   add(3, colouredDots);
   add(3, removeGuildAvyImgBorder);
-  add(3, guildXPLock);
+  add(3, guildXPLock, [xpLock]);
   var leftHandSideColumnTable = pCC
     .lastElementChild.rows[2].cells[0].firstElementChild;
   add(3, logoToggle, [leftHandSideColumnTable]);
@@ -38,4 +38,10 @@ export default function injectGuild() {
     add(3, conflictInfo, [leftHandSideColumnTable]);
   }
   add(4, guildTracker);
+}
+
+export default function injectGuild() {
+  var xpLock = document
+    .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+  if (xpLock) {guildWidgets(xpLock);}
 }

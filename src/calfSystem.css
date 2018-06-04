@@ -809,6 +809,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.fshBreakAll {word-break: break-all}
+
 /* Shoutbox Preview Table */
 .sbpTbl {
   width: 325px;

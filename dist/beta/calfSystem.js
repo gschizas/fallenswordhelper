@@ -9058,14 +9058,12 @@
   }
 
   function removeGuildAvyImgBorder() {
-    document.querySelector('#pCC img[oldtitle$="\'s Logo"]')
-      .removeAttribute('style');
+    var guildLogo = document.querySelector('#pCC img[oldtitle$="\'s Logo"]');
+    guildLogo.removeAttribute('style');
+    guildLogo.nextElementSibling.nextElementSibling.classList.add('fshBreakAll');
   }
 
-  function guildXPLock() {
-    var xpLock = document
-      .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
-    if (!xpLock) {return;}
+  function guildXPLock(xpLock) {
     var xpLockmouseover = xpLock.dataset.tipped;
     var xpLockXP = getIntFromRegExp(xpLockmouseover,
       /XP Lock: <b>(\d*)/);
@@ -9145,10 +9143,10 @@
       '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
   }
 
-  function injectGuild() {
+  function guildWidgets(xpLock) {
     add(3, colouredDots);
     add(3, removeGuildAvyImgBorder);
-    add(3, guildXPLock);
+    add(3, guildXPLock, [xpLock]);
     var leftHandSideColumnTable = pCC
       .lastElementChild.rows[2].cells[0].firstElementChild;
     add(3, logoToggle, [leftHandSideColumnTable]);
@@ -9162,6 +9160,12 @@
       add(3, conflictInfo, [leftHandSideColumnTable]);
     }
     add(4, guildTracker);
+  }
+
+  function injectGuild() {
+    var xpLock = document
+      .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+    if (xpLock) {guildWidgets(xpLock);}
   }
 
   function guildInventory$1(data) {
@@ -9228,10 +9232,18 @@
     }
   }
 
-  function injectGuildAddTagsWidgets() {
+  function doItemTagging() {
     pCC.addEventListener('click', evtHdlr);
     paintTable();
     checkAllBtn();
+  }
+
+  function injectGuildAddTagsWidgets() {
+    if (getElementById('tagging_cost')) {
+      doItemTagging();
+    } else {
+      injectGuild();
+    }
   }
 
   var ranks;
@@ -19324,7 +19336,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '22';
+  window.FSH.calf = '23';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
