@@ -9075,6 +9075,10 @@
     }
   }
 
+  function getXpLock() {
+    return document.querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+  }
+
   function toggleVisibilty(evt) {
     var anItemId = evt.target.getAttribute('linkto');
     var anItem = getElementById(anItemId);
@@ -9163,8 +9167,7 @@
   }
 
   function injectGuild() {
-    var xpLock = document
-      .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+    var xpLock = getXpLock();
     if (xpLock) {guildWidgets(xpLock);}
   }
 
@@ -14693,7 +14696,7 @@
   function injectViewGuild() {
     add(3, colouredDots);
     removeGuildAvyImgBorder();
-    guildXPLock();
+    guildXPLock(getXpLock());
     highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
     highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
     if (dontHighlight()) {return;}
@@ -19336,7 +19339,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '23';
+  window.FSH.calf = '24';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
