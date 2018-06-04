@@ -11,7 +11,7 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from '../common/levelHighlight';
-import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
+import {getXpLock, guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var highlightPlayersNearMyLvl;
 var highlightGvGPlayersNearMyLvl;
@@ -52,7 +52,7 @@ function dontHighlight() {
 export default function injectViewGuild() {
   add(3, colouredDots);
   removeGuildAvyImgBorder();
-  guildXPLock();
+  guildXPLock(getXpLock());
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
   if (dontHighlight()) {return;}

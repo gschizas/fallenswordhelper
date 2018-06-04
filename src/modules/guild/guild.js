@@ -8,7 +8,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import playerName from '../common/playerName';
-import {guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
+import {getXpLock, guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 import {logoToggle, statToggle, structureToggle} from './panelToggle';
 
 function selfRecallLink(leftHandSideColumnTable) {
@@ -41,7 +41,6 @@ function guildWidgets(xpLock) {
 }
 
 export default function injectGuild() {
-  var xpLock = document
-    .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+  var xpLock = getXpLock();
   if (xpLock) {guildWidgets(xpLock);}
 }
