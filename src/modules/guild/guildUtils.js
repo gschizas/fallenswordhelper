@@ -19,3 +19,7 @@ export function guildXPLock(xpLock) {
       ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
   }
 }
+
+export function getXpLock() {
+  return document.querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+}
