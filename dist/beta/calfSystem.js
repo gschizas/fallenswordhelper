@@ -9057,10 +9057,15 @@
     return result;
   }
 
+  function wrapUrl(guildLogo) {
+    var url = guildLogo.nextElementSibling.nextElementSibling;
+    if (url) {url.classList.add('fshBreakAll');}
+  }
+
   function removeGuildAvyImgBorder() {
     var guildLogo = document.querySelector('#pCC img[oldtitle$="\'s Logo"]');
     guildLogo.removeAttribute('style');
-    guildLogo.nextElementSibling.nextElementSibling.classList.add('fshBreakAll');
+    wrapUrl(guildLogo);
   }
 
   function guildXPLock(xpLock) {
@@ -11273,9 +11278,11 @@
   }
 
   function fastDebuff() {
-    var profileRightColumn = getElementById('profileRightColumn')
-      .lastElementChild;
-    profileRightColumn.addEventListener('click', interceptDebuff, true);
+    var profileRightColumn = getElementById('profileRightColumn');
+    if (profileRightColumn) {
+      profileRightColumn.lastElementChild
+        .addEventListener('click', interceptDebuff, true);
+    }
   }
 
   function restyleBackpack() {
@@ -19339,7 +19346,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '24';
+  window.FSH.calf = '25';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
