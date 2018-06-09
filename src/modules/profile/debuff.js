@@ -60,7 +60,9 @@ function interceptDebuff(e) { // jQuery
 }
 
 export default function fastDebuff() {
-  var profileRightColumn = getElementById('profileRightColumn')
-    .lastElementChild;
-  profileRightColumn.addEventListener('click', interceptDebuff, true);
+  var profileRightColumn = getElementById('profileRightColumn');
+  if (profileRightColumn) {
+    profileRightColumn.lastElementChild
+      .addEventListener('click', interceptDebuff, true);
+  }
 }
