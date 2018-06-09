@@ -2,10 +2,15 @@ import addCommas from '../system/addCommas';
 import getIntFromRegExp from '../system/getIntFromRegExp';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
+function wrapUrl(guildLogo) {
+  var url = guildLogo.nextElementSibling.nextElementSibling;
+  if (url) {url.classList.add('fshBreakAll');}
+}
+
 export function removeGuildAvyImgBorder() {
   var guildLogo = document.querySelector('#pCC img[oldtitle$="\'s Logo"]');
   guildLogo.removeAttribute('style');
-  guildLogo.nextElementSibling.nextElementSibling.classList.add('fshBreakAll');
+  wrapUrl(guildLogo);
 }
 
 export function guildXPLock(xpLock) {
