@@ -28,6 +28,14 @@ function updateQuestLink() {
   }
 }
 
+function updateScavLink() {
+  var lastScavPage = getValue('lastScavPage');
+  if (lastScavPage.length > 0) {
+    getElementById('nav-actions-artisanship-scavenging')
+      .setAttribute('href', lastScavPage);
+  }
+}
+
 function insertAdjElement(parent, listItem) {
   insertElementAfter(listItem, parent);
 }
@@ -155,6 +163,7 @@ export default function injectMenu() {
   if (!getElementById('pCL') || jQueryNotPresent()) {return;}
   guildId = currentGuildId();
   updateQuestLink();
+  updateScavLink();
   // character
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   insertAfterParent('nav-character-log', insertHtmlAfterEnd,

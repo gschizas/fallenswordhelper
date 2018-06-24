@@ -2,6 +2,7 @@ import {def_quickSearch} from './defaultQuickSearchList';
 
 /* eslint-disable max-lines */
 export var defaults = {
+  lastScavPage: '',
   lastActiveQuestPage: '',
   lastNormalActiveQuestPage: '',
   lastNormalCompletedQuestPage: '',
