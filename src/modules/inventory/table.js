@@ -73,6 +73,10 @@ var tblCols = [
   {title: 'Send', data: 'type', render: sendRender}
 ];
 
+function isUserInv() {
+  return 'player_id' in theInv;
+}
+
 export default function doTable() { // jQuery
   $('#pCC').append('<table id="fshInv" class="hover" ' +
     'style="font-size: x-small;"></table>');
@@ -92,8 +96,6 @@ export default function doTable() { // jQuery
     stateDuration: 0
   });
   table.column(12).visible('current_player_id' in theInv);
-  table.column(17).visible('player_id' in theInv &&
-    showQuickDropLinks);
-  table.column(18).visible('player_id' in theInv &&
-    showQuickSendLinks);
+  table.column(17).visible(isUserInv() && showQuickDropLinks);
+  table.column(18).visible(isUserInv() && showQuickSendLinks);
 }
