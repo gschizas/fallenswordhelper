@@ -12,7 +12,7 @@ function buffAll(self) {
   var shortList = [];
   for (var j = 1; j < titanTable.rows.length; j += 2) {
     var firstCell = titanTable.rows[j].cells[0].firstChild.firstChild;
-    shortList.push(firstCell.textContent);
+    if (firstCell) {shortList.push(firstCell.textContent);}
   }
   openQuickBuffByName(shortList.join());
 }

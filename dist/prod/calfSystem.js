@@ -560,6 +560,7 @@
 
   /* eslint-disable max-lines */
   var defaults = {
+    lastScavPage: '',
     lastActiveQuestPage: '',
     lastNormalActiveQuestPage: '',
     lastNormalCompletedQuestPage: '',
@@ -1606,7 +1607,7 @@
 
   function intValue(theText) {
     if (!theText) {return 0;}
-    return parseInt(theText.replace(/,/g, ''), 10);
+    return Number(theText.replace(/,/g, ''));
   }
 
   var pvpLowerLevel;
@@ -4830,6 +4831,14 @@
     }
   }
 
+  function updateScavLink() {
+    var lastScavPage = getValue('lastScavPage');
+    if (lastScavPage.length > 0) {
+      getElementById('nav-actions-artisanship-scavenging')
+        .setAttribute('href', lastScavPage);
+    }
+  }
+
   function insertAdjElement(parent, listItem) {
     insertElementAfter(listItem, parent);
   }
@@ -4957,6 +4966,7 @@
     if (!getElementById('pCL') || jQueryNotPresent()) {return;}
     guildId$2 = currentGuildId();
     updateQuestLink();
+    updateScavLink();
     // character
     anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
     insertAfterParent('nav-character-log', insertHtmlAfterEnd,
@@ -9945,6 +9955,10 @@
     {title: 'Send', data: 'type', render: sendRender}
   ];
 
+  function isUserInv() {
+    return 'player_id' in theInv;
+  }
+
   function doTable$1() { // jQuery
     $('#pCC').append('<table id="fshInv" class="hover" ' +
       'style="font-size: x-small;"></table>');
@@ -9964,10 +9978,8 @@
       stateDuration: 0
     });
     table.column(12).visible('current_player_id' in theInv);
-    table.column(17).visible('player_id' in theInv &&
-      showQuickDropLinks);
-    table.column(18).visible('player_id' in theInv &&
-      showQuickSendLinks);
+    table.column(17).visible(isUserInv() && showQuickDropLinks);
+    table.column(18).visible(isUserInv() && showQuickSendLinks);
   }
 
   function setChecks() {
@@ -13240,10 +13252,73 @@
     });
   }
 
-  // var system = require('./support/system');
+  var multCnt;
+  var maxTimes;
+  var statbarGold;
+  var gold;
 
-  // Legacy - Bad, could be repurposed
-  /* function getBpCountFromWorld(responseText) {
+  function setMaxTimes() {
+    if (maxTimes) {
+      maxTimes.innerHTML = '';
+      var scoutGold = Number(gold.value);
+      if (scoutGold !== 0) {
+        var myGold = intValue(statbarGold.textContent);
+        var times = Math.floor(myGold / scoutGold).toString();
+        maxTimes.innerHTML = '&nbsp;&nbsp;Max: ' + times + ' times';
+      }
+    }
+  }
+
+  function foundMultiplierCount() {
+    maxTimes = createSpan();
+    insertElement(multCnt.parentNode, maxTimes);
+    statbarGold = getElementById('statbar-gold');
+    gold = getElementById('gold');
+    setMaxTimes();
+    gold.addEventListener('keyup', setMaxTimes);
+  }
+
+  function lookForMultiplierCount() {
+    multCnt = getElementById('multiplier_count');
+    if (multCnt) {foundMultiplierCount();}
+  }
+
+  function setLastScav(caveId, gold) {
+    setValue('lastScavPage',
+      '?cmd=scavenging&cave_id=' + caveId + '&gold=' + gold);
+  }
+
+  function dontPost$1(e) {
+    var caveEle = document.querySelector('#pCC input[name="cave_id"]:checked');
+    if (caveEle) {
+      e.preventDefault();
+      var caveId = caveEle.value;
+      var gold = getElementById('gold').value;
+      setLastScav(caveId, gold);
+      window.location = 'index.php?cmd=scavenging&subcmd=process&cave_id=' +
+        caveId + '&gold=' + gold + '&submit=Scavenge';
+    }
+  }
+
+  function lookForScavBtn() {
+    var scavBtn = document.querySelector('#pCC input[value="Scavenge"]');
+    if (scavBtn) {scavBtn.addEventListener('click', dontPost$1);}
+  }
+
+  /* global sendRequest:true */
+
+  var fshSummary;
+
+  function getSummary() {
+    if (!fshSummary) {
+      fshSummary = createDiv();
+      insertElement(pCC, fshSummary);
+    }
+    fshSummary.innerHTML = '';
+    return fshSummary;
+  }
+
+  /* function getBpCountFromWorld(responseText) { // Legacy - Bad, could be repurposed
     // backpack counter
     var doc=system.createDocument(responseText);
     var bp=system.findNode(
@@ -13257,50 +13332,77 @@
   }
   */
 
-  /* function multiSummary() { // Legacy - Bad, could be repurposed
-    var injectHere=system.findNode(
-      '//b[contains(.,"Multiple Scavenging Results")]/..');
-    if (injectHere) { // multi scavenging
-      var victories=system.findNodes('//td[contains(.,"victorious")]');
-      if (victories) {
-        injectHere.innerHTML+='<br/>Victories: '+victories.length;
-      }
-      var defeats=system.findNodes('//td[contains(.,"defeated")]');
-      if (defeats) {
-        injectHere.innerHTML+=', Defeated: '+defeats.length;
-      }
-      var gains=system.findNodes('//td[contains(.,"Item Gained")]/b');
-      if (gains) {
-        injectHere.innerHTML+='<br/>'+gains.length+' item(s): ';
-        var gainHash={};
-        for (var i=0;i<gains.length;i += 1) {
-          if (gainHash[gains[i].textContent]) {
-            gainHash[gains[i].textContent]+= 1;
-          } else {
-            gainHash[gains[i].textContent]=1;
-          }
-        }
-        for (var item in gainHash) {
-          if (!gainHash.hasOwnProperty(item)) { continue; }
-          injectHere.innerHTML+=gainHash[item]+' '+item+'(s), ';
-        }
-      }
+  function getVictories(report) {
+    var victories = report.match(/victorious/g);
+    // console.log('victories', victories);
+    if (victories) {
+      return 'Victories: ' + victories.length;
     }
-    system.xmlhttp('index.php?cmd=world', getBpCountFromWorld);
-  }
-  */
-
-  function dontPost$1(e) { // jQuery
-    e.preventDefault();
-    window.location = 'index.php?cmd=scavenging&subcmd=process' +
-      '&cave_id=' + $('#pCC input[name="cave_id"]:checked').val() +
-      '&gold=' + $('#gold').val() + '&submit=Scavenge';
+    return '';
   }
 
-  function injectScavenging() { // jQuery
-    if (jQueryPresent()) {
-      $('#pCC input[value="Scavenge"]').click(dontPost$1);
+  function getDefeats(report) {
+    var defeats = report.match(/defeated/g);
+    // console.log('defeats', defeats);
+    if (defeats) {
+      return ', Defeated: ' + defeats.length;
     }
+    return '';
+  }
+
+  function buildGainHash(gains) {
+    return gains.reduce(function(prev, curr) {
+      var itemName = curr.match(/>([^<]+)</)[1];
+      prev[itemName] = (prev[itemName] || 0) + 1;
+      return prev;
+    }, {});
+  }
+
+  function gotGains(gains) {
+    var ret = '<br>' + gains.length + ' item(s):';
+    var gainHash = buildGainHash(gains);
+    Object.keys(gainHash).sort(alpha$1).forEach(function(item) {
+      ret += '<br>' + gainHash[item] + ' ' + item + '(s), ';
+    });
+    return ret;
+  }
+
+  function getGains(report) {
+    var gains = report.match(/Item Gained: <b>[^<]+<\/b>/g);
+    if (gains) {return gotGains(gains);}
+  }
+
+  function multiScav() {
+    var ret = '';
+    var scavRes = getElementById('scavenge_results');
+    if (scavRes) {
+      var report = scavRes.innerHTML;
+      ret += getVictories(report);
+      ret += getDefeats(report);
+      ret += getGains(report);
+    }
+    return ret;
+  }
+
+  function interceptSendRequest(oldSendRequest) {
+    return function(amount, goldValue, caveValue) {
+      oldSendRequest(amount, goldValue, caveValue);
+      setLastScav(caveValue, goldValue);
+      getSummary().innerHTML = multiScav();
+    };
+  }
+
+  function lookForSendRequest() {
+    var oldSendRequest = sendRequest;
+    if (isFunction(oldSendRequest)) {
+      sendRequest = interceptSendRequest(oldSendRequest);
+    }
+  }
+
+  function injectScavenging() {
+    lookForScavBtn();
+    lookForSendRequest();
+    lookForMultiplierCount();
   }
 
   function buffIndividual(self) {
@@ -13314,7 +13416,7 @@
     var shortList = [];
     for (var j = 1; j < titanTable.rows.length; j += 2) {
       var firstCell = titanTable.rows[j].cells[0].firstChild.firstChild;
-      shortList.push(firstCell.textContent);
+      if (firstCell) {shortList.push(firstCell.textContent);}
     }
     openQuickBuffByName(shortList.join());
   }
@@ -19249,7 +19351,10 @@
     realms: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
     relics: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
     shops: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
-    scavenging: {'-': {'-': {'-': {'-': injectScavenging}}}},
+    scavenging: {
+      '-': {'-': {'-': {'-': injectScavenging}}},
+      process: {'-': {'-': {'-': injectScavenging}}}
+    },
     temple: {'-': {'-': {'-': {'-': parseTemplePage}}}},
     composing: {
       '-': {'-': {'-': {'-': injectComposing}}},
@@ -19342,7 +19447,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '25';
+  window.FSH.calf = '26';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

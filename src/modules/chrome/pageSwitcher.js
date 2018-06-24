@@ -28,7 +28,7 @@ import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import injectReportPaint from '../guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
-import injectScavenging from '../legacy/scavenging';
+import injectScavenging from '../scavenging/scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';
 import injectSettings from '../settings/injectSettings';
 import injectStoreItems from '../dropItems/injectStoreItems';
@@ -199,7 +199,10 @@ export default {
   realms: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
   relics: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
   shops: {'-': {'-': {'-': {'-': allowBack}}}}, // UFSG
-  scavenging: {'-': {'-': {'-': {'-': injectScavenging}}}},
+  scavenging: {
+    '-': {'-': {'-': {'-': injectScavenging}}},
+    process: {'-': {'-': {'-': injectScavenging}}}
+  },
   temple: {'-': {'-': {'-': {'-': parseTemplePage}}}},
   composing: {
     '-': {'-': {'-': {'-': injectComposing}}},
