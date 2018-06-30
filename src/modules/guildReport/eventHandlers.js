@@ -11,6 +11,7 @@ function recallItem(evt) { // jQuery
   var theTd = evt.target.parentNode.parentNode;
   if (mode === '0') {theTd = theTd.parentNode;}
   var href = theTd.firstElementChild.href;
+  if (!href) {return;}
   queueRecallItem({
     invId: href.match(/&id=(\d+)/)[1],
     playerId: href.match(/&player_id=(\d+)/)[1],

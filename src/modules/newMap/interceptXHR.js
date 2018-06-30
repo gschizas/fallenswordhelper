@@ -18,7 +18,7 @@ var testActions = [
 
 function xhrDataFilter(data) {
   var myData = jsonParse(data);
-  if (testActions.some(function(el) {return el();})) {return data;}
+  if (testActions.some(function(el) {return el(myData);})) {return data;}
   var realm = GameData.realm();
   myData.actions = myData.actions.filter(function(el) {
     if (el.type === 6) {
