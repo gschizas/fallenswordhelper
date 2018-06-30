@@ -12788,6 +12788,7 @@
     var theTd = evt.target.parentNode.parentNode;
     if (mode === '0') {theTd = theTd.parentNode;}
     var href = theTd.firstElementChild.href;
+    if (!href) {return;}
     queueRecallItem({
       invId: href.match(/&id=(\d+)/)[1],
       playerId: href.match(/&player_id=(\d+)/)[1],
@@ -17272,7 +17273,7 @@
 
   function xhrDataFilter(data) {
     var myData = jsonParse(data);
-    if (testActions.some(function(el) {return el();})) {return data;}
+    if (testActions.some(function(el) {return el(myData);})) {return data;}
     var realm = GameData.realm();
     myData.actions = myData.actions.filter(function(el) {
       if (el.type === 6) {
@@ -19447,7 +19448,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '26';
+  window.FSH.calf = '27';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
