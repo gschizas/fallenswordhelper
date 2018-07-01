@@ -22,7 +22,7 @@ var content;
 var itemList;
 
 function doAction(self, fn, verb) { // jQuery.min
-  sendEvent('QuickWear', 'doAction');
+  sendEvent('QuickWear', 'doAction - ' + verb);
   self.textContent = '';
   self.classList.remove('smallLink');
   self.classList.add('fshSpinner', 'fshSpin12');

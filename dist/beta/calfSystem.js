@@ -3488,7 +3488,7 @@
   var itemList;
 
   function doAction(self, fn, verb) { // jQuery.min
-    sendEvent('QuickWear', 'doAction');
+    sendEvent('QuickWear', 'doAction - ' + verb);
     self.textContent = '';
     self.classList.remove('smallLink');
     self.classList.add('fshSpinner', 'fshSpin12');
@@ -8467,140 +8467,6 @@
     return shortList;
   }
 
-  function parseGroupStats(html) {
-    var doc = createDocument(html);
-    return groupViewStats(doc);
-  }
-
-  function getGroupStats(viewStats) {
-    return retryAjax(viewStats).pipe(parseGroupStats);
-  }
-
-  function invalidResult(result) {
-    return !result || !result.snapshotLength || result.snapshotLength === 0;
-  }
-
-  function xPathAll(expr, doc, context) {
-    var result = xPathEvaluate(XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-      expr, doc, context);
-    if (invalidResult(result)) {return;}
-    var a = [];
-    for (var i = 0; i < result.snapshotLength; i += 1) {
-      a.push(result.snapshotItem(i));
-    }
-    return a;
-  }
-
-  var maxGroupSizeToJoin;
-
-  function displayMinGroupLevel() { // jQuery
-    var minGroupLevel = getValue('minGroupLevel');
-    if (minGroupLevel) {
-      $('#pCC > table > tbody > tr > td > table td').first()
-        .append('<span style="color:blue"> ' +
-        'Current Min Level Setting: ' + minGroupLevel + '</span>');
-    }
-  }
-
-  function filterMercs(e) {return !e.includes('#000099');}
-
-  function joinGroup(groupJoinURL, joinButton) { // jQuery
-    return retryAjax(groupJoinURL).done(function() {
-      joinButton.classList.add('fshHide');
-    });
-  }
-
-  function doJoinUnderSize(prev, joinButton) { // Legacy
-    var memList = joinButton.parentNode.parentNode.parentNode
-      .previousSibling.previousSibling.previousSibling.previousSibling;
-    var memListArrayWithMercs = memList.innerHTML.split(',');
-    var memListArrayWithoutMercs = memListArrayWithMercs
-      .filter(filterMercs);
-    if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
-      var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
-        joinButton.parentNode.href)[1];
-      var groupJoinURL = 'index.php?no_mobile=1&cmd=guild&subcmd=groups' +
-        '&subcmd2=join&group_id=' + groupID;
-      prev.push(joinGroup(groupJoinURL, joinButton));
-    }
-    return prev;
-  }
-
-  function joinAllGroupsUnderSize() { // Legacy
-    var joinButtons = xPathAll(
-      './/img[contains(@src,"skin/icon_action_join.gif")]', document, pCC);
-    if (!joinButtons) {return;}
-    var prm = joinButtons.reduce(doJoinUnderSize, []);
-    $.when.apply($, prm).done(function() {
-      location.href = 'index.php?cmd=guild&subcmd=groups';
-    });
-  }
-
-  function parseGroupData(linkElement, obj) {
-    var extraText = '<table class="fshgrpstat">' +
-      '<tr>' +
-      '<td class="fshBrown">Attack</td>' +
-      '<td class="fshRight">' + obj.attack + '</td>' +
-      '<td class="fshBrown">Defense</td>' +
-      '<td class="fshRight">' + obj.defense + '</td>' +
-      '</tr><tr>' +
-      '<td class="fshBrown">Armor</td>' +
-      '<td class="fshRight">' + obj.armor + '</td>' +
-      '<td class="fshBrown">Damage</td>' +
-      '<td class="fshRight">' + obj.damage + '</td>' +
-      '</tr><tr>' +
-      '<td class="fshBrown">HP</td>' +
-      '<td class="fshRight">' + obj.hp + '</td>' +
-      '<td colspan="2"></td>' +
-      '</tr></table>';
-    var expiresLocation = linkElement.parentNode.parentNode
-      .previousElementSibling;
-    insertHtmlBeforeEnd(expiresLocation, extraText);
-  }
-
-  function fetchGroupData(evt) {
-    evt.target.classList.add('fshHide');
-    var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
-    Array.prototype.forEach.call(allItems, function(aLink) {
-      getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
-    });
-  }
-
-  function groupButtons() { // Legacy
-    var buttonElement = xPath('.//td[input[@value="Join All Available Groups"]]',
-      document, pCC);
-    var enableMaxGroupSizeToJoin =
-      getValue('enableMaxGroupSizeToJoin');
-    if (enableMaxGroupSizeToJoin) {
-      maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-      var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
-      joinAllInput.classList.add('fshHide');
-      buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
-        'size" type="button" value="Join All Groups < ' +
-        maxGroupSizeToJoin + ' Members" class="custombutton">';
-      getElementById('joinallgroupsundersize')
-        .addEventListener('click', joinAllGroupsUnderSize, true);
-    }
-    buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
-      'type="button" value="Fetch Group Stats" class="custombutton">';
-
-    getElementById('fetchgroupstats')
-      .addEventListener('click', fetchGroupData);
-
-    if (calf.subcmd2 === 'joinallgroupsundersize') {
-      joinAllGroupsUnderSize();
-    }
-  }
-
-  function fixTable() { // jQuery
-    // Cows don't add!
-    var tds = $('#pCC td.header-dark');
-    tds.eq(0).attr('width', '20%');
-    tds.eq(1).attr('width', '51%');
-    tds.eq(2).attr('width', '22%');
-    tds.eq(3).attr('width', '7%');
-  }
-
   function groupLocalTime(theDateCell) { // jQuery
     var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
     var x = xRE.exec(theDateCell.text());
@@ -8669,6 +8535,141 @@
 
     timeEnd('groups.doGroupPaint');
 
+  }
+
+  function addButton(target, val) {
+    var theButton = createInput({
+      className: 'custombutton',
+      type: 'button',
+      value: val
+    });
+    insertHtmlBeforeEnd(target, '&nbsp;');
+    insertElement(target, theButton);
+    return theButton;
+  }
+
+  function parseGroupStats(html) {
+    var doc = createDocument(html);
+    return groupViewStats(doc);
+  }
+
+  function getGroupStats(viewStats) {
+    return retryAjax(viewStats).pipe(parseGroupStats);
+  }
+
+  function parseGroupData(linkElement, obj) {
+    var extraText = '<table class="fshgrpstat">' +
+      '<tr>' +
+      '<td class="fshBrown">Attack</td>' +
+      '<td class="fshRight">' + obj.attack + '</td>' +
+      '<td class="fshBrown">Defense</td>' +
+      '<td class="fshRight">' + obj.defense + '</td>' +
+      '</tr><tr>' +
+      '<td class="fshBrown">Armor</td>' +
+      '<td class="fshRight">' + obj.armor + '</td>' +
+      '<td class="fshBrown">Damage</td>' +
+      '<td class="fshRight">' + obj.damage + '</td>' +
+      '</tr><tr>' +
+      '<td class="fshBrown">HP</td>' +
+      '<td class="fshRight">' + obj.hp + '</td>' +
+      '<td colspan="2"></td>' +
+      '</tr></table>';
+    var expiresLocation = linkElement.parentNode.parentNode
+      .previousElementSibling;
+    insertHtmlBeforeEnd(expiresLocation, extraText);
+  }
+
+  function fetchGroupData(evt) {
+    evt.target.disabled = true;
+    var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
+    Array.prototype.forEach.call(allItems, function(aLink) {
+      getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
+    });
+  }
+
+  function fetchGroupStatsButton(buttonRow) {
+    var fetchStats = addButton(buttonRow, 'Fetch Group Stats');
+    fetchStats.addEventListener('click', fetchGroupData);
+  }
+
+  var maxGroupSizeToJoin;
+
+  function filterMercs(e) {return !e.includes('#000099');}
+
+  function joinGroup(groupID, container) { // jQuery.min
+    return retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=groups' +
+      '&subcmd2=join&group_id=' + groupID).done(function() {
+      container.innerHTML = '<span class="fshXSmall fshBlue" ' +
+        'style="line-height: 19px;">Joined</span>';
+    });
+  }
+
+  function doJoinUnderSize(joinButton) {
+    var memList = joinButton.parentNode.parentNode.parentNode
+      .cells[1].children[0];
+    var memListArrayWithMercs = memList.innerHTML.split(',');
+    var memListArrayWithoutMercs = memListArrayWithMercs
+      .filter(filterMercs);
+    if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
+      var container = createDiv({
+        className: 'group-action-link fshRelative',
+        innerHTML: '<span class="fshSpinner fshSpinner12"></span>',
+        style: {height: '19px', width: '19px'}
+      });
+      joinButton.parentNode.replaceChild(container, joinButton);
+      var groupID = /confirmJoin\((\d+)\)/.exec(joinButton.href)[1];
+      joinGroup(groupID, container);
+    }
+  }
+
+  function joinAllGroupsUnderSize() {
+    sendEvent('groups', 'joinAllGroupsUnderSize');
+    var joinButtons = document
+      .querySelectorAll('#pCC a[href*="confirmJoin"]');
+    if (joinButtons.length === 0) {return;}
+    Array.prototype.forEach.call(joinButtons, doJoinUnderSize);
+  }
+
+  function joinUnderButton(buttonRow) {
+    var joinUnder = addButton(buttonRow,
+      'Join All Groups < ' + maxGroupSizeToJoin + ' Members');
+    joinUnder.addEventListener('click', joinAllGroupsUnderSize);
+  }
+
+  function groupButtons() {
+    var joinAll = document
+      .querySelector('#pCC input[value="Join All Available Groups"]');
+    var buttonRow = joinAll.parentNode;
+    var enableMaxGroupSizeToJoin = getValue('enableMaxGroupSizeToJoin');
+    if (enableMaxGroupSizeToJoin) {
+      maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+      joinAll.classList.add('fshHide');
+      joinUnderButton(buttonRow);
+    }
+
+    fetchGroupStatsButton(buttonRow);
+
+    if (calf.subcmd2 === 'joinallgroupsundersize') {
+      joinAllGroupsUnderSize();
+    }
+  }
+
+  function displayMinGroupLevel() { // jQuery
+    var minGroupLevel = getValue('minGroupLevel');
+    if (minGroupLevel) {
+      $('#pCC > table > tbody > tr > td > table td').first()
+        .append('<span style="color:blue"> ' +
+        'Current Min Level Setting: ' + minGroupLevel + '</span>');
+    }
+  }
+
+  function fixTable() { // jQuery
+    // Cows don't add!
+    var tds = $('#pCC td.header-dark');
+    tds.eq(0).attr('width', '20%');
+    tds.eq(1).attr('width', '51%');
+    tds.eq(2).attr('width', '22%');
+    tds.eq(3).attr('width', '7%');
   }
 
   function injectGroups() { // jQuery
@@ -11311,7 +11312,7 @@
   }
 
   function fastAction(theBackpack, evt, action, result) { // jQuery.min
-    sendEvent('profile', 'fastAction');
+    sendEvent('profile', 'fastAction - ' + result);
     var self = evt.target;
     var invId = self.parentNode.parentNode.firstElementChild.dataset.inv;
     self.textContent = '';
@@ -17626,6 +17627,21 @@
       quickInvent, true);
   }
 
+  function invalidResult(result) {
+    return !result || !result.snapshotLength || result.snapshotLength === 0;
+  }
+
+  function xPathAll(expr, doc, context) {
+    var result = xPathEvaluate(XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
+      expr, doc, context);
+    if (invalidResult(result)) {return;}
+    var a = [];
+    for (var i = 0; i < result.snapshotLength; i += 1) {
+      a.push(result.snapshotItem(i));
+    }
+    return a;
+  }
+
   var itemRE$1 = /<b>([^<]+)<\/b>/i;
   var plantFromComponentHash = {
     'Amber Essense': 'Amber Plant',
@@ -19452,7 +19468,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '27';
+  window.FSH.calf = '28';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
