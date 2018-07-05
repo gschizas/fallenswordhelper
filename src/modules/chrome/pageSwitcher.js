@@ -108,6 +108,7 @@ export default {
       storeitems: {'-': {'-': injectStoreItems}}
     },
     chat: {'-': {'-': {'-': guildChat}}},
+    dochat: {'-': {'-': {'-': guildChat}}},
     log: {'-': {'-': {'-': guildLog}}},
     groups: {
       viewstats: {'-': {'-': injectGroupStats}},

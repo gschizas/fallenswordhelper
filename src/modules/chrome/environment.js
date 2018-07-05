@@ -59,10 +59,6 @@ function getCoreFunction() {
   } else {
     cmd = newSelector('input[name="cmd"]');
     subcmd = newSelector('input[name="subcmd"]');
-    if (subcmd === 'dochat') {
-      cmd = '-';
-      subcmd = '-';
-    }
     subcmd2 = newSelector('input[name="subcmd2"]');
     type = '-';
     fromWorld = '-';
