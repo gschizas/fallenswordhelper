@@ -1,9 +1,9 @@
-import {buildFshDivs} from './buildFshDivs';
+import buildFshDivs from './buildFshDivs';
 import calf from '../../support/calf';
-import {doHuntingBuffs} from './doHuntingBuffs';
+import doHuntingBuffs from './doHuntingBuffs';
 import getCombatBias from '../getCombatBias';
 import getValue from '../../system/getValue';
-import {interceptXHR} from '../interceptXHR';
+import interceptXHR from '../interceptXHR';
 import {prepareHidePlayerActions} from '../prepareHidePlayerActions';
 import shouldBeArray from '../../system/shouldBeArray';
 
@@ -24,8 +24,8 @@ function getPrefs() {
 export default function worldPrefs() {
   getCombatBias();
   getPrefs();
-  buildFshDivs();
+  var missingBuffsDiv = buildFshDivs();
   interceptXHR();
-  doHuntingBuffs();
+  doHuntingBuffs(missingBuffsDiv);
   prepareHidePlayerActions();
 }

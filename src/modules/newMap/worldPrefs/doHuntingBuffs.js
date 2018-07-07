@@ -1,41 +1,61 @@
 import calf from '../../support/calf';
 import {def_playerBuffs} from '../../support/constants';
-import {missingBuffsDiv} from './buildFshDivs';
 import {
   huntingBuffs,
   huntingBuffsName,
   setCurrentBuffList
 } from './setCurrentBuffList';
 
-function huntingBuffsEnabled(evt, data) {
-  if (!calf.showBuffs) {
-    missingBuffsDiv.innerHTML = '';
-    return;
-  }
-  var buffHash = data.b.reduce(function(prev, curr) {
-    prev[curr.name] = true;
-    return prev;
-  }, {});
-  var missingBuffs = huntingBuffs.reduce(function(prev, curr) {
+function buildBuffHash(prev, curr) {
+  prev[curr.name] = true;
+  return prev;
+}
+
+function findMissingBuffs(buffHash) {
+  return function(prev, curr) {
     if (!buffHash[curr.trim()]) {prev.push(curr);}
     return prev;
-  }, []);
+  };
+}
+
+function displayMissingBuffs(missingBuffsDiv, missingBuffs) {
+  missingBuffsDiv.innerHTML = 'You are missing some ' + huntingBuffsName +
+    ' hunting buffs<br>(' + missingBuffs.join(', ') + ')';
+}
+
+function clearBuffDiv(missingBuffsDiv) {
+  missingBuffsDiv.innerHTML = '';
+}
+
+function lookForMissingBuffs(missingBuffsDiv, data) {
+  var buffHash = data.b.reduce(buildBuffHash, {});
+  var missingBuffs = huntingBuffs.reduce(findMissingBuffs(buffHash), []);
   if (missingBuffs.length > 0) {
-    missingBuffsDiv.innerHTML = 'You are missing some ' +
-      huntingBuffsName + ' hunting buffs<br>(' +
-      missingBuffs.join(', ') + ')';
-  } else {missingBuffsDiv.innerHTML = '';}
+    displayMissingBuffs(missingBuffsDiv, missingBuffs);
+  } else {
+    clearBuffDiv(missingBuffsDiv);
+  }
 }
 
-function dataEventsPlayerBuffs(evt, data) {
-  if (huntingBuffs) {huntingBuffsEnabled(evt, data);}
+function huntingBuffsEnabled(missingBuffsDiv, evt, data) {
+  if (calf.showBuffs) {
+    lookForMissingBuffs(missingBuffsDiv, data);
+  } else {
+    clearBuffDiv(missingBuffsDiv);
+  }
 }
 
-export function doHuntingBuffs() { // jQuery.min
+function dataEventsPlayerBuffs(missingBuffsDiv) {
+  return function(evt, data) {
+    if (huntingBuffs) {huntingBuffsEnabled(missingBuffsDiv, evt, data);}
+  };
+}
+
+export default function doHuntingBuffs(missingBuffsDiv) { // jQuery.min
   setCurrentBuffList();
-  $.subscribe(def_playerBuffs, dataEventsPlayerBuffs);
+  $.subscribe(def_playerBuffs, dataEventsPlayerBuffs(missingBuffsDiv));
   if (calf.showBuffs && window.initialGameData) { // HCS initial data
-    dataEventsPlayerBuffs(null,
+    dataEventsPlayerBuffs(missingBuffsDiv)(null,
       {b: window.initialGameData.player.buffs});
   }
 }
