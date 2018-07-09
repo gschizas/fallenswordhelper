@@ -2,13 +2,6 @@ import bitwiseAnd from '../common/bitwiseAnd';
 import calf from '../support/calf';
 import {def_fetch_worldRealmActions} from '../support/constants';
 import jsonParse from '../common/jsonParse';
-import setValue from '../system/setValue';
-
-export function toggleSubLvlCreature() {
-  calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
-  setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
-  GameData.fetch(256);
-}
 
 var testActions = [
   function(myData) {return !myData;},
@@ -42,6 +35,6 @@ function xhrPreFilter(options, originalOptions) {
   }
 }
 
-export function interceptXHR() { // jQuery.min
+export default function interceptXHR() { // jQuery.min
   $.ajaxPrefilter('JSON', xhrPreFilter);
 }

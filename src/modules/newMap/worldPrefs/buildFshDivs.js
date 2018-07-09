@@ -11,9 +11,7 @@ import {toggleShowCreatureInfo} from '../monsterLog/creatureInfo';
 import toggleShowHuntingBuffs from './toggleShowHuntingBuffs';
 import {toggleShowMonsterLog} from '../monsterLog/processMonsterLog';
 import {toggleShowTitanInfo} from '../titanStats/titanStats';
-import {toggleSubLvlCreature} from '../interceptXHR';
-
-export var missingBuffsDiv;
+import toggleSubLvlCreature from './toggleSubLvlCreature';
 
 var fshEvents = {
   hideSubLvlCreature: toggleSubLvlCreature,
@@ -32,7 +30,7 @@ function prefsClickEvent(e) {
   }
 }
 
-export function buildFshDivs() {
+export default function buildFshDivs() {
   var fshDiv = createDiv({className: 'fshCenter fshFten'});
   var prefsDiv = createDiv({
     id: 'fshWorldPrefs',
@@ -47,8 +45,9 @@ export function buildFshDivs() {
   prefsDiv.addEventListener('click', prefsClickEvent);
   prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
   insertElement(fshDiv, prefsDiv);
-  missingBuffsDiv = createDiv();
+  var missingBuffsDiv = createDiv();
   insertElement(fshDiv, missingBuffsDiv);
   var tempWorldButtons = getElementById('worldContainerBelow').children[0];
   insertElementBefore(fshDiv, tempWorldButtons);
+  return missingBuffsDiv;
 }

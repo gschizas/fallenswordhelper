@@ -19,9 +19,8 @@ function joinGroup(groupID, container) { // jQuery.min
 }
 
 function doJoinUnderSize(joinButton) {
-  var memList = joinButton.parentNode.parentNode.parentNode
-    .cells[1].children[0];
-  var memListArrayWithMercs = memList.innerHTML.split(',');
+  var memList = joinButton.parentNode.parentNode.parentNode.cells[1];
+  var memListArrayWithMercs = memList.textContent.split(',');
   var memListArrayWithoutMercs = memListArrayWithMercs
     .filter(filterMercs);
   if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
