@@ -1,4 +1,4 @@
-import {afterUpdateActionList} from '../doNotKill';
+import afterUpdateActionList from '../doNotKill/afterUpdateActionList';
 import calf from '../../support/calf';
 import insertElement from '../../common/insertElement';
 import setValue from '../../system/setValue';
