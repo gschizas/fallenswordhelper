@@ -8605,9 +8605,8 @@
   }
 
   function doJoinUnderSize(joinButton) {
-    var memList = joinButton.parentNode.parentNode.parentNode
-      .cells[1].children[0];
-    var memListArrayWithMercs = memList.innerHTML.split(',');
+    var memList = joinButton.parentNode.parentNode.parentNode.cells[1];
+    var memListArrayWithMercs = memList.textContent.split(',');
     var memListArrayWithoutMercs = memListArrayWithMercs
       .filter(filterMercs);
     if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
@@ -17260,14 +17259,127 @@
     GameData.fetch(16);
   }
 
-  function bitwiseAnd(a, b) {
-    return a & b; // eslint-disable-line no-bitwise
-  }
-
   function toggleSubLvlCreature() {
     calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
     setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
     GameData.fetch(256);
+  }
+
+  var fshEvents = {
+    hideSubLvlCreature: toggleSubLvlCreature,
+    hidePlayerActions: toggleHidePlayerActions,
+    showCreatureInfo: toggleShowCreatureInfo,
+    showHuntingBuffs: toggleShowHuntingBuffs,
+    showMonsterLog: toggleShowMonsterLog,
+    showTitanInfo: toggleShowTitanInfo
+  };
+
+  function prefsClickEvent(e) {
+    var tmpFn = fshEvents[e.target.name];
+    if (isFunction(tmpFn)) {
+      e.target.blur();
+      tmpFn(e);
+    }
+  }
+
+  function buildFshDivs() {
+    var fshDiv = createDiv({className: 'fshCenter fshFten'});
+    var prefsDiv = createDiv({
+      id: 'fshWorldPrefs',
+      innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
+        '<br>' +
+        simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+        huntingBuffsHtml()
+    });
+    prefsDiv.addEventListener('click', prefsClickEvent);
+    prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
+    insertElement(fshDiv, prefsDiv);
+    var missingBuffsDiv = createDiv();
+    insertElement(fshDiv, missingBuffsDiv);
+    var tempWorldButtons = getElementById('worldContainerBelow').children[0];
+    insertElementBefore(fshDiv, tempWorldButtons);
+    return missingBuffsDiv;
+  }
+
+  function buildBuffHash(prev, curr) {
+    prev[curr.name] = true;
+    return prev;
+  }
+
+  function findMissingBuffs(buffHash) {
+    return function(prev, curr) {
+      if (!buffHash[curr.trim()]) {prev.push(curr);}
+      return prev;
+    };
+  }
+
+  function displayMissingBuffs(missingBuffsDiv, missingBuffs) {
+    missingBuffsDiv.innerHTML = 'You are missing some ' + huntingBuffsName +
+      ' hunting buffs<br>(' + missingBuffs.join(', ') + ')';
+  }
+
+  function clearBuffDiv(missingBuffsDiv) {
+    missingBuffsDiv.innerHTML = '';
+  }
+
+  function lookForMissingBuffs(missingBuffsDiv, data) {
+    var buffHash = data.b.reduce(buildBuffHash, {});
+    var missingBuffs = huntingBuffs$1.reduce(findMissingBuffs(buffHash), []);
+    if (missingBuffs.length > 0) {
+      displayMissingBuffs(missingBuffsDiv, missingBuffs);
+    } else {
+      clearBuffDiv(missingBuffsDiv);
+    }
+  }
+
+  function huntingBuffsEnabled(missingBuffsDiv, evt, data) {
+    if (calf.showBuffs) {
+      lookForMissingBuffs(missingBuffsDiv, data);
+    } else {
+      clearBuffDiv(missingBuffsDiv);
+    }
+  }
+
+  function dataEventsPlayerBuffs(missingBuffsDiv) {
+    return function(evt, data) {
+      if (huntingBuffs$1) {huntingBuffsEnabled(missingBuffsDiv, evt, data);}
+    };
+  }
+
+  function doHuntingBuffs(missingBuffsDiv) { // jQuery.min
+    setCurrentBuffList();
+    $.subscribe(def_playerBuffs, dataEventsPlayerBuffs(missingBuffsDiv));
+    if (calf.showBuffs && window.initialGameData) { // HCS initial data
+      dataEventsPlayerBuffs(missingBuffsDiv)(null,
+        {b: window.initialGameData.player.buffs});
+    }
+  }
+
+  function getBiasGeneral(combatEvaluatorBias) {
+    if (bias[combatEvaluatorBias]) {
+      return bias[combatEvaluatorBias].generalVariable;
+    }
+    return 1.1053;
+  }
+
+  function getBiasHp(combatEvaluatorBias) {
+    if (bias[combatEvaluatorBias]) {
+      return bias[combatEvaluatorBias].hpVariable;
+    }
+    return 1.1;
+  }
+
+  function getCombatBias() {
+    calf.combatEvaluatorBias = getValue('combatEvaluatorBias');
+    calf.generalVariable = getBiasGeneral(calf.combatEvaluatorBias);
+    calf.hpVariable = getBiasHp(calf.combatEvaluatorBias);
+  }
+
+  function bitwiseAnd(a, b) {
+    return a & b; // eslint-disable-line no-bitwise
   }
 
   var testActions = [
@@ -17306,99 +17418,6 @@
     $.ajaxPrefilter('JSON', xhrPreFilter);
   }
 
-  var missingBuffsDiv;
-
-  var fshEvents = {
-    hideSubLvlCreature: toggleSubLvlCreature,
-    hidePlayerActions: toggleHidePlayerActions,
-    showCreatureInfo: toggleShowCreatureInfo,
-    showHuntingBuffs: toggleShowHuntingBuffs,
-    showMonsterLog: toggleShowMonsterLog,
-    showTitanInfo: toggleShowTitanInfo
-  };
-
-  function prefsClickEvent(e) {
-    var tmpFn = fshEvents[e.target.name];
-    if (isFunction(tmpFn)) {
-      e.target.blur();
-      tmpFn(e);
-    }
-  }
-
-  function buildFshDivs() {
-    var fshDiv = createDiv({className: 'fshCenter fshFten'});
-    var prefsDiv = createDiv({
-      id: 'fshWorldPrefs',
-      innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
-        simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
-        simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
-        '<br>' +
-        simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-        simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-        huntingBuffsHtml()
-    });
-    prefsDiv.addEventListener('click', prefsClickEvent);
-    prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-    insertElement(fshDiv, prefsDiv);
-    missingBuffsDiv = createDiv();
-    insertElement(fshDiv, missingBuffsDiv);
-    var tempWorldButtons = getElementById('worldContainerBelow').children[0];
-    insertElementBefore(fshDiv, tempWorldButtons);
-  }
-
-  function huntingBuffsEnabled(evt, data) {
-    if (!calf.showBuffs) {
-      missingBuffsDiv.innerHTML = '';
-      return;
-    }
-    var buffHash = data.b.reduce(function(prev, curr) {
-      prev[curr.name] = true;
-      return prev;
-    }, {});
-    var missingBuffs = huntingBuffs$1.reduce(function(prev, curr) {
-      if (!buffHash[curr.trim()]) {prev.push(curr);}
-      return prev;
-    }, []);
-    if (missingBuffs.length > 0) {
-      missingBuffsDiv.innerHTML = 'You are missing some ' +
-        huntingBuffsName + ' hunting buffs<br>(' +
-        missingBuffs.join(', ') + ')';
-    } else {missingBuffsDiv.innerHTML = '';}
-  }
-
-  function dataEventsPlayerBuffs(evt, data) {
-    if (huntingBuffs$1) {huntingBuffsEnabled(evt, data);}
-  }
-
-  function doHuntingBuffs() { // jQuery.min
-    setCurrentBuffList();
-    $.subscribe(def_playerBuffs, dataEventsPlayerBuffs);
-    if (calf.showBuffs && window.initialGameData) { // HCS initial data
-      dataEventsPlayerBuffs(null,
-        {b: window.initialGameData.player.buffs});
-    }
-  }
-
-  function getBiasGeneral(combatEvaluatorBias) {
-    if (bias[combatEvaluatorBias]) {
-      return bias[combatEvaluatorBias].generalVariable;
-    }
-    return 1.1053;
-  }
-
-  function getBiasHp(combatEvaluatorBias) {
-    if (bias[combatEvaluatorBias]) {
-      return bias[combatEvaluatorBias].hpVariable;
-    }
-    return 1.1;
-  }
-
-  function getCombatBias() {
-    calf.combatEvaluatorBias = getValue('combatEvaluatorBias');
-    calf.generalVariable = getBiasGeneral(calf.combatEvaluatorBias);
-    calf.hpVariable = getBiasHp(calf.combatEvaluatorBias);
-  }
-
   function getPrefs$1() {
     calf.buffs = shouldBeArray('huntingBuffs');
     calf.buffsName = getValue('huntingBuffsName');
@@ -17416,9 +17435,9 @@
   function worldPrefs() {
     getCombatBias();
     getPrefs$1();
-    buildFshDivs();
+    var missingBuffsDiv = buildFshDivs();
     interceptXHR();
-    doHuntingBuffs();
+    doHuntingBuffs(missingBuffsDiv);
     prepareHidePlayerActions();
   }
 
@@ -19499,7 +19518,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '29';
+  window.FSH.calf = '30';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
