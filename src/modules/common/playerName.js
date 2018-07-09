@@ -1,4 +1,4 @@
-import {getElementById} from '../common/getElement';
+import {getElementById} from './getElement';
 
 var thisPlayerName;
 
