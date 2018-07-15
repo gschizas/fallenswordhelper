@@ -2661,10 +2661,19 @@
     });
   }
 
+  function processResult(r) {
+    if (r.item) {
+      return 'You successfully extracted 1 \'' + r.item.n +
+        '\' component(s) from 1 resource(s).</span>';
+    }
+    return '<span class="fshRed">You failed to extract any components from ' +
+      'resource(s).</span>';
+  }
+
   function quickDoneExtracted(invId, json) {
     if (jsonFail(json, buyResult)) {return;}
     backpackRemove(invId);
-    outputResult('Item Extracted.', buyResult);
+    outputResult(processResult(json.r), buyResult);
   }
 
   function doExtract(target) {
@@ -2724,8 +2733,9 @@
 
   function showQuickExtract() {
     resourceList = extractInv.reduce(resources, {});
-    var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
-      '<tr><td colspan="2"><ol id="qeresult"></ol></td></tr>';
+    var output =
+      '<tr><th width="20%">Actions</th><th colspan="2">Items</th></tr>' +
+      '<tr><td colspan="3"><ol id="qeresult"></ol></td></tr>';
     output += Object.keys(resourceList).reduce(tableRows, '');
     extTbl.innerHTML = output;
     buyResult = getElementById('qeresult');
@@ -10539,11 +10549,15 @@
     });
   }
 
-  function removeImg(itemId) { // jQuery
+  function killQTip(itemId) { // jQuery
     var qtipApi = $('#temp-inv-img-' + itemId).qtip('api');
     if (qtipApi) {qtipApi.destroy(true);}
-    var thisCell = getElementById('temp-inv-' + itemId);
-    while (thisCell.firstChild) {thisCell.removeChild(thisCell.firstChild);}
+  }
+
+  function removeImg(item) {
+    killQTip(item.id);
+    var thisCell = getElementById('temp-inv-' + item.id);
+    if (thisCell) {thisCell.innerHTML = '';}
   }
 
   function takeSuccess(takeResult, json) {
@@ -15100,8 +15114,6 @@
     }
   }
 
-  var oldDoAction;
-
   function afterUpdateActionList() {
     // color the critters in the do no kill list blue
     var act = getElementById('actionList');
@@ -15112,9 +15124,8 @@
     });
   }
 
-  var actionsToIntercept = {
-    // def_creatureCombat
-    '2': function(action, fetch, data, attempts) {
+  function interceptCreatureCombat(oldDoAction) {
+    return function(action, fetch, data, attempts) {
       // Do custom stuff e.g. do not kill list
       var creature = GameData.actions()[data.passback];
       if (creature) {
@@ -15127,7 +15138,12 @@
       }
       // Call standard action
       oldDoAction(action, fetch, data, attempts);
-    }
+    };
+  }
+
+  var actionsToIntercept = {
+    // def_creatureCombat
+    '2': interceptCreatureCombat
   };
 
   function firstAttempt(attempts) {
@@ -15138,18 +15154,20 @@
     return interceptFunction && isFunction(interceptFunction);
   }
 
-  function maybeIntercept(action, fetch, data, attempts) {
-    var interceptFunction = actionsToIntercept[action];
-    if (goodInterceptFunction(interceptFunction) && firstAttempt(attempts)) {
-      interceptFunction(action, fetch, data, attempts);
-    } else {
-      oldDoAction(action, fetch, data, attempts);
-    }
+  function maybeIntercept(oldDoAction) {
+    return function(action, fetch, data, attempts) {
+      var interceptFunction = actionsToIntercept[action];
+      if (goodInterceptFunction(interceptFunction) && firstAttempt(attempts)) {
+        interceptFunction(oldDoAction)(action, fetch, data, attempts);
+      } else {
+        oldDoAction(action, fetch, data, attempts);
+      }
+    };
   }
 
   function interceptDoAction() {
-    oldDoAction = GameData.doAction;
-    GameData.doAction = maybeIntercept;
+    var oldDoAction = GameData.doAction;
+    GameData.doAction = maybeIntercept(oldDoAction);
   }
 
   function doNotKill() {
@@ -17612,16 +17630,18 @@
     });
   }
 
+  function processResult$1(r) {
+    if (r.item) {
+      return '<span class="fshGreen">You successfully invented the item [' +
+        r.item.n + '].</span>';
+    }
+    return '<span class="fshRed">You have failed to invent the item.</span>';
+  }
+
   function quickInventDone(json) {
     var inventResult = getElementById('invent_Result');
     if (jsonFail(json, inventResult)) {return;}
-    if (json.r.success) {
-      outputResult('<span class="fshGreen">' +
-        'You successfully invented the item!</span>', inventResult);
-    } else {
-      outputResult('<span class="fshRed">' +
-        'You have failed to invent the item.</span>', inventResult);
-    }
+    outputResult(processResult$1(json.r), inventResult);
   }
 
   function quickInvent() { // Legacy
@@ -19518,7 +19538,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '30';
+  window.FSH.calf = '31';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

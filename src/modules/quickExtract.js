@@ -29,10 +29,19 @@ function backpackRemove(invId) {
   });
 }
 
+function processResult(r) {
+  if (r.item) {
+    return 'You successfully extracted 1 \'' + r.item.n +
+      '\' component(s) from 1 resource(s).</span>';
+  }
+  return '<span class="fshRed">You failed to extract any components from ' +
+    'resource(s).</span>';
+}
+
 function quickDoneExtracted(invId, json) {
   if (jsonFail(json, buyResult)) {return;}
   backpackRemove(invId);
-  outputResult('Item Extracted.', buyResult);
+  outputResult(processResult(json.r), buyResult);
 }
 
 function doExtract(target) {
@@ -92,8 +101,9 @@ function tableRows(prev, item_id) {
 
 function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
-  var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
-    '<tr><td colspan="2"><ol id="qeresult"></ol></td></tr>';
+  var output =
+    '<tr><th width="20%">Actions</th><th colspan="2">Items</th></tr>' +
+    '<tr><td colspan="3"><ol id="qeresult"></ol></td></tr>';
   output += Object.keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
   buyResult = getElementById('qeresult');

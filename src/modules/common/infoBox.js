@@ -1,5 +1,5 @@
 import createDocument from '../system/createDocument';
-import {getElementById} from '../common/getElement';
+import {getElementById} from './getElement';
 
 export default function infoBox(documentText) {
   var doc = createDocument(documentText);

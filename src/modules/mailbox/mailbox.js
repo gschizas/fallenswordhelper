@@ -84,11 +84,15 @@ function makeItemBoxes(itemTbl, itemList) {
   });
 }
 
-function removeImg(itemId) { // jQuery
+function killQTip(itemId) { // jQuery
   var qtipApi = $('#temp-inv-img-' + itemId).qtip('api');
   if (qtipApi) {qtipApi.destroy(true);}
-  var thisCell = getElementById('temp-inv-' + itemId);
-  while (thisCell.firstChild) {thisCell.removeChild(thisCell.firstChild);}
+}
+
+function removeImg(item) {
+  killQTip(item.id);
+  var thisCell = getElementById('temp-inv-' + item.id);
+  if (thisCell) {thisCell.innerHTML = '';}
 }
 
 function takeSuccess(takeResult, json) {
