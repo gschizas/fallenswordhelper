@@ -3,16 +3,18 @@ import {getElementById} from '../common/getElement';
 import jsonFail from '../common/jsonFail';
 import outputResult from '../common/outputResult';
 
+function processResult(r) {
+  if (r.item) {
+    return '<span class="fshGreen">You successfully invented the item [' +
+      r.item.n + '].</span>';
+  }
+  return '<span class="fshRed">You have failed to invent the item.</span>';
+}
+
 function quickInventDone(json) {
   var inventResult = getElementById('invent_Result');
   if (jsonFail(json, inventResult)) {return;}
-  if (json.r.success) {
-    outputResult('<span class="fshGreen">' +
-      'You successfully invented the item!</span>', inventResult);
-  } else {
-    outputResult('<span class="fshRed">' +
-      'You have failed to invent the item.</span>', inventResult);
-  }
+  outputResult(processResult(json.r), inventResult);
 }
 
 function quickInvent() { // Legacy
