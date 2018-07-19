@@ -89,7 +89,7 @@ function parseGuild(data) {
     guilds[guildId].forEach(function(player) {
       if (member.name === player.player) {
         doOnlineDot(player.dom, guildId, {
-          last_login: (nowSecs - member.last_activity).toString(),
+          last_login: member.last_activity.toString(),
           virtual_level: member.vl
         });
       }
