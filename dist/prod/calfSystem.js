@@ -9966,7 +9966,8 @@
   ];
 
   function isUserInv() {
-    return 'player_id' in theInv;
+    // return 'player_id' in theInv; // Rollup is spazzing
+    return Boolean(theInv.player_id);
   }
 
   function doTable$1() { // jQuery
@@ -14493,7 +14494,7 @@
       guilds[guildId].forEach(function(player) {
         if (member.name === player.player) {
           doOnlineDot(player.dom, guildId, {
-            last_login: (nowSecs - member.last_activity).toString(),
+            last_login: member.last_activity.toString(),
             virtual_level: member.vl
           });
         }
@@ -15120,18 +15121,25 @@
     });
   }
 
+  function creatureOnList(creatureName, passback) {
+    if (calf.doNotKillList.includes(creatureName)) {
+      getElementById('actionList').children[passback].children[0].children[1]
+        .classList.remove('loading');
+      return true;
+    }
+  }
+
+  function weShouldBlock(passback) {
+    // Do custom stuff e.g. do not kill list
+    var creature = GameData.actions()[passback];
+    if (creature) {
+      return creatureOnList(creature.data.name, passback);
+    }
+  }
+
   function interceptCreatureCombat(oldDoAction) {
     return function(action, fetch, data, attempts) {
-      // Do custom stuff e.g. do not kill list
-      var creature = GameData.actions()[data.passback];
-      if (creature) {
-        var creatureName = creature.data.name;
-        if (calf.doNotKillList.indexOf(creatureName) !== -1) {
-          $('#actionList div.header').eq(data.passback)
-            .find('a.icon').removeClass('loading');
-          return;
-        }
-      }
+      if (weShouldBlock(data.passback)) {return;}
       // Call standard action
       oldDoAction(action, fetch, data, attempts);
     };
@@ -19534,7 +19542,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '31';
+  window.FSH.calf = '32';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
