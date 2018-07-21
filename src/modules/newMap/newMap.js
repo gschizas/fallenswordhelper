@@ -1,9 +1,10 @@
 import combatLogger from './combatLogger';
+import {createStyle} from '../common/cElement';
 import {def_afterUpdateActionlist} from '../support/constants';
 import doNotKill from './doNotKill/doNotKill';
-import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectRelic from './relic/relic';
+import insertElement from '../common/insertElement';
 import onWorld from './onWorld';
 import prepareShop from './shop';
 import startMonsterLog from './monsterLog/monsterLog';
@@ -35,25 +36,16 @@ function hideGroupButton() {
   });
 }
 
-function colorType(actionList, creatureClass, colorClass) {
-  var creatures = actionList.getElementsByClassName(creatureClass);
-  Array.prototype.forEach.call(creatures, function(el) {
-    el.classList.add(colorClass);
-  });
+function injectMonsterStyle() {
+  insertElement(document.body, createStyle(
+    '#actionList .creature-1 {color: green;}\n' +
+    '#actionList .creature-2 {color: yellow;}\n' +
+    '#actionList .creature-3 {color: red;}'
+  ));
 }
 
-function colorMonsters() {
-  var act = getElementById('actionList');
-  colorType(act, 'creature-1', 'fshGreen');
-  colorType(act, 'creature-2', 'fshYellow');
-  colorType(act, 'creature-3', 'fshRed');
-}
-
-function doMonsterColors() { // jQuery.min
-  if (getValue('enableCreatureColoring')) {
-    $.subscribe(def_afterUpdateActionlist, colorMonsters);
-    colorMonsters();
-  }
+function doMonsterColors() {
+  if (getValue('enableCreatureColoring')) {injectMonsterStyle();}
 }
 
 function doRepair(e, key) {

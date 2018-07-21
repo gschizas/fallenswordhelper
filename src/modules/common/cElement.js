@@ -83,3 +83,7 @@ export function createLabel(props) {
 export function textSpan(text) {
   return createSpan({textContent: text});
 }
+
+export function createStyle(style) {
+  return cElement('style', {innerHTML: style});
+}
