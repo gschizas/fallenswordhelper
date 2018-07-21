@@ -36,7 +36,7 @@ export function typeFilter() { // jQuery
 
 function testSetId(data) {
   return options.checkedElements['-1'] &&
-    data.stats && data.stats.set_id !== '-1';
+    data.stats && data.stats.set_id !== -1;
 }
 
 export function setFilter() { // jQuery

@@ -1211,6 +1211,10 @@
     return createSpan({textContent: text});
   }
 
+  function createStyle(style) {
+    return cElement('style', {innerHTML: style});
+  }
+
   function insertElement(parent, child) {
     if (parent instanceof Node && child instanceof Node) {
       parent.appendChild(child);
@@ -8367,6 +8371,7 @@
   function injectBioWidgets() {
     bioEditLines = getValue('bioEditLines');
     textArea$1 = getElementById('textInputBox');
+    if (!textArea$1) {return;}
     bioPreview();
     bioWords();
     bioHeight();
@@ -9981,8 +9986,7 @@
   ];
 
   function isUserInv() {
-    // return 'player_id' in theInv; // Rollup is spazzing
-    return Boolean(theInv.player_id);
+    return 'player_id' in theInv;
   }
 
   function doTable$1() { // jQuery
@@ -10401,7 +10405,7 @@
 
   function testSetId(data) {
     return options.checkedElements['-1'] &&
-      data.stats && data.stats.set_id !== '-1';
+      data.stats && data.stats.set_id !== -1;
   }
 
   function setFilter() { // jQuery
@@ -17517,25 +17521,16 @@
     });
   }
 
-  function colorType(actionList, creatureClass, colorClass) {
-    var creatures = actionList.getElementsByClassName(creatureClass);
-    Array.prototype.forEach.call(creatures, function(el) {
-      el.classList.add(colorClass);
-    });
+  function injectMonsterStyle() {
+    insertElement(document.body, createStyle(
+      '#actionList .creature-1 {color: green;}\n' +
+      '#actionList .creature-2 {color: yellow;}\n' +
+      '#actionList .creature-3 {color: red;}'
+    ));
   }
 
-  function colorMonsters() {
-    var act = getElementById('actionList');
-    colorType(act, 'creature-1', 'fshGreen');
-    colorType(act, 'creature-2', 'fshYellow');
-    colorType(act, 'creature-3', 'fshRed');
-  }
-
-  function doMonsterColors() { // jQuery.min
-    if (getValue('enableCreatureColoring')) {
-      $.subscribe(def_afterUpdateActionlist, colorMonsters);
-      colorMonsters();
-    }
+  function doMonsterColors() {
+    if (getValue('enableCreatureColoring')) {injectMonsterStyle();}
   }
 
   function doRepair$1(e, key) {
@@ -19589,7 +19584,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '32';
+  window.FSH.calf = '33';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
