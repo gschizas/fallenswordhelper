@@ -105,6 +105,7 @@ function updateBioCharacters() {
 export default function injectBioWidgets() {
   bioEditLines = getValue('bioEditLines');
   textArea = getElementById('textInputBox');
+  if (!textArea) {return;}
   bioPreview();
   bioWords();
   bioHeight();
