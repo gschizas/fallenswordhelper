@@ -74,8 +74,7 @@ var tblCols = [
 ];
 
 function isUserInv() {
-  // return 'player_id' in theInv; // Rollup is spazzing
-  return Boolean(theInv.player_id);
+  return 'player_id' in theInv;
 }
 
 export default function doTable() { // jQuery
