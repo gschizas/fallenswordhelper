@@ -1300,7 +1300,7 @@
 
   function pushNewRecord(member) {
     oldArchive.members[member.name].push([
-      Math.floor(member.last_activity / 86400),
+      Math.floor((nowSecs - member.last_activity) / 86400),
       member.current_stamina,
       member.level,
       member.max_stamina,
@@ -1357,7 +1357,7 @@
       if (type2change) {
         pushNewRecord(member);
       } else {
-        archiveRecord[act] = Math.floor(member.last_activity / 86400);
+        archiveRecord[act] = Math.floor((nowSecs - member.last_activity) / 86400);
         archiveRecord[utc] = nowSecs;
       }
     }
@@ -19584,7 +19584,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '33';
+  window.FSH.calf = '34';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
