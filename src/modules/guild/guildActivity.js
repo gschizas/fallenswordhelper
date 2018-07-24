@@ -12,7 +12,7 @@ var guild;
 
 function pushNewRecord(member) {
   oldArchive.members[member.name].push([
-    Math.floor(member.last_activity / 86400),
+    Math.floor((nowSecs - member.last_activity) / 86400),
     member.current_stamina,
     member.level,
     member.max_stamina,
@@ -69,7 +69,7 @@ function processMemberRecord(newArchive, member) {
     if (type2change) {
       pushNewRecord(member);
     } else {
-      archiveRecord[act] = Math.floor(member.last_activity / 86400);
+      archiveRecord[act] = Math.floor((nowSecs - member.last_activity) / 86400);
       archiveRecord[utc] = nowSecs;
     }
   }
