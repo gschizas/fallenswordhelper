@@ -45,7 +45,7 @@ function setMsg(msg) {
 }
 
 function keypress(evt) {
-  if (evt.code === 'Enter' && !evt.shiftKey) {
+  if (evt.key === 'Enter' && !evt.shiftKey) {
     evt.preventDefault();
     sendMessage();
   }
