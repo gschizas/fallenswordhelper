@@ -38,7 +38,7 @@ function rearrangeTable(btnMass) {
 
 function keypress(sendBtn) {
   return function(evt) {
-    if (evt.code === 'Enter' && !evt.shiftKey) {
+    if (evt.key === 'Enter' && !evt.shiftKey) {
       evt.preventDefault();
       sendBtn.click();
     }
