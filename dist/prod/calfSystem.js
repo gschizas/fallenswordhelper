@@ -5053,7 +5053,7 @@
   }
 
   function keypress(evt) {
-    if (evt.code === 'Enter' && !evt.shiftKey) {
+    if (evt.key === 'Enter' && !evt.shiftKey) {
       evt.preventDefault();
       sendMessage();
     }
@@ -18532,7 +18532,7 @@
 
   function keypress$1(sendBtn) {
     return function(evt) {
-      if (evt.code === 'Enter' && !evt.shiftKey) {
+      if (evt.key === 'Enter' && !evt.shiftKey) {
         evt.preventDefault();
         sendBtn.click();
       }
@@ -19537,7 +19537,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '34';
+  window.FSH.calf = '35';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
