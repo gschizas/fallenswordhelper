@@ -9279,11 +9279,13 @@
     }
   }
 
-  var ranks;
-  var myRank;
-  var theRows;
-  var rankCount;
-  var characterRow;
+  function ranks(data) {
+    return guild(extend({subcmd: 'ranks'}, data));
+  }
+
+  function rankPosition(direction, rankId) {
+    return ranks({subcmd2: direction, rank_id: rankId});
+  }
 
   var privLookup = {
     'Bank Withdraw': 5,
@@ -9327,6 +9329,29 @@
     });
   }
 
+  function weightings() {
+    // gather rank info button
+    var addNewRank = document.querySelector('#pCC a[href*="=ranks&subcmd2=add"]');
+    if (addNewRank) {
+      var weightButton = createInput({
+        id: 'getrankweightings',
+        className: 'custombutton',
+        type: 'button',
+        value: 'Get Rank Weightings'
+      });
+      weightButton.addEventListener('click', fetchRankData);
+      var theTd = addNewRank.parentNode.parentNode;
+      insertHtmlBeforeEnd(theTd, '&nbsp;');
+      insertElement(theTd, weightButton);
+    }
+  }
+
+  var ranks$1;
+  var myRank;
+  var theRows;
+  var rankCount;
+  var characterRow;
+
   function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
     return characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
       targetRowNum < 1 ||
@@ -9344,14 +9369,13 @@
   }
 
   function overrideUpDown(evt, val) {
-    var onclickHREF = /window.location='(.*)';/
-      .exec(evt.target.getAttribute('onclick'))[1];
     var thisRankRow = evt.target.parentNode.parentNode.parentNode;
     var thisRankRowNum = thisRankRow.rowIndex;
     var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
     var parentTable = thisRankRow.parentNode;
     if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
-    retryAjax(onclickHREF);
+    var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
+    rankPosition(val.toLowerCase(), matchRankId[1]);
     var injectRow = parentTable.rows[targetRowNum];
     parentTable.insertBefore(thisRankRow, injectRow);
     var pxScroll = getPxScroll(val);
@@ -9360,28 +9384,14 @@
   }
 
   function ajaxifyRankControls(evt) {
-    var val = evt.target.getAttribute('value');
-    if (val === 'Up' || val === 'Down') {overrideUpDown(evt, val);}
+    var val = evt.target.value;
+    if (['Up', 'Down'].includes(val)) {overrideUpDown(evt, val);}
   }
 
   function doButtons() {
-    // gather rank info button
-    var addNewRank = document.querySelector('#pCC a[href*="=ranks&subcmd2=add"]');
-    if (addNewRank) {
-      var weightButton = createInput({
-        id: 'getrankweightings',
-        className: 'custombutton',
-        type: 'button',
-        value: 'Get Rank Weightings'
-      });
-      weightButton.addEventListener('click', fetchRankData);
-      var theTd = addNewRank.parentNode.parentNode;
-      insertHtmlBeforeEnd(theTd, '&nbsp;');
-      insertElement(theTd, weightButton);
-    }
+    weightings();
     if (getValue('ajaxifyRankControls')) {
-      pCC.addEventListener('click',
-        ajaxifyRankControls, true);
+      pCC.addEventListener('click', ajaxifyRankControls, true);
     }
   }
 
@@ -9392,10 +9402,10 @@
   }
 
   function hasMembers(rankCell, rankName) {
-    if (ranks[rankName]) { // has members
+    if (ranks$1[rankName]) { // has members
       isMyRank(rankName);
       insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
-        ranks[rankName].join(', ') + '</span>');
+        ranks$1[rankName].join(', ') + '</span>');
     }
   }
 
@@ -9432,7 +9442,7 @@
   }
 
   function getRanks(membrList) {
-    ranks = Object.keys(membrList).reduce(function(prev, curr) {
+    ranks$1 = Object.keys(membrList).reduce(function(prev, curr) {
       if (curr !== 'lastUpdate') {
         var rankName = membrList[curr].rank_name;
         prev[rankName] = prev[rankName] || [];
@@ -19541,7 +19551,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '35';
+  window.FSH.calf = '36';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

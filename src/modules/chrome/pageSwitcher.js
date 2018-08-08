@@ -14,7 +14,7 @@ import injectGroupStats from '../groups/injectGroupStats';
 import injectGroups from '../groups/groups';
 import injectGuild from '../guild/guild';
 import injectGuildAddTagsWidgets from '../guild/injectGuildAddTagsWidgets';
-import injectGuildRanks from '../rank';
+import injectGuildRanks from '../guild/ranks/rank';
 import {injectInventoryManagerNew} from '../inventory/inventory';
 import injectMailbox from '../mailbox/mailbox';
 import injectMonsterLog from '../monstorLog';
