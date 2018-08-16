@@ -1,7 +1,7 @@
 import backpack from '../ajax/backpack';
 import equipItem from '../ajax/equipItem';
 import errorDialog from '../app/errorDialog';
-import recall from '../app/guild/inventory/recall';
+import recallItem from '../ajax/recallItem';
 import takeItem from '../ajax/takeItem';
 import useItem from '../ajax/useItem';
 
@@ -67,7 +67,7 @@ function recallItemStatus(o) {
 
 function pipeRecallToQueue(o) {
   return function() {
-    return recall(o.invId, o.playerId, o.mode).pipe(errorDialog)
+    return recallItem(o.invId, o.playerId, o.mode).pipe(errorDialog)
       .pipe(recallItemStatus(o));
   };
 }

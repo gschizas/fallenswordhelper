@@ -1,3 +1,4 @@
+import dialogMsg from '../common/dialogMsg';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jConfirm from '../common/jConfirm';
@@ -26,7 +27,7 @@ function doDebuff(aLink) { // jQuery
       if (data.response.response === 0) {
         aLink.parentNode.innerHTML = '';
       } else {
-        $('#dialog_msg').html(data.response.msg).dialog('open');
+        dialogMsg(data.response.msg);
       }
     });
 }

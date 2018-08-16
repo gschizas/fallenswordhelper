@@ -2,6 +2,7 @@ import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
 import {colouredDots} from '../common/colouredDots';
+import dialogMsg from '../common/dialogMsg';
 import fallback from '../system/fallback';
 import fastDebuff from './debuff';
 import getUrlParameter from '../system/getUrlParameter';
@@ -42,7 +43,7 @@ function yuuzhan(playername, avyImg) {
   if (playername === 'yuuzhan') {
     avyImg.src = 'http://evolutions.yvong.com/images/tumbler.gif';
     avyImg.addEventListener('click', function() {
-      $('#dialog_msg').text('Winner!').dialog('open');
+      dialogMsg('Winner!');
     });
   }
 }

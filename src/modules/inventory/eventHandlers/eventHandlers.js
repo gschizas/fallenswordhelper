@@ -2,15 +2,14 @@ import allChecks from './allChecks';
 import changeLvls from './changeLvls';
 import clearChecks from './clearChecks';
 import doAction from './doAction';
-import dostoreitems from '../../app/guild/inventory/dostoreitems';
 import dropItem from '../../ajax/dropItem';
 import equipItem from '../../ajax/equipItem';
 import getChecks from './getChecks';
-// import {injectInventoryManagerNew} from '../inventory';
 import moveItem from '../../ajax/moveItem';
 import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
 import sendItem from '../../ajax/sendItem';
+import storeItems from '../../ajax/storeItems';
 import useItem from '../../ajax/useItem';
 import {queueRecallItem, queueTakeItem} from '../../ajaxQueue/queue';
 
@@ -57,7 +56,7 @@ function doMoveItem(e) { // jQuery
 
 function doStoreItem(e) { // jQuery
   var self = $(e.target);
-  doAction(dostoreitems.bind(null, [self.attr('invid')]), self);
+  doAction(storeItems.bind(null, [self.attr('invid')]), self);
 }
 
 function doDropItem(e) { // jQuery
