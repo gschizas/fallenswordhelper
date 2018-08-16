@@ -1,6 +1,6 @@
 import add from '../support/task';
 import getValue from '../system/getValue';
-import moreToDo from '../common/moreToDo';
+import moreToDo from './moreToDo';
 import {lastActivityRE, nowSecs} from '../support/constants';
 
 var dotList;

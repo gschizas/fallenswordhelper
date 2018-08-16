@@ -1,9 +1,8 @@
-import errorDialog from '../../errorDialog';
 import guildInventory from './guildInventory';
 
 export default function dostoreitems(invIdAry) {
   return guildInventory({
     subcmd2: 'dostoreitems',
     storeIndex: invIdAry
-  }).pipe(errorDialog);
+  });
 }

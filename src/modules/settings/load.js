@@ -1,3 +1,4 @@
+import dialogMsg from '../common/dialogMsg';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import isObject from '../common/isObject';
@@ -32,7 +33,7 @@ export default function injectSaveSettings() { // Hybrid
       Object.keys(settings).forEach(function(id) {
         setValue(id, settings[id]);
       });
-      $('#dialog_msg').text('Settings loaded successfully!').dialog('open');
+      dialogMsg('Settings loaded successfully!');
     }
   });
 }

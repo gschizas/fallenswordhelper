@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import dialogMsg from '../common/dialogMsg';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../monstorLog';
@@ -100,7 +101,7 @@ function saveConfig() { // jQuery
   saveNumeric('combatEvaluatorBias');
   saveOther('enabledHuntingMode');
   saveBoxes.forEach(saveValueForm);
-  $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
+  dialogMsg('FS Helper Settings Saved');
 }
 
 function showLogs() {

@@ -1,14 +1,15 @@
 // import localforage from
 //   '../../../node_modules/localforage/dist/localforage.nopromises';
+import dialogMsg from '../common/dialogMsg';
 import {sendException} from '../support/fshGa';
 import stringifyError from '../common/stringifyError';
 
 function getForageError(forage, err) {
   if (err.name === 'UnknownError') {
-    $('#dialog_msg').html('Firefox IndexedDB - UnknownError<br>' +
+    dialogMsg('Firefox IndexedDB - UnknownError<br>' +
       err.message + '<br>' +
       '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
-      'More Info</a>').dialog('open');
+      'More Info</a>');
   } else {
     sendException(forage + ' localforage.getItem error ' +
       stringifyError(err), false);

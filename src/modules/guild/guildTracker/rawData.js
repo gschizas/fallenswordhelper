@@ -1,4 +1,5 @@
 import add from '../../support/task';
+import dialogMsg from '../../common/dialogMsg';
 import {initTable} from './trackerTable';
 import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
@@ -35,11 +36,11 @@ function doSave() {
   var newData = jsonParse(ioText.value);
   setForage('fsh_guildActivity', newData)
     .done(function() {
-      $('#dialog_msg').text('Update successful').dialog('open');
+      dialogMsg('Update successful');
       initTable(newData.members);
     })
     .fail(function(err) {
-      $('#dialog_msg').text(err).dialog('open');
+      dialogMsg(err);
     });
 }
 

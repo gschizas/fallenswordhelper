@@ -22,7 +22,7 @@ function doCheckAll() {
 }
 
 function takeResult(self, data) {
-  if (data.r === 0) {
+  if (data.s) {
     self.removeAttribute('style');
     self.className = 'fshGreen';
     self.textContent = 'Taken';
