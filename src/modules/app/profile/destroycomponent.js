@@ -1,5 +1,5 @@
 import profile from './profile';
 
-export default function destroyComponent() {
-  return profile({subcmd: 'destroycomponent'});
+export default function destroyComponent(componentIdAry) {
+  return profile({subcmd: 'destroycomponent', removeIndex: componentIdAry});
 }
