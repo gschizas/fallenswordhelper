@@ -1,32 +1,81 @@
 var dragTarget;
+var mouseX;
+var mouseY;
+var offsetX;
+var offsetY;
+var timer;
+
+function setDragTarget(parent, event) {
+  if (parent) {
+    dragTarget = parent;
+  } else {
+    dragTarget = event.target;
+  }
+}
+
+function setMouseCoord(event) {
+  mouseX = event.clientX;
+  mouseY = event.clientY;
+}
+
+function getTransformXY(trans) {
+  if (trans === 'none') {return [0, 0];}
+  var matrix = trans.match(/(\d+), (\d+), (\d+), (\d+), (-?\d+), (-?\d+)/);
+  return [Number(matrix[5]), Number(matrix[6])];
+}
+
+function setOffsets() {
+  var style = window.getComputedStyle(dragTarget, null);
+  var transformXY = getTransformXY(style.transform);
+  offsetX = transformXY[0] - mouseX;
+  offsetY = transformXY[1] - mouseY;
+}
+
+function drawElement(event) {
+  if (event.clientX !== mouseX || event.clientY !== mouseY) {
+    dragTarget.style.transform =
+      'matrix(1, 0, 0, 1, ' + (event.clientX + offsetX).toString() +
+      ', ' + (event.clientY + offsetY).toString() + ')';
+    setMouseCoord(event);
+  }
+}
+
+function checkInterval(event) {
+  var now = performance.now();
+  if (now - timer > 16) {
+    drawElement(event);
+    timer = now;
+  }
+}
 
 function dragOver(event) {
+  checkInterval(event);
   event.preventDefault();
   return false;
 }
 
 function dragDrop(event) {
-  var offset = event.dataTransfer.getData('text/plain').split(',');
-  dragTarget.style.left =
-    event.clientX + parseInt(offset[0], 10) + 'px';
-  dragTarget.style.top =
-    event.clientY + parseInt(offset[1], 10) + 'px';
+  drawElement(event);
   document.body.removeEventListener('dragover', dragOver, false);
   document.body.removeEventListener('drop', dragDrop, false);
   event.preventDefault();
   return false;
 }
 
+function setDragImage(event) {
+  var img = new Image();
+  img.src =
+    'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+  event.dataTransfer.setDragImage(img, 0, 0);
+}
+
 function dragStart(parent, event) {
-  if (parent) {
-    dragTarget = parent;
-  } else {
-    dragTarget = event.target;
-  }
-  var style = window.getComputedStyle(dragTarget, null);
-  event.dataTransfer.setData('text/plain',
-    parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
-    (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
+  setDragTarget(parent, event);
+  setDragImage(event);
+  setMouseCoord(event);
+  setOffsets();
+  timer = 0;
+  event.dataTransfer.setData('text/plain', '');
   document.body.addEventListener('dragover', dragOver, false);
   document.body.addEventListener('drop', dragDrop, false);
 }
