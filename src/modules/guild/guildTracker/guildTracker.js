@@ -38,6 +38,12 @@ function keydownHandler(evt) {
   }
 }
 
+function maybeClose(ret) {
+  return function() {
+    if (isClosed()) {ret.style.transform = null;}
+  };
+}
+
 function makeDragHandle() {
   return createUl({
     className: 'fshMove ui-tabs-nav ui-widget-header ui-corner-all ' +
@@ -84,6 +90,7 @@ function makePopup() {
   insertElement(container, makeInOut());
   insertElement(ret, container);
   draggable(hdl, ret);
+  tracker.addEventListener('change', maybeClose(ret));
   insertElement(trDialog, ret);
 }
 
