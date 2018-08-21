@@ -35,6 +35,8 @@ export default function injectInvent() { // Bad jQuery
     '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
     '</span><ol id="invent_Result"></ol></td></tr>';
   $('input[name="recipe_id"]').closest('tbody').append(selector);
-  getElementById('quickInvent').addEventListener('click',
-    quickInvent, true);
+  var qi = getElementById('quickInvent');
+  if (qi) {
+    qi.addEventListener('click', quickInvent, true);
+  }
 }

@@ -11474,8 +11474,10 @@
 
   function displayComponentTally(self, data) {
     var sumComp = self.parentNode;
-    sumComp.innerHTML = '';
-    insertElement(sumComp, makeTallyTable(data));
+    if (sumComp) {
+      sumComp.innerHTML = '';
+      insertElement(sumComp, makeTallyTable(data));
+    }
   }
 
   function countComponent(self) { // jQuery.min
@@ -17844,8 +17846,10 @@
       '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
       '</span><ol id="invent_Result"></ol></td></tr>';
     $('input[name="recipe_id"]').closest('tbody').append(selector);
-    getElementById('quickInvent').addEventListener('click',
-      quickInvent, true);
+    var qi = getElementById('quickInvent');
+    if (qi) {
+      qi.addEventListener('click', quickInvent, true);
+    }
   }
 
   function invalidResult(result) {
@@ -19738,7 +19742,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '38';
+  window.FSH.calf = '39';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
