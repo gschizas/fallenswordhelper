@@ -48,8 +48,10 @@ function makeTallyTable(data) {
 
 function displayComponentTally(self, data) {
   var sumComp = self.parentNode;
-  sumComp.innerHTML = '';
-  insertElement(sumComp, makeTallyTable(data));
+  if (sumComp) {
+    sumComp.innerHTML = '';
+    insertElement(sumComp, makeTallyTable(data));
+  }
 }
 
 function countComponent(self) { // jQuery.min
