@@ -149,32 +149,6 @@
     });
   }
 
-  // TODO needs CORS
-
-  // window.addEventListener('error', function(e) {
-  //   // console.log('e.message', e.message);
-  //   // console.log('e.filename', e.filename);
-  //   // console.log('e.lineno', e.lineno);
-  //   // console.log('e.colno', e.colno);
-  //   console.log('error event', e);
-  //   if (e.error) {
-  //     console.log('error event message', e.error.message);
-  //     console.log('error event stack', e.error.stack);
-  //   }
-  //   // sendException(e.error.stack, true);
-  // });
-
-  // var oldError = window.onerror;
-  // window.onerror = function(message, source, lineno, colno, error) {
-  //   console.log('onerror message', message);
-  //   console.log('onerror source', source);
-  //   console.log('onerror lineno', lineno);
-  //   console.log('onerror colno', colno);
-  //   console.log('onerror error', error);
-  //   console.log('onerror error.message', error.message);
-  //   console.log('onerror error.stack', error.stack);
-  // };
-
   // GM_ApiBrowserCheck
   // @author        GIJoe
   // @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
@@ -11628,31 +11602,21 @@
     addComposingButtons(thisInvTable);
   }
 
-  var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
-
-  function debuff(buffId) {
-    return retryAjax({
-      url: 'fetchdata.php',
-      data: {
-        a: '22',
-        d: '0',
-        id: buffId
-      },
-      dataType: 'json'
+  function removeskill(buffId) {
+    return profile({
+      subcmd: 'removeskill',
+      skill_id: buffId
     });
   }
 
-  function doDebuff(aLink) { // jQuery
+  var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
+
+  function doDebuff(aLink) { // jQuery.min
     sendEvent('profile', 'doDebuff');
     var buffId = aLink.href.match(/(\d+)$/)[1];
-    debuff(buffId)
-      .done(function(data) {
-        if (data.response.response === 0) {
-          aLink.parentNode.innerHTML = '';
-        } else {
-          dialogMsg(data.response.msg);
-        }
-      });
+    removeskill(buffId).done(errorDialog).done(function(json) {
+      if (json.s) {aLink.parentNode.innerHTML = '';}
+    });
   }
 
   function doPrompt(aLink) {
@@ -12682,95 +12646,6 @@
     injectMoveItems();
   }
 
-  var retries = 0;
-  var quickBuffHeader =
-    '<div id="helperQBheader"><table class="quickbuffTable"><thead><tr>' +
-    '<th class="quickbuffTableHeader">Sustain</th>' +
-    '<th class="quickbuffTableHeader">Fury Caster</th>' +
-    '<th class="quickbuffTableHeader">Guild Buffer</th>' +
-    '<th class="quickbuffTableHeader">Buff Master</th>' +
-    '<th class="quickbuffTableHeader">Extend</th>' +
-    '<th class="quickbuffTableHeader">Reinforce</th>' +
-    '</tr></thead><tbody><tr>' +
-    '<td id="fshSus" class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshFur" class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshGB"  class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshBM"  class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshExt" class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshRI"  class="quickbuffTableDetail">&nbsp;</td>' +
-    '</tr></tbody></table></div>';
-  var excludeBuff = {
-    'skill-50': 'Death Dealer',
-    'skill-54': 'Counter Attack',
-    'skill-55': 'Summon Shield Imp',
-    'skill-56': 'Vision',
-    'skill-60': 'Nightmare Visage',
-    'skill-61': 'Quest Finder',
-    'skill-98': 'Barricade',
-    'skill-101': 'Severe Condition'
-  };
-
-  function getEnhancement(doc, enh, inject) {
-    var enhLevel = doc[enh] || 0;
-    var enhClass = 'fshLime';
-    if (enhLevel < 100) {enhClass = 'fshRed';}
-    inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
-  }
-
-  function timeUnit(value, unit) {
-    if (value > 0) {return value.toString() + unit;}
-    return '';
-  }
-
-  function buffTimeLeft(_s) {
-    var m = Math.floor(_s / 60);
-    var s = _s % 60;
-    var buffTimeToExpire = timeUnit(m, 'm');
-    if (m > 0 && s > 0) {buffTimeToExpire += ' ';}
-    buffTimeToExpire += timeUnit(s, 's');
-    return buffTimeToExpire;
-  }
-
-  function getBuff(doc, buff, inject) {
-    var s = fallback(doc[buff], 0);
-    if (s) {
-      var buffTimeToExpire = buffTimeLeft(s);
-      inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
-        'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
-    } else {
-      var elem = getElementById('buff-outer')
-        .querySelector('input[data-name="' + buff + '"]');
-      if (elem) {
-        inject.innerHTML = '<span class="quickbuffActivate" ' +
-          'buffID="' + elem.getAttribute('value') + '">Activate</span>';
-      } else {
-        inject.innerHTML = '<span class="fshRed;">Off</span>';
-      }
-    }
-  }
-
-  function itWorked(result) {
-    return result &&
-      (result.textContent.indexOf(
-        'current or higher level is currently active on') !== -1 ||
-      result.textContent.indexOf('was activated on') !== -1);
-  }
-
-  function quickActivate(evt) { // jQuery
-    var trigger = evt.target;
-    if (trigger.className !== 'quickbuffActivate') {return;}
-    var buffHref = '?cmd=quickbuff&subcmd=activate&targetPlayers=' +
-      window.self + '&skills[]=' + trigger.getAttribute('buffID');
-    retryAjax(buffHref).done(function(data) {
-      var doc = createDocument(data);
-      var result = doc.querySelector('#quickbuff-report font');
-      if (itWorked(result)) {
-        trigger.className = 'fshLime';
-        trigger.innerHTML = 'On';
-      }
-    });
-  }
-
   function addStatsQuickBuff(data) {
     var myPlayer = document.querySelector('div.player[data-username="' +
       data.username + '"]');
@@ -12814,48 +12689,38 @@
       '">[' + playerBuffLevel + ']</span>';
   }
 
-  function hazBuff(playerData, el) {
-    var myBuffName = el.getAttribute('data-name');
-    var playerBuffLevel = playerData[myBuffName];
-    var playerSpan = el.nextElementSibling.nextElementSibling;
-    if (playerBuffLevel || playerSpan) {
-      buffRunning(el, playerBuffLevel, playerSpan);
-    }
+  function hazBuff(playerData) {
+    return function(el) {
+      var myBuffName = el.getAttribute('data-name');
+      var playerBuffLevel = playerData[myBuffName];
+      var playerSpan = el.nextElementSibling.nextElementSibling;
+      if (playerBuffLevel || playerSpan) {
+        buffRunning(el, playerBuffLevel, playerSpan);
+      }
+    };
   }
 
-  function addBuffLevels(evt) {
-    var player = evt.target;
-    if (player.tagName !== 'H1') {return;}
-    getProfile(player.textContent).done(addStatsQuickBuff);
-
-    var playerData = player.parentNode.lastElementChild.textContent.split(',');
-    playerData = playerData.reduce(function(prev, curr) {
+  function makeBuffArray(player) {
+    var buffList = player.parentNode.lastElementChild.textContent.split(',');
+    return buffList.reduce(function(prev, curr) {
       if (curr.indexOf(' [') !== -1) {
         var foo = curr.split(' [');
         prev[foo[0].trim()] = parseInt(foo[1].replace(']', ''), 10);
       }
       return prev;
     }, {});
-
-    var buffOuter = getElementById('buff-outer');
-    var nodeList = buffOuter.querySelectorAll('input[name]');
-
-    Array.prototype.forEach.call(nodeList, hazBuff.bind(null, playerData));
-
   }
 
-  function doLabels(el) {
-    var nameSpan = el.firstElementChild;
-    var dataTipped = nameSpan.dataset.tipped;
-    var cost = el.previousElementSibling.getAttribute('data-cost');
-    nameSpan.dataset.tipped = dataTipped
-      .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
-    var lvlSpan = nameSpan.firstElementChild;
-    var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
-    if (!excludeBuff[el.getAttribute('for')] && myLvl < 125) {
-      el.classList.add('fshDim');
-    }
+  function addBuffLevels(evt) {
+    var player = evt.target;
+    if (player.tagName !== 'H1') {return;}
+    getProfile(player.textContent).done(addStatsQuickBuff);
+    var playerData = makeBuffArray(player);
+    var nodeList = document.querySelectorAll('#buff-outer input[name]');
+    Array.from(nodeList).forEach(hazBuff(playerData));
   }
+
+  var retries = 0;
 
   function waitForPlayer(firstPlayer) {
     return !firstPlayer && retries < 9;
@@ -12879,36 +12744,153 @@
     if (targets && targets !== '') {haveTargets();}
   }
 
-  function getSustain$1(responseText) {
-    var enh = responseText._enhancements.reduce(function(prev, curr) {
-      prev[curr.name] = curr.value;
-      return prev;
-    }, {});
+  function timeUnit(value, unit) {
+    if (value > 0) {return value.toString() + unit;}
+    return '';
+  }
+
+  function buffTimeLeft(_s) {
+    var m = Math.floor(_s / 60);
+    var s = _s % 60;
+    var buffTimeToExpire = timeUnit(m, 'm');
+    if (m > 0 && s > 0) {buffTimeToExpire += ' ';}
+    buffTimeToExpire += timeUnit(s, 's');
+    return buffTimeToExpire;
+  }
+
+  function getBuff(doc, buff, inject) {
+    var s = fallback(doc[buff], 0);
+    if (s) {
+      var buffTimeToExpire = buffTimeLeft(s);
+      inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
+        'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
+    } else {
+      var elem = document.querySelector('#buff-outer input[data-name="' +
+        buff + '"]');
+      if (elem) {
+        inject.innerHTML = '<span class="quickbuffActivate" data-buffid="' +
+          elem.value + '">Activate</span>';
+      } else {
+        inject.innerHTML = '<span class="fshRed;">Off</span>';
+      }
+    }
+  }
+
+  function populateBuffs(responseText) {
     var skl = responseText._skills.reduce(function(prev, curr) {
       prev[curr.name] = curr.duration;
       return prev;
     }, {});
-    getEnhancement(enh, 'Sustain', getElementById('fshSus'));
-    getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
     getBuff(skl, 'Guild Buffer', getElementById('fshGB'));
     getBuff(skl, 'Buff Master', getElementById('fshBM'));
     getBuff(skl, 'Extend', getElementById('fshExt'));
     getBuff(skl, 'Reinforce', getElementById('fshRI'));
-
-    getElementById('helperQBheader')
-      .addEventListener('click', quickActivate);
-    getElementById('players')
-      .addEventListener('click', addBuffLevels);
-
-    var labels = getElementById('buff-outer')
-      .querySelectorAll('label[for^="skill-"]');
-    Array.prototype.forEach.call(labels, doLabels);
-
-    firstPlayerStats();
-
   }
 
-  function injectQuickBuff() { // jQuery
+  function quickbuff(userAry, buffAry) {
+    return callApp({
+      cmd: 'quickbuff',
+      subcmd: 'activate',
+      username: userAry,
+      skill: buffAry
+    });
+  }
+
+  function itWorked(result) {
+    return result.s && result.r[0].casts.length === 1;
+  }
+
+  function processResult$1(trigger) {
+    return function(json) {
+      if (itWorked(json)) {
+        trigger.className = 'fshLime';
+        trigger.innerHTML = 'On';
+      }
+    };
+  }
+
+  function quickActivate(evt) { // jQuery.min
+    var trigger = evt.target;
+    if (trigger.className !== 'quickbuffActivate') {return;}
+    quickbuff([window.self], [trigger.dataset.buffid])
+      .done(processResult$1(trigger));
+  }
+
+  var quickBuffHeader =
+    '<div id="helperQBheader"><table class="quickbuffTable"><thead><tr>' +
+    '<th class="quickbuffTableHeader">Sustain</th>' +
+    '<th class="quickbuffTableHeader">Fury Caster</th>' +
+    '<th class="quickbuffTableHeader">Guild Buffer</th>' +
+    '<th class="quickbuffTableHeader">Buff Master</th>' +
+    '<th class="quickbuffTableHeader">Extend</th>' +
+    '<th class="quickbuffTableHeader">Reinforce</th>' +
+    '</tr></thead><tbody><tr>' +
+    '<td id="fshSus" class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshFur" class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshGB"  class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshBM"  class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshExt" class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshRI"  class="quickbuffTableDetail">&nbsp;</td>' +
+    '</tr></tbody></table></div>';
+  var excludeBuff = {
+    'skill-50': 'Death Dealer',
+    'skill-54': 'Counter Attack',
+    'skill-55': 'Summon Shield Imp',
+    'skill-56': 'Vision',
+    'skill-60': 'Nightmare Visage',
+    'skill-61': 'Quest Finder',
+    'skill-98': 'Barricade',
+    'skill-101': 'Severe Condition'
+  };
+
+  function getEnhancement(doc, enh, inject) {
+    var enhLevel = doc[enh] || 0;
+    var enhClass = 'fshLime';
+    if (enhLevel < 100) {enhClass = 'fshRed';}
+    inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
+  }
+
+  function populateEnhancements(responseText) {
+    var enh = responseText._enhancements.reduce(function(prev, curr) {
+      prev[curr.name] = curr.value;
+      return prev;
+    }, {});
+    getEnhancement(enh, 'Sustain', getElementById('fshSus'));
+    getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
+  }
+
+  function setupEventHandlers() {
+    getElementById('helperQBheader').addEventListener('click', quickActivate);
+    getElementById('players').addEventListener('click', addBuffLevels);
+  }
+
+  function eachLabel(el) {
+    var nameSpan = el.firstElementChild;
+    var dataTipped = nameSpan.dataset.tipped;
+    var cost = el.previousElementSibling.dataset.cost;
+    nameSpan.dataset.tipped = dataTipped
+      .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
+    var lvlSpan = nameSpan.firstElementChild;
+    var myLvl = Number(lvlSpan.textContent.replace(/\[|\]/g, ''));
+    if (!excludeBuff[el.for] && myLvl < 125) {
+      el.classList.add('fshDim');
+    }
+  }
+
+  function doLabels() {
+    var labels = document.querySelectorAll('#buff-outer label[for^="skill-"]');
+    Array.from(labels).forEach(eachLabel);
+  }
+
+  function getSustain$1(responseText) {
+    populateEnhancements(responseText);
+    populateBuffs(responseText);
+    setupEventHandlers();
+    doLabels();
+    firstPlayerStats();
+  }
+
+  function injectQuickBuff() { // jQuery.min
     if (jQueryNotPresent()) {return;}
     var quickbuffDiv = getElementById('quickbuff');
     if (!quickbuffDiv) {return;}
@@ -17785,7 +17767,7 @@
     });
   }
 
-  function processResult$1(r) {
+  function processResult$2(r) {
     if (r.item) {
       return '<span class="fshGreen">You successfully invented the item [' +
         r.item.n + '].</span>';
@@ -17796,7 +17778,7 @@
   function quickInventDone(json) {
     var inventResult = getElementById('invent_Result');
     if (jsonFail(json, inventResult)) {return;}
-    outputResult(processResult$1(json.r), inventResult);
+    outputResult(processResult$2(json.r), inventResult);
   }
 
   function quickInvent() { // Legacy
@@ -19695,7 +19677,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '39';
+  window.FSH.calf = '40';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
