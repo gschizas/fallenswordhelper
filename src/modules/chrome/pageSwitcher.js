@@ -23,7 +23,7 @@ import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectProfile from '../profile/profile';
 import injectProfileDropItems from '../dropItems/injectProfileDropItems';
-import injectQuickBuff from '../quickBuff';
+import injectQuickBuff from '../quickbuff/quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import injectReportPaint from '../guildReport/guildReport';
