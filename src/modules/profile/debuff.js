@@ -1,35 +1,18 @@
-import dialogMsg from '../common/dialogMsg';
+import errorDialog from '../app/errorDialog';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jConfirm from '../common/jConfirm';
-import retryAjax from '../ajax/retryAjax';
+import removeskill from '../app/profile/removeskill';
 import {sendEvent} from '../support/fshGa';
 
 var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
-function debuff(buffId) {
-  return retryAjax({
-    url: 'fetchdata.php',
-    data: {
-      a: '22',
-      d: '0',
-      id: buffId
-    },
-    dataType: 'json'
-  });
-}
-
-function doDebuff(aLink) { // jQuery
+function doDebuff(aLink) { // jQuery.min
   sendEvent('profile', 'doDebuff');
   var buffId = aLink.href.match(/(\d+)$/)[1];
-  debuff(buffId)
-    .done(function(data) {
-      if (data.response.response === 0) {
-        aLink.parentNode.innerHTML = '';
-      } else {
-        dialogMsg(data.response.msg);
-      }
-    });
+  removeskill(buffId).done(errorDialog).done(function(json) {
+    if (json.s) {aLink.parentNode.innerHTML = '';}
+  });
 }
 
 function doPrompt(aLink) {

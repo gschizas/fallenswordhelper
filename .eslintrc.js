@@ -211,10 +211,8 @@ module.exports = {
     'space-infix-ops': ['error'],
     'space-unary-ops': ['error', {words: true, nonwords: false}],
     'spaced-comment': ['warn', 'always', {
-      line: {
-        markers: ['#if'],
-        exceptions: ['#endif']
-      }
+      markers: ['#if', '#set'],
+      exceptions: ['#endif']
     }],
     'template-tag-spacing': ['off'],
     'unicode-bom': ['error'],

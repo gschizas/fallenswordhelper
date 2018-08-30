@@ -102,29 +102,3 @@ export function sendException(desc, fatal) {
     exFatal: fatal
   });
 }
-
-// TODO needs CORS
-
-// window.addEventListener('error', function(e) {
-//   // console.log('e.message', e.message);
-//   // console.log('e.filename', e.filename);
-//   // console.log('e.lineno', e.lineno);
-//   // console.log('e.colno', e.colno);
-//   console.log('error event', e);
-//   if (e.error) {
-//     console.log('error event message', e.error.message);
-//     console.log('error event stack', e.error.stack);
-//   }
-//   // sendException(e.error.stack, true);
-// });
-
-// var oldError = window.onerror;
-// window.onerror = function(message, source, lineno, colno, error) {
-//   console.log('onerror message', message);
-//   console.log('onerror source', source);
-//   console.log('onerror lineno', lineno);
-//   console.log('onerror colno', colno);
-//   console.log('onerror error', error);
-//   console.log('onerror error.message', error.message);
-//   console.log('onerror error.stack', error.stack);
-// };
