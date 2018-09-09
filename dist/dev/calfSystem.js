@@ -1004,12 +1004,10 @@
   }
 
   function gotGuildLogNodes(guildLogNodes) {
-    var guildLogNode;
-    for (var i = 0; i < guildLogNodes.length; i += 1) {
-      guildLogNode = guildLogNodes[i];
-      guildLogNode.href = newGuildLogUrl;
-    }
-    hideGuildLogMsg(guildLogNode);
+    Array.from(guildLogNodes).forEach(function(el) {
+      el.href = newGuildLogUrl;
+    });
+    hideGuildLogMsg(guildLogNodes[guildLogNodes.length - 1]);
   }
 
   function changeGuildLogHREF() {
@@ -2236,10 +2234,7 @@
     calculateBoundaries();
     guildId$1 = currentGuildId();
 
-    table = $('#fshInv', context).dataTable({ // context
-      data: onlineData,
-      pageLength: 30,
-      lengthMenu: [[30, 60, -1], [30, 60, 'All']],
+    table = $('#fshInv', context).DataTable({ // context
       columns: [
         {title: 'Guild', 'class': 'dt-center', orderable: false},
         {title: 'Name', 'class': 'dt-center'},
@@ -2251,10 +2246,14 @@
           $('td', row).eq(2).addClass('lvlHighlight');
         }
       },
+      data: onlineData,
+      deferRender: true,
+      lengthMenu: [[30, 60, -1], [30, 60, 'All']],
       order: [3, 'desc'],
-      stateSave: true,
-      stateDuration: 0
-    }).api();
+      pageLength: 30,
+      stateDuration: 0,
+      stateSave: true
+    });
   }
 
   function checkLastPage() {
@@ -7469,7 +7468,14 @@
       .pipe(setHelperMembrList.bind(null, guildId));
   }
 
-  var newSummary = {};
+  function advisorView(period) {
+    return guild({subcmd: 'advisor', subcmd2: 'view', period: period});
+  }
+
+  function partial(fn /* , rest args */) {
+    return fn.bind.apply(fn, Array.from(arguments));
+  }
+
   var advisorColumns = [
     {title: '<div class="fshBold">Member</div>'},
     {title: '<div class="fshBold">Lvl</div>', 'class': 'dt-center'},
@@ -7487,230 +7493,218 @@
     {title: '<div class="fshBold">Relic</div>', 'class': 'dt-center'},
     {title: '<div class="fshBold">XP Contrib</div>', 'class': 'dt-center'}
   ];
-  var membrList;
-  var list;
-  var data = [];
 
-  function doTable() { // jQuery
-    $(list).dataTable({
-      pageLength: 25,
-      lengthMenu: [[25, 50, -1], [25, 50, 'All']],
-      autoWidth: false,
-      columns: advisorColumns,
-      stateSave: true,
-      stateDuration: 0
-    });
-  }
-
-  function summaryLink() {
-    var updateInput = pCC.getElementsByClassName('custombutton');
-    if (updateInput.length === 0) {return;}
-    insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
-      '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
-  }
-
-  function playerName$2(f) {
+  function playerName$2(f, membrList) {
     if (!membrList[f]) {return f;}
     return '<a href="index.php?cmd=profile&player_id=' +
       membrList[f].id + '">' + f + '</a>';
   }
 
-  function playerLevel(f) {
+  function playerLevel(f, membrList) {
     if (!membrList[f]) {return '';}
     return membrList[f].level;
   }
 
-  function playerRank(f) {
+  function playerRank(f, membrList) {
     if (!membrList[f]) {return '';}
     return '<div class="fshAdvRank">' +
-      membrList[f].rank_name + '</div>';
+      membrList[f].rank_name.trim() + '</div>';
   }
 
-  function injectAdvisorNew() {
-
-    time('guildAdvisor.injectAdvisorNew');
-
-    list = pCC.getElementsByTagName('TABLE')[1];
-    if (!list) {return;}
-    var totalRow = list.firstElementChild.lastElementChild;
-    var totalCell = totalRow.firstElementChild;
-    totalCell.className = 'fshRight';
-    totalCell.setAttribute('colspan', '3');
-    var tfoot = createTFoot();
-    insertElement(tfoot, totalRow);
-    list.className = 'fshXSmall hover';
-    list.firstElementChild
-      .removeChild(list.firstElementChild.firstElementChild);
-    Array.prototype.forEach.call(list.rows, function(tr) {
-      Array.prototype.forEach.call(tr.cells, function(td) {
-        td.removeAttribute('bgcolor');
-      });
-      var tdOne = tr.cells[0];
-      var username = tdOne.textContent.trim();
-      tdOne.innerHTML = playerName$2(username);
-      insertHtmlAfterEnd(tdOne, '<td>' + playerLevel(username) +
-        '</td><td>' + playerRank(username) + '</td>');
+  function doTable(tbl, data, callback) { // jQuery
+    $(tbl).DataTable({
+      autoWidth: false,
+      columnDefs: [{
+        targets: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        orderSequence: ['desc', 'asc']
+      }],
+      columns: advisorColumns,
+      data: data,
+      deferRender: true,
+      initComplete: callback,
+      lengthMenu: [[25, 50, -1], [25, 50, 'All']],
+      pageLength: 25,
+      stateDuration: 0,
+      stateSave: true
     });
-    insertElement(list, tfoot);
-    add(3, doTable);
-    summaryLink();
-
-    timeEnd('guildAdvisor.injectAdvisorNew');
-
   }
 
-  function returnAdvisorPage(e, response) {
+  function swapOutAdvisorTable(div, targetElement) {
+    targetElement.parentNode.replaceChild(div, targetElement);
+  }
 
-    time('guildAdvisor.returnAdvisorPage' + e);
+  function switcheroo(div, targetElement) {
+    add(3, partial(swapOutAdvisorTable, div, targetElement));
+  }
 
+  function injectTable(targetElement, tfoot, data) {
+    var div = createDiv();
+    var tbl = createTable({className: 'fshDataTable fshXSmall hover'});
+    insertElement(div, tbl);
+    insertElement(tbl, tfoot);
+    add(3, doTable, [tbl, data, partial(switcheroo, div, targetElement)]);
+    return div;
+  }
+
+  function returnAdvisorPage(list, e, response) {
     insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
       ' day ' + e + ',');
-    var doc = createDocument(response);
-    var pcc = getElementById('pCC', doc);
-    if (!pcc) {return;}
-    var table = pcc.firstElementChild.firstElementChild.lastElementChild
-      .firstElementChild.firstElementChild;
-    var tr = table.rows;
-    Array.prototype.forEach.call(tr, function(el) {
-      var tds = el.cells;
-      var member = tds[0].textContent.trim();
-      if (member === 'Member') {return;}
-      newSummary[member] = fallback(newSummary[member], {});
-      newSummary[member].deposit =
-        fallback(newSummary[member].deposit, 0) +
-        intValue(tds[1].textContent);
-      newSummary[member].tax = fallback(newSummary[member].tax, 0) +
-        intValue(tds[2].textContent);
-      newSummary[member].total = fallback(newSummary[member].total, 0) +
-        intValue(tds[3].textContent);
-      newSummary[member].fsp = fallback(newSummary[member].fsp, 0) +
-        intValue(tds[4].textContent);
-      newSummary[member].skills = fallback(newSummary[member].skills, 0) +
-        intValue(tds[5].textContent);
-      newSummary[member].grpCrt = fallback(newSummary[member].grpCrt, 0) +
-        intValue(tds[6].textContent);
-      newSummary[member].grpJoin =
-        fallback(newSummary[member].grpJoin, 0) +
-        intValue(tds[7].textContent);
-      newSummary[member].relics = fallback(newSummary[member].relics, 0) +
-        intValue(tds[8].textContent);
-      newSummary[member].contrib =
-        fallback(newSummary[member].contrib, 0) +
-        intValue(tds[9].textContent);
+    return response.r;
+  }
+
+  function getAdvisorPage(list, e) { // jQuery.min
+    return advisorView(e).pipe(partial(returnAdvisorPage, list, e));
+  }
+
+  function addElements(ary, v, i) {
+    return v + ary[i];
+  }
+
+  function addStuff(prev, curr) {
+    return prev.map(function(el, i) {
+      el.stats = el.stats.map(partial(addElements, curr[i].stats));
+      return el;
     });
-
-    timeEnd('guildAdvisor.returnAdvisorPage' + e);
-
   }
 
-  function getAdvisorPage(e) { // jQuery
-    return retryAjax({
-      url: 'index.php',
-      data: {
-        no_mobile: 1,
-        cmd: 'guild',
-        subcmd: 'advisor',
-        period: e
-      }
-    }).done(returnAdvisorPage.bind(null, e));
+  function reorgStats(el) {
+    return {
+      player: el.player,
+      stats: [el.stats[6], el.stats[7], el.stats[6] + el.stats[7], el.stats[1],
+        el.stats[2], el.stats[3], el.stats[4], el.stats[8], el.stats[5]]
+    };
   }
 
-  function displayAdvisor() { // jQuery
+  function makeTotal(prev, curr) {
+    return curr.stats.map(partial(addElements, prev));
+  }
 
-    time('guildAdvisor.displayAdvisor');
+  function footerStats(prev, curr) {
+    return prev + '<td><u>' + curr + '</u></td>';
+  }
 
-    list.className = 'fshXSmall hover';
-    list.innerHTML = '<tfoot id="advTFoot"><tr><td class="fshRight" ' +
-      'colspan="3">Total: </td><td><u>' +
-      addCommas(newSummary['Total:'].deposit) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].tax) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].total) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].fsp) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].skills) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].grpCrt) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].grpJoin) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].relics) + '</u></td><td><u>' +
-      addCommas(newSummary['Total:'].contrib) +
-        '</u></td></tr></tfoot>';
-    $(list).dataTable({
-      data: data,
-      pageLength: 25,
-      lengthMenu: [[25, 50, -1], [25, 50, 'All']],
-      autoWidth: false,
-      columns: advisorColumns,
-      stateSave: true,
-      stateDuration: 0
+  function makeTfoot(total) {
+    var stats = total.map(addCommas);
+    return createTFoot({
+      innerHTML: '<tr><td class="fshRight" ' +
+      'colspan="3">Total: </td>' +
+      stats.reduce(footerStats, '') +
+      '</tr>'
     });
-
-    timeEnd('guildAdvisor.displayAdvisor');
-
   }
 
-  function addStats(f) {
-    if (f === 'Total:') {return;}
-    data.push([
-      playerName$2(f),
-      playerLevel(f),
-      playerRank(f),
-      addCommas(newSummary[f].deposit),
-      addCommas(newSummary[f].tax),
-      addCommas(newSummary[f].total),
-      addCommas(newSummary[f].fsp),
-      addCommas(newSummary[f].skills),
-      addCommas(newSummary[f].grpCrt),
-      addCommas(newSummary[f].grpJoin),
-      addCommas(newSummary[f].relics),
-      addCommas(newSummary[f].contrib),
-    ]);
+  function makeData(membrList, el) {
+    var stats = el.stats.map(addCommas);
+    return [
+      playerName$2(el.player.name, membrList),
+      el.player.level,
+      playerRank(el.player.name, membrList)
+    ].concat(stats);
   }
 
-  function addAdvisorPages() {
-    Object.keys(newSummary).forEach(addStats);
-    add(3, displayAdvisor);
+  function addAdvisorPages(list) {
+    var args = Array.from(arguments).slice(1);
+    var added = args.slice(2).reduce(addStuff, args[1]).map(reorgStats);
+    injectTable(list,
+      makeTfoot(added.slice(1).reduce(makeTotal, added[0].stats)),
+      added.map(partial(makeData, args[0]))
+    );
   }
 
-  function injectAdvisorWeekly() { // jQuery
+  function injectAdvisorWeekly(list) { // jQuery
 
     time('guildAdvisor.injectAdvisorWeekly');
 
-    list = pCC.firstElementChild.firstElementChild
-      .lastElementChild.firstElementChild.firstElementChild;
-    if (!list) {return;}
     list.innerHTML = '<span class="fshCurveContainer fshFlex">' +
       '<span class="fshCurveEle fshCurveLbl fshOldSpinner"></span>' +
       '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>' +
       '</span>';
 
-    $.when(
-      getMembrList(false)
-        .done(function(response) {
-          membrList = response;
-        }),
-      getAdvisorPage(1),
-      getAdvisorPage(2),
-      getAdvisorPage(3),
-      getAdvisorPage(4),
-      getAdvisorPage(5),
-      getAdvisorPage(6),
-      getAdvisorPage(7)
-    ).done(function() {
-      add(3, addAdvisorPages);
-    });
+    var prm = [getMembrList(false)]
+      .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
+
+    $.when.apply($, prm).done(partial(addAdvisorPages, list));
 
     timeEnd('guildAdvisor.injectAdvisorWeekly');
 
   }
 
-  function injectAdvisor() {
-    if (jQueryNotPresent()) {return;}
+  function getTfoot(list) {
+    var totalRow = list.rows[list.rows.length - 1];
+    var totalClone = totalRow.cloneNode(true);
+    var tfoot = createTFoot();
+    insertElement(tfoot, totalClone);
+    var totalCell = totalClone.cells[0];
+    totalCell.className = 'fshRight';
+    totalCell.setAttribute('colspan', '3');
+    return tfoot;
+  }
+
+  function cellText(cell, i) {
+    if (i === 0) {
+      return cell.textContent.trim();
+    }
+    return cell.textContent;
+  }
+
+  function bodyText(membrList, row) {
+    var foo = Array.from(row.cells, cellText);
+    foo.splice(0, 1, playerName$2(foo[0], membrList),
+      playerLevel(foo[0], membrList), playerRank(foo[0], membrList));
+    return foo;
+  }
+
+  function getData(list, membrList) {
+    return Array.from(list.rows).slice(1, -1)
+      .map(partial(bodyText, membrList));
+  }
+
+  // function summaryLink(newDiv) {
+  function summaryLink() {
+    var updateInput = pCC.getElementsByClassName('custombutton');
+    if (updateInput.length === 0) {return;}
+    insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
+      '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
+    // var btnSpan = createSpan({textContent: ' '});
+    // var theBtn = createButton({
+    //   className: 'fshBl fshBlm',
+    //   textContent: '7-Day Summary'
+    // });
+    // theBtn.addEventListener('click', partial(injectAdvisorWeekly, newDiv));
+    // insertElement(btnSpan, theBtn);
+    // insertElement(updateInput[0].parentNode, btnSpan);
+  }
+
+  function injectAdvisorDaily(list, membrList) {
+
+    time('guildAdvisor.injectAdvisorDaily');
+
+    var data = getData(list, membrList);
+    var tfoot = getTfoot(list);
+    injectTable(list, tfoot, data);
+    summaryLink();
+    // var newDiv = injectTable(list, tfoot, data);
+    // summaryLink(newDiv);
+
+    timeEnd('guildAdvisor.injectAdvisorDaily');
+
+  }
+
+  function switcher(list) {
     if (calf.subcmd2 === 'weekly') {
-      injectAdvisorWeekly();
+      injectAdvisorWeekly(list);
     } else {
       getMembrList(false).done(function(response) {
-        membrList = response;
-        add(3, injectAdvisorNew);
+        injectAdvisorDaily(list, response);
       });
     }
+  }
+
+  function injectAdvisor() {
+    if (jQueryNotPresent()) {return;}
+    var list = pCC.getElementsByTagName('TABLE')[1];
+    if (!list) {return;}
+    switcher(list);
   }
 
   var tabs;
@@ -10041,10 +10035,7 @@
     $('#pCC').append('<table id="fshInv" class="hover" ' +
       'style="font-size: x-small;"></table>');
     var table = $('#fshInv').DataTable({
-      data: theInv.items,
       autoWidth: false,
-      pageLength: 50,
-      lengthMenu: [[50, 100, 150, 200, -1], [50, 100, 150, 200, 'All']],
       columnDefs: [{targets: '_all', defaultContent: ''},
         {
           targets: [1, 4, 5, 6, 7, 8, 9, 10, 12, 13],
@@ -10052,8 +10043,12 @@
         }],
       columns: tblCols,
       createdRow: createdRow,
-      stateSave: true,
-      stateDuration: 0
+      data: theInv.items,
+      deferRender: true,
+      lengthMenu: [[50, 100, 150, 200, -1], [50, 100, 150, 200, 'All']],
+      pageLength: 50,
+      stateDuration: 0,
+      stateSave: true
     });
     table.column(12).visible('current_player_id' in theInv);
     table.column(17).visible(isUserInv() && showQuickDropLinks);
@@ -11231,7 +11226,7 @@
     return tbl.rows[tbl.rows.length - 1];
   }
 
-  function addStats$1(el) {
+  function addStats(el) {
     var statTable = closestTable(el);
     var statObj = Array.prototype.reduce.call(statTable.rows,
       reduceStatTable, {});
@@ -11250,7 +11245,7 @@
     bonus = Array.prototype.filter.call(bonus, function(el) {
       return el.textContent === 'Bonuses';
     });
-    bonus.forEach(addStats$1);
+    bonus.forEach(addStats);
     return container.innerHTML;
   }
 
@@ -18588,17 +18583,17 @@
         injectQuestBookFull();
       }
     },
-    {
-      condition: function() {
-        return xPath('//font[@size=2 and .="Advisor"]') &&
-        xPath('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
-            'and .="Back to Guild Management"]');
-      },
-      result: function() {
-        screenview('unknown.guildAdvisor.injectAdvisor');
-        injectAdvisor();
-      }
-    },
+    // {
+    //   condition: function() {
+    //     return xPath('//font[@size=2 and .="Advisor"]') &&
+    //     xPath('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
+    //         'and .="Back to Guild Management"]');
+    //   },
+    //   result: function() {
+    //     screenview('unknown.guildAdvisor.injectAdvisor');
+    //     injectAdvisor();
+    //   }
+    // },
     // {
     //   condition: function() {
     //     return xPath('//a[.="Back to Scavenging"]');

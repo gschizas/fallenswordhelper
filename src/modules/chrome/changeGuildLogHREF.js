@@ -16,12 +16,10 @@ function hideGuildLogMsg(guildLogNode) {
 }
 
 function gotGuildLogNodes(guildLogNodes) {
-  var guildLogNode;
-  for (var i = 0; i < guildLogNodes.length; i += 1) {
-    guildLogNode = guildLogNodes[i];
-    guildLogNode.href = newGuildLogUrl;
-  }
-  hideGuildLogMsg(guildLogNode);
+  Array.from(guildLogNodes).forEach(function(el) {
+    el.href = newGuildLogUrl;
+  });
+  hideGuildLogMsg(guildLogNodes[guildLogNodes.length - 1]);
 }
 
 export default function changeGuildLogHREF() {

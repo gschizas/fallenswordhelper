@@ -1,3 +1,9 @@
+/* Data Tables */
+.fshDataTable {
+  border: 1px solid black;
+  width: 650px;
+}
+
 /* World Action List */
 #actionList .crate {background-color: PaleVioletRed;}
 

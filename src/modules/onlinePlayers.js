@@ -103,10 +103,7 @@ function gotOnlinePlayers() { // jQuery
   calculateBoundaries();
   guildId = currentGuildId();
 
-  table = $('#fshInv', context).dataTable({ // context
-    data: onlineData,
-    pageLength: 30,
-    lengthMenu: [[30, 60, -1], [30, 60, 'All']],
+  table = $('#fshInv', context).DataTable({ // context
     columns: [
       {title: 'Guild', 'class': 'dt-center', orderable: false},
       {title: 'Name', 'class': 'dt-center'},
@@ -118,10 +115,14 @@ function gotOnlinePlayers() { // jQuery
         $('td', row).eq(2).addClass('lvlHighlight');
       }
     },
+    data: onlineData,
+    deferRender: true,
+    lengthMenu: [[30, 60, -1], [30, 60, 'All']],
     order: [3, 'desc'],
-    stateSave: true,
-    stateDuration: 0
-  }).api();
+    pageLength: 30,
+    stateDuration: 0,
+    stateSave: true
+  });
 }
 
 function checkLastPage() {

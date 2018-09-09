@@ -1,4 +1,5 @@
 import jscc from 'rollup-plugin-jscc';
+// import resolve from 'rollup-plugin-node-resolve';
 // import legacy from 'rollup-plugin-legacy';
 
 let source = process.env.SOURCE;
@@ -71,6 +72,7 @@ export default {
     //   'node_modules/localforage/dist/localforage.nopromises.js':
     //     'localforage'
     // }),
+    // resolve(),
     jscc(opts)
   ],
   watch: {include: 'src/**/*.js'}

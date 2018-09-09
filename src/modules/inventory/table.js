@@ -81,10 +81,7 @@ export default function doTable() { // jQuery
   $('#pCC').append('<table id="fshInv" class="hover" ' +
     'style="font-size: x-small;"></table>');
   var table = $('#fshInv').DataTable({
-    data: theInv.items,
     autoWidth: false,
-    pageLength: 50,
-    lengthMenu: [[50, 100, 150, 200, -1], [50, 100, 150, 200, 'All']],
     columnDefs: [{targets: '_all', defaultContent: ''},
       {
         targets: [1, 4, 5, 6, 7, 8, 9, 10, 12, 13],
@@ -92,8 +89,12 @@ export default function doTable() { // jQuery
       }],
     columns: tblCols,
     createdRow: createdRow,
-    stateSave: true,
-    stateDuration: 0
+    data: theInv.items,
+    deferRender: true,
+    lengthMenu: [[50, 100, 150, 200, -1], [50, 100, 150, 200, 'All']],
+    pageLength: 50,
+    stateDuration: 0,
+    stateSave: true
   });
   table.column(12).visible('current_player_id' in theInv);
   table.column(17).visible(isUserInv() && showQuickDropLinks);
