@@ -1,5 +1,5 @@
 import {getElementById} from '../common/getElement';
-import injectAdvisor from '../guildAdvisor';
+// import injectAdvisor from '../guildAdvisor';
 import {injectQuestBookFull} from '../questBook';
 import inventing from '../recipes/inventing';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -26,17 +26,17 @@ var unknown = [
       injectQuestBookFull();
     }
   },
-  {
-    condition: function() {
-      return xPath('//font[@size=2 and .="Advisor"]') &&
-      xPath('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
-          'and .="Back to Guild Management"]');
-    },
-    result: function() {
-      screenview('unknown.guildAdvisor.injectAdvisor');
-      injectAdvisor();
-    }
-  },
+  // {
+  //   condition: function() {
+  //     return xPath('//font[@size=2 and .="Advisor"]') &&
+  //     xPath('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
+  //         'and .="Back to Guild Management"]');
+  //   },
+  //   result: function() {
+  //     screenview('unknown.guildAdvisor.injectAdvisor');
+  //     injectAdvisor();
+  //   }
+  // },
   // {
   //   condition: function() {
   //     return xPath('//a[.="Back to Scavenging"]');
