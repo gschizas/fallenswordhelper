@@ -17,7 +17,8 @@ if (source === 'calf') {
 let version = require('./package.json').version;
 let varAry = version.split('.');
 let core = varAry[0] + varAry[1];
-let local = 'https://' + require('ip').address() + ':9966/';
+// let local = 'https://' + require('ip').address() + ':9966/';
+let local = 'https://localhost:9966/';
 let github = 'https://fallenswordhelper.github.io/fallenswordhelper/';
 
 // rollup options

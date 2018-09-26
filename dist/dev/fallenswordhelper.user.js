@@ -12,7 +12,7 @@
 // @exclude        https://www.fallensword.com/app.php*
 // @exclude        https://www.fallensword.com/fetchdata.php*
 // @version        1523a
-// @downloadURL    https://192.168.137.1:9966/dist/dev/fallenswordhelper.user.js
+// @downloadURL    https://localhost:9966/dist/dev/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
@@ -24,10 +24,10 @@ function fshMain(ver) {
   window.FSH = window.FSH || {};
   window.FSH.version = ver;
 
-  var cssFiles = ['https://192.168.137.1:9966/src/calfSystem.css'];
+  var cssFiles = ['https://localhost:9966/src/calfSystem.css'];
   var scriptFiles = [
     'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.6.0/localforage.nopromises.min.js',
-    'https://192.168.137.1:9966/dist/dev/calfSystem.js'
+    'https://localhost:9966/dist/dev/calfSystem.js'
   ];
   if (typeof window.jQuery !== 'undefined') {
     scriptFiles.push('https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
