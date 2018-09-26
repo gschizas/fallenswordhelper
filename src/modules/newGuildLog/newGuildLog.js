@@ -3,6 +3,7 @@ import addLogColoring from '../logs/addLogColoring';
 import createDocument from '../system/createDocument';
 import {createTable} from '../common/cElement';
 import eventHandler from '../common/eventHandler';
+import functionPasses from '../common/functionPasses';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
@@ -58,12 +59,15 @@ function parsePage(data) {
   fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage + '...';
 }
 
-function rowMatchesLog(timestamp, myMsg) {
-  return timestamp === options.log[0][0] && myMsg === options.log[0][2];
-}
-
 function seenRowBefore(timestamp, myMsg) {
-  return currPage === 1 && options.log && rowMatchesLog(timestamp, myMsg);
+  return [
+    function() {return currPage === 1;},
+    function() {return options.log;},
+    function() {return options.log[0];},
+    function() {return options.log[0][0];},
+    function() {return timestamp === options.log[0][0];},
+    function() {return myMsg === options.log[0][2];}
+  ].every(functionPasses);
 }
 
 function getTableList(tableList) {
@@ -196,7 +200,7 @@ function addHide(el) {
 }
 
 function removeHide(el) {
-  if (el.classList) {el.classList.remove('fshHide');}
+  if (el && el.classList) {el.classList.remove('fshHide');}
 }
 
 function selectAll() {

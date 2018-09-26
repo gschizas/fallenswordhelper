@@ -1,4 +1,5 @@
 import currentGuildId from '../common/currentGuildId';
+import functionPasses from '../common/functionPasses';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
@@ -167,7 +168,7 @@ var topRatedTests = [
 ];
 
 function testforTopRated() {
-  return topRatedTests.every(function(e) {return e();});
+  return topRatedTests.every(functionPasses);
 }
 
 export default function injectTopRated() {

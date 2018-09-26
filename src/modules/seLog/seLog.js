@@ -2,6 +2,7 @@ import calf from '../support/calf';
 import getForage from '../ajax/getForage';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
+import partial from '../common/partial';
 import setForage from '../ajax/setForage';
 import superelite from '../app/superelite';
 
@@ -20,21 +21,31 @@ export function disableBackgroundChecks() {
   }
 }
 
-function gotSe(data) { // jQuery.min
+function dataLooksOk(data) {
+  return data && data.t;
+}
+
+function updateSeLog(serverTime, element) {
+  var myTime = serverTime - element.time;
+  var mobName = element.creature.name.replace(' (Super Elite)', '');
+  if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
+    oldLog.se[mobName] = myTime;
+  }
+}
+
+function processSeData(data) {
   var serverTime = Number(data.t.split(' ')[1]);
   if (!oldLog) {oldLog = {lastUpdate: 0, se: {}};}
   oldLog.lastUpdate = serverTime;
   var resultAry = data.r;
   if (resultAry) {
-    resultAry.forEach(function(element) {
-      var myTime = serverTime - element.time;
-      var mobName = element.creature.name.replace(' (Super Elite)', '');
-      if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
-        oldLog.se[mobName] = myTime;
-      }
-    });
+    resultAry.forEach(partial(updateSeLog, serverTime));
     setForage('fsh_seLog', oldLog);
   }
+}
+
+function gotSe(data) {
+  if (dataLooksOk(data)) {processSeData(data);}
 }
 
 function getSeLog() { // jQuery.min
