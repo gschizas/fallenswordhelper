@@ -18,7 +18,7 @@ function compDeleted(self, itemId) {
     if (data.s) {
       updateComponentCounts(itemId);
       updateUsedCount(1);
-      self.parentNode.innerHTML = '';
+      if (self.parentNode) {self.parentNode.innerHTML = '';}
     }
   };
 }

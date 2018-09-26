@@ -6354,6 +6354,10 @@
     }
   }
 
+  function partial(fn /* , rest args */) {
+    return fn.bind.apply(fn, Array.from(arguments));
+  }
+
   // import failStub from './failStub';
 
   function superelite() {
@@ -6376,21 +6380,31 @@
     }
   }
 
-  function gotSe(data) { // jQuery.min
+  function dataLooksOk(data) {
+    return data && data.t;
+  }
+
+  function updateSeLog(serverTime, element) {
+    var myTime = serverTime - element.time;
+    var mobName = element.creature.name.replace(' (Super Elite)', '');
+    if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
+      oldLog.se[mobName] = myTime;
+    }
+  }
+
+  function processSeData(data) {
     var serverTime = Number(data.t.split(' ')[1]);
     if (!oldLog) {oldLog = {lastUpdate: 0, se: {}};}
     oldLog.lastUpdate = serverTime;
     var resultAry = data.r;
     if (resultAry) {
-      resultAry.forEach(function(element) {
-        var myTime = serverTime - element.time;
-        var mobName = element.creature.name.replace(' (Super Elite)', '');
-        if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
-          oldLog.se[mobName] = myTime;
-        }
-      });
+      resultAry.forEach(partial(updateSeLog, serverTime));
       setForage('fsh_seLog', oldLog);
     }
+  }
+
+  function gotSe(data) {
+    if (dataLooksOk(data)) {processSeData(data);}
   }
 
   function getSeLog() { // jQuery.min
@@ -7472,10 +7486,6 @@
     return guild({subcmd: 'advisor', subcmd2: 'view', period: period});
   }
 
-  function partial(fn /* , rest args */) {
-    return fn.bind.apply(fn, Array.from(arguments));
-  }
-
   var advisorColumns = [
     {title: '<div class="fshBold">Member</div>'},
     {title: '<div class="fshBold">Lvl</div>', 'class': 'dt-center'},
@@ -7575,6 +7585,10 @@
     };
   }
 
+  function addUpStats(args) {
+    return args.slice(2).reduce(addStuff, args[1]).map(reorgStats);
+  }
+
   function makeTotal(prev, curr) {
     return curr.stats.map(partial(addElements, prev));
   }
@@ -7583,8 +7597,8 @@
     return prev + '<td><u>' + curr + '</u></td>';
   }
 
-  function makeTfoot(total) {
-    var stats = total.map(addCommas);
+  function makeTfoot(added) {
+    var stats = added.slice(1).reduce(makeTotal, added[0].stats).map(addCommas);
     return createTFoot({
       innerHTML: '<tr><td class="fshRight" ' +
       'colspan="3">Total: </td>' +
@@ -7604,9 +7618,9 @@
 
   function addAdvisorPages(list) {
     var args = Array.from(arguments).slice(1);
-    var added = args.slice(2).reduce(addStuff, args[1]).map(reorgStats);
+    var added = addUpStats(args);
     injectTable(list,
-      makeTfoot(added.slice(1).reduce(makeTotal, added[0].stats)),
+      makeTfoot(added),
       added.map(partial(makeData, args[0]))
     );
   }
@@ -10860,6 +10874,8 @@
     if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
   }
 
+  function functionPasses(fn) {return fn();}
+
   var lookup = [
     [],
     ['(Potion)'],
@@ -10998,12 +11014,15 @@
     fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage$1 + '...';
   }
 
-  function rowMatchesLog(timestamp, myMsg) {
-    return timestamp === options$1.log[0][0] && myMsg === options$1.log[0][2];
-  }
-
   function seenRowBefore(timestamp, myMsg) {
-    return currPage === 1 && options$1.log && rowMatchesLog(timestamp, myMsg);
+    return [
+      function() {return currPage === 1;},
+      function() {return options$1.log;},
+      function() {return options$1.log[0];},
+      function() {return options$1.log[0][0];},
+      function() {return timestamp === options$1.log[0][0];},
+      function() {return myMsg === options$1.log[0][2];}
+    ].every(functionPasses);
   }
 
   function getTableList(tableList) {
@@ -11136,7 +11155,7 @@
   }
 
   function removeHide(el) {
-    if (el.classList) {el.classList.remove('fshHide');}
+    if (el && el.classList) {el.classList.remove('fshHide');}
   }
 
   function selectAll() {
@@ -11333,7 +11352,9 @@
   }
 
   function updateUsedCount(del) {
-    var fshTally = getInvTable().parentNode.children[2].children[1].children[0];
+    var invTableParent = getInvTable().parentNode;
+    if (!invTableParent) {return;}
+    var fshTally = invTableParent.children[2].children[1].children[0];
     if (fshTally.tagName !== 'TABLE') {return;}
     var tallyRows = fshTally.rows;
     var usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
@@ -11357,7 +11378,7 @@
       if (data.s) {
         updateComponentCounts(itemId);
         updateUsedCount(1);
-        self.parentNode.innerHTML = '';
+        if (self.parentNode) {self.parentNode.innerHTML = '';}
       }
     };
   }
@@ -14735,7 +14756,7 @@
   ];
 
   function testforTopRated() {
-    return topRatedTests.every(function(e) {return e();});
+    return topRatedTests.every(functionPasses);
   }
 
   function injectTopRated() {
@@ -19062,16 +19083,14 @@
   var listOfAllies;
   var listOfEnemies;
 
-  function buildNickList() {// Native
-    calf.nickList = buffList.reduce(function(prev, curr) {
-      var ret = prev;
-      var nicks = curr.nicks.split(',');
-      nicks.forEach(function(el) {
-        var nick = el.toLowerCase();
-        ret[nick] = curr.id;
-      });
-      return ret;
-    }, {});
+  function buildNickList(prev, curr) {
+    var ret = prev;
+    var nicks = curr.nicks.split(',');
+    nicks.forEach(function(el) {
+      var nick = el.toLowerCase();
+      ret[nick] = curr.id;
+    });
+    return ret;
   }
 
   function isEnemy(playerName, playerElement) { // Legacy
@@ -19201,7 +19220,7 @@
   }
 
   function addLogWidgetsOld() { // Legacy
-    buildNickList();
+    calf.nickList = buffList.reduce(buildNickList, {});
     calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
     var logTable = document.querySelector('#pCC > table:last-of-type');
     if (logTable) {foundLogTable(logTable);}
@@ -19719,7 +19738,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '40';
+  window.FSH.calf = '42';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

@@ -16,16 +16,14 @@ var memberNameString;
 var listOfAllies;
 var listOfEnemies;
 
-function buildNickList() {// Native
-  calf.nickList = buffList.reduce(function(prev, curr) {
-    var ret = prev;
-    var nicks = curr.nicks.split(',');
-    nicks.forEach(function(el) {
-      var nick = el.toLowerCase();
-      ret[nick] = curr.id;
-    });
-    return ret;
-  }, {});
+function buildNickList(prev, curr) {
+  var ret = prev;
+  var nicks = curr.nicks.split(',');
+  nicks.forEach(function(el) {
+    var nick = el.toLowerCase();
+    ret[nick] = curr.id;
+  });
+  return ret;
 }
 
 function isEnemy(playerName, playerElement) { // Legacy
@@ -155,7 +153,7 @@ function foundLogTable(logTable) { // Legacy
 }
 
 function addLogWidgetsOld() { // Legacy
-  buildNickList();
+  calf.nickList = buffList.reduce(buildNickList, {});
   calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
   var logTable = document.querySelector('#pCC > table:last-of-type');
   if (logTable) {foundLogTable(logTable);}
