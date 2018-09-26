@@ -36,6 +36,10 @@ function reorgStats(el) {
   };
 }
 
+function addUpStats(args) {
+  return args.slice(2).reduce(addStuff, args[1]).map(reorgStats);
+}
+
 function makeTotal(prev, curr) {
   return curr.stats.map(partial(addElements, prev));
 }
@@ -44,8 +48,8 @@ function footerStats(prev, curr) {
   return prev + '<td><u>' + curr + '</u></td>';
 }
 
-function makeTfoot(total) {
-  var stats = total.map(addCommas);
+function makeTfoot(added) {
+  var stats = added.slice(1).reduce(makeTotal, added[0].stats).map(addCommas);
   return createTFoot({
     innerHTML: '<tr><td class="fshRight" ' +
     'colspan="3">Total: </td>' +
@@ -65,9 +69,9 @@ function makeData(membrList, el) {
 
 function addAdvisorPages(list) {
   var args = Array.from(arguments).slice(1);
-  var added = args.slice(2).reduce(addStuff, args[1]).map(reorgStats);
+  var added = addUpStats(args);
   injectTable(list,
-    makeTfoot(added.slice(1).reduce(makeTotal, added[0].stats)),
+    makeTfoot(added),
     added.map(partial(makeData, args[0]))
   );
 }
