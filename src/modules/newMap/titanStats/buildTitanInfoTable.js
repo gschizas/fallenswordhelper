@@ -15,10 +15,8 @@ import {createSpan, createTable, textSpan} from '../../common/cElement';
 export var titanTbl;
 
 export function clearMemberRows() {
-  if (titanTbl.rows.length > 7) {
-    for (var i = 7; i < titanTbl.rows.length; i += 1) {
-      titanTbl.deleteRow(i);
-    }
+  while (titanTbl.rows.length > 7) {
+    titanTbl.deleteRow(7);
   }
 }
 
