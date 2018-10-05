@@ -1,6 +1,7 @@
 import destroyComponent from '../../app/profile/destroycomponent';
 import errorDialog from '../../app/errorDialog';
 import {itemRE} from '../../support/constants';
+import partial from '../../common/partial';
 import updateUsedCount from './updateUsedCount';
 
 function updateComponentCounts(itemId) {
@@ -12,15 +13,12 @@ function updateComponentCounts(itemId) {
   countDom.textContent = count.toString();
 }
 
-function compDeleted(self, itemId) {
-  return function(data) {
-    // console.log('data', data);
-    if (data.s) {
-      updateComponentCounts(itemId);
-      updateUsedCount(1);
-      if (self.parentNode) {self.parentNode.innerHTML = '';}
-    }
-  };
+function compDeleted(self, itemId, data) {
+  if (data.s) {
+    updateComponentCounts(itemId);
+    updateUsedCount(1);
+    if (self.parentNode) {self.parentNode.innerHTML = '';}
+  }
 }
 
 function delComponent(self) { // jQuery.min
@@ -28,10 +26,9 @@ function delComponent(self) { // jQuery.min
   var matches = tipped.match(itemRE);
   var itemId = matches[1];
   var componentId = matches[2];
-  // console.log('a=', componentId, 'b=', itemId);
   destroyComponent([componentId])
     .pipe(errorDialog)
-    .done(compDeleted(self, itemId));
+    .done(partial(compDeleted, self, itemId));
 }
 
 export default function componentDeleteHandler(evt) {
