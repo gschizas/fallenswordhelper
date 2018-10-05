@@ -30,7 +30,7 @@ export function showRankButton(playerid, playername) {
       'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
       playerid + '" data-tipped="Rank ' + playername +
       '" style="background-image: url(\'' + imageServer +
-      '/guilds/' + guildId + '_mini.jpg\');"></a>&nbsp;&nbsp;';
+      '/guilds/' + guildId + '_mini.png\');"></a>&nbsp;&nbsp;';
   }
   return '';
 }
