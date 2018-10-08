@@ -25,8 +25,8 @@ function composePots(button, templateId) {
     '[id|="composing-template"]:not(#composing-template-multi)');
   for (var i = 0; i < button.value; i += 1) {
     openTemplates[i].value = templateId;
-    // openTemplates[i].nextElementSibling.nextElementSibling.children[0].click();
-    backgroundCreate(openTemplates[i]);
+    backgroundCreate(openTemplates[i].nextElementSibling.nextElementSibling,
+      openTemplates[i]);
   }
 }
 

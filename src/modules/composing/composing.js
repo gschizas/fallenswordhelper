@@ -32,7 +32,7 @@ function isOurTarget(target) {
 function doQuickCreate(self) {
   var temp = self.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
-    backgroundCreate(temp);
+    backgroundCreate(self, temp);
     sendEvent('composing', 'QuickCreate');
   }
 }
