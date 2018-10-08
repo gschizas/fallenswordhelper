@@ -55,3 +55,6 @@ export var def_fetch_worldRealmDynamic = 128;
 export var def_fetch_worldRealmActions = 256;
 export var def_fetch_playerEquipment = 512;
 export var def_fetch_playerNotifications = 1024;
+
+export var def_needToCompose = 'needToCompose';
+export var def_lastComposeCheck = 'lastComposeCheck';

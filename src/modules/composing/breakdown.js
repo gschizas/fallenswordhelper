@@ -3,6 +3,7 @@ import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import perfFilter from '../common/perfFilter';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
@@ -11,15 +12,14 @@ import {simpleCheckbox} from '../settings/simpleCheckbox';
 var disableBreakdownPrompts;
 var selectedList = [];
 
-function disappearance(self) {return function() {self.hide();};}
+function disappearance(self) {self.hide();}
 
-function goDown(self, disappear) {
-  return function() {self.animate({height: 0}, 500, disappear);};
-}
+function goDown(self, disappear) {self.animate({height: 0}, 500, disappear);}
 
 function fadeAway() {
   var self = $('#composingMessageContainer');
-  self.animate({opacity: 0}, 500, goDown(self, disappearance(self)));
+  self.animate({opacity: 0}, 500,
+    partial(goDown, self, partial(disappearance, self)));
 }
 
 function showComposingMessage(message, bgcolor) { // jQuery

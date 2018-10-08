@@ -1,9 +1,11 @@
+import addEventListenerOnce from '../../common/addEventListenerOnce';
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import partial from '../../common/partial';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
@@ -39,9 +41,7 @@ function keydownHandler(evt) {
 }
 
 function maybeClose(ret) {
-  return function() {
-    if (isClosed()) {ret.style.transform = null;}
-  };
+  if (isClosed()) {ret.style.transform = null;}
 }
 
 function makeDragHandle() {
@@ -59,7 +59,6 @@ function makeDragHandle() {
 }
 
 function updateRawData() {
-  acttab2.removeEventListener('change', updateRawData);
   if (trackerData) {queueRawData(trackerData);}
 }
 
@@ -76,7 +75,7 @@ function makeInnerPopup() {
     name: 'acttabs',
     type: 'radio'
   });
-  acttab2.addEventListener('change', updateRawData);
+  addEventListenerOnce(acttab2, 'change', updateRawData);
   insertElement(dialogPopup, acttab2);
   return dialogPopup;
 }
@@ -90,7 +89,7 @@ function makePopup() {
   insertElement(container, makeInOut());
   insertElement(ret, container);
   draggable(hdl, ret);
-  tracker.addEventListener('change', maybeClose(ret));
+  tracker.addEventListener('change', partial(maybeClose, ret));
   insertElement(trDialog, ret);
 }
 
@@ -117,7 +116,6 @@ function togglePref(evt) {
 
 function openDialog() {
   getForage('fsh_guildActivity').done(gotActivity);
-  tracker.removeEventListener('change', openDialog);
   calf.dialogIsClosed = isClosed;
   addOverlay();
   makePopup();
@@ -139,7 +137,7 @@ export default function guildTracker() {
     className: 'fsh-dialog-open',
     type: 'checkbox'
   });
-  tracker.addEventListener('change', openDialog);
+  addEventListenerOnce(tracker, 'change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   insertElement(trDialog, tracker);
   document.body.addEventListener('keydown', keydownHandler);

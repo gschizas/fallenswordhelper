@@ -4,6 +4,7 @@ import formatLocalDateTime from '../../common/formatLocalDateTime';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isUndefined from '../../common/isUndefined';
+import partial from '../../common/partial';
 import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
 import {
   createDiv,
@@ -35,31 +36,29 @@ function memberFilter(memberKey) {
   return selMember && selMember !== '- All -' && selMember !== memberKey;
 }
 
-function aMembersActivityRows(memberKey) {
-  return function(inside, activity) {
-    return inside + '<tr>' +
-      '<td>' +
-      formatLocalDateTime(new Date(activity[utc] * 1000)) +
-      '</td>' +
-      '<td>' + memberKey + '</td>' +
-      '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
-      '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
-      '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
-      '<td class="fshRight">' + toText(activity[max]) + '</td>' +
-      '<td class="fshRight">' +
-        Math.floor(activity[cur] / activity[max] * 100) +
-      '</td>' +
-      '<td class="fshRight">' + activity[act] + '</td>' +
-      '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
-      '</tr>';
-  };
+function aMembersActivityRows(memberKey, inside, activity) {
+  return inside + '<tr>' +
+    '<td>' +
+    formatLocalDateTime(new Date(activity[utc] * 1000)) +
+    '</td>' +
+    '<td>' + memberKey + '</td>' +
+    '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
+    '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
+    '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
+    '<td class="fshRight">' + toText(activity[max]) + '</td>' +
+    '<td class="fshRight">' +
+      Math.floor(activity[cur] / activity[max] * 100) +
+    '</td>' +
+    '<td class="fshRight">' + activity[act] + '</td>' +
+    '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
+    '</tr>';
 }
 
 function memberRows() {
   return Object.keys(myMembers).reduce(function(outside, memberKey) {
     if (memberFilter(memberKey)) {return outside;}
     return outside +
-      myMembers[memberKey].reduce(aMembersActivityRows(memberKey), '');
+      myMembers[memberKey].reduce(partial(aMembersActivityRows, memberKey), '');
   }, '');
 }
 

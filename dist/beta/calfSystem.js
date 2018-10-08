@@ -434,6 +434,16 @@
 
   var calf = {};
 
+  // https://stackoverflow.com/a/34325394
+
+  // eslint-disable-next-line max-len
+  function addEventListenerOnce(target, type, listener, addOptions, removeOptions) {
+    target.addEventListener(type, function fn() {
+      target.removeEventListener(type, fn, removeOptions);
+      listener.apply(this, arguments); // eslint-disable-line no-invalid-this
+    }, addOptions);
+  }
+
   var dragTarget;
   var mouseX;
   var mouseY;
@@ -493,7 +503,6 @@
   function dragDrop(event) {
     drawElement(event);
     document.body.removeEventListener('dragover', dragOver, false);
-    document.body.removeEventListener('drop', dragDrop, false);
     event.preventDefault();
     return false;
   }
@@ -513,7 +522,7 @@
     timer = 0;
     event.dataTransfer.setData('text/plain', '');
     document.body.addEventListener('dragover', dragOver, false);
-    document.body.addEventListener('drop', dragDrop, false);
+    addEventListenerOnce(document.body, 'drop', dragDrop, false);
   }
 
   function draggable(element, parent) {
@@ -977,6 +986,9 @@
 
   var def_fetch_worldRealmActions = 256;
 
+  var def_needToCompose = 'needToCompose';
+  var def_lastComposeCheck = 'lastComposeCheck';
+
   function testForGuildLogMsg(guildLogNode) {
     return location.search !== newGuildLogLoc ||
       guildLogNode.parentNode.id !== 'notification-guild-log';
@@ -1409,43 +1421,16 @@
     }
   }
 
-  function createDocument(details) {
-    // Use DOMParser to prevent img src tags downloading
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(details, 'text/html');
-    return doc;
+  function composing(data) {
+    return callApp(extend({cmd: 'composing'}, data));
   }
 
-  function getRandomInt(_min, _max) {
-    var min = Math.ceil(_min);
-    var max = Math.floor(_max);
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
-
-  function insertElementBefore(newNode, referenceNode) {
-    if (referenceNode instanceof Node &&
-        referenceNode.parentNode instanceof Node) {
-      return referenceNode.parentNode.insertBefore(newNode, referenceNode);
-    }
+  function composingView() {
+    return composing({subcmd: 'view'});
   }
 
   function insertHtmlAfterBegin(parent, html) {
     insertHtml(parent, 'afterbegin', html);
-  }
-
-  function insertHtmlAfterEnd(parent, html) {
-    insertHtml(parent, 'afterend', html);
-  }
-
-  var pCC = getElementById('pCC');
-  var pCR = getElementById('pCR');
-
-  function rnd() {
-    return getRandomInt(1000000000, 9999999998);
-  }
-
-  function setValue(name, value) {
-    GM_setValue(name, value);
   }
 
   var composeMsg =
@@ -1457,155 +1442,57 @@
     insertHtmlAfterBegin(getElementById('notifications'), composeMsg);
   }
 
-  function getDoc(data) {
-    if (calf.cmd !== 'composing') {
-      return createDocument(data);
-    }
-    return document;
+  function setValue(name, value) {
+    GM_setValue(name, value);
   }
 
-  function parseComposing(data) {
-    var doc = getDoc(data);
-    var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
-    var times = [];
-    var openSlots = doc.getElementsByClassName('composing-potion-time');
-    Array.prototype.forEach.call(openSlots, function(el) {
-      if (el.textContent === 'ETA: Ready to Collect!' ||
-          el.textContent === 'ETA: n/a') {
-        times.push(0);
-      } else {
-        var timeArr = timeRE.exec(el.textContent);
-        var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
-          1000 + now;
-        times.push(milli);
-      }
-    });
-    var eta = Math.min.apply(null, times);
-    if (eta === 0) {
-      if (calf.cmd !== 'composing') {displayComposeMsg();}
-      setValue('needToCompose', true);
+  function getTime(pot) {
+    return pot.time_remaining;
+  }
+
+  function displayAlert() {
+    displayComposeMsg();
+    setValue(def_needToCompose, true);
+  }
+
+  function potsBrewing(potions) {
+    var minTimeInSecs = Math.min.apply(null, potions.map(getTime));
+    if (minTimeInSecs > 0) {
+      setValue(def_needToCompose, false);
+      setValue(def_lastComposeCheck, now + minTimeInSecs * 1000);
     } else {
-      setValue('needToCompose', false);
-      setValue('lastComposeCheck', eta);
+      displayAlert();
     }
   }
 
-  function createSuccess(temp, textStatus) {
-    var potName = temp[temp.selectedIndex].text;
-    var myParent = temp.parentNode;
-    var infoDiv = myParent.previousElementSibling.previousElementSibling;
-    infoDiv.children[0].innerHTML = '';
-    infoDiv.children[0].classList.add('fshPot');
-    infoDiv.children[0].style.backgroundImage = 'url(' + imageServer +
-      '/composing/potions/' + getRandomInt(1, 11) + '_' +
-      getRandomInt(1, 51) + '.gif)';
-    infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
-      potName + '</span>\' Potion';
-    infoDiv.children[3].innerHTML = '';
-    myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
-  }
-
-  function createPotion(temp) { // jQuery
-    retryAjax({
-      cache: false,
-      dataType: 'json',
-      url: 'index.php',
-      data: {
-        cmd: 'composing',
-        subcmd: 'createajax',
-        template_id: temp.value,
-        _rnd: rnd()
-      }
-    }).done(function potionDone(data, textStatus) {
-      if (data.error !== '') {
-        temp.parentNode.innerHTML = '<div class="fshScs">' +
-          data.error + '</div>';
-      } else {
-        createSuccess(temp, textStatus);
-      }
-    });
-  }
-
-  function isOurTarget(target) {
-    return target.tagName === 'SPAN' && target.className === 'quickCreate';
-  }
-
-  function doQuickCreate(self) {
-    var temp = self.previousElementSibling.previousElementSibling;
-    if (temp && temp.value !== 'none') {
-      self.innerHTML = '';
-      self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
-      createPotion(temp);
+  function parseComposingApp(result) {
+    if (result.potions.length !== result.max_potions) {
+      displayAlert();
+    } else {
+      potsBrewing(result.potions);
     }
   }
 
-  function quickCreate(evt) {
-    var self = evt.target.parentNode;
-    if (isOurTarget(self)) {doQuickCreate(self);}
+  function checkAppResponse(json) {
+    if (json.s) {parseComposingApp(json.r);}
   }
 
-  function checkLastCompose() { // jQuery
-    var lastComposeCheck = getValue('lastComposeCheck');
+  function checkLastCompose() { // jQuery.min
+    var lastComposeCheck = getValue(def_lastComposeCheck);
     if (lastComposeCheck && now < lastComposeCheck) {return;}
-    retryAjax('index.php?no_mobile=1&cmd=composing').done(function(data) {
-      add(3, parseComposing, [data]);
-    });
+    composingView().done(checkAppResponse);
   }
 
   function composeAlert() {
-    var needToCompose = getValue('needToCompose');
-    if (needToCompose) {
+    if (getValue(def_needToCompose)) {
       displayComposeMsg();
-      return;
+    } else {
+      checkLastCompose();
     }
-    checkLastCompose();
   }
 
   function injectComposeAlert() {
-    if (jQueryPresent() && calf.cmd !== 'composing') {composeAlert();}
-  }
-
-  function moveButtons() {
-    if (getValue('moveComposingButtons')) {
-      var buttonDiv = getElementById('composing-error-dialog')
-        .previousElementSibling;
-      buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-      var top = pCC.getElementsByClassName('composing-level')[0]
-        .parentNode;
-      insertElementBefore(buttonDiv, top);
-    }
-  }
-
-  function hasJQuery() {
-    if (calf.enableComposingAlert) {
-      parseComposing();
-    }
-
-    var buttons = pCC
-      .querySelectorAll('input[id^=create-]:not(#create-multi)');
-    Array.prototype.forEach.call(buttons, function(el) {
-      insertHtmlAfterEnd(el, '<span class="quickCreate">' +
-        '[<span class="sendLink">Quick Create</span>]</span>');
-    });
-    pCC.addEventListener('click', quickCreate);
-    moveButtons();
-  }
-
-  function injectComposing() {
-    if (jQueryPresent() && pCC) {hasJQuery();}
-  }
-
-  function composingCreate() {
-    getElementById('composing-add-skill')
-      .addEventListener('click', function() {
-        getElementById('composing-skill-level-input').value =
-          getElementById('composing-skill-level-max').textContent;
-      });
-    getElementById('composing-skill-select')
-      .addEventListener('change', function() {
-        getElementById('composing-skill-level-input').value =
-          getElementById('composing-skill-level-max').textContent;
-      });
+    if (calf.cmd !== 'composing' && jQueryPresent()) {composeAlert();}
   }
 
   function makePageHeader(title, comment, spanId, button) {
@@ -1627,6 +1514,9 @@
     return makePageHeader(o.title, o.comment, o.spanId, o.button) +
       '<div class="fshSmall" id="' + o.divId + '"></div>';
   }
+
+  var pCC = getElementById('pCC');
+  var pCR = getElementById('pCR');
 
   function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
     var passthru = '';
@@ -2120,6 +2010,13 @@
     if (jQueryNotPresent()) {return;}
     content$1 = injector || pCC;
     getForage('fsh_combatLog').done(gotCombatLog);
+  }
+
+  function createDocument(details) {
+    // Use DOMParser to prevent img src tags downloading
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(details, 'text/html');
+    return doc;
   }
 
   var guildId;
@@ -4664,6 +4561,12 @@
     '<a href="index.php?cmd=profile&player_id=1599987">yuuzhan</a></li>' +
     '</ul></div>';
 
+  function toggleMenu(evt) {
+    if (evt.target.id !== 'helperMenu') {return;}
+    var menu = evt.target.firstElementChild;
+    menu.classList.toggle('showMenuDiv');
+  }
+
   var functionLookup = {
     'Buff Log': injectBuffLog,
     'Combat Log': injectNotepadShowLogs,
@@ -4698,10 +4601,8 @@
     }
   }
 
-  function showHelperMenu() {
-    var helperMenu = getElementById('helperMenu');
-    helperMenu.removeEventListener('mouseenter', showHelperMenu);
-
+  function showHelperMenu(evt) {
+    var helperMenu = evt.target;
     var helperMenuDiv = createDiv({
       id: 'helperMenuDiv',
       className: 'helperMenuDiv',
@@ -4712,11 +4613,7 @@
     });
     insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
     insertElement(helperMenu, helperMenuDiv);
-    helperMenu.addEventListener('click', function(evt) {
-      if (evt.target.id !== 'helperMenu') {return;}
-      var menu = evt.target.firstElementChild;
-      menu.classList.toggle('showMenuDiv');
-    });
+    helperMenu.addEventListener('click', toggleMenu);
     helperMenuDiv.addEventListener('click', eventHandler$1);
   }
 
@@ -4729,7 +4626,7 @@
     if (getValue('keepHelperMenuOnScreen')) {
       helperMenu.classList.add('fshFixed');
     }
-    helperMenu.addEventListener('mouseenter', showHelperMenu);
+    addEventListenerOnce(helperMenu, 'mouseenter', showHelperMenu);
     if (getValue('draggableHelperMenu')) {
       helperMenu.classList.add('fshMove');
       draggable(helperMenu);
@@ -4741,6 +4638,10 @@
     // don't put all the menu code here (but call if clicked) to minimize lag
     var node = getElementById('statbar-container');
     if (node) {haveNode$1(node);}
+  }
+
+  function insertHtmlAfterEnd(parent, html) {
+    insertHtml(parent, 'afterend', html);
   }
 
   function parseDateAsTimestamp(textDate) {
@@ -5284,8 +5185,6 @@
   function prayToGods(e) { // jQuery
     var myGod = e.target.getAttribute('praytype');
     if (!myGod) {return;}
-    getElementById('helperPrayToGods').removeEventListener('click',
-      prayToGods);
     retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
       .done(havePrayed);
     $(e.target).qtip('hide');
@@ -5293,8 +5192,7 @@
 
   function displayDisconnectedFromGodsMessage() {
     insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
-    getElementById('helperPrayToGods').addEventListener('click',
-      prayToGods);
+    addEventListenerOnce(getElementById('helperPrayToGods'), 'click', prayToGods);
   }
 
   function templeAlertEnabled(responseText) {
@@ -5797,7 +5695,9 @@
   }
 
   function getActiveBountyList(doc) { // Legacy
-    var activeTable = getElementById('bounty-info', doc).parentNode.parentNode
+    var bountyInfo = getElementById('bounty-info', doc);
+    if (!bountyInfo) {return;}
+    var activeTable = bountyInfo.parentNode.parentNode
       .previousElementSibling.children[0].children[0];
     bountyList = {};
     bountyList.bounty = [];
@@ -6162,14 +6062,14 @@
     }
   }
 
-  function getDoc$1(doc, context) {
+  function getDoc(doc, context) {
     if (doc instanceof HTMLDocument) {return doc;}
     if (context) {return context.ownerDocument;}
     return document;
   }
 
   function xPathEvaluate(type, expr, _doc, _context) {
-    var doc = getDoc$1(_doc, _context);
+    var doc = getDoc(_doc, _context);
     var context = fallback(_context, doc);
     return doc.evaluate(expr, context, null, type, null);
   }
@@ -6957,15 +6857,14 @@
   var disableBreakdownPrompts;
   var selectedList = [];
 
-  function disappearance(self) {return function() {self.hide();};}
+  function disappearance(self) {self.hide();}
 
-  function goDown(self, disappear) {
-    return function() {self.animate({height: 0}, 500, disappear);};
-  }
+  function goDown(self, disappear) {self.animate({height: 0}, 500, disappear);}
 
   function fadeAway() {
     var self = $('#composingMessageContainer');
-    self.animate({opacity: 0}, 500, goDown(self, disappearance(self)));
+    self.animate({opacity: 0}, 500,
+      partial(goDown, self, partial(disappearance, self)));
   }
 
   function showComposingMessage(message, bgcolor) { // jQuery
@@ -7054,6 +6953,17 @@
       '</tbody></table>');
     getElementById('disableBreakdownPrompts')
       .addEventListener('click', togglePref$1);
+  }
+
+  function setMaxVal() {
+    getElementById('composing-skill-level-input').value =
+      getElementById('composing-skill-level-max').textContent;
+  }
+
+  function composingCreate() {
+    getElementById('composing-add-skill').addEventListener('click', setMaxVal);
+    getElementById('composing-skill-select')
+      .addEventListener('change', setMaxVal);
   }
 
   function makeFolderSpans$1(folders, needsWorn) {
@@ -8410,6 +8320,284 @@
     updateBioCharacters();
   }
 
+  function getRandomInt(_min, _max) {
+    var min = Math.ceil(_min);
+    var max = Math.floor(_max);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  function rnd() {
+    return getRandomInt(1000000000, 9999999998);
+  }
+
+  function createPotionFromTemplate(tempId) {
+    return retryAjax({
+      cache: false,
+      dataType: 'json',
+      url: 'index.php',
+      data: {
+        cmd: 'composing',
+        subcmd: 'createajax',
+        template_id: tempId,
+        _rnd: rnd()
+      }
+    });
+  }
+
+  /*
+  Based on
+  https://github.com/addyosmani/pubsubz
+  */
+
+  var topics = {};
+  var subUid = -1;
+
+  function publish(topic, args) {
+    if (!topics[topic]) {return;}
+    topics[topic].forEach(function(el) {
+      add(3, el.func, [args]);
+    });
+    return true; // probably not needed
+  }
+
+  function subscribe(topic, func) {
+    if (!topics[topic]) {topics[topic] = [];}
+    subUid += 1;
+    var token = subUid.toString();
+    topics[topic].push({token: token, func: func});
+    return token;
+  }
+
+  function randomBackgroundImage() {
+    return 'url(' + imageServer + '/composing/potions/' +
+      getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.gif)';
+  }
+
+  function updateInfoDiv(infoDiv, potName) {
+    infoDiv.children[0].innerHTML = '';
+    infoDiv.children[0].classList.add('fshPot');
+    infoDiv.children[0].style.backgroundImage = randomBackgroundImage();
+    infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
+      potName + '</span>\' Potion';
+    infoDiv.children[3].innerHTML = '';
+  }
+
+  function amILast() {
+    var openTemplates = document.querySelectorAll(
+      '[id|="composing-template"]:not(#composing-template-multi)');
+    if (openTemplates.length === 0) {
+      setValue(def_needToCompose, false);
+    }
+  }
+
+  function createSuccess(temp, textStatus) {
+    var myParent = temp.parentNode;
+    myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
+    updateInfoDiv(myParent.previousElementSibling.previousElementSibling,
+      temp[temp.selectedIndex].text);
+    amILast();
+  }
+
+  function potionDone(temp, data, textStatus) {
+    if (data.error) {
+      temp.parentNode.innerHTML = '<div class="fshScs">' +
+        data.error + '</div>';
+    } else {
+      createSuccess(temp, textStatus);
+    }
+  }
+
+  function createPotion(temp) { // jQuery.min
+    createPotionFromTemplate(temp.value).done(partial(potionDone, temp));
+    // setTimeout(partial(potionDone, temp, {}, 'faked'), 200);
+  }
+
+  function backgroundCreate(self, temp) {
+    self.innerHTML = '';
+    self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
+    createPotion(temp);
+    publish('quickcreate');
+  }
+
+  function doTableClass(myTable, slotsLeft) {
+    myTable.classList.add('left-' + slotsLeft.toString());
+  }
+
+  function quickcreate(myTable) {
+    var openTemplates = document.querySelectorAll('.quickCreate .sendLink');
+    doTableClass(myTable, openTemplates.length);
+  }
+
+  function composePots(button, templateId) {
+    sendEvent('composing', 'FastComposeButton');
+    var openTemplates = document.querySelectorAll(
+      '[id|="composing-template"]:not(#composing-template-multi)');
+    for (var i = 0; i < button.value; i += 1) {
+      openTemplates[i].value = templateId;
+      backgroundCreate(openTemplates[i].nextElementSibling.nextElementSibling,
+        openTemplates[i]);
+    }
+  }
+
+  function handleClick(evt) {
+    var button = evt.target;
+    var templateId = button.dataset.templateId;
+    if (templateId) {composePots(button, templateId);}
+  }
+
+  function buildButton(val, templateId) {
+    return createInput({
+      className: 'awesome orange',
+      dataset: {templateId: templateId},
+      type: 'button',
+      value: val
+    });
+  }
+
+  function buildCells(template, myRow, compSlot, i) {
+    if (i === 0) {myRow.insertCell(-1).textContent = template[1];}
+    insertElement(
+      myRow.insertCell(-1),
+      buildButton((i + 1).toString(), template[0])
+    );
+    return myRow;
+  }
+
+  function buildRows(compSlots, openSlots, myTable, template) {
+    compSlots.reduce(partial(buildCells, template), myTable.insertRow(-1));
+    return myTable;
+  }
+
+  function buildTable(templates, compSlots, openSlots) {
+    var myTable = createTable({id: 'fshFastCompose'});
+    doTableClass(myTable, openSlots);
+    return templates.reduce(partial(buildRows, compSlots, openSlots), myTable);
+  }
+
+  function setupFastCompose(fcDiv, compSlots, openSlots) {
+    var templates = Array.from(
+      document.querySelectorAll('#composing-template-multi option'),
+      function(el) {return [el.value, el.text];}
+    );
+    var myTable = buildTable(templates, compSlots, openSlots);
+    insertElement(fcDiv, myTable);
+    pCC.addEventListener('click', handleClick);
+    subscribe('quickcreate', partial(quickcreate, myTable));
+  }
+
+  function openSlot(e) {return e.textContent === 'ETA: n/a';}
+
+  function drawList(fcDiv) {
+    sendEvent('composing', 'FastCompose');
+    insertHtmlBeforeEnd(fcDiv, '<br>');
+    var compSlots = Array.from(
+      document.getElementsByClassName('composing-potion-time')
+    );
+    var openSlots = compSlots.filter(openSlot).length;
+    if (openSlots > 0) {
+      setupFastCompose(fcDiv, compSlots, openSlots);
+    } else {
+      insertHtmlBeforeEnd(fcDiv, 'No open slots!');
+    }
+  }
+
+  function fastCompose() {
+    var buttonDiv = document.querySelector('#pCC div.centered');
+    insertHtmlAfterEnd(buttonDiv.children[1],
+      ' | <label for="fast-compose"><span class="sendLink">' +
+      'Fast Compose</span></label>');
+    var fcDiv = createDiv({className: 'centered'});
+    insertElementAfter(fcDiv, buttonDiv);
+    var fcCheck = createInput({id: 'fast-compose', type: 'checkbox'});
+    insertElementAfter(fcCheck, buttonDiv);
+    addEventListenerOnce(fcCheck, 'change', partial(drawList, fcDiv));
+  }
+
+  function insertElementBefore(newNode, referenceNode) {
+    if (referenceNode instanceof Node &&
+        referenceNode.parentNode instanceof Node) {
+      return referenceNode.parentNode.insertBefore(newNode, referenceNode);
+    }
+  }
+
+  var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
+
+  function timeRemaining(times, el) {
+    var timeArr = timeRE.exec(el.textContent);
+    if (timeArr) {
+      var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
+        1000 + now;
+      return times.concat(milli);
+    }
+    return times.concat(0);
+  }
+
+  function setNeed(bool) {
+    setValue(def_needToCompose, bool);
+  }
+
+  function parseComposing() {
+    if (!calf.enableComposingAlert) {return;}
+    var openSlots = document.getElementsByClassName('composing-potion-time');
+    var times = Array.from(openSlots).reduce(timeRemaining, []);
+    var eta = Math.min.apply(null, times);
+    if (eta === 0) {
+      setNeed(true);
+    } else {
+      setNeed(false);
+      setValue(def_lastComposeCheck, eta);
+    }
+  }
+
+  function moveButtons() {
+    if (getValue('moveComposingButtons')) {
+      var buttonDiv = getElementById('composing-error-dialog')
+        .previousElementSibling;
+      buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
+      var top = pCC.getElementsByClassName('composing-level')[0]
+        .parentNode;
+      insertElementBefore(buttonDiv, top);
+    }
+  }
+
+  function injectButton(el) {
+    insertHtmlAfterEnd(el, '<span class="quickCreate">' +
+      '[<span class="sendLink">Quick Create</span>]</span>');
+  }
+
+  function isOurTarget(target) {
+    return target.tagName === 'SPAN' && target.className === 'quickCreate';
+  }
+
+  function doQuickCreate(self) {
+    var temp = self.previousElementSibling.previousElementSibling;
+    if (temp && temp.value !== 'none') {
+      backgroundCreate(self, temp);
+      sendEvent('composing', 'QuickCreate');
+    }
+  }
+
+  function quickCreate(evt) {
+    var self = evt.target.parentNode;
+    if (isOurTarget(self)) {
+      doQuickCreate(self);
+    }
+  }
+
+  function hasJQuery() {
+    parseComposing();
+    var buttons = pCC
+      .querySelectorAll('input[id^=create-]:not(#create-multi)');
+    Array.from(buttons).forEach(injectButton);
+    pCC.addEventListener('click', quickCreate);
+    moveButtons();
+    fastCompose();
+  }
+
+  function injectComposing() {
+    if (jQueryPresent() && pCC) {hasJQuery();}
+  }
+
   function addMercStat(mouseover, stat, i) {
     return stat +
       Math.round(Number(mercRE[i].exec(mouseover)[1]) * defenderMultiplier);
@@ -8855,31 +9043,29 @@
     return selMember && selMember !== '- All -' && selMember !== memberKey;
   }
 
-  function aMembersActivityRows(memberKey) {
-    return function(inside, activity) {
-      return inside + '<tr>' +
-        '<td>' +
-        formatLocalDateTime(new Date(activity[utc] * 1000)) +
-        '</td>' +
-        '<td>' + memberKey + '</td>' +
-        '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
-        '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
-        '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
-        '<td class="fshRight">' + toText(activity[max]) + '</td>' +
-        '<td class="fshRight">' +
-          Math.floor(activity[cur] / activity[max] * 100) +
-        '</td>' +
-        '<td class="fshRight">' + activity[act] + '</td>' +
-        '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
-        '</tr>';
-    };
+  function aMembersActivityRows(memberKey, inside, activity) {
+    return inside + '<tr>' +
+      '<td>' +
+      formatLocalDateTime(new Date(activity[utc] * 1000)) +
+      '</td>' +
+      '<td>' + memberKey + '</td>' +
+      '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
+      '<td class="fshRight">' + toText(activity[max]) + '</td>' +
+      '<td class="fshRight">' +
+        Math.floor(activity[cur] / activity[max] * 100) +
+      '</td>' +
+      '<td class="fshRight">' + activity[act] + '</td>' +
+      '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
+      '</tr>';
   }
 
   function memberRows() {
     return Object.keys(myMembers).reduce(function(outside, memberKey) {
       if (memberFilter(memberKey)) {return outside;}
       return outside +
-        myMembers[memberKey].reduce(aMembersActivityRows(memberKey), '');
+        myMembers[memberKey].reduce(partial(aMembersActivityRows, memberKey), '');
     }, '');
   }
 
@@ -9010,9 +9196,7 @@
   }
 
   function maybeClose(ret) {
-    return function() {
-      if (isClosed()) {ret.style.transform = null;}
-    };
+    if (isClosed()) {ret.style.transform = null;}
   }
 
   function makeDragHandle() {
@@ -9030,7 +9214,6 @@
   }
 
   function updateRawData() {
-    acttab2.removeEventListener('change', updateRawData);
     if (trackerData) {queueRawData(trackerData);}
   }
 
@@ -9047,7 +9230,7 @@
       name: 'acttabs',
       type: 'radio'
     });
-    acttab2.addEventListener('change', updateRawData);
+    addEventListenerOnce(acttab2, 'change', updateRawData);
     insertElement(dialogPopup, acttab2);
     return dialogPopup;
   }
@@ -9061,7 +9244,7 @@
     insertElement(container, makeInOut());
     insertElement(ret, container);
     draggable(hdl, ret);
-    tracker.addEventListener('change', maybeClose(ret));
+    tracker.addEventListener('change', partial(maybeClose, ret));
     insertElement(trDialog, ret);
   }
 
@@ -9088,7 +9271,6 @@
 
   function openDialog() {
     getForage('fsh_guildActivity').done(gotActivity$1);
-    tracker.removeEventListener('change', openDialog);
     calf.dialogIsClosed = isClosed;
     addOverlay();
     makePopup();
@@ -9110,7 +9292,7 @@
       className: 'fsh-dialog-open',
       type: 'checkbox'
     });
-    tracker.addEventListener('change', openDialog);
+    addEventListenerOnce(tracker, 'change', openDialog);
     trDialog = createDiv({className: 'fsh-dialog'});
     insertElement(trDialog, tracker);
     document.body.addEventListener('keydown', keydownHandler);
@@ -10256,12 +10438,10 @@
 
   var deferred = window.jQuery && jQuery.when();
 
-  function itemStatus(data) {
-    return function() {return data;};
-  }
+  function itemStatus(data) {return data;}
 
   function doAction$2(fn, item, data) {
-    return fn(item).pipe(itemStatus(data));
+    return fn(item).pipe(partial(itemStatus, data));
   }
 
   function additionalAction(action, data) {
@@ -10290,40 +10470,34 @@
     return deferred;
   }
 
-  function gotBackpack(o, data) {
-    return function(bpData) {
-      // TODO assuming backpack is successful...
-      var lastBackpackItem = bpData.items[bpData.items.length - 1].a;
-      if (o.action === 'wear') {
-        return doAction$2(equipItem, lastBackpackItem, data);
-        // Return recall status irrespective of the status of the equipitem
-      }
-      if (o.action === 'use') {
-        return doAction$2(useItem, lastBackpackItem, data);
-        // Return recall status irrespective of the status of the useitem
-      }
-    };
+  function gotBackpack(o, data, bpData) {
+    // TODO assuming backpack is successful...
+    var lastBackpackItem = bpData.items[bpData.items.length - 1].a;
+    if (o.action === 'wear') {
+      return doAction$2(equipItem, lastBackpackItem, data);
+      // Return recall status irrespective of the status of the equipitem
+    }
+    if (o.action === 'use') {
+      return doAction$2(useItem, lastBackpackItem, data);
+      // Return recall status irrespective of the status of the useitem
+    }
   }
 
-  function recallItemStatus(o) {
-    return function(data) {
-      if (data.r === 0 && o.action !== 'recall') {
-        return backpack$1().pipe(gotBackpack(o, data));
-      }
-      return data;
-    };
+  function recallItemStatus(o, data) {
+    if (data.r === 0 && o.action !== 'recall') {
+      return backpack$1().pipe(partial(gotBackpack, o, data));
+    }
+    return data;
   }
 
   function pipeRecallToQueue(o) {
-    return function() {
-      return recallItem(o.invId, o.playerId, o.mode).pipe(errorDialog)
-        .pipe(recallItemStatus(o));
-    };
+    return recallItem(o.invId, o.playerId, o.mode).pipe(errorDialog)
+      .pipe(partial(recallItemStatus, o));
   }
 
   function queueRecallItem(o) {
     // You have to chain them because they could be modifying the backpack
-    deferred = deferred.pipe(pipeRecallToQueue(o));
+    deferred = deferred.pipe(partial(pipeRecallToQueue, o));
     return deferred;
   }
 
@@ -10635,11 +10809,9 @@
     outputResult(json.r.length.toString() + ' item(s) taken.', takeResult);
   }
 
-  function doneTake(takeResult) {
-    return function(json) {
-      if (jsonFail(json, takeResult)) {return;}
-      takeSuccess(takeResult, json);
-    };
+  function doneTake(takeResult, json) {
+    if (jsonFail(json, takeResult)) {return;}
+    takeSuccess(takeResult, json);
   }
 
   function takeSimilar(itemList, takeResult, self) { // jQuery.min
@@ -10647,16 +10819,14 @@
     var invIds = itemList[type].invIds;
     self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
     for (var i = 0; i < invIds.length; i += 40) {
-      takeitems(invIds.slice(i, i + 40)).done(doneTake(takeResult));
+      takeitems(invIds.slice(i, i + 40)).done(partial(doneTake, takeResult));
     }
   }
 
-  function clickEvt(itemList, takeResult) {
-    return function(evt) {
-      if (evt.target.classList.contains('fshBls')) {
-        takeSimilar(itemList, takeResult, evt.target);
-      }
-    };
+  function clickEvt(itemList, takeResult, evt) {
+    if (evt.target.classList.contains('fshBls')) {
+      takeSimilar(itemList, takeResult, evt.target);
+    }
   }
 
   function makeQtDiv(itemList) {
@@ -10667,7 +10837,7 @@
       var itemTbl = createDiv({className: 'fshTakeGrid'});
       makeItemBoxes(itemTbl, itemList);
       insertElement(qt, itemTbl);
-      itemTbl.addEventListener('click', clickEvt(itemList, takeResult));
+      itemTbl.addEventListener('click', partial(clickEvt, itemList, takeResult));
     } else {
       takeResult.textContent = 'Your browser is not supported.';
     }
@@ -10680,20 +10850,14 @@
     makeQtDiv(itemList);
   }
 
-  function onchange(qtCheckbox, items, injector) {
-    return function changeHdl() {
-      qtCheckbox.removeEventListener('change', changeHdl);
-      toggleQuickTake(items, injector);
-    };
-  }
-
   function makeQtCheckbox(items, injector) {
     var qtCheckbox = createInput({
       id: 'fshQuickTake',
       type: 'checkbox'
     });
     insertElementBefore(qtCheckbox, injector);
-    qtCheckbox.addEventListener('change', onchange(qtCheckbox, items, injector));
+    addEventListenerOnce(qtCheckbox, 'change',
+      partial(toggleQuickTake, items, injector));
   }
 
   function injectMailbox() {
@@ -11069,7 +11233,7 @@
     storeOptions();
   }
 
-  function buildTable() {
+  function buildTable$1() {
     myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
     insertHtmlBeforeEnd(myTable, headerRow);
 
@@ -11117,7 +11281,7 @@
     }
     fshOutput.textContent = 'Loading complete.';
     updateOptionsLog();
-    buildTable();
+    buildTable$1();
   }
 
   function processFirstPage$1(data) {
@@ -11359,15 +11523,12 @@
     countDom.textContent = count.toString();
   }
 
-  function compDeleted(self, itemId) {
-    return function(data) {
-      // console.log('data', data);
-      if (data.s) {
-        updateComponentCounts(itemId);
-        updateUsedCount(1);
-        if (self.parentNode) {self.parentNode.innerHTML = '';}
-      }
-    };
+  function compDeleted(self, itemId, data) {
+    if (data.s) {
+      updateComponentCounts(itemId);
+      updateUsedCount(1);
+      if (self.parentNode) {self.parentNode.innerHTML = '';}
+    }
   }
 
   function delComponent(self) { // jQuery.min
@@ -11375,10 +11536,9 @@
     var matches = tipped.match(itemRE);
     var itemId = matches[1];
     var componentId = matches[2];
-    // console.log('a=', componentId, 'b=', itemId);
     destroyComponent([componentId])
       .pipe(errorDialog)
-      .done(compDeleted(self, itemId));
+      .done(partial(compDeleted, self, itemId));
   }
 
   function componentDeleteHandler(evt) {
@@ -11839,7 +11999,7 @@
         'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
         playerid + '" data-tipped="Rank ' + playername +
         '" style="background-image: url(\'' + imageServer +
-        '/guilds/' + guildId$3 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
+        '/guilds/' + guildId$3 + '_mini.png\');"></a>&nbsp;&nbsp;';
     }
     return '';
   }
@@ -11851,9 +12011,7 @@
     return [];
   }
 
-  function hasRelationship(txt) {
-    return function(el) {return el.test.includes(txt);};
-  }
+  function hasRelationship(txt, el) {return el.test.includes(txt);}
 
   function externalRelationship(_txt) {
     var scenario = [
@@ -11862,7 +12020,7 @@
       {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
     ];
     var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
-    var relObj = scenario.find(hasRelationship(txt));
+    var relObj = scenario.find(partial(hasRelationship, txt));
     if (relObj) {return relObj.type;}
   }
 
@@ -12707,15 +12865,13 @@
       '">[' + playerBuffLevel + ']</span>';
   }
 
-  function hazBuff(playerData) {
-    return function(el) {
-      var myBuffName = el.getAttribute('data-name');
-      var playerBuffLevel = playerData[myBuffName];
-      var playerSpan = el.nextElementSibling.nextElementSibling;
-      if (playerBuffLevel || playerSpan) {
-        buffRunning(el, playerBuffLevel, playerSpan);
-      }
-    };
+  function hazBuff(playerData, el) {
+    var myBuffName = el.getAttribute('data-name');
+    var playerBuffLevel = playerData[myBuffName];
+    var playerSpan = el.nextElementSibling.nextElementSibling;
+    if (playerBuffLevel || playerSpan) {
+      buffRunning(el, playerBuffLevel, playerSpan);
+    }
   }
 
   function makeBuffArray(player) {
@@ -12735,7 +12891,7 @@
     getProfile(player.textContent).done(addStatsQuickBuff);
     var playerData = makeBuffArray(player);
     var nodeList = document.querySelectorAll('#buff-outer input[name]');
-    Array.from(nodeList).forEach(hazBuff(playerData));
+    Array.from(nodeList).forEach(partial(hazBuff, playerData));
   }
 
   var retries = 0;
@@ -12818,20 +12974,18 @@
     return result.s && result.r[0].casts.length === 1;
   }
 
-  function processResult$1(trigger) {
-    return function(json) {
-      if (itWorked(json)) {
-        trigger.className = 'fshLime';
-        trigger.innerHTML = 'On';
-      }
-    };
+  function processResult$1(trigger, json) {
+    if (itWorked(json)) {
+      trigger.className = 'fshLime';
+      trigger.innerHTML = 'On';
+    }
   }
 
   function quickActivate(evt) { // jQuery.min
     var trigger = evt.target;
     if (trigger.className !== 'quickbuffActivate') {return;}
     quickbuff([window.self], [trigger.dataset.buffid])
-      .done(processResult$1(trigger));
+      .done(partial(processResult$1, trigger));
   }
 
   var quickBuffHeader =
@@ -15887,10 +16041,8 @@
   var titanTbl;
 
   function clearMemberRows() {
-    if (titanTbl.rows.length > 7) {
-      for (var i = 7; i < titanTbl.rows.length; i += 1) {
-        titanTbl.deleteRow(i);
-      }
+    while (titanTbl.rows.length > 7) {
+      titanTbl.deleteRow(7);
     }
   }
 
@@ -17493,11 +17645,9 @@
     return prev;
   }
 
-  function findMissingBuffs(buffHash) {
-    return function(prev, curr) {
-      if (!buffHash[curr.trim()]) {prev.push(curr);}
-      return prev;
-    };
+  function findMissingBuffs(buffHash, prev, curr) {
+    if (!buffHash[curr.trim()]) {prev.push(curr);}
+    return prev;
   }
 
   function displayMissingBuffs(missingBuffsDiv, missingBuffs) {
@@ -17511,7 +17661,8 @@
 
   function lookForMissingBuffs(missingBuffsDiv, data) {
     var buffHash = data.b.reduce(buildBuffHash, {});
-    var missingBuffs = huntingBuffs$1.reduce(findMissingBuffs(buffHash), []);
+    var missingBuffs = huntingBuffs$1.reduce(
+      partial(findMissingBuffs, buffHash), []);
     if (missingBuffs.length > 0) {
       displayMissingBuffs(missingBuffsDiv, missingBuffs);
     } else {
@@ -17527,18 +17678,16 @@
     }
   }
 
-  function dataEventsPlayerBuffs(missingBuffsDiv) {
-    return function(evt, data) {
-      if (huntingBuffs$1) {huntingBuffsEnabled(missingBuffsDiv, evt, data);}
-    };
+  function dataEventsPlayerBuffs(missingBuffsDiv, evt, data) {
+    if (huntingBuffs$1) {huntingBuffsEnabled(missingBuffsDiv, evt, data);}
   }
 
   function doHuntingBuffs(missingBuffsDiv) { // jQuery.min
     setCurrentBuffList();
-    $.subscribe(def_playerBuffs, dataEventsPlayerBuffs(missingBuffsDiv));
+    var buffsFn = partial(dataEventsPlayerBuffs, missingBuffsDiv);
+    $.subscribe(def_playerBuffs, buffsFn);
     if (calf.showBuffs && window.initialGameData) { // HCS initial data
-      dataEventsPlayerBuffs(missingBuffsDiv)(null,
-        {b: window.initialGameData.player.buffs});
+      buffsFn(null, {b: window.initialGameData.player.buffs});
     }
   }
 
@@ -18658,9 +18807,7 @@
   }
 
   function removeCrlf(fshTxt) {
-    return function() {
-      fshTxt.value = fshTxt.value.replace(/\r\n|\n|\r/g, ' ');
-    };
+    fshTxt.value = fshTxt.value.replace(/\r\n|\n|\r/g, ' ');
   }
 
   function setDoChat(el) {
@@ -18690,13 +18837,11 @@
     return ourTd;
   }
 
-  function keypress$1(sendBtn) {
-    return function(evt) {
-      if (evt.key === 'Enter' && !evt.shiftKey) {
-        evt.preventDefault();
-        sendBtn.click();
-      }
-    };
+  function keypress$1(sendBtn, evt) {
+    if (evt.key === 'Enter' && !evt.shiftKey) {
+      evt.preventDefault();
+      sendBtn.click();
+    }
   }
 
   function makeTextArea(sendBtn) {
@@ -18707,7 +18852,7 @@
       rows: 2
     });
     setDoChat(fshTxt);
-    fshTxt.addEventListener('keypress', keypress$1(sendBtn));
+    fshTxt.addEventListener('keypress', partial(keypress$1, sendBtn));
     return fshTxt;
   }
 
@@ -18719,7 +18864,7 @@
     var ourTd = rearrangeTable(btnMass);
     var fshTxt = makeTextArea(sendBtn);
     ourTd.replaceChild(fshTxt, ourTd.children[0]);
-    theForm.addEventListener('submit', removeCrlf(fshTxt));
+    theForm.addEventListener('submit', partial(removeCrlf, fshTxt));
   }
 
   function addChatTextArea() {
@@ -19695,7 +19840,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '42';
+  window.FSH.calf = '43';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
