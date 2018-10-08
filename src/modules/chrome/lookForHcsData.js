@@ -4,7 +4,7 @@ import changeGuildLogHREF from './changeGuildLogHREF';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import guildActivity from '../guild/guildActivity';
-import {injectComposeAlert} from '../composing/composing';
+import injectComposeAlert from '../composing/injectComposeAlert';
 import injectFSBoxLog from './injectFSBoxLog';
 import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';

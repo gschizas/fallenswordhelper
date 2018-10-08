@@ -4,6 +4,7 @@ https://github.com/addyosmani/pubsubz
 */
 
 import add from './task';
+import partial from '../common/partial';
 
 var topics = {};
 var subUid = -1;
@@ -24,21 +25,17 @@ export function subscribe(topic, func) {
   return token;
 }
 
-function hasSub(token, subs) {
-  return function(el, i) {
-    if (el.token === token) {
-      subs.splice(i, 1);
-      return true;
-    }
-  };
+function hasSub(token, subs, el, i) {
+  if (el.token === token) {
+    subs.splice(i, 1);
+    return true;
+  }
 }
 
-function hasTopic(token) {
-  return function(subs) {
-    return subs.some(hasSub(token, subs));
-  };
+function hasTopic(token, subs) {
+  return subs.some(partial(hasSub, token, subs));
 }
 
 export function unsubscribe(token) {
-  if (topics.values().some(hasTopic(token))) {return token;}
+  if (topics.values().some(partial(hasTopic, token))) {return token;}
 }

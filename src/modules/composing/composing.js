@@ -1,136 +1,12 @@
-import add from '../support/task';
-import calf from '../support/calf';
-import createDocument from '../system/createDocument';
+import fastCompose from './fastCompose';
 import {getElementById} from '../common/getElement';
-import getRandomInt from '../system/getRandomInt';
 import getValue from '../system/getValue';
-import {imageServer} from '../system/system';
 import insertElementBefore from '../common/insertElementBefore';
-import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryPresent from '../common/jQueryPresent';
-import {now} from '../support/constants';
 import {pCC} from '../support/layout';
-import retryAjax from '../ajax/retryAjax';
-import rnd from '../system/rnd';
-import setValue from '../system/setValue';
-
-var composeMsg =
-  '<li class="notification"><a href="index.php?cmd=composing"><span' +
-  ' class="notification-icon"></span><p class="notification-content">' +
-  'Composing to do</p></a></li>';
-
-function displayComposeMsg() {
-  insertHtmlAfterBegin(getElementById('notifications'), composeMsg);
-}
-
-function getDoc(data) {
-  if (calf.cmd !== 'composing') {
-    return createDocument(data);
-  }
-  return document;
-}
-
-function parseComposing(data) {
-  var doc = getDoc(data);
-  var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
-  var times = [];
-  var openSlots = doc.getElementsByClassName('composing-potion-time');
-  Array.prototype.forEach.call(openSlots, function(el) {
-    if (el.textContent === 'ETA: Ready to Collect!' ||
-        el.textContent === 'ETA: n/a') {
-      times.push(0);
-    } else {
-      var timeArr = timeRE.exec(el.textContent);
-      var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
-        1000 + now;
-      times.push(milli);
-    }
-  });
-  var eta = Math.min.apply(null, times);
-  if (eta === 0) {
-    if (calf.cmd !== 'composing') {displayComposeMsg();}
-    setValue('needToCompose', true);
-  } else {
-    setValue('needToCompose', false);
-    setValue('lastComposeCheck', eta);
-  }
-}
-
-function createSuccess(temp, textStatus) {
-  var potName = temp[temp.selectedIndex].text;
-  var myParent = temp.parentNode;
-  var infoDiv = myParent.previousElementSibling.previousElementSibling;
-  infoDiv.children[0].innerHTML = '';
-  infoDiv.children[0].classList.add('fshPot');
-  infoDiv.children[0].style.backgroundImage = 'url(' + imageServer +
-    '/composing/potions/' + getRandomInt(1, 11) + '_' +
-    getRandomInt(1, 51) + '.gif)';
-  infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
-    potName + '</span>\' Potion';
-  infoDiv.children[3].innerHTML = '';
-  myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
-}
-
-function createPotion(temp) { // jQuery
-  retryAjax({
-    cache: false,
-    dataType: 'json',
-    url: 'index.php',
-    data: {
-      cmd: 'composing',
-      subcmd: 'createajax',
-      template_id: temp.value,
-      _rnd: rnd()
-    }
-  }).done(function potionDone(data, textStatus) {
-    if (data.error !== '') {
-      temp.parentNode.innerHTML = '<div class="fshScs">' +
-        data.error + '</div>';
-    } else {
-      createSuccess(temp, textStatus);
-    }
-  });
-}
-
-function isOurTarget(target) {
-  return target.tagName === 'SPAN' && target.className === 'quickCreate';
-}
-
-function doQuickCreate(self) {
-  var temp = self.previousElementSibling.previousElementSibling;
-  if (temp && temp.value !== 'none') {
-    self.innerHTML = '';
-    self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
-    createPotion(temp);
-  }
-}
-
-function quickCreate(evt) {
-  var self = evt.target.parentNode;
-  if (isOurTarget(self)) {doQuickCreate(self);}
-}
-
-function checkLastCompose() { // jQuery
-  var lastComposeCheck = getValue('lastComposeCheck');
-  if (lastComposeCheck && now < lastComposeCheck) {return;}
-  retryAjax('index.php?no_mobile=1&cmd=composing').done(function(data) {
-    add(3, parseComposing, [data]);
-  });
-}
-
-function composeAlert() {
-  var needToCompose = getValue('needToCompose');
-  if (needToCompose) {
-    displayComposeMsg();
-    return;
-  }
-  checkLastCompose();
-}
-
-export function injectComposeAlert() {
-  if (jQueryPresent() && calf.cmd !== 'composing') {composeAlert();}
-}
+import parseComposing from './parseComposing';
+import quickCreate from './quickCreate';
 
 function moveButtons() {
   if (getValue('moveComposingButtons')) {
@@ -143,34 +19,21 @@ function moveButtons() {
   }
 }
 
-function hasJQuery() {
-  if (calf.enableComposingAlert) {
-    parseComposing();
-  }
+function injectButton(el) {
+  insertHtmlAfterEnd(el, '<span class="quickCreate">' +
+    '[<span class="sendLink">Quick Create</span>]</span>');
+}
 
+function hasJQuery() {
+  parseComposing();
   var buttons = pCC
     .querySelectorAll('input[id^=create-]:not(#create-multi)');
-  Array.prototype.forEach.call(buttons, function(el) {
-    insertHtmlAfterEnd(el, '<span class="quickCreate">' +
-      '[<span class="sendLink">Quick Create</span>]</span>');
-  });
+  Array.from(buttons).forEach(injectButton);
   pCC.addEventListener('click', quickCreate);
   moveButtons();
+  fastCompose();
 }
 
-export function injectComposing() {
+export default function injectComposing() {
   if (jQueryPresent() && pCC) {hasJQuery();}
-}
-
-export function composingCreate() {
-  getElementById('composing-add-skill')
-    .addEventListener('click', function() {
-      getElementById('composing-skill-level-input').value =
-        getElementById('composing-skill-level-max').textContent;
-    });
-  getElementById('composing-skill-select')
-    .addEventListener('change', function() {
-      getElementById('composing-skill-level-input').value =
-        getElementById('composing-skill-level-max').textContent;
-    });
 }
