@@ -37,7 +37,9 @@ function parseActiveBounty(activeTable) { // Legacy
 }
 
 export function getActiveBountyList(doc) { // Legacy
-  var activeTable = getElementById('bounty-info', doc).parentNode.parentNode
+  var bountyInfo = getElementById('bounty-info', doc);
+  if (!bountyInfo) {return;}
+  var activeTable = bountyInfo.parentNode.parentNode
     .previousElementSibling.children[0].children[0];
   bountyList = {};
   bountyList.bounty = [];
