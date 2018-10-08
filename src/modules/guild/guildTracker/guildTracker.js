@@ -1,3 +1,4 @@
+import addEventListenerOnce from '../../common/addEventListenerOnce';
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
@@ -58,7 +59,6 @@ function makeDragHandle() {
 }
 
 function updateRawData() {
-  acttab2.removeEventListener('change', updateRawData);
   if (trackerData) {queueRawData(trackerData);}
 }
 
@@ -75,7 +75,7 @@ function makeInnerPopup() {
     name: 'acttabs',
     type: 'radio'
   });
-  acttab2.addEventListener('change', updateRawData);
+  addEventListenerOnce(acttab2, 'change', updateRawData);
   insertElement(dialogPopup, acttab2);
   return dialogPopup;
 }
@@ -116,7 +116,6 @@ function togglePref(evt) {
 
 function openDialog() {
   getForage('fsh_guildActivity').done(gotActivity);
-  tracker.removeEventListener('change', openDialog);
   calf.dialogIsClosed = isClosed;
   addOverlay();
   makePopup();
@@ -138,7 +137,7 @@ export default function guildTracker() {
     className: 'fsh-dialog-open',
     type: 'checkbox'
   });
-  tracker.addEventListener('change', openDialog);
+  addEventListenerOnce(tracker, 'change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   insertElement(trDialog, tracker);
   document.body.addEventListener('keydown', keydownHandler);

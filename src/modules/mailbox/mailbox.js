@@ -1,3 +1,4 @@
+import addEventListenerOnce from '../common/addEventListenerOnce';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
@@ -142,20 +143,14 @@ function toggleQuickTake(items, injector) {
   makeQtDiv(itemList);
 }
 
-function onchange(qtCheckbox, items, injector) {
-  return function changeHdl() {
-    qtCheckbox.removeEventListener('change', changeHdl);
-    toggleQuickTake(items, injector);
-  };
-}
-
 function makeQtCheckbox(items, injector) {
   var qtCheckbox = createInput({
     id: 'fshQuickTake',
     type: 'checkbox'
   });
   insertElementBefore(qtCheckbox, injector);
-  qtCheckbox.addEventListener('change', onchange(qtCheckbox, items, injector));
+  addEventListenerOnce(qtCheckbox, 'change',
+    partial(toggleQuickTake, items, injector));
 }
 
 export default function injectMailbox() {

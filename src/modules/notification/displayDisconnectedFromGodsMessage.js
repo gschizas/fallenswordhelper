@@ -1,3 +1,4 @@
+import addEventListenerOnce from '../common/addEventListenerOnce';
 import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
 import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
@@ -37,8 +38,6 @@ function havePrayed() {
 function prayToGods(e) { // jQuery
   var myGod = e.target.getAttribute('praytype');
   if (!myGod) {return;}
-  getElementById('helperPrayToGods').removeEventListener('click',
-    prayToGods);
   retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
   $(e.target).qtip('hide');
@@ -46,6 +45,5 @@ function prayToGods(e) { // jQuery
 
 export default function displayDisconnectedFromGodsMessage() {
   insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
-  getElementById('helperPrayToGods').addEventListener('click',
-    prayToGods);
+  addEventListenerOnce(getElementById('helperPrayToGods'), 'click', prayToGods);
 }

@@ -1,3 +1,5 @@
+import addEventListenerOnce from './addEventListenerOnce';
+
 var dragTarget;
 var mouseX;
 var mouseY;
@@ -57,7 +59,6 @@ function dragOver(event) {
 function dragDrop(event) {
   drawElement(event);
   document.body.removeEventListener('dragover', dragOver, false);
-  document.body.removeEventListener('drop', dragDrop, false);
   event.preventDefault();
   return false;
 }
@@ -77,7 +78,7 @@ function dragStart(parent, event) {
   timer = 0;
   event.dataTransfer.setData('text/plain', '');
   document.body.addEventListener('dragover', dragOver, false);
-  document.body.addEventListener('drop', dragDrop, false);
+  addEventListenerOnce(document.body, 'drop', dragDrop, false);
 }
 
 export default function draggable(element, parent) {

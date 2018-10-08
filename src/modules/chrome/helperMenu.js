@@ -1,3 +1,4 @@
+import addEventListenerOnce from '../common/addEventListenerOnce';
 import {createDiv} from '../common/cElement';
 import draggable from '../common/dragStart';
 import {getElementById} from '../common/getElement';
@@ -43,6 +44,12 @@ var helperMenuBlob =
   '<a href="index.php?cmd=profile&player_id=1599987">yuuzhan</a></li>' +
   '</ul></div>';
 
+function toggleMenu(evt) {
+  if (evt.target.id !== 'helperMenu') {return;}
+  var menu = evt.target.firstElementChild;
+  menu.classList.toggle('showMenuDiv');
+}
+
 var functionLookup = {
   'Buff Log': injectBuffLog,
   'Combat Log': injectNotepadShowLogs,
@@ -77,10 +84,8 @@ function eventHandler(evt) {
   }
 }
 
-function showHelperMenu() {
-  var helperMenu = getElementById('helperMenu');
-  helperMenu.removeEventListener('mouseenter', showHelperMenu);
-
+function showHelperMenu(evt) {
+  var helperMenu = evt.target;
   var helperMenuDiv = createDiv({
     id: 'helperMenuDiv',
     className: 'helperMenuDiv',
@@ -91,11 +96,7 @@ function showHelperMenu() {
   });
   insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
   insertElement(helperMenu, helperMenuDiv);
-  helperMenu.addEventListener('click', function(evt) {
-    if (evt.target.id !== 'helperMenu') {return;}
-    var menu = evt.target.firstElementChild;
-    menu.classList.toggle('showMenuDiv');
-  });
+  helperMenu.addEventListener('click', toggleMenu);
   helperMenuDiv.addEventListener('click', eventHandler);
 }
 
@@ -108,7 +109,7 @@ function haveNode(node) {
   if (getValue('keepHelperMenuOnScreen')) {
     helperMenu.classList.add('fshFixed');
   }
-  helperMenu.addEventListener('mouseenter', showHelperMenu);
+  addEventListenerOnce(helperMenu, 'mouseenter', showHelperMenu);
   if (getValue('draggableHelperMenu')) {
     helperMenu.classList.add('fshMove');
     draggable(helperMenu);
