@@ -7,6 +7,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonFail from '../common/jsonFail';
 import outputResult from '../common/outputResult';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import takeitems from '../app/tempinv/take';
 import {
   createDiv,
@@ -100,11 +101,9 @@ function takeSuccess(takeResult, json) {
   outputResult(json.r.length.toString() + ' item(s) taken.', takeResult);
 }
 
-function doneTake(takeResult) {
-  return function(json) {
-    if (jsonFail(json, takeResult)) {return;}
-    takeSuccess(takeResult, json);
-  };
+function doneTake(takeResult, json) {
+  if (jsonFail(json, takeResult)) {return;}
+  takeSuccess(takeResult, json);
 }
 
 function takeSimilar(itemList, takeResult, self) { // jQuery.min
@@ -112,16 +111,14 @@ function takeSimilar(itemList, takeResult, self) { // jQuery.min
   var invIds = itemList[type].invIds;
   self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
   for (var i = 0; i < invIds.length; i += 40) {
-    takeitems(invIds.slice(i, i + 40)).done(doneTake(takeResult));
+    takeitems(invIds.slice(i, i + 40)).done(partial(doneTake, takeResult));
   }
 }
 
-function clickEvt(itemList, takeResult) {
-  return function(evt) {
-    if (evt.target.classList.contains('fshBls')) {
-      takeSimilar(itemList, takeResult, evt.target);
-    }
-  };
+function clickEvt(itemList, takeResult, evt) {
+  if (evt.target.classList.contains('fshBls')) {
+    takeSimilar(itemList, takeResult, evt.target);
+  }
 }
 
 function makeQtDiv(itemList) {
@@ -132,7 +129,7 @@ function makeQtDiv(itemList) {
     var itemTbl = createDiv({className: 'fshTakeGrid'});
     makeItemBoxes(itemTbl, itemList);
     insertElement(qt, itemTbl);
-    itemTbl.addEventListener('click', clickEvt(itemList, takeResult));
+    itemTbl.addEventListener('click', partial(clickEvt, itemList, takeResult));
   } else {
     takeResult.textContent = 'Your browser is not supported.';
   }

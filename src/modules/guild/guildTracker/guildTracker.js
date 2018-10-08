@@ -4,6 +4,7 @@ import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import partial from '../../common/partial';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
@@ -39,9 +40,7 @@ function keydownHandler(evt) {
 }
 
 function maybeClose(ret) {
-  return function() {
-    if (isClosed()) {ret.style.transform = null;}
-  };
+  if (isClosed()) {ret.style.transform = null;}
 }
 
 function makeDragHandle() {
@@ -90,7 +89,7 @@ function makePopup() {
   insertElement(container, makeInOut());
   insertElement(ret, container);
   draggable(hdl, ret);
-  tracker.addEventListener('change', maybeClose(ret));
+  tracker.addEventListener('change', partial(maybeClose, ret));
   insertElement(trDialog, ret);
 }
 

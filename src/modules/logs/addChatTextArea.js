@@ -2,11 +2,10 @@ import {createTextArea} from '../common/cElement';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 
 function removeCrlf(fshTxt) {
-  return function() {
-    fshTxt.value = fshTxt.value.replace(/\r\n|\n|\r/g, ' ');
-  };
+  fshTxt.value = fshTxt.value.replace(/\r\n|\n|\r/g, ' ');
 }
 
 function setDoChat(el) {
@@ -36,13 +35,11 @@ function rearrangeTable(btnMass) {
   return ourTd;
 }
 
-function keypress(sendBtn) {
-  return function(evt) {
-    if (evt.key === 'Enter' && !evt.shiftKey) {
-      evt.preventDefault();
-      sendBtn.click();
-    }
-  };
+function keypress(sendBtn, evt) {
+  if (evt.key === 'Enter' && !evt.shiftKey) {
+    evt.preventDefault();
+    sendBtn.click();
+  }
 }
 
 function makeTextArea(sendBtn) {
@@ -53,7 +50,7 @@ function makeTextArea(sendBtn) {
     rows: 2
   });
   setDoChat(fshTxt);
-  fshTxt.addEventListener('keypress', keypress(sendBtn));
+  fshTxt.addEventListener('keypress', partial(keypress, sendBtn));
   return fshTxt;
 }
 
@@ -65,7 +62,7 @@ function hasTextEntry() {
   var ourTd = rearrangeTable(btnMass);
   var fshTxt = makeTextArea(sendBtn);
   ourTd.replaceChild(fshTxt, ourTd.children[0]);
-  theForm.addEventListener('submit', removeCrlf(fshTxt));
+  theForm.addEventListener('submit', partial(removeCrlf, fshTxt));
 }
 
 export default function addChatTextArea() {

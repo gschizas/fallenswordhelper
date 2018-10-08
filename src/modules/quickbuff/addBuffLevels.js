@@ -2,6 +2,7 @@ import {createSpan} from '../common/cElement';
 import formatLastActivity from '../system/formatLastActivity';
 import getProfile from '../ajax/getProfile';
 import insertElementAfter from '../common/insertElementAfter';
+import partial from '../common/partial';
 
 function addStatsQuickBuff(data) {
   var myPlayer = document.querySelector('div.player[data-username="' +
@@ -46,15 +47,13 @@ function buffRunning(el, playerBuffLevel, playerSpan) {
     '">[' + playerBuffLevel + ']</span>';
 }
 
-function hazBuff(playerData) {
-  return function(el) {
-    var myBuffName = el.getAttribute('data-name');
-    var playerBuffLevel = playerData[myBuffName];
-    var playerSpan = el.nextElementSibling.nextElementSibling;
-    if (playerBuffLevel || playerSpan) {
-      buffRunning(el, playerBuffLevel, playerSpan);
-    }
-  };
+function hazBuff(playerData, el) {
+  var myBuffName = el.getAttribute('data-name');
+  var playerBuffLevel = playerData[myBuffName];
+  var playerSpan = el.nextElementSibling.nextElementSibling;
+  if (playerBuffLevel || playerSpan) {
+    buffRunning(el, playerBuffLevel, playerSpan);
+  }
 }
 
 function makeBuffArray(player) {
@@ -74,5 +73,5 @@ export default function addBuffLevels(evt) {
   getProfile(player.textContent).done(addStatsQuickBuff);
   var playerData = makeBuffArray(player);
   var nodeList = document.querySelectorAll('#buff-outer input[name]');
-  Array.from(nodeList).forEach(hazBuff(playerData));
+  Array.from(nodeList).forEach(partial(hazBuff, playerData));
 }

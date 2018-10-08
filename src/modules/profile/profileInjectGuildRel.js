@@ -2,6 +2,7 @@ import currentGuildId from '../common/currentGuildId';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import partial from '../common/partial';
 import setValue from '../system/setValue';
 
 var guildId;
@@ -42,9 +43,7 @@ function guildAry(val) {
   return [];
 }
 
-function hasRelationship(txt) {
-  return function(el) {return el.test.includes(txt);};
-}
+function hasRelationship(txt, el) {return el.test.includes(txt);}
 
 function externalRelationship(_txt) {
   var scenario = [
@@ -53,7 +52,7 @@ function externalRelationship(_txt) {
     {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
   ];
   var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
-  var relObj = scenario.find(hasRelationship(txt));
+  var relObj = scenario.find(partial(hasRelationship, txt));
   if (relObj) {return relObj.type;}
 }
 
