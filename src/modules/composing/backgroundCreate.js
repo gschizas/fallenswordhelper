@@ -50,23 +50,9 @@ function createPotion(temp) { // jQuery.min
   // setTimeout(partial(potionDone, temp, {}, 'faked'), 200);
 }
 
-function isOurTarget(target) {
-  return target.tagName === 'SPAN' && target.className === 'quickCreate';
-}
-
-function doQuickCreate(self) {
-  var temp = self.previousElementSibling.previousElementSibling;
-  if (temp && temp.value !== 'none') {
-    self.innerHTML = '';
-    self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
-    createPotion(temp);
-    publish('quickcreate');
-  }
-}
-
-export default function quickCreate(evt) {
-  var self = evt.target.parentNode;
-  if (isOurTarget(self)) {
-    doQuickCreate(self);
-  }
+export default function backgroundCreate(temp) {
+  self.innerHTML = '';
+  self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
+  createPotion(temp);
+  publish('quickcreate');
 }

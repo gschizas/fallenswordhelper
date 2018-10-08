@@ -1,3 +1,4 @@
+import backgroundCreate from './backgroundCreate';
 import fastCompose from './fastCompose';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
@@ -6,7 +7,7 @@ import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryPresent from '../common/jQueryPresent';
 import {pCC} from '../support/layout';
 import parseComposing from './parseComposing';
-import quickCreate from './quickCreate';
+import {sendEvent} from '../support/fshGa';
 
 function moveButtons() {
   if (getValue('moveComposingButtons')) {
@@ -22,6 +23,25 @@ function moveButtons() {
 function injectButton(el) {
   insertHtmlAfterEnd(el, '<span class="quickCreate">' +
     '[<span class="sendLink">Quick Create</span>]</span>');
+}
+
+function isOurTarget(target) {
+  return target.tagName === 'SPAN' && target.className === 'quickCreate';
+}
+
+function doQuickCreate(self) {
+  var temp = self.previousElementSibling.previousElementSibling;
+  if (temp && temp.value !== 'none') {
+    backgroundCreate(temp);
+    sendEvent('composing', 'QuickCreate');
+  }
+}
+
+function quickCreate(evt) {
+  var self = evt.target.parentNode;
+  if (isOurTarget(self)) {
+    doQuickCreate(self);
+  }
 }
 
 function hasJQuery() {
