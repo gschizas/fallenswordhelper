@@ -216,5 +216,6 @@ export var defaults = {
   disableQuickWearPrompts: false,
   enableGuildActivityTracker: false,
   enableSeTracker: false,
-  showTitanInfo: false
+  showTitanInfo: false,
+  highlightPvpProtection: false
 };
