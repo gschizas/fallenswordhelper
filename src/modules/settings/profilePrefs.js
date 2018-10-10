@@ -32,5 +32,6 @@ export default function profilePrefs() {
 
     simpleCheckbox('showStatBonusTotal') +
     simpleCheckbox('enableQuickDrink') +
-    simpleCheckbox('disableDeactivatePrompts');
+    simpleCheckbox('disableDeactivatePrompts') +
+    simpleCheckbox('highlightPvpProtection');
 }

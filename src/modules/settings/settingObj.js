@@ -121,5 +121,6 @@ export var saveBoxes = [
   'disableDeactivatePrompts',
   'moveComposingButtons',
   'showExtraLinks',
-  'expandMenuOnKeyPress'
+  'expandMenuOnKeyPress',
+  'highlightPvpProtection'
 ];

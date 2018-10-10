@@ -53,9 +53,7 @@ export default function injectProfile() { // Legacy
   profileInjectQuickButton(avyImg, playerid, playername);
   updateNmv();
   updateStatistics();
-  //#if _DEV  //  highlightPvpProtection
   highlightPvpProtection();
-  //#endif
   profileRenderBio(self);
   addStatTotalToMouseover();
   add(3, colouredDots);

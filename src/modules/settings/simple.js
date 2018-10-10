@@ -309,5 +309,9 @@ export default {
   wantedGuildMembers: {
     helpTitle: 'Show Guild Members',
     helpText: 'If enabled, will show guild members in the wanted bounty list.'
+  },
+  highlightPvpProtection: {
+    helpTitle: 'Highlight Pvp Protection',
+    helpText: 'If enabled, will put a red box around PvP Protection.'
   }
 };
