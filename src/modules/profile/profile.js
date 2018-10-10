@@ -3,7 +3,6 @@ import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
 import {colouredDots} from '../common/colouredDots';
 import components from './components/components';
-import dialogMsg from '../common/dialogMsg';
 import fallback from '../system/fallback';
 import fastDebuff from './debuff';
 import getUrlParameter from '../system/getUrlParameter';
@@ -39,15 +38,6 @@ function ifSelf(self) {
   }
 }
 
-function yuuzhan(playername, avyImg) {
-  if (playername === 'yuuzhan') {
-    avyImg.src = 'http://evolutions.yvong.com/images/tumbler.gif';
-    avyImg.addEventListener('click', function() {
-      dialogMsg('Winner!');
-    });
-  }
-}
-
 export default function injectProfile() { // Legacy
   if (jQueryNotPresent()) {return;}
   var avyImg = document
@@ -61,11 +51,6 @@ export default function injectProfile() { // Legacy
   // It sets up guildId and currentGuildRelationship
   var playerid = fallback(getUrlParameter('player_id'), playerId());
   profileInjectQuickButton(avyImg, playerid, playername);
-
-  //* ************* yuuzhan having fun
-  yuuzhan(playername, avyImg);
-  //* *************
-
   updateNmv();
   updateStatistics();
   //#if _DEV  //  highlightPvpProtection
