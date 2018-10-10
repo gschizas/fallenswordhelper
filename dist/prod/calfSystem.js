@@ -806,7 +806,8 @@
     disableQuickWearPrompts: false,
     enableGuildActivityTracker: false,
     enableSeTracker: false,
-    showTitanInfo: false
+    showTitanInfo: false,
+    highlightPvpProtection: false
   };
 
   function getValue(name) {
@@ -3230,6 +3231,10 @@
     wantedGuildMembers: {
       helpTitle: 'Show Guild Members',
       helpText: 'If enabled, will show guild members in the wanted bounty list.'
+    },
+    highlightPvpProtection: {
+      helpTitle: 'Highlight Pvp Protection',
+      helpText: 'If enabled, will put a red box around PvP Protection.'
     }
   };
 
@@ -3356,7 +3361,8 @@
     'disableDeactivatePrompts',
     'moveComposingButtons',
     'showExtraLinks',
-    'expandMenuOnKeyPress'
+    'expandMenuOnKeyPress',
+    'highlightPvpProtection'
   ];
 
   function helpLink(title, text) {
@@ -4306,8 +4312,6 @@
     }
     bufferProgress.innerHTML = 'Parsing player data ...';
     bufferProgress.style.color = 'green';
-
-
     onlinePlayers$1.forEach(function(j) {
       retryAjax(j).done(function(html) {
         parseProfileAndDisplay(html, {
@@ -11831,6 +11835,15 @@
     }
   }
 
+  function highlightPvpProtection() {
+    if (!getValue('highlightPvpProtection')) {return;}
+    var pvpp = document
+      .querySelector('#profileLeftColumn a[href="index.php?cmd=points"]');
+    if (pvpp.parentNode.nextSibling.textContent.trim() !== 'N/A') {
+      pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red';
+    }
+  }
+
   function restyleBackpack() {
     var bpBack = getElementById('backpack');
     bpBack.className = 'fshBackpack';
@@ -12339,15 +12352,6 @@
     }
   }
 
-  function yuuzhan(playername, avyImg) {
-    if (playername === 'yuuzhan') {
-      avyImg.src = 'http://evolutions.yvong.com/images/tumbler.gif';
-      avyImg.addEventListener('click', function() {
-        dialogMsg('Winner!');
-      });
-    }
-  }
-
   function injectProfile() { // Legacy
     if (jQueryNotPresent()) {return;}
     var avyImg = document
@@ -12361,13 +12365,9 @@
     // It sets up guildId and currentGuildRelationship
     var playerid = fallback(getUrlParameter('player_id'), playerId());
     profileInjectQuickButton(avyImg, playerid, playername);
-
-    //* ************* yuuzhan having fun
-    yuuzhan(playername, avyImg);
-    //* *************
-
     updateNmv();
     updateStatistics();
+    highlightPvpProtection();
     profileRenderBio(self);
     addStatTotalToMouseover();
     add(3, colouredDots);
@@ -14400,7 +14400,8 @@
 
       simpleCheckbox('showStatBonusTotal') +
       simpleCheckbox('enableQuickDrink') +
-      simpleCheckbox('disableDeactivatePrompts');
+      simpleCheckbox('disableDeactivatePrompts') +
+      simpleCheckbox('highlightPvpProtection');
   }
 
   function questPrefs() {
@@ -19836,7 +19837,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '43';
+  window.FSH.calf = '44';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
