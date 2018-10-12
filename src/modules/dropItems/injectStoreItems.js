@@ -209,11 +209,11 @@ function inventory(data) {
   paintCount = 0;
   add(3, invPaint);
   doFolderButtons(data.folders);
+  pCC.addEventListener('click', eventHandler(evts));
 }
 
 export default function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
   getInventoryById().done(inventory);
   add(3, getItems);
-  pCC.addEventListener('click', eventHandler(evts));
 }
