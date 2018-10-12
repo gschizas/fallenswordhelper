@@ -1,3 +1,4 @@
+import addEventListenerOnce from '../../common/addEventListenerOnce';
 import createDocument from '../../system/createDocument';
 import {def_suffixSuccessActionResponse} from '../../support/constants';
 import getGroupStats from '../../ajax/getGroupStats';
@@ -86,7 +87,8 @@ function viewRelic(e, data) {
   relicData = data.response.data;
   if (relicData.defenders.length > 0) {
     primaryElementsSetup(relicData);
-    fetchStatsBtn.addEventListener('click', getStats);
+    // fetchStatsBtn.addEventListener('click', getStats);
+    addEventListenerOnce(fetchStatsBtn, 'click', getStats);
   }
 }
 

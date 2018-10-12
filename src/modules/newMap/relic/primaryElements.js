@@ -8,7 +8,7 @@ export var leftDiv;
 export var fetchStatsBtn;
 export var myDefenders;
 
-export function defendersSetup(relicData) {
+function defendersSetup(relicData) {
   myDefenders = relicData.defenders.map(function(x) {
     return x.player_name;
   });
