@@ -1,6 +1,7 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
 import toggleVisibilty from '../common/toggleVisibilty';
 
 export function logoToggle(leftHandSideColumnTable) { // Legacy
@@ -14,8 +15,7 @@ export function logoToggle(leftHandSideColumnTable) { // Legacy
   if (getValue('guildLogoControl')) {
     guildLogoElement.classList.add('fshHide');
   }
-  getElementById('toggleGuildLogoControl')
-    .addEventListener('click', toggleVisibilty);
+  on(getElementById('toggleGuildLogoControl'), 'click', toggleVisibilty);
 }
 
 export function statToggle(leftHandSideColumnTable) { // Legacy
@@ -30,8 +30,7 @@ export function statToggle(leftHandSideColumnTable) { // Legacy
   if (getValue('statisticsControl')) {
     statisticsControlElement.classList.add('fshHide');
   }
-  getElementById('toggleStatisticsControl')
-    .addEventListener('click', toggleVisibilty);
+  on(getElementById('toggleStatisticsControl'), 'click', toggleVisibilty);
 }
 
 export function structureToggle(leftHandSideColumnTable) { // Legacy
@@ -45,6 +44,5 @@ export function structureToggle(leftHandSideColumnTable) { // Legacy
   if (getValue('guildStructureControl')) {
     guildStructureControlElement.classList.add('fshHide');
   }
-  getElementById('toggleGuildStructureControl')
-    .addEventListener('click', toggleVisibilty);
+  on(getElementById('toggleGuildStructureControl'), 'click', toggleVisibilty);
 }

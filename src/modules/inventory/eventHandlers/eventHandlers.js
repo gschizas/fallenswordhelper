@@ -6,6 +6,7 @@ import dropItem from '../../ajax/dropItem';
 import equipItem from '../../ajax/equipItem';
 import getChecks from './getChecks';
 import moveItem from '../../ajax/moveItem';
+import partial from '../../common/partial';
 import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
 import sendItem from '../../ajax/sendItem';
@@ -21,7 +22,7 @@ function setName(e) { // jQuery
 function takeItem(e) { // jQuery
   var self = $(e.target);
   doAction(
-    queueTakeItem.bind(null, self.attr('invid'), self.attr('action')),
+    partial(queueTakeItem, self.attr('invid'), self.attr('action')),
     self
   );
 }
@@ -29,7 +30,7 @@ function takeItem(e) { // jQuery
 function recallItem(e) { // jQuery
   var self = $(e.target);
   doAction(
-    queueRecallItem.bind(null, {
+    partial(queueRecallItem, {
       invId: self.attr('invid'),
       playerId: self.attr('playerid'),
       mode: self.attr('mode'),
@@ -41,12 +42,12 @@ function recallItem(e) { // jQuery
 
 function wearItem(e) { // jQuery
   var self = $(e.target);
-  doAction(equipItem.bind(null, self.attr('invid')), self);
+  doAction(partial(equipItem, self.attr('invid')), self);
 }
 
 function doUseItem(e) { // jQuery
   var self = $(e.target);
-  doAction(useItem.bind(null, self.attr('invid')), self);
+  doAction(partial(useItem, self.attr('invid')), self);
 }
 
 function doMoveItem(e) { // jQuery
@@ -56,17 +57,17 @@ function doMoveItem(e) { // jQuery
 
 function doStoreItem(e) { // jQuery
   var self = $(e.target);
-  doAction(storeItems.bind(null, [self.attr('invid')]), self);
+  doAction(partial(storeItems, [self.attr('invid')]), self);
 }
 
 function doDropItem(e) { // jQuery
   var self = $(e.target);
-  doAction(dropItem.bind(null, [self.data('inv')]), self);
+  doAction(partial(dropItem, [self.data('inv')]), self);
 }
 
 function doSendItem(e) { // jQuery
   var self = $(e.target);
-  doAction(sendItem.bind(null, [self.data('inv')]), self);
+  doAction(partial(sendItem, [self.data('inv')]), self);
 }
 
 export default function eventHandlers() { // jQuery

@@ -1,6 +1,8 @@
 import addButton from './addButton';
 import getGroupStats from '../ajax/getGroupStats';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
+import partial from '../common/partial';
 
 function parseGroupData(linkElement, obj) {
   var extraText = '<table class="fshgrpstat">' +
@@ -28,11 +30,11 @@ function fetchGroupData(evt) {
   evt.target.disabled = true;
   var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
   Array.prototype.forEach.call(allItems, function(aLink) {
-    getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
+    getGroupStats(aLink.href).done(partial(parseGroupData, aLink));
   });
 }
 
 export default function fetchGroupStatsButton(buttonRow) {
   var fetchStats = addButton(buttonRow, 'Fetch Group Stats');
-  fetchStats.addEventListener('click', fetchGroupData);
+  on(fetchStats, 'click', fetchGroupData);
 }

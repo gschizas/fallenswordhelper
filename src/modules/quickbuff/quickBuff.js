@@ -4,6 +4,7 @@ import {getElementById} from '../common/getElement';
 import getProfile from '../ajax/getProfile';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import populateBuffs from './populateBuffs';
 import quickActivate from './quickActivate';
 import {excludeBuff, quickBuffHeader} from './assets';
@@ -25,8 +26,8 @@ function populateEnhancements(responseText) {
 }
 
 function setupEventHandlers() {
-  getElementById('helperQBheader').addEventListener('click', quickActivate);
-  getElementById('players').addEventListener('click', addBuffLevels);
+  on(getElementById('helperQBheader'), 'click', quickActivate);
+  on(getElementById('players'), 'click', addBuffLevels);
 }
 
 function eachLabel(el) {

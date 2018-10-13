@@ -12,6 +12,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import moreToDo from '../common/moreToDo';
 import moveItemsToFolder from './moveItemsToFolder';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
@@ -209,7 +210,7 @@ function inventory(data) {
   paintCount = 0;
   add(3, invPaint);
   doFolderButtons(data.folders);
-  pCC.addEventListener('click', eventHandler(evts));
+  on(pCC, 'click', eventHandler(evts));
 }
 
 export default function injectStoreItems() {

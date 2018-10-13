@@ -1,4 +1,5 @@
 import {getElementById} from '../../common/getElement';
+import on from '../../common/on';
 
 var creatureViewTests = ['verb', 'view', 'tip-static', 'fshTip'];
 
@@ -32,5 +33,5 @@ function moEvt(evt) {
 }
 
 export function interceptMouseEvents() {
-  getElementById('actionList').addEventListener('mouseover', moEvt);
+  on(getElementById('actionList'), 'mouseover', moEvt);
 }

@@ -17,6 +17,7 @@ import insertQuickWear from '../quickWear/quickWear';
 import isFunction from '../common/isFunction';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
+import on from '../common/on';
 import {sendEvent} from '../support/fshGa';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
@@ -96,8 +97,8 @@ function showHelperMenu(evt) {
   });
   insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
   insertElement(helperMenu, helperMenuDiv);
-  helperMenu.addEventListener('click', toggleMenu);
-  helperMenuDiv.addEventListener('click', eventHandler);
+  on(helperMenu, 'click', toggleMenu);
+  on(helperMenuDiv, 'click', eventHandler);
 }
 
 function haveNode(node) {

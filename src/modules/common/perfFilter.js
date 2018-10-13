@@ -4,6 +4,7 @@ import getInventoryById from '../ajax/getInventoryById';
 import insertElement from './insertElement';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
 import jQueryNotPresent from './jQueryNotPresent';
+import on from './on';
 import {pCC} from '../support/layout';
 
 var inv;
@@ -25,7 +26,7 @@ function drawFilters(data) {
   insertHtmlBeforeEnd(buttonDiv,
     '<button class="fshBl">Perfect</button>');
   insertElement(pCC, buttonDiv);
-  buttonDiv.addEventListener('click', selectPerf);
+  on(buttonDiv, 'click', selectPerf);
 }
 
 export default function perfFilter(loc) { // jQuery.min

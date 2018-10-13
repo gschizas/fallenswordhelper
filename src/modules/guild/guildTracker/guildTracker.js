@@ -5,6 +5,7 @@ import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import on from '../../common/on';
 import partial from '../../common/partial';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
@@ -89,7 +90,7 @@ function makePopup() {
   insertElement(container, makeInOut());
   insertElement(ret, container);
   draggable(hdl, ret);
-  tracker.addEventListener('change', partial(maybeClose, ret));
+  on(tracker, 'change', partial(maybeClose, ret));
   insertElement(trDialog, ret);
 }
 
@@ -130,7 +131,7 @@ export default function guildTracker() {
   insertElement(cellOne, gs);
   cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
     '&nbsp;<label class="custombutton" for="tracker">Show</label>';
-  newTr.addEventListener('change', togglePref);
+  on(newTr, 'change', togglePref);
   oldTr.parentNode.replaceChild(newTr, oldTr);
   tracker = createInput({
     id: 'tracker',
@@ -140,6 +141,6 @@ export default function guildTracker() {
   addEventListenerOnce(tracker, 'change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   insertElement(trDialog, tracker);
-  document.body.addEventListener('keydown', keydownHandler);
+  on(document.body, 'keydown', keydownHandler);
   insertElement(document.body, trDialog);
 }

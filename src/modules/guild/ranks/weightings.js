@@ -4,6 +4,8 @@ import {getElementById} from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import on from '../../common/on';
+import partial from '../../common/partial';
 import retryAjax from '../../ajax/retryAjax';
 
 var privLookup = {
@@ -44,7 +46,7 @@ function fetchRankData() { // jQuery.min
     var targetNode = anItem.parentNode.parentNode.previousElementSibling;
     var href = /window\.location='(.*)';/.exec(anItem
       .getAttribute('onclick'))[1];
-    retryAjax(href).done(parseRankData.bind(null, targetNode));
+    retryAjax(href).done(partial(parseRankData, targetNode));
   });
 }
 
@@ -58,7 +60,7 @@ export default function weightings() {
       type: 'button',
       value: 'Get Rank Weightings'
     });
-    weightButton.addEventListener('click', fetchRankData);
+    on(weightButton, 'click', fetchRankData);
     var theTd = addNewRank.parentNode.parentNode;
     insertHtmlBeforeEnd(theTd, '&nbsp;');
     insertElement(theTd, weightButton);

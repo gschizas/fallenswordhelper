@@ -5,6 +5,7 @@ import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import setValueJSON from '../system/setValueJSON';
 
 var enterForSendMessage;
@@ -53,7 +54,7 @@ function keypress(evt) {
 
 function captureEnter() {
   if (enterForSendMessage) {
-    dialogMsg.addEventListener('keypress', keypress);
+    on(dialogMsg, 'keypress', keypress);
   }
 }
 
@@ -141,7 +142,7 @@ function showMsgTemplate() {
       fshButton('add', 'Add'),
       '<input id="newTmpl" class="ui-widget-content fshTmpl">');
     showingTemplates = true;
-    msgTbl.addEventListener('click', eventHandler(myEvents));
+    on(msgTbl, 'click', eventHandler(myEvents));
   }
 }
 

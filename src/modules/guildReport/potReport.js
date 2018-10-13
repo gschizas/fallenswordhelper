@@ -7,7 +7,9 @@ import getForage from '../ajax/getForage';
 import insertElement from '../common/insertElement';
 import isChecked from '../system/isChecked';
 import isSelected from '../system/isSelected';
+import on from '../common/on';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import setForage from '../ajax/setForage';
 import testRange from '../system/testRange';
 
@@ -132,7 +134,7 @@ function makeRowsFromPivot(pivot, prev, pot) {
 function drawInventory() {
   var pivot = Object.keys(potObj).reduce(pivotPotObj, {});
   inventory.innerHTML = '<table><tbody>' +
-    Object.keys(pivot).reduce(makeRowsFromPivot.bind(null, pivot), '') +
+    Object.keys(pivot).reduce(partial(makeRowsFromPivot, pivot), '') +
     '</tbody></table>';
 }
 
@@ -198,9 +200,9 @@ function gotMap(data) {
   insertElement(panels, thresholds);
 
   var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
-  myCell.addEventListener('change', onChange);
-  myCell.addEventListener('click', eventHandler(evtHdl));
-  myCell.addEventListener('input', onInput);
+  on(myCell, 'change', onChange);
+  on(myCell, 'click', eventHandler(evtHdl));
+  on(myCell, 'input', onInput);
   insertElement(myCell, container);
 }
 

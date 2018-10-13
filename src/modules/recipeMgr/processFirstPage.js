@@ -2,6 +2,7 @@ import createDocument from '../system/createDocument';
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 
 var itmRE =
@@ -34,7 +35,7 @@ function reduceItemOrComponent(bgGif, prev, el) {
 function parseRecipeItemOrComponent(bgGif, doc) {
   var tblCells = getElementById('pCC', doc).getElementsByTagName('td');
   return Array.prototype.reduce.call(tblCells,
-    reduceItemOrComponent.bind(null, bgGif), []);
+    partial(reduceItemOrComponent, bgGif), []);
 }
 
 function processRecipe(output, recipebook, recipe, data) {
@@ -63,7 +64,7 @@ function processFolderAnyPage(output, recipebook, data) { // jQuery.min
       id: getCustomUrlParameter(el.href, 'recipe_id')
     };
     prev.push(retryAjax(el.href)
-      .pipe(processRecipe.bind(null, output, recipebook, recipe)));
+      .pipe(partial(processRecipe, output, recipebook, recipe)));
     return prev;
   }, []);
   return $.when.apply($, prm);
@@ -82,10 +83,10 @@ function processFolderFirstPage(output, recipebook, data) { // jQuery.min
     .getElementsByTagName('option').length;
   for (var i = 1; i < pages; i += 1) {
     prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
-      .pipe(processFolderAnyPage.bind(null, output, recipebook)));
+      .pipe(partial(processFolderAnyPage, output, recipebook)));
   }
   prm.push($.when(data)
-    .pipe(processFolderAnyPage.bind(null, output, recipebook)));
+    .pipe(partial(processFolderAnyPage, output, recipebook)));
   return $.when.apply($, prm);
 }
 
@@ -102,7 +103,7 @@ function reduceFolders(output, recipebook, prev, el) { // jQuery.min
     return prev;
   }
   prev.push(retryAjax(href)
-    .pipe(processFolderFirstPage.bind(null, output, recipebook)));
+    .pipe(partial(processFolderFirstPage, output, recipebook)));
   return prev;
 }
 
@@ -111,8 +112,8 @@ export default function processFirstPage(output, recipebook, data) { // jQuery.m
   var scope = getElementById('pCC', doc).firstElementChild.rows[4].cells[0]
     .firstElementChild.getElementsByTagName('img');
   var prm = Array.prototype.reduce.call(scope,
-    reduceFolders.bind(null, output, recipebook), []);
+    partial(reduceFolders, output, recipebook), []);
   prm.push($.when(data)
-    .pipe(processFolderFirstPage.bind(null, output, recipebook)));
+    .pipe(partial(processFolderFirstPage, output, recipebook)));
   return $.when.apply($, prm);
 }

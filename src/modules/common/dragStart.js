@@ -1,4 +1,7 @@
 import addEventListenerOnce from './addEventListenerOnce';
+import off from './off';
+import on from './on';
+import partial from './partial';
 
 var dragTarget;
 var mouseX;
@@ -58,7 +61,7 @@ function dragOver(event) {
 
 function dragDrop(event) {
   drawElement(event);
-  document.body.removeEventListener('dragover', dragOver, false);
+  off(document.body, 'dragover', dragOver, false);
   event.preventDefault();
   return false;
 }
@@ -77,11 +80,11 @@ function dragStart(parent, event) {
   setOffsets();
   timer = 0;
   event.dataTransfer.setData('text/plain', '');
-  document.body.addEventListener('dragover', dragOver, false);
+  on(document.body, 'dragover', dragOver, false);
   addEventListenerOnce(document.body, 'drop', dragDrop, false);
 }
 
 export default function draggable(element, parent) {
   element.draggable = true;
-  element.addEventListener('dragstart', dragStart.bind(null, parent));
+  on(element, 'dragstart', partial(dragStart, parent));
 }

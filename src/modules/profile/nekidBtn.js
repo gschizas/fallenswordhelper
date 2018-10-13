@@ -1,6 +1,7 @@
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
+import on from '../common/on';
 import {sendEvent} from '../support/fshGa';
 import unequipitem from '../app/profile/unequipitem';
 import {createButton, createDiv} from '../common/cElement';
@@ -39,6 +40,6 @@ export default function nekidBtn() {
   insertElement(nekidDiv, theBtn);
   insertTextBeforeEnd(nekidDiv, ' ]');
   profileRightColumn.replaceChild(nekidDiv, targetBr);
-  theBtn.addEventListener('click', getNekid);
+  on(theBtn, 'click', getNekid);
 }
 

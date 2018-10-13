@@ -4,6 +4,7 @@ import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
@@ -72,7 +73,7 @@ function setupFastCompose(fcDiv, compSlots, openSlots) {
   );
   var myTable = buildTable(templates, compSlots, openSlots);
   insertElement(fcDiv, myTable);
-  pCC.addEventListener('click', handleClick);
+  on(pCC, 'click', handleClick);
   subscribe('quickcreate', partial(quickcreate, myTable));
 }
 

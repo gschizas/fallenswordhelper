@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import on from '../common/on';
 import setLastScav from './setLastScav';
 
 function dontPost(e) {
@@ -15,5 +16,5 @@ function dontPost(e) {
 
 export default function lookForScavBtn() {
   var scavBtn = document.querySelector('#pCC input[value="Scavenge"]');
-  if (scavBtn) {scavBtn.addEventListener('click', dontPost);}
+  if (scavBtn) {on(scavBtn, 'click', dontPost);}
 }

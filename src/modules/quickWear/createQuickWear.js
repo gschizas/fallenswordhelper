@@ -1,6 +1,7 @@
 import {beginFolderSpanElement} from '../support/constants';
 import {imageServer} from '../system/system';
 import insertElement from '../common/insertElement';
+import partial from '../common/partial';
 import playerId from '../common/playerId';
 import {createDiv, createTBody, createTable} from '../common/cElement';
 
@@ -68,7 +69,7 @@ export default function createQuickWear(appInv) {
   insertElement(tbl, tbody);
   appInv.r.forEach(function(aFolder) {
     aFolder.items.sort(alpha);
-    aFolder.items.forEach(tableRows.bind(null, tbody, currentPlayerId));
+    aFolder.items.forEach(partial(tableRows, tbody, currentPlayerId));
   });
   var qw = createDiv({
     id: 'invTabs-qw',

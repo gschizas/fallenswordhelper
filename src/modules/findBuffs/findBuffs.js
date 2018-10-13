@@ -5,6 +5,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {lastActivityRE} from '../support/constants';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
@@ -236,12 +237,12 @@ function getBufferProgress() {
 }
 
 function setupFindEvent(fn) {
-  getElementById('findbuffsbutton').addEventListener('click', fn, true);
+  on(getElementById('findbuffsbutton'), 'click', fn, true);
 }
 
 function setupClearEvent() {
-  getElementById('clearresultsbutton')
-    .addEventListener('click', findBuffsClearResults, true);
+  on(getElementById('clearresultsbutton'),
+    'click', findBuffsClearResults, true);
 }
 
 export function injectFindBuffs(injector) { // Legacy

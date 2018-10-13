@@ -2,6 +2,7 @@ import {createDiv} from '../common/cElement';
 import generateRecipeTable from './generateRecipeTable';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import partial from '../common/partial';
 import processFirstPage from './processFirstPage';
 import retryAjax from '../ajax/retryAjax';
 import setForage from '../ajax/setForage';
@@ -20,7 +21,7 @@ export function parseInventingStart() { // jQuery.min
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
   retryAjax('index.php?no_mobile=1&cmd=inventing')
-    .pipe(processFirstPage.bind(null, output, recipebook))
+    .pipe(partial(processFirstPage, output, recipebook))
     .done(displayStuff);
 }
 

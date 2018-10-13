@@ -9,6 +9,7 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../../quickExtract';
 import jQueryDialog from '../../chrome/jQueryDialog';
+import on from '../../common/on';
 import {sendEvent} from '../../support/fshGa';
 
 function componentBtnContainer() {
@@ -69,7 +70,7 @@ function deleteAllHandler(evt) {
 function addComposingButtons(thisInvTable) {
   var compDiv = thisInvTable.parentNode;
   insertElement(compDiv, componentBtnContainer());
-  compDiv.addEventListener('click', eventHandler3([
+  on(compDiv, 'click', eventHandler3([
     quickExtractHandler,
     enableQuickDelHandler,
     deleteAllHandler,

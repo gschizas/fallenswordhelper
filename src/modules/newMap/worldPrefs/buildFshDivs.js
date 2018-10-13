@@ -4,6 +4,7 @@ import {huntingBuffsHtml} from '../../settings/worldPrefs';
 import insertElement from '../../common/insertElement';
 import insertElementBefore from '../../common/insertElementBefore';
 import isFunction from '../../common/isFunction';
+import on from '../../common/on';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import toggleEnabledHuntingMode from './toggleEnabledHuntingMode';
 import {toggleHidePlayerActions} from '../prepareHidePlayerActions';
@@ -42,8 +43,8 @@ export default function buildFshDivs() {
       simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
       huntingBuffsHtml()
   });
-  prefsDiv.addEventListener('click', prefsClickEvent);
-  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
+  on(prefsDiv, 'click', prefsClickEvent);
+  on(prefsDiv, 'change', toggleEnabledHuntingMode);
   insertElement(fshDiv, prefsDiv);
   var missingBuffsDiv = createDiv();
   insertElement(fshDiv, missingBuffsDiv);

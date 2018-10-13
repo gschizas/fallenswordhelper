@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import on from '../common/on';
 
 var maxcharacters;
 var textArea;
@@ -24,7 +25,7 @@ function updateShoutboxPreview() {
 
 function injectShoutboxWidgets() {
   textArea = getElementById('textInputBox');
-  textArea.addEventListener('keyup', updateShoutboxPreview);
+  on(textArea, 'keyup', updateShoutboxPreview);
 }
 
 export function newsFsbox() {

@@ -11,6 +11,8 @@ import hasDblr from './hasDblr';
 import {imageServer} from '../system/system';
 import insertElement from '../common/insertElement';
 import jQueryPresent from '../common/jQueryPresent';
+import on from '../common/on';
+import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 import subscribes from '../newMap/newMap';
@@ -22,14 +24,19 @@ function recastImpAndRefresh(responseText) { // Legacy
   }
 }
 
+function doRecast(impHref) {
+  retryAjax(impHref).done(recastImpAndRefresh);
+}
+
+function toggle() {
+  setValue('trackKillStreak', !getValue('trackKillStreak'));
+  location.reload();
+}
+
 function toggleKsTracker() { // Legacy
   var trackKS = getElementById('Helper:toggleKStracker');
   if (trackKS) {
-    trackKS.addEventListener('click', function() {
-      setValue('trackKillStreak',
-        !getValue('trackKillStreak'));
-      location.reload();
-    }, true);
+    on(trackKS, 'click', toggle, true);
   }
 }
 
@@ -39,14 +46,11 @@ function canRecast(hasDd, hasSsi, impsRem) {
 
 function impRecast(hasDd, hasSsi, impsRem) { // Legacy - Old Map
   if (canRecast(hasDd, hasSsi, impsRem)) {
-    var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
+    var fshRecastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
     var impHref = 'index.php?no_mobile=1&cmd=quickbuff&subcmd=activate&target' +
-      'Players=' +
-      $('dt.stat-name:first').next().text().replace(/,/g, '') +
+      'Players=' + $('dt.stat-name:first').next().text().replace(/,/g, '') +
       '&skills%5B%5D=55';
-    _recastImpAndRefresh.addEventListener('click', function() {
-      retryAjax(impHref).done(recastImpAndRefresh);
-    }, true);
+    on(fshRecastImpAndRefresh, 'click', partial(doRecast, impHref), true);
   }
 }
 

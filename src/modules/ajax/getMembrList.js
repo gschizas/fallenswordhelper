@@ -3,6 +3,7 @@ import currentGuildId from '../common/currentGuildId';
 import getForage from './getForage';
 import isObject from '../common/isObject';
 import {now} from '../support/constants';
+import partial from '../common/partial';
 import retryAjax from './retryAjax';
 import setForage from './setForage';
 
@@ -62,7 +63,7 @@ function guildMembers(force, guildId) {
     return getGuildMembers(guildId).done(addMembrListToForage);
   }
   return getForage('fsh_membrList')
-    .pipe(getMembrListFromForage.bind(null, guildId));
+    .pipe(partial(getMembrListFromForage, guildId));
 }
 
 function setHelperMembrList(guildId, membrList) {
@@ -73,5 +74,5 @@ function setHelperMembrList(guildId, membrList) {
 export default function getMembrList(force) {
   var guildId = currentGuildId();
   return guildMembers(force, guildId)
-    .pipe(setHelperMembrList.bind(null, guildId));
+    .pipe(partial(setHelperMembrList, guildId));
 }

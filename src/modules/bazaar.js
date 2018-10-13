@@ -4,6 +4,7 @@ import insertElement from './common/insertElement';
 import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
+import on from './common/on';
 import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
 import testQuant from './system/testQuant';
@@ -89,7 +90,7 @@ export default function injectBazaar() { // TODO stop using getElementById
   });
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);
-  getElementById('fshBazaar').addEventListener('click', select);
-  getElementById('buy_amount').addEventListener('input', quantity);
-  getElementById('fshBuy').addEventListener('click', buy);
+  on(getElementById('fshBazaar'), 'click', select);
+  on(getElementById('buy_amount'), 'input', quantity);
+  on(getElementById('fshBuy'), 'click', buy);
 }

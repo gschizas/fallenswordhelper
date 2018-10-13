@@ -3,6 +3,7 @@ import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import fetchGroupStatsButton from './fetchGroupStatsButton';
 import getValue from '../system/getValue';
+import on from '../common/on';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
 
@@ -46,7 +47,7 @@ function joinAllGroupsUnderSize() {
 function joinUnderButton(buttonRow) {
   var joinUnder = addButton(buttonRow,
     'Join All Groups < ' + maxGroupSizeToJoin + ' Members');
-  joinUnder.addEventListener('click', joinAllGroupsUnderSize);
+  on(joinUnder, 'click', joinAllGroupsUnderSize);
 }
 
 export default function groupButtons() {

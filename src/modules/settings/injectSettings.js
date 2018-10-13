@@ -9,6 +9,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';
 import setValue from '../system/setValue';
@@ -120,27 +121,22 @@ function createEventListeners() { // Legacy
     className: 'fshLink',
     textContent: 'Tick all buffs'
   });
-  tickAll.addEventListener('click', toggleTickAllBuffs);
+  on(tickAll, 'click', toggleTickAllBuffs);
   var inject = getElementById('settingsTabs-4').firstElementChild
     .rows[0].cells[0];
   insertElement(inject, createBr());
   insertElement(inject, tickAll);
 
-  getElementById('fshClearStorage').addEventListener('click', clearStorage);
+  on(getElementById('fshClearStorage'), 'click', clearStorage);
 
-  getElementById('Helper:SaveOptions').addEventListener('click', saveConfig);
-  getElementById('Helper:ShowLogs').addEventListener('click', showLogs);
-  getElementById('Helper:ShowMonsterLogs')
-    .addEventListener('click', showMonsterLogs);
+  on(getElementById('Helper:SaveOptions'), 'click', saveConfig);
+  on(getElementById('Helper:ShowLogs'), 'click', showLogs);
+  on(getElementById('Helper:ShowMonsterLogs'), 'click', showMonsterLogs);
 
-  getElementById('toggleShowGuildSelfMessage')
-    .addEventListener('click', toggleVisibilty);
-  getElementById('toggleShowGuildFrndMessage')
-    .addEventListener('click', toggleVisibilty);
-  getElementById('toggleShowGuildPastMessage')
-    .addEventListener('click', toggleVisibilty);
-  getElementById('toggleShowGuildEnmyMessage')
-    .addEventListener('click', toggleVisibilty);
+  on(getElementById('toggleShowGuildSelfMessage'), 'click', toggleVisibilty);
+  on(getElementById('toggleShowGuildFrndMessage'), 'click', toggleVisibilty);
+  on(getElementById('toggleShowGuildPastMessage'), 'click', toggleVisibilty);
+  on(getElementById('toggleShowGuildEnmyMessage'), 'click', toggleVisibilty);
 }
 
 export default function injectSettings() { // jQuery

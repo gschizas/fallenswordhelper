@@ -3,6 +3,7 @@ import dialogMsg from '../../common/dialogMsg';
 import {initTable} from './trackerTable';
 import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
+import on from '../../common/on';
 import setForage from '../../ajax/setForage';
 import {
   createBr,
@@ -49,7 +50,7 @@ function customButton(text, fn) {
     className: 'custombutton',
     textContent: text
   });
-  btn.addEventListener('click', fn);
+  on(btn, 'click', fn);
   return btn;
 }
 

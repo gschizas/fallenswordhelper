@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {parseBountyPageForWorld} from './parseBountyPageForWorld';
 import retryAjax from '../ajax/retryAjax';
 import setValueJSON from '../system/setValueJSON';
@@ -60,8 +61,8 @@ function resetList(e) {
 }
 
 function doHandlers() {
-  if (bountyListDiv) {bountyListDiv.addEventListener('click', resetList);}
-  if (wantedListDiv) {wantedListDiv.addEventListener('click', resetList);}
+  if (bountyListDiv) {on(bountyListDiv, 'click', resetList);}
+  if (wantedListDiv) {on(wantedListDiv, 'click', resetList);}
 }
 
 export function prepareBountyData() {

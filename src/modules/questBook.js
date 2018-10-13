@@ -3,6 +3,7 @@ import getValue from './system/getValue';
 import {guideUrl} from './support/constants';
 import {imageServer} from './system/system';
 import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
+import on from './common/on';
 import {pCC} from './support/layout';
 import setValue from './system/setValue';
 
@@ -143,7 +144,7 @@ function doHideQuests(hideQuests, questName, aRow) {
 }
 
 export function injectQuestBookFull() {
-  pCC.addEventListener('click', dontPost);
+  on(pCC, 'click', dontPost);
   storeQuestPage();
   var questTable = pCC.getElementsByTagName('table')[5];
   if (!questTable) {return;}

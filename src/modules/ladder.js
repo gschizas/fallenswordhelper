@@ -2,16 +2,19 @@ import {createTr} from './common/cElement';
 import getValue from './system/getValue';
 import insertElement from './common/insertElement';
 import {now} from './support/constants';
+import on from './common/on';
 import outputFormat from './system/outputFormat';
+
+function updateUrl(e) {
+  e.preventDefault();
+  window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
+    document.querySelector('#pCC select[name="viewing_band_id"]').value;
+}
 
 function dontPost() {
   var submitButton = document.querySelector('#pCC input[type="submit"]');
   if (submitButton) {
-    submitButton.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
-        document.querySelector('#pCC select[name="viewing_band_id"]').value;
-    });
+    on(submitButton, 'click', updateUrl);
   }
 }
 

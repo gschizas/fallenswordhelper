@@ -3,7 +3,13 @@ import insertElement from '../common/insertElement';
 import insertQuickWear from '../quickWear/quickWear';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
+import on from '../common/on';
 import {sendEvent} from '../support/fshGa';
+
+function openQwDialog() {
+  sendEvent('profile', 'insertQuickWear');
+  jQueryDialog(insertQuickWear);
+}
 
 export default function quickWearLink() {
   // quick wear manager link
@@ -15,8 +21,5 @@ export default function quickWearLink() {
   insertElement(wrap, qw);
   insertTextBeforeEnd(wrap, ']');
   insertElement(node.parentNode, wrap);
-  qw.addEventListener('click', function() {
-    sendEvent('profile', 'insertQuickWear');
-    jQueryDialog(insertQuickWear);
-  });
+  on(qw, 'click', openQwDialog);
 }

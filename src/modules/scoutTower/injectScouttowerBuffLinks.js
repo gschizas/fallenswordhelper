@@ -1,4 +1,5 @@
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 
 function buffIndividual(self) {
@@ -47,7 +48,7 @@ function gotTables(titanTables) {
     if (titanTable.rows.length < 2) {continue;}
     doBuffLinks(titanTable);
   }
-  titanTables[1].addEventListener('click', evtHdl);
+  on(titanTables[1], 'click', evtHdl);
 }
 
 export default function injectScouttowerBuffLinks(titanTables) {

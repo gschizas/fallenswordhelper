@@ -6,6 +6,7 @@ import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
+import on from '../common/on';
 import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
 
@@ -37,7 +38,7 @@ function fSBoxExists(node) { // jQuery.min
     className: 'fshYellow',
     innerHTML: '[ <span class="fshLink">Log</span> ]'
   });
-  log.addEventListener('click', function() {
+  on(log, 'click', function() {
     sendEvent('injectFSBoxLog', 'injectFsBoxContent');
     jQueryDialog(injectFsBoxContent);
   });

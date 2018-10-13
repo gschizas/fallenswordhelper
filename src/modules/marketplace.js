@@ -1,6 +1,7 @@
 import addCommas from './system/addCommas';
 import {closestTable} from './common/closest';
 import {getElementById} from './common/getElement';
+import on from './common/on';
 import {pCC} from './support/layout';
 
 var amt;
@@ -55,5 +56,5 @@ function addMarketplaceWarning() {
 }
 
 export default function marketplace() {
-  pCC.addEventListener('keyup', addMarketplaceWarning);
+  on(pCC, 'keyup', addMarketplaceWarning);
 }

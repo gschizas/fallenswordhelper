@@ -1,6 +1,7 @@
 import fallback from '../system/fallback';
 import isFunction from '../common/isFunction';
 import isUndefined from '../common/isUndefined';
+import on from '../common/on';
 import {sendException} from './fshGa';
 import {getLength, pop, push} from './sch';
 
@@ -78,13 +79,15 @@ function callback(event) {
   }
 }
 
-window.addEventListener('message', callback);
+on(window, 'message', callback);
 
-window.addEventListener('error', function(e) {
+function logError(e) {
   if (e.error) {
     var msg = parseError(e.error);
     if (msg.includes('calfSystem')) {
       sendException(msg, true);
     }
   }
-});
+}
+
+on(window, 'error', logError);

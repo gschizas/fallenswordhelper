@@ -4,6 +4,7 @@ import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import setValue from '../system/setValue';
@@ -49,7 +50,7 @@ function newsEvt(evt) {
 function fixCollapse() {
   var newsCol = document.getElementsByClassName('news_left_column');
   if (jQueryNotPresent() || newsCol.length !== 1) {return;}
-  newsCol[0].addEventListener('click', newsEvt, true);
+  on(newsCol[0], 'click', newsEvt, true);
 }
 
 function lookForPvPLadder() {

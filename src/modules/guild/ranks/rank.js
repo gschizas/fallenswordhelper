@@ -4,6 +4,7 @@ import getValue from '../../system/getValue';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import moreToDo from '../../common/moreToDo';
+import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import playerName from '../../common/playerName';
 import rankPosition from '../../app/guild/ranks/position';
@@ -54,7 +55,7 @@ function ajaxifyRankControls(evt) {
 function doButtons() {
   weightings();
   if (getValue('ajaxifyRankControls')) {
-    pCC.addEventListener('click', ajaxifyRankControls, true);
+    on(pCC, 'click', ajaxifyRankControls, true);
   }
 }
 

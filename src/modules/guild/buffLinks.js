@@ -1,6 +1,7 @@
 import add from '../support/task';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import moreToDo from '../common/moreToDo';
+import on from '../common/on';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import {pCC} from '../support/layout';
 
@@ -19,14 +20,16 @@ function batchBuffLinks() {
   }
 }
 
+function openQuickBuff(evt) {
+  if (evt.target.className !== 'smallLink') {return;}
+  openQuickBuffByName(evt.target.previousElementSibling.text);
+}
+
 export default function buffLinks() {
   // TODO preference
   memCount = 0;
   members = document.querySelectorAll(
     '#pCC a[href^="index.php?cmd=profile&player_id="]');
   add(3, batchBuffLinks);
-  pCC.addEventListener('click', function(evt) {
-    if (evt.target.className !== 'smallLink') {return;}
-    openQuickBuffByName(evt.target.previousElementSibling.text);
-  });
+  on(pCC, 'click', openQuickBuff);
 }

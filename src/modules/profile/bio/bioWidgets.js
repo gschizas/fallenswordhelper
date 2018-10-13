@@ -5,6 +5,7 @@ import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
+import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
 import setValue from '../../system/setValue';
@@ -91,7 +92,7 @@ function bioHeight() {
     value: 'Update Rows To Show',
     type: 'button'
   });
-  saveLines.addEventListener('click', changeHeight);
+  on(saveLines, 'click', changeHeight);
   insertElement(bioEditLinesDiv, saveLines);
   insertElement(pCC, bioEditLinesDiv);
 }
@@ -111,9 +112,9 @@ export default function injectBioWidgets() {
   bioHeight();
   textArea.rows = bioEditLines;
   if (calf.cmd === 'profile') {
-    textArea.parentNode.addEventListener('click', bioEvtHdl);
+    on(textArea.parentNode, 'click', bioEvtHdl);
   }
-  textArea.addEventListener('keyup', updateBioCharacters);
+  on(textArea, 'keyup', updateBioCharacters);
   // Force the preview area to render
   updateBioCharacters();
 }

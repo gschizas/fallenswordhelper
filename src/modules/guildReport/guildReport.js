@@ -2,6 +2,7 @@ import add from '../support/task';
 import eventHandlers from './eventHandlers';
 import getMembrList from '../ajax/getMembrList';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import prepareChildRows from './prepareChildRows';
 import reportHeader from './reportHeader';
@@ -14,6 +15,5 @@ export default function injectReportPaint() { // jQuery
   });
   add(2, searchUser);
   add(3, prepareChildRows);
-  pCC.getElementsByTagName('TABLE')[1]
-    .addEventListener('click', eventHandlers);
+  on(pCC.getElementsByTagName('TABLE')[1], 'click', eventHandlers);
 }

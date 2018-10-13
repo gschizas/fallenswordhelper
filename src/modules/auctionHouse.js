@@ -5,6 +5,7 @@ import {imageServer} from './system/system';
 import insertElementAfterBegin from './common/insertElementAfterBegin';
 import insertHtmlAfterBegin from './common/insertHtmlAfterBegin';
 import jQueryNotPresent from './common/jQueryNotPresent';
+import on from './common/on';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 import retryAjax from './ajax/retryAjax';
@@ -43,7 +44,7 @@ function makeCancelAll() {
   insertHtmlAfterBegin(fill, ']');
   insertElementAfterBegin(fill, cancelAll);
   insertHtmlAfterBegin(fill, '[');
-  cancelAll.addEventListener('click', cancelAllAH);
+  on(cancelAll, 'click', cancelAllAH);
 }
 
 function autoFill() {

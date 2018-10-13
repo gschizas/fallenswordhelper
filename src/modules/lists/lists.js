@@ -6,6 +6,7 @@ import isChecked from '../system/isChecked';
 import jsonParse from '../common/jsonParse';
 import makePageHeader from './makePageHeader';
 import makePageTemplate from './makePageTemplate';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import setValueJSON from '../system/setValueJSON';
 
@@ -169,7 +170,7 @@ export function injectAuctionSearch(injector) { // Legacy
     categoryField: 'category',
   };
   generateManageTable();
-  content.addEventListener('click', eventHandler(listEvents));
+  on(content, 'click', eventHandler(listEvents));
 }
 
 export function injectQuickLinkManager(injector) { // Legacy
@@ -194,5 +195,5 @@ export function injectQuickLinkManager(injector) { // Legacy
     gmname: 'quickLinks',
   };
   generateManageTable();
-  content.addEventListener('click', eventHandler(listEvents));
+  on(content, 'click', eventHandler(listEvents));
 }

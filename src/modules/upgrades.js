@@ -4,6 +4,8 @@ import insertElement from './common/insertElement';
 import insertTextBeforeEnd from './common/insertTextBeforeEnd';
 import intValue from './system/intValue';
 import isNaN from './common/isNaN';
+import on from './common/on';
+import partial from './common/partial';
 import {server} from './system/system';
 import setValue from './system/setValue';
 
@@ -90,8 +92,8 @@ function updateStamCount(type, upgrade, evt) {
 
 function injectUpgradeHelper(type) {
   var upgrade = findText(type);
-  getInputElement(upgrade).addEventListener('keyup',
-    updateStamCount.bind(null, type, upgrade));
+  on(getInputElement(upgrade), 'keyup',
+    partial(updateStamCount, type, upgrade));
 }
 
 function injectPoints() {

@@ -4,6 +4,7 @@ import getValue from '../system/getValue';
 import guildManage from '../app/guild/manage';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
+import partial from '../common/partial';
 import setForage from '../ajax/setForage';
 import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';
 
@@ -79,7 +80,7 @@ function processMemberRecord(newArchive, member) {
 function doMerge() { // jQuery.min
   var newArchive = {lastUpdate: nowSecs, members: {}};
   guild.r.ranks.forEach(function(rank) {
-    rank.members.forEach(processMemberRecord.bind(null, newArchive));
+    rank.members.forEach(partial(processMemberRecord, newArchive));
   });
   setForage('fsh_guildActivity', newArchive);
 }

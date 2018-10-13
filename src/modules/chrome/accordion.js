@@ -13,6 +13,7 @@ import isObject from '../common/isObject';
 import jQueryDialog from './jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {newGuildLogUrl} from '../support/constants';
+import on from '../common/on';
 import {createAnchor, createLi} from '../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
@@ -54,7 +55,7 @@ function anchorButton(navLvl, text, fn, target) {
     className: 'nav-link fshPoint',
     textContent: text
   });
-  al.addEventListener('click', function() {
+  on(al, 'click', function() {
     sendEvent('accordion', text);
     jQueryDialog(fn);
   });

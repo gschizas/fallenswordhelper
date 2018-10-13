@@ -2,6 +2,7 @@ import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import makePageTemplate from '../lists/makePageTemplate';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import setForage from '../ajax/setForage';
 
@@ -23,6 +24,6 @@ export default function injectBuffLog(injector) { // jQuery.min
     button: 'Clear',
     divId: 'bufflog'
   });
-  getElementById('clearBuffs').addEventListener('click', clearBuffLog);
+  on(getElementById('clearBuffs'), 'click', clearBuffLog);
   getForage('fsh_buffLog').done(displayBuffLog);
 }

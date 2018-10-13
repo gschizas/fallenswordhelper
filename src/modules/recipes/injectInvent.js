@@ -1,6 +1,7 @@
 import doinvent from '../app/inventing/doinvent';
 import {getElementById} from '../common/getElement';
 import jsonFail from '../common/jsonFail';
+import on from '../common/on';
 import outputResult from '../common/outputResult';
 
 function processResult(r) {
@@ -37,6 +38,6 @@ export default function injectInvent() { // Bad jQuery
   $('input[name="recipe_id"]').closest('tbody').append(selector);
   var qi = getElementById('quickInvent');
   if (qi) {
-    qi.addEventListener('click', quickInvent, true);
+    on(qi, 'click', quickInvent, true);
   }
 }

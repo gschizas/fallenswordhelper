@@ -21,7 +21,6 @@ export function getItems() {
   addStatTotalToMouseover();
   getPrefs();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
-  // pCC.addEventListener('click', eventHandler(evts));
   var imgList = getItemImg();
   itemsAry = [];
   itemsHash = {};

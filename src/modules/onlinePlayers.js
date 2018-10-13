@@ -7,6 +7,7 @@ import getValue from './system/getValue';
 import intValue from './system/intValue';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import {now} from './support/constants';
+import on from './common/on';
 import retryAjax from './ajax/retryAjax';
 import setForage from './ajax/setForage';
 import setValue from './system/setValue';
@@ -216,8 +217,8 @@ function injectOnlinePlayersNew() { // jQuery
     onlinePlayers = value || {};
     gotOnlinePlayers();
   });
-  context[0].addEventListener('click', doOnlinePlayerEventHandlers);
-  context[0].addEventListener('keyup', changeLvl);
+  on(context[0], 'click', doOnlinePlayerEventHandlers);
+  on(context[0], 'keyup', changeLvl);
 }
 
 export default function injectOnlinePlayers(content) { // jQuery
