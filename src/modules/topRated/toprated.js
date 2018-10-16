@@ -9,7 +9,7 @@ import isUndefined from '../common/isUndefined';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
 import on from '../common/on';
-import {onlineDot} from '../common/colouredDots';
+import onlineDot from '../common/onlineDot';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import playerDataObject from '../common/playerDataObject';

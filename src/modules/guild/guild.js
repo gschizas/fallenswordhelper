@@ -1,6 +1,6 @@
 import add from '../support/task';
 import buffLinks from './buffLinks';
-import {colouredDots} from '../common/colouredDots';
+import colouredDots from '../common/colouredDots';
 import conflictInfo from './conflictInfo';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';

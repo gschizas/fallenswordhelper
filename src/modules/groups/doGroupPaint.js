@@ -1,6 +1,6 @@
 import doBuffLinks from '../common/doBuffLinks';
 import {months} from '../support/constants';
-import {onlineDot} from '../common/colouredDots';
+import onlineDot from '../common/onlineDot';
 import partial from '../common/partial';
 import {server} from '../system/system';
 import {time, timeEnd} from '../support/debug';
