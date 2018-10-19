@@ -8,8 +8,10 @@ import isObject from '../common/isObject';
 import isUndefined from '../common/isUndefined';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/constants';
-import {onlineDot} from '../common/colouredDots';
+import on from '../common/on';
+import onlineDot from '../common/onlineDot';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import playerDataObject from '../common/playerDataObject';
 import {
   calculateBoundaries,
@@ -80,7 +82,7 @@ function addPlayerToGuild(tbl, playerName) {
 function stackAjax(prm, playerName, tbl, guildId) {
   prm.push(getProfile(playerName)
     .pipe(null, failFilter)
-    .done(parsePlayer.bind(null, tbl, guildId))
+    .done(partial(parsePlayer, tbl, guildId))
   );
 }
 
@@ -152,7 +154,7 @@ function looksLikeTopRated() {
     }
   });
   theCell.insertBefore(findBtn, theCell.firstElementChild);
-  findBtn.addEventListener('click', getMyVL);
+  on(findBtn, 'click', getMyVL);
 }
 
 var topRatedTests = [

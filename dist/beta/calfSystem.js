@@ -294,6 +294,10 @@
 
   function isFunction(e) {return isType(e, 'function');}
 
+  function on(target, type, listener, options) {
+    target.addEventListener(type, listener, options);
+  }
+
   /*
   Based on
   fiddle.jshell.net/GRIFFnDOOR/r7tvg/
@@ -421,27 +425,37 @@
     }
   }
 
-  window.addEventListener('message', callback);
+  on(window, 'message', callback);
 
-  window.addEventListener('error', function(e) {
+  function logError(e) {
     if (e.error) {
       var msg = parseError(e.error);
       if (msg.includes('calfSystem')) {
         sendException(msg, true);
       }
     }
-  });
+  }
+
+  on(window, 'error', logError);
 
   var calf = {};
+
+  function off(target, type, listener, options) {
+    target.removeEventListener(type, listener, options);
+  }
 
   // https://stackoverflow.com/a/34325394
 
   // eslint-disable-next-line max-len
-  function addEventListenerOnce(target, type, listener, addOptions, removeOptions) {
-    target.addEventListener(type, function fn() {
-      target.removeEventListener(type, fn, removeOptions);
+  function once(target, type, listener, addOptions, removeOptions) {
+    on(target, type, function fn() {
+      off(target, type, fn, removeOptions);
       listener.apply(this, arguments); // eslint-disable-line no-invalid-this
     }, addOptions);
+  }
+
+  function partial(fn /* , rest args */) {
+    return fn.bind.apply(fn, Array.from(arguments));
   }
 
   var dragTarget;
@@ -502,7 +516,7 @@
 
   function dragDrop(event) {
     drawElement(event);
-    document.body.removeEventListener('dragover', dragOver, false);
+    off(document.body, 'dragover', dragOver, false);
     event.preventDefault();
     return false;
   }
@@ -521,13 +535,13 @@
     setOffsets();
     timer = 0;
     event.dataTransfer.setData('text/plain', '');
-    document.body.addEventListener('dragover', dragOver, false);
-    addEventListenerOnce(document.body, 'drop', dragDrop, false);
+    on(document.body, 'dragover', dragOver, false);
+    once(document.body, 'drop', dragDrop, false);
   }
 
   function draggable(element, parent) {
     element.draggable = true;
-    element.addEventListener('dragstart', dragStart.bind(null, parent));
+    on(element, 'dragstart', partial(dragStart, parent));
   }
 
   function escapeHtml(unsafe) {
@@ -1078,30 +1092,44 @@
   var paused$1 = true;
   var queue = [];
 
+  function setOpts(options) {
+    if (typeof options === 'string') {
+      return {url: options};
+    }
+    return options;
+  }
+
+  function clearXhr(xhr) {
+    xhr.abort();
+    queue = [];
+  }
+
   function beforeSend(xhr) {
-    window.addEventListener('beforeunload', function() {
-      xhr.abort();
-      queue = [];
-    });
+    on(window, 'beforeunload', partial(clearXhr, xhr));
+  }
+
+  function failFilter(fn, opt, retries, dfr) {
+    return function(jqXhr, textStatus, errorThrown) {
+      if (retries > 0 && jqXhr.status === 503) {
+        setTimeout(fn, 100, opt, retries - 1, dfr);
+      } else {
+        dfr.reject(jqXhr, textStatus, errorThrown);
+      }
+    };
   }
 
   function doAjax(options, retries, dfr) {
-    var opt;
-    if (typeof options === 'string') {
-      opt = {url: options};
-    } else {
-      opt = options;
-    }
+    var opt = setOpts(options);
     opt.beforeSend = beforeSend;
-    return $.ajax(opt).pipe(dfr.resolve,
-      function(jqXhr, textStatus, errorThrown) {
-        if (retries > 0 && jqXhr.status === 503) {
-          setTimeout(doAjax, 100, opt, retries - 1, dfr);
-        } else {
-          dfr.reject(jqXhr, textStatus, errorThrown);
-        }
-      }
-    );
+    return $.ajax(opt).pipe(dfr.resolve, failFilter(doAjax, opt, retries, dfr));
+  }
+
+  function attemptTask(runner) {
+    if ($.active < 4) {
+      var opts = queue.shift();
+      doAjax.apply(null, opts);
+      runner();
+    }
   }
 
   function taskRunner$1() {
@@ -1109,11 +1137,7 @@
       paused$1 = true;
     } else {
       paused$1 = false;
-      if ($.active < 4) {
-        var opts = queue.shift();
-        doAjax.apply(null, opts);
-        taskRunner$1();
-      }
+      attemptTask(taskRunner$1);
     }
   }
 
@@ -1239,6 +1263,14 @@
 
   function createStyle(style) {
     return cElement('style', {innerHTML: style});
+  }
+
+  function createSelect(props) {
+    return cElement('select', props);
+  }
+
+  function createOption(props) {
+    return cElement('option', props);
   }
 
   function insertElement(parent, child) {
@@ -1393,7 +1425,7 @@
   function doMerge() { // jQuery.min
     var newArchive = {lastUpdate: nowSecs, members: {}};
     guild$1.r.ranks.forEach(function(rank) {
-      rank.members.forEach(processMemberRecord.bind(null, newArchive));
+      rank.members.forEach(partial(processMemberRecord, newArchive));
     });
     setForage('fsh_guildActivity', newArchive);
   }
@@ -1638,6 +1670,15 @@
       .css('resize', 'none');
   }
 
+  function inject(fsboxcontent) {
+    getElementById('fsboxdetail').innerHTML = fsboxcontent;
+  }
+
+  function clearFsBox() {
+    setForage('fsh_fsboxcontent', '');
+    location.reload();
+  }
+
   function injectFsBoxContent(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     var content = injector || pCC;
@@ -1648,14 +1689,8 @@
       button: 'Clear',
       divId: 'fsboxdetail'
     });
-    getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
-      getElementById('fsboxdetail').innerHTML = fsboxcontent;
-    });
-    getElementById('fsboxclear')
-      .addEventListener('click', function() {
-        setForage('fsh_fsboxcontent', '');
-        location.reload();
-      }, true);
+    getForage('fsh_fsboxcontent').done(inject);
+    on(getElementById('fsboxclear'), 'click', clearFsBox, true);
   }
 
   function jQueryDialog(fn) { // jQuery
@@ -1704,7 +1739,7 @@
       className: 'fshYellow',
       innerHTML: '[ <span class="fshLink">Log</span> ]'
     });
-    log.addEventListener('click', function() {
+    on(log, 'click', function() {
       sendEvent('injectFSBoxLog', 'injectFsBoxContent');
       jQueryDialog(injectFsBoxContent);
     });
@@ -1734,7 +1769,7 @@
       button: 'Clear',
       divId: 'bufflog'
     });
-    getElementById('clearBuffs').addEventListener('click', clearBuffLog);
+    on(getElementById('clearBuffs'), 'click', clearBuffLog);
     getForage('fsh_buffLog').done(displayBuffLog);
   }
 
@@ -1892,7 +1927,7 @@
       '<th class="fshCenter">HP</th>' +
       '<th class="fshCenter">Enhancements</th>' +
       '</tr></thead><tbody id="entityTableOutput"></tbody></table>';
-    content.addEventListener('click', doHandlers);
+    on(content, 'click', doHandlers);
   }
 
   function hazEnhancements(enhancements) {
@@ -2001,10 +2036,8 @@
       '</tr>' + yuuzParser + '</table></div>' +
       '</form>';
     textArea = getElementById('combatLog');
-    getElementById('copyLog')
-      .addEventListener('click', notepadCopyLog);
-    getElementById('clearLog')
-      .addEventListener('click', notepadClearLog);
+    on(getElementById('copyLog'), 'click', notepadCopyLog);
+    on(getElementById('clearLog'), 'click', notepadClearLog);
   }
 
   function injectNotepadShowLogs(injector) { // jQuery.min
@@ -2233,8 +2266,8 @@
       onlinePlayers = value || {};
       gotOnlinePlayers();
     });
-    context[0].addEventListener('click', doOnlinePlayerEventHandlers);
-    context[0].addEventListener('keyup', changeLvl);
+    on(context[0], 'click', doOnlinePlayerEventHandlers);
+    on(context[0], 'keyup', changeLvl);
   }
 
   function injectOnlinePlayers(content) { // jQuery
@@ -2366,7 +2399,7 @@
   function parseRecipeItemOrComponent(bgGif, doc) {
     var tblCells = getElementById('pCC', doc).getElementsByTagName('td');
     return Array.prototype.reduce.call(tblCells,
-      reduceItemOrComponent.bind(null, bgGif), []);
+      partial(reduceItemOrComponent, bgGif), []);
   }
 
   function processRecipe(output, recipebook, recipe, data) {
@@ -2395,7 +2428,7 @@
         id: getCustomUrlParameter(el.href, 'recipe_id')
       };
       prev.push(retryAjax(el.href)
-        .pipe(processRecipe.bind(null, output, recipebook, recipe)));
+        .pipe(partial(processRecipe, output, recipebook, recipe)));
       return prev;
     }, []);
     return $.when.apply($, prm);
@@ -2414,10 +2447,10 @@
       .getElementsByTagName('option').length;
     for (var i = 1; i < pages; i += 1) {
       prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
-        .pipe(processFolderAnyPage.bind(null, output, recipebook)));
+        .pipe(partial(processFolderAnyPage, output, recipebook)));
     }
     prm.push($.when(data)
-      .pipe(processFolderAnyPage.bind(null, output, recipebook)));
+      .pipe(partial(processFolderAnyPage, output, recipebook)));
     return $.when.apply($, prm);
   }
 
@@ -2434,7 +2467,7 @@
       return prev;
     }
     prev.push(retryAjax(href)
-      .pipe(processFolderFirstPage.bind(null, output, recipebook)));
+      .pipe(partial(processFolderFirstPage, output, recipebook)));
     return prev;
   }
 
@@ -2443,9 +2476,9 @@
     var scope = getElementById('pCC', doc).firstElementChild.rows[4].cells[0]
       .firstElementChild.getElementsByTagName('img');
     var prm = Array.prototype.reduce.call(scope,
-      reduceFolders.bind(null, output, recipebook), []);
+      partial(reduceFolders, output, recipebook), []);
     prm.push($.when(data)
-      .pipe(processFolderFirstPage.bind(null, output, recipebook)));
+      .pipe(partial(processFolderFirstPage, output, recipebook)));
     return $.when.apply($, prm);
   }
 
@@ -2463,7 +2496,7 @@
     recipebook.recipe = [];
     output.innerHTML = '<br>Parsing inventing screen ...<br>';
     retryAjax('index.php?no_mobile=1&cmd=inventing')
-      .pipe(processFirstPage.bind(null, output, recipebook))
+      .pipe(partial(processFirstPage, output, recipebook))
       .done(displayStuff);
   }
 
@@ -2518,8 +2551,8 @@
   function injectRecipeManager(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     var content = injector || pCC;
-    getForage('fsh_recipeBook').done(gotRecipeBook.bind(null, content));
-    content.addEventListener('click', rmEvtHdl);
+    getForage('fsh_recipeBook').done(partial(gotRecipeBook, content));
+    on(content, 'click', rmEvtHdl);
   }
 
   function eventHandler(evtAry) {
@@ -2610,14 +2643,14 @@
       InventoryIDs.length + ' resources';
     for (var i = 0; i < InventoryIDs.length; i += 1) {
       useitem(InventoryIDs[i])
-        .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
+        .done(partial(quickDoneExtracted, InventoryIDs[i]));
     }
   }
 
   function extractAllSimilar(self) {
     jConfirm('Extract Resources',
       'Are you sure you want to extract all similar items?',
-      doExtract.bind(null, self)
+      partial(doExtract, self)
     );
   }
 
@@ -2660,6 +2693,7 @@
   }
 
   function showQuickExtract() {
+    if (!extractInv) {return;}
     resourceList = extractInv.reduce(resources, {});
     var output =
       '<tr><th width="20%">Actions</th><th colspan="2">Items</th></tr>' +
@@ -2719,7 +2753,7 @@
     insertElement(content, extTbl);
     selectST = true;
     selectMain = true;
-    content.addEventListener('click', eventHandler(extractEvents));
+    on(content, 'click', eventHandler(extractEvents));
     getInventory().done(prepInv);
   }
 
@@ -2787,7 +2821,7 @@
     insertElement(tbl, tbody);
     appInv.r.forEach(function(aFolder) {
       aFolder.items.sort(alpha);
-      aFolder.items.forEach(tableRows$1.bind(null, tbody, currentPlayerId));
+      aFolder.items.forEach(partial(tableRows$1, tbody, currentPlayerId));
     });
     var qw = createDiv({
       id: 'invTabs-qw',
@@ -2899,7 +2933,7 @@
   function testItemList(invCount, quickSL, item) {
     var name = item.n;
     foundInvItem(invCount, name);
-    quickSL.forEach(inQuickSearchList.bind(null, invCount, name));
+    quickSL.forEach(partial(inQuickSearchList, invCount, name));
   }
 
   function showAHInvManager(itemList) {
@@ -2907,7 +2941,7 @@
     var quickSL = getValueJSON('quickSearchList');
     // fill up the Inv Counter
     itemList.r.forEach(function(aFolder) {
-      aFolder.items.forEach(testItemList.bind(null, invCount, quickSL));
+      aFolder.items.forEach(partial(testItemList, invCount, quickSL));
     });
     var im = createDiv({
       id: 'invTabs-ah',
@@ -3455,7 +3489,7 @@
     } else {
       jConfirm('Use/Extract Item',
         'Are you sure you want to use/extract the item?',
-        doUseItem.bind(null, self)
+        partial(doUseItem, self)
       );
     }
   }
@@ -3476,12 +3510,12 @@
 
   function processFolder(folderId, aFolder) {
     var thisFolder = aFolder.id;
-    aFolder.items.forEach(processItems.bind(null, folderId, thisFolder));
+    aFolder.items.forEach(partial(processItems, folderId, thisFolder));
   }
 
   function hideFolders(self) {
     var folderId = self.dataset.folder;
-    itemList.r.forEach(processFolder.bind(null, folderId));
+    itemList.r.forEach(partial(processFolder, folderId));
   }
 
   function togglePref() {
@@ -3539,7 +3573,7 @@
     insertElement(invTabs, invTabsQw);
     content$2.innerHTML = '';
     insertElement(content$2, invTabs);
-    invTabs.addEventListener('click', eventHandler(events));
+    on(invTabs, 'click', eventHandler(events));
     insertElement(invTabs, showAHInvManager(appInv));
     insertHtmlBeforeEnd(getElementById('setPrompt'),
       simpleCheckboxHtml('disableQuickWearPrompts'));
@@ -3721,7 +3755,7 @@
       categoryField: 'category',
     };
     generateManageTable();
-    content.addEventListener('click', eventHandler(listEvents));
+    on(content, 'click', eventHandler(listEvents));
   }
 
   function injectQuickLinkManager(injector) { // Legacy
@@ -3746,7 +3780,7 @@
       gmname: 'quickLinks',
     };
     generateManageTable();
-    content.addEventListener('click', eventHandler(listEvents));
+    on(content, 'click', eventHandler(listEvents));
   }
 
   /* eslint-disable no-multi-spaces, max-len */
@@ -3976,12 +4010,6 @@
       disclaimer();
   }
 
-  function moreToDo(limit, cntr, list) {
-    return list && performance.now() < limit && cntr < list.length;
-  }
-
-  var dotList;
-  var dotCount;
   var redDot =
     '<span class="fshDot redDot tip-static" data-tipped="Offline"></span>';
   var greenDiamond =
@@ -4038,36 +4066,6 @@
       if (min < el.condition) {return el.result;}
     }
     return redDot;
-  }
-
-  function changeOnlineDot(contactLink) {
-    var lastActivity = lastActivityRE
-      .exec(contactLink.dataset.tipped);
-    contactLink.parentNode.previousSibling.innerHTML =
-      onlineDot({
-        min: lastActivity[3],
-        hour: lastActivity[2],
-        day: lastActivity[1]
-      });
-  }
-
-  function batchDots() {
-    var limit = performance.now() + 5;
-    while (moreToDo(limit, dotCount, dotList)) {
-      changeOnlineDot(dotList[dotCount]);
-      dotCount += 1;
-    }
-    if (dotCount < dotList.length) {
-      add(3, batchDots);
-    }
-  }
-
-  function colouredDots() {
-    if (!getValue('enhanceOnlineDots')) {return;}
-    dotList = document.querySelectorAll(
-      '#pCC a[data-tipped*="Last Activity"]');
-    dotCount = 0;
-    add(3, batchDots);
   }
 
   var sustainLevelRE = /Level<br>(\d+)%/;
@@ -4513,12 +4511,12 @@
   }
 
   function setupFindEvent(fn) {
-    getElementById('findbuffsbutton').addEventListener('click', fn, true);
+    on(getElementById('findbuffsbutton'), 'click', fn, true);
   }
 
   function setupClearEvent() {
-    getElementById('clearresultsbutton')
-      .addEventListener('click', findBuffsClearResults, true);
+    on(getElementById('clearresultsbutton'),
+      'click', findBuffsClearResults, true);
   }
 
   function injectFindBuffs(injector) { // Legacy
@@ -4617,8 +4615,8 @@
     });
     insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
     insertElement(helperMenu, helperMenuDiv);
-    helperMenu.addEventListener('click', toggleMenu);
-    helperMenuDiv.addEventListener('click', eventHandler$1);
+    on(helperMenu, 'click', toggleMenu);
+    on(helperMenuDiv, 'click', eventHandler$1);
   }
 
   function haveNode$1(node) {
@@ -4630,7 +4628,7 @@
     if (getValue('keepHelperMenuOnScreen')) {
       helperMenu.classList.add('fshFixed');
     }
-    addEventListenerOnce(helperMenu, 'mouseenter', showHelperMenu);
+    once(helperMenu, 'mouseenter', showHelperMenu);
     if (getValue('draggableHelperMenu')) {
       helperMenu.classList.add('fshMove');
       draggable(helperMenu);
@@ -4695,7 +4693,7 @@
   function fixCollapse() {
     var newsCol = document.getElementsByClassName('news_left_column');
     if (jQueryNotPresent() || newsCol.length !== 1) {return;}
-    newsCol[0].addEventListener('click', newsEvt, true);
+    on(newsCol[0], 'click', newsEvt, true);
   }
 
   function lookForPvPLadder() {
@@ -4808,7 +4806,7 @@
       className: 'nav-link fshPoint',
       textContent: text
     });
-    al.addEventListener('click', function() {
+    on(al, 'click', function() {
       sendEvent('accordion', text);
       jQueryDialog(fn);
     });
@@ -4998,7 +4996,7 @@
 
   function captureEnter() {
     if (enterForSendMessage) {
-      dialogMsg$1.addEventListener('keypress', keypress);
+      on(dialogMsg$1, 'keypress', keypress);
     }
   }
 
@@ -5086,7 +5084,7 @@
         fshButton('add', 'Add'),
         '<input id="newTmpl" class="ui-widget-content fshTmpl">');
       showingTemplates = true;
-      msgTbl.addEventListener('click', eventHandler(myEvents));
+      on(msgTbl, 'click', eventHandler(myEvents));
     }
   }
 
@@ -5196,7 +5194,7 @@
 
   function displayDisconnectedFromGodsMessage() {
     insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
-    addEventListenerOnce(getElementById('helperPrayToGods'), 'click', prayToGods);
+    once(getElementById('helperPrayToGods'), 'click', prayToGods);
   }
 
   function templeAlertEnabled(responseText) {
@@ -5654,7 +5652,7 @@
     wrapper += '</div></div>';
     insertHtmlBeforeEnd(fshAllyEnemy, wrapper);
     insertElementAfterBegin(pCR, fshAllyEnemy);
-    fshAllyEnemy.addEventListener('click', eventHandler$2);
+    on(fshAllyEnemy, 'click', eventHandler$2);
     injectAllyEnemyList(data);
   }
 
@@ -5975,8 +5973,8 @@
   }
 
   function doHandlers$1() {
-    if (bountyListDiv) {bountyListDiv.addEventListener('click', resetList$1);}
-    if (wantedListDiv) {wantedListDiv.addEventListener('click', resetList$1);}
+    if (bountyListDiv) {on(bountyListDiv, 'click', resetList$1);}
+    if (wantedListDiv) {on(wantedListDiv, 'click', resetList$1);}
   }
 
   function prepareBountyData() {
@@ -6245,10 +6243,6 @@
     }
   }
 
-  function partial(fn /* , rest args */) {
-    return fn.bind.apply(fn, Array.from(arguments));
-  }
-
   // import failStub from './failStub';
 
   function superelite() {
@@ -6346,7 +6340,7 @@
     var statWrapper = character.parentNode;
     insertElement(myWrapper, character);
     statWrapper.insertBefore(myWrapper, statWrapper.firstChild);
-    myWrapper.addEventListener('click', function(evt) {
+    on(myWrapper, 'click', function(evt) {
       evt.stopPropagation();
     }, true);
   }
@@ -6728,17 +6722,19 @@
     }
   }
 
+  function makeUrl(prev, e) {
+    return prev + '&' + e.name + '=' + e.value;
+  }
+
+  function updateUrl(evt) {
+    evt.preventDefault();
+    var validInputs = document.querySelectorAll('input:not([type="submit"])' +
+      ':not([type="checkbox"]), select, input[type="checkbox"]:checked');
+    window.location = Array.from(validInputs).reduce(makeUrl, 'index.php?');
+  }
+
   function allowBack() {
-    document.querySelector('input[type="submit"]')
-      .addEventListener('click', function(evt) {
-        evt.preventDefault();
-        var url = 'index.php?';
-        Array.prototype.forEach.call(
-          document.querySelectorAll('input:not([type="submit"])' +
-            ':not([type="checkbox"]), select, input[type="checkbox"]:checked'),
-          function(e) {url += '&' + e.name + '=' + e.value;});
-        window.location = url;
-      });
+    on(document.querySelector('input[type="submit"]'), 'click', updateUrl);
   }
 
   var moveOptions =
@@ -6849,7 +6845,7 @@
     insertHtmlBeforeEnd(buttonDiv,
       '<button class="fshBl">Perfect</button>');
     insertElement(pCC, buttonDiv);
-    buttonDiv.addEventListener('click', selectPerf);
+    on(buttonDiv, 'click', selectPerf);
   }
 
   function perfFilter(loc) { // jQuery.min
@@ -6947,16 +6943,14 @@
     if (jQueryNotPresent()) {return;}
     perfFilter('composing');
     disableBreakdownPrompts = getValue('disableBreakdownPrompts');
-    getElementById('breakdown-selected-items').parentNode
-      .addEventListener('click', breakEvt, true);
-    getElementById('composing-items')
-      .addEventListener('click', itemClick);
+    on(getElementById('breakdown-selected-items').parentNode,
+      'click', breakEvt, true);
+    on(getElementById('composing-items'), 'click', itemClick);
     insertHtmlBeforeEnd(pCC,
       '<table class="fshTblCenter"><tbody>' +
       simpleCheckbox('disableBreakdownPrompts') +
       '</tbody></table>');
-    getElementById('disableBreakdownPrompts')
-      .addEventListener('click', togglePref$1);
+    on(getElementById('disableBreakdownPrompts'), 'click', togglePref$1);
   }
 
   function setMaxVal() {
@@ -6965,9 +6959,8 @@
   }
 
   function composingCreate() {
-    getElementById('composing-add-skill').addEventListener('click', setMaxVal);
-    getElementById('composing-skill-select')
-      .addEventListener('change', setMaxVal);
+    on(getElementById('composing-add-skill'), 'click', setMaxVal);
+    on(getElementById('composing-skill-select'), 'change', setMaxVal);
   }
 
   function makeFolderSpans$1(folders, needsWorn) {
@@ -7056,7 +7049,7 @@
     var inject = itemTable.parentNode.parentNode
       .previousElementSibling.firstElementChild;
     inject.classList.add('fshCenter');
-    inject.addEventListener('click', doHideFolders);
+    on(inject, 'click', doHideFolders);
     insertHtmlBeforeEnd(inject, makeFolderSpans$1(folders, true));
     return inject;
   }
@@ -7074,7 +7067,7 @@
       className: 'fshVMid',
       type: 'checkbox'
     });
-    perfBox.addEventListener('change', reDrawGrid);
+    on(perfBox, 'change', reDrawGrid);
     insertElement(perfLabel, perfBox);
     insertHtmlBeforeEnd(inject, ' &ensp;');
     insertElement(inject, perfLabel);
@@ -7231,16 +7224,15 @@
   function setupPref(prefName) {
     var prefEl = getElementById(prefName);
     prefValue = prefEl.checked;
-    getElementById(prefName)
-      .addEventListener('change', togglePref$2.bind(null, prefName));
+    on(getElementById(prefName), 'change', partial(togglePref$2, prefName));
   }
 
   function collapse(param) {
     headerIndex = param.headInd;
     setupPref(param.prefName);
     Array.prototype.forEach.call(param.theTable.rows,
-      doTagging.bind(null, param.articleTest, param.extraFn));
-    param.theTable.addEventListener('click', evtHdl);
+      partial(doTagging, param.articleTest, param.extraFn));
+    on(param.theTable, 'click', evtHdl);
   }
 
   function testArticle(rowType) {return rowType === 1;}
@@ -7298,7 +7290,7 @@
     if (self.tagName === 'IMG') {
       e.preventDefault();
       var anchor = self.parentNode.href;
-      guildMailboxTake(anchor).done(takeResult.bind(null, self));
+      guildMailboxTake(anchor).done(partial(takeResult, self));
     }
     if (self.className === 'sendLink') {
       var nodeList = pCC.getElementsByTagName('img');
@@ -7308,7 +7300,7 @@
 
   function guildMailbox() {
     if (jQueryNotPresent()) {return;}
-    pCC.addEventListener('click', guildMailboxEvent);
+    on(pCC, 'click', guildMailboxEvent);
     insertHtmlBeforeEnd(document.querySelector('#pCC td[height="25"]'),
       '<span class="sendLink">Take All</span>');
   }
@@ -7369,7 +7361,7 @@
       return getGuildMembers(guildId).done(addMembrListToForage);
     }
     return getForage('fsh_membrList')
-      .pipe(getMembrListFromForage.bind(null, guildId));
+      .pipe(partial(getMembrListFromForage, guildId));
   }
 
   function setHelperMembrList(guildId, membrList) {
@@ -7380,7 +7372,7 @@
   function getMembrList(force) {
     var guildId = currentGuildId();
     return guildMembers(force, guildId)
-      .pipe(setHelperMembrList.bind(null, guildId));
+      .pipe(partial(setHelperMembrList, guildId));
   }
 
   function advisorView(period) {
@@ -7952,9 +7944,9 @@
     });
     bazaarTable = bazaarTable.replace(/@\d@/g, '');
     insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);
-    getElementById('fshBazaar').addEventListener('click', select);
-    getElementById('buy_amount').addEventListener('input', quantity);
-    getElementById('fshBuy').addEventListener('click', buy);
+    on(getElementById('fshBazaar'), 'click', select);
+    on(getElementById('buy_amount'), 'input', quantity);
+    on(getElementById('fshBuy'), 'click', buy);
   }
 
   var buffCost = {count: 0, buffs: {}};
@@ -8297,7 +8289,7 @@
       value: 'Update Rows To Show',
       type: 'button'
     });
-    saveLines.addEventListener('click', changeHeight);
+    on(saveLines, 'click', changeHeight);
     insertElement(bioEditLinesDiv, saveLines);
     insertElement(pCC, bioEditLinesDiv);
   }
@@ -8317,9 +8309,9 @@
     bioHeight();
     textArea$1.rows = bioEditLines;
     if (calf.cmd === 'profile') {
-      textArea$1.parentNode.addEventListener('click', bioEvtHdl);
+      on(textArea$1.parentNode, 'click', bioEvtHdl);
     }
-    textArea$1.addEventListener('keyup', updateBioCharacters);
+    on(textArea$1, 'keyup', updateBioCharacters);
     // Force the preview area to render
     updateBioCharacters();
   }
@@ -8417,6 +8409,7 @@
   }
 
   function backgroundCreate(self, temp) {
+    if (!(temp instanceof Node)) {return;}
     self.innerHTML = '';
     self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
     createPotion(temp);
@@ -8485,7 +8478,7 @@
     );
     var myTable = buildTable(templates, compSlots, openSlots);
     insertElement(fcDiv, myTable);
-    pCC.addEventListener('click', handleClick);
+    on(pCC, 'click', handleClick);
     subscribe('quickcreate', partial(quickcreate, myTable));
   }
 
@@ -8514,7 +8507,7 @@
     insertElementAfter(fcDiv, buttonDiv);
     var fcCheck = createInput({id: 'fast-compose', type: 'checkbox'});
     insertElementAfter(fcCheck, buttonDiv);
-    addEventListenerOnce(fcCheck, 'change', partial(drawList, fcDiv));
+    once(fcCheck, 'change', partial(drawList, fcDiv));
   }
 
   function insertElementBefore(newNode, referenceNode) {
@@ -8593,7 +8586,7 @@
     var buttons = pCC
       .querySelectorAll('input[id^=create-]:not(#create-multi)');
     Array.from(buttons).forEach(injectButton);
-    pCC.addEventListener('click', quickCreate);
+    on(pCC, 'click', quickCreate);
     moveButtons();
     fastCompose();
   }
@@ -8608,7 +8601,7 @@
   }
 
   function addMercStats(prev, merc) {
-    return prev.map(addMercStat.bind(null, merc.dataset.tipped));
+    return prev.map(partial(addMercStat, merc.dataset.tipped));
   }
 
   function addAllMercStats(mercElements) {
@@ -8688,28 +8681,31 @@
     }
   }
 
+  function batchUp(prev, curr, i) {
+    var slot = Math.floor(i / 16);
+    prev[slot] = fallback(prev[slot], []);
+    prev[slot].push(curr);
+    return prev;
+  }
+
+  function makeButtons(prev, curr, i) {
+    var theNames = curr.join(',');
+    var modifierWord = places[i];
+    var li = createLi();
+    var btn = createButton({
+      className: 'fshBl fshBls tip-static',
+      dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
+      textContent: 'Buff ' + modifierWord + ' 16'
+    });
+    on(btn, 'click', partial(openQuickBuffByName, theNames));
+    insertElement(li, btn);
+    insertElement(prev, li);
+    return prev;
+  }
+
   function doBuffLinks(members) {
     // quick buff only supports 16
-    var shortList = members.reduce(function(prev, curr, i) {
-      var slot = Math.floor(i / 16);
-      prev[slot] = fallback(prev[slot], []);
-      prev[slot].push(curr);
-      return prev;
-    }, []).reduce(function(prev, curr, i) {
-      var theNames = curr.join(',');
-      var modifierWord = places[i];
-      var li = createLi();
-      var btn = createButton({
-        className: 'fshBl fshBls tip-static',
-        dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
-        textContent: 'Buff ' + modifierWord + ' 16'
-      });
-      btn.addEventListener('click',
-        openQuickBuffByName.bind(null, theNames));
-      insertElement(li, btn);
-      insertElement(prev, li);
-      return prev;
-    }, createUl());
+    var shortList = members.reduce(batchUp, []).reduce(makeButtons, createUl());
     return shortList;
   }
 
@@ -8754,7 +8750,7 @@
     var td2 = $('td', row).eq(1);
     var theList = td2.html();
     var listArr = theList.split(', ');
-    if (listArr.length > 1) {listArr.sort(byMember.bind(null, membrlist));}
+    if (listArr.length > 1) {listArr.sort(partial(byMember, membrlist));}
     var buffList = listArr.filter(function(name) {
       return name !== '[none]' && name.indexOf('<font') === -1;
     });
@@ -8829,13 +8825,13 @@
     evt.target.disabled = true;
     var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
     Array.prototype.forEach.call(allItems, function(aLink) {
-      getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
+      getGroupStats(aLink.href).done(partial(parseGroupData, aLink));
     });
   }
 
   function fetchGroupStatsButton(buttonRow) {
     var fetchStats = addButton(buttonRow, 'Fetch Group Stats');
-    fetchStats.addEventListener('click', fetchGroupData);
+    on(fetchStats, 'click', fetchGroupData);
   }
 
   var maxGroupSizeToJoin;
@@ -8878,7 +8874,7 @@
   function joinUnderButton(buttonRow) {
     var joinUnder = addButton(buttonRow,
       'Join All Groups < ' + maxGroupSizeToJoin + ' Members');
-    joinUnder.addEventListener('click', joinAllGroupsUnderSize);
+    on(joinUnder, 'click', joinAllGroupsUnderSize);
   }
 
   function groupButtons() {
@@ -8926,31 +8922,63 @@
     fixTable();
   }
 
-  var members;
-  var memCount;
+  function moreToDo(limit, cntr, list) {
+    return list && performance.now() < limit && cntr < list.length;
+  }
 
-  function batchBuffLinks() {
+  function maybeEndFn(endFn) {
+    if (isFunction(endFn)) {add(3, endFn);}
+  }
+
+  function batch(itemsAry, counter, doFn, endFn) {
     var limit = performance.now() + 5;
-    while (moreToDo(limit, memCount, members)) {
-      insertHtmlBeforeEnd(members[memCount].parentNode,
-        ' <span class="smallLink">[b]</span>');
-      memCount += 1;
+    var localCounter = counter;
+    while (moreToDo(limit, localCounter, itemsAry)) {
+      doFn(itemsAry[localCounter], localCounter, itemsAry);
+      localCounter += 1;
     }
-    if (memCount < members.length) {
-      add(3, batchBuffLinks);
+    if (localCounter < itemsAry.length) {
+      add(3, batch, [itemsAry, localCounter, doFn, endFn]);
+    } else {
+      maybeEndFn(endFn);
     }
+  }
+
+  function insertBuffLink(el) {
+    insertHtmlBeforeEnd(el.parentNode, ' <span class="smallLink">[b]</span>');
+  }
+
+  function openQuickBuff(evt) {
+    if (evt.target.className !== 'smallLink') {return;}
+    openQuickBuffByName(evt.target.previousElementSibling.text);
   }
 
   function buffLinks() {
     // TODO preference
-    memCount = 0;
-    members = document.querySelectorAll(
+    var members = document.querySelectorAll(
       '#pCC a[href^="index.php?cmd=profile&player_id="]');
-    add(3, batchBuffLinks);
-    pCC.addEventListener('click', function(evt) {
-      if (evt.target.className !== 'smallLink') {return;}
-      openQuickBuffByName(evt.target.previousElementSibling.text);
-    });
+    batch(members, 0, insertBuffLink);
+    on(pCC, 'click', openQuickBuff);
+  }
+
+  var dotList;
+
+  function changeOnlineDot(contactLink) {
+    var lastActivity = lastActivityRE
+      .exec(contactLink.dataset.tipped);
+    contactLink.parentNode.previousSibling.innerHTML =
+      onlineDot({
+        min: lastActivity[3],
+        hour: lastActivity[2],
+        day: lastActivity[1]
+      });
+  }
+
+  function colouredDots() {
+    if (!getValue('enhanceOnlineDots')) {return;}
+    dotList = document.querySelectorAll(
+      '#pCC a[data-tipped*="Last Activity"]');
+    batch(dotList, 0, changeOnlineDot);
   }
 
   var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
@@ -9112,7 +9140,7 @@
 
     actBody = createTBody();
     insertElement(tg, actBody);
-    tg.addEventListener('change', myChange);
+    on(tg, 'change', myChange);
     tgCont = createDiv({className: 'tgCont fshSpinner64'});
     insertElement(tgCont, tg);
     return tgCont;
@@ -9156,7 +9184,7 @@
       className: 'custombutton',
       textContent: text
     });
-    btn.addEventListener('click', fn);
+    on(btn, 'click', fn);
     return btn;
   }
 
@@ -9234,7 +9262,7 @@
       name: 'acttabs',
       type: 'radio'
     });
-    addEventListenerOnce(acttab2, 'change', updateRawData);
+    once(acttab2, 'change', updateRawData);
     insertElement(dialogPopup, acttab2);
     return dialogPopup;
   }
@@ -9248,7 +9276,7 @@
     insertElement(container, makeInOut());
     insertElement(ret, container);
     draggable(hdl, ret);
-    tracker.addEventListener('change', partial(maybeClose, ret));
+    on(tracker, 'change', partial(maybeClose, ret));
     insertElement(trDialog, ret);
   }
 
@@ -9289,17 +9317,17 @@
     insertElement(cellOne, gs);
     cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
       '&nbsp;<label class="custombutton" for="tracker">Show</label>';
-    newTr.addEventListener('change', togglePref$3);
+    on(newTr, 'change', togglePref$3);
     oldTr.parentNode.replaceChild(newTr, oldTr);
     tracker = createInput({
       id: 'tracker',
       className: 'fsh-dialog-open',
       type: 'checkbox'
     });
-    addEventListenerOnce(tracker, 'change', openDialog);
+    once(tracker, 'change', openDialog);
     trDialog = createDiv({className: 'fsh-dialog'});
     insertElement(trDialog, tracker);
-    document.body.addEventListener('keydown', keydownHandler);
+    on(document.body, 'keydown', keydownHandler);
     insertElement(document.body, trDialog);
   }
 
@@ -9364,8 +9392,7 @@
     if (getValue('guildLogoControl')) {
       guildLogoElement.classList.add('fshHide');
     }
-    getElementById('toggleGuildLogoControl')
-      .addEventListener('click', toggleVisibilty);
+    on(getElementById('toggleGuildLogoControl'), 'click', toggleVisibilty);
   }
 
   function statToggle(leftHandSideColumnTable) { // Legacy
@@ -9380,8 +9407,7 @@
     if (getValue('statisticsControl')) {
       statisticsControlElement.classList.add('fshHide');
     }
-    getElementById('toggleStatisticsControl')
-      .addEventListener('click', toggleVisibilty);
+    on(getElementById('toggleStatisticsControl'), 'click', toggleVisibilty);
   }
 
   function structureToggle(leftHandSideColumnTable) { // Legacy
@@ -9395,8 +9421,7 @@
     if (getValue('guildStructureControl')) {
       guildStructureControlElement.classList.add('fshHide');
     }
-    getElementById('toggleGuildStructureControl')
-      .addEventListener('click', toggleVisibilty);
+    on(getElementById('toggleGuildStructureControl'), 'click', toggleVisibilty);
   }
 
   function selfRecallLink(leftHandSideColumnTable) {
@@ -9469,7 +9494,7 @@
   function fastBp(el) {
     var itmId = el.parentNode.previousElementSibling.previousElementSibling
       .firstElementChild.value;
-    takeitem(itmId).done(takeResult$1.bind(null, el));
+    takeitem(itmId).done(partial(takeResult$1, el));
     el.textContent = '';
     el.className = 'guildTagSpinner';
     el.style.backgroundImage = 'url(\'' + imageServer +
@@ -9498,7 +9523,7 @@
   }
 
   function doItemTagging() {
-    pCC.addEventListener('click', evtHdlr);
+    on(pCC, 'click', evtHdlr);
     paintTable();
     checkAllBtn();
   }
@@ -9557,7 +9582,7 @@
       var targetNode = anItem.parentNode.parentNode.previousElementSibling;
       var href = /window\.location='(.*)';/.exec(anItem
         .getAttribute('onclick'))[1];
-      retryAjax(href).done(parseRankData.bind(null, targetNode));
+      retryAjax(href).done(partial(parseRankData, targetNode));
     });
   }
 
@@ -9571,7 +9596,7 @@
         type: 'button',
         value: 'Get Rank Weightings'
       });
-      weightButton.addEventListener('click', fetchRankData);
+      on(weightButton, 'click', fetchRankData);
       var theTd = addNewRank.parentNode.parentNode;
       insertHtmlBeforeEnd(theTd, '&nbsp;');
       insertElement(theTd, weightButton);
@@ -9581,7 +9606,6 @@
   var ranks$1;
   var myRank;
   var theRows;
-  var rankCount;
   var characterRow;
 
   function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
@@ -9623,26 +9647,26 @@
   function doButtons() {
     weightings();
     if (getValue('ajaxifyRankControls')) {
-      pCC.addEventListener('click', ajaxifyRankControls, true);
+      on(pCC, 'click', ajaxifyRankControls, true);
     }
   }
 
-  function isMyRank(rankName) {
+  function isMyRank(rankCell, rankName) {
     if (rankName === myRank) {
-      characterRow = rankCount; // limit for ajaxify later
+      characterRow = rankCell.parentNode.rowIndex; // limit for ajaxify later
     }
   }
 
   function hasMembers(rankCell, rankName) {
     if (ranks$1[rankName]) { // has members
-      isMyRank(rankName);
+      isMyRank(rankCell, rankName);
       insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
         ranks$1[rankName].join(', ') + '</span>');
     }
   }
 
   function getRankName(rankCell) {
-    if (rankCount === 1) {return 'Guild Founder';}
+    if (rankCell.parentNode.rowIndex === 1) {return 'Guild Founder';}
     return rankCell.textContent;
   }
 
@@ -9650,20 +9674,6 @@
     var rankCell = el.firstElementChild;
     var rankName = getRankName(rankCell);
     hasMembers(rankCell, rankName);
-  }
-
-  function paintRanks() {
-    var limit = performance.now() + 10;
-    while (moreToDo(limit, rankCount, theRows)) {
-      var el = theRows[rankCount];
-
-      writeMembers(el);
-
-      rankCount += 1;
-    }
-    if (rankCount < theRows.length) {
-      add(3, paintRanks);
-    }
   }
 
   function findTheRows() {
@@ -9685,8 +9695,7 @@
     myRank = membrList[playerName()].rank_name;
     theRows = findTheRows();
     if (theRows) {
-      rankCount = 1;
-      add(3, paintRanks);
+      batch(theRows, 1, writeMembers);
     }
   }
 
@@ -10310,7 +10319,7 @@
 
   function doAction$1(fn, self) { // jQuery
     removeClass(self);
-    fn().done(killRow.bind(null, self));
+    fn().done(partial(killRow, self));
     anotherSpinner(self);
   }
 
@@ -10469,7 +10478,7 @@
   function queueTakeItem(invId, action) {
     // You have to chain them because they could be modifying the backpack
     deferred = deferred.pipe(function pipeTakeToQueue() {
-      return takeItem(invId).pipe(takeItemStatus.bind(null, action));
+      return takeItem(invId).pipe(partial(takeItemStatus, action));
     });
     return deferred;
   }
@@ -10513,7 +10522,7 @@
   function takeItem$1(e) { // jQuery
     var self = $(e.target);
     doAction$1(
-      queueTakeItem.bind(null, self.attr('invid'), self.attr('action')),
+      partial(queueTakeItem, self.attr('invid'), self.attr('action')),
       self
     );
   }
@@ -10521,7 +10530,7 @@
   function recallItem$1(e) { // jQuery
     var self = $(e.target);
     doAction$1(
-      queueRecallItem.bind(null, {
+      partial(queueRecallItem, {
         invId: self.attr('invid'),
         playerId: self.attr('playerid'),
         mode: self.attr('mode'),
@@ -10533,12 +10542,12 @@
 
   function wearItem(e) { // jQuery
     var self = $(e.target);
-    doAction$1(equipItem.bind(null, self.attr('invid')), self);
+    doAction$1(partial(equipItem, self.attr('invid')), self);
   }
 
   function doUseItem$1(e) { // jQuery
     var self = $(e.target);
-    doAction$1(useItem.bind(null, self.attr('invid')), self);
+    doAction$1(partial(useItem, self.attr('invid')), self);
   }
 
   function doMoveItem(e) { // jQuery
@@ -10548,17 +10557,17 @@
 
   function doStoreItem(e) { // jQuery
     var self = $(e.target);
-    doAction$1(storeItems.bind(null, [self.attr('invid')]), self);
+    doAction$1(partial(storeItems, [self.attr('invid')]), self);
   }
 
   function doDropItem(e) { // jQuery
     var self = $(e.target);
-    doAction$1(dropItem.bind(null, [self.data('inv')]), self);
+    doAction$1(partial(dropItem, [self.data('inv')]), self);
   }
 
   function doSendItem(e) { // jQuery
     var self = $(e.target);
-    doAction$1(sendItem.bind(null, [self.data('inv')]), self);
+    doAction$1(partial(sendItem, [self.data('inv')]), self);
   }
 
   function eventHandlers() { // jQuery
@@ -10841,7 +10850,7 @@
       var itemTbl = createDiv({className: 'fshTakeGrid'});
       makeItemBoxes(itemTbl, itemList);
       insertElement(qt, itemTbl);
-      itemTbl.addEventListener('click', partial(clickEvt, itemList, takeResult));
+      on(itemTbl, 'click', partial(clickEvt, itemList, takeResult));
     } else {
       takeResult.textContent = 'Your browser is not supported.';
     }
@@ -10860,7 +10869,7 @@
       type: 'checkbox'
     });
     insertElementBefore(qtCheckbox, injector);
-    addEventListenerOnce(qtCheckbox, 'change',
+    once(qtCheckbox, 'change',
       partial(toggleQuickTake, items, injector));
   }
 
@@ -11353,7 +11362,7 @@
     options$1.checks = options$1.checks || defChecks.slice(0);
     pCC.innerHTML = guildLogFilter;
     fshNewGuildLog = getElementById('fshNewGuildLog');
-    fshNewGuildLog.addEventListener('click', eventHandler(guildLogEvents));
+    on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
     setChecks$1();
     fshOutput = getElementById('fshOutput');
     maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));
@@ -11488,7 +11497,7 @@
   }
 
   function ajaxifyProfileSections() {
-    pCC.addEventListener('click', testForSection);
+    on(pCC, 'click', testForSection);
   }
 
   function destroyComponent(componentIdAry) {
@@ -11768,7 +11777,7 @@
   function addComposingButtons(thisInvTable) {
     var compDiv = thisInvTable.parentNode;
     insertElement(compDiv, componentBtnContainer());
-    compDiv.addEventListener('click', eventHandler3([
+    on(compDiv, 'click', eventHandler3([
       quickExtractHandler,
       enableQuickDelHandler,
       deleteAllHandler,
@@ -11832,8 +11841,7 @@
   function fastDebuff() {
     var profileRightColumn = getElementById('profileRightColumn');
     if (profileRightColumn) {
-      profileRightColumn.lastElementChild
-        .addEventListener('click', interceptDebuff, true);
+      on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
     }
   }
 
@@ -11914,7 +11922,7 @@
       '#backpackTab_' + self.type.toString() +
       ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
     if (items.length === 0) {return;}
-    Array.prototype.forEach.call(items, drawButtons.bind(null, self));
+    Array.from(items).forEach(partial(drawButtons, self));
   }
 
   function foundBackpack(backpackContainer, theBackpack) {
@@ -11927,7 +11935,7 @@
     if (getElementById('backpack_current').textContent.length !== 0) {
       add(3, fastWearLinks, [theBackpack]);
     }
-    backpackContainer.addEventListener('click', evtHdl$1.bind(null, theBackpack));
+    on(backpackContainer, 'click', partial(evtHdl$1, theBackpack));
   }
 
   function initialiseFastWear() {
@@ -11983,7 +11991,7 @@
     insertElement(nekidDiv, theBtn);
     insertTextBeforeEnd(nekidDiv, ' ]');
     profileRightColumn.replaceChild(nekidDiv, targetBr);
-    theBtn.addEventListener('click', getNekid);
+    on(theBtn, 'click', getNekid);
   }
 
   var guildId$3;
@@ -12181,8 +12189,7 @@
       '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
       '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
       '</span>';
-    getElementById('fshBioExpander')
-      .addEventListener('click', expandBio);
+    on(getElementById('fshBioExpander'), 'click', expandBio);
   }
 
   function findStartPosition(bioContents, _maxRowsToShow) {
@@ -12244,7 +12251,12 @@
     if (!bioCell) {return;}
     testForRender(self, bioCell);
     if (getValue('enableBioCompressor')) {compressBio(bioCell);}
-    bioCell.addEventListener('click', bioEvtHdl);
+    on(bioCell, 'click', bioEvtHdl);
+  }
+
+  function openQwDialog() {
+    sendEvent('profile', 'insertQuickWear');
+    jQueryDialog(insertQuickWear);
   }
 
   function quickWearLink() {
@@ -12257,10 +12269,7 @@
     insertElement(wrap, qw);
     insertTextBeforeEnd(wrap, ']');
     insertElement(node.parentNode, wrap);
-    qw.addEventListener('click', function() {
-      sendEvent('profile', 'insertQuickWear');
-      jQueryDialog(insertQuickWear);
-    });
+    on(qw, 'click', openQwDialog);
   }
 
   function profileSelectAll() {
@@ -12282,7 +12291,7 @@
       ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
     if (!node) {return;}
     var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
-    allSpan.addEventListener('click', profileSelectAll);
+    on(allSpan, 'click', profileSelectAll);
     var wrapper = createSpan({innerHTML: '[&nbsp;'});
     insertElement(wrapper, allSpan);
     insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');
@@ -12605,7 +12614,6 @@
     addStatTotalToMouseover();
     getPrefs();
     doToggleButtons(showExtraLinks, showQuickDropLinks$1);
-    // pCC.addEventListener('click', eventHandler(evts));
     var imgList = getItemImg();
     itemsAry$1 = [];
     itemsHash = {};
@@ -12627,7 +12635,6 @@
   }
 
   var extraLinks;
-  var paintCount;
   var checkAll;
   var dropLinks;
   var invItems$2;
@@ -12694,7 +12701,8 @@
     if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
   }
 
-  function itemWidgets(o, item) {
+  function itemWidgets(o) {
+    var item = invItems$2[o.invid];
     if (item) {
       afterbegin(o, item);
       beforeend(o, item);
@@ -12709,27 +12717,11 @@
     sendLinks = true;
   }
 
-  function invPaint() { // Native - abstract this pattern
-    var limit = performance.now() + 5;
-    while (moreToDo(limit, paintCount, itemsAry$1)) {
-      var o = itemsAry$1[paintCount];
-      var item = invItems$2[o.invid];
-      itemWidgets(o, item);
-      paintCount += 1;
-    }
-    if (paintCount < itemsAry$1.length) {
-      add(3, invPaint);
-    } else {
-      doneInvPaint();
-    }
-  }
-
   function toggleShowExtraLinks() {
     setShowExtraLinks();
     doToggleButtons(showExtraLinks, showQuickDropLinks$1);
     if (!extraLinks) {
-      paintCount = 0;
-      add(3, invPaint);
+      batch(itemsAry$1, 0, itemWidgets, doneInvPaint);
     } else {
       itemsAry$1.forEach(function(o) {
         var el = o.injectHere.firstElementChild;
@@ -12742,8 +12734,7 @@
     setShowQuickDropLinks();
     doToggleButtons(showExtraLinks, showQuickDropLinks$1);
     if (!dropLinks) {
-      paintCount = 0;
-      add(3, invPaint);
+      batch(itemsAry$1, 0, itemWidgets, doneInvPaint);
     } else {
       itemsAry$1.forEach(function(o) {
         var el = o.injectHere.querySelector('.dropLink');
@@ -12805,16 +12796,15 @@
     colouring = false;
     dropLinks = false;
     sendLinks = false;
-    paintCount = 0;
-    add(3, invPaint);
+    batch(itemsAry$1, 0, itemWidgets, doneInvPaint);
     doFolderButtons$1(data.folders);
+    on(pCC, 'click', eventHandler(evts));
   }
 
   function injectStoreItems() {
     if (jQueryNotPresent()) {return;}
     getInventoryById().done(inventory$1);
     add(3, getItems$1);
-    pCC.addEventListener('click', eventHandler(evts));
   }
 
   function injectProfileDropItems() {
@@ -13032,8 +13022,8 @@
   }
 
   function setupEventHandlers() {
-    getElementById('helperQBheader').addEventListener('click', quickActivate);
-    getElementById('players').addEventListener('click', addBuffLevels);
+    on(getElementById('helperQBheader'), 'click', quickActivate);
+    on(getElementById('players'), 'click', addBuffLevels);
   }
 
   function eachLabel(el) {
@@ -13163,87 +13153,17 @@
     }
   }
 
-  var storeMap = 'fsh_potMap';
-  var defaultOpts = {
-    pottab1: false,
-    pottab2: false,
-    pottab3: false,
-    myMap: {},
-    minpoint: 12,
-    maxpoint: 20
-  };
-  var potObj;
-  var potOpts;
   var inventory$2;
-  var mapping;
-  var thresholds;
 
-  function createContainer() {
-    return createDiv({
-      id: 'potReport',
-      innerHTML: '<input id="pottab1" type="checkbox" name="pottabs"' +
-        isChecked(potOpts.pottab1) + '>' +
-        '<label for="pottab1">Composed Potion Inventory</label>' +
-        '<input id="pottab2" type="checkbox" name="pottabs"' +
-        isChecked(potOpts.pottab2) + '>' +
-        '<label for="pottab2">Mapping</label>' +
-        '<input id="pottab3" type="checkbox" name="pottabs"' +
-        isChecked(potOpts.pottab3) + '>' +
-        '<label for="pottab3">Thresholds</label>'
-    });
-  }
-
-  function createThresholds() {
-    return createDiv({
-      id: 'thresholds',
-      innerHTML: 'Min:' +
-        '<input id="minpoint" type="number" value="' +
-        potOpts.minpoint + '" min="0" max="999">' +
-        'Max:' +
-        '<input id="maxpoint" type="number" value="' +
-        potOpts.maxpoint + '" min="0" max="999">',
-    });
-  }
-
-  function sortKeys(obj) {
-    return Object.keys(obj).sort(alpha$1).reduce(function(result, key) {
-      result[key] = obj[key];
-      return result;
-    }, {});
-  }
-
-  function resetMap() {
-    potOpts.myMap = Object.keys(potObj).reduce(function(prev, pot) {
-      prev[pot] = pot;
-      return prev;
-    }, {});
-  }
-
-  function buildMap() {
-    Object.keys(potObj).forEach(function(pot) {
-      if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
-    });
-    potOpts.myMap = sortKeys(potOpts.myMap);
-  }
-
-  function buildOptions$1(select) {
-    return '<select name="' + select +
-      '"><option value="Ignore">Ignore</option>' +
-      Object.keys(potOpts.myMap).reduce(function(prev, pot) {
-        return prev + '<option value="' + pot + '"' +
-          isSelected(pot, potOpts.myMap[select]) + '>' + pot + '</option>';
-      }, '') + '</select>';
-  }
-
-  function drawMapping() {
-    mapping.innerHTML = '<table><tbody>' +
-      Object.keys(potOpts.myMap).reduce(function(prev, pot) {
-        var options = buildOptions$1(pot);
-        return prev + '<tr height="19px"><td>' + pot + '</td><td>' + options +
-          '</td></tr>';
-      }, '') + '<tr><td></td><td class="fshCenter">' +
-      '<input id="fshReset" value="Reset" type="button">' +
-      '</td></tr></tbody></table>';
+  function pivotPotObj(potOpts, potObj, prev, pot) {
+    if (potOpts.myMap[pot] !== 'Ignore') {
+      if (prev[potOpts.myMap[pot]]) {
+        prev[potOpts.myMap[pot]] += potObj[pot];
+      } else {
+        prev[potOpts.myMap[pot]] = potObj[pot];
+      }
+    }
+    return prev;
   }
 
   function perc2color(percent) {
@@ -13262,123 +13182,249 @@
     return '#' + ('000000' + h.toString(16)).slice(-6);
   }
 
-  function pivotPotObj(prev, pot) {
-    if (potOpts.myMap[pot] !== 'Ignore') {
-      if (prev[potOpts.myMap[pot]]) {
-        prev[potOpts.myMap[pot]] += potObj[pot];
-      } else {
-        prev[potOpts.myMap[pot]] = potObj[pot];
-      }
-    }
-    return prev;
-  }
-
-  function makeRowsFromPivot(pivot, prev, pot) {
-    return prev + '<tr height="19px"><td>' + pot +
+  function makeRowsFromPivot(potOpts, pivot, prev, pot) {
+    return prev + '<tr><td>' + pot +
       '</td><td style="background-color: ' +
       perc2color((pivot[pot] - potOpts.minpoint) /
       (potOpts.maxpoint - potOpts.minpoint) * 100) + ';">' +
       pivot[pot].toString() + '</td></tr>';
   }
 
-  function drawInventory() {
-    var pivot = Object.keys(potObj).reduce(pivotPotObj, {});
+  function drawInventory(potOpts, potObj) {
+    var pivot = Object.keys(potObj)
+      .reduce(partial(pivotPotObj, potOpts, potObj), {});
     inventory$2.innerHTML = '<table><tbody>' +
-      Object.keys(pivot).reduce(makeRowsFromPivot.bind(null, pivot), '') +
+      Object.keys(pivot).reduce(partial(makeRowsFromPivot, potOpts, pivot), '') +
       '</tbody></table>';
   }
 
-  function onChange(e) {
+  function initInventory(potOpts, potObj, panels) {
+    inventory$2 = createDiv({id: 'inventory'});
+    if (potOpts.pottab1) {
+      drawInventory(potOpts, potObj);
+    } else {
+      once(panels.parentNode.children[0], 'change',
+        partial(drawInventory, potOpts, potObj));
+    }
+    insertElement(panels, inventory$2);
+  }
+
+  var mapping;
+  var selectRowTmp;
+
+  function getRow() {
+    var rowTmp = createTr();
+    rowTmp.insertCell(-1);
+    rowTmp.insertCell(-1);
+    return rowTmp;
+  }
+
+  function setOption(value) {
+    var option = createOption();
+    option.value = value;
+    option.text = value;
+    return option;
+  }
+
+  function getSelect(ary) {
+    var selectTmp = createSelect({
+      className: 'tip-static',
+      dataset: {tipped: 'Set to "Ignore" to exclude from report'}
+    });
+    insertElement(selectTmp, setOption('Ignore'));
+    ary.forEach(function(el) {
+      insertElement(selectTmp, setOption(el[0]));
+    });
+    return selectTmp;
+  }
+
+  function getSelectRow(ary) {
+    if (!selectRowTmp) {
+      selectRowTmp = getRow();
+      var select = getSelect(ary);
+      insertElement(selectRowTmp.cells[1], select);
+    }
+    return selectRowTmp.cloneNode(true);
+  }
+
+  function insertRows(mapTbl, el, i, ary) {
+    var selectRow = getSelectRow(ary);
+    selectRow.cells[0].textContent = el[0];
+    var select = selectRow.cells[1].children[0];
+    select.name = el[0];
+    select.value = el[1];
+    insertElement(mapTbl.tBodies[0], selectRow);
+  }
+
+  function insertFinal(mapTbl) {
+    var row = getRow();
+    var input = createInput({
+      id: 'fshReset',
+      type: 'button',
+      value: 'Reset'
+    });
+    insertElement(row.cells[1], input);
+    insertElement(mapTbl.tBodies[0], row);
+    return 0;
+  }
+
+  function drawMapping(potOpts) {
+    var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
+    mapping.replaceChild(mapTbl, mapping.children[0]);
+    add(3, batch, [Object.entries(potOpts.myMap), 0,
+      partial(insertRows, mapTbl), partial(insertFinal, mapTbl)]);
+  }
+
+  function initMapping(potOpts, panels) {
+    mapping = createDiv({id: 'mapping', innerHTML: '<p></p>'});
+    if (potOpts.pottab2) {
+      drawMapping(potOpts);
+    } else {
+      once(panels.parentNode.children[2], 'change',
+        partial(drawMapping, potOpts));
+    }
+    insertElement(panels, mapping);
+  }
+
+  var storeMap = 'fsh_potMap';
+  var defaultOpts = {
+    pottab1: false,
+    pottab2: false,
+    pottab3: false,
+    myMap: {},
+    minpoint: 12,
+    maxpoint: 20
+  };
+
+  function sortKeys(obj) {
+    return Object.keys(obj).sort(alpha$1).reduce(function(result, key) {
+      result[key] = obj[key];
+      return result;
+    }, {});
+  }
+
+  function buildMap(potOpts, potObj) {
+    Object.keys(potObj).forEach(function(pot) {
+      if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
+    });
+    return sortKeys(potOpts.myMap);
+  }
+
+  function createContainer(potOpts) {
+    return createDiv({
+      id: 'potReport',
+      innerHTML: '<input id="pottab1" type="checkbox"' +
+        isChecked(potOpts.pottab1) + '>' +
+        '<label for="pottab1">Composed Potion Inventory</label>' +
+        '<input id="pottab2" type="checkbox"' +
+        isChecked(potOpts.pottab2) + '>' +
+        '<label for="pottab2">Mapping</label>' +
+        '<input id="pottab3" type="checkbox"' +
+        isChecked(potOpts.pottab3) + '>' +
+        '<label for="pottab3">Thresholds</label>'
+    });
+  }
+
+  function createThresholds(potOpts, panels) {
+    var thresholds = createDiv({
+      id: 'thresholds',
+      innerHTML: 'Min:' +
+        '<input id="minpoint" type="number" value="' +
+        potOpts.minpoint + '" min="0" max="999">' +
+        'Max:' +
+        '<input id="maxpoint" type="number" value="' +
+        potOpts.maxpoint + '" min="0" max="999">',
+    });
+    insertElement(panels, thresholds);
+  }
+
+  function onChange(potOpts, potObj, e) {
     if (e.target.tagName === 'SELECT') {
       potOpts.myMap[e.target.name] = e.target.value;
       setForage(storeMap, potOpts);
-      drawInventory();
+      drawInventory(potOpts, potObj);
     }
   }
 
-  function doReset$1() {
-    resetMap();
-    setForage(storeMap, potOpts);
-    drawMapping();
-    drawInventory();
+  function resetMap(potOpts, potObj) {
+    potOpts.myMap = Object.keys(potObj).reduce(function(prev, pot) {
+      prev[pot] = pot;
+      return prev;
+    }, {});
   }
 
-  function saveState(self) {
-    var option = self.id;
-    potOpts[option] = self.checked;
-    setForage(storeMap, potOpts);
-  }
-
-  var evtHdl$2 = [
-    {
-      test: function(self) {return self.id === 'fshReset';},
-      act: doReset$1
-    },
-    {
-      test: function(self) {
-        return /^pottab\d$/.test(self.id);
-      },
-      act: saveState
+  function doReset$1(potOpts, potObj, evt) {
+    if (evt.target.id === 'fshReset') {
+      resetMap(potOpts, potObj);
+      setForage(storeMap, potOpts);
+      drawMapping(potOpts);
+      drawInventory(potOpts, potObj);
+      return true;
     }
-  ];
+  }
 
-  function onInput(e) {
+  function saveState(potOpts, evt) {
+    var self = evt.target;
+    if (/^pottab\d$/.test(self.id)) {
+      var option = self.id;
+      potOpts[option] = self.checked;
+      setForage(storeMap, potOpts);
+      return true;
+    }
+  }
+
+  function onInput(potOpts, potObj, e) {
     var self = e.target.id;
     var maybeValue = testRange(e.target.value, 0, 999);
     if (maybeValue) {
       potOpts[self] = maybeValue;
       setForage(storeMap, potOpts);
-      drawInventory();
+      drawInventory(potOpts, potObj);
     }
   }
 
-  function gotMap(data) {
-    potOpts = extend({}, defaultOpts);
-    extend(potOpts, fallback(data, {}));
-    buildMap(potObj);
-    setForage(storeMap, potOpts);
-    var container = createContainer();
-    var panels = createDiv({id: 'panels'});
-    insertElement(container, panels);
-    inventory$2 = createDiv({id: 'inventory'});
-    drawInventory();
-    insertElement(panels, inventory$2);
-    mapping = createDiv({id: 'mapping'});
-    drawMapping();
-    insertElement(panels, mapping);
-    thresholds = createThresholds();
-    insertElement(panels, thresholds);
-
+  function injectCell(potOpts, potObj) {
     var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
-    myCell.addEventListener('change', onChange);
-    myCell.addEventListener('click', eventHandler(evtHdl$2));
-    myCell.addEventListener('input', onInput);
-    insertElement(myCell, container);
+    on(myCell, 'change', partial(onChange, potOpts, potObj));
+    on(myCell, 'click', eventHandler3([
+      partial(doReset$1, potOpts, potObj),
+      partial(saveState, potOpts)
+    ]));
+    on(myCell, 'input', partial(onInput, potOpts, potObj));
+    return myCell;
   }
 
-  function potReport(potObj_) {
-    potObj = sortKeys(potObj_);
-    getForage(storeMap).done(gotMap);
+  function buildPanels(potOpts, potObj) {
+    var container = createContainer(potOpts);
+    var panels = createDiv({id: 'panels'});
+    insertElement(container, panels);
+    initInventory(potOpts, potObj, panels);
+    initMapping(potOpts, panels);
+    createThresholds(potOpts, panels);
+    insertElement(injectCell(potOpts, potObj), container);
+  }
+
+  function gotMap(potObj, data) {
+    var potOpts = extend({}, defaultOpts); // deep clone
+    extend(potOpts, fallback(data, {}));
+    potOpts.myMap = buildMap(potOpts, potObj);
+    setForage(storeMap, potOpts);
+    buildPanels(potOpts, potObj);
+  }
+
+  function potReport(potObj) {
+    getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
   }
 
   var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
     'Gut Rot Head Splitter|Serum');
-  var counter;
   var nodeArray;
   var nodeList;
-  var potObj$1;
+  var potObj;
 
-  function paintChild() {
-    var limit = performance.now() + 1;
-    while (moreToDo(limit, counter, nodeArray)) {
-      var el = nodeList[counter];
-      var inject = nodeArray[counter];
-      insertElement(el, inject);
-      counter += 1;
-    }
-    if (counter < nodeArray.length) {
-      add(3, paintChild);
-    }
+  function doPaintChild(inject, localCounter) {
+    var el = nodeList[localCounter];
+    insertElement(el, inject);
   }
 
   function hideElement$1(test) {
@@ -13394,10 +13440,10 @@
   function addPotObj(item) {
     if (item.indexOf(' (Potion)') !== -1) {
       var itemName = item.replace(' (Potion)', '');
-      if (potObj$1[itemName]) {
-        potObj$1[itemName] += 1;
+      if (potObj[itemName]) {
+        potObj[itemName] += 1;
       } else {
-        potObj$1[itemName] = 1;
+        potObj[itemName] = 1;
       }
     }
   }
@@ -13428,10 +13474,10 @@
     if (el instanceof Element) {el.removeAttribute('width');}
   }
 
-  function doSpan(el) {
-    if (counter === 0) {
-      el.previousSibling.setAttribute('width', '200px');
-      el.setAttribute('width', '370px');
+  function doSpan(el, localCounter) {
+    if (localCounter === 0) {
+      el.previousSibling.width = '200px';
+      el.width = '370px';
     } else {
       removeWidth(el.previousSibling);
       removeWidth(el);
@@ -13439,67 +13485,38 @@
     nodeArray.push(mySpan(el));
   }
 
-  function makeSpan() {
-    var limit = performance.now() + 10;
-    while (moreToDo(limit, counter, nodeList)) {
-      var el = nodeList[counter];
-
-      doSpan(el);
-
-      counter += 1;
-    }
-    if (counter < nodeList.length) {
-      add(3, makeSpan);
-    } else {
-      counter = 0;
-      add(3, paintChild);
-      potReport(potObj$1);
-    }
+  function finishSpan() {
+    batch(nodeArray, 0, doPaintChild, partial(potReport, potObj));
   }
 
   function prepareChildRows() {
     nodeList = document.querySelectorAll('#pCC table table ' +
       'tr:not(.fshHide) td:nth-of-type(3n)');
-    potObj$1 = {};
+    potObj = {};
     nodeArray = [];
-    counter = 0;
-    add(3, makeSpan);
+    batch(nodeList, 0, doSpan, finishSpan);
   }
 
-  var headerCount;
-  var headers$1;
-
   function memberHeader(oldhtml) {
-    if (!calf.membrList[oldhtml]) {return oldhtml;}
     return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
       '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
       '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
       oldhtml + '>m</span> ]';
   }
 
-  function paintHeader() {
-    var limit = performance.now() + 10;
-    while (moreToDo(limit, headerCount, headers$1)) {
-      // while (performance.now() < limit && headerCount < headers.length) {
-      var el = headers$1[headerCount];
-      var oldhtml = el.textContent;
+  function updateMemberHeader(el) {
+    var oldhtml = el.textContent;
+    if (calf.membrList[oldhtml]) {
       el.innerHTML = memberHeader(oldhtml);
-      headerCount += 1;
-    }
-    if (headerCount < headers$1.length) {
-      add(3, paintHeader);
     }
   }
 
   function reportHeader() {
-    headers$1 = document.querySelectorAll('#pCC table table ' +
+    var headers = document.querySelectorAll('#pCC table table ' +
       'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
-    headerCount = 0;
-    add(3, paintHeader);
+    batch(headers, 0, updateMemberHeader);
   }
 
-  var counter$1;
-  var nodeList$1;
   var findUser;
   var foundUser;
 
@@ -13512,20 +13529,6 @@
     }
   }
 
-  function hideOthers() {
-    var limit = performance.now() + 5;
-    while (moreToDo(limit, counter$1, nodeList$1)) {
-      var el = nodeList$1[counter$1];
-
-      hideOther(el);
-
-      counter$1 += 1;
-    }
-    if (counter$1 < nodeList$1.length) {
-      add(2, hideOthers);
-    }
-  }
-
   function searchUser() {
     findUser = getUrlParameter('user');
     if (!findUser) {return;}
@@ -13535,9 +13538,8 @@
       return el.textContent === findUser;
     });
     if (!userNode) {return;}
-    nodeList$1 = document.querySelectorAll('#pCC table table tr');
-    counter$1 = 0;
-    add(2, hideOthers);
+    var nodeList = document.querySelectorAll('#pCC table table tr');
+    batch(nodeList, 0, hideOther);
   }
 
   function injectReportPaint() { // jQuery
@@ -13547,8 +13549,7 @@
     });
     add(2, searchUser);
     add(3, prepareChildRows);
-    pCC.getElementsByTagName('TABLE')[1]
-      .addEventListener('click', eventHandlers$1);
+    on(pCC.getElementsByTagName('TABLE')[1], 'click', eventHandlers$1);
   }
 
   function injectSaveSettings() { // Hybrid
@@ -13605,7 +13606,7 @@
     statbarGold = getElementById('statbar-gold');
     gold = getElementById('gold');
     setMaxTimes();
-    gold.addEventListener('keyup', setMaxTimes);
+    on(gold, 'keyup', setMaxTimes);
   }
 
   function lookForMultiplierCount() {
@@ -13632,7 +13633,7 @@
 
   function lookForScavBtn() {
     var scavBtn = document.querySelector('#pCC input[value="Scavenge"]');
-    if (scavBtn) {scavBtn.addEventListener('click', dontPost$1);}
+    if (scavBtn) {on(scavBtn, 'click', dontPost$1);}
   }
 
   /* global sendRequest:true */
@@ -13761,7 +13762,7 @@
     }
   }
 
-  function evtHdl$3(e) {
+  function evtHdl$2(e) {
     if (e.target.classList.contains('fshBl')) {buffEvent(e);}
   }
 
@@ -13781,7 +13782,7 @@
       if (titanTable.rows.length < 2) {continue;}
       doBuffLinks$1(titanTable);
     }
-    titanTables[1].addEventListener('click', evtHdl$3);
+    on(titanTables[1], 'click', evtHdl$2);
   }
 
   function injectScouttowerBuffLinks(titanTables) {
@@ -13840,7 +13841,7 @@
         '<td class="header fshCenter">Visible</td></tr>'
     });
     insertElement(trackerTable, tBody);
-    Object.keys(theTitans).forEach(addRow$1.bind(null, theTitans, tBody));
+    Object.keys(theTitans).forEach(partial(addRow$1, theTitans, tBody));
 
     var newRow = parentTable.insertRow(5);
     var newCell = newRow.insertCell(-1);
@@ -14121,48 +14122,53 @@
       simpleCheckbox('detailedConflictInfo');
   }
 
+  function newGuildLogHistory() {
+    return '<tr><td class="fshRight">New Guild Log History' +
+      helpLink('New Guild Log History (pages)',
+        'This is the number of pages that the new guild log ' +
+        'screen will go back in history.') +
+      ':</td><td><input name="newGuildLogHistoryPages" size="3" value="' +
+      getValue('newGuildLogHistoryPages') + '"></td></td></tr>';
+  }
+
+  function newLogMessageSound() {
+    return '<tr><td class="fshRight">New Log Message Sound' +
+      helpLink('New Log Message Sound',
+        'The .wav or .ogg file to play when you have unread log messages. ' +
+        'This must be a .wav or .ogg file. This option can be turned on/off ' +
+        'on the world page. Only works in Firefox 3.5+') +
+      ':</td><td colspan="3"><input name="defaultMessageSound" size="60" ' +
+      'value="' + getValue('defaultMessageSound') +
+      '"></td></tr>';
+  }
+
+  function playSoundOnUnreadLog() {
+    return '<tr><td class="fshRight">Play sound on unread log' +
+      helpLink('Play sound on unread log',
+        'Should the above sound play when you have unread log messages? ' +
+        '(will work on Firefox 3.5+ only)') +
+      ':</td><td><input name="playNewMessageSound" type="checkbox" ' +
+      'value="on"' +
+      isChecked(getValue('playNewMessageSound')) + '>' +
+      ' Show speaker on world' +
+      helpLink('Show speaker on world',
+        'Should the toggle play sound speaker show on the world map? ' +
+        '(This icon is next to the Fallensword wiki icon and will only ' +
+        'display on Firefox 3.5+)') +
+      ':<input name="showSpeakerOnWorld" type="checkbox" value="on"' +
+      isChecked(getValue('showSpeakerOnWorld')) +
+      '></tr></td>';
+  }
+
   function logPrefs() {
     // Log screen prefs
-    return '<tr><th colspan="2"><b>Log screen preferences' +
-        '</b></th></tr>' +
-
+    return '<tr><th colspan="2"><b>Log screen preferences</b></th></tr>' +
       simpleCheckbox('hideNonPlayerGuildLogMessages') +
       simpleCheckbox('useNewGuildLog') +
-
-      '<tr><td class="fshRight">New Guild Log History' +
-        helpLink('New Guild Log History (pages)',
-          'This is the number of pages that the new guild log ' +
-          'screen will go back in history.') +
-        ':</td><td><input name="newGuildLogHistoryPages" size="3" value="' +
-        getValue('newGuildLogHistoryPages') + '"></td></td></tr>' +
-
+      newGuildLogHistory() +
       simpleCheckbox('enableLogColoring') +
-
-      '<tr><td class="fshRight">New Log Message Sound' +
-        helpLink('New Log Message Sound',
-          'The .wav or .ogg file to play when you have unread log messages. ' +
-          'This must be a .wav or .ogg file. This option can be turned on/off ' +
-          'on the world page. Only works in Firefox 3.5+') +
-        ':</td><td colspan="3"><input name="defaultMessageSound" size="60" ' +
-        'value="' + getValue('defaultMessageSound') +
-        '"></td></tr>' +
-
-      '<tr><td class="fshRight">Play sound on unread log' +
-        helpLink('Play sound on unread log',
-          'Should the above sound play when you have unread log messages? ' +
-          '(will work on Firefox 3.5+ only)') +
-        ':</td><td><input name="playNewMessageSound" type="checkbox" ' +
-        'value="on"' +
-        isChecked(getValue('playNewMessageSound')) + '>' +
-        ' Show speaker on world' +
-        helpLink('Show speaker on world',
-          'Should the toggle play sound speaker show on the world map? ' +
-          '(This icon is next to the Fallensword wiki icon and will only ' +
-          'display on Firefox 3.5+)') +
-        ':<input name="showSpeakerOnWorld" type="checkbox" value="on"' +
-        isChecked(getValue('showSpeakerOnWorld')) +
-        '></tr></td>' +
-
+      newLogMessageSound() +
+      playSoundOnUnreadLog() +
       simpleCheckbox('enableChatParsing') +
       simpleCheckbox('keepBuffLog') +
       simpleCheckbox('addAttackLinkToLog') +
@@ -14612,27 +14618,22 @@
       className: 'fshLink',
       textContent: 'Tick all buffs'
     });
-    tickAll.addEventListener('click', toggleTickAllBuffs);
+    on(tickAll, 'click', toggleTickAllBuffs);
     var inject = getElementById('settingsTabs-4').firstElementChild
       .rows[0].cells[0];
     insertElement(inject, createBr());
     insertElement(inject, tickAll);
 
-    getElementById('fshClearStorage').addEventListener('click', clearStorage);
+    on(getElementById('fshClearStorage'), 'click', clearStorage);
 
-    getElementById('Helper:SaveOptions').addEventListener('click', saveConfig);
-    getElementById('Helper:ShowLogs').addEventListener('click', showLogs);
-    getElementById('Helper:ShowMonsterLogs')
-      .addEventListener('click', showMonsterLogs);
+    on(getElementById('Helper:SaveOptions'), 'click', saveConfig);
+    on(getElementById('Helper:ShowLogs'), 'click', showLogs);
+    on(getElementById('Helper:ShowMonsterLogs'), 'click', showMonsterLogs);
 
-    getElementById('toggleShowGuildSelfMessage')
-      .addEventListener('click', toggleVisibilty);
-    getElementById('toggleShowGuildFrndMessage')
-      .addEventListener('click', toggleVisibilty);
-    getElementById('toggleShowGuildPastMessage')
-      .addEventListener('click', toggleVisibilty);
-    getElementById('toggleShowGuildEnmyMessage')
-      .addEventListener('click', toggleVisibilty);
+    on(getElementById('toggleShowGuildSelfMessage'), 'click', toggleVisibilty);
+    on(getElementById('toggleShowGuildFrndMessage'), 'click', toggleVisibilty);
+    on(getElementById('toggleShowGuildPastMessage'), 'click', toggleVisibilty);
+    on(getElementById('toggleShowGuildEnmyMessage'), 'click', toggleVisibilty);
   }
 
   function injectSettings() { // jQuery
@@ -14778,7 +14779,7 @@
     }
   }
 
-  function failFilter(jqXhr) {
+  function failFilter$1(jqXhr) {
     return $.Deferred().resolve(null, jqXhr).promise();
   }
 
@@ -14798,8 +14799,8 @@
 
   function stackAjax(prm, playerName, tbl, guildId) {
     prm.push(getProfile(playerName)
-      .pipe(null, failFilter)
-      .done(parsePlayer.bind(null, tbl, guildId))
+      .pipe(null, failFilter$1)
+      .done(partial(parsePlayer, tbl, guildId))
     );
   }
 
@@ -14871,7 +14872,7 @@
       }
     });
     theCell.insertBefore(findBtn, theCell.firstElementChild);
-    findBtn.addEventListener('click', getMyVL);
+    on(findBtn, 'click', getMyVL);
   }
 
   var topRatedTests = [
@@ -14959,7 +14960,7 @@
       id: 'fshFolderSelect',
       innerHTML: folderCell
     });
-    foldersRow.addEventListener('click', hideFolder);
+    on(foldersRow, 'click', hideFolder);
     var el = getElementById('item-list').parentNode.parentNode;
     insertHtmlBeforeBegin(el, '<tr id="fshShowSTs">' +
       '<td align="center" colspan=6>' +
@@ -15083,7 +15084,7 @@
       id: 'fshSelectMultiple',
       innerHTML: myTd
     });
-    multiple.addEventListener('click', toggleAllPlants);
+    on(multiple, 'click', toggleAllPlants);
     var el = getElementById('item-list').parentNode.parentNode;
     el.parentNode.insertBefore(multiple, el);
   }
@@ -15741,7 +15742,19 @@
     groupStats$1.hp -= mercStats.hp;
   }
 
-  function updateDefValues() {
+  function withRelicMultiplier(val) {
+    return Math.round(val * relicMultiplier);
+  }
+
+  function updateDefenderValues() {
+    defRawAttack += withRelicMultiplier(leadDefender.attackValue);
+    defRawDefense += withRelicMultiplier(leadDefender.defenseValue);
+    defRawArmor += withRelicMultiplier(leadDefender.armorValue);
+    defRawDamage += withRelicMultiplier(leadDefender.damageValue);
+    defRawHp += withRelicMultiplier(leadDefender.hpValue);
+  }
+
+  function updateDefenderElements() {
     attackElement.textContent = addCommas(defRawAttack);
     defenseElement.textContent = addCommas(defRawDefense);
     armorElement.textContent = addCommas(defRawArmor);
@@ -15752,105 +15765,159 @@
     defProcessedElement.textContent = defProcessed.toString();
   }
 
-  function calculateGroup() {
-    processingStatus.textContent = 'Processing attacking group stats ... ';
-    if (mercStats) {deductMercStats();}
+  function updateGroupValues() {
     groupAttackElement.textContent = addCommas(groupStats$1.attack);
     groupDefenseElement.textContent = addCommas(groupStats$1.defense);
     groupArmorElement.textContent = addCommas(groupStats$1.armor);
     groupDamageElement.textContent = addCommas(groupStats$1.damage);
     groupHPElement.textContent = addCommas(groupStats$1.hp);
+  }
 
-    var buffs = reduceBuffArray(GameData.player().buffs);
-
-    var nightmareVisageEffect = Math.ceil(groupStats$1.attack *
+  function calcNmvEffect(buffs) {
+    return Math.ceil(groupStats$1.attack *
       (fallback(buffs['Nightmare Visage'], 0) * 0.0025));
-    groupStats$1.attack -= nightmareVisageEffect;
+  }
 
+  function doGroupAttackBuffedElement() {
     var storedFlinchEffectValue = Math.ceil(groupStats$1.attack *
       leadDefender.flinchLevel * 0.001);
     groupAttackBuffedElement.textContent = addCommas(groupStats$1.attack -
       storedFlinchEffectValue);
+  }
 
-    var defenseWithConstitution = Math.ceil(groupStats$1.defense *
+  function calcDefWithConst(buffs) {
+    return Math.ceil(groupStats$1.defense *
       (1 + fallback(buffs.Constitution, 0) * 0.001));
-    var totalDefense = defenseWithConstitution + nightmareVisageEffect;
-    groupDefenseBuffedElement.textContent = addCommas(totalDefense);
+  }
 
+  function doGroupDefenseBuffedElement(nmv, defConst) {
+    groupDefenseBuffedElement.textContent = addCommas(defConst + nmv);
+  }
+
+  function doGroupArmorBuffedElement(buffs) {
     groupArmorBuffedElement.textContent = addCommas(groupStats$1.armor +
       Math.floor(groupStats$1.armor * fallback(buffs.Sanctuary, 0) * 0.001));
+  }
 
-    var fortitudeBonusHP = Math.ceil(defenseWithConstitution *
+  function calcFortitudeBonusHP(buffs, defenseWithConstitution) {
+    return Math.ceil(defenseWithConstitution *
       fallback(buffs.Fortitude, 0) * 0.001);
+  }
+
+  function doGroupHPBuffedElement(fortitudeBonusHP) {
+    groupHPBuffedElement.textContent = addCommas(groupStats$1.hp +
+      fortitudeBonusHP);
+  }
+
+  function doGroupDamageBuffedElement(buffs, fortitudeBonusHP) {
     var chiStrikeBonusDamage = Math.ceil((groupStats$1.hp + fortitudeBonusHP) *
       fallback(buffs['Chi Strike'], 0) * 0.001);
     var storedTerrorizeEffectValue = Math.ceil(
       groupStats$1.damage * leadDefender.terrorizeLevel * 0.001);
     groupDamageBuffedElement.textContent = addCommas(groupStats$1.damage +
       chiStrikeBonusDamage - storedTerrorizeEffectValue);
-    groupHPBuffedElement.textContent = addCommas(groupStats$1.hp +
-      fortitudeBonusHP);
+  }
 
-    // Effect on defending group from Flinch on attacking group.
+  function doGroupAttributeElements(buffs) {
+    var nightmareVisageEffect = calcNmvEffect(buffs);
+    groupStats$1.attack -= nightmareVisageEffect; // <-- important
+    doGroupAttackBuffedElement();
+    var defenseWithConstitution = calcDefWithConst(buffs);
+    doGroupDefenseBuffedElement(nightmareVisageEffect, defenseWithConstitution);
+    doGroupArmorBuffedElement(buffs);
+    var fortitudeBonusHP = calcFortitudeBonusHP(buffs, defenseWithConstitution);
+    doGroupHPBuffedElement(fortitudeBonusHP);
+    doGroupDamageBuffedElement(buffs, fortitudeBonusHP);
+  }
+
+  function flinchEffectOnDefenders(buffs) {
     var flinchEffectValue = Math.ceil(defBuffedAttack *
       fallback(buffs.Flinch, 0) * 0.001);
     defenseBuffedElement.textContent = addCommas(defBuffedAttack -
       flinchEffectValue);
+  }
+
+  function terrorizeEffectOnDefenders(buffs) {
     var terrorizeEffectValue = Math.ceil(defBuffedDamage *
       fallback(buffs.Terrorize, 0) * 0.001);
     damageBuffedElement.textContent = addCommas(defBuffedDamage -
       terrorizeEffectValue);
+  }
 
+  function calculateGroup() {
+    processingStatus.textContent = 'Processing attacking group stats ... ';
+    if (mercStats) {deductMercStats();}
+    updateGroupValues();
+    var buffs = reduceBuffArray(GameData.player().buffs);
+    doGroupAttributeElements(buffs);
+    flinchEffectOnDefenders(buffs); // Effect on defending group from Flinch on attacking group.
+    terrorizeEffectOnDefenders(buffs);
     processingStatus.textContent = 'Done.';
   }
 
-  function doCalculations() {
-    processingStatus.textContent = 'Processing defending guild stats ... ';
+  function calcDefenderNmvEffect() {
+    return Math.ceil(defRawAttack * (leadDefender.nightmareVisageLevel * 0.0025));
+  }
 
-    defRawAttack += Math.round(leadDefender.attackValue * relicMultiplier);
-    var nightmareVisageEffect = Math.ceil(defRawAttack *
-      (leadDefender.nightmareVisageLevel * 0.0025));
-
-    defRawDefense += Math.round(leadDefender.defenseValue * relicMultiplier);
-    var defenseWithConstitution = Math.ceil(defRawDefense *
+  function calcDefenderDefenseWithConst() {
+    return Math.ceil(defRawDefense *
       (1 + leadDefender.constitutionLevel * 0.001));
-    var defBuffedDefense = defenseWithConstitution + nightmareVisageEffect;
+  }
 
-    defRawArmor += Math.round(leadDefender.armorValue * relicMultiplier);
-
-    defRawDamage += Math.round(leadDefender.damageValue * relicMultiplier);
-    defRawHp += Math.round(leadDefender.hpValue * relicMultiplier);
-    var fortitudeBonusHP = Math.ceil(defenseWithConstitution *
-      leadDefender.fortitudeLevel * 0.001);
-    var defBuffedHp = defRawHp + fortitudeBonusHP;
-    var chiStrikeBonusDamage = Math.ceil(defBuffedHp *
-      leadDefender.chiStrikeLevel * 0.001);
-
-    updateDefValues();
-
-    defBuffedAttack = defRawAttack - nightmareVisageEffect;
+  function updateDefenderBuffedAttack(nmvEffect) {
+    defBuffedAttack = defRawAttack - nmvEffect;
     attackBuffedElement.textContent = addCommas(defBuffedAttack);
+  }
+
+  function updateDefenderBuffedDefense(nmv, defWithConst) {
+    var defBuffedDefense = defWithConst + nmv;
     defenseBuffedElement.textContent = addCommas(defBuffedDefense);
     dc225Element.textContent = addCommas(Math.ceil(
       defBuffedDefense * 0.55));
     dc175Element.textContent = addCommas(Math.ceil(
       defBuffedDefense * 0.65));
+  }
+
+  function updateDefenderBuffedArmor() {
     armorBuffedElement.textContent = addCommas(defRawArmor +
       Math.floor(defRawArmor * leadDefender.sanctuaryLevel * 0.001));
+  }
+
+  function calcDefenderFortitudeBonusHp(defWithConst) {
+    return Math.ceil(defWithConst * leadDefender.fortitudeLevel * 0.001);
+  }
+
+  function updateDefenderBuffedDamage(defBuffedHp) {
+    var chiStrikeBonusDamage = Math.ceil(defBuffedHp *
+      leadDefender.chiStrikeLevel * 0.001);
     defBuffedDamage = defRawDamage + chiStrikeBonusDamage;
     damageBuffedElement.textContent = addCommas(defBuffedDamage);
-    hpBuffedElement.textContent = addCommas(defBuffedHp);
+  }
 
+  function isLeadDefenderCloaked() {
     if (leadDefender.cloakLevel !== 0) {
       lDCloakedElement.textContent = 'Yes';
     }
+  }
 
+  function doCalculations() {
+    processingStatus.textContent = 'Processing defending guild stats ... ';
+    updateDefenderValues();
+    updateDefenderElements();
+    var nmvEffect = calcDefenderNmvEffect();
+    updateDefenderBuffedAttack(nmvEffect);
+    var defWithConst = calcDefenderDefenseWithConst();
+    updateDefenderBuffedDefense(nmvEffect, defWithConst);
+    updateDefenderBuffedArmor();
+    var defBuffedHp = defRawHp + calcDefenderFortitudeBonusHp(defWithConst);
+    hpBuffedElement.textContent = addCommas(defBuffedHp);
+    updateDefenderBuffedDamage(defBuffedHp);
+    isLeadDefenderCloaked();
     if (GameData.player().hasGroup) {
       calculateGroup();
     } else {
       processingStatus.textContent = 'Done.';
     }
-
   }
 
   function parseDefender(json) {
@@ -15862,7 +15929,7 @@
     defRawDamage += Math.round(defender.damageValue * defenderMultiplier);
     defRawHp += Math.round(defender.hpValue * defenderMultiplier);
     if (defender.cloakLevel !== 0) {defCloaked += 1;}
-    updateDefValues();
+    updateDefenderElements();
   }
 
   function storeLeadDefender(json) {
@@ -15920,6 +15987,7 @@
   function parseGroups(html) {
     var doc = createDocument(html);
     var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
+    if (!disband) {return;}
     var viewStats = disband.previousElementSibling.href;
     var prm = [getGroupStats(viewStats).done(storeGroupStats)];
     var hasMerc = disband.parentNode.parentNode.previousElementSibling
@@ -15950,7 +16018,7 @@
     relicData = data.response.data;
     if (relicData.defenders.length > 0) {
       primaryElementsSetup(relicData);
-      fetchStatsBtn.addEventListener('click', getStats);
+      once(fetchStatsBtn, 'click', getStats);
     }
   }
 
@@ -16235,7 +16303,7 @@
     GameData.doAction(12, 401, {}, 0);
   }
 
-  function openQuickBuff() {
+  function openQuickBuff$1() {
     openQuickBuffByName(playerName());
   }
 
@@ -16277,7 +16345,7 @@
     },
     {
       test: function(self) {return self === quickBuff;},
-      act: openQuickBuff
+      act: openQuickBuff$1
     },
     {
       test: function(self) {return self === realmMap;},
@@ -16390,8 +16458,8 @@
     showQuickLinks(buttonContainer, data);
     showSpeakerOnWorld(buttonContainer);
     showHuntMode(buttonContainer);
-    buttonContainer.addEventListener('click', eventHandler(clickHdl));
-    buttonContainer.addEventListener('change', eventHandler(changeHdl));
+    on(buttonContainer, 'click', eventHandler(clickHdl));
+    on(buttonContainer, 'change', eventHandler(changeHdl));
     getElementById('worldContainer')
       .insertBefore(buttonContainer, getElementById('worldCoord'));
   }
@@ -16415,8 +16483,7 @@
     if (hazRealm(data)) {
       injectButtons(data);
       titanStats(data);
-      getElementById('buffList')
-        .addEventListener('click', fixDebuffQTip);
+      on(getElementById('buffList'), 'click', fixDebuffQTip);
       if (calf.hideSubLvlCreature) {GameData.fetch(256);}
     }
   }
@@ -16519,7 +16586,7 @@
     });
     insertElement(fshDiv, numInput);
     qbBtn = createButton({textContent: 'Quick-buy'});
-    qbBtn.addEventListener('click', qBuy);
+    on(qbBtn, 'click', qBuy);
     insertElement(fshDiv, qbBtn);
     resultDiv = createDiv();
     insertElement(fshDiv, resultDiv);
@@ -17360,7 +17427,7 @@
     });
     insertElement(btnContainer, doNotKillBtn);
     insertElement(creatureBody, btnContainer);
-    doNotKillBtn.addEventListener('click', addRemoveCreature);
+    on(doNotKillBtn, 'click', addRemoveCreature);
   }
 
   function doNotKillLink() {
@@ -17629,8 +17696,8 @@
         simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
         huntingBuffsHtml()
     });
-    prefsDiv.addEventListener('click', prefsClickEvent);
-    prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
+    on(prefsDiv, 'click', prefsClickEvent);
+    on(prefsDiv, 'change', toggleEnabledHuntingMode);
     insertElement(fshDiv, prefsDiv);
     var missingBuffsDiv = createDiv();
     insertElement(fshDiv, missingBuffsDiv);
@@ -17778,7 +17845,7 @@
   }
 
   function hideGroupSubscribe(type) { // jQuery.min
-    $.subscribe(def_afterUpdateActionlist, hideGroupByType.bind(null, type));
+    $.subscribe(def_afterUpdateActionlist, partial(hideGroupByType, type));
   }
 
   var hideGroupTypes = [
@@ -17856,14 +17923,19 @@
     }
   }
 
+  function doRecast(impHref) {
+    retryAjax(impHref).done(recastImpAndRefresh);
+  }
+
+  function toggle() {
+    setValue('trackKillStreak', !getValue('trackKillStreak'));
+    location.reload();
+  }
+
   function toggleKsTracker() { // Legacy
     var trackKS = getElementById('Helper:toggleKStracker');
     if (trackKS) {
-      trackKS.addEventListener('click', function() {
-        setValue('trackKillStreak',
-          !getValue('trackKillStreak'));
-        location.reload();
-      }, true);
+      on(trackKS, 'click', toggle, true);
     }
   }
 
@@ -17873,14 +17945,11 @@
 
   function impRecast(hasDd, hasSsi, impsRem) { // Legacy - Old Map
     if (canRecast(hasDd, hasSsi, impsRem)) {
-      var _recastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
+      var fshRecastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
       var impHref = 'index.php?no_mobile=1&cmd=quickbuff&subcmd=activate&target' +
-        'Players=' +
-        $('dt.stat-name:first').next().text().replace(/,/g, '') +
+        'Players=' + $('dt.stat-name:first').next().text().replace(/,/g, '') +
         '&skills%5B%5D=55';
-      _recastImpAndRefresh.addEventListener('click', function() {
-        retryAjax(impHref).done(recastImpAndRefresh);
-      }, true);
+      on(fshRecastImpAndRefresh, 'click', partial(doRecast, impHref), true);
     }
   }
 
@@ -17969,7 +18038,7 @@
     $('input[name="recipe_id"]').closest('tbody').append(selector);
     var qi = getElementById('quickInvent');
     if (qi) {
-      qi.addEventListener('click', quickInvent, true);
+      on(qi, 'click', quickInvent, true);
     }
   }
 
@@ -18074,14 +18143,16 @@
     }
   }
 
+  function updateUrl$1(e) {
+    e.preventDefault();
+    window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
+      document.querySelector('#pCC select[name="viewing_band_id"]').value;
+  }
+
   function dontPost$2() {
     var submitButton = document.querySelector('#pCC input[type="submit"]');
     if (submitButton) {
-      submitButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
-          document.querySelector('#pCC select[name="viewing_band_id"]').value;
-      });
+      on(submitButton, 'click', updateUrl$1);
     }
   }
 
@@ -18171,7 +18242,7 @@
   }
 
   function marketplace() {
-    pCC.addEventListener('keyup', addMarketplaceWarning);
+    on(pCC, 'keyup', addMarketplaceWarning);
   }
 
   var oldMoves = [];
@@ -18370,8 +18441,8 @@
 
   function injectUpgradeHelper(type) {
     var upgrade = findText(type);
-    getInputElement(upgrade).addEventListener('keyup',
-      updateStamCount.bind(null, type, upgrade));
+    on(getInputElement(upgrade), 'keyup',
+      partial(updateStamCount, type, upgrade));
   }
 
   function injectPoints() {
@@ -18430,7 +18501,7 @@
         '<td class="header fshCenter">Last Kill</td></tr>'
     });
     insertElement(trackerTable, tBody);
-    seAry.forEach(addRow$2.bind(null, tBody));
+    seAry.forEach(partial(addRow$2, tBody));
     return trackerTable;
   }
 
@@ -18489,7 +18560,7 @@
     newCell = insertNewRow();
     newCell.className = 'fshCenter';
     newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
-    newCell.addEventListener('change', togglePref$4);
+    on(newCell, 'change', togglePref$4);
     if (calf.enableSeTracker) {
       getFshSeLog().done(waitForLog);
     }
@@ -18632,7 +18703,7 @@
   }
 
   function injectQuestBookFull() {
-    pCC.addEventListener('click', dontPost$3);
+    on(pCC, 'click', dontPost$3);
     storeQuestPage();
     var questTable = pCC.getElementsByTagName('table')[5];
     if (!questTable) {return;}
@@ -18851,7 +18922,7 @@
       rows: 2
     });
     setDoChat(fshTxt);
-    fshTxt.addEventListener('keypress', partial(keypress$1, sendBtn));
+    on(fshTxt, 'keypress', partial(keypress$1, sendBtn));
     return fshTxt;
   }
 
@@ -18863,7 +18934,7 @@
     var ourTd = rearrangeTable(btnMass);
     var fshTxt = makeTextArea(sendBtn);
     ourTd.replaceChild(fshTxt, ourTd.children[0]);
-    theForm.addEventListener('submit', partial(removeCrlf, fshTxt));
+    on(theForm, 'submit', partial(removeCrlf, fshTxt));
   }
 
   function addChatTextArea() {
@@ -19087,7 +19158,7 @@
   function unknownSpecials(json) {
     if (!json.r.specials.every(inSpecialsList)) {
       retryAjax('index.php?cmd=combat&subcmd=view&combat_id=' + json.r.id)
-        .done(whatsMissing.bind(null, json));
+        .done(partial(whatsMissing, json));
     }
   }
 
@@ -19107,8 +19178,8 @@
     if (combatCache[combatID] && combatCache[combatID].logTime) {
       parseCombat(combatSummary, combatCache[combatID]);
     } else {
-      viewCombat(combatID).done(cacheCombat.bind(null, aRow))
-        .done(parseCombat.bind(null, combatSummary));
+      viewCombat(combatID).done(partial(cacheCombat, aRow))
+        .done(partial(parseCombat, combatSummary));
     }
   }
 
@@ -19410,7 +19481,7 @@
     insertHtmlAfterBegin(fill, ']');
     insertElementAfterBegin(fill, cancelAll);
     insertHtmlAfterBegin(fill, '[');
-    cancelAll.addEventListener('click', cancelAllAH);
+    on(cancelAll, 'click', cancelAllAH);
   }
 
   function autoFill() {
@@ -19599,7 +19670,7 @@
 
   function injectShoutboxWidgets() {
     textArea$2 = getElementById('textInputBox');
-    textArea$2.addEventListener('keyup', updateShoutboxPreview);
+    on(textArea$2, 'keyup', updateShoutboxPreview);
   }
 
   function newsFsbox() {
@@ -19839,7 +19910,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '44';
+  window.FSH.calf = '45';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

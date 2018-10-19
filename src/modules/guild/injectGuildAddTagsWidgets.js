@@ -4,7 +4,9 @@ import {imageServer} from '../system/system';
 import injectGuild from './guild';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import takeitem from '../app/guild/inventory/takeitem';
 
 function doItemTable(rows) {
@@ -32,7 +34,7 @@ function takeResult(self, data) {
 function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
     .firstElementChild.value;
-  takeitem(itmId).done(takeResult.bind(null, el));
+  takeitem(itmId).done(partial(takeResult, el));
   el.textContent = '';
   el.className = 'guildTagSpinner';
   el.style.backgroundImage = 'url(\'' + imageServer +
@@ -61,7 +63,7 @@ function checkAllBtn() {
 }
 
 function doItemTagging() {
-  pCC.addEventListener('click', evtHdlr);
+  on(pCC, 'click', evtHdlr);
   paintTable();
   checkAllBtn();
 }

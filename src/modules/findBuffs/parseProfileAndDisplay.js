@@ -2,7 +2,7 @@ import createDocument from '../system/createDocument';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import intValue from '../system/intValue';
-import {onlineDot} from '../common/colouredDots';
+import onlineDot from '../common/onlineDot';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
 

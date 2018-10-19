@@ -3,6 +3,7 @@ import {def_suffixSuccessActionResponse} from '../../support/constants';
 import getGroupStats from '../../ajax/getGroupStats';
 import getMercStats from '../../ajax/getMercStats';
 import getProfile from '../../ajax/getProfile';
+import once from '../../common/once';
 import {parseGuild} from './parseGuild';
 import retryAjax from '../../ajax/retryAjax';
 import {
@@ -56,6 +57,7 @@ function getGroups() {
 function parseGroups(html) {
   var doc = createDocument(html);
   var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
+  if (!disband) {return;}
   var viewStats = disband.previousElementSibling.href;
   var prm = [getGroupStats(viewStats).done(storeGroupStats)];
   var hasMerc = disband.parentNode.parentNode.previousElementSibling
@@ -86,7 +88,7 @@ function viewRelic(e, data) {
   relicData = data.response.data;
   if (relicData.defenders.length > 0) {
     primaryElementsSetup(relicData);
-    fetchStatsBtn.addEventListener('click', getStats);
+    once(fetchStatsBtn, 'click', getStats);
   }
 }
 

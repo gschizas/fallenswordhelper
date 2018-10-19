@@ -1,6 +1,7 @@
 import {createTextArea} from '../common/cElement';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 
@@ -50,7 +51,7 @@ function makeTextArea(sendBtn) {
     rows: 2
   });
   setDoChat(fshTxt);
-  fshTxt.addEventListener('keypress', partial(keypress, sendBtn));
+  on(fshTxt, 'keypress', partial(keypress, sendBtn));
   return fshTxt;
 }
 
@@ -62,7 +63,7 @@ function hasTextEntry() {
   var ourTd = rearrangeTable(btnMass);
   var fshTxt = makeTextArea(sendBtn);
   ourTd.replaceChild(fshTxt, ourTd.children[0]);
-  theForm.addEventListener('submit', partial(removeCrlf, fshTxt));
+  on(theForm, 'submit', partial(removeCrlf, fshTxt));
 }
 
 export default function addChatTextArea() {

@@ -9,6 +9,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import {nowSecs} from '../support/constants';
+import on from '../common/on';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import {pCR} from '../support/layout';
 
@@ -220,7 +221,7 @@ function makeDiv(data) {
   wrapper += '</div></div>';
   insertHtmlBeforeEnd(fshAllyEnemy, wrapper);
   insertElementAfterBegin(pCR, fshAllyEnemy);
-  fshAllyEnemy.addEventListener('click', eventHandler);
+  on(fshAllyEnemy, 'click', eventHandler);
   injectAllyEnemyList(data);
 }
 

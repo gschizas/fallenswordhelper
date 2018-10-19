@@ -7,8 +7,10 @@ import insertElement from './common/insertElement';
 import jConfirm from './common/jConfirm';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
+import on from './common/on';
 import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
+import partial from './common/partial';
 import useitem from './app/profile/useitem';
 
 var extTbl;
@@ -50,14 +52,14 @@ function doExtract(target) {
     InventoryIDs.length + ' resources';
   for (var i = 0; i < InventoryIDs.length; i += 1) {
     useitem(InventoryIDs[i])
-      .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
+      .done(partial(quickDoneExtracted, InventoryIDs[i]));
   }
 }
 
 function extractAllSimilar(self) {
   jConfirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
-    doExtract.bind(null, self)
+    partial(doExtract, self)
   );
 }
 
@@ -100,6 +102,7 @@ function tableRows(prev, item_id) {
 }
 
 function showQuickExtract() {
+  if (!extractInv) {return;}
   resourceList = extractInv.reduce(resources, {});
   var output =
     '<tr><th width="20%">Actions</th><th colspan="2">Items</th></tr>' +
@@ -159,6 +162,6 @@ export default function insertQuickExtract(injector) { // jQuery.min
   insertElement(content, extTbl);
   selectST = true;
   selectMain = true;
-  content.addEventListener('click', eventHandler(extractEvents));
+  on(content, 'click', eventHandler(extractEvents));
   getInventory().done(prepInv);
 }

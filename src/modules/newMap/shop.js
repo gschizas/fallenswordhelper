@@ -3,6 +3,7 @@ import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
 import retryAjax from '../ajax/retryAjax';
 import rnd from '../system/rnd';
 import testQuant from '../system/testQuant';
@@ -82,7 +83,7 @@ function injectQuickBuy() {
   });
   insertElement(fshDiv, numInput);
   qbBtn = createButton({textContent: 'Quick-buy'});
-  qbBtn.addEventListener('click', qBuy);
+  on(qbBtn, 'click', qBuy);
   insertElement(fshDiv, qbBtn);
   resultDiv = createDiv();
   insertElement(fshDiv, resultDiv);

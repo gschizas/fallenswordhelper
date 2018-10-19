@@ -51,6 +51,7 @@ function createPotion(temp) { // jQuery.min
 }
 
 export default function backgroundCreate(self, temp) {
+  if (!(temp instanceof Node)) {return;}
   self.innerHTML = '';
   self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
   createPotion(temp);

@@ -1,27 +1,18 @@
-import add from '../support/task';
+import batch from '../common/batch';
 import {createSpan} from '../common/cElement';
 import insertElement from '../common/insertElement';
-import moreToDo from '../common/moreToDo';
-import potReport from './potReport';
+import partial from '../common/partial';
+import potReport from './potReport/potReport';
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
   'Gut Rot Head Splitter|Serum');
-var counter;
 var nodeArray;
 var nodeList;
 var potObj;
 
-function paintChild() {
-  var limit = performance.now() + 1;
-  while (moreToDo(limit, counter, nodeArray)) {
-    var el = nodeList[counter];
-    var inject = nodeArray[counter];
-    insertElement(el, inject);
-    counter += 1;
-  }
-  if (counter < nodeArray.length) {
-    add(3, paintChild);
-  }
+function doPaintChild(inject, localCounter) {
+  var el = nodeList[localCounter];
+  insertElement(el, inject);
 }
 
 function hideElement(test) {
@@ -71,10 +62,10 @@ function removeWidth(el) {
   if (el instanceof Element) {el.removeAttribute('width');}
 }
 
-function doSpan(el) {
-  if (counter === 0) {
-    el.previousSibling.setAttribute('width', '200px');
-    el.setAttribute('width', '370px');
+function doSpan(el, localCounter) {
+  if (localCounter === 0) {
+    el.previousSibling.width = '200px';
+    el.width = '370px';
   } else {
     removeWidth(el.previousSibling);
     removeWidth(el);
@@ -82,22 +73,8 @@ function doSpan(el) {
   nodeArray.push(mySpan(el));
 }
 
-function makeSpan() {
-  var limit = performance.now() + 10;
-  while (moreToDo(limit, counter, nodeList)) {
-    var el = nodeList[counter];
-
-    doSpan(el);
-
-    counter += 1;
-  }
-  if (counter < nodeList.length) {
-    add(3, makeSpan);
-  } else {
-    counter = 0;
-    add(3, paintChild);
-    potReport(potObj);
-  }
+function finishSpan() {
+  batch(nodeArray, 0, doPaintChild, partial(potReport, potObj));
 }
 
 export default function prepareChildRows() {
@@ -105,6 +82,5 @@ export default function prepareChildRows() {
     'tr:not(.fshHide) td:nth-of-type(3n)');
   potObj = {};
   nodeArray = [];
-  counter = 0;
-  add(3, makeSpan);
+  batch(nodeList, 0, doSpan, finishSpan);
 }

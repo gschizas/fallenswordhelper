@@ -2,6 +2,7 @@ import errorDialog from '../app/errorDialog';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jConfirm from '../common/jConfirm';
+import on from '../common/on';
 import removeskill from '../app/profile/removeskill';
 import {sendEvent} from '../support/fshGa';
 
@@ -46,7 +47,6 @@ function interceptDebuff(e) { // jQuery
 export default function fastDebuff() {
   var profileRightColumn = getElementById('profileRightColumn');
   if (profileRightColumn) {
-    profileRightColumn.lastElementChild
-      .addEventListener('click', interceptDebuff, true);
+    on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
   }
 }

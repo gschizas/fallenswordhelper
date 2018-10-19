@@ -2,6 +2,7 @@ import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import intValue from '../system/intValue';
+import on from '../common/on';
 
 var multCnt;
 var maxTimes;
@@ -26,7 +27,7 @@ function foundMultiplierCount() {
   statbarGold = getElementById('statbar-gold');
   gold = getElementById('gold');
   setMaxTimes();
-  gold.addEventListener('keyup', setMaxTimes);
+  on(gold, 'keyup', setMaxTimes);
 }
 
 export default function lookForMultiplierCount() {

@@ -3,7 +3,9 @@ import formatUtcDateTime from '../common/formatUtcDateTime';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import setValue from '../system/setValue';
 import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
 import {createTBody, createTable} from '../common/cElement';
@@ -31,7 +33,7 @@ function buildTrackerTable(seAry) {
       '<td class="header fshCenter">Last Kill</td></tr>'
   });
   insertElement(trackerTable, tBody);
-  seAry.forEach(addRow.bind(null, tBody));
+  seAry.forEach(partial(addRow, tBody));
   return trackerTable;
 }
 
@@ -90,7 +92,7 @@ export default function superelite() {
   newCell = insertNewRow();
   newCell.className = 'fshCenter';
   newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
-  newCell.addEventListener('change', togglePref);
+  on(newCell, 'change', togglePref);
   if (calf.enableSeTracker) {
     getFshSeLog().done(waitForLog);
   }

@@ -2,6 +2,7 @@ import {getElementById} from './common/getElement';
 import getForage from './ajax/getForage';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
+import on from './common/on';
 import {pCC} from './support/layout';
 import quickBuffHref from './common/quickBuffHref';
 import setForage from './ajax/setForage';
@@ -43,6 +44,15 @@ export function injectNotepad() { // jQuery
     .css('resize', 'none');
 }
 
+function inject(fsboxcontent) {
+  getElementById('fsboxdetail').innerHTML = fsboxcontent;
+}
+
+function clearFsBox() {
+  setForage('fsh_fsboxcontent', '');
+  location.reload();
+}
+
 export function injectFsBoxContent(injector) { // jQuery.min
   if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
@@ -53,12 +63,6 @@ export function injectFsBoxContent(injector) { // jQuery.min
     button: 'Clear',
     divId: 'fsboxdetail'
   });
-  getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
-    getElementById('fsboxdetail').innerHTML = fsboxcontent;
-  });
-  getElementById('fsboxclear')
-    .addEventListener('click', function() {
-      setForage('fsh_fsboxcontent', '');
-      location.reload();
-    }, true);
+  getForage('fsh_fsboxcontent').done(inject);
+  on(getElementById('fsboxclear'), 'click', clearFsBox, true);
 }

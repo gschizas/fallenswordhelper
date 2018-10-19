@@ -6,6 +6,7 @@ import getForage from './ajax/getForage';
 import {imageServer} from './system/system';
 import jQueryPresent from './common/jQueryPresent';
 import numberSort from './system/numberSort';
+import on from './common/on';
 import {pCC} from './support/layout';
 import setForage from './ajax/setForage';
 import stringSort from './system/stringSort';
@@ -91,7 +92,7 @@ function drawTable() {
     '<th class="fshCenter">HP</th>' +
     '<th class="fshCenter">Enhancements</th>' +
     '</tr></thead><tbody id="entityTableOutput"></tbody></table>';
-  content.addEventListener('click', doHandlers);
+  on(content, 'click', doHandlers);
 }
 
 function hazEnhancements(enhancements) {

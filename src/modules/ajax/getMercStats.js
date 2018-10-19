@@ -1,4 +1,5 @@
 import createDocument from '../system/createDocument';
+import partial from '../common/partial';
 import retryAjax from './retryAjax';
 import {defenderMultiplier, mercRE} from '../support/constants';
 
@@ -8,7 +9,7 @@ function addMercStat(mouseover, stat, i) {
 }
 
 function addMercStats(prev, merc) {
-  return prev.map(addMercStat.bind(null, merc.dataset.tipped));
+  return prev.map(partial(addMercStat, merc.dataset.tipped));
 }
 
 function addAllMercStats(mercElements) {

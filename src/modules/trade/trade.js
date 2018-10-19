@@ -7,6 +7,7 @@ import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import jsonParse from '../common/jsonParse';
+import on from '../common/on';
 
 function getHowMany(itemTables) {
   var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
@@ -83,7 +84,7 @@ function injectTradeOld() {
     id: 'fshSelectMultiple',
     innerHTML: myTd
   });
-  multiple.addEventListener('click', toggleAllPlants);
+  on(multiple, 'click', toggleAllPlants);
   var el = getElementById('item-list').parentNode.parentNode;
   el.parentNode.insertBefore(multiple, el);
 }

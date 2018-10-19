@@ -1,4 +1,5 @@
 import {imageServer} from '../../system/system';
+import partial from '../../common/partial';
 
 function removeClass(self) {
   self.closest('tr')
@@ -26,6 +27,6 @@ function anotherSpinner(self) {
 
 export default function doAction(fn, self) { // jQuery
   removeClass(self);
-  fn().done(killRow.bind(null, self));
+  fn().done(partial(killRow, self));
   anotherSpinner(self);
 }

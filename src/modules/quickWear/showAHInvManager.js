@@ -1,6 +1,7 @@
 import {createDiv} from '../common/cElement';
 import getValueJSON from '../system/getValueJSON';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import partial from '../common/partial';
 
 function ahLink(searchname, nickname) {
   return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
@@ -82,7 +83,7 @@ function inQuickSearchList(invCount, name, listItem) {
 function testItemList(invCount, quickSL, item) {
   var name = item.n;
   foundInvItem(invCount, name);
-  quickSL.forEach(inQuickSearchList.bind(null, invCount, name));
+  quickSL.forEach(partial(inQuickSearchList, invCount, name));
 }
 
 export default function showAHInvManager(itemList) {
@@ -90,7 +91,7 @@ export default function showAHInvManager(itemList) {
   var quickSL = getValueJSON('quickSearchList');
   // fill up the Inv Counter
   itemList.r.forEach(function(aFolder) {
-    aFolder.items.forEach(testItemList.bind(null, invCount, quickSL));
+    aFolder.items.forEach(partial(testItemList, invCount, quickSL));
   });
   var im = createDiv({
     id: 'invTabs-ah',

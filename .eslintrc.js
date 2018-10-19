@@ -212,7 +212,7 @@ module.exports = {
     'space-unary-ops': ['error', {words: true, nonwords: false}],
     'spaced-comment': ['warn', 'always', {
       markers: ['#if', '#set'],
-      exceptions: ['#endif']
+      exceptions: ['#else', '#endif']
     }],
     'template-tag-spacing': ['off'],
     'unicode-bom': ['error'],

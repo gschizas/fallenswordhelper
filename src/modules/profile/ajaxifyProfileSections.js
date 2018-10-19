@@ -1,5 +1,6 @@
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
 
@@ -59,5 +60,5 @@ function testForSection(evt) {
 }
 
 export default function ajaxifyProfileSections() {
-  pCC.addEventListener('click', testForSection);
+  on(pCC, 'click', testForSection);
 }

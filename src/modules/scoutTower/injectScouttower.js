@@ -5,6 +5,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import partial from '../common/partial';
 import roundToString from '../common/roundToString';
 import setForage from '../ajax/setForage';
 import {createAnchor, createTBody, createTable} from '../common/cElement';
@@ -48,7 +49,7 @@ function displayTracker(parentTable, theTitans) {
       '<td class="header fshCenter">Visible</td></tr>'
   });
   insertElement(trackerTable, tBody);
-  Object.keys(theTitans).forEach(addRow.bind(null, theTitans, tBody));
+  Object.keys(theTitans).forEach(partial(addRow, theTitans, tBody));
 
   var newRow = parentTable.insertRow(5);
   var newCell = newRow.insertCell(-1);

@@ -9,7 +9,9 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';
 import jQueryPresent from '../common/jQueryPresent';
 import loadInventory from '../app/profile/loadInventory';
+import on from '../common/on';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
 import setValue from '../system/setValue';
 import showAHInvManager from './showAHInvManager';
@@ -42,7 +44,7 @@ function useProfileInventoryItem(self) {
   } else {
     jConfirm('Use/Extract Item',
       'Are you sure you want to use/extract the item?',
-      doUseItem.bind(null, self)
+      partial(doUseItem, self)
     );
   }
 }
@@ -63,12 +65,12 @@ function processItems(folderId, thisFolder, o) {
 
 function processFolder(folderId, aFolder) {
   var thisFolder = aFolder.id;
-  aFolder.items.forEach(processItems.bind(null, folderId, thisFolder));
+  aFolder.items.forEach(partial(processItems, folderId, thisFolder));
 }
 
 function hideFolders(self) {
   var folderId = self.dataset.folder;
-  itemList.r.forEach(processFolder.bind(null, folderId));
+  itemList.r.forEach(partial(processFolder, folderId));
 }
 
 function togglePref() {
@@ -126,7 +128,7 @@ function showQuickWear(appInv) {
   insertElement(invTabs, invTabsQw);
   content.innerHTML = '';
   insertElement(content, invTabs);
-  invTabs.addEventListener('click', eventHandler(events));
+  on(invTabs, 'click', eventHandler(events));
   insertElement(invTabs, showAHInvManager(appInv));
   insertHtmlBeforeEnd(getElementById('setPrompt'),
     simpleCheckboxHtml('disableQuickWearPrompts'));

@@ -5,6 +5,7 @@ import getForage from '../ajax/getForage';
 import insertElement from '../common/insertElement';
 import {nowSecs} from '../support/constants';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import partial from '../common/partial';
 import playerId from '../common/playerId';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
@@ -82,7 +83,7 @@ function whatsMissing(json, html) {
 function unknownSpecials(json) {
   if (!json.r.specials.every(inSpecialsList)) {
     retryAjax('index.php?cmd=combat&subcmd=view&combat_id=' + json.r.id)
-      .done(whatsMissing.bind(null, json));
+      .done(partial(whatsMissing, json));
   }
 }
 
@@ -102,8 +103,8 @@ function processCombat(aRow) {
   if (combatCache[combatID] && combatCache[combatID].logTime) {
     parseCombat(combatSummary, combatCache[combatID]);
   } else {
-    viewCombat(combatID).done(cacheCombat.bind(null, aRow))
-      .done(parseCombat.bind(null, combatSummary));
+    viewCombat(combatID).done(partial(cacheCombat, aRow))
+      .done(partial(parseCombat, combatSummary));
   }
 }
 

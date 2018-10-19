@@ -2,6 +2,7 @@ import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
 
 function profileSelectAll() {
   var bpTabs = getElementById('backpack_tabs');
@@ -22,7 +23,7 @@ export default function selectAllLink() {
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
   if (!node) {return;}
   var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
-  allSpan.addEventListener('click', profileSelectAll);
+  on(allSpan, 'click', profileSelectAll);
   var wrapper = createSpan({innerHTML: '[&nbsp;'});
   insertElement(wrapper, allSpan);
   insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');

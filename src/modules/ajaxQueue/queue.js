@@ -35,7 +35,7 @@ function takeItemStatus(action, data) {
 export function queueTakeItem(invId, action) {
   // You have to chain them because they could be modifying the backpack
   deferred = deferred.pipe(function pipeTakeToQueue() {
-    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
+    return takeItem(invId).pipe(partial(takeItemStatus, action));
   });
   return deferred;
 }

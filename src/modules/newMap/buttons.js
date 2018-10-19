@@ -4,6 +4,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
+import on from '../common/on';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import playerName from '../common/playerName';
 import setValue from '../system/setValue';
@@ -184,8 +185,8 @@ export function injectButtons(data) {
   showQuickLinks(buttonContainer, data);
   showSpeakerOnWorld(buttonContainer);
   showHuntMode(buttonContainer);
-  buttonContainer.addEventListener('click', eventHandler(clickHdl));
-  buttonContainer.addEventListener('change', eventHandler(changeHdl));
+  on(buttonContainer, 'click', eventHandler(clickHdl));
+  on(buttonContainer, 'change', eventHandler(changeHdl));
   getElementById('worldContainer')
     .insertBefore(buttonContainer, getElementById('worldCoord'));
 }

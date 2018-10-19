@@ -6,6 +6,7 @@ import getValue from '../system/getValue';
 import injectRelic from './relic/relic';
 import insertElement from '../common/insertElement';
 import onWorld from './onWorld';
+import partial from '../common/partial';
 import prepareShop from './shop';
 import startMonsterLog from './monsterLog/monsterLog';
 import viewCreature from './viewCreature/viewCreature';
@@ -16,7 +17,7 @@ function hideGroupByType(type) { // jQuery
 }
 
 function hideGroupSubscribe(type) { // jQuery.min
-  $.subscribe(def_afterUpdateActionlist, hideGroupByType.bind(null, type));
+  $.subscribe(def_afterUpdateActionlist, partial(hideGroupByType, type));
 }
 
 var hideGroupTypes = [

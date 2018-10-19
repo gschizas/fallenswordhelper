@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import on from '../common/on';
 
 function setMaxVal() {
   getElementById('composing-skill-level-input').value =
@@ -6,7 +7,6 @@ function setMaxVal() {
 }
 
 export default function composingCreate() {
-  getElementById('composing-add-skill').addEventListener('click', setMaxVal);
-  getElementById('composing-skill-select')
-    .addEventListener('change', setMaxVal);
+  on(getElementById('composing-add-skill'), 'click', setMaxVal);
+  on(getElementById('composing-skill-select'), 'change', setMaxVal);
 }

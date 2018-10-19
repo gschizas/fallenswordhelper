@@ -1,4 +1,3 @@
-import addEventListenerOnce from '../common/addEventListenerOnce';
 import {createDiv} from '../common/cElement';
 import draggable from '../common/dragStart';
 import {getElementById} from '../common/getElement';
@@ -17,6 +16,8 @@ import insertQuickWear from '../quickWear/quickWear';
 import isFunction from '../common/isFunction';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
+import on from '../common/on';
+import once from '../common/once';
 import {sendEvent} from '../support/fshGa';
 import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
 import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
@@ -96,8 +97,8 @@ function showHelperMenu(evt) {
   });
   insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
   insertElement(helperMenu, helperMenuDiv);
-  helperMenu.addEventListener('click', toggleMenu);
-  helperMenuDiv.addEventListener('click', eventHandler);
+  on(helperMenu, 'click', toggleMenu);
+  on(helperMenuDiv, 'click', eventHandler);
 }
 
 function haveNode(node) {
@@ -109,7 +110,7 @@ function haveNode(node) {
   if (getValue('keepHelperMenuOnScreen')) {
     helperMenu.classList.add('fshFixed');
   }
-  addEventListenerOnce(helperMenu, 'mouseenter', showHelperMenu);
+  once(helperMenu, 'mouseenter', showHelperMenu);
   if (getValue('draggableHelperMenu')) {
     helperMenu.classList.add('fshMove');
     draggable(helperMenu);

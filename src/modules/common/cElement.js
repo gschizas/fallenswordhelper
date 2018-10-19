@@ -87,3 +87,11 @@ export function textSpan(text) {
 export function createStyle(style) {
   return cElement('style', {innerHTML: style});
 }
+
+export function createSelect(props) {
+  return cElement('select', props);
+}
+
+export function createOption(props) {
+  return cElement('option', props);
+}

@@ -1,6 +1,7 @@
 import bioEvtHdl from './bioEvtHdl';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import on from '../../common/on';
 import renderBio from './render';
 
 function expandBio() {
@@ -44,8 +45,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
     '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
-  getElementById('fshBioExpander')
-    .addEventListener('click', expandBio);
+  on(getElementById('fshBioExpander'), 'click', expandBio);
 }
 
 function findStartPosition(bioContents, _maxRowsToShow) {
@@ -107,5 +107,5 @@ export default function profileRenderBio(self) {
   if (!bioCell) {return;}
   testForRender(self, bioCell);
   if (getValue('enableBioCompressor')) {compressBio(bioCell);}
-  bioCell.addEventListener('click', bioEvtHdl);
+  on(bioCell, 'click', bioEvtHdl);
 }

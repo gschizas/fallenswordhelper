@@ -1,30 +1,47 @@
+import on from '../common/on';
+import partial from '../common/partial';
+
 var paused = true;
 var queue = [];
 
+function setOpts(options) {
+  if (typeof options === 'string') {
+    return {url: options};
+  }
+  return options;
+}
+
+function clearXhr(xhr) {
+  xhr.abort();
+  queue = [];
+}
+
 function beforeSend(xhr) {
-  window.addEventListener('beforeunload', function() {
-    xhr.abort();
-    queue = [];
-  });
+  on(window, 'beforeunload', partial(clearXhr, xhr));
+}
+
+function failFilter(fn, opt, retries, dfr) {
+  return function(jqXhr, textStatus, errorThrown) {
+    if (retries > 0 && jqXhr.status === 503) {
+      setTimeout(fn, 100, opt, retries - 1, dfr);
+    } else {
+      dfr.reject(jqXhr, textStatus, errorThrown);
+    }
+  };
 }
 
 function doAjax(options, retries, dfr) {
-  var opt;
-  if (typeof options === 'string') {
-    opt = {url: options};
-  } else {
-    opt = options;
-  }
+  var opt = setOpts(options);
   opt.beforeSend = beforeSend;
-  return $.ajax(opt).pipe(dfr.resolve,
-    function(jqXhr, textStatus, errorThrown) {
-      if (retries > 0 && jqXhr.status === 503) {
-        setTimeout(doAjax, 100, opt, retries - 1, dfr);
-      } else {
-        dfr.reject(jqXhr, textStatus, errorThrown);
-      }
-    }
-  );
+  return $.ajax(opt).pipe(dfr.resolve, failFilter(doAjax, opt, retries, dfr));
+}
+
+function attemptTask(runner) {
+  if ($.active < 4) {
+    var opts = queue.shift();
+    doAjax.apply(null, opts);
+    runner();
+  }
 }
 
 function taskRunner() {
@@ -32,11 +49,7 @@ function taskRunner() {
     paused = true;
   } else {
     paused = false;
-    if ($.active < 4) {
-      var opts = queue.shift();
-      doAjax.apply(null, opts);
-      taskRunner();
-    }
+    attemptTask(taskRunner);
   }
 }
 

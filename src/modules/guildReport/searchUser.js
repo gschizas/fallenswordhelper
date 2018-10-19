@@ -1,9 +1,6 @@
-import add from '../support/task';
+import batch from '../common/batch';
 import getUrlParameter from '../system/getUrlParameter';
-import moreToDo from '../common/moreToDo';
 
-var counter;
-var nodeList;
 var findUser;
 var foundUser;
 
@@ -16,20 +13,6 @@ function hideOther(el) {
   }
 }
 
-function hideOthers() {
-  var limit = performance.now() + 5;
-  while (moreToDo(limit, counter, nodeList)) {
-    var el = nodeList[counter];
-
-    hideOther(el);
-
-    counter += 1;
-  }
-  if (counter < nodeList.length) {
-    add(2, hideOthers);
-  }
-}
-
 export default function searchUser() {
   findUser = getUrlParameter('user');
   if (!findUser) {return;}
@@ -39,7 +22,6 @@ export default function searchUser() {
     return el.textContent === findUser;
   });
   if (!userNode) {return;}
-  nodeList = document.querySelectorAll('#pCC table table tr');
-  counter = 0;
-  add(2, hideOthers);
+  var nodeList = document.querySelectorAll('#pCC table table tr');
+  batch(nodeList, 0, hideOther);
 }

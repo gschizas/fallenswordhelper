@@ -2,6 +2,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import perfFilter from '../common/perfFilter';
@@ -98,14 +99,12 @@ export default function composingBreakdown() {
   if (jQueryNotPresent()) {return;}
   perfFilter('composing');
   disableBreakdownPrompts = getValue('disableBreakdownPrompts');
-  getElementById('breakdown-selected-items').parentNode
-    .addEventListener('click', breakEvt, true);
-  getElementById('composing-items')
-    .addEventListener('click', itemClick);
+  on(getElementById('breakdown-selected-items').parentNode,
+    'click', breakEvt, true);
+  on(getElementById('composing-items'), 'click', itemClick);
   insertHtmlBeforeEnd(pCC,
     '<table class="fshTblCenter"><tbody>' +
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
-  getElementById('disableBreakdownPrompts')
-    .addEventListener('click', togglePref);
+  on(getElementById('disableBreakdownPrompts'), 'click', togglePref);
 }

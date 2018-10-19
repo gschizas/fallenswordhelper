@@ -3,7 +3,9 @@ import dialog from '../ajax/dialog';
 import infoBox from '../common/infoBox';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 
 function translateReturnInfo(data) {
@@ -31,7 +33,7 @@ function guildMailboxEvent(e) { // jQuery.min
   if (self.tagName === 'IMG') {
     e.preventDefault();
     var anchor = self.parentNode.href;
-    guildMailboxTake(anchor).done(takeResult.bind(null, self));
+    guildMailboxTake(anchor).done(partial(takeResult, self));
   }
   if (self.className === 'sendLink') {
     var nodeList = pCC.getElementsByTagName('img');
@@ -41,7 +43,7 @@ function guildMailboxEvent(e) { // jQuery.min
 
 export default function guildMailbox() {
   if (jQueryNotPresent()) {return;}
-  pCC.addEventListener('click', guildMailboxEvent);
+  on(pCC, 'click', guildMailboxEvent);
   insertHtmlBeforeEnd(document.querySelector('#pCC td[height="25"]'),
     '<span class="sendLink">Take All</span>');
 }

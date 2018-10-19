@@ -6,6 +6,7 @@ import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {createDiv, createTr} from '../common/cElement';
 import {time, timeEnd} from '../support/debug';
 
@@ -74,7 +75,7 @@ function doFolderHeaders(folders) {
     id: 'fshFolderSelect',
     innerHTML: folderCell
   });
-  foldersRow.addEventListener('click', hideFolder);
+  on(foldersRow, 'click', hideFolder);
   var el = getElementById('item-list').parentNode.parentNode;
   insertHtmlBeforeBegin(el, '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +

@@ -7,6 +7,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {itemRE} from '../support/constants';
 import jQueryPresent from '../common/jQueryPresent';
 import makeFolderSpans from '../common/makeFolderSpans';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import toggleForce from '../common/toggleForce';
 import {createDiv, createInput, createLabel} from '../common/cElement';
@@ -84,7 +85,7 @@ function doFolderButtons(folders) {
   var inject = itemTable.parentNode.parentNode
     .previousElementSibling.firstElementChild;
   inject.classList.add('fshCenter');
-  inject.addEventListener('click', doHideFolders);
+  on(inject, 'click', doHideFolders);
   insertHtmlBeforeEnd(inject, makeFolderSpans(folders, true));
   return inject;
 }
@@ -102,7 +103,7 @@ function doPerfSwitch(inject) {
     className: 'fshVMid',
     type: 'checkbox'
   });
-  perfBox.addEventListener('change', reDrawGrid);
+  on(perfBox, 'change', reDrawGrid);
   insertElement(perfLabel, perfBox);
   insertHtmlBeforeEnd(inject, ' &ensp;');
   insertElement(inject, perfLabel);

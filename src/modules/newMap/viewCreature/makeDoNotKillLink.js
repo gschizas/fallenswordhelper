@@ -1,6 +1,7 @@
 import afterUpdateActionList from '../doNotKill/afterUpdateActionList';
 import calf from '../../support/calf';
 import insertElement from '../../common/insertElement';
+import on from '../../common/on';
 import setValue from '../../system/setValue';
 import {createButton, createDiv} from '../../common/cElement';
 
@@ -49,7 +50,7 @@ function makeDnkBtn() {
   });
   insertElement(btnContainer, doNotKillBtn);
   insertElement(creatureBody, btnContainer);
-  doNotKillBtn.addEventListener('click', addRemoveCreature);
+  on(doNotKillBtn, 'click', addRemoveCreature);
 }
 
 function doNotKillLink() {

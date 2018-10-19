@@ -399,6 +399,7 @@
   color: #381f00;
   cursor: pointer;
 }
+#potReport tr {height: 19px;}
 
 /* Quick Wear */
 #invTabs {min-width: 500px;}

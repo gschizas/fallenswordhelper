@@ -10,6 +10,7 @@ import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import retryAjax from '../ajax/retryAjax';
@@ -243,7 +244,7 @@ function gotOptions(guildLog) {
   options.checks = options.checks || defChecks.slice(0);
   pCC.innerHTML = guildLogFilter;
   fshNewGuildLog = getElementById('fshNewGuildLog');
-  fshNewGuildLog.addEventListener('click', eventHandler(guildLogEvents));
+  on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
   setChecks();
   fshOutput = getElementById('fshOutput');
   maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));

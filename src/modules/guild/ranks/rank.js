@@ -1,9 +1,10 @@
 import add from '../../support/task';
+import batch from '../../common/batch';
 import getMembrList from '../../ajax/getMembrList';
 import getValue from '../../system/getValue';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import moreToDo from '../../common/moreToDo';
+import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import playerName from '../../common/playerName';
 import rankPosition from '../../app/guild/ranks/position';
@@ -12,7 +13,6 @@ import weightings from './weightings';
 var ranks;
 var myRank;
 var theRows;
-var rankCount;
 var characterRow;
 
 function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
@@ -54,26 +54,26 @@ function ajaxifyRankControls(evt) {
 function doButtons() {
   weightings();
   if (getValue('ajaxifyRankControls')) {
-    pCC.addEventListener('click', ajaxifyRankControls, true);
+    on(pCC, 'click', ajaxifyRankControls, true);
   }
 }
 
-function isMyRank(rankName) {
+function isMyRank(rankCell, rankName) {
   if (rankName === myRank) {
-    characterRow = rankCount; // limit for ajaxify later
+    characterRow = rankCell.parentNode.rowIndex; // limit for ajaxify later
   }
 }
 
 function hasMembers(rankCell, rankName) {
   if (ranks[rankName]) { // has members
-    isMyRank(rankName);
+    isMyRank(rankCell, rankName);
     insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
       ranks[rankName].join(', ') + '</span>');
   }
 }
 
 function getRankName(rankCell) {
-  if (rankCount === 1) {return 'Guild Founder';}
+  if (rankCell.parentNode.rowIndex === 1) {return 'Guild Founder';}
   return rankCell.textContent;
 }
 
@@ -81,20 +81,6 @@ function writeMembers(el) {
   var rankCell = el.firstElementChild;
   var rankName = getRankName(rankCell);
   hasMembers(rankCell, rankName);
-}
-
-function paintRanks() {
-  var limit = performance.now() + 10;
-  while (moreToDo(limit, rankCount, theRows)) {
-    var el = theRows[rankCount];
-
-    writeMembers(el);
-
-    rankCount += 1;
-  }
-  if (rankCount < theRows.length) {
-    add(3, paintRanks);
-  }
 }
 
 function findTheRows() {
@@ -116,8 +102,7 @@ function getRanks(membrList) {
   myRank = membrList[playerName()].rank_name;
   theRows = findTheRows();
   if (theRows) {
-    rankCount = 1;
-    add(3, paintRanks);
+    batch(theRows, 1, writeMembers);
   }
 }
 

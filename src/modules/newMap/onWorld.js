@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import {colorHash} from './assets';
 import {getElementById} from '../common/getElement';
+import on from '../common/on';
 import {titanStats} from './titanStats/titanStats';
 import {
   def_playerBuffs,
@@ -22,8 +23,7 @@ function injectWorldNewMap(data) {
   if (hazRealm(data)) {
     injectButtons(data);
     titanStats(data);
-    getElementById('buffList')
-      .addEventListener('click', fixDebuffQTip);
+    on(getElementById('buffList'), 'click', fixDebuffQTip);
     if (calf.hideSubLvlCreature) {GameData.fetch(256);}
   }
 }

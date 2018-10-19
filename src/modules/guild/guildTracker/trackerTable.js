@@ -4,6 +4,7 @@ import formatLocalDateTime from '../../common/formatLocalDateTime';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isUndefined from '../../common/isUndefined';
+import on from '../../common/on';
 import partial from '../../common/partial';
 import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
 import {
@@ -101,7 +102,7 @@ export function makeTg() {
 
   actBody = createTBody();
   insertElement(tg, actBody);
-  tg.addEventListener('change', myChange);
+  on(tg, 'change', myChange);
   tgCont = createDiv({className: 'tgCont fshSpinner64'});
   insertElement(tgCont, tg);
   return tgCont;

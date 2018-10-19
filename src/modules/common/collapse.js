@@ -1,6 +1,8 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import isFunction from './isFunction';
+import on from './on';
+import partial from './partial';
 import setValue from '../system/setValue';
 
 var warehouse = [];
@@ -118,14 +120,13 @@ function togglePref(prefName) {
 function setupPref(prefName) {
   var prefEl = getElementById(prefName);
   prefValue = prefEl.checked;
-  getElementById(prefName)
-    .addEventListener('change', togglePref.bind(null, prefName));
+  on(getElementById(prefName), 'change', partial(togglePref, prefName));
 }
 
 export default function collapse(param) {
   headerIndex = param.headInd;
   setupPref(param.prefName);
   Array.prototype.forEach.call(param.theTable.rows,
-    doTagging.bind(null, param.articleTest, param.extraFn));
-  param.theTable.addEventListener('click', evtHdl);
+    partial(doTagging, param.articleTest, param.extraFn));
+  on(param.theTable, 'click', evtHdl);
 }

@@ -4,6 +4,8 @@ import equipItem from '../ajax/equipItem';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
+import on from '../common/on';
+import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
 import useItem from '../ajax/useItem';
 
@@ -75,7 +77,7 @@ function fastWearLinks(self) {
     '#backpackTab_' + self.type.toString() +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
   if (items.length === 0) {return;}
-  Array.prototype.forEach.call(items, drawButtons.bind(null, self));
+  Array.from(items).forEach(partial(drawButtons, self));
 }
 
 function foundBackpack(backpackContainer, theBackpack) {
@@ -88,7 +90,7 @@ function foundBackpack(backpackContainer, theBackpack) {
   if (getElementById('backpack_current').textContent.length !== 0) {
     add(3, fastWearLinks, [theBackpack]);
   }
-  backpackContainer.addEventListener('click', evtHdl.bind(null, theBackpack));
+  on(backpackContainer, 'click', partial(evtHdl, theBackpack));
 }
 
 function initialiseFastWear() {

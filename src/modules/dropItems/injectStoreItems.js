@@ -1,4 +1,5 @@
 import add from '../support/task';
+import batch from '../common/batch';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
@@ -10,8 +11,8 @@ import hideFolders from './hideFolders';
 import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import moreToDo from '../common/moreToDo';
 import moveItemsToFolder from './moveItemsToFolder';
+import on from '../common/on';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
 import sendItem from '../ajax/sendItem';
@@ -28,7 +29,6 @@ import {getItems, itemsAry, itemsHash} from './getItems';
 import {guideUrl, rarity} from '../support/constants';
 
 var extraLinks;
-var paintCount;
 var checkAll;
 var dropLinks;
 var invItems;
@@ -95,7 +95,8 @@ function beforeend(o, item) {
   if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
 }
 
-function itemWidgets(o, item) {
+function itemWidgets(o) {
+  var item = invItems[o.invid];
   if (item) {
     afterbegin(o, item);
     beforeend(o, item);
@@ -110,27 +111,11 @@ function doneInvPaint() {
   sendLinks = true;
 }
 
-function invPaint() { // Native - abstract this pattern
-  var limit = performance.now() + 5;
-  while (moreToDo(limit, paintCount, itemsAry)) {
-    var o = itemsAry[paintCount];
-    var item = invItems[o.invid];
-    itemWidgets(o, item);
-    paintCount += 1;
-  }
-  if (paintCount < itemsAry.length) {
-    add(3, invPaint);
-  } else {
-    doneInvPaint();
-  }
-}
-
 function toggleShowExtraLinks() {
   setShowExtraLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
-    paintCount = 0;
-    add(3, invPaint);
+    batch(itemsAry, 0, itemWidgets, doneInvPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
@@ -143,8 +128,7 @@ function toggleShowQuickDropLinks() {
   setShowQuickDropLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
-    paintCount = 0;
-    add(3, invPaint);
+    batch(itemsAry, 0, itemWidgets, doneInvPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
@@ -206,14 +190,13 @@ function inventory(data) {
   colouring = false;
   dropLinks = false;
   sendLinks = false;
-  paintCount = 0;
-  add(3, invPaint);
+  batch(itemsAry, 0, itemWidgets, doneInvPaint);
   doFolderButtons(data.folders);
+  on(pCC, 'click', eventHandler(evts));
 }
 
 export default function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
   getInventoryById().done(inventory);
   add(3, getItems);
-  pCC.addEventListener('click', eventHandler(evts));
 }

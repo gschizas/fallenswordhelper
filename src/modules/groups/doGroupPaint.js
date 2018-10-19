@@ -1,6 +1,7 @@
 import doBuffLinks from '../common/doBuffLinks';
 import {months} from '../support/constants';
-import {onlineDot} from '../common/colouredDots';
+import onlineDot from '../common/onlineDot';
+import partial from '../common/partial';
 import {server} from '../system/system';
 import {time, timeEnd} from '../support/debug';
 
@@ -45,7 +46,7 @@ function doGroupRow(row, membrlist) { // jQuery
   var td2 = $('td', row).eq(1);
   var theList = td2.html();
   var listArr = theList.split(', ');
-  if (listArr.length > 1) {listArr.sort(byMember.bind(null, membrlist));}
+  if (listArr.length > 1) {listArr.sort(partial(byMember, membrlist));}
   var buffList = listArr.filter(function(name) {
     return name !== '[none]' && name.indexOf('<font') === -1;
   });
