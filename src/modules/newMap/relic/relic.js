@@ -57,6 +57,7 @@ function getGroups() {
 function parseGroups(html) {
   var doc = createDocument(html);
   var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
+  if (!disband) {return;}
   var viewStats = disband.previousElementSibling.href;
   var prm = [getGroupStats(viewStats).done(storeGroupStats)];
   var hasMerc = disband.parentNode.parentNode.previousElementSibling

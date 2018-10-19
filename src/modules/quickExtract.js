@@ -102,6 +102,7 @@ function tableRows(prev, item_id) {
 }
 
 function showQuickExtract() {
+  if (!extractInv) {return;}
   resourceList = extractInv.reduce(resources, {});
   var output =
     '<tr><th width="20%">Actions</th><th colspan="2">Items</th></tr>' +
