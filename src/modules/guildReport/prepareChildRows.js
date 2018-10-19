@@ -2,7 +2,7 @@ import batch from '../common/batch';
 import {createSpan} from '../common/cElement';
 import insertElement from '../common/insertElement';
 import partial from '../common/partial';
-import potReport from './potReport';
+import potReport from './potReport/potReport';
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
   'Gut Rot Head Splitter|Serum');

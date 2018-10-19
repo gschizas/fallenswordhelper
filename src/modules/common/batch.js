@@ -13,7 +13,7 @@ export default function batch(itemsAry, counter, doFn, endFn) {
   var limit = performance.now() + 5;
   var localCounter = counter;
   while (moreToDo(limit, localCounter, itemsAry)) {
-    doFn(itemsAry[localCounter], localCounter);
+    doFn(itemsAry[localCounter], localCounter, itemsAry);
     localCounter += 1;
   }
   if (localCounter < itemsAry.length) {
