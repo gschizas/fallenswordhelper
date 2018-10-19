@@ -1,4 +1,3 @@
-import addEventListenerOnce from '../../common/addEventListenerOnce';
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
@@ -6,6 +5,7 @@ import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
+import once from '../../common/once';
 import partial from '../../common/partial';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
@@ -76,7 +76,7 @@ function makeInnerPopup() {
     name: 'acttabs',
     type: 'radio'
   });
-  addEventListenerOnce(acttab2, 'change', updateRawData);
+  once(acttab2, 'change', updateRawData);
   insertElement(dialogPopup, acttab2);
   return dialogPopup;
 }
@@ -138,7 +138,7 @@ export default function guildTracker() {
     className: 'fsh-dialog-open',
     type: 'checkbox'
   });
-  addEventListenerOnce(tracker, 'change', openDialog);
+  once(tracker, 'change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   insertElement(trDialog, tracker);
   on(document.body, 'keydown', keydownHandler);

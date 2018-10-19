@@ -1,10 +1,10 @@
-import addEventListenerOnce from '../common/addEventListenerOnce';
 import backgroundCreate from './backgroundCreate';
 import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import on from '../common/on';
+import once from '../common/once';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
@@ -102,5 +102,5 @@ export default function fastCompose() {
   insertElementAfter(fcDiv, buttonDiv);
   var fcCheck = createInput({id: 'fast-compose', type: 'checkbox'});
   insertElementAfter(fcCheck, buttonDiv);
-  addEventListenerOnce(fcCheck, 'change', partial(drawList, fcDiv));
+  once(fcCheck, 'change', partial(drawList, fcDiv));
 }

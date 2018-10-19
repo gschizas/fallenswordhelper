@@ -1,4 +1,3 @@
-import addEventListenerOnce from '../common/addEventListenerOnce';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
@@ -7,6 +6,7 @@ import {itemRE} from '../support/constants';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonFail from '../common/jsonFail';
 import on from '../common/on';
+import once from '../common/once';
 import outputResult from '../common/outputResult';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
@@ -150,7 +150,7 @@ function makeQtCheckbox(items, injector) {
     type: 'checkbox'
   });
   insertElementBefore(qtCheckbox, injector);
-  addEventListenerOnce(qtCheckbox, 'change',
+  once(qtCheckbox, 'change',
     partial(toggleQuickTake, items, injector));
 }
 

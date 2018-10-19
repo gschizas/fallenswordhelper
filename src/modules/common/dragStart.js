@@ -1,6 +1,6 @@
-import addEventListenerOnce from './addEventListenerOnce';
 import off from './off';
 import on from './on';
+import once from './once';
 import partial from './partial';
 
 var dragTarget;
@@ -81,7 +81,7 @@ function dragStart(parent, event) {
   timer = 0;
   event.dataTransfer.setData('text/plain', '');
   on(document.body, 'dragover', dragOver, false);
-  addEventListenerOnce(document.body, 'drop', dragDrop, false);
+  once(document.body, 'drop', dragDrop, false);
 }
 
 export default function draggable(element, parent) {

@@ -1,7 +1,7 @@
-import addEventListenerOnce from '../common/addEventListenerOnce';
 import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
 import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
+import once from '../common/once';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 
@@ -45,5 +45,5 @@ function prayToGods(e) { // jQuery
 
 export default function displayDisconnectedFromGodsMessage() {
   insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
-  addEventListenerOnce(getElementById('helperPrayToGods'), 'click', prayToGods);
+  once(getElementById('helperPrayToGods'), 'click', prayToGods);
 }
