@@ -17,7 +17,7 @@ export default function batch(priority, itemsAry, counter, doFn, endFn) {
     localCounter += 1;
   }
   if (localCounter < itemsAry.length) {
-    add(priority, batch, [itemsAry, localCounter, doFn, endFn]);
+    add(priority, batch, [priority, itemsAry, localCounter, doFn, endFn]);
   } else {
     maybeEndFn(priority, endFn);
   }
