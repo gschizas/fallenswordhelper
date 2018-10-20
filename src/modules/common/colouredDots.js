@@ -20,5 +20,5 @@ export default function colouredDots() {
   if (!getValue('enhanceOnlineDots')) {return;}
   dotList = document.querySelectorAll(
     '#pCC a[data-tipped*="Last Activity"]');
-  batch(dotList, 0, changeOnlineDot);
+  batch(3, dotList, 0, changeOnlineDot);
 }

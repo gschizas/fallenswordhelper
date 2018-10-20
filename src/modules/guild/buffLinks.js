@@ -17,6 +17,6 @@ export default function buffLinks() {
   // TODO preference
   var members = document.querySelectorAll(
     '#pCC a[href^="index.php?cmd=profile&player_id="]');
-  batch(members, 0, insertBuffLink);
+  batch(3, members, 0, insertBuffLink);
   on(pCC, 'click', openQuickBuff);
 }

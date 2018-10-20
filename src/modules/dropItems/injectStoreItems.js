@@ -115,7 +115,7 @@ function toggleShowExtraLinks() {
   setShowExtraLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
-    batch(itemsAry, 0, itemWidgets, doneInvPaint);
+    batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
@@ -128,7 +128,7 @@ function toggleShowQuickDropLinks() {
   setShowQuickDropLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
-    batch(itemsAry, 0, itemWidgets, doneInvPaint);
+    batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
@@ -190,7 +190,7 @@ function inventory(data) {
   colouring = false;
   dropLinks = false;
   sendLinks = false;
-  batch(itemsAry, 0, itemWidgets, doneInvPaint);
+  batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   doFolderButtons(data.folders);
   on(pCC, 'click', eventHandler(evts));
 }

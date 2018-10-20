@@ -23,5 +23,5 @@ export default function searchUser() {
   });
   if (!userNode) {return;}
   var nodeList = document.querySelectorAll('#pCC table table tr');
-  batch(nodeList, 0, hideOther);
+  batch(2, nodeList, 0, hideOther);
 }

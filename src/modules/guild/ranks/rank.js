@@ -102,7 +102,7 @@ function getRanks(membrList) {
   myRank = membrList[playerName()].rank_name;
   theRows = findTheRows();
   if (theRows) {
-    batch(theRows, 1, writeMembers);
+    batch(3, theRows, 1, writeMembers);
   }
 }
 
