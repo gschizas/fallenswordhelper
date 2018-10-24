@@ -106,6 +106,7 @@
       .replace(/&[a-z_]*page=.+/, '')
       .replace(/&prestige=.+/, '')
       .replace(/&withdraw_amount=.+/, '')
+      .replace(/&amount=.+/, '')
       .replace(/&tickets=.+/, '')
       .replace(/&search=.+/, '')
       .replace(/&target=.+/, '')
@@ -8924,11 +8925,11 @@
     return list && performance.now() < limit && cntr < list.length;
   }
 
-  function maybeEndFn(endFn) {
-    if (isFunction(endFn)) {add(3, endFn);}
+  function maybeEndFn(priority, endFn) {
+    if (isFunction(endFn)) {add(priority, endFn);}
   }
 
-  function batch(itemsAry, counter, doFn, endFn) {
+  function batch(priority, itemsAry, counter, doFn, endFn) {
     var limit = performance.now() + 5;
     var localCounter = counter;
     while (moreToDo(limit, localCounter, itemsAry)) {
@@ -8936,9 +8937,9 @@
       localCounter += 1;
     }
     if (localCounter < itemsAry.length) {
-      add(3, batch, [itemsAry, localCounter, doFn, endFn]);
+      add(priority, batch, [priority, itemsAry, localCounter, doFn, endFn]);
     } else {
-      maybeEndFn(endFn);
+      maybeEndFn(priority, endFn);
     }
   }
 
@@ -8955,7 +8956,7 @@
     // TODO preference
     var members = document.querySelectorAll(
       '#pCC a[href^="index.php?cmd=profile&player_id="]');
-    batch(members, 0, insertBuffLink);
+    batch(3, members, 0, insertBuffLink);
     on(pCC, 'click', openQuickBuff);
   }
 
@@ -8976,7 +8977,7 @@
     if (!getValue('enhanceOnlineDots')) {return;}
     dotList = document.querySelectorAll(
       '#pCC a[data-tipped*="Last Activity"]');
-    batch(dotList, 0, changeOnlineDot);
+    batch(3, dotList, 0, changeOnlineDot);
   }
 
   var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
@@ -9693,7 +9694,7 @@
     myRank = membrList[playerName()].rank_name;
     theRows = findTheRows();
     if (theRows) {
-      batch(theRows, 1, writeMembers);
+      batch(3, theRows, 1, writeMembers);
     }
   }
 
@@ -12719,7 +12720,7 @@
     setShowExtraLinks();
     doToggleButtons(showExtraLinks, showQuickDropLinks$1);
     if (!extraLinks) {
-      batch(itemsAry$1, 0, itemWidgets, doneInvPaint);
+      batch(3, itemsAry$1, 0, itemWidgets, doneInvPaint);
     } else {
       itemsAry$1.forEach(function(o) {
         var el = o.injectHere.firstElementChild;
@@ -12732,7 +12733,7 @@
     setShowQuickDropLinks();
     doToggleButtons(showExtraLinks, showQuickDropLinks$1);
     if (!dropLinks) {
-      batch(itemsAry$1, 0, itemWidgets, doneInvPaint);
+      batch(3, itemsAry$1, 0, itemWidgets, doneInvPaint);
     } else {
       itemsAry$1.forEach(function(o) {
         var el = o.injectHere.querySelector('.dropLink');
@@ -12787,14 +12788,14 @@
   }
 
   function inventory$1(data) {
-    if (badData(data)) {return;}
+    if (badData(data) || !itemsAry$1) {return;}
     extraLinks = false;
     checkAll = false;
     invItems$2 = data.items;
     colouring = false;
     dropLinks = false;
     sendLinks = false;
-    batch(itemsAry$1, 0, itemWidgets, doneInvPaint);
+    batch(3, itemsAry$1, 0, itemWidgets, doneInvPaint);
     doFolderButtons$1(data.folders);
     on(pCC, 'click', eventHandler(evts));
   }
@@ -13269,7 +13270,7 @@
   function drawMapping(potOpts) {
     var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
     mapping.replaceChild(mapTbl, mapping.children[0]);
-    add(3, batch, [Object.entries(potOpts.myMap), 0,
+    add(3, batch, [3, Object.entries(potOpts.myMap), 0,
       partial(insertRows, mapTbl), partial(insertFinal, mapTbl)]);
   }
 
@@ -13484,7 +13485,7 @@
   }
 
   function finishSpan() {
-    batch(nodeArray, 0, doPaintChild, partial(potReport, potObj));
+    batch(3, nodeArray, 0, doPaintChild, partial(potReport, potObj));
   }
 
   function prepareChildRows() {
@@ -13492,7 +13493,7 @@
       'tr:not(.fshHide) td:nth-of-type(3n)');
     potObj = {};
     nodeArray = [];
-    batch(nodeList, 0, doSpan, finishSpan);
+    batch(3, nodeList, 0, doSpan, finishSpan);
   }
 
   function memberHeader(oldhtml) {
@@ -13512,7 +13513,7 @@
   function reportHeader() {
     var headers = document.querySelectorAll('#pCC table table ' +
       'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
-    batch(headers, 0, updateMemberHeader);
+    batch(3, headers, 0, updateMemberHeader);
   }
 
   var findUser;
@@ -13537,7 +13538,7 @@
     });
     if (!userNode) {return;}
     var nodeList = document.querySelectorAll('#pCC table table tr');
-    batch(nodeList, 0, hideOther);
+    batch(2, nodeList, 0, hideOther);
   }
 
   function injectReportPaint() { // jQuery
@@ -19542,7 +19543,7 @@
   }
 
   function updateDepoAmount(o, doc) { // jQuery
-    if (o.data.deposit_amount !== '1') {
+    if (o.data.amount !== '1') {
       $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
     } else {
       $('#pCC #deposit_amount').val('1');
@@ -19582,7 +19583,7 @@
     var amount = $('#pCC #deposit_amount').val();
     if (invalidAmount(o, amount)) {return;}
     o.data.mode = 'deposit';
-    o.data.deposit_amount = amount;
+    o.data.amount = amount;
     doAjax$1(o.data);
   }
 
@@ -19592,7 +19593,7 @@
     var amount = $('#pCC #withdraw_amount').val();
     if (!$.isNumeric(amount) || amount < 1) {return;}
     o.data.mode = 'withdraw';
-    o.data.withdraw_amount = amount;
+    o.data.amount = amount;
     doAjax$1(o.data);
   }
 
@@ -19908,7 +19909,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '45';
+  window.FSH.calf = '46';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
