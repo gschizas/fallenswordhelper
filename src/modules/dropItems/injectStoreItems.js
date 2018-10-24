@@ -183,7 +183,7 @@ function badData(data) {
 }
 
 function inventory(data) {
-  if (badData(data)) {return;}
+  if (badData(data) || !itemsAry) {return;}
   extraLinks = false;
   checkAll = false;
   invItems = data.items;
