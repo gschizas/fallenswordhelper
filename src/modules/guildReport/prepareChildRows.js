@@ -74,7 +74,7 @@ function doSpan(el, localCounter) {
 }
 
 function finishSpan() {
-  batch(nodeArray, 0, doPaintChild, partial(potReport, potObj));
+  batch(3, nodeArray, 0, doPaintChild, partial(potReport, potObj));
 }
 
 export default function prepareChildRows() {
@@ -82,5 +82,5 @@ export default function prepareChildRows() {
     'tr:not(.fshHide) td:nth-of-type(3n)');
   potObj = {};
   nodeArray = [];
-  batch(nodeList, 0, doSpan, finishSpan);
+  batch(3, nodeList, 0, doSpan, finishSpan);
 }

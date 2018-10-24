@@ -5,11 +5,11 @@ function moreToDo(limit, cntr, list) {
   return list && performance.now() < limit && cntr < list.length;
 }
 
-function maybeEndFn(endFn) {
-  if (isFunction(endFn)) {add(3, endFn);}
+function maybeEndFn(priority, endFn) {
+  if (isFunction(endFn)) {add(priority, endFn);}
 }
 
-export default function batch(itemsAry, counter, doFn, endFn) {
+export default function batch(priority, itemsAry, counter, doFn, endFn) {
   var limit = performance.now() + 5;
   var localCounter = counter;
   while (moreToDo(limit, localCounter, itemsAry)) {
@@ -17,8 +17,8 @@ export default function batch(itemsAry, counter, doFn, endFn) {
     localCounter += 1;
   }
   if (localCounter < itemsAry.length) {
-    add(3, batch, [itemsAry, localCounter, doFn, endFn]);
+    add(priority, batch, [priority, itemsAry, localCounter, doFn, endFn]);
   } else {
-    maybeEndFn(endFn);
+    maybeEndFn(priority, endFn);
   }
 }

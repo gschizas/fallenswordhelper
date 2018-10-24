@@ -74,7 +74,7 @@ function insertFinal(mapTbl) {
 export function drawMapping(potOpts) {
   var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
   mapping.replaceChild(mapTbl, mapping.children[0]);
-  add(3, batch, [Object.entries(potOpts.myMap), 0,
+  add(3, batch, [3, Object.entries(potOpts.myMap), 0,
     partial(insertRows, mapTbl), partial(insertFinal, mapTbl)]);
 }
 

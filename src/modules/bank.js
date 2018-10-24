@@ -45,7 +45,7 @@ function disableDepo(o) { // jQuery
 }
 
 function updateDepoAmount(o, doc) { // jQuery
-  if (o.data.deposit_amount !== '1') {
+  if (o.data.amount !== '1') {
     $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
   } else {
     $('#pCC #deposit_amount').val('1');
@@ -85,7 +85,7 @@ function bankDeposit(e) { // jQuery
   var amount = $('#pCC #deposit_amount').val();
   if (invalidAmount(o, amount)) {return;}
   o.data.mode = 'deposit';
-  o.data.deposit_amount = amount;
+  o.data.amount = amount;
   doAjax(o.data);
 }
 
@@ -95,7 +95,7 @@ function bankWithdrawal(e) { // jQuery
   var amount = $('#pCC #withdraw_amount').val();
   if (!$.isNumeric(amount) || amount < 1) {return;}
   o.data.mode = 'withdraw';
-  o.data.withdraw_amount = amount;
+  o.data.amount = amount;
   doAjax(o.data);
 }
 
