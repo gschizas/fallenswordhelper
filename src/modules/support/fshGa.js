@@ -57,6 +57,7 @@ function fixupUrl() {
     .replace(/&[a-z_]*page=.+/, '')
     .replace(/&prestige=.+/, '')
     .replace(/&withdraw_amount=.+/, '')
+    .replace(/&amount=.+/, '')
     .replace(/&tickets=.+/, '')
     .replace(/&search=.+/, '')
     .replace(/&target=.+/, '')
