@@ -3,6 +3,7 @@ import batch from '../../common/batch';
 import insertElement from '../../common/insertElement';
 import once from '../../common/once';
 import partial from '../../common/partial';
+import {sendEvent} from '../../support/fshGa';
 import {
   createDiv,
   createInput,
@@ -72,6 +73,7 @@ function insertFinal(mapTbl) {
 }
 
 export function drawMapping(potOpts) {
+  sendEvent('potReport', 'drawMapping');
   var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
   mapping.replaceChild(mapTbl, mapping.children[0]);
   add(3, batch, [3, Object.entries(potOpts.myMap), 0,

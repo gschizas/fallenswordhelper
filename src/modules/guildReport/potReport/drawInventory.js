@@ -2,6 +2,7 @@ import {createDiv} from '../../common/cElement';
 import insertElement from '../../common/insertElement';
 import once from '../../common/once';
 import partial from '../../common/partial';
+import {sendEvent} from '../../support/fshGa';
 
 var inventory;
 
@@ -41,6 +42,7 @@ function makeRowsFromPivot(potOpts, pivot, prev, pot) {
 }
 
 export function drawInventory(potOpts, potObj) {
+  sendEvent('potReport', 'drawInventory');
   var pivot = Object.keys(potObj)
     .reduce(partial(pivotPotObj, potOpts, potObj), {});
   inventory.innerHTML = '<table><tbody>' +
