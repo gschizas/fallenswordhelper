@@ -6,6 +6,7 @@ import fallback from '../../system/fallback';
 import getForage from '../../ajax/getForage';
 import insertElement from '../../common/insertElement';
 import isChecked from '../../system/isChecked';
+import isFunction from '../../common/isFunction';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
@@ -141,5 +142,7 @@ function gotMap(potObj, data) {
 }
 
 export default function potReport(potObj) {
-  getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+  if (isFunction(Object.entries)) {
+    getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+  }
 }
