@@ -7,6 +7,7 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import once from '../../common/once';
 import partial from '../../common/partial';
+import {sendEvent} from '../../support/fshGa';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
@@ -60,6 +61,7 @@ function makeDragHandle() {
 }
 
 function updateRawData() {
+  sendEvent('guildTracker', 'updateRawData');
   if (trackerData) {queueRawData(trackerData);}
 }
 
@@ -116,6 +118,7 @@ function togglePref(evt) {
 }
 
 function openDialog() {
+  sendEvent('guildTracker', 'openDialog');
   getForage('fsh_guildActivity').done(gotActivity);
   calf.dialogIsClosed = isClosed;
   addOverlay();

@@ -3,24 +3,9 @@ import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import intValue from '../system/intValue';
 import onlineDot from '../common/onlineDot';
+import uniq from '../common/uniq';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
-
-function uniq(arr, removeBy) {
-  var seen = {};
-  if (removeBy) {
-    return arr.filter(function(item) {
-      if (seen[item[removeBy]]) {return false;}
-      seen[item[removeBy]] = true;
-      return true;
-    });
-  }
-  return arr.filter(function(item) {
-    if (seen[item]) {return false;}
-    seen[item] = true;
-    return true;
-  });
-}
 
 function getPrevBr(bioCellHtml, runningTotalPosition) { // Legacy
   var prevBR = bioCellHtml.lastIndexOf('<br>', runningTotalPosition - 1);

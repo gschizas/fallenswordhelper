@@ -1,6 +1,6 @@
 import calf from '../support/calf';
 import createDocument from '../system/createDocument';
-import {doSendGold} from '../newMap/sendGold';
+import {doSendGold} from '../world/newMap/sendGold';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertQuickWear from '../quickWear/quickWear';

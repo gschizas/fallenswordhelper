@@ -6,6 +6,7 @@ import doFolders from './doFolders';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import insertElementBefore from '../common/insertElementBefore';
 import jsonParse from '../common/jsonParse';
 import on from '../common/on';
 
@@ -86,7 +87,7 @@ function injectTradeOld() {
   });
   on(multiple, 'click', toggleAllPlants);
   var el = getElementById('item-list').parentNode.parentNode;
-  el.parentNode.insertBefore(multiple, el);
+  insertElementBefore(multiple, el);
 }
 
 export default function injectTrade() {

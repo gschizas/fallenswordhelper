@@ -55,7 +55,8 @@
   }
 
   var times = {};
-  var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
+  var refAry = ['pagereboot.com', 'refreshthing.com', 'refreshthis.com',
+    'lazywebtools.co.uk'];
 
   function isAuto() {
     var docRef = document.referrer
@@ -822,7 +823,8 @@
     enableGuildActivityTracker: false,
     enableSeTracker: false,
     showTitanInfo: false,
-    highlightPvpProtection: false
+    highlightPvpProtection: false,
+    showBuffInfo: false
   };
 
   function getValue(name) {
@@ -994,9 +996,28 @@
   var beginFolderSpanElement =
     '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
   var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
+
   var def_afterUpdateActionlist = 'after-update.actionlist';
   var def_playerBuffs = 'buffs.player';
+  var def_playerUpdate = 'update.player';
+  var def_playerLevel = 'level.stats-player';
+  var def_shopPrompt = 'prompt.worldDialogShop';
+  var def_controlsKeydown = 'keydown.controls';
+  var def_realmUpdate = 'update.realm';
+
   var def_suffixSuccessActionResponse = '-success.action-response';
+  var def_refreshActionList = '-1' + def_suffixSuccessActionResponse;
+  var def_viewCreature = '1' + def_suffixSuccessActionResponse;
+  var def_PvE = '2' + def_suffixSuccessActionResponse;
+  var def_relicView = '9' + def_suffixSuccessActionResponse;
+  var def_stairway = '5' + def_suffixSuccessActionResponse;
+  var def_teleport = '25' + def_suffixSuccessActionResponse;
+
+  var def_fetch_playerStats = 1;
+  var def_fetch_playerBackpackCount = 2;
+
+  var def_fetch_playerBuffs = 16;
+  var def_fetch_worldRealmDynamic = 128;
 
   var def_fetch_worldRealmActions = 256;
 
@@ -2554,6 +2575,13 @@
     on(content, 'click', rmEvtHdl);
   }
 
+  function insertElementBefore(newNode, referenceNode) {
+    if (referenceNode instanceof Node &&
+        referenceNode.parentNode instanceof Node) {
+      return referenceNode.parentNode.insertBefore(newNode, referenceNode);
+    }
+  }
+
   function eventHandler(evtAry) {
     return function(evt) {
       var self = evt.target;
@@ -3270,6 +3298,10 @@
     highlightPvpProtection: {
       helpTitle: 'Highlight Pvp Protection',
       helpText: 'If enabled, will put a red box around PvP Protection.'
+    },
+    showBuffInfo: {
+      helpTitle: 'Show Buff Info',
+      helpText: 'This will show buff info in the action list.',
     }
   };
 
@@ -4067,23 +4099,26 @@
     return redDot;
   }
 
-  var sustainLevelRE = /Level<br>(\d+)%/;
+  function getMyItem(removeBy, item) {
+    if (removeBy) {
+      return item[removeBy];
+    }
+    return item;
+  }
+
+  function genericFilter(removeBy, seen, item) {
+    var myItem = getMyItem(removeBy, item);
+    if (!seen[myItem]) {
+      seen[myItem] = true;
+      return true;
+    }
+  }
 
   function uniq(arr, removeBy) {
-    var seen = {};
-    if (removeBy) {
-      return arr.filter(function(item) {
-        if (seen[item[removeBy]]) {return false;}
-        seen[item[removeBy]] = true;
-        return true;
-      });
-    }
-    return arr.filter(function(item) {
-      if (seen[item]) {return false;}
-      seen[item] = true;
-      return true;
-    });
+    return arr.filter(partial(genericFilter, removeBy, {}));
   }
+
+  var sustainLevelRE = /Level<br>(\d+)%/;
 
   function getPrevBr(bioCellHtml, runningTotalPosition) { // Legacy
     var prevBR = bioCellHtml.lastIndexOf('<br>', runningTotalPosition - 1);
@@ -4558,8 +4593,6 @@
     '</ul><h3>FSH developer quick links</h3><ul>' +
     '<li><span class="a-reply" target_player="PointyHair">PM</span> ' +
     '<a href="index.php?cmd=profile&player_id=1963510">PointyHair</a></li>' +
-    '<li><span class="a-reply" target_player="yuuzhan">PM</span> ' +
-    '<a href="index.php?cmd=profile&player_id=1599987">yuuzhan</a></li>' +
     '</ul></div>';
 
   function toggleMenu(evt) {
@@ -4632,7 +4665,7 @@
       helperMenu.classList.add('fshMove');
       draggable(helperMenu);
     }
-    node.parentNode.insertBefore(helperMenu, node);
+    insertElementBefore(helperMenu, node);
   }
 
   function injectHelperMenu() {
@@ -4718,7 +4751,7 @@
         href: guideUrl + 'creatures&search_name=' + myName,
         target: '_blank'
       });
-      img.parentNode.insertBefore(myLink, img);
+      insertElementBefore(myLink, img);
       insertElement(myLink, img);
     });
   }
@@ -4764,8 +4797,7 @@
   function insertElementAfter(newNode, referenceNode) {
     if (referenceNode instanceof Node &&
         referenceNode.parentNode instanceof Node) {
-      return referenceNode.parentNode.insertBefore(newNode,
-        referenceNode.nextSibling);
+      return insertElementBefore(newNode, referenceNode.nextSibling);
     }
   }
 
@@ -5302,7 +5334,7 @@
 
   function insertElementAfterBegin(parentNode, newNode) {
     if (parentNode instanceof Element) {
-      parentNode.insertBefore(newNode, parentNode.firstChild);
+      insertElementBefore(newNode, parentNode.firstChild);
     }
   }
 
@@ -5998,6 +6030,7 @@
     return result;
   }
 
+  var goldAmount;
   var sendGoldonWorld;
 
   function doSendGold() { // jQuery
@@ -6018,49 +6051,43 @@
         setValue('currentGoldSentTotal',
           parseInt(getValue('currentGoldSentTotal'), 10) +
           parseInt(getValue('goldAmount'), 10));
-        GameData.fetch(1);
+        GameData.fetch(def_fetch_playerStats);
       }
     });
+  }
+
+  function statbarGoldBackground(colour) {
+    $('#statbar-gold').css('background-color', colour);
+  }
+
+  function updateSendGoldOnWorld() { // jQuery
+    $('#HelperSendTotal').html(addCommas(getValue('currentGoldSentTotal')));
+    if (Number(GameData.player().gold) > goldAmount) {
+      statbarGoldBackground('red');
+    } else {
+      statbarGoldBackground('inherit');
+    }
   }
 
   function injectSendGoldOnWorld() { // jQuery
     sendGoldonWorld = getValue('sendGoldonWorld');
     if (!sendGoldonWorld) {return;}
+    goldAmount = getValue('goldAmount');
     $('#statbar-gold-tooltip-general').append(
       '<dt class="stat-gold-sendTo">Send To:</dt>' +
-      '<dd id="HelperSendTo">' + getValue('goldRecipient') +
-      '</dd>' +
+      '<dd id="HelperSendTo">' + getValue('goldRecipient') + '</dd>' +
       '<dt class="stat-gold-sendAmt">Amount:</dt>' +
-      '<dd id="HelperSendAmt">' + getValue('goldAmount')
-        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>' +
+      '<dd id="HelperSendAmt">' + addCommas(goldAmount) + '</dd>' +
       '<dt class="stat-gold-sendTo">Send?</dt>' +
       '<dd><input id="HelperSendGold" value="Send!" class="custombutton" ' +
       'type="submit"><input type="hidden" id="xc" value=""</dd>' +
       '<dt class="stat-gold-sendTotal">Total Sent:</dt>' +
       '<dd id="HelperSendTotal">' +
-        getValue('currentGoldSentTotal')
-          .toString()
-          .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') +
-        '</dd>');
+        addCommas(getValue('currentGoldSentTotal')) + '</dd>'
+    );
     $('#HelperSendGold').click(doSendGold);
-  }
-
-  function updateGoldValue(data) {
-    $('#HelperSendTotal')
-      .html(getValue('currentGoldSentTotal')
-        .toString()
-        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
-    if (parseInt(data.player.gold, 10) > getValue('goldAmount')) {
-      $('#statbar-gold').css('background-color', 'red');
-    } else {
-      $('#statbar-gold').css('background-color', 'inherit');
-    }
-  }
-
-  function updateSendGoldOnWorld(data) { // jQuery
-    if (data.player && sendGoldonWorld) {
-      updateGoldValue(data);
-    }
+    updateSendGoldOnWorld();
+    $.subscribe('gold.stats-player', updateSendGoldOnWorld);
   }
 
   function getDoc(doc, context) {
@@ -6338,7 +6365,7 @@
     var character = getElementById(id);
     var statWrapper = character.parentNode;
     insertElement(myWrapper, character);
-    statWrapper.insertBefore(myWrapper, statWrapper.firstChild);
+    insertElementBefore(myWrapper, statWrapper.firstChild);
     on(myWrapper, 'click', function(evt) {
       evt.stopPropagation();
     }, true);
@@ -8394,6 +8421,7 @@
   }
 
   function potionDone(temp, data, textStatus) {
+    if (!(temp instanceof Node)) {return;}
     if (data.error) {
       temp.parentNode.innerHTML = '<div class="fshScs">' +
         data.error + '</div>';
@@ -8408,7 +8436,6 @@
   }
 
   function backgroundCreate(self, temp) {
-    if (!(temp instanceof Node)) {return;}
     self.innerHTML = '';
     self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
     createPotion(temp);
@@ -8507,13 +8534,6 @@
     var fcCheck = createInput({id: 'fast-compose', type: 'checkbox'});
     insertElementAfter(fcCheck, buttonDiv);
     once(fcCheck, 'change', partial(drawList, fcDiv));
-  }
-
-  function insertElementBefore(newNode, referenceNode) {
-    if (referenceNode instanceof Node &&
-        referenceNode.parentNode instanceof Node) {
-      return referenceNode.parentNode.insertBefore(newNode, referenceNode);
-    }
   }
 
   var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
@@ -9245,6 +9265,7 @@
   }
 
   function updateRawData() {
+    sendEvent('guildTracker', 'updateRawData');
     if (trackerData) {queueRawData(trackerData);}
   }
 
@@ -9301,6 +9322,7 @@
   }
 
   function openDialog() {
+    sendEvent('guildTracker', 'openDialog');
     getForage('fsh_guildActivity').done(gotActivity$1);
     calf.dialogIsClosed = isClosed;
     addOverlay();
@@ -9632,7 +9654,7 @@
     var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
     rankPosition(val.toLowerCase(), matchRankId[1]);
     var injectRow = parentTable.rows[targetRowNum];
-    parentTable.insertBefore(thisRankRow, injectRow);
+    insertElementBefore(thisRankRow, injectRow);
     var pxScroll = getPxScroll(val);
     window.scrollBy(0, pxScroll);
     evt.stopPropagation();
@@ -12468,7 +12490,7 @@
         var tr = createTr({className: 'fshCenter'});
         var insertHere = createTd({colSpan: 3});
         insertElement(tr, insertHere);
-        formNode.parentNode.insertBefore(tr, formNode);
+        insertElementBefore(tr, formNode);
         insertHere.innerHTML = makeFolderSpans$1(folders);
         extraButtons();
       }
@@ -13190,6 +13212,7 @@
   }
 
   function drawInventory(potOpts, potObj) {
+    sendEvent('potReport', 'drawInventory');
     var pivot = Object.keys(potObj)
       .reduce(partial(pivotPotObj, potOpts, potObj), {});
     inventory$2.innerHTML = '<table><tbody>' +
@@ -13268,6 +13291,7 @@
   }
 
   function drawMapping(potOpts) {
+    sendEvent('potReport', 'drawMapping');
     var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
     mapping.replaceChild(mapTbl, mapping.children[0]);
     add(3, batch, [3, Object.entries(potOpts.myMap), 0,
@@ -13412,7 +13436,9 @@
   }
 
   function potReport(potObj) {
-    getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+    if (isFunction(Object.entries)) {
+      getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+    }
   }
 
   var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
@@ -13901,6 +13927,11 @@
     });
     insertElement(myLink, myImg);
     insertElement(aRow.cells[0], myLink);
+
+    var realmCell = aRow.cells[1];
+    var realmName = realmCell.textContent;
+    realmCell.innerHTML = '<a href="' + guideUrl + 'realms&search_name=' +
+      realmName + '" target="_blank">' + realmName + '</a>';
   }
 
   function gotOldTitans(oldTitans) {
@@ -14803,18 +14834,27 @@
     );
   }
 
+  function eachPlayer(member, guildId, player) {
+    if (member.name === player.player) {
+      doOnlineDot(player.dom, guildId, {
+        last_login: member.last_activity.toString(),
+        virtual_level: member.vl
+      });
+    }
+  }
+
+  function eachMember(guildId, member) {
+    guilds[guildId].forEach(partial(eachPlayer, member, guildId));
+  }
+
+  function eachRank(guildId, rank) {
+    rank.members.forEach(partial(eachMember, guildId));
+  }
+
   function parseGuild(data) {
     var guildId = data.r.id;
-    data.r.members.forEach(function(member) {
-      guilds[guildId].forEach(function(player) {
-        if (member.name === player.player) {
-          doOnlineDot(player.dom, guildId, {
-            last_login: member.last_activity.toString(),
-            virtual_level: member.vl
-          });
-        }
-      });
-    });
+    // data.r.ranks.forEach(partial(eachRank, guildId));
+    uniq(data.r.ranks, 'id').forEach(partial(eachRank, guildId)); // BUG
   }
 
   function findOnlinePlayers() { // jQuery
@@ -14843,6 +14883,7 @@
   }
 
   function getMyVL(e) { // jQuery
+    sendEvent('toprated', 'FindOnlinePlayers');
     $(e.target).qtip('hide');
     spinner$1 = createSpan({
       className: 'fshCurveContainer fshTopListSpinner',
@@ -14870,7 +14911,7 @@
           'top 250 players (warning ... takes a few seconds).'
       }
     });
-    theCell.insertBefore(findBtn, theCell.firstElementChild);
+    insertElementAfterBegin(theCell, findBtn);
     on(findBtn, 'click', getMyVL);
   }
 
@@ -14906,7 +14947,7 @@
         oldItems[0].classList.add('fshBlock');
         insertElement(itemDiv, oldItems[0]);
       }
-      itemList.parentNode.insertBefore(itemDiv, itemList);
+      insertElementBefore(itemDiv, itemList);
     }
     return itemDiv;
   }
@@ -15085,7 +15126,7 @@
     });
     on(multiple, 'click', toggleAllPlants);
     var el = getElementById('item-list').parentNode.parentNode;
-    el.parentNode.insertBefore(multiple, el);
+    insertElementBefore(multiple, el);
   }
 
   function injectTrade() {
@@ -15142,224 +15183,361 @@
     Array.prototype.forEach.call(memList, highlightMembers);
   }
 
-  function getTarget$1(doc) {
-    if (doc instanceof HTMLDocument) {return doc;}
-    return document;
+  var containerDiv;
+
+  function wantsBuffInfo(ary) {
+    return calf.showBuffInfo && ary.some(function(e) {return e;});
   }
 
-  function patchXPath(xpath) {
-    if (xpath.indexOf('/') === 0) {
-      return '.' + xpath;
-      // TODO this is likely to be bad
-      // this is a chrome fix - needs a .// for xpath
-      // where as firefox can function without it.
-      // firefox still works with .//
+  function drawBuffInfo() {
+    if (containerDiv) {
+      toggleForce(containerDiv, false);
+    } else {
+      containerDiv = createDiv({
+        className: 'fshActionBox',
+        innerHTML: '<div></div><div></div><div></div>' +
+          '<div></div><div></div><div></div>'
+      });
+      var actCont = getElementById('actionContainer');
+      insertElementAfter(containerDiv, actCont.children[2]);
     }
-    return xpath;
+    return containerDiv;
   }
 
-  function findNodes(xpath, doc) {
-    var _xpath = patchXPath(xpath);
-    var nodes = [];
-    var target;
-    // We may have passed in a HTMLDocument object as the context
-    // See createDocument with DOMParser
-    // This only matters in Firefox. evaluate will fail silently if
-    // the context is not part of the calling object.
-    var _doc = fallback(doc, document);
-    target = getTarget$1(_doc);
-    var findQ = target.evaluate(_xpath, _doc, null,
-      XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-    if (findQ.snapshotLength === 0) {return null;}
-    for (var i = 0; i < findQ.snapshotLength; i += 1) {
-      nodes.push(findQ.snapshotItem(i));
+  function hideBuffInfo() {
+    if (containerDiv) {
+      toggleForce(containerDiv, true);
     }
-    return nodes;
   }
 
-  function findNode(xpath, doc) {
-    var nodes = findNodes(xpath, doc);
-    if (!nodes) {return null;}
-    return nodes[0];
+  function buffInfoDiv(ary) {
+    if (wantsBuffInfo(ary)) {
+      return drawBuffInfo();
+    }
+    hideBuffInfo();
+  }
+
+  var caDiv;
+  var caSpan;
+
+  function initCaDiv(containerDiv) {
+    caDiv = containerDiv.children[3];
+    caDiv.className = 'fshBlue';
+    caDiv.textContent = 'CA ';
+    caSpan = createSpan();
+    insertElement(caDiv, caSpan);
+    insertTextBeforeEnd(caDiv, ' active');
+  }
+
+  function hasCa(containerDiv, ca) {
+    if (caDiv) {
+      toggleForce(caDiv, false);
+    } else {
+      initCaDiv(containerDiv);
+    }
+    caSpan.textContent = ca.level;
+  }
+
+  function hideCa() {
+    if (caDiv) {
+      toggleForce(caDiv, true);
+    }
+  }
+
+  function doCa(containerDiv, ca) {
+    if (ca) {
+      hasCa(containerDiv, ca);
+    } else {
+      hideCa();
+    }
+  }
+
+  var dblDiv;
+  var dblSpan;
+
+  function initDblDiv(containerDiv) {
+    dblDiv = containerDiv.children[4];
+    dblDiv.className = 'fshRed';
+    dblDiv.textContent = 'Doubler ';
+    dblSpan = createSpan();
+    insertElement(dblDiv, dblSpan);
+    insertTextBeforeEnd(dblDiv, ' active');
+  }
+
+  function hasDbl(containerDiv, dbl) {
+    if (dblDiv) {
+      toggleForce(dblDiv, false);
+    } else {
+      initDblDiv(containerDiv);
+    }
+    dblSpan.textContent = dbl.level;
+  }
+
+  function hideDbl() {
+    if (dblDiv) {
+      toggleForce(dblDiv, true);
+    }
+  }
+
+  function doDbl(containerDiv, dbl) {
+    if (dbl) {
+      hasDbl(containerDiv, dbl);
+    } else {
+      hideDbl();
+    }
+  }
+
+  var ddDiv;
+  var ddSpan;
+
+  function initDdDiv(containerDiv) {
+    ddDiv = containerDiv.children[2];
+    ddDiv.textContent = 'Damage bonus: ';
+    ddSpan = createSpan();
+    insertElement(ddDiv, ddSpan);
+    insertTextBeforeEnd(ddDiv, '%');
+  }
+
+  function getDdBonus(dd, killStreak) {
+    if (dd) {
+      var ddPerc = Math.min(
+        Math.round(
+          Math.floor(killStreak / 5) * Number(dd.level)
+        ) * 0.01, 20
+      );
+      var ddBonus = Math.round(ddPerc * 100) / 100;
+      return ddBonus.toString();
+    }
+    return '0';
+  }
+
+  function hasDd(containerDiv, dd, ks) {
+    if (ddDiv) {
+      toggleForce(ddDiv, false);
+    } else {
+      initDdDiv(containerDiv);
+    }
+    ddSpan.textContent = getDdBonus(dd, Number(ks));
+  }
+
+  function hideDd() {
+    if (ddDiv) {
+      toggleForce(ddDiv, true);
+    }
+  }
+
+  function doDeathDealer(containerDiv, dd, ks) {
+    if (dd) {
+      hasDd(containerDiv, dd, ks);
+    } else {
+      hideDd();
+    }
+  }
+
+  var ksDiv;
+  var killStreakSpan;
+
+  function initKsDiv(containerDiv) {
+    ksDiv = containerDiv.children[1];
+    ksDiv.textContent = 'Kill Streak: ';
+    killStreakSpan = createSpan();
+    insertElement(ksDiv, killStreakSpan);
+  }
+
+  function showKs(containerDiv, ks) {
+    if (ksDiv) {
+      toggleForce(ksDiv, false);
+    } else {
+      initKsDiv(containerDiv);
+    }
+    killStreakSpan.textContent = addCommas(ks);
+  }
+
+  function hideKs() {
+    if (ksDiv) {
+      toggleForce(ksDiv, true);
+    }
+  }
+
+  function doKs(containerDiv, dd, titanActive, ks) {
+    if (dd || titanActive) {
+      showKs(containerDiv, ks);
+    } else {
+      hideKs();
+    }
+  }
+
+  function getBuff$1(name) {
+    return GameData.player().buffs.find(function(e) {return e.name === name;});
+  }
+
+  function getCooldown() {
+    var cooldown = GameData.player().teleportCooldown;
+    return cooldown > 1 && cooldown;
+  }
+
+  var colorHash = [
+    'red', // Should never see this.
+    'orange',
+    'yellow'
+  ];
+
+  function impIconColour() { // jQuery
+    var imp = $('#actionlist-shield-imp');
+    if (imp.length === 1) {
+      imp.css('background-color',
+        colorHash[imp.text()] || '#ad8043');
+    }
+  }
+
+  var impDiv;
+  var impRemainingSpan;
+
+  function getImpsRemaining(imp) {
+    if (imp) {
+      return Number(imp.stack);
+    }
+    return 0;
   }
 
   var impStyles = [
-    ' style="color:red; font-size:large; font-weight:bold"',
-    ' style="color:Orangered; font-size:large; font-weight:bold"',
-    ' style="color:Orangered; font-size:medium; font-weight:bold;"'
+    'imp-0',
+    'imp-1',
+    'imp-1'
   ];
 
-  function getImpWarningStyle(impsRem) { // Legacy
-    if (impsRem >= 0 && impsRem <= 2) {
-      return impStyles[impsRem];
-    }
-    return ' style="color:green; font-size:medium;"';
+  function getImpWarningStyle(impsRem) {
+    return impStyles[impsRem] || 'fshGreen';
   }
 
-  function impWarning(impsRem) { // Legacy
-    var applyImpWarningColor = getImpWarningStyle(impsRem);
-    var recastButton = '';
-    if (impsRem === 0) {
-      recastButton = '&nbsp;<span id="Helper:recastImpAndRefresh" ' +
-        'style="color: blue; cursor: pointer; text-decoration: underline; ' +
-        'font-size: xx-small;">Recast</span>';
-    }
-    return '<tr><td' + applyImpWarningColor + '>Shield Imps Remaining: ' +
-      impsRem.toString() + recastButton + '</td></tr>';
+  function initImpDiv(containerDiv) {
+    impDiv = containerDiv.children[0];
+    impDiv.textContent = 'Shield Imps Remaining: ';
+    impRemainingSpan = createSpan();
+    insertElement(impDiv, impRemainingSpan);
+    insertHtmlBeforeEnd(impDiv,
+      '&nbsp;<span id="fshImpRecast" class="xSmallLink">Recast</span>');
   }
 
-  function getKillStreak(responseText) { // Hybrid
-    var doc = createDocument(responseText);
-    var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
-    var playerKillStreakValue;
-    if (killStreakLocation.length > 0) {
-      playerKillStreakValue = intValue(killStreakLocation.text());
+  function hasImp(containerDiv, imp) {
+    if (impDiv) {
+      toggleForce(impDiv, false);
+    } else {
+      initImpDiv(containerDiv);
     }
-    var killStreakElement = findNode('//span[@findme="killstreak"]');
-    killStreakElement.innerHTML = addCommas(playerKillStreakValue);
-    setValue('lastKillStreak', playerKillStreakValue);
-    var deathDealerBuff =
-      findNode('//img[contains(@data-tipped,"Death Dealer")]');
-    var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
-    var deathDealer = deathDealerRE.exec($(deathDealerBuff).data('tipped'));
-    var deathDealerPercentage;
-    if (deathDealer) {
-      var deathDealerLevel = deathDealer[1];
-      deathDealerPercentage = Math.min(Math.round(
-        Math.floor(playerKillStreakValue / 5) * deathDealerLevel
-      ) * 0.01, 20);
-    }
-    var deathDealerPercentageElement =
-      findNode('//span[@findme="damagebonus"]');
-    deathDealerPercentageElement.innerHTML = deathDealerPercentage;
-    setValue('lastDeathDealerPercentage', deathDealerPercentage);
+    var impsRem = getImpsRemaining(imp);
+    impDiv.className = getImpWarningStyle(impsRem);
+    impRemainingSpan.textContent = impsRem.toString();
   }
 
-  function getLastValue(pref) {
-    var val = getValue(pref);
-    if (isUndefined(val)) {
-      setValue(pref, 0);
-      val = 0;
+  function hideImpWarning() {
+    if (impDiv) {
+      toggleForce(impDiv, true);
     }
-    return val;
   }
 
-  function getTrackText(trackKillStreak) { // Legacy
-    if (trackKillStreak) {return 'ON';}
-    return 'off';
-  }
-
-  function notMaxDd(lastDeathDealerPercentage, lastKillStreak) {
-    var trackKillStreak = getValue('trackKillStreak');
-    var trackText = getTrackText(trackKillStreak);
-    if (!trackKillStreak) {
-      return '<tr><td style="font-size:small; color:' +
-        'navy" nowrap>KillStreak tracker disabled. <span style="' +
-        'font-size:xx-small">Track: <span id=Helper:toggleKS' +
-        'tracker style="color:navy;cursor:pointer;text-' +
-        'decoration:underline;" title="Click to toggle">' +
-        trackText + '</span></span></td></tr>';
+  function impWarning(containerDiv, imp, dd) {
+    if (imp || dd) {
+      hasImp(containerDiv, imp);
+    } else {
+      hideImpWarning();
     }
-    retryAjax('index.php?no_mobile=1&cmd=profile').done(getKillStreak);
-    return '<tr><td style="font-size:small; color:' +
-      'navy" nowrap>KillStreak: <span findme="killstreak">' +
-      addCommas(lastKillStreak) + '</span> Damage bonus' +
-      ': <span findme="damagebonus">' +
-      Math.round(lastDeathDealerPercentage * 100) / 100 +
-      '</span>%&nbsp;<span style="font-size:xx-small">Track: ' +
-      '<span id=Helper:toggleKStracker style="color:navy;' +
-      'cursor:pointer;text-decoration:underline;" title="Click' +
-      ' to toggle">' + trackText + '</span></span></td></tr>';
   }
 
-  function doDeathDealer(impsRem) { // Legacy
-    var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
-    var lastKillStreak = getLastValue('lastKillStreak');
-    if (impsRem > 0 && lastDeathDealerPercentage === 20) {
-      return '<tr><td style="font-size:small; color:black"' +
-        '>Kill Streak: <span findme="killstreak">&gt;' +
-        addCommas(lastKillStreak) + '</span> Damage bonus: <' +
-        'span findme="damagebonus">20</span>%</td></tr>';
+  function titanKs() {
+    var dynamic = GameData.realm().dynamic;
+    return Array.isArray(dynamic) && dynamic.some(function(el) {
+      return el.type === 0;
+    });
+  }
+
+  var cdDiv;
+  var cooldownSpan;
+
+  function initCdDiv(containerDiv, cd) {
+    cdDiv = containerDiv.children[5];
+    cdDiv.textContent = 'Teleport Cooldown: ';
+    cooldownSpan = textSpan(cd.toString());
+    insertElement(cdDiv, cooldownSpan);
+  }
+
+  function hasCd(containerDiv, cd) {
+    if (cdDiv) {
+      toggleForce(cdDiv, false);
+    } else {
+      initCdDiv(containerDiv, cd);
     }
-    return notMaxDd(lastDeathDealerPercentage, lastKillStreak);
   }
 
-  function getImpHp(hasDd, impsRem) { // Legacy - Old Map
-    var ret = impWarning(impsRem);
-    if (hasDd) {
-      ret += doDeathDealer(impsRem);
+  function hideCd() {
+    if (cdDiv) {
+      toggleForce(cdDiv, true);
     }
-    return ret;
   }
 
-  function findImps(hasDd, hasSsi, impsRem) { // Legacy - Old Map
-    if (hasDd || hasSsi) {
-      return getImpHp(hasDd, impsRem);
-    }
-    return '';
-  }
-
-  var re = /(\d+) HP remaining/;
-
-  function getImpsRemaining(hasSsi) { // Legacy - Old Map
-    var impsRem = 0;
-    if (hasSsi) {
-      var textToTest = $(hasSsi).data('tipped');
-      var impsRemainingRE = re.exec(textToTest);
-      impsRem = Number(impsRemainingRE[1]);
-    }
-    return impsRem;
-  }
-
-  function getCaLvl(hasCounterAttack) { // Legacy
-    var counterAttackLevel;
-    if (hasCounterAttack.getAttribute('src').search('/skills/') !== -1) {
-      var onmouseover = $(hasCounterAttack).data('tipped');
-      var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
-      var counterAttack = counterAttackRE.exec(onmouseover);
-      if (counterAttack) {
-        counterAttackLevel = counterAttack[1];
+  function doCountdown(secs) {
+    if (cooldownSpan) {
+      cooldownSpan.textContent = secs.toString();
+      if (secs > 0) {
+        setTimeout(doCountdown, 1000, secs - 1);
       }
     }
-    return '<tr><td style="font-size:small; color:' +
-      'blue">CA' + counterAttackLevel + ' active</td></tr>';
   }
 
-  function hasCA() { // Legacy
-    var replacementText = '';
-    var hasCounterAttack = findNode('//img[contains(@src,"/54_sm.gif")]');
-    if (hasCounterAttack) {
-      replacementText += getCaLvl(hasCounterAttack);
+  function tpCooldown(containerDiv, cd) {
+    if (cd) {
+      hasCd(containerDiv, cd);
+    } else {
+      hideCd();
     }
-    return replacementText;
   }
 
-  var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
+  var dd;
+  var dbl;
+  var ca;
+  var imp;
+  var cd;
+  var titanActive;
+  var ks;
 
-  function doublerLvl(onmouseover) { // Legacy
-    var doubler = doublerRE.exec(onmouseover);
-    if (doubler) {return doubler[1];}
+  function initVars() {
+    dd = getBuff$1('Death Dealer');
+    dbl = getBuff$1('Doubler');
+    ca = getBuff$1('Counter Attack');
+    imp = getBuff$1('Summon Shield Imp');
+    cd = getCooldown();
+    titanActive = titanKs();
+    ks = GameData.player().killStreak;
   }
 
-  function getDoublerLevel(hasDoubler) { // Legacy
-    var doublerLevel;
-    if (hasDoubler.getAttribute('src').search('/skills/') !== -1) {
-      var onmouseover = $(hasDoubler).data('tipped');
-      doublerLevel = doublerLvl(onmouseover);
+  function updateBuffInfo() {
+    impIconColour();
+    initVars();
+    var containerDiv = buffInfoDiv([dd, dbl, ca, imp, cd, titanActive]);
+    if (containerDiv) {
+      impWarning(containerDiv, imp, dd);
+      doKs(containerDiv, dd, titanActive, ks);
+      doDeathDealer(containerDiv, dd, ks);
+      doCa(containerDiv, ca);
+      doDbl(containerDiv, dbl);
+      tpCooldown(containerDiv, cd);
     }
-    if (doublerLevel === 200) { // ???
-      return '<tr><td style="font-size:small; color:' +
-        'red">Doubler ' + doublerLevel + ' active</td></tr>';
-    }
-    return '';
   }
 
-  function hasDblr() { // Legacy
-    var hasDoubler = findNode('//img[contains(@src,"/26_sm.gif")]');
-    if (hasDoubler) {
-      return getDoublerLevel(hasDoubler);
-    }
-    return '';
+  function teleportEvent(e, data) {
+    doCountdown(data.player.teleportCooldown);
+  }
+
+  function buffInfo() {
+    updateBuffInfo();
+    $.subscribe(def_playerBuffs + ' ' + def_playerUpdate, updateBuffInfo);
+    $.subscribe(def_teleport, teleportEvent);
+  }
+
+  function toggleBuffInfo() {
+    calf.showBuffInfo = !calf.showBuffInfo;
+    setValue('showBuffInfo', calf.showBuffInfo);
+    updateBuffInfo();
   }
 
   // Taking the Not Save in case they add new enhancements.
@@ -15417,7 +15595,7 @@
 
   function gotCombatLog$1(data) { // jQuery.min
     if (data) {combatLog$1 = data;}
-    $.subscribe('2' + def_suffixSuccessActionResponse, combatResponse);
+    $.subscribe(def_PvE, combatResponse);
   }
 
   function combatLogger() { // jQuery.min
@@ -15496,6 +15674,208 @@
     interceptDoAction();
   }
 
+  // BUGFIX - in case of teleporting in new realm with footprints turned on
+
+  function invalidFootprints() {
+    return window.GameController && GameController.Realm &&
+      !GameController.Realm.footprintTileList;
+  }
+
+  function fixTeleport() {
+    if (invalidFootprints()) {
+      GameController.Realm.footprintTileList = [];
+    }
+  }
+
+  var buttonContainer;
+  var realmLvl;
+  var yourLvl;
+  var formGroup;
+  var quickBuff;
+  var realmMap;
+  var ufsgMap;
+  var soundCheck;
+  var huntCheck;
+
+  function doFormGroup(self) { // jQuery.min
+    $(self).qtip('hide');
+    GameData.doAction(12, 401, {}, 0);
+  }
+
+  function openQuickBuff$1() {
+    openQuickBuffByName(playerName());
+  }
+
+  function openRealmMap() {
+    window.open('index.php?cmd=world&subcmd=map', 'fsMap');
+  }
+
+  function openUfsgMap() {
+    var gameRealm = GameData.realm();
+    window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
+      'mapUfsg');
+  }
+
+  function toggleSound() {
+    // Doesn't actually work in New World...
+    setValue('playNewMessageSound', !getValue('playNewMessageSound'));
+  }
+
+  function toggleHuntMode() {
+    calf.huntingMode = !calf.huntingMode;
+    setValue('huntingMode', calf.huntingMode);
+  }
+
+  var changeHdl = [
+    {
+      test: function(self) {return self === soundCheck;},
+      act: toggleSound
+    },
+    {
+      test: function(self) {return self === huntCheck;},
+      act: toggleHuntMode
+    }
+  ];
+
+  var clickHdl = [
+    {
+      test: function(self) {return self === formGroup;},
+      act: doFormGroup
+    },
+    {
+      test: function(self) {return self === quickBuff;},
+      act: openQuickBuff$1
+    },
+    {
+      test: function(self) {return self === realmMap;},
+      act: openRealmMap
+    },
+    {
+      test: function(self) {return self === ufsgMap;},
+      act: openUfsgMap
+    }
+  ];
+
+  function makeButtonContainer() {
+    return createDiv({
+      className: 'fshCurveContainer',
+      id: 'fshWorldButtonContainer'
+    });
+  }
+
+  function doLevels(worldName) {
+    var lvlDiv = createDiv({className: 'fshFsty'});
+    var topDiv = createDiv({textContent: 'Min Lvl: '});
+    realmLvl = textSpan(GameData.realm().minlevel.toString());
+    insertElement(topDiv, realmLvl);
+    insertElement(lvlDiv, topDiv);
+    var btmDiv = createDiv({textContent: 'Your Lvl: '});
+    yourLvl = textSpan(GameData.player().level.toString());
+    insertElement(btmDiv, yourLvl);
+    insertElement(lvlDiv, btmDiv);
+    insertElement(worldName, lvlDiv);
+  }
+
+  function doBtn(className, tip, worldName) {
+    var btn = createButton({
+      className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
+      dataset: {tipped: tip}
+    });
+    insertElement(worldName, btn);
+    return btn;
+  }
+
+  function showQuickLinks(worldName) {
+    doLevels(worldName);
+    formGroup = doBtn('fshFormGroup', 'Quick Create Attack Group', worldName);
+    quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
+    realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
+    ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
+  }
+
+  function createLbl(className, tip, htmlFor) {
+    return createLabel({
+      className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
+      dataset: {tipped: tip},
+      htmlFor: htmlFor
+    });
+  }
+
+  function makeToggleBtn(o) {
+    var btnDiv = createDiv({className: 'fshToggle'});
+    var btnCheck = createInput({
+      checked: o.prefVal,
+      id: o.checkId,
+      type: 'checkbox'
+    });
+    insertElement(btnDiv, btnCheck);
+    var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
+    insertElement(btnDiv, onLbl);
+    var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
+    insertElement(btnDiv, offLbl);
+    insertElement(o.worldName, btnDiv);
+    return btnCheck;
+  }
+
+  function showSpeakerOnWorld(worldName) {
+    if (getValue('showSpeakerOnWorld')) {
+      var msgSounds = getValue('playNewMessageSound');
+      soundCheck = makeToggleBtn({
+        prefVal: msgSounds,
+        checkId: 'fshSoundCheck',
+        onClass: 'soundOn',
+        onTip: 'Turn Off Sound when you have a new log message',
+        offClass: 'soundOff',
+        offTip: 'Turn On Sound when you have a new log message',
+        worldName: worldName
+      });
+    }
+  }
+
+  function showHuntMode(worldName) {
+    var inHuntMode = calf.huntingMode;
+    huntCheck = makeToggleBtn({
+      prefVal: inHuntMode,
+      checkId: 'fshHuntCheck',
+      onClass: 'huntOn',
+      onTip: 'Hunting mode is ON',
+      offClass: 'huntOff',
+      offTip: 'Hunting mode is OFF',
+      worldName: worldName
+    });
+  }
+
+  function injectButtons() {
+    if (!buttonContainer) {
+      buttonContainer = makeButtonContainer();
+      showQuickLinks(buttonContainer);
+      showSpeakerOnWorld(buttonContainer);
+      showHuntMode(buttonContainer);
+      on(buttonContainer, 'click', eventHandler(clickHdl));
+      on(buttonContainer, 'change', eventHandler(changeHdl));
+      insertElementBefore(buttonContainer, getElementById('worldCoord'));
+    }
+  }
+
+  function realmUpdate(e, data) {
+    if (realmLvl && data.b.minlevel) {
+      fixTeleport();
+      realmLvl.textContent = data.b.minlevel.toString();
+    }
+  }
+
+  function levelStats(e, data) {
+    if (yourLvl) {
+      yourLvl.textContent = data.b;
+    }
+  }
+
+  function initButtons() {
+    injectButtons();
+    $.subscribe(def_realmUpdate, realmUpdate);
+    $.subscribe(def_playerLevel, levelStats);
+  }
+
   var atkStats = '<table class="relicT relicS"><thead>' +
     '<tr><th colspan="2">Adjusted defense values</th></tr></thead><tbody>' +
     '<tr><td>DC225:</td><td id="DC225">0</td></tr>' +
@@ -15550,7 +15930,7 @@
       'defending group and attacking group.</td></tr>' +
     '</tbody></table>';
 
-  var containerDiv;
+  var containerDiv$1;
   var leftDiv;
   var fetchStatsBtn;
   var myDefenders;
@@ -15563,13 +15943,13 @@
 
   function primaryElementsSetup(relicData) {
     defendersSetup(relicData);
-    if (containerDiv) {
-      containerDiv.innerHTML = '';
+    if (containerDiv$1) {
+      containerDiv$1.innerHTML = '';
     } else {
-      containerDiv = createDiv({className: 'body'});
+      containerDiv$1 = createDiv({className: 'body'});
     }
     leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
-    insertElement(containerDiv, leftDiv);
+    insertElement(containerDiv$1, leftDiv);
     if (relicData.is_owner) {
       insertElement(leftDiv, doBuffLinks(myDefenders));
     }
@@ -15579,7 +15959,7 @@
     });
     insertElement(leftDiv, fetchStatsBtn);
     var dialogRelic = getElementById('dialog-relic');
-    insertElement(dialogRelic, containerDiv);
+    insertElement(dialogRelic, containerDiv$1);
   }
 
   var guildMemberList;
@@ -15642,7 +16022,7 @@
         guildMemberList[key].id + '">' + key + '</a>');
       return prev;
     }, []);
-    insertHtmlBeforeEnd(containerDiv,
+    insertHtmlBeforeEnd(containerDiv$1,
       '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
       '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
       '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
@@ -15694,13 +16074,13 @@
       className: 'fshFloatLeft fshRelicMidDiv',
       innerHTML: defStats
     });
-    insertElement(containerDiv, midDiv);
+    insertElement(containerDiv$1, midDiv);
     setDefVars();
     var rightDiv = createDiv({
       className: 'fshFloatLeft fshRelicRightDiv',
       innerHTML: atkStats
     });
-    insertElement(containerDiv, rightDiv);
+    insertElement(containerDiv$1, rightDiv);
     setAtkVars();
   }
 
@@ -16022,21 +16402,8 @@
   }
 
   function injectRelic() {
-    $.subscribe('9' + def_suffixSuccessActionResponse, viewRelic);
+    $.subscribe(def_relicView, viewRelic);
   }
-
-  var colorHash = {
-    '0': 'red', // Should never see this.
-    '1': 'orange',
-    '2': 'yellow'
-  };
-
-  var bias = {
-    '0': {generalVariable: 1.1053, hpVariable: 1.1},
-    '1': {generalVariable: 1.1, hpVariable: 1.053},
-    '2': {generalVariable: 1.053, hpVariable: 1},
-    '3': {generalVariable: 1.1053, hpVariable: 1}
-  };
 
   /*
     colSpan = attributes[0]
@@ -16084,7 +16451,7 @@
   var statusText;
   var cooldownText;
 
-  function initVars() {
+  function initVars$1() {
     currentHp = createSpan();
     maxHp = createSpan();
     guildKills = createSpan();
@@ -16166,8 +16533,8 @@
       toggleForce(titanDiv, false);
     } else {
       var actCont = getElementById('actionContainer');
-      titanDiv = createDiv({className: 'titanInfo'});
-      initVars();
+      titanDiv = createDiv({className: 'fshActionBox titanInfo'});
+      initVars$1();
       buildTitanInfoTable();
       insertElement(titanDiv, titanTbl);
       insertElement(actCont, titanDiv);
@@ -16275,10 +16642,10 @@
     }
   }
 
-  function titanStats(data) {
-    if (data.realm.dynamic) {
-      setRealm(data.realm.name);
-      testDynamics(data.realm.dynamic);
+  function titanStats(realm) {
+    if (realm.dynamic) {
+      setRealm(realm.name);
+      testDynamics(realm.dynamic);
     }
   }
 
@@ -16288,227 +16655,24 @@
     testDynamics(GameData.realm().dynamic);
   }
 
-  var buttonContainer;
-  var yourLvl;
-  var formGroup;
-  var quickBuff;
-  var realmMap;
-  var ufsgMap;
-  var soundCheck;
-  var huntCheck;
-
-  function doFormGroup(self) { // jQuery.min
-    $(self).qtip('hide');
-    GameData.doAction(12, 401, {}, 0);
-  }
-
-  function openQuickBuff$1() {
-    openQuickBuffByName(playerName());
-  }
-
-  function openRealmMap() {
-    window.open('index.php?cmd=world&subcmd=map', 'fsMap');
-  }
-
-  function openUfsgMap() {
-    var gameRealm = GameData.realm();
-    window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
-      'mapUfsg');
-  }
-
-  function toggleSound() {
-    // Doesn't actually work in New World...
-    setValue('playNewMessageSound', !getValue('playNewMessageSound'));
-  }
-
-  function toggleHuntMode() {
-    calf.huntingMode = !calf.huntingMode;
-    setValue('huntingMode', calf.huntingMode);
-  }
-
-  var changeHdl = [
-    {
-      test: function(self) {return self === soundCheck;},
-      act: toggleSound
-    },
-    {
-      test: function(self) {return self === huntCheck;},
-      act: toggleHuntMode
-    }
-  ];
-
-  var clickHdl = [
-    {
-      test: function(self) {return self === formGroup;},
-      act: doFormGroup
-    },
-    {
-      test: function(self) {return self === quickBuff;},
-      act: openQuickBuff$1
-    },
-    {
-      test: function(self) {return self === realmMap;},
-      act: openRealmMap
-    },
-    {
-      test: function(self) {return self === ufsgMap;},
-      act: openUfsgMap
-    }
-  ];
-
-  function fixTeleport() {
-    if (window.GameController && GameController.Realm) {
-      GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
-    }
-  }
-
-  function makeButtonContainer() {
-    if (buttonContainer) {buttonContainer.remove();}
-    return createDiv({
-      className: 'fshCurveContainer',
-      id: 'fshWorldButtonContainer'
-    });
-  }
-
-  function doLevels(data, worldName) {
-    var lvlDiv = createDiv({
-      className: 'fshFsty',
-      innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
-    });
-    var btmDiv = createDiv({textContent: 'Your Lvl: '});
-    yourLvl = textSpan(data.player.level.toString());
-    insertElement(btmDiv, yourLvl);
-    insertElement(lvlDiv, btmDiv);
-    insertElement(worldName, lvlDiv);
-  }
-
-  function doBtn(className, tip, worldName) {
-    var btn = createButton({
-      className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
-      dataset: {tipped: tip}
-    });
-    insertElement(worldName, btn);
-    return btn;
-  }
-
-  function showQuickLinks(worldName, data) {
-    doLevels(data, worldName);
-    formGroup = doBtn('fshFormGroup', 'Quick Create Attack Group', worldName);
-    quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
-    realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
-    ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
-  }
-
-  function createLbl(className, tip, htmlFor) {
-    return createLabel({
-      className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
-      dataset: {tipped: tip},
-      htmlFor: htmlFor
-    });
-  }
-
-  function makeToggleBtn(o) {
-    var btnDiv = createDiv({className: 'fshToggle'});
-    var btnCheck = createInput({
-      checked: o.prefVal,
-      id: o.checkId,
-      type: 'checkbox'
-    });
-    insertElement(btnDiv, btnCheck);
-    var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
-    insertElement(btnDiv, onLbl);
-    var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
-    insertElement(btnDiv, offLbl);
-    insertElement(o.worldName, btnDiv);
-    return btnCheck;
-  }
-
-  function showSpeakerOnWorld(worldName) {
-    if (getValue('showSpeakerOnWorld')) {
-      var msgSounds = getValue('playNewMessageSound');
-      soundCheck = makeToggleBtn({
-        prefVal: msgSounds,
-        checkId: 'fshSoundCheck',
-        onClass: 'soundOn',
-        onTip: 'Turn Off Sound when you have a new log message',
-        offClass: 'soundOff',
-        offTip: 'Turn On Sound when you have a new log message',
-        worldName: worldName
-      });
-    }
-  }
-
-  function showHuntMode(worldName) {
-    var inHuntMode = calf.huntingMode;
-    huntCheck = makeToggleBtn({
-      prefVal: inHuntMode,
-      checkId: 'fshHuntCheck',
-      onClass: 'huntOn',
-      onTip: 'Hunting mode is ON',
-      offClass: 'huntOff',
-      offTip: 'Hunting mode is OFF',
-      worldName: worldName
-    });
-  }
-
-  function injectButtons(data) {
-    fixTeleport();
-    buttonContainer = makeButtonContainer();
-    showQuickLinks(buttonContainer, data);
-    showSpeakerOnWorld(buttonContainer);
-    showHuntMode(buttonContainer);
-    on(buttonContainer, 'click', eventHandler(clickHdl));
-    on(buttonContainer, 'change', eventHandler(changeHdl));
-    getElementById('worldContainer')
-      .insertBefore(buttonContainer, getElementById('worldCoord'));
-  }
-
-  function levelStats(e, data) {
-    if (yourLvl) {
-      yourLvl.textContent = data.b;
-    }
-  }
-
-  function fixDebuffQTip(e) { // jQuery.min
-    $(e.target).qtip('hide');
-  }
-
   function hazRealm(data) {
     return data.realm && data.realm.name;
   }
 
-  function injectWorldNewMap(data) {
-    updateSendGoldOnWorld(data);
+  function injectWorldNewMap(e, data) {
     if (hazRealm(data)) {
-      injectButtons(data);
-      titanStats(data);
-      on(getElementById('buffList'), 'click', fixDebuffQTip);
-      if (calf.hideSubLvlCreature) {GameData.fetch(256);}
-    }
-  }
-
-  function impIconColour() { // jQuery
-    var imp = $('#actionlist-shield-imp');
-    if (imp.length === 1) {
-      imp.css('background-color',
-        colorHash[imp.text()] || '#ad8043');
+      titanStats(data.realm);
     }
   }
 
   function onWorld() {
-    injectSendGoldOnWorld();
     if (window.initialGameData) {// HCS initial data
-      injectWorldNewMap(window.initialGameData);
-      impIconColour(null,
-        {b: window.initialGameData.player.buffs});
+      injectWorldNewMap(null, window.initialGameData);
     }
-    $.subscribe('-1' + def_suffixSuccessActionResponse +
-                ' 5' + def_suffixSuccessActionResponse,
-    function(e, data) { // change of information
-      injectWorldNewMap(data);
-    });
-    $.subscribe(def_playerBuffs, impIconColour);
-    $.subscribe('level.stats-player', levelStats);
+    $.subscribe(
+      def_refreshActionList + ' ' + def_stairway,
+      injectWorldNewMap // change of information
+    );
   }
 
   var shoppingData;
@@ -16602,7 +16766,7 @@
   }
 
   function prepareShop() {
-    $.subscribe('prompt.worldDialogShop', worldDialogShop);
+    $.subscribe(def_shopPrompt, worldDialogShop);
   }
 
   var showCreatureInfo;
@@ -17593,30 +17757,21 @@
   }
 
   function viewCreature() {
-    $.subscribe('1' + def_suffixSuccessActionResponse, processCreature);
+    $.subscribe(def_viewCreature, processCreature);
   }
 
   var huntingBuffs$1;
   var huntingBuffsName;
-  var buffLookup = {
-    '1': function() {
-      huntingBuffs$1 = calf.buffs;
-      huntingBuffsName = calf.buffsName;
-    },
-    '2': function() {
-      huntingBuffs$1 = calf.buffs2;
-      huntingBuffsName = calf.buffs2Name;
-    },
-    '3': function() {
-      huntingBuffs$1 = calf.buffs3;
-      huntingBuffsName = calf.buffs3Name;
-    }
-  };
 
   function setCurrentBuffList() {
-    var tmpFn = buffLookup[calf.enabledHuntingMode];
-    if (isFunction(tmpFn)) {
-      tmpFn();
+    var lookup = [, // eslint-disable-line no-sparse-arrays
+      [calf.buffs, calf.buffsName],
+      [calf.buffs2, calf.buffs2Name],
+      [calf.buffs3, calf.buffs3Name]
+    ][calf.enabledHuntingMode];
+    if (Array.isArray(lookup)) {
+      huntingBuffs$1 = lookup[0];
+      huntingBuffsName = lookup[1];
     }
   }
 
@@ -17625,7 +17780,7 @@
     calf.enabledHuntingMode = e.target.value;
     setValue('enabledHuntingMode', calf.enabledHuntingMode);
     setCurrentBuffList();
-    GameData.fetch(16);
+    GameData.fetch(def_fetch_playerBuffs);
   }
 
   var hidePlayerActions;
@@ -17633,7 +17788,7 @@
   function toggleHidePlayerActions() {
     hidePlayerActions = !hidePlayerActions;
     setValue('hidePlayerActions', hidePlayerActions);
-    GameData.fetch(256);
+    GameData.fetch(def_fetch_worldRealmActions);
   }
 
   function doHidePlayerActions() {
@@ -17657,13 +17812,13 @@
   function toggleShowHuntingBuffs() {
     calf.showBuffs = !calf.showBuffs;
     setValue('showHuntingBuffs', calf.showBuffs);
-    GameData.fetch(16);
+    GameData.fetch(def_fetch_playerBuffs);
   }
 
   function toggleSubLvlCreature() {
     calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
     setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
-    GameData.fetch(256);
+    GameData.fetch(def_fetch_worldRealmActions);
   }
 
   var fshEvents = {
@@ -17672,7 +17827,8 @@
     showCreatureInfo: toggleShowCreatureInfo,
     showHuntingBuffs: toggleShowHuntingBuffs,
     showMonsterLog: toggleShowMonsterLog,
-    showTitanInfo: toggleShowTitanInfo
+    showTitanInfo: toggleShowTitanInfo,
+    showBuffInfo: toggleBuffInfo
   };
 
   function prefsClickEvent(e) {
@@ -17690,6 +17846,7 @@
       innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
         simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
         simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('showBuffInfo') +
         '<br>' +
         simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
         simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
@@ -17756,6 +17913,13 @@
     }
   }
 
+  var bias = [
+    {generalVariable: 1.1053, hpVariable: 1.1},
+    {generalVariable: 1.1, hpVariable: 1.053},
+    {generalVariable: 1.053, hpVariable: 1},
+    {generalVariable: 1.1053, hpVariable: 1}
+  ];
+
   function getBiasGeneral(combatEvaluatorBias) {
     if (bias[combatEvaluatorBias]) {
       return bias[combatEvaluatorBias].generalVariable;
@@ -17780,24 +17944,28 @@
     return a & b; // eslint-disable-line no-bitwise
   }
 
-  var testActions = [
-    function(myData) {return !myData;},
-    function(myData) {return !myData.actions;},
-    function(myData) {return myData.actions.length === 0;}
-  ];
+  function noAction(myData) {
+    return !myData || !myData.actions || myData.actions.length === 0;
+  }
+
+  function subLvlMobs(realmLevel, el) {
+    if (el.type === 6) {
+      return el.data.creature_type !== 0 || el.data.level >= realmLevel;
+    }
+    return true;
+  }
+
+  function getLvlToTest(myData) {
+    return myData.realm && myData.realm.minlevel || GameData.realm().minlevel;
+  }
 
   function xhrDataFilter(data) {
     var myData = jsonParse(data);
-    if (testActions.some(function(el) {return el(myData);})) {return data;}
-    var realm = GameData.realm();
-    myData.actions = myData.actions.filter(function(el) {
-      if (el.type === 6) {
-        return el.data.creature_type !== 0 || el.data.level >= realm.minlevel;
-      }
-      return true;
-    });
-    var ret = JSON.stringify(myData);
-    return ret;
+    if (noAction(myData)) {return data;}
+    myData.actions = myData.actions.filter(
+      partial(subLvlMobs, getLvlToTest(myData))
+    );
+    return JSON.stringify(myData);
   }
 
   function isActionList(originalOptions) {
@@ -17814,6 +17982,7 @@
 
   function interceptXHR() { // jQuery.min
     $.ajaxPrefilter('JSON', xhrPreFilter);
+    GameData.fetch(def_fetch_worldRealmActions);
   }
 
   function getPrefs$1() {
@@ -17828,6 +17997,7 @@
     calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
     calf.showBuffs = getValue('showHuntingBuffs');
     calf.showTitanInfo = getValue('showTitanInfo');
+    calf.showBuffInfo = getValue('showBuffInfo');
   }
 
   function worldPrefs() {
@@ -17877,23 +18047,38 @@
   }
 
   function doRepair$1(e, key) {
-    if (key === 'ACT_REPAIR') {GameData.fetch(402);}
+    if (key === 'ACT_REPAIR') {
+      GameData.fetch(
+        def_fetch_playerBackpackCount +
+        def_fetch_playerBuffs +
+        def_fetch_worldRealmDynamic +
+        def_fetch_worldRealmActions
+      );
+    }
+  }
+
+  function fixDebuffQTip(e) { // jQuery.min
+    $(e.target).qtip('hide');
   }
 
   function subscribes() { // jQuery.min
     worldPrefs();
+    injectSendGoldOnWorld();
     viewCreature();
     hideGroupButton(); // Hide Create Group button
     doMonsterColors();
     doNotKill(); // add do-not-kill list functionality
     startMonsterLog(); // add monster log functionality
-    $.subscribe('keydown.controls', doRepair$1);
+    $.subscribe(def_controlsKeydown, doRepair$1);
     combatLogger();
-    onWorld(); // on world
+    onWorld();
     prepareShop();
     injectRelic();
     $('#messageCenter').worldMessageCenter({offset: '0 60'});
     $('#mapTooltip').qtip('hide');
+    initButtons();
+    buffInfo();
+    on(getElementById('buffList'), 'click', fixDebuffQTip);
   }
 
   // -1 = world page
@@ -17915,84 +18100,12 @@
   // 17 = login
   // 18 = username not found
 
-  function recastImpAndRefresh(responseText) { // Legacy
-    var doc = createDocument(responseText);
-    if (doc) {
-      location.reload();
-    }
-  }
-
-  function doRecast(impHref) {
-    retryAjax(impHref).done(recastImpAndRefresh);
-  }
-
-  function toggle() {
-    setValue('trackKillStreak', !getValue('trackKillStreak'));
-    location.reload();
-  }
-
-  function toggleKsTracker() { // Legacy
-    var trackKS = getElementById('Helper:toggleKStracker');
-    if (trackKS) {
-      on(trackKS, 'click', toggle, true);
-    }
-  }
-
-  function canRecast(hasDd, hasSsi, impsRem) {
-    return (hasDd || hasSsi) && impsRem === 0;
-  }
-
-  function impRecast(hasDd, hasSsi, impsRem) { // Legacy - Old Map
-    if (canRecast(hasDd, hasSsi, impsRem)) {
-      var fshRecastImpAndRefresh = getElementById('Helper:recastImpAndRefresh');
-      var impHref = 'index.php?no_mobile=1&cmd=quickbuff&subcmd=activate&target' +
-        'Players=' + $('dt.stat-name:first').next().text().replace(/,/g, '') +
-        '&skills%5B%5D=55';
-      on(fshRecastImpAndRefresh, 'click', partial(doRecast, impHref), true);
-    }
-  }
-
-  function injectOldMap() { // Legacy - Old Map
-    // extra world screen text
-    var replacementText = '<td background="' + imageServer +
-      '/skin/realm_right_bg.jpg"><table align="right" cellpadding="1" ' +
-      'style="width:270px;margin-left:38px;margin-right:38px;font-size' +
-      ':medium; border-spacing: 1px; border-collapse: collapse;"><tr><' +
-      'td colspan="2" height="10"></td></tr><tr>';
-    var hasShieldImp = findNode('//img[contains(@src,"/55_sm.gif")]');
-    var hasDeathDealer = findNode('//img[contains(@src,"/50_sm.gif")]');
-    var impsRemaining = getImpsRemaining(hasShieldImp);
-    replacementText += findImps(hasDeathDealer, hasShieldImp, impsRemaining);
-    replacementText += hasCA();
-    replacementText += hasDblr();
-    if (calf.huntingMode) {
-      replacementText += '<tr><td style="font-size: small; color:red">' +
-        'Hunting mode enabled</td></tr>';
-    }
-    replacementText += '<tr><td colspan="2" height="10"></td></tr>';
-    replacementText += '</td>';
-
-    var injectHere = findNode('//div[table[@class="centered" ' +
-      'and @style="width: 270px;"]]');
-    if (!injectHere) {return;}
-    // insert after kill all monsters image and text
-    var newSpan = createDiv({innerHTML: replacementText});
-    insertElement(injectHere, newSpan);
-
-    impRecast(hasDeathDealer, hasShieldImp, impsRemaining);
-    toggleKsTracker();
-  }
-
-  function oldOrNew() {
-    if (getElementById('worldPage') && window.GameData) { // new map
-      subscribes();
-    } else { // not new map.
-      injectOldMap();
-    }
+  function isNewMap() {
+    return jQueryPresent() && getElementById('worldPage') && window.GameData;
   }
 
   function injectWorld() {
-    if (jQueryPresent()) {oldOrNew();}
+    if (isNewMap()) {subscribes();}
   }
 
   function doinvent(recipe) {
@@ -19909,7 +20022,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '46';
+  window.FSH.calf = '47';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

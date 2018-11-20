@@ -3,7 +3,8 @@ import {log} from './debug';
 import playerId from '../common/playerId';
 
 var times = {};
-var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
+var refAry = ['pagereboot.com', 'refreshthing.com', 'refreshthis.com',
+  'lazywebtools.co.uk'];
 
 function isAuto() {
   var docRef = document.referrer

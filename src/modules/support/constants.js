@@ -35,9 +35,22 @@ export var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 export var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
 export var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
+
 export var def_afterUpdateActionlist = 'after-update.actionlist';
 export var def_playerBuffs = 'buffs.player';
+export var def_playerUpdate = 'update.player';
+export var def_playerLevel = 'level.stats-player';
+export var def_shopPrompt = 'prompt.worldDialogShop';
+export var def_controlsKeydown = 'keydown.controls';
+export var def_realmUpdate = 'update.realm';
+
 export var def_suffixSuccessActionResponse = '-success.action-response';
+export var def_refreshActionList = '-1' + def_suffixSuccessActionResponse;
+export var def_viewCreature = '1' + def_suffixSuccessActionResponse;
+export var def_PvE = '2' + def_suffixSuccessActionResponse;
+export var def_relicView = '9' + def_suffixSuccessActionResponse;
+export var def_stairway = '5' + def_suffixSuccessActionResponse;
+export var def_teleport = '25' + def_suffixSuccessActionResponse;
 
 export var def_creatureCombat = 2;
 export var def_repairAll = 15;

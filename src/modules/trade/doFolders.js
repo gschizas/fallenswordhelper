@@ -22,7 +22,7 @@ function getItemDiv() {
       oldItems[0].classList.add('fshBlock');
       insertElement(itemDiv, oldItems[0]);
     }
-    itemList.parentNode.insertBefore(itemDiv, itemList);
+    insertElementBefore(itemDiv, itemList);
   }
   return itemDiv;
 }

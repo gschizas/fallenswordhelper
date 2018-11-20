@@ -110,6 +110,11 @@ function guideLink(aRow) {
   });
   insertElement(myLink, myImg);
   insertElement(aRow.cells[0], myLink);
+
+  var realmCell = aRow.cells[1];
+  var realmName = realmCell.textContent;
+  realmCell.innerHTML = '<a href="' + guideUrl + 'realms&search_name=' +
+    realmName + '" target="_blank">' + realmName + '</a>';
 }
 
 function gotOldTitans(oldTitans) {

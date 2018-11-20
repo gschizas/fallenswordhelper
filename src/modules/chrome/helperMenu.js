@@ -10,6 +10,7 @@ import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertElement from '../common/insertElement';
+import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../quickExtract';
 import insertQuickWear from '../quickWear/quickWear';
@@ -41,8 +42,6 @@ var helperMenuBlob =
   '</ul><h3>FSH developer quick links</h3><ul>' +
   '<li><span class="a-reply" target_player="PointyHair">PM</span> ' +
   '<a href="index.php?cmd=profile&player_id=1963510">PointyHair</a></li>' +
-  '<li><span class="a-reply" target_player="yuuzhan">PM</span> ' +
-  '<a href="index.php?cmd=profile&player_id=1599987">yuuzhan</a></li>' +
   '</ul></div>';
 
 function toggleMenu(evt) {
@@ -115,7 +114,7 @@ function haveNode(node) {
     helperMenu.classList.add('fshMove');
     draggable(helperMenu);
   }
-  node.parentNode.insertBefore(helperMenu, node);
+  insertElementBefore(helperMenu, node);
 }
 
 export default function injectHelperMenu() {
