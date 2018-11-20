@@ -2,6 +2,7 @@ import add from '../../support/task';
 import batch from '../../common/batch';
 import getMembrList from '../../ajax/getMembrList';
 import getValue from '../../system/getValue';
+import insertElementBefore from '../../common/insertElementBefore';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
@@ -40,7 +41,7 @@ function overrideUpDown(evt, val) {
   var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
   rankPosition(val.toLowerCase(), matchRankId[1]);
   var injectRow = parentTable.rows[targetRowNum];
-  parentTable.insertBefore(thisRankRow, injectRow);
+  insertElementBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(val);
   window.scrollBy(0, pxScroll);
   evt.stopPropagation();

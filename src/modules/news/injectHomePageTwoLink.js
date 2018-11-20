@@ -2,6 +2,7 @@ import {createAnchor} from '../common/cElement';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
+import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
@@ -76,7 +77,7 @@ function addUfsgLinks() {
       href: guideUrl + 'creatures&search_name=' + myName,
       target: '_blank'
     });
-    img.parentNode.insertBefore(myLink, img);
+    insertElementBefore(myLink, img);
     insertElement(myLink, img);
   });
 }

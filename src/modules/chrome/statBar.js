@@ -1,6 +1,7 @@
 import {createAnchor} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
+import insertElementBefore from '../common/insertElementBefore';
 import on from '../common/on';
 
 function statbarWrapper(href, id) {
@@ -8,7 +9,7 @@ function statbarWrapper(href, id) {
   var character = getElementById(id);
   var statWrapper = character.parentNode;
   insertElement(myWrapper, character);
-  statWrapper.insertBefore(myWrapper, statWrapper.firstChild);
+  insertElementBefore(myWrapper, statWrapper.firstChild);
   on(myWrapper, 'click', function(evt) {
     evt.stopPropagation();
   }, true);
