@@ -1,22 +1,29 @@
-import calf from '../../support/calf';
-import eventHandler from '../../common/eventHandler';
-import {getElementById} from '../../common/getElement';
-import getValue from '../../system/getValue';
-import {guideUrl} from '../../support/constants';
-import insertElement from '../../common/insertElement';
-import on from '../../common/on';
-import openQuickBuffByName from '../../common/openQuickBuffByName';
-import playerName from '../../common/playerName';
-import setValue from '../../system/setValue';
+import calf from '../../../support/calf';
+import eventHandler from '../../../common/eventHandler';
+import fixTeleport from './fixTeleport';
+import {getElementById} from '../../../common/getElement';
+import getValue from '../../../system/getValue';
+import insertElement from '../../../common/insertElement';
+import insertElementBefore from '../../../common/insertElementBefore';
+import on from '../../../common/on';
+import openQuickBuffByName from '../../../common/openQuickBuffByName';
+import playerName from '../../../common/playerName';
+import setValue from '../../../system/setValue';
 import {
   createButton,
   createDiv,
   createInput,
   createLabel,
   textSpan
-} from '../../common/cElement';
+} from '../../../common/cElement';
+import {
+  def_playerLevel,
+  def_realmUpdate,
+  guideUrl
+} from '../../../support/constants';
 
 var buttonContainer;
+var realmLvl;
 var yourLvl;
 var formGroup;
 var quickBuff;
@@ -84,27 +91,21 @@ var clickHdl = [
   }
 ];
 
-function fixTeleport() {
-  if (window.GameController && GameController.Realm) {
-    GameController.Realm.footprintTileList = []; // BUGFIX - in case of teleporting in new realm with footprints turned on
-  }
-}
-
 function makeButtonContainer() {
-  if (buttonContainer) {buttonContainer.remove();}
   return createDiv({
     className: 'fshCurveContainer',
     id: 'fshWorldButtonContainer'
   });
 }
 
-function doLevels(data, worldName) {
-  var lvlDiv = createDiv({
-    className: 'fshFsty',
-    innerHTML: '<div>Min Lvl: ' + data.realm.minlevel + '</div>'
-  });
+function doLevels(worldName) {
+  var lvlDiv = createDiv({className: 'fshFsty'});
+  var topDiv = createDiv({textContent: 'Min Lvl: '});
+  realmLvl = textSpan(GameData.realm().minlevel.toString());
+  insertElement(topDiv, realmLvl);
+  insertElement(lvlDiv, topDiv);
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
-  yourLvl = textSpan(data.player.level.toString());
+  yourLvl = textSpan(GameData.player().level.toString());
   insertElement(btmDiv, yourLvl);
   insertElement(lvlDiv, btmDiv);
   insertElement(worldName, lvlDiv);
@@ -119,8 +120,8 @@ function doBtn(className, tip, worldName) {
   return btn;
 }
 
-function showQuickLinks(worldName, data) {
-  doLevels(data, worldName);
+function showQuickLinks(worldName) {
+  doLevels(worldName);
   formGroup = doBtn('fshFormGroup', 'Quick Create Attack Group', worldName);
   quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
   realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
@@ -179,20 +180,33 @@ function showHuntMode(worldName) {
   });
 }
 
-export function injectButtons(data) {
-  fixTeleport();
-  buttonContainer = makeButtonContainer();
-  showQuickLinks(buttonContainer, data);
-  showSpeakerOnWorld(buttonContainer);
-  showHuntMode(buttonContainer);
-  on(buttonContainer, 'click', eventHandler(clickHdl));
-  on(buttonContainer, 'change', eventHandler(changeHdl));
-  getElementById('worldContainer')
-    .insertBefore(buttonContainer, getElementById('worldCoord'));
+function injectButtons() {
+  if (!buttonContainer) {
+    buttonContainer = makeButtonContainer();
+    showQuickLinks(buttonContainer);
+    showSpeakerOnWorld(buttonContainer);
+    showHuntMode(buttonContainer);
+    on(buttonContainer, 'click', eventHandler(clickHdl));
+    on(buttonContainer, 'change', eventHandler(changeHdl));
+    insertElementBefore(buttonContainer, getElementById('worldCoord'));
+  }
 }
 
-export function levelStats(e, data) {
+function realmUpdate(e, data) {
+  if (realmLvl && data.b.minlevel) {
+    fixTeleport();
+    realmLvl.textContent = data.b.minlevel.toString();
+  }
+}
+
+function levelStats(e, data) {
   if (yourLvl) {
     yourLvl.textContent = data.b;
   }
+}
+
+export default function initButtons() {
+  injectButtons();
+  $.subscribe(def_realmUpdate, realmUpdate);
+  $.subscribe(def_playerLevel, levelStats);
 }

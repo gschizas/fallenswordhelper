@@ -1,5 +1,5 @@
 import createDocument from '../../../system/createDocument';
-import {def_suffixSuccessActionResponse} from '../../../support/constants';
+import {def_relicView} from '../../../support/constants';
 import getGroupStats from '../../../ajax/getGroupStats';
 import getMercStats from '../../../ajax/getMercStats';
 import getProfile from '../../../ajax/getProfile';
@@ -93,5 +93,5 @@ function viewRelic(e, data) {
 }
 
 export default function injectRelic() {
-  $.subscribe('9' + def_suffixSuccessActionResponse, viewRelic);
+  $.subscribe(def_relicView, viewRelic);
 }

@@ -1,9 +1,9 @@
 import buildFshDivs from './buildFshDivs';
 import calf from '../../../support/calf';
 import doHuntingBuffs from './doHuntingBuffs';
-import getCombatBias from '../getCombatBias';
+import getCombatBias from './getCombatBias';
 import getValue from '../../../system/getValue';
-import interceptXHR from '../interceptXHR';
+import interceptXHR from './interceptXHR';
 import {prepareHidePlayerActions} from '../prepareHidePlayerActions';
 import shouldBeArray from '../../../system/shouldBeArray';
 
@@ -19,6 +19,7 @@ function getPrefs() {
   calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
   calf.showBuffs = getValue('showHuntingBuffs');
   calf.showTitanInfo = getValue('showTitanInfo');
+  calf.showBuffInfo = getValue('showBuffInfo');
 }
 
 export default function worldPrefs() {

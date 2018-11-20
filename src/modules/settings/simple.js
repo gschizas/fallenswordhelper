@@ -313,5 +313,9 @@ export default {
   highlightPvpProtection: {
     helpTitle: 'Highlight Pvp Protection',
     helpText: 'If enabled, will put a red box around PvP Protection.'
+  },
+  showBuffInfo: {
+    helpTitle: 'Show Buff Info',
+    helpText: 'This will show buff info in the action list.',
   }
 };

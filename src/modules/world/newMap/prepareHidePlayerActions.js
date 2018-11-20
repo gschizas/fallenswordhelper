@@ -1,14 +1,17 @@
-import {def_afterUpdateActionlist} from '../../support/constants';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import setValue from '../../system/setValue';
+import {
+  def_afterUpdateActionlist,
+  def_fetch_worldRealmActions
+} from '../../support/constants';
 
 var hidePlayerActions;
 
 export function toggleHidePlayerActions() {
   hidePlayerActions = !hidePlayerActions;
   setValue('hidePlayerActions', hidePlayerActions);
-  GameData.fetch(256);
+  GameData.fetch(def_fetch_worldRealmActions);
 }
 
 function doHidePlayerActions() {

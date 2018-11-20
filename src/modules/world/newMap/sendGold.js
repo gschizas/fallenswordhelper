@@ -1,8 +1,11 @@
+import addCommas from '../../system/addCommas';
+import {def_fetch_playerStats} from '../../support/constants';
 import getValue from '../../system/getValue';
 import infoBox from '../../common/infoBox';
 import retryAjax from '../../ajax/retryAjax';
 import setValue from '../../system/setValue';
 
+var goldAmount;
 var sendGoldonWorld;
 
 export function doSendGold() { // jQuery
@@ -23,47 +26,41 @@ export function doSendGold() { // jQuery
       setValue('currentGoldSentTotal',
         parseInt(getValue('currentGoldSentTotal'), 10) +
         parseInt(getValue('goldAmount'), 10));
-      GameData.fetch(1);
+      GameData.fetch(def_fetch_playerStats);
     }
   });
+}
+
+function statbarGoldBackground(colour) {
+  $('#statbar-gold').css('background-color', colour);
+}
+
+function updateSendGoldOnWorld() { // jQuery
+  $('#HelperSendTotal').html(addCommas(getValue('currentGoldSentTotal')));
+  if (Number(GameData.player().gold) > goldAmount) {
+    statbarGoldBackground('red');
+  } else {
+    statbarGoldBackground('inherit');
+  }
 }
 
 export function injectSendGoldOnWorld() { // jQuery
   sendGoldonWorld = getValue('sendGoldonWorld');
   if (!sendGoldonWorld) {return;}
+  goldAmount = getValue('goldAmount');
   $('#statbar-gold-tooltip-general').append(
     '<dt class="stat-gold-sendTo">Send To:</dt>' +
-    '<dd id="HelperSendTo">' + getValue('goldRecipient') +
-    '</dd>' +
+    '<dd id="HelperSendTo">' + getValue('goldRecipient') + '</dd>' +
     '<dt class="stat-gold-sendAmt">Amount:</dt>' +
-    '<dd id="HelperSendAmt">' + getValue('goldAmount')
-      .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>' +
+    '<dd id="HelperSendAmt">' + addCommas(goldAmount) + '</dd>' +
     '<dt class="stat-gold-sendTo">Send?</dt>' +
     '<dd><input id="HelperSendGold" value="Send!" class="custombutton" ' +
     'type="submit"><input type="hidden" id="xc" value=""</dd>' +
     '<dt class="stat-gold-sendTotal">Total Sent:</dt>' +
     '<dd id="HelperSendTotal">' +
-      getValue('currentGoldSentTotal')
-        .toString()
-        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') +
-      '</dd>');
+      addCommas(getValue('currentGoldSentTotal')) + '</dd>'
+  );
   $('#HelperSendGold').click(doSendGold);
-}
-
-function updateGoldValue(data) {
-  $('#HelperSendTotal')
-    .html(getValue('currentGoldSentTotal')
-      .toString()
-      .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
-  if (parseInt(data.player.gold, 10) > getValue('goldAmount')) {
-    $('#statbar-gold').css('background-color', 'red');
-  } else {
-    $('#statbar-gold').css('background-color', 'inherit');
-  }
-}
-
-export function updateSendGoldOnWorld(data) { // jQuery
-  if (data.player && sendGoldonWorld) {
-    updateGoldValue(data);
-  }
+  updateSendGoldOnWorld();
+  $.subscribe('gold.stats-player', updateSendGoldOnWorld);
 }

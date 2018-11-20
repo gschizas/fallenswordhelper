@@ -6,6 +6,7 @@ import insertElementBefore from '../../../common/insertElementBefore';
 import isFunction from '../../../common/isFunction';
 import on from '../../../common/on';
 import {simpleCheckboxHtml} from '../../../settings/simpleCheckbox';
+import {toggleBuffInfo} from '../buffInfo/buffInfo';
 import toggleEnabledHuntingMode from './toggleEnabledHuntingMode';
 import {toggleHidePlayerActions} from '../prepareHidePlayerActions';
 import {toggleShowCreatureInfo} from '../monsterLog/creatureInfo';
@@ -20,7 +21,8 @@ var fshEvents = {
   showCreatureInfo: toggleShowCreatureInfo,
   showHuntingBuffs: toggleShowHuntingBuffs,
   showMonsterLog: toggleShowMonsterLog,
-  showTitanInfo: toggleShowTitanInfo
+  showTitanInfo: toggleShowTitanInfo,
+  showBuffInfo: toggleBuffInfo
 };
 
 function prefsClickEvent(e) {
@@ -38,6 +40,7 @@ export default function buildFshDivs() {
     innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
       simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
       simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showBuffInfo') +
       '<br>' +
       simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
       simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +

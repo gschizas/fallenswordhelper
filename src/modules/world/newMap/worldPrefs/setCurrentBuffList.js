@@ -1,26 +1,16 @@
 import calf from '../../../support/calf';
-import isFunction from '../../../common/isFunction';
 
 export var huntingBuffs;
 export var huntingBuffsName;
-var buffLookup = {
-  '1': function() {
-    huntingBuffs = calf.buffs;
-    huntingBuffsName = calf.buffsName;
-  },
-  '2': function() {
-    huntingBuffs = calf.buffs2;
-    huntingBuffsName = calf.buffs2Name;
-  },
-  '3': function() {
-    huntingBuffs = calf.buffs3;
-    huntingBuffsName = calf.buffs3Name;
-  }
-};
 
 export function setCurrentBuffList() {
-  var tmpFn = buffLookup[calf.enabledHuntingMode];
-  if (isFunction(tmpFn)) {
-    tmpFn();
+  var lookup = [, // eslint-disable-line no-sparse-arrays
+    [calf.buffs, calf.buffsName],
+    [calf.buffs2, calf.buffs2Name],
+    [calf.buffs3, calf.buffs3Name]
+  ][calf.enabledHuntingMode];
+  if (Array.isArray(lookup)) {
+    huntingBuffs = lookup[0];
+    huntingBuffsName = lookup[1];
   }
 }

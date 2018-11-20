@@ -217,5 +217,6 @@ export var defaults = {
   enableGuildActivityTracker: false,
   enableSeTracker: false,
   showTitanInfo: false,
-  highlightPvpProtection: false
+  highlightPvpProtection: false,
+  showBuffInfo: false
 };

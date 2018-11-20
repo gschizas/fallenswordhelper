@@ -1,4 +1,4 @@
-import {addRows} from './common';
+import {addRows} from './addRows';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import {

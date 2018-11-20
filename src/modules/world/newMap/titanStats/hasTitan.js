@@ -34,7 +34,7 @@ export function setupTitanDiv() {
     toggleForce(titanDiv, false);
   } else {
     var actCont = getElementById('actionContainer');
-    titanDiv = createDiv({className: 'titanInfo'});
+    titanDiv = createDiv({className: 'fshActionBox titanInfo'});
     initVars();
     buildTitanInfoTable();
     insertElement(titanDiv, titanTbl);

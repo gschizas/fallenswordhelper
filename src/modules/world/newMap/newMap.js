@@ -1,16 +1,28 @@
+import {buffInfo} from './buffInfo/buffInfo';
 import combatLogger from './combatLogger';
 import {createStyle} from '../../common/cElement';
-import {def_afterUpdateActionlist} from '../../support/constants';
 import doNotKill from './doNotKill/doNotKill';
+import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
+import {injectSendGoldOnWorld} from './sendGold';
 import insertElement from '../../common/insertElement';
+import on from '../../common/on';
 import onWorld from './onWorld';
 import partial from '../../common/partial';
 import prepareShop from './shop';
 import startMonsterLog from './monsterLog/monsterLog';
 import viewCreature from './viewCreature/viewCreature';
 import worldPrefs from './worldPrefs/worldPrefs';
+import {
+  def_afterUpdateActionlist,
+  def_controlsKeydown,
+  def_fetch_playerBackpackCount,
+  def_fetch_playerBuffs,
+  def_fetch_worldRealmActions,
+  def_fetch_worldRealmDynamic
+} from '../../support/constants';
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
@@ -50,23 +62,38 @@ function doMonsterColors() {
 }
 
 function doRepair(e, key) {
-  if (key === 'ACT_REPAIR') {GameData.fetch(402);}
+  if (key === 'ACT_REPAIR') {
+    GameData.fetch(
+      def_fetch_playerBackpackCount +
+      def_fetch_playerBuffs +
+      def_fetch_worldRealmDynamic +
+      def_fetch_worldRealmActions
+    );
+  }
+}
+
+function fixDebuffQTip(e) { // jQuery.min
+  $(e.target).qtip('hide');
 }
 
 export default function subscribes() { // jQuery.min
   worldPrefs();
+  injectSendGoldOnWorld();
   viewCreature();
   hideGroupButton(); // Hide Create Group button
   doMonsterColors();
   doNotKill(); // add do-not-kill list functionality
   startMonsterLog(); // add monster log functionality
-  $.subscribe('keydown.controls', doRepair);
+  $.subscribe(def_controlsKeydown, doRepair);
   combatLogger();
-  onWorld(); // on world
+  onWorld();
   prepareShop();
   injectRelic();
   $('#messageCenter').worldMessageCenter({offset: '0 60'});
   $('#mapTooltip').qtip('hide');
+  initButtons();
+  buffInfo();
+  on(getElementById('buffList'), 'click', fixDebuffQTip);
 }
 
 // -1 = world page

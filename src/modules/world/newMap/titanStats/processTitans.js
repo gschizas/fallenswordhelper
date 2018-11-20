@@ -1,4 +1,4 @@
-import {addRows} from './common';
+import {addRows} from './addRows';
 import padZ from '../../../system/padZ';
 import {realmName} from './realm';
 import roundToString from '../../../common/roundToString';

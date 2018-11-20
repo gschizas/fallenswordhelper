@@ -1,4 +1,5 @@
 import addCommas from '../../system/addCommas';
+import {def_shopPrompt} from '../../support/constants';
 import fallback from '../../system/fallback';
 import {getElementById} from '../../common/getElement';
 import insertElement from '../../common/insertElement';
@@ -100,5 +101,5 @@ function worldDialogShop(e, data) {
 }
 
 export default function prepareShop() {
-  $.subscribe('prompt.worldDialogShop', worldDialogShop);
+  $.subscribe(def_shopPrompt, worldDialogShop);
 }

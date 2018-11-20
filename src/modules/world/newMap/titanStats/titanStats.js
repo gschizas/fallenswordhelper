@@ -45,10 +45,10 @@ function testDynamics(dynamic) {
   }
 }
 
-export function titanStats(data) {
-  if (data.realm.dynamic) {
-    setRealm(data.realm.name);
-    testDynamics(data.realm.dynamic);
+export function titanStats(realm) {
+  if (realm.dynamic) {
+    setRealm(realm.name);
+    testDynamics(realm.dynamic);
   }
 }
 

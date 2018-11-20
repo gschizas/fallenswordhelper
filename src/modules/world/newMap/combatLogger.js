@@ -1,4 +1,4 @@
-import {def_suffixSuccessActionResponse} from '../../support/constants';
+import {def_PvE} from '../../support/constants';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
 import setForage from '../../ajax/setForage';
@@ -58,7 +58,7 @@ function combatResponse(e, data) {
 
 function gotCombatLog(data) { // jQuery.min
   if (data) {combatLog = data;}
-  $.subscribe('2' + def_suffixSuccessActionResponse, combatResponse);
+  $.subscribe(def_PvE, combatResponse);
 }
 
 export default function combatLogger() { // jQuery.min

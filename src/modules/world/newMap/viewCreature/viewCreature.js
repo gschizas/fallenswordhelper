@@ -1,6 +1,6 @@
 import calf from '../../../support/calf';
 import {createDiv} from '../../../common/cElement';
-import {def_suffixSuccessActionResponse} from '../../../support/constants';
+import {def_viewCreature} from '../../../support/constants';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
 import evalAttack from './evalAttack';
@@ -166,5 +166,5 @@ function processCreature(e, data) {
 }
 
 export default function viewCreature() {
-  $.subscribe('1' + def_suffixSuccessActionResponse, processCreature);
+  $.subscribe(def_viewCreature, processCreature);
 }
