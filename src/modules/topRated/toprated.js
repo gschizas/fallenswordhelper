@@ -3,6 +3,7 @@ import functionPasses from '../common/functionPasses';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
+import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import isObject from '../common/isObject';
 import isUndefined from '../common/isUndefined';
@@ -13,6 +14,8 @@ import onlineDot from '../common/onlineDot';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import playerDataObject from '../common/playerDataObject';
+import {sendEvent} from '../support/fshGa';
+import uniq from '../common/uniq';
 import {
   calculateBoundaries,
   pvpLowerLevel,
@@ -86,18 +89,27 @@ function stackAjax(prm, playerName, tbl, guildId) {
   );
 }
 
+function eachPlayer(member, guildId, player) {
+  if (member.name === player.player) {
+    doOnlineDot(player.dom, guildId, {
+      last_login: member.last_activity.toString(),
+      virtual_level: member.vl
+    });
+  }
+}
+
+function eachMember(guildId, member) {
+  guilds[guildId].forEach(partial(eachPlayer, member, guildId));
+}
+
+function eachRank(guildId, rank) {
+  rank.members.forEach(partial(eachMember, guildId));
+}
+
 function parseGuild(data) {
   var guildId = data.r.id;
-  data.r.members.forEach(function(member) {
-    guilds[guildId].forEach(function(player) {
-      if (member.name === player.player) {
-        doOnlineDot(player.dom, guildId, {
-          last_login: member.last_activity.toString(),
-          virtual_level: member.vl
-        });
-      }
-    });
-  });
+  // data.r.ranks.forEach(partial(eachRank, guildId));
+  uniq(data.r.ranks, 'id').forEach(partial(eachRank, guildId)); // BUG
 }
 
 function findOnlinePlayers() { // jQuery
@@ -126,6 +138,7 @@ function findOnlinePlayers() { // jQuery
 }
 
 function getMyVL(e) { // jQuery
+  sendEvent('toprated', 'FindOnlinePlayers');
   $(e.target).qtip('hide');
   spinner = createSpan({
     className: 'fshCurveContainer fshTopListSpinner',
@@ -153,7 +166,7 @@ function looksLikeTopRated() {
         'top 250 players (warning ... takes a few seconds).'
     }
   });
-  theCell.insertBefore(findBtn, theCell.firstElementChild);
+  insertElementAfterBegin(theCell, findBtn);
   on(findBtn, 'click', getMyVL);
 }
 
