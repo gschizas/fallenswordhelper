@@ -1,12 +1,9 @@
 import partial from '../common/partial';
 import quickbuff from '../app/quickbuff';
-
-function itWorked(result) {
-  return result.s && result.r[0].casts.length === 1;
-}
+import quickbuffSuccess from '../common/quickbuffSuccess';
 
 function processResult(trigger, json) {
-  if (itWorked(json)) {
+  if (quickbuffSuccess(json)) {
     trigger.className = 'fshLime';
     trigger.innerHTML = 'On';
   }

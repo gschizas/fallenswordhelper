@@ -12983,12 +12983,12 @@
     });
   }
 
-  function itWorked(result) {
+  function quickbuffSuccess(result) {
     return result.s && result.r[0].casts.length === 1;
   }
 
   function processResult$1(trigger, json) {
-    if (itWorked(json)) {
+    if (quickbuffSuccess(json)) {
       trigger.className = 'fshLime';
       trigger.innerHTML = 'On';
     }
@@ -15395,6 +15395,17 @@
   var impDiv;
   var impRemainingSpan;
 
+  function refreshBuffs(json) {
+    if (quickbuffSuccess(json)) {
+      GameData.fetch(def_fetch_playerBuffs);
+    }
+  }
+
+  function recastClick() {
+    if (getBuff$1('Summon Shield Imp')) {return;}
+    quickbuff([playerName()], [55]).done(refreshBuffs);
+  }
+
   function getImpsRemaining(imp) {
     if (imp) {
       return Number(imp.stack);
@@ -15417,8 +15428,10 @@
     impDiv.textContent = 'Shield Imps Remaining: ';
     impRemainingSpan = createSpan();
     insertElement(impDiv, impRemainingSpan);
-    insertHtmlBeforeEnd(impDiv,
-      '&nbsp;<span id="fshImpRecast" class="xSmallLink">Recast</span>');
+    insertHtmlBeforeEnd(impDiv, '&nbsp;');
+    var recast = createSpan({className: 'xSmallLink', textContent: 'Recast'});
+    insertElement(impDiv, recast);
+    on(recast, 'click', recastClick);
   }
 
   function hasImp(containerDiv, imp) {
@@ -20024,7 +20037,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '47';
+  window.FSH.calf = '48';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
