@@ -5,8 +5,9 @@ import insertElementBefore from '../common/insertElementBefore';
 import on from '../common/on';
 
 function statbarWrapper(href, id) {
-  var myWrapper = createAnchor({href: href});
   var character = getElementById(id);
+  if (!character) {return;}
+  var myWrapper = createAnchor({href: href});
   var statWrapper = character.parentNode;
   insertElement(myWrapper, character);
   insertElementBefore(myWrapper, statWrapper.firstChild);

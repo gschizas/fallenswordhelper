@@ -6363,8 +6363,9 @@
   }
 
   function statbarWrapper(href, id) {
-    var myWrapper = createAnchor({href: href});
     var character = getElementById(id);
+    if (!character) {return;}
+    var myWrapper = createAnchor({href: href});
     var statWrapper = character.parentNode;
     insertElement(myWrapper, character);
     insertElementBefore(myWrapper, statWrapper.firstChild);
@@ -15778,10 +15779,16 @@
     });
   }
 
+  function getMinLevel() {
+    var minLevel = GameData.realm().minlevel;
+    if (minLevel) {return minLevel.toString();}
+    return '?';
+  }
+
   function doLevels(worldName) {
     var lvlDiv = createDiv({className: 'fshFsty'});
     var topDiv = createDiv({textContent: 'Min Lvl: '});
-    realmLvl = textSpan(GameData.realm().minlevel.toString());
+    realmLvl = textSpan(getMinLevel());
     insertElement(topDiv, realmLvl);
     insertElement(lvlDiv, topDiv);
     var btmDiv = createDiv({textContent: 'Your Lvl: '});
@@ -20037,7 +20044,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '48';
+  window.FSH.calf = '49';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

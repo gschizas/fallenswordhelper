@@ -98,10 +98,16 @@ function makeButtonContainer() {
   });
 }
 
+function getMinLevel() {
+  var minLevel = GameData.realm().minlevel;
+  if (minLevel) {return minLevel.toString();}
+  return '?';
+}
+
 function doLevels(worldName) {
   var lvlDiv = createDiv({className: 'fshFsty'});
   var topDiv = createDiv({textContent: 'Min Lvl: '});
-  realmLvl = textSpan(GameData.realm().minlevel.toString());
+  realmLvl = textSpan(getMinLevel());
   insertElement(topDiv, realmLvl);
   insertElement(lvlDiv, topDiv);
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
