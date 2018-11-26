@@ -4,7 +4,10 @@ var thisPlayerName;
 
 export default function playerName() {
   if (!thisPlayerName) {
-    thisPlayerName = getElementById('statbar-character').textContent;
+    var statBarCharacter = getElementById('statbar-character');
+    if (statBarCharacter) {
+      thisPlayerName = statBarCharacter.textContent;
+    }
   }
   return thisPlayerName;
 }

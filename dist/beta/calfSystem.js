@@ -4286,7 +4286,10 @@
 
   function playerName() {
     if (!thisPlayerName) {
-      thisPlayerName = getElementById('statbar-character').textContent;
+      var statBarCharacter = getElementById('statbar-character');
+      if (statBarCharacter) {
+        thisPlayerName = statBarCharacter.textContent;
+      }
     }
     return thisPlayerName;
   }
@@ -15385,7 +15388,10 @@
   }
 
   function getBuff$1(name) {
-    return GameData.player().buffs.find(function(e) {return e.name === name;});
+    var buffs = GameData.player().buffs;
+    if (buffs) {
+      return buffs.find(function(e) {return e.name === name;});
+    }
   }
 
   function getCooldown() {
@@ -20057,7 +20063,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '51';
+  window.FSH.calf = '52';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
