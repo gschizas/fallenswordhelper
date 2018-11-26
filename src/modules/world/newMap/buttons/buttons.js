@@ -98,20 +98,19 @@ function makeButtonContainer() {
   });
 }
 
-function getMinLevel() {
-  var minLevel = GameData.realm().minlevel;
-  if (minLevel) {return minLevel.toString();}
+function exists(val) {
+  if (val) {return val.toString();}
   return '?';
 }
 
 function doLevels(worldName) {
   var lvlDiv = createDiv({className: 'fshFsty'});
   var topDiv = createDiv({textContent: 'Min Lvl: '});
-  realmLvl = textSpan(getMinLevel());
+  realmLvl = textSpan(exists(GameData.realm().minlevel));
   insertElement(topDiv, realmLvl);
   insertElement(lvlDiv, topDiv);
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
-  yourLvl = textSpan(GameData.player().level.toString());
+  yourLvl = textSpan(exists(GameData.player().level));
   insertElement(btmDiv, yourLvl);
   insertElement(lvlDiv, btmDiv);
   insertElement(worldName, lvlDiv);
