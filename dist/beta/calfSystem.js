@@ -4796,10 +4796,17 @@
     Array.prototype.forEach.call(nodeList, findNewGroup);
   }
 
+  function refIsLast(newNode, referenceNode) {
+    if (referenceNode.nextSibling instanceof Node) {
+      return insertElementBefore(newNode, referenceNode.nextSibling);
+    }
+    return insertElement(referenceNode.parentNode, newNode);
+  }
+
   function insertElementAfter(newNode, referenceNode) {
     if (referenceNode instanceof Node &&
         referenceNode.parentNode instanceof Node) {
-      return insertElementBefore(newNode, referenceNode.nextSibling);
+      return refIsLast(newNode, referenceNode);
     }
   }
 
@@ -5334,9 +5341,16 @@
     }
   }
 
+  function noChildren(parentNode, newNode) {
+    if (parentNode.firstChild instanceof Node) {
+      return insertElementBefore(newNode, parentNode.firstChild);
+    }
+    return insertElement(parentNode, newNode);
+  }
+
   function insertElementAfterBegin(parentNode, newNode) {
     if (parentNode instanceof Element) {
-      insertElementBefore(newNode, parentNode.firstChild);
+      return noChildren(parentNode, newNode);
     }
   }
 
@@ -20044,7 +20058,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '49';
+  window.FSH.calf = '50';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
