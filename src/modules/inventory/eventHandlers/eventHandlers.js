@@ -9,7 +9,7 @@ import moveItem from '../../ajax/moveItem';
 import partial from '../../common/partial';
 import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
-import sendItem from '../../ajax/sendItem';
+import senditems from '../../app/trade/senditems';
 import storeItems from '../../ajax/storeItems';
 import useItem from '../../ajax/useItem';
 import {queueRecallItem, queueTakeItem} from '../../ajaxQueue/queue';
@@ -67,7 +67,7 @@ function doDropItem(e) { // jQuery
 
 function doSendItem(e) { // jQuery
   var self = $(e.target);
-  doAction(partial(sendItem, [self.data('inv')]), self);
+  doAction(partial(senditems, [self.data('inv')]), self);
 }
 
 export default function eventHandlers() { // jQuery
