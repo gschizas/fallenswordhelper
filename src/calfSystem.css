@@ -693,7 +693,7 @@
   font-weight: bold;
   cursor: pointer;
   text-decoration: underline;
-  z-index: 100;
+  z-index: 100100;
   text-align: center;
   white-space: nowrap;
 }
@@ -701,7 +701,7 @@
 /* Quick Links */
 .fshQuickLinks {
   position: absolute;
-  z-index: 50;
+  z-index: 100050;
   text-align: left;
   white-space: nowrap;
   color: black;
