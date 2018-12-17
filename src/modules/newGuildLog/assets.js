@@ -46,19 +46,6 @@ export var headerRow = '<tbody><tr>' +
   '<td class="header" width="16">&nbsp;</td>' +
   '<td class="header" width="20%">Date</td>' +
   '<td class="header" width="80%">Message</td></tr></tbody>';
-export var msgType = [
-  'Unknown', // 0
-  'Potion', // 1
-  'showRecallMessages', // 2
-  'showTaggingMessages', // 3
-  'showRelicMessages', // 4
-  'showMercenaryMessages', // 5
-  'showGroupCombatMessages', // 6
-  'showDonationMessages', // 7
-  'showRankingMessages', // 8
-  'showGvGMessages', // 9
-  'showTitanMessages' // 10
-];
 export var defChecks = [true, true, true, true, true, true,
   true, true, true, true, true];
 export var noChecks = [false, false, false, false, false, false,

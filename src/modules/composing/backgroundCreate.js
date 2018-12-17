@@ -30,6 +30,7 @@ function amILast() {
 
 function createSuccess(temp, textStatus) {
   var myParent = temp.parentNode;
+  if (!myParent) {return;}
   myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
   updateInfoDiv(myParent.previousElementSibling.previousElementSibling,
     temp[temp.selectedIndex].text);
@@ -37,9 +38,10 @@ function createSuccess(temp, textStatus) {
 }
 
 function potionDone(temp, data, textStatus) {
-  if (!(temp instanceof Node)) {return;}
+  var resultNode = temp.parentNode;
+  if (!resultNode) {return;}
   if (data.error) {
-    temp.parentNode.innerHTML = '<div class="fshScs">' +
+    resultNode.innerHTML = '<div class="fshScs">' +
       data.error + '</div>';
   } else {
     createSuccess(temp, textStatus);

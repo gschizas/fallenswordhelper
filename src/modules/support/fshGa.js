@@ -1,5 +1,7 @@
 import isUndefined from '../common/isUndefined';
+//#if _BETA  //  Timing output
 import {log} from './debug';
+//#endif
 import playerId from '../common/playerId';
 
 var times = {};

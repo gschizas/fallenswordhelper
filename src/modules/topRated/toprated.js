@@ -13,7 +13,9 @@ import on from '../common/on';
 import onlineDot from '../common/onlineDot';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
+//#if _DEV  //  get cloaked players
 import playerDataObject from '../common/playerDataObject';
+//#endif
 import {sendEvent} from '../support/fshGa';
 import uniq from '../common/uniq';
 import {

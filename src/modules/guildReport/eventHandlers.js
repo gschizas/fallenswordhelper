@@ -1,9 +1,16 @@
 import equipItem from '../ajax/equipItem';
 import {imageServer} from '../system/system';
+import partial from '../common/partial';
 import {queueRecallItem} from '../ajaxQueue/queue';
 
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
   'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
+
+function recalled(theTd, data) {
+  if (data.r === 1) {return;}
+  theTd.innerHTML = '<span class="fastWorn">' +
+    'You successfully recalled the item</span>';
+}
 
 function recallItem(evt) { // jQuery
   $(evt.target).qtip('hide');
@@ -17,23 +24,21 @@ function recallItem(evt) { // jQuery
     playerId: href.match(/&player_id=(\d+)/)[1],
     mode: mode,
     action: evt.target.getAttribute('action')
-  })
-    .done(function(data) {
-      if (data.r === 1) {return;}
-      theTd.innerHTML = '<span class="fastWorn">' +
-        'You successfully recalled the item</span>';
-    });
+  }).done(partial(recalled, theTd));
   theTd.innerHTML = spinner;
+}
+
+function wornItem(theTd, data) {
+  if (data.r === 1) {return;}
+  theTd.innerHTML = '<span class="fastWorn">Worn</span>';
 }
 
 function wearItem(evt) { // jQuery
   $(evt.target).qtip('hide');
   var theTd = evt.target.parentNode.parentNode.parentNode;
   var href = theTd.firstElementChild.href;
-  equipItem(href.match(/&id=(\d+)/)[1]).done(function(data) {
-    if (data.r === 1) {return;}
-    theTd.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
+  if (!href) {return;}
+  equipItem(href.match(/&id=(\d+)/)[1]).done(partial(wornItem, theTd));
   theTd.innerHTML = spinner;
 }
 

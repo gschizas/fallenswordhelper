@@ -19,23 +19,8 @@ function getSummary() {
   return fshSummary;
 }
 
-/* function getBpCountFromWorld(responseText) { // Legacy - Bad, could be repurposed
-  // backpack counter
-  var doc=system.createDocument(responseText);
-  var bp=system.findNode(
-    '//td[a/img[contains(@src,"_manageitems.gif")]]',doc);
-  var injectHere=document.getElementById('reportDiv');
-  if (!injectHere) {
-    injectHere=system.findNode(
-      '//b[contains(.,"Multiple Scavenging Results")]/..');
-  }
-  insertElement(injectHere, bp);
-}
-*/
-
 function getVictories(report) {
   var victories = report.match(/victorious/g);
-  // console.log('victories', victories);
   if (victories) {
     return 'Victories: ' + victories.length;
   }
@@ -44,7 +29,6 @@ function getVictories(report) {
 
 function getDefeats(report) {
   var defeats = report.match(/defeated/g);
-  // console.log('defeats', defeats);
   if (defeats) {
     return ', Defeated: ' + defeats.length;
   }

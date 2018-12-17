@@ -15,7 +15,7 @@ import moveItemsToFolder from './moveItemsToFolder';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import quickAction from './quickAction';
-import sendItem from '../ajax/sendItem';
+import senditems from '../app/trade/senditems';
 import toggleForce from '../common/toggleForce';
 import {
   disableItemColoring,
@@ -162,7 +162,7 @@ var evts = [
   },
   {
     test: function(self) {return self.classList.contains('sendLink');},
-    act: function(self) {quickAction(self, sendItem, 'Sent', '.dropLink');}
+    act: function(self) {quickAction(self, senditems, 'Sent', '.dropLink');}
   },
   {
     test: function(self) {return self.classList.contains('dropLink');},

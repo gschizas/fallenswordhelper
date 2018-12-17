@@ -1,5 +1,5 @@
 import callApp from '../callApp';
-import {getValue} from '../../system/system';
+import getValue from '../../system/getValue';
 
 export default function senditems(invIdAry) {
   return callApp({
@@ -7,6 +7,6 @@ export default function senditems(invIdAry) {
     subcmd: 'senditems',
     xc: window.ajaxXC,
     target_username: getValue('itemRecipient'),
-    sendItemList: invIdAry // This isn't working...
+    items: invIdAry
   });
 }

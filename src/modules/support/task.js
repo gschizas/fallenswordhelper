@@ -17,6 +17,7 @@ function taskRunner() {
   }
 }
 
+//#if _DEV  //  Not sending args as Array
 function devLog(args) {
   if (args && !Array.isArray(args)) {
     // eslint-disable-next-line no-console
@@ -24,6 +25,7 @@ function devLog(args) {
   }
 }
 
+//#endif
 export default function add(priority, fn, args, scope) {
   //#if _DEV  //  Not sending args as Array
   devLog(args);
