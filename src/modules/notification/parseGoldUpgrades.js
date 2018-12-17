@@ -7,7 +7,9 @@ function findDoc(data) {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
     return createDocument(data);
   }
-  document.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
+  var boxes = document.querySelectorAll('#pCC input[name="quantity"]');
+  boxes[0].value = '100';
+  boxes[1].value = '10';
   return document;
 }
 
