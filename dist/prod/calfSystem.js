@@ -10,38 +10,6 @@
     return document.getElementById(id);
   }
 
-  function insertHtml(parent, where, html) {
-    if (parent instanceof Element) {
-      parent.insertAdjacentHTML(where, html);
-    }
-  }
-
-  function insertHtmlBeforeEnd(parent, html) {
-    insertHtml(parent, 'beforeend', html);
-  }
-
-  var timers = {};
-  var footWrap = getElementById('foot-wrap');
-
-  function log(text, value) {
-    if (footWrap) {
-      insertHtmlBeforeEnd(footWrap,
-        '<br>' + text + ': ' + value + ' (' + typeof value + ')');
-    }
-  }
-
-  function time(name) {
-    if (name) {timers[name] = performance.now() * 1000;}
-  }
-
-  function timeEnd(name) {
-    if (timers[name]) {
-      log(name, Math.round(performance.now() * 1000 -
-        timers[name]) / 1000 + 'ms');
-      delete timers[name];
-    }
-  }
-
   var thePlayerId;
 
   function playerId() {
@@ -864,6 +832,16 @@
   var imageServer = window.HCS && window.HCS.defines &&
     window.HCS.defines.fileserver &&
     window.HCS.defines.fileserver.slice(0, -1);
+
+  function insertHtml(parent, where, html) {
+    if (parent instanceof Element) {
+      parent.insertAdjacentHTML(where, html);
+    }
+  }
+
+  function insertHtmlBeforeEnd(parent, html) {
+    insertHtml(parent, 'beforeend', html);
+  }
 
   function retBool(bool, ifTrue, ifFalse) {
     if (bool) {
@@ -5294,7 +5272,9 @@
     if (location.search.indexOf('cmd=points&type=1') === -1) {
       return createDocument(data);
     }
-    document.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
+    var boxes = document.querySelectorAll('#pCC input[name="quantity"]');
+    boxes[0].value = '100';
+    boxes[1].value = '10';
     return document;
   }
 
@@ -7493,6 +7473,28 @@
     return div;
   }
 
+  var timers = {};
+  var footWrap = getElementById('foot-wrap');
+
+  function log(text, value) {
+    if (footWrap) {
+      insertHtmlBeforeEnd(footWrap,
+        '<br>' + text + ': ' + value + ' (' + typeof value + ')');
+    }
+  }
+
+  function time(name) {
+    if (name) {timers[name] = performance.now() * 1000;}
+  }
+
+  function timeEnd(name) {
+    if (timers[name]) {
+      log(name, Math.round(performance.now() * 1000 -
+        timers[name]) / 1000 + 'ms');
+      delete timers[name];
+    }
+  }
+
   function returnAdvisorPage(list, e, response) {
     insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
       ' day ' + e + ',');
@@ -8432,6 +8434,7 @@
 
   function createSuccess(temp, textStatus) {
     var myParent = temp.parentNode;
+    if (!myParent) {return;}
     myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
     updateInfoDiv(myParent.previousElementSibling.previousElementSibling,
       temp[temp.selectedIndex].text);
@@ -8439,9 +8442,10 @@
   }
 
   function potionDone(temp, data, textStatus) {
-    if (!(temp instanceof Node)) {return;}
+    var resultNode = temp.parentNode;
+    if (!resultNode) {return;}
     if (data.error) {
-      temp.parentNode.innerHTML = '<div class="fshScs">' +
+      resultNode.innerHTML = '<div class="fshScs">' +
         data.error + '</div>';
     } else {
       createSuccess(temp, textStatus);
@@ -10416,27 +10420,14 @@
     $('#fshInv').DataTable().draw(false);
   }
 
-  function htmlResult(data) { // TODO change to app code to avoid 302 redirect
-    var info = infoBox(data);
-    var _r = 1;
-    // if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
-    if (info.includes('successfully')) {_r = 0;}
-    return {r: _r, m: info};
-  }
-
-  function sendItem(invIdList) {
-    return retryAjax({
-      url: 'index.php',
-      data: {
-        no_mobile: 1,
-        cmd: 'trade',
-        subcmd: 'senditems',
-        xc: window.ajaxXC,
-        target_username: getValue('itemRecipient'),
-        sendItemList: invIdList
-      }
-    }).pipe(htmlResult)
-      .done(dialog);
+  function senditems(invIdAry) {
+    return callApp({
+      cmd: 'trade',
+      subcmd: 'senditems',
+      xc: window.ajaxXC,
+      target_username: getValue('itemRecipient'),
+      items: invIdAry
+    });
   }
 
   function dostoreitems(invIdAry) {
@@ -10606,7 +10597,7 @@
 
   function doSendItem(e) { // jQuery
     var self = $(e.target);
-    doAction$1(partial(sendItem, [self.data('inv')]), self);
+    doAction$1(partial(senditems, [self.data('inv')]), self);
   }
 
   function eventHandlers() { // jQuery
@@ -11967,9 +11958,9 @@
   function foundBackpack(backpackContainer, theBackpack) {
     var oldShow = theBackpack._showPage;
     theBackpack._showPage = function(type, page) {
-      if (!this.tabData) {return;}
-      oldShow.call(this, type, page);
-      fastWearLinks(this);
+      if (!theBackpack.tabData) {return;}
+      oldShow.call(theBackpack, type, page);
+      fastWearLinks(theBackpack);
     };
     if (getElementById('backpack_current').textContent.length !== 0) {
       add(3, fastWearLinks, [theBackpack]);
@@ -12807,7 +12798,7 @@
     },
     {
       test: function(self) {return self.classList.contains('sendLink');},
-      act: function(self) {quickAction(self, sendItem, 'Sent', '.dropLink');}
+      act: function(self) {quickAction(self, senditems, 'Sent', '.dropLink');}
     },
     {
       test: function(self) {return self.classList.contains('dropLink');},
@@ -13140,6 +13131,12 @@
   var spinner = '<span class="guildReportSpinner" style="background-image: ' +
     'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
 
+  function recalled(theTd, data) {
+    if (data.r === 1) {return;}
+    theTd.innerHTML = '<span class="fastWorn">' +
+      'You successfully recalled the item</span>';
+  }
+
   function recallItem$2(evt) { // jQuery
     $(evt.target).qtip('hide');
     var mode = evt.target.getAttribute('mode');
@@ -13152,23 +13149,21 @@
       playerId: href.match(/&player_id=(\d+)/)[1],
       mode: mode,
       action: evt.target.getAttribute('action')
-    })
-      .done(function(data) {
-        if (data.r === 1) {return;}
-        theTd.innerHTML = '<span class="fastWorn">' +
-          'You successfully recalled the item</span>';
-      });
+    }).done(partial(recalled, theTd));
     theTd.innerHTML = spinner;
+  }
+
+  function wornItem(theTd, data) {
+    if (data.r === 1) {return;}
+    theTd.innerHTML = '<span class="fastWorn">Worn</span>';
   }
 
   function wearItem$1(evt) { // jQuery
     $(evt.target).qtip('hide');
     var theTd = evt.target.parentNode.parentNode.parentNode;
     var href = theTd.firstElementChild.href;
-    equipItem(href.match(/&id=(\d+)/)[1]).done(function(data) {
-      if (data.r === 1) {return;}
-      theTd.innerHTML = '<span class="fastWorn">Worn</span>';
-    });
+    if (!href) {return;}
+    equipItem(href.match(/&id=(\d+)/)[1]).done(partial(wornItem, theTd));
     theTd.innerHTML = spinner;
   }
 
@@ -13692,23 +13687,8 @@
     return fshSummary;
   }
 
-  /* function getBpCountFromWorld(responseText) { // Legacy - Bad, could be repurposed
-    // backpack counter
-    var doc=system.createDocument(responseText);
-    var bp=system.findNode(
-      '//td[a/img[contains(@src,"_manageitems.gif")]]',doc);
-    var injectHere=document.getElementById('reportDiv');
-    if (!injectHere) {
-      injectHere=system.findNode(
-        '//b[contains(.,"Multiple Scavenging Results")]/..');
-    }
-    insertElement(injectHere, bp);
-  }
-  */
-
   function getVictories(report) {
     var victories = report.match(/victorious/g);
-    // console.log('victories', victories);
     if (victories) {
       return 'Victories: ' + victories.length;
     }
@@ -13717,7 +13697,6 @@
 
   function getDefeats(report) {
     var defeats = report.match(/defeated/g);
-    // console.log('defeats', defeats);
     if (defeats) {
       return ', Defeated: ' + defeats.length;
     }
@@ -14712,82 +14691,6 @@
 
   function guildView(guildId) {
     return guild({subcmd: 'view', guild_id: guildId});
-  }
-
-  function cloakGuess(bonus, level) {
-    if (bonus > level * 10 ||
-        bonus < level) {
-      return bonus;
-    }
-    return level * 10;
-  }
-
-  function updateForCloak(obj) {
-    obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
-    obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
-    obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
-    obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
-    obj.hpValue = obj.hpBonus;
-  }
-
-  var statList = [
-    ['levelValue', 'level'],
-    ['attackValue', 'attack'],
-    ['attackBonus', 'bonus_attack'],
-    ['defenseValue', 'defense'],
-    ['defenseBonus', 'bonus_defense'],
-    ['armorValue', 'armor'],
-    ['armorBonus', 'bonus_armor'],
-    ['damageValue', 'damage'],
-    ['damageBonus', 'bonus_damage'],
-    ['hpValue', 'hp'],
-    ['hpBonus', 'bonus_hp'],
-    ['killStreakValue', 'killstreak']
-  ];
-
-  function importStats(obj, json) {
-    statList.forEach(function(el) {
-      obj[el[0]] = Number(json[el[1]]);
-    });
-  }
-
-  var buffList$1 = [
-    ['counterAttackLevel', 'Counter Attack'],
-    ['doublerLevel', 'Doubler'],
-    ['deathDealerLevel', 'Death Dealer'],
-    ['darkCurseLevel', 'Dark Curse'],
-    ['holyFlameLevel', 'Holy Flame'],
-    ['constitutionLevel', 'Constitution'],
-    ['sanctuaryLevel', 'Sanctuary'],
-    ['flinchLevel', 'Flinch'],
-    ['nightmareVisageLevel', 'Nightmare Visage'],
-    ['superEliteSlayerLevel', 'Super Elite Slayer'],
-    ['fortitudeLevel', 'Fortitude'],
-    ['chiStrikeLevel', 'Chi Strike'],
-    ['terrorizeLevel', 'Terrorize'],
-    ['barricadeLevel', 'Barricade'],
-    ['reignOfTerrorLevel', 'Reign Of Terror'],
-    ['anchoredLevel', 'Anchored'],
-    ['severeConditionLevel', 'Severe Condition'],
-    ['entrenchLevel', 'Entrench'],
-    ['cloakLevel', 'Cloak']
-  ];
-
-  function importBuffs(obj, buffs) {
-    buffList$1.forEach(function(el) {
-      obj[el[0]] = fallback(buffs[el[1]], 0);
-    });
-  }
-
-  function playerDataObject(json) {
-    var buffs = reduceBuffArray(json._skills);
-    var obj = {};
-    importStats(obj, json);
-    importBuffs(obj, buffs);
-    obj.superEliteSlayerMultiplier = Math.round(0.002 *
-      obj.superEliteSlayerLevel * 100) / 100;
-    if (obj.cloakLevel !== 0) {updateForCloak(obj);}
-    return obj;
   }
 
   var highlightPlayersNearMyLvl$1;
@@ -16137,6 +16040,82 @@
     relicCountElement.textContent = relicCount.toString();
     relicMultiplier = calcRelicMultiplier(relicCount);
     lDPercentageElement.textContent = (relicMultiplier * 100).toString() + '%';
+  }
+
+  function cloakGuess(bonus, level) {
+    if (bonus > level * 10 ||
+        bonus < level) {
+      return bonus;
+    }
+    return level * 10;
+  }
+
+  function updateForCloak(obj) {
+    obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+    obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+    obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+    obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
+    obj.hpValue = obj.hpBonus;
+  }
+
+  var statList = [
+    ['levelValue', 'level'],
+    ['attackValue', 'attack'],
+    ['attackBonus', 'bonus_attack'],
+    ['defenseValue', 'defense'],
+    ['defenseBonus', 'bonus_defense'],
+    ['armorValue', 'armor'],
+    ['armorBonus', 'bonus_armor'],
+    ['damageValue', 'damage'],
+    ['damageBonus', 'bonus_damage'],
+    ['hpValue', 'hp'],
+    ['hpBonus', 'bonus_hp'],
+    ['killStreakValue', 'killstreak']
+  ];
+
+  function importStats(obj, json) {
+    statList.forEach(function(el) {
+      obj[el[0]] = Number(json[el[1]]);
+    });
+  }
+
+  var buffList$1 = [
+    ['counterAttackLevel', 'Counter Attack'],
+    ['doublerLevel', 'Doubler'],
+    ['deathDealerLevel', 'Death Dealer'],
+    ['darkCurseLevel', 'Dark Curse'],
+    ['holyFlameLevel', 'Holy Flame'],
+    ['constitutionLevel', 'Constitution'],
+    ['sanctuaryLevel', 'Sanctuary'],
+    ['flinchLevel', 'Flinch'],
+    ['nightmareVisageLevel', 'Nightmare Visage'],
+    ['superEliteSlayerLevel', 'Super Elite Slayer'],
+    ['fortitudeLevel', 'Fortitude'],
+    ['chiStrikeLevel', 'Chi Strike'],
+    ['terrorizeLevel', 'Terrorize'],
+    ['barricadeLevel', 'Barricade'],
+    ['reignOfTerrorLevel', 'Reign Of Terror'],
+    ['anchoredLevel', 'Anchored'],
+    ['severeConditionLevel', 'Severe Condition'],
+    ['entrenchLevel', 'Entrench'],
+    ['cloakLevel', 'Cloak']
+  ];
+
+  function importBuffs(obj, buffs) {
+    buffList$1.forEach(function(el) {
+      obj[el[0]] = fallback(buffs[el[1]], 0);
+    });
+  }
+
+  function playerDataObject(json) {
+    var buffs = reduceBuffArray(json._skills);
+    var obj = {};
+    importStats(obj, json);
+    importBuffs(obj, buffs);
+    obj.superEliteSlayerMultiplier = Math.round(0.002 *
+      obj.superEliteSlayerLevel * 100) / 100;
+    if (obj.cloakLevel !== 0) {updateForCloak(obj);}
+    return obj;
   }
 
   var defRawAttack;
@@ -20061,7 +20040,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '52';
+  window.FSH.calf = '53';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
@@ -20086,4 +20065,4 @@
   };
 
 }());
-//# sourceMappingURL=prod_calfSystem.js.map
+//# sourceMappingURL=calfSystem.js.map
