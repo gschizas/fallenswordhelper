@@ -1,9 +1,10 @@
-import fallback from '../../system/fallback';
+import canRecall from './canRecall';
 import {rarity} from '../../support/constants';
-import {theInv} from '../options';
+import {theInv} from '../buildInv';
 
-function getT(player_id) {
-  if (player_id === -1) {return 4;}
+function getT(row) {
+  if (row.player_id === -1) {return 4;}
+  if (canRecall(row)) {return 7;}
   return 1;
 }
 
@@ -18,9 +19,7 @@ function isPartOfSet(row) {
 }
 
 function nameRenderDisplay(data, row) {
-  var cur = fallback(theInv.player_id,
-    theInv.current_player_id);
-  var t = getT(row.player_id);
+  var t = getT(row);
   var p = player(theInv.player_id, row.player_id,
     theInv.guild_id);
 
@@ -37,8 +36,7 @@ function nameRenderDisplay(data, row) {
     '" class="fshInvItem tip-dynamic ' +
     rarity[row.rarity].clas + '" ' +
     'data-tipped="fetchitem.php?item_id=' + row.item_id +
-    '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p +
-    '&currentPlayerId=' + cur + '">' +
+    '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p + '">' +
     bold + '</a>' + _setName;
 }
 

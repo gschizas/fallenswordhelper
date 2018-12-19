@@ -1,4 +1,4 @@
-import {theInv} from '../options';
+import {theInv} from '../buildInv';
 
 function userInvNotEquipped(row) {
   return row.folder_id && !row.equipped;

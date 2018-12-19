@@ -1,5 +1,6 @@
+import canRecall from './canRecall';
 import fallback from '../../system/fallback';
-import {theInv} from '../options';
+import {theInv} from '../buildInv';
 
 function gsRecall(row) {
   return '<span class="fshLink recallItem" invid="' +
@@ -18,18 +19,6 @@ function gsDisplayType(type, row, fn) {
     return fn(row);
   }
   return 'GS';
-}
-
-function onGuildMember(row) {
-  return row.player_id && row.player_id !== -1;
-}
-
-function isTagged(row) {
-  return row.folder_id && row.guild_tag !== -1;
-}
-
-function canRecall(row) {
-  return onGuildMember(row) || isTagged(row);
 }
 
 function canStore(row) {

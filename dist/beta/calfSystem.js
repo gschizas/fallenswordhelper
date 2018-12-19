@@ -9752,6 +9752,53 @@
     add(3, doButtons);
   }
 
+  function fetchinv() {
+    return guild({subcmd: 'fetchinv'});
+  }
+
+  function report() {
+    return guildInventory$1({subcmd2: 'report'});
+  }
+
+  var theInv;
+  var composed = [];
+
+  function cacheTheInv(data) {
+    theInv = data;
+  }
+
+  function getComposedFromBp(data) {
+    composed = data.r.map(function(el) {return el.items;})
+      .reduce(function(a, b) {return a.concat(b);})
+      .filter(function(el) {return el.t === 15;});
+  }
+
+  function getComposedFromGs(data) {
+    composed = composed.concat(data.r.filter(function(el) {return el.t === 15;}));
+  }
+
+  function gotSomeStuff() {
+    theInv.items.forEach(function(item) {
+      if (item.type === 15) {
+        var cp = composed.find(function(pot) {return pot.a === item.inv_id;});
+        item.item_name = cp.n;
+      }
+    });
+  }
+
+  function buildInv() {
+    var prm = [];
+    prm.push(getInventory().done(cacheTheInv));
+    if (calf.subcmd === 'invmanagernew') {
+      prm.push(loadInventory().done(getComposedFromBp));
+    }
+    if (calf.subcmd === 'guildinvmgr') {
+      prm.push(fetchinv().done(getComposedFromGs));
+      prm.push(report().done(getComposedFromGs));
+    }
+    return $.when.apply($, prm).done(gotSomeStuff);
+  }
+
   function clearButton() { // jQuery
     var input = $('#fshInv_filter input');
     input.prop('type', 'text');
@@ -9762,6 +9809,29 @@
       input.val('');
       $('#fshInv').DataTable().search('').draw();
     });
+  }
+
+  function decorate() {
+    if (theInv.folders) {
+      theInv.folders['-1'] = 'Main';
+    }
+  }
+
+  function bpDisplayType(type, row) {
+    if (type !== 'display') {return 'BP';}
+    if (row.player_id === -1) {
+      return '<span class="fshLink takeItem" invid="' + row.inv_id +
+        '" action="take">BP</span>';
+    }
+    return '<span class="fshLink recallItem" invid="' + row.inv_id +
+      '" playerid="' + row.player_id +
+      '" mode="0" action="recall">BP</span>';
+  }
+
+  function bpRender(where, type, row) {
+    if (row.folder_id || row.player_id ===
+      theInv.current_player_id) {return;}
+    return bpDisplayType(type, row);
   }
 
   var defaultOptions = {
@@ -9841,8 +9911,9 @@
     '<td><input id="fshContainer" item="14" type="checkbox"/></td>' +
     '<td class="fshRight">&nbsp;Frag Stash:</td>' +
     '<td><input id="fshStash" item="16" type="checkbox"/></td>' +
-    // ' Composed: <input id="fshComposed" item="15" type="checkbox"/>' +
-    '<td colspan="3"></td></tr>' +
+    '<td class="fshRight">&nbsp;Composed:</td>' +
+    '<td><input id="fshComposed" item="15" type="checkbox"/></td>' +
+    '<td></td></tr>' +
     '<tr>' +
     '<td class="fshRight">&nbsp;Common:</td>' +
     '<td><input id="fshCommon" item="100" type="checkbox" checked/></td>' +
@@ -9901,51 +9972,6 @@
     Uncrafted: {abbr: 'Unc', colour: '#666666', index: 1}
   };
 
-  var options;
-  var showQuickDropLinks;
-  var showQuickSendLinks;
-  var theInv;
-
-  function storeTheInv(data) {
-    theInv = data;
-  }
-
-  function extendOptions(data) {
-    options = extend({}, defaultOptions);
-    extend(options, fallback(data, {}));
-    showQuickDropLinks = getValue('showQuickDropLinks');
-    showQuickSendLinks = getValue('showQuickSendLinks');
-  }
-
-  function decorate() {
-    if (theInv.folders) {
-      theInv.folders['-1'] = 'Main';
-    }
-    // Hide composed potions until Zorg fixes the feed
-    theInv.items =
-      theInv.items.filter(function(obj) {
-        return obj.type !== 15;
-      });
-    //
-  }
-
-  function bpDisplayType(type, row) {
-    if (type !== 'display') {return 'BP';}
-    if (row.player_id === -1) {
-      return '<span class="fshLink takeItem" invid="' + row.inv_id +
-        '" action="take">BP</span>';
-    }
-    return '<span class="fshLink recallItem" invid="' + row.inv_id +
-      '" playerid="' + row.player_id +
-      '" mode="0" action="recall">BP</span>';
-  }
-
-  function bpRender(where, type, row) {
-    if (row.folder_id || row.player_id ===
-      theInv.current_player_id) {return;}
-    return bpDisplayType(type, row);
-  }
-
   function craftRender(craft) {
     if (craftHash[craft]) {return craftHash[craft].abbr;}
     return '';
@@ -9984,9 +10010,27 @@
   }
 
   function durabilityRender(data, type, row) {
-    if (parseInt(row.max_durability, 10) > 0) {
+    if (row.type < 9 && row.max_durability > 0) {
       return Math.ceil(row.durability / row.max_durability * 100);
     }
+  }
+
+  function forgeRender(data, type, row) {
+    if (row.type < 9) {
+      return row.forge;
+    }
+  }
+
+  function onGuildMember(row) {
+    return row.player_id && row.player_id !== -1;
+  }
+
+  function isTagged(row) {
+    return row.folder_id && row.guild_tag !== -1;
+  }
+
+  function canRecall(row) {
+    return onGuildMember(row) || isTagged(row);
   }
 
   function gsRecall(row) {
@@ -10008,18 +10052,6 @@
     return 'GS';
   }
 
-  function onGuildMember(row) {
-    return row.player_id && row.player_id !== -1;
-  }
-
-  function isTagged(row) {
-    return row.folder_id && row.guild_tag !== -1;
-  }
-
-  function canRecall(row) {
-    return onGuildMember(row) || isTagged(row);
-  }
-
   function canStore(row) {
     return row.folder_id && !row.bound; // && !row.equipped;
   }
@@ -10029,8 +10061,9 @@
     if (canStore(row)) {return gsDisplayType(type, row, gsStore);}
   }
 
-  function getT(player_id) {
-    if (player_id === -1) {return 4;}
+  function getT(row) {
+    if (row.player_id === -1) {return 4;}
+    if (canRecall(row)) {return 7;}
     return 1;
   }
 
@@ -10045,9 +10078,7 @@
   }
 
   function nameRenderDisplay(data, row) {
-    var cur = fallback(theInv.player_id,
-      theInv.current_player_id);
-    var t = getT(row.player_id);
+    var t = getT(row);
     var p = player(theInv.player_id, row.player_id,
       theInv.guild_id);
 
@@ -10064,8 +10095,7 @@
       '" class="fshInvItem tip-dynamic ' +
       rarity[row.rarity].clas + '" ' +
       'data-tipped="fetchitem.php?item_id=' + row.item_id +
-      '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p +
-      '&currentPlayerId=' + cur + '">' +
+      '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p + '">' +
       bold + '</a>' + _setName;
   }
 
@@ -10209,6 +10239,17 @@
     return theInv.folders[row.folder_id];
   }
 
+  var options;
+  var showQuickDropLinks;
+  var showQuickSendLinks;
+
+  function extendOptions(data) {
+    options = extend({}, defaultOptions);
+    extend(options, fallback(data, {}));
+    showQuickDropLinks = getValue('showQuickDropLinks');
+    showQuickSendLinks = getValue('showQuickSendLinks');
+  }
+
   var tblCols = [
     {title: 'Name', data: 'item_name', render: nameRender},
     {title: 'Level', data: 'stats.min_level'},
@@ -10231,7 +10272,7 @@
     {title: 'Arm', data: 'stats.armor'},
     {title: 'Dam', data: 'stats.damage'},
     {title: 'HP', data: 'stats.hp'},
-    {title: 'Frg', data: 'forge'},
+    {title: 'Frg', data: 'forge', render: forgeRender},
     {
       title: 'Craft',
       data: 'craft',
@@ -10743,7 +10784,7 @@
 
   function syncInvMan() { // jQuery
     var prm = [];
-    prm.push(getInventory().done(storeTheInv));
+    prm.push(buildInv());
     if (calf.subcmd === 'guildinvmgr') {
       prm.push(getMembrList(false));
     }
@@ -20042,7 +20083,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '53';
+  window.FSH.calf = '54';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

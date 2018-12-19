@@ -3,16 +3,18 @@ import craftRender from './render/craftRender';
 import createdRow from './render/createdRow';
 import dropRender from './render/dropRender';
 import durabilityRender from './render/durabilityRender';
+import forgeRender from './render/forgeRender';
 import gsRender from './render/gsRender';
 import nameRender from './render/nameRender';
 import sendRender from './render/sendRender';
+import {theInv} from './buildInv';
 import wearUseRender from './render/wearUseRender';
 import whereData from './render/whereData';
 import whereRender from './render/whereRender';
 import whereRenderDisplay from './render/whereRenderDisplay';
 import whereRenderFilter from './render/whereRenderFilter';
 import {craftHash, itemType} from './assets';
-import {showQuickDropLinks, showQuickSendLinks, theInv} from './options';
+import {showQuickDropLinks, showQuickSendLinks} from './options';
 
 var tblCols = [
   {title: 'Name', data: 'item_name', render: nameRender},
@@ -36,7 +38,7 @@ var tblCols = [
   {title: 'Arm', data: 'stats.armor'},
   {title: 'Dam', data: 'stats.damage'},
   {title: 'HP', data: 'stats.hp'},
-  {title: 'Frg', data: 'forge'},
+  {title: 'Frg', data: 'forge', render: forgeRender},
   {
     title: 'Craft',
     data: 'craft',

@@ -75,8 +75,9 @@ export var invManFilter =
   '<td><input id="fshContainer" item="14" type="checkbox"/></td>' +
   '<td class="fshRight">&nbsp;Frag Stash:</td>' +
   '<td><input id="fshStash" item="16" type="checkbox"/></td>' +
-  // ' Composed: <input id="fshComposed" item="15" type="checkbox"/>' +
-  '<td colspan="3"></td></tr>' +
+  '<td class="fshRight">&nbsp;Composed:</td>' +
+  '<td><input id="fshComposed" item="15" type="checkbox"/></td>' +
+  '<td></td></tr>' +
   '<tr>' +
   '<td class="fshRight">&nbsp;Common:</td>' +
   '<td><input id="fshCommon" item="100" type="checkbox" checked/></td>' +
