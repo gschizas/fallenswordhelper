@@ -6,11 +6,6 @@ import getValue from '../system/getValue';
 export var options;
 export var showQuickDropLinks;
 export var showQuickSendLinks;
-export var theInv;
-
-export function storeTheInv(data) {
-  theInv = data;
-}
 
 export function extendOptions(data) {
   options = extend({}, defaultOptions);

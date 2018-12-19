@@ -1,18 +1,18 @@
 import add from '../support/task';
+import {buildInv} from './buildInv';
 import calf from '../support/calf';
 import clearButton from './clearButton';
 import decorate from './decorate';
 import doTable from './table';
 import eventHandlers from './eventHandlers/eventHandlers';
+import {extendOptions} from './options';
 import getForage from '../ajax/getForage';
-import getInventory from '../ajax/getInventory';
 import getMembrList from '../ajax/getMembrList';
 import headers from './headers';
 import {imageServer} from '../system/system';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
-import {extendOptions, storeTheInv} from './options';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
@@ -60,7 +60,7 @@ function getInvMan() {
 
 function syncInvMan() { // jQuery
   var prm = [];
-  prm.push(getInventory().done(storeTheInv));
+  prm.push(buildInv());
   if (calf.subcmd === 'guildinvmgr') {
     prm.push(getMembrList(false));
   }

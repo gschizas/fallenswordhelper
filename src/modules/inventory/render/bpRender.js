@@ -1,4 +1,4 @@
-import {theInv} from '../options';
+import {theInv} from '../buildInv';
 
 function bpDisplayType(type, row) {
   if (type !== 'display') {return 'BP';}
