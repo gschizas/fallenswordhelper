@@ -1,5 +1,5 @@
 import {options} from '../options';
-import setForage from '../../ajax/setForage';
+import saveOptions from '../saveOptions';
 
 export default function changeLvls() { // jQuery
   var minLvl = parseInt($('#fshMinLvl').val(), 10);
@@ -7,6 +7,6 @@ export default function changeLvls() { // jQuery
   if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
   options.fshMinLvl = minLvl;
   options.fshMaxLvl = maxLvl;
-  setForage('fsh_inventory', options);
+  saveOptions(options);
   $('#fshInv').DataTable().draw(false);
 }

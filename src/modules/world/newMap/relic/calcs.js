@@ -145,7 +145,7 @@ function doGroupAttributeElements(buffs) {
 function flinchEffectOnDefenders(buffs) {
   var flinchEffectValue = Math.ceil(defBuffedAttack *
     fallback(buffs.Flinch, 0) * 0.001);
-  defenseBuffedElement.textContent = addCommas(defBuffedAttack -
+  attackBuffedElement.textContent = addCommas(defBuffedAttack -
     flinchEffectValue);
 }
 

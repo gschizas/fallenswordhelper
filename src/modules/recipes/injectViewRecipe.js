@@ -3,6 +3,7 @@ import fallback from '../system/fallback';
 import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 import {server} from '../system/system';
 import xPath from '../common/xPath';
@@ -26,22 +27,6 @@ function getItemName(responseText) { // Legacy
   if (itemName) {return itemName[1];}
 }
 
-function injectViewRecipeLinks(responseText, callback) { // Legacy
-  var itemName = getItemName(responseText);
-  var plantFromComponent = fallback(plantFromComponentHash[itemName],
-    itemName);
-  if (itemName !== plantFromComponent) {
-    var itemLinks = createTd({
-      innerHTML: '<a href="' + server +
-        '?cmd=auctionhouse&search=' +
-        encodeURI(plantFromComponent) + '">AH</a>'
-    });
-    var counter = xPath('../../../../tr[2]/td', document, callback);
-    counter.setAttribute('colspan', '2');
-    insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
-  }
-}
-
 function linkFromMouseoverCustom(mouseOver) { // Legacy
   var reParams =
     /item_id=(\d+)&inv_id=([-0-9]*)&t=(\d+)&p=(\d+)&vcode=([a-z0-9]*)/i;
@@ -60,6 +45,35 @@ function linkFromMouseoverCustom(mouseOver) { // Legacy
   return theUrl;
 }
 
+function injectViewRecipeLinks(responseText, callback) { // Legacy
+  var itemName = getItemName(responseText);
+  var plantFromComponent = fallback(plantFromComponentHash[itemName],
+    itemName);
+  if (itemName !== plantFromComponent) {
+    var itemLinks = createTd({
+      innerHTML: '<a href="' + server +
+        '?cmd=auctionhouse&search=' +
+        encodeURI(plantFromComponent) + '">AH</a>'
+    });
+    var counter = xPath('../../../../tr[2]/td', document, callback);
+    counter.setAttribute('colspan', '2');
+    insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
+  }
+}
+
+function processMouseOver(compI, html) {
+  injectViewRecipeLinks(html, compI);
+}
+
+function processComponents(compI) {
+  var mo = compI.dataset.tipped;
+  retryAjax(linkFromMouseoverCustom(mo)).done(partial(processMouseOver, compI));
+  var componentCountElement = compI.parentNode.parentNode
+    .parentNode.nextSibling.firstChild;
+  componentCountElement.innerHTML = '<nobr>' +
+    componentCountElement.innerHTML + '</nobr>';
+}
+
 export default function injectViewRecipe() { // Legacy
   var recipe = $('#pCC table table b').first();
   var name = recipe.html();
@@ -74,15 +88,6 @@ export default function injectViewRecipe() { // Legacy
     './/b[.="Components Required"]/../../following-sibling::tr[2]//img',
     document, pCC);
   if (components) {
-    components.forEach(function(compI) {
-      var mo = compI.dataset.tipped;
-      retryAjax(linkFromMouseoverCustom(mo)).done(function(html) {
-        injectViewRecipeLinks(html, compI);
-      });
-      var componentCountElement = compI.parentNode.parentNode
-        .parentNode.nextSibling.firstChild;
-      componentCountElement.innerHTML = '<nobr>' +
-        componentCountElement.innerHTML + '</nobr>';
-    });
+    components.forEach(processComponents);
   }
 }
