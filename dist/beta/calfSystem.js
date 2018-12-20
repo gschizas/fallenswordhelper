@@ -1956,36 +1956,40 @@
     return enhancements && enhancements.length > 0;
   }
 
+  function buildEnhancements(tmpObj, _prev, _curr) {
+    return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
+      tmpObj.enhancements[_curr].min + ' - ' +
+      tmpObj.enhancements[_curr].max + '</span><br>';
+  }
+
+  function buildArray(data, prev, curr) {
+    var tmpObj = data[curr];
+    tmpObj.name = curr;
+    tmpObj.image = '<img class="tip-static" src="' + imageServer +
+      '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
+      imageServer + '/creatures/' + tmpObj.image_id +
+      '.jpg\' width=200 height=200>" width=40 height=40>';
+    tmpObj.level = addCommas(tmpObj.level);
+    tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
+    tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
+    tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
+    tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
+    tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
+    var enhancements;
+    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
+    if (hazEnhancements(enhancements)) {
+      var tmp = '<span class="fshXXSmall">';
+      tmp += enhancements.reduce(partial(buildEnhancements, tmpObj), '');
+      tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
+    } else {
+      tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
+    }
+    prev.push(tmpObj);
+    return prev;
+  }
+
   function prepMonster(data) {
-    monsterAry = Object.keys(data).reduce(function(prev, curr) {
-      var tmpObj = data[curr];
-      tmpObj.name = curr;
-      tmpObj.image = '<img class="tip-static" src="' + imageServer +
-        '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
-        imageServer + '/creatures/' + tmpObj.image_id +
-        '.jpg\' width=200 height=200>" width=40 height=40>';
-      tmpObj.level = addCommas(tmpObj.level);
-      tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
-      tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
-      tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
-      tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
-      tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-      var enhancements;
-      if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-      if (hazEnhancements(enhancements)) {
-        var tmp = '<span class="fshXXSmall">';
-        tmp += enhancements.reduce(function(_prev, _curr) {
-          return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
-            tmpObj.enhancements[_curr].min + ' - ' +
-            tmpObj.enhancements[_curr].max + '</span><br>';
-        }, '');
-        tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
-      } else {
-        tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
-      }
-      prev.push(tmpObj);
-      return prev;
-    }, []);
+    monsterAry = Object.keys(data).reduce(partial(buildArray, data), []);
   }
 
   function prepAry(data) {
@@ -2077,13 +2081,15 @@
 
   var guildId;
 
+  function getGuildId(el) {
+    var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
+    if (match) {guildId = Number(match[1]);}
+  }
+
   function currentGuildId() {
     if (!guildId) {
       var nodeList = document.body.getElementsByTagName('script');
-      Array.prototype.forEach.call(nodeList, function getGuildId(el) {
-        var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-        if (match) {guildId = Number(match[1]);}
-      });
+      Array.prototype.forEach.call(nodeList, getGuildId);
     }
     return guildId;
   }
@@ -9767,34 +9773,54 @@
     theInv = data;
   }
 
+  function doInventory() {
+    return getInventory().done(cacheTheInv);
+  }
+
   function getComposedFromBp(data) {
     composed = data.r.map(function(el) {return el.items;})
       .reduce(function(a, b) {return a.concat(b);})
       .filter(function(el) {return el.t === 15;});
   }
 
+  function doComposedFromBp() {
+    return loadInventory().done(getComposedFromBp);
+  }
+
   function getComposedFromGs(data) {
     composed = composed.concat(data.r.filter(function(el) {return el.t === 15;}));
   }
 
+  function doGs() {
+    return fetchinv().done(getComposedFromGs);
+  }
+
+  function doReport() {
+    return report().done(getComposedFromGs);
+  }
+
+  function thisPot(inv_id, pot) {return pot.a === inv_id;}
+
+  function addComposedName(item) {
+    if (item.type === 15) {
+      var cp = composed.find(partial(thisPot, item.inv_id));
+      item.item_name = cp.n;
+    }
+  }
+
   function gotSomeStuff() {
-    theInv.items.forEach(function(item) {
-      if (item.type === 15) {
-        var cp = composed.find(function(pot) {return pot.a === item.inv_id;});
-        item.item_name = cp.n;
-      }
-    });
+    theInv.items.forEach(addComposedName);
   }
 
   function buildInv() {
     var prm = [];
-    prm.push(getInventory().done(cacheTheInv));
+    prm.push(doInventory());
     if (calf.subcmd === 'invmanagernew') {
-      prm.push(loadInventory().done(getComposedFromBp));
+      prm.push(doComposedFromBp());
     }
     if (calf.subcmd === 'guildinvmgr') {
-      prm.push(fetchinv().done(getComposedFromGs));
-      prm.push(report().done(getComposedFromGs));
+      prm.push(doGs());
+      prm.push(doReport());
     }
     return $.when.apply($, prm).done(gotSomeStuff);
   }
@@ -10104,8 +10130,12 @@
     return nameRenderDisplay(data, row);
   }
 
+  function cantSend(row) {
+    return row.equipped || row.guild_tag === -1 && row.bound;
+  }
+
   function sendRender(data, type, row) {
-    if (fallback(row.bound, row.equipped)) {return;}
+    if (cantSend(row)) {return;}
     if (type !== 'display') {return 'Send';}
     return '<span class="sendItem tip-static sendLink" data-tipped=' +
       '"INSTANTLY SEND THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk."' +
@@ -10337,6 +10367,10 @@
     table.column(18).visible(isUserInv() && showQuickSendLinks);
   }
 
+  function saveOptions(options) {
+    setForage('fsh_' + calf.subcmd, options);
+  }
+
   function setChecks() {
     Array.prototype.forEach.call(
       document.querySelectorAll('table.fshInvFilter input[type="checkbox"]'),
@@ -10344,7 +10378,7 @@
         el.checked =
           options.checkedElements[el.getAttribute('item')] === 1;
       });
-    setForage('fsh_inventory', options);
+    saveOptions(options);
   }
 
   function allChecks() { // jQuery
@@ -10359,7 +10393,7 @@
     if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
     options.fshMinLvl = minLvl;
     options.fshMaxLvl = maxLvl;
-    setForage('fsh_inventory', options);
+    saveOptions(options);
     $('#fshInv').DataTable().draw(false);
   }
 
@@ -10430,7 +10464,7 @@
       function(el) {
         options.checkedElements[el.getAttribute('item')] = 1;
       });
-    setForage('fsh_inventory', options);
+    saveOptions(options);
     $('#fshInv').DataTable().draw(false);
   }
 
@@ -10457,7 +10491,7 @@
   function resetLvls$1() { // jQuery
     options.fshMinLvl = defaultOptions.fshMinLvl;
     options.fshMaxLvl = defaultOptions.fshMaxLvl;
-    setForage('fsh_inventory', options);
+    saveOptions(options);
     $('#fshMinLvl').val(options.fshMinLvl);
     $('#fshMaxLvl').val(options.fshMaxLvl);
     $('#fshInv').DataTable().draw(false);
@@ -10470,7 +10504,7 @@
       xc: window.ajaxXC,
       target_username: getValue('itemRecipient'),
       items: invIdAry
-    });
+    }).pipe(ajaxReturnCode);
   }
 
   function dostoreitems(invIdAry) {
@@ -10788,7 +10822,7 @@
     if (calf.subcmd === 'guildinvmgr') {
       prm.push(getMembrList(false));
     }
-    prm.push(getForage('fsh_inventory')
+    prm.push(getForage('fsh_' + calf.subcmd)
       .done(extendOptions)
     );
     $.when.apply($, prm).done(function() {
@@ -13140,23 +13174,25 @@
     }, {});
   }
 
-  var packRE = />([ a-zA-Z]+) Level (\d+)/g;
+  var packRE = />\s*([ a-zA-Z]+) Level (\d+)/g;
+
+  function checkForBuffs(myBuffs, el) {
+    var tipped = el.dataset.tipped;
+    var packBuffs;
+    while ((packBuffs = packRE.exec(tipped)) !== null) {
+      if (myBuffs[packBuffs[1]] === Number(packBuffs[2])) {
+        insertHtmlBeforeEnd(el.parentNode,
+          '<br><span class="fshRed fshNoWrap">' + packBuffs[1] + ' ' +
+          packBuffs[2] + ' active</span>');
+      }
+    }
+  }
 
   function postWarnings(myBuffs) {
     var packsRow = pCC.firstElementChild.rows[9];
     if (!packsRow) {return;}
     var nodeList = packsRow.cells[0].firstElementChild.getElementsByTagName('A');
-    Array.prototype.forEach.call(nodeList, function(el) {
-      var tipped = el.dataset.tipped;
-      var packBuffs;
-      while ((packBuffs = packRE.exec(tipped)) !== null) {
-        if (myBuffs[packBuffs[1]] === Number(packBuffs[2])) {
-          insertHtmlBeforeEnd(el.parentNode,
-            '<br><span class="fshRed fshNoWrap">' + packBuffs[1] + ' ' +
-            packBuffs[2] + ' active</span>');
-        }
-      }
-    });
+    Array.prototype.forEach.call(nodeList, partial(checkForBuffs, myBuffs));
   }
 
   function parseProfile(data) {
@@ -13633,14 +13669,7 @@
     on(pCC.getElementsByTagName('TABLE')[1], 'click', eventHandlers$1);
   }
 
-  function injectSaveSettings() { // Hybrid
-    if (jQueryNotPresent()) {return;}
-    var content = pCC;
-    var fshSettings = {};
-    var list = GM_listValues();
-    for (var i = 0; i < list.length; i += 1) {
-      fshSettings[list[i]] = getValue(list[i]);
-    }
+  function drawBox(content, fshSettings) {
     content.innerHTML = '<h1>FSH Settings</h1><br><center>The box below ' +
       'is your current settings. Copy it to save your current settings<br>' +
       'To load saved settings, simply replace the contents of the box with ' +
@@ -13652,16 +13681,31 @@
       JSON.stringify(fshSettings) + '</textarea>' +
       '<br><input id="HelperLoadSettings" class="custombutton" ' +
       'type="submit" value="Load Settings!" /></center>';
-    $('#HelperLoadSettings').click(function() {
-      var userInput = jsonParse(getElementById('HelperfshSettings').value);
-      if (isObject(userInput)) {
-        var settings = userInput;
-        Object.keys(settings).forEach(function(id) {
-          setValue(id, settings[id]);
-        });
-        dialogMsg('Settings loaded successfully!');
-      }
-    });
+  }
+
+  function saveSetting(settings, id) {
+    setValue(id, settings[id]);
+  }
+
+  function clickHandler() {
+    var userInput = jsonParse(getElementById('HelperfshSettings').value);
+    if (isObject(userInput)) {
+      var settings = userInput;
+      Object.keys(settings).forEach(partial(saveSetting, settings));
+      dialogMsg('Settings loaded successfully!');
+    }
+  }
+
+  function injectSaveSettings() { // Hybrid
+    if (jQueryNotPresent()) {return;}
+    var content = pCC;
+    var fshSettings = {};
+    var list = GM_listValues();
+    for (var i = 0; i < list.length; i += 1) {
+      fshSettings[list[i]] = getValue(list[i]);
+    }
+    drawBox(content, fshSettings);
+    $('#HelperLoadSettings').click(clickHandler);
   }
 
   var multCnt;
@@ -15994,19 +16038,21 @@
   var groupHPBuffedElement;
   var processingStatus;
 
+  function whyIsntThisAFilter(prev, key) {
+    for (var i = 0; i < memberExclusions.length; i += 1) { // WTF?
+      if (memberExclusions[i](key)) {return prev;}
+    }
+    prev.push('<a href="index.php?cmd=profile&player_id=' +
+      guildMemberList[key].id + '">' + key + '</a>');
+    return prev;
+  }
+
   function missingMembers(membrList) {
     guildMemberList = membrList;
     var myMembers = Object.keys(guildMemberList);
     twoMinutes = nowSecs - 120;
     sevenDays = nowSecs - 604800;
-    var filtered = myMembers.reduce(function(prev, key) {
-      for (var i = 0; i < memberExclusions.length; i += 1) {
-        if (memberExclusions[i](key)) {return prev;}
-      }
-      prev.push('<a href="index.php?cmd=profile&player_id=' +
-        guildMemberList[key].id + '">' + key + '</a>');
-      return prev;
-    }, []);
+    var filtered = myMembers.reduce(whyIsntThisAFilter, []);
     insertHtmlBeforeEnd(containerDiv$1,
       '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
       '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
@@ -16273,7 +16319,7 @@
   function flinchEffectOnDefenders(buffs) {
     var flinchEffectValue = Math.ceil(defBuffedAttack *
       fallback(buffs.Flinch, 0) * 0.001);
-    defenseBuffedElement.textContent = addCommas(defBuffedAttack -
+    attackBuffedElement.textContent = addCommas(defBuffedAttack -
       flinchEffectValue);
   }
 
@@ -18248,22 +18294,6 @@
     if (itemName) {return itemName[1];}
   }
 
-  function injectViewRecipeLinks(responseText, callback) { // Legacy
-    var itemName = getItemName(responseText);
-    var plantFromComponent = fallback(plantFromComponentHash[itemName],
-      itemName);
-    if (itemName !== plantFromComponent) {
-      var itemLinks = createTd({
-        innerHTML: '<a href="' + server +
-          '?cmd=auctionhouse&search=' +
-          encodeURI(plantFromComponent) + '">AH</a>'
-      });
-      var counter = xPath('../../../../tr[2]/td', document, callback);
-      counter.setAttribute('colspan', '2');
-      insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
-    }
-  }
-
   function linkFromMouseoverCustom(mouseOver) { // Legacy
     var reParams =
       /item_id=(\d+)&inv_id=([-0-9]*)&t=(\d+)&p=(\d+)&vcode=([a-z0-9]*)/i;
@@ -18282,6 +18312,35 @@
     return theUrl;
   }
 
+  function injectViewRecipeLinks(responseText, callback) { // Legacy
+    var itemName = getItemName(responseText);
+    var plantFromComponent = fallback(plantFromComponentHash[itemName],
+      itemName);
+    if (itemName !== plantFromComponent) {
+      var itemLinks = createTd({
+        innerHTML: '<a href="' + server +
+          '?cmd=auctionhouse&search=' +
+          encodeURI(plantFromComponent) + '">AH</a>'
+      });
+      var counter = xPath('../../../../tr[2]/td', document, callback);
+      counter.setAttribute('colspan', '2');
+      insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
+    }
+  }
+
+  function processMouseOver$1(compI, html) {
+    injectViewRecipeLinks(html, compI);
+  }
+
+  function processComponents(compI) {
+    var mo = compI.dataset.tipped;
+    retryAjax(linkFromMouseoverCustom(mo)).done(partial(processMouseOver$1, compI));
+    var componentCountElement = compI.parentNode.parentNode
+      .parentNode.nextSibling.firstChild;
+    componentCountElement.innerHTML = '<nobr>' +
+      componentCountElement.innerHTML + '</nobr>';
+  }
+
   function injectViewRecipe() { // Legacy
     var recipe = $('#pCC table table b').first();
     var name = recipe.html();
@@ -18296,16 +18355,7 @@
       './/b[.="Components Required"]/../../following-sibling::tr[2]//img',
       document, pCC);
     if (components) {
-      components.forEach(function(compI) {
-        var mo = compI.dataset.tipped;
-        retryAjax(linkFromMouseoverCustom(mo)).done(function(html) {
-          injectViewRecipeLinks(html, compI);
-        });
-        var componentCountElement = compI.parentNode.parentNode
-          .parentNode.nextSibling.firstChild;
-        componentCountElement.innerHTML = '<nobr>' +
-          componentCountElement.innerHTML + '</nobr>';
-      });
+      components.forEach(processComponents);
     }
   }
 
@@ -20083,7 +20133,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '54';
+  window.FSH.calf = '55';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
