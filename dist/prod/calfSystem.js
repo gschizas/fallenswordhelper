@@ -1928,6 +1928,13 @@
     on(content, 'click', doHandlers);
   }
 
+  function imgHtml(tmpObj) {
+    return '<img class="tip-static" src="' + imageServer +
+      '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
+      imageServer + '/creatures/' + tmpObj.image_id +
+      '.jpg\' width=200 height=200>" width=40 height=40>';
+  }
+
   function hazEnhancements(enhancements) {
     return enhancements && enhancements.length > 0;
   }
@@ -1938,34 +1945,33 @@
       tmpObj.enhancements[_curr].max + '</span><br>';
   }
 
-  function buildArray(data, prev, curr) {
-    var tmpObj = data[curr];
-    tmpObj.name = curr;
-    tmpObj.image = '<img class="tip-static" src="' + imageServer +
-      '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
-      imageServer + '/creatures/' + tmpObj.image_id +
-      '.jpg\' width=200 height=200>" width=40 height=40>';
+  function formatEnhancements(tmpObj) {
+    var enhancements;
+    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
+    if (hazEnhancements(enhancements)) {
+      var tmp = '<span class="fshXXSmall">';
+      tmp += enhancements.reduce(partial(buildEnhancements, tmpObj), '');
+      return tmp.slice(0, -4) + '</span>';
+    }
+    return '<span class="fshGrey">**Missing**</span>';
+  }
+
+  function buildHtml(data, key) {
+    var tmpObj = data[key];
+    tmpObj.name = key;
+    tmpObj.image = imgHtml(tmpObj);
     tmpObj.level = addCommas(tmpObj.level);
     tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
     tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
     tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
     tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
     tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-    var enhancements;
-    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-    if (hazEnhancements(enhancements)) {
-      var tmp = '<span class="fshXXSmall">';
-      tmp += enhancements.reduce(partial(buildEnhancements, tmpObj), '');
-      tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
-    } else {
-      tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
-    }
-    prev.push(tmpObj);
-    return prev;
+    tmpObj.enhancements = formatEnhancements(tmpObj);
+    return tmpObj;
   }
 
   function prepMonster(data) {
-    monsterAry = Object.keys(data).reduce(partial(buildArray, data), []);
+    monsterAry = Object.keys(data).map(partial(buildHtml, data));
   }
 
   function prepAry(data) {
@@ -3638,6 +3644,27 @@
     return result;
   }
 
+  function headersToHtml(prev, curr) {
+    return prev + '<th>' + curr + '</th>';
+  }
+
+  function needsCat(item, i, currentItems) {
+    return param.categoryField && (i === 0 ||
+      currentItems[i - 1][param.categoryField] !== item[param.categoryField]);
+  }
+
+  function itemRows(prev, item, i, currentItems) {
+    var result = '<tr>';
+    if (needsCat(item, i, currentItems)) {
+      result += '<td><span class="fshQs">' + item[param.categoryField] +
+        '</span></td><td></td><td></td><td></td><td></td></tr><tr>';
+    }
+    result += itemRow(item);
+    result += '<td><span class="HelperTextLink" data-itemId="' + i +
+      '" id="fshDel' + i + '">[Del]</span></td></tr>';
+    return prev + result;
+  }
+
   function doInputs() { // Legacy
     var result = '<tr>';
     for (var i = 0; i < param.tags.length; i += 1) {
@@ -3650,25 +3677,9 @@
   function generateManageTable() { // Legacy
     var result = '<table cellspacing="2" cellpadding="2" class="fshGc" ' +
       'width="100%"><tr class="fshOr">';
-    result += param.headers.reduce(function(prev, curr) {
-      return prev + '<th>' + curr + '</th>';
-    }, '');
+    result += param.headers.reduce(headersToHtml, '');
     result += '<th>Action</th></tr>';
-    var currentCategory = '';
-    param.currentItems.forEach(function(item, i) {
-      result += '<tr>';
-      if (param.categoryField &&
-          currentCategory !==
-          item[param.categoryField]) {
-        currentCategory = item[param.categoryField];
-        result += '<td><span class="fshQs">' +
-          currentCategory + '</span></td><td></td><td></td><td></td><td></td>' +
-            '</tr><tr>';
-      }
-      result += itemRow(item);
-      result += '<td><span class="HelperTextLink" data-itemId="' + i +
-        '" id="fshDel' + i + '">[Del]</span></td></tr>';
-    });
+    result += param.currentItems.reduce(itemRows, '');
     result += doInputs();
     result += '<td><span class="HelperTextLink" id="fshAdd">' +
       '[Add]</span></td></tr></table>' +
@@ -4936,12 +4947,7 @@
     }
   }
 
-  function injectMenu() {
-    if (!getElementById('pCL') || jQueryNotPresent()) {return;}
-    guildId$2 = currentGuildId();
-    updateQuestLink();
-    updateScavLink();
-    // character
+  function characterButtons() {
     anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
     insertAfterParent('nav-character-log', insertHtmlAfterEnd,
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -4955,15 +4961,9 @@
     creatureLogLink();
     anchorButton('1', 'Quick Links', injectQuickLinkManager,
       'nav-character-notepad');
-    // guild
-    guildInventory();
-    newGuildLogLink();
-    // top rated
-    insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
-      'Top 250 Players</a></li>');
-    // actions
+  }
+
+  function actionButtons() {
     anchorButton('2', 'AH Quick Search', injectAuctionSearch,
       'nav-actions-trade-auctionhouse');
     anchorButton('2', 'Online Players', injectOnlinePlayers,
@@ -4972,6 +4972,23 @@
       'nav-actions-interaction-findplayer');
     anchorButton('2', 'Find Buffs', injectFindBuffs,
       'nav-actions-interaction-findplayer');
+  }
+
+  function injectMenu() {
+    if (!getElementById('pCL') || jQueryNotPresent()) {return;}
+    guildId$2 = currentGuildId();
+    updateQuestLink();
+    updateScavLink();
+    characterButtons();
+    // guild
+    guildInventory();
+    newGuildLogLink();
+    // top rated
+    insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
+      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+      'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
+      'Top 250 Players</a></li>');
+    actionButtons();
     adjustHeight();
   }
 
@@ -12108,28 +12125,6 @@
     enemy: {color: 'fshRed', message: getValue('guildEnmyMessage')}
   };
 
-  function showRecallButton(playername) {
-    if (currentGuildRelationship === 'self') {
-      return '<a class="quickButton tip-static" ' +
-        'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
-        playername + '" data-tipped="Recall items from ' + playername +
-        '" style="background-image: url(\'' + imageServer +
-        '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-    }
-    return '';
-  }
-
-  function showRankButton(playerid, playername) {
-    if (currentGuildRelationship === 'self' && getValue('showAdmin')) {
-      return '<a class="quickButton buttonGuildRank tip-static" href="' +
-        'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
-        playerid + '" data-tipped="Rank ' + playername +
-        '" style="background-image: url(\'' + imageServer +
-        '/guilds/' + guildId$3 + '_mini.png\');"></a>&nbsp;&nbsp;';
-    }
-    return '';
-  }
-
   function guildAry(val) {
     if (val) {
       return val.toLowerCase().replace(/\s\s*/g, ' ').split(/\s*,\s*/);
@@ -12182,27 +12177,52 @@
     }
   }
 
+  function joinGroups() {
+    if (!getValue('enableMaxGroupSizeToJoin')) {
+      return '<a class="quickButton buttonJoinAll tip-static" ' +
+        'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
+        'data-tipped="Join All Groups" style="background-image: url(\'' +
+        imageServer +
+        '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+    }
+    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+    return '<a class="quickButton buttonJoinUnder tip-static" ' +
+      'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
+      'joinallgroupsundersize" data-tipped="Join All Groups < ' +
+      maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
+      imageServer +
+      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+  }
+
+  function showRecallButton(playername) {
+    if (currentGuildRelationship === 'self') {
+      return '<a class="quickButton tip-static" ' +
+        'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
+        playername + '" data-tipped="Recall items from ' + playername +
+        '" style="background-image: url(\'' + imageServer +
+        '/temple/3.gif\');"></a>&nbsp;&nbsp;';
+    }
+    return '';
+  }
+
+  function showRankButton(playerid, playername) {
+    if (currentGuildRelationship === 'self' && getValue('showAdmin')) {
+      return '<a class="quickButton buttonGuildRank tip-static" href="' +
+        'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
+        playerid + '" data-tipped="Rank ' + playername +
+        '" style="background-image: url(\'' + imageServer +
+        '/guilds/' + guildId$3 + '_mini.png\');"></a>&nbsp;&nbsp;';
+    }
+    return '';
+  }
+
   function profileInjectQuickButton(avyImg, playerid, playername) {
     var newhtml = '<div align="center">';
     newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
       quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
       '" style="background-image: url(\'' + imageServer +
       '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
-    if (!getValue('enableMaxGroupSizeToJoin')) {
-      newhtml += '<a class="quickButton buttonJoinAll tip-static" ' +
-        'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
-        'data-tipped="Join All Groups" style="background-image: url(\'' +
-        imageServer +
-        '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-    } else {
-      var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-      newhtml += '<a class="quickButton buttonJoinUnder tip-static" ' +
-        'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
-        'joinallgroupsundersize" data-tipped="Join All Groups < ' +
-        maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
-        imageServer +
-        '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-    }
+    newhtml += joinGroups();
     newhtml += '<a class="quickButton tip-static" ' +
       'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid +
       '" data-tipped="Go to ' + playername +
@@ -14037,38 +14057,45 @@
     getForage('fsh_titans').done(gotOldTitans); // Pref
   }
 
+  function showActiveBounties() {
+    return '<tr><td align= "right">' + networkIcon +
+      'Show Active Bounties' +
+      helpLink('Show Active Bounties',
+        'This will show your active bounties on the right hand side') +
+      ':</td><td colspan="3"><input name="enableActiveBountyList" ' +
+      'type = "checkbox" value = "on"' +
+      isChecked(calf.enableActiveBountyList) + '>&nbsp;' +
+      '<input name="bountyListRefreshTime" size="3" value="' +
+      calf.bountyListRefreshTime + '"> seconds refresh</td></tr>';
+  }
+
+  function showWantedBounties() {
+    return '<tr><td align= "right">' + networkIcon +
+      'Show Wanted Bounties' +
+      helpLink('Show Wanted Bounties',
+        'This will show when someone you want is on the bounty board, ' +
+        'the list is displayed on the right hand side') +
+      ':</td><td colspan="3"><input name="enableWantedList" ' +
+      'type="checkbox" value="on"' +
+      isChecked(calf.enableWantedList) +
+      '> Refresh time is same as Active Bounties';
+  }
+
+  function wantedNames$1() {
+    return '<tr><td align= "right">Wanted Names' +
+      helpLink('Wanted Names',
+        'The names of the people you want to see on the bounty board ' +
+        'separated by commas (or * for all)') + ':</td><td colspan="3">' +
+      '<input name="wantedNames" size="60" value="' + calf.wantedNames +
+      '"></td></tr>';
+  }
+
   function bountyPrefs() {
     // Bounty hunting prefs
-    return '<tr><th colspan="2"><b>Bounty hunting preferences' +
-        '</b></th></tr>' +
-
-      '<tr><td align= "right">' + networkIcon +
-        'Show Active Bounties' +
-        helpLink('Show Active Bounties',
-          'This will show your active bounties on the right hand side') +
-        ':</td><td colspan="3"><input name="enableActiveBountyList" ' +
-        'type = "checkbox" value = "on"' +
-        isChecked(calf.enableActiveBountyList) + '>&nbsp;' +
-        '<input name="bountyListRefreshTime" size="3" value="' +
-        calf.bountyListRefreshTime + '"> seconds refresh</td></tr>' +
-
-      '<tr><td align= "right">' + networkIcon +
-        'Show Wanted Bounties' +
-        helpLink('Show Wanted Bounties',
-          'This will show when someone you want is on the bounty board, ' +
-          'the list is displayed on the right hand side') +
-        ':</td><td colspan="3"><input name="enableWantedList" ' +
-        'type="checkbox" value="on"' +
-        isChecked(calf.enableWantedList) +
-        '> Refresh time is same as Active Bounties' +
-
-      '<tr><td align= "right">Wanted Names' +
-        helpLink('Wanted Names',
-          'The names of the people you want to see on the bounty board ' +
-          'separated by commas (or * for all)') + ':</td><td colspan="3">' +
-        '<input name="wantedNames" size="60" value="' + calf.wantedNames +
-        '"></td></tr>' +
-
+    return '<tr><th colspan="2"><b>Bounty hunting preferences</b></th></tr>' +
+      showActiveBounties() +
+      showWantedBounties() +
+      wantedNames$1() +
       simpleCheckbox('wantedGuildMembers') +
       simpleCheckbox('enableAttackHelper') +
       simpleCheckbox('showPvPSummaryInLog');
@@ -15990,23 +16017,8 @@
   }
 
   var guildMemberList;
-  var twoMinutes;
-  var sevenDays;
-  var memberExclusions = [
-    function(key) {return key === 'lastUpdate';},
-    function(key) {return myDefenders.indexOf(key) !== -1;},
-    function(key) {return !guildMemberList[key].last_login;},
-    function(key) {return Number(guildMemberList[key].last_login) >= twoMinutes;},
-    function(key) {return Number(guildMemberList[key].last_login) <= sevenDays;},
-    function(key) {
-      return guildMemberList[key].level >= 400 &&
-        guildMemberList[key].level <= 421;
-    },
-    function(key) {
-      return guildMemberList[key].level >= 441 &&
-        guildMemberList[key].level <= 450;
-    }
-  ];
+  var twoMinutesAgo;
+  var sevenDaysAgo;
   var relicCountElement;
   var lDPercentageElement;
   var lDCloakedElement;
@@ -16036,24 +16048,45 @@
   var groupHPBuffedElement;
   var processingStatus;
 
-  function whyIsntThisAFilter(prev, key) {
-    for (var i = 0; i < memberExclusions.length; i += 1) { // WTF?
-      if (memberExclusions[i](key)) {return prev;}
+  var available = [
+    function(key) {return key !== 'lastUpdate';},
+    function(key) {return !myDefenders.includes(key);},
+    function(key) {return guildMemberList[key].last_login;},
+    function(key) {
+      return Number(guildMemberList[key].last_login) < twoMinutesAgo;
+    },
+    function(key) {
+      return Number(guildMemberList[key].last_login) > sevenDaysAgo;
+    },
+    function(key) {
+      return guildMemberList[key].level < 400 ||
+        guildMemberList[key].level > 421;
+    },
+    function(key) {
+      return guildMemberList[key].level < 441 ||
+        guildMemberList[key].level > 450;
     }
-    prev.push('<a href="index.php?cmd=profile&player_id=' +
-      guildMemberList[key].id + '">' + key + '</a>');
-    return prev;
+  ];
+
+  function availableMembers(key) {
+    return available.every(function(fn) {return fn(key);});
+  }
+
+  function makeLinks(key) {
+    return '<a href="index.php?cmd=profile&player_id=' +
+      guildMemberList[key].id + '">' + key + '</a>';
   }
 
   function missingMembers(membrList) {
     guildMemberList = membrList;
-    var myMembers = Object.keys(guildMemberList);
-    twoMinutes = nowSecs - 120;
-    sevenDays = nowSecs - 604800;
-    var filtered = myMembers.reduce(whyIsntThisAFilter, []);
+    twoMinutesAgo = nowSecs - 120;
+    sevenDaysAgo = nowSecs - 604800;
+    var filtered = Object.keys(guildMemberList)
+      .filter(availableMembers).map(makeLinks);
     insertHtmlBeforeEnd(containerDiv$1,
-      '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
-      '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
+      '<div class="fshFloatLeft fshRelicLowDiv">' +
+      '<table class="relicT"><thead><tr><th>' + filtered.length.toString() +
+      ' Offline guild members not at relic:</th></tr></thead>' +
       '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
       '</table></div>');
   }
@@ -16095,7 +16128,7 @@
     fetchStatsBtn.classList.add('fshHide');
     var hideRelicOffline = getValue('hideRelicOffline');
     if (relicData.is_owner && !hideRelicOffline) {
-      getMembrList(false).done(missingMembers);
+      getMembrList(true).done(missingMembers);
     }
     insertHtmlBeforeEnd(leftDiv, proc);
     processingStatus = getElementById('ProcessingStatus');
@@ -17307,6 +17340,16 @@
     return 0;
   }
 
+  function lowestCaStats(combat) {
+    combat.extraAttackAtLowestFeasibleCALevel = Math.floor(
+      combat.player.attackValue * 0.0025 * combat.lowestFeasibleCALevel);
+    combat.extraDamageAtLowestFeasibleCALevel = Math.floor(
+      combat.player.damageValue * 0.0025 * combat.lowestFeasibleCALevel);
+    combat.extraNotes += 'Extra CA Att/Dam at this lowered CA level = ' +
+      combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
+      combat.extraDamageAtLowestFeasibleCALevel + '<br>';
+  }
+
   function caRunning(combat) {
     calcLowest(combat);
     combat.lowestFeasibleCALevel =
@@ -17315,16 +17358,7 @@
     combat.extraNotes += 'Lowest CA to still 1-hit this creature = ' +
       combat.lowestFeasibleCALevel + '<br>';
     if (combat.lowestFeasibleCALevel !== 0) {
-      combat.extraAttackAtLowestFeasibleCALevel =
-        Math.floor(combat.player.attackValue * 0.0025 *
-        combat.lowestFeasibleCALevel);
-      combat.extraDamageAtLowestFeasibleCALevel =
-        Math.floor(combat.player.damageValue * 0.0025 *
-        combat.lowestFeasibleCALevel);
-      combat.extraNotes +=
-        'Extra CA Att/Dam at this lowered CA level = ' +
-        combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
-        combat.extraDamageAtLowestFeasibleCALevel + '<br>';
+      lowestCaStats(combat);
     }
     combat.extraStaminaPerHitAtLowestFeasibleCALevel = stamAtLowestCa(combat);
     if (combat.extraStaminaPerHitAtLowestFeasibleCALevel <
@@ -19521,7 +19555,7 @@
     return false;
   }
 
-  function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
+  function canIgnore(aRow, playerName, isGuildMate) {
     if (!isGuildMate) {
       var dateExtraText = '<nobr><span style="font-size:x-small;">' +
         '[ <a title="Add to Ignore List" href="index.php?cmd=log' +
@@ -19530,6 +19564,10 @@
       aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' +
         dateExtraText;
     }
+  }
+
+  function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
+    canIgnore(aRow, playerName, isGuildMate);
     var buffingPlayerIDRE = /player_id=(\d+)/;
     var buffingPlayerID = buffingPlayerIDRE
       .exec(aRow.cells[2].innerHTML)[1];
@@ -20131,7 +20169,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '55';
+  window.FSH.calf = '56';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

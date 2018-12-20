@@ -38,6 +38,27 @@ function itemRow(item) { // Legacy
   return result;
 }
 
+function headersToHtml(prev, curr) {
+  return prev + '<th>' + curr + '</th>';
+}
+
+function needsCat(item, i, currentItems) {
+  return param.categoryField && (i === 0 ||
+    currentItems[i - 1][param.categoryField] !== item[param.categoryField]);
+}
+
+function itemRows(prev, item, i, currentItems) {
+  var result = '<tr>';
+  if (needsCat(item, i, currentItems)) {
+    result += '<td><span class="fshQs">' + item[param.categoryField] +
+      '</span></td><td></td><td></td><td></td><td></td></tr><tr>';
+  }
+  result += itemRow(item);
+  result += '<td><span class="HelperTextLink" data-itemId="' + i +
+    '" id="fshDel' + i + '">[Del]</span></td></tr>';
+  return prev + result;
+}
+
 function doInputs() { // Legacy
   var result = '<tr>';
   for (var i = 0; i < param.tags.length; i += 1) {
@@ -50,25 +71,9 @@ function doInputs() { // Legacy
 function generateManageTable() { // Legacy
   var result = '<table cellspacing="2" cellpadding="2" class="fshGc" ' +
     'width="100%"><tr class="fshOr">';
-  result += param.headers.reduce(function(prev, curr) {
-    return prev + '<th>' + curr + '</th>';
-  }, '');
+  result += param.headers.reduce(headersToHtml, '');
   result += '<th>Action</th></tr>';
-  var currentCategory = '';
-  param.currentItems.forEach(function(item, i) {
-    result += '<tr>';
-    if (param.categoryField &&
-        currentCategory !==
-        item[param.categoryField]) {
-      currentCategory = item[param.categoryField];
-      result += '<td><span class="fshQs">' +
-        currentCategory + '</span></td><td></td><td></td><td></td><td></td>' +
-          '</tr><tr>';
-    }
-    result += itemRow(item);
-    result += '<td><span class="HelperTextLink" data-itemId="' + i +
-      '" id="fshDel' + i + '">[Del]</span></td></tr>';
-  });
+  result += param.currentItems.reduce(itemRows, '');
   result += doInputs();
   result += '<td><span class="HelperTextLink" id="fshAdd">' +
     '[Add]</span></td></tr></table>' +

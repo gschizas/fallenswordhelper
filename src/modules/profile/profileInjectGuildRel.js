@@ -1,40 +1,17 @@
 import currentGuildId from '../common/currentGuildId';
 import getValue from '../system/getValue';
-import {imageServer} from '../system/system';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import partial from '../common/partial';
 import setValue from '../system/setValue';
 
-var guildId;
-var currentGuildRelationship;
+export var guildId;
+export var currentGuildRelationship;
 var guildMessages = {
   self: {color: 'fshGreen', message: getValue('guildSelfMessage')},
   friendly: {color: 'fshOliveDrab', message: getValue('guildFrndMessage')},
   old: {color: 'fshDarkCyan', message: getValue('guildPastMessage')},
   enemy: {color: 'fshRed', message: getValue('guildEnmyMessage')}
 };
-
-export function showRecallButton(playername) {
-  if (currentGuildRelationship === 'self') {
-    return '<a class="quickButton tip-static" ' +
-      'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
-      playername + '" data-tipped="Recall items from ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-  }
-  return '';
-}
-
-export function showRankButton(playerid, playername) {
-  if (currentGuildRelationship === 'self' && getValue('showAdmin')) {
-    return '<a class="quickButton buttonGuildRank tip-static" href="' +
-      'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
-      playerid + '" data-tipped="Rank ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/guilds/' + guildId + '_mini.png\');"></a>&nbsp;&nbsp;';
-  }
-  return '';
-}
 
 function guildAry(val) {
   if (val) {
