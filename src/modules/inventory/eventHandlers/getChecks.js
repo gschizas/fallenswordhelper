@@ -1,5 +1,5 @@
 import {options} from '../options';
-import setForage from '../../ajax/setForage';
+import saveOptions from '../saveOptions';
 
 export default function getChecks() { // jQuery
   options.checkedElements = {};
@@ -9,6 +9,6 @@ export default function getChecks() { // jQuery
     function(el) {
       options.checkedElements[el.getAttribute('item')] = 1;
     });
-  setForage('fsh_inventory', options);
+  saveOptions(options);
   $('#fshInv').DataTable().draw(false);
 }

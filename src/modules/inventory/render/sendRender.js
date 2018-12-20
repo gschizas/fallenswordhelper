@@ -1,7 +1,9 @@
-import fallback from '../../system/fallback';
+function cantSend(row) {
+  return row.equipped || row.guild_tag === -1 && row.bound;
+}
 
 export default function sendRender(data, type, row) {
-  if (fallback(row.bound, row.equipped)) {return;}
+  if (cantSend(row)) {return;}
   if (type !== 'display') {return 'Send';}
   return '<span class="sendItem tip-static sendLink" data-tipped=' +
     '"INSTANTLY SEND THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk."' +

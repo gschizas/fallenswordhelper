@@ -64,7 +64,7 @@ function syncInvMan() { // jQuery
   if (calf.subcmd === 'guildinvmgr') {
     prm.push(getMembrList(false));
   }
-  prm.push(getForage('fsh_inventory')
+  prm.push(getForage('fsh_' + calf.subcmd)
     .done(extendOptions)
   );
   $.when.apply($, prm).done(function() {

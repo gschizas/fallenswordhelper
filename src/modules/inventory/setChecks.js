@@ -1,5 +1,5 @@
 import {options} from './options';
-import setForage from '../ajax/setForage';
+import saveOptions from './saveOptions';
 
 export default function setChecks() {
   Array.prototype.forEach.call(
@@ -8,5 +8,5 @@ export default function setChecks() {
       el.checked =
         options.checkedElements[el.getAttribute('item')] === 1;
     });
-  setForage('fsh_inventory', options);
+  saveOptions(options);
 }
