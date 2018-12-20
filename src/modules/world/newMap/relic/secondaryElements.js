@@ -60,19 +60,21 @@ export var groupHPElement;
 export var groupHPBuffedElement;
 export var processingStatus;
 
+function whyIsntThisAFilter(prev, key) {
+  for (var i = 0; i < memberExclusions.length; i += 1) { // WTF?
+    if (memberExclusions[i](key)) {return prev;}
+  }
+  prev.push('<a href="index.php?cmd=profile&player_id=' +
+    guildMemberList[key].id + '">' + key + '</a>');
+  return prev;
+}
+
 function missingMembers(membrList) {
   guildMemberList = membrList;
   var myMembers = Object.keys(guildMemberList);
   twoMinutes = nowSecs - 120;
   sevenDays = nowSecs - 604800;
-  var filtered = myMembers.reduce(function(prev, key) {
-    for (var i = 0; i < memberExclusions.length; i += 1) {
-      if (memberExclusions[i](key)) {return prev;}
-    }
-    prev.push('<a href="index.php?cmd=profile&player_id=' +
-      guildMemberList[key].id + '">' + key + '</a>');
-    return prev;
-  }, []);
+  var filtered = myMembers.reduce(whyIsntThisAFilter, []);
   insertHtmlBeforeEnd(containerDiv,
     '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
     '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +

@@ -8,6 +8,7 @@ import jQueryPresent from './common/jQueryPresent';
 import numberSort from './system/numberSort';
 import on from './common/on';
 import {pCC} from './support/layout';
+import partial from './common/partial';
 import setForage from './ajax/setForage';
 import stringSort from './system/stringSort';
 
@@ -99,36 +100,40 @@ function hazEnhancements(enhancements) {
   return enhancements && enhancements.length > 0;
 }
 
+function buildEnhancements(tmpObj, _prev, _curr) {
+  return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
+    tmpObj.enhancements[_curr].min + ' - ' +
+    tmpObj.enhancements[_curr].max + '</span><br>';
+}
+
+function buildArray(data, prev, curr) {
+  var tmpObj = data[curr];
+  tmpObj.name = curr;
+  tmpObj.image = '<img class="tip-static" src="' + imageServer +
+    '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
+    imageServer + '/creatures/' + tmpObj.image_id +
+    '.jpg\' width=200 height=200>" width=40 height=40>';
+  tmpObj.level = addCommas(tmpObj.level);
+  tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
+  tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
+  tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
+  tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
+  tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
+  var enhancements;
+  if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
+  if (hazEnhancements(enhancements)) {
+    var tmp = '<span class="fshXXSmall">';
+    tmp += enhancements.reduce(partial(buildEnhancements, tmpObj), '');
+    tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
+  } else {
+    tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
+  }
+  prev.push(tmpObj);
+  return prev;
+}
+
 function prepMonster(data) {
-  monsterAry = Object.keys(data).reduce(function(prev, curr) {
-    var tmpObj = data[curr];
-    tmpObj.name = curr;
-    tmpObj.image = '<img class="tip-static" src="' + imageServer +
-      '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
-      imageServer + '/creatures/' + tmpObj.image_id +
-      '.jpg\' width=200 height=200>" width=40 height=40>';
-    tmpObj.level = addCommas(tmpObj.level);
-    tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
-    tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
-    tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
-    tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
-    tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-    var enhancements;
-    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-    if (hazEnhancements(enhancements)) {
-      var tmp = '<span class="fshXXSmall">';
-      tmp += enhancements.reduce(function(_prev, _curr) {
-        return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
-          tmpObj.enhancements[_curr].min + ' - ' +
-          tmpObj.enhancements[_curr].max + '</span><br>';
-      }, '');
-      tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
-    } else {
-      tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
-    }
-    prev.push(tmpObj);
-    return prev;
-  }, []);
+  monsterAry = Object.keys(data).reduce(partial(buildArray, data), []);
 }
 
 function prepAry(data) {
