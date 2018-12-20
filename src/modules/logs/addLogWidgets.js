@@ -49,7 +49,7 @@ function playerColor(colorPlayerName, playerName, playerElement) { // Legacy
   return false;
 }
 
-function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
+function canIgnore(aRow, playerName, isGuildMate) {
   if (!isGuildMate) {
     var dateExtraText = '<nobr><span style="font-size:x-small;">' +
       '[ <a title="Add to Ignore List" href="index.php?cmd=log' +
@@ -58,6 +58,10 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
     aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' +
       dateExtraText;
   }
+}
+
+function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
+  canIgnore(aRow, playerName, isGuildMate);
   var buffingPlayerIDRE = /player_id=(\d+)/;
   var buffingPlayerID = buffingPlayerIDRE
     .exec(aRow.cells[2].innerHTML)[1];

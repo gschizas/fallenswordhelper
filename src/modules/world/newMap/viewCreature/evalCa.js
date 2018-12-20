@@ -20,6 +20,16 @@ function stamAtLowestCa(combat) {
   return 0;
 }
 
+function lowestCaStats(combat) {
+  combat.extraAttackAtLowestFeasibleCALevel = Math.floor(
+    combat.player.attackValue * 0.0025 * combat.lowestFeasibleCALevel);
+  combat.extraDamageAtLowestFeasibleCALevel = Math.floor(
+    combat.player.damageValue * 0.0025 * combat.lowestFeasibleCALevel);
+  combat.extraNotes += 'Extra CA Att/Dam at this lowered CA level = ' +
+    combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
+    combat.extraDamageAtLowestFeasibleCALevel + '<br>';
+}
+
 function caRunning(combat) {
   calcLowest(combat);
   combat.lowestFeasibleCALevel =
@@ -28,16 +38,7 @@ function caRunning(combat) {
   combat.extraNotes += 'Lowest CA to still 1-hit this creature = ' +
     combat.lowestFeasibleCALevel + '<br>';
   if (combat.lowestFeasibleCALevel !== 0) {
-    combat.extraAttackAtLowestFeasibleCALevel =
-      Math.floor(combat.player.attackValue * 0.0025 *
-      combat.lowestFeasibleCALevel);
-    combat.extraDamageAtLowestFeasibleCALevel =
-      Math.floor(combat.player.damageValue * 0.0025 *
-      combat.lowestFeasibleCALevel);
-    combat.extraNotes +=
-      'Extra CA Att/Dam at this lowered CA level = ' +
-      combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
-      combat.extraDamageAtLowestFeasibleCALevel + '<br>';
+    lowestCaStats(combat);
   }
   combat.extraStaminaPerHitAtLowestFeasibleCALevel = stamAtLowestCa(combat);
   if (combat.extraStaminaPerHitAtLowestFeasibleCALevel <

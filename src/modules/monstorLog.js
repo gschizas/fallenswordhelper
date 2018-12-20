@@ -96,6 +96,13 @@ function drawTable() {
   on(content, 'click', doHandlers);
 }
 
+function imgHtml(tmpObj) {
+  return '<img class="tip-static" src="' + imageServer +
+    '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
+    imageServer + '/creatures/' + tmpObj.image_id +
+    '.jpg\' width=200 height=200>" width=40 height=40>';
+}
+
 function hazEnhancements(enhancements) {
   return enhancements && enhancements.length > 0;
 }
@@ -106,34 +113,33 @@ function buildEnhancements(tmpObj, _prev, _curr) {
     tmpObj.enhancements[_curr].max + '</span><br>';
 }
 
-function buildArray(data, prev, curr) {
-  var tmpObj = data[curr];
-  tmpObj.name = curr;
-  tmpObj.image = '<img class="tip-static" src="' + imageServer +
-    '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
-    imageServer + '/creatures/' + tmpObj.image_id +
-    '.jpg\' width=200 height=200>" width=40 height=40>';
+function formatEnhancements(tmpObj) {
+  var enhancements;
+  if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
+  if (hazEnhancements(enhancements)) {
+    var tmp = '<span class="fshXXSmall">';
+    tmp += enhancements.reduce(partial(buildEnhancements, tmpObj), '');
+    return tmp.slice(0, -4) + '</span>';
+  }
+  return '<span class="fshGrey">**Missing**</span>';
+}
+
+function buildHtml(data, key) {
+  var tmpObj = data[key];
+  tmpObj.name = key;
+  tmpObj.image = imgHtml(tmpObj);
   tmpObj.level = addCommas(tmpObj.level);
   tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
   tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
   tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
   tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
   tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-  var enhancements;
-  if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-  if (hazEnhancements(enhancements)) {
-    var tmp = '<span class="fshXXSmall">';
-    tmp += enhancements.reduce(partial(buildEnhancements, tmpObj), '');
-    tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
-  } else {
-    tmpObj.enhancements = '<span class="fshGrey">**Missing**</span>';
-  }
-  prev.push(tmpObj);
-  return prev;
+  tmpObj.enhancements = formatEnhancements(tmpObj);
+  return tmpObj;
 }
 
 function prepMonster(data) {
-  monsterAry = Object.keys(data).reduce(partial(buildArray, data), []);
+  monsterAry = Object.keys(data).map(partial(buildHtml, data));
 }
 
 function prepAry(data) {

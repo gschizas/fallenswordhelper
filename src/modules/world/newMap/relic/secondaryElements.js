@@ -14,23 +14,8 @@ import {
 } from './primaryElements';
 
 var guildMemberList;
-var twoMinutes;
-var sevenDays;
-var memberExclusions = [
-  function(key) {return key === 'lastUpdate';},
-  function(key) {return myDefenders.indexOf(key) !== -1;},
-  function(key) {return !guildMemberList[key].last_login;},
-  function(key) {return Number(guildMemberList[key].last_login) >= twoMinutes;},
-  function(key) {return Number(guildMemberList[key].last_login) <= sevenDays;},
-  function(key) {
-    return guildMemberList[key].level >= 400 &&
-      guildMemberList[key].level <= 421;
-  },
-  function(key) {
-    return guildMemberList[key].level >= 441 &&
-      guildMemberList[key].level <= 450;
-  }
-];
+var twoMinutesAgo;
+var sevenDaysAgo;
 export var relicCountElement;
 export var lDPercentageElement;
 export var lDCloakedElement;
@@ -60,24 +45,45 @@ export var groupHPElement;
 export var groupHPBuffedElement;
 export var processingStatus;
 
-function whyIsntThisAFilter(prev, key) {
-  for (var i = 0; i < memberExclusions.length; i += 1) { // WTF?
-    if (memberExclusions[i](key)) {return prev;}
+var available = [
+  function(key) {return key !== 'lastUpdate';},
+  function(key) {return !myDefenders.includes(key);},
+  function(key) {return guildMemberList[key].last_login;},
+  function(key) {
+    return Number(guildMemberList[key].last_login) < twoMinutesAgo;
+  },
+  function(key) {
+    return Number(guildMemberList[key].last_login) > sevenDaysAgo;
+  },
+  function(key) {
+    return guildMemberList[key].level < 400 ||
+      guildMemberList[key].level > 421;
+  },
+  function(key) {
+    return guildMemberList[key].level < 441 ||
+      guildMemberList[key].level > 450;
   }
-  prev.push('<a href="index.php?cmd=profile&player_id=' +
-    guildMemberList[key].id + '">' + key + '</a>');
-  return prev;
+];
+
+function availableMembers(key) {
+  return available.every(function(fn) {return fn(key);});
+}
+
+function makeLinks(key) {
+  return '<a href="index.php?cmd=profile&player_id=' +
+    guildMemberList[key].id + '">' + key + '</a>';
 }
 
 function missingMembers(membrList) {
   guildMemberList = membrList;
-  var myMembers = Object.keys(guildMemberList);
-  twoMinutes = nowSecs - 120;
-  sevenDays = nowSecs - 604800;
-  var filtered = myMembers.reduce(whyIsntThisAFilter, []);
+  twoMinutesAgo = nowSecs - 120;
+  sevenDaysAgo = nowSecs - 604800;
+  var filtered = Object.keys(guildMemberList)
+    .filter(availableMembers).map(makeLinks);
   insertHtmlBeforeEnd(containerDiv,
-    '<div class="fshFloatLeft fshRelicLowDiv"><table class="relicT">' +
-    '<thead><tr><th>Offline guild members not at relic:</th></tr></thead>' +
+    '<div class="fshFloatLeft fshRelicLowDiv">' +
+    '<table class="relicT"><thead><tr><th>' + filtered.length.toString() +
+    ' Offline guild members not at relic:</th></tr></thead>' +
     '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
     '</table></div>');
 }
@@ -119,7 +125,7 @@ export function prepareSecondaryDivs(relicData) {
   fetchStatsBtn.classList.add('fshHide');
   var hideRelicOffline = getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
-    getMembrList(false).done(missingMembers);
+    getMembrList(true).done(missingMembers);
   }
   insertHtmlBeforeEnd(leftDiv, proc);
   processingStatus = getElementById('ProcessingStatus');

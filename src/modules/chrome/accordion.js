@@ -160,12 +160,7 @@ function adjustHeight() {
   }
 }
 
-export default function injectMenu() {
-  if (!getElementById('pCL') || jQueryNotPresent()) {return;}
-  guildId = currentGuildId();
-  updateQuestLink();
-  updateScavLink();
-  // character
+function characterButtons() {
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   insertAfterParent('nav-character-log', insertHtmlAfterEnd,
     '<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -179,15 +174,9 @@ export default function injectMenu() {
   creatureLogLink();
   anchorButton('1', 'Quick Links', injectQuickLinkManager,
     'nav-character-notepad');
-  // guild
-  guildInventory();
-  newGuildLogLink();
-  // top rated
-  insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
-    '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-    'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
-    'Top 250 Players</a></li>');
-  // actions
+}
+
+function actionButtons() {
   anchorButton('2', 'AH Quick Search', injectAuctionSearch,
     'nav-actions-trade-auctionhouse');
   anchorButton('2', 'Online Players', injectOnlinePlayers,
@@ -196,5 +185,22 @@ export default function injectMenu() {
     'nav-actions-interaction-findplayer');
   anchorButton('2', 'Find Buffs', injectFindBuffs,
     'nav-actions-interaction-findplayer');
+}
+
+export default function injectMenu() {
+  if (!getElementById('pCL') || jQueryNotPresent()) {return;}
+  guildId = currentGuildId();
+  updateQuestLink();
+  updateScavLink();
+  characterButtons();
+  // guild
+  guildInventory();
+  newGuildLogLink();
+  // top rated
+  insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
+    '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+    'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
+    'Top 250 Players</a></li>');
+  actionButtons();
   adjustHeight();
 }
