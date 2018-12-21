@@ -54,18 +54,19 @@ function fixCollapse() {
   on(newsCol[0], 'click', newsEvt, true);
 }
 
+function pvpLadder(head) {return head.children[1].textContent === 'PvP Ladder';}
+
+function timestamp(head) {
+  return parseDateAsTimestamp(head.children[2].textContent);
+}
+
 function lookForPvPLadder() {
-  var lastLadderReset = getValue('lastLadderReset');
   var rumours = pCC.getElementsByClassName('news_head_tavern');
-  Array.prototype.forEach.call(rumours, function(head) {
-    if (head.children[1].textContent === 'PvP Ladder') {
-      var logTime = parseDateAsTimestamp(head.children[2].textContent);
-      if (logTime > lastLadderReset) {
-        setValue('lastLadderReset', logTime);
-        lastLadderReset = logTime;
-      }
-    }
-  });
+  var pvpTimes = Array.from(rumours).filter(pvpLadder).map(timestamp);
+  var logTime = Math.max.apply(null, pvpTimes);
+  if (logTime > getValue('lastLadderReset')) {
+    setValue('lastLadderReset', logTime);
+  }
 }
 
 function addUfsgLinks() {

@@ -2870,11 +2870,6 @@
     return profile({subcmd: 'loadinventory'});
   }
 
-  function ahLink(searchname, nickname) {
-    return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
-      '">' + nickname + '</a>';
-  }
-
   function foundInvItem(invCount, name) {
     if (invCount[name]) {
       invCount[name].count += 1;
@@ -2883,17 +2878,23 @@
     }
   }
 
+  function ahLink(searchname, nickname) {
+    return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
+      '">' + nickname + '</a>';
+  }
+
+  function toHtml(invCount, prev, key) {
+    if (invCount[key].nicknameList.length !== 0) {
+      return prev + '<tr><td>' + key + '</td><td>' +
+        invCount[key].nicknameList.map(partial(ahLink, key)).join(' ') +
+        '</td><td>' +
+        invCount[key].count + '</td><td></td><td></td></tr>';
+    }
+    return prev;
+  }
+
   function displayFoundCount(invCount) {
-    return Object.keys(invCount).reduce(function(prev, key) {
-      if (invCount[key].nicknameList.length !== 0) {
-        return prev + '<tr><td>' + key + '</td><td>' +
-          invCount[key].nicknameList.map(function(nickname) {
-            return ahLink(key, nickname);
-          }).join(' ') + '</td><td>' +
-          invCount[key].count + '</td><td></td><td></td></tr>';
-      }
-      return prev;
-    }, '');
+    return Object.keys(invCount).reduce(partial(toHtml, invCount), '');
   }
 
   function displayNotFound(quickSL) {
@@ -4726,18 +4727,19 @@
     on(newsCol[0], 'click', newsEvt, true);
   }
 
+  function pvpLadder(head) {return head.children[1].textContent === 'PvP Ladder';}
+
+  function timestamp(head) {
+    return parseDateAsTimestamp(head.children[2].textContent);
+  }
+
   function lookForPvPLadder() {
-    var lastLadderReset = getValue('lastLadderReset');
     var rumours = pCC.getElementsByClassName('news_head_tavern');
-    Array.prototype.forEach.call(rumours, function(head) {
-      if (head.children[1].textContent === 'PvP Ladder') {
-        var logTime = parseDateAsTimestamp(head.children[2].textContent);
-        if (logTime > lastLadderReset) {
-          setValue('lastLadderReset', logTime);
-          lastLadderReset = logTime;
-        }
-      }
-    });
+    var pvpTimes = Array.from(rumours).filter(pvpLadder).map(timestamp);
+    var logTime = Math.max.apply(null, pvpTimes);
+    if (logTime > getValue('lastLadderReset')) {
+      setValue('lastLadderReset', logTime);
+    }
   }
 
   function addUfsgLinks() {
@@ -9793,6 +9795,7 @@
   }
 
   function getComposedFromBp(data) {
+    if (!data.r) {return;}
     composed = data.r.map(function(el) {return el.items;})
       .reduce(function(a, b) {return a.concat(b);})
       .filter(function(el) {return el.t === 15;});
@@ -9803,6 +9806,7 @@
   }
 
   function getComposedFromGs(data) {
+    if (!data.r) {return;}
     composed = composed.concat(data.r.filter(function(el) {return el.t === 15;}));
   }
 
@@ -12652,29 +12656,68 @@
     });
   }
 
+  function chunk(size, ary) {
+    var ret = [];
+    for (var i = 0; i < ary.length; i += size) {
+      ret.push(ary.slice(i, i + size));
+    }
+    return ret;
+  }
+
+  function postApp(data) {
+    extend(data, {app: 1});
+    return retryAjax({
+      type: 'POST',
+      url: 'app.php',
+      data: data,
+      dataType: 'json'
+    });
+  }
+
+  function sendtofolder(folderId, itemsAry) {
+    return postApp({
+      cmd: 'profile',
+      subcmd: 'sendtofolder',
+      folder_id: folderId,
+      folderItem: itemsAry
+    });
+  }
+
+  function checked(o) {
+    return o.injectHere.previousElementSibling.previousElementSibling
+      .children[0].checked;
+  }
+
+  function invid(o) {return o.invid;}
+
+  function itemByInvId(invId, item) {
+    return invId.toString() === item.invid;
+  }
+
+  function removeInvId(itemsAry, invId) {
+    var o = itemsAry.find(partial(itemByInvId, invId));
+    if (o) {
+      var tr = o.injectHere.parentNode;
+      tr.nextElementSibling.remove();
+      tr.remove();
+      o.el = null;
+      o.invid = null;
+      o.injectHere = null;
+    }
+  }
+
+  function removeInvIds(itemsAry, json) {
+    json.r.forEach(partial(removeInvId, itemsAry));
+  }
+
+  function moveList(itemsAry, folderId, list) {
+    return sendtofolder(folderId, list).done(partial(removeInvIds, itemsAry));
+  }
+
   function moveItemsToFolder(itemsAry) { // jQuery.min
     var folderId = getElementById('selectFolderId').value;
-    var batchNo;
-    var counter = 0;
-    var invList = [];
-    var prm = [];
-    itemsAry.forEach(function(o) {
-      var el = o.injectHere.previousElementSibling.previousElementSibling
-        .firstElementChild;
-      if (el.checked) {
-        batchNo = Math.floor(counter / 50);
-        invList[batchNo] = fallback(invList[batchNo], []);
-        invList[batchNo].push(o.invid);
-        counter += 1;
-        if (counter % 50 === 0) {
-          prm.push(moveItem(invList[batchNo], folderId));
-        }
-      }
-    });
-    if (counter % 50 !== 0) {
-      prm.push(moveItem(invList[batchNo], folderId));
-    }
-    $.when.apply($, prm).done(function() {location.reload();}); // TODO ajaxify this
+    chunk(50, itemsAry.filter(checked).map(invid))
+      .map(partial(moveList, itemsAry, folderId));
   }
 
   function anotherSpinner$1(self) {
@@ -16283,6 +16326,7 @@
   }
 
   function updateGroupValues() {
+    if (!groupStats$1) {return;}
     groupAttackElement.textContent = addCommas(groupStats$1.attack);
     groupDefenseElement.textContent = addCommas(groupStats$1.defense);
     groupArmorElement.textContent = addCommas(groupStats$1.armor);
@@ -16757,15 +16801,20 @@
     return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
   }
 
+  function titanIsAlive(data) {
+    if (goodData(data)) {
+      processTitans(data.r);
+      if (titanToShow(GameData.realm().dynamic)) {
+        return true;
+      }
+      hideTitanDiv();
+    }
+  }
+
   function ajaxScoutTower() {
     scouttower().done(function processScoutTower(data) {
-      if (goodData(data)) {
-        processTitans(data.r);
-        if (titanToShow(GameData.realm().dynamic)) {
-          timeoutId$1 = window.setTimeout(ajaxScoutTower, 30000);
-        } else {
-          hideTitanDiv();
-        }
+      if (titanIsAlive(data)) {
+        timeoutId$1 = window.setTimeout(ajaxScoutTower, 30000);
       }
     });
   }
@@ -20169,7 +20218,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '56';
+  window.FSH.calf = '57';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

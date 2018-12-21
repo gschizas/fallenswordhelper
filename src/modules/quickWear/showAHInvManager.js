@@ -3,11 +3,6 @@ import getValueJSON from '../system/getValueJSON';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import partial from '../common/partial';
 
-function ahLink(searchname, nickname) {
-  return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
-    '">' + nickname + '</a>';
-}
-
 function foundInvItem(invCount, name) {
   if (invCount[name]) {
     invCount[name].count += 1;
@@ -16,17 +11,23 @@ function foundInvItem(invCount, name) {
   }
 }
 
+function ahLink(searchname, nickname) {
+  return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
+    '">' + nickname + '</a>';
+}
+
+function toHtml(invCount, prev, key) {
+  if (invCount[key].nicknameList.length !== 0) {
+    return prev + '<tr><td>' + key + '</td><td>' +
+      invCount[key].nicknameList.map(partial(ahLink, key)).join(' ') +
+      '</td><td>' +
+      invCount[key].count + '</td><td></td><td></td></tr>';
+  }
+  return prev;
+}
+
 function displayFoundCount(invCount) {
-  return Object.keys(invCount).reduce(function(prev, key) {
-    if (invCount[key].nicknameList.length !== 0) {
-      return prev + '<tr><td>' + key + '</td><td>' +
-        invCount[key].nicknameList.map(function(nickname) {
-          return ahLink(key, nickname);
-        }).join(' ') + '</td><td>' +
-        invCount[key].count + '</td><td></td><td></td></tr>';
-    }
-    return prev;
-  }, '');
+  return Object.keys(invCount).reduce(partial(toHtml, invCount), '');
 }
 
 function displayNotFound(quickSL) {
