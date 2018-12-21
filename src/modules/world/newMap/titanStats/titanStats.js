@@ -1,4 +1,5 @@
 import calf from '../../../support/calf';
+import partial from '../../../common/partial';
 import {processTitans} from './processTitans';
 import scouttower from '../../../app/guild/scouttower';
 import {setRealm} from './realm';
@@ -22,17 +23,18 @@ function titanToShow(dynamic) {
   return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
 }
 
+function processScoutTower(ast, data) {
+  if (!goodData(data)) {return;}
+  processTitans(data.r);
+  if (titanToShow(GameData.realm().dynamic)) {
+    timeoutId = window.setTimeout(ast, 30000);
+  } else {
+    hideTitanDiv();
+  }
+}
+
 function ajaxScoutTower() {
-  scouttower().done(function processScoutTower(data) {
-    if (goodData(data)) {
-      processTitans(data.r);
-      if (titanToShow(GameData.realm().dynamic)) {
-        timeoutId = window.setTimeout(ajaxScoutTower, 30000);
-      } else {
-        hideTitanDiv();
-      }
-    }
-  });
+  scouttower().done(partial(processScoutTower, ajaxScoutTower));
 }
 
 function testDynamics(dynamic) {
