@@ -78,6 +78,7 @@ function updateDefenderElements() {
 }
 
 function updateGroupValues() {
+  if (!groupStats) {return;}
   groupAttackElement.textContent = addCommas(groupStats.attack);
   groupDefenseElement.textContent = addCommas(groupStats.defense);
   groupArmorElement.textContent = addCommas(groupStats.armor);

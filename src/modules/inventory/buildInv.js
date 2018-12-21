@@ -17,6 +17,7 @@ function doInventory() {
 }
 
 function getComposedFromBp(data) {
+  if (!data.r) {return;}
   composed = data.r.map(function(el) {return el.items;})
     .reduce(function(a, b) {return a.concat(b);})
     .filter(function(el) {return el.t === 15;});
@@ -27,6 +28,7 @@ function doComposedFromBp() {
 }
 
 function getComposedFromGs(data) {
+  if (!data.r) {return;}
   composed = composed.concat(data.r.filter(function(el) {return el.t === 15;}));
 }
 
