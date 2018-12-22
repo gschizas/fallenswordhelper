@@ -1,7 +1,7 @@
 import {options} from '../options';
 import saveOptions from '../saveOptions';
 
-export default function getChecks() { // jQuery
+export default function getChecks(fshInv) { // jQuery
   options.checkedElements = {};
   Array.prototype.forEach.call(
     document.querySelectorAll(
@@ -10,5 +10,5 @@ export default function getChecks() { // jQuery
       options.checkedElements[el.getAttribute('item')] = 1;
     });
   saveOptions(options);
-  $('#fshInv').DataTable().draw(false);
+  $(fshInv).DataTable().draw(false);
 }

@@ -14,9 +14,9 @@ import storeItems from '../../ajax/storeItems';
 import useItem from '../../ajax/useItem';
 import {queueRecallItem, queueTakeItem} from '../../ajaxQueue/queue';
 
-function setName(e) { // jQuery
-  $('#fshInv').DataTable().search($(e.target).attr('set')).draw();
-  $('#fshInv_filter input').focus();
+function setName(fshInv, e) { // jQuery
+  $(fshInv).DataTable().search($(e.target).attr('set')).draw();
+  $('#' + fshInv.id + '_filter input').focus();
 }
 
 function takeItem(e) { // jQuery
@@ -70,21 +70,29 @@ function doSendItem(e) { // jQuery
   doAction(partial(senditems, [self.data('inv')]), self);
 }
 
-export default function eventHandlers() { // jQuery
-  // $('#fshRefresh').click(injectInventoryManagerNew);
-  $('#fshMinLvl, #fshMaxLvl').keyup(changeLvls);
-  $('#fshReset').click(resetLvls);
-  $('table.fshInvFilter').on('click', 'input[type="checkbox"]', getChecks);
-  $('#fshAll').click(allChecks);
-  $('#fshNone').click(clearChecks);
-  $('#fshDefault').click(resetChecks);
-  $('#fshInv').on('click', 'span.setName', setName);
-  $('#fshInv').on('click', 'span.takeItem', takeItem);
-  $('#fshInv').on('click', 'span.recallItem', recallItem);
-  $('#fshInv').on('click', 'span.wearItem', wearItem);
-  $('#fshInv').on('click', 'span.useItem', doUseItem);
-  $('#fshInv').on('change', 'select.fshMoveItem', doMoveItem);
-  $('#fshInv').on('click', 'span.dropItem', doDropItem);
-  $('#fshInv').on('click', 'span.sendItem', doSendItem);
-  $('#fshInv').on('click', 'span.storeItem', doStoreItem);
+function spanClickHandlers(fshInv) {
+  $(fshInv).on('click', 'span.setName', partial(setName, fshInv));
+  $(fshInv).on('click', 'span.takeItem', takeItem);
+  $(fshInv).on('click', 'span.recallItem', recallItem);
+  $(fshInv).on('click', 'span.wearItem', wearItem);
+  $(fshInv).on('click', 'span.useItem', doUseItem);
+  $(fshInv).on('click', 'span.dropItem', doDropItem);
+  $(fshInv).on('click', 'span.sendItem', doSendItem);
+  $(fshInv).on('click', 'span.storeItem', doStoreItem);
+}
+
+function setupClickHandlers(fshInv) {
+  $('#fshReset').click(partial(resetLvls, fshInv));
+  $('#fshAll').click(partial(allChecks, fshInv));
+  $('#fshNone').click(partial(clearChecks, fshInv));
+  $('#fshDefault').click(partial(resetChecks, fshInv));
+  $('table.fshInvFilter').on('click', 'input[type="checkbox"]',
+    partial(getChecks, fshInv));
+  spanClickHandlers(fshInv);
+}
+
+export default function eventHandlers(fshInv) { // jQuery
+  $('#fshMinLvl, #fshMaxLvl').keyup(partial(changeLvls, fshInv));
+  $(fshInv).on('change', 'select.fshMoveItem', doMoveItem);
+  setupClickHandlers(fshInv);
 }

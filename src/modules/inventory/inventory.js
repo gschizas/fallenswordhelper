@@ -11,15 +11,17 @@ import getMembrList from '../ajax/getMembrList';
 import headers from './headers';
 import {imageServer} from '../system/system';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import {pCC} from '../support/layout';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
 function doSpinner() { // jQuery
-  $('#pCC').html('<span id="fshInvMan"><img src = "' +
+  // $('#pCC').html('<span id="fshInvMan"><img src = "' +
+  pCC.innerHTML = '<span id="fshInvMan"><img src = "' +
   imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
-    'Getting inventory data...</span>');
+    'Getting inventory data...</span>';
 }
 
 function rekeyMembrList() {
@@ -48,11 +50,11 @@ function getInvMan() {
   headers();
   setChecks();
   setLvls();
-  doTable();
-  eventHandlers();
+  var fshInv = doTable();
+  eventHandlers(fshInv);
   // eslint-disable-next-line no-use-before-define
   $('#fshRefresh').click(injectInventoryManagerNew);
-  clearButton();
+  clearButton(fshInv);
 
   timeEnd('inventory.getInvMan');
 

@@ -1,11 +1,14 @@
 import bpRender from './render/bpRender';
 import craftRender from './render/craftRender';
+import {createTable} from '../common/cElement';
 import createdRow from './render/createdRow';
 import dropRender from './render/dropRender';
 import durabilityRender from './render/durabilityRender';
 import forgeRender from './render/forgeRender';
 import gsRender from './render/gsRender';
+import insertElement from '../common/insertElement';
 import nameRender from './render/nameRender';
+import {pCC} from '../support/layout';
 import sendRender from './render/sendRender';
 import {theInv} from './buildInv';
 import wearUseRender from './render/wearUseRender';
@@ -79,10 +82,24 @@ function isUserInv() {
   return 'player_id' in theInv;
 }
 
-export default function doTable() { // jQuery
-  $('#pCC').append('<table id="fshInv" class="hover" ' +
-    'style="font-size: x-small;"></table>');
-  var table = $('#fshInv').DataTable({
+function tableId() {
+  if (isUserInv()) {
+    return 'fshUserInv';
+  }
+  return 'fshGuildInv';
+}
+
+function injectTable() {
+  var fshInv = createTable({
+    className: 'hover fshXSmall',
+    id: tableId()
+  });
+  insertElement(pCC, fshInv);
+  return fshInv;
+}
+
+function makeDataTable(fshInv) { // jQuery
+  return $(fshInv).DataTable({
     autoWidth: false,
     columnDefs: [{targets: '_all', defaultContent: ''},
       {
@@ -98,7 +115,17 @@ export default function doTable() { // jQuery
     stateDuration: 0,
     stateSave: true
   });
+}
+
+function hideCols(table) {
   table.column(12).visible('current_player_id' in theInv);
   table.column(17).visible(isUserInv() && showQuickDropLinks);
   table.column(18).visible(isUserInv() && showQuickSendLinks);
+}
+
+export default function doTable() {
+  var fshInv = injectTable();
+  var table = makeDataTable(fshInv);
+  hideCols(table);
+  return fshInv;
 }
