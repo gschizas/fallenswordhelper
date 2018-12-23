@@ -33,15 +33,18 @@ function testType(o, el) {
   if (match) {match.r(o, el);}
 }
 
+function doCheck(o) {
+  if (!o.injectHere) {return;}
+  var tr = o.injectHere.parentNode;
+  if (tr.classList.contains('fshHide')) {return;}
+  var el = o.el.parentNode.parentNode.previousElementSibling
+    .firstElementChild;
+  testType(o, el);
+}
+
 export default function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
   invItems = invItems_;
   type = type_;
   itemId = Number(itemId_);
-  itemsAry.forEach(function(o) {
-    var tr = o.injectHere.parentNode;
-    if (tr.classList.contains('fshHide')) {return;}
-    var el = o.el.parentNode.parentNode.previousElementSibling
-      .firstElementChild;
-    testType(o, el);
-  });
+  itemsAry.forEach(doCheck);
 }

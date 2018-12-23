@@ -4,6 +4,7 @@ import partial from '../common/partial';
 import sendtofolder from '../app/profile/sendtofolder';
 
 function checked(o) {
+  if (!o.injectHere) {return;}
   return o.injectHere.previousElementSibling.previousElementSibling
     .children[0].checked;
 }
