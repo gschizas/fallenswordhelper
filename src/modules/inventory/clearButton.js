@@ -1,6 +1,5 @@
 export default function clearButton(fshInv) { // jQuery
   var input = $('#' + fshInv.id + '_filter input');
-  console.log('input', input);
   input.prop('type', 'text');
   var clear = $('<span>&times;</span>');
   input.wrap($('<span class="text-input-wrapper"/>'));
