@@ -20,12 +20,13 @@ export var moveOptions =
   '<option value="14">Poison</option>' +
   '</select></td>';
 export var tableOpts = {
-  paging: false,
-  info: false,
-  order: [[3, 'asc'], [0, 'asc']],
   columnDefs: [
     {orderable: false, targets: [9]}
   ],
+  dom: 't',
+  info: false,
+  order: [[3, 'asc'], [0, 'asc']],
+  paging: false,
   stateSave: true,
   stateDuration: 0
 };
