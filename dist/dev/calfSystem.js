@@ -6844,12 +6844,13 @@
     '<option value="14">Poison</option>' +
     '</select></td>';
   var tableOpts = {
-    paging: false,
-    info: false,
-    order: [[3, 'asc'], [0, 'asc']],
     columnDefs: [
       {orderable: false, targets: [9]}
     ],
+    dom: 't',
+    info: false,
+    order: [[3, 'asc'], [0, 'asc']],
+    paging: false,
     stateSave: true,
     stateDuration: 0
   };
@@ -7699,10 +7700,12 @@
     switcher(list);
   }
 
-  var tabs;
-  var theTables;
   var opts;
   var oldIds;
+
+  function storeOpts() {
+    setForage('fsh_arena', opts);
+  }
 
   function levelsAreNotNaN(minLvl, maxLvl) {
     return !isNaN(minLvl) && !isNaN(maxLvl);
@@ -7715,7 +7718,7 @@
       opts = fallback(opts, {});
       opts.minLvl = minLvl;
       opts.maxLvl = maxLvl;
-      setForage('fsh_arena', opts);
+      storeOpts();
       $('#arenaTypeTabs table[width="635"]').DataTable().draw();
     }
   }
@@ -7724,7 +7727,7 @@
     opts = opts || {};
     opts.minLvl = defaults.arenaMinLvl;
     opts.maxLvl = defaults.arenaMaxLvl;
-    setForage('fsh_arena', opts);
+    storeOpts();
     $('#fshMinLvl').val(opts.minLvl);
     $('#fshMaxLvl').val(opts.maxLvl);
     $('#arenaTypeTabs table[width="635"]').DataTable().draw();
@@ -7733,27 +7736,39 @@
   function hideMoves(evt) { // jQuery
     opts = opts || {};
     opts.hideMoves = evt.target.checked;
-    setForage('fsh_arena', opts);
+    storeOpts();
     $('.moveMax').toggle(!evt.target.checked);
   }
 
-  function testIsNotDesc(test) {
-    return test && test[1] === '_desc';
+  function setOpts$1(arena) {
+    opts = arena || {};
+    oldIds = opts.id || {};
+    opts.id = {};
   }
 
-  function sortHandler(evt) { // jQuery
-    var self = $(evt.target).closest('td');
-    var table = self.closest('table').DataTable();
-    var myCol = self.index();
-    var classes = self.attr('class');
-    var test = /sorting([^\s]+)/.exec(classes);
-    var sortOrder = 'desc';
-    if (testIsNotDesc(test)) {sortOrder = 'asc';}
-    if (myCol !== 3) {
-      table.order([3, 'asc'], [myCol, sortOrder]).draw();
-    } else {
-      table.order([3, sortOrder]).draw();
-    }
+  var lvlTests$1 = [
+    function(min) {return !min;},
+    function(min, max) {return !max;},
+    function(min, max) {return isNaN(min) && isNaN(max);},
+    function(min, max, level) {return isNaN(min) && level <= max;},
+    function(min, max, level) {return min <= level && isNaN(max);},
+    function(min, max, level) {return min <= level && level <= max;}
+  ];
+
+  function hazOpts(_settings, data) {
+    var min = opts.minLvl;
+    var max = opts.maxLvl;
+    var level = intValue(data[7]);
+    return lvlTests$1.some(function(fn) {return fn(min, max, level);});
+  }
+
+  function lvlFilter(_settings, data) {
+    if (opts) {return hazOpts(_settings, data);}
+    return true;
+  }
+
+  function doLvlFilter() {
+    $.fn.dataTable.ext.search.push(lvlFilter);
   }
 
   function hideMovesCheckbox(aTable) { // jQuery
@@ -7796,28 +7811,19 @@
     $('td', theRow).append(aTable);
   }
 
-  var doLvlFilter = [
-    function(min) {return !min;},
-    function(min, max) {return !max;},
-    function(min, max) {return isNaN(min) && isNaN(max);},
-    function(min, max, level) {return isNaN(min) && level <= max;},
-    function(min, max, level) {return min <= level && isNaN(max);},
-    function(min, max, level) {return min <= level && level <= max;}
-  ];
-
-  function hazOpts(_settings, data) {
-    var min = opts.minLvl;
-    var max = opts.maxLvl;
-    var level = intValue(data[7]);
-    for (var i = 0; i < doLvlFilter.length; i += 1) {
-      if (doLvlFilter[i](min, max, level)) {return true;}
+  function colourNewRow(row, id) { // jQuery
+    if (oldIds && !oldIds[id]) {
+      row.css('background-color', '#F5F298');
+      row.find('tr').css('background-color', '#F5F298');
     }
-    return false;
   }
 
-  function lvlFilter(_settings, data) {
-    if (opts) {return hazOpts(_settings, data);}
-    return true;
+  function checkTournamentId(row, cell) { // jQuery
+    var matches = /#\s(\d+)/.exec(cell.text());
+    if ([matches, opts, opts.id].every(isObject)) {
+      opts.id[matches[1]] = matches[1];
+      colourNewRow(row, matches[1]);
+    }
   }
 
   function players(cell) { // jQuery
@@ -7827,9 +7833,18 @@
     }
   }
 
-  function boolData(cell) { // jQuery
+  function joinCost(cell) {
+    cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
+  }
+
+  function boolData(theCells, i) { // jQuery
+    var cell = theCells.eq(i);
     var matches = /(\d)\.gif/.exec($('img', cell).attr('src'));
     if (matches) {cell.attr('data-order', matches[1]);}
+  }
+
+  function theBools(theCells) {
+    [4, 5, 6].forEach(partial(boolData, theCells));
   }
 
   function hazMaxMoves(matches, row) { // jQuery
@@ -7858,35 +7873,47 @@
     cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
   }
 
-  function colourNewRow(row, id) { // jQuery
-    if (oldIds && !oldIds[id]) {
-      row.css('background-color', '#F5F298');
-      row.find('tr').css('background-color', '#F5F298');
-    }
-  }
-
-  function checkTournamentId(row, cell) { // jQuery
-    var matches = /#\s(\d+)/.exec(cell.text());
-    if ([matches, opts, opts.id].every(isObject)) {
-      opts.id[matches[1]] = matches[1];
-      colourNewRow(row, matches[1]);
-    }
-  }
-
-  function orderData(i, e) { // jQuery
+  function _orderData(i, e) { // jQuery
     var row = $(e);
     var theCells = row.children();
-    var cell = theCells.eq(0);
-    checkTournamentId(row, cell);
+    checkTournamentId(row, theCells.eq(0));
     players(theCells.eq(1));
-    cell = theCells.eq(2);
-    cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
-    boolData(theCells.eq(4));
-    boolData(theCells.eq(5));
-    boolData(theCells.eq(6));
+    joinCost(theCells.eq(2));
+    theBools(theCells);
     maxMoves(theCells.eq(8), row);
     reward(theCells.eq(8));
   }
+
+  function orderData(theTables) {
+    var myRows = theTables.children('tbody').children('tr');
+    myRows.each(_orderData);
+  }
+
+  function testIsNotDesc(test) {
+    return test && test[1] === '_desc';
+  }
+
+  function sortHandler(evt) { // jQuery
+    var self = $(evt.target).closest('td');
+    var table = self.closest('table').DataTable();
+    var myCol = self.index();
+    var classes = self.attr('class');
+    var test = /sorting([^\s]+)/.exec(classes);
+    var sortOrder = 'desc';
+    if (testIsNotDesc(test)) {sortOrder = 'asc';}
+    if (myCol !== 3) {
+      table.order([3, 'asc'], [myCol, sortOrder]).draw();
+    } else {
+      table.order([3, sortOrder]).draw();
+    }
+  }
+
+  function redoSort(tabs) {
+    $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
+    tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
+  }
+
+  var theTables;
 
   function redoHead(i, e) { // jQuery
     var firstRow = $('tr', e).first();
@@ -7894,23 +7921,18 @@
     $(e).prepend($('<thead/>').append(firstRow));
   }
 
-  function process(arena) { // jQuery
+  function process(tabs, arena) { // jQuery
 
     time('arena.process');
 
     theTables.each(redoHead);
-    opts = arena || {};
-    oldIds = opts.id || {};
-    opts.id = {};
-    var myRows = theTables.children('tbody').children('tr');
-    myRows.each(orderData);
+    setOpts$1(arena);
+    orderData(theTables);
     filterHeader();
-    setForage('fsh_arena', opts);
-    $.fn.dataTable.ext.search.push(lvlFilter);
+    storeOpts();
+    doLvlFilter();
     theTables.DataTable(tableOpts);
-    $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
-    $('div.dataTables_filter').hide();
-    tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
+    redoSort(tabs);
     tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
 
     timeEnd('arena.process');
@@ -7919,10 +7941,10 @@
 
   function injectArena() { // jQuery
     if (jQueryNotPresent()) {return;}
-    tabs = $('#arenaTypeTabs');
+    var tabs = $('#arenaTypeTabs');
     if (tabs.length !== 1) {return;} // Join error screen
     theTables = $('table[width="635"]', tabs);
-    getForage('fsh_arena').done(process);
+    getForage('fsh_arena').done(partial(process, tabs));
   }
 
   function buyitem(item) {
@@ -9858,15 +9880,15 @@
     return $.when.apply($, prm).done(gotSomeStuff);
   }
 
-  function clearButton() { // jQuery
-    var input = $('#fshInv_filter input');
+  function clearButton(fshInv) { // jQuery
+    var input = $('#' + fshInv.id + '_filter input');
     input.prop('type', 'text');
     var clear = $('<span>&times;</span>');
     input.wrap($('<span class="text-input-wrapper"/>'));
     input.after(clear);
     clear.click(function() {
       input.val('');
-      $('#fshInv').DataTable().search('').draw();
+      $(fshInv).DataTable().search('').draw();
     });
   }
 
@@ -10376,10 +10398,24 @@
     return 'player_id' in theInv;
   }
 
-  function doTable$1() { // jQuery
-    $('#pCC').append('<table id="fshInv" class="hover" ' +
-      'style="font-size: x-small;"></table>');
-    var table = $('#fshInv').DataTable({
+  function tableId() {
+    if (isUserInv()) {
+      return 'fshUserInv';
+    }
+    return 'fshGuildInv';
+  }
+
+  function injectTable$1() {
+    var fshInv = createTable({
+      className: 'hover fshXSmall',
+      id: tableId()
+    });
+    insertElement(pCC, fshInv);
+    return fshInv;
+  }
+
+  function makeDataTable(fshInv) { // jQuery
+    return $(fshInv).DataTable({
       autoWidth: false,
       columnDefs: [{targets: '_all', defaultContent: ''},
         {
@@ -10395,9 +10431,19 @@
       stateDuration: 0,
       stateSave: true
     });
+  }
+
+  function hideCols(table) {
     table.column(12).visible('current_player_id' in theInv);
     table.column(17).visible(isUserInv() && showQuickDropLinks);
     table.column(18).visible(isUserInv() && showQuickSendLinks);
+  }
+
+  function doTable$1() {
+    var fshInv = injectTable$1();
+    var table = makeDataTable(fshInv);
+    hideCols(table);
+    return fshInv;
   }
 
   function saveOptions(options) {
@@ -10414,20 +10460,20 @@
     saveOptions(options);
   }
 
-  function allChecks() { // jQuery
+  function allChecks(fshInv) { // jQuery
     options.checkedElements = inventoryCheckAll;
     setChecks();
-    $('#fshInv').DataTable().draw(false);
+    $(fshInv).DataTable().draw(false);
   }
 
-  function changeLvls$1() { // jQuery
+  function changeLvls$1(fshInv) { // jQuery
     var minLvl = parseInt($('#fshMinLvl').val(), 10);
     var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
     if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
     options.fshMinLvl = minLvl;
     options.fshMaxLvl = maxLvl;
     saveOptions(options);
-    $('#fshInv').DataTable().draw(false);
+    $(fshInv).DataTable().draw(false);
   }
 
   function clearGearOnly(checkedElements) {
@@ -10440,10 +10486,10 @@
     return newEle;
   }
 
-  function clearChecks() { // jQuery
+  function clearChecks(fshInv) { // jQuery
     options.checkedElements = clearGearOnly(options.checkedElements);
     setChecks();
-    $('#fshInv').DataTable().draw();
+    $(fshInv).DataTable().draw();
   }
 
   function removeClass(self) {
@@ -10489,7 +10535,7 @@
     }).done(dialog);
   }
 
-  function getChecks() { // jQuery
+  function getChecks(fshInv) { // jQuery
     options.checkedElements = {};
     Array.prototype.forEach.call(
       document.querySelectorAll(
@@ -10498,7 +10544,7 @@
         options.checkedElements[el.getAttribute('item')] = 1;
       });
     saveOptions(options);
-    $('#fshInv').DataTable().draw(false);
+    $(fshInv).DataTable().draw(false);
   }
 
   function moveItem(invIdList, folderId) {
@@ -10515,19 +10561,19 @@
     }).done(dialog);
   }
 
-  function resetChecks() { // jQuery
+  function resetChecks(fshInv) { // jQuery
     options.checkedElements = defaultOptions.checkedElements;
     setChecks();
-    $('#fshInv').DataTable().draw(false);
+    $(fshInv).DataTable().draw(false);
   }
 
-  function resetLvls$1() { // jQuery
+  function resetLvls$1(fshInv) { // jQuery
     options.fshMinLvl = defaultOptions.fshMinLvl;
     options.fshMaxLvl = defaultOptions.fshMaxLvl;
     saveOptions(options);
     $('#fshMinLvl').val(options.fshMinLvl);
     $('#fshMaxLvl').val(options.fshMaxLvl);
-    $('#fshInv').DataTable().draw(false);
+    $(fshInv).DataTable().draw(false);
   }
 
   function senditems(invIdAry) {
@@ -10654,9 +10700,9 @@
     return deferred;
   }
 
-  function setName$1(e) { // jQuery
-    $('#fshInv').DataTable().search($(e.target).attr('set')).draw();
-    $('#fshInv_filter input').focus();
+  function setName$1(fshInv, e) { // jQuery
+    $(fshInv).DataTable().search($(e.target).attr('set')).draw();
+    $('#' + fshInv.id + '_filter input').focus();
   }
 
   function takeItem$1(e) { // jQuery
@@ -10710,26 +10756,34 @@
     doAction$1(partial(senditems, [self.data('inv')]), self);
   }
 
-  function eventHandlers() { // jQuery
-    // $('#fshRefresh').click(injectInventoryManagerNew);
-    $('#fshMinLvl, #fshMaxLvl').keyup(changeLvls$1);
-    $('#fshReset').click(resetLvls$1);
-    $('table.fshInvFilter').on('click', 'input[type="checkbox"]', getChecks);
-    $('#fshAll').click(allChecks);
-    $('#fshNone').click(clearChecks);
-    $('#fshDefault').click(resetChecks);
-    $('#fshInv').on('click', 'span.setName', setName$1);
-    $('#fshInv').on('click', 'span.takeItem', takeItem$1);
-    $('#fshInv').on('click', 'span.recallItem', recallItem$1);
-    $('#fshInv').on('click', 'span.wearItem', wearItem);
-    $('#fshInv').on('click', 'span.useItem', doUseItem$1);
-    $('#fshInv').on('change', 'select.fshMoveItem', doMoveItem);
-    $('#fshInv').on('click', 'span.dropItem', doDropItem);
-    $('#fshInv').on('click', 'span.sendItem', doSendItem);
-    $('#fshInv').on('click', 'span.storeItem', doStoreItem);
+  function spanClickHandlers(fshInv) {
+    $(fshInv).on('click', 'span.setName', partial(setName$1, fshInv));
+    $(fshInv).on('click', 'span.takeItem', takeItem$1);
+    $(fshInv).on('click', 'span.recallItem', recallItem$1);
+    $(fshInv).on('click', 'span.wearItem', wearItem);
+    $(fshInv).on('click', 'span.useItem', doUseItem$1);
+    $(fshInv).on('click', 'span.dropItem', doDropItem);
+    $(fshInv).on('click', 'span.sendItem', doSendItem);
+    $(fshInv).on('click', 'span.storeItem', doStoreItem);
   }
 
-  function headers() { // jQuery
+  function setupClickHandlers(fshInv) {
+    $('#fshReset').click(partial(resetLvls$1, fshInv));
+    $('#fshAll').click(partial(allChecks, fshInv));
+    $('#fshNone').click(partial(clearChecks, fshInv));
+    $('#fshDefault').click(partial(resetChecks, fshInv));
+    $('table.fshInvFilter').on('click', 'input[type="checkbox"]',
+      partial(getChecks, fshInv));
+    spanClickHandlers(fshInv);
+  }
+
+  function eventHandlers(fshInv) { // jQuery
+    $('#fshMinLvl, #fshMaxLvl').keyup(partial(changeLvls$1, fshInv));
+    $(fshInv).on('change', 'select.fshMoveItem', doMoveItem);
+    setupClickHandlers(fshInv);
+  }
+
+  function headers() {
     var reportTitle;
     if (theInv.player_id) {
       reportTitle = '<b>&nbsp;Inventory Manager</b> ' +
@@ -10740,8 +10794,7 @@
         theInv.items.length +
         ' items (maroon = in BP, blue=guild store)';
     }
-    var myHtml = invManFilter.replace('@@reportTitle@@', reportTitle);
-    $('#pCC').html(myHtml);
+    pCC.innerHTML = invManFilter.replace('@@reportTitle@@', reportTitle);
   }
 
   function setLvls() { // jQuery
@@ -10749,7 +10802,7 @@
     $('#fshMaxLvl').val(options.fshMaxLvl);
   }
 
-  var lvlTests$1 = [
+  var lvlTests$2 = [
     function(level) {return level === 0;},
     function(level, min, max) {return isNaN(min) && isNaN(max);},
     function(level, min, max) {return isNaN(min) && level <= max;},
@@ -10761,8 +10814,8 @@
     var min = options.fshMinLvl;
     var max = options.fshMaxLvl;
     var level = intValue(data[1]); // use data for the level column
-    for (var i = 0; i < lvlTests$1.length; i += 1) {
-      if (lvlTests$1[i](level, min, max)) {return true;}
+    for (var i = 0; i < lvlTests$2.length; i += 1) {
+      if (lvlTests$2[i](level, min, max)) {return true;}
     }
     return false;
   }
@@ -10808,9 +10861,10 @@
   }
 
   function doSpinner() { // jQuery
-    $('#pCC').html('<span id="fshInvMan"><img src = "' +
+    // $('#pCC').html('<span id="fshInvMan"><img src = "' +
+    pCC.innerHTML = '<span id="fshInvMan"><img src = "' +
     imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
-      'Getting inventory data...</span>');
+      'Getting inventory data...</span>';
   }
 
   function rekeyMembrList() {
@@ -10839,11 +10893,11 @@
     headers();
     setChecks();
     setLvls();
-    doTable$1();
-    eventHandlers();
+    var fshInv = doTable$1();
+    eventHandlers(fshInv);
     // eslint-disable-next-line no-use-before-define
     $('#fshRefresh').click(injectInventoryManagerNew);
-    clearButton();
+    clearButton(fshInv);
 
     timeEnd('inventory.getInvMan');
 
@@ -12586,17 +12640,20 @@
     if (match) {match.r(o, el);}
   }
 
+  function doCheck(o) {
+    if (!o.injectHere) {return;}
+    var tr = o.injectHere.parentNode;
+    if (tr.classList.contains('fshHide')) {return;}
+    var el = o.el.parentNode.parentNode.previousElementSibling
+      .firstElementChild;
+    testType(o, el);
+  }
+
   function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
     invItems$1 = invItems_;
     type = type_;
     itemId = Number(itemId_);
-    itemsAry.forEach(function(o) {
-      var tr = o.injectHere.parentNode;
-      if (tr.classList.contains('fshHide')) {return;}
-      var el = o.el.parentNode.parentNode.previousElementSibling
-        .firstElementChild;
-      testType(o, el);
-    });
+    itemsAry.forEach(doCheck);
   }
 
   function extraButtons() {
@@ -12698,6 +12755,7 @@
   }
 
   function checked(o) {
+    if (!o.injectHere) {return;}
     return o.injectHere.previousElementSibling.previousElementSibling
       .children[0].checked;
   }
@@ -16817,22 +16875,18 @@
     return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
   }
 
-  function titanIsAlive(data) {
-    if (goodData(data)) {
-      processTitans(data.r);
-      if (titanToShow(GameData.realm().dynamic)) {
-        return true;
-      }
+  function processScoutTower(ast, data) {
+    if (!goodData(data)) {return;}
+    processTitans(data.r);
+    if (titanToShow(GameData.realm().dynamic)) {
+      timeoutId$1 = window.setTimeout(ast, 30000);
+    } else {
       hideTitanDiv();
     }
   }
 
   function ajaxScoutTower() {
-    scouttower().done(function processScoutTower(data) {
-      if (titanIsAlive(data)) {
-        timeoutId$1 = window.setTimeout(ajaxScoutTower, 30000);
-      }
-    });
+    scouttower().done(partial(processScoutTower, ajaxScoutTower));
   }
 
   function testDynamics(dynamic) {
@@ -20315,7 +20369,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '57';
+  window.FSH.calf = '58';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
