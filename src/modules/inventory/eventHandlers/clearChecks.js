@@ -11,8 +11,8 @@ function clearGearOnly(checkedElements) {
   return newEle;
 }
 
-export default function clearChecks() { // jQuery
+export default function clearChecks(fshInv) { // jQuery
   options.checkedElements = clearGearOnly(options.checkedElements);
   setChecks();
-  $('#fshInv').DataTable().draw();
+  $(fshInv).DataTable().draw();
 }

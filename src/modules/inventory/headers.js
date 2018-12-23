@@ -1,7 +1,8 @@
 import {invManFilter} from './assets';
+import {pCC} from '../support/layout';
 import {theInv} from './buildInv';
 
-export default function headers() { // jQuery
+export default function headers() {
   var reportTitle;
   if (theInv.player_id) {
     reportTitle = '<b>&nbsp;Inventory Manager</b> ' +
@@ -12,6 +13,5 @@ export default function headers() { // jQuery
       theInv.items.length +
       ' items (maroon = in BP, blue=guild store)';
   }
-  var myHtml = invManFilter.replace('@@reportTitle@@', reportTitle);
-  $('#pCC').html(myHtml);
+  pCC.innerHTML = invManFilter.replace('@@reportTitle@@', reportTitle);
 }

@@ -7,7 +7,7 @@ import globalQuest from '../topRated/globalQuest';
 import guildHall from '../guild/hall';
 import guildMailbox from '../mailbox/guildMailbox';
 import injectAdvisor from '../guild/advisor/guildAdvisor';
-import injectArena from '../arena/arena';
+import {injectArena} from '../arena/arena';
 import injectBazaar from '../bazaar';
 import injectBioWidgets from '../profile/bio/bioWidgets';
 import injectBuffLog from '../buffLog/injectBuffLog';
