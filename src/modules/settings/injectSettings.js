@@ -30,20 +30,33 @@ function findSelect(name) {
   return findEl('select', name);
 }
 
-function getVars() {
-  calf.showBuffs = getValue('showHuntingBuffs');
-  calf.buffs = getValue('huntingBuffs');
-  calf.buffsName = getValue('huntingBuffsName');
-  calf.buffs2 = getValue('huntingBuffs2');
-  calf.buffs2Name = getValue('huntingBuffs2Name');
-  calf.buffs3 = getValue('huntingBuffs3');
-  calf.buffs3Name = getValue('huntingBuffs3Name');
-  calf.doNotKillList = getValue('doNotKillList');
+function mappedVars() {
+  [
+    ['showBuffs', 'showHuntingBuffs'],
+    ['buffs', 'huntingBuffs'],
+    ['buffsName', 'huntingBuffsName'],
+    ['buffs2', 'huntingBuffs2'],
+    ['buffs2Name', 'huntingBuffs2Name'],
+    ['buffs3', 'huntingBuffs3'],
+    ['buffs3Name', 'huntingBuffs3Name']
+  ].forEach(function(el) {
+    calf[el[0]] = getValue(el[1]);
+  });
+}
 
-  calf.bountyListRefreshTime = getValue('bountyListRefreshTime');
-  calf.wantedNames = getValue('wantedNames');
-  calf.combatEvaluatorBias = getValue('combatEvaluatorBias');
-  calf.enabledHuntingMode = getValue('enabledHuntingMode');
+function simpleVars() {
+  [
+    'doNotKillList',
+    'bountyListRefreshTime',
+    'wantedNames',
+    'combatEvaluatorBias',
+    'enabledHuntingMode'
+  ].forEach(function(pref) {calf[pref] = getValue(pref);});
+}
+
+function getVars() {
+  mappedVars();
+  simpleVars();
   calf.storage = (JSON.stringify(localStorage).length /
     (5 * 1024 * 1024) * 100).toFixed(2);
 }
@@ -115,7 +128,13 @@ function showMonsterLogs() {
   jQueryDialog(injectMonsterLog);
 }
 
-function createEventListeners() { // Legacy
+function insertFshTab(settingsTabs) {
+  if ($(settingsTabs).tabs('length') > 0) {
+    $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
+  }
+}
+
+function doTickAll() {
   var tickAll = createSpan({
     id: 'fshAllBuffs',
     className: 'fshLink',
@@ -126,17 +145,34 @@ function createEventListeners() { // Legacy
     .rows[0].cells[0];
   insertElement(inject, createBr());
   insertElement(inject, tickAll);
+}
 
-  on(getElementById('fshClearStorage'), 'click', clearStorage);
+function clickHandlers() {
+  [
+    ['fshClearStorage', clearStorage],
+    ['Helper:SaveOptions', saveConfig],
+    ['Helper:ShowLogs', showLogs],
+    ['Helper:ShowMonsterLogs', showMonsterLogs]
+  ].forEach(function(el) {
+    on(getElementById(el[0]), 'click', el[1]);
+  });
+}
 
-  on(getElementById('Helper:SaveOptions'), 'click', saveConfig);
-  on(getElementById('Helper:ShowLogs'), 'click', showLogs);
-  on(getElementById('Helper:ShowMonsterLogs'), 'click', showMonsterLogs);
+function onVisibilityToggle() {
+  [
+    'toggleShowGuildSelfMessage',
+    'toggleShowGuildFrndMessage',
+    'toggleShowGuildPastMessage',
+    'toggleShowGuildEnmyMessage'
+  ].forEach(function(id) {
+    on(getElementById(id), 'click', toggleVisibilty);
+  });
+}
 
-  on(getElementById('toggleShowGuildSelfMessage'), 'click', toggleVisibilty);
-  on(getElementById('toggleShowGuildFrndMessage'), 'click', toggleVisibilty);
-  on(getElementById('toggleShowGuildPastMessage'), 'click', toggleVisibilty);
-  on(getElementById('toggleShowGuildEnmyMessage'), 'click', toggleVisibilty);
+function createEventListeners() { // Legacy
+  doTickAll();
+  clickHandlers();
+  onVisibilityToggle();
 }
 
 export default function injectSettings() { // jQuery
@@ -146,9 +182,7 @@ export default function injectSettings() { // jQuery
   var settingsTabs = getElementById('settingsTabs');
   insertHtmlBeforeEnd(settingsTabs, '<div id="fshSettings">' +
     calf.configData + '</div>');
-  if ($(settingsTabs).tabs('length') > 0) {
-    $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
-  }
+  insertFshTab(settingsTabs);
 
   createEventListeners();
 

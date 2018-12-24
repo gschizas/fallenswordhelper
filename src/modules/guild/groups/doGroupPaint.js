@@ -1,0 +1,94 @@
+import doBuffLinks from '../../common/doBuffLinks';
+import {months} from '../../support/constants';
+import onlineDot from '../../common/onlineDot';
+import partial from '../../common/partial';
+import {server} from '../../system/system';
+import {time, timeEnd} from '../../support/debug';
+
+var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
+
+function dateFromUTC(x, curYear) {
+  var groupDate = new Date();
+  groupDate.setUTCDate(x[2]);
+  groupDate.setUTCMonth(months.indexOf(x[3]));
+  groupDate.setUTCFullYear(curYear);
+  groupDate.setUTCHours(x[4]);
+  groupDate.setUTCMinutes(x[5]);
+  return groupDate;
+}
+
+function groupLocalTime(theDateCell) { // jQuery
+  var x = xRE.exec(theDateCell.text());
+  var curYear = new Date().getFullYear(); // Boundary condition
+  theDateCell.append('<br><span class="fshBlue fshXSmall">' +
+    'Local: ' + dateFromUTC(x, curYear).toString().substr(0, 21) + '</span>');
+}
+
+function creatorDotAndLink(membrlist, row) {
+  var creator = $('b', row).text();
+  if (membrlist[creator]) {
+    return onlineDot({last_login: membrlist[creator].last_login}) +
+      '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
+      membrlist[creator].id + '"><b>' + creator + '</b></a> [' +
+      membrlist[creator].level + ']';
+  }
+  return '<b>' + creator + '</b>';
+}
+
+function memberLevel(membrlist, member) {
+  if (membrlist[member]) {return membrlist[member].level;}
+  return 0;
+}
+
+function byMemberLevel(membrlist, a, b) {
+  return memberLevel(membrlist, b) - memberLevel(membrlist, a);
+}
+
+function profileLink(membrlist, name) {
+  if (!membrlist[name]) {return name;}
+  return '<a href="index.php?cmd=profile&player_id=' +
+    membrlist[name].id + '">' + name + '</a>';
+}
+
+function groupMembers(membrlist, membersCell) {
+  var listArr = membersCell.html().split(', ');
+  if (listArr.length > 1) {listArr.sort(partial(byMemberLevel, membrlist));}
+  return listArr;
+}
+
+function ourMembers(name) {
+  return name !== '[none]' && name.indexOf('<font') === -1;
+}
+
+function buffLinks(creatorCell, listArr) {
+  var buffList = listArr.filter(ourMembers);
+  if (buffList.length > 0) {creatorCell.append(doBuffLinks(buffList));}
+  creatorCell.append('<span class="fshXSmall">Members: ' +
+    buffList.length + '</span>');
+}
+
+function memberProfileLinks(membrlist, membersCell, listArr) {
+  var memberLinks = listArr.map(partial(profileLink, membrlist));
+  membersCell.html('<span>' + memberLinks.join(', ') + '</span>');
+}
+
+function doGroupRow(membrlist, i, row) { // jQuery
+  var creatorCell = $('td', row).first();
+  creatorCell.html(creatorDotAndLink(membrlist, row));
+  var membersCell = $('td', row).eq(1);
+  var listArr = groupMembers(membrlist, membersCell);
+  buffLinks(creatorCell, listArr);
+  memberProfileLinks(membrlist, membersCell, listArr);
+  groupLocalTime($('td', row).eq(2));
+}
+
+export default function doGroupPaint(m) { // jQuery
+
+  time('groups.doGroupPaint');
+
+  $('#pCC table table table tr').has('.group-action-container')
+    .each(partial(doGroupRow, m));
+
+  timeEnd('groups.doGroupPaint');
+
+}

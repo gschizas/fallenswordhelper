@@ -1,8 +1,8 @@
 import doGroupPaint from './doGroupPaint';
-import getMembrList from '../ajax/getMembrList';
-import getValue from '../system/getValue';
+import getMembrList from '../../ajax/getMembrList';
+import getValue from '../../system/getValue';
 import groupButtons from './groupButtons';
-import jQueryNotPresent from '../common/jQueryNotPresent';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
 
 function displayMinGroupLevel() { // jQuery
   var minGroupLevel = getValue('minGroupLevel');

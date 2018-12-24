@@ -1,6 +1,6 @@
-import {createInput} from '../common/cElement';
-import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import {createInput} from '../../common/cElement';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 
 export default function addButton(target, val) {
   var theButton = createInput({

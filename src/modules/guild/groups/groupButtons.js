@@ -1,11 +1,11 @@
 import addButton from './addButton';
-import calf from '../support/calf';
-import {createDiv} from '../common/cElement';
+import calf from '../../support/calf';
+import {createDiv} from '../../common/cElement';
 import fetchGroupStatsButton from './fetchGroupStatsButton';
-import getValue from '../system/getValue';
-import on from '../common/on';
-import retryAjax from '../ajax/retryAjax';
-import {sendEvent} from '../support/fshGa';
+import getValue from '../../system/getValue';
+import on from '../../common/on';
+import retryAjax from '../../ajax/retryAjax';
+import {sendEvent} from '../../support/fshGa';
 
 var maxGroupSizeToJoin;
 
