@@ -39,23 +39,24 @@ function gameHelpLink() {
 }
 
 function getEnvVars() {
-  calf.enableAllyOnlineList = getValue('enableAllyOnlineList');
-  calf.enableEnemyOnlineList = getValue('enableEnemyOnlineList');
-  calf.enableGuildInfoWidgets = getValue('enableGuildInfoWidgets');
-  calf.enableOnlineAlliesWidgets =
-    getValue('enableOnlineAlliesWidgets');
-  calf.enableSeTracker = getValue('enableSeTracker');
-  calf.hideGuildInfoTrade = getValue('hideGuildInfoTrade');
-  calf.hideGuildInfoSecureTrade = getValue('hideGuildInfoSecureTrade');
-  calf.hideGuildInfoBuff = getValue('hideGuildInfoBuff');
-  calf.hideGuildInfoMessage = getValue('hideGuildInfoMessage');
-  calf.hideBuffSelected = getValue('hideBuffSelected');
-  calf.enableTempleAlert = getValue('enableTempleAlert');
-  calf.enableUpgradeAlert = getValue('enableUpgradeAlert');
-  calf.enableComposingAlert = getValue('enableComposingAlert');
-  calf.enableActiveBountyList = getValue('enableActiveBountyList');
-  calf.enableWantedList = getValue('enableWantedList');
-  calf.wantedGuildMembers = getValue('wantedGuildMembers');
+  [
+    'enableAllyOnlineList',
+    'enableEnemyOnlineList',
+    'enableGuildInfoWidgets',
+    'enableOnlineAlliesWidgets',
+    'enableSeTracker',
+    'hideGuildInfoTrade',
+    'hideGuildInfoSecureTrade',
+    'hideGuildInfoBuff',
+    'hideGuildInfoMessage',
+    'hideBuffSelected',
+    'enableTempleAlert',
+    'enableUpgradeAlert',
+    'enableComposingAlert',
+    'enableActiveBountyList',
+    'enableWantedList',
+    'wantedGuildMembers'
+  ].forEach(function(el) {calf[el] = getValue(el);});
   calf.allyEnemyOnlineRefreshTime =
     getValue('allyEnemyOnlineRefreshTime') * 1000;
 }

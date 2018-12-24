@@ -1,22 +1,10 @@
 import intValue from '../system/intValue';
 import {options} from './options';
-
-var lvlTests = [
-  function(level) {return level === 0;},
-  function(level, min, max) {return isNaN(min) && isNaN(max);},
-  function(level, min, max) {return isNaN(min) && level <= max;},
-  function(level, min, max) {return min <= level && isNaN(max);},
-  function(level, min, max) {return min <= level && level <= max;}
-];
+import {itemLvlTest, lvlTest} from '../common/lvlTests';
 
 function doLvlFilter(_settings, data) {
-  var min = options.fshMinLvl;
-  var max = options.fshMaxLvl;
-  var level = intValue(data[1]); // use data for the level column
-  for (var i = 0; i < lvlTests.length; i += 1) {
-    if (lvlTests[i](level, min, max)) {return true;}
-  }
-  return false;
+  return lvlTest(itemLvlTest, intValue(data[1]),
+    options.fshMinLvl, options.fshMaxLvl);
 }
 
 export function lvlFilter() { // jQuery
