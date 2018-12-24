@@ -7,6 +7,30 @@ import playerId from '../common/playerId';
 var times = {};
 var refAry = ['pagereboot.com', 'refreshthing.com', 'refreshthis.com',
   'lazywebtools.co.uk'];
+var urlPatch = [
+  [/&m=.*/],
+  [/&subcmd=&.*/],
+  [/&subcmd2=&.*/],
+  [/&[a-z_]+_id=.+/],
+  [/&id=.+/],
+  [/&target_player=.+/],
+  [/&[a-z]+_username=.+/],
+  [/\?cmd=auctionhouse.+/, '?cmd=auctionhouse'],
+  [/&subcmd=[0-9a-f]{32}/],
+  [/&search_active=.+/],
+  [/&letter=.+/],
+  [/&guild_name=.+/],
+  [/&user=.+/],
+  [/&[a-z_]*page=.+/],
+  [/&prestige=.+/],
+  [/&withdraw_amount=.+/],
+  [/&amount=.+/],
+  [/&tickets=.+/],
+  [/&search=.+/],
+  [/&target=.+/],
+  [/&xcv=[0-9a-f]{32}/],
+  [/\?ref=[0-9]+/]
+];
 
 function isAuto() {
   var docRef = document.referrer
@@ -42,30 +66,13 @@ export function end(category, variable, label) {
   sendTiming(category, variable, label);
 }
 
+function stripExtra(prev, curr) {
+  return prev.replace(curr[0], curr[1] || '');
+}
+
 function fixupUrl() {
   var origPath = window.location.pathname + window.location.search;
-  var page = origPath.replace(/&m=.*/, '')
-    .replace(/&subcmd=&.*/, '')
-    .replace(/&subcmd2=&.*/, '')
-    .replace(/&[a-z_]+_id=.+/, '')
-    .replace(/&id=.+/, '')
-    .replace(/&target_player=.+/, '')
-    .replace(/&[a-z]+_username=.+/, '')
-    .replace(/\?cmd=auctionhouse.+/, '?cmd=auctionhouse')
-    .replace(/&subcmd=[0-9a-f]{32}/, '')
-    .replace(/&search_active=.+/, '')
-    .replace(/&letter=.+/, '')
-    .replace(/&guild_name=.+/, '')
-    .replace(/&user=.+/, '')
-    .replace(/&[a-z_]*page=.+/, '')
-    .replace(/&prestige=.+/, '')
-    .replace(/&withdraw_amount=.+/, '')
-    .replace(/&amount=.+/, '')
-    .replace(/&tickets=.+/, '')
-    .replace(/&search=.+/, '')
-    .replace(/&target=.+/, '')
-    .replace(/&xcv=[0-9a-f]{32}/, '')
-    .replace(/\?ref=[0-9]+/, '');
+  var page = urlPatch.reduce(stripExtra, origPath);
   ga('fsh.set', 'page', page);
 }
 
