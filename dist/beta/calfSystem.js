@@ -57,6 +57,30 @@
   var times = {};
   var refAry = ['pagereboot.com', 'refreshthing.com', 'refreshthis.com',
     'lazywebtools.co.uk'];
+  var urlPatch = [
+    [/&m=.*/],
+    [/&subcmd=&.*/],
+    [/&subcmd2=&.*/],
+    [/&[a-z_]+_id=.+/],
+    [/&id=.+/],
+    [/&target_player=.+/],
+    [/&[a-z]+_username=.+/],
+    [/\?cmd=auctionhouse.+/, '?cmd=auctionhouse'],
+    [/&subcmd=[0-9a-f]{32}/],
+    [/&search_active=.+/],
+    [/&letter=.+/],
+    [/&guild_name=.+/],
+    [/&user=.+/],
+    [/&[a-z_]*page=.+/],
+    [/&prestige=.+/],
+    [/&withdraw_amount=.+/],
+    [/&amount=.+/],
+    [/&tickets=.+/],
+    [/&search=.+/],
+    [/&target=.+/],
+    [/&xcv=[0-9a-f]{32}/],
+    [/\?ref=[0-9]+/]
+  ];
 
   function isAuto() {
     var docRef = document.referrer
@@ -90,30 +114,13 @@
     sendTiming(category, variable, label);
   }
 
+  function stripExtra(prev, curr) {
+    return prev.replace(curr[0], curr[1] || '');
+  }
+
   function fixupUrl() {
     var origPath = window.location.pathname + window.location.search;
-    var page = origPath.replace(/&m=.*/, '')
-      .replace(/&subcmd=&.*/, '')
-      .replace(/&subcmd2=&.*/, '')
-      .replace(/&[a-z_]+_id=.+/, '')
-      .replace(/&id=.+/, '')
-      .replace(/&target_player=.+/, '')
-      .replace(/&[a-z]+_username=.+/, '')
-      .replace(/\?cmd=auctionhouse.+/, '?cmd=auctionhouse')
-      .replace(/&subcmd=[0-9a-f]{32}/, '')
-      .replace(/&search_active=.+/, '')
-      .replace(/&letter=.+/, '')
-      .replace(/&guild_name=.+/, '')
-      .replace(/&user=.+/, '')
-      .replace(/&[a-z_]*page=.+/, '')
-      .replace(/&prestige=.+/, '')
-      .replace(/&withdraw_amount=.+/, '')
-      .replace(/&amount=.+/, '')
-      .replace(/&tickets=.+/, '')
-      .replace(/&search=.+/, '')
-      .replace(/&target=.+/, '')
-      .replace(/&xcv=[0-9a-f]{32}/, '')
-      .replace(/\?ref=[0-9]+/, '');
+    var page = urlPatch.reduce(stripExtra, origPath);
     ga('fsh.set', 'page', page);
   }
 
@@ -2100,6 +2107,20 @@
     return guildId;
   }
 
+  var playerLvlTest = [
+    function(level, min, max) {return isNaN(min) && isNaN(max);},
+    function(level, min, max) {return isNaN(min) && level <= max;},
+    function(level, min, max) {return min <= level && isNaN(max);},
+    function(level, min, max) {return min <= level && level <= max;}
+  ];
+
+  var itemLvlTest;
+  itemLvlTest = [function(level) {return level === 0;}].concat(playerLvlTest);
+
+  function lvlTest(ary, level, min, max) {
+    return ary.some(function(fn) {return fn(level, min, max);});
+  }
+
   var context;
   var onlinePlayers;
   var onlineData;
@@ -2129,13 +2150,6 @@
     if (!isNaN(val)) {setValue(key, val);}
   }
 
-  var lvlTests = [
-    function(level, min, max) {return isNaN(min) && isNaN(max);},
-    function(level, min, max) {return isNaN(min) && level <= max;},
-    function(level, min, max) {return min <= level && isNaN(max);},
-    function(level, min, max) {return min <= level && level <= max;}
-  ];
-
   function dataTableSearch(_settings, data) { // jQuery
     /* Custom filtering function which will search
     data in column three between two values */
@@ -2144,10 +2158,7 @@
     saveVal('onlinePlayerMinLvl', min);
     saveVal('onlinePlayerMaxLvl', max);
     var level = fallback(intValue(data[2]), 0);
-    for (var i = 0; i < lvlTests.length; i += 1) {
-      if (lvlTests[i](level, min, max)) {return true;}
-    }
-    return false;
+    return lvlTest(playerLvlTest, level, min, max);
   }
 
   function filterHeaderOnlinePlayers() { // jQuery
@@ -6620,23 +6631,24 @@
   }
 
   function getEnvVars() {
-    calf.enableAllyOnlineList = getValue('enableAllyOnlineList');
-    calf.enableEnemyOnlineList = getValue('enableEnemyOnlineList');
-    calf.enableGuildInfoWidgets = getValue('enableGuildInfoWidgets');
-    calf.enableOnlineAlliesWidgets =
-      getValue('enableOnlineAlliesWidgets');
-    calf.enableSeTracker = getValue('enableSeTracker');
-    calf.hideGuildInfoTrade = getValue('hideGuildInfoTrade');
-    calf.hideGuildInfoSecureTrade = getValue('hideGuildInfoSecureTrade');
-    calf.hideGuildInfoBuff = getValue('hideGuildInfoBuff');
-    calf.hideGuildInfoMessage = getValue('hideGuildInfoMessage');
-    calf.hideBuffSelected = getValue('hideBuffSelected');
-    calf.enableTempleAlert = getValue('enableTempleAlert');
-    calf.enableUpgradeAlert = getValue('enableUpgradeAlert');
-    calf.enableComposingAlert = getValue('enableComposingAlert');
-    calf.enableActiveBountyList = getValue('enableActiveBountyList');
-    calf.enableWantedList = getValue('enableWantedList');
-    calf.wantedGuildMembers = getValue('wantedGuildMembers');
+    [
+      'enableAllyOnlineList',
+      'enableEnemyOnlineList',
+      'enableGuildInfoWidgets',
+      'enableOnlineAlliesWidgets',
+      'enableSeTracker',
+      'hideGuildInfoTrade',
+      'hideGuildInfoSecureTrade',
+      'hideGuildInfoBuff',
+      'hideGuildInfoMessage',
+      'hideBuffSelected',
+      'enableTempleAlert',
+      'enableUpgradeAlert',
+      'enableComposingAlert',
+      'enableActiveBountyList',
+      'enableWantedList',
+      'wantedGuildMembers'
+    ].forEach(function(el) {calf[el] = getValue(el);});
     calf.allyEnemyOnlineRefreshTime =
       getValue('allyEnemyOnlineRefreshTime') * 1000;
   }
@@ -7734,7 +7746,7 @@
     opts.id = {};
   }
 
-  var lvlTests$1 = [
+  var lvlTests = [
     function(min) {return !min;},
     function(min, max) {return !max;},
     function(min, max) {return isNaN(min) && isNaN(max);},
@@ -7747,7 +7759,7 @@
     var min = opts.minLvl;
     var max = opts.maxLvl;
     var level = intValue(data[7]);
-    return lvlTests$1.some(function(fn) {return fn(min, max, level);});
+    return lvlTests.some(function(fn) {return fn(min, max, level);});
   }
 
   function lvlFilter(_settings, data) {
@@ -9819,7 +9831,7 @@
   }
 
   function getComposedFromBp(data) {
-    if (!data.r) {return;}
+    if (!Array.isArray(data.r)) {return;}
     composed = data.r.map(function(el) {return el.items;})
       .reduce(function(a, b) {return a.concat(b);})
       .filter(function(el) {return el.t === 15;});
@@ -9830,7 +9842,7 @@
   }
 
   function getComposedFromGs(data) {
-    if (!data.r) {return;}
+    if (!Array.isArray(data.r)) {return;}
     composed = composed.concat(data.r.filter(function(el) {return el.t === 15;}));
   }
 
@@ -10790,22 +10802,9 @@
     $('#fshMaxLvl').val(options.fshMaxLvl);
   }
 
-  var lvlTests$2 = [
-    function(level) {return level === 0;},
-    function(level, min, max) {return isNaN(min) && isNaN(max);},
-    function(level, min, max) {return isNaN(min) && level <= max;},
-    function(level, min, max) {return min <= level && isNaN(max);},
-    function(level, min, max) {return min <= level && level <= max;}
-  ];
-
   function doLvlFilter$1(_settings, data) {
-    var min = options.fshMinLvl;
-    var max = options.fshMaxLvl;
-    var level = intValue(data[1]); // use data for the level column
-    for (var i = 0; i < lvlTests$2.length; i += 1) {
-      if (lvlTests$2[i](level, min, max)) {return true;}
-    }
-    return false;
+    return lvlTest(itemLvlTest, intValue(data[1]),
+      options.fshMinLvl, options.fshMaxLvl);
   }
 
   function lvlFilter$1() { // jQuery
@@ -20274,7 +20273,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '58';
+  window.FSH.calf = '59';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
