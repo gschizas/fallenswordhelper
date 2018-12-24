@@ -1,6 +1,7 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
+import getValue from '../system/getValue';
 import {injectFsBoxContent} from '../misc';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -45,7 +46,12 @@ function fSBoxExists(node) { // jQuery.min
   insertElement(nodediv, log);
 }
 
-export default function injectFSBoxLog() {
+function findFsBox() {
   var node = getElementById('minibox-fsbox');
   if (jQueryPresent() && node) {fSBoxExists(node);}
+}
+
+export default function injectFSBoxLog() {
+  if (!getValue('fsboxlog')) {return;}
+  findFsBox();
 }
