@@ -16,6 +16,7 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from './common/levelHighlight';
+import {lvlTest, playerLvlTest} from './common/lvlTests';
 
 var context;
 var onlinePlayers;
@@ -46,13 +47,6 @@ function saveVal(key, val) {
   if (!isNaN(val)) {setValue(key, val);}
 }
 
-var lvlTests = [
-  function(level, min, max) {return isNaN(min) && isNaN(max);},
-  function(level, min, max) {return isNaN(min) && level <= max;},
-  function(level, min, max) {return min <= level && isNaN(max);},
-  function(level, min, max) {return min <= level && level <= max;}
-];
-
 function dataTableSearch(_settings, data) { // jQuery
   /* Custom filtering function which will search
   data in column three between two values */
@@ -61,10 +55,7 @@ function dataTableSearch(_settings, data) { // jQuery
   saveVal('onlinePlayerMinLvl', min);
   saveVal('onlinePlayerMaxLvl', max);
   var level = fallback(intValue(data[2]), 0);
-  for (var i = 0; i < lvlTests.length; i += 1) {
-    if (lvlTests[i](level, min, max)) {return true;}
-  }
-  return false;
+  return lvlTest(playerLvlTest, level, min, max);
 }
 
 function filterHeaderOnlinePlayers() { // jQuery
