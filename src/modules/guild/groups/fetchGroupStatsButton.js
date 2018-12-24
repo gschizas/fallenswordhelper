@@ -1,8 +1,8 @@
 import addButton from './addButton';
-import getGroupStats from '../ajax/getGroupStats';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import on from '../common/on';
-import partial from '../common/partial';
+import getGroupStats from '../../ajax/getGroupStats';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import on from '../../common/on';
+import partial from '../../common/partial';
 
 function parseGroupData(linkElement, obj) {
   var extraText = '<table class="fshgrpstat">' +

@@ -154,6 +154,31 @@ function doMoveDailyQuest() {
   }
 }
 
+function priorityThree() {
+  [
+    navMenu,
+    statbar,
+    injectStaminaCalculator,
+    injectLevelupCalculator,
+    injectMenu,
+    injectFSBoxLog,
+    interceptQuickBuff,
+    injectJoinAllLink,
+    changeGuildLogHREF,
+    injectHomePageTwoLink,
+    injectQuickMsgDialogJQ,
+    injectServerNode,
+    scoutTowerLink
+  ].forEach(function(fn) {add(3, fn);});
+}
+
+function priorityFour() {
+  [
+    guildActivity,
+    seLog
+  ].forEach(function(fn) {add(4, fn);});
+}
+
 function notHuntMode() {
   if (calf.huntingMode) {return;}
   // move boxes in opposite order that you want them to appear.
@@ -161,34 +186,10 @@ function notHuntMode() {
   doMoveAllyList();
   doMoveDailyQuest();
   doMoveFsBox();
-
   getEnvVars();
   conditional();
-
-  add(3, navMenu);
-  add(3, statbar);
-
-  add(3, injectStaminaCalculator);
-  add(3, injectLevelupCalculator);
-
-  add(3, injectMenu);
-
-  if (getValue('fsboxlog')) {
-    add(3, injectFSBoxLog);
-  }
-  add(3, interceptQuickBuff);
-
-  add(3, injectJoinAllLink);
-  add(3, changeGuildLogHREF);
-  add(3, injectHomePageTwoLink);
-
-  add(3, injectQuickMsgDialogJQ);
-
-  add(3, injectServerNode);
-  add(3, scoutTowerLink);
-
-  add(4, guildActivity);
-  add(4, seLog);
+  priorityThree();
+  priorityFour();
 }
 
 function prepareEnv() {

@@ -1775,9 +1775,14 @@
     insertElement(nodediv, log);
   }
 
-  function injectFSBoxLog() {
+  function findFsBox() {
     var node = getElementById('minibox-fsbox');
     if (jQueryPresent() && node) {fSBoxExists(node);}
+  }
+
+  function injectFSBoxLog() {
+    if (!getValue('fsboxlog')) {return;}
+    findFsBox();
   }
 
   function displayBuffLog(buffLog) {
@@ -6746,6 +6751,31 @@
     }
   }
 
+  function priorityThree() {
+    [
+      navMenu,
+      statbar,
+      injectStaminaCalculator,
+      injectLevelupCalculator,
+      injectMenu,
+      injectFSBoxLog,
+      interceptQuickBuff,
+      injectJoinAllLink,
+      changeGuildLogHREF,
+      injectHomePageTwoLink,
+      injectQuickMsgDialogJQ,
+      injectServerNode,
+      scoutTowerLink
+    ].forEach(function(fn) {add(3, fn);});
+  }
+
+  function priorityFour() {
+    [
+      guildActivity,
+      seLog
+    ].forEach(function(fn) {add(4, fn);});
+  }
+
   function notHuntMode() {
     if (calf.huntingMode) {return;}
     // move boxes in opposite order that you want them to appear.
@@ -6753,34 +6783,10 @@
     doMoveAllyList();
     doMoveDailyQuest();
     doMoveFsBox();
-
     getEnvVars();
     conditional();
-
-    add(3, navMenu);
-    add(3, statbar);
-
-    add(3, injectStaminaCalculator);
-    add(3, injectLevelupCalculator);
-
-    add(3, injectMenu);
-
-    if (getValue('fsboxlog')) {
-      add(3, injectFSBoxLog);
-    }
-    add(3, interceptQuickBuff);
-
-    add(3, injectJoinAllLink);
-    add(3, changeGuildLogHREF);
-    add(3, injectHomePageTwoLink);
-
-    add(3, injectQuickMsgDialogJQ);
-
-    add(3, injectServerNode);
-    add(3, scoutTowerLink);
-
-    add(4, guildActivity);
-    add(4, seLog);
+    priorityThree();
+    priorityFour();
   }
 
   function prepareEnv() {
@@ -8811,22 +8817,27 @@
     return shortList;
   }
 
-  function groupLocalTime(theDateCell) { // jQuery
-    var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
-    var x = xRE.exec(theDateCell.text());
-    var month = months.indexOf(x[3]);
-    var curYear = new Date().getFullYear(); // Boundary condition
+  var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
+
+  function dateFromUTC(x, curYear) {
     var groupDate = new Date();
     groupDate.setUTCDate(x[2]);
-    groupDate.setUTCMonth(month);
+    groupDate.setUTCMonth(months.indexOf(x[3]));
     groupDate.setUTCFullYear(curYear);
     groupDate.setUTCHours(x[4]);
     groupDate.setUTCMinutes(x[5]);
-    theDateCell.append('<br><span style="color:blue; font-size:x-small">' +
-      'Local: ' + groupDate.toString().substr(0, 21) + '</span>');
+    return groupDate;
   }
 
-  function getCreator(membrlist, creator) {
+  function groupLocalTime(theDateCell) { // jQuery
+    var x = xRE.exec(theDateCell.text());
+    var curYear = new Date().getFullYear(); // Boundary condition
+    theDateCell.append('<br><span class="fshBlue fshXSmall">' +
+      'Local: ' + dateFromUTC(x, curYear).toString().substr(0, 21) + '</span>');
+  }
+
+  function creatorDotAndLink(membrlist, row) {
+    var creator = $('b', row).text();
     if (membrlist[creator]) {
       return onlineDot({last_login: membrlist[creator].last_login}) +
         '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
@@ -8841,30 +8852,45 @@
     return 0;
   }
 
-  function byMember(membrlist, a, b) {
+  function byMemberLevel(membrlist, a, b) {
     return memberLevel(membrlist, b) - memberLevel(membrlist, a);
   }
 
-  function doGroupRow(row, membrlist) { // jQuery
-    var creator = $('b', row).text();
-    var td = $('td', row).first();
-    td.html(getCreator(membrlist, creator));
-    var td2 = $('td', row).eq(1);
-    var theList = td2.html();
-    var listArr = theList.split(', ');
-    if (listArr.length > 1) {listArr.sort(partial(byMember, membrlist));}
-    var buffList = listArr.filter(function(name) {
-      return name !== '[none]' && name.indexOf('<font') === -1;
-    });
-    if (buffList.length > 0) {td.append(doBuffLinks(buffList));}
-    td.append('<span class="fshXSmall">Members: ' +
+  function profileLink(membrlist, name) {
+    if (!membrlist[name]) {return name;}
+    return '<a href="index.php?cmd=profile&player_id=' +
+      membrlist[name].id + '">' + name + '</a>';
+  }
+
+  function groupMembers(membrlist, membersCell) {
+    var listArr = membersCell.html().split(', ');
+    if (listArr.length > 1) {listArr.sort(partial(byMemberLevel, membrlist));}
+    return listArr;
+  }
+
+  function ourMembers(name) {
+    return name !== '[none]' && name.indexOf('<font') === -1;
+  }
+
+  function buffLinks(creatorCell, listArr) {
+    var buffList = listArr.filter(ourMembers);
+    if (buffList.length > 0) {creatorCell.append(doBuffLinks(buffList));}
+    creatorCell.append('<span class="fshXSmall">Members: ' +
       buffList.length + '</span>');
-    listArr = listArr.map(function(name) {
-      if (!membrlist[name]) {return name;}
-      return '<a href="index.php?cmd=profile&player_id=' +
-        membrlist[name].id + '">' + name + '</a>';
-    });
-    td2.html('<span>' + listArr.join(', ') + '</span>');
+  }
+
+  function memberProfileLinks(membrlist, membersCell, listArr) {
+    var memberLinks = listArr.map(partial(profileLink, membrlist));
+    membersCell.html('<span>' + memberLinks.join(', ') + '</span>');
+  }
+
+  function doGroupRow(membrlist, i, row) { // jQuery
+    var creatorCell = $('td', row).first();
+    creatorCell.html(creatorDotAndLink(membrlist, row));
+    var membersCell = $('td', row).eq(1);
+    var listArr = groupMembers(membrlist, membersCell);
+    buffLinks(creatorCell, listArr);
+    memberProfileLinks(membrlist, membersCell, listArr);
     groupLocalTime($('td', row).eq(2));
   }
 
@@ -8873,9 +8899,7 @@
     time('groups.doGroupPaint');
 
     $('#pCC table table table tr').has('.group-action-container')
-      .each(function(i, e) {
-        doGroupRow(e, m);
-      });
+      .each(partial(doGroupRow, m));
 
     timeEnd('groups.doGroupPaint');
 
@@ -9055,7 +9079,7 @@
     openQuickBuffByName(evt.target.previousElementSibling.text);
   }
 
-  function buffLinks() {
+  function buffLinks$1() {
     // TODO preference
     var members = document.querySelectorAll(
       '#pCC a[href^="index.php?cmd=profile&player_id="]');
@@ -9547,7 +9571,7 @@
     add(3, logoToggle, [leftHandSideColumnTable]);
     add(3, statToggle, [leftHandSideColumnTable]);
     add(3, structureToggle, [leftHandSideColumnTable]);
-    add(3, buffLinks);
+    add(3, buffLinks$1);
     add(3, selfRecallLink, [leftHandSideColumnTable]);
     if (jQueryNotPresent()) {return;}
     // Detailed conflict information
@@ -14768,20 +14792,33 @@
     return findEl('select', name);
   }
 
-  function getVars() {
-    calf.showBuffs = getValue('showHuntingBuffs');
-    calf.buffs = getValue('huntingBuffs');
-    calf.buffsName = getValue('huntingBuffsName');
-    calf.buffs2 = getValue('huntingBuffs2');
-    calf.buffs2Name = getValue('huntingBuffs2Name');
-    calf.buffs3 = getValue('huntingBuffs3');
-    calf.buffs3Name = getValue('huntingBuffs3Name');
-    calf.doNotKillList = getValue('doNotKillList');
+  function mappedVars() {
+    [
+      ['showBuffs', 'showHuntingBuffs'],
+      ['buffs', 'huntingBuffs'],
+      ['buffsName', 'huntingBuffsName'],
+      ['buffs2', 'huntingBuffs2'],
+      ['buffs2Name', 'huntingBuffs2Name'],
+      ['buffs3', 'huntingBuffs3'],
+      ['buffs3Name', 'huntingBuffs3Name']
+    ].forEach(function(el) {
+      calf[el[0]] = getValue(el[1]);
+    });
+  }
 
-    calf.bountyListRefreshTime = getValue('bountyListRefreshTime');
-    calf.wantedNames = getValue('wantedNames');
-    calf.combatEvaluatorBias = getValue('combatEvaluatorBias');
-    calf.enabledHuntingMode = getValue('enabledHuntingMode');
+  function simpleVars() {
+    [
+      'doNotKillList',
+      'bountyListRefreshTime',
+      'wantedNames',
+      'combatEvaluatorBias',
+      'enabledHuntingMode'
+    ].forEach(function(pref) {calf[pref] = getValue(pref);});
+  }
+
+  function getVars() {
+    mappedVars();
+    simpleVars();
     calf.storage = (JSON.stringify(localStorage).length /
       (5 * 1024 * 1024) * 100).toFixed(2);
   }
@@ -14853,7 +14890,13 @@
     jQueryDialog(injectMonsterLog);
   }
 
-  function createEventListeners() { // Legacy
+  function insertFshTab(settingsTabs) {
+    if ($(settingsTabs).tabs('length') > 0) {
+      $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
+    }
+  }
+
+  function doTickAll() {
     var tickAll = createSpan({
       id: 'fshAllBuffs',
       className: 'fshLink',
@@ -14864,17 +14907,34 @@
       .rows[0].cells[0];
     insertElement(inject, createBr());
     insertElement(inject, tickAll);
+  }
 
-    on(getElementById('fshClearStorage'), 'click', clearStorage);
+  function clickHandlers() {
+    [
+      ['fshClearStorage', clearStorage],
+      ['Helper:SaveOptions', saveConfig],
+      ['Helper:ShowLogs', showLogs],
+      ['Helper:ShowMonsterLogs', showMonsterLogs]
+    ].forEach(function(el) {
+      on(getElementById(el[0]), 'click', el[1]);
+    });
+  }
 
-    on(getElementById('Helper:SaveOptions'), 'click', saveConfig);
-    on(getElementById('Helper:ShowLogs'), 'click', showLogs);
-    on(getElementById('Helper:ShowMonsterLogs'), 'click', showMonsterLogs);
+  function onVisibilityToggle() {
+    [
+      'toggleShowGuildSelfMessage',
+      'toggleShowGuildFrndMessage',
+      'toggleShowGuildPastMessage',
+      'toggleShowGuildEnmyMessage'
+    ].forEach(function(id) {
+      on(getElementById(id), 'click', toggleVisibilty);
+    });
+  }
 
-    on(getElementById('toggleShowGuildSelfMessage'), 'click', toggleVisibilty);
-    on(getElementById('toggleShowGuildFrndMessage'), 'click', toggleVisibilty);
-    on(getElementById('toggleShowGuildPastMessage'), 'click', toggleVisibilty);
-    on(getElementById('toggleShowGuildEnmyMessage'), 'click', toggleVisibilty);
+  function createEventListeners() { // Legacy
+    doTickAll();
+    clickHandlers();
+    onVisibilityToggle();
   }
 
   function injectSettings() { // jQuery
@@ -14884,9 +14944,7 @@
     var settingsTabs = getElementById('settingsTabs');
     insertHtmlBeforeEnd(settingsTabs, '<div id="fshSettings">' +
       calf.configData + '</div>');
-    if ($(settingsTabs).tabs('length') > 0) {
-      $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
-    }
+    insertFshTab(settingsTabs);
 
     createEventListeners();
 
@@ -20273,7 +20331,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '59';
+  window.FSH.calf = '60';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
