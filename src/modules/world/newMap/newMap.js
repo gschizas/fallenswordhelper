@@ -72,28 +72,46 @@ function doRepair(e, key) {
   }
 }
 
+function repairButton() {
+  $.subscribe(def_controlsKeydown, doRepair);
+}
+
+function msgCenterOffset() {
+  $('#messageCenter').worldMessageCenter({offset: '0 60'});
+}
+
+function hideMapTooltip() {
+  $('#mapTooltip').qtip('hide');
+}
+
 function fixDebuffQTip(e) { // jQuery.min
   $(e.target).qtip('hide');
 }
 
-export default function subscribes() { // jQuery.min
-  worldPrefs();
-  injectSendGoldOnWorld();
-  viewCreature();
-  hideGroupButton(); // Hide Create Group button
-  doMonsterColors();
-  doNotKill(); // add do-not-kill list functionality
-  startMonsterLog(); // add monster log functionality
-  $.subscribe(def_controlsKeydown, doRepair);
-  combatLogger();
-  onWorld();
-  prepareShop();
-  injectRelic();
-  $('#messageCenter').worldMessageCenter({offset: '0 60'});
-  $('#mapTooltip').qtip('hide');
-  initButtons();
-  buffInfo();
+function fixDebuff() {
   on(getElementById('buffList'), 'click', fixDebuffQTip);
+}
+
+export default function subscribes() {
+  [
+    worldPrefs,
+    injectSendGoldOnWorld,
+    viewCreature,
+    hideGroupButton,
+    doMonsterColors,
+    doNotKill,
+    startMonsterLog,
+    repairButton,
+    combatLogger,
+    onWorld,
+    prepareShop,
+    injectRelic,
+    msgCenterOffset,
+    hideMapTooltip,
+    initButtons,
+    buffInfo,
+    fixDebuff
+  ].forEach(function(fn) {fn();});
 }
 
 // -1 = world page
