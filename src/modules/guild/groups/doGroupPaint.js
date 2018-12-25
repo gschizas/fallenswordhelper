@@ -17,7 +17,8 @@ function dateFromUTC(x, curYear) {
   return groupDate;
 }
 
-function groupLocalTime(theDateCell) { // jQuery
+function groupLocalTime(row) { // jQuery
+  var theDateCell = $('td', row).eq(2);
   var x = xRE.exec(theDateCell.text());
   var curYear = new Date().getFullYear(); // Boundary condition
   theDateCell.append('<br><span class="fshBlue fshXSmall">' +
@@ -33,6 +34,12 @@ function creatorDotAndLink(membrlist, row) {
       membrlist[creator].level + ']';
   }
   return '<b>' + creator + '</b>';
+}
+
+function getCreatorCell(membrlist, row) {
+  var creatorCell = $('td', row).first();
+  creatorCell.html(creatorDotAndLink(membrlist, row));
+  return creatorCell;
 }
 
 function memberLevel(membrlist, member) {
@@ -73,13 +80,12 @@ function memberProfileLinks(membrlist, membersCell, listArr) {
 }
 
 function doGroupRow(membrlist, i, row) { // jQuery
-  var creatorCell = $('td', row).first();
-  creatorCell.html(creatorDotAndLink(membrlist, row));
+  var creatorCell = getCreatorCell(membrlist, row);
   var membersCell = $('td', row).eq(1);
   var listArr = groupMembers(membrlist, membersCell);
   buffLinks(creatorCell, listArr);
   memberProfileLinks(membrlist, membersCell, listArr);
-  groupLocalTime($('td', row).eq(2));
+  groupLocalTime(row);
 }
 
 export default function doGroupPaint(m) { // jQuery

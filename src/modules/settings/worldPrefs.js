@@ -1,3 +1,4 @@
+import bunchOfSimple from './bunchOfSimple';
 import calf from '../support/calf';
 import getValue from '../system/getValue';
 import isChecked from '../system/isChecked';
@@ -158,9 +159,11 @@ export function prefs() {
     worldGroup() +
     keepCombatLogs() +
 
-    simpleCheckbox('showCombatLog') +
-    simpleCheckbox('enableCreatureColoring') +
-    simpleCheckbox('showCreatureInfo') +
+    bunchOfSimple([
+      'showCombatLog',
+      'enableCreatureColoring',
+      'showCreatureInfo'
+    ]) +
 
     combatEvalBias() +
     keepCreatureLog() +

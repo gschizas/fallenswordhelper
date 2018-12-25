@@ -9,22 +9,33 @@ import on from '../common/on';
 import {pCC} from '../support/layout';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
+import partial from '../common/partial';
 import playerName from '../common/playerName';
 import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 import stringSort from '../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
+import {calcMinLvl, setMinLvl} from './minLvl';
+import {getBufferProgress, updateProgress} from './bufferProgress';
 
-var characterName;
 var findBuffNicks;
 var findBuffMinCastLevel;
-var findBuffsLevel175Only;
 var onlinePlayers;
 var onlinePlayersSetting;
 export var extraProfile;
 var profilePagesToSearch;
 var profilePagesToSearchProcessed;
-var bufferProgress;
+
+function gotProfile(j, html) {
+  parseProfileAndDisplay(html, {
+    href: onlinePlayers[j],
+    findBuffNicks: findBuffNicks
+  });
+}
+
+function getProfile(j) {
+  retryAjax(j).done(partial(gotProfile, j));
+}
 
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
@@ -32,26 +43,11 @@ function findBuffsParsePlayersForBuffs() { // Legacy
   getElementById('potentialBuffers').innerHTML =
     onlinePlayers.length;
   if (onlinePlayers.length <= 0) {
-    bufferProgress.innerHTML = 'Done.';
-    bufferProgress.style.color = 'blue';
+    updateProgress('Done.', 'blue');
     return;
   }
-  bufferProgress.innerHTML = 'Parsing player data ...';
-  bufferProgress.style.color = 'green';
-  onlinePlayers.forEach(function(j) {
-    retryAjax(j).done(function(html) {
-      parseProfileAndDisplay(html, {
-        href: onlinePlayers[j],
-        bufferProgress: bufferProgress,
-        findBuffNicks: findBuffNicks
-      });
-    });
-  });
-}
-
-function calcMinLvl() { // Legacy
-  if (findBuffsLevel175Only) {return 500;}
-  return 1;
+  updateProgress('Parsing player data ...', 'green');
+  onlinePlayers.forEach(getProfile);
 }
 
 function calcNextPage(curPage, maxPage) { // Legacy
@@ -61,7 +57,7 @@ function calcNextPage(curPage, maxPage) { // Legacy
 
 function addPlayerToSearchList(onlinePlayer, onlinePlayerName) {
   // add online player to search list (all but self)
-  if (characterName !== onlinePlayerName.trim()) {
+  if (playerName() !== onlinePlayerName.trim()) {
     onlinePlayers.push(onlinePlayer);
   }
 }
@@ -78,20 +74,31 @@ function playerRow(i, e) {
   }
 }
 
+function getMaxPage(doc) {
+  return parseInt($(doc).find('td:has(input[name="page"]):last')
+    .text().replace(/\D/g, ''), 10);
+}
+
+function getCurrPage(doc) {
+  return parseInt($(doc).find('input[name="page"]:last').val()
+    .replace(/\D/g, ''), 10);
+}
+
+function playerRows(doc) {
+  $(doc).find('table:contains("Username")>tbody>tr:has' +
+    '(td>a[href*="cmd=profile&player_id="])').each(playerRow);
+}
+
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var doc = createDocument(responseText);
-  var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has' +
-    '(td>a[href*="cmd=profile&player_id="])');
-  var maxPage = parseInt($(doc).find('td:has(input[name="page"]):last')
-    .text().replace(/\D/g, ''), 10);
-  var curPage = parseInt($(doc).find('input[name="page"]:last').val()
-    .replace(/\D/g, ''), 10);
+  var maxPage = getMaxPage(doc);
+  var curPage = getCurrPage(doc);
   if (curPage !== 1) {
-    playerRows.each(playerRow);
+    playerRows(doc);
   }
   if (curPage < maxPage) {
     var newPage = calcNextPage(curPage, maxPage);
-    bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
+    updateProgress('Parsing online page ' + curPage + ' ...');
     retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
       newPage.toString()).done(findBuffsParseOnlinePlayers);
   } else {
@@ -184,21 +191,16 @@ function findBuffsClearResults() { // Legacy
     buffTable.deleteRow(j - 1);
   }
   getElementById('buffNicks').innerHTML = '';
-  bufferProgress.innerHTML = 'Idle.';
-  bufferProgress.style.color = 'black';
+  updateProgress('Idle.', 'black');
   getElementById('potentialBuffers').innerHTML = '';
   getElementById('buffersProcessed').innerHTML = 0;
 }
 
 function findAnyStart(progMsg) { // jQuery
   if (jQueryNotPresent()) {return;}
-  characterName = playerName();
   getElementById('buffNicks').innerHTML = findBuffNicks;
-  if (jQueryNotPresent()) {return;}
-  bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
-  bufferProgress.style.color = 'green';
-  findBuffsLevel175Only =
-    getElementById('level175').checked;
+  updateProgress('Gathering list of ' + progMsg + ' ...', 'green');
+  setMinLvl();
   getElementById('buffersProcessed').innerHTML = 0;
   onlinePlayers = [];
   extraProfile = getElementById('extraProfile').value;
@@ -230,10 +232,6 @@ function findOtherStart() { // Legacy
 
 function getExtraProfile() {
   extraProfile = getValue('extraProfile');
-}
-
-function getBufferProgress() {
-  bufferProgress = getElementById('bufferProgress');
 }
 
 function setupFindEvent(fn) {

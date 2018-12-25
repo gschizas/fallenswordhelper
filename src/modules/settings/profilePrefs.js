@@ -1,13 +1,16 @@
+import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
+import {helpLink} from './simpleCheckbox';
 import isChecked from '../system/isChecked';
-import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 export default function profilePrefs() {
   // profile prefs
   return '<tr><th colspan="2"><b>Profile preferences</b></th></tr>' +
 
-    simpleCheckbox('renderSelfBio') +
-    simpleCheckbox('renderOtherBios') +
+    bunchOfSimple([
+      'renderSelfBio',
+      'renderOtherBios'
+    ]) +
 
     '<tr><td class="fshRight">Enable Bio Compressor' +
       helpLink('Enable Bio Compressor',
@@ -30,8 +33,10 @@ export default function profilePrefs() {
       ':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" ' +
       'value="' + getValue('buyBuffsGreeting') + '"></td></tr>' +
 
-    simpleCheckbox('showStatBonusTotal') +
-    simpleCheckbox('enableQuickDrink') +
-    simpleCheckbox('disableDeactivatePrompts') +
-    simpleCheckbox('highlightPvpProtection');
+    bunchOfSimple([
+      'showStatBonusTotal',
+      'enableQuickDrink',
+      'disableDeactivatePrompts',
+      'highlightPvpProtection'
+    ]);
 }

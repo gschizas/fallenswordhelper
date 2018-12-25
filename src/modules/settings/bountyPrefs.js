@@ -1,7 +1,8 @@
+import bunchOfSimple from './bunchOfSimple';
 import calf from '../support/calf';
+import {helpLink} from './simpleCheckbox';
 import isChecked from '../system/isChecked';
 import {networkIcon} from './settingObj';
-import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function showActiveBounties() {
   return '<tr><td align= "right">' + networkIcon +
@@ -42,7 +43,9 @@ export default function bountyPrefs() {
     showActiveBounties() +
     showWantedBounties() +
     wantedNames() +
-    simpleCheckbox('wantedGuildMembers') +
-    simpleCheckbox('enableAttackHelper') +
-    simpleCheckbox('showPvPSummaryInLog');
+    bunchOfSimple([
+      'wantedGuildMembers',
+      'enableAttackHelper',
+      'showPvPSummaryInLog'
+    ]);
 }

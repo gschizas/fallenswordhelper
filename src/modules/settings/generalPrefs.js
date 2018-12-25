@@ -1,8 +1,9 @@
+import bunchOfSimple from './bunchOfSimple';
 import calf from '../support/calf';
 import getValue from '../system/getValue';
+import {helpLink} from './simpleCheckbox';
 import isChecked from '../system/isChecked';
 import {networkIcon} from './settingObj';
-import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function guildInfoWidgets() {
   return '<tr><td class="fshRight"><label for="enableGuildInfoWidgets">' +
@@ -56,27 +57,33 @@ export default function generalPrefs() {
 
     guildInfoWidgets() +
 
-    simpleCheckbox('moveGuildList') +
-    simpleCheckbox('moveOnlineAlliesList') +
+    bunchOfSimple([
+      'moveGuildList',
+      'moveOnlineAlliesList'
+    ]) +
 
     onlineAlliesEnemies() +
 
-    simpleCheckbox('enableOnlineAlliesWidgets') +
-    simpleCheckbox('moveFSBox') +
-    simpleCheckbox('moveDailyQuest') +
-    simpleCheckbox('fsboxlog') +
-    simpleCheckbox('gameHelpLink') +
-    simpleCheckbox('enableTempleAlert') +
-    simpleCheckbox('enableUpgradeAlert') +
-    simpleCheckbox('enableComposingAlert') +
-    simpleCheckbox('enhanceOnlineDots') +
-    simpleCheckbox('hideBuffSelected') +
-    simpleCheckbox('hideHelperMenu') +
-    simpleCheckbox('keepHelperMenuOnScreen') +
-    simpleCheckbox('draggableHelperMenu') +
+    bunchOfSimple([
+      'enableOnlineAlliesWidgets',
+      'moveFSBox',
+      'moveDailyQuest',
+      'fsboxlog',
+      'gameHelpLink',
+      'enableTempleAlert',
+      'enableUpgradeAlert',
+      'enableComposingAlert',
+      'enhanceOnlineDots',
+      'hideBuffSelected',
+      'hideHelperMenu',
+      'keepHelperMenuOnScreen',
+      'draggableHelperMenu'
+    ]) +
 
     quickLinksLocation() +
 
-    simpleCheckbox('draggableQuickLinks') +
-    simpleCheckbox('expandMenuOnKeyPress');
+    bunchOfSimple([
+      'draggableQuickLinks',
+      'expandMenuOnKeyPress'
+    ]);
 }

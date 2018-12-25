@@ -1,3 +1,4 @@
+import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
 import isChecked from '../system/isChecked';
 import {helpLink, simpleCheckbox} from './simpleCheckbox';
@@ -43,14 +44,18 @@ function playSoundOnUnreadLog() {
 export default function logPrefs() {
   // Log screen prefs
   return '<tr><th colspan="2"><b>Log screen preferences</b></th></tr>' +
-    simpleCheckbox('hideNonPlayerGuildLogMessages') +
-    simpleCheckbox('useNewGuildLog') +
+    bunchOfSimple([
+      'hideNonPlayerGuildLogMessages',
+      'useNewGuildLog'
+    ]) +
     newGuildLogHistory() +
     simpleCheckbox('enableLogColoring') +
     newLogMessageSound() +
     playSoundOnUnreadLog() +
-    simpleCheckbox('enableChatParsing') +
-    simpleCheckbox('keepBuffLog') +
-    simpleCheckbox('addAttackLinkToLog') +
-    simpleCheckbox('enhanceChatTextEntry');
+    bunchOfSimple([
+      'enableChatParsing',
+      'keepBuffLog',
+      'addAttackLinkToLog',
+      'enhanceChatTextEntry'
+    ]);
 }
