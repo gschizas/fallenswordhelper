@@ -2066,11 +2066,20 @@
     getForage('fsh_combatLog').done(gotCombatLog);
   }
 
-  function createDocument(details) {
-    // Use DOMParser to prevent img src tags downloading
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(details, 'text/html');
-    return doc;
+  function onlinePlayer(onlinePlayers, player) {
+    var guildImage = $('<div/>').append(onlinePlayers[player][0]);
+    $('img', guildImage).addClass('fshImgCntr');
+    return [
+      guildImage.html(),
+      onlinePlayers[player][1],
+      onlinePlayers[player][2],
+      onlinePlayers[player][3] * 100 +
+      onlinePlayers[player][4] + 1,
+    ];
+  }
+
+  function buildOnlinePlayerData(onlinePlayers) { // jQuery
+    return Object.keys(onlinePlayers).map(partial(onlinePlayer, onlinePlayers));
   }
 
   var guildId;
@@ -2088,6 +2097,85 @@
     return guildId;
   }
 
+  var highlightPlayersNearMyLvl;
+  var table;
+
+  function guildNumber(html) {
+    var match = html.match(/;guild_id=([0-9]+)"/);
+    if (match) {return Number(match[1]);}
+  }
+
+  var highlightTests = [
+    function() {return highlightPlayersNearMyLvl;},
+    function(data) {return guildNumber(data[0]) !== currentGuildId();},
+    function(data) {return intValue(data[2]) >= pvpLowerLevel;},
+    function(data) {return intValue(data[2]) <= pvpUpperLevel;}
+  ];
+
+  function pvpHighlight(data) {
+    return highlightTests.every(function(el) {
+      return el(data);
+    });
+  }
+
+  function createdRow(row, data) {
+    if (pvpHighlight(data)) {
+      $('td', row).eq(2).addClass('lvlHighlight');
+    }
+  }
+
+  function tableOpts(onlineData) {
+    return {
+      columns: [
+        {title: 'Guild', 'class': 'dt-center', orderable: false},
+        {title: 'Name', 'class': 'dt-center'},
+        {title: 'Level', 'class': 'dt-center'},
+        {title: 'Page/Index', 'class': 'dt-center'}
+      ],
+      createdRow: createdRow,
+      data: onlineData,
+      deferRender: true,
+      lengthMenu: [[30, 60, -1], [30, 60, 'All']],
+      order: [3, 'desc'],
+      pageLength: 30,
+      stateDuration: 0,
+      stateSave: true
+    };
+  }
+
+  function doTable(context, onlineData) {
+    highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
+    table = $('#fshInv', context).DataTable(tableOpts(onlineData));
+  }
+
+  function tableDraw() {
+    table.draw();
+  }
+
+  function changeLvl(e) { // jQuery
+    if (e.target.id === 'fshMinLvl' || e.target.id === 'fshMaxLvl') {
+      tableDraw();
+    }
+  }
+
+  function createDocument(details) {
+    // Use DOMParser to prevent img src tags downloading
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(details, 'text/html');
+    return doc;
+  }
+
+  function doRefreshButton() {
+    var lastCheck = getValue('lastOnlineCheck');
+    if (now - lastCheck > 300000) {
+      return '<span> (takes a while to refresh so only do it ' +
+        'if you really need to) </span><span id="fshRefresh" class="fshLink"' +
+        '>[Refresh]</span>';
+    }
+    return '<span>[ Wait ' + Math.round(300 - (now -
+      lastCheck) / 1000) + 's ]</span>';
+  }
+
   var playerLvlTest = [
     function(level, min, max) {return isNaN(min) && isNaN(max);},
     function(level, min, max) {return isNaN(min) && level <= max;},
@@ -2102,48 +2190,22 @@
     return ary.some(function(fn) {return fn(level, min, max);});
   }
 
-  var context;
-  var onlinePlayers;
-  var onlineData;
-  var highlightPlayersNearMyLvl;
-  var onlinePages;
-  var lastPage;
-  var table;
-  var guildId$1;
-
-  function buildOnlinePlayerData() { // jQuery
-    onlineData = [];
-    Object.keys(onlinePlayers).forEach(function(player) {
-      var guildImage = $('<div/>')
-        .append(onlinePlayers[player][0]);
-      $('img', guildImage).addClass('fshImgCntr');
-      onlineData.push([
-        guildImage.html(),
-        onlinePlayers[player][1],
-        onlinePlayers[player][2],
-        onlinePlayers[player][3] * 100 +
-        onlinePlayers[player][4] + 1,
-      ]);
-    });
-  }
-
   function saveVal(key, val) {
     if (!isNaN(val)) {setValue(key, val);}
   }
 
-  function dataTableSearch(_settings, data) { // jQuery
-    /* Custom filtering function which will search
-    data in column three between two values */
-    var min = parseInt($('#fshMinLvl', context).val(), 10); // context
-    var max = parseInt($('#fshMaxLvl', context).val(), 10); // context
+  function dataTableSearch(context, _settings, data) { // jQuery
+    var min = parseInt($('#fshMinLvl', context).val(), 10);
+    var max = parseInt($('#fshMaxLvl', context).val(), 10);
     saveVal('onlinePlayerMinLvl', min);
     saveVal('onlinePlayerMaxLvl', max);
     var level = fallback(intValue(data[2]), 0);
     return lvlTest(playerLvlTest, level, min, max);
   }
 
-  function filterHeaderOnlinePlayers() { // jQuery
-    $('#fshOutput', context).html( // context
+  function filterHeaderOnlinePlayers(context) { // jQuery
+    $.fn.dataTable.ext.search.push(partial(dataTableSearch, context));
+    $('#fshOutput', context).html(
       '<div align=right>' +
       'Min lvl:<input value="' + getValue('onlinePlayerMinLvl') +
         '" size=5 id="fshMinLvl" /> ' +
@@ -2153,52 +2215,24 @@
       '</div><table id="fshInv" class="allow stripe hover"></table>');
   }
 
-  function guildNumber(html) {
-    var match = html.match(/;guild_id=([0-9]+)"/);
-    if (match) {return Number(match[1]);}
+  function resetEvt(context) {
+    setValue('onlinePlayerMinLvl', defaults.onlinePlayerMinLvl);
+    setValue('onlinePlayerMaxLvl', defaults.onlinePlayerMaxLvl);
+    $('#fshMinLvl', context).val(defaults.onlinePlayerMinLvl);
+    $('#fshMaxLvl', context).val(defaults.onlinePlayerMaxLvl);
+    tableDraw();
   }
 
-  var highlightTests = [
-    function() {return highlightPlayersNearMyLvl;},
-    function(data) {return guildNumber(data[0]) !== guildId$1;},
-    function(data) {return intValue(data[2]) >= pvpLowerLevel;},
-    function(data) {return intValue(data[2]) <= pvpUpperLevel;}
-  ];
+  var context;
+  var onlinePlayers;
+  var onlinePages;
+  var lastPage;
 
-  function pvpHighlight(data) {
-    return highlightTests.every(function(el) {
-      return el(data);
-    });
-  }
-
-  function gotOnlinePlayers() { // jQuery
-    buildOnlinePlayerData();
-    $.fn.dataTable.ext.search.push(dataTableSearch);
-    filterHeaderOnlinePlayers();
-    highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
+  function gotOnlinePlayers(value) { // jQuery
+    onlinePlayers = value || {};
+    filterHeaderOnlinePlayers(context);
     calculateBoundaries();
-    guildId$1 = currentGuildId();
-
-    table = $('#fshInv', context).DataTable({ // context
-      columns: [
-        {title: 'Guild', 'class': 'dt-center', orderable: false},
-        {title: 'Name', 'class': 'dt-center'},
-        {title: 'Level', 'class': 'dt-center'},
-        {title: 'Page/Index', 'class': 'dt-center'}
-      ],
-      createdRow: function(row, data) {
-        if (pvpHighlight(data)) {
-          $('td', row).eq(2).addClass('lvlHighlight');
-        }
-      },
-      data: onlineData,
-      deferRender: true,
-      lengthMenu: [[30, 60, -1], [30, 60, 'All']],
-      order: [3, 'desc'],
-      pageLength: 30,
-      stateDuration: 0,
-      stateSave: true
-    });
+    doTable(context, buildOnlinePlayerData(onlinePlayers));
   }
 
   function checkLastPage() {
@@ -2208,35 +2242,55 @@
     }
   }
 
-  function getOnlinePlayers(data) { // Bad jQuery
-    $('#fshOutput', context).append(' ' +
-      (onlinePages + 1)); // context
-    var doc = createDocument(data);
-    var input = $('#pCC input.custominput', doc).first();
+  function seenPlayer(player, thePage) {
+    return onlinePlayers[player] && onlinePlayers[player][3] > thePage;
+  }
+
+  function buildElements(thePage, index, element) {
+    var tds = $('td', $(element));
+    var tdsOne = tds.eq(1);
+    var player = tdsOne.text();
+    if (seenPlayer(player, thePage)) {return;}
+    onlinePlayers[player] = [
+      tds.eq(0).html(),
+      tdsOne.html(),
+      tds.eq(2).text(),
+      thePage,
+      index
+    ];
+  }
+
+  function processTheRows(doc, input) {
     var thePage = input.attr('value');
     var theRows = $('#pCC img[src$="/skin/icon_action_view.gif',
       doc).parent().parent().parent();
-    theRows.each(function(index, element) {
-      var tds = $('td', $(element));
-      var player = tds.eq(1).text();
-      if (onlinePlayers[player] &&
-          onlinePlayers[player][3] > thePage) {return;}
-      onlinePlayers[player] = [
-        tds.eq(0).html(),
-        tds.eq(1).html(),
-        tds.eq(2).text(),
-        thePage,
-        index
-      ];
-    });
+    theRows.each(partial(buildElements, thePage));
+  }
+
+  function getLastPage(input) {
+    return parseInt(input.parent().text().match(/(\d+)/g)[0], 10);
+  }
+
+  function getOtherPages(callback, input) {
+    lastPage = getLastPage(input);
+    for (var i = 2; i <= lastPage; i += 1) {
+      retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' + i)
+        .done(callback);
+    }
+  }
+
+  function updateStatus(text) {
+    $('#fshOutput', context).append(text);
+  }
+
+  function getOnlinePlayers(data) { // Bad jQuery
+    updateStatus(' ' + (onlinePages + 1));
+    var doc = createDocument(data);
+    var input = $('#pCC input.custominput', doc).first();
+    processTheRows(doc, input);
     onlinePages += 1;
     if (onlinePages === 1) {
-      input = input.parent().text();
-      lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
-      for (var i = 2; i <= lastPage; i += 1) {
-        retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' + i)
-          .done(getOnlinePlayers);
-      }
+      getOtherPages(getOnlinePlayers, input);
     }
     checkLastPage();
   }
@@ -2248,51 +2302,20 @@
     retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
       .done(getOnlinePlayers);
     setValue('lastOnlineCheck', now);
-    $('#fshOutput', context).append('Parsing online players...'); // context
+    updateStatus('Parsing online players...');
   }
 
-  function changeLvl(e) { // jQuery
-    if (e.target.id === 'fshMinLvl' || e.target.id === 'fshMaxLvl') {
-      table.draw();
-    }
-  }
-
-  function resetEvt() { // context
-    setValue('onlinePlayerMinLvl',
-      defaults.onlinePlayerMinLvl);
-    setValue('onlinePlayerMaxLvl',
-      defaults.onlinePlayerMaxLvl);
-    $('#fshMinLvl', context).val(
-      defaults.onlinePlayerMinLvl); // context
-    $('#fshMaxLvl', context).val(
-      defaults.onlinePlayerMaxLvl); // context
-    table.draw();
-  }
-
-  function doOnlinePlayerEventHandlers(e) {
+  function clickHandler(e) {
     if (e.target.id === 'fshRefresh') {refreshEvt();}
-    if (e.target.id === 'fshReset') {resetEvt();}
+    if (e.target.id === 'fshReset') {resetEvt(context);}
   }
 
   function injectOnlinePlayersNew() { // jQuery
-    var lastCheck = getValue('lastOnlineCheck');
-    var refreshButton;
-    if (now - lastCheck > 300000) {
-      refreshButton = '<span> (takes a while to refresh so only do it ' +
-        'if you really need to) </span><span id="fshRefresh" class="fshLink"' +
-        '>[Refresh]</span>';
-    } else {
-      refreshButton = '<span>[ Wait ' + Math.round(300 - (now -
-        lastCheck) / 1000) + 's ]</span>';
-    }
     context.html(
-      '<span><b>Online Players</b></span>' + refreshButton +
+      '<span><b>Online Players</b></span>' + doRefreshButton() +
       '<div id="fshOutput"></div>');
-    getForage('fsh_onlinePlayers').done(function(value) {
-      onlinePlayers = value || {};
-      gotOnlinePlayers();
-    });
-    on(context[0], 'click', doOnlinePlayerEventHandlers);
+    getForage('fsh_onlinePlayers').done(gotOnlinePlayers);
+    on(context[0], 'click', clickHandler);
     on(context[0], 'keyup', changeLvl);
   }
 
@@ -4858,7 +4881,7 @@
     }
   }
 
-  var guildId$2;
+  var guildId$1;
 
   function updateQuestLink() {
     var lastActiveQuestPage = getValue('lastActiveQuestPage');
@@ -4923,7 +4946,7 @@
   }
 
   function newGuildLogLink() {
-    if (guildId$2 && !getValue('useNewGuildLog')) {
+    if (guildId$1 && !getValue('useNewGuildLog')) {
       // if not using the new guild log, show it as a separate menu entry
       insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
         '<li class="nav-level-2"><a class="nav-link" ' +
@@ -4933,7 +4956,7 @@
   }
 
   function guildInventory() {
-    if (guildId$2) {
+    if (guildId$1) {
       insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
         '<li class="nav-level-2"><a class="nav-link" id="nav-' +
         'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
@@ -5028,7 +5051,7 @@
 
   function injectMenu() {
     if (!getElementById('pCL') || jQueryNotPresent()) {return;}
-    guildId$2 = currentGuildId();
+    guildId$1 = currentGuildId();
     updateQuestLink();
     updateScavLink();
     characterButtons();
@@ -6859,7 +6882,7 @@
     '<option value="13">Fire Blast</option>' +
     '<option value="14">Poison</option>' +
     '</select></td>';
-  var tableOpts = {
+  var tableOpts$1 = {
     columnDefs: [
       {orderable: false, targets: [9]}
     ],
@@ -7516,7 +7539,7 @@
       membrList[f].rank_name.trim() + '</div>';
   }
 
-  function doTable(tbl, data, callback) { // jQuery
+  function doTable$1(tbl, data, callback) { // jQuery
     $(tbl).DataTable({
       autoWidth: false,
       columnDefs: [{
@@ -7547,7 +7570,7 @@
     var tbl = createTable({className: 'fshDataTable fshXSmall hover'});
     insertElement(div, tbl);
     insertElement(tbl, tfoot);
-    add(3, doTable, [tbl, data, partial(switcheroo, div, targetElement)]);
+    add(3, doTable$1, [tbl, data, partial(switcheroo, div, targetElement)]);
     return div;
   }
 
@@ -7969,7 +7992,7 @@
     filterHeader();
     storeOpts();
     doLvlFilter();
-    theTables.DataTable(tableOpts);
+    theTables.DataTable(tableOpts$1);
     redoSort(tabs);
     tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
 
@@ -10135,7 +10158,7 @@
     return guildRowColor(data);
   }
 
-  function createdRow(row, data) {
+  function createdRow$1(row, data) {
     var colour = getRowColor(data);
     row.classList.add(colour);
   }
@@ -10485,7 +10508,7 @@
           orderSequence: ['desc', 'asc']
         }],
       columns: tblCols,
-      createdRow: createdRow,
+      createdRow: createdRow$1,
       data: theInv.items,
       deferRender: true,
       lengthMenu: [[50, 100, 150, 200, -1], [50, 100, 150, 200, 'All']],
@@ -10501,7 +10524,7 @@
     table.column(18).visible(isUserInv() && showQuickSendLinks);
   }
 
-  function doTable$1() {
+  function doTable$2() {
     var fshInv = injectTable$1();
     var table = makeDataTable(fshInv);
     hideCols(table);
@@ -10942,7 +10965,7 @@
     headers();
     setChecks();
     setLvls();
-    var fshInv = doTable$1();
+    var fshInv = doTable$2();
     eventHandlers(fshInv);
     // eslint-disable-next-line no-use-before-define
     $('#fshRefresh').click(injectInventoryManagerNew);
@@ -11459,7 +11482,7 @@
     parseTable();
   }
 
-  function getOtherPages() {
+  function getOtherPages$1() {
     var prm = [];
     if (completeReload) {
       for (var i = 2; i <= maxPage$1; i += 1) {
@@ -11542,7 +11565,7 @@
 
   function processFirstPage$1(data) {
     processPage(data);
-    getOtherPages().done(gotOtherPages);
+    getOtherPages$1().done(gotOtherPages);
   }
 
   function toggleItem(self) {
@@ -12237,7 +12260,7 @@
     on(theBtn, 'click', getNekid);
   }
 
-  var guildId$3;
+  var guildId$2;
   var currentGuildRelationship;
   var guildMessages = {
     self: {color: 'fshGreen', message: getValue('guildSelfMessage')},
@@ -12272,8 +12295,8 @@
   }
 
   function guildRelationship(aLink) {
-    guildId$3 = thisGuildId(aLink);
-    if (guildId$3 && guildId$3 === currentGuildId()) {
+    guildId$2 = thisGuildId(aLink);
+    if (guildId$2 && guildId$2 === currentGuildId()) {
       setValue('guildSelf', aLink.text);
       return 'self';
     }
@@ -12332,7 +12355,7 @@
         'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
         playerid + '" data-tipped="Rank ' + playername +
         '" style="background-image: url(\'' + imageServer +
-        '/guilds/' + guildId$3 + '_mini.png\');"></a>&nbsp;&nbsp;';
+        '/guilds/' + guildId$2 + '_mini.png\');"></a>&nbsp;&nbsp;';
     }
     return '';
   }
@@ -13869,7 +13892,7 @@
     setValue(id, settings[id]);
   }
 
-  function clickHandler() {
+  function clickHandler$1() {
     var userInput = jsonParse(getElementById('HelperfshSettings').value);
     if (isObject(userInput)) {
       var settings = userInput;
@@ -13887,7 +13910,7 @@
       fshSettings[list[i]] = getValue(list[i]);
     }
     drawBox(content, fshSettings);
-    $('#HelperLoadSettings').click(clickHandler);
+    $('#HelperLoadSettings').click(clickHandler$1);
   }
 
   var multCnt;
@@ -14308,6 +14331,30 @@
         escapeHtml(getValue('sendClasses')) + '">';
   }
 
+  var topBlock = [
+    'moveGuildList',
+    'moveOnlineAlliesList'
+  ];
+  var middleBlock = [
+    'enableOnlineAlliesWidgets',
+    'moveFSBox',
+    'moveDailyQuest',
+    'fsboxlog',
+    'gameHelpLink',
+    'enableTempleAlert',
+    'enableUpgradeAlert',
+    'enableComposingAlert',
+    'enhanceOnlineDots',
+    'hideBuffSelected',
+    'hideHelperMenu',
+    'keepHelperMenuOnScreen',
+    'draggableHelperMenu'
+  ];
+  var bottomBlock = [
+    'draggableQuickLinks',
+    'expandMenuOnKeyPress'
+  ];
+
   function guildInfoWidgets() {
     return '<tr><td class="fshRight"><label for="enableGuildInfoWidgets">' +
       'Enable Guild Info Widgets' +
@@ -14357,38 +14404,12 @@
     // General Prefs
     return '<tr><th colspan="2"><b>General preferences ' +
         '(apply to most screens)</b></th></tr>' +
-
       guildInfoWidgets() +
-
-      bunchOfSimple([
-        'moveGuildList',
-        'moveOnlineAlliesList'
-      ]) +
-
+      bunchOfSimple(topBlock) +
       onlineAlliesEnemies() +
-
-      bunchOfSimple([
-        'enableOnlineAlliesWidgets',
-        'moveFSBox',
-        'moveDailyQuest',
-        'fsboxlog',
-        'gameHelpLink',
-        'enableTempleAlert',
-        'enableUpgradeAlert',
-        'enableComposingAlert',
-        'enhanceOnlineDots',
-        'hideBuffSelected',
-        'hideHelperMenu',
-        'keepHelperMenuOnScreen',
-        'draggableHelperMenu'
-      ]) +
-
+      bunchOfSimple(middleBlock) +
       quickLinksLocation() +
-
-      bunchOfSimple([
-        'draggableQuickLinks',
-        'expandMenuOnKeyPress'
-      ]);
+      bunchOfSimple(bottomBlock);
   }
 
   function injectSettingsGuildData(guildType) {
@@ -18430,28 +18451,46 @@
     }
   }
 
+  function repairButton() {
+    $.subscribe(def_controlsKeydown, doRepair$1);
+  }
+
+  function msgCenterOffset() {
+    $('#messageCenter').worldMessageCenter({offset: '0 60'});
+  }
+
+  function hideMapTooltip() {
+    $('#mapTooltip').qtip('hide');
+  }
+
   function fixDebuffQTip(e) { // jQuery.min
     $(e.target).qtip('hide');
   }
 
-  function subscribes() { // jQuery.min
-    worldPrefs();
-    injectSendGoldOnWorld();
-    viewCreature();
-    hideGroupButton(); // Hide Create Group button
-    doMonsterColors();
-    doNotKill(); // add do-not-kill list functionality
-    startMonsterLog(); // add monster log functionality
-    $.subscribe(def_controlsKeydown, doRepair$1);
-    combatLogger();
-    onWorld();
-    prepareShop();
-    injectRelic();
-    $('#messageCenter').worldMessageCenter({offset: '0 60'});
-    $('#mapTooltip').qtip('hide');
-    initButtons();
-    buffInfo();
+  function fixDebuff() {
     on(getElementById('buffList'), 'click', fixDebuffQTip);
+  }
+
+  function subscribes() {
+    [
+      worldPrefs,
+      injectSendGoldOnWorld,
+      viewCreature,
+      hideGroupButton,
+      doMonsterColors,
+      doNotKill,
+      startMonsterLog,
+      repairButton,
+      combatLogger,
+      onWorld,
+      prepareShop,
+      injectRelic,
+      msgCenterOffset,
+      hideMapTooltip,
+      initButtons,
+      buffInfo,
+      fixDebuff
+    ].forEach(function(fn) {fn();});
   }
 
   // -1 = world page
@@ -20403,7 +20442,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '61';
+  window.FSH.calf = '62';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
