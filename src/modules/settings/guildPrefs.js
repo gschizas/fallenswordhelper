@@ -1,6 +1,7 @@
+import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
+import {helpLink} from './simpleCheckbox';
 import isChecked from '../system/isChecked';
-import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function injectSettingsGuildData(guildType) {
   var title = '';
@@ -49,7 +50,9 @@ export default function guildPrefs() {
       isChecked(getValue('highlightGvGPlayersNearMyLvl')) +
       '></td></tr>' +
 
-    simpleCheckbox('showAdmin') +
-    simpleCheckbox('ajaxifyRankControls') +
-    simpleCheckbox('detailedConflictInfo');
+    bunchOfSimple([
+      'showAdmin',
+      'ajaxifyRankControls',
+      'detailedConflictInfo'
+    ]);
 }

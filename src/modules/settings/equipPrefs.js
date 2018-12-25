@@ -1,3 +1,4 @@
+import bunchOfSimple from './bunchOfSimple';
 import escapeHtml from '../system/escapeHtml';
 import getValue from '../system/getValue';
 import isChecked from '../system/isChecked';
@@ -8,8 +9,10 @@ export default function equipPrefs() {
   return '<tr><th colspan="2"><b>Equipment screen preferences' +
       '</b></th></tr>' +
 
-    simpleCheckbox('showExtraLinks') +
-    simpleCheckbox('disableItemColoring') +
+    bunchOfSimple([
+      'showExtraLinks',
+      'disableItemColoring'
+    ]) +
 
     '<tr><td class="fshRight">Show Quick Send Item' +
       helpLink('Show Quick Send on Manage Backpack',

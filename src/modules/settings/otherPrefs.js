@@ -1,3 +1,4 @@
+import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
 import isChecked from '../system/isChecked';
 import {helpLink, simpleCheckbox} from './simpleCheckbox';
@@ -18,9 +19,11 @@ export default function otherPrefs() {
       '&nbsp;<input name="hideRecipeNames" size="60" value="' +
       getValue('hideRecipeNames') + '"></td></tr>' +
 
-    simpleCheckbox('hideRelicOffline') +
-    simpleCheckbox('enterForSendMessage') +
-    simpleCheckbox('navigateToLogAfterMsg') +
+    bunchOfSimple([
+      'hideRelicOffline',
+      'enterForSendMessage',
+      'navigateToLogAfterMsg'
+    ]) +
 
     '<tr><td align= "right">Max Group Size to Join' +
       helpLink('Max Group Size to Join',

@@ -1,6 +1,7 @@
+import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
+import {helpLink} from './simpleCheckbox';
 import isChecked from '../system/isChecked';
-import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 export default function questPrefs() {
   // Quest Preferences
@@ -16,6 +17,8 @@ export default function questPrefs() {
       '&nbsp;<input name="hideQuestNames" size="60" value="' +
       getValue('hideQuestNames') + '"></td></tr>' +
 
-    simpleCheckbox('storeLastQuestPage') +
-    simpleCheckbox('showNextQuestSteps');
+    bunchOfSimple([
+      'storeLastQuestPage',
+      'showNextQuestSteps'
+    ]);
 }

@@ -4,6 +4,7 @@ import {getElementById} from '../common/getElement';
 import intValue from '../system/intValue';
 import onlineDot from '../common/onlineDot';
 import uniq from '../common/uniq';
+import {updateProgress} from './bufferProgress';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
 
@@ -21,6 +22,13 @@ function getNextBr(bioCellHtml, runningTotalPosition) { // Legacy
   return nextBR;
 }
 
+function extractLine(bioCellHtml, runningTotalPosition) {
+  var prevBR = getPrevBr(bioCellHtml, runningTotalPosition);
+  var nextBR = getNextBr(bioCellHtml, runningTotalPosition);
+  var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
+  return textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
+}
+
 function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
   var res = [];
   var buffPosition = 0;
@@ -36,11 +44,7 @@ function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
     if (buffPosition !== -1) {
       startingPosition = buffPosition + 1;
       runningTotalPosition += buffPosition;
-      var prevBR = getPrevBr(bioCellHtml, runningTotalPosition);
-      var nextBR = getNextBr(bioCellHtml, runningTotalPosition);
-      var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
-      textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
-      res.push(textLine);
+      res.push(extractLine(bioCellHtml, runningTotalPosition));
     }
   }
   return uniq(res);
@@ -62,13 +66,23 @@ function getSustain(doc) {
   return fallback(sustainLevel, -1);
 }
 
-function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
-  var innerPlayerName = getElementById('pCC', doc)
-    .getElementsByTagName('h1')[0].textContent;
-  var levelValue = intValue(getElementById('profileLeftColumn', doc)
+function getInnerPlayerName(doc) {
+  return getElementById('pCC', doc).getElementsByTagName('h1')[0].textContent;
+}
+
+function getInnerLevelValue(doc) {
+  return intValue(getElementById('profileLeftColumn', doc)
     .children[4].children[0].rows[0].cells[1].textContent);
-  var virtualLevelValue = parseInt(getElementById('stat-vl', doc)
-    .textContent, 10);
+}
+
+function getInnerVirtualLevel(doc) {
+  return parseInt(getElementById('stat-vl', doc).textContent, 10);
+}
+
+function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
+  var innerPlayerName = getInnerPlayerName(doc);
+  var levelValue = getInnerLevelValue(doc);
+  var virtualLevelValue = getInnerVirtualLevel(doc);
   var lastActivityMinutes = parseInt(lastActivity[1], 10);
   var lastActivityIMG = onlineDot({min: lastActivityMinutes});
   var playerHREF = callback.href;
@@ -121,48 +135,50 @@ function buffCell(newRow, textLineArray) {
   });
 }
 
-function updateProcessed(callback) {
+function updateProcessed() {
   var processedBuffers = getElementById('buffersProcessed');
   var potentialBuffers =
     parseInt(getElementById('potentialBuffers').textContent, 10);
   var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
   processedBuffers.innerHTML = processedBuffersCount + 1;
   if (potentialBuffers === processedBuffersCount + 1) {
-    callback.bufferProgress.innerHTML = 'Done.';
-    callback.bufferProgress.style.color = 'blue';
+    updateProgress('Done.', 'blue');
   }
+}
+
+function calcLastActivity(doc) {
+  var innerPcc = getElementById('pCC', doc);
+  var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
+  return /(\d+) mins, (\d+) secs/.exec(lastActivityElement.textContent);
+}
+
+function getExtend(doc) {
+  return doc.querySelector('img.tip-static[data-tipped*="Extend"]');
+}
+
+function addRowToTable(bioCellHtml, callback, doc, textLineArray) {
+  var lastActivity = calcLastActivity(doc);
+  var buffTable = getElementById('buffTable');
+  var newRow = buffTable.insertRow(-1);
+  doNameCell({
+    newRow: newRow,
+    doc: doc,
+    callback: callback,
+    lastActivity: lastActivity,
+    bioCellHtml: bioCellHtml
+  });
+  playerInfoCell(newRow, lastActivity, getSustain(doc), getExtend(doc));
+  buffCell(newRow, textLineArray);
 }
 
 export default function parseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
   var doc = createDocument(responseText);
-  // name and level
-  var innerPcc = getElementById('pCC', doc);
-  // last activity
-  var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
-  var lastActivity = /(\d+) mins, (\d+) secs/
-    .exec(lastActivityElement.textContent);
-  // buffs
   var bioCellHtml = getElementById('profile-bio', doc).innerHTML;
-  var buffTable = getElementById('buffTable');
   var textLineArray = getBioLines(bioCellHtml, callback.findBuffNicks);
-  // sustain
-  var sustainLevel = getSustain(doc);
-  // extend
-  var hasExtendBuff = doc.querySelector(
-    'img.tip-static[data-tipped*="Extend"]');
 
   // add row to table
   if (textLineArray.length > 0) {
-    var newRow = buffTable.insertRow(-1);
-    doNameCell({
-      newRow: newRow,
-      doc: doc,
-      callback: callback,
-      lastActivity: lastActivity,
-      bioCellHtml: bioCellHtml
-    });
-    playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff);
-    buffCell(newRow, textLineArray);
+    addRowToTable(bioCellHtml, callback, doc, textLineArray);
   }
-  updateProcessed(callback);
+  updateProcessed();
 }
