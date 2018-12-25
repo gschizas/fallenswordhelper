@@ -4166,6 +4166,19 @@
     return arr.filter(partial(genericFilter, removeBy, {}));
   }
 
+  var bufferProgress;
+
+  function getBufferProgress() {
+    bufferProgress = getElementById('bufferProgress');
+  }
+
+  function updateProgress(html, colour) {
+    bufferProgress.innerHTML = html;
+    if (colour) {
+      bufferProgress.style.color = colour;
+    }
+  }
+
   var sustainLevelRE = /Level<br>(\d+)%/;
 
   function getPrevBr(bioCellHtml, runningTotalPosition) { // Legacy
@@ -4180,6 +4193,13 @@
       return bioCellHtml.length - 5;
     }
     return nextBR;
+  }
+
+  function extractLine(bioCellHtml, runningTotalPosition) {
+    var prevBR = getPrevBr(bioCellHtml, runningTotalPosition);
+    var nextBR = getNextBr(bioCellHtml, runningTotalPosition);
+    var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
+    return textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
   }
 
   function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
@@ -4197,11 +4217,7 @@
       if (buffPosition !== -1) {
         startingPosition = buffPosition + 1;
         runningTotalPosition += buffPosition;
-        var prevBR = getPrevBr(bioCellHtml, runningTotalPosition);
-        var nextBR = getNextBr(bioCellHtml, runningTotalPosition);
-        var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
-        textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
-        res.push(textLine);
+        res.push(extractLine(bioCellHtml, runningTotalPosition));
       }
     }
     return uniq(res);
@@ -4223,13 +4239,23 @@
     return fallback(sustainLevel, -1);
   }
 
-  function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
-    var innerPlayerName = getElementById('pCC', doc)
-      .getElementsByTagName('h1')[0].textContent;
-    var levelValue = intValue(getElementById('profileLeftColumn', doc)
+  function getInnerPlayerName(doc) {
+    return getElementById('pCC', doc).getElementsByTagName('h1')[0].textContent;
+  }
+
+  function getInnerLevelValue(doc) {
+    return intValue(getElementById('profileLeftColumn', doc)
       .children[4].children[0].rows[0].cells[1].textContent);
-    var virtualLevelValue = parseInt(getElementById('stat-vl', doc)
-      .textContent, 10);
+  }
+
+  function getInnerVirtualLevel(doc) {
+    return parseInt(getElementById('stat-vl', doc).textContent, 10);
+  }
+
+  function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
+    var innerPlayerName = getInnerPlayerName(doc);
+    var levelValue = getInnerLevelValue(doc);
+    var virtualLevelValue = getInnerVirtualLevel(doc);
     var lastActivityMinutes = parseInt(lastActivity[1], 10);
     var lastActivityIMG = onlineDot({min: lastActivityMinutes});
     var playerHREF = callback.href;
@@ -4282,50 +4308,52 @@
     });
   }
 
-  function updateProcessed(callback) {
+  function updateProcessed() {
     var processedBuffers = getElementById('buffersProcessed');
     var potentialBuffers =
       parseInt(getElementById('potentialBuffers').textContent, 10);
     var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
     processedBuffers.innerHTML = processedBuffersCount + 1;
     if (potentialBuffers === processedBuffersCount + 1) {
-      callback.bufferProgress.innerHTML = 'Done.';
-      callback.bufferProgress.style.color = 'blue';
+      updateProgress('Done.', 'blue');
     }
+  }
+
+  function calcLastActivity(doc) {
+    var innerPcc = getElementById('pCC', doc);
+    var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
+    return /(\d+) mins, (\d+) secs/.exec(lastActivityElement.textContent);
+  }
+
+  function getExtend(doc) {
+    return doc.querySelector('img.tip-static[data-tipped*="Extend"]');
+  }
+
+  function addRowToTable(bioCellHtml, callback, doc, textLineArray) {
+    var lastActivity = calcLastActivity(doc);
+    var buffTable = getElementById('buffTable');
+    var newRow = buffTable.insertRow(-1);
+    doNameCell({
+      newRow: newRow,
+      doc: doc,
+      callback: callback,
+      lastActivity: lastActivity,
+      bioCellHtml: bioCellHtml
+    });
+    playerInfoCell(newRow, lastActivity, getSustain(doc), getExtend(doc));
+    buffCell(newRow, textLineArray);
   }
 
   function parseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
     var doc = createDocument(responseText);
-    // name and level
-    var innerPcc = getElementById('pCC', doc);
-    // last activity
-    var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
-    var lastActivity = /(\d+) mins, (\d+) secs/
-      .exec(lastActivityElement.textContent);
-    // buffs
     var bioCellHtml = getElementById('profile-bio', doc).innerHTML;
-    var buffTable = getElementById('buffTable');
     var textLineArray = getBioLines(bioCellHtml, callback.findBuffNicks);
-    // sustain
-    var sustainLevel = getSustain(doc);
-    // extend
-    var hasExtendBuff = doc.querySelector(
-      'img.tip-static[data-tipped*="Extend"]');
 
     // add row to table
     if (textLineArray.length > 0) {
-      var newRow = buffTable.insertRow(-1);
-      doNameCell({
-        newRow: newRow,
-        doc: doc,
-        callback: callback,
-        lastActivity: lastActivity,
-        bioCellHtml: bioCellHtml
-      });
-      playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff);
-      buffCell(newRow, textLineArray);
+      addRowToTable(bioCellHtml, callback, doc, textLineArray);
     }
-    updateProcessed(callback);
+    updateProcessed();
   }
 
   var thisPlayerName;
@@ -4374,16 +4402,35 @@
     progress: 'Other'
   };
 
-  var characterName;
+  var findBuffsLevel175Only;
+
+  function calcMinLvl() { // Legacy
+    if (findBuffsLevel175Only) {return 500;}
+    return 1;
+  }
+
+  function setMinLvl() {
+    findBuffsLevel175Only = getElementById('level175').checked;
+  }
+
   var findBuffNicks;
   var findBuffMinCastLevel;
-  var findBuffsLevel175Only;
   var onlinePlayers$1;
   var onlinePlayersSetting;
   var extraProfile;
   var profilePagesToSearch;
   var profilePagesToSearchProcessed;
-  var bufferProgress;
+
+  function gotProfile(j, html) {
+    parseProfileAndDisplay(html, {
+      href: onlinePlayers$1[j],
+      findBuffNicks: findBuffNicks
+    });
+  }
+
+  function getProfile(j) {
+    retryAjax(j).done(partial(gotProfile, j));
+  }
 
   function findBuffsParsePlayersForBuffs() { // Legacy
     // remove duplicates TODO
@@ -4391,26 +4438,11 @@
     getElementById('potentialBuffers').innerHTML =
       onlinePlayers$1.length;
     if (onlinePlayers$1.length <= 0) {
-      bufferProgress.innerHTML = 'Done.';
-      bufferProgress.style.color = 'blue';
+      updateProgress('Done.', 'blue');
       return;
     }
-    bufferProgress.innerHTML = 'Parsing player data ...';
-    bufferProgress.style.color = 'green';
-    onlinePlayers$1.forEach(function(j) {
-      retryAjax(j).done(function(html) {
-        parseProfileAndDisplay(html, {
-          href: onlinePlayers$1[j],
-          bufferProgress: bufferProgress,
-          findBuffNicks: findBuffNicks
-        });
-      });
-    });
-  }
-
-  function calcMinLvl() { // Legacy
-    if (findBuffsLevel175Only) {return 500;}
-    return 1;
+    updateProgress('Parsing player data ...', 'green');
+    onlinePlayers$1.forEach(getProfile);
   }
 
   function calcNextPage(curPage, maxPage) { // Legacy
@@ -4420,7 +4452,7 @@
 
   function addPlayerToSearchList(onlinePlayer, onlinePlayerName) {
     // add online player to search list (all but self)
-    if (characterName !== onlinePlayerName.trim()) {
+    if (playerName() !== onlinePlayerName.trim()) {
       onlinePlayers$1.push(onlinePlayer);
     }
   }
@@ -4437,20 +4469,31 @@
     }
   }
 
+  function getMaxPage(doc) {
+    return parseInt($(doc).find('td:has(input[name="page"]):last')
+      .text().replace(/\D/g, ''), 10);
+  }
+
+  function getCurrPage(doc) {
+    return parseInt($(doc).find('input[name="page"]:last').val()
+      .replace(/\D/g, ''), 10);
+  }
+
+  function playerRows(doc) {
+    $(doc).find('table:contains("Username")>tbody>tr:has' +
+      '(td>a[href*="cmd=profile&player_id="])').each(playerRow);
+  }
+
   function findBuffsParseOnlinePlayers(responseText) { // Legacy
     var doc = createDocument(responseText);
-    var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has' +
-      '(td>a[href*="cmd=profile&player_id="])');
-    var maxPage = parseInt($(doc).find('td:has(input[name="page"]):last')
-      .text().replace(/\D/g, ''), 10);
-    var curPage = parseInt($(doc).find('input[name="page"]:last').val()
-      .replace(/\D/g, ''), 10);
+    var maxPage = getMaxPage(doc);
+    var curPage = getCurrPage(doc);
     if (curPage !== 1) {
-      playerRows.each(playerRow);
+      playerRows(doc);
     }
     if (curPage < maxPage) {
       var newPage = calcNextPage(curPage, maxPage);
-      bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
+      updateProgress('Parsing online page ' + curPage + ' ...');
       retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
         newPage.toString()).done(findBuffsParseOnlinePlayers);
     } else {
@@ -4543,21 +4586,16 @@
       buffTable.deleteRow(j - 1);
     }
     getElementById('buffNicks').innerHTML = '';
-    bufferProgress.innerHTML = 'Idle.';
-    bufferProgress.style.color = 'black';
+    updateProgress('Idle.', 'black');
     getElementById('potentialBuffers').innerHTML = '';
     getElementById('buffersProcessed').innerHTML = 0;
   }
 
   function findAnyStart(progMsg) { // jQuery
     if (jQueryNotPresent()) {return;}
-    characterName = playerName();
     getElementById('buffNicks').innerHTML = findBuffNicks;
-    if (jQueryNotPresent()) {return;}
-    bufferProgress.innerHTML = 'Gathering list of ' + progMsg + ' ...';
-    bufferProgress.style.color = 'green';
-    findBuffsLevel175Only =
-      getElementById('level175').checked;
+    updateProgress('Gathering list of ' + progMsg + ' ...', 'green');
+    setMinLvl();
     getElementById('buffersProcessed').innerHTML = 0;
     onlinePlayers$1 = [];
     extraProfile = getElementById('extraProfile').value;
@@ -4589,10 +4627,6 @@
 
   function getExtraProfile() {
     extraProfile = getValue('extraProfile');
-  }
-
-  function getBufferProgress() {
-    bufferProgress = getElementById('bufferProgress');
   }
 
   function setupFindEvent(fn) {
@@ -5502,7 +5536,7 @@
       outputFormat(m, ' mins, ') + s + ' secs';
   }
 
-  function getProfile(username) {
+  function getProfile$1(username) {
     return retryAjax({
       url: 'index.php',
       data: {
@@ -5524,7 +5558,7 @@
   }
 
   function getMyProfile() {
-    return getProfile(playerName())
+    return getProfile$1(playerName())
       .pipe(addLastUpdateDate)
       .done(sendMyProfileToForage);
   }
@@ -8841,7 +8875,8 @@
     return groupDate;
   }
 
-  function groupLocalTime(theDateCell) { // jQuery
+  function groupLocalTime(row) { // jQuery
+    var theDateCell = $('td', row).eq(2);
     var x = xRE.exec(theDateCell.text());
     var curYear = new Date().getFullYear(); // Boundary condition
     theDateCell.append('<br><span class="fshBlue fshXSmall">' +
@@ -8857,6 +8892,12 @@
         membrlist[creator].level + ']';
     }
     return '<b>' + creator + '</b>';
+  }
+
+  function getCreatorCell(membrlist, row) {
+    var creatorCell = $('td', row).first();
+    creatorCell.html(creatorDotAndLink(membrlist, row));
+    return creatorCell;
   }
 
   function memberLevel(membrlist, member) {
@@ -8897,13 +8938,12 @@
   }
 
   function doGroupRow(membrlist, i, row) { // jQuery
-    var creatorCell = $('td', row).first();
-    creatorCell.html(creatorDotAndLink(membrlist, row));
+    var creatorCell = getCreatorCell(membrlist, row);
     var membersCell = $('td', row).eq(1);
     var listArr = groupMembers(membrlist, membersCell);
     buffLinks(creatorCell, listArr);
     memberProfileLinks(membrlist, membersCell, listArr);
-    groupLocalTime($('td', row).eq(2));
+    groupLocalTime(row);
   }
 
   function doGroupPaint(m) { // jQuery
@@ -13141,7 +13181,7 @@
   function addBuffLevels(evt) {
     var player = evt.target;
     if (player.tagName !== 'H1') {return;}
-    getProfile(player.textContent).done(addStatsQuickBuff);
+    getProfile$1(player.textContent).done(addStatsQuickBuff);
     var playerData = makeBuffArray(player);
     var nodeList = document.querySelectorAll('#buff-outer input[name]');
     Array.from(nodeList).forEach(partial(hazBuff, playerData));
@@ -13320,7 +13360,7 @@
     var quickbuffDiv = getElementById('quickbuff');
     if (!quickbuffDiv) {return;}
     insertHtmlAfterEnd(quickbuffDiv.firstElementChild, quickBuffHeader);
-    getProfile(window.self).done(getSustain$1);
+    getProfile$1(window.self).done(getSustain$1);
   }
 
   function reduceBuffArray(buffAry) {
@@ -14195,6 +14235,14 @@
     getForage('fsh_titans').done(gotOldTitans); // Pref
   }
 
+  function concatSimple(prev, curr) {
+    return prev + simpleCheckbox(curr);
+  }
+
+  function bunchOfSimple(ary) {
+    return ary.reduce(concatSimple, '');
+  }
+
   function showActiveBounties() {
     return '<tr><td align= "right">' + networkIcon +
       'Show Active Bounties' +
@@ -14234,9 +14282,11 @@
       showActiveBounties() +
       showWantedBounties() +
       wantedNames$1() +
-      simpleCheckbox('wantedGuildMembers') +
-      simpleCheckbox('enableAttackHelper') +
-      simpleCheckbox('showPvPSummaryInLog');
+      bunchOfSimple([
+        'wantedGuildMembers',
+        'enableAttackHelper',
+        'showPvPSummaryInLog'
+      ]);
   }
 
   function equipPrefs() {
@@ -14244,8 +14294,10 @@
     return '<tr><th colspan="2"><b>Equipment screen preferences' +
         '</b></th></tr>' +
 
-      simpleCheckbox('showExtraLinks') +
-      simpleCheckbox('disableItemColoring') +
+      bunchOfSimple([
+        'showExtraLinks',
+        'disableItemColoring'
+      ]) +
 
       '<tr><td class="fshRight">Show Quick Send Item' +
         helpLink('Show Quick Send on Manage Backpack',
@@ -14322,29 +14374,35 @@
 
       guildInfoWidgets() +
 
-      simpleCheckbox('moveGuildList') +
-      simpleCheckbox('moveOnlineAlliesList') +
+      bunchOfSimple([
+        'moveGuildList',
+        'moveOnlineAlliesList'
+      ]) +
 
       onlineAlliesEnemies() +
 
-      simpleCheckbox('enableOnlineAlliesWidgets') +
-      simpleCheckbox('moveFSBox') +
-      simpleCheckbox('moveDailyQuest') +
-      simpleCheckbox('fsboxlog') +
-      simpleCheckbox('gameHelpLink') +
-      simpleCheckbox('enableTempleAlert') +
-      simpleCheckbox('enableUpgradeAlert') +
-      simpleCheckbox('enableComposingAlert') +
-      simpleCheckbox('enhanceOnlineDots') +
-      simpleCheckbox('hideBuffSelected') +
-      simpleCheckbox('hideHelperMenu') +
-      simpleCheckbox('keepHelperMenuOnScreen') +
-      simpleCheckbox('draggableHelperMenu') +
+      bunchOfSimple([
+        'enableOnlineAlliesWidgets',
+        'moveFSBox',
+        'moveDailyQuest',
+        'fsboxlog',
+        'gameHelpLink',
+        'enableTempleAlert',
+        'enableUpgradeAlert',
+        'enableComposingAlert',
+        'enhanceOnlineDots',
+        'hideBuffSelected',
+        'hideHelperMenu',
+        'keepHelperMenuOnScreen',
+        'draggableHelperMenu'
+      ]) +
 
       quickLinksLocation() +
 
-      simpleCheckbox('draggableQuickLinks') +
-      simpleCheckbox('expandMenuOnKeyPress');
+      bunchOfSimple([
+        'draggableQuickLinks',
+        'expandMenuOnKeyPress'
+      ]);
   }
 
   function injectSettingsGuildData(guildType) {
@@ -14394,9 +14452,11 @@
         isChecked(getValue('highlightGvGPlayersNearMyLvl')) +
         '></td></tr>' +
 
-      simpleCheckbox('showAdmin') +
-      simpleCheckbox('ajaxifyRankControls') +
-      simpleCheckbox('detailedConflictInfo');
+      bunchOfSimple([
+        'showAdmin',
+        'ajaxifyRankControls',
+        'detailedConflictInfo'
+      ]);
   }
 
   function newGuildLogHistory() {
@@ -14440,16 +14500,20 @@
   function logPrefs() {
     // Log screen prefs
     return '<tr><th colspan="2"><b>Log screen preferences</b></th></tr>' +
-      simpleCheckbox('hideNonPlayerGuildLogMessages') +
-      simpleCheckbox('useNewGuildLog') +
+      bunchOfSimple([
+        'hideNonPlayerGuildLogMessages',
+        'useNewGuildLog'
+      ]) +
       newGuildLogHistory() +
       simpleCheckbox('enableLogColoring') +
       newLogMessageSound() +
       playSoundOnUnreadLog() +
-      simpleCheckbox('enableChatParsing') +
-      simpleCheckbox('keepBuffLog') +
-      simpleCheckbox('addAttackLinkToLog') +
-      simpleCheckbox('enhanceChatTextEntry');
+      bunchOfSimple([
+        'enableChatParsing',
+        'keepBuffLog',
+        'addAttackLinkToLog',
+        'enhanceChatTextEntry'
+      ]);
   }
 
   function otherPrefs() {
@@ -14468,9 +14532,11 @@
         '&nbsp;<input name="hideRecipeNames" size="60" value="' +
         getValue('hideRecipeNames') + '"></td></tr>' +
 
-      simpleCheckbox('hideRelicOffline') +
-      simpleCheckbox('enterForSendMessage') +
-      simpleCheckbox('navigateToLogAfterMsg') +
+      bunchOfSimple([
+        'hideRelicOffline',
+        'enterForSendMessage',
+        'navigateToLogAfterMsg'
+      ]) +
 
       '<tr><td align= "right">Max Group Size to Join' +
         helpLink('Max Group Size to Join',
@@ -14635,9 +14701,11 @@
       worldGroup() +
       keepCombatLogs() +
 
-      simpleCheckbox('showCombatLog') +
-      simpleCheckbox('enableCreatureColoring') +
-      simpleCheckbox('showCreatureInfo') +
+      bunchOfSimple([
+        'showCombatLog',
+        'enableCreatureColoring',
+        'showCreatureInfo'
+      ]) +
 
       combatEvalBias() +
       keepCreatureLog() +
@@ -14659,8 +14727,10 @@
     // profile prefs
     return '<tr><th colspan="2"><b>Profile preferences</b></th></tr>' +
 
-      simpleCheckbox('renderSelfBio') +
-      simpleCheckbox('renderOtherBios') +
+      bunchOfSimple([
+        'renderSelfBio',
+        'renderOtherBios'
+      ]) +
 
       '<tr><td class="fshRight">Enable Bio Compressor' +
         helpLink('Enable Bio Compressor',
@@ -14683,10 +14753,12 @@
         ':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" ' +
         'value="' + getValue('buyBuffsGreeting') + '"></td></tr>' +
 
-      simpleCheckbox('showStatBonusTotal') +
-      simpleCheckbox('enableQuickDrink') +
-      simpleCheckbox('disableDeactivatePrompts') +
-      simpleCheckbox('highlightPvpProtection');
+      bunchOfSimple([
+        'showStatBonusTotal',
+        'enableQuickDrink',
+        'disableDeactivatePrompts',
+        'highlightPvpProtection'
+      ]);
   }
 
   function questPrefs() {
@@ -14703,8 +14775,10 @@
         '&nbsp;<input name="hideQuestNames" size="60" value="' +
         getValue('hideQuestNames') + '"></td></tr>' +
 
-      simpleCheckbox('storeLastQuestPage') +
-      simpleCheckbox('showNextQuestSteps');
+      bunchOfSimple([
+        'storeLastQuestPage',
+        'showNextQuestSteps'
+      ]);
   }
 
   function storageDetails() {
@@ -15111,7 +15185,7 @@
   }
 
   function stackAjax(prm, playerName, tbl, guildId) {
-    prm.push(getProfile(playerName)
+    prm.push(getProfile$1(playerName)
       .pipe(null, failFilter$1)
       .done(partial(parsePlayer, tbl, guildId))
     );
@@ -16699,10 +16773,10 @@
       prm.push(getGroups().pipe(parseGroups));
     }
     for (var i = 1; i < myDefenders.length; i += 1) {
-      prm.push(getProfile(myDefenders[i]).done(parseDefender)
+      prm.push(getProfile$1(myDefenders[i]).done(parseDefender)
         .fail(ajaxFailure));
     }
-    prm.push(getProfile(myDefenders[0]).done(storeLeadDefender));
+    prm.push(getProfile$1(myDefenders[0]).done(storeLeadDefender));
     $.when.apply($, prm).done(doCalculations);
   }
 
@@ -20426,7 +20500,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '60';
+  window.FSH.calf = '61';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
