@@ -4,7 +4,7 @@ import getValue from '../system/getValue';
 import injectBuffLog from '../buffLog/injectBuffLog';
 import injectMonsterLog from '../monstorLog';
 import injectNotepadShowLogs from '../combatLog';
-import injectOnlinePlayers from '../onlinePlayers';
+import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';

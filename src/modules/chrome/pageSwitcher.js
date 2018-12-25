@@ -22,7 +22,7 @@ import injectMailbox from '../mailbox/mailbox';
 import injectMonsterLog from '../monstorLog';
 import injectNewGuildLog from '../newGuildLog/newGuildLog';
 import injectNotepadShowLogs from '../combatLog';
-import injectOnlinePlayers from '../onlinePlayers';
+import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
 import injectProfile from '../profile/profile';
 import injectProfileDropItems from '../dropItems/injectProfileDropItems';
 import injectQuickBuff from '../quickbuff/quickBuff';

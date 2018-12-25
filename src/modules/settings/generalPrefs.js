@@ -5,6 +5,30 @@ import {helpLink} from './simpleCheckbox';
 import isChecked from '../system/isChecked';
 import {networkIcon} from './settingObj';
 
+var topBlock = [
+  'moveGuildList',
+  'moveOnlineAlliesList'
+];
+var middleBlock = [
+  'enableOnlineAlliesWidgets',
+  'moveFSBox',
+  'moveDailyQuest',
+  'fsboxlog',
+  'gameHelpLink',
+  'enableTempleAlert',
+  'enableUpgradeAlert',
+  'enableComposingAlert',
+  'enhanceOnlineDots',
+  'hideBuffSelected',
+  'hideHelperMenu',
+  'keepHelperMenuOnScreen',
+  'draggableHelperMenu'
+];
+var bottomBlock = [
+  'draggableQuickLinks',
+  'expandMenuOnKeyPress'
+];
+
 function guildInfoWidgets() {
   return '<tr><td class="fshRight"><label for="enableGuildInfoWidgets">' +
     'Enable Guild Info Widgets' +
@@ -54,36 +78,10 @@ export default function generalPrefs() {
   // General Prefs
   return '<tr><th colspan="2"><b>General preferences ' +
       '(apply to most screens)</b></th></tr>' +
-
     guildInfoWidgets() +
-
-    bunchOfSimple([
-      'moveGuildList',
-      'moveOnlineAlliesList'
-    ]) +
-
+    bunchOfSimple(topBlock) +
     onlineAlliesEnemies() +
-
-    bunchOfSimple([
-      'enableOnlineAlliesWidgets',
-      'moveFSBox',
-      'moveDailyQuest',
-      'fsboxlog',
-      'gameHelpLink',
-      'enableTempleAlert',
-      'enableUpgradeAlert',
-      'enableComposingAlert',
-      'enhanceOnlineDots',
-      'hideBuffSelected',
-      'hideHelperMenu',
-      'keepHelperMenuOnScreen',
-      'draggableHelperMenu'
-    ]) +
-
+    bunchOfSimple(middleBlock) +
     quickLinksLocation() +
-
-    bunchOfSimple([
-      'draggableQuickLinks',
-      'expandMenuOnKeyPress'
-    ]);
+    bunchOfSimple(bottomBlock);
 }
