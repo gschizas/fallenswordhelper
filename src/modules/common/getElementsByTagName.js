@@ -1,3 +1,4 @@
-export default function getElementsByTagName(element, tagName) {
-  return element.getElementsByTagName(tagName);
+export default function getElementsByTagName(tagName, element) {
+  if (element) {return element.getElementsByTagName(tagName);}
+  return document.getElementsByTagName(tagName);
 }

@@ -23,7 +23,7 @@ function doPickMove(moveId, slotId) {
 }
 
 function getAllMoves() {
-  return Array.from(getElementsByTagName(selectRow, 'select'))
+  return Array.from(getElementsByTagName('select', selectRow))
     .map(function(el) {return el.value;});
 }
 

@@ -70,6 +70,17 @@ function setGroupEvalalutor(html) {
   groupEvaluator.innerHTML = html;
 }
 
+function superElite(ses, obj) {
+  // reduce stats if critter is a SE and player has SES cast on them.
+  if (obj.name.search('Super Elite') !== -1) { // TODO type
+    obj.attack -= Math.ceil(obj.attack * ses);
+    obj.defense -= Math.ceil(obj.defense * ses);
+    obj.armor -= Math.ceil(obj.armor * ses);
+    obj.damage -= Math.ceil(obj.damage * ses);
+    obj.hp -= Math.ceil(obj.hp * ses);
+  }
+}
+
 function creatureData(creature, ses) {
   var obj = {};
   obj.name = creature.name;
@@ -79,28 +90,18 @@ function creatureData(creature, ses) {
   obj.armor = Number(creature.armor);
   obj.damage = Number(creature.damage);
   obj.hp = Number(creature.hp);
-  // reduce stats if critter is a SE and player has SES cast on them.
-  if (obj.name.search('Super Elite') !== -1) { // TODO type
-    obj.attack -= Math.ceil(obj.attack * ses);
-    obj.defense -= Math.ceil(obj.defense * ses);
-    obj.armor -= Math.ceil(obj.armor * ses);
-    obj.damage -= Math.ceil(obj.damage * ses);
-    obj.hp -= Math.ceil(obj.hp * ses);
-  }
+  superElite(ses, obj);
   return obj;
 }
 
-function doCombatEval(data, playerJson, groupData) {
-  var combat = {};
-  combat.callback = groupData;
-  // playerdata
-  combat.player = playerDataObject(playerJson);
+function biasVars(combat) {
   combat.combatEvaluatorBias = calf.combatEvaluatorBias;
   combat.attackVariable = 1.1053;
   combat.generalVariable = calf.generalVariable;
   combat.hpVariable = calf.hpVariable;
-  combat.creature = creatureData(data.response.data,
-    combat.player.superEliteSlayerMultiplier);
+}
+
+function buffProcessing(combat) {
   evalExtraBuffs(combat);
   evalAttack(combat);
   evalDamage(combat);
@@ -108,6 +109,17 @@ function doCombatEval(data, playerJson, groupData) {
   evalArmour(combat);
   evalAnalysis(combat);
   evalCA(combat);
+}
+
+function doCombatEval(data, playerJson, groupData) {
+  var combat = {};
+  combat.callback = groupData;
+  // playerdata
+  combat.player = playerDataObject(playerJson);
+  biasVars(combat);
+  combat.creature = creatureData(data.response.data,
+    combat.player.superEliteSlayerMultiplier);
+  buffProcessing(combat);
   combat.evaluatorHTML = evalHTML(combat);
   if (groupData.groupExists) {
     setGroupEvalalutor(combat.evaluatorHTML);
