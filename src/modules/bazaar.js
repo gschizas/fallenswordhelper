@@ -34,11 +34,7 @@ function testBuyAmount() {
   return testQuant(getElementById('buy_amount').value);
 }
 
-function select(evt) {
-  var target = evt.target;
-  if (!target.classList.contains('bazaarButton')) {return;}
-  var theValue = testBuyAmount();
-  if (!theValue) {return;}
+function buyTarget(target, theValue) {
   getElementById('quantity').textContent = theValue;
   ItemId = target.getAttribute('itemid');
   getElementById('fshBazaarWarning').removeAttribute('class');
@@ -47,6 +43,14 @@ function select(evt) {
   var selected = getElementById('selectedItem');
   selected.innerHTML = '';
   insertElement(selected, dupNode);
+}
+
+function select(evt) {
+  var target = evt.target;
+  if (!target.classList.contains('bazaarButton')) {return;}
+  var theValue = testBuyAmount();
+  if (!theValue) {return;}
+  buyTarget(target, theValue);
 }
 
 function quantity() {
@@ -74,23 +78,29 @@ function buy() { // jQuery.min
   }
 }
 
+function doMiniatures(el, i) {
+  var item = el.firstElementChild;
+  var tipped = item.dataset.tipped;
+  bazaarTable = bazaarTable
+    .replace('@' + i + '@', bazaarItem)
+    .replace('@src@', item.getAttribute('src'))
+    .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
+    .replace('@tipped@', tipped);
+}
+
+function evtHandlers() {
+  on(getElementById('fshBazaar'), 'click', select);
+  on(getElementById('buy_amount'), 'input', quantity);
+  on(getElementById('fshBuy'), 'click', buy);
+}
+
 export default function injectBazaar() { // TODO stop using getElementById
   if (jQueryNotPresent()) {return;}
   var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = pCC.getElementsByTagName('A');
-  Array.prototype.forEach.call(potions, function(el, i) {
-    var item = el.firstElementChild;
-    var tipped = item.dataset.tipped;
-    bazaarTable = bazaarTable
-      .replace('@' + i + '@', bazaarItem)
-      .replace('@src@', item.getAttribute('src'))
-      .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
-      .replace('@tipped@', tipped);
-  });
+  Array.from(potions).forEach(doMiniatures);
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);
-  on(getElementById('fshBazaar'), 'click', select);
-  on(getElementById('buy_amount'), 'input', quantity);
-  on(getElementById('fshBuy'), 'click', buy);
+  evtHandlers();
 }

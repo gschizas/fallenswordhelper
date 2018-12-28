@@ -20,11 +20,13 @@ import injectGuildRanks from '../guild/ranks/rank';
 import {injectInventoryManagerNew} from '../inventory/inventory';
 import injectMailbox from '../mailbox/mailbox';
 import injectMonsterLog from '../monstorLog';
-import injectNewGuildLog from '../newGuildLog/newGuildLog';
+import injectNewGuildLog from '../guild/newGuildLog/newGuildLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
 import injectProfile from '../profile/profile';
 import injectProfileDropItems from '../dropItems/injectProfileDropItems';
+import injectQuestBookFull from '../questbook/injectQuestBookFull';
+import injectQuestTracker from '../questbook/injectQuestTracker';
 import injectQuickBuff from '../quickbuff/quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
@@ -63,7 +65,6 @@ import {
   injectFsBoxContent,
   injectNotepad
 } from '../misc';
-import {injectQuestBookFull, injectQuestTracker} from '../questBook';
 import {newsFsbox, newsShoutbox} from '../news/news';
 
 export default {

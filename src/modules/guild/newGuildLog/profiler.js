@@ -1,4 +1,5 @@
-import isType from '../common/isType';
+import isType from '../../common/isType';
+import partial from '../../common/partial';
 
 var lookup = [
   [],
@@ -30,16 +31,17 @@ var lookup = [
     'a 7 day cooldown has been activated on your guild for this titan'],
 ];
 
-export function rowProfile(data) {
-
-  function isMatch(el) {
-    if (isType(el, 'string')) {
-      return data.includes(el);
-    }
-    return el.test(data);
+function isMatch(data, el) {
+  if (isType(el, 'string')) {
+    return data.includes(el);
   }
+  return el.test(data);
+}
 
-  var myIndex = lookup.findIndex(function(ary) {return ary.some(isMatch);});
+function logType(data, ary) {return ary.some(partial(isMatch, data));}
+
+export function rowProfile(data) {
+  var myIndex = lookup.findIndex(partial(logType, data));
   if (myIndex === -1) {return 0;}
   return myIndex;
 }

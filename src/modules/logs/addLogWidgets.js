@@ -10,11 +10,22 @@ import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import quickBuffHref from '../common/quickBuffHref';
 import {addPvpSummary, initCache} from './addPvpSummary';
+import {getKeys, playerColor, prepareAlliesEnemies} from './playerColour';
 
-var myPlayer = {};
-var memberNameString;
-var listOfAllies;
-var listOfEnemies;
+function getCalfVars() {
+  calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
+  calf.lastLadderReset = getValue('lastLadderReset');
+  calf.enableChatParsing = getValue('enableChatParsing');
+}
+
+function doMsgHeader(logTable) {
+  var messageHeader = logTable.rows[0].cells[2];
+  if (messageHeader) {
+    insertHtmlBeforeEnd(messageHeader, '&nbsp;&nbsp;' +
+      '<span class="fshWhite">(Guild mates show up in ' +
+      '<span class="fshGreen">green</span>)</span>');
+  }
+}
 
 function buildNickList(prev, curr) {
   var ret = prev;
@@ -24,29 +35,6 @@ function buildNickList(prev, curr) {
     ret[nick] = curr.id;
   });
   return ret;
-}
-
-function isEnemy(playerName, playerElement) { // Legacy
-  if (listOfEnemies.indexOf(playerName) !== -1) {
-    playerElement.style.color = 'red';
-  }
-}
-
-function isAlly(playerName, playerElement) { // Legacy
-  if (listOfAllies.indexOf(playerName) !== -1) {
-    playerElement.style.color = 'blue';
-  }
-}
-
-function playerColor(colorPlayerName, playerName, playerElement) { // Legacy
-  if (!colorPlayerName) {return false;}
-  if (memberNameString.indexOf(playerName) !== -1) {
-    playerElement.style.color = 'green';
-    return true;
-  }
-  isEnemy(playerName, playerElement);
-  isAlly(playerName, playerElement);
-  return false;
 }
 
 function canIgnore(aRow, playerName, isGuildMate) {
@@ -120,40 +108,34 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
   var isGuildMate = playerColor(colorPlayerName, playerName, playerElement);
   doChat(messageType, aRow, isGuildMate, playerName);
   doExtraStuff(aRow, messageType, playerName, isGuildMate);
-  addPvpSummary(aRow, messageType);
-  processLadder(aRow, messageType);
 }
 
 function processLogWidgetRow(aRow) { // Legacy
   // Valid Types: General, Chat, Guild
   var messageType = aRow.cells[0].firstChild.getAttribute('oldtitle');
-  if (messageType) {doLogWidgetRow(aRow, messageType);}
+  if (messageType) {
+    doLogWidgetRow(aRow, messageType);
+    addPvpSummary(aRow, messageType);
+    processLadder(aRow, messageType);
+  }
 }
 
-function foundLogTable(logTable) { // Legacy
-  memberNameString = Object.keys(calf.membrList);
-  listOfAllies = myPlayer._allies.map(function(obj) {
-    return obj.username;
-  });
-  listOfEnemies = myPlayer._enemies.map(function(obj) {
-    return obj.username;
-  });
-  calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
-  calf.lastLadderReset = getValue('lastLadderReset');
-  calf.enableChatParsing = getValue('enableChatParsing');
-  var messageHeader = logTable.rows[0].cells[2];
-  if (messageHeader) {
-    insertHtmlBeforeEnd(messageHeader, '&nbsp;&nbsp;' +
-      '<span class="fshWhite">(Guild mates show up in ' +
-      '<span class="fshGreen">green</span>)</span>');
-  }
+function processTableRows(logTable) {
   for (var i = 1; i < logTable.rows.length; i += 2) {
     processLogWidgetRow(logTable.rows[i]);
   }
-  $('.a-reply').click(function(evt) {
-    window.openQuickMsgDialog(evt.target.getAttribute('target_player'),
-      '', evt.target.getAttribute('replyTo'));
-  });
+}
+
+function openMsgDialog(evt) {
+  window.openQuickMsgDialog(evt.target.getAttribute('target_player'),
+    '', evt.target.getAttribute('replyTo'));
+}
+
+function foundLogTable(logTable) { // Legacy
+  getCalfVars();
+  doMsgHeader(logTable);
+  processTableRows(logTable);
+  $('.a-reply').click(openMsgDialog);
 }
 
 function addLogWidgetsOld() { // Legacy
@@ -166,10 +148,8 @@ function addLogWidgetsOld() { // Legacy
 export default function addLogWidgets() { // jQuery.min
   if (jQueryNotPresent()) {return;}
   $.when(
-    getMembrList(false),
-    myStats(false).done(function(data) {
-      myPlayer = data;
-    }),
+    getMembrList(false).done(getKeys),
+    myStats(false).done(prepareAlliesEnemies),
     initCache()
   ).done(addLogWidgetsOld);
 }
