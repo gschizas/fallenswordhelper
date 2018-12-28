@@ -2226,13 +2226,17 @@
     return ary.some(function(fn) {return fn(level, min, max);});
   }
 
+  function getVal(el, context) {
+    return parseInt($(el, context).val(), 10);
+  }
+
   function saveVal(key, val) {
     if (!isNaN(val)) {setValue(key, val);}
   }
 
   function dataTableSearch(context, _settings, data) { // jQuery
-    var min = parseInt($('#fshMinLvl', context).val(), 10);
-    var max = parseInt($('#fshMaxLvl', context).val(), 10);
+    var min = getVal('#fshMinLvl', context);
+    var max = getVal('#fshMaxLvl', context);
     saveVal('onlinePlayerMinLvl', min);
     saveVal('onlinePlayerMaxLvl', max);
     var level = fallback(intValue(data[2]), 0);
@@ -2282,18 +2286,21 @@
     return onlinePlayers[player] && onlinePlayers[player][3] > thePage;
   }
 
-  function buildElements(thePage, index, element) {
-    var tds = $('td', $(element));
-    var tdsOne = tds.eq(1);
-    var player = tdsOne.text();
-    if (seenPlayer(player, thePage)) {return;}
-    onlinePlayers[player] = [
+  function playerRecord(thePage, index, tds) {
+    return [
       tds.eq(0).html(),
-      tdsOne.html(),
+      tds.eq(1).html(),
       tds.eq(2).text(),
       thePage,
       index
     ];
+  }
+
+  function buildElements(thePage, index, element) {
+    var tds = $('td', $(element));
+    var player = tds.eq(1).text();
+    if (seenPlayer(player, thePage)) {return;}
+    onlinePlayers[player] = playerRecord(thePage, index, tds);
   }
 
   function processTheRows(doc, input) {
@@ -8070,11 +8077,7 @@
     return testQuant(getElementById('buy_amount').value);
   }
 
-  function select(evt) {
-    var target = evt.target;
-    if (!target.classList.contains('bazaarButton')) {return;}
-    var theValue = testBuyAmount();
-    if (!theValue) {return;}
+  function buyTarget(target, theValue) {
     getElementById('quantity').textContent = theValue;
     ItemId = target.getAttribute('itemid');
     getElementById('fshBazaarWarning').removeAttribute('class');
@@ -8083,6 +8086,14 @@
     var selected = getElementById('selectedItem');
     selected.innerHTML = '';
     insertElement(selected, dupNode);
+  }
+
+  function select(evt) {
+    var target = evt.target;
+    if (!target.classList.contains('bazaarButton')) {return;}
+    var theValue = testBuyAmount();
+    if (!theValue) {return;}
+    buyTarget(target, theValue);
   }
 
   function quantity() {
@@ -8110,25 +8121,31 @@
     }
   }
 
+  function doMiniatures(el, i) {
+    var item = el.firstElementChild;
+    var tipped = item.dataset.tipped;
+    bazaarTable = bazaarTable
+      .replace('@' + i + '@', bazaarItem)
+      .replace('@src@', item.getAttribute('src'))
+      .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
+      .replace('@tipped@', tipped);
+  }
+
+  function evtHandlers() {
+    on(getElementById('fshBazaar'), 'click', select);
+    on(getElementById('buy_amount'), 'input', quantity);
+    on(getElementById('fshBuy'), 'click', buy);
+  }
+
   function injectBazaar() { // TODO stop using getElementById
     if (jQueryNotPresent()) {return;}
     var pbImg = pCC.getElementsByTagName('IMG')[0];
     pbImg.className = 'fshFloatLeft';
     var potions = pCC.getElementsByTagName('A');
-    Array.prototype.forEach.call(potions, function(el, i) {
-      var item = el.firstElementChild;
-      var tipped = item.dataset.tipped;
-      bazaarTable = bazaarTable
-        .replace('@' + i + '@', bazaarItem)
-        .replace('@src@', item.getAttribute('src'))
-        .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
-        .replace('@tipped@', tipped);
-    });
+    Array.from(potions).forEach(doMiniatures);
     bazaarTable = bazaarTable.replace(/@\d@/g, '');
     insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);
-    on(getElementById('fshBazaar'), 'click', select);
-    on(getElementById('buy_amount'), 'input', quantity);
-    on(getElementById('fshBuy'), 'click', buy);
+    evtHandlers();
   }
 
   var buffCost = {count: 0, buffs: {}};
@@ -11320,6 +11337,14 @@
 
   function functionPasses(fn) {return fn();}
 
+  function getGuildLogPage(page) {
+    return retryAjax({
+      url: 'index.php',
+      data: {no_mobile: 1, cmd: 'guild', subcmd: 'log', page: page},
+      datatype: 'html'
+    });
+  }
+
   var lookup = [
     [],
     ['(Potion)'],
@@ -11350,16 +11375,17 @@
       'a 7 day cooldown has been activated on your guild for this titan'],
   ];
 
-  function rowProfile(data) {
-
-    function isMatch(el) {
-      if (isType(el, 'string')) {
-        return data.includes(el);
-      }
-      return el.test(data);
+  function isMatch(data, el) {
+    if (isType(el, 'string')) {
+      return data.includes(el);
     }
+    return el.test(data);
+  }
 
-    var myIndex = lookup.findIndex(function(ary) {return ary.some(isMatch);});
+  function logType(data, ary) {return ary.some(partial(isMatch, data));}
+
+  function rowProfile(data) {
+    var myIndex = lookup.findIndex(partial(logType, data));
     if (myIndex === -1) {return 0;}
     return myIndex;
   }
@@ -11429,29 +11455,9 @@
   var completeReload = true;
   var myTable;
 
-  function getGuildLogPage(page) {
-    return retryAjax({
-      url: 'index.php',
-      data: {no_mobile: 1, cmd: 'guild', subcmd: 'log', page: page},
-      datatype: 'html'
-    });
-  }
-
-  function findPageInput(prev, curr) {
-    var output = prev;
-    if (!prev && curr.name === 'page') {output = curr;}
-    return output;
-  }
-
-  function getPageInput() {
-    var inputList = getElementById('pCC', doc)
-      .getElementsByClassName('custominput');
-    return Array.prototype.reduce.call(inputList, findPageInput, null);
-  }
-
   function parsePage(data) {
     doc = createDocument(data);
-    var pageInput = getPageInput();
+    var pageInput = doc.querySelector('input[name="page"]');
     currPage = Number(pageInput.value);
     lastPage$1 = Number(/\d+/.exec(pageInput.parentNode.textContent)[0]);
     if (currPage === 1) {maxPage$1 = Math.min(lastPage$1, maxPagesToFetch);}
@@ -11526,29 +11532,42 @@
     storeOptions();
   }
 
+  function makeCell(row, html) {
+    var thisCell = row.insertCell(-1);
+    thisCell.innerHTML = html;
+    thisCell.className = 'row';
+  }
+
+  function dataRow(r) {
+    var myRow = myTable.insertRow(-1);
+    r.push(myRow);
+    if (!options$1.checks[r[4]]) {myRow.className = 'fshHide';}
+    makeCell(myRow,
+      '<span class="newGuildLog" style="background-image: url(\'' +
+      imageServer + '/skin/log_1.gif\');"></span>');
+    makeCell(myRow, '<nobr>' + r[2] + '</nobr>');
+    makeCell(myRow, r[3]);
+  }
+
+  function separatorRow(r) {
+    var sepRow = myTable.insertRow(-1);
+    r.push(sepRow);
+    if (!options$1.checks[r[4]]) {sepRow.className = 'fshHide';}
+    var sep = sepRow.insertCell(-1);
+    sep.className = 'divider';
+    sep.colSpan = 3;
+  }
+
+  function buildRow(r) {
+    dataRow(r);
+    separatorRow(r);
+  }
+
   function buildTable$1() {
     myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
     insertHtmlBeforeEnd(myTable, headerRow);
 
-    tmpGuildLog.forEach(function(r) {
-      var myRow = myTable.insertRow(-1);
-      r.push(myRow);
-      if (!options$1.checks[r[4]]) {myRow.className = 'fshHide';}
-      myRow.insertCell(-1).innerHTML =
-        '<span class="newGuildLog" style="background-image: url(\'' +
-        imageServer + '/skin/log_1.gif\');"></span>';
-      myRow.cells[0].className = 'row';
-      myRow.insertCell(-1).innerHTML = '<nobr>' + r[2] + '</nobr>';
-      myRow.cells[1].className = 'row';
-      myRow.insertCell(-1).innerHTML = r[3];
-      myRow.cells[2].className = 'row';
-      var sepRow = myTable.insertRow(-1);
-      r.push(sepRow);
-      if (!options$1.checks[r[4]]) {sepRow.className = 'fshHide';}
-      var sep = sepRow.insertCell(-1);
-      sep.className = 'divider';
-      sep.colSpan = 3;
-    });
+    tmpGuildLog.forEach(buildRow);
 
     var injector = getElementById('fshInjectHere');
     pCC.replaceChild(myTable, injector);
@@ -11637,16 +11656,28 @@
     {test: function(self) {return self.id === 'rfsh';}, act: refresh}
   ];
 
-  function gotOptions(guildLog) {
+  function setOpts$2(guildLog) {
     options$1 = guildLog || options$1;
     options$1.checks = options$1.checks || defChecks.slice(0);
-    pCC.innerHTML = guildLogFilter;
+  }
+
+  function getElements() {
     fshNewGuildLog = getElementById('fshNewGuildLog');
-    on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
-    setChecks$1();
     fshOutput = getElementById('fshOutput');
+  }
+
+  function setMaxPage() {
     maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));
     maxPage$1 = maxPagesToFetch;
+  }
+
+  function gotOptions(guildLog) {
+    setOpts$2(guildLog);
+    pCC.innerHTML = guildLogFilter;
+    getElements();
+    on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
+    setChecks$1();
+    setMaxPage();
     getGuildLogPage(1).done(processFirstPage$1);
   }
 
@@ -11675,7 +11706,7 @@
     return prev;
   }
 
-  function getVal(prop, obj) {
+  function getVal$1(prop, obj) {
     if (obj[prop] && obj[prop].value) {
       return obj[prop].value;
     }
@@ -11693,9 +11724,9 @@
     var statTable = closestTable(el);
     var statObj = Array.prototype.reduce.call(statTable.rows,
       reduceStatTable, {});
-    var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
-      getVal('Armor', statObj) + getVal('Damage', statObj) +
-      getVal('HP', statObj);
+    var totalStats = getVal$1('Attack', statObj) + getVal$1('Defense', statObj) +
+      getVal$1('Armor', statObj) + getVal$1('Damage', statObj) +
+      getVal$1('HP', statObj);
     insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
       '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
       totalStats + '&nbsp;</td></tr>');
@@ -13138,6 +13169,178 @@
     injectMoveItems();
   }
 
+  function dontPost$1(e) {
+    if (e.target.type !== 'submit') {return;}
+    e.preventDefault();
+    var form = e.target.form;
+    var mode = form[1].value;
+    var type = form[2].value;
+    var letter = form[3].value;
+    var sortby = form[4].value;
+    var sortbydir = form[5].value;
+    var page = form[6].value;
+    window.location = 'index.php?cmd=questbook&type=' + type + '&mode=' + mode +
+      '&page=' + page + '&letter=' + letter + '&sortby=' + sortby +
+      '&sortbydir=' + sortbydir;
+  }
+
+  function guideButtons(questID, questName) {
+    return '<div class="parent">' +
+      '<a href="' + guideUrl + 'quests&' +
+      'subcmd=view&quest_id=' + questID + '" class="tip-static" ' +
+      'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
+      'style="background-image: url(\'' + imageServer +
+      '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
+      '<a href="https://wiki.fallensword.com/index.php?title=' +
+      questName.replace(/ /g, '_') + '" class="tip-static" ' +
+      'data-tipped="Search for this quest on the Wiki" ' +
+      'style="background-image: url(\'' + imageServer +
+      '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
+  }
+
+  var normalLink;
+  var seasonLink;
+  var activeLink;
+  var completeLink;
+  var notStartedLink;
+  var currentPageValue;
+
+  var currentLocationValue = [
+    {value: 0},
+    {value: 3},
+    {value: 0},
+    {value: 1},
+    {value: 2}
+  ];
+
+  var savePrefKey = [
+    'lastNormalActiveQuestPage',
+    'lastNormalCompletedQuestPage',
+    'lastNormalNotStartedQuestPage',
+    'lastSeasonalActiveQuestPage',
+    'lastSeasonalCompletedQuestPage',
+    'lastSeasonalNotStartedQuestPage'
+  ];
+
+  function whereAmI() {
+    var aLinks = pCC.getElementsByTagName('a');
+    normalLink = aLinks[0];
+    seasonLink = aLinks[1];
+    activeLink = aLinks[2];
+    completeLink = aLinks[3];
+    notStartedLink = aLinks[4];
+    currentPageValue = currentLocationValue.reduce(function(prev, curr, i) {
+      var ret = prev;
+      if (aLinks[i].firstElementChild.getAttribute('color') === '#FF0000') {
+        ret += curr.value;
+      }
+      return ret;
+    }, 0);
+  }
+
+  function storeLoc() {
+    var lastQBPage = location.search;
+    setValue('lastActiveQuestPage', lastQBPage);
+    setValue(savePrefKey[currentPageValue], lastQBPage);
+  }
+
+  function getPrevVals() {
+    return savePrefKey.map(function(pref) {return getValue(pref);});
+  }
+
+  function oppositeType(lastPages) {
+    return [
+      lastPages[3],
+      lastPages[4],
+      lastPages[5],
+      lastPages[0],
+      lastPages[1],
+      lastPages[2]
+    ];
+  }
+
+  function setLink(aLink, url) {
+    if (url.length > 0) {
+      aLink.setAttribute('href', url);
+    }
+  }
+
+  function subset(lastPages, i) {
+    setLink(activeLink, lastPages[i]);
+    setLink(completeLink, lastPages[i + 1]);
+    setLink(notStartedLink, lastPages[i + 2]);
+  }
+
+  function updateLinks() {
+    var lastPages = getPrevVals();
+    var oppositeTypeUrl = oppositeType(lastPages);
+
+    if (currentPageValue < 3) {
+      setLink(seasonLink, oppositeTypeUrl[currentPageValue]);
+      subset(lastPages, 0);
+    } else {
+      setLink(normalLink, oppositeTypeUrl[currentPageValue]);
+      subset(lastPages, 3);
+    }
+  }
+
+  function storeQuestPage() {
+    if (getValue('storeLastQuestPage')) {
+      whereAmI();
+      storeLoc();
+      updateLinks();
+    }
+  }
+
+  function isHideQuests() {
+    if (getValue('hideQuests')) {
+      return getValue('hideQuestNames').split(',');
+    }
+    return [];
+  }
+
+  function doHideQuests(hideQuests, questName, aRow) {
+    if (hideQuests.indexOf(questName) >= 0) {
+      aRow.classList.add('fshHide');
+      aRow.nextElementSibling.classList.add('fshHide');
+      aRow.nextElementSibling.nextElementSibling.classList.add('fshHide');
+      aRow.nextElementSibling.nextElementSibling.nextElementSibling
+        .classList.add('fshHide');
+    }
+  }
+
+  function forEachQuest(hideQuests, questTable) {
+    for (var i = 2; i < questTable.rows.length; i += 4) {
+      var aRow = questTable.rows[i];
+      var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
+      doHideQuests(hideQuests, questName, aRow);
+      var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
+      aRow.cells[4].innerHTML = guideButtons(questID, questName);
+    }
+  }
+
+  function injectQuestBookFull() {
+    on(pCC, 'click', dontPost$1);
+    storeQuestPage();
+    var questTable = pCC.getElementsByTagName('table')[5];
+    if (!questTable) {return;}
+    var hideQuests = isHideQuests();
+    forEachQuest(hideQuests, questTable);
+  }
+
+  function injectQuestTracker() {
+    var lastActiveQuestPage = getValue('lastActiveQuestPage');
+    if (lastActiveQuestPage.length > 0) {
+      pCC.getElementsByTagName('a')[0]
+        .setAttribute('href', lastActiveQuestPage);
+    }
+    var questID = getUrlParameter('quest_id');
+    var injectHere = pCC.getElementsByTagName('td')[0];
+    var questName = injectHere.getElementsByTagName('font')[1].textContent
+      .replace(/"/g, '');
+    insertHtmlBeforeEnd(injectHere, guideButtons(questID, questName));
+  }
+
   function addStatsQuickBuff(data) {
     var myPlayer = document.querySelector('div.player[data-username="' +
       data.username + '"]');
@@ -13963,7 +14166,7 @@
       '?cmd=scavenging&cave_id=' + caveId + '&gold=' + gold);
   }
 
-  function dontPost$1(e) {
+  function dontPost$2(e) {
     var caveEle = document.querySelector('#pCC input[name="cave_id"]:checked');
     if (caveEle) {
       e.preventDefault();
@@ -13977,7 +14180,7 @@
 
   function lookForScavBtn() {
     var scavBtn = document.querySelector('#pCC input[value="Scavenge"]');
-    if (scavBtn) {on(scavBtn, 'click', dontPost$1);}
+    if (scavBtn) {on(scavBtn, 'click', dontPost$2);}
   }
 
   /* global sendRequest:true */
@@ -18693,7 +18896,7 @@
       document.querySelector('#pCC select[name="viewing_band_id"]').value;
   }
 
-  function dontPost$2() {
+  function dontPost$3() {
     var submitButton = document.querySelector('#pCC input[type="submit"]');
     if (submitButton) {
       on(submitButton, 'click', updateUrl$1);
@@ -18730,7 +18933,7 @@
   }
 
   function ladder() {
-    dontPost$2();
+    dontPost$3();
     lastReset();
   }
 
@@ -18789,8 +18992,12 @@
     on(pCC, 'keyup', addMarketplaceWarning);
   }
 
+  function getElementsByTagName(element, tagName) {
+    return element.getElementsByTagName(tagName);
+  }
+
   var oldMoves = [];
-  var nodes;
+  var imgNodes;
   var selectRow;
 
   function doPickMove(moveId, slotId) {
@@ -18806,64 +19013,78 @@
     });
   }
 
-  function updateMoves() { // jQuery
-    var newMoves = [];
-    $('select', selectRow).each(function(i, e) {
-      newMoves.push($(e).val());
-    });
-    var prm = [];
-    newMoves.forEach(function(val, ind) {
-      if (val === oldMoves[ind]) {return;}
-      prm.push(doPickMove('x', ind));
-      nodes.eq(ind).attr({
-        src: imageServer + '/world/actionLoadingSpinner.gif',
-        width: '25',
-        height: '25'
-      });
-    });
-    $.when.apply($, prm).done(function() {
-      newMoves.forEach(function(val, ind) {
-        if (val === 'x' || val === oldMoves[ind]) {return;}
-        prm.push(doPickMove(val, ind));
-      });
-      $.when.apply($, prm).done(function() {
-        window.location = 'index.php?cmd=arena&subcmd=setup';
-      });
-    });
+  function getAllMoves() {
+    return Array.from(getElementsByTagName(selectRow, 'select'))
+      .map(function(el) {return el.value;});
   }
 
-  function selectMoves(evt) { // jQuery
-    $(evt.target).off();
-
-    nodes =
-      $('#pCC a[href^="index.php?cmd=arena&subcmd=pickmove&slot_id="] img');
-    var table = nodes.eq(0).closest('table').parent().closest('table');
-
-    var row = $('<tr/>');
-    selectRow = row;
-    row.append('<td/>');
-    nodes.each(function(i, e) {
-      var move = $(e).attr('src');
-      if (move.indexOf('bar_icon_holder.jpg') > 0) {
-        move = 'x';
-      } else {
-        move = move.match(/pvp\/(\d+).gif$/)[1];
-      }
-      var html = $(moveOptions);
-      $('option[value=' + move + ']', html).prop('selected', true);
-      row.append(html);
+  function resetMove(val, ind) {
+    if (val === oldMoves[ind]) {return;}
+    imgNodes.eq(ind).attr({
+      src: imageServer + '/world/actionLoadingSpinner.gif',
+      width: '25',
+      height: '25'
     });
-    table.append(row);
+    return doPickMove('x', ind);
+  }
 
-    $('img[src$="pvp/bar_spacer.jpg"]', table)
-      .attr({width: '15', height: '50'});
+  function newMove(val, ind) {
+    if (val === 'x' || val === oldMoves[ind]) {return;}
+    return doPickMove(val, ind);
+  }
 
-    row = $('<tr><td colspan=32 align=center ' +
+  function pageRefresh() {
+    window.location = 'index.php?cmd=arena&subcmd=setup';
+  }
+
+  function changeMoves(newMoves) {
+    var prm = newMoves.map(newMove);
+    $.when.apply($, prm).done(pageRefresh);
+  }
+
+  function updateMoves() { // jQuery
+    var newMoves = getAllMoves();
+    var prm = newMoves.map(resetMove);
+    $.when.apply($, prm).done(partial(changeMoves, newMoves));
+  }
+
+  function updateButton(table) { // jQuery
+    var row = $('<tr><td colspan=32 align=center ' +
       'style="padding-top: 2px;padding-bottom: 2px;">' +
       '<input class="custombutton" value="Update" type="button">' +
       '</td></tr>');
     $('input', row).click(updateMoves);
     table.append(row);
+  }
+
+  function makeDropDown(row, i, e) { // jQuery
+    var move = $(e).attr('src');
+    if (move.indexOf('bar_icon_holder.jpg') > 0) {
+      move = 'x';
+    } else {
+      move = move.match(/pvp\/(\d+).gif$/)[1];
+    }
+    oldMoves.push(move);
+    var html = $(moveOptions);
+    $('option[value=' + move + ']', html).prop('selected', true);
+    row.append(html);
+  }
+
+  function pickerRow(table) { // jQuery
+    var row = $('<tr/>');
+    selectRow = row.get(0);
+    row.append('<td/>');
+    imgNodes.each(partial(makeDropDown, row));
+    table.append(row);
+  }
+
+  function selectMoves(evt) { // jQuery
+    $(evt.target).off();
+    imgNodes = $('#pCC a[href*="=pickmove&"] img');
+    var table = imgNodes.eq(0).closest('table').parent().closest('table');
+    pickerRow(table);
+    $('img[src$="pvp/bar_spacer.jpg"]', table).attr({width: '15', height: '50'});
+    updateButton(table);
   }
 
   function setupMoves() { // jQuery
@@ -19110,170 +19331,6 @@
     }
   }
 
-  var normalLink;
-  var seasonLink;
-  var activeLink;
-  var completeLink;
-  var notStartedLink;
-  var currentPageValue;
-
-  function dontPost$3(e) {
-    if (e.target.type !== 'submit') {return;}
-    e.preventDefault();
-    var form = e.target.form;
-    var mode = form[1].value;
-    var type = form[2].value;
-    var letter = form[3].value;
-    var sortby = form[4].value;
-    var sortbydir = form[5].value;
-    var page = form[6].value;
-    window.location = 'index.php?cmd=questbook&type=' + type + '&mode=' + mode +
-      '&page=' + page + '&letter=' + letter + '&sortby=' + sortby +
-      '&sortbydir=' + sortbydir;
-  }
-
-  var currentLocationValue = [
-    {value: 0},
-    {value: 3},
-    {value: 0},
-    {value: 1},
-    {value: 2}
-  ];
-
-  var savePrefKey = [
-    'lastNormalActiveQuestPage',
-    'lastNormalCompletedQuestPage',
-    'lastNormalNotStartedQuestPage',
-    'lastSeasonalActiveQuestPage',
-    'lastSeasonalCompletedQuestPage',
-    'lastSeasonalNotStartedQuestPage'
-  ];
-
-  function whereAmI() {
-    var aLinks = pCC.getElementsByTagName('a');
-    normalLink = aLinks[0];
-    seasonLink = aLinks[1];
-    activeLink = aLinks[2];
-    completeLink = aLinks[3];
-    notStartedLink = aLinks[4];
-    currentPageValue = currentLocationValue.reduce(function(prev, curr, i) {
-      var ret = prev;
-      if (aLinks[i].firstElementChild.getAttribute('color') === '#FF0000') {
-        ret += curr.value;
-      }
-      return ret;
-    }, 0);
-  }
-
-  function storeLoc() {
-    var lastQBPage = location.search;
-    setValue('lastActiveQuestPage', lastQBPage);
-    setValue(savePrefKey[currentPageValue], lastQBPage);
-  }
-
-  function setLink(aLink, url) {
-    if (url.length > 0) {
-      aLink.setAttribute('href', url);
-    }
-  }
-
-  function updateLinks() {
-    var lastNormalActiveQuestPage = getValue(savePrefKey[0]);
-    var lastNormalCompletedQuestPage = getValue(savePrefKey[1]);
-    var lastNormalNotStartedQuestPage = getValue(savePrefKey[2]);
-    var lastSeasonalActiveQuestPage = getValue(savePrefKey[3]);
-    var lastSeasonalCompletedQuestPage = getValue(savePrefKey[4]);
-    var lastSeasonalNotStartedQuestPage = getValue(savePrefKey[5]);
-
-    var oppositeTypeUrl = [
-      lastSeasonalActiveQuestPage,
-      lastSeasonalCompletedQuestPage,
-      lastSeasonalNotStartedQuestPage,
-      lastNormalActiveQuestPage,
-      lastNormalCompletedQuestPage,
-      lastNormalNotStartedQuestPage
-    ];
-
-    if (currentPageValue < 3) {
-      setLink(seasonLink, oppositeTypeUrl[currentPageValue]);
-      setLink(activeLink, lastNormalActiveQuestPage);
-      setLink(completeLink, lastNormalCompletedQuestPage);
-      setLink(notStartedLink, lastNormalNotStartedQuestPage);
-    } else {
-      setLink(normalLink, oppositeTypeUrl[currentPageValue]);
-      setLink(activeLink, lastSeasonalActiveQuestPage);
-      setLink(completeLink, lastSeasonalCompletedQuestPage);
-      setLink(notStartedLink, lastSeasonalNotStartedQuestPage);
-    }
-  }
-
-  function storeQuestPage() {
-    if (getValue('storeLastQuestPage')) {
-      whereAmI();
-      storeLoc();
-      updateLinks();
-    }
-  }
-
-  function guideButtons(questID, questName) {
-    return '<div class="parent">' +
-      '<a href="' + guideUrl + 'quests&' +
-      'subcmd=view&quest_id=' + questID + '" class="tip-static" ' +
-      'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
-      'style="background-image: url(\'' + imageServer +
-      '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
-      '<a href="https://wiki.fallensword.com/index.php?title=' +
-      questName.replace(/ /g, '_') + '" class="tip-static" ' +
-      'data-tipped="Search for this quest on the Wiki" ' +
-      'style="background-image: url(\'' + imageServer +
-      '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
-  }
-
-  function isHideQuests() {
-    if (getValue('hideQuests')) {
-      return getValue('hideQuestNames').split(',');
-    }
-    return [];
-  }
-
-  function doHideQuests(hideQuests, questName, aRow) {
-    if (hideQuests.indexOf(questName) >= 0) {
-      aRow.classList.add('fshHide');
-      aRow.nextElementSibling.classList.add('fshHide');
-      aRow.nextElementSibling.nextElementSibling.classList.add('fshHide');
-      aRow.nextElementSibling.nextElementSibling.nextElementSibling
-        .classList.add('fshHide');
-    }
-  }
-
-  function injectQuestBookFull() {
-    on(pCC, 'click', dontPost$3);
-    storeQuestPage();
-    var questTable = pCC.getElementsByTagName('table')[5];
-    if (!questTable) {return;}
-    var hideQuests = isHideQuests();
-    for (var i = 2; i < questTable.rows.length; i += 4) {
-      var aRow = questTable.rows[i];
-      var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
-      doHideQuests(hideQuests, questName, aRow);
-      var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-      aRow.cells[4].innerHTML = guideButtons(questID, questName);
-    }
-  }
-
-  function injectQuestTracker() {
-    var lastActiveQuestPage = getValue('lastActiveQuestPage');
-    if (lastActiveQuestPage.length > 0) {
-      pCC.getElementsByTagName('a')[0]
-        .setAttribute('href', lastActiveQuestPage);
-    }
-    var questID = getUrlParameter('quest_id');
-    var injectHere = pCC.getElementsByTagName('td')[0];
-    var questName = injectHere.getElementsByTagName('font')[1].textContent
-      .replace(/"/g, '');
-    insertHtmlBeforeEnd(injectHere, guideButtons(questID, questName));
-  }
-
   function rejected(timeStamp, buffsNotCast, buffLog) {
     if (buffsNotCast) {
       return timeStamp + ' <span style="color: red;">' +
@@ -19342,26 +19399,6 @@
         injectQuestBookFull();
       }
     },
-    // {
-    //   condition: function() {
-    //     return xPath('//font[@size=2 and .="Advisor"]') &&
-    //     xPath('//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
-    //         'and .="Back to Guild Management"]');
-    //   },
-    //   result: function() {
-    //     screenview('unknown.guildAdvisor.injectAdvisor');
-    //     injectAdvisor();
-    //   }
-    // },
-    // {
-    //   condition: function() {
-    //     return xPath('//a[.="Back to Scavenging"]');
-    //   },
-    //   result: function() {
-    //     screenview('unknown.scavenging.injectScavenging');
-    //     FSH.scavenging.injectScavenging(); // Is this used???
-    //   }
-    // },
     {
       condition: function() {
         return $('#pCC img[title="Inventing"]').length > 0;
@@ -19812,10 +19849,64 @@
     return getForage('fsh_pvpCombat').done(checkCache);
   }
 
-  var myPlayer = {};
-  var memberNameString;
+  var memberNamesAsStrings;
   var listOfAllies;
   var listOfEnemies;
+
+  function setColour(el, col) {
+    el.classList.add(col);
+  }
+
+  function isEnemy(playerName, playerElement) {
+    if (listOfEnemies.includes(playerName)) {
+      setColour(playerElement, 'fshRed');
+    }
+  }
+
+  function isAlly(playerName, playerElement) {
+    if (listOfAllies.includes(playerName)) {
+      setColour(playerElement, 'fshBlue');
+    }
+  }
+
+  function playerColor(colorPlayerName, playerName, playerElement) {
+    if (!colorPlayerName) {return false;}
+    if (memberNamesAsStrings.includes(playerName)) {
+      setColour(playerElement, 'fshGreen');
+      return true;
+    }
+    isEnemy(playerName, playerElement);
+    isAlly(playerName, playerElement);
+    return false;
+  }
+
+  function getKeys(data) {
+    memberNamesAsStrings = Object.keys(data);
+  }
+
+  function justUsername(obj) {
+    return obj.username;
+  }
+
+  function prepareAlliesEnemies(data) {
+    listOfAllies = data._allies.map(justUsername);
+    listOfEnemies = data._enemies.map(justUsername);
+  }
+
+  function getCalfVars() {
+    calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
+    calf.lastLadderReset = getValue('lastLadderReset');
+    calf.enableChatParsing = getValue('enableChatParsing');
+  }
+
+  function doMsgHeader(logTable) {
+    var messageHeader = logTable.rows[0].cells[2];
+    if (messageHeader) {
+      insertHtmlBeforeEnd(messageHeader, '&nbsp;&nbsp;' +
+        '<span class="fshWhite">(Guild mates show up in ' +
+        '<span class="fshGreen">green</span>)</span>');
+    }
+  }
 
   function buildNickList(prev, curr) {
     var ret = prev;
@@ -19825,29 +19916,6 @@
       ret[nick] = curr.id;
     });
     return ret;
-  }
-
-  function isEnemy(playerName, playerElement) { // Legacy
-    if (listOfEnemies.indexOf(playerName) !== -1) {
-      playerElement.style.color = 'red';
-    }
-  }
-
-  function isAlly(playerName, playerElement) { // Legacy
-    if (listOfAllies.indexOf(playerName) !== -1) {
-      playerElement.style.color = 'blue';
-    }
-  }
-
-  function playerColor(colorPlayerName, playerName, playerElement) { // Legacy
-    if (!colorPlayerName) {return false;}
-    if (memberNameString.indexOf(playerName) !== -1) {
-      playerElement.style.color = 'green';
-      return true;
-    }
-    isEnemy(playerName, playerElement);
-    isAlly(playerName, playerElement);
-    return false;
   }
 
   function canIgnore(aRow, playerName, isGuildMate) {
@@ -19921,40 +19989,34 @@
     var isGuildMate = playerColor(colorPlayerName, playerName, playerElement);
     doChat(messageType, aRow, isGuildMate, playerName);
     doExtraStuff(aRow, messageType, playerName, isGuildMate);
-    addPvpSummary(aRow, messageType);
-    processLadder(aRow, messageType);
   }
 
   function processLogWidgetRow(aRow) { // Legacy
     // Valid Types: General, Chat, Guild
     var messageType = aRow.cells[0].firstChild.getAttribute('oldtitle');
-    if (messageType) {doLogWidgetRow(aRow, messageType);}
+    if (messageType) {
+      doLogWidgetRow(aRow, messageType);
+      addPvpSummary(aRow, messageType);
+      processLadder(aRow, messageType);
+    }
   }
 
-  function foundLogTable(logTable) { // Legacy
-    memberNameString = Object.keys(calf.membrList);
-    listOfAllies = myPlayer._allies.map(function(obj) {
-      return obj.username;
-    });
-    listOfEnemies = myPlayer._enemies.map(function(obj) {
-      return obj.username;
-    });
-    calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
-    calf.lastLadderReset = getValue('lastLadderReset');
-    calf.enableChatParsing = getValue('enableChatParsing');
-    var messageHeader = logTable.rows[0].cells[2];
-    if (messageHeader) {
-      insertHtmlBeforeEnd(messageHeader, '&nbsp;&nbsp;' +
-        '<span class="fshWhite">(Guild mates show up in ' +
-        '<span class="fshGreen">green</span>)</span>');
-    }
+  function processTableRows(logTable) {
     for (var i = 1; i < logTable.rows.length; i += 2) {
       processLogWidgetRow(logTable.rows[i]);
     }
-    $('.a-reply').click(function(evt) {
-      window.openQuickMsgDialog(evt.target.getAttribute('target_player'),
-        '', evt.target.getAttribute('replyTo'));
-    });
+  }
+
+  function openMsgDialog(evt) {
+    window.openQuickMsgDialog(evt.target.getAttribute('target_player'),
+      '', evt.target.getAttribute('replyTo'));
+  }
+
+  function foundLogTable(logTable) { // Legacy
+    getCalfVars();
+    doMsgHeader(logTable);
+    processTableRows(logTable);
+    $('.a-reply').click(openMsgDialog);
   }
 
   function addLogWidgetsOld() { // Legacy
@@ -19967,10 +20029,8 @@
   function addLogWidgets() { // jQuery.min
     if (jQueryNotPresent()) {return;}
     $.when(
-      getMembrList(false),
-      myStats(false).done(function(data) {
-        myPlayer = data;
-      }),
+      getMembrList(false).done(getKeys),
+      myStats(false).done(prepareAlliesEnemies),
       initCache()
     ).done(addLogWidgetsOld);
   }
@@ -20476,7 +20536,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '62';
+  window.FSH.calf = '63';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
