@@ -1,119 +1,42 @@
 import createDocument from '../system/createDocument';
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
-import {getElementById} from '../common/getElement';
+import getFolderImgs from './getFolderImgs';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import partial from '../common/partial';
+import processFolderFirstPage from './processFolderFirstPage';
 import retryAjax from '../ajax/retryAjax';
 
-var itmRE =
-  /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
-
-function hasAmounts(result, amounts) {
-  if (amounts) {
-    var resultAmounts = amounts.textContent.split('/');
-    result.amountPresent = parseInt(resultAmounts[0], 10);
-    result.amountNeeded = parseInt(resultAmounts[1], 10);
-  }
+function notUnassigned(el) {
+  return getCustomUrlParameter(el.parentNode.href, 'folder_id') !== '-1';
 }
 
-function reduceItemOrComponent(bgGif, prev, el) {
-  var background = el.getAttribute('background');
-  if (!background || background.indexOf(bgGif) === -1) {return prev;}
-  var img = el.children[0].children[0];
-  var mouseOver = img.dataset.tipped;
-  var mouseOverRX = mouseOver.match(itmRE);
-  var result = {
-    img: img.getAttribute('src'),
-    id: mouseOverRX[1],
-    verify: mouseOverRX[3]
-  };
-  hasAmounts(result, el.parentNode.nextElementSibling);
-  prev.push(result);
-  return prev;
-}
-
-function parseRecipeItemOrComponent(bgGif, doc) {
-  var tblCells = getElementById('pCC', doc).getElementsByTagName('td');
-  return Array.prototype.reduce.call(tblCells,
-    partial(reduceItemOrComponent, bgGif), []);
-}
-
-function processRecipe(output, recipebook, recipe, data) {
-  var doc = createDocument(data);
-  insertHtmlBeforeEnd(output,
-    'Parsing blueprint ' + recipe.name + '...<br>');
-  recipe.items = parseRecipeItemOrComponent('/inventory/2x3.gif', doc);
-  recipe.components = parseRecipeItemOrComponent('/inventory/1x1mini.gif', doc);
-  recipe.target = parseRecipeItemOrComponent('/hellforge/2x3.gif', doc)[0];
-  recipebook.recipe.push(recipe);
-}
-
-function processFolderAnyPage(output, recipebook, data) { // jQuery.min
-  var doc = createDocument(data);
-  var innerPcc = getElementById('pCC', doc);
-  var scope = innerPcc.firstElementChild.rows[6].cells[0]
-    .firstElementChild.getElementsByTagName('a');
-  var prm = Array.prototype.reduce.call(scope, function(prev, el) {
-    insertHtmlBeforeEnd(output,
-      'Found blueprint "' + el.textContent + '".<br>');
-    var recipe = {
-      img: el.parentNode.previousElementSibling.firstElementChild
-        .getAttribute('src'),
-      link: el.href,
-      name: el.textContent,
-      id: getCustomUrlParameter(el.href, 'recipe_id')
-    };
-    prev.push(retryAjax(el.href)
-      .pipe(partial(processRecipe, output, recipebook, recipe)));
-    return prev;
-  }, []);
-  return $.when.apply($, prm);
-}
-
-function processFolderFirstPage(output, recipebook, data) { // jQuery.min
-  var prm = [];
-  var doc = createDocument(data);
-  var innerPcc = getElementById('pCC', doc);
-  var scope = innerPcc.firstElementChild.rows[4].cells[0]
-    .firstElementChild.getElementsByTagName('img');
-  var thisFolder = Array.prototype.filter.call(scope, function(el) {
-    return /\/folder_on\.gif/.test(el.getAttribute('src'));
-  })[0];
-  var pages = innerPcc.getElementsByClassName('customselect')[0]
-    .getElementsByTagName('option').length;
-  for (var i = 1; i < pages; i += 1) {
-    prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
-      .pipe(partial(processFolderAnyPage, output, recipebook)));
-  }
-  prm.push($.when(data)
-    .pipe(partial(processFolderAnyPage, output, recipebook)));
-  return $.when.apply($, prm);
-}
-
-function reduceFolders(output, recipebook, prev, el) { // jQuery.min
-  var href = el.parentNode.href;
+function noQuests(output, el) {
   var folderName = el.parentNode.nextElementSibling.nextElementSibling
     .firstChild.textContent;
-  if (getCustomUrlParameter(href, 'folder_id') === '-1') {
-    return prev;
-  }
-  if (/quest/i.test(folderName)) {
+  var hasQuest = /quest/i.test(folderName);
+  if (hasQuest) {
     insertHtmlBeforeEnd(output, 'Skipping folder "' +
       folderName + '"  as it has the word "quest" in folder name.<br>');
-    return prev;
   }
-  prev.push(retryAjax(href)
-    .pipe(partial(processFolderFirstPage, output, recipebook)));
-  return prev;
+  return !hasQuest;
 }
 
-export default function processFirstPage(output, recipebook, data) { // jQuery.min
-  var doc = createDocument(data);
-  var scope = getElementById('pCC', doc).firstElementChild.rows[4].cells[0]
-    .firstElementChild.getElementsByTagName('img');
-  var prm = Array.prototype.reduce.call(scope,
-    partial(reduceFolders, output, recipebook), []);
-  prm.push($.when(data)
-    .pipe(partial(processFolderFirstPage, output, recipebook)));
+function doAjax(bindFolderFirstPage, el) {
+  return retryAjax(el.parentNode.href).pipe(bindFolderFirstPage);
+}
+
+function buildPrm(output, html, bindFolderFirstPage) {
+  var doc = createDocument(html);
+  var folderImgs = getFolderImgs(doc);
+  return folderImgs
+    .filter(notUnassigned)
+    .filter(partial(noQuests, output))
+    .map(partial(doAjax, bindFolderFirstPage));
+}
+
+export default function processFirstPage(output, recipebook, html) { // jQuery.min
+  var bindFolderFirstPage = partial(processFolderFirstPage, output, recipebook);
+  var prm = buildPrm(output, html, bindFolderFirstPage);
+  prm.push($.when(html).pipe(bindFolderFirstPage));
   return $.when.apply($, prm);
 }
