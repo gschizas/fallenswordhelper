@@ -38,18 +38,21 @@ function seenPlayer(player, thePage) {
   return onlinePlayers[player] && onlinePlayers[player][3] > thePage;
 }
 
-function buildElements(thePage, index, element) {
-  var tds = $('td', $(element));
-  var tdsOne = tds.eq(1);
-  var player = tdsOne.text();
-  if (seenPlayer(player, thePage)) {return;}
-  onlinePlayers[player] = [
+function playerRecord(thePage, index, tds) {
+  return [
     tds.eq(0).html(),
-    tdsOne.html(),
+    tds.eq(1).html(),
     tds.eq(2).text(),
     thePage,
     index
   ];
+}
+
+function buildElements(thePage, index, element) {
+  var tds = $('td', $(element));
+  var player = tds.eq(1).text();
+  if (seenPlayer(player, thePage)) {return;}
+  onlinePlayers[player] = playerRecord(thePage, index, tds);
 }
 
 function processTheRows(doc, input) {

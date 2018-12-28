@@ -1,22 +1,22 @@
-import addGuildLogWidgets from '../logs/addGuildLogWidgets';
-import addLogColoring from '../logs/addLogColoring';
-import createDocument from '../system/createDocument';
-import {createTable} from '../common/cElement';
-import eventHandler from '../common/eventHandler';
-import functionPasses from '../common/functionPasses';
-import {getElementById} from '../common/getElement';
-import getForage from '../ajax/getForage';
-import getValue from '../system/getValue';
-import {imageServer} from '../system/system';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
-import {pCC} from '../support/layout';
-import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
-import retryAjax from '../ajax/retryAjax';
+import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
+import addLogColoring from '../../logs/addLogColoring';
+import createDocument from '../../system/createDocument';
+import {createTable} from '../../common/cElement';
+import eventHandler from '../../common/eventHandler';
+import functionPasses from '../../common/functionPasses';
+import {getElementById} from '../../common/getElement';
+import getForage from '../../ajax/getForage';
+import getGuildLogPage from './getGuildLogPage';
+import getValue from '../../system/getValue';
+import {imageServer} from '../../system/system';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
+import on from '../../common/on';
+import {pCC} from '../../support/layout';
+import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import {rowProfile} from './profiler';
-import setForage from '../ajax/setForage';
-import toggleForce from '../common/toggleForce';
+import setForage from '../../ajax/setForage';
+import toggleForce from '../../common/toggleForce';
 import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
 
 var options = {};
@@ -31,29 +31,9 @@ var tmpGuildLog = [];
 var completeReload = true;
 var myTable;
 
-function getGuildLogPage(page) {
-  return retryAjax({
-    url: 'index.php',
-    data: {no_mobile: 1, cmd: 'guild', subcmd: 'log', page: page},
-    datatype: 'html'
-  });
-}
-
-function findPageInput(prev, curr) {
-  var output = prev;
-  if (!prev && curr.name === 'page') {output = curr;}
-  return output;
-}
-
-function getPageInput() {
-  var inputList = getElementById('pCC', doc)
-    .getElementsByClassName('custominput');
-  return Array.prototype.reduce.call(inputList, findPageInput, null);
-}
-
 function parsePage(data) {
   doc = createDocument(data);
-  var pageInput = getPageInput();
+  var pageInput = doc.querySelector('input[name="page"]');
   currPage = Number(pageInput.value);
   lastPage = Number(/\d+/.exec(pageInput.parentNode.textContent)[0]);
   if (currPage === 1) {maxPage = Math.min(lastPage, maxPagesToFetch);}
@@ -128,29 +108,42 @@ function updateOptionsLog() {
   storeOptions();
 }
 
+function makeCell(row, html) {
+  var thisCell = row.insertCell(-1);
+  thisCell.innerHTML = html;
+  thisCell.className = 'row';
+}
+
+function dataRow(r) {
+  var myRow = myTable.insertRow(-1);
+  r.push(myRow);
+  if (!options.checks[r[4]]) {myRow.className = 'fshHide';}
+  makeCell(myRow,
+    '<span class="newGuildLog" style="background-image: url(\'' +
+    imageServer + '/skin/log_1.gif\');"></span>');
+  makeCell(myRow, '<nobr>' + r[2] + '</nobr>');
+  makeCell(myRow, r[3]);
+}
+
+function separatorRow(r) {
+  var sepRow = myTable.insertRow(-1);
+  r.push(sepRow);
+  if (!options.checks[r[4]]) {sepRow.className = 'fshHide';}
+  var sep = sepRow.insertCell(-1);
+  sep.className = 'divider';
+  sep.colSpan = 3;
+}
+
+function buildRow(r) {
+  dataRow(r);
+  separatorRow(r);
+}
+
 function buildTable() {
   myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
   insertHtmlBeforeEnd(myTable, headerRow);
 
-  tmpGuildLog.forEach(function(r) {
-    var myRow = myTable.insertRow(-1);
-    r.push(myRow);
-    if (!options.checks[r[4]]) {myRow.className = 'fshHide';}
-    myRow.insertCell(-1).innerHTML =
-      '<span class="newGuildLog" style="background-image: url(\'' +
-      imageServer + '/skin/log_1.gif\');"></span>';
-    myRow.cells[0].className = 'row';
-    myRow.insertCell(-1).innerHTML = '<nobr>' + r[2] + '</nobr>';
-    myRow.cells[1].className = 'row';
-    myRow.insertCell(-1).innerHTML = r[3];
-    myRow.cells[2].className = 'row';
-    var sepRow = myTable.insertRow(-1);
-    r.push(sepRow);
-    if (!options.checks[r[4]]) {sepRow.className = 'fshHide';}
-    var sep = sepRow.insertCell(-1);
-    sep.className = 'divider';
-    sep.colSpan = 3;
-  });
+  tmpGuildLog.forEach(buildRow);
 
   var injector = getElementById('fshInjectHere');
   pCC.replaceChild(myTable, injector);
@@ -239,16 +232,28 @@ var guildLogEvents = [
   {test: function(self) {return self.id === 'rfsh';}, act: refresh}
 ];
 
-function gotOptions(guildLog) {
+function setOpts(guildLog) {
   options = guildLog || options;
   options.checks = options.checks || defChecks.slice(0);
-  pCC.innerHTML = guildLogFilter;
+}
+
+function getElements() {
   fshNewGuildLog = getElementById('fshNewGuildLog');
-  on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
-  setChecks();
   fshOutput = getElementById('fshOutput');
+}
+
+function setMaxPage() {
   maxPagesToFetch = Number(getValue('newGuildLogHistoryPages'));
   maxPage = maxPagesToFetch;
+}
+
+function gotOptions(guildLog) {
+  setOpts(guildLog);
+  pCC.innerHTML = guildLogFilter;
+  getElements();
+  on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
+  setChecks();
+  setMaxPage();
   getGuildLogPage(1).done(processFirstPage);
 }
 

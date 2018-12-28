@@ -5,13 +5,17 @@ import partial from '../../common/partial';
 import setValue from '../../system/setValue';
 import {lvlTest, playerLvlTest} from '../../common/lvlTests';
 
+function getVal(el, context) {
+  return parseInt($(el, context).val(), 10);
+}
+
 function saveVal(key, val) {
   if (!isNaN(val)) {setValue(key, val);}
 }
 
 function dataTableSearch(context, _settings, data) { // jQuery
-  var min = parseInt($('#fshMinLvl', context).val(), 10);
-  var max = parseInt($('#fshMaxLvl', context).val(), 10);
+  var min = getVal('#fshMinLvl', context);
+  var max = getVal('#fshMaxLvl', context);
   saveVal('onlinePlayerMinLvl', min);
   saveVal('onlinePlayerMaxLvl', max);
   var level = fallback(intValue(data[2]), 0);
