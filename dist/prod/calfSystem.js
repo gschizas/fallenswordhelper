@@ -2425,8 +2425,46 @@
     }
   }
 
+  function getElementsByTagName(tagName, element) {
+    if (element) {return element.getElementsByTagName(tagName);}
+    return document.getElementsByTagName(tagName);
+  }
+
+  function getFolderImgs(doc) {
+    var el = getElementById('pCC', doc).children[0].rows[4].cells[0].children[0];
+    return Array.from(getElementsByTagName('img', el));
+  }
+
+  function getElementsByClassName(names, element) {
+    if (element) {return element.getElementsByClassName(names);}
+    return document.getElementsByClassName(names);
+  }
+
   var itmRE =
     /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
+
+  function getTblCells(doc) {
+    var tblCells = getElementsByTagName('td', getElementById('pCC', doc));
+    return Array.from(tblCells);
+  }
+
+  function background(bgGif, el) {
+    var bg = el.getAttribute('background');
+    return bg && bg.includes(bgGif);
+  }
+
+  function splitMouseover(img) {
+    var mouseOver = img.dataset.tipped;
+    return mouseOver.match(itmRE);
+  }
+
+  function buildResult(img, mouseOverRX) {
+    return {
+      img: img.getAttribute('src'),
+      id: mouseOverRX[1],
+      verify: mouseOverRX[3]
+    };
+  }
 
   function hasAmounts(result, amounts) {
     if (amounts) {
@@ -2436,105 +2474,129 @@
     }
   }
 
-  function reduceItemOrComponent(bgGif, prev, el) {
-    var background = el.getAttribute('background');
-    if (!background || background.indexOf(bgGif) === -1) {return prev;}
+  function attribs(el) {
     var img = el.children[0].children[0];
-    var mouseOver = img.dataset.tipped;
-    var mouseOverRX = mouseOver.match(itmRE);
-    var result = {
-      img: img.getAttribute('src'),
-      id: mouseOverRX[1],
-      verify: mouseOverRX[3]
-    };
+    var mouseOverRX = splitMouseover(img);
+    var result = buildResult(img, mouseOverRX);
     hasAmounts(result, el.parentNode.nextElementSibling);
-    prev.push(result);
-    return prev;
+    return result;
   }
 
-  function parseRecipeItemOrComponent(bgGif, doc) {
-    var tblCells = getElementById('pCC', doc).getElementsByTagName('td');
-    return Array.prototype.reduce.call(tblCells,
-      partial(reduceItemOrComponent, bgGif), []);
+  function parseRecipe(tblCells, bgGif) {
+    return tblCells
+      .filter(partial(background, bgGif))
+      .map(attribs);
   }
 
-  function processRecipe(output, recipebook, recipe, data) {
-    var doc = createDocument(data);
+  function processRecipe(output, recipebook, recipe, html) {
+    var doc = createDocument(html);
     insertHtmlBeforeEnd(output,
       'Parsing blueprint ' + recipe.name + '...<br>');
-    recipe.items = parseRecipeItemOrComponent('/inventory/2x3.gif', doc);
-    recipe.components = parseRecipeItemOrComponent('/inventory/1x1mini.gif', doc);
-    recipe.target = parseRecipeItemOrComponent('/hellforge/2x3.gif', doc)[0];
+    var tblCells = getTblCells(doc);
+    recipe.items = parseRecipe(tblCells, '/inventory/2x3.gif');
+    recipe.components = parseRecipe(tblCells, '/inventory/1x1mini.gif');
+    recipe.target = parseRecipe(tblCells, '/hellforge/2x3.gif')[0];
     recipebook.recipe.push(recipe);
   }
 
-  function processFolderAnyPage(output, recipebook, data) { // jQuery.min
-    var doc = createDocument(data);
+  function recipeAry(doc) {
     var innerPcc = getElementById('pCC', doc);
-    var scope = innerPcc.firstElementChild.rows[6].cells[0]
-      .firstElementChild.getElementsByTagName('a');
-    var prm = Array.prototype.reduce.call(scope, function(prev, el) {
-      insertHtmlBeforeEnd(output,
-        'Found blueprint "' + el.textContent + '".<br>');
-      var recipe = {
-        img: el.parentNode.previousElementSibling.firstElementChild
-          .getAttribute('src'),
-        link: el.href,
-        name: el.textContent,
-        id: getCustomUrlParameter(el.href, 'recipe_id')
-      };
-      prev.push(retryAjax(el.href)
-        .pipe(partial(processRecipe, output, recipebook, recipe)));
-      return prev;
-    }, []);
+    var scope = innerPcc.children[0].rows[6].cells[0].children[0];
+    var tagList = getElementsByTagName('a', scope);
+    return Array.from(tagList);
+  }
+
+  function makeRecipe(el) {
+    return {
+      img: el.parentNode.previousElementSibling.children[0].getAttribute('src'),
+      link: el.href,
+      name: el.textContent,
+      id: getCustomUrlParameter(el.href, 'recipe_id')
+    };
+  }
+
+  function getRecipe(output, recipebook, el) {
+    insertHtmlBeforeEnd(output, 'Found blueprint "' + el.textContent + '".<br>');
+    var recipe = makeRecipe(el);
+    return retryAjax(el.href)
+      .pipe(partial(processRecipe, output, recipebook, recipe));
+  }
+
+  function processFolderAnyPage(output, recipebook, html) { // jQuery.min
+    var doc = createDocument(html);
+    var prm = recipeAry(doc).map(partial(getRecipe, output, recipebook));
     return $.when.apply($, prm);
   }
 
-  function processFolderFirstPage(output, recipebook, data) { // jQuery.min
-    var prm = [];
-    var doc = createDocument(data);
+  function thisInventFolder(el) {
+    return /\/folder_on\.gif/.test(el.getAttribute('src'));
+  }
+
+  function thisFolderHref(doc) {
+    return getFolderImgs(doc).find(thisInventFolder).parentNode.href;
+  }
+
+  function notThisPage(el, i) {return i !== 0;}
+
+  function pageNumber(el) {return el.value;}
+
+  function otherPages(doc) {
     var innerPcc = getElementById('pCC', doc);
-    var scope = innerPcc.firstElementChild.rows[4].cells[0]
-      .firstElementChild.getElementsByTagName('img');
-    var thisFolder = Array.prototype.filter.call(scope, function(el) {
-      return /\/folder_on\.gif/.test(el.getAttribute('src'));
-    })[0];
-    var pages = innerPcc.getElementsByClassName('customselect')[0]
-      .getElementsByTagName('option').length;
-    for (var i = 1; i < pages; i += 1) {
-      prm.push(retryAjax(thisFolder.parentNode.href + '&page=' + i)
-        .pipe(partial(processFolderAnyPage, output, recipebook)));
-    }
-    prm.push($.when(data)
-      .pipe(partial(processFolderAnyPage, output, recipebook)));
+    var select = getElementsByClassName('customselect', innerPcc)[0];
+    var options = getElementsByTagName('option', select);
+    return Array.from(options).filter(notThisPage).map(pageNumber);
+  }
+
+  function getPage(thisFolder, bindFolderAnyPage, i) {
+    return retryAjax(thisFolder + '&page=' + i)
+      .pipe(bindFolderAnyPage);
+  }
+
+  function ajaxOtherPages(doc, thisFolder, bindFolderAnyPage) {
+    return otherPages(doc).map(partial(getPage, thisFolder, bindFolderAnyPage));
+  }
+
+  function processFolderFirstPage(output, recipebook, html) { // jQuery.min
+    var doc = createDocument(html);
+    var thisFolder = thisFolderHref(doc);
+    var bindFolderAnyPage = partial(processFolderAnyPage, output, recipebook);
+    var prm = ajaxOtherPages(doc, thisFolder, bindFolderAnyPage);
+    prm.push($.when(html).pipe(bindFolderAnyPage));
     return $.when.apply($, prm);
   }
 
-  function reduceFolders(output, recipebook, prev, el) { // jQuery.min
-    var href = el.parentNode.href;
+  function notUnassigned(el) {
+    return getCustomUrlParameter(el.parentNode.href, 'folder_id') !== '-1';
+  }
+
+  function noQuests(output, el) {
     var folderName = el.parentNode.nextElementSibling.nextElementSibling
       .firstChild.textContent;
-    if (getCustomUrlParameter(href, 'folder_id') === '-1') {
-      return prev;
-    }
-    if (/quest/i.test(folderName)) {
+    var hasQuest = /quest/i.test(folderName);
+    if (hasQuest) {
       insertHtmlBeforeEnd(output, 'Skipping folder "' +
         folderName + '"  as it has the word "quest" in folder name.<br>');
-      return prev;
     }
-    prev.push(retryAjax(href)
-      .pipe(partial(processFolderFirstPage, output, recipebook)));
-    return prev;
+    return !hasQuest;
   }
 
-  function processFirstPage(output, recipebook, data) { // jQuery.min
-    var doc = createDocument(data);
-    var scope = getElementById('pCC', doc).firstElementChild.rows[4].cells[0]
-      .firstElementChild.getElementsByTagName('img');
-    var prm = Array.prototype.reduce.call(scope,
-      partial(reduceFolders, output, recipebook), []);
-    prm.push($.when(data)
-      .pipe(partial(processFolderFirstPage, output, recipebook)));
+  function doAjax$1(bindFolderFirstPage, el) {
+    return retryAjax(el.parentNode.href).pipe(bindFolderFirstPage);
+  }
+
+  function buildPrm(output, html, bindFolderFirstPage) {
+    var doc = createDocument(html);
+    var folderImgs = getFolderImgs(doc);
+    return folderImgs
+      .filter(notUnassigned)
+      .filter(partial(noQuests, output))
+      .map(partial(doAjax$1, bindFolderFirstPage));
+  }
+
+  function processFirstPage(output, recipebook, html) { // jQuery.min
+    var bindFolderFirstPage = partial(processFolderFirstPage, output, recipebook);
+    var prm = buildPrm(output, html, bindFolderFirstPage);
+    prm.push($.when(html).pipe(bindFolderFirstPage));
     return $.when.apply($, prm);
   }
 
@@ -4874,6 +4936,54 @@
     Array.prototype.forEach.call(nodeList, findNewGroup);
   }
 
+  function valueText(collection) {
+    return collection[0].nextElementSibling.textContent;
+  }
+
+  function asInt(className) {
+    return intValue(
+      valueText(getElementsByClassName(className))
+    );
+  }
+
+  function padZ(n) {
+    var ret = n.toString();
+    if (n < 10) {ret = '0' + ret;}
+    return ret;
+  }
+
+  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  function formatShortDate(aDate) {
+    return padZ(aDate.getHours()) + ':' +
+      padZ(aDate.getMinutes()) + ' ' +
+      days[aDate.getDay()] + ' ' +
+      padZ(aDate.getDate()) + '/' +
+      months[aDate.getMonth()] + '/' +
+      aDate.getFullYear();
+  }
+
+  function timeBox(nextGainTime, hrsToGo) {
+    var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
+    if (!nextGain) {return;}
+    return '<dd>' +
+      formatShortDate(new Date(now +
+      (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
+      parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
+  }
+
+  function injectLevelupCalculator() {
+    var nextGain = getElementsByClassName('stat-xp-nextGain');
+    if (nextGain.length === 0) {return;}
+    insertHtmlBeforeEnd(getElementById('statbar-level-tooltip-general'),
+      '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
+      timeBox(
+        valueText(nextGain),
+        Math.ceil(asInt('stat-xp-remaining') / asInt('stat-xp-gainPerHour'))
+      )
+    );
+  }
+
   function refIsLast(newNode, referenceNode) {
     if (referenceNode.nextSibling instanceof Node) {
       return insertElementBefore(newNode, referenceNode.nextSibling);
@@ -5276,6 +5386,32 @@
     if (validStatBoxes(topbannerStats, gameStats)) {
       statBoxesExist(topbannerStats, gameStats);
     }
+  }
+
+  function getStamVals(staminaMouseover) {
+    return /([,0-9]+)\s\/\s([,0-9]+)/.exec(
+      valueText(getElementsByClassName('stat-name', staminaMouseover))
+    );
+  }
+
+  function maxStamAt(nextGain, stamVals) {
+    return '<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
+      timeBox(
+        valueText(nextGain),
+        // get the max hours to still be inside stamina maximum
+        Math.floor(
+          (intValue(stamVals[2]) - intValue(stamVals[1])) /
+          asInt('stat-stamina-gainPerHour')
+        )
+      );
+  }
+
+  function injectStaminaCalculator() {
+    var nextGain = getElementsByClassName('stat-stamina-nextGain');
+    if (nextGain.length === 0) {return;}
+    var staminaMouseover = getElementById('statbar-stamina-tooltip-stamina');
+    var stamVals = getStamVals(staminaMouseover);
+    insertHtmlBeforeEnd(staminaMouseover, maxStamAt(nextGain, stamVals));
   }
 
   var havePrayedMsg =
@@ -6590,80 +6726,6 @@
     // add coloring for offline time
     Array.prototype.forEach.call(
       onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
-  }
-
-  function padZ(n) {
-    var ret = n.toString();
-    if (n < 10) {ret = '0' + ret;}
-    return ret;
-  }
-
-  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-  function formatShortDate(aDate) {
-    var yyyy = aDate.getFullYear();
-    var dd = padZ(aDate.getDate());
-    var ddd = days[aDate.getDay()];
-    var month = months[aDate.getMonth()];
-    var hh = padZ(aDate.getHours());
-    var mm = padZ(aDate.getMinutes());
-    return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
-  }
-
-  function timeBox(nextGainTime, hrsToGo) {
-    var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
-    if (!nextGain) {return;}
-    return '<dd>' +
-      formatShortDate(new Date(now +
-      (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
-      parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
-  }
-
-  function injectStaminaCalculator() {
-    var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
-    if (nextGain.length === 0) {return;}
-    var staminaMouseover =
-      getElementById('statbar-stamina-tooltip-stamina');
-    var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
-      staminaMouseover.getElementsByClassName('stat-name')[0]
-        .nextElementSibling.textContent
-    );
-    insertHtmlBeforeEnd(staminaMouseover,
-      '<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
-      timeBox(
-        nextGain[0].nextElementSibling.textContent,
-        // get the max hours to still be inside stamina maximum
-        Math.floor(
-          (intValue(stamVals[2]) -
-          intValue(stamVals[1])) /
-          intValue(
-            document.getElementsByClassName('stat-stamina-gainPerHour')[0]
-              .nextElementSibling.textContent
-          )
-        )
-      )
-    );
-  }
-
-  function injectLevelupCalculator() {
-    var nextGain = document.getElementsByClassName('stat-xp-nextGain');
-    if (nextGain.length === 0) {return;}
-    insertHtmlBeforeEnd(getElementById('statbar-level-tooltip-general'),
-      '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
-      timeBox(
-        nextGain[0].nextElementSibling.textContent,
-        Math.ceil(
-          intValue(
-            document.getElementsByClassName('stat-xp-remaining')[0]
-              .nextElementSibling.textContent
-          ) /
-          intValue(
-            document.getElementsByClassName('stat-xp-gainPerHour')[0]
-              .nextElementSibling.textContent
-          )
-        )
-      )
-    );
   }
 
   function gameHelpLink() {
@@ -18258,6 +18320,17 @@
     groupEvaluator.innerHTML = html;
   }
 
+  function superElite(ses, obj) {
+    // reduce stats if critter is a SE and player has SES cast on them.
+    if (obj.name.search('Super Elite') !== -1) { // TODO type
+      obj.attack -= Math.ceil(obj.attack * ses);
+      obj.defense -= Math.ceil(obj.defense * ses);
+      obj.armor -= Math.ceil(obj.armor * ses);
+      obj.damage -= Math.ceil(obj.damage * ses);
+      obj.hp -= Math.ceil(obj.hp * ses);
+    }
+  }
+
   function creatureData(creature, ses) {
     var obj = {};
     obj.name = creature.name;
@@ -18267,28 +18340,18 @@
     obj.armor = Number(creature.armor);
     obj.damage = Number(creature.damage);
     obj.hp = Number(creature.hp);
-    // reduce stats if critter is a SE and player has SES cast on them.
-    if (obj.name.search('Super Elite') !== -1) { // TODO type
-      obj.attack -= Math.ceil(obj.attack * ses);
-      obj.defense -= Math.ceil(obj.defense * ses);
-      obj.armor -= Math.ceil(obj.armor * ses);
-      obj.damage -= Math.ceil(obj.damage * ses);
-      obj.hp -= Math.ceil(obj.hp * ses);
-    }
+    superElite(ses, obj);
     return obj;
   }
 
-  function doCombatEval(data, playerJson, groupData) {
-    var combat = {};
-    combat.callback = groupData;
-    // playerdata
-    combat.player = playerDataObject(playerJson);
+  function biasVars(combat) {
     combat.combatEvaluatorBias = calf.combatEvaluatorBias;
     combat.attackVariable = 1.1053;
     combat.generalVariable = calf.generalVariable;
     combat.hpVariable = calf.hpVariable;
-    combat.creature = creatureData(data.response.data,
-      combat.player.superEliteSlayerMultiplier);
+  }
+
+  function buffProcessing(combat) {
     evalExtraBuffs(combat);
     evalAttack(combat);
     evalDamage(combat);
@@ -18296,6 +18359,17 @@
     evalArmour(combat);
     evalAnalysis(combat);
     evalCA(combat);
+  }
+
+  function doCombatEval(data, playerJson, groupData) {
+    var combat = {};
+    combat.callback = groupData;
+    // playerdata
+    combat.player = playerDataObject(playerJson);
+    biasVars(combat);
+    combat.creature = creatureData(data.response.data,
+      combat.player.superEliteSlayerMultiplier);
+    buffProcessing(combat);
     combat.evaluatorHTML = evalHTML(combat);
     if (groupData.groupExists) {
       setGroupEvalalutor(combat.evaluatorHTML);
@@ -18976,10 +19050,6 @@
     on(pCC, 'keyup', addMarketplaceWarning);
   }
 
-  function getElementsByTagName(element, tagName) {
-    return element.getElementsByTagName(tagName);
-  }
-
   var oldMoves = [];
   var imgNodes;
   var selectRow;
@@ -18998,7 +19068,7 @@
   }
 
   function getAllMoves() {
-    return Array.from(getElementsByTagName(selectRow, 'select'))
+    return Array.from(getElementsByTagName('select', selectRow))
       .map(function(el) {return el.value;});
   }
 
@@ -20166,7 +20236,7 @@
       !$.isNumeric(amount) || amount < 1;
   }
 
-  function doAjax$1(oData) {
+  function doAjax$2(oData) {
     retryAjax({url: 'index.php', data: oData}).done(transResponse);
   }
 
@@ -20177,7 +20247,7 @@
     if (invalidAmount(o, amount)) {return;}
     o.data.mode = 'deposit';
     o.data.amount = amount;
-    doAjax$1(o.data);
+    doAjax$2(o.data);
   }
 
   function bankWithdrawal(e) { // jQuery
@@ -20187,7 +20257,7 @@
     if (!$.isNumeric(amount) || amount < 1) {return;}
     o.data.mode = 'withdraw';
     o.data.amount = amount;
-    doAjax$1(o.data);
+    doAjax$2(o.data);
   }
 
   function linkToGuildBank(o, bank) { // jQuery
@@ -20502,7 +20572,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '63';
+  window.FSH.calf = '64';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
