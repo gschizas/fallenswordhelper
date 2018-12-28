@@ -9,9 +9,11 @@ import injectFSBoxLog from './injectFSBoxLog';
 import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
 import injectJoinAllLink from '../notification/injectJoinAllLink';
+import injectLevelupCalculator from './calcs/injectLevelupCalculator';
 import injectMenu from './accordion';
 import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
+import injectStaminaCalculator from './calcs/injectStaminaCalculator';
 import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
 import insertElement from '../common/insertElement';
@@ -27,7 +29,6 @@ import scoutTowerLink from './scoutTowerLink';
 import {seLog} from '../seLog/seLog';
 import statbar from './statBar';
 import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
-import {injectLevelupCalculator, injectStaminaCalculator} from './calc';
 
 function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');
