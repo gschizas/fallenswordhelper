@@ -1,3 +1,5 @@
+import {createAnchor} from '../common/cElement';
+import displayTracker from './displayTracker';
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../common/insertElement';
@@ -5,10 +7,8 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
-import partial from '../common/partial';
 import roundToString from '../common/roundToString';
 import setForage from '../ajax/setForage';
-import {createAnchor, createTBody, createTable} from '../common/cElement';
 import {guideUrl, now} from '../support/constants';
 
 function getTitanName(aRow) {
@@ -30,31 +30,6 @@ function cooldownTracker(aRow, theTitans) {
       seen: 'yes'
     };
   }
-}
-
-function addRow(theTitans, trackerTable, titan) {
-  if (theTitans[titan].coolTime < now) {return;}
-  insertHtmlBeforeEnd(trackerTable,
-    '<tr><td class="fshCenter">' + titan + '</td>' +
-    '<td class="fshBold fshCenter fshCooldown">' +
-    theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
-    theTitans[titan].seen + '</td></tr>');
-}
-
-function displayTracker(parentTable, theTitans) {
-  var trackerTable = createTable({className: 'fshTTracker'});
-  var tBody = createTBody({
-    innerHTML: '<tr><td class="header fshCenter">Titan</td>' +
-      '<td class="header fshCenter">Cooldown</td>' +
-      '<td class="header fshCenter">Visible</td></tr>'
-  });
-  insertElement(trackerTable, tBody);
-  Object.keys(theTitans).forEach(partial(addRow, theTitans, tBody));
-
-  var newRow = parentTable.insertRow(5);
-  var newCell = newRow.insertCell(-1);
-  newCell.colSpan = 3;
-  insertElement(newCell, trackerTable);
 }
 
 function addMissingTitansFromOld(oldTitans, newTitans) {
@@ -87,9 +62,7 @@ export function getKillsPct(currentNumberOfKills, guildKills) {
   return guildKills * 100 / currentNumberOfKills;
 }
 
-function killsSummary(aRow) {
-  var titanHP = aRow.cells[2].textContent;
-  if (titanHP.indexOf('-') !== -1) {return;}
+function injectSummary(aRow, titanHP) {
   var guildKills = Number(aRow.cells[3].textContent);
   var titanHPArray = titanHP.split('/');
   var currentHP = Number(titanHPArray[0]);
@@ -99,6 +72,12 @@ function killsSummary(aRow) {
     roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
     '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
     '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
+}
+
+function killsSummary(aRow) {
+  var titanHP = aRow.cells[2].textContent;
+  if (titanHP.indexOf('-') !== -1) {return;}
+  injectSummary(aRow, titanHP);
 }
 
 function guideLink(aRow) {
