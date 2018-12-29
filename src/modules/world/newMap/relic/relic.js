@@ -1,3 +1,4 @@
+import badData from '../badData';
 import createDocument from '../../../system/createDocument';
 import {def_relicView} from '../../../support/constants';
 import getGroupStats from '../../../ajax/getGroupStats';
@@ -85,6 +86,7 @@ export function getStats() {
 }
 
 function viewRelic(e, data) {
+  if (badData(data)) {return;}
   relicData = data.response.data;
   if (relicData.defenders.length > 0) {
     primaryElementsSetup(relicData);
