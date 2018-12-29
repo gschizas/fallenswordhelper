@@ -7081,6 +7081,7 @@
     getInventoryById().done(drawFilters);
   }
 
+  var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
   var disableBreakdownPrompts;
   var selectedList = [];
 
@@ -7094,6 +7095,19 @@
       partial(goDown, self, partial(disappearance, self)));
   }
 
+  function msgText(message, bgcolor) {
+    return $('<div/>', {id: 'composingMessageText'})
+      .css({
+        width: '90%',
+        'text-align': 'center',
+        'background-color': bgcolor,
+        color: 'rgb(255, 255, 255)',
+        margin: '5px auto 5px auto',
+        padding: '2px'
+      })
+      .html(message);
+  }
+
   function showComposingMessage(message, bgcolor) { // jQuery
     $('#composingMessageContainer').remove();
 
@@ -7102,19 +7116,7 @@
         $('<div/>', {
           id: 'composingMessageContainer',
           width: '100%'
-        })
-          .append(
-            $('<div/>', {id: 'composingMessageText'})
-              .css({
-                width: '90%',
-                'text-align': 'center',
-                'background-color': bgcolor,
-                color: 'rgb(255, 255, 255)',
-                margin: '5px auto 5px auto',
-                padding: '2px'
-              })
-              .html(message)
-          )
+        }).append(msgText(message, bgcolor))
       );
 
     setTimeout(fadeAway, 5000);
@@ -7163,21 +7165,29 @@
 
   function togglePref$1() {
     disableBreakdownPrompts = !disableBreakdownPrompts;
-    setValue('disableBreakdownPrompts', disableBreakdownPrompts);
+    setValue(prefDisableBreakdownPrompts, disableBreakdownPrompts);
+  }
+
+  function prefBox() {
+    insertHtmlBeforeEnd(pCC,
+      '<table class="fshTblCenter"><tbody>' +
+      simpleCheckbox(prefDisableBreakdownPrompts) +
+      '</tbody></table>');
+  }
+
+  function setupHandlers() {
+    on(getElementById('breakdown-selected-items').parentNode, 'click', breakEvt,
+      true);
+    on(getElementById('composing-items'), 'click', itemClick);
+    on(getElementById(prefDisableBreakdownPrompts), 'click', togglePref$1);
   }
 
   function composingBreakdown() {
     if (jQueryNotPresent()) {return;}
     perfFilter('composing');
-    disableBreakdownPrompts = getValue('disableBreakdownPrompts');
-    on(getElementById('breakdown-selected-items').parentNode,
-      'click', breakEvt, true);
-    on(getElementById('composing-items'), 'click', itemClick);
-    insertHtmlBeforeEnd(pCC,
-      '<table class="fshTblCenter"><tbody>' +
-      simpleCheckbox('disableBreakdownPrompts') +
-      '</tbody></table>');
-    on(getElementById('disableBreakdownPrompts'), 'click', togglePref$1);
+    disableBreakdownPrompts = getValue(prefDisableBreakdownPrompts);
+    prefBox();
+    setupHandlers();
   }
 
   function setMaxVal() {
@@ -10949,22 +10959,30 @@
     doAction$1(partial(senditems, [self.data('inv')]), self);
   }
 
+  function elementClickHandlers(fshInv) {
+    [
+      ['#fshReset', resetLvls$1],
+      ['#fshAll', allChecks],
+      ['#fshNone', clearChecks],
+      ['#fshDefault', resetChecks]
+    ].forEach(function(el) {$(el[0]).click(partial(el[1], fshInv));});
+  }
+
   function spanClickHandlers(fshInv) {
-    $(fshInv).on('click', 'span.setName', partial(setName$1, fshInv));
-    $(fshInv).on('click', 'span.takeItem', takeItem$1);
-    $(fshInv).on('click', 'span.recallItem', recallItem$1);
-    $(fshInv).on('click', 'span.wearItem', wearItem);
-    $(fshInv).on('click', 'span.useItem', doUseItem$1);
-    $(fshInv).on('click', 'span.dropItem', doDropItem);
-    $(fshInv).on('click', 'span.sendItem', doSendItem);
-    $(fshInv).on('click', 'span.storeItem', doStoreItem);
+    [
+      ['setName', partial(setName$1, fshInv)],
+      ['takeItem', takeItem$1],
+      ['recallItem', recallItem$1],
+      ['wearItem', wearItem],
+      ['useItem', doUseItem$1],
+      ['dropItem', doDropItem],
+      ['sendItem', doSendItem],
+      ['storeItem', doStoreItem]
+    ].forEach(function(el) {$(fshInv).on('click', 'span.' + el[0], el[1]);});
   }
 
   function setupClickHandlers(fshInv) {
-    $('#fshReset').click(partial(resetLvls$1, fshInv));
-    $('#fshAll').click(partial(allChecks, fshInv));
-    $('#fshNone').click(partial(clearChecks, fshInv));
-    $('#fshDefault').click(partial(resetChecks, fshInv));
+    elementClickHandlers(fshInv);
     $('table.fshInvFilter').on('click', 'input[type="checkbox"]',
       partial(getChecks, fshInv));
     spanClickHandlers(fshInv);
@@ -14343,6 +14361,34 @@
     lookForMultiplierCount();
   }
 
+  function addRow$1(theTitans, trackerTable, titan) {
+    if (theTitans[titan].coolTime < now) {return;}
+    insertHtmlBeforeEnd(trackerTable,
+      '<tr><td class="fshCenter">' + titan + '</td>' +
+      '<td class="fshBold fshCenter fshCooldown">' +
+      theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
+      theTitans[titan].seen + '</td></tr>');
+  }
+
+  function makeTrackerTable(theTitans) {
+    var trackerTable = createTable({className: 'fshTTracker'});
+    var tBody = createTBody({
+      innerHTML: '<tr><td class="header fshCenter">Titan</td>' +
+        '<td class="header fshCenter">Cooldown</td>' +
+        '<td class="header fshCenter">Visible</td></tr>'
+    });
+    insertElement(trackerTable, tBody);
+    Object.keys(theTitans).forEach(partial(addRow$1, theTitans, tBody));
+  }
+
+  function displayTracker(parentTable, theTitans) {
+    var trackerTable = makeTrackerTable(theTitans);
+    var newRow = parentTable.insertRow(5);
+    var newCell = newRow.insertCell(-1);
+    newCell.colSpan = 3;
+    insertElement(newCell, trackerTable);
+  }
+
   function buffIndividual(self) {
     if (self.previousElementSibling) {
       openQuickBuffByName(self.previousElementSibling.textContent);
@@ -14431,31 +14477,6 @@
     }
   }
 
-  function addRow$1(theTitans, trackerTable, titan) {
-    if (theTitans[titan].coolTime < now) {return;}
-    insertHtmlBeforeEnd(trackerTable,
-      '<tr><td class="fshCenter">' + titan + '</td>' +
-      '<td class="fshBold fshCenter fshCooldown">' +
-      theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
-      theTitans[titan].seen + '</td></tr>');
-  }
-
-  function displayTracker(parentTable, theTitans) {
-    var trackerTable = createTable({className: 'fshTTracker'});
-    var tBody = createTBody({
-      innerHTML: '<tr><td class="header fshCenter">Titan</td>' +
-        '<td class="header fshCenter">Cooldown</td>' +
-        '<td class="header fshCenter">Visible</td></tr>'
-    });
-    insertElement(trackerTable, tBody);
-    Object.keys(theTitans).forEach(partial(addRow$1, theTitans, tBody));
-
-    var newRow = parentTable.insertRow(5);
-    var newCell = newRow.insertCell(-1);
-    newCell.colSpan = 3;
-    insertElement(newCell, trackerTable);
-  }
-
   function addMissingTitansFromOld(oldTitans, newTitans) {
     if (!oldTitans) {return;}
     Object.keys(oldTitans).forEach(function(oldTitan) {
@@ -14486,9 +14507,7 @@
     return guildKills * 100 / currentNumberOfKills;
   }
 
-  function killsSummary(aRow) {
-    var titanHP = aRow.cells[2].textContent;
-    if (titanHP.indexOf('-') !== -1) {return;}
+  function injectSummary(aRow, titanHP) {
     var guildKills = Number(aRow.cells[3].textContent);
     var titanHPArray = titanHP.split('/');
     var currentHP = Number(titanHPArray[0]);
@@ -14498,6 +14517,12 @@
       roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
       '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
       '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
+  }
+
+  function killsSummary(aRow) {
+    var titanHP = aRow.cells[2].textContent;
+    if (titanHP.indexOf('-') !== -1) {return;}
+    injectSummary(aRow, titanHP);
   }
 
   function guideLink(aRow) {
@@ -16301,6 +16326,30 @@
     }
   }
 
+  function createLbl(className, tip, htmlFor) {
+    return createLabel({
+      className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
+      dataset: {tipped: tip},
+      htmlFor: htmlFor
+    });
+  }
+
+  function makeToggleBtn(o) {
+    var btnDiv = createDiv({className: 'fshToggle'});
+    var btnCheck = createInput({
+      checked: o.prefVal,
+      id: o.checkId,
+      type: 'checkbox'
+    });
+    insertElement(btnDiv, btnCheck);
+    var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
+    insertElement(btnDiv, onLbl);
+    var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
+    insertElement(btnDiv, offLbl);
+    insertElement(o.worldName, btnDiv);
+    return btnCheck;
+  }
+
   var buttonContainer;
   var realmLvl;
   var yourLvl;
@@ -16382,16 +16431,24 @@
     return '?';
   }
 
-  function doLevels(worldName) {
-    var lvlDiv = createDiv({className: 'fshFsty'});
+  function minLvl() {
     var topDiv = createDiv({textContent: 'Min Lvl: '});
     realmLvl = textSpan(exists(GameData.realm().minlevel));
     insertElement(topDiv, realmLvl);
-    insertElement(lvlDiv, topDiv);
+    return topDiv;
+  }
+
+  function yrLvl() {
     var btmDiv = createDiv({textContent: 'Your Lvl: '});
     yourLvl = textSpan(exists(GameData.player().level));
     insertElement(btmDiv, yourLvl);
-    insertElement(lvlDiv, btmDiv);
+    return btmDiv;
+  }
+
+  function doLevels(worldName) {
+    var lvlDiv = createDiv({className: 'fshFsty'});
+    insertElement(lvlDiv, minLvl());
+    insertElement(lvlDiv, yrLvl());
     insertElement(worldName, lvlDiv);
   }
 
@@ -16410,30 +16467,6 @@
     quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
     realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
     ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
-  }
-
-  function createLbl(className, tip, htmlFor) {
-    return createLabel({
-      className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
-      dataset: {tipped: tip},
-      htmlFor: htmlFor
-    });
-  }
-
-  function makeToggleBtn(o) {
-    var btnDiv = createDiv({className: 'fshToggle'});
-    var btnCheck = createInput({
-      checked: o.prefVal,
-      id: o.checkId,
-      type: 'checkbox'
-    });
-    insertElement(btnDiv, btnCheck);
-    var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
-    insertElement(btnDiv, onLbl);
-    var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
-    insertElement(btnDiv, offLbl);
-    insertElement(o.worldName, btnDiv);
-    return btnCheck;
   }
 
   function showSpeakerOnWorld(worldName) {
@@ -16464,14 +16497,22 @@
     });
   }
 
+  function addButtons() {
+    showQuickLinks(buttonContainer);
+    showSpeakerOnWorld(buttonContainer);
+    showHuntMode(buttonContainer);
+  }
+
+  function setupHandlers$1() {
+    on(buttonContainer, 'click', eventHandler(clickHdl));
+    on(buttonContainer, 'change', eventHandler(changeHdl));
+  }
+
   function injectButtons() {
     if (!buttonContainer) {
       buttonContainer = makeButtonContainer();
-      showQuickLinks(buttonContainer);
-      showSpeakerOnWorld(buttonContainer);
-      showHuntMode(buttonContainer);
-      on(buttonContainer, 'click', eventHandler(clickHdl));
-      on(buttonContainer, 'change', eventHandler(changeHdl));
+      addButtons();
+      setupHandlers$1();
       insertElementBefore(buttonContainer, getElementById('worldCoord'));
     }
   }
@@ -17048,16 +17089,26 @@
       jqXHR.statusText;
   }
 
-  function getGuild$1() {
-    return retryAjax({
-      url: 'index.php',
-      data: {
-        no_mobile: 1,
-        cmd: 'guild',
-        subcmd: 'view',
-        guild_id: relicData.controlled_by.guild_id
-      }
-    });
+  function hasMerc(disband) {
+    return disband.parentNode.parentNode.previousElementSibling
+      .previousElementSibling.innerHTML.indexOf('"#000099"') !== -1;
+  }
+
+  function buildGroupPrm(disband) {
+    var viewStats = disband.previousElementSibling.href;
+    var prm = [getGroupStats(viewStats).done(storeGroupStats)];
+    if (hasMerc(disband)) {
+      prm.push(getMercStats().done(storeMercStats));
+    }
+    return prm;
+  }
+
+  function parseGroups(html) {
+    var doc = createDocument(html);
+    var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
+    if (!disband) {return;}
+    var prm = buildGroupPrm(disband);
+    return $.when.apply($, prm);
   }
 
   function getGroups() {
@@ -17068,36 +17119,41 @@
         cmd: 'guild',
         subcmd: 'groups'
       }
+    }).pipe(parseGroups);
+  }
+
+  function getGuild$1() {
+    return retryAjax({
+      url: 'index.php',
+      data: {
+        no_mobile: 1,
+        cmd: 'guild',
+        subcmd: 'view',
+        guild_id: relicData.controlled_by.guild_id
+      }
+    }).done(parseGuild$1);
+  }
+
+  function getDefenders() {
+    return myDefenders.map(function(el, i) {
+      if (i === 0) {return getProfile$1(el).done(storeLeadDefender);}
+      return getProfile$1(el).done(parseDefender).fail(ajaxFailure);
     });
   }
 
-  function parseGroups(html) {
-    var doc = createDocument(html);
-    var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
-    if (!disband) {return;}
-    var viewStats = disband.previousElementSibling.href;
-    var prm = [getGroupStats(viewStats).done(storeGroupStats)];
-    var hasMerc = disband.parentNode.parentNode.previousElementSibling
-      .previousElementSibling.innerHTML.indexOf('"#000099"') !== -1;
-    if (hasMerc) {
-      prm.push(getMercStats().done(storeMercStats));
+  function buildStatPrm() {
+    var prm = [getGuild$1()];
+    if (GameData.player().hasGroup) {
+      prm.push(getGroups());
     }
-    return $.when.apply($, prm);
+    prm = prm.concat(getDefenders());
+    return prm;
   }
 
   function getStats() {
     prepareSecondaryDivs(relicData);
     resetCounters();
-    var prm = [];
-    prm.push(getGuild$1().done(parseGuild$1));
-    if (GameData.player().hasGroup) {
-      prm.push(getGroups().pipe(parseGroups));
-    }
-    for (var i = 1; i < myDefenders.length; i += 1) {
-      prm.push(getProfile$1(myDefenders[i]).done(parseDefender)
-        .fail(ajaxFailure));
-    }
-    prm.push(getProfile$1(myDefenders[0]).done(storeLeadDefender));
+    var prm = buildStatPrm();
     $.when.apply($, prm).done(doCalculations);
   }
 
@@ -17814,12 +17870,24 @@
     return combat.player.armorValue;
   }
 
+  function overallArmour(combat) {
+    var armorVal = calcArm(combat);
+    combat.overallArmorValue = armorVal +
+      Math.floor(combat.player.armorValue *
+      combat.player.sanctuaryLevel * 0.001);
+  }
+
   function evalSanctuary(combat) {
     if (combat.player.sanctuaryLevel > 0) {
       combat.extraNotes += 'Sanc Bonus Armor = ' +
         Math.floor(combat.player.armorValue *
         combat.player.sanctuaryLevel * 0.001) + '<br>';
     }
+  }
+
+  function calcTerrorizeEffect(combat) {
+    combat.terrorizeEffect = Math.floor(combat.creature.damage *
+      combat.player.terrorizeLevel * 0.001);
   }
 
   function evalTerrorize(combat) {
@@ -17829,30 +17897,38 @@
     }
   }
 
-  function evalArmour(combat) {
-    var armorVal = calcArm(combat);
-    combat.overallArmorValue = armorVal +
-      Math.floor(combat.player.armorValue *
-      combat.player.sanctuaryLevel * 0.001);
-    evalSanctuary(combat);
-    combat.terrorizeEffect = Math.floor(combat.creature.damage *
-      combat.player.terrorizeLevel * 0.001);
-    evalTerrorize(combat);
-    combat.creature.damage -= combat.terrorizeEffect;
+  function calcDamageDone(combat) {
     combat.creatureDamageDone = Math.ceil(combat.generalVariable *
       combat.creature.damage - combat.overallArmorValue +
       combat.overallHPValue);
+  }
+
+  function creatureCanHit(combat) {
+    var approxDmg = combat.generalVariable * combat.creature.damage;
+    if (approxDmg < combat.overallArmorValue) {
+      combat.numberOfCreatureHitsTillDead = combat.overallHPValue;
+    } else {
+      combat.numberOfCreatureHitsTillDead = Math.ceil(
+        combat.overallHPValue / (approxDmg - combat.overallArmorValue));
+    }
+  }
+
+  function calcNumberOfHits(combat) {
     if (combat.creatureHitByHowMuch >= 0) {
-      var approxDmg = combat.generalVariable * combat.creature.damage;
-      if (approxDmg < combat.overallArmorValue) {
-        combat.numberOfCreatureHitsTillDead = combat.overallHPValue;
-      } else {
-        combat.numberOfCreatureHitsTillDead = Math.ceil(
-          combat.overallHPValue / (approxDmg - combat.overallArmorValue));
-      }
+      creatureCanHit(combat);
     } else {
       combat.numberOfCreatureHitsTillDead = '-';
     }
+  }
+
+  function evalArmour(combat) {
+    overallArmour(combat);
+    evalSanctuary(combat);
+    calcTerrorizeEffect(combat);
+    evalTerrorize(combat);
+    combat.creature.damage -= combat.terrorizeEffect;
+    calcDamageDone(combat);
+    calcNumberOfHits(combat);
   }
 
   function calcAttack(combat) {
@@ -20647,7 +20723,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '65';
+  window.FSH.calf = '66';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
