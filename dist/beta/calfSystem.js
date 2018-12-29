@@ -3106,6 +3106,10 @@
     return '';
   }
 
+  function isValueChecked(pref) {
+    return isChecked(getValue(pref));
+  }
+
   /* eslint-disable max-lines */
   var mySimpleCheckboxes = {
     moveGuildList: {
@@ -3566,10 +3570,6 @@
     return '';
   }
 
-  function isOn(name) {
-    return isChecked(getValue(name));
-  }
-
   function justLabel(name) {
     var o = mySimpleCheckboxes[name];
     return hasNetwork(o) +
@@ -3580,7 +3580,7 @@
 
   function justCheckbox(name) {
     return '<input id="' + name + '" name="' + name +
-      '" class="fshVMid" type="checkbox" value="on"' + isOn(name) + '>';
+      '" class="fshVMid" type="checkbox" value="on"' + isValueChecked(name) + '>';
   }
 
   function simpleCheckboxHtml(name) {
@@ -4537,14 +4537,19 @@
     }
   }
 
+  function getOnlinePlayerLevel(e) {
+    return parseInt($(e).find('td:eq(2)').text().replace(/,/g, ''), 10);
+  }
+
+  function includePlayer(onlinePlayerLevel, minPlayerVirtualLevel) {
+    return onlinePlayerLevel >= findBuffMinCastLevel &&
+      onlinePlayerLevel >= minPlayerVirtualLevel;
+  }
+
   function playerRow(i, e) {
-    var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
-    var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
-      .replace(/,/g, ''), 10);
-    var onlinePlayerName = $(e).find('td:eq(1) a').text();
-    var minPlayerVirtualLevel = calcMinLvl();
-    if (onlinePlayerLevel >= findBuffMinCastLevel &&
-        onlinePlayerLevel >= minPlayerVirtualLevel) {
+    if (includePlayer(getOnlinePlayerLevel(e), calcMinLvl())) {
+      var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
+      var onlinePlayerName = $(e).find('td:eq(1) a').text();
       addPlayerToSearchList(onlinePlayer, onlinePlayerName);
     }
   }
@@ -4564,18 +4569,22 @@
       '(td>a[href*="cmd=profile&player_id="])').each(playerRow);
   }
 
+  function nextPage(curPage, maxPage, callback) {
+    var newPage = calcNextPage(curPage, maxPage);
+    updateProgress('Parsing online page ' + curPage + ' ...');
+    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
+      newPage.toString()).done(callback);
+  }
+
   function findBuffsParseOnlinePlayers(responseText) { // Legacy
     var doc = createDocument(responseText);
-    var maxPage = getMaxPage(doc);
     var curPage = getCurrPage(doc);
     if (curPage !== 1) {
       playerRows(doc);
     }
+    var maxPage = getMaxPage(doc);
     if (curPage < maxPage) {
-      var newPage = calcNextPage(curPage, maxPage);
-      updateProgress('Parsing online page ' + curPage + ' ...');
-      retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
-        newPage.toString()).done(findBuffsParseOnlinePlayers);
+      nextPage(curPage, maxPage, findBuffsParseOnlinePlayers);
     } else {
       // all done so moving on
       findBuffsParsePlayersForBuffs();
@@ -9536,15 +9545,25 @@
     return dialogPopup;
   }
 
-  function makePopup() {
+  function makeRet() {
     var ret = makeInnerPopup();
     var hdl = makeDragHandle();
     insertElement(ret, hdl);
+    draggable(hdl, ret);
+    return ret;
+  }
+
+  function makeContainer() {
     var container = createDiv({className: 'fsh-dialog-content'});
     insertElement(container, makeTg());
     insertElement(container, makeInOut());
+    return container;
+  }
+
+  function makePopup() {
+    var ret = makeRet();
+    var container = makeContainer();
     insertElement(ret, container);
-    draggable(hdl, ret);
     on(tracker, 'change', partial(maybeClose, ret));
     insertElement(trDialog, ret);
   }
@@ -9578,7 +9597,7 @@
     makePopup();
   }
 
-  function guildTracker() {
+  function injectShowTracker() {
     var gs = document.querySelector('#pCC img.guild_openGuildStore');
     var oldTr = gs.parentNode.parentNode;
     var newTr = createTr();
@@ -9589,6 +9608,9 @@
       '&nbsp;<label class="custombutton" for="tracker">Show</label>';
     on(newTr, 'change', togglePref$3);
     oldTr.parentNode.replaceChild(newTr, oldTr);
+  }
+
+  function injectTracker() {
     tracker = createInput({
       id: 'tracker',
       className: 'fsh-dialog-open',
@@ -9599,6 +9621,11 @@
     insertElement(trDialog, tracker);
     on(document.body, 'keydown', keydownHandler);
     insertElement(document.body, trDialog);
+  }
+
+  function guildTracker() {
+    injectShowTracker();
+    injectTracker();
   }
 
   function getIntFromRegExp(theText, rxSearch) {
@@ -11984,6 +12011,7 @@
   }
 
   function displayComponentTally(self, data) {
+    if (!Array.isArray(data.r)) {return;}
     var sumComp = self.parentNode;
     if (sumComp) {
       sumComp.innerHTML = '';
@@ -11993,9 +12021,7 @@
 
   function countComponent(self) { // jQuery.min
     sendEvent('components', 'countComponent');
-    loadComponents().done(function(data) {
-      displayComponentTally(self, data);
-    });
+    loadComponents().done(partial(displayComponentTally, self));
   }
 
   function countComponentHandler(evt) {
@@ -14581,7 +14607,7 @@
           'quick send the item to this person') +
         ':</td><td><input name="showQuickSendLinks" type="checkbox" ' +
         'value="on"' +
-        isChecked(getValue('showQuickSendLinks')) + '>' +
+        isValueChecked('showQuickSendLinks') + '>' +
         '&nbsp;&nbsp;Send Items To ' +
         '<input name="itemRecipient" size="10" value="' +
         getValue('itemRecipient') + '">' +
@@ -14699,12 +14725,9 @@
       '</div>';
   }
 
-  function guildPrefs() {
-    // Guild Manage
-    return '<tr><th colspan="2"><b>Guild>Manage preferences' +
-        '</b></th></tr>' +
-      '<tr><td colspan="2">Enter guild names, ' +
-        'separated by commas</td></tr>' +
+  function guildNames() {
+    return '<tr><td colspan="2">' +
+        'Enter guild names, separated by commas</td></tr>' +
       '<tr><td class="fshRight">Own Guild</td><td>' +
         injectSettingsGuildData('Self') + '</td></tr>' +
       '<tr><td class="fshRight">Friendly Guilds</td><td>' +
@@ -14712,20 +14735,29 @@
       '<tr><td class="fshRight">Old Guilds</td><td>' +
         injectSettingsGuildData('Past') + '</td></tr>' +
       '<tr><td class="fshRight">Enemy Guilds</td><td>' +
-        injectSettingsGuildData('Enmy') + '</td></tr>' +
+        injectSettingsGuildData('Enmy') + '</td></tr>';
+  }
 
-      '<tr><td class="fshRight">Highlight Valid PvP Targets' +
-        helpLink('Highlight Valid PvP Targets',
-          'Enabling this option will highlight targets in OTHER guilds that ' +
-          'are within your level range to attack for PvP or GvG.') +
-        ':</td><td>PvP: <input name="highlightPlayersNearMyLvl" ' +
-        'type="checkbox" value="on"' +
-        isChecked(getValue('highlightPlayersNearMyLvl')) +
-        '> GvG: <input name="highlightGvGPlayersNearMyLvl" ' +
-        'type="checkbox" value="on"' +
-        isChecked(getValue('highlightGvGPlayersNearMyLvl')) +
-        '></td></tr>' +
+  function pvpTargets() {
+    return '<tr><td class="fshRight">Highlight Valid PvP Targets' +
+      helpLink('Highlight Valid PvP Targets',
+        'Enabling this option will highlight targets in OTHER guilds that ' +
+        'are within your level range to attack for PvP or GvG.') +
+      ':</td><td>PvP: <input name="highlightPlayersNearMyLvl" ' +
+      'type="checkbox" value="on"' +
+      isValueChecked('highlightPlayersNearMyLvl') +
+      '> GvG: <input name="highlightGvGPlayersNearMyLvl" ' +
+      'type="checkbox" value="on"' +
+      isValueChecked('highlightGvGPlayersNearMyLvl') +
+      '></td></tr>';
+  }
 
+  function guildPrefs() {
+    // Guild Manage
+    return '<tr><th colspan="2"><b>Guild>Manage preferences' +
+        '</b></th></tr>' +
+      guildNames() +
+      pvpTargets() +
       bunchOfSimple([
         'showAdmin',
         'ajaxifyRankControls',
@@ -14760,14 +14792,14 @@
         '(will work on Firefox 3.5+ only)') +
       ':</td><td><input name="playNewMessageSound" type="checkbox" ' +
       'value="on"' +
-      isChecked(getValue('playNewMessageSound')) + '>' +
+      isValueChecked('playNewMessageSound') + '>' +
       ' Show speaker on world' +
       helpLink('Show speaker on world',
         'Should the toggle play sound speaker show on the world map? ' +
         '(This icon is next to the Fallensword wiki icon and will only ' +
         'display on Firefox 3.5+)') +
       ':<input name="showSpeakerOnWorld" type="checkbox" value="on"' +
-      isChecked(getValue('showSpeakerOnWorld')) +
+      isValueChecked('showSpeakerOnWorld') +
       '></tr></td>';
   }
 
@@ -14790,39 +14822,42 @@
       ]);
   }
 
+  function recipeHiding() {
+    return '<tr><td class="fshRight">Hide Specific Recipes' +
+      helpLink('Hide Specific Recipes',
+        'If enabled, this hides recipes whose name matches the list ' +
+        '(separated by commas). This works on Recipe Manager') +
+      ':</td><td colspan="3"><input name="hideRecipes" ' +
+      'type="checkbox" value="on"' +
+      isValueChecked('hideRecipes') + '>' +
+      '&nbsp;<input name="hideRecipeNames" size="60" value="' +
+      getValue('hideRecipeNames') + '"></td></tr>';
+  }
+
+  function groupJoinSize() {
+    return '<tr><td align= "right">Max Group Size to Join' +
+      helpLink('Max Group Size to Join',
+        'This will disable HCSs Join All functionality and will only join ' +
+        'groups less than a set size. ') +
+      ':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" ' +
+      'type = "checkbox" value = "on"' +
+      isValueChecked('enableMaxGroupSizeToJoin') +
+      '>&nbsp;&nbsp;Max Size: ' +
+      '<input name="maxGroupSizeToJoin" size="3" value="' +
+      getValue('maxGroupSizeToJoin') + '"></td></tr>';
+  }
+
   function otherPrefs() {
     // Other prefs
     return '<tr><th colspan="2"><b>Other preferences</b></th></tr>' +
-
       simpleCheckbox('autoFillMinBidPrice') +
-
-      '<tr><td class="fshRight">Hide Specific Recipes' +
-        helpLink('Hide Specific Recipes',
-          'If enabled, this hides recipes whose name matches the list ' +
-          '(separated by commas). This works on Recipe Manager') +
-        ':</td><td colspan="3"><input name="hideRecipes" ' +
-        'type="checkbox" value="on"' +
-        isChecked(getValue('hideRecipes')) + '>' +
-        '&nbsp;<input name="hideRecipeNames" size="60" value="' +
-        getValue('hideRecipeNames') + '"></td></tr>' +
-
+      recipeHiding() +
       bunchOfSimple([
         'hideRelicOffline',
         'enterForSendMessage',
         'navigateToLogAfterMsg'
       ]) +
-
-      '<tr><td align= "right">Max Group Size to Join' +
-        helpLink('Max Group Size to Join',
-          'This will disable HCSs Join All functionality and will only join ' +
-          'groups less than a set size. ') +
-        ':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" ' +
-        'type = "checkbox" value = "on"' +
-        isChecked(getValue('enableMaxGroupSizeToJoin')) +
-        '>&nbsp;&nbsp;Max Size: ' +
-        '<input name="maxGroupSizeToJoin" size="3" value="' +
-        getValue('maxGroupSizeToJoin') + '"></td></tr>' +
-
+      groupJoinSize() +
       simpleCheckbox('moveComposingButtons');
   }
 
@@ -14833,19 +14868,19 @@
         'Enabling this option will hide the Create Group button') +
       ':</td><td>' +
       '<input name="hideChampionsGroup" type="checkbox" value="on"' +
-        isChecked(getValue('hideChampionsGroup')) + '>' +
+        isValueChecked('hideChampionsGroup') + '>' +
       '&nbsp;Champions&nbsp;&nbsp;' +
       '<input name="hideElitesGroup" type="checkbox" value="on"' +
-        isChecked(getValue('hideElitesGroup')) + '>' +
+        isValueChecked('hideElitesGroup') + '>' +
       '&nbsp;Elites&nbsp;&nbsp;' +
       '<input name="hideSEGroup" type="checkbox" value="on"' +
-        isChecked(getValue('hideSEGroup')) + '>' +
+        isValueChecked('hideSEGroup') + '>' +
       '&nbsp;Super Elite&nbsp;&nbsp;' +
       '<input name="hideTitanGroup" type="checkbox" value="on"' +
-        isChecked(getValue('hideTitanGroup')) + '>' +
+        isValueChecked('hideTitanGroup') + '>' +
       '&nbsp;Titan&nbsp;&nbsp;' +
       '<input name="hideLegendaryGroup" type="checkbox" value="on"' +
-        isChecked(getValue('hideLegendaryGroup')) + '>' +
+        isValueChecked('hideLegendaryGroup') + '>' +
       '&nbsp;Legendary' +
       '</td></tr>';
   }
@@ -14856,7 +14891,7 @@
         'Save combat logs to a temporary variable. ' +
         'Press <u>Show logs</u> on the right to display and copy them') +
       ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
-      isChecked(getValue('keepLogs')) + '>&nbsp;&nbsp;' +
+      isValueChecked('keepLogs') + '>&nbsp;&nbsp;' +
       '<input type="button" class="custombutton" value="Show Logs" ' +
       'id="Helper:ShowLogs"></td></tr>';
   }
@@ -14899,7 +14934,7 @@
         'This will show an icon below the world map to allow you to ' +
         'quickly send gold to a Friend.') +
       ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
-      isChecked(getValue('sendGoldonWorld')) + '>' +
+      isValueChecked('sendGoldonWorld') + '>' +
       '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
       getValue('goldAmount') + '"> ' +
       'gold to <input name="goldRecipient" size="10" value="' +
@@ -14967,6 +15002,27 @@
       '"></td></tr>';
   }
 
+  function huntingBuffsLists() {
+    return huntingBuffsList(
+      calf.buffsName, 'huntingBuffsName', 'huntingBuffs', calf.buffs
+    ) + huntingBuffsList(
+      calf.buffs2Name, 'huntingBuffs2Name', 'huntingBuffs2', calf.buffs2
+    ) + huntingBuffsList(
+      calf.buffs3Name, 'huntingBuffs3Name', 'huntingBuffs3', calf.buffs3
+    );
+  }
+
+  function joinFuncs() {
+    return [
+      combatEvalBias(),
+      keepCreatureLog(),
+      showSendGold(),
+      theDoNotKillList(),
+      huntingBuffs(),
+      huntingBuffsLists()
+    ].join('');
+  }
+
   function prefs() {
     // World Screen
     return '<tr><th colspan="2"><b>' +
@@ -14981,18 +15037,7 @@
         'showCreatureInfo'
       ]) +
 
-      combatEvalBias() +
-      keepCreatureLog() +
-      showSendGold() +
-      theDoNotKillList() +
-      huntingBuffs() +
-
-      huntingBuffsList(calf.buffsName, 'huntingBuffsName', 'huntingBuffs',
-        calf.buffs) +
-      huntingBuffsList(calf.buffs2Name, 'huntingBuffs2Name', 'huntingBuffs2',
-        calf.buffs2) +
-      huntingBuffsList(calf.buffs3Name, 'huntingBuffs3Name', 'huntingBuffs3',
-        calf.buffs3) +
+      joinFuncs() +
 
       simpleCheckbox('huntingMode');
   }
@@ -15012,7 +15057,7 @@
           'link to expand the compressed section.') +
         ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
         'value="on"' +
-        isChecked(getValue('enableBioCompressor')) +
+        isValueChecked('enableBioCompressor') +
         '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
         'value="' + getValue('maxCompressedCharacters') + '" />' +
         ' Max Lines:<input name="maxCompressedLines" size="3" value="' +
@@ -15045,7 +15090,7 @@
           '(separated by commas). This works on Quest Manager and Quest Book.') +
         ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
         'value="on"' +
-        isChecked(getValue('hideQuests')) + '>' +
+        isValueChecked('hideQuests') + '>' +
         '&nbsp;<input name="hideQuestNames" size="60" value="' +
         getValue('hideQuestNames') + '"></td></tr>' +
 
@@ -16450,6 +16495,10 @@
     $.subscribe(def_playerLevel, levelStats);
   }
 
+  function badData$1(data) {
+    return !data || !data.response || !data.response.data;
+  }
+
   var atkStats = '<table class="relicT relicS"><thead>' +
     '<tr><th colspan="2">Adjusted defense values</th></tr></thead><tbody>' +
     '<tr><td>DC225:</td><td id="DC225">0</td></tr>' +
@@ -17053,6 +17102,7 @@
   }
 
   function viewRelic(e, data) {
+    if (badData$1(data)) {return;}
     relicData = data.response.data;
     if (relicData.defenders.length > 0) {
       primaryElementsSetup(relicData);
@@ -17202,12 +17252,9 @@
 
   function formatOffset(secs) {
     var aDate = new Date(now + secs * 1000);
-    var yyyy = aDate.getFullYear();
-    var dd = padZ(aDate.getDate());
-    var month = months[aDate.getMonth()];
-    var hh = padZ(aDate.getHours());
-    var mm = padZ(aDate.getMinutes());
-    return hh + ':' + mm + ' ' + dd + '/' + month + '/' + yyyy;
+    return padZ(aDate.getHours()) + ':' + padZ(aDate.getMinutes()) + ' ' +
+      padZ(aDate.getDate()) + '/' + months[aDate.getMonth()] + '/' +
+      aDate.getFullYear();
   }
 
   function getCooldownHtml(cooldown) {
@@ -17219,16 +17266,27 @@
       '</span>';
   }
 
+  function currentPctText(ourTitan) {
+    return roundToString(
+      getKillsPct(ourTitan.max_hp - ourTitan.current_hp, ourTitan.kills), 2
+    );
+  }
+
+  function totalPctText(ourTitan) {
+    return roundToString(ourTitan.kills * 100 / ourTitan.max_hp, 2);
+  }
+
+  function statusTextHtml(ourTitan) {
+    return getTitanString(ourTitan.kills, ourTitan.max_hp, ourTitan.current_hp);
+  }
+
   function doTopLabels(ourTitan) {
     currentHp.textContent = ourTitan.current_hp.toString();
     maxHp.textContent = ourTitan.max_hp.toString();
     guildKills.textContent = ourTitan.kills.toString();
-    currentPct.textContent = roundToString(getKillsPct(ourTitan.max_hp -
-      ourTitan.current_hp, ourTitan.kills), 2);
-    totalPct.textContent = roundToString(ourTitan.kills * 100 / ourTitan.max_hp,
-      2);
-    statusText.innerHTML = getTitanString(ourTitan.kills, ourTitan.max_hp,
-      ourTitan.current_hp);
+    currentPct.textContent = currentPctText(ourTitan);
+    totalPct.textContent = totalPctText(ourTitan);
+    statusText.innerHTML = statusTextHtml(ourTitan);
     cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
   }
 
@@ -17647,10 +17705,6 @@
     getForage('fsh_monsterLog').done(function(data) {
       monsterLog = data || {};
     });
-  }
-
-  function badData$1(data) {
-    return !data || !data.response || !data.response.data;
   }
 
   function processMonster(data) {
@@ -19615,12 +19669,25 @@
         '>Buff</a></span>';
   }
 
-  function getAttackPart(playerName) { // Legacy
-    if (calf.addAttackLinkToLog) {
-      return ' | <a href="index.php?cmd=attackplayer&target_username=' +
-        playerName + '">Attack</a>';
+  function makeFirstPart(messageHTML) {
+    return messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
+  }
+
+  function makeMsgReplyTo(playerName, firstPart) {
+    var replyTo = '';
+    if (calf.enableChatParsing) {
+      replyTo = removeHTML(firstPart.replace(/&nbsp;/g, ' ')).substr(0, 140);
     }
-    return '';
+    return '[ <span style="cursor:pointer;text-' +
+    'decoration:underline"class="a-reply" target_player="' + playerName +
+    '" replyTo="' + replyTo + '...">Reply</span>';
+  }
+
+  function makeExtraPart(playerName) {
+    return ' | <a href="index.php?cmd=trade&target_player=' +
+    playerName + '">Trade</a> | <a title="Secure Trade" ' +
+    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+    playerName + '">ST</a>';
   }
 
   function getThirdPart(messageHTML) { // Legacy
@@ -19638,30 +19705,36 @@
     return '';
   }
 
+  function getAttackPart(playerName) { // Legacy
+    if (calf.addAttackLinkToLog) {
+      return ' | <a href="index.php?cmd=attackplayer&target_username=' +
+        playerName + '">Attack</a>';
+    }
+    return '';
+  }
+
+  function makeFourthPart(messageHTML) {
+    return messageHTML.substring(messageHTML
+      .indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
+  }
+
+  function makeLastPart(messageHTML) {
+    return messageHTML.substring(messageHTML.indexOf('</small>'),
+      messageHTML.length);
+  }
+
+  function messageExtras(aRow, playerName) {
+    var messageHTML = aRow.cells[2].innerHTML;
+    var firstPart = makeFirstPart(messageHTML);
+    aRow.cells[2].innerHTML = firstPart + '<nobr>' +
+      makeMsgReplyTo(playerName, firstPart) + makeExtraPart(playerName) +
+      getThirdPart(messageHTML) + getAttackPart(playerName) +
+      makeFourthPart(messageHTML) + '</nobr>' + makeLastPart(messageHTML);
+  }
+
   function isChat(aRow, isGuildMate, playerName) { // Legacy
     reportIgnore(aRow, isGuildMate, playerName);
-    var messageHTML = aRow.cells[2].innerHTML;
-    var firstPart = messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
-    var thirdPart = getThirdPart(messageHTML);
-    var fourthPart = messageHTML.substring(messageHTML
-      .indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
-    var lastPart = messageHTML.substring(messageHTML.indexOf('</small>'),
-      messageHTML.length);
-    var extraPart = ' | <a href="index.php?cmd=trade&target_player=' +
-      playerName + '">Trade</a> | <a title="Secure Trade" ' +
-      'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
-      playerName + '">ST</a>';
-    var attackPart = getAttackPart(playerName);
-    var replyTo = '';
-    if (calf.enableChatParsing) {
-      replyTo = removeHTML(firstPart.replace(/&nbsp;/g, ' ')).substr(0, 140);
-    }
-    var msgReplyTo = '[ <span style="cursor:pointer;text-' +
-      'decoration:underline"class="a-reply" target_player="' + playerName +
-      '" replyTo="' + replyTo + '...">Reply</span>';
-    aRow.cells[2].innerHTML = firstPart + '<nobr>' + msgReplyTo +
-      extraPart + thirdPart + attackPart + fourthPart +
-      '</nobr>' + lastPart;
+    messageExtras(aRow, playerName);
   }
 
   function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
@@ -20574,7 +20647,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '64';
+  window.FSH.calf = '65';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
