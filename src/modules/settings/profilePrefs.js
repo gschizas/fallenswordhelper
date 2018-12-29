@@ -1,7 +1,7 @@
 import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
 import {helpLink} from './simpleCheckbox';
-import isChecked from '../system/isChecked';
+import isValueChecked from './isValueChecked';
 
 export default function profilePrefs() {
   // profile prefs
@@ -18,7 +18,7 @@ export default function profilePrefs() {
         'link to expand the compressed section.') +
       ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
       'value="on"' +
-      isChecked(getValue('enableBioCompressor')) +
+      isValueChecked('enableBioCompressor') +
       '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
       'value="' + getValue('maxCompressedCharacters') + '" />' +
       ' Max Lines:<input name="maxCompressedLines" size="3" value="' +

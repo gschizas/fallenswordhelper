@@ -3,6 +3,7 @@ import calf from '../support/calf';
 import getValue from '../system/getValue';
 import isChecked from '../system/isChecked';
 import isSelected from '../system/isSelected';
+import isValueChecked from './isValueChecked';
 import {
   helpLink,
   justCheckbox,
@@ -17,19 +18,19 @@ function worldGroup() {
       'Enabling this option will hide the Create Group button') +
     ':</td><td>' +
     '<input name="hideChampionsGroup" type="checkbox" value="on"' +
-      isChecked(getValue('hideChampionsGroup')) + '>' +
+      isValueChecked('hideChampionsGroup') + '>' +
     '&nbsp;Champions&nbsp;&nbsp;' +
     '<input name="hideElitesGroup" type="checkbox" value="on"' +
-      isChecked(getValue('hideElitesGroup')) + '>' +
+      isValueChecked('hideElitesGroup') + '>' +
     '&nbsp;Elites&nbsp;&nbsp;' +
     '<input name="hideSEGroup" type="checkbox" value="on"' +
-      isChecked(getValue('hideSEGroup')) + '>' +
+      isValueChecked('hideSEGroup') + '>' +
     '&nbsp;Super Elite&nbsp;&nbsp;' +
     '<input name="hideTitanGroup" type="checkbox" value="on"' +
-      isChecked(getValue('hideTitanGroup')) + '>' +
+      isValueChecked('hideTitanGroup') + '>' +
     '&nbsp;Titan&nbsp;&nbsp;' +
     '<input name="hideLegendaryGroup" type="checkbox" value="on"' +
-      isChecked(getValue('hideLegendaryGroup')) + '>' +
+      isValueChecked('hideLegendaryGroup') + '>' +
     '&nbsp;Legendary' +
     '</td></tr>';
 }
@@ -40,7 +41,7 @@ function keepCombatLogs() {
       'Save combat logs to a temporary variable. ' +
       'Press <u>Show logs</u> on the right to display and copy them') +
     ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
-    isChecked(getValue('keepLogs')) + '>&nbsp;&nbsp;' +
+    isValueChecked('keepLogs') + '>&nbsp;&nbsp;' +
     '<input type="button" class="custombutton" value="Show Logs" ' +
     'id="Helper:ShowLogs"></td></tr>';
 }
@@ -83,7 +84,7 @@ function showSendGold() {
       'This will show an icon below the world map to allow you to ' +
       'quickly send gold to a Friend.') +
     ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
-    isChecked(getValue('sendGoldonWorld')) + '>' +
+    isValueChecked('sendGoldonWorld') + '>' +
     '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
     getValue('goldAmount') + '"> ' +
     'gold to <input name="goldRecipient" size="10" value="' +
@@ -151,6 +152,27 @@ function huntingBuffsList(modeLabel, modeName, buffsName, buffs) {
     '"></td></tr>';
 }
 
+function huntingBuffsLists() {
+  return huntingBuffsList(
+    calf.buffsName, 'huntingBuffsName', 'huntingBuffs', calf.buffs
+  ) + huntingBuffsList(
+    calf.buffs2Name, 'huntingBuffs2Name', 'huntingBuffs2', calf.buffs2
+  ) + huntingBuffsList(
+    calf.buffs3Name, 'huntingBuffs3Name', 'huntingBuffs3', calf.buffs3
+  );
+}
+
+function joinFuncs() {
+  return [
+    combatEvalBias(),
+    keepCreatureLog(),
+    showSendGold(),
+    theDoNotKillList(),
+    huntingBuffs(),
+    huntingBuffsLists()
+  ].join('');
+}
+
 export function prefs() {
   // World Screen
   return '<tr><th colspan="2"><b>' +
@@ -165,18 +187,7 @@ export function prefs() {
       'showCreatureInfo'
     ]) +
 
-    combatEvalBias() +
-    keepCreatureLog() +
-    showSendGold() +
-    theDoNotKillList() +
-    huntingBuffs() +
-
-    huntingBuffsList(calf.buffsName, 'huntingBuffsName', 'huntingBuffs',
-      calf.buffs) +
-    huntingBuffsList(calf.buffs2Name, 'huntingBuffs2Name', 'huntingBuffs2',
-      calf.buffs2) +
-    huntingBuffsList(calf.buffs3Name, 'huntingBuffs3Name', 'huntingBuffs3',
-      calf.buffs3) +
+    joinFuncs() +
 
     simpleCheckbox('huntingMode');
 }

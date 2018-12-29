@@ -1,7 +1,7 @@
 import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
 import {helpLink} from './simpleCheckbox';
-import isChecked from '../system/isChecked';
+import isValueChecked from './isValueChecked';
 
 function injectSettingsGuildData(guildType) {
   var title = '';
@@ -23,12 +23,9 @@ function injectSettingsGuildData(guildType) {
     '</div>';
 }
 
-export default function guildPrefs() {
-  // Guild Manage
-  return '<tr><th colspan="2"><b>Guild>Manage preferences' +
-      '</b></th></tr>' +
-    '<tr><td colspan="2">Enter guild names, ' +
-      'separated by commas</td></tr>' +
+function guildNames() {
+  return '<tr><td colspan="2">' +
+      'Enter guild names, separated by commas</td></tr>' +
     '<tr><td class="fshRight">Own Guild</td><td>' +
       injectSettingsGuildData('Self') + '</td></tr>' +
     '<tr><td class="fshRight">Friendly Guilds</td><td>' +
@@ -36,20 +33,29 @@ export default function guildPrefs() {
     '<tr><td class="fshRight">Old Guilds</td><td>' +
       injectSettingsGuildData('Past') + '</td></tr>' +
     '<tr><td class="fshRight">Enemy Guilds</td><td>' +
-      injectSettingsGuildData('Enmy') + '</td></tr>' +
+      injectSettingsGuildData('Enmy') + '</td></tr>';
+}
 
-    '<tr><td class="fshRight">Highlight Valid PvP Targets' +
-      helpLink('Highlight Valid PvP Targets',
-        'Enabling this option will highlight targets in OTHER guilds that ' +
-        'are within your level range to attack for PvP or GvG.') +
-      ':</td><td>PvP: <input name="highlightPlayersNearMyLvl" ' +
-      'type="checkbox" value="on"' +
-      isChecked(getValue('highlightPlayersNearMyLvl')) +
-      '> GvG: <input name="highlightGvGPlayersNearMyLvl" ' +
-      'type="checkbox" value="on"' +
-      isChecked(getValue('highlightGvGPlayersNearMyLvl')) +
-      '></td></tr>' +
+function pvpTargets() {
+  return '<tr><td class="fshRight">Highlight Valid PvP Targets' +
+    helpLink('Highlight Valid PvP Targets',
+      'Enabling this option will highlight targets in OTHER guilds that ' +
+      'are within your level range to attack for PvP or GvG.') +
+    ':</td><td>PvP: <input name="highlightPlayersNearMyLvl" ' +
+    'type="checkbox" value="on"' +
+    isValueChecked('highlightPlayersNearMyLvl') +
+    '> GvG: <input name="highlightGvGPlayersNearMyLvl" ' +
+    'type="checkbox" value="on"' +
+    isValueChecked('highlightGvGPlayersNearMyLvl') +
+    '></td></tr>';
+}
 
+export default function guildPrefs() {
+  // Guild Manage
+  return '<tr><th colspan="2"><b>Guild>Manage preferences' +
+      '</b></th></tr>' +
+    guildNames() +
+    pvpTargets() +
     bunchOfSimple([
       'showAdmin',
       'ajaxifyRankControls',
