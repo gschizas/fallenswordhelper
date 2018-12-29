@@ -50,27 +50,32 @@ function getImg(recipe) {
   return '';
 }
 
+function hidden(recipe) {
+  return !hideRecipes.includes(recipe.name);
+}
+
+function makeRow(recipe) {
+  return '<tr class="rmTr">' +
+      '<td class="rmTd">' +
+        '<a href="' + recipe.link + '">' +
+          '<img src="' + recipe.img + '" height="30px" width="30px">' +
+        '</a>' +
+      '</td>' +
+      '<td class="rmTd">' +
+        '<a href="' + recipe.link + '">' + recipe.name + '</a>' +
+      '</td>' +
+      '<td class="rmTd">' + getRecipeItems(recipe) + '</td>' +
+      '<td class="rmTd">' + getComponents(recipe) + '</td>' +
+      '<td class="rmTd">' + getImg(recipe) + '</td>' +
+    '</tr>';
+}
+
 function drawRecipeTable(output, recipebook) { // Legacy
   currentPlayerId = playerId();
-  var i;
   var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
     '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
     '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
-  var recipe;
-  for (i = 0; i < recipebook.recipe.length; i += 1) {
-    recipe = recipebook.recipe[i];
-    if (hideRecipes.indexOf(recipe.name) !== -1) {continue;}
-    result += '<tr class="rmTr"><td class="rmTd"><a href="' + recipe.link +
-      '"><img src="' + recipe.img +
-      '" height="30px" width="30px"></a></td><td class="rmTd"><a href="' +
-      recipe.link + '">' + recipe.name + '</a></td><td class="rmTd">';
-    result += getRecipeItems(recipe);
-    result += '</td><td class="rmTd">';
-    result += getComponents(recipe);
-    result += '</td><td class="rmTd">';
-    result += getImg(recipe);
-    result += '</td></tr>';
-  }
+  result += recipebook.recipe.filter(hidden).map(makeRow).join('');
   result += '</table>';
   output.innerHTML = result;
   recipebook.lastUpdate = new Date();

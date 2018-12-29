@@ -22,6 +22,7 @@ function makeTrackerTable(theTitans) {
   });
   insertElement(trackerTable, tBody);
   Object.keys(theTitans).forEach(partial(addRow, theTitans, tBody));
+  return trackerTable;
 }
 
 export default function displayTracker(parentTable, theTitans) {

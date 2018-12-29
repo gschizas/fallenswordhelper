@@ -38,6 +38,7 @@ export var arenaFilter =
   '&nbsp;Max lvl:&nbsp;<input id="fshMaxLvl" size="5">&nbsp;&nbsp;' +
   '<input id="fshReset" class="custombutton" type="button" ' +
   'value="Reset"></span></td></tr></tbody></table>';
+export var fshArenaKey = 'fsh_arena';
 
 export function dontPost(e) { // jQuery
   e.preventDefault();

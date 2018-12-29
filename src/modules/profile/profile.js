@@ -38,6 +38,25 @@ function ifSelf(self) {
   }
 }
 
+function guildRelationship(avyImg, playername, self) {
+  // Must be before profileInjectQuickButton
+  profileInjectGuildRel(self);
+  // It sets up guildId and currentGuildRelationship
+  var playerid = fallback(getUrlParameter('player_id'), playerId());
+  profileInjectQuickButton(avyImg, playerid, playername);
+}
+
+function updateDom(avyImg, playername, self) {
+  ifSelf(self);
+  guildRelationship(avyImg, playername, self);
+  updateNmv();
+  updateStatistics();
+  highlightPvpProtection();
+  profileRenderBio(self);
+  addStatTotalToMouseover();
+  add(3, colouredDots);
+}
+
 export default function injectProfile() { // Legacy
   if (jQueryNotPresent()) {return;}
   var avyImg = document
@@ -45,16 +64,5 @@ export default function injectProfile() { // Legacy
   if (!avyImg) {return;}
   var playername = pCC.getElementsByTagName('h1')[0].textContent;
   var self = playername === playerName();
-  ifSelf(self);
-  // Must be before profileInjectQuickButton
-  profileInjectGuildRel(self);
-  // It sets up guildId and currentGuildRelationship
-  var playerid = fallback(getUrlParameter('player_id'), playerId());
-  profileInjectQuickButton(avyImg, playerid, playername);
-  updateNmv();
-  updateStatistics();
-  highlightPvpProtection();
-  profileRenderBio(self);
-  addStatTotalToMouseover();
-  add(3, colouredDots);
+  updateDom(avyImg, playername, self);
 }

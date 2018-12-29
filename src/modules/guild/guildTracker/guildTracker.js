@@ -135,17 +135,29 @@ function openDialog() {
   makePopup();
 }
 
+function makeCellOne(gs, newTr) {
+  var cellOne = newTr.insertCell(-1);
+  insertElement(cellOne, gs);
+}
+
+function makeCellTwo(newTr) {
+  var cellTwo = newTr.insertCell(-1);
+  cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
+    '&nbsp;<label class="custombutton" for="tracker">Show</label>';
+}
+
+function makeNewTr(gs) {
+  var newTr = createTr();
+  makeCellOne(gs, newTr);
+  makeCellTwo(newTr);
+  on(newTr, 'change', togglePref);
+  return newTr;
+}
+
 function injectShowTracker() {
   var gs = document.querySelector('#pCC img.guild_openGuildStore');
   var oldTr = gs.parentNode.parentNode;
-  var newTr = createTr();
-  var cellOne = newTr.insertCell(-1);
-  var cellTwo = newTr.insertCell(-1);
-  insertElement(cellOne, gs);
-  cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
-    '&nbsp;<label class="custombutton" for="tracker">Show</label>';
-  on(newTr, 'change', togglePref);
-  oldTr.parentNode.replaceChild(newTr, oldTr);
+  oldTr.parentNode.replaceChild(makeNewTr(gs), oldTr);
 }
 
 function injectTracker() {

@@ -9,22 +9,24 @@ function colourNewRow(row, id) { // jQuery
   }
 }
 
-function checkTournamentId(row, cell) { // jQuery
-  var matches = /#\s(\d+)/.exec(cell.text());
+function checkTournamentId(row, theCells) { // jQuery
+  var matches = /#\s(\d+)/.exec(theCells.eq(0).text());
   if ([matches, opts, opts.id].every(isObject)) {
     opts.id[matches[1]] = matches[1];
     colourNewRow(row, matches[1]);
   }
 }
 
-function players(cell) { // jQuery
+function players(theCells) { // jQuery
+  var cell = theCells.eq(1);
   var matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
   if (matches) {
     cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
   }
 }
 
-function joinCost(cell) {
+function joinCost(theCells) {
+  var cell = theCells.eq(2);
   cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
 }
 
@@ -53,13 +55,15 @@ function optsHazMoves(cell, row) { // jQuery
   }
 }
 
-function maxMoves(cell, row) { // jQuery
+function maxMoves(theCells, row) { // jQuery
+  var cell = theCells.eq(8);
   if (opts && opts.moves) {
     optsHazMoves(cell, row);
   }
 }
 
-function reward(cell) { // jQuery
+function reward(theCells) { // jQuery
+  var cell = theCells.eq(8);
   if (cell.children('table').length !== 1) {return;}
   cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
 }
@@ -67,12 +71,12 @@ function reward(cell) { // jQuery
 function _orderData(i, e) { // jQuery
   var row = $(e);
   var theCells = row.children();
-  checkTournamentId(row, theCells.eq(0));
-  players(theCells.eq(1));
-  joinCost(theCells.eq(2));
+  checkTournamentId(row, theCells);
+  players(theCells);
+  joinCost(theCells);
   theBools(theCells);
-  maxMoves(theCells.eq(8), row);
-  reward(theCells.eq(8));
+  maxMoves(theCells, row);
+  reward(theCells);
 }
 
 export default function orderData(theTables) {

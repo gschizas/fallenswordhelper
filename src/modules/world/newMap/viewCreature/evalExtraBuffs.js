@@ -17,6 +17,22 @@ function evalHolyFlame(combat) {
   }
 }
 
+function calcDdBonus(combat) {
+  combat.deathDealerBonusDamage =
+    Math.floor(combat.player.damageValue * (Math.min(Math.floor(
+      combat.player.killStreakValue / 5) * 0.01 *
+      combat.player.deathDealerLevel, 20) / 100));
+}
+
+function calcCaBonus(combat) {
+  combat.counterAttackBonusAttack =
+    Math.floor(combat.player.attackValue * 0.0025 *
+    combat.player.counterAttackLevel);
+  combat.counterAttackBonusDamage =
+    Math.floor(combat.player.damageValue * 0.0025 *
+    combat.player.counterAttackLevel);
+}
+
 function evalExtraStam(combat) {
   combat.extraStaminaPerHit = 0;
   if (combat.player.counterAttackLevel > 0) {
@@ -51,16 +67,8 @@ export default function evalExtraBuffs(combat) {
   // armor of the creature has been taken off.
   evalHolyFlame(combat);
   // Death Dealer and Counter Attack both applied at the same time
-  combat.deathDealerBonusDamage =
-    Math.floor(combat.player.damageValue * (Math.min(Math.floor(
-      combat.player.killStreakValue / 5) * 0.01 *
-      combat.player.deathDealerLevel, 20) / 100));
-  combat.counterAttackBonusAttack =
-    Math.floor(combat.player.attackValue * 0.0025 *
-    combat.player.counterAttackLevel);
-  combat.counterAttackBonusDamage =
-    Math.floor(combat.player.damageValue * 0.0025 *
-    combat.player.counterAttackLevel);
+  calcDdBonus(combat);
+  calcCaBonus(combat);
   evalExtraStam(combat);
   evalDeathDealer(combat);
   evalCounterAttack(combat);

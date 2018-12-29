@@ -35,23 +35,26 @@ function findPlayers(aRow) { // Legacy
   }
 }
 
-function likeInvite(aRow, hasInvited) { // Legacy
-  var message = aRow.cells[2].innerHTML;
-  var firstQuote = message.indexOf('\'');
-  var firstPart = '';
-  firstPart = message.substring(0, firstQuote);
-  var secondQuote = message.indexOf('\'', firstQuote + 1);
-  var targetPlayerName = message.substring(firstQuote + 1, secondQuote);
-  aRow.cells[2].innerHTML = firstPart + '\'' +
-    '<a href="index.php?cmd=findplayer&search_active=1&' +
-    'search_level_max=&search_level_min=&search_username=' +
-    targetPlayerName + '&search_show_first=1">' + targetPlayerName +
-    '</a>' + message.substring(secondQuote, message.length);
-  if (!hasInvited &&
-    targetPlayerName !== playerName()) {
+function dimIfNotMe(aRow, hasInvited, targetPlayerName) {
+  if (!hasInvited && targetPlayerName !== playerName()) {
     $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
     aRow.style.color = 'gray';
   }
+}
+
+function searchPlayerHref(targetPlayerName) {
+  return '<a href="index.php?cmd=findplayer&search_active=1&' +
+    'search_level_max=&search_level_min=&search_username=' +
+    targetPlayerName + '&search_show_first=1">' + targetPlayerName + '</a>';
+}
+
+function likeInvite(aRow, hasInvited) {
+  var message = aRow.cells[2].innerHTML;
+  var parts = message.split('\'');
+  var targetPlayerName = parts[1];
+  parts[1] = searchPlayerHref(targetPlayerName);
+  aRow.cells[2].innerHTML = parts.join('\'');
+  dimIfNotMe(aRow, hasInvited, targetPlayerName);
 }
 
 function guildInvite(aRow) { // Legacy
