@@ -5447,6 +5447,10 @@
     insertHtmlBeforeEnd(staminaMouseover, maxStamAt(nextGain, stamVals));
   }
 
+  function hideQTip(el) {
+    $(el).qtip('hide');
+  }
+
   var havePrayedMsg =
     '<span class="notification-icon"></span><p class="notification-content">' +
     'You are currently praying at the temple.</p>';
@@ -5482,7 +5486,7 @@
     if (!myGod) {return;}
     retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
       .done(havePrayed);
-    $(e.target).qtip('hide');
+    hideQTip(e.target);
   }
 
   function displayDisconnectedFromGodsMessage() {
@@ -5975,26 +5979,36 @@
   var wantedArray;
   var bountyUrl = 'index.php?no_mobile=1&cmd=bounty&page=';
 
+  function hasActiveBounties(activeTable) {
+    return !/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML);
+  }
+
+  function bountyData(theCells) {
+    var targetData = theCells[0].firstChild.firstChild;
+    return {
+      target: targetData.firstChild.textContent,
+      link: targetData.href,
+      lvl: targetData.nextSibling.textContent.replace(/[[|\]]/, ''),
+      reward: theCells[2].textContent,
+      rewardType: theCells[2].firstChild.firstChild.firstChild.firstChild
+        .nextSibling.firstChild.title,
+      posted: theCells[3].textContent,
+      xpLoss: theCells[4].textContent,
+      progress: theCells[5].textContent
+    };
+  }
+
+  function getAllBounties(activeTable) {
+    for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
+      var theCells = activeTable.rows[i].cells;
+      var thisBounty = bountyData(theCells);
+      bountyList.bounty.push(thisBounty);
+    }
+  }
+
   function parseActiveBounty(activeTable) { // Legacy
-    if (!/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML)) {
-      for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
-        var theCells = activeTable.rows[i].cells;
-        var thisBounty = {};
-        thisBounty.target = theCells[0].firstChild
-          .firstChild.firstChild.textContent;
-        thisBounty.link = theCells[0].firstChild.firstChild.href;
-        thisBounty.lvl = theCells[0].firstChild
-          .firstChild.nextSibling.textContent
-          .replace(/\[/, '').replace(/\]/, '');
-        thisBounty.reward = theCells[2].textContent;
-        thisBounty.rewardType = theCells[2]
-          .firstChild.firstChild.firstChild.firstChild
-          .nextSibling.firstChild.title;
-        thisBounty.posted = theCells[3].textContent;
-        thisBounty.xpLoss = theCells[4].textContent;
-        thisBounty.progress = theCells[5].textContent;
-        bountyList.bounty.push(thisBounty);
-      }
+    if (hasActiveBounties(activeTable)) {
+      getAllBounties(activeTable);
     }
   }
 
@@ -8040,18 +8054,17 @@
     myRows.each(_orderData);
   }
 
-  function testIsNotDesc(test) {
-    return test && test[1] === '_desc';
-  }
+  var sortClasses = 'td.sorting, td.sorting_asc, td.sorting_desc';
 
-  function sortHandler(evt) { // jQuery
-    var self = $(evt.target).closest('td');
-    var table = self.closest('table').DataTable();
-    var myCol = self.index();
+  function calculateSortOrder(self) {
     var classes = self.attr('class');
     var test = /sorting([^\s]+)/.exec(classes);
-    var sortOrder = 'desc';
-    if (testIsNotDesc(test)) {sortOrder = 'asc';}
+    if (test && test[1] === '_desc') {return 'asc';}
+    return 'desc';
+  }
+
+  function sortDataTable(self, myCol, sortOrder) {
+    var table = self.closest('table').DataTable();
     if (myCol !== 3) {
       table.order([3, 'asc'], [myCol, sortOrder]).draw();
     } else {
@@ -8059,9 +8072,15 @@
     }
   }
 
+  function sortHandler(evt) { // jQuery
+    var self = $(evt.target).closest('td');
+    var sortOrder = calculateSortOrder(self);
+    sortDataTable(self, self.index(), sortOrder);
+  }
+
   function redoSort(tabs) {
-    $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
-    tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
+    $(sortClasses, tabs).off('click');
+    tabs.on('click', sortClasses, sortHandler);
   }
 
   var theTables;
@@ -9298,16 +9317,24 @@
     }
   }
 
-  function gotConflictInfo(responseText, callback) { // Legacy
+  function getMaxPage$1(page) {
+    return Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
+  }
+
+  function getNextPage(curPage, fn, callback) {
+    retryAjax(ajaxUrl + 'page=' + (curPage + 1).toString())
+      .done(partial(fn, callback));
+  }
+
+  function gotConflictInfo(callback, responseText) { // Legacy
     var doc = createDocument(responseText);
     var page = doc.querySelector('#pCC input[name="page"]');
     if (!page) {return;}
     var curPage = Number(page.value);
-    var maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
+    var maxPage = getMaxPage$1(page);
     activeConflicts(doc, curPage, callback.node);
     if (maxPage > curPage) {
-      retryAjax(ajaxUrl + 'page=' + (curPage + 1).toString())
-        .done(function(html) {gotConflictInfo(html, callback);});
+      getNextPage(curPage, gotConflictInfo, callback);
     }
   }
 
@@ -9315,8 +9342,7 @@
     var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
       .firstChild.nextSibling;
     if (statCtrl) {
-      retryAjax(ajaxUrl)
-        .done(function(data) {gotConflictInfo(data, {node: statCtrl});});
+      retryAjax(ajaxUrl).done(partial(gotConflictInfo, {node: statCtrl}));
     }
   }
 
@@ -9741,23 +9767,39 @@
       '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
   }
 
-  function guildWidgets(xpLock) {
-    add(3, colouredDots);
-    add(3, removeGuildAvyImgBorder);
-    add(3, guildXPLock, [xpLock]);
-    var leftHandSideColumnTable = pCC
-      .lastElementChild.rows[2].cells[0].firstElementChild;
-    add(3, logoToggle, [leftHandSideColumnTable]);
-    add(3, statToggle, [leftHandSideColumnTable]);
-    add(3, structureToggle, [leftHandSideColumnTable]);
-    add(3, buffLinks$1);
-    add(3, selfRecallLink, [leftHandSideColumnTable]);
+  function getLhsColTab() {
+    return pCC.lastElementChild.rows[2].cells[0].children[0];
+  }
+
+  function lhsAdditions(leftHandSideColumnTable) {
+    [
+      logoToggle,
+      statToggle,
+      structureToggle,
+      selfRecallLink
+    ].forEach(function(fn) {add(3, fn, [leftHandSideColumnTable]);});
+  }
+
+  function ajaxStuff(leftHandSideColumnTable) {
     if (jQueryNotPresent()) {return;}
     // Detailed conflict information
     if (getValue('detailedConflictInfo')) {
       add(3, conflictInfo, [leftHandSideColumnTable]);
     }
     add(4, guildTracker);
+  }
+
+  function guildWidgets(xpLock) {
+    add(3, colouredDots);
+    add(3, removeGuildAvyImgBorder);
+    add(3, guildXPLock, [xpLock]);
+
+    var leftHandSideColumnTable = getLhsColTab();
+    lhsAdditions(leftHandSideColumnTable);
+
+    add(3, buffLinks$1);
+
+    ajaxStuff(leftHandSideColumnTable);
   }
 
   function injectGuild() {
@@ -10698,7 +10740,7 @@
   function removeClass(self) {
     self.closest('tr')
       .find('.takeItem, .recallItem, .wearItem, .dropItem, .sendItem, .storeItem')
-      .removeClass().qtip('hide');
+      .removeClass();
   }
 
   function killRow(self, data) { // jQuery
@@ -10720,6 +10762,7 @@
   }
 
   function doAction$1(fn, self) { // jQuery
+    hideQTip(self);
     removeClass(self);
     fn().done(partial(killRow, self));
     anotherSpinner(self);
@@ -12008,17 +12051,25 @@
     return tBody;
   }
 
-  function makeTotalRow(tbl, data) {
+  function makeTotalCell(tbl) {
     var totRow = tbl.insertRow(-1);
     insertHtmlBeforeEnd(totRow, '<td>Total:</td>');
     var totCell = totRow.insertCell(-1);
     totCell.colSpan = 2;
+    return totCell;
+  }
+
+  function makeUsedCount(data) {
     var usedCount = data.r.length;
-    var totalCount = data.h.cm;
     var usedCountDom = createSpan();
     usedCountDom.innerHTML = usedCount.toString();
-    insertElement(totCell, usedCountDom);
-    insertTextBeforeEnd(totCell, ' / ' + totalCount.toString());
+    return usedCountDom;
+  }
+
+  function makeTotalRow(tbl, data) {
+    var totCell = makeTotalCell(tbl);
+    insertElement(totCell, makeUsedCount(data));
+    insertTextBeforeEnd(totCell, ' / ' + data.h.cm.toString());
   }
 
   function makeTallyTable(data) {
@@ -12232,10 +12283,10 @@
     }
   }
 
-  function interceptDebuff(e) { // jQuery
+  function interceptDebuff(e) {
     var aLink = e.target;
     if (aLink.tagName === 'IMG') {
-      $(e.target).qtip('hide');
+      hideQTip(e.target);
       aLink = aLink.parentNode;
     } else if (aLink.tagName !== 'A') {return;}
     e.stopPropagation();
@@ -13009,25 +13060,39 @@
       '/skin/loading.gif" width="15" height="15">';
   }
 
-  function quickAction(self, fn, success, otherClass) { // jQuery.min
-    self.className = 'quickAction';
+  function actionReturn(self, success, data) {
+    if (data.r === 1) {return;}
+    self.style.color = 'green';
+    self.innerHTML = success;
+  }
+
+  function doAction$3(self, fn, success) {
     var itemInvId = self.getAttribute('itemInvId');
-    fn([itemInvId]).done(function(data) {
-      if (data.r === 1) {return;}
-      self.style.color = 'green';
-      self.innerHTML = success;
-    });
-    $(self).qtip('hide');
-    anotherSpinner$1(self);
-    var theTd = self.parentNode;
+    fn([itemInvId]).done(partial(actionReturn, self, success));
+  }
+
+  function disableOtherButton(theTd, otherClass) {
     var otherButton = theTd.querySelector(otherClass);
     if (otherButton) {
       otherButton.className = 'quickAction';
       otherButton.innerHTML = '';
     }
-    var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
+  }
+
+  function disableCheckbox(theTd) {
+    var checkbox = theTd.parentNode.children[0].children[0];
     checkbox.checked = false;
     checkbox.disabled = true;
+  }
+
+  function quickAction(self, fn, success, otherClass) {
+    self.className = 'quickAction';
+    doAction$3(self, fn, success);
+    hideQTip(self);
+    anotherSpinner$1(self);
+    var theTd = self.parentNode;
+    disableOtherButton(theTd, otherClass);
+    disableCheckbox(theTd);
   }
 
   var disableItemColoring;
@@ -13732,19 +13797,23 @@
       'You successfully recalled the item</span>';
   }
 
+  function recallInfObj(evt, mode, href) {
+    return {
+      invId: href.match(/&id=(\d+)/)[1],
+      playerId: href.match(/&player_id=(\d+)/)[1],
+      mode: mode,
+      action: evt.target.getAttribute('action')
+    };
+  }
+
   function recallItem$2(evt) { // jQuery
-    $(evt.target).qtip('hide');
+    hideQTip(evt.target);
     var mode = evt.target.getAttribute('mode');
     var theTd = evt.target.parentNode.parentNode;
     if (mode === '0') {theTd = theTd.parentNode;}
     var href = theTd.firstElementChild.href;
     if (!href) {return;}
-    queueRecallItem({
-      invId: href.match(/&id=(\d+)/)[1],
-      playerId: href.match(/&player_id=(\d+)/)[1],
-      mode: mode,
-      action: evt.target.getAttribute('action')
-    }).done(partial(recalled, theTd));
+    queueRecallItem(recallInfObj(evt, mode, href)).done(partial(recalled, theTd));
     theTd.innerHTML = spinner;
   }
 
@@ -13754,7 +13823,7 @@
   }
 
   function wearItem$1(evt) { // jQuery
-    $(evt.target).qtip('hide');
+    hideQTip(evt.target);
     var theTd = evt.target.parentNode.parentNode.parentNode;
     var href = theTd.firstElementChild.href;
     if (!href) {return;}
@@ -14616,6 +14685,30 @@
       ]);
   }
 
+  function quickSend() {
+    return '<tr><td class="fshRight">Show Quick Send Item' +
+      helpLink('Show Quick Send on Manage Backpack',
+        'This will show a link beside each item which gives the option to ' +
+        'quick send the item to this person') +
+      ':</td><td><input name="showQuickSendLinks" type="checkbox" ' +
+      'value="on"' +
+      isValueChecked('showQuickSendLinks') + '>' +
+      '&nbsp;&nbsp;Send Items To ' +
+      '<input name="itemRecipient" size="10" value="' +
+      getValue('itemRecipient') + '">';
+  }
+
+  function makeSendClasses() {
+    return '<tr><td class="fshRight">Quick Select all of type in Send Screen' +
+      helpLink('Quick Select all of type in Send Screen',
+        'This allows you to customize what quick links you would like ' +
+        'displayed in your send item screen.<br>Use the format ' +
+        '[&quot;name&quot;,&quot;itemid&quot;],[&quot;othername&quot;,' +
+        '&quot;itemid2&quot;].<br>WARNING: NO REFUNDS ON ERROR') +
+      ':</td><td><input name="sendClasses" size="60" value="' +
+      escapeHtml(getValue('sendClasses')) + '">';
+  }
+
   function equipPrefs() {
     // Equipment screen prefs
     return '<tr><th colspan="2"><b>Equipment screen preferences' +
@@ -14626,27 +14719,11 @@
         'disableItemColoring'
       ]) +
 
-      '<tr><td class="fshRight">Show Quick Send Item' +
-        helpLink('Show Quick Send on Manage Backpack',
-          'This will show a link beside each item which gives the option to ' +
-          'quick send the item to this person') +
-        ':</td><td><input name="showQuickSendLinks" type="checkbox" ' +
-        'value="on"' +
-        isValueChecked('showQuickSendLinks') + '>' +
-        '&nbsp;&nbsp;Send Items To ' +
-        '<input name="itemRecipient" size="10" value="' +
-        getValue('itemRecipient') + '">' +
+      quickSend() +
 
       simpleCheckbox('showQuickDropLinks') +
 
-      '<tr><td class="fshRight">Quick Select all of type in Send Screen' +
-        helpLink('Quick Select all of type in Send Screen',
-          'This allows you to customize what quick links you would like ' +
-          'displayed in your send item screen.<br>Use the format ' +
-          '[&quot;name&quot;,&quot;itemid&quot;],[&quot;othername&quot;,' +
-          '&quot;itemid2&quot;].<br>WARNING: NO REFUNDS ON ERROR') +
-        ':</td><td><input name="sendClasses" size="60" value="' +
-        escapeHtml(getValue('sendClasses')) + '">';
+      makeSendClasses();
   }
 
   var topBlock = [
@@ -15505,9 +15582,9 @@
     });
   }
 
-  function getMyVL(e) { // jQuery
+  function getMyVL(e) {
     sendEvent('toprated', 'FindOnlinePlayers');
-    $(e.target).qtip('hide');
+    hideQTip(e.target);
     spinner$1 = createSpan({
       className: 'fshCurveContainer fshTopListSpinner',
       innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
@@ -16360,8 +16437,8 @@
   var soundCheck;
   var huntCheck;
 
-  function doFormGroup(self) { // jQuery.min
-    $(self).qtip('hide');
+  function doFormGroup(self) {
+    hideQTip(self);
     GameData.doAction(12, 401, {}, 0);
   }
 
@@ -18869,11 +18946,11 @@
   }
 
   function hideMapTooltip() {
-    $('#mapTooltip').qtip('hide');
+    hideQTip('#mapTooltip');
   }
 
-  function fixDebuffQTip(e) { // jQuery.min
-    $(e.target).qtip('hide');
+  function fixDebuffQTip(e) {
+    hideQTip(e.target);
   }
 
   function fixDebuff() {
@@ -20723,7 +20800,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '66';
+  window.FSH.calf = '67';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
