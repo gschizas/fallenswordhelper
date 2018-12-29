@@ -3,6 +3,7 @@ import functionPasses from '../common/functionPasses';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
+import hideQTip from '../common/hideQTip';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import isObject from '../common/isObject';
@@ -139,9 +140,9 @@ function findOnlinePlayers() { // jQuery
   });
 }
 
-function getMyVL(e) { // jQuery
+function getMyVL(e) {
   sendEvent('toprated', 'FindOnlinePlayers');
-  $(e.target).qtip('hide');
+  hideQTip(e.target);
   spinner = createSpan({
     className: 'fshCurveContainer fshTopListSpinner',
     innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'

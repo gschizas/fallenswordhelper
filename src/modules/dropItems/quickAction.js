@@ -1,4 +1,6 @@
+import hideQTip from '../common/hideQTip';
 import {imageServer} from '../system/system';
+import partial from '../common/partial';
 
 function anotherSpinner(self) {
   self.innerHTML = '<img class="quickActionSpinner" src="' +
@@ -6,23 +8,37 @@ function anotherSpinner(self) {
     '/skin/loading.gif" width="15" height="15">';
 }
 
-export default function quickAction(self, fn, success, otherClass) { // jQuery.min
-  self.className = 'quickAction';
+function actionReturn(self, success, data) {
+  if (data.r === 1) {return;}
+  self.style.color = 'green';
+  self.innerHTML = success;
+}
+
+function doAction(self, fn, success) {
   var itemInvId = self.getAttribute('itemInvId');
-  fn([itemInvId]).done(function(data) {
-    if (data.r === 1) {return;}
-    self.style.color = 'green';
-    self.innerHTML = success;
-  });
-  $(self).qtip('hide');
-  anotherSpinner(self);
-  var theTd = self.parentNode;
+  fn([itemInvId]).done(partial(actionReturn, self, success));
+}
+
+function disableOtherButton(theTd, otherClass) {
   var otherButton = theTd.querySelector(otherClass);
   if (otherButton) {
     otherButton.className = 'quickAction';
     otherButton.innerHTML = '';
   }
-  var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
+}
+
+function disableCheckbox(theTd) {
+  var checkbox = theTd.parentNode.children[0].children[0];
   checkbox.checked = false;
   checkbox.disabled = true;
+}
+
+export default function quickAction(self, fn, success, otherClass) {
+  self.className = 'quickAction';
+  doAction(self, fn, success);
+  hideQTip(self);
+  anotherSpinner(self);
+  var theTd = self.parentNode;
+  disableOtherButton(theTd, otherClass);
+  disableCheckbox(theTd);
 }

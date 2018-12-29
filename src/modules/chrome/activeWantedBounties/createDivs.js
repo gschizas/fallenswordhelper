@@ -1,7 +1,7 @@
-import calf from '../support/calf';
-import {createDiv} from '../common/cElement';
-import insertElementAfterBegin from '../common/insertElementAfterBegin';
-import {pCR} from '../support/layout';
+import calf from '../../support/calf';
+import {createDiv} from '../../common/cElement';
+import insertElementAfterBegin from '../../common/insertElementAfterBegin';
+import {pCR} from '../../support/layout';
 
 export var bountyListDiv;
 export var wantedListDiv;

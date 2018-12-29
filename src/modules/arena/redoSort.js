@@ -1,15 +1,14 @@
-function testIsNotDesc(test) {
-  return test && test[1] === '_desc';
-}
+var sortClasses = 'td.sorting, td.sorting_asc, td.sorting_desc';
 
-function sortHandler(evt) { // jQuery
-  var self = $(evt.target).closest('td');
-  var table = self.closest('table').DataTable();
-  var myCol = self.index();
+function calculateSortOrder(self) {
   var classes = self.attr('class');
   var test = /sorting([^\s]+)/.exec(classes);
-  var sortOrder = 'desc';
-  if (testIsNotDesc(test)) {sortOrder = 'asc';}
+  if (test && test[1] === '_desc') {return 'asc';}
+  return 'desc';
+}
+
+function sortDataTable(self, myCol, sortOrder) {
+  var table = self.closest('table').DataTable();
   if (myCol !== 3) {
     table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {
@@ -17,7 +16,13 @@ function sortHandler(evt) { // jQuery
   }
 }
 
+function sortHandler(evt) { // jQuery
+  var self = $(evt.target).closest('td');
+  var sortOrder = calculateSortOrder(self);
+  sortDataTable(self, self.index(), sortOrder);
+}
+
 export default function redoSort(tabs) {
-  $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
-  tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
+  $(sortClasses, tabs).off('click');
+  tabs.on('click', sortClasses, sortHandler);
 }

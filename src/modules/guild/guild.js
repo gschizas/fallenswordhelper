@@ -21,23 +21,39 @@ function selfRecallLink(leftHandSideColumnTable) {
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
-function guildWidgets(xpLock) {
-  add(3, colouredDots);
-  add(3, removeGuildAvyImgBorder);
-  add(3, guildXPLock, [xpLock]);
-  var leftHandSideColumnTable = pCC
-    .lastElementChild.rows[2].cells[0].firstElementChild;
-  add(3, logoToggle, [leftHandSideColumnTable]);
-  add(3, statToggle, [leftHandSideColumnTable]);
-  add(3, structureToggle, [leftHandSideColumnTable]);
-  add(3, buffLinks);
-  add(3, selfRecallLink, [leftHandSideColumnTable]);
+function getLhsColTab() {
+  return pCC.lastElementChild.rows[2].cells[0].children[0];
+}
+
+function lhsAdditions(leftHandSideColumnTable) {
+  [
+    logoToggle,
+    statToggle,
+    structureToggle,
+    selfRecallLink
+  ].forEach(function(fn) {add(3, fn, [leftHandSideColumnTable]);});
+}
+
+function ajaxStuff(leftHandSideColumnTable) {
   if (jQueryNotPresent()) {return;}
   // Detailed conflict information
   if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo, [leftHandSideColumnTable]);
   }
   add(4, guildTracker);
+}
+
+function guildWidgets(xpLock) {
+  add(3, colouredDots);
+  add(3, removeGuildAvyImgBorder);
+  add(3, guildXPLock, [xpLock]);
+
+  var leftHandSideColumnTable = getLhsColTab();
+  lhsAdditions(leftHandSideColumnTable);
+
+  add(3, buffLinks);
+
+  ajaxStuff(leftHandSideColumnTable);
 }
 
 export default function injectGuild() {

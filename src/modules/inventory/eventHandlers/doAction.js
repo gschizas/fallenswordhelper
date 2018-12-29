@@ -1,10 +1,11 @@
+import hideQTip from '../../common/hideQTip';
 import {imageServer} from '../../system/system';
 import partial from '../../common/partial';
 
 function removeClass(self) {
   self.closest('tr')
     .find('.takeItem, .recallItem, .wearItem, .dropItem, .sendItem, .storeItem')
-    .removeClass().qtip('hide');
+    .removeClass();
 }
 
 function killRow(self, data) { // jQuery
@@ -26,6 +27,7 @@ function anotherSpinner(self) {
 }
 
 export default function doAction(fn, self) { // jQuery
+  hideQTip(self);
   removeClass(self);
   fn().done(partial(killRow, self));
   anotherSpinner(self);

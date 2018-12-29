@@ -1,9 +1,9 @@
-import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import setValueJSON from '../system/setValueJSON';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import setValueJSON from '../../system/setValueJSON';
 import {wantedList} from './lists';
 import {wantedListDiv} from './createDivs';
-import {createDiv, createSpan} from '../common/cElement';
+import {createDiv, createSpan} from '../../common/cElement';
 
 export var wantedListReset;
 

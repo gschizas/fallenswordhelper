@@ -1,9 +1,9 @@
-import calf from '../support/calf';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
+import calf from '../../support/calf';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
+import on from '../../common/on';
 import {parseBountyPageForWorld} from './parseBountyPageForWorld';
-import retryAjax from '../ajax/retryAjax';
-import setValueJSON from '../system/setValueJSON';
+import retryAjax from '../../ajax/retryAjax';
+import setValueJSON from '../../system/setValueJSON';
 import {
   bountyList,
   bountyUrl,

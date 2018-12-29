@@ -1,4 +1,4 @@
-import calf from '../support/calf';
+import calf from '../../support/calf';
 import {wantedArray, wantedList} from './lists';
 
 var thisBounty;

@@ -1,7 +1,8 @@
-import equipItem from '../ajax/equipItem';
-import {imageServer} from '../system/system';
-import partial from '../common/partial';
-import {queueRecallItem} from '../ajaxQueue/queue';
+import equipItem from '../../ajax/equipItem';
+import hideQTip from '../../common/hideQTip';
+import {imageServer} from '../../system/system';
+import partial from '../../common/partial';
+import {queueRecallItem} from '../../ajaxQueue/queue';
 
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
   'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
@@ -12,19 +13,23 @@ function recalled(theTd, data) {
     'You successfully recalled the item</span>';
 }
 
+function recallInfObj(evt, mode, href) {
+  return {
+    invId: href.match(/&id=(\d+)/)[1],
+    playerId: href.match(/&player_id=(\d+)/)[1],
+    mode: mode,
+    action: evt.target.getAttribute('action')
+  };
+}
+
 function recallItem(evt) { // jQuery
-  $(evt.target).qtip('hide');
+  hideQTip(evt.target);
   var mode = evt.target.getAttribute('mode');
   var theTd = evt.target.parentNode.parentNode;
   if (mode === '0') {theTd = theTd.parentNode;}
   var href = theTd.firstElementChild.href;
   if (!href) {return;}
-  queueRecallItem({
-    invId: href.match(/&id=(\d+)/)[1],
-    playerId: href.match(/&player_id=(\d+)/)[1],
-    mode: mode,
-    action: evt.target.getAttribute('action')
-  }).done(partial(recalled, theTd));
+  queueRecallItem(recallInfObj(evt, mode, href)).done(partial(recalled, theTd));
   theTd.innerHTML = spinner;
 }
 
@@ -34,7 +39,7 @@ function wornItem(theTd, data) {
 }
 
 function wearItem(evt) { // jQuery
-  $(evt.target).qtip('hide');
+  hideQTip(evt.target);
   var theTd = evt.target.parentNode.parentNode.parentNode;
   var href = theTd.firstElementChild.href;
   if (!href) {return;}

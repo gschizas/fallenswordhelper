@@ -3,6 +3,7 @@ import eventHandler from '../../../common/eventHandler';
 import fixTeleport from './fixTeleport';
 import {getElementById} from '../../../common/getElement';
 import getValue from '../../../system/getValue';
+import hideQTip from '../../../common/hideQTip';
 import insertElement from '../../../common/insertElement';
 import insertElementBefore from '../../../common/insertElementBefore';
 import makeToggleBtn from './makeToggleBtn';
@@ -31,8 +32,8 @@ var ufsgMap;
 var soundCheck;
 var huntCheck;
 
-function doFormGroup(self) { // jQuery.min
-  $(self).qtip('hide');
+function doFormGroup(self) {
+  hideQTip(self);
   GameData.doAction(12, 401, {}, 0);
 }
 

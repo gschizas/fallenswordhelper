@@ -1,9 +1,9 @@
 import {bountyList} from './lists';
 import {bountyListDiv} from './createDivs';
-import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import setValueJSON from '../system/setValueJSON';
-import {createDiv, createSpan} from '../common/cElement';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import setValueJSON from '../../system/setValueJSON';
+import {createDiv, createSpan} from '../../common/cElement';
 
 export var bountyListReset;
 
