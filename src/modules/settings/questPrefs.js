@@ -1,7 +1,7 @@
 import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
 import {helpLink} from './simpleCheckbox';
-import isChecked from '../system/isChecked';
+import isValueChecked from './isValueChecked';
 
 export default function questPrefs() {
   // Quest Preferences
@@ -13,7 +13,7 @@ export default function questPrefs() {
         '(separated by commas). This works on Quest Manager and Quest Book.') +
       ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
       'value="on"' +
-      isChecked(getValue('hideQuests')) + '>' +
+      isValueChecked('hideQuests') + '>' +
       '&nbsp;<input name="hideQuestNames" size="60" value="' +
       getValue('hideQuestNames') + '"></td></tr>' +
 

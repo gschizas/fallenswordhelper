@@ -1,6 +1,5 @@
 import fallback from '../system/fallback';
-import getValue from '../system/getValue';
-import isChecked from '../system/isChecked';
+import isValueChecked from './isValueChecked';
 import mySimpleCheckboxes from './simple';
 import {networkIcon} from './settingObj';
 
@@ -15,10 +14,6 @@ function hasNetwork(o) {
   return '';
 }
 
-function isOn(name) {
-  return isChecked(getValue(name));
-}
-
 export function justLabel(name) {
   var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
@@ -29,7 +24,7 @@ export function justLabel(name) {
 
 export function justCheckbox(name) {
   return '<input id="' + name + '" name="' + name +
-    '" class="fshVMid" type="checkbox" value="on"' + isOn(name) + '>';
+    '" class="fshVMid" type="checkbox" value="on"' + isValueChecked(name) + '>';
 }
 
 export function simpleCheckboxHtml(name) {

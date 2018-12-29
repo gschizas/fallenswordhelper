@@ -1,7 +1,7 @@
 import bunchOfSimple from './bunchOfSimple';
 import escapeHtml from '../system/escapeHtml';
 import getValue from '../system/getValue';
-import isChecked from '../system/isChecked';
+import isValueChecked from './isValueChecked';
 import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 export default function equipPrefs() {
@@ -20,7 +20,7 @@ export default function equipPrefs() {
         'quick send the item to this person') +
       ':</td><td><input name="showQuickSendLinks" type="checkbox" ' +
       'value="on"' +
-      isChecked(getValue('showQuickSendLinks')) + '>' +
+      isValueChecked('showQuickSendLinks') + '>' +
       '&nbsp;&nbsp;Send Items To ' +
       '<input name="itemRecipient" size="10" value="' +
       getValue('itemRecipient') + '">' +

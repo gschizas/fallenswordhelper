@@ -37,12 +37,25 @@ function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
       '>Buff</a></span>';
 }
 
-function getAttackPart(playerName) { // Legacy
-  if (calf.addAttackLinkToLog) {
-    return ' | <a href="index.php?cmd=attackplayer&target_username=' +
-      playerName + '">Attack</a>';
+function makeFirstPart(messageHTML) {
+  return messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
+}
+
+function makeMsgReplyTo(playerName, firstPart) {
+  var replyTo = '';
+  if (calf.enableChatParsing) {
+    replyTo = removeHTML(firstPart.replace(/&nbsp;/g, ' ')).substr(0, 140);
   }
-  return '';
+  return '[ <span style="cursor:pointer;text-' +
+  'decoration:underline"class="a-reply" target_player="' + playerName +
+  '" replyTo="' + replyTo + '...">Reply</span>';
+}
+
+function makeExtraPart(playerName) {
+  return ' | <a href="index.php?cmd=trade&target_player=' +
+  playerName + '">Trade</a> | <a title="Secure Trade" ' +
+  'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+  playerName + '">ST</a>';
 }
 
 function getThirdPart(messageHTML) { // Legacy
@@ -60,30 +73,36 @@ function getThirdPart(messageHTML) { // Legacy
   return '';
 }
 
+function getAttackPart(playerName) { // Legacy
+  if (calf.addAttackLinkToLog) {
+    return ' | <a href="index.php?cmd=attackplayer&target_username=' +
+      playerName + '">Attack</a>';
+  }
+  return '';
+}
+
+function makeFourthPart(messageHTML) {
+  return messageHTML.substring(messageHTML
+    .indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
+}
+
+function makeLastPart(messageHTML) {
+  return messageHTML.substring(messageHTML.indexOf('</small>'),
+    messageHTML.length);
+}
+
+function messageExtras(aRow, playerName) {
+  var messageHTML = aRow.cells[2].innerHTML;
+  var firstPart = makeFirstPart(messageHTML);
+  aRow.cells[2].innerHTML = firstPart + '<nobr>' +
+    makeMsgReplyTo(playerName, firstPart) + makeExtraPart(playerName) +
+    getThirdPart(messageHTML) + getAttackPart(playerName) +
+    makeFourthPart(messageHTML) + '</nobr>' + makeLastPart(messageHTML);
+}
+
 function isChat(aRow, isGuildMate, playerName) { // Legacy
   reportIgnore(aRow, isGuildMate, playerName);
-  var messageHTML = aRow.cells[2].innerHTML;
-  var firstPart = messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
-  var thirdPart = getThirdPart(messageHTML);
-  var fourthPart = messageHTML.substring(messageHTML
-    .indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
-  var lastPart = messageHTML.substring(messageHTML.indexOf('</small>'),
-    messageHTML.length);
-  var extraPart = ' | <a href="index.php?cmd=trade&target_player=' +
-    playerName + '">Trade</a> | <a title="Secure Trade" ' +
-    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
-    playerName + '">ST</a>';
-  var attackPart = getAttackPart(playerName);
-  var replyTo = '';
-  if (calf.enableChatParsing) {
-    replyTo = removeHTML(firstPart.replace(/&nbsp;/g, ' ')).substr(0, 140);
-  }
-  var msgReplyTo = '[ <span style="cursor:pointer;text-' +
-    'decoration:underline"class="a-reply" target_player="' + playerName +
-    '" replyTo="' + replyTo + '...">Reply</span>';
-  aRow.cells[2].innerHTML = firstPart + '<nobr>' + msgReplyTo +
-    extraPart + thirdPart + attackPart + fourthPart +
-    '</nobr>' + lastPart;
+  messageExtras(aRow, playerName);
 }
 
 export default function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy

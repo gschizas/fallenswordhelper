@@ -1,3 +1,4 @@
+import badData from '../badData';
 import {def_afterUpdateActionlist} from '../../../support/constants';
 import retryAjax from '../../../ajax/retryAjax';
 import {
@@ -11,10 +12,6 @@ import {
   processMonsterLog,
   showMonsterLog
 } from './processMonsterLog';
-
-function badData(data) {
-  return !data || !data.response || !data.response.data;
-}
 
 function processMonster(data) {
   if (badData(data)) {return;} // creature is null

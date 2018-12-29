@@ -1,6 +1,6 @@
 import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
-import isChecked from '../system/isChecked';
+import isValueChecked from './isValueChecked';
 import {helpLink, simpleCheckbox} from './simpleCheckbox';
 
 function newGuildLogHistory() {
@@ -30,14 +30,14 @@ function playSoundOnUnreadLog() {
       '(will work on Firefox 3.5+ only)') +
     ':</td><td><input name="playNewMessageSound" type="checkbox" ' +
     'value="on"' +
-    isChecked(getValue('playNewMessageSound')) + '>' +
+    isValueChecked('playNewMessageSound') + '>' +
     ' Show speaker on world' +
     helpLink('Show speaker on world',
       'Should the toggle play sound speaker show on the world map? ' +
       '(This icon is next to the Fallensword wiki icon and will only ' +
       'display on Firefox 3.5+)') +
     ':<input name="showSpeakerOnWorld" type="checkbox" value="on"' +
-    isChecked(getValue('showSpeakerOnWorld')) +
+    isValueChecked('showSpeakerOnWorld') +
     '></tr></td>';
 }
 

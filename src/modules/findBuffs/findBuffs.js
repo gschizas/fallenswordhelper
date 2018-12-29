@@ -62,14 +62,19 @@ function addPlayerToSearchList(onlinePlayer, onlinePlayerName) {
   }
 }
 
+function getOnlinePlayerLevel(e) {
+  return parseInt($(e).find('td:eq(2)').text().replace(/,/g, ''), 10);
+}
+
+function includePlayer(onlinePlayerLevel, minPlayerVirtualLevel) {
+  return onlinePlayerLevel >= findBuffMinCastLevel &&
+    onlinePlayerLevel >= minPlayerVirtualLevel;
+}
+
 function playerRow(i, e) {
-  var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
-  var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
-    .replace(/,/g, ''), 10);
-  var onlinePlayerName = $(e).find('td:eq(1) a').text();
-  var minPlayerVirtualLevel = calcMinLvl();
-  if (onlinePlayerLevel >= findBuffMinCastLevel &&
-      onlinePlayerLevel >= minPlayerVirtualLevel) {
+  if (includePlayer(getOnlinePlayerLevel(e), calcMinLvl())) {
+    var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
+    var onlinePlayerName = $(e).find('td:eq(1) a').text();
     addPlayerToSearchList(onlinePlayer, onlinePlayerName);
   }
 }
@@ -89,18 +94,22 @@ function playerRows(doc) {
     '(td>a[href*="cmd=profile&player_id="])').each(playerRow);
 }
 
+function nextPage(curPage, maxPage, callback) {
+  var newPage = calcNextPage(curPage, maxPage);
+  updateProgress('Parsing online page ' + curPage + ' ...');
+  retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
+    newPage.toString()).done(callback);
+}
+
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var doc = createDocument(responseText);
-  var maxPage = getMaxPage(doc);
   var curPage = getCurrPage(doc);
   if (curPage !== 1) {
     playerRows(doc);
   }
+  var maxPage = getMaxPage(doc);
   if (curPage < maxPage) {
-    var newPage = calcNextPage(curPage, maxPage);
-    updateProgress('Parsing online page ' + curPage + ' ...');
-    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
-      newPage.toString()).done(findBuffsParseOnlinePlayers);
+    nextPage(curPage, maxPage, findBuffsParseOnlinePlayers);
   } else {
     // all done so moving on
     findBuffsParsePlayersForBuffs();

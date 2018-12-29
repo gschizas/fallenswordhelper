@@ -83,15 +83,25 @@ function makeInnerPopup() {
   return dialogPopup;
 }
 
-function makePopup() {
+function makeRet() {
   var ret = makeInnerPopup();
   var hdl = makeDragHandle();
   insertElement(ret, hdl);
+  draggable(hdl, ret);
+  return ret;
+}
+
+function makeContainer() {
   var container = createDiv({className: 'fsh-dialog-content'});
   insertElement(container, makeTg());
   insertElement(container, makeInOut());
+  return container;
+}
+
+function makePopup() {
+  var ret = makeRet();
+  var container = makeContainer();
   insertElement(ret, container);
-  draggable(hdl, ret);
   on(tracker, 'change', partial(maybeClose, ret));
   insertElement(trDialog, ret);
 }
@@ -125,7 +135,7 @@ function openDialog() {
   makePopup();
 }
 
-export default function guildTracker() {
+function injectShowTracker() {
   var gs = document.querySelector('#pCC img.guild_openGuildStore');
   var oldTr = gs.parentNode.parentNode;
   var newTr = createTr();
@@ -136,6 +146,9 @@ export default function guildTracker() {
     '&nbsp;<label class="custombutton" for="tracker">Show</label>';
   on(newTr, 'change', togglePref);
   oldTr.parentNode.replaceChild(newTr, oldTr);
+}
+
+function injectTracker() {
   tracker = createInput({
     id: 'tracker',
     className: 'fsh-dialog-open',
@@ -146,4 +159,9 @@ export default function guildTracker() {
   insertElement(trDialog, tracker);
   on(document.body, 'keydown', keydownHandler);
   insertElement(document.body, trDialog);
+}
+
+export default function guildTracker() {
+  injectShowTracker();
+  injectTracker();
 }
