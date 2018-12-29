@@ -20,14 +20,18 @@ function guildAry(val) {
   return [];
 }
 
-function hasRelationship(txt, el) {return el.test.includes(txt);}
-
-function externalRelationship(_txt) {
-  var scenario = [
+function buildScenario() {
+  return [
     {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
     {test: guildAry(getValue('guildPast')), type: 'old'},
     {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
   ];
+}
+
+function hasRelationship(txt, el) {return el.test.includes(txt);}
+
+function externalRelationship(_txt) {
+  var scenario = buildScenario();
   var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
   var relObj = scenario.find(partial(hasRelationship, txt));
   if (relObj) {return relObj.type;}

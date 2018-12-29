@@ -1,3 +1,4 @@
+import {fshArenaKey} from './assets';
 import getForage from '../ajax/getForage';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import setForage from '../ajax/setForage';
@@ -15,10 +16,10 @@ function gotMoves(_arena) { // jQuery
       .exec(self.closest('td').html())[1]);
     arena.moves[moveId].href = src;
   });
-  setForage('fsh_arena', arena);
+  setForage(fshArenaKey, arena);
 }
 
 export default function storeMoves() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getForage('fsh_arena').done(gotMoves);
+  getForage(fshArenaKey).done(gotMoves);
 }

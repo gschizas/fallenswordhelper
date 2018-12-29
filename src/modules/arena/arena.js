@@ -5,7 +5,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import orderData from './orderData';
 import partial from '../common/partial';
 import redoSort from './redoSort';
-import {dontPost, tableOpts} from './assets';
+import {dontPost, fshArenaKey, tableOpts} from './assets';
 import {
   setOpts,
   storeOpts
@@ -20,22 +20,26 @@ function redoHead(i, e) { // jQuery
   $(e).prepend($('<thead/>').append(firstRow));
 }
 
-function process(tabs, arena) { // jQuery
-
-  time('arena.process');
-
-  theTables.each(redoHead);
-  setOpts(arena);
-  orderData(theTables);
+function prepareEnv() {
   filterHeader();
   storeOpts();
   doLvlFilter();
+}
+
+function arenaDataTable(tabs, arena) {
+  theTables.each(redoHead);
+  setOpts(arena);
+  orderData(theTables);
+  prepareEnv();
   theTables.DataTable(tableOpts);
   redoSort(tabs);
   tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
+}
 
+function process(tabs, arena) { // jQuery
+  time('arena.process');
+  arenaDataTable(tabs, arena);
   timeEnd('arena.process');
-
 }
 
 export function injectArena() { // jQuery
@@ -43,5 +47,5 @@ export function injectArena() { // jQuery
   var tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) {return;} // Join error screen
   theTables = $('table[width="635"]', tabs);
-  getForage('fsh_arena').done(partial(process, tabs));
+  getForage(fshArenaKey).done(partial(process, tabs));
 }

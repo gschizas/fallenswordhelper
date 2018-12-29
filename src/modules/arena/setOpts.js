@@ -1,35 +1,31 @@
 import {defaults} from '../support/dataObj';
-import fallback from '../system/fallback';
+import {fshArenaKey} from './assets';
 import setForage from '../ajax/setForage';
 
 export var opts;
 export var oldIds;
 
 export function storeOpts() {
-  setForage('fsh_arena', opts);
+  setForage(fshArenaKey, opts);
 }
 
-function levelsAreNotNaN(minLvl, maxLvl) {
-  return !isNaN(minLvl) && !isNaN(maxLvl);
+function newOpts(newMin, newMax) {
+  opts = opts || {};
+  opts.minLvl = newMin;
+  opts.maxLvl = newMax;
+  storeOpts();
 }
 
 export function changeLvls() { // jQuery
   var minLvl = parseInt($('#fshMinLvl').val(), 10);
   var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
-  if (levelsAreNotNaN(minLvl, maxLvl)) {
-    opts = fallback(opts, {});
-    opts.minLvl = minLvl;
-    opts.maxLvl = maxLvl;
-    storeOpts();
-    $('#arenaTypeTabs table[width="635"]').DataTable().draw();
-  }
+  if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
+  newOpts(minLvl, maxLvl);
+  $('#arenaTypeTabs table[width="635"]').DataTable().draw();
 }
 
 export function resetLvls() { // jQuery
-  opts = opts || {};
-  opts.minLvl = defaults.arenaMinLvl;
-  opts.maxLvl = defaults.arenaMaxLvl;
-  storeOpts();
+  newOpts(defaults.arenaMinLvl, defaults.arenaMaxLvl);
   $('#fshMinLvl').val(opts.minLvl);
   $('#fshMaxLvl').val(opts.maxLvl);
   $('#arenaTypeTabs table[width="635"]').DataTable().draw();
