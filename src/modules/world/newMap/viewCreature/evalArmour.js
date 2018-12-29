@@ -5,12 +5,24 @@ function calcArm(combat) {
   return combat.player.armorValue;
 }
 
+function overallArmour(combat) {
+  var armorVal = calcArm(combat);
+  combat.overallArmorValue = armorVal +
+    Math.floor(combat.player.armorValue *
+    combat.player.sanctuaryLevel * 0.001);
+}
+
 function evalSanctuary(combat) {
   if (combat.player.sanctuaryLevel > 0) {
     combat.extraNotes += 'Sanc Bonus Armor = ' +
       Math.floor(combat.player.armorValue *
       combat.player.sanctuaryLevel * 0.001) + '<br>';
   }
+}
+
+function calcTerrorizeEffect(combat) {
+  combat.terrorizeEffect = Math.floor(combat.creature.damage *
+    combat.player.terrorizeLevel * 0.001);
 }
 
 function evalTerrorize(combat) {
@@ -20,28 +32,36 @@ function evalTerrorize(combat) {
   }
 }
 
-export default function evalArmour(combat) {
-  var armorVal = calcArm(combat);
-  combat.overallArmorValue = armorVal +
-    Math.floor(combat.player.armorValue *
-    combat.player.sanctuaryLevel * 0.001);
-  evalSanctuary(combat);
-  combat.terrorizeEffect = Math.floor(combat.creature.damage *
-    combat.player.terrorizeLevel * 0.001);
-  evalTerrorize(combat);
-  combat.creature.damage -= combat.terrorizeEffect;
+function calcDamageDone(combat) {
   combat.creatureDamageDone = Math.ceil(combat.generalVariable *
     combat.creature.damage - combat.overallArmorValue +
     combat.overallHPValue);
+}
+
+function creatureCanHit(combat) {
+  var approxDmg = combat.generalVariable * combat.creature.damage;
+  if (approxDmg < combat.overallArmorValue) {
+    combat.numberOfCreatureHitsTillDead = combat.overallHPValue;
+  } else {
+    combat.numberOfCreatureHitsTillDead = Math.ceil(
+      combat.overallHPValue / (approxDmg - combat.overallArmorValue));
+  }
+}
+
+function calcNumberOfHits(combat) {
   if (combat.creatureHitByHowMuch >= 0) {
-    var approxDmg = combat.generalVariable * combat.creature.damage;
-    if (approxDmg < combat.overallArmorValue) {
-      combat.numberOfCreatureHitsTillDead = combat.overallHPValue;
-    } else {
-      combat.numberOfCreatureHitsTillDead = Math.ceil(
-        combat.overallHPValue / (approxDmg - combat.overallArmorValue));
-    }
+    creatureCanHit(combat);
   } else {
     combat.numberOfCreatureHitsTillDead = '-';
   }
+}
+
+export default function evalArmour(combat) {
+  overallArmour(combat);
+  evalSanctuary(combat);
+  calcTerrorizeEffect(combat);
+  evalTerrorize(combat);
+  combat.creature.damage -= combat.terrorizeEffect;
+  calcDamageDone(combat);
+  calcNumberOfHits(combat);
 }

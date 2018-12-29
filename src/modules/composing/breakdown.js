@@ -10,6 +10,7 @@ import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 import {simpleCheckbox} from '../settings/simpleCheckbox';
 
+var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
 var disableBreakdownPrompts;
 var selectedList = [];
 
@@ -23,6 +24,19 @@ function fadeAway() {
     partial(goDown, self, partial(disappearance, self)));
 }
 
+function msgText(message, bgcolor) {
+  return $('<div/>', {id: 'composingMessageText'})
+    .css({
+      width: '90%',
+      'text-align': 'center',
+      'background-color': bgcolor,
+      color: 'rgb(255, 255, 255)',
+      margin: '5px auto 5px auto',
+      padding: '2px'
+    })
+    .html(message);
+}
+
 function showComposingMessage(message, bgcolor) { // jQuery
   $('#composingMessageContainer').remove();
 
@@ -31,19 +45,7 @@ function showComposingMessage(message, bgcolor) { // jQuery
       $('<div/>', {
         id: 'composingMessageContainer',
         width: '100%'
-      })
-        .append(
-          $('<div/>', {id: 'composingMessageText'})
-            .css({
-              width: '90%',
-              'text-align': 'center',
-              'background-color': bgcolor,
-              color: 'rgb(255, 255, 255)',
-              margin: '5px auto 5px auto',
-              padding: '2px'
-            })
-            .html(message)
-        )
+      }).append(msgText(message, bgcolor))
     );
 
   setTimeout(fadeAway, 5000);
@@ -92,19 +94,27 @@ function itemClick(evt) {
 
 function togglePref() {
   disableBreakdownPrompts = !disableBreakdownPrompts;
-  setValue('disableBreakdownPrompts', disableBreakdownPrompts);
+  setValue(prefDisableBreakdownPrompts, disableBreakdownPrompts);
+}
+
+function prefBox() {
+  insertHtmlBeforeEnd(pCC,
+    '<table class="fshTblCenter"><tbody>' +
+    simpleCheckbox(prefDisableBreakdownPrompts) +
+    '</tbody></table>');
+}
+
+function setupHandlers() {
+  on(getElementById('breakdown-selected-items').parentNode, 'click', breakEvt,
+    true);
+  on(getElementById('composing-items'), 'click', itemClick);
+  on(getElementById(prefDisableBreakdownPrompts), 'click', togglePref);
 }
 
 export default function composingBreakdown() {
   if (jQueryNotPresent()) {return;}
   perfFilter('composing');
-  disableBreakdownPrompts = getValue('disableBreakdownPrompts');
-  on(getElementById('breakdown-selected-items').parentNode,
-    'click', breakEvt, true);
-  on(getElementById('composing-items'), 'click', itemClick);
-  insertHtmlBeforeEnd(pCC,
-    '<table class="fshTblCenter"><tbody>' +
-    simpleCheckbox('disableBreakdownPrompts') +
-    '</tbody></table>');
-  on(getElementById('disableBreakdownPrompts'), 'click', togglePref);
+  disableBreakdownPrompts = getValue(prefDisableBreakdownPrompts);
+  prefBox();
+  setupHandlers();
 }

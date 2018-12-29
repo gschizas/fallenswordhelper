@@ -5,6 +5,7 @@ import {getElementById} from '../../../common/getElement';
 import getValue from '../../../system/getValue';
 import insertElement from '../../../common/insertElement';
 import insertElementBefore from '../../../common/insertElementBefore';
+import makeToggleBtn from './makeToggleBtn';
 import on from '../../../common/on';
 import openQuickBuffByName from '../../../common/openQuickBuffByName';
 import playerName from '../../../common/playerName';
@@ -12,8 +13,6 @@ import setValue from '../../../system/setValue';
 import {
   createButton,
   createDiv,
-  createInput,
-  createLabel,
   textSpan
 } from '../../../common/cElement';
 import {
@@ -103,16 +102,24 @@ function exists(val) {
   return '?';
 }
 
-function doLevels(worldName) {
-  var lvlDiv = createDiv({className: 'fshFsty'});
+function minLvl() {
   var topDiv = createDiv({textContent: 'Min Lvl: '});
   realmLvl = textSpan(exists(GameData.realm().minlevel));
   insertElement(topDiv, realmLvl);
-  insertElement(lvlDiv, topDiv);
+  return topDiv;
+}
+
+function yrLvl() {
   var btmDiv = createDiv({textContent: 'Your Lvl: '});
   yourLvl = textSpan(exists(GameData.player().level));
   insertElement(btmDiv, yourLvl);
-  insertElement(lvlDiv, btmDiv);
+  return btmDiv;
+}
+
+function doLevels(worldName) {
+  var lvlDiv = createDiv({className: 'fshFsty'});
+  insertElement(lvlDiv, minLvl());
+  insertElement(lvlDiv, yrLvl());
   insertElement(worldName, lvlDiv);
 }
 
@@ -131,30 +138,6 @@ function showQuickLinks(worldName) {
   quickBuff = doBtn('fshQuickBuff', 'Open Quick Buff Popup', worldName);
   realmMap = doBtn('fshRealmMap', 'Open Realm Map', worldName);
   ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
-}
-
-function createLbl(className, tip, htmlFor) {
-  return createLabel({
-    className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
-    dataset: {tipped: tip},
-    htmlFor: htmlFor
-  });
-}
-
-function makeToggleBtn(o) {
-  var btnDiv = createDiv({className: 'fshToggle'});
-  var btnCheck = createInput({
-    checked: o.prefVal,
-    id: o.checkId,
-    type: 'checkbox'
-  });
-  insertElement(btnDiv, btnCheck);
-  var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
-  insertElement(btnDiv, onLbl);
-  var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
-  insertElement(btnDiv, offLbl);
-  insertElement(o.worldName, btnDiv);
-  return btnCheck;
 }
 
 function showSpeakerOnWorld(worldName) {
@@ -185,14 +168,22 @@ function showHuntMode(worldName) {
   });
 }
 
+function addButtons() {
+  showQuickLinks(buttonContainer);
+  showSpeakerOnWorld(buttonContainer);
+  showHuntMode(buttonContainer);
+}
+
+function setupHandlers() {
+  on(buttonContainer, 'click', eventHandler(clickHdl));
+  on(buttonContainer, 'change', eventHandler(changeHdl));
+}
+
 function injectButtons() {
   if (!buttonContainer) {
     buttonContainer = makeButtonContainer();
-    showQuickLinks(buttonContainer);
-    showSpeakerOnWorld(buttonContainer);
-    showHuntMode(buttonContainer);
-    on(buttonContainer, 'click', eventHandler(clickHdl));
-    on(buttonContainer, 'change', eventHandler(changeHdl));
+    addButtons();
+    setupHandlers();
     insertElementBefore(buttonContainer, getElementById('worldCoord'));
   }
 }

@@ -70,22 +70,30 @@ function doSendItem(e) { // jQuery
   doAction(partial(senditems, [self.data('inv')]), self);
 }
 
+function elementClickHandlers(fshInv) {
+  [
+    ['#fshReset', resetLvls],
+    ['#fshAll', allChecks],
+    ['#fshNone', clearChecks],
+    ['#fshDefault', resetChecks]
+  ].forEach(function(el) {$(el[0]).click(partial(el[1], fshInv));});
+}
+
 function spanClickHandlers(fshInv) {
-  $(fshInv).on('click', 'span.setName', partial(setName, fshInv));
-  $(fshInv).on('click', 'span.takeItem', takeItem);
-  $(fshInv).on('click', 'span.recallItem', recallItem);
-  $(fshInv).on('click', 'span.wearItem', wearItem);
-  $(fshInv).on('click', 'span.useItem', doUseItem);
-  $(fshInv).on('click', 'span.dropItem', doDropItem);
-  $(fshInv).on('click', 'span.sendItem', doSendItem);
-  $(fshInv).on('click', 'span.storeItem', doStoreItem);
+  [
+    ['setName', partial(setName, fshInv)],
+    ['takeItem', takeItem],
+    ['recallItem', recallItem],
+    ['wearItem', wearItem],
+    ['useItem', doUseItem],
+    ['dropItem', doDropItem],
+    ['sendItem', doSendItem],
+    ['storeItem', doStoreItem]
+  ].forEach(function(el) {$(fshInv).on('click', 'span.' + el[0], el[1]);});
 }
 
 function setupClickHandlers(fshInv) {
-  $('#fshReset').click(partial(resetLvls, fshInv));
-  $('#fshAll').click(partial(allChecks, fshInv));
-  $('#fshNone').click(partial(clearChecks, fshInv));
-  $('#fshDefault').click(partial(resetChecks, fshInv));
+  elementClickHandlers(fshInv);
   $('table.fshInvFilter').on('click', 'input[type="checkbox"]',
     partial(getChecks, fshInv));
   spanClickHandlers(fshInv);
