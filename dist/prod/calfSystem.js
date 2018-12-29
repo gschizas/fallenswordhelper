@@ -2389,27 +2389,32 @@
     return '';
   }
 
+  function hidden(recipe) {
+    return !hideRecipes.includes(recipe.name);
+  }
+
+  function makeRow(recipe) {
+    return '<tr class="rmTr">' +
+        '<td class="rmTd">' +
+          '<a href="' + recipe.link + '">' +
+            '<img src="' + recipe.img + '" height="30px" width="30px">' +
+          '</a>' +
+        '</td>' +
+        '<td class="rmTd">' +
+          '<a href="' + recipe.link + '">' + recipe.name + '</a>' +
+        '</td>' +
+        '<td class="rmTd">' + getRecipeItems(recipe) + '</td>' +
+        '<td class="rmTd">' + getComponents(recipe) + '</td>' +
+        '<td class="rmTd">' + getImg(recipe) + '</td>' +
+      '</tr>';
+  }
+
   function drawRecipeTable(output, recipebook) { // Legacy
     currentPlayerId = playerId();
-    var i;
     var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
       '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
       '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
-    var recipe;
-    for (i = 0; i < recipebook.recipe.length; i += 1) {
-      recipe = recipebook.recipe[i];
-      if (hideRecipes.indexOf(recipe.name) !== -1) {continue;}
-      result += '<tr class="rmTr"><td class="rmTd"><a href="' + recipe.link +
-        '"><img src="' + recipe.img +
-        '" height="30px" width="30px"></a></td><td class="rmTd"><a href="' +
-        recipe.link + '">' + recipe.name + '</a></td><td class="rmTd">';
-      result += getRecipeItems(recipe);
-      result += '</td><td class="rmTd">';
-      result += getComponents(recipe);
-      result += '</td><td class="rmTd">';
-      result += getImg(recipe);
-      result += '</td></tr>';
-    }
+    result += recipebook.recipe.filter(hidden).map(makeRow).join('');
     result += '</table>';
     output.innerHTML = result;
     recipebook.lastUpdate = new Date();
@@ -6993,6 +6998,7 @@
     '&nbsp;Max lvl:&nbsp;<input id="fshMaxLvl" size="5">&nbsp;&nbsp;' +
     '<input id="fshReset" class="custombutton" type="button" ' +
     'value="Reset"></span></td></tr></tbody></table>';
+  var fshArenaKey = 'fsh_arena';
 
   function dontPost(e) { // jQuery
     e.preventDefault();
@@ -7867,30 +7873,26 @@
   var oldIds;
 
   function storeOpts() {
-    setForage('fsh_arena', opts);
+    setForage(fshArenaKey, opts);
   }
 
-  function levelsAreNotNaN(minLvl, maxLvl) {
-    return !isNaN(minLvl) && !isNaN(maxLvl);
+  function newOpts(newMin, newMax) {
+    opts = opts || {};
+    opts.minLvl = newMin;
+    opts.maxLvl = newMax;
+    storeOpts();
   }
 
   function changeLvls() { // jQuery
     var minLvl = parseInt($('#fshMinLvl').val(), 10);
     var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
-    if (levelsAreNotNaN(minLvl, maxLvl)) {
-      opts = fallback(opts, {});
-      opts.minLvl = minLvl;
-      opts.maxLvl = maxLvl;
-      storeOpts();
-      $('#arenaTypeTabs table[width="635"]').DataTable().draw();
-    }
+    if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
+    newOpts(minLvl, maxLvl);
+    $('#arenaTypeTabs table[width="635"]').DataTable().draw();
   }
 
   function resetLvls() { // jQuery
-    opts = opts || {};
-    opts.minLvl = defaults.arenaMinLvl;
-    opts.maxLvl = defaults.arenaMaxLvl;
-    storeOpts();
+    newOpts(defaults.arenaMinLvl, defaults.arenaMaxLvl);
     $('#fshMinLvl').val(opts.minLvl);
     $('#fshMaxLvl').val(opts.maxLvl);
     $('#arenaTypeTabs table[width="635"]').DataTable().draw();
@@ -7981,22 +7983,24 @@
     }
   }
 
-  function checkTournamentId(row, cell) { // jQuery
-    var matches = /#\s(\d+)/.exec(cell.text());
+  function checkTournamentId(row, theCells) { // jQuery
+    var matches = /#\s(\d+)/.exec(theCells.eq(0).text());
     if ([matches, opts, opts.id].every(isObject)) {
       opts.id[matches[1]] = matches[1];
       colourNewRow(row, matches[1]);
     }
   }
 
-  function players(cell) { // jQuery
+  function players(theCells) { // jQuery
+    var cell = theCells.eq(1);
     var matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
     if (matches) {
       cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
     }
   }
 
-  function joinCost(cell) {
+  function joinCost(theCells) {
+    var cell = theCells.eq(2);
     cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
   }
 
@@ -8025,13 +8029,15 @@
     }
   }
 
-  function maxMoves(cell, row) { // jQuery
+  function maxMoves(theCells, row) { // jQuery
+    var cell = theCells.eq(8);
     if (opts && opts.moves) {
       optsHazMoves(cell, row);
     }
   }
 
-  function reward(cell) { // jQuery
+  function reward(theCells) { // jQuery
+    var cell = theCells.eq(8);
     if (cell.children('table').length !== 1) {return;}
     cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
   }
@@ -8039,12 +8045,12 @@
   function _orderData(i, e) { // jQuery
     var row = $(e);
     var theCells = row.children();
-    checkTournamentId(row, theCells.eq(0));
-    players(theCells.eq(1));
-    joinCost(theCells.eq(2));
+    checkTournamentId(row, theCells);
+    players(theCells);
+    joinCost(theCells);
     theBools(theCells);
-    maxMoves(theCells.eq(8), row);
-    reward(theCells.eq(8));
+    maxMoves(theCells, row);
+    reward(theCells);
   }
 
   function orderData(theTables) {
@@ -8089,22 +8095,26 @@
     $(e).prepend($('<thead/>').append(firstRow));
   }
 
-  function process(tabs, arena) { // jQuery
-
-    time('arena.process');
-
-    theTables.each(redoHead);
-    setOpts$1(arena);
-    orderData(theTables);
+  function prepareEnv$1() {
     filterHeader();
     storeOpts();
     doLvlFilter();
+  }
+
+  function arenaDataTable(tabs, arena) {
+    theTables.each(redoHead);
+    setOpts$1(arena);
+    orderData(theTables);
+    prepareEnv$1();
     theTables.DataTable(tableOpts$1);
     redoSort(tabs);
     tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
+  }
 
+  function process(tabs, arena) { // jQuery
+    time('arena.process');
+    arenaDataTable(tabs, arena);
     timeEnd('arena.process');
-
   }
 
   function injectArena() { // jQuery
@@ -8112,7 +8122,7 @@
     var tabs = $('#arenaTypeTabs');
     if (tabs.length !== 1) {return;} // Join error screen
     theTables = $('table[width="635"]', tabs);
-    getForage('fsh_arena').done(partial(process, tabs));
+    getForage(fshArenaKey).done(partial(process, tabs));
   }
 
   function buyitem(item) {
@@ -9631,17 +9641,29 @@
     makePopup();
   }
 
+  function makeCellOne(gs, newTr) {
+    var cellOne = newTr.insertCell(-1);
+    insertElement(cellOne, gs);
+  }
+
+  function makeCellTwo(newTr) {
+    var cellTwo = newTr.insertCell(-1);
+    cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
+      '&nbsp;<label class="custombutton" for="tracker">Show</label>';
+  }
+
+  function makeNewTr(gs) {
+    var newTr = createTr();
+    makeCellOne(gs, newTr);
+    makeCellTwo(newTr);
+    on(newTr, 'change', togglePref$3);
+    return newTr;
+  }
+
   function injectShowTracker() {
     var gs = document.querySelector('#pCC img.guild_openGuildStore');
     var oldTr = gs.parentNode.parentNode;
-    var newTr = createTr();
-    var cellOne = newTr.insertCell(-1);
-    var cellTwo = newTr.insertCell(-1);
-    insertElement(cellOne, gs);
-    cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
-      '&nbsp;<label class="custombutton" for="tracker">Show</label>';
-    on(newTr, 'change', togglePref$3);
-    oldTr.parentNode.replaceChild(newTr, oldTr);
+    oldTr.parentNode.replaceChild(makeNewTr(gs), oldTr);
   }
 
   function injectTracker() {
@@ -11347,23 +11369,26 @@
     }
   }
 
-  function likeInvite(aRow, hasInvited) { // Legacy
-    var message = aRow.cells[2].innerHTML;
-    var firstQuote = message.indexOf('\'');
-    var firstPart = '';
-    firstPart = message.substring(0, firstQuote);
-    var secondQuote = message.indexOf('\'', firstQuote + 1);
-    var targetPlayerName = message.substring(firstQuote + 1, secondQuote);
-    aRow.cells[2].innerHTML = firstPart + '\'' +
-      '<a href="index.php?cmd=findplayer&search_active=1&' +
-      'search_level_max=&search_level_min=&search_username=' +
-      targetPlayerName + '&search_show_first=1">' + targetPlayerName +
-      '</a>' + message.substring(secondQuote, message.length);
-    if (!hasInvited &&
-      targetPlayerName !== playerName()) {
+  function dimIfNotMe(aRow, hasInvited, targetPlayerName) {
+    if (!hasInvited && targetPlayerName !== playerName()) {
       $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
       aRow.style.color = 'gray';
     }
+  }
+
+  function searchPlayerHref(targetPlayerName) {
+    return '<a href="index.php?cmd=findplayer&search_active=1&' +
+      'search_level_max=&search_level_min=&search_username=' +
+      targetPlayerName + '&search_show_first=1">' + targetPlayerName + '</a>';
+  }
+
+  function likeInvite(aRow, hasInvited) {
+    var message = aRow.cells[2].innerHTML;
+    var parts = message.split('\'');
+    var targetPlayerName = parts[1];
+    parts[1] = searchPlayerHref(targetPlayerName);
+    aRow.cells[2].innerHTML = parts.join('\'');
+    dimIfNotMe(aRow, hasInvited, targetPlayerName);
   }
 
   function guildInvite(aRow) { // Legacy
@@ -11500,7 +11525,8 @@
     ['has added a new rank entitled', 'has deleted the rank',
       'has requested to join the guild', 'has invited the player',
       'has officially joined the guild', 'has been kicked from the guild by',
-      'has left the guild', 'has been assigned the rank'],
+      'has left the guild', 'has been assigned the rank',
+      'has added/updated a rank entitled'],
     [/resulted in (.*) with a final score of/,
       'resulted in a draw. Your GvG rating ',
       'has just initiated a conflict with the guild',
@@ -12464,14 +12490,18 @@
     return [];
   }
 
-  function hasRelationship(txt, el) {return el.test.includes(txt);}
-
-  function externalRelationship(_txt) {
-    var scenario = [
+  function buildScenario() {
+    return [
       {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
       {test: guildAry(getValue('guildPast')), type: 'old'},
       {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
     ];
+  }
+
+  function hasRelationship(txt, el) {return el.test.includes(txt);}
+
+  function externalRelationship(_txt) {
+    var scenario = buildScenario();
     var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
     var relObj = scenario.find(partial(hasRelationship, txt));
     if (relObj) {return relObj.type;}
@@ -12820,6 +12850,25 @@
     }
   }
 
+  function guildRelationship$1(avyImg, playername, self) {
+    // Must be before profileInjectQuickButton
+    profileInjectGuildRel(self);
+    // It sets up guildId and currentGuildRelationship
+    var playerid = fallback(getUrlParameter('player_id'), playerId());
+    profileInjectQuickButton(avyImg, playerid, playername);
+  }
+
+  function updateDom(avyImg, playername, self) {
+    ifSelf(self);
+    guildRelationship$1(avyImg, playername, self);
+    updateNmv();
+    updateStatistics();
+    highlightPvpProtection();
+    profileRenderBio(self);
+    addStatTotalToMouseover();
+    add(3, colouredDots);
+  }
+
   function injectProfile() { // Legacy
     if (jQueryNotPresent()) {return;}
     var avyImg = document
@@ -12827,18 +12876,7 @@
     if (!avyImg) {return;}
     var playername = pCC.getElementsByTagName('h1')[0].textContent;
     var self = playername === playerName();
-    ifSelf(self);
-    // Must be before profileInjectQuickButton
-    profileInjectGuildRel(self);
-    // It sets up guildId and currentGuildRelationship
-    var playerid = fallback(getUrlParameter('player_id'), playerId());
-    profileInjectQuickButton(avyImg, playerid, playername);
-    updateNmv();
-    updateStatistics();
-    highlightPvpProtection();
-    profileRenderBio(self);
-    addStatTotalToMouseover();
-    add(3, colouredDots);
+    updateDom(avyImg, playername, self);
   }
 
   function injectMoveItems() {
@@ -14446,6 +14484,7 @@
     });
     insertElement(trackerTable, tBody);
     Object.keys(theTitans).forEach(partial(addRow$1, theTitans, tBody));
+    return trackerTable;
   }
 
   function displayTracker(parentTable, theTitans) {
@@ -15142,36 +15181,40 @@
       simpleCheckbox('huntingMode');
   }
 
+  function bioCompressor() {
+    return '<tr><td class="fshRight">Enable Bio Compressor' +
+      helpLink('Enable Bio Compressor',
+        'This will compress long bios according to settings and provide a ' +
+        'link to expand the compressed section.') +
+      ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
+      'value="on"' +
+      isValueChecked('enableBioCompressor') +
+      '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
+      'value="' + getValue('maxCompressedCharacters') + '" />' +
+      ' Max Lines:<input name="maxCompressedLines" size="3" value="' +
+      getValue('maxCompressedLines') + '"></td></tr>';
+  }
+
+  function buffGreet() {
+    return '<tr><td class="fshRight">Buy Buffs Greeting' +
+      helpLink('Buy Buffs Greeting',
+        'This is the default text to open a message with when asking to ' +
+        'buy buffs. You can use {playername} to insert the target players ' +
+        'name. You can also use {buffs} to insert the list of buffs. You ' +
+        'can use {cost} to insert the total cost of the buffs.') +
+      ':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" ' +
+      'value="' + getValue('buyBuffsGreeting') + '"></td></tr>';
+  }
+
   function profilePrefs() {
     // profile prefs
     return '<tr><th colspan="2"><b>Profile preferences</b></th></tr>' +
-
       bunchOfSimple([
         'renderSelfBio',
         'renderOtherBios'
       ]) +
-
-      '<tr><td class="fshRight">Enable Bio Compressor' +
-        helpLink('Enable Bio Compressor',
-          'This will compress long bios according to settings and provide a ' +
-          'link to expand the compressed section.') +
-        ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
-        'value="on"' +
-        isValueChecked('enableBioCompressor') +
-        '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
-        'value="' + getValue('maxCompressedCharacters') + '" />' +
-        ' Max Lines:<input name="maxCompressedLines" size="3" value="' +
-        getValue('maxCompressedLines') + '"></td></tr>' +
-
-      '<tr><td class="fshRight">Buy Buffs Greeting' +
-        helpLink('Buy Buffs Greeting',
-          'This is the default text to open a message with when asking to ' +
-          'buy buffs. You can use {playername} to insert the target players ' +
-          'name. You can also use {buffs} to insert the list of buffs. You ' +
-          'can use {cost} to insert the total cost of the buffs.') +
-        ':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" ' +
-        'value="' + getValue('buyBuffsGreeting') + '"></td></tr>' +
-
+      bioCompressor() +
+      buffGreet() +
       bunchOfSimple([
         'showStatBonusTotal',
         'enableQuickDrink',
@@ -18262,6 +18305,22 @@
     }
   }
 
+  function calcDdBonus(combat) {
+    combat.deathDealerBonusDamage =
+      Math.floor(combat.player.damageValue * (Math.min(Math.floor(
+        combat.player.killStreakValue / 5) * 0.01 *
+        combat.player.deathDealerLevel, 20) / 100));
+  }
+
+  function calcCaBonus(combat) {
+    combat.counterAttackBonusAttack =
+      Math.floor(combat.player.attackValue * 0.0025 *
+      combat.player.counterAttackLevel);
+    combat.counterAttackBonusDamage =
+      Math.floor(combat.player.damageValue * 0.0025 *
+      combat.player.counterAttackLevel);
+  }
+
   function evalExtraStam(combat) {
     combat.extraStaminaPerHit = 0;
     if (combat.player.counterAttackLevel > 0) {
@@ -18296,16 +18355,8 @@
     // armor of the creature has been taken off.
     evalHolyFlame(combat);
     // Death Dealer and Counter Attack both applied at the same time
-    combat.deathDealerBonusDamage =
-      Math.floor(combat.player.damageValue * (Math.min(Math.floor(
-        combat.player.killStreakValue / 5) * 0.01 *
-        combat.player.deathDealerLevel, 20) / 100));
-    combat.counterAttackBonusAttack =
-      Math.floor(combat.player.attackValue * 0.0025 *
-      combat.player.counterAttackLevel);
-    combat.counterAttackBonusDamage =
-      Math.floor(combat.player.damageValue * 0.0025 *
-      combat.player.counterAttackLevel);
+    calcDdBonus(combat);
+    calcCaBonus(combat);
     evalExtraStam(combat);
     evalDeathDealer(combat);
     evalCounterAttack(combat);
@@ -19376,12 +19427,12 @@
         .exec(self.closest('td').html())[1]);
       arena.moves[moveId].href = src;
     });
-    setForage('fsh_arena', arena);
+    setForage(fshArenaKey, arena);
   }
 
   function storeMoves() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getForage('fsh_arena').done(gotMoves);
+    getForage(fshArenaKey).done(gotMoves);
   }
 
   var upgrades;
@@ -20798,7 +20849,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '67';
+  window.FSH.calf = '68';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
