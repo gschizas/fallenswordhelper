@@ -4,14 +4,36 @@ module.exports = {
     sourceType: 'module',
     ecmaFeatures: {impliedStrict: true}
   },
-  env: {
-    browser: true,
-    node: true,
-    jquery: true,
-    greasemonkey: true,
-    es6: true
-  },
+  env: {},
   globals: {
+
+    DOMParser: false,
+    Element: false,
+    HTMLDocument: false,
+    HTMLTableElement: false,
+    Image: false,
+    Node: false,
+    XPathResult: false,
+    console: false,
+    document: false,
+    localStorage: false,
+    location: false,
+    performance: false,
+    setTimeout: false,
+    window: false,
+
+    module: false,
+    process: false,
+    require: false,
+
+    $: false,
+    jQuery: false,
+
+    GM_getValue: false,
+    GM_info: false,
+    GM_listValues: false,
+    GM_setValue: false,
+
     FSH: true,
     localforage: false,
     ga: false,
