@@ -27,17 +27,25 @@ function makeTallyTbody(data) {
   return tBody;
 }
 
-function makeTotalRow(tbl, data) {
+function makeTotalCell(tbl) {
   var totRow = tbl.insertRow(-1);
   insertHtmlBeforeEnd(totRow, '<td>Total:</td>');
   var totCell = totRow.insertCell(-1);
   totCell.colSpan = 2;
+  return totCell;
+}
+
+function makeUsedCount(data) {
   var usedCount = data.r.length;
-  var totalCount = data.h.cm;
   var usedCountDom = createSpan();
   usedCountDom.innerHTML = usedCount.toString();
-  insertElement(totCell, usedCountDom);
-  insertTextBeforeEnd(totCell, ' / ' + totalCount.toString());
+  return usedCountDom;
+}
+
+function makeTotalRow(tbl, data) {
+  var totCell = makeTotalCell(tbl);
+  insertElement(totCell, makeUsedCount(data));
+  insertTextBeforeEnd(totCell, ' / ' + data.h.cm.toString());
 }
 
 function makeTallyTable(data) {

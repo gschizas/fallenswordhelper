@@ -1,9 +1,9 @@
-import add from '../../support/task';
-import batch from '../../common/batch';
-import insertElement from '../../common/insertElement';
-import once from '../../common/once';
-import partial from '../../common/partial';
-import {sendEvent} from '../../support/fshGa';
+import add from '../../../support/task';
+import batch from '../../../common/batch';
+import insertElement from '../../../common/insertElement';
+import once from '../../../common/once';
+import partial from '../../../common/partial';
+import {sendEvent} from '../../../support/fshGa';
 import {
   createDiv,
   createInput,
@@ -11,7 +11,7 @@ import {
   createSelect,
   createTable,
   createTr
-} from '../../common/cElement';
+} from '../../../common/cElement';
 
 var mapping;
 var selectRowTmp;

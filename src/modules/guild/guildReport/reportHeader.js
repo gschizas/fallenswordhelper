@@ -1,6 +1,6 @@
-import batch from '../common/batch';
-import calf from '../support/calf';
-import onlineDot from '../common/onlineDot';
+import batch from '../../common/batch';
+import calf from '../../support/calf';
+import onlineDot from '../../common/onlineDot';
 
 function memberHeader(oldhtml) {
   return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +

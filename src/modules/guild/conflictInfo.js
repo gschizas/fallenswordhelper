@@ -1,4 +1,5 @@
 import createDocument from '../system/createDocument';
+import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 
 var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
@@ -31,16 +32,24 @@ function activeConflicts(doc, curPage, insertHere) { // Legacy
   }
 }
 
-function gotConflictInfo(responseText, callback) { // Legacy
+function getMaxPage(page) {
+  return Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
+}
+
+function getNextPage(curPage, fn, callback) {
+  retryAjax(ajaxUrl + 'page=' + (curPage + 1).toString())
+    .done(partial(fn, callback));
+}
+
+function gotConflictInfo(callback, responseText) { // Legacy
   var doc = createDocument(responseText);
   var page = doc.querySelector('#pCC input[name="page"]');
   if (!page) {return;}
   var curPage = Number(page.value);
-  var maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);
+  var maxPage = getMaxPage(page);
   activeConflicts(doc, curPage, callback.node);
   if (maxPage > curPage) {
-    retryAjax(ajaxUrl + 'page=' + (curPage + 1).toString())
-      .done(function(html) {gotConflictInfo(html, callback);});
+    getNextPage(curPage, gotConflictInfo, callback);
   }
 }
 
@@ -48,7 +57,6 @@ export default function conflictInfo(leftHandSideColumnTable) { // jQuery.min
   var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
     .firstChild.nextSibling;
   if (statCtrl) {
-    retryAjax(ajaxUrl)
-      .done(function(data) {gotConflictInfo(data, {node: statCtrl});});
+    retryAjax(ajaxUrl).done(partial(gotConflictInfo, {node: statCtrl}));
   }
 }

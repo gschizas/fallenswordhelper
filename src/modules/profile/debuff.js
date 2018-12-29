@@ -1,6 +1,7 @@
 import errorDialog from '../app/errorDialog';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import hideQTip from '../common/hideQTip';
 import jConfirm from '../common/jConfirm';
 import on from '../common/on';
 import removeskill from '../app/profile/removeskill';
@@ -33,10 +34,10 @@ function checkForPrompt(aLink) {
   }
 }
 
-function interceptDebuff(e) { // jQuery
+function interceptDebuff(e) {
   var aLink = e.target;
   if (aLink.tagName === 'IMG') {
-    $(e.target).qtip('hide');
+    hideQTip(e.target);
     aLink = aLink.parentNode;
   } else if (aLink.tagName !== 'A') {return;}
   e.stopPropagation();

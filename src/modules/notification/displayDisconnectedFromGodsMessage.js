@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import hideQTip from '../common/hideQTip';
 import {imageServer} from '../system/system';
 import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 import once from '../common/once';
@@ -40,7 +41,7 @@ function prayToGods(e) { // jQuery
   if (!myGod) {return;}
   retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
     .done(havePrayed);
-  $(e.target).qtip('hide');
+  hideQTip(e.target);
 }
 
 export default function displayDisconnectedFromGodsMessage() {

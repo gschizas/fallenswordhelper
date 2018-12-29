@@ -1,8 +1,8 @@
-import {getElementById} from '../common/getElement';
-import getValue from '../system/getValue';
-import getValueJSON from '../system/getValueJSON';
-import {nowSecs} from '../support/constants';
-import setValue from '../system/setValue';
+import {getElementById} from '../../common/getElement';
+import getValue from '../../system/getValue';
+import getValueJSON from '../../system/getValueJSON';
+import {nowSecs} from '../../support/constants';
+import setValue from '../../system/setValue';
 
 export var bountyList;
 export var wantedList;
@@ -13,26 +13,36 @@ var wantedNames;
 export var wantedArray;
 export var bountyUrl = 'index.php?no_mobile=1&cmd=bounty&page=';
 
+function hasActiveBounties(activeTable) {
+  return !/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML);
+}
+
+function bountyData(theCells) {
+  var targetData = theCells[0].firstChild.firstChild;
+  return {
+    target: targetData.firstChild.textContent,
+    link: targetData.href,
+    lvl: targetData.nextSibling.textContent.replace(/[[|\]]/, ''),
+    reward: theCells[2].textContent,
+    rewardType: theCells[2].firstChild.firstChild.firstChild.firstChild
+      .nextSibling.firstChild.title,
+    posted: theCells[3].textContent,
+    xpLoss: theCells[4].textContent,
+    progress: theCells[5].textContent
+  };
+}
+
+function getAllBounties(activeTable) {
+  for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
+    var theCells = activeTable.rows[i].cells;
+    var thisBounty = bountyData(theCells);
+    bountyList.bounty.push(thisBounty);
+  }
+}
+
 function parseActiveBounty(activeTable) { // Legacy
-  if (!/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML)) {
-    for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
-      var theCells = activeTable.rows[i].cells;
-      var thisBounty = {};
-      thisBounty.target = theCells[0].firstChild
-        .firstChild.firstChild.textContent;
-      thisBounty.link = theCells[0].firstChild.firstChild.href;
-      thisBounty.lvl = theCells[0].firstChild
-        .firstChild.nextSibling.textContent
-        .replace(/\[/, '').replace(/\]/, '');
-      thisBounty.reward = theCells[2].textContent;
-      thisBounty.rewardType = theCells[2]
-        .firstChild.firstChild.firstChild.firstChild
-        .nextSibling.firstChild.title;
-      thisBounty.posted = theCells[3].textContent;
-      thisBounty.xpLoss = theCells[4].textContent;
-      thisBounty.progress = theCells[5].textContent;
-      bountyList.bounty.push(thisBounty);
-    }
+  if (hasActiveBounties(activeTable)) {
+    getAllBounties(activeTable);
   }
 }
 

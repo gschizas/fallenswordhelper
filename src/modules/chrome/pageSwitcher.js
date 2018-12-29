@@ -30,7 +30,7 @@ import injectQuestTracker from '../questbook/injectQuestTracker';
 import injectQuickBuff from '../quickbuff/quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
-import injectReportPaint from '../guildReport/guildReport';
+import injectReportPaint from '../guild/guildReport/guildReport';
 import injectSaveSettings from '../settings/load';
 import injectScavenging from '../scavenging/scavenging';
 import injectScouttower from '../scoutTower/injectScouttower';

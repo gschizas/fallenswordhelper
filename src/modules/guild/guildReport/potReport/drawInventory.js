@@ -1,8 +1,8 @@
-import {createDiv} from '../../common/cElement';
-import insertElement from '../../common/insertElement';
-import once from '../../common/once';
-import partial from '../../common/partial';
-import {sendEvent} from '../../support/fshGa';
+import {createDiv} from '../../../common/cElement';
+import insertElement from '../../../common/insertElement';
+import once from '../../../common/once';
+import partial from '../../../common/partial';
+import {sendEvent} from '../../../support/fshGa';
 
 var inventory;
 

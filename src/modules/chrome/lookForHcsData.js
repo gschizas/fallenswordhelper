@@ -23,7 +23,7 @@ import jsonParse from '../common/jsonParse';
 import navMenu from './navMenu';
 import {pCR} from '../support/layout';
 import prepareAllyEnemyList from './allyEnemy';
-import {prepareBountyData} from '../activeWantedBounties/activeWantedBounties';
+import {prepareBountyData} from './activeWantedBounties/activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
 import scoutTowerLink from './scoutTowerLink';
 import {seLog} from '../seLog/seLog';

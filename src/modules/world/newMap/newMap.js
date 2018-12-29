@@ -4,6 +4,7 @@ import {createStyle} from '../../common/cElement';
 import doNotKill from './doNotKill/doNotKill';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import hideQTip from '../../common/hideQTip';
 import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
 import {injectSendGoldOnWorld} from './sendGold';
@@ -81,11 +82,11 @@ function msgCenterOffset() {
 }
 
 function hideMapTooltip() {
-  $('#mapTooltip').qtip('hide');
+  hideQTip('#mapTooltip');
 }
 
-function fixDebuffQTip(e) { // jQuery.min
-  $(e.target).qtip('hide');
+function fixDebuffQTip(e) {
+  hideQTip(e.target);
 }
 
 function fixDebuff() {

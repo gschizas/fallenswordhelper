@@ -1,5 +1,5 @@
-import batch from '../common/batch';
-import getUrlParameter from '../system/getUrlParameter';
+import batch from '../../common/batch';
+import getUrlParameter from '../../system/getUrlParameter';
 
 var findUser;
 var foundUser;
