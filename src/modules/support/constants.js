@@ -40,6 +40,7 @@ export var def_afterUpdateActionlist = 'after-update.actionlist';
 export var def_playerBuffs = 'buffs.player';
 export var def_playerUpdate = 'update.player';
 export var def_playerLevel = 'level.stats-player';
+export var def_playerGold = 'gold.stats-player';
 export var def_shopPrompt = 'prompt.worldDialogShop';
 export var def_controlsKeydown = 'keydown.controls';
 export var def_realmUpdate = 'update.realm';
@@ -71,3 +72,7 @@ export var def_fetch_playerNotifications = 1024;
 
 export var def_needToCompose = 'needToCompose';
 export var def_lastComposeCheck = 'lastComposeCheck';
+
+export var def_table = 'table';
+
+export var fshBuffLog = 'fsh_buffLog';

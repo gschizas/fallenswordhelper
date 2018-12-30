@@ -1,9 +1,15 @@
 import buffList from '../support/buffObj';
 import formatLocalDateTime from '../common/formatLocalDateTime';
+import {fshBuffLog} from '../support/constants';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import setForage from '../ajax/setForage';
+
+var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
+  ' higher level is currently active on \'(\\w*)\'');
+var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
+  'activated on \'(\\w*)\'');
 
 function rejected(timeStamp, buffsNotCast, buffLog) {
   if (buffsNotCast) {
@@ -36,20 +42,16 @@ function buffResult(_buffLog) {
   var timeStamp = formatLocalDateTime(new Date());
   var buffsAttempted = getElementById('quickbuff-report')
     .innerHTML.split('<p>');
-  var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
-    ' higher level is currently active on \'(\\w*)\'');
-  var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
-    'activated on \'(\\w*)\'');
   for (var i = 0; i < buffsAttempted.length; i += 1) {
     var buffCast = buffsCastRE.exec(buffsAttempted[i]);
     var buffNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
     buffLog = successfull(timeStamp, buffCast, buffLog);
     buffLog = rejected(timeStamp, buffNotCast, buffLog);
   }
-  setForage('fsh_buffLog', buffLog);
+  setForage(fshBuffLog, buffLog);
 }
 
 export default function updateBuffLog() {
   if (!getValue('keepBuffLog')) {return;}
-  getForage('fsh_buffLog').done(buffResult);
+  getForage(fshBuffLog).done(buffResult);
 }

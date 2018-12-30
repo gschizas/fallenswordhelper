@@ -14,6 +14,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
+import when from '../common/when';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../support/debug';
 
@@ -60,6 +61,10 @@ function getInvMan() {
 
 }
 
+function asyncCall() {
+  add(3, getInvMan);
+}
+
 function syncInvMan() { // jQuery
   var prm = [];
   prm.push(buildInv());
@@ -69,9 +74,7 @@ function syncInvMan() { // jQuery
   prm.push(getForage('fsh_' + calf.subcmd)
     .done(extendOptions)
   );
-  $.when.apply($, prm).done(function() {
-    add(3, getInvMan);
-  });
+  when(prm, asyncCall);
 }
 
 export function injectInventoryManagerNew() {

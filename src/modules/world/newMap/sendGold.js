@@ -1,9 +1,9 @@
 import addCommas from '../../system/addCommas';
-import {def_fetch_playerStats} from '../../support/constants';
 import getValue from '../../system/getValue';
 import infoBox from '../../common/infoBox';
 import retryAjax from '../../ajax/retryAjax';
 import setValue from '../../system/setValue';
+import {def_fetch_playerStats, def_playerGold} from '../../support/constants';
 
 var goldAmount;
 var sendGoldonWorld;
@@ -44,12 +44,8 @@ function updateSendGoldOnWorld() { // jQuery
   }
 }
 
-export function injectSendGoldOnWorld() { // jQuery
-  sendGoldonWorld = getValue('sendGoldonWorld');
-  if (!sendGoldonWorld) {return;}
-  goldAmount = getValue('goldAmount');
-  $('#statbar-gold-tooltip-general').append(
-    '<dt class="stat-gold-sendTo">Send To:</dt>' +
+function extraHtml() {
+  return '<dt class="stat-gold-sendTo">Send To:</dt>' +
     '<dd id="HelperSendTo">' + getValue('goldRecipient') + '</dd>' +
     '<dt class="stat-gold-sendAmt">Amount:</dt>' +
     '<dd id="HelperSendAmt">' + addCommas(goldAmount) + '</dd>' +
@@ -58,9 +54,18 @@ export function injectSendGoldOnWorld() { // jQuery
     'type="submit"><input type="hidden" id="xc" value=""</dd>' +
     '<dt class="stat-gold-sendTotal">Total Sent:</dt>' +
     '<dd id="HelperSendTotal">' +
-      addCommas(getValue('currentGoldSentTotal')) + '</dd>'
-  );
+      addCommas(getValue('currentGoldSentTotal')) + '</dd>';
+}
+
+function prepareSendGoldOnWorld() {
+  goldAmount = getValue('goldAmount');
+  $('#statbar-gold-tooltip-general').append(extraHtml());
   $('#HelperSendGold').click(doSendGold);
   updateSendGoldOnWorld();
-  $.subscribe('gold.stats-player', updateSendGoldOnWorld);
+  $.subscribe(def_playerGold, updateSendGoldOnWorld);
+}
+
+export function injectSendGoldOnWorld() { // jQuery
+  sendGoldonWorld = getValue('sendGoldonWorld');
+  if (sendGoldonWorld) {prepareSendGoldOnWorld();}
 }

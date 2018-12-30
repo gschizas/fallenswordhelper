@@ -27,10 +27,7 @@ function getNekid() {
   Array.prototype.forEach.call(aLinks, removeItem);
 }
 
-export default function nekidBtn() {
-  var profileRightColumn = getElementById('profileRightColumn');
-  profileCombatSetDiv = getElementById('profileCombatSetDiv');
-  var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
+function makeButton() {
   var nekidDiv = createDiv({className: 'fshCenter'});
   var theBtn = createButton({
     className: 'fshBl fshBls',
@@ -39,7 +36,15 @@ export default function nekidBtn() {
   insertTextBeforeEnd(nekidDiv, '[ ');
   insertElement(nekidDiv, theBtn);
   insertTextBeforeEnd(nekidDiv, ' ]');
-  profileRightColumn.replaceChild(nekidDiv, targetBr);
   on(theBtn, 'click', getNekid);
+  return nekidDiv;
+}
+
+export default function nekidBtn() {
+  var profileRightColumn = getElementById('profileRightColumn');
+  profileCombatSetDiv = getElementById('profileCombatSetDiv');
+  var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
+  var nekidDiv = makeButton();
+  profileRightColumn.replaceChild(nekidDiv, targetBr);
 }
 

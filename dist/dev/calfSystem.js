@@ -1022,6 +1022,7 @@
   var def_playerBuffs = 'buffs.player';
   var def_playerUpdate = 'update.player';
   var def_playerLevel = 'level.stats-player';
+  var def_playerGold = 'gold.stats-player';
   var def_shopPrompt = 'prompt.worldDialogShop';
   var def_controlsKeydown = 'keydown.controls';
   var def_realmUpdate = 'update.realm';
@@ -1044,6 +1045,10 @@
 
   var def_needToCompose = 'needToCompose';
   var def_lastComposeCheck = 'lastComposeCheck';
+
+  var def_table = 'table';
+
+  var fshBuffLog = 'fsh_buffLog';
 
   function testForGuildLogMsg(guildLogNode) {
     return location.search !== newGuildLogLoc ||
@@ -1802,7 +1807,7 @@
   }
 
   function clearBuffLog() {
-    setForage('fsh_buffLog', '').done(displayBuffLog);
+    setForage(fshBuffLog, '').done(displayBuffLog);
   }
 
   function injectBuffLog(injector) { // jQuery.min
@@ -1816,7 +1821,7 @@
       divId: 'bufflog'
     });
     on(getElementById('clearBuffs'), 'click', clearBuffLog);
-    getForage('fsh_buffLog').done(displayBuffLog);
+    getForage(fshBuffLog).done(displayBuffLog);
   }
 
   function addCommas(x) {
@@ -3766,6 +3771,33 @@
     GM_setValue(name, JSON.stringify(value));
   }
 
+  var auctionSearchBlurb =
+    '<div>This screen allows you to set up some quick ' +
+    'search templates for the Auction House. The Display on AH column ' +
+    'indicates if the quick search will show on the short list on the ' +
+    'Auction House main screen. A maximum of 36 items can show on this ' +
+    'list (It will not show more than 36 even if you have more than 36 ' +
+    'flagged). To edit items, either use the large text area below, or ' +
+    'add a new entry and delete the old one. You can always reset the ' +
+    'list to the default values.</div>' +
+    '<div class="fshSmall" id="fshAso">' +
+    '</div>';
+
+  function auctionSearchParams() {
+    return {
+      id: 'fshAso',
+      headers: ['Category', 'Nickname', 'Quick Search Text',
+        'Display in AH?'],
+      fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
+      tags: ['text', 'text', 'text', 'checkbox'],
+      url: ['', '',
+        'index.php?cmd=auctionhouse&amp;type=-1&amp;search=@replaceme@', ''],
+      currentItems: getValueJSON('quickSearchList'),
+      gmname: 'quickSearchList',
+      categoryField: 'category',
+    };
+  }
+
   var param;
 
   function hasUrl(j) {
@@ -3907,29 +3939,9 @@
     var content = injector || pCC;
     content.innerHTML =
       makePageHeader('Trade Hub Quick Search', '', '', '') +
-      '<div>This screen allows you to set up some quick ' +
-        'search templates for the Auction House. The Display on AH column ' +
-        'indicates if the quick search will show on the short list on the ' +
-        'Auction House main screen. A maximum of 36 items can show on this ' +
-        'list (It will not show more than 36 even if you have more than 36 ' +
-        'flagged). To edit items, either use the large text area below, or ' +
-        'add a new entry and delete the old one. You can always reset the ' +
-        'list to the default values.</div>' +
-      '<div class="fshSmall" id="fshAso">' +
-      '</div>';
+      auctionSearchBlurb;
     // global parameters for the meta function generateManageTable
-    param = {
-      id: 'fshAso',
-      headers: ['Category', 'Nickname', 'Quick Search Text',
-        'Display in AH?'],
-      fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
-      tags: ['text', 'text', 'text', 'checkbox'],
-      url: ['', '',
-        'index.php?cmd=auctionhouse&amp;type=-1&amp;search=@replaceme@', ''],
-      currentItems: getValueJSON('quickSearchList'),
-      gmname: 'quickSearchList',
-      categoryField: 'category',
-    };
+    param = auctionSearchParams();
     generateManageTable();
     on(content, 'click', eventHandler(listEvents));
   }
@@ -5034,6 +5046,68 @@
     );
   }
 
+  function navHeightsIsArray(theNav, myNav) {
+    // first the closed saved variables
+    myNav.heights = [
+      null,
+      null,
+      // Character
+      getElementById('nav-character').nextElementSibling.children
+        .length * 22,
+      660,
+      // Guild
+      document.querySelectorAll('#nav-guild > ul li').length * 22,
+      374,
+      132,
+      132,
+      null
+    ];
+    if (myNav.state !== '-1' && myNav.state !== -1) {
+      // and now the open one
+      theNav.children[myNav.state].children[1].style.height =
+        myNav.heights[myNav.state] + 'px';
+    }
+  }
+
+  function navHeightExists(theNav, myNav) {
+    if (Array.isArray(myNav.heights)) {
+      navHeightsIsArray(theNav, myNav);
+    } else {
+      sendException('$(\'#nav\').data(\'nav\').heights is not an Array', false);
+    }
+  }
+
+  function navDataExists(theNav, myNav) {
+    if ('heights' in myNav) {
+      navHeightExists(theNav, myNav);
+    } else {
+      sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
+    }
+  }
+
+  function navExists(theNav) { // jQuery
+    var myNav = $(theNav).data('nav');
+    if (isObject(myNav)) {
+      navDataExists(theNav, myNav);
+    } else {
+      sendException('$(\'#nav\').data(\'nav\') is not an object', false);
+    }
+  }
+
+  function adjustHeight() {
+    // adjust the menu height for the newly added items
+    var theNav = getElementById('nav');
+    if (theNav instanceof Element) {
+      navExists(theNav);
+    } else {
+      sendException('#nav is not an Element', false);
+    }
+  }
+
+  function execute(fn) {
+    fn();
+  }
+
   function refIsLast(newNode, referenceNode) {
     if (referenceNode.nextSibling instanceof Node) {
       return insertElementBefore(newNode, referenceNode.nextSibling);
@@ -5047,8 +5121,6 @@
       return refIsLast(newNode, referenceNode);
     }
   }
-
-  var guildId$1;
 
   function updateQuestLink() {
     var lastActiveQuestPage = getValue('lastActiveQuestPage');
@@ -5113,7 +5185,7 @@
   }
 
   function newGuildLogLink() {
-    if (guildId$1 && !getValue('useNewGuildLog')) {
+    if (currentGuildId() && !getValue('useNewGuildLog')) {
       // if not using the new guild log, show it as a separate menu entry
       insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
         '<li class="nav-level-2"><a class="nav-link" ' +
@@ -5123,69 +5195,11 @@
   }
 
   function guildInventory() {
-    if (guildId$1) {
+    if (currentGuildId()) {
       insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
         '<li class="nav-level-2"><a class="nav-link" id="nav-' +
         'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
         '&subcmd=guildinvmgr">Guild Inventory</a></li>');
-    }
-  }
-
-  function navHeightsIsArray(theNav, myNav) {
-    // first the closed saved variables
-    myNav.heights = [
-      null,
-      null,
-      // Character
-      getElementById('nav-character').nextElementSibling.children
-        .length * 22,
-      660,
-      // Guild
-      document.querySelectorAll('#nav-guild > ul li').length * 22,
-      374,
-      132,
-      132,
-      null
-    ];
-    if (myNav.state !== '-1' && myNav.state !== -1) {
-      // and now the open one
-      theNav.children[myNav.state].children[1].style.height =
-        myNav.heights[myNav.state] + 'px';
-    }
-  }
-
-  function navHeightExists(theNav, myNav) {
-    if (Array.isArray(myNav.heights)) {
-      navHeightsIsArray(theNav, myNav);
-    } else {
-      sendException('$(\'#nav\').data(\'nav\').heights is not an Array', false);
-    }
-  }
-
-  function navDataExists(theNav, myNav) {
-    if ('heights' in myNav) {
-      navHeightExists(theNav, myNav);
-    } else {
-      sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
-    }
-  }
-
-  function navExists(theNav) { // jQuery
-    var myNav = $(theNav).data('nav');
-    if (isObject(myNav)) {
-      navDataExists(theNav, myNav);
-    } else {
-      sendException('$(\'#nav\').data(\'nav\') is not an object', false);
-    }
-  }
-
-  function adjustHeight() {
-    // adjust the menu height for the newly added items
-    var theNav = getElementById('nav');
-    if (theNav instanceof Element) {
-      navExists(theNav);
-    } else {
-      sendException('#nav is not an Element', false);
     }
   }
 
@@ -5216,22 +5230,29 @@
       'nav-actions-interaction-findplayer');
   }
 
-  function injectMenu() {
-    if (!getElementById('pCL') || jQueryNotPresent()) {return;}
-    guildId$1 = currentGuildId();
-    updateQuestLink();
-    updateScavLink();
-    characterButtons();
-    // guild
-    guildInventory();
-    newGuildLogLink();
-    // top rated
+  function topRatedLink() {
     insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
       'Top 250 Players</a></li>');
-    actionButtons();
-    adjustHeight();
+  }
+
+  function doAccordion() {
+    [
+      updateQuestLink,
+      updateScavLink,
+      characterButtons,
+      guildInventory,
+      newGuildLogLink,
+      topRatedLink,
+      actionButtons,
+      adjustHeight,
+    ].forEach(execute);
+  }
+
+  function injectMenu() {
+    if (!getElementById('pCL') || jQueryNotPresent()) {return;}
+    doAccordion();
   }
 
   var enterForSendMessage;
@@ -6371,12 +6392,8 @@
     }
   }
 
-  function injectSendGoldOnWorld() { // jQuery
-    sendGoldonWorld = getValue('sendGoldonWorld');
-    if (!sendGoldonWorld) {return;}
-    goldAmount = getValue('goldAmount');
-    $('#statbar-gold-tooltip-general').append(
-      '<dt class="stat-gold-sendTo">Send To:</dt>' +
+  function extraHtml() {
+    return '<dt class="stat-gold-sendTo">Send To:</dt>' +
       '<dd id="HelperSendTo">' + getValue('goldRecipient') + '</dd>' +
       '<dt class="stat-gold-sendAmt">Amount:</dt>' +
       '<dd id="HelperSendAmt">' + addCommas(goldAmount) + '</dd>' +
@@ -6385,11 +6402,20 @@
       'type="submit"><input type="hidden" id="xc" value=""</dd>' +
       '<dt class="stat-gold-sendTotal">Total Sent:</dt>' +
       '<dd id="HelperSendTotal">' +
-        addCommas(getValue('currentGoldSentTotal')) + '</dd>'
-    );
+        addCommas(getValue('currentGoldSentTotal')) + '</dd>';
+  }
+
+  function prepareSendGoldOnWorld() {
+    goldAmount = getValue('goldAmount');
+    $('#statbar-gold-tooltip-general').append(extraHtml());
     $('#HelperSendGold').click(doSendGold);
     updateSendGoldOnWorld();
-    $.subscribe('gold.stats-player', updateSendGoldOnWorld);
+    $.subscribe(def_playerGold, updateSendGoldOnWorld);
+  }
+
+  function injectSendGoldOnWorld() { // jQuery
+    sendGoldonWorld = getValue('sendGoldonWorld');
+    if (sendGoldonWorld) {prepareSendGoldOnWorld();}
   }
 
   function getDoc(doc, context) {
@@ -7648,6 +7674,10 @@
     return guild({subcmd: 'advisor', subcmd2: 'view', period: period});
   }
 
+  function when(prm, callback) {
+    return $.when.apply($, prm).done(callback);
+  }
+
   var advisorColumns = [
     {title: '<div class="fshBold">Member</div>'},
     {title: '<div class="fshBold">Lvl</div>', 'class': 'dt-center'},
@@ -7799,7 +7829,7 @@
     var prm = [getMembrList(false)]
       .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
 
-    $.when.apply($, prm).done(partial(addAdvisorPages, list));
+    when(prm, partial(addAdvisorPages, list));
 
     timeEnd('guildAdvisor.injectAdvisorWeekly');
 
@@ -9374,16 +9404,19 @@
     return 0;
   }
 
+  function isDate(aDate) {
+    return Object.prototype.toString.call(aDate) === '[object Date]' &&
+      !isNaN(aDate.getTime());
+  }
+
   function formatLocalDateTime(aDate) {
-    if (Object.prototype.toString.call(aDate) === '[object Date]' &&
-        !isNaN(aDate.getTime())) {
-      var yyyy = aDate.getFullYear().toString();
-      var mon = padZ(aDate.getMonth() + 1);
-      var dd = padZ(aDate.getDate());
-      var hh = padZ(aDate.getHours());
-      var mm = padZ(aDate.getMinutes());
-      var ss = padZ(aDate.getSeconds());
-      return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+    if (isDate) {
+      return aDate.getFullYear().toString() + '-' +
+        padZ(aDate.getMonth() + 1) + '-' +
+        padZ(aDate.getDate()) + ' ' +
+        padZ(aDate.getHours()) + ':' +
+        padZ(aDate.getMinutes()) + ':' +
+        padZ(aDate.getSeconds());
     }
   }
 
@@ -10147,8 +10180,7 @@
   }
 
   function buildInv() {
-    var prm = [];
-    prm.push(doInventory());
+    var prm = [doInventory()];
     if (calf.subcmd === 'invmanagernew') {
       prm.push(doComposedFromBp());
     }
@@ -10156,7 +10188,7 @@
       prm.push(doGs());
       prm.push(doReport());
     }
-    return $.when.apply($, prm).done(gotSomeStuff);
+    return when(prm, gotSomeStuff);
   }
 
   function clearButton(fshInv) { // jQuery
@@ -10777,16 +10809,22 @@
       .removeClass();
   }
 
+  function clearButtons(td) {
+    [
+      2, // Where
+      12, // BP - GS
+      13, // GS - W/U
+      14, // W/U - Tag
+      15, // Tag - Drop
+      16 // ? - Send
+    ].forEach(function(i) {td.eq(i).empty();});
+  }
+
   function killRow(self, data) { // jQuery
     if (data.r === 1) {return;}
     var tr = self.closest('tr');
     var td = $('td', tr);
-    td.eq(2).empty(); // Where
-    td.eq(12).empty(); // BP - GS
-    td.eq(13).empty(); // GS - W/U
-    td.eq(14).empty(); // W/U - Tag
-    td.eq(15).empty(); // Tag - Drop
-    td.eq(16).empty(); // ? - Send
+    clearButtons(td);
     tr.css('text-decoration', 'line-through');
   }
 
@@ -11178,6 +11216,10 @@
 
   }
 
+  function asyncCall() {
+    add(3, getInvMan);
+  }
+
   function syncInvMan() { // jQuery
     var prm = [];
     prm.push(buildInv());
@@ -11187,9 +11229,7 @@
     prm.push(getForage('fsh_' + calf.subcmd)
       .done(extendOptions)
     );
-    $.when.apply($, prm).done(function() {
-      add(3, getInvMan);
-    });
+    when(prm, asyncCall);
   }
 
   function injectInventoryManagerNew() {
@@ -12187,6 +12227,8 @@
     }
   }
 
+  function removeSpinner(td) {td.parentNode.remove();}
+
   function delCompType(self) { // jQuery.min
     var toDelete = componentList[self.dataset.compid].del;
     var td = self.parentNode;
@@ -12197,7 +12239,7 @@
       prm.push(destroyComponent(toDelete.slice(i, i + batchSize))
         .done(destroyed));
     }
-    $.when.apply($, prm).done(function() {td.parentNode.remove();});
+    when(prm, partial(removeSpinner, td));
   }
 
   function deleteTypeHandler(evt) {
@@ -12472,10 +12514,7 @@
     Array.prototype.forEach.call(aLinks, removeItem);
   }
 
-  function nekidBtn() {
-    var profileRightColumn = getElementById('profileRightColumn');
-    profileCombatSetDiv = getElementById('profileCombatSetDiv');
-    var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
+  function makeButton() {
     var nekidDiv = createDiv({className: 'fshCenter'});
     var theBtn = createButton({
       className: 'fshBl fshBls',
@@ -12484,11 +12523,19 @@
     insertTextBeforeEnd(nekidDiv, '[ ');
     insertElement(nekidDiv, theBtn);
     insertTextBeforeEnd(nekidDiv, ' ]');
-    profileRightColumn.replaceChild(nekidDiv, targetBr);
     on(theBtn, 'click', getNekid);
+    return nekidDiv;
   }
 
-  var guildId$2;
+  function nekidBtn() {
+    var profileRightColumn = getElementById('profileRightColumn');
+    profileCombatSetDiv = getElementById('profileCombatSetDiv');
+    var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
+    var nekidDiv = makeButton();
+    profileRightColumn.replaceChild(nekidDiv, targetBr);
+  }
+
+  var guildId$1;
   var currentGuildRelationship;
   var guildMessages = {
     self: {color: 'fshGreen', message: getValue('guildSelfMessage')},
@@ -12527,8 +12574,8 @@
   }
 
   function guildRelationship(aLink) {
-    guildId$2 = thisGuildId(aLink);
-    if (guildId$2 && guildId$2 === currentGuildId()) {
+    guildId$1 = thisGuildId(aLink);
+    if (guildId$1 && guildId$1 === currentGuildId()) {
       setValue('guildSelf', aLink.text);
       return 'self';
     }
@@ -12587,7 +12634,7 @@
         'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
         playerid + '" data-tipped="Rank ' + playername +
         '" style="background-image: url(\'' + imageServer +
-        '/guilds/' + guildId$2 + '_mini.png\');"></a>&nbsp;&nbsp;';
+        '/guilds/' + guildId$1 + '_mini.png\');"></a>&nbsp;&nbsp;';
     }
     return '';
   }
@@ -14133,14 +14180,18 @@
     }
   }
 
-  function injectCell(potOpts, potObj) {
-    var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
+  function cellEventHandlers(potOpts, potObj, myCell) {
     on(myCell, 'change', partial(onChange, potOpts, potObj));
     on(myCell, 'click', eventHandler3([
       partial(doReset$1, potOpts, potObj),
       partial(saveState, potOpts)
     ]));
     on(myCell, 'input', partial(onInput, potOpts, potObj));
+  }
+
+  function injectCell(potOpts, potObj) {
+    var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
+    cellEventHandlers(potOpts, potObj, myCell);
     return myCell;
   }
 
@@ -15304,6 +15355,29 @@
       '</span></td></tr>';
   }
 
+  function corePrefs() {
+    return [
+      // General Prefs
+      generalPrefs(),
+      // Guild Manage
+      guildPrefs(),
+      // World Screen
+      prefs(),
+      // Log screen prefs
+      logPrefs(),
+      // Equipment screen prefs
+      equipPrefs(),
+      // Quest Preferences
+      questPrefs(),
+      // profile prefs
+      profilePrefs(),
+      // Bounty hunting prefs
+      bountyPrefs(),
+      // Other prefs
+      otherPrefs()
+    ].join('');
+  }
+
   function setupConfigData() {
     calf.configData =
       '<form><table id="fshSettingsTable">' +
@@ -15311,24 +15385,7 @@
         'Settings</b></th></thead>' +
       storageDetails() +
       linkToWebsite() +
-      // General Prefs
-      generalPrefs() +
-      // Guild Manage
-      guildPrefs() +
-      // World Screen
-      prefs() +
-      // Log screen prefs
-      logPrefs() +
-      // Equipment screen prefs
-      equipPrefs() +
-      // Quest Preferences
-      questPrefs() +
-      // profile prefs
-      profilePrefs() +
-      // Bounty hunting prefs
-      bountyPrefs() +
-      // Other prefs
-      otherPrefs() +
+      corePrefs() +
       // save button
       '<tr><td colspan="2" align=center><input type="button" class=' +
         '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
@@ -15690,6 +15747,10 @@
     uniq(data.r.ranks, 'id').forEach(partial(eachRank, guildId)); // BUG
   }
 
+  function hideSpinner() {
+    spinner$1.classList.add('fshHide');
+  }
+
   function findOnlinePlayers() { // jQuery
     var someTables = pCC.getElementsByTagName('table');
     var prm = [];
@@ -15710,9 +15771,7 @@
         guildView(guildId).done(parseGuild);
       }
     });
-    $.when.apply($, prm).done(function() {
-      spinner$1.classList.add('fshHide');
-    });
+    when(prm, hideSpinner);
   }
 
   function getMyVL(e) {
@@ -16815,13 +16874,15 @@
     });
   }
 
-  function primaryElementsSetup(relicData) {
-    defendersSetup(relicData);
+  function containerSetup() {
     if (containerDiv$1) {
       containerDiv$1.innerHTML = '';
     } else {
       containerDiv$1 = createDiv({className: 'body'});
     }
+  }
+
+  function makeLeftDiv(relicData) {
     leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
     insertElement(containerDiv$1, leftDiv);
     if (relicData.is_owner) {
@@ -16832,6 +16893,12 @@
       textContent: 'Fetch Stats'
     });
     insertElement(leftDiv, fetchStatsBtn);
+  }
+
+  function primaryElementsSetup(relicData) {
+    defendersSetup(relicData);
+    containerSetup();
+    makeLeftDiv(relicData);
     var dialogRelic = getElementById('dialog-relic');
     insertElement(dialogRelic, containerDiv$1);
   }
@@ -17288,7 +17355,7 @@
     prepareSecondaryDivs(relicData);
     resetCounters();
     var prm = buildStatPrm();
-    $.when.apply($, prm).done(doCalculations);
+    when(prm, doCalculations);
   }
 
   function viewRelic(e, data) {
@@ -17639,7 +17706,7 @@
     for (var i = 1; i < theValue; i += 1) {
       prm.push(quickBuy().done(quickDone));
     }
-    $.when.apply($, prm).done(normalBuy);
+    when(prm, normalBuy);
   }
 
   function injectQuickBuy() {
@@ -19041,7 +19108,7 @@
       initButtons,
       buffInfo,
       fixDebuff
-    ].forEach(function(fn) {fn();});
+    ].forEach(execute);
   }
 
   // -1 = world page
@@ -19367,13 +19434,13 @@
 
   function changeMoves(newMoves) {
     var prm = newMoves.map(newMove);
-    $.when.apply($, prm).done(pageRefresh);
+    when(prm, pageRefresh);
   }
 
   function updateMoves() { // jQuery
     var newMoves = getAllMoves();
     var prm = newMoves.map(resetMove);
-    $.when.apply($, prm).done(partial(changeMoves, newMoves));
+    when(prm, partial(changeMoves, newMoves));
   }
 
   function updateButton(table) { // jQuery
@@ -19406,10 +19473,14 @@
     table.append(row);
   }
 
+  function getTable$1() {
+    return imgNodes.eq(0).closest(def_table).parent().closest(def_table);
+  }
+
   function selectMoves(evt) { // jQuery
     $(evt.target).off();
     imgNodes = $('#pCC a[href*="=pickmove&"] img');
-    var table = imgNodes.eq(0).closest('table').parent().closest('table');
+    var table = getTable$1();
     pickerRow(table);
     $('img[src$="pvp/bar_spacer.jpg"]', table).attr({width: '15', height: '50'});
     updateButton(table);
@@ -19565,15 +19636,13 @@
   }
 
   function formatUtcDateTime(aDate) {
-    if (Object.prototype.toString.call(aDate) === '[object Date]' &&
-        !isNaN(aDate.getTime())) {
-      var yyyy = aDate.getUTCFullYear().toString();
-      var mon = padZ(aDate.getUTCMonth() + 1);
-      var dd = padZ(aDate.getUTCDate());
-      var hh = padZ(aDate.getUTCHours());
-      var mm = padZ(aDate.getUTCMinutes());
-      var ss = padZ(aDate.getUTCSeconds());
-      return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+    if (isDate) {
+      return aDate.getUTCFullYear().toString() + '-' +
+        padZ(aDate.getUTCMonth() + 1) + '-' +
+        padZ(aDate.getUTCDate()) + ' ' +
+        padZ(aDate.getUTCHours()) + ':' +
+        padZ(aDate.getUTCMinutes()) + ':' +
+        padZ(aDate.getUTCSeconds());
     }
   }
 
@@ -19659,6 +19728,11 @@
     }
   }
 
+  var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
+    ' higher level is currently active on \'(\\w*)\'');
+  var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
+    'activated on \'(\\w*)\'');
+
   function rejected(timeStamp, buffsNotCast, buffLog) {
     if (buffsNotCast) {
       return timeStamp + ' <span style="color: red;">' +
@@ -19690,22 +19764,18 @@
     var timeStamp = formatLocalDateTime(new Date());
     var buffsAttempted = getElementById('quickbuff-report')
       .innerHTML.split('<p>');
-    var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
-      ' higher level is currently active on \'(\\w*)\'');
-    var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
-      'activated on \'(\\w*)\'');
     for (var i = 0; i < buffsAttempted.length; i += 1) {
       var buffCast = buffsCastRE.exec(buffsAttempted[i]);
       var buffNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
       buffLog = successfull(timeStamp, buffCast, buffLog);
       buffLog = rejected(timeStamp, buffNotCast, buffLog);
     }
-    setForage('fsh_buffLog', buffLog);
+    setForage(fshBuffLog, buffLog);
   }
 
   function updateBuffLog() {
     if (!getValue('keepBuffLog')) {return;}
-    getForage('fsh_buffLog').done(buffResult);
+    getForage(fshBuffLog).done(buffResult);
   }
 
   var unknown = [
@@ -20408,6 +20478,10 @@
     addLogWidgets();
   }
 
+  function doRefresh$1() {
+    getElementById('refresh').click();
+  }
+
   function cancelAllAH() { // jQuery
     var cancelButtons = getElementById('resultRows')
       .getElementsByClassName('auctionCancel');
@@ -20426,9 +20500,7 @@
         })
       );
     }
-    $.when.apply($, prm).done(function() {
-      getElementById('refresh').click();
-    });
+    when(prm, doRefresh$1);
   }
 
   function makeCancelAll() {
@@ -20488,50 +20560,70 @@
     initWithdraw: '1'
   };
   var bankSettings;
+  var statbarGold$1 = '#pH #statbar-gold';
+  var statbarGoldTooltip = '#pH #statbar-gold-tooltip-general dd';
+  var pccB = '#pCC b';
+  var infoMsg = '#pCC #info-msg';
+  var withdrawAmount = '#pCC #withdraw_amount';
+  var depositAmount = '#pCC #deposit_amount';
+  var disabled = 'disabled';
+  var inputDepo = '#pCC input[value="Deposit"]';
 
   function doInfoBox(infoBox) { // jQuery
-    var target = $('#pCC #info-msg');
+    var target = $(infoMsg);
     if (target.length === 0) {
-      $('#pCC').prepend(infoBox.closest('table'));
+      $('#pCC').prepend(infoBox.closest(def_table));
     } else {
-      target.closest('table').replaceWith(infoBox.closest('table'));
+      target.closest(def_table).replaceWith(infoBox.closest(def_table));
     }
   }
 
+  function doStatBarGold(doc) {
+    $(statbarGold$1).text($(statbarGold$1, doc).text());
+    $(statbarGoldTooltip).text(function(index) {
+      return $(statbarGoldTooltip, doc).eq(index).text();
+    });
+  }
+
+  function doBoldText(doc, o) {
+    $(pccB).slice(o.balPos).text(function(index) {
+      return $(pccB, doc).slice(o.balPos).eq(index).text();
+    });
+  }
+
   function disableDepo(o) { // jQuery
-    if ($('#pCC b').eq(o.depoPos).text() === '0') {
-      $('#pCC input[value="Deposit"]').prop('disabled', true);
+    if ($(pccB).eq(o.depoPos).text() === '0') {
+      $(inputDepo).prop(disabled, true);
     }
   }
 
   function updateDepoAmount(o, doc) { // jQuery
     if (o.data.amount !== '1') {
-      $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
+      $(depositAmount).val($(depositAmount, doc).val());
     } else {
-      $('#pCC #deposit_amount').val('1');
+      $(depositAmount).val('1');
     }
+  }
+
+  function replaceValues(doc, infoBox) {
+    doInfoBox(infoBox);
+    doStatBarGold(doc);
+    var o = bankSettings;
+    doBoldText(doc, o);
+    disableDepo(o);
+    updateDepoAmount(o, doc);
+    $(withdrawAmount).val(o.initWithdraw);
   }
 
   function transResponse(response) { // jQuery
     var doc = createDocument(response);
-    var infoBox = $('#pCC #info-msg', doc);
+    var infoBox = $(infoMsg, doc);
     if (infoBox.length === 0) {return;}
-    doInfoBox(infoBox);
-    $('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
-    $('#pH #statbar-gold-tooltip-general dd').text(function(index) {
-      return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
-    });
-    var o = bankSettings;
-    $('#pCC b').slice(o.balPos).text(function(index) {
-      return $('#pCC b', doc).slice(o.balPos).eq(index).text();
-    });
-    disableDepo(o);
-    updateDepoAmount(o, doc);
-    $('#pCC #withdraw_amount').val(o.initWithdraw);
+    replaceValues(doc, infoBox);
   }
 
   function invalidAmount(o, amount) { // jQuery
-    return $('#pCC b').eq(o.depoPos).text() === '0' ||
+    return $(pccB).eq(o.depoPos).text() === '0' ||
       !$.isNumeric(amount) || amount < 1;
   }
 
@@ -20542,7 +20634,7 @@
   function bankDeposit(e) { // jQuery
     e.preventDefault();
     var o = bankSettings;
-    var amount = $('#pCC #deposit_amount').val();
+    var amount = $(depositAmount).val();
     if (invalidAmount(o, amount)) {return;}
     o.data.mode = 'deposit';
     o.data.amount = amount;
@@ -20552,7 +20644,7 @@
   function bankWithdrawal(e) { // jQuery
     e.preventDefault();
     var o = bankSettings;
-    var amount = $('#pCC #withdraw_amount').val();
+    var amount = $(withdrawAmount).val();
     if (!$.isNumeric(amount) || amount < 1) {return;}
     o.data.mode = 'withdraw';
     o.data.amount = amount;
@@ -20568,8 +20660,8 @@
   }
 
   function captureButtons(o, depo, withdraw) { // jQuery
-    if ($('#pCC b').eq(o.depoPos).text() === '0') { // Check Deposits Available
-      depo.prop('disabled', true);
+    if ($(pccB).eq(o.depoPos).text() === '0') { // Check Deposits Available
+      depo.prop(disabled, true);
     } else {
       depo.click(bankDeposit);
     }
@@ -20578,7 +20670,7 @@
 
   function appLink(o, bank) { // jQuery
     linkToGuildBank(o, bank);
-    var depo = $('#pCC input[value="Deposit"]');
+    var depo = $(inputDepo);
     if (depo.length !== 1) {return;}
     var withdraw = $('#pCC input[value="Withdraw"]');
     if (withdraw.length !== 1) {return;}
@@ -20587,7 +20679,7 @@
 
   function hasJquery$1() { // jQuery
     var o = bankSettings;
-    var bank = $('#pCC b');
+    var bank = $(pccB);
     if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
       appLink(o, bank);
     }
@@ -20883,7 +20975,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '68';
+  window.FSH.calf = '69';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

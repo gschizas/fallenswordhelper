@@ -1,4 +1,5 @@
 import createDocument from './system/createDocument';
+import {def_table} from './support/constants';
 import jQueryPresent from './common/jQueryPresent';
 import retryAjax from './ajax/retryAjax';
 
@@ -28,50 +29,70 @@ var guildBank = {
   initWithdraw: '1'
 };
 var bankSettings;
+var statbarGold = '#pH #statbar-gold';
+var statbarGoldTooltip = '#pH #statbar-gold-tooltip-general dd';
+var pccB = '#pCC b';
+var infoMsg = '#pCC #info-msg';
+var withdrawAmount = '#pCC #withdraw_amount';
+var depositAmount = '#pCC #deposit_amount';
+var disabled = 'disabled';
+var inputDepo = '#pCC input[value="Deposit"]';
 
 function doInfoBox(infoBox) { // jQuery
-  var target = $('#pCC #info-msg');
+  var target = $(infoMsg);
   if (target.length === 0) {
-    $('#pCC').prepend(infoBox.closest('table'));
+    $('#pCC').prepend(infoBox.closest(def_table));
   } else {
-    target.closest('table').replaceWith(infoBox.closest('table'));
+    target.closest(def_table).replaceWith(infoBox.closest(def_table));
   }
 }
 
+function doStatBarGold(doc) {
+  $(statbarGold).text($(statbarGold, doc).text());
+  $(statbarGoldTooltip).text(function(index) {
+    return $(statbarGoldTooltip, doc).eq(index).text();
+  });
+}
+
+function doBoldText(doc, o) {
+  $(pccB).slice(o.balPos).text(function(index) {
+    return $(pccB, doc).slice(o.balPos).eq(index).text();
+  });
+}
+
 function disableDepo(o) { // jQuery
-  if ($('#pCC b').eq(o.depoPos).text() === '0') {
-    $('#pCC input[value="Deposit"]').prop('disabled', true);
+  if ($(pccB).eq(o.depoPos).text() === '0') {
+    $(inputDepo).prop(disabled, true);
   }
 }
 
 function updateDepoAmount(o, doc) { // jQuery
   if (o.data.amount !== '1') {
-    $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
+    $(depositAmount).val($(depositAmount, doc).val());
   } else {
-    $('#pCC #deposit_amount').val('1');
+    $(depositAmount).val('1');
   }
+}
+
+function replaceValues(doc, infoBox) {
+  doInfoBox(infoBox);
+  doStatBarGold(doc);
+  var o = bankSettings;
+  doBoldText(doc, o);
+  disableDepo(o);
+  updateDepoAmount(o, doc);
+  $(withdrawAmount).val(o.initWithdraw);
 }
 
 function transResponse(response) { // jQuery
   var doc = createDocument(response);
-  var infoBox = $('#pCC #info-msg', doc);
+  var infoBox = $(infoMsg, doc);
   if (infoBox.length === 0) {return;}
-  doInfoBox(infoBox);
-  $('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
-  $('#pH #statbar-gold-tooltip-general dd').text(function(index) {
-    return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
-  });
-  var o = bankSettings;
-  $('#pCC b').slice(o.balPos).text(function(index) {
-    return $('#pCC b', doc).slice(o.balPos).eq(index).text();
-  });
-  disableDepo(o);
-  updateDepoAmount(o, doc);
-  $('#pCC #withdraw_amount').val(o.initWithdraw);
+  replaceValues(doc, infoBox);
 }
 
 function invalidAmount(o, amount) { // jQuery
-  return $('#pCC b').eq(o.depoPos).text() === '0' ||
+  return $(pccB).eq(o.depoPos).text() === '0' ||
     !$.isNumeric(amount) || amount < 1;
 }
 
@@ -82,7 +103,7 @@ function doAjax(oData) {
 function bankDeposit(e) { // jQuery
   e.preventDefault();
   var o = bankSettings;
-  var amount = $('#pCC #deposit_amount').val();
+  var amount = $(depositAmount).val();
   if (invalidAmount(o, amount)) {return;}
   o.data.mode = 'deposit';
   o.data.amount = amount;
@@ -92,7 +113,7 @@ function bankDeposit(e) { // jQuery
 function bankWithdrawal(e) { // jQuery
   e.preventDefault();
   var o = bankSettings;
-  var amount = $('#pCC #withdraw_amount').val();
+  var amount = $(withdrawAmount).val();
   if (!$.isNumeric(amount) || amount < 1) {return;}
   o.data.mode = 'withdraw';
   o.data.amount = amount;
@@ -108,8 +129,8 @@ function linkToGuildBank(o, bank) { // jQuery
 }
 
 function captureButtons(o, depo, withdraw) { // jQuery
-  if ($('#pCC b').eq(o.depoPos).text() === '0') { // Check Deposits Available
-    depo.prop('disabled', true);
+  if ($(pccB).eq(o.depoPos).text() === '0') { // Check Deposits Available
+    depo.prop(disabled, true);
   } else {
     depo.click(bankDeposit);
   }
@@ -118,7 +139,7 @@ function captureButtons(o, depo, withdraw) { // jQuery
 
 function appLink(o, bank) { // jQuery
   linkToGuildBank(o, bank);
-  var depo = $('#pCC input[value="Deposit"]');
+  var depo = $(inputDepo);
   if (depo.length !== 1) {return;}
   var withdraw = $('#pCC input[value="Withdraw"]');
   if (withdraw.length !== 1) {return;}
@@ -127,7 +148,7 @@ function appLink(o, bank) { // jQuery
 
 function hasJquery() { // jQuery
   var o = bankSettings;
-  var bank = $('#pCC b');
+  var bank = $(pccB);
   if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
     appLink(o, bank);
   }

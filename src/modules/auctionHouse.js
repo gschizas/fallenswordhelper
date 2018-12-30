@@ -9,6 +9,11 @@ import on from './common/on';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 import retryAjax from './ajax/retryAjax';
+import when from './common/when';
+
+function doRefresh() {
+  getElementById('refresh').click();
+}
 
 function cancelAllAH() { // jQuery
   var cancelButtons = getElementById('resultRows')
@@ -28,9 +33,7 @@ function cancelAllAH() { // jQuery
       })
     );
   }
-  $.when.apply($, prm).done(function() {
-    getElementById('refresh').click();
-  });
+  when(prm, doRefresh);
 }
 
 function makeCancelAll() {

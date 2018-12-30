@@ -10,7 +10,7 @@ import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
 import injectJoinAllLink from '../notification/injectJoinAllLink';
 import injectLevelupCalculator from './calcs/injectLevelupCalculator';
-import injectMenu from './accordion';
+import injectMenu from './accordion/injectMenu';
 import injectQuickMsgDialogJQ from './messaging';
 import injectServerNode from './injectServerNode';
 import injectStaminaCalculator from './calcs/injectStaminaCalculator';

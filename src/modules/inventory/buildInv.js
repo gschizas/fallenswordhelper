@@ -4,6 +4,7 @@ import getInventory from '../ajax/getInventory';
 import loadInventory from '../app/profile/loadInventory';
 import partial from '../common/partial';
 import report from '../app/guild/inventory/report';
+import when from '../common/when';
 
 export var theInv;
 var composed = [];
@@ -54,8 +55,7 @@ function gotSomeStuff() {
 }
 
 export function buildInv() {
-  var prm = [];
-  prm.push(doInventory());
+  var prm = [doInventory()];
   if (calf.subcmd === 'invmanagernew') {
     prm.push(doComposedFromBp());
   }
@@ -63,5 +63,5 @@ export function buildInv() {
     prm.push(doGs());
     prm.push(doReport());
   }
-  return $.when.apply($, prm).done(gotSomeStuff);
+  return when(prm, gotSomeStuff);
 }

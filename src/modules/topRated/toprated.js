@@ -19,6 +19,7 @@ import playerDataObject from '../common/playerDataObject';
 //#endif
 import {sendEvent} from '../support/fshGa';
 import uniq from '../common/uniq';
+import when from '../common/when';
 import {
   calculateBoundaries,
   pvpLowerLevel,
@@ -115,6 +116,10 @@ function parseGuild(data) {
   uniq(data.r.ranks, 'id').forEach(partial(eachRank, guildId)); // BUG
 }
 
+function hideSpinner() {
+  spinner.classList.add('fshHide');
+}
+
 function findOnlinePlayers() { // jQuery
   var someTables = pCC.getElementsByTagName('table');
   var prm = [];
@@ -135,9 +140,7 @@ function findOnlinePlayers() { // jQuery
       guildView(guildId).done(parseGuild);
     }
   });
-  $.when.apply($, prm).done(function() {
-    spinner.classList.add('fshHide');
-  });
+  when(prm, hideSpinner);
 }
 
 function getMyVL(e) {
