@@ -1,6 +1,7 @@
 import createDocument from '../../system/createDocument';
 import {createInput} from '../../common/cElement';
 import {getElementById} from '../../common/getElement';
+import hideElement from '../../common/hideElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -40,7 +41,7 @@ function parseRankData(linkElement, responseText) {
 
 function fetchRankData() { // jQuery.min
   var calcButton = getElementById('getrankweightings');
-  calcButton.classList.add('fshHide');
+  hideElement(calcButton);
   var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
   Array.prototype.forEach.call(allItems, function(anItem) {
     var targetNode = anItem.parentNode.parentNode.previousElementSibling;

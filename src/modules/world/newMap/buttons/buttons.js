@@ -1,5 +1,5 @@
 import calf from '../../../support/calf';
-import eventHandler from '../../../common/eventHandler';
+import eventHandler5 from '../../../common/eventHandler5';
 import fixTeleport from './fixTeleport';
 import {getElementById} from '../../../common/getElement';
 import getValue from '../../../system/getValue';
@@ -60,36 +60,6 @@ function toggleHuntMode() {
   calf.huntingMode = !calf.huntingMode;
   setValue('huntingMode', calf.huntingMode);
 }
-
-var changeHdl = [
-  {
-    test: function(self) {return self === soundCheck;},
-    act: toggleSound
-  },
-  {
-    test: function(self) {return self === huntCheck;},
-    act: toggleHuntMode
-  }
-];
-
-var clickHdl = [
-  {
-    test: function(self) {return self === formGroup;},
-    act: doFormGroup
-  },
-  {
-    test: function(self) {return self === quickBuff;},
-    act: openQuickBuff
-  },
-  {
-    test: function(self) {return self === realmMap;},
-    act: openRealmMap
-  },
-  {
-    test: function(self) {return self === ufsgMap;},
-    act: openUfsgMap
-  }
-];
 
 function makeButtonContainer() {
   return createDiv({
@@ -175,9 +145,21 @@ function addButtons() {
   showHuntMode(buttonContainer);
 }
 
+var changeHdl = [
+  [function(self) {return self === soundCheck;}, toggleSound],
+  [function(self) {return self === huntCheck;}, toggleHuntMode]
+];
+
+var clickHdl = [
+  [function(self) {return self === formGroup;}, doFormGroup],
+  [function(self) {return self === quickBuff;}, openQuickBuff],
+  [function(self) {return self === realmMap;}, openRealmMap],
+  [function(self) {return self === ufsgMap;}, openUfsgMap]
+];
+
 function setupHandlers() {
-  on(buttonContainer, 'click', eventHandler(clickHdl));
-  on(buttonContainer, 'change', eventHandler(changeHdl));
+  on(buttonContainer, 'click', eventHandler5(clickHdl));
+  on(buttonContainer, 'change', eventHandler5(changeHdl));
 }
 
 function injectButtons() {

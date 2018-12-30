@@ -22,7 +22,7 @@ function destroyed(data) {
 
 function removeSpinner(td) {td.parentNode.remove();}
 
-function delCompType(self) { // jQuery.min
+export default function delCompType(self) { // jQuery.min
   var toDelete = componentList[self.dataset.compid].del;
   var td = self.parentNode;
   doSpinner(td);
@@ -33,11 +33,4 @@ function delCompType(self) { // jQuery.min
       .done(destroyed));
   }
   when(prm, partial(removeSpinner, td));
-}
-
-export default function deleteTypeHandler(evt) {
-  if (evt.target.classList.contains('compDelType')) {
-    delCompType(evt.target);
-    return true;
-  }
 }

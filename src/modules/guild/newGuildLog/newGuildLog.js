@@ -2,12 +2,13 @@ import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
 import addLogColoring from '../../logs/addLogColoring';
 import createDocument from '../../system/createDocument';
 import {createTable} from '../../common/cElement';
-import eventHandler from '../../common/eventHandler';
+import eventHandler5 from '../../common/eventHandler5';
 import functionPasses from '../../common/functionPasses';
 import {getElementById} from '../../common/getElement';
 import getForage from '../../ajax/getForage';
 import getGuildLogPage from './getGuildLogPage';
 import getValue from '../../system/getValue';
+import hideElement from '../../common/hideElement';
 import {imageServer} from '../../system/system';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
@@ -189,10 +190,6 @@ function toggleItem(self) {
   });
 }
 
-function addHide(el) {
-  if (el.classList) {el.classList.add('fshHide');}
-}
-
 function removeHide(el) {
   if (el && el.classList) {el.classList.remove('fshHide');}
 }
@@ -210,8 +207,8 @@ function selectNone() {
   options.checks = noChecks.slice(0);
   setChecks();
   tmpGuildLog.forEach(function(r) {
-    addHide(r[5]);
-    addHide(r[6]);
+    hideElement(r[5]);
+    hideElement(r[6]);
   });
 }
 
@@ -226,10 +223,10 @@ function refresh() {
 }
 
 var guildLogEvents = [
-  {test: function(self) {return self.tagName === 'INPUT';}, act: toggleItem},
-  {test: function(self) {return self.id === 'fshAll';}, act: selectAll},
-  {test: function(self) {return self.id === 'fshNone';}, act: selectNone},
-  {test: function(self) {return self.id === 'rfsh';}, act: refresh}
+  [function(self) {return self.tagName === 'INPUT';}, toggleItem],
+  [function(self) {return self.id === 'fshAll';}, selectAll],
+  [function(self) {return self.id === 'fshNone';}, selectNone],
+  [function(self) {return self.id === 'rfsh';}, refresh]
 ];
 
 function setOpts(guildLog) {
@@ -251,7 +248,7 @@ function gotOptions(guildLog) {
   setOpts(guildLog);
   pCC.innerHTML = guildLogFilter;
   getElements();
-  on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
+  on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents));
   setChecks();
   setMaxPage();
   getGuildLogPage(1).done(processFirstPage);

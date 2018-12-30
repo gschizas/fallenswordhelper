@@ -1,4 +1,6 @@
 import add from '../support/task';
+import addGuildInfoWidgets from './widgets/addGuildInfoWidgets';
+import addOnlineAlliesWidgets from './widgets/addOnlineAlliesWidgets';
 import calf from '../support/calf';
 import changeGuildLogHREF from './changeGuildLogHREF';
 import {getElementById} from '../common/getElement';
@@ -28,7 +30,6 @@ import replaceKeyHandler from './keyHandler';
 import scoutTowerLink from './scoutTowerLink';
 import {seLog} from '../seLog/seLog';
 import statbar from './statBar';
-import {addGuildInfoWidgets, addOnlineAlliesWidgets} from './widgets';
 
 function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');

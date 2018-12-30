@@ -64,14 +64,7 @@ function displayComponentTally(self, data) {
   }
 }
 
-function countComponent(self) { // jQuery.min
+export default function countComponent(self) { // jQuery.min
   sendEvent('components', 'countComponent');
   loadComponents().done(partial(displayComponentTally, self));
-}
-
-export default function countComponentHandler(evt) {
-  if (evt.target.classList.contains('count-components')) {
-    countComponent(evt.target);
-    return true;
-  }
 }

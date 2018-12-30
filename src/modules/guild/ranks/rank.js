@@ -32,24 +32,28 @@ function getPxScroll(val) {
   return 22;
 }
 
-function overrideUpDown(evt, val) {
-  var thisRankRow = evt.target.parentNode.parentNode.parentNode;
-  var thisRankRowNum = thisRankRow.rowIndex;
-  var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
-  var parentTable = thisRankRow.parentNode;
-  if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
+function shuffleRows(evt, thisRankRow, targetRowNum) {
   var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
-  rankPosition(val.toLowerCase(), matchRankId[1]);
-  var injectRow = parentTable.rows[targetRowNum];
+  rankPosition(evt.target.value.toLowerCase(), matchRankId[1]);
+  var injectRow = thisRankRow.parentNode.rows[targetRowNum];
   insertElementBefore(thisRankRow, injectRow);
-  var pxScroll = getPxScroll(val);
+  var pxScroll = getPxScroll(evt.target.value);
   window.scrollBy(0, pxScroll);
   evt.stopPropagation();
 }
 
+function overrideUpDown(evt) {
+  var thisRankRow = evt.target.parentNode.parentNode.parentNode;
+  var targetRowNum = thisRankRow.rowIndex +
+    getTargetRowNumber(evt.target.value);
+  if (notValidRow(
+    thisRankRow.rowIndex, targetRowNum, thisRankRow.parentNode
+  )) {return;}
+  shuffleRows(evt, thisRankRow, targetRowNum);
+}
+
 function ajaxifyRankControls(evt) {
-  var val = evt.target.value;
-  if (['Up', 'Down'].includes(val)) {overrideUpDown(evt, val);}
+  if (['Up', 'Down'].includes(evt.target.value)) {overrideUpDown(evt);}
 }
 
 function doButtons() {

@@ -1,5 +1,6 @@
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import hideElement from './hideElement';
 import isFunction from './isFunction';
 import on from './on';
 import partial from './partial';
@@ -11,7 +12,7 @@ var headerIndex;
 
 function collapseArt(article) {
   article.rows.forEach(function(el) {
-    el.row.classList.add('fshHide');
+    hideElement(el.row);
   });
   article.open = false;
 }
@@ -70,7 +71,7 @@ function makeHeaderClickable(row) {
 
 function collapseDuringAnalysis(row, thisArticle) {
   if (prefValue) {
-    row.classList.add('fshHide');
+    hideElement(row);
     thisArticle.open = false;
   } else {
     thisArticle.open = true;

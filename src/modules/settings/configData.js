@@ -1,6 +1,7 @@
 import bountyPrefs from './bountyPrefs';
 import calf from '../support/calf';
 import equipPrefs from './equipPrefs';
+import functionPasses from '../common/functionPasses';
 import generalPrefs from './generalPrefs';
 import guildPrefs from './guildPrefs';
 import logPrefs from './logPrefs';
@@ -59,24 +60,24 @@ function codedBy() {
 function corePrefs() {
   return [
     // General Prefs
-    generalPrefs(),
+    generalPrefs,
     // Guild Manage
-    guildPrefs(),
+    guildPrefs,
     // World Screen
-    prefs(),
+    prefs,
     // Log screen prefs
-    logPrefs(),
+    logPrefs,
     // Equipment screen prefs
-    equipPrefs(),
+    equipPrefs,
     // Quest Preferences
-    questPrefs(),
+    questPrefs,
     // profile prefs
-    profilePrefs(),
+    profilePrefs,
     // Bounty hunting prefs
-    bountyPrefs(),
+    bountyPrefs,
     // Other prefs
-    otherPrefs()
-  ].join('');
+    otherPrefs
+  ].map(functionPasses).join('');
 }
 
 export default function setupConfigData() {

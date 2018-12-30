@@ -1,9 +1,10 @@
 import {createDiv} from '../common/cElement';
 import createQuickWear from './createQuickWear';
 import equipItem from '../ajax/equipItem';
-import eventHandler from '../common/eventHandler';
-import {getElementById} from '../common/getElement';
+import eventHandler5 from '../common/eventHandler5';
 import getValue from '../system/getValue';
+import hasClass from '../common/hasClass';
+import hasClasses from '../common/hasClasses';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';
@@ -78,29 +79,23 @@ function togglePref() {
   setValue('disableQuickWearPrompts', disableQuickWearPrompts);
 }
 
-var events = [
-  {
-    test: function(self) {
-      return self.classList.contains('smallLink') &&
-        self.classList.contains('fshEq');
-    },
-    act: equipProfileInventoryItem
-  },
-  {
-    test: function(self) {
-      return self.classList.contains('smallLink') &&
-        self.classList.contains('fshUse');
-    },
-    act: useProfileInventoryItem
-  },
-  {
-    test: function(self) {return self.classList.contains('fshFolder');},
-    act: hideFolders
-  },
-  {
-    test: function(self) {return self.id === 'disableQuickWearPrompts';},
-    act: togglePref
-  }
+var evts5 = [
+  [
+    function(self) {return hasClasses(['smallLink', 'fshEq'], self);},
+    equipProfileInventoryItem
+  ],
+  [
+    function(self) {return hasClasses(['smallLink', 'fshUse'], self);},
+    useProfileInventoryItem
+  ],
+  [
+    function(self) {return hasClass('fshFolder', self);},
+    hideFolders
+  ],
+  [
+    function(self) {return self.id === 'disableQuickWearPrompts';},
+    togglePref
+  ]
 ];
 
 function createInvTabs() {
@@ -117,7 +112,8 @@ function createInvTabs() {
       '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
       '<label for="qwtab2">Inventory Manager Counter' +
         '<br>filtered by AH Quick Search</label>' +
-      '</li><div id="setPrompt" class="fshFloatRight fshCenter"></div></ul>'
+      '</li><div id="setPrompt" class="fshFloatRight fshCenter">' +
+      simpleCheckboxHtml('disableQuickWearPrompts') + '</div></ul>'
   });
 }
 
@@ -128,10 +124,8 @@ function showQuickWear(appInv) {
   insertElement(invTabs, invTabsQw);
   content.innerHTML = '';
   insertElement(content, invTabs);
-  on(invTabs, 'click', eventHandler(events));
+  on(invTabs, 'click', eventHandler5(evts5));
   insertElement(invTabs, showAHInvManager(appInv));
-  insertHtmlBeforeEnd(getElementById('setPrompt'),
-    simpleCheckboxHtml('disableQuickWearPrompts'));
 }
 
 function hasJquery(injector) { // jQuery.min

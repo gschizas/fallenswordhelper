@@ -2,6 +2,7 @@ import add from '../support/task';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
+import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
@@ -51,7 +52,7 @@ function doHideFolder(evt) {
     }
     if (shouldHide(hidden, all, hasFolder)) {
       el.classList.remove('fshBlock');
-      el.classList.add('fshHide'); // hide()
+      hideElement(el); // hide()
     }
   });
 }

@@ -2,6 +2,7 @@ import {createDiv} from '../../../common/cElement';
 import {getElementById} from '../../../common/getElement';
 import getMembrList from '../../../ajax/getMembrList';
 import getValue from '../../../system/getValue';
+import hideElement from '../../../common/hideElement';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
 import {nowSecs} from '../../../support/constants';
@@ -122,7 +123,7 @@ function setAtkVars() {
 }
 
 export function prepareSecondaryDivs(relicData) {
-  fetchStatsBtn.classList.add('fshHide');
+  hideElement(fetchStatsBtn);
   var hideRelicOffline = getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(true).done(missingMembers);

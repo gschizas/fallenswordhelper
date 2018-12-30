@@ -1,6 +1,7 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import getInventoryById from '../ajax/getInventoryById';
+import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -36,7 +37,7 @@ function drawingNewItemTable() {
       insertElement(drawingNewItemTable.itemGrid, itemDiv);
     });
     insertElementAfterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
-    itemTable.classList.add('fshHide');
+    hideElement(itemTable);
   }
 }
 

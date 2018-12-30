@@ -1,3 +1,5 @@
+import basicBounty from './basicBounty';
+import extend from '../../common/extend';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import getValueJSON from '../../system/getValueJSON';
@@ -18,18 +20,7 @@ function hasActiveBounties(activeTable) {
 }
 
 function bountyData(theCells) {
-  var targetData = theCells[0].firstChild.firstChild;
-  return {
-    target: targetData.firstChild.textContent,
-    link: targetData.href,
-    lvl: targetData.nextSibling.textContent.replace(/[[|\]]/, ''),
-    reward: theCells[2].textContent,
-    rewardType: theCells[2].firstChild.firstChild.firstChild.firstChild
-      .nextSibling.firstChild.title,
-    posted: theCells[3].textContent,
-    xpLoss: theCells[4].textContent,
-    progress: theCells[5].textContent
-  };
+  return extend(basicBounty(theCells), {progress: theCells[5].textContent});
 }
 
 function getAllBounties(activeTable) {

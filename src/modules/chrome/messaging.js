@@ -1,4 +1,4 @@
-import eventHandler from '../common/eventHandler';
+import classHandler from '../common/classHandler';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
@@ -117,19 +117,10 @@ function insertTemplate(self) {
     .replace(/\{playername\}/g, targetPlayer) + '\n';
 }
 
-var myEvents = [
-  {
-    test: function(self) {return self.classList.contains('del-button');},
-    act: deleteTemplate
-  },
-  {
-    test: function(self) {return self.classList.contains('add-button');},
-    act: addNewTemplate
-  },
-  {
-    test: function(self) {return self.classList.contains('add-template');},
-    act: insertTemplate
-  }
+var classEvents = [
+  ['del-button', deleteTemplate],
+  ['add-button', addNewTemplate],
+  ['add-template', insertTemplate],
 ];
 
 function showMsgTemplate() {
@@ -142,7 +133,7 @@ function showMsgTemplate() {
       fshButton('add', 'Add'),
       '<input id="newTmpl" class="ui-widget-content fshTmpl">');
     showingTemplates = true;
-    on(msgTbl, 'click', eventHandler(myEvents));
+    on(msgTbl, 'click', classHandler(classEvents));
   }
 }
 
