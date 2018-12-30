@@ -2,7 +2,9 @@ import {componentList} from './prepareComponentList';
 import deleteVisible from './deleteVisible';
 import destroyComponent from '../../app/profile/destroycomponent';
 import {imageServer} from '../../system/system';
+import partial from '../../common/partial';
 import updateUsedCount from './updateUsedCount';
+import when from '../../common/when';
 
 function doSpinner(td) {
   td.innerHTML = '';
@@ -18,6 +20,8 @@ function destroyed(data) {
   }
 }
 
+function removeSpinner(td) {td.parentNode.remove();}
+
 function delCompType(self) { // jQuery.min
   var toDelete = componentList[self.dataset.compid].del;
   var td = self.parentNode;
@@ -28,7 +32,7 @@ function delCompType(self) { // jQuery.min
     prm.push(destroyComponent(toDelete.slice(i, i + batchSize))
       .done(destroyed));
   }
-  $.when.apply($, prm).done(function() {td.parentNode.remove();});
+  when(prm, partial(removeSpinner, td));
 }
 
 export default function deleteTypeHandler(evt) {

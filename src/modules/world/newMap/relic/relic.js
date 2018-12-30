@@ -7,6 +7,7 @@ import getProfile from '../../../ajax/getProfile';
 import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
 import retryAjax from '../../../ajax/retryAjax';
+import when from '../../../common/when';
 import {
   doCalculations,
   parseDefender,
@@ -97,7 +98,7 @@ export function getStats() {
   prepareSecondaryDivs(relicData);
   resetCounters();
   var prm = buildStatPrm();
-  $.when.apply($, prm).done(doCalculations);
+  when(prm, doCalculations);
 }
 
 function viewRelic(e, data) {

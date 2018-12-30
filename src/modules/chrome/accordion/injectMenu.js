@@ -1,25 +1,25 @@
-import currentGuildId from '../common/currentGuildId';
-import {getElementById} from '../common/getElement';
-import getValue from '../system/getValue';
-import injectBuffLog from '../buffLog/injectBuffLog';
-import injectMonsterLog from '../monstorLog';
-import injectNotepadShowLogs from '../combatLog';
-import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
-import injectRecipeManager from '../recipeMgr/recipeMgr';
-import insertElement from '../common/insertElement';
-import insertElementAfter from '../common/insertElementAfter';
-import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
-import isObject from '../common/isObject';
-import jQueryDialog from './jQueryDialog';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import {newGuildLogUrl} from '../support/constants';
-import on from '../common/on';
-import {createAnchor, createLi} from '../common/cElement';
-import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
-import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
-import {sendEvent, sendException} from '../support/fshGa';
-
-var guildId;
+import adjustHeight from './adjustHeight';
+import currentGuildId from '../../common/currentGuildId';
+import execute from '../../common/execute';
+import {getElementById} from '../../common/getElement';
+import getValue from '../../system/getValue';
+import injectBuffLog from '../../buffLog/injectBuffLog';
+import injectMonsterLog from '../../monstorLog';
+import injectNotepadShowLogs from '../../combatLog';
+import injectOnlinePlayers from
+  '../../notepad/onlinePlayers/injectOnlinePlayers';
+import injectRecipeManager from '../../recipeMgr/recipeMgr';
+import insertElement from '../../common/insertElement';
+import insertElementAfter from '../../common/insertElementAfter';
+import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
+import jQueryDialog from '../jQueryDialog';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
+import {newGuildLogUrl} from '../../support/constants';
+import on from '../../common/on';
+import {createAnchor, createLi} from '../../common/cElement';
+import {injectAuctionSearch, injectQuickLinkManager} from '../../lists/lists';
+import {injectFindBuffs, injectFindOther} from '../../findBuffs/findBuffs';
+import {sendEvent, sendException} from '../../support/fshGa';
 
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
@@ -84,7 +84,7 @@ function creatureLogLink() {
 }
 
 function newGuildLogLink() {
-  if (guildId && !getValue('useNewGuildLog')) {
+  if (currentGuildId() && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
     insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" ' +
@@ -94,69 +94,11 @@ function newGuildLogLink() {
 }
 
 function guildInventory() {
-  if (guildId) {
+  if (currentGuildId()) {
     insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
       '&subcmd=guildinvmgr">Guild Inventory</a></li>');
-  }
-}
-
-function navHeightsIsArray(theNav, myNav) {
-  // first the closed saved variables
-  myNav.heights = [
-    null,
-    null,
-    // Character
-    getElementById('nav-character').nextElementSibling.children
-      .length * 22,
-    660,
-    // Guild
-    document.querySelectorAll('#nav-guild > ul li').length * 22,
-    374,
-    132,
-    132,
-    null
-  ];
-  if (myNav.state !== '-1' && myNav.state !== -1) {
-    // and now the open one
-    theNav.children[myNav.state].children[1].style.height =
-      myNav.heights[myNav.state] + 'px';
-  }
-}
-
-function navHeightExists(theNav, myNav) {
-  if (Array.isArray(myNav.heights)) {
-    navHeightsIsArray(theNav, myNav);
-  } else {
-    sendException('$(\'#nav\').data(\'nav\').heights is not an Array', false);
-  }
-}
-
-function navDataExists(theNav, myNav) {
-  if ('heights' in myNav) {
-    navHeightExists(theNav, myNav);
-  } else {
-    sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
-  }
-}
-
-function navExists(theNav) { // jQuery
-  var myNav = $(theNav).data('nav');
-  if (isObject(myNav)) {
-    navDataExists(theNav, myNav);
-  } else {
-    sendException('$(\'#nav\').data(\'nav\') is not an object', false);
-  }
-}
-
-function adjustHeight() {
-  // adjust the menu height for the newly added items
-  var theNav = getElementById('nav');
-  if (theNav instanceof Element) {
-    navExists(theNav);
-  } else {
-    sendException('#nav is not an Element', false);
   }
 }
 
@@ -187,20 +129,27 @@ function actionButtons() {
     'nav-actions-interaction-findplayer');
 }
 
-export default function injectMenu() {
-  if (!getElementById('pCL') || jQueryNotPresent()) {return;}
-  guildId = currentGuildId();
-  updateQuestLink();
-  updateScavLink();
-  characterButtons();
-  // guild
-  guildInventory();
-  newGuildLogLink();
-  // top rated
+function topRatedLink() {
   insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
     '<li class="nav-level-2"><a class="nav-link" id="nav-' +
     'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
     'Top 250 Players</a></li>');
-  actionButtons();
-  adjustHeight();
+}
+
+function doAccordion() {
+  [
+    updateQuestLink,
+    updateScavLink,
+    characterButtons,
+    guildInventory,
+    newGuildLogLink,
+    topRatedLink,
+    actionButtons,
+    adjustHeight,
+  ].forEach(execute);
+}
+
+export default function injectMenu() {
+  if (!getElementById('pCL') || jQueryNotPresent()) {return;}
+  doAccordion();
 }

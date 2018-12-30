@@ -8,16 +8,22 @@ function removeClass(self) {
     .removeClass();
 }
 
+function clearButtons(td) {
+  [
+    2, // Where
+    12, // BP - GS
+    13, // GS - W/U
+    14, // W/U - Tag
+    15, // Tag - Drop
+    16 // ? - Send
+  ].forEach(function(i) {td.eq(i).empty();});
+}
+
 function killRow(self, data) { // jQuery
   if (data.r === 1) {return;}
   var tr = self.closest('tr');
   var td = $('td', tr);
-  td.eq(2).empty(); // Where
-  td.eq(12).empty(); // BP - GS
-  td.eq(13).empty(); // GS - W/U
-  td.eq(14).empty(); // W/U - Tag
-  td.eq(15).empty(); // Tag - Drop
-  td.eq(16).empty(); // ? - Send
+  clearButtons(td);
   tr.css('text-decoration', 'line-through');
 }
 

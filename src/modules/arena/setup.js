@@ -1,9 +1,11 @@
+import {def_table} from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import {imageServer} from '../system/system';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {moveOptions} from './assets';
 import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
+import when from '../common/when';
 
 var oldMoves = [];
 var imgNodes;
@@ -48,13 +50,13 @@ function pageRefresh() {
 
 function changeMoves(newMoves) {
   var prm = newMoves.map(newMove);
-  $.when.apply($, prm).done(pageRefresh);
+  when(prm, pageRefresh);
 }
 
 function updateMoves() { // jQuery
   var newMoves = getAllMoves();
   var prm = newMoves.map(resetMove);
-  $.when.apply($, prm).done(partial(changeMoves, newMoves));
+  when(prm, partial(changeMoves, newMoves));
 }
 
 function updateButton(table) { // jQuery
@@ -87,10 +89,14 @@ function pickerRow(table) { // jQuery
   table.append(row);
 }
 
+function getTable() {
+  return imgNodes.eq(0).closest(def_table).parent().closest(def_table);
+}
+
 function selectMoves(evt) { // jQuery
   $(evt.target).off();
   imgNodes = $('#pCC a[href*="=pickmove&"] img');
-  var table = imgNodes.eq(0).closest('table').parent().closest('table');
+  var table = getTable();
   pickerRow(table);
   $('img[src$="pvp/bar_spacer.jpg"]', table).attr({width: '15', height: '50'});
   updateButton(table);

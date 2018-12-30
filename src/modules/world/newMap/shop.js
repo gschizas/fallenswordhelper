@@ -8,6 +8,7 @@ import on from '../../common/on';
 import retryAjax from '../../ajax/retryAjax';
 import rnd from '../../system/rnd';
 import testQuant from '../../system/testQuant';
+import when from '../../common/when';
 import {createButton, createDiv, createInput} from '../../common/cElement';
 
 var shoppingData;
@@ -66,7 +67,7 @@ function qBuy() {
   for (var i = 1; i < theValue; i += 1) {
     prm.push(quickBuy().done(quickDone));
   }
-  $.when.apply($, prm).done(normalBuy);
+  when(prm, normalBuy);
 }
 
 function injectQuickBuy() {

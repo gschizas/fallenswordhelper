@@ -56,6 +56,29 @@ function codedBy() {
     '</span></td></tr>';
 }
 
+function corePrefs() {
+  return [
+    // General Prefs
+    generalPrefs(),
+    // Guild Manage
+    guildPrefs(),
+    // World Screen
+    prefs(),
+    // Log screen prefs
+    logPrefs(),
+    // Equipment screen prefs
+    equipPrefs(),
+    // Quest Preferences
+    questPrefs(),
+    // profile prefs
+    profilePrefs(),
+    // Bounty hunting prefs
+    bountyPrefs(),
+    // Other prefs
+    otherPrefs()
+  ].join('');
+}
+
 export default function setupConfigData() {
   calf.configData =
     '<form><table id="fshSettingsTable">' +
@@ -63,24 +86,7 @@ export default function setupConfigData() {
       'Settings</b></th></thead>' +
     storageDetails() +
     linkToWebsite() +
-    // General Prefs
-    generalPrefs() +
-    // Guild Manage
-    guildPrefs() +
-    // World Screen
-    prefs() +
-    // Log screen prefs
-    logPrefs() +
-    // Equipment screen prefs
-    equipPrefs() +
-    // Quest Preferences
-    questPrefs() +
-    // profile prefs
-    profilePrefs() +
-    // Bounty hunting prefs
-    bountyPrefs() +
-    // Other prefs
-    otherPrefs() +
+    corePrefs() +
     // save button
     '<tr><td colspan="2" align=center><input type="button" class=' +
       '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +

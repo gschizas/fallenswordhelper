@@ -2,6 +2,7 @@ import {buffInfo} from './buffInfo/buffInfo';
 import combatLogger from './combatLogger';
 import {createStyle} from '../../common/cElement';
 import doNotKill from './doNotKill/doNotKill';
+import execute from '../../common/execute';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import hideQTip from '../../common/hideQTip';
@@ -112,7 +113,7 @@ export default function subscribes() {
     initButtons,
     buffInfo,
     fixDebuff
-  ].forEach(function(fn) {fn();});
+  ].forEach(execute);
 }
 
 // -1 = world page

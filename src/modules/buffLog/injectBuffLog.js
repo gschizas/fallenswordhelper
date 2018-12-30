@@ -1,3 +1,4 @@
+import {fshBuffLog} from '../support/constants';
 import {getElementById} from '../common/getElement';
 import getForage from '../ajax/getForage';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -11,7 +12,7 @@ function displayBuffLog(buffLog) {
 }
 
 function clearBuffLog() {
-  setForage('fsh_buffLog', '').done(displayBuffLog);
+  setForage(fshBuffLog, '').done(displayBuffLog);
 }
 
 export default function injectBuffLog(injector) { // jQuery.min
@@ -25,5 +26,5 @@ export default function injectBuffLog(injector) { // jQuery.min
     divId: 'bufflog'
   });
   on(getElementById('clearBuffs'), 'click', clearBuffLog);
-  getForage('fsh_buffLog').done(displayBuffLog);
+  getForage(fshBuffLog).done(displayBuffLog);
 }

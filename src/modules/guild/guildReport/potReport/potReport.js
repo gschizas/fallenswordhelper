@@ -112,14 +112,18 @@ function onInput(potOpts, potObj, e) {
   }
 }
 
-function injectCell(potOpts, potObj) {
-  var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
+function cellEventHandlers(potOpts, potObj, myCell) {
   on(myCell, 'change', partial(onChange, potOpts, potObj));
   on(myCell, 'click', eventHandler3([
     partial(doReset, potOpts, potObj),
     partial(saveState, potOpts)
   ]));
   on(myCell, 'input', partial(onInput, potOpts, potObj));
+}
+
+function injectCell(potOpts, potObj) {
+  var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
+  cellEventHandlers(potOpts, potObj, myCell);
   return myCell;
 }
 

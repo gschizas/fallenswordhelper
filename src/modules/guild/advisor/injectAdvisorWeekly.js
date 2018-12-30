@@ -4,6 +4,7 @@ import {createTFoot} from '../../common/cElement';
 import getMembrList from '../../ajax/getMembrList';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
+import when from '../../common/when';
 import {injectTable, playerName, playerRank} from './helpers';
 import {time, timeEnd} from '../../support/debug';
 
@@ -88,7 +89,7 @@ export default function injectAdvisorWeekly(list) { // jQuery
   var prm = [getMembrList(false)]
     .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
 
-  $.when.apply($, prm).done(partial(addAdvisorPages, list));
+  when(prm, partial(addAdvisorPages, list));
 
   timeEnd('guildAdvisor.injectAdvisorWeekly');
 

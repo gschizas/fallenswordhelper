@@ -14,13 +14,15 @@ function defendersSetup(relicData) {
   });
 }
 
-export function primaryElementsSetup(relicData) {
-  defendersSetup(relicData);
+function containerSetup() {
   if (containerDiv) {
     containerDiv.innerHTML = '';
   } else {
     containerDiv = createDiv({className: 'body'});
   }
+}
+
+function makeLeftDiv(relicData) {
   leftDiv = createDiv({className: 'fshFloatLeft fshRelicLeftDiv'});
   insertElement(containerDiv, leftDiv);
   if (relicData.is_owner) {
@@ -31,6 +33,12 @@ export function primaryElementsSetup(relicData) {
     textContent: 'Fetch Stats'
   });
   insertElement(leftDiv, fetchStatsBtn);
+}
+
+export function primaryElementsSetup(relicData) {
+  defendersSetup(relicData);
+  containerSetup();
+  makeLeftDiv(relicData);
   var dialogRelic = getElementById('dialog-relic');
   insertElement(dialogRelic, containerDiv);
 }
