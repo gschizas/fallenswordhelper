@@ -1164,10 +1164,20 @@
 
   var def_needToCompose = 'needToCompose';
   var def_lastComposeCheck = 'lastComposeCheck';
+  var def_characterVirtualLevel = 'characterVirtualLevel';
 
   var def_table = 'table';
 
   var fshBuffLog = 'fsh_buffLog';
+
+  var def_statbarLevel = 'statbar-level-tooltip-general';
+  var def_statLevel = 'stat-level';
+  var def_statDefense = 'stat-defense';
+  var def_statAttack = 'stat-attack';
+  var def_statDamage = 'stat-damage';
+  var def_statArmor = 'stat-armor';
+  var def_statHp = 'stat-hp';
+  var def_statVl = 'stat-vl';
 
   function testForGuildLogMsg(guildLogNode) {
     return location.search !== newGuildLogLoc ||
@@ -1367,7 +1377,7 @@
   }
 
   function createTable(props) {
-    return cElement('table', props);
+    return cElement(def_table, props);
   }
 
   function createTBody(props) {
@@ -1445,7 +1455,7 @@
     return child;
   }
 
-  function jConfirm(title, msgText, fn) { // jQuery
+  function makeFshMsg() {
     var fshMsg = getElementById('fshmsg');
     if (!fshMsg) {
       fshMsg = createDiv({id: 'fshmsg'});
@@ -1458,7 +1468,10 @@
         resizable: false,
       });
     }
-    fshMsg.textContent = msgText;
+    return fshMsg;
+  }
+
+  function openFshMsg(title, fn, fshMsg) {
     $(fshMsg).dialog('option', {
       buttons: {
         Yes: function() {
@@ -1469,6 +1482,12 @@
       },
       title: title
     }).dialog('open');
+  }
+
+  function jConfirm(title, msgText, fn) { // jQuery
+    var fshMsg = makeFshMsg();
+    fshMsg.textContent = msgText;
+    openFshMsg(title, fn, fshMsg);
   }
 
   function clearForage() {
@@ -1736,8 +1755,8 @@
 
   function calcLvlToTest() {
     var levelToTest = intValue(document.getElementsByClassName(
-      'stat-level')[0].nextElementSibling.textContent);
-    var characterVirtualLevel = getValue('characterVirtualLevel');
+      def_statLevel)[0].nextElementSibling.textContent);
+    var characterVirtualLevel = getValue(def_characterVirtualLevel);
     if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
     return levelToTest;
   }
@@ -1947,6 +1966,49 @@
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
+  function imgHtml(image_id) {
+    return '<img class="tip-static" src="' + imageServer +
+      '/creatures/' + image_id + '.jpg" data-tipped="<img src=\'' +
+      imageServer + '/creatures/' + image_id +
+      '.jpg\' width=200 height=200>" width=40 height=40>';
+  }
+
+  function hazEnhancements(enhancements) {
+    return enhancements && Object.keys(enhancements).length > 0;
+  }
+
+  function statMinMax(stat) {
+    return stat.min.toString() + ' - ' + stat.max.toString();
+  }
+
+  function buildEnhancements(pair) {
+    return '<span class="fshNoWrap">' + pair[0] + ': ' +
+      statMinMax(pair[1]) + '</span>';
+  }
+
+  function formatEnhancements(enhancements) {
+    if (hazEnhancements(enhancements)) {
+      var tmp = '<span class="fshXXSmall">';
+      tmp += Object.entries(enhancements).map(buildEnhancements).join('<br>');
+      return tmp + '</span>';
+    }
+    return '<span class="fshGrey">**Missing**</span>';
+  }
+
+  function buildHtml(data, key) {
+    return extend(data[key], {
+      name: key,
+      image: imgHtml(data[key].image_id),
+      level: addCommas(data[key].level),
+      attack: statMinMax(data[key].attack),
+      defense: statMinMax(data[key].defense),
+      armor: statMinMax(data[key].armor),
+      damage: statMinMax(data[key].damage),
+      hp: statMinMax(data[key].hp),
+      enhancements: formatEnhancements(data[key].enhancements)
+    });
+  }
+
   function reverseSort(headerClicked) {
     return calf.sortBy && calf.sortBy === headerClicked;
   }
@@ -2024,22 +2086,22 @@
       'Please enable entity log and travel a bit to see the world</span>';
   }
 
+  function makeRow(el) {
+    return '<tr>' +
+      '<td class="fshCenter">' + el.image + '</td>' +
+      '<td>' + el.name + '</td>' +
+      '<td class="fshCenter">' + el.creature_class + '</td>' +
+      '<td class="fshCenter">' + el.level + '</td>' +
+      '<td class="fshCenter">' + el.attack + '</td>' +
+      '<td class="fshCenter">' + el.defense + '</td>' +
+      '<td class="fshCenter">' + el.armor + '</td>' +
+      '<td class="fshCenter">' + el.damage + '</td>' +
+      '<td class="fshCenter">' + el.hp + '</td>' +
+      '<td class="fshCenter">' + el.enhancements + '</td></tr>';
+  }
+
   function mobRows() {
-    var result = '';
-    for (var i = 0; i < monsterAry.length; i += 1) {
-      result += '<tr>' +
-        '<td class="fshCenter">' + monsterAry[i].image + '</td>' +
-        '<td>' + monsterAry[i].name + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].creature_class + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].level + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].attack + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].defense + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].armor + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].damage + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].hp + '</td>' +
-        '<td class="fshCenter">' + monsterAry[i].enhancements + '</td></tr>';
-    }
-    return result;
+    return monsterAry.map(makeRow).join('');
   }
 
   function drawMobs() {
@@ -2100,48 +2162,6 @@
     on(content, 'click', doHandlers);
   }
 
-  function imgHtml(tmpObj) {
-    return '<img class="tip-static" src="' + imageServer +
-      '/creatures/' + tmpObj.image_id + '.jpg" data-tipped="<img src=\'' +
-      imageServer + '/creatures/' + tmpObj.image_id +
-      '.jpg\' width=200 height=200>" width=40 height=40>';
-  }
-
-  function hazEnhancements(enhancements) {
-    return enhancements && enhancements.length > 0;
-  }
-
-  function buildEnhancements(tmpObj, _prev, _curr) {
-    return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
-      tmpObj.enhancements[_curr].min + ' - ' +
-      tmpObj.enhancements[_curr].max + '</span><br>';
-  }
-
-  function formatEnhancements(tmpObj) {
-    var enhancements;
-    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
-    if (hazEnhancements(enhancements)) {
-      var tmp = '<span class="fshXXSmall">';
-      tmp += enhancements.reduce(partial(buildEnhancements, tmpObj), '');
-      return tmp.slice(0, -4) + '</span>';
-    }
-    return '<span class="fshGrey">**Missing**</span>';
-  }
-
-  function buildHtml(data, key) {
-    var tmpObj = data[key];
-    tmpObj.name = key;
-    tmpObj.image = imgHtml(tmpObj);
-    tmpObj.level = addCommas(tmpObj.level);
-    tmpObj.attack = tmpObj.attack.min + ' - ' + tmpObj.attack.max;
-    tmpObj.defense = tmpObj.defense.min + ' - ' + tmpObj.defense.max;
-    tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
-    tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
-    tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-    tmpObj.enhancements = formatEnhancements(tmpObj);
-    return tmpObj;
-  }
-
   function prepMonster(data) {
     monsterAry = Object.keys(data).map(partial(buildHtml, data));
   }
@@ -2172,6 +2192,14 @@
   var content$1;
   var combatLog = [];
   var textArea;
+  var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
+    '</td></tr>' +
+    '<tr><td colspan="4" align="center">WARNING: this links to an ' +
+    'external site not related to HCS.<br />' +
+    'If you wish to visit site directly URL is: http://evolutions.' +
+    'yvong.com/fshlogparser.php<br />' +
+    '<tr><td colspan=4 align="center"><input type="hidden" value="true" ' +
+    'name="submit"><input type="submit" value="Analyze!"></td></tr>';
 
   function notepadCopyLog() {
     textArea.focus();
@@ -2192,14 +2220,6 @@
 
   function gotCombatLog(data) {
     if (data) {combatLog = data;}
-    var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
-      '</td></tr>' +
-      '<tr><td colspan="4" align="center">WARNING: this links to an ' +
-      'external site not related to HCS.<br />' +
-      'If you wish to visit site directly URL is: http://evolutions.' +
-      'yvong.com/fshlogparser.php<br />' +
-      '<tr><td colspan=4 align="center"><input type="hidden" value="true" ' +
-      'name="submit"><input type="submit" value="Analyze!"></td></tr>';
     content$1.innerHTML = '<h1>Combat Logs</h1><br /><form action="http://' +
       'evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
       '<div align="center"><textarea align="center" cols="80" rows="25" ' +
@@ -2553,7 +2573,7 @@
     return !hideRecipes.includes(recipe.name);
   }
 
-  function makeRow(recipe) {
+  function makeRow$1(recipe) {
     return '<tr class="rmTr">' +
         '<td class="rmTd">' +
           '<a href="' + recipe.link + '">' +
@@ -2574,7 +2594,7 @@
     var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
       '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
       '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
-    result += recipebook.recipe.filter(hidden).map(makeRow).join('');
+    result += recipebook.recipe.filter(hidden).map(makeRow$1).join('');
     result += '</table>';
     output.innerHTML = result;
     recipebook.lastUpdate = new Date();
@@ -2845,16 +2865,16 @@
     }
   }
 
-  function passingTest(self, el) {return el[0](self);}
-
-  function doEvent(evtAry, evt) {
+  function handleEvent(passingTest, evtAry, evt) {
     var self = evt.target;
     var hdl = evtAry.find(partial(passingTest, self));
-    if (hdl) {hdl[1](self);}
+    if (hdl) {return hdl[1](self);}
   }
 
+  function passingTest(self, el) {return el[0](self);}
+
   function eventHandler5(evtAry) {
-    return partial(doEvent, evtAry);
+    return partial(handleEvent, passingTest, evtAry);
   }
 
   function getInventory() {
@@ -4485,7 +4505,7 @@
   }
 
   function getInnerVirtualLevel(doc) {
-    return parseInt(getElementById('stat-vl', doc).textContent, 10);
+    return parseInt(getElementById(def_statVl, doc).textContent, 10);
   }
 
   function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
@@ -4697,13 +4717,13 @@
     return parseInt($(e).find('td:eq(2)').text().replace(/,/g, ''), 10);
   }
 
-  function includePlayer(onlinePlayerLevel, minPlayerVirtualLevel) {
+  function includePlayer(onlinePlayerLevel) {
     return onlinePlayerLevel >= findBuffMinCastLevel &&
-      onlinePlayerLevel >= minPlayerVirtualLevel;
+      onlinePlayerLevel >= calcMinLvl();
   }
 
   function playerRow(i, e) {
-    if (includePlayer(getOnlinePlayerLevel(e), calcMinLvl())) {
+    if (includePlayer(getOnlinePlayerLevel(e))) {
       var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
       var onlinePlayerName = $(e).find('td:eq(1) a').text();
       addPlayerToSearchList(onlinePlayer, onlinePlayerName);
@@ -5014,50 +5034,6 @@
       Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
   }
 
-  function containsNewsHead(el) {
-    return el.classList.contains('news_head') ||
-      el.classList.contains('news_head_tavern');
-  }
-
-  function closestHead(el) {
-    if (containsNewsHead(el)) {
-      return el;
-    }
-    if (el.classList.contains('news_left_column')) {return;}
-    return closestHead(el.parentNode);
-  }
-
-  function getNewsClass(newsHead) {
-    if (newsHead.classList.contains('news_head_tavern')) {
-      return '.news_body_tavern';
-    }
-    return '.news_body';
-  }
-
-  function gotNewsHead(evt, newsHead) { // jQuery
-    var newsBody = newsHead.nextElementSibling;
-    var newsClass = getNewsClass(newsHead);
-    if (!$(newsBody).data('open')) {
-      evt.preventDefault();
-      $(newsClass).hide().data('open', false);
-      $(newsBody).show().data('open', true);
-    } else if (evt.target.tagName !== 'A') {
-      $(newsBody).hide().data('open', false);
-    }
-    evt.stopPropagation();
-  }
-
-  function newsEvt(evt) {
-    var newsHead = closestHead(evt.target);
-    if (newsHead) {gotNewsHead(evt, newsHead);}
-  }
-
-  function fixCollapse() {
-    var newsCol = document.getElementsByClassName('news_left_column');
-    if (jQueryNotPresent() || newsCol.length !== 1) {return;}
-    on(newsCol[0], 'click', newsEvt, true);
-  }
-
   function pvpLadder(head) {return head.children[1].textContent === 'PvP Ladder';}
 
   function timestamp(head) {
@@ -5098,7 +5074,6 @@
       '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
     insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
       '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
-    fixCollapse(); // Pref
     lookForPvPLadder(); // Pref
     addUfsgLinks(); // Pref
   }
@@ -5164,7 +5139,7 @@
   function injectLevelupCalculator() {
     var nextGain = getElementsByClassName('stat-xp-nextGain');
     if (nextGain.length === 0) {return;}
-    insertHtmlBeforeEnd(getElementById('statbar-level-tooltip-general'),
+    insertHtmlBeforeEnd(getElementById(def_statbarLevel),
       '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
       timeBox(
         valueText(nextGain),
@@ -5384,14 +5359,8 @@
 
   function passingTest$1(self, el) {return hasClass(el[0], self);}
 
-  function doEvent$1(evtAry, evt) {
-    var self = evt.target;
-    var hdl = evtAry.find(partial(passingTest$1, self));
-    if (hdl) {hdl[1](self);}
-  }
-
   function classHandler(evtAry) {
-    return partial(doEvent$1, evtAry);
+    return partial(handleEvent, passingTest$1, evtAry);
   }
 
   var enterForSendMessage;
@@ -7096,21 +7065,32 @@
       pageId;
   }
 
-  function overrideButtons() {
+  function lastPage$1() {
+    return $('#pCC input[value="Go"]').closest('td').prev().text()
+      .replace(/\D/g, '');
+  }
+
+  function injectStartButton() {
     var prevButton = $('#pCC input[value="<"]');
-    var nextButton = $('#pCC input[value=">"]');
     if (prevButton.length === 1) {
       var startButton = $('<input value="<<" type="button">');
       prevButton.before(startButton).before('&nbsp;');
       startButton.click(function() {gotoPage(1);});
     }
+  }
+
+  function injectFinishButton() {
+    var nextButton = $('#pCC input[value=">"]');
     if (nextButton.length === 1) {
-      var lastPage = $('#pCC input[value="Go"]').closest('td').prev().text()
-        .replace(/\D/g, '');
       var finishButton = $('<input value=">>" type="button">');
       nextButton.after(finishButton).after('&nbsp;');
-      finishButton.click(function() {gotoPage(lastPage);});
+      finishButton.click(function() {gotoPage(lastPage$1());});
     }
+  }
+
+  function overrideButtons() {
+    injectStartButton();
+    injectFinishButton();
     $('#pCC input[value="View"]').click(dontPost);
   }
 
@@ -7298,7 +7278,7 @@
   var perfBox;
 
   function whichTableHasItems() {
-    var allTables = pCC.lastElementChild.getElementsByTagName('table');
+    var allTables = pCC.lastElementChild.getElementsByTagName(def_table);
     if (calf.cmd === 'crafting') {
       return allTables[1];
     }
@@ -7415,7 +7395,7 @@
   }
 
   function globalQuest() {
-    var topTable = pCC.getElementsByTagName('table')[3];
+    var topTable = pCC.getElementsByTagName(def_table)[3];
     for (var i = 2; i < topTable.rows.length; i += 4) {
       var aCell = topTable.rows[i].cells[1];
       aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
@@ -8111,7 +8091,7 @@
 
   function reward(theCells) { // jQuery
     var cell = theCells.eq(8);
-    if (cell.children('table').length !== 1) {return;}
+    if (cell.children(def_table).length !== 1) {return;}
     cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
   }
 
@@ -8141,7 +8121,7 @@
   }
 
   function sortDataTable(self, myCol, sortOrder) {
-    var table = self.closest('table').DataTable();
+    var table = self.closest(def_table).DataTable();
     if (myCol !== 3) {
       table.order([3, 'asc'], [myCol, sortOrder]).draw();
     } else {
@@ -8994,6 +8974,20 @@
       'index.php?no_mobile=1&cmd=guild&subcmd=mercs').pipe(parseMercStats);
   }
 
+  var attackElement;
+  var defenseElement;
+  var armorElement;
+  var damageElement;
+  var hpElement;
+
+  function getElements(doc) {
+    attackElement = getElementById(def_statAttack, doc);
+    defenseElement = getElementById(def_statDefense, doc);
+    armorElement = getElementById(def_statArmor, doc);
+    damageElement = getElementById(def_statDamage, doc);
+    hpElement = getElementById(def_statHp, doc);
+  }
+
   function statAsNumber(el) {
     if (el) {
       return intValue(el.textContent);
@@ -9002,11 +8996,7 @@
   }
 
   function groupViewStats(doc) {
-    var attackElement = getElementById('stat-attack', doc);
-    var defenseElement = getElementById('stat-defense', doc);
-    var armorElement = getElementById('stat-armor', doc);
-    var damageElement = getElementById('stat-damage', doc);
-    var hpElement = getElementById('stat-hp', doc);
+    getElements(doc);
     return {
       attack: statAsNumber(attackElement),
       attackElement: attackElement,
@@ -9977,7 +9967,7 @@
   }
 
   function paintTable() {
-    var nodeList = pCC.getElementsByTagName('table');
+    var nodeList = pCC.getElementsByTagName(def_table);
     if (nodeList.length > 0) {
       doItemTable(nodeList[nodeList.length - 1].rows);
     }
@@ -10834,13 +10824,17 @@
     $(fshInv).DataTable().draw(false);
   }
 
+  function newOpts$1(newMin, newMax) {
+    options.fshMinLvl = newMin;
+    options.fshMaxLvl = newMax;
+    saveOptions(options);
+  }
+
   function changeLvls$1(fshInv) { // jQuery
     var minLvl = parseInt($('#fshMinLvl').val(), 10);
     var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
     if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
-    options.fshMinLvl = minLvl;
-    options.fshMaxLvl = maxLvl;
-    saveOptions(options);
+    newOpts$1(minLvl, maxLvl);
     $(fshInv).DataTable().draw(false);
   }
 
@@ -11249,28 +11243,33 @@
       }, {});
   }
 
-  function getInvMan() {
+  function prepareLayout() {
+    [
+      decorate,
+      lvlFilter$1,
+      typeFilter,
+      setFilter,
+      rarityFilter,
+      headers,
+      setChecks,
+      setLvls
+    ].forEach(execute);
+  }
 
-    time('inventory.getInvMan');
-
+  function doInventory$1() {
     if (calf.membrList) {rekeyMembrList();}
-
-    decorate();
-    lvlFilter$1();
-    typeFilter();
-    setFilter();
-    rarityFilter();
-    headers();
-    setChecks();
-    setLvls();
+    prepareLayout();
     var fshInv = doTable$2();
     eventHandlers$1(fshInv);
     // eslint-disable-next-line no-use-before-define
     $('#fshRefresh').click(injectInventoryManagerNew);
     clearButton(fshInv);
+  }
 
+  function getInvMan() {
+    time('inventory.getInvMan');
+    doInventory$1();
     timeEnd('inventory.getInvMan');
-
   }
 
   function asyncCall() {
@@ -11727,7 +11726,7 @@
   var maxPage$1;
   var doc;
   var currPage;
-  var lastPage$1;
+  var lastPage$2;
   var tmpGuildLog = [];
   var completeReload = true;
   var myTable;
@@ -11736,8 +11735,8 @@
     doc = createDocument(data);
     var pageInput = doc.querySelector('input[name="page"]');
     currPage = Number(pageInput.value);
-    lastPage$1 = Number(/\d+/.exec(pageInput.parentNode.textContent)[0]);
-    if (currPage === 1) {maxPage$1 = Math.min(lastPage$1, maxPagesToFetch);}
+    lastPage$2 = Number(/\d+/.exec(pageInput.parentNode.textContent)[0]);
+    if (currPage === 1) {maxPage$1 = Math.min(lastPage$2, maxPagesToFetch);}
     fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage$1 + '...';
   }
 
@@ -11934,7 +11933,7 @@
     options$1.checks = options$1.checks || defChecks.slice(0);
   }
 
-  function getElements() {
+  function getElements$1() {
     fshNewGuildLog = getElementById('fshNewGuildLog');
     fshOutput = getElementById('fshOutput');
   }
@@ -11947,7 +11946,7 @@
   function gotOptions(guildLog) {
     setOpts$2(guildLog);
     pCC.innerHTML = guildLogFilter;
-    getElements();
+    getElements$1();
     on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents));
     setChecks$1();
     setMaxPage();
@@ -12689,7 +12688,7 @@
   function countContacts(el, isAllies) {
     var target = el.parentNode;
     var numberOfContacts = target.nextSibling.nextSibling
-      .getElementsByTagName('table').length - 1;
+      .getElementsByTagName(def_table).length - 1;
     if (isAllies) {
       totalAllyEnemy(target, numberOfContacts, getValue('alliestotal'));
     } else {
@@ -12863,22 +12862,29 @@
 
   function storeVL() {
     // store the VL of the player
-    var virtualLevel = parseInt(getElementById('stat-vl').textContent, 10);
-    if (intValue(document.getElementsByClassName('stat-level')[0]
+    var virtualLevel = parseInt(getElementById(def_statVl).textContent, 10);
+    if (intValue(document.getElementsByClassName(def_statLevel)[0]
       .nextElementSibling.textContent) === virtualLevel) {
-      setValue('characterVirtualLevel', ''); // ?
+      setValue(def_characterVirtualLevel, ''); // ?
     } else {
-      setValue('characterVirtualLevel', virtualLevel);
+      setValue(def_characterVirtualLevel, virtualLevel);
     }
   }
 
-  function gotAtk(nmvImg, atkStat) {
-    var defStat = Number(
-      getElementById('stat-defense').firstChild.textContent.trim());
-    var oldTipped = nmvImg.dataset.tipped;
+  function getDefStat() {
+    return Number(getElementById(def_statDefense).firstChild.textContent.trim());
+  }
+
+  function calcNmvEffect(atkStat, oldTipped) {
     var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
     var nmvLvl = Number(lvlAry[1]);
-    var nmvEffect = Math.floor(atkStat * nmvLvl * 0.0025);
+    return Math.floor(atkStat * nmvLvl * 0.0025);
+  }
+
+  function gotAtk(nmvImg, atkStat) {
+    var defStat = getDefStat();
+    var oldTipped = nmvImg.dataset.tipped;
+    var nmvEffect = calcNmvEffect(atkStat, oldTipped);
     nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
       '<br>Attack: ' + (atkStat - nmvEffect).toString() +
       '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
@@ -12886,7 +12892,7 @@
   }
 
   function gotImg(nmvImg) {
-    var atkEl = getElementById('stat-attack');
+    var atkEl = getElementById(def_statAttack);
     if (!atkEl) {return;}
     var atkStat = Number(atkEl.firstChild.textContent.trim());
     if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
@@ -12906,8 +12912,8 @@
 
   function updateStatistics() {
     var charStats = getElementById('profileLeftColumn')
-      .getElementsByTagName('table')[0];
-    var dodgyTables = charStats.getElementsByTagName('table');
+      .getElementsByTagName(def_table)[0];
+    var dodgyTables = charStats.getElementsByTagName(def_table);
     Array.prototype.forEach.call(dodgyTables, removeStatTable);
   }
 
@@ -13031,7 +13037,7 @@
   }
 
   function extraButtons() {
-    var tRows = pCC.getElementsByTagName('table')[0].rows;
+    var tRows = pCC.getElementsByTagName(def_table)[0].rows;
     insertHtmlAfterBegin(tRows[tRows.length - 2].cells[0],
       '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
   }
@@ -13233,7 +13239,7 @@
   var itemsHash;
 
   function getItemImg() {
-    var allTables = pCC.getElementsByTagName('table');
+    var allTables = pCC.getElementsByTagName(def_table);
     var lastTable = allTables[allTables.length - 1];
     return lastTable.getElementsByTagName('img');
   }
@@ -13592,7 +13598,7 @@
   function injectQuestBookFull() {
     on(pCC, 'click', dontPost$1);
     storeQuestPage();
-    var questTable = pCC.getElementsByTagName('table')[5];
+    var questTable = pCC.getElementsByTagName(def_table)[5];
     if (!questTable) {return;}
     var hideQuests = isHideQuests();
     forEachQuest(hideQuests, questTable);
@@ -14730,7 +14736,7 @@
   }
 
   function gotOldTitans(oldTitans) {
-    var titanTables = pCC.getElementsByTagName('table');
+    var titanTables = pCC.getElementsByTagName(def_table);
     injectScouttowerBuffLinks(titanTables);
     var titanTable = titanTables[1];
     var newTitans = {};
@@ -15769,7 +15775,7 @@
   }
 
   function findOnlinePlayers() { // jQuery
-    var someTables = pCC.getElementsByTagName('table');
+    var someTables = pCC.getElementsByTagName(def_table);
     var prm = [];
     guilds = {};
     Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
@@ -15851,7 +15857,7 @@
     if (!itemDiv) {
       itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
       var itemList = getElementById('item-list');
-      var oldItems = itemList.getElementsByTagName('table');
+      var oldItems = itemList.getElementsByTagName(def_table);
       while (oldItems.length) {
         oldItems[0].classList.add('fshBlock');
         insertElement(itemDiv, oldItems[0]);
@@ -15872,7 +15878,7 @@
   function doHideFolder(evt) {
     var folderid = evt.target.id;
     var itemDiv = getItemDiv();
-    var items = itemDiv.getElementsByTagName('table');
+    var items = itemDiv.getElementsByTagName(def_table);
     Array.prototype.forEach.call(items, function(el) {
       el.firstElementChild.lastElementChild.firstElementChild
         .firstElementChild.checked = false;
@@ -15943,7 +15949,7 @@
     invItems$3 = data.items;
     /* Highlight items in ST */
     var nodeList = getElementById('item-list')
-      .getElementsByTagName('table');
+      .getElementsByTagName(def_table);
     Array.prototype.forEach.call(nodeList, forEachInvItem);
     doFolderHeaders(data.folders);
 
@@ -16908,15 +16914,15 @@
   var relicCountElement;
   var lDPercentageElement;
   var lDCloakedElement;
-  var attackElement;
+  var attackElement$1;
   var attackBuffedElement;
-  var defenseElement;
+  var defenseElement$1;
   var defenseBuffedElement;
-  var armorElement;
+  var armorElement$1;
   var armorBuffedElement;
-  var damageElement;
+  var damageElement$1;
   var damageBuffedElement;
-  var hpElement;
+  var hpElement$1;
   var hpBuffedElement;
   var defCloakedElement;
   var defProcessedElement;
@@ -16981,15 +16987,15 @@
     relicCountElement = getElementById('relicCount');
     lDPercentageElement = getElementById('LDPercentage');
     lDCloakedElement = getElementById('LDCloaked');
-    attackElement = getElementById('attackValue');
+    attackElement$1 = getElementById('attackValue');
     attackBuffedElement = getElementById('attackValueBuffed');
-    defenseElement = getElementById('defenseValue');
+    defenseElement$1 = getElementById('defenseValue');
     defenseBuffedElement = getElementById('defenseValueBuffed');
-    armorElement = getElementById('armorValue');
+    armorElement$1 = getElementById('armorValue');
     armorBuffedElement = getElementById('armorValueBuffed');
-    damageElement = getElementById('damageValue');
+    damageElement$1 = getElementById('damageValue');
     damageBuffedElement = getElementById('damageValueBuffed');
-    hpElement = getElementById('hpValue');
+    hpElement$1 = getElementById('hpValue');
     hpBuffedElement = getElementById('hpValueBuffed');
     defCloakedElement = getElementById('defendersCloaked');
     defProcessedElement = getElementById('defendersProcessed');
@@ -17082,11 +17088,11 @@
   }
 
   function updateDefenderElements() {
-    attackElement.textContent = addCommas(defRawAttack);
-    defenseElement.textContent = addCommas(defRawDefense);
-    armorElement.textContent = addCommas(defRawArmor);
-    damageElement.textContent = addCommas(defRawDamage);
-    hpElement.textContent = addCommas(defRawHp);
+    attackElement$1.textContent = addCommas(defRawAttack);
+    defenseElement$1.textContent = addCommas(defRawDefense);
+    armorElement$1.textContent = addCommas(defRawArmor);
+    damageElement$1.textContent = addCommas(defRawDamage);
+    hpElement$1.textContent = addCommas(defRawHp);
     defCloakedElement.textContent = defCloaked.toString();
     defProcessed += 1;
     defProcessedElement.textContent = defProcessed.toString();
@@ -17101,7 +17107,7 @@
     groupHPElement.textContent = addCommas(groupStats$1.hp);
   }
 
-  function calcNmvEffect(buffs) {
+  function calcNmvEffect$1(buffs) {
     return Math.ceil(groupStats$1.attack *
       (fallback(buffs['Nightmare Visage'], 0) * 0.0025));
   }
@@ -17147,7 +17153,7 @@
   }
 
   function doGroupAttributeElements(buffs) {
-    var nightmareVisageEffect = calcNmvEffect(buffs);
+    var nightmareVisageEffect = calcNmvEffect$1(buffs);
     groupStats$1.attack -= nightmareVisageEffect; // <-- important
     doGroupAttackBuffedElement();
     var defenseWithConstitution = calcDefWithConst(buffs);
@@ -17761,15 +17767,18 @@
       .nextElementSibling.textContent;
   }
 
+  function getTooltipStats(statTooltip) {
+    statDefense = getStatText(statTooltip, def_statDefense);
+    statAttack = getStatText(statTooltip, def_statAttack);
+    statDamage = getStatText(statTooltip, def_statDamage);
+    statArmor = getStatText(statTooltip, def_statArmor);
+    statHp = getStatText(statTooltip, def_statHp);
+  }
+
   function getMyStats() {
     statLevel = intValue(getStatText(
-      getElementById('statbar-level-tooltip-general'), 'stat-level'));
-    var statTooltip = getElementById('statbar-character-tooltip-stats');
-    statDefense = getStatText(statTooltip, 'stat-defense');
-    statAttack = getStatText(statTooltip, 'stat-attack');
-    statDamage = getStatText(statTooltip, 'stat-damage');
-    statArmor = getStatText(statTooltip, 'stat-armor');
-    statHp = getStatText(statTooltip, 'stat-hp');
+      getElementById(def_statbarLevel), def_statLevel));
+    getTooltipStats(getElementById('statbar-character-tooltip-stats'));
   }
 
   function tipHeader(creature) {
@@ -18660,9 +18669,9 @@
     groupEvaluator.innerHTML = html;
   }
 
-  function superElite(ses, obj) {
+  function superElite(ses, obj, type) {
     // reduce stats if critter is a SE and player has SES cast on them.
-    if (obj.name.search('Super Elite') !== -1) { // TODO type
+    if (type === 3) {
       obj.attack -= Math.ceil(obj.attack * ses);
       obj.defense -= Math.ceil(obj.defense * ses);
       obj.armor -= Math.ceil(obj.armor * ses);
@@ -18672,15 +18681,16 @@
   }
 
   function creatureData(creature, ses) {
-    var obj = {};
-    obj.name = creature.name;
-    obj.class = creature.creature_class;
-    obj.attack = Number(creature.attack);
-    obj.defense = Number(creature.defense);
-    obj.armor = Number(creature.armor);
-    obj.damage = Number(creature.damage);
-    obj.hp = Number(creature.hp);
-    superElite(ses, obj);
+    var obj = {
+      name: creature.name,
+      'class': creature.creature_class,
+      attack: Number(creature.attack),
+      defense: Number(creature.defense),
+      armor: Number(creature.armor),
+      damage: Number(creature.damage),
+      hp: Number(creature.hp)
+    };
+    superElite(ses, obj, creature.type);
     return obj;
   }
 
@@ -19000,19 +19010,31 @@
     GameData.fetch(def_fetch_worldRealmActions);
   }
 
+  function arrayType() {
+    [
+      ['buffs', 'huntingBuffs'],
+      ['buffs2', 'huntingBuffs2'],
+      ['buffs3', 'huntingBuffs3'],
+      ['doNotKillList', 'doNotKillList']
+    ].forEach(function(a) {calf[a[0]] = shouldBeArray(a[1]);});
+  }
+
+  function valueType() {
+    [
+      ['buffsName', 'huntingBuffsName'],
+      ['buffs2Name', 'huntingBuffs2Name'],
+      ['buffs3Name', 'huntingBuffs3Name'],
+      ['enabledHuntingMode', 'enabledHuntingMode'],
+      ['hideSubLvlCreature', 'hideSubLvlCreature'],
+      ['showBuffs', 'showHuntingBuffs'],
+      ['showTitanInfo', 'showTitanInfo'],
+      ['showBuffInfo', 'showBuffInfo'],
+    ].forEach(function(a) {calf[a[0]] = getValue(a[1]);});
+  }
+
   function getPrefs$1() {
-    calf.buffs = shouldBeArray('huntingBuffs');
-    calf.buffsName = getValue('huntingBuffsName');
-    calf.buffs2 = shouldBeArray('huntingBuffs2');
-    calf.buffs2Name = getValue('huntingBuffs2Name');
-    calf.buffs3 = shouldBeArray('huntingBuffs3');
-    calf.buffs3Name = getValue('huntingBuffs3Name');
-    calf.doNotKillList = shouldBeArray('doNotKillList');
-    calf.enabledHuntingMode = getValue('enabledHuntingMode');
-    calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
-    calf.showBuffs = getValue('showHuntingBuffs');
-    calf.showTitanInfo = getValue('showTitanInfo');
-    calf.showBuffInfo = getValue('showBuffInfo');
+    arrayType();
+    valueType();
   }
 
   function worldPrefs() {
@@ -19638,14 +19660,38 @@
     injectPoints();
   }
 
+  function yearAsString$1(aDate) {
+    return aDate.getUTCFullYear().toString();
+  }
+
+  function paddedMonthNumber$1(aDate) {
+    return padZ(aDate.getUTCMonth() + 1);
+  }
+
+  function paddedDayNumber$1(aDate) {
+    return padZ(aDate.getUTCDate());
+  }
+
+  function padddedHours$1(aDate) {
+    return padZ(aDate.getUTCHours());
+  }
+
+  function paddedMinutes$1(aDate) {
+    return padZ(aDate.getUTCMinutes());
+  }
+
+  function paddedSeconds$1(aDate) {
+    return padZ(aDate.getUTCSeconds());
+  }
+
   function formatUtcDateTime(aDate) {
     if (isDate) {
-      return aDate.getUTCFullYear().toString() + '-' +
-        padZ(aDate.getUTCMonth() + 1) + '-' +
-        padZ(aDate.getUTCDate()) + ' ' +
-        padZ(aDate.getUTCHours()) + ':' +
-        padZ(aDate.getUTCMinutes()) + ':' +
-        padZ(aDate.getUTCSeconds());
+      return yearAsString$1(aDate) + '-' +
+        paddedMonthNumber$1(aDate) + '-' +
+        paddedDayNumber$1(aDate) + ' ' +
+        padddedHours$1(aDate) + ':' +
+        paddedMinutes$1(aDate) + ':' +
+        paddedSeconds$1(aDate);
     }
   }
 
@@ -19850,7 +19896,7 @@
   function viewArchive() {
     lastLadderReset = getValue(ladderResetPref);
     var prefName = 'collapseNewsArchive';
-    var theTables = pCC.getElementsByTagName('table');
+    var theTables = pCC.getElementsByTagName(def_table);
     if (theTables.length > 2) {
       setupPref$2(prefName, theTables[0].rows[2]);
       collapse({
@@ -20978,7 +21024,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '70';
+  window.FSH.calf = '71';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
