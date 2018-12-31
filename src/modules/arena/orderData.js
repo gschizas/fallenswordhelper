@@ -1,3 +1,4 @@
+import {def_table} from '../support/constants';
 import isObject from '../common/isObject';
 import partial from '../common/partial';
 import {oldIds, opts} from './setOpts';
@@ -64,7 +65,7 @@ function maxMoves(theCells, row) { // jQuery
 
 function reward(theCells) { // jQuery
   var cell = theCells.eq(8);
-  if (cell.children('table').length !== 1) {return;}
+  if (cell.children(def_table).length !== 1) {return;}
   cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
 }
 

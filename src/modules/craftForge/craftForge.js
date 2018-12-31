@@ -5,13 +5,13 @@ import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import {itemRE} from '../support/constants';
 import jQueryPresent from '../common/jQueryPresent';
 import makeFolderSpans from '../common/makeFolderSpans';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import toggleForce from '../common/toggleForce';
 import {createDiv, createInput, createLabel} from '../common/cElement';
+import {def_table, itemRE} from '../support/constants';
 
 var itemTable;
 var itemsAry;
@@ -20,7 +20,7 @@ var folderId = 0;
 var perfBox;
 
 function whichTableHasItems() {
-  var allTables = pCC.lastElementChild.getElementsByTagName('table');
+  var allTables = pCC.lastElementChild.getElementsByTagName(def_table);
   if (calf.cmd === 'crafting') {
     return allTables[1];
   }

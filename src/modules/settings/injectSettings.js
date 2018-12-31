@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import dialogMsg from '../common/dialogMsg';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import injectMonsterLog from '../monstorLog';
+import injectMonsterLog from '../notepad/monstorLog/monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';

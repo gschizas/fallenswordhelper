@@ -10,7 +10,6 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import isObject from '../common/isObject';
 import isUndefined from '../common/isUndefined';
 import jQueryPresent from '../common/jQueryPresent';
-import {nowSecs} from '../support/constants';
 import on from '../common/on';
 import onlineDot from '../common/onlineDot';
 import {pCC} from '../support/layout';
@@ -27,6 +26,7 @@ import {
   pvpUpperLevel
 } from '../common/levelHighlight';
 import {createInput, createSpan} from '../common/cElement';
+import {def_table, nowSecs} from '../support/constants';
 
 var highlightPlayersNearMyLvl;
 var spinner;
@@ -122,7 +122,7 @@ function hideSpinner() {
 }
 
 function findOnlinePlayers() { // jQuery
-  var someTables = pCC.getElementsByTagName('table');
+  var someTables = pCC.getElementsByTagName(def_table);
   var prm = [];
   guilds = {};
   Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {

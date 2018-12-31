@@ -1,4 +1,5 @@
 import add from '../support/task';
+import {def_table} from '../support/constants';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getInventoryById from '../ajax/getInventoryById';
@@ -18,7 +19,7 @@ function getItemDiv() {
   if (!itemDiv) {
     itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
     var itemList = getElementById('item-list');
-    var oldItems = itemList.getElementsByTagName('table');
+    var oldItems = itemList.getElementsByTagName(def_table);
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
       insertElement(itemDiv, oldItems[0]);
@@ -39,7 +40,7 @@ function shouldHide(hidden, all, hasFolder) {
 function doHideFolder(evt) {
   var folderid = evt.target.id;
   var itemDiv = getItemDiv();
-  var items = itemDiv.getElementsByTagName('table');
+  var items = itemDiv.getElementsByTagName(def_table);
   Array.prototype.forEach.call(items, function(el) {
     el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild.checked = false;
@@ -110,7 +111,7 @@ function processTrade(data) {
   invItems = data.items;
   /* Highlight items in ST */
   var nodeList = getElementById('item-list')
-    .getElementsByTagName('table');
+    .getElementsByTagName(def_table);
   Array.prototype.forEach.call(nodeList, forEachInvItem);
   doFolderHeaders(data.folders);
 

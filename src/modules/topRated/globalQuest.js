@@ -1,7 +1,8 @@
+import {def_table} from '../support/constants';
 import {pCC} from '../support/layout';
 
 export default function globalQuest() {
-  var topTable = pCC.getElementsByTagName('table')[3];
+  var topTable = pCC.getElementsByTagName(def_table)[3];
   for (var i = 2; i < topTable.rows.length; i += 4) {
     var aCell = topTable.rows[i].cells[1];
     aCell.innerHTML = '<a href="index.php?cmd=findplayer' +

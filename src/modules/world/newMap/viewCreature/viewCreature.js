@@ -70,9 +70,9 @@ function setGroupEvalalutor(html) {
   groupEvaluator.innerHTML = html;
 }
 
-function superElite(ses, obj) {
+function superElite(ses, obj, type) {
   // reduce stats if critter is a SE and player has SES cast on them.
-  if (obj.name.search('Super Elite') !== -1) { // TODO type
+  if (type === 3) {
     obj.attack -= Math.ceil(obj.attack * ses);
     obj.defense -= Math.ceil(obj.defense * ses);
     obj.armor -= Math.ceil(obj.armor * ses);
@@ -82,15 +82,16 @@ function superElite(ses, obj) {
 }
 
 function creatureData(creature, ses) {
-  var obj = {};
-  obj.name = creature.name;
-  obj.class = creature.creature_class;
-  obj.attack = Number(creature.attack);
-  obj.defense = Number(creature.defense);
-  obj.armor = Number(creature.armor);
-  obj.damage = Number(creature.damage);
-  obj.hp = Number(creature.hp);
-  superElite(ses, obj);
+  var obj = {
+    name: creature.name,
+    'class': creature.creature_class,
+    attack: Number(creature.attack),
+    defense: Number(creature.defense),
+    armor: Number(creature.armor),
+    damage: Number(creature.damage),
+    hp: Number(creature.hp)
+  };
+  superElite(ses, obj, creature.type);
   return obj;
 }
 

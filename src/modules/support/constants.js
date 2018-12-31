@@ -72,7 +72,17 @@ export var def_fetch_playerNotifications = 1024;
 
 export var def_needToCompose = 'needToCompose';
 export var def_lastComposeCheck = 'lastComposeCheck';
+export var def_characterVirtualLevel = 'characterVirtualLevel';
 
 export var def_table = 'table';
 
 export var fshBuffLog = 'fsh_buffLog';
+
+export var def_statbarLevel = 'statbar-level-tooltip-general';
+export var def_statLevel = 'stat-level';
+export var def_statDefense = 'stat-defense';
+export var def_statAttack = 'stat-attack';
+export var def_statDamage = 'stat-damage';
+export var def_statArmor = 'stat-armor';
+export var def_statHp = 'stat-hp';
+export var def_statVl = 'stat-vl';

@@ -9,6 +9,14 @@ import setForage from './ajax/setForage';
 var content;
 var combatLog = [];
 var textArea;
+var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
+  '</td></tr>' +
+  '<tr><td colspan="4" align="center">WARNING: this links to an ' +
+  'external site not related to HCS.<br />' +
+  'If you wish to visit site directly URL is: http://evolutions.' +
+  'yvong.com/fshlogparser.php<br />' +
+  '<tr><td colspan=4 align="center"><input type="hidden" value="true" ' +
+  'name="submit"><input type="submit" value="Analyze!"></td></tr>';
 
 function notepadCopyLog() {
   textArea.focus();
@@ -29,14 +37,6 @@ function notepadClearLog() { // jQuery
 
 function gotCombatLog(data) {
   if (data) {combatLog = data;}
-  var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
-    '</td></tr>' +
-    '<tr><td colspan="4" align="center">WARNING: this links to an ' +
-    'external site not related to HCS.<br />' +
-    'If you wish to visit site directly URL is: http://evolutions.' +
-    'yvong.com/fshlogparser.php<br />' +
-    '<tr><td colspan=4 align="center"><input type="hidden" value="true" ' +
-    'name="submit"><input type="submit" value="Analyze!"></td></tr>';
   content.innerHTML = '<h1>Combat Logs</h1><br /><form action="http://' +
     'evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
     '<div align="center"><textarea align="center" cols="80" rows="25" ' +

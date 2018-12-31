@@ -3,12 +3,12 @@ import currentGuildId from '../../common/currentGuildId';
 import execute from '../../common/execute';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
-import injectBuffLog from '../../buffLog/injectBuffLog';
-import injectMonsterLog from '../../monstorLog';
+import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
+import injectMonsterLog from '../../notepad/monstorLog/monstorLog';
 import injectNotepadShowLogs from '../../combatLog';
 import injectOnlinePlayers from
   '../../notepad/onlinePlayers/injectOnlinePlayers';
-import injectRecipeManager from '../../recipeMgr/recipeMgr';
+import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
 import insertElement from '../../common/insertElement';
 import insertElementAfter from '../../common/insertElementAfter';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
@@ -17,8 +17,10 @@ import jQueryNotPresent from '../../common/jQueryNotPresent';
 import {newGuildLogUrl} from '../../support/constants';
 import on from '../../common/on';
 import {createAnchor, createLi} from '../../common/cElement';
-import {injectAuctionSearch, injectQuickLinkManager} from '../../lists/lists';
-import {injectFindBuffs, injectFindOther} from '../../findBuffs/findBuffs';
+import {injectAuctionSearch, injectQuickLinkManager} from
+  '../../notepad/lists/lists';
+import {injectFindBuffs, injectFindOther} from
+  '../../notepad/findBuffs/findBuffs';
 import {sendEvent, sendException} from '../../support/fshGa';
 
 function updateQuestLink() {

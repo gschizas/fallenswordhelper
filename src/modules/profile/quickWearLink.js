@@ -1,6 +1,6 @@
 import {createSpan} from '../common/cElement';
 import insertElement from '../common/insertElement';
-import insertQuickWear from '../quickWear/quickWear';
+import insertQuickWear from '../notepad/quickWear/quickWear';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
 import on from '../common/on';

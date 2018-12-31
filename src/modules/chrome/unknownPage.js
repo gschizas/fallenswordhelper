@@ -3,7 +3,7 @@ import injectQuestBookFull from '../questbook/injectQuestBookFull';
 import inventing from '../recipes/inventing';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {screenview} from '../support/fshGa';
-import updateBuffLog from '../buffLog/updateBuffLog';
+import updateBuffLog from '../notepad/buffLog/updateBuffLog';
 import xPath from '../common/xPath';
 
 var unknown = [

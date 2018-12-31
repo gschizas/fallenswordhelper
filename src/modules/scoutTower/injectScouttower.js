@@ -9,7 +9,7 @@ import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import roundToString from '../common/roundToString';
 import setForage from '../ajax/setForage';
-import {guideUrl, now} from '../support/constants';
+import {def_table, guideUrl, now} from '../support/constants';
 
 function getTitanName(aRow) {
   return aRow.cells[0].firstElementChild.getAttribute('oldtitle');
@@ -97,7 +97,7 @@ function guideLink(aRow) {
 }
 
 function gotOldTitans(oldTitans) {
-  var titanTables = pCC.getElementsByTagName('table');
+  var titanTables = pCC.getElementsByTagName(def_table);
   injectScouttowerBuffLinks(titanTables);
   var titanTable = titanTables[1];
   var newTitans = {};

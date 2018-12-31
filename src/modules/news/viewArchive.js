@@ -1,4 +1,5 @@
 import collapse from '../common/collapse';
+import {def_table} from '../support/constants';
 import getValue from '../system/getValue';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import {pCC} from '../support/layout';
@@ -29,7 +30,7 @@ function setupPref(prefName, rowInjector) {
 export default function viewArchive() {
   lastLadderReset = getValue(ladderResetPref);
   var prefName = 'collapseNewsArchive';
-  var theTables = pCC.getElementsByTagName('table');
+  var theTables = pCC.getElementsByTagName(def_table);
   if (theTables.length > 2) {
     setupPref(prefName, theTables[0].rows[2]);
     collapse({

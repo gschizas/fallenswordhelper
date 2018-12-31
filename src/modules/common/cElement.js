@@ -1,3 +1,4 @@
+import {def_table} from '../support/constants';
 import isObject from './isObject';
 
 export function mixin(obj, mixins) {
@@ -25,7 +26,7 @@ export function createSpan(props) {
 }
 
 export function createTable(props) {
-  return cElement('table', props);
+  return cElement(def_table, props);
 }
 
 export function createTBody(props) {

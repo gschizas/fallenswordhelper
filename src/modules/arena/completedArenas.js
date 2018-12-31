@@ -6,21 +6,32 @@ function gotoPage(pageId) {
     pageId;
 }
 
-function overrideButtons() {
+function lastPage() {
+  return $('#pCC input[value="Go"]').closest('td').prev().text()
+    .replace(/\D/g, '');
+}
+
+function injectStartButton() {
   var prevButton = $('#pCC input[value="<"]');
-  var nextButton = $('#pCC input[value=">"]');
   if (prevButton.length === 1) {
     var startButton = $('<input value="<<" type="button">');
     prevButton.before(startButton).before('&nbsp;');
     startButton.click(function() {gotoPage(1);});
   }
+}
+
+function injectFinishButton() {
+  var nextButton = $('#pCC input[value=">"]');
   if (nextButton.length === 1) {
-    var lastPage = $('#pCC input[value="Go"]').closest('td').prev().text()
-      .replace(/\D/g, '');
     var finishButton = $('<input value=">>" type="button">');
     nextButton.after(finishButton).after('&nbsp;');
-    finishButton.click(function() {gotoPage(lastPage);});
+    finishButton.click(function() {gotoPage(lastPage());});
   }
+}
+
+function overrideButtons() {
+  injectStartButton();
+  injectFinishButton();
   $('#pCC input[value="View"]').click(dontPost);
 }
 

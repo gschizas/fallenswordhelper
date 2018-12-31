@@ -3,7 +3,7 @@ import createDocument from '../system/createDocument';
 import {doSendGold} from '../world/newMap/sendGold';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
-import insertQuickWear from '../quickWear/quickWear';
+import insertQuickWear from '../notepad/quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
