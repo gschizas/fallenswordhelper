@@ -1,5 +1,5 @@
 import {createTable} from './common/cElement';
-import eventHandler from './common/eventHandler';
+import eventHandler5 from './common/eventHandler5';
 import {getElementById} from './common/getElement';
 import getInventory from './ajax/getInventory';
 import {imageServer} from './system/system';
@@ -128,24 +128,24 @@ function prepInv(data) {
 }
 
 var extractEvents = [
-  {
-    test: function(self) {return self.id === 'fshInSt';},
-    act: function() {
+  [
+    function(self) {return self.id === 'fshInSt';},
+    function() {
       selectST = !selectST;
       showQuickExtract();
     }
-  },
-  {
-    test: function(self) {return self.id === 'fshInMain';},
-    act: function() {
+  ],
+  [
+    function(self) {return self.id === 'fshInMain';},
+    function() {
       selectMain = !selectMain;
       showQuickExtract();
     }
-  },
-  {
-    test: function(self) {return self.id.indexOf('fshExtr') === 0;},
-    act: extractAllSimilar
-  }
+  ],
+  [
+    function(self) {return self.id.indexOf('fshExtr') === 0;},
+    extractAllSimilar
+  ]
 ];
 
 export default function insertQuickExtract(injector) { // jQuery.min
@@ -162,6 +162,6 @@ export default function insertQuickExtract(injector) { // jQuery.min
   insertElement(content, extTbl);
   selectST = true;
   selectMain = true;
-  on(content, 'click', eventHandler(extractEvents));
+  on(content, 'click', eventHandler5(extractEvents));
   getInventory().done(prepInv);
 }

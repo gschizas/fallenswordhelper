@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import hideElement from '../common/hideElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import on from '../common/on';
 import toggleVisibilty from '../common/toggleVisibilty';
@@ -13,7 +14,7 @@ export function logoToggle(leftHandSideColumnTable) { // Legacy
     .firstChild.nextSibling;
   guildLogoElement.id = 'guildLogoControl';
   if (getValue('guildLogoControl')) {
-    guildLogoElement.classList.add('fshHide');
+    hideElement(guildLogoElement);
   }
   on(getElementById('toggleGuildLogoControl'), 'click', toggleVisibilty);
 }
@@ -28,7 +29,7 @@ export function statToggle(leftHandSideColumnTable) { // Legacy
     .firstChild.nextSibling;
   statisticsControlElement.id = 'statisticsControl';
   if (getValue('statisticsControl')) {
-    statisticsControlElement.classList.add('fshHide');
+    hideElement(statisticsControlElement);
   }
   on(getElementById('toggleStatisticsControl'), 'click', toggleVisibilty);
 }
@@ -42,7 +43,7 @@ export function structureToggle(leftHandSideColumnTable) { // Legacy
     .cells[0].firstChild.nextSibling;
   guildStructureControlElement.id = 'guildStructureControl';
   if (getValue('guildStructureControl')) {
-    guildStructureControlElement.classList.add('fshHide');
+    hideElement(guildStructureControlElement);
   }
   on(getElementById('toggleGuildStructureControl'), 'click', toggleVisibilty);
 }

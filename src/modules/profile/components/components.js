@@ -1,10 +1,11 @@
-import componentDeleteHandler from './componentDeleteHandler';
-import countComponentHandler from './countComponentHandler';
+import classHandler from '../../common/classHandler';
+import countComponent from './countComponent';
 import {createDiv} from '../../common/cElement';
 import decorateButton from './decorateButton';
-import deleteTypeHandler from './deleteTypeHandler';
-import eventHandler3 from '../../common/eventHandler3';
+import delCompType from './delCompType';
+import delComponent from './delComponent';
 import getInvTable from './getInvTable';
+import hideElement from '../../common/hideElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../../quickExtract';
@@ -21,12 +22,9 @@ function componentBtnContainer() {
   return cmDiv;
 }
 
-function quickExtractHandler(evt) {
-  if (evt.target.classList.contains('quick-extract-components')) {
-    sendEvent('components', 'insertQuickExtract');
-    jQueryDialog(insertQuickExtract);
-    return true;
-  }
+function quickExtractHandler() {
+  sendEvent('components', 'insertQuickExtract');
+  jQueryDialog(insertQuickExtract);
 }
 
 function addDelBtn(el) {
@@ -37,18 +35,11 @@ function addDelBtn(el) {
 function enableDelComponent(self) {
   sendEvent('components', 'enableDelComponent');
   var quickDelDiv = self.parentNode;
-  quickDelDiv.classList.add('fshHide');
+  hideElement(quickDelDiv);
   var cmDiv = quickDelDiv.parentNode;
   insertElement(cmDiv, decorateButton('Delete All Visible'));
   var nodeList = getInvTable().getElementsByTagName('IMG');
   Array.from(nodeList).forEach(addDelBtn);
-}
-
-function enableQuickDelHandler(evt) {
-  if (evt.target.classList.contains('enable-quick-del')) {
-    enableDelComponent(evt.target);
-    return true;
-  }
 }
 
 function delAllComponent(self) {
@@ -60,24 +51,19 @@ function delAllComponent(self) {
   });
 }
 
-function deleteAllHandler(evt) {
-  if (evt.target.classList.contains('delete-all-visible')) {
-    delAllComponent(evt.target);
-    return true;
-  }
-}
+var classEvts = [
+  ['quick-extract-components', quickExtractHandler],
+  ['enable-quick-del', enableDelComponent],
+  ['delete-all-visible', delAllComponent],
+  ['compDelBtn', delComponent],
+  ['count-components', countComponent],
+  ['compDelType', delCompType]
+];
 
 function addComposingButtons(thisInvTable) {
   var compDiv = thisInvTable.parentNode;
   insertElement(compDiv, componentBtnContainer());
-  on(compDiv, 'click', eventHandler3([
-    quickExtractHandler,
-    enableQuickDelHandler,
-    deleteAllHandler,
-    componentDeleteHandler,
-    countComponentHandler,
-    deleteTypeHandler
-  ]));
+  on(compDiv, 'click', classHandler(classEvts));
 }
 
 export default function components() {

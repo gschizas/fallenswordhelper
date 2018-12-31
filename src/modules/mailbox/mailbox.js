@@ -123,15 +123,19 @@ function clickEvt(itemList, takeResult, evt) {
   }
 }
 
+function makeItemTable(itemList, qt, takeResult) {
+  var itemTbl = createDiv({className: 'fshTakeGrid'});
+  makeItemBoxes(itemTbl, itemList);
+  insertElement(qt, itemTbl);
+  on(itemTbl, 'click', partial(clickEvt, itemList, takeResult));
+}
+
 function makeQtDiv(itemList) {
   var qt = basicQt();
   var takeResult = makeTakeResult(qt);
   insertElement(qt, createDiv());
   if (isFunction(Object.entries)) {
-    var itemTbl = createDiv({className: 'fshTakeGrid'});
-    makeItemBoxes(itemTbl, itemList);
-    insertElement(qt, itemTbl);
-    on(itemTbl, 'click', partial(clickEvt, itemList, takeResult));
+    makeItemTable(itemList, qt, takeResult);
   } else {
     takeResult.textContent = 'Your browser is not supported.';
   }

@@ -1,6 +1,7 @@
 import dontPost from './dontPost';
 import getValue from '../system/getValue';
 import guideButtons from './guideButtons';
+import hideElement from '../common/hideElement';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import setValue from '../system/setValue';
@@ -108,11 +109,10 @@ function isHideQuests() {
 
 function doHideQuests(hideQuests, questName, aRow) {
   if (hideQuests.indexOf(questName) >= 0) {
-    aRow.classList.add('fshHide');
-    aRow.nextElementSibling.classList.add('fshHide');
-    aRow.nextElementSibling.nextElementSibling.classList.add('fshHide');
-    aRow.nextElementSibling.nextElementSibling.nextElementSibling
-      .classList.add('fshHide');
+    hideElement(aRow);
+    hideElement(aRow.nextElementSibling);
+    hideElement(aRow.nextElementSibling.nextElementSibling);
+    hideElement(aRow.nextElementSibling.nextElementSibling.nextElementSibling);
   }
 }
 

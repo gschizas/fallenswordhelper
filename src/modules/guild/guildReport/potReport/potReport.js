@@ -1,6 +1,6 @@
 import alpha from '../../../common/alpha';
 import {createDiv} from '../../../common/cElement';
-import eventHandler3 from '../../../common/eventHandler3';
+import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';
 import fallback from '../../../system/fallback';
 import getForage from '../../../ajax/getForage';
@@ -82,24 +82,30 @@ function resetMap(potOpts, potObj) {
   }, {});
 }
 
-function doReset(potOpts, potObj, evt) {
-  if (evt.target.id === 'fshReset') {
-    resetMap(potOpts, potObj);
-    setForage(storeMap, potOpts);
-    drawMapping(potOpts);
-    drawInventory(potOpts, potObj);
-    return true;
-  }
+function doReset(potOpts, potObj) {
+  resetMap(potOpts, potObj);
+  setForage(storeMap, potOpts);
+  drawMapping(potOpts);
+  drawInventory(potOpts, potObj);
 }
 
-function saveState(potOpts, evt) {
-  var self = evt.target;
-  if (/^pottab\d$/.test(self.id)) {
-    var option = self.id;
-    potOpts[option] = self.checked;
-    setForage(storeMap, potOpts);
-    return true;
-  }
+function saveState(potOpts, self) {
+  var option = self.id;
+  potOpts[option] = self.checked;
+  setForage(storeMap, potOpts);
+}
+
+function clickEvents(potOpts, potObj) {
+  return [
+    [
+      function(self) {return self.id === 'fshReset';},
+      partial(doReset, potOpts, potObj)
+    ],
+    [
+      function(self) {return /^pottab\d$/.test(self.id);},
+      partial(saveState, potOpts)
+    ]
+  ];
 }
 
 function onInput(potOpts, potObj, e) {
@@ -114,10 +120,7 @@ function onInput(potOpts, potObj, e) {
 
 function cellEventHandlers(potOpts, potObj, myCell) {
   on(myCell, 'change', partial(onChange, potOpts, potObj));
-  on(myCell, 'click', eventHandler3([
-    partial(doReset, potOpts, potObj),
-    partial(saveState, potOpts)
-  ]));
+  on(myCell, 'click', eventHandler5(clickEvents(potOpts, potObj)));
   on(myCell, 'input', partial(onInput, potOpts, potObj));
 }
 

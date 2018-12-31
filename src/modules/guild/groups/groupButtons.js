@@ -3,6 +3,7 @@ import calf from '../../support/calf';
 import {createDiv} from '../../common/cElement';
 import fetchGroupStatsButton from './fetchGroupStatsButton';
 import getValue from '../../system/getValue';
+import hideElement from '../../common/hideElement';
 import on from '../../common/on';
 import retryAjax from '../../ajax/retryAjax';
 import {sendEvent} from '../../support/fshGa';
@@ -57,7 +58,7 @@ export default function groupButtons() {
   var enableMaxGroupSizeToJoin = getValue('enableMaxGroupSizeToJoin');
   if (enableMaxGroupSizeToJoin) {
     maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    joinAll.classList.add('fshHide');
+    hideElement(joinAll);
     joinUnderButton(buttonRow);
   }
 

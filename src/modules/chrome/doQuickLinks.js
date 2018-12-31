@@ -2,7 +2,6 @@ import add from '../support/task';
 import calf from '../support/calf';
 import draggable from '../common/dragStart';
 import escapeHtml from '../system/escapeHtml';
-import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
@@ -26,32 +25,36 @@ function isDraggable(draggableQuickLinks) {
   }
 }
 
-function haveNode(node, quickLinks) { // Native ?
-  var quickLinksTopPx = getValue('quickLinksTopPx');
-  var quickLinksLeftPx = getValue('quickLinksLeftPx');
+function linkHtml(link) {
+  var newWindow = retBool(link.newWindow, ' target="new"', '');
+  return '<li><a href="' + escapeHtml(link.url) + '"' +
+    newWindow + '>' + link.name + '</a></li>';
+}
+
+function makeQuickLinks(quickLinks) {
+  return quickLinks.map(linkHtml).join('');
+}
+
+function haveLinks(quickLinks) { // Native ?
   var draggableQuickLinks = getValue('draggableQuickLinks');
-  var draggableQuickLinksClass = retBool(draggableQuickLinks, ' fshMove', '');
-  var html = '<div style="top:' + quickLinksTopPx + 'px; left:' +
-    quickLinksLeftPx + 'px; background-image:url(\'' + imageServer +
+  var html = '<div style="top:' + getValue('quickLinksTopPx') + 'px; left:' +
+    getValue('quickLinksLeftPx') + 'px; background-image:url(\'' + imageServer +
     '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
     retOption('keepHelperMenuOnScreen', ' fshFixed', '') +
-    draggableQuickLinksClass + '">';
-  for (var i = 0; i < quickLinks.length; i += 1) {
-    var newWindow = retBool(quickLinks[i].newWindow, ' target="new"', '');
-    html += '<li><a href="' + escapeHtml(quickLinks[i].url) + '"' +
-      newWindow + '>' + quickLinks[i].name + '</a></li>';
-  }
-  html += '</div>';
+    retBool(draggableQuickLinks, ' fshMove', '') + '">' +
+    makeQuickLinks(quickLinks) + '</div>';
   insertHtmlBeforeEnd(document.body, html);
   isDraggable(draggableQuickLinks);
 }
 
+function haveNode() {
+  var quickLinks = getValueJSON('quickLinks') || [];
+  if (quickLinks.length > 0) {haveLinks(quickLinks);}
+}
+
 function injectQuickLinks() { // Native ?
   var node = getElementById('statbar-container');
-  if (!node) {return;}
-  var quickLinks = fallback(getValueJSON('quickLinks'), []);
-  if (quickLinks.length <= 0) {return;}
-  haveNode(node, quickLinks);
+  if (node) {haveNode();}
 }
 
 export default function doQuickLinks() {

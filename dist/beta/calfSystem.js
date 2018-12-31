@@ -891,32 +891,36 @@
     }
   }
 
-  function haveNode(node, quickLinks) { // Native ?
-    var quickLinksTopPx = getValue('quickLinksTopPx');
-    var quickLinksLeftPx = getValue('quickLinksLeftPx');
+  function linkHtml(link) {
+    var newWindow = retBool(link.newWindow, ' target="new"', '');
+    return '<li><a href="' + escapeHtml(link.url) + '"' +
+      newWindow + '>' + link.name + '</a></li>';
+  }
+
+  function makeQuickLinks(quickLinks) {
+    return quickLinks.map(linkHtml).join('');
+  }
+
+  function haveLinks(quickLinks) { // Native ?
     var draggableQuickLinks = getValue('draggableQuickLinks');
-    var draggableQuickLinksClass = retBool(draggableQuickLinks, ' fshMove', '');
-    var html = '<div style="top:' + quickLinksTopPx + 'px; left:' +
-      quickLinksLeftPx + 'px; background-image:url(\'' + imageServer +
+    var html = '<div style="top:' + getValue('quickLinksTopPx') + 'px; left:' +
+      getValue('quickLinksLeftPx') + 'px; background-image:url(\'' + imageServer +
       '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
       retOption('keepHelperMenuOnScreen', ' fshFixed', '') +
-      draggableQuickLinksClass + '">';
-    for (var i = 0; i < quickLinks.length; i += 1) {
-      var newWindow = retBool(quickLinks[i].newWindow, ' target="new"', '');
-      html += '<li><a href="' + escapeHtml(quickLinks[i].url) + '"' +
-        newWindow + '>' + quickLinks[i].name + '</a></li>';
-    }
-    html += '</div>';
+      retBool(draggableQuickLinks, ' fshMove', '') + '">' +
+      makeQuickLinks(quickLinks) + '</div>';
     insertHtmlBeforeEnd(document.body, html);
     isDraggable(draggableQuickLinks);
   }
 
+  function haveNode() {
+    var quickLinks = getValueJSON('quickLinks') || [];
+    if (quickLinks.length > 0) {haveLinks(quickLinks);}
+  }
+
   function injectQuickLinks() { // Native ?
     var node = getElementById('statbar-container');
-    if (!node) {return;}
-    var quickLinks = fallback(getValueJSON('quickLinks'), []);
-    if (quickLinks.length <= 0) {return;}
-    haveNode(node, quickLinks);
+    if (node) {haveNode();}
   }
 
   function doQuickLinks() {
@@ -967,6 +971,121 @@
   function isObject(e) {return isType(e, 'object');}
 
   function jQueryNotPresent() {return !isFunction(window.$);}
+
+  function colouring(parent, colourFn) {
+    Array.prototype.forEach.call(
+      parent.getElementsByClassName('player-name'), colourFn);
+  }
+
+  function contactColour(el, obj) {
+    var onMouseOver = el.dataset.tipped;
+    var lastActivityMinutes =
+      /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+    if (lastActivityMinutes < 2) {
+      el.classList.add(obj.l1);
+    } else if (lastActivityMinutes < 5) {
+      el.classList.add(obj.l2);
+    } else {
+      el.classList.add(obj.l3);
+    }
+  }
+
+  function hideElement(el) {
+    if (el && el.classList) {el.classList.add('fshHide');}
+  }
+
+  function hideNodeList(nodeList) {
+    Array.prototype.forEach.call(nodeList, hideElement);
+  }
+
+  function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
+    hideNodeList(parent.querySelectorAll(selector));
+  }
+
+  var hideBtn = [
+    {
+      condition: function() {return calf.hideGuildInfoTrade;},
+      guildSelector: '#guild-minibox-action-trade',
+      allySelector: '#online-allies-action-trade'
+    },
+    {
+      condition: function() {return calf.hideGuildInfoSecureTrade;},
+      guildSelector: '#guild-minibox-action-secure-trade',
+      allySelector: '#online-allies-action-secure-trade'
+    },
+    {
+      condition: function() {return calf.hideGuildInfoBuff;},
+      guildSelector: '#guild-minibox-action-quickbuff',
+      allySelector: '#online-allies-action-quickbuff'
+    },
+    {
+      condition: function() {return calf.hideGuildInfoMessage;},
+      guildSelector: '#guild-minibox-action-send-message',
+      allySelector: '#online-allies-action-send-message'
+    }
+  ];
+
+  function doHideBtn(context, selector) {
+    hideBtn.forEach(function(el) {
+      if (el.condition()) {
+        hideQuerySelectorAll(context, el[selector]);
+      }
+    });
+  }
+
+  function doHideBuffSelected(parent, checkOn, quickBuff) {
+    if (calf.hideBuffSelected) {
+      hideNodeList(parent.getElementsByClassName(checkOn));
+      hideElement(getElementById(quickBuff));
+    }
+  }
+
+  function guildColour(el) {
+    contactColour(el, {
+      l1: 'fshGreen',
+      l2: 'fshWhite',
+      l3: 'fshGrey'
+    });
+  }
+
+  function updateChatLink() {
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#pCR h4'),
+      function(el) {
+        if (el.textContent !== 'Chat') {return;}
+        el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">' +
+          el.textContent + '</a>';
+      }
+    );
+  }
+
+  function addGuildInfoWidgets() {
+    var guildMembrList = getElementById('minibox-guild-members-list');
+    if (!guildMembrList) {return;} // list exists
+    // hide guild info links
+    doHideBtn(guildMembrList, 'guildSelector');
+    doHideBuffSelected(guildMembrList, 'guild-buff-check-on', 'guild-quick-buff');
+    // add coloring for offline time
+    colouring(guildMembrList, guildColour);
+    updateChatLink();
+  }
+
+  function alliesColour(el) {
+    contactColour(el, {
+      l1: 'fshDodgerBlue',
+      l2: 'fshLightSkyBlue',
+      l3: 'fshPowderBlue'
+    });
+  }
+
+  function addOnlineAlliesWidgets() {
+    var onlineAlliesList = getElementById('minibox-allies-list');
+    if (!onlineAlliesList) {return;}
+    doHideBtn(onlineAlliesList, 'allySelector');
+    doHideBuffSelected(onlineAlliesList, 'ally-buff-check-on', 'ally-quick-buff');
+    // add coloring for offline time
+    colouring(onlineAlliesList, alliesColour);
+  }
 
   var rarity = [
     {colour: '#ffffff', clas: 'fshCommon'},
@@ -1048,7 +1167,7 @@
     if (testForGuildLogMsg(guildLogNode)) {return;}
     var messageBox = guildLogNode.parentNode;
     if (messageBox) {
-      messageBox.classList.add('fshHide');
+      hideElement(messageBox);
     }
   }
 
@@ -2714,12 +2833,16 @@
     }
   }
 
-  function eventHandler(evtAry) {
-    return function(evt) {
-      var self = evt.target;
-      var hdl = evtAry.find(function(el) {return el.test(self);});
-      if (hdl) {hdl.act(self);}
-    };
+  function passingTest(self, el) {return el[0](self);}
+
+  function doEvent(evtAry, evt) {
+    var self = evt.target;
+    var hdl = evtAry.find(partial(passingTest, self));
+    if (hdl) {hdl[1](self);}
+  }
+
+  function eventHandler5(evtAry) {
+    return partial(doEvent, evtAry);
   }
 
   function getInventory() {
@@ -2878,24 +3001,24 @@
   }
 
   var extractEvents = [
-    {
-      test: function(self) {return self.id === 'fshInSt';},
-      act: function() {
+    [
+      function(self) {return self.id === 'fshInSt';},
+      function() {
         selectST = !selectST;
         showQuickExtract();
       }
-    },
-    {
-      test: function(self) {return self.id === 'fshInMain';},
-      act: function() {
+    ],
+    [
+      function(self) {return self.id === 'fshInMain';},
+      function() {
         selectMain = !selectMain;
         showQuickExtract();
       }
-    },
-    {
-      test: function(self) {return self.id.indexOf('fshExtr') === 0;},
-      act: extractAllSimilar
-    }
+    ],
+    [
+      function(self) {return self.id.indexOf('fshExtr') === 0;},
+      extractAllSimilar
+    ]
   ];
 
   function insertQuickExtract(injector) { // jQuery.min
@@ -2912,7 +3035,7 @@
     insertElement(content, extTbl);
     selectST = true;
     selectMain = true;
-    on(content, 'click', eventHandler(extractEvents));
+    on(content, 'click', eventHandler5(extractEvents));
     getInventory().done(prepInv);
   }
 
@@ -3006,6 +3129,16 @@
       },
       dataType: 'json'
     }).done(dialog);
+  }
+
+  function hasClass(className, el) {
+    return el.classList.contains(className);
+  }
+
+  function hasClasses(classAry, el) {
+    return classAry.every(function(className) {
+      return hasClass(className, el);
+    });
   }
 
   function loadInventory() {
@@ -3687,29 +3820,23 @@
     setValue('disableQuickWearPrompts', disableQuickWearPrompts);
   }
 
-  var events = [
-    {
-      test: function(self) {
-        return self.classList.contains('smallLink') &&
-          self.classList.contains('fshEq');
-      },
-      act: equipProfileInventoryItem
-    },
-    {
-      test: function(self) {
-        return self.classList.contains('smallLink') &&
-          self.classList.contains('fshUse');
-      },
-      act: useProfileInventoryItem
-    },
-    {
-      test: function(self) {return self.classList.contains('fshFolder');},
-      act: hideFolders
-    },
-    {
-      test: function(self) {return self.id === 'disableQuickWearPrompts';},
-      act: togglePref
-    }
+  var evts5 = [
+    [
+      function(self) {return hasClasses(['smallLink', 'fshEq'], self);},
+      equipProfileInventoryItem
+    ],
+    [
+      function(self) {return hasClasses(['smallLink', 'fshUse'], self);},
+      useProfileInventoryItem
+    ],
+    [
+      function(self) {return hasClass('fshFolder', self);},
+      hideFolders
+    ],
+    [
+      function(self) {return self.id === 'disableQuickWearPrompts';},
+      togglePref
+    ]
   ];
 
   function createInvTabs() {
@@ -3726,7 +3853,8 @@
         '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
         '<label for="qwtab2">Inventory Manager Counter' +
           '<br>filtered by AH Quick Search</label>' +
-        '</li><div id="setPrompt" class="fshFloatRight fshCenter"></div></ul>'
+        '</li><div id="setPrompt" class="fshFloatRight fshCenter">' +
+        simpleCheckboxHtml('disableQuickWearPrompts') + '</div></ul>'
     });
   }
 
@@ -3737,10 +3865,8 @@
     insertElement(invTabs, invTabsQw);
     content$2.innerHTML = '';
     insertElement(content$2, invTabs);
-    on(invTabs, 'click', eventHandler(events));
+    on(invTabs, 'click', eventHandler5(evts5));
     insertElement(invTabs, showAHInvManager(appInv));
-    insertHtmlBeforeEnd(getElementById('setPrompt'),
-      simpleCheckboxHtml('disableQuickWearPrompts'));
   }
 
   function hasJquery(injector) { // jQuery.min
@@ -3914,14 +4040,15 @@
   }
 
   var listEvents = [
-    {test: function(self) {return self.id === 'fshReset';}, act: resetRawEditor},
-    {test: function(self) {return self.id === 'fshSave';}, act: saveRawEditor},
-    {test: function(self) {return self.id === 'fshAdd';}, act: addQuickItem},
-    {
-      test: function(self) {return self.id.indexOf('fshDel') === 0;},
-      act: deleteQuickItem
-    }
+    [function(self) {return self.id === 'fshReset';}, resetRawEditor],
+    [function(self) {return self.id === 'fshSave';}, saveRawEditor],
+    [function(self) {return self.id === 'fshAdd';}, addQuickItem],
+    [function(self) {return self.id.indexOf('fshDel') === 0;}, deleteQuickItem]
   ];
+
+  function setupEventHandler(content) {
+    on(content, 'click', eventHandler5(listEvents));
+  }
 
   function injectAuctionSearch(injector) { // Legacy
     var content = injector || pCC;
@@ -3931,7 +4058,7 @@
     // global parameters for the meta function generateManageTable
     param = auctionSearchParams();
     generateManageTable();
-    on(content, 'click', eventHandler(listEvents));
+    setupEventHandler(content);
   }
 
   function injectQuickLinkManager(injector) { // Legacy
@@ -3956,7 +4083,7 @@
       gmname: 'quickLinks',
     };
     generateManageTable();
-    on(content, 'click', eventHandler(listEvents));
+    setupEventHandler(content);
   }
 
   /* eslint-disable no-multi-spaces, max-len */
@@ -4816,7 +4943,7 @@
     }
   }
 
-  function eventHandler$1(evt) {
+  function eventHandler(evt) {
     if (evt.target.classList.contains('fshLink')) {
       callHelperFunction(evt);
       return;
@@ -4839,7 +4966,7 @@
     insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
     insertElement(helperMenu, helperMenuDiv);
     on(helperMenu, 'click', toggleMenu);
-    on(helperMenuDiv, 'click', eventHandler$1);
+    on(helperMenuDiv, 'click', eventHandler);
   }
 
   function haveNode$1(node) {
@@ -5243,6 +5370,18 @@
     doAccordion();
   }
 
+  function passingTest$1(self, el) {return hasClass(el[0], self);}
+
+  function doEvent$1(evtAry, evt) {
+    var self = evt.target;
+    var hdl = evtAry.find(partial(passingTest$1, self));
+    if (hdl) {hdl[1](self);}
+  }
+
+  function classHandler(evtAry) {
+    return partial(doEvent$1, evtAry);
+  }
+
   var enterForSendMessage;
   var quickMsgDialog;
   var $quickMessageDialog;
@@ -5352,19 +5491,10 @@
       .replace(/\{playername\}/g, targetPlayer) + '\n';
   }
 
-  var myEvents = [
-    {
-      test: function(self) {return self.classList.contains('del-button');},
-      act: deleteTemplate
-    },
-    {
-      test: function(self) {return self.classList.contains('add-button');},
-      act: addNewTemplate
-    },
-    {
-      test: function(self) {return self.classList.contains('add-template');},
-      act: insertTemplate
-    }
+  var classEvents = [
+    ['del-button', deleteTemplate],
+    ['add-button', addNewTemplate],
+    ['add-template', insertTemplate],
   ];
 
   function showMsgTemplate() {
@@ -5377,7 +5507,7 @@
         fshButton('add', 'Add'),
         '<input id="newTmpl" class="ui-widget-content fshTmpl">');
       showingTemplates = true;
-      on(msgTbl, 'click', eventHandler(myEvents));
+      on(msgTbl, 'click', classHandler(classEvents));
     }
   }
 
@@ -5955,7 +6085,7 @@
     {className: 'enemy-quick-buff', handler: selectedBuff}
   ];
 
-  function eventHandler$2(evt) {
+  function eventHandler$1(evt) {
     var self = evt.target;
     if (self.id === 'fshResetEnemy') {
       resetList();
@@ -5984,7 +6114,7 @@
     wrapper += '</div></div>';
     insertHtmlBeforeEnd(fshAllyEnemy, wrapper);
     insertElementAfterBegin(pCR, fshAllyEnemy);
-    on(fshAllyEnemy, 'click', eventHandler$2);
+    on(fshAllyEnemy, 'click', eventHandler$1);
     injectAllyEnemyList(data);
   }
 
@@ -5994,6 +6124,24 @@
       .done(function(data) {
         add(3, makeDiv, [data]);
       });
+  }
+
+  function rewardType(theCells) {
+    return theCells[2].firstChild.firstChild.firstChild.firstChild
+      .nextSibling.firstChild.title;
+  }
+
+  function basicBounty(theCells) {
+    var targetData = theCells[0].firstChild.firstChild;
+    return {
+      target: targetData.firstChild.textContent,
+      link: targetData.href,
+      lvl: targetData.nextSibling.textContent.replace(/[[|\]]/, ''),
+      reward: theCells[2].textContent,
+      rewardType: rewardType(theCells),
+      posted: theCells[3].textContent,
+      xpLoss: theCells[4].textContent,
+    };
   }
 
   var bountyList;
@@ -6010,18 +6158,7 @@
   }
 
   function bountyData(theCells) {
-    var targetData = theCells[0].firstChild.firstChild;
-    return {
-      target: targetData.firstChild.textContent,
-      link: targetData.href,
-      lvl: targetData.nextSibling.textContent.replace(/[[|\]]/, ''),
-      reward: theCells[2].textContent,
-      rewardType: theCells[2].firstChild.firstChild.firstChild.firstChild
-        .nextSibling.firstChild.title,
-      posted: theCells[3].textContent,
-      xpLoss: theCells[4].textContent,
-      progress: theCells[5].textContent
-    };
+    return extend(basicBounty(theCells), {progress: theCells[5].textContent});
   }
 
   function getAllBounties(activeTable) {
@@ -6087,32 +6224,20 @@
     setValue('bwNeedsRefresh', false);
   }
 
-  var thisBounty;
-
-  function acceptBtn(action, cell) {
-    if (action !== '[n/a]') {
+  function acceptBtn(theCells) {
+    var cell = theCells[6];
+    if (cell.textContent.trim() !== '[n/a]') {
       return cell.firstChild.firstChild.getAttribute('onclick');
     }
     return '';
   }
 
-  function getTarget(target, theRow) {
-    thisBounty = {};
-    thisBounty.target = target;
-    thisBounty.link = theRow.cells[0].firstChild.firstChild.href;
-    thisBounty.lvl = theRow.cells[0].firstChild.firstChild.nextSibling
-      .textContent.replace(/\[/, '').replace(/\]/, '');
-    thisBounty.offerer = theRow.cells[1].firstChild.firstChild.firstChild
-      .textContent;
-    thisBounty.reward = theRow.cells[2].textContent;
-    thisBounty.rewardType = theRow.cells[2].firstChild.firstChild.firstChild
-      .firstChild.nextSibling.firstChild.title;
-    thisBounty.xpLoss = theRow.cells[3].textContent;
-    thisBounty.posted = theRow.cells[4].textContent;
-    thisBounty.tickets = theRow.cells[5].textContent;
-    thisBounty.accept = acceptBtn(theRow.cells[6].textContent.trim(),
-      theRow.cells[6]);
-    wantedList.bounty.push(thisBounty);
+  function getTarget(theCells) {
+    return extend(basicBounty(theCells), {
+      offerer: theCells[1].firstChild.firstChild.firstChild.textContent,
+      tickets: theCells[5].textContent,
+      accept: acceptBtn(theCells)
+    });
   }
 
   var isWanted = [
@@ -6124,10 +6249,14 @@
     }
   ];
 
+  function wanted(target, theRow) {
+    return theRow.cells[6].textContent.trim() !== '[active]' &&
+      isWanted.some(function(el) {return el(target, theRow);});
+  }
+
   function wantedTarget(target, theRow) {
-    if (theRow.cells[6].textContent.trim() !== '[active]' &&
-        isWanted.some(function(el) {return el(target, theRow);})) {
-      getTarget(target, theRow);
+    if (wanted(target, theRow)) {
+      wantedList.bounty.push(getTarget(theRow.cells));
     }
   }
 
@@ -6697,115 +6826,6 @@
     statbarWrapper('index.php?cmd=bank', 'statbar-gold');
   }
 
-  function hideElement(el) {
-    el.classList.add('fshHide');
-  }
-
-  function hideNodeList(nodeList) {
-    Array.prototype.forEach.call(nodeList, hideElement);
-  }
-
-  function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
-    hideNodeList(parent.querySelectorAll(selector));
-  }
-
-  function contactColour(el, obj) {
-    var onMouseOver = el.dataset.tipped;
-    var lastActivityMinutes =
-      /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-    if (lastActivityMinutes < 2) {
-      el.classList.add(obj.l1);
-    } else if (lastActivityMinutes < 5) {
-      el.classList.add(obj.l2);
-    } else {
-      el.classList.add(obj.l3);
-    }
-  }
-
-  function guildColour(el) {
-    contactColour(el, {
-      l1: 'fshGreen',
-      l2: 'fshWhite',
-      l3: 'fshGrey'
-    });
-  }
-
-  function alliesColour(el) {
-    contactColour(el, {
-      l1: 'fshDodgerBlue',
-      l2: 'fshLightSkyBlue',
-      l3: 'fshPowderBlue'
-    });
-  }
-
-  var hideBtn = [
-    {
-      condition: function() {return calf.hideGuildInfoTrade;},
-      guildSelector: '#guild-minibox-action-trade',
-      allySelector: '#online-allies-action-trade'
-    },
-    {
-      condition: function() {return calf.hideGuildInfoSecureTrade;},
-      guildSelector: '#guild-minibox-action-secure-trade',
-      allySelector: '#online-allies-action-secure-trade'
-    },
-    {
-      condition: function() {return calf.hideGuildInfoBuff;},
-      guildSelector: '#guild-minibox-action-quickbuff',
-      allySelector: '#online-allies-action-quickbuff'
-    },
-    {
-      condition: function() {return calf.hideGuildInfoMessage;},
-      guildSelector: '#guild-minibox-action-send-message',
-      allySelector: '#online-allies-action-send-message'
-    }
-  ];
-
-  function doHideBtn(context, selector) {
-    hideBtn.forEach(function(el) {
-      if (el.condition()) {
-        hideQuerySelectorAll(context, el[selector]);
-      }
-    });
-  }
-
-  function addGuildInfoWidgets() {
-    var guildMembrList = getElementById('minibox-guild-members-list');
-    if (!guildMembrList) {return;} // list exists
-    // hide guild info links
-    doHideBtn(guildMembrList, 'guildSelector');
-    if (calf.hideBuffSelected) {
-      hideNodeList(
-        guildMembrList.getElementsByClassName('guild-buff-check-on'));
-      getElementById('guild-quick-buff').classList.add('fshHide');
-    }
-    // add coloring for offline time
-    Array.prototype.forEach.call(
-      guildMembrList.getElementsByClassName('player-name'), guildColour);
-    Array.prototype.forEach.call(
-      document.querySelectorAll('#pCR h4'),
-      function(el) {
-        if (el.textContent !== 'Chat') {return;}
-        el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">' +
-          el.textContent + '</a>';
-      }
-    );
-  }
-
-  function addOnlineAlliesWidgets() {
-    var onlineAlliesList = getElementById('minibox-allies-list');
-    if (!onlineAlliesList) {return;}
-    doHideBtn(onlineAlliesList, 'allySelector');
-    if (calf.hideBuffSelected) {
-      hideNodeList(
-        onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
-      getElementById('ally-quick-buff').classList.add('fshHide');
-    }
-    // add coloring for offline time
-    Array.prototype.forEach.call(
-      onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
-  }
-
   function gameHelpLink() {
     var nodeList = document.querySelectorAll('#pCR h3');
     Array.prototype.forEach.call(nodeList, function(el) {
@@ -7283,7 +7303,7 @@
         insertElement(drawingNewItemTable.itemGrid, itemDiv);
       });
       insertElementAfterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
-      itemTable.classList.add('fshHide');
+      hideElement(itemTable);
     }
   }
 
@@ -7398,7 +7418,7 @@
 
   function collapseArt(article) {
     article.rows.forEach(function(el) {
-      el.row.classList.add('fshHide');
+      hideElement(el.row);
     });
     article.open = false;
   }
@@ -7457,7 +7477,7 @@
 
   function collapseDuringAnalysis(row, thisArticle) {
     if (prefValue) {
-      row.classList.add('fshHide');
+      hideElement(row);
       thisArticle.open = false;
     } else {
       thisArticle.open = true;
@@ -7968,6 +7988,13 @@
     $.fn.dataTable.ext.search.push(lvlFilter);
   }
 
+  function makeTheRow() {
+    var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
+    theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
+    theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
+    return theRow;
+  }
+
   function hideMovesCheckbox(aTable) { // jQuery
     var fshHideMoves = $('#fshHideMoves', aTable);
     if (opts && 'hideMoves' in opts) {
@@ -7995,16 +8022,18 @@
     }
   }
 
+  function eventHandlers(aTable) {
+    $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
+    $('#fshReset', aTable).click(resetLvls);
+  }
+
   function filterHeader() { // jQuery
-    var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
-    theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
-    theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
+    var theRow = makeTheRow();
     var aTable = $(arenaFilter);
     hideMovesCheckbox(aTable);
     minLvlValue(aTable);
     maxLvlValue(aTable);
-    $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
-    $('#fshReset', aTable).click(resetLvls);
+    eventHandlers(aTable);
     $('td', theRow).append(aTable);
   }
 
@@ -9230,7 +9259,7 @@
     var enableMaxGroupSizeToJoin = getValue('enableMaxGroupSizeToJoin');
     if (enableMaxGroupSizeToJoin) {
       maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-      joinAll.classList.add('fshHide');
+      hideElement(joinAll);
       joinUnderButton(buttonRow);
     }
 
@@ -9397,14 +9426,38 @@
       !isNaN(aDate.getTime());
   }
 
+  function yearAsString(aDate) {
+    return aDate.getFullYear().toString();
+  }
+
+  function paddedMonthNumber(aDate) {
+    return padZ(aDate.getMonth() + 1);
+  }
+
+  function paddedDayNumber(aDate) {
+    return padZ(aDate.getDate());
+  }
+
+  function padddedHours(aDate) {
+    return padZ(aDate.getHours());
+  }
+
+  function paddedMinutes(aDate) {
+    return padZ(aDate.getMinutes());
+  }
+
+  function paddedSeconds(aDate) {
+    return padZ(aDate.getSeconds());
+  }
+
   function formatLocalDateTime(aDate) {
     if (isDate) {
-      return aDate.getFullYear().toString() + '-' +
-        padZ(aDate.getMonth() + 1) + '-' +
-        padZ(aDate.getDate()) + ' ' +
-        padZ(aDate.getHours()) + ':' +
-        padZ(aDate.getMinutes()) + ':' +
-        padZ(aDate.getSeconds());
+      return yearAsString(aDate) + '-' +
+        paddedMonthNumber(aDate) + '-' +
+        paddedDayNumber(aDate) + ' ' +
+        padddedHours(aDate) + ':' +
+        paddedMinutes(aDate) + ':' +
+        paddedSeconds(aDate);
     }
   }
 
@@ -9778,7 +9831,7 @@
       .firstChild.nextSibling;
     guildLogoElement.id = 'guildLogoControl';
     if (getValue('guildLogoControl')) {
-      guildLogoElement.classList.add('fshHide');
+      hideElement(guildLogoElement);
     }
     on(getElementById('toggleGuildLogoControl'), 'click', toggleVisibilty);
   }
@@ -9793,7 +9846,7 @@
       .firstChild.nextSibling;
     statisticsControlElement.id = 'statisticsControl';
     if (getValue('statisticsControl')) {
-      statisticsControlElement.classList.add('fshHide');
+      hideElement(statisticsControlElement);
     }
     on(getElementById('toggleStatisticsControl'), 'click', toggleVisibilty);
   }
@@ -9807,7 +9860,7 @@
       .cells[0].firstChild.nextSibling;
     guildStructureControlElement.id = 'guildStructureControl';
     if (getValue('guildStructureControl')) {
-      guildStructureControlElement.classList.add('fshHide');
+      hideElement(guildStructureControlElement);
     }
     on(getElementById('toggleGuildStructureControl'), 'click', toggleVisibilty);
   }
@@ -9980,7 +10033,7 @@
 
   function fetchRankData() { // jQuery.min
     var calcButton = getElementById('getrankweightings');
-    calcButton.classList.add('fshHide');
+    hideElement(calcButton);
     var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
     Array.prototype.forEach.call(allItems, function(anItem) {
       var targetNode = anItem.parentNode.parentNode.previousElementSibling;
@@ -10028,24 +10081,28 @@
     return 22;
   }
 
-  function overrideUpDown(evt, val) {
-    var thisRankRow = evt.target.parentNode.parentNode.parentNode;
-    var thisRankRowNum = thisRankRow.rowIndex;
-    var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
-    var parentTable = thisRankRow.parentNode;
-    if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
+  function shuffleRows(evt, thisRankRow, targetRowNum) {
     var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
-    rankPosition(val.toLowerCase(), matchRankId[1]);
-    var injectRow = parentTable.rows[targetRowNum];
+    rankPosition(evt.target.value.toLowerCase(), matchRankId[1]);
+    var injectRow = thisRankRow.parentNode.rows[targetRowNum];
     insertElementBefore(thisRankRow, injectRow);
-    var pxScroll = getPxScroll(val);
+    var pxScroll = getPxScroll(evt.target.value);
     window.scrollBy(0, pxScroll);
     evt.stopPropagation();
   }
 
+  function overrideUpDown(evt) {
+    var thisRankRow = evt.target.parentNode.parentNode.parentNode;
+    var targetRowNum = thisRankRow.rowIndex +
+      getTargetRowNumber(evt.target.value);
+    if (notValidRow(
+      thisRankRow.rowIndex, targetRowNum, thisRankRow.parentNode
+    )) {return;}
+    shuffleRows(evt, thisRankRow, targetRowNum);
+  }
+
   function ajaxifyRankControls(evt) {
-    var val = evt.target.value;
-    if (['Up', 'Down'].includes(val)) {overrideUpDown(evt, val);}
+    if (['Up', 'Down'].includes(evt.target.value)) {overrideUpDown(evt);}
   }
 
   function doButtons() {
@@ -11091,7 +11148,7 @@
     spanClickHandlers(fshInv);
   }
 
-  function eventHandlers(fshInv) { // jQuery
+  function eventHandlers$1(fshInv) { // jQuery
     $('#fshMinLvl, #fshMaxLvl').keyup(partial(changeLvls$1, fshInv));
     $(fshInv).on('change', 'select.fshMoveItem', doMoveItem);
     setupClickHandlers(fshInv);
@@ -11195,7 +11252,7 @@
     setChecks();
     setLvls();
     var fshInv = doTable$2();
-    eventHandlers(fshInv);
+    eventHandlers$1(fshInv);
     // eslint-disable-next-line no-use-before-define
     $('#fshRefresh').click(injectInventoryManagerNew);
     clearButton(fshInv);
@@ -11339,15 +11396,19 @@
     }
   }
 
+  function makeItemTable(itemList, qt, takeResult) {
+    var itemTbl = createDiv({className: 'fshTakeGrid'});
+    makeItemBoxes(itemTbl, itemList);
+    insertElement(qt, itemTbl);
+    on(itemTbl, 'click', partial(clickEvt, itemList, takeResult));
+  }
+
   function makeQtDiv(itemList) {
     var qt = basicQt();
     var takeResult = makeTakeResult(qt);
     insertElement(qt, createDiv());
     if (isFunction(Object.entries)) {
-      var itemTbl = createDiv({className: 'fshTakeGrid'});
-      makeItemBoxes(itemTbl, itemList);
-      insertElement(qt, itemTbl);
-      on(itemTbl, 'click', partial(clickEvt, itemList, takeResult));
+      makeItemTable(itemList, qt, takeResult);
     } else {
       takeResult.textContent = 'Your browser is not supported.';
     }
@@ -11817,10 +11878,6 @@
     });
   }
 
-  function addHide(el) {
-    if (el.classList) {el.classList.add('fshHide');}
-  }
-
   function removeHide(el) {
     if (el && el.classList) {el.classList.remove('fshHide');}
   }
@@ -11838,8 +11895,8 @@
     options$1.checks = noChecks.slice(0);
     setChecks$1();
     tmpGuildLog.forEach(function(r) {
-      addHide(r[5]);
-      addHide(r[6]);
+      hideElement(r[5]);
+      hideElement(r[6]);
     });
   }
 
@@ -11854,10 +11911,10 @@
   }
 
   var guildLogEvents = [
-    {test: function(self) {return self.tagName === 'INPUT';}, act: toggleItem},
-    {test: function(self) {return self.id === 'fshAll';}, act: selectAll},
-    {test: function(self) {return self.id === 'fshNone';}, act: selectNone},
-    {test: function(self) {return self.id === 'rfsh';}, act: refresh}
+    [function(self) {return self.tagName === 'INPUT';}, toggleItem],
+    [function(self) {return self.id === 'fshAll';}, selectAll],
+    [function(self) {return self.id === 'fshNone';}, selectNone],
+    [function(self) {return self.id === 'rfsh';}, refresh]
   ];
 
   function setOpts$2(guildLog) {
@@ -11879,7 +11936,7 @@
     setOpts$2(guildLog);
     pCC.innerHTML = guildLogFilter;
     getElements();
-    on(fshNewGuildLog, 'click', eventHandler(guildLogEvents));
+    on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents));
     setChecks$1();
     setMaxPage();
     getGuildLogPage(1).done(processFirstPage$1);
@@ -11979,7 +12036,7 @@
 
   function oldStyleDiv(target) {
     if (target.style.display === 'block') {
-      target.classList.add('fshHide');
+      hideElement(target);
     }
     target.removeAttribute('style');
     return 0;
@@ -12013,67 +12070,6 @@
 
   function ajaxifyProfileSections() {
     on(pCC, 'click', testForSection);
-  }
-
-  function destroyComponent(componentIdAry) {
-    return profile({subcmd: 'destroycomponent', removeIndex: componentIdAry});
-  }
-
-  var invTableCache;
-
-  function getInvTable() {
-    if (!invTableCache) {
-      var invTables = getElementById('profileRightColumn')
-        .getElementsByClassName('inventory-table');
-      if (invTables.length === 2) {invTableCache = invTables[1];}
-    }
-    return invTableCache;
-  }
-
-  function updateUsedCount(del) {
-    var invTableParent = getInvTable().parentNode;
-    if (!invTableParent) {return;}
-    var fshTally = invTableParent.children[2].children[1].children[0];
-    if (fshTally.tagName !== 'TABLE') {return;}
-    var tallyRows = fshTally.rows;
-    var usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
-    var usedCount = Number(usedCountDom.textContent);
-    usedCount -= del;
-    usedCountDom.textContent = usedCount.toString();
-  }
-
-  function updateComponentCounts(itemId) {
-    var delBtn = document.querySelector('#fshTally [data-compid="' + itemId +
-      '"]');
-    if (!delBtn) {return;}
-    var countDom = delBtn.parentNode.parentNode.children[1];
-    var count = Number(countDom.textContent) - 1;
-    countDom.textContent = count.toString();
-  }
-
-  function compDeleted(self, itemId, data) {
-    if (data.s) {
-      updateComponentCounts(itemId);
-      updateUsedCount(1);
-      if (self.parentNode) {self.parentNode.innerHTML = '';}
-    }
-  }
-
-  function delComponent(self) { // jQuery.min
-    var tipped = self.parentNode.children[0].children[0].dataset.tipped;
-    var matches = tipped.match(itemRE);
-    var itemId = matches[1];
-    var componentId = matches[2];
-    destroyComponent([componentId])
-      .pipe(errorDialog)
-      .done(partial(compDeleted, self, itemId));
-  }
-
-  function componentDeleteHandler(evt) {
-    if (evt.target.classList.contains('compDelBtn')) {
-      delComponent(evt.target);
-      return true;
-    }
   }
 
   function loadComponents() {
@@ -12159,13 +12155,6 @@
     loadComponents().done(partial(displayComponentTally, self));
   }
 
-  function countComponentHandler(evt) {
-    if (evt.target.classList.contains('count-components')) {
-      countComponent(evt.target);
-      return true;
-    }
-  }
-
   function decorateButton(label) {
     var parentDiv = createDiv();
     var innerSpan = createSpan({
@@ -12176,6 +12165,17 @@
     insertElement(parentDiv, innerSpan);
     insertHtmlBeforeEnd(parentDiv, ']');
     return parentDiv;
+  }
+
+  var invTableCache;
+
+  function getInvTable() {
+    if (!invTableCache) {
+      var invTables = getElementById('profileRightColumn')
+        .getElementsByClassName('inventory-table');
+      if (invTables.length === 2) {invTableCache = invTables[1];}
+    }
+    return invTableCache;
   }
 
   var visibleCache;
@@ -12199,6 +12199,22 @@
     ary.forEach(function(a) {
       if (visibleComponents[a]) {visibleComponents[a].innerHTML = '';}
     });
+  }
+
+  function destroyComponent(componentIdAry) {
+    return profile({subcmd: 'destroycomponent', removeIndex: componentIdAry});
+  }
+
+  function updateUsedCount(del) {
+    var invTableParent = getInvTable().parentNode;
+    if (!invTableParent) {return;}
+    var fshTally = invTableParent.children[2].children[1].children[0];
+    if (fshTally.tagName !== 'TABLE') {return;}
+    var tallyRows = fshTally.rows;
+    var usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
+    var usedCount = Number(usedCountDom.textContent);
+    usedCount -= del;
+    usedCountDom.textContent = usedCount.toString();
   }
 
   function doSpinner$1(td) {
@@ -12230,17 +12246,31 @@
     when(prm, partial(removeSpinner, td));
   }
 
-  function deleteTypeHandler(evt) {
-    if (evt.target.classList.contains('compDelType')) {
-      delCompType(evt.target);
-      return true;
+  function updateComponentCounts(itemId) {
+    var delBtn = document.querySelector('#fshTally [data-compid="' + itemId +
+      '"]');
+    if (!delBtn) {return;}
+    var countDom = delBtn.parentNode.parentNode.children[1];
+    var count = Number(countDom.textContent) - 1;
+    countDom.textContent = count.toString();
+  }
+
+  function compDeleted(self, itemId, data) {
+    if (data.s) {
+      updateComponentCounts(itemId);
+      updateUsedCount(1);
+      if (self.parentNode) {self.parentNode.innerHTML = '';}
     }
   }
 
-  function eventHandler3(evtAry) {
-    return function(evt) {
-      evtAry.some(function(el) {return el(evt);});
-    };
+  function delComponent(self) { // jQuery.min
+    var tipped = self.parentNode.children[0].children[0].dataset.tipped;
+    var matches = tipped.match(itemRE);
+    var itemId = matches[1];
+    var componentId = matches[2];
+    destroyComponent([componentId])
+      .pipe(errorDialog)
+      .done(partial(compDeleted, self, itemId));
   }
 
   function componentBtnContainer() {
@@ -12252,12 +12282,9 @@
     return cmDiv;
   }
 
-  function quickExtractHandler(evt) {
-    if (evt.target.classList.contains('quick-extract-components')) {
-      sendEvent('components', 'insertQuickExtract');
-      jQueryDialog(insertQuickExtract);
-      return true;
-    }
+  function quickExtractHandler() {
+    sendEvent('components', 'insertQuickExtract');
+    jQueryDialog(insertQuickExtract);
   }
 
   function addDelBtn(el) {
@@ -12268,18 +12295,11 @@
   function enableDelComponent(self) {
     sendEvent('components', 'enableDelComponent');
     var quickDelDiv = self.parentNode;
-    quickDelDiv.classList.add('fshHide');
+    hideElement(quickDelDiv);
     var cmDiv = quickDelDiv.parentNode;
     insertElement(cmDiv, decorateButton('Delete All Visible'));
     var nodeList = getInvTable().getElementsByTagName('IMG');
     Array.from(nodeList).forEach(addDelBtn);
-  }
-
-  function enableQuickDelHandler(evt) {
-    if (evt.target.classList.contains('enable-quick-del')) {
-      enableDelComponent(evt.target);
-      return true;
-    }
   }
 
   function delAllComponent(self) {
@@ -12291,24 +12311,19 @@
     });
   }
 
-  function deleteAllHandler(evt) {
-    if (evt.target.classList.contains('delete-all-visible')) {
-      delAllComponent(evt.target);
-      return true;
-    }
-  }
+  var classEvts = [
+    ['quick-extract-components', quickExtractHandler],
+    ['enable-quick-del', enableDelComponent],
+    ['delete-all-visible', delAllComponent],
+    ['compDelBtn', delComponent],
+    ['count-components', countComponent],
+    ['compDelType', delCompType]
+  ];
 
   function addComposingButtons(thisInvTable) {
     var compDiv = thisInvTable.parentNode;
     insertElement(compDiv, componentBtnContainer());
-    on(compDiv, 'click', eventHandler3([
-      quickExtractHandler,
-      enableQuickDelHandler,
-      deleteAllHandler,
-      componentDeleteHandler,
-      countComponentHandler,
-      deleteTypeHandler
-    ]));
+    on(compDiv, 'click', classHandler(classEvts));
   }
 
   function components() {
@@ -13239,7 +13254,7 @@
   var checkAll;
   var dropLinks;
   var invItems$2;
-  var colouring;
+  var colouring$1;
   var sendLinks;
 
   function afterbegin(o, item) {
@@ -13255,7 +13270,7 @@
   }
 
   function itemColouring(o, item) {
-    if (!colouring && !disableItemColoring) {
+    if (!colouring$1 && !disableItemColoring) {
       o.injectHere.classList.add(rarity[item.rarity].clas);
     }
   }
@@ -13313,7 +13328,7 @@
   function doneInvPaint() {
     if (showExtraLinks) {extraLinks = true;}
     checkAll = true;
-    colouring = true;
+    colouring$1 = true;
     if (showQuickDropLinks$1) {dropLinks = true;}
     sendLinks = true;
   }
@@ -13345,44 +13360,44 @@
   }
 
   var evts = [
-    {
-      test: function(self) {return self.id === 'fshShowExtraLinks';},
-      act: toggleShowExtraLinks
-    },
-    {
-      test: function(self) {return self.id === 'fshShowQuickDropLinks';},
-      act: toggleShowQuickDropLinks
-    },
-    {
-      test: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-      act: function() {doCheckboxes(itemsAry$1, invItems$2, 'guild');}
-    },
-    {
-      test: function(self) {return self.id === 'fshMove';},
-      act: function() {moveItemsToFolder(itemsAry$1);}
-    },
-    {
-      test: function(self) {return self.hasAttribute('linkto');},
-      act: function(self) {
+    [
+      function(self) {return self.id === 'fshShowExtraLinks';},
+      toggleShowExtraLinks
+    ],
+    [
+      function(self) {return self.id === 'fshShowQuickDropLinks';},
+      toggleShowQuickDropLinks
+    ],
+    [
+      function(self) {return self.id === 'fshSelectAllGuildLocked';},
+      function() {doCheckboxes(itemsAry$1, invItems$2, 'guild');}
+    ],
+    [
+      function(self) {return self.id === 'fshMove';},
+      function() {moveItemsToFolder(itemsAry$1);}
+    ],
+    [
+      function(self) {return self.hasAttribute('linkto');},
+      function(self) {
         doCheckboxes(itemsAry$1, invItems$2, 'item', self.getAttribute('linkto'));
       }
-    },
-    {
-      test: function(self) {return self.classList.contains('sendLink');},
-      act: function(self) {quickAction(self, senditems, 'Sent', '.dropLink');}
-    },
-    {
-      test: function(self) {return self.classList.contains('dropLink');},
-      act: function(self) {quickAction(self, dropItem, 'Dropped', '.sendLink');}
-    },
-    {
-      test: function(self) {return self.classList.contains('fshFolder');},
-      act: function(self) {hideFolders$1(itemsAry$1, invItems$2, self);}
-    },
-    {
-      test: function(self) {return self.id === 'fshChkAll';},
-      act: function() {doCheckboxes(itemsAry$1, invItems$2, 'checkAll');}
-    }
+    ],
+    [
+      function(self) {return hasClass('sendLink', self);},
+      function(self) {quickAction(self, senditems, 'Sent', '.dropLink');}
+    ],
+    [
+      function(self) {return hasClass('dropLink', self);},
+      function(self) {quickAction(self, dropItem, 'Dropped', '.sendLink');}
+    ],
+    [
+      function(self) {return hasClass('fshFolder', self);},
+      function(self) {hideFolders$1(itemsAry$1, invItems$2, self);}
+    ],
+    [
+      function(self) {return self.id === 'fshChkAll';},
+      function() {doCheckboxes(itemsAry$1, invItems$2, 'checkAll');}
+    ]
   ];
 
   function badData(data) {
@@ -13394,12 +13409,12 @@
     extraLinks = false;
     checkAll = false;
     invItems$2 = data.items;
-    colouring = false;
+    colouring$1 = false;
     dropLinks = false;
     sendLinks = false;
     batch(3, itemsAry$1, 0, itemWidgets, doneInvPaint);
     doFolderButtons$1(data.folders);
-    on(pCC, 'click', eventHandler(evts));
+    on(pCC, 'click', eventHandler5(evts));
   }
 
   function injectStoreItems() {
@@ -13545,11 +13560,10 @@
 
   function doHideQuests(hideQuests, questName, aRow) {
     if (hideQuests.indexOf(questName) >= 0) {
-      aRow.classList.add('fshHide');
-      aRow.nextElementSibling.classList.add('fshHide');
-      aRow.nextElementSibling.nextElementSibling.classList.add('fshHide');
-      aRow.nextElementSibling.nextElementSibling.nextElementSibling
-        .classList.add('fshHide');
+      hideElement(aRow);
+      hideElement(aRow.nextElementSibling);
+      hideElement(aRow.nextElementSibling.nextElementSibling);
+      hideElement(aRow.nextElementSibling.nextElementSibling.nextElementSibling);
     }
   }
 
@@ -13916,7 +13930,7 @@
     theTd.innerHTML = spinner;
   }
 
-  var events$1 = [
+  var events = [
     {test: 'recall', fn: recallItem$2},
     {test: 'equip', fn: wearItem$1},
     {
@@ -13927,10 +13941,10 @@
     }
   ];
 
-  function eventHandlers$1(evt) {
-    for (var i = 0; i < events$1.length; i += 1) {
-      if (evt.target.classList.contains(events$1[i].test)) {
-        events$1[i].fn(evt);
+  function eventHandlers$2(evt) {
+    for (var i = 0; i < events.length; i += 1) {
+      if (evt.target.classList.contains(events[i].test)) {
+        events[i].fn(evt);
         return;
       }
     }
@@ -14138,24 +14152,30 @@
     }, {});
   }
 
-  function doReset$1(potOpts, potObj, evt) {
-    if (evt.target.id === 'fshReset') {
-      resetMap(potOpts, potObj);
-      setForage(storeMap, potOpts);
-      drawMapping(potOpts);
-      drawInventory(potOpts, potObj);
-      return true;
-    }
+  function doReset$1(potOpts, potObj) {
+    resetMap(potOpts, potObj);
+    setForage(storeMap, potOpts);
+    drawMapping(potOpts);
+    drawInventory(potOpts, potObj);
   }
 
-  function saveState(potOpts, evt) {
-    var self = evt.target;
-    if (/^pottab\d$/.test(self.id)) {
-      var option = self.id;
-      potOpts[option] = self.checked;
-      setForage(storeMap, potOpts);
-      return true;
-    }
+  function saveState(potOpts, self) {
+    var option = self.id;
+    potOpts[option] = self.checked;
+    setForage(storeMap, potOpts);
+  }
+
+  function clickEvents(potOpts, potObj) {
+    return [
+      [
+        function(self) {return self.id === 'fshReset';},
+        partial(doReset$1, potOpts, potObj)
+      ],
+      [
+        function(self) {return /^pottab\d$/.test(self.id);},
+        partial(saveState, potOpts)
+      ]
+    ];
   }
 
   function onInput(potOpts, potObj, e) {
@@ -14170,10 +14190,7 @@
 
   function cellEventHandlers(potOpts, potObj, myCell) {
     on(myCell, 'change', partial(onChange, potOpts, potObj));
-    on(myCell, 'click', eventHandler3([
-      partial(doReset$1, potOpts, potObj),
-      partial(saveState, potOpts)
-    ]));
+    on(myCell, 'click', eventHandler5(clickEvents(potOpts, potObj)));
     on(myCell, 'input', partial(onInput, potOpts, potObj));
   }
 
@@ -14340,7 +14357,7 @@
     });
     add(2, searchUser);
     add(3, prepareChildRows);
-    on(pCC.getElementsByTagName('TABLE')[1], 'click', eventHandlers$1);
+    on(pCC.getElementsByTagName('TABLE')[1], 'click', eventHandlers$2);
   }
 
   function drawBox(content, fshSettings) {
@@ -15346,24 +15363,24 @@
   function corePrefs() {
     return [
       // General Prefs
-      generalPrefs(),
+      generalPrefs,
       // Guild Manage
-      guildPrefs(),
+      guildPrefs,
       // World Screen
-      prefs(),
+      prefs,
       // Log screen prefs
-      logPrefs(),
+      logPrefs,
       // Equipment screen prefs
-      equipPrefs(),
+      equipPrefs,
       // Quest Preferences
-      questPrefs(),
+      questPrefs,
       // profile prefs
-      profilePrefs(),
+      profilePrefs,
       // Bounty hunting prefs
-      bountyPrefs(),
+      bountyPrefs,
       // Other prefs
-      otherPrefs()
-    ].join('');
+      otherPrefs
+    ].map(functionPasses).join('');
   }
 
   function setupConfigData() {
@@ -15658,7 +15675,7 @@
   }
 
   function hideSpinner() {
-    spinner$1.classList.add('fshHide');
+    hideElement(spinner$1);
   }
 
   function findOnlinePlayers() { // jQuery
@@ -15778,7 +15795,7 @@
       }
       if (shouldHide(hidden, all, hasFolder)) {
         el.classList.remove('fshBlock');
-        el.classList.add('fshHide'); // hide()
+        hideElement(el); // hide()
       }
     });
   }
@@ -16568,36 +16585,6 @@
     setValue('huntingMode', calf.huntingMode);
   }
 
-  var changeHdl = [
-    {
-      test: function(self) {return self === soundCheck;},
-      act: toggleSound
-    },
-    {
-      test: function(self) {return self === huntCheck;},
-      act: toggleHuntMode
-    }
-  ];
-
-  var clickHdl = [
-    {
-      test: function(self) {return self === formGroup;},
-      act: doFormGroup
-    },
-    {
-      test: function(self) {return self === quickBuff;},
-      act: openQuickBuff$1
-    },
-    {
-      test: function(self) {return self === realmMap;},
-      act: openRealmMap
-    },
-    {
-      test: function(self) {return self === ufsgMap;},
-      act: openUfsgMap
-    }
-  ];
-
   function makeButtonContainer() {
     return createDiv({
       className: 'fshCurveContainer',
@@ -16682,9 +16669,21 @@
     showHuntMode(buttonContainer);
   }
 
+  var changeHdl = [
+    [function(self) {return self === soundCheck;}, toggleSound],
+    [function(self) {return self === huntCheck;}, toggleHuntMode]
+  ];
+
+  var clickHdl = [
+    [function(self) {return self === formGroup;}, doFormGroup],
+    [function(self) {return self === quickBuff;}, openQuickBuff$1],
+    [function(self) {return self === realmMap;}, openRealmMap],
+    [function(self) {return self === ufsgMap;}, openUfsgMap]
+  ];
+
   function setupHandlers$1() {
-    on(buttonContainer, 'click', eventHandler(clickHdl));
-    on(buttonContainer, 'change', eventHandler(changeHdl));
+    on(buttonContainer, 'click', eventHandler5(clickHdl));
+    on(buttonContainer, 'change', eventHandler5(changeHdl));
   }
 
   function injectButtons() {
@@ -16922,7 +16921,7 @@
   }
 
   function prepareSecondaryDivs(relicData) {
-    fetchStatsBtn.classList.add('fshHide');
+    hideElement(fetchStatsBtn);
     var hideRelicOffline = getValue('hideRelicOffline');
     if (relicData.is_owner && !hideRelicOffline) {
       getMembrList(true).done(missingMembers);
@@ -18796,7 +18795,7 @@
     Array.prototype.forEach.call(players, function(el) {
       var verbs = el.getElementsByClassName('verbs');
       if (verbs.length === 1) {
-        verbs[0].classList.add('fshHide');
+        hideElement(verbs[0]);
       }
     });
   }
@@ -18819,6 +18818,20 @@
     GameData.fetch(def_fetch_worldRealmActions);
   }
 
+  function buildPrefsDiv() {
+    return createDiv({
+      id: 'fshWorldPrefs',
+      innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('showBuffInfo') +
+        '<br>' +
+        simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+        simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+        huntingBuffsHtml()
+    });
+  }
+
   var fshEvents = {
     hideSubLvlCreature: toggleSubLvlCreature,
     hidePlayerActions: toggleHidePlayerActions,
@@ -18839,17 +18852,7 @@
 
   function buildFshDivs() {
     var fshDiv = createDiv({className: 'fshCenter fshFten'});
-    var prefsDiv = createDiv({
-      id: 'fshWorldPrefs',
-      innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
-        simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
-        simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
-        simpleCheckboxHtml('showBuffInfo') +
-        '<br>' +
-        simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-        simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-        huntingBuffsHtml()
-    });
+    var prefsDiv = buildPrefsDiv();
     on(prefsDiv, 'click', prefsClickEvent);
     on(prefsDiv, 'change', toggleEnabledHuntingMode);
     insertElement(fshDiv, prefsDiv);
@@ -20943,7 +20946,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '69';
+  window.FSH.calf = '70';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

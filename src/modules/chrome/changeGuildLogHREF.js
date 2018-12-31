@@ -1,4 +1,5 @@
 import getValue from '../system/getValue';
+import hideElement from '../common/hideElement';
 import {newGuildLogLoc, newGuildLogUrl} from '../support/constants';
 
 function testForGuildLogMsg(guildLogNode) {
@@ -11,7 +12,7 @@ function hideGuildLogMsg(guildLogNode) {
   if (testForGuildLogMsg(guildLogNode)) {return;}
   var messageBox = guildLogNode.parentNode;
   if (messageBox) {
-    messageBox.classList.add('fshHide');
+    hideElement(messageBox);
   }
 }
 

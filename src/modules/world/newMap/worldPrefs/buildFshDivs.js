@@ -15,6 +15,20 @@ import {toggleShowMonsterLog} from '../monsterLog/processMonsterLog';
 import {toggleShowTitanInfo} from '../titanStats/titanStats';
 import toggleSubLvlCreature from './toggleSubLvlCreature';
 
+function buildPrefsDiv() {
+  return createDiv({
+    id: 'fshWorldPrefs',
+    innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('showBuffInfo') +
+      '<br>' +
+      simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+      huntingBuffsHtml()
+  });
+}
+
 var fshEvents = {
   hideSubLvlCreature: toggleSubLvlCreature,
   hidePlayerActions: toggleHidePlayerActions,
@@ -35,17 +49,7 @@ function prefsClickEvent(e) {
 
 export default function buildFshDivs() {
   var fshDiv = createDiv({className: 'fshCenter fshFten'});
-  var prefsDiv = createDiv({
-    id: 'fshWorldPrefs',
-    innerHTML: simpleCheckboxHtml('showCreatureInfo') + '&nbsp;&nbsp;' +
-      simpleCheckboxHtml('showMonsterLog') + '&nbsp;&nbsp;' +
-      simpleCheckboxHtml('showTitanInfo') + '&nbsp;&nbsp;' +
-      simpleCheckboxHtml('showBuffInfo') +
-      '<br>' +
-      simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-      simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-      huntingBuffsHtml()
-  });
+  var prefsDiv = buildPrefsDiv();
   on(prefsDiv, 'click', prefsClickEvent);
   on(prefsDiv, 'change', toggleEnabledHuntingMode);
   insertElement(fshDiv, prefsDiv);

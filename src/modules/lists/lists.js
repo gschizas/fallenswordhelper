@@ -1,5 +1,5 @@
 import {defaults} from '../support/dataObj';
-import eventHandler from '../common/eventHandler';
+import eventHandler5 from '../common/eventHandler5';
 import {getElementById} from '../common/getElement';
 import getValueJSON from '../system/getValueJSON';
 import isChecked from '../system/isChecked';
@@ -139,14 +139,15 @@ function resetRawEditor() { // Legacy
 }
 
 var listEvents = [
-  {test: function(self) {return self.id === 'fshReset';}, act: resetRawEditor},
-  {test: function(self) {return self.id === 'fshSave';}, act: saveRawEditor},
-  {test: function(self) {return self.id === 'fshAdd';}, act: addQuickItem},
-  {
-    test: function(self) {return self.id.indexOf('fshDel') === 0;},
-    act: deleteQuickItem
-  }
+  [function(self) {return self.id === 'fshReset';}, resetRawEditor],
+  [function(self) {return self.id === 'fshSave';}, saveRawEditor],
+  [function(self) {return self.id === 'fshAdd';}, addQuickItem],
+  [function(self) {return self.id.indexOf('fshDel') === 0;}, deleteQuickItem]
 ];
+
+function setupEventHandler(content) {
+  on(content, 'click', eventHandler5(listEvents));
+}
 
 export function injectAuctionSearch(injector) { // Legacy
   var content = injector || pCC;
@@ -156,7 +157,7 @@ export function injectAuctionSearch(injector) { // Legacy
   // global parameters for the meta function generateManageTable
   param = auctionSearchParams();
   generateManageTable();
-  on(content, 'click', eventHandler(listEvents));
+  setupEventHandler(content);
 }
 
 export function injectQuickLinkManager(injector) { // Legacy
@@ -181,5 +182,5 @@ export function injectQuickLinkManager(injector) { // Legacy
     gmname: 'quickLinks',
   };
   generateManageTable();
-  on(content, 'click', eventHandler(listEvents));
+  setupEventHandler(content);
 }

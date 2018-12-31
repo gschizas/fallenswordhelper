@@ -21,7 +21,7 @@ function compDeleted(self, itemId, data) {
   }
 }
 
-function delComponent(self) { // jQuery.min
+export default function delComponent(self) { // jQuery.min
   var tipped = self.parentNode.children[0].children[0].dataset.tipped;
   var matches = tipped.match(itemRE);
   var itemId = matches[1];
@@ -29,11 +29,4 @@ function delComponent(self) { // jQuery.min
   destroyComponent([componentId])
     .pipe(errorDialog)
     .done(partial(compDeleted, self, itemId));
-}
-
-export default function componentDeleteHandler(evt) {
-  if (evt.target.classList.contains('compDelBtn')) {
-    delComponent(evt.target);
-    return true;
-  }
 }

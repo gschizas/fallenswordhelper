@@ -3,6 +3,7 @@ import functionPasses from '../common/functionPasses';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
+import hideElement from '../common/hideElement';
 import hideQTip from '../common/hideQTip';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -117,7 +118,7 @@ function parseGuild(data) {
 }
 
 function hideSpinner() {
-  spinner.classList.add('fshHide');
+  hideElement(spinner);
 }
 
 function findOnlinePlayers() { // jQuery

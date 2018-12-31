@@ -1,5 +1,6 @@
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
+import hideElement from '../common/hideElement';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import retryAjax from '../ajax/retryAjax';
@@ -27,7 +28,7 @@ function isSectionToggle(self) {
 
 function oldStyleDiv(target) {
   if (target.style.display === 'block') {
-    target.classList.add('fshHide');
+    hideElement(target);
   }
   target.removeAttribute('style');
   return 0;

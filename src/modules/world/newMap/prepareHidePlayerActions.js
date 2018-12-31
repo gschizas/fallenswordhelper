@@ -1,5 +1,6 @@
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import hideElement from '../../common/hideElement';
 import setValue from '../../system/setValue';
 import {
   def_afterUpdateActionlist,
@@ -21,7 +22,7 @@ function doHidePlayerActions() {
   Array.prototype.forEach.call(players, function(el) {
     var verbs = el.getElementsByClassName('verbs');
     if (verbs.length === 1) {
-      verbs[0].classList.add('fshHide');
+      hideElement(verbs[0]);
     }
   });
 }

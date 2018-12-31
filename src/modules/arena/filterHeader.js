@@ -2,6 +2,13 @@ import {arenaFilter} from './assets';
 import {defaults} from '../support/dataObj';
 import {changeLvls, hideMoves, opts, resetLvls} from './setOpts';
 
+function makeTheRow() {
+  var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
+  theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
+  theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
+  return theRow;
+}
+
 function hideMovesCheckbox(aTable) { // jQuery
   var fshHideMoves = $('#fshHideMoves', aTable);
   if (opts && 'hideMoves' in opts) {
@@ -29,15 +36,17 @@ function maxLvlValue(aTable) { // jQuery
   }
 }
 
+function eventHandlers(aTable) {
+  $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
+  $('#fshReset', aTable).click(resetLvls);
+}
+
 export default function filterHeader() { // jQuery
-  var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
-  theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
-  theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
+  var theRow = makeTheRow();
   var aTable = $(arenaFilter);
   hideMovesCheckbox(aTable);
   minLvlValue(aTable);
   maxLvlValue(aTable);
-  $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
-  $('#fshReset', aTable).click(resetLvls);
+  eventHandlers(aTable);
   $('td', theRow).append(aTable);
 }

@@ -1,32 +1,22 @@
+import basicBounty from './basicBounty';
 import calf from '../../support/calf';
+import extend from '../../common/extend';
 import {wantedArray, wantedList} from './lists';
 
-var thisBounty;
-
-function acceptBtn(action, cell) {
-  if (action !== '[n/a]') {
+function acceptBtn(theCells) {
+  var cell = theCells[6];
+  if (cell.textContent.trim() !== '[n/a]') {
     return cell.firstChild.firstChild.getAttribute('onclick');
   }
   return '';
 }
 
-function getTarget(target, theRow) {
-  thisBounty = {};
-  thisBounty.target = target;
-  thisBounty.link = theRow.cells[0].firstChild.firstChild.href;
-  thisBounty.lvl = theRow.cells[0].firstChild.firstChild.nextSibling
-    .textContent.replace(/\[/, '').replace(/\]/, '');
-  thisBounty.offerer = theRow.cells[1].firstChild.firstChild.firstChild
-    .textContent;
-  thisBounty.reward = theRow.cells[2].textContent;
-  thisBounty.rewardType = theRow.cells[2].firstChild.firstChild.firstChild
-    .firstChild.nextSibling.firstChild.title;
-  thisBounty.xpLoss = theRow.cells[3].textContent;
-  thisBounty.posted = theRow.cells[4].textContent;
-  thisBounty.tickets = theRow.cells[5].textContent;
-  thisBounty.accept = acceptBtn(theRow.cells[6].textContent.trim(),
-    theRow.cells[6]);
-  wantedList.bounty.push(thisBounty);
+function getTarget(theCells) {
+  return extend(basicBounty(theCells), {
+    offerer: theCells[1].firstChild.firstChild.firstChild.textContent,
+    tickets: theCells[5].textContent,
+    accept: acceptBtn(theCells)
+  });
 }
 
 var isWanted = [
@@ -38,10 +28,14 @@ var isWanted = [
   }
 ];
 
+function wanted(target, theRow) {
+  return theRow.cells[6].textContent.trim() !== '[active]' &&
+    isWanted.some(function(el) {return el(target, theRow);});
+}
+
 function wantedTarget(target, theRow) {
-  if (theRow.cells[6].textContent.trim() !== '[active]' &&
-      isWanted.some(function(el) {return el(target, theRow);})) {
-    getTarget(target, theRow);
+  if (wanted(target, theRow)) {
+    wantedList.bounty.push(getTarget(theRow.cells));
   }
 }
 
