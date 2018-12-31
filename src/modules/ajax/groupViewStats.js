@@ -1,5 +1,26 @@
 import {getElementById} from '../common/getElement';
 import intValue from '../system/intValue';
+import {
+  def_statArmor,
+  def_statAttack,
+  def_statDamage,
+  def_statDefense,
+  def_statHp
+} from '../support/constants';
+
+var attackElement;
+var defenseElement;
+var armorElement;
+var damageElement;
+var hpElement;
+
+function getElements(doc) {
+  attackElement = getElementById(def_statAttack, doc);
+  defenseElement = getElementById(def_statDefense, doc);
+  armorElement = getElementById(def_statArmor, doc);
+  damageElement = getElementById(def_statDamage, doc);
+  hpElement = getElementById(def_statHp, doc);
+}
 
 function statAsNumber(el) {
   if (el) {
@@ -9,11 +30,7 @@ function statAsNumber(el) {
 }
 
 export default function groupViewStats(doc) {
-  var attackElement = getElementById('stat-attack', doc);
-  var defenseElement = getElementById('stat-defense', doc);
-  var armorElement = getElementById('stat-armor', doc);
-  var damageElement = getElementById('stat-damage', doc);
-  var hpElement = getElementById('stat-hp', doc);
+  getElements(doc);
   return {
     attack: statAsNumber(attackElement),
     attackElement: attackElement,

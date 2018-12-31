@@ -1,12 +1,20 @@
 import {getElementById} from '../common/getElement';
+import {def_statAttack, def_statDefense} from '../support/constants';
 
-function gotAtk(nmvImg, atkStat) {
-  var defStat = Number(
-    getElementById('stat-defense').firstChild.textContent.trim());
-  var oldTipped = nmvImg.dataset.tipped;
+function getDefStat() {
+  return Number(getElementById(def_statDefense).firstChild.textContent.trim());
+}
+
+function calcNmvEffect(atkStat, oldTipped) {
   var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
   var nmvLvl = Number(lvlAry[1]);
-  var nmvEffect = Math.floor(atkStat * nmvLvl * 0.0025);
+  return Math.floor(atkStat * nmvLvl * 0.0025);
+}
+
+function gotAtk(nmvImg, atkStat) {
+  var defStat = getDefStat();
+  var oldTipped = nmvImg.dataset.tipped;
+  var nmvEffect = calcNmvEffect(atkStat, oldTipped);
   nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
     '<br>Attack: ' + (atkStat - nmvEffect).toString() +
     '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
@@ -14,7 +22,7 @@ function gotAtk(nmvImg, atkStat) {
 }
 
 function gotImg(nmvImg) {
-  var atkEl = getElementById('stat-attack');
+  var atkEl = getElementById(def_statAttack);
   if (!atkEl) {return;}
   var atkStat = Number(atkEl.firstChild.textContent.trim());
   if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}

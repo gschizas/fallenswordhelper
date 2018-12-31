@@ -3,6 +3,15 @@ import {getElementById} from '../../../common/getElement';
 import getValue from '../../../system/getValue';
 import intValue from '../../../system/intValue';
 import setValue from '../../../system/setValue';
+import {
+  def_statArmor,
+  def_statAttack,
+  def_statDamage,
+  def_statDefense,
+  def_statHp,
+  def_statLevel,
+  def_statbarLevel
+} from '../../../support/constants';
 
 export var showCreatureInfo;
 var statLevel;
@@ -22,15 +31,18 @@ function getStatText(statTooltip, statClassName) {
     .nextElementSibling.textContent;
 }
 
+function getTooltipStats(statTooltip) {
+  statDefense = getStatText(statTooltip, def_statDefense);
+  statAttack = getStatText(statTooltip, def_statAttack);
+  statDamage = getStatText(statTooltip, def_statDamage);
+  statArmor = getStatText(statTooltip, def_statArmor);
+  statHp = getStatText(statTooltip, def_statHp);
+}
+
 export function getMyStats() {
   statLevel = intValue(getStatText(
-    getElementById('statbar-level-tooltip-general'), 'stat-level'));
-  var statTooltip = getElementById('statbar-character-tooltip-stats');
-  statDefense = getStatText(statTooltip, 'stat-defense');
-  statAttack = getStatText(statTooltip, 'stat-attack');
-  statDamage = getStatText(statTooltip, 'stat-damage');
-  statArmor = getStatText(statTooltip, 'stat-armor');
-  statHp = getStatText(statTooltip, 'stat-hp');
+    getElementById(def_statbarLevel), def_statLevel));
+  getTooltipStats(getElementById('statbar-character-tooltip-stats'));
 }
 
 function tipHeader(creature) {

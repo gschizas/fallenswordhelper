@@ -1,3 +1,5 @@
+import {def_table} from '../support/constants';
+
 var sortClasses = 'td.sorting, td.sorting_asc, td.sorting_desc';
 
 function calculateSortOrder(self) {
@@ -8,7 +10,7 @@ function calculateSortOrder(self) {
 }
 
 function sortDataTable(self, myCol, sortOrder) {
-  var table = self.closest('table').DataTable();
+  var table = self.closest(def_table).DataTable();
   if (myCol !== 3) {
     table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {

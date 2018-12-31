@@ -1,4 +1,5 @@
 import {createInput} from '../common/cElement';
+import {def_table} from '../support/constants';
 import {getElementById} from '../common/getElement';
 import {imageServer} from '../system/system';
 import injectGuild from './guild';
@@ -48,7 +49,7 @@ function evtHdlr(e) {
 }
 
 function paintTable() {
-  var nodeList = pCC.getElementsByTagName('table');
+  var nodeList = pCC.getElementsByTagName(def_table);
   if (nodeList.length > 0) {
     doItemTable(nodeList[nodeList.length - 1].rows);
   }

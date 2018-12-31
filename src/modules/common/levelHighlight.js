@@ -1,5 +1,6 @@
 import getValue from '../system/getValue';
 import intValue from '../system/intValue';
+import {def_characterVirtualLevel, def_statLevel} from '../support/constants';
 
 export var pvpLowerLevel;
 export var pvpUpperLevel;
@@ -8,8 +9,8 @@ export var gvgUpperLevel;
 
 function calcLvlToTest() {
   var levelToTest = intValue(document.getElementsByClassName(
-    'stat-level')[0].nextElementSibling.textContent);
-  var characterVirtualLevel = getValue('characterVirtualLevel');
+    def_statLevel)[0].nextElementSibling.textContent);
+  var characterVirtualLevel = getValue(def_characterVirtualLevel);
   if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
   return levelToTest;
 }

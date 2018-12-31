@@ -1,3 +1,4 @@
+import {def_table} from '../support/constants';
 import dontPost from './dontPost';
 import getValue from '../system/getValue';
 import guideButtons from './guideButtons';
@@ -129,7 +130,7 @@ function forEachQuest(hideQuests, questTable) {
 export default function injectQuestBookFull() {
   on(pCC, 'click', dontPost);
   storeQuestPage();
-  var questTable = pCC.getElementsByTagName('table')[5];
+  var questTable = pCC.getElementsByTagName(def_table)[5];
   if (!questTable) {return;}
   var hideQuests = isHideQuests();
   forEachQuest(hideQuests, questTable);

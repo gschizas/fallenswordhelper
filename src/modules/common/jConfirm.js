@@ -2,7 +2,7 @@ import {createDiv} from './cElement';
 import {getElementById} from './getElement';
 import insertElement from './insertElement';
 
-export default function jConfirm(title, msgText, fn) { // jQuery
+function makeFshMsg() {
   var fshMsg = getElementById('fshmsg');
   if (!fshMsg) {
     fshMsg = createDiv({id: 'fshmsg'});
@@ -15,7 +15,10 @@ export default function jConfirm(title, msgText, fn) { // jQuery
       resizable: false,
     });
   }
-  fshMsg.textContent = msgText;
+  return fshMsg;
+}
+
+function openFshMsg(title, fn, fshMsg) {
   $(fshMsg).dialog('option', {
     buttons: {
       Yes: function() {
@@ -26,4 +29,10 @@ export default function jConfirm(title, msgText, fn) { // jQuery
     },
     title: title
   }).dialog('open');
+}
+
+export default function jConfirm(title, msgText, fn) { // jQuery
+  var fshMsg = makeFshMsg();
+  fshMsg.textContent = msgText;
+  openFshMsg(title, fn, fshMsg);
 }

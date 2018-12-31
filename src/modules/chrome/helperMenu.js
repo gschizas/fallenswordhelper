@@ -3,25 +3,26 @@ import draggable from '../common/dragStart';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
-import injectBuffLog from '../buffLog/injectBuffLog';
+import injectBuffLog from '../notepad/buffLog/injectBuffLog';
 import {injectFsBoxContent} from '../misc';
-import injectMonsterLog from '../monstorLog';
+import injectMonsterLog from '../notepad/monstorLog/monstorLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
-import injectRecipeManager from '../recipeMgr/recipeMgr';
+import injectRecipeManager from '../notepad/recipeMgr/recipeMgr';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../quickExtract';
-import insertQuickWear from '../quickWear/quickWear';
+import insertQuickWear from '../notepad/quickWear/quickWear';
 import isFunction from '../common/isFunction';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
 import on from '../common/on';
 import once from '../common/once';
 import {sendEvent} from '../support/fshGa';
-import {injectAuctionSearch, injectQuickLinkManager} from '../lists/lists';
-import {injectFindBuffs, injectFindOther} from '../findBuffs/findBuffs';
+import {injectAuctionSearch, injectQuickLinkManager} from
+  '../notepad/lists/lists';
+import {injectFindBuffs, injectFindOther} from '../notepad/findBuffs/findBuffs';
 
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +
