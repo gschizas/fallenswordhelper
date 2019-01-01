@@ -2,7 +2,7 @@ import {buffInfo} from './buffInfo/buffInfo';
 import combatLogger from './combatLogger';
 import {createStyle} from '../../common/cElement';
 import doNotKill from './doNotKill/doNotKill';
-import execute from '../../common/execute';
+import executeAll from '../../common/executeAll';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import hideQTip from '../../common/hideQTip';
@@ -95,7 +95,7 @@ function fixDebuff() {
 }
 
 export default function subscribes() {
-  [
+  executeAll([
     worldPrefs,
     injectSendGoldOnWorld,
     viewCreature,
@@ -113,7 +113,7 @@ export default function subscribes() {
     initButtons,
     buffInfo,
     fixDebuff
-  ].forEach(execute);
+  ]);
 }
 
 // -1 = world page

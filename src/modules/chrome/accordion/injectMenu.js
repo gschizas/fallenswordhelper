@@ -1,6 +1,6 @@
 import adjustHeight from './adjustHeight';
 import currentGuildId from '../../common/currentGuildId';
-import execute from '../../common/execute';
+import executeAll from '../../common/executeAll';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
@@ -139,7 +139,7 @@ function topRatedLink() {
 }
 
 function doAccordion() {
-  [
+  executeAll([
     updateQuestLink,
     updateScavLink,
     characterButtons,
@@ -148,7 +148,7 @@ function doAccordion() {
     topRatedLink,
     actionButtons,
     adjustHeight,
-  ].forEach(execute);
+  ]);
 }
 
 export default function injectMenu() {
