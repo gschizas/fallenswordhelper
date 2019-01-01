@@ -141,8 +141,7 @@ function doTickAll() {
     textContent: 'Tick all buffs'
   });
   on(tickAll, 'click', toggleTickAllBuffs);
-  var inject = getElementById('settingsTabs-4').firstElementChild
-    .rows[0].cells[0];
+  var inject = getElementById('settingsTabs-4').children[0].rows[0].cells[0];
   insertElement(inject, createBr());
   insertElement(inject, tickAll);
 }

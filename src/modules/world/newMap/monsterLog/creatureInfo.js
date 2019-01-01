@@ -150,8 +150,8 @@ function doCreatureInfo(data) {
     if (bailOut[i](data, actions)) {return;}
   }
   // monster = 0;
-  doMouseOver(data.response.data, actions[data.passback].firstElementChild
-    .firstElementChild.firstElementChild);
+  doMouseOver(data.response.data, actions[data.passback].children[0]
+    .children[0].children[0]);
 }
 
 export function processMouseOver(data) {

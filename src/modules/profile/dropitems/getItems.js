@@ -1,5 +1,6 @@
 import addStatTotalToMouseover from '../../common/addStatTotalToMouseover';
 import doToggleButtons from './doToggleButtons';
+import getElementsByTagName from '../../common/getElementsByTagName';
 import {pCC} from '../../support/layout';
 import {def_table, itemRE} from '../../support/constants';
 import {
@@ -12,9 +13,9 @@ export var itemsAry;
 export var itemsHash;
 
 function getItemImg() {
-  var allTables = pCC.getElementsByTagName(def_table);
+  var allTables = getElementsByTagName(def_table, pCC);
   var lastTable = allTables[allTables.length - 1];
-  return lastTable.getElementsByTagName('img');
+  return getElementsByTagName('img', lastTable);
 }
 
 export function getItems() {

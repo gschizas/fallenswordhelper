@@ -47,8 +47,7 @@ function doCheckAll(evt) {
   var howMany = getHowMany(itemTables);
   var itemsInSt = findStCheck();
   Array.prototype.forEach.call(itemTables, function(el) {
-    var checkbox = el.firstElementChild.lastElementChild.firstElementChild
-      .firstElementChild;
+    var checkbox = el.children[0].lastElementChild.children[0].children[0];
     if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;

@@ -1,5 +1,6 @@
 import {closestTable} from './closest';
 import {createDiv} from './cElement';
+import getElementsByTagName from './getElementsByTagName';
 import insertHtmlBeforeBegin from './insertHtmlBeforeBegin';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
 
@@ -48,7 +49,7 @@ function addStats(el) {
 function fshDataFilter(data) {
   var container = createDiv();
   insertHtmlBeforeEnd(container, data);
-  var bonus = container.getElementsByTagName('font');
+  var bonus = getElementsByTagName('font', container);
   bonus = Array.prototype.filter.call(bonus, function(el) {
     return el.textContent === 'Bonuses';
   });

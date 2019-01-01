@@ -27,7 +27,7 @@ function recallItem(evt) { // jQuery
   var mode = evt.target.getAttribute('mode');
   var theTd = evt.target.parentNode.parentNode;
   if (mode === '0') {theTd = theTd.parentNode;}
-  var href = theTd.firstElementChild.href;
+  var href = theTd.children[0].href;
   if (!href) {return;}
   queueRecallItem(recallInfObj(evt, mode, href)).done(partial(recalled, theTd));
   theTd.innerHTML = spinner;
@@ -41,7 +41,7 @@ function wornItem(theTd, data) {
 function wearItem(evt) { // jQuery
   hideQTip(evt.target);
   var theTd = evt.target.parentNode.parentNode.parentNode;
-  var href = theTd.firstElementChild.href;
+  var href = theTd.children[0].href;
   if (!href) {return;}
   equipItem(href.match(/&id=(\d+)/)[1]).done(partial(wornItem, theTd));
   theTd.innerHTML = spinner;

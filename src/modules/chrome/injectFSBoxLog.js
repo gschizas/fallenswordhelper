@@ -1,5 +1,6 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import {injectFsBoxContent} from '../misc';
@@ -27,7 +28,7 @@ function storeFSBox(_boxList) {
 
 function fSBoxExists(node) { // jQuery.min
   var nodediv = node.lastElementChild;
-  var playerName = nodediv.getElementsByTagName('a');
+  var playerName = getElementsByTagName('a', nodediv);
   if (playerName.length === 0) {return;}
   getForage('fsh_fsboxcontent').done(storeFSBox);
   playerName = playerName[0].textContent;

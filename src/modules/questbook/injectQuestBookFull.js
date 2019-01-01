@@ -1,5 +1,6 @@
 import {def_table} from '../support/constants';
 import dontPost from './dontPost';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import guideButtons from './guideButtons';
 import hideElement from '../common/hideElement';
@@ -32,7 +33,7 @@ var savePrefKey = [
 ];
 
 function whereAmI() {
-  var aLinks = pCC.getElementsByTagName('a');
+  var aLinks = getElementsByTagName('a', pCC);
   normalLink = aLinks[0];
   seasonLink = aLinks[1];
   activeLink = aLinks[2];
@@ -40,7 +41,7 @@ function whereAmI() {
   notStartedLink = aLinks[4];
   currentPageValue = currentLocationValue.reduce(function(prev, curr, i) {
     var ret = prev;
-    if (aLinks[i].firstElementChild.getAttribute('color') === '#FF0000') {
+    if (aLinks[i].children[0].getAttribute('color') === '#FF0000') {
       ret += curr.value;
     }
     return ret;
@@ -130,7 +131,7 @@ function forEachQuest(hideQuests, questTable) {
 export default function injectQuestBookFull() {
   on(pCC, 'click', dontPost);
   storeQuestPage();
-  var questTable = pCC.getElementsByTagName(def_table)[5];
+  var questTable = getElementsByTagName(def_table, pCC)[5];
   if (!questTable) {return;}
   var hideQuests = isHideQuests();
   forEachQuest(hideQuests, questTable);

@@ -47,7 +47,7 @@ var helperMenuBlob =
 
 function toggleMenu(evt) {
   if (evt.target.id !== 'helperMenu') {return;}
-  var menu = evt.target.firstElementChild;
+  var menu = evt.target.children[0];
   menu.classList.toggle('showMenuDiv');
 }
 

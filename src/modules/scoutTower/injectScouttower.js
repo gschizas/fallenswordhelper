@@ -1,5 +1,6 @@
 import {createAnchor} from '../common/cElement';
 import displayTracker from './displayTracker';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getForage from '../ajax/getForage';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../common/insertElement';
@@ -12,7 +13,7 @@ import setForage from '../ajax/setForage';
 import {def_table, guideUrl, now} from '../support/constants';
 
 function getTitanName(aRow) {
-  return aRow.cells[0].firstElementChild.getAttribute('oldtitle');
+  return aRow.cells[0].children[0].getAttribute('oldtitle');
 }
 
 function cooldownTracker(aRow, theTitans) {
@@ -82,7 +83,7 @@ function killsSummary(aRow) {
 
 function guideLink(aRow) {
   var myName = encodeURIComponent(getTitanName(aRow));
-  var myImg = aRow.cells[0].firstElementChild;
+  var myImg = aRow.cells[0].children[0];
   var myLink = createAnchor({
     href: guideUrl + 'creatures&search_name=' + myName,
     target: '_blank'
@@ -97,7 +98,7 @@ function guideLink(aRow) {
 }
 
 function gotOldTitans(oldTitans) {
-  var titanTables = pCC.getElementsByTagName(def_table);
+  var titanTables = getElementsByTagName(def_table, pCC);
   injectScouttowerBuffLinks(titanTables);
   var titanTable = titanTables[1];
   var newTitans = {};

@@ -5,6 +5,7 @@ import {createTable} from '../../common/cElement';
 import eventHandler5 from '../../common/eventHandler5';
 import functionPasses from '../../common/functionPasses';
 import {getElementById} from '../../common/getElement';
+import getElementsByTagName from '../../common/getElementsByTagName';
 import getForage from '../../ajax/getForage';
 import getGuildLogPage from './getGuildLogPage';
 import getValue from '../../system/getValue';
@@ -154,7 +155,7 @@ function buildTable() {
 
 function setChecks() {
   Array.prototype.forEach.call(
-    fshNewGuildLog.getElementsByTagName('input'),
+    getElementsByTagName('input', fshNewGuildLog),
     function(el) {
       el.checked = options.checks[el.getAttribute('item')];
     }

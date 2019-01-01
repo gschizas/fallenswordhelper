@@ -22,8 +22,7 @@ function cancelAllAH() { // jQuery
   var prm = [];
   for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
     var cancelButton = cancelButtons[i];
-    var itemImage = cancelButton.parentNode.parentNode.firstElementChild
-      .firstElementChild;
+    var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
     cancelButton.outerHTML = '<img src="' + imageServer +
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
@@ -42,7 +41,7 @@ function makeCancelAll() {
     textContent: 'Cancel All'
   });
   var fill = getElementById('fill').parentNode.parentNode
-    .nextElementSibling.firstElementChild;
+    .nextElementSibling.children[0];
   fill.classList.add('fshCenter');
   insertHtmlAfterBegin(fill, ']');
   insertElementAfterBegin(fill, cancelAll);

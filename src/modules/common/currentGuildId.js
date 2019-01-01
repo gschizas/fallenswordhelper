@@ -1,3 +1,5 @@
+import getElementsByTagName from './getElementsByTagName';
+
 var guildId;
 
 function getGuildId(el) {
@@ -7,7 +9,7 @@ function getGuildId(el) {
 
 export default function currentGuildId() {
   if (!guildId) {
-    var nodeList = document.body.getElementsByTagName('script');
+    var nodeList = getElementsByTagName('script', document.body);
     Array.prototype.forEach.call(nodeList, getGuildId);
   }
   return guildId;

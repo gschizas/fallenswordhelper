@@ -4,6 +4,7 @@ import {createDiv} from '../../common/cElement';
 import decorateButton from './decorateButton';
 import delCompType from './delCompType';
 import delComponent from './delComponent';
+import getElementsByTagName from '../../common/getElementsByTagName';
 import getInvTable from './getInvTable';
 import hideElement from '../../common/hideElement';
 import insertElement from '../../common/insertElement';
@@ -38,7 +39,7 @@ function enableDelComponent(self) {
   hideElement(quickDelDiv);
   var cmDiv = quickDelDiv.parentNode;
   insertElement(cmDiv, decorateButton('Delete All Visible'));
-  var nodeList = getInvTable().getElementsByTagName('IMG');
+  var nodeList = getElementsByTagName('img', getInvTable());
   Array.from(nodeList).forEach(addDelBtn);
 }
 

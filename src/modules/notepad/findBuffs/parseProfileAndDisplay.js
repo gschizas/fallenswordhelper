@@ -2,6 +2,7 @@ import createDocument from '../../system/createDocument';
 import {def_statVl} from '../../support/constants';
 import fallback from '../../system/fallback';
 import {getElementById} from '../../common/getElement';
+import getElementsByTagName from '../../common/getElementsByTagName';
 import intValue from '../../system/intValue';
 import onlineDot from '../../common/onlineDot';
 import uniq from '../../common/uniq';
@@ -52,13 +53,13 @@ function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
 }
 
 function getSustain(doc) {
-  var aLinks = getElementById('profileLeftColumn', doc)
-    .getElementsByTagName('a');
+  var aLinks = getElementsByTagName('a',
+    getElementById('profileLeftColumn', doc));
   var sustainLevel;
   Array.prototype.some.call(aLinks, function(el) {
     if (el.textContent === 'Sustain') {
       var sustainText = el.parentNode.parentNode.parentNode.nextElementSibling
-        .firstElementChild.dataset.tipped;
+        .children[0].dataset.tipped;
       sustainLevel = parseInt(sustainLevelRE.exec(sustainText)[1], 10);
       return true;
     }
@@ -68,7 +69,7 @@ function getSustain(doc) {
 }
 
 function getInnerPlayerName(doc) {
-  return getElementById('pCC', doc).getElementsByTagName('h1')[0].textContent;
+  return getElementsByTagName('h1', getElementById('pCC', doc))[0].textContent;
 }
 
 function getInnerLevelValue(doc) {
@@ -149,7 +150,7 @@ function updateProcessed() {
 
 function calcLastActivity(doc) {
   var innerPcc = getElementById('pCC', doc);
-  var lastActivityElement = innerPcc.getElementsByTagName('p')[0];
+  var lastActivityElement = getElementsByTagName('p', innerPcc)[0];
   return /(\d+) mins, (\d+) secs/.exec(lastActivityElement.textContent);
 }
 

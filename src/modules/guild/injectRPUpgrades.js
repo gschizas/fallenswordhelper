@@ -1,3 +1,4 @@
+import getElementsByTagName from '../common/getElementsByTagName';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
@@ -20,9 +21,9 @@ function checkForBuffs(myBuffs, el) {
 }
 
 function postWarnings(myBuffs) {
-  var packsRow = pCC.firstElementChild.rows[9];
+  var packsRow = pCC.children[0].rows[9];
   if (!packsRow) {return;}
-  var nodeList = packsRow.cells[0].firstElementChild.getElementsByTagName('A');
+  var nodeList = getElementsByTagName('a', packsRow.cells[0].children[0]);
   Array.prototype.forEach.call(nodeList, partial(checkForBuffs, myBuffs));
 }
 

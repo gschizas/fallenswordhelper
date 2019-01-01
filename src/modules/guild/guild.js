@@ -2,6 +2,7 @@ import add from '../support/task';
 import buffLinks from './buffLinks';
 import colouredDots from '../common/colouredDots';
 import conflictInfo from './conflictInfo';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -13,7 +14,7 @@ import {logoToggle, statToggle, structureToggle} from './panelToggle';
 
 function selfRecallLink(leftHandSideColumnTable) {
   // self recall
-  var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
+  var getLi = getElementsByTagName('li', leftHandSideColumnTable);
   var selfRecall = getLi[getLi.length - 1].parentNode;
   insertHtmlBeforeEnd(selfRecall,
     '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +

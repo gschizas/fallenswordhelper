@@ -1,4 +1,5 @@
 import {def_table} from '../support/constants';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
@@ -13,8 +14,8 @@ function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
 
 function countContacts(el, isAllies) {
   var target = el.parentNode;
-  var numberOfContacts = target.nextSibling.nextSibling
-    .getElementsByTagName(def_table).length - 1;
+  var numberOfContacts = getElementsByTagName(def_table,
+    target.nextSibling.nextSibling).length - 1;
   if (isAllies) {
     totalAllyEnemy(target, numberOfContacts, getValue('alliestotal'));
   } else {

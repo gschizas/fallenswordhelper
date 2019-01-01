@@ -1,4 +1,5 @@
 import {createTextArea} from '../common/cElement';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import on from '../common/on';
@@ -14,13 +15,13 @@ function setDoChat(el) {
 }
 
 function giveFormId() {
-  var formList = pCC.getElementsByTagName('form');
+  var formList = getElementsByTagName('form', pCC);
   formList[0].id = 'dochat';
   return formList[0];
 }
 
 function giveInputsId() {
-  var inputList = pCC.getElementsByTagName('input');
+  var inputList = getElementsByTagName('input', pCC);
   var filteredList = Array.prototype.slice.call(inputList, 0, 7);
   filteredList.forEach(function(el) {setDoChat(el);});
   return filteredList[5];
