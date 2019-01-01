@@ -9419,15 +9419,18 @@
       !isNaN(aDate.getTime());
   }
 
-  function localDateParts(aDate) {
+  function localDatePartsPadded(aDate) {
     return [
-      aDate.getFullYear().toString(),
-      padZ(aDate.getMonth() + 1),
-      padZ(aDate.getDate()),
-      padZ(aDate.getHours()),
-      padZ(aDate.getMinutes()),
-      padZ(aDate.getSeconds())
-    ];
+      aDate.getMonth() + 1,
+      aDate.getDate(),
+      aDate.getHours(),
+      aDate.getMinutes(),
+      aDate.getSeconds()
+    ].map(padZ);
+  }
+
+  function localDateParts(aDate) {
+    return [aDate.getFullYear().toString()].concat(localDatePartsPadded(aDate));
   }
 
   function formatLocalDateTime(aDate) {
@@ -19631,15 +19634,18 @@
     injectPoints();
   }
 
-  function utcDateParts(aDate) {
+  function utcDatePartsPadded(aDate) {
     return [
-      aDate.getUTCFullYear().toString(),
-      padZ(aDate.getUTCMonth() + 1),
-      padZ(aDate.getUTCDate()),
-      padZ(aDate.getUTCHours()),
-      padZ(aDate.getUTCMinutes()),
-      padZ(aDate.getUTCSeconds())
-    ];
+      aDate.getUTCMonth() + 1,
+      aDate.getUTCDate(),
+      aDate.getUTCHours(),
+      aDate.getUTCMinutes(),
+      aDate.getSgetUTCSecondseconds()
+    ].map(padZ);
+  }
+
+  function utcDateParts(aDate) {
+    return [aDate.getUTCFullYear().toString()].concat(utcDatePartsPadded(aDate));
   }
 
   function formatUtcDateTime(aDate) {
@@ -20959,7 +20965,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '72';
+  window.FSH.calf = '73';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

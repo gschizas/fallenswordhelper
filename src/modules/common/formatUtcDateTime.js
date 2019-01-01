@@ -2,15 +2,18 @@ import formatDateTime from './formatDateTime';
 import isDate from './isDate';
 import padZ from '../system/padZ';
 
-function utcDateParts(aDate) {
+function utcDatePartsPadded(aDate) {
   return [
-    aDate.getUTCFullYear().toString(),
-    padZ(aDate.getUTCMonth() + 1),
-    padZ(aDate.getUTCDate()),
-    padZ(aDate.getUTCHours()),
-    padZ(aDate.getUTCMinutes()),
-    padZ(aDate.getUTCSeconds())
-  ];
+    aDate.getUTCMonth() + 1,
+    aDate.getUTCDate(),
+    aDate.getUTCHours(),
+    aDate.getUTCMinutes(),
+    aDate.getSgetUTCSecondseconds()
+  ].map(padZ);
+}
+
+function utcDateParts(aDate) {
+  return [aDate.getUTCFullYear().toString()].concat(utcDatePartsPadded(aDate));
 }
 
 export default function formatUtcDateTime(aDate) {

@@ -2,15 +2,18 @@ import formatDateTime from './formatDateTime';
 import isDate from './isDate';
 import padZ from '../system/padZ';
 
-function localDateParts(aDate) {
+function localDatePartsPadded(aDate) {
   return [
-    aDate.getFullYear().toString(),
-    padZ(aDate.getMonth() + 1),
-    padZ(aDate.getDate()),
-    padZ(aDate.getHours()),
-    padZ(aDate.getMinutes()),
-    padZ(aDate.getSeconds())
-  ];
+    aDate.getMonth() + 1,
+    aDate.getDate(),
+    aDate.getHours(),
+    aDate.getMinutes(),
+    aDate.getSeconds()
+  ].map(padZ);
+}
+
+function localDateParts(aDate) {
+  return [aDate.getFullYear().toString()].concat(localDatePartsPadded(aDate));
 }
 
 export default function formatLocalDateTime(aDate) {
