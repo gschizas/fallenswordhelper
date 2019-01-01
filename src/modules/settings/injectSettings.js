@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import dialogMsg from '../common/dialogMsg';
+import getCalfPrefs from '../common/getCalfPrefs';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../notepad/monstorLog/monstorLog';
@@ -51,7 +52,7 @@ function simpleVars() {
     'wantedNames',
     'combatEvaluatorBias',
     'enabledHuntingMode'
-  ].forEach(function(pref) {calf[pref] = getValue(pref);});
+  ].forEach(getCalfPrefs);
 }
 
 function getVars() {

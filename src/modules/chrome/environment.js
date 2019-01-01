@@ -7,7 +7,7 @@ import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
 import isObject from '../common/isObject';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import lookForHcsData from './lookForHcsData';
+import lookForHcsData from './lookForHcsData/lookForHcsData';
 import pageSwitcher from './pageSwitcher';
 import {end, screenview, setup, start} from '../support/fshGa';
 

@@ -14,10 +14,15 @@ import on from '../common/on';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import {pCR} from '../support/layout';
 
-var buffCheck = '<span class="enemy-buff-check-on"></span>';
-var msgButton = '<span class="enemy-send-message guild-icon left ' +
+var enemyBuffCheckOn = 'enemy-buff-check-on';
+var enemyBuffCheckOff = 'enemy-buff-check-off';
+var enemySendMessage = 'enemy-send-message';
+var enemyQuickbuff = 'enemy-quickbuff';
+var enemySelectedBuff = 'enemy-quick-buff';
+var buffCheck = '<span class="' + enemyBuffCheckOn + '"></span>';
+var msgButton = '<span class="' + enemySendMessage + ' guild-icon left ' +
   'guild-minibox-action tip-static" data-tipped="Send Message"></span>';
-var buffButton = '<span class="enemy-quickbuff guild-icon left ' +
+var buffButton = '<span class="' + enemyQuickbuff + ' guild-icon left ' +
   'guild-minibox-action tip-static" data-tipped="Quick Buff"></span>';
 
 var contactClass = [
@@ -160,8 +165,8 @@ function resetList() { // jQuery.min
 }
 
 function toggleBuffSelected(self) {
-  self.classList.toggle('enemy-buff-check-on');
-  self.classList.toggle('enemy-buff-check-off');
+  self.classList.toggle(enemyBuffCheckOn);
+  self.classList.toggle(enemyBuffCheckOff);
 }
 
 function msgPlayer(self) {
@@ -175,7 +180,7 @@ function buffPlayer(self) {
 }
 
 function selectedBuff() {
-  var buffBalls = getElementsByClassName('enemy-buff-check-on',
+  var buffBalls = getElementsByClassName(enemyBuffCheckOn,
     getElementById('fshContactList'));
   var sendstring = Array.prototype.reduce.call(buffBalls,
     function(prev, curr) {
@@ -186,11 +191,11 @@ function selectedBuff() {
 }
 
 var classEvt = [
-  {className: 'enemy-buff-check-on', handler: toggleBuffSelected},
-  {className: 'enemy-buff-check-off', handler: toggleBuffSelected},
-  {className: 'enemy-send-message', handler: msgPlayer},
-  {className: 'enemy-quickbuff', handler: buffPlayer},
-  {className: 'enemy-quick-buff', handler: selectedBuff}
+  {className: enemyBuffCheckOn, handler: toggleBuffSelected},
+  {className: enemyBuffCheckOff, handler: toggleBuffSelected},
+  {className: enemySendMessage, handler: msgPlayer},
+  {className: enemyQuickbuff, handler: buffPlayer},
+  {className: enemySelectedBuff, handler: selectedBuff}
 ];
 
 function eventHandler(evt) {
@@ -217,7 +222,7 @@ function makeDiv(data) {
     '<h4>Online Contacts <span id="fshResetEnemy">Reset</span></h4>' +
     '<div id="minibox-enemy"><ul id="fshContactList"></ul>';
   if (!calf.hideBuffSelected) {
-    wrapper += '<ul class="enemy-quick-buff">Quick Buff Selected</ul>';
+    wrapper += '<ul class="' + enemySelectedBuff + '">Quick Buff Selected</ul>';
   }
   wrapper += '</div></div>';
   insertHtmlBeforeEnd(fshAllyEnemy, wrapper);
