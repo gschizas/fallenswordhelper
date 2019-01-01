@@ -9411,43 +9411,30 @@
     return 0;
   }
 
+  function formatDateTime(dateParts) {
+    return dateParts[0] + '-' + dateParts[1] + '-' + dateParts[2] + ' ' +
+      dateParts[3] + ':' + dateParts[4] + ':' + dateParts[5];
+  }
+
   function isDate(aDate) {
     return Object.prototype.toString.call(aDate) === '[object Date]' &&
       !isNaN(aDate.getTime());
   }
 
-  function yearAsString(aDate) {
-    return aDate.getFullYear().toString();
-  }
-
-  function paddedMonthNumber(aDate) {
-    return padZ(aDate.getMonth() + 1);
-  }
-
-  function paddedDayNumber(aDate) {
-    return padZ(aDate.getDate());
-  }
-
-  function padddedHours(aDate) {
-    return padZ(aDate.getHours());
-  }
-
-  function paddedMinutes(aDate) {
-    return padZ(aDate.getMinutes());
-  }
-
-  function paddedSeconds(aDate) {
-    return padZ(aDate.getSeconds());
+  function localDateParts(aDate) {
+    return [
+      aDate.getFullYear().toString(),
+      padZ(aDate.getMonth() + 1),
+      padZ(aDate.getDate()),
+      padZ(aDate.getHours()),
+      padZ(aDate.getMinutes()),
+      padZ(aDate.getSeconds())
+    ];
   }
 
   function formatLocalDateTime(aDate) {
-    if (isDate) {
-      return yearAsString(aDate) + '-' +
-        paddedMonthNumber(aDate) + '-' +
-        paddedDayNumber(aDate) + ' ' +
-        padddedHours(aDate) + ':' +
-        paddedMinutes(aDate) + ':' +
-        paddedSeconds(aDate);
+    if (isDate(aDate)) {
+      return formatDateTime(localDateParts(aDate));
     }
   }
 
@@ -19646,38 +19633,20 @@
     injectPoints();
   }
 
-  function yearAsString$1(aDate) {
-    return aDate.getUTCFullYear().toString();
-  }
-
-  function paddedMonthNumber$1(aDate) {
-    return padZ(aDate.getUTCMonth() + 1);
-  }
-
-  function paddedDayNumber$1(aDate) {
-    return padZ(aDate.getUTCDate());
-  }
-
-  function padddedHours$1(aDate) {
-    return padZ(aDate.getUTCHours());
-  }
-
-  function paddedMinutes$1(aDate) {
-    return padZ(aDate.getUTCMinutes());
-  }
-
-  function paddedSeconds$1(aDate) {
-    return padZ(aDate.getUTCSeconds());
+  function utcDateParts(aDate) {
+    return [
+      aDate.getUTCFullYear().toString(),
+      padZ(aDate.getUTCMonth() + 1),
+      padZ(aDate.getUTCDate()),
+      padZ(aDate.getUTCHours()),
+      padZ(aDate.getUTCMinutes()),
+      padZ(aDate.getUTCSeconds())
+    ];
   }
 
   function formatUtcDateTime(aDate) {
-    if (isDate) {
-      return yearAsString$1(aDate) + '-' +
-        paddedMonthNumber$1(aDate) + '-' +
-        paddedDayNumber$1(aDate) + ' ' +
-        padddedHours$1(aDate) + ':' +
-        paddedMinutes$1(aDate) + ':' +
-        paddedSeconds$1(aDate);
+    if (isDate(aDate)) {
+      return formatDateTime(utcDateParts(aDate));
     }
   }
 
@@ -20992,7 +20961,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '71';
+  window.FSH.calf = '72';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
