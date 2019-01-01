@@ -1,37 +1,20 @@
+import formatDateTime from './formatDateTime';
 import isDate from './isDate';
 import padZ from '../system/padZ';
 
-function yearAsString(aDate) {
-  return aDate.getUTCFullYear().toString();
-}
-
-function paddedMonthNumber(aDate) {
-  return padZ(aDate.getUTCMonth() + 1);
-}
-
-function paddedDayNumber(aDate) {
-  return padZ(aDate.getUTCDate());
-}
-
-function padddedHours(aDate) {
-  return padZ(aDate.getUTCHours());
-}
-
-function paddedMinutes(aDate) {
-  return padZ(aDate.getUTCMinutes());
-}
-
-function paddedSeconds(aDate) {
-  return padZ(aDate.getUTCSeconds());
+function utcDateParts(aDate) {
+  return [
+    aDate.getUTCFullYear().toString(),
+    padZ(aDate.getUTCMonth() + 1),
+    padZ(aDate.getUTCDate()),
+    padZ(aDate.getUTCHours()),
+    padZ(aDate.getUTCMinutes()),
+    padZ(aDate.getUTCSeconds())
+  ];
 }
 
 export default function formatUtcDateTime(aDate) {
-  if (isDate) {
-    return yearAsString(aDate) + '-' +
-      paddedMonthNumber(aDate) + '-' +
-      paddedDayNumber(aDate) + ' ' +
-      padddedHours(aDate) + ':' +
-      paddedMinutes(aDate) + ':' +
-      paddedSeconds(aDate);
+  if (isDate(aDate)) {
+    return formatDateTime(utcDateParts(aDate));
   }
 }
