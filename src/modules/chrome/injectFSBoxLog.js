@@ -1,5 +1,6 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
@@ -19,8 +20,8 @@ function getBoxList(boxList) {
 
 function storeFSBox(_boxList) {
   var boxList = getBoxList(_boxList);
-  var fsbox = getElementById('minibox-fsbox')
-    .getElementsByClassName('message')[0].innerHTML;
+  var fsbox = getElementsByClassName('message',
+    getElementById('minibox-fsbox'))[0].innerHTML;
   if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
   if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
   setForage('fsh_fsboxcontent', boxList);

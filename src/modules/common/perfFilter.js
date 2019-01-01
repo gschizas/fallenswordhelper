@@ -1,5 +1,6 @@
 import {createDiv} from './cElement';
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from './getElementsByClassName';
 import getInventoryById from '../ajax/getInventoryById';
 import insertElement from './insertElement';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
@@ -11,8 +12,8 @@ var inv;
 var target;
 
 function selectPerf() {
-  var items = getElementById(target + '-items')
-    .getElementsByClassName('selectable-item');
+  var items = getElementsByClassName('selectable-item',
+    getElementById(target + '-items'));
   if (items.length === 0) {return;}
   Array.prototype.forEach.call(items, function(e) {
     var thisItem = e.id.replace(target + '-item-', '');

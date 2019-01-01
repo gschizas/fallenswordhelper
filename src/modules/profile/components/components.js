@@ -4,6 +4,7 @@ import {createDiv} from '../../common/cElement';
 import decorateButton from './decorateButton';
 import delCompType from './delCompType';
 import delComponent from './delComponent';
+import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getInvTable from './getInvTable';
 import hideElement from '../../common/hideElement';
@@ -46,7 +47,7 @@ function enableDelComponent(self) {
 function delAllComponent(self) {
   sendEvent('components', 'delAllComponent');
   var thisInvTable = self.parentNode.parentNode.parentNode.children[0];
-  var nodeList = thisInvTable.getElementsByClassName('compDelBtn');
+  var nodeList = getElementsByClassName('compDelBtn', thisInvTable);
   Array.from(nodeList).forEach(function(el) {
     el.click();
   });

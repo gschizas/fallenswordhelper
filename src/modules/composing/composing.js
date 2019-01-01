@@ -1,6 +1,7 @@
 import backgroundCreate from './backgroundCreate';
 import fastCompose from './fastCompose';
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from '../common/getElementsByClassName';
 import getValue from '../system/getValue';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
@@ -15,7 +16,7 @@ function moveButtons() {
     var buttonDiv = getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-    var top = pCC.getElementsByClassName('composing-level')[0]
+    var top = getElementsByClassName('composing-level', pCC)[0]
       .parentNode;
     insertElementBefore(buttonDiv, top);
   }

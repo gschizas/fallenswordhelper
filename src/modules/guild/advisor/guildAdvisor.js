@@ -1,5 +1,6 @@
 import calf from '../../support/calf';
 import {createTFoot} from '../../common/cElement';
+import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getMembrList from '../../ajax/getMembrList';
 import injectAdvisorWeekly from './injectAdvisorWeekly';
@@ -42,7 +43,7 @@ function getData(list, membrList) {
 }
 
 function summaryLink() {
-  var updateInput = pCC.getElementsByClassName('custombutton');
+  var updateInput = getElementsByClassName('custombutton', pCC);
   if (updateInput.length === 0) {return;}
   insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');

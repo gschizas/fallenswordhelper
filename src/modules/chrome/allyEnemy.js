@@ -4,6 +4,7 @@ import {createDiv} from '../common/cElement';
 import fallback from '../system/fallback';
 import formatLastActivity from '../system/formatLastActivity';
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from '../common/getElementsByClassName';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -174,8 +175,8 @@ function buffPlayer(self) {
 }
 
 function selectedBuff() {
-  var buffBalls = getElementById('fshContactList')
-    .getElementsByClassName('enemy-buff-check-on');
+  var buffBalls = getElementsByClassName('enemy-buff-check-on',
+    getElementById('fshContactList'));
   var sendstring = Array.prototype.reduce.call(buffBalls,
     function(prev, curr) {
       prev.push(curr.nextElementSibling.textContent);

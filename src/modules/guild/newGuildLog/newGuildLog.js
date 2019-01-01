@@ -5,6 +5,7 @@ import {createTable} from '../../common/cElement';
 import eventHandler5 from '../../common/eventHandler5';
 import functionPasses from '../../common/functionPasses';
 import {getElementById} from '../../common/getElement';
+import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getForage from '../../ajax/getForage';
 import getGuildLogPage from './getGuildLogPage';
@@ -71,7 +72,7 @@ function getTableList(tableList) {
 }
 
 function parseTable() {
-  var tableList = doc.getElementsByClassName('width_full');
+  var tableList = getElementsByClassName('width_full', doc);
   if (tableList.length === 1) {getTableList(tableList);}
 }
 

@@ -1,6 +1,7 @@
 import classHandler from '../common/classHandler';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from '../common/getElementsByClassName';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -60,7 +61,7 @@ function captureEnter() {
 
 function getValidateTips() {
   if (!validateTips) {
-    var nodes = quickMsgDialog.getElementsByClassName('validateTips');
+    var nodes = getElementsByClassName('validateTips', quickMsgDialog);
     if (nodes.length === 1) {
       validateTips = nodes[0];
     }

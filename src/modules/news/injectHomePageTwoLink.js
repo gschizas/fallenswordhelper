@@ -1,4 +1,5 @@
 import {createAnchor} from '../common/cElement';
+import getElementsByClassName from '../common/getElementsByClassName';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
@@ -15,7 +16,7 @@ function timestamp(head) {
 }
 
 function lookForPvPLadder() {
-  var rumours = pCC.getElementsByClassName('news_head_tavern');
+  var rumours = getElementsByClassName('news_head_tavern', pCC);
   var pvpTimes = Array.from(rumours).filter(pvpLadder).map(timestamp);
   var logTime = Math.max.apply(null, pvpTimes);
   if (logTime > getValue('lastLadderReset')) {

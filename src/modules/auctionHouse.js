@@ -1,5 +1,6 @@
 import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
+import getElementsByClassName from './common/getElementsByClassName';
 import getValue from './system/getValue';
 import {imageServer} from './system/system';
 import insertElementAfterBegin from './common/insertElementAfterBegin';
@@ -16,8 +17,8 @@ function doRefresh() {
 }
 
 function cancelAllAH() { // jQuery
-  var cancelButtons = getElementById('resultRows')
-    .getElementsByClassName('auctionCancel');
+  var cancelButtons = getElementsByClassName('auctionCancel',
+    getElementById('resultRows'));
   if (cancelButtons.length === 0) {return;}
   var prm = [];
   for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {

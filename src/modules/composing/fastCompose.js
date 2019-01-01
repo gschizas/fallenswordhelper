@@ -1,4 +1,5 @@
 import backgroundCreate from './backgroundCreate';
+import getElementsByClassName from '../common/getElementsByClassName';
 import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
@@ -83,7 +84,7 @@ function drawList(fcDiv) {
   sendEvent('composing', 'FastCompose');
   insertHtmlBeforeEnd(fcDiv, '<br>');
   var compSlots = Array.from(
-    document.getElementsByClassName('composing-potion-time')
+    getElementsByClassName('composing-potion-time', document)
   );
   var openSlots = compSlots.filter(openSlot).length;
   if (openSlots > 0) {
