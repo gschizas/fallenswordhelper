@@ -1459,11 +1459,11 @@
     findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
       'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
       pvpLowerLevel + '&search_level_max=' +
-      pvpUpperLevel + '&search_in_guild=0"><span ' +
+      pvpUpperLevel + '&search_in_guild=-1"><span ' +
       'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
       'index.php?cmd=findplayer&search_active=1&search_username=&' +
       'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
-      gvgUpperLevel + '&search_in_guild=0"><span style="color:blue;">' +
+      gvgUpperLevel + '&search_in_guild=-1"><span style="color:blue;">' +
       'Get GvG targets</span></a>');
 
     $('table[class="width_full"]').find('a[href*="player_id"]')
@@ -20977,15 +20977,20 @@
     }
   };
 
+  var cmd;
+  var subcmd;
+  var subcmd2;
+  var type$2;
+  var fromWorld;
   var coreFunction;
   var functionPath;
 
-  function getType(cmd) {
-    var type = '-';
-    if (cmd === 'points') {
-      type = fallback(getUrlParameter('type'), '-');
+  function getType(_cmd) {
+    var _type = '-';
+    if (_cmd === 'points') {
+      _type = getUrlParameter('type') || '-';
     }
-    return type;
+    return _type;
   }
 
   function newSelector(selector) {
@@ -20994,48 +20999,53 @@
   }
 
   var isValid = [
-    function(cmd) {return pageSwitcher[cmd];},
-    function(cmd, subcmd) {return pageSwitcher[cmd][subcmd];},
-    function(cmd, subcmd, subcmd2) {return pageSwitcher[cmd][subcmd][subcmd2];},
-    function(cmd, subcmd, subcmd2, type) {
-      return pageSwitcher[cmd][subcmd][subcmd2][type];
-    }
+    function() {return pageSwitcher[cmd];},
+    function() {return pageSwitcher[cmd][subcmd];},
+    function() {return pageSwitcher[cmd][subcmd][subcmd2];},
+    function() {return pageSwitcher[cmd][subcmd][subcmd2][type$2];}
   ];
 
-  function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
-    if (isValid.every(function(e) {
-      return isObject(e(cmd, subcmd, subcmd2, type));
-    }) && pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
-      return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
+  function returnsObject(e) {return isObject(e());}
+
+  function testCoreFunction() {
+    if (isValid.every(returnsObject) &&
+        pageSwitcher[cmd][subcmd][subcmd2][type$2][fromWorld]) {
+      return pageSwitcher[cmd][subcmd][subcmd2][type$2][fromWorld];
     }
   }
 
-  function getCoreFunction() {
-    var cmd;
-    var subcmd;
-    var subcmd2;
-    var type;
-    var fromWorld;
-    if (document.location.search !== '') {
-      cmd = fallback(getUrlParameter('cmd'), '-');
-      subcmd = fallback(getUrlParameter('subcmd'), '-');
-      subcmd2 = fallback(getUrlParameter('subcmd2'), '-');
-      type = getType(cmd);
-      fromWorld = fallback(getUrlParameter('fromworld'), '-');
-    } else {
-      cmd = newSelector('input[name="cmd"]');
-      subcmd = newSelector('input[name="subcmd"]');
-      subcmd2 = newSelector('input[name="subcmd2"]');
-      type = '-';
-      fromWorld = '-';
-    }
+  function getParamsFromUrl() {
+    cmd = fallback(getUrlParameter('cmd'), '-');
+    subcmd = fallback(getUrlParameter('subcmd'), '-');
+    subcmd2 = fallback(getUrlParameter('subcmd2'), '-');
+    type$2 = getType(cmd);
+    fromWorld = fallback(getUrlParameter('fromworld'), '-');
+  }
+
+  function getParamsFromPage() {
+    cmd = newSelector('input[name="cmd"]');
+    subcmd = newSelector('input[name="subcmd"]');
+    subcmd2 = newSelector('input[name="subcmd2"]');
+    type$2 = '-';
+    fromWorld = '-';
+  }
+
+  function setCalfParams() {
     calf.cmd = cmd;
     calf.subcmd = subcmd;
     calf.subcmd2 = subcmd2;
-    functionPath = cmd + '/' + subcmd + '/' + subcmd2 + '/' + type + '/' +
-      fromWorld;
+  }
 
-    coreFunction = testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld);
+  function getCoreFunction() {
+    if (document.location.search !== '') {
+      getParamsFromUrl();
+    } else {
+      getParamsFromPage();
+    }
+    setCalfParams();
+    functionPath = cmd + '/' + subcmd + '/' + subcmd2 + '/' + type$2 + '/' +
+      fromWorld;
+    coreFunction = testCoreFunction();
   }
 
   function devHooks() {
@@ -21060,7 +21070,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '76';
+  window.FSH.calf = '77';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
