@@ -2,6 +2,7 @@ import add from '../support/task';
 import {def_table} from '../support/constants';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
 import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
@@ -19,7 +20,7 @@ function getItemDiv() {
   if (!itemDiv) {
     itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
     var itemList = getElementById('item-list');
-    var oldItems = itemList.getElementsByTagName(def_table);
+    var oldItems = getElementsByTagName(def_table, itemList);
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
       insertElement(itemDiv, oldItems[0]);
@@ -40,10 +41,9 @@ function shouldHide(hidden, all, hasFolder) {
 function doHideFolder(evt) {
   var folderid = evt.target.id;
   var itemDiv = getItemDiv();
-  var items = itemDiv.getElementsByTagName(def_table);
+  var items = getElementsByTagName(def_table, itemDiv);
   Array.prototype.forEach.call(items, function(el) {
-    el.firstElementChild.lastElementChild.firstElementChild
-      .firstElementChild.checked = false;
+    el.children[0].lastElementChild.children[0].children[0].checked = false;
     var hidden = el.classList.contains('fshHide');
     var all = folderid === 'folderid0';
     var hasFolder = el.classList.contains(folderid);
@@ -93,8 +93,7 @@ function stColor(el, item) {
 }
 
 function forEachInvItem(el) {
-  var checkbox = el.firstElementChild.lastElementChild.firstElementChild
-    .firstElementChild;
+  var checkbox = el.children[0].lastElementChild.children[0].children[0];
   var item = invItems[checkbox.getAttribute('value')];
   if (item) {
     el.classList.add('folderid' + item.folder_id);
@@ -110,8 +109,7 @@ function processTrade(data) {
 
   invItems = data.items;
   /* Highlight items in ST */
-  var nodeList = getElementById('item-list')
-    .getElementsByTagName(def_table);
+  var nodeList = getElementsByTagName(def_table, getElementById('item-list'));
   Array.prototype.forEach.call(nodeList, forEachInvItem);
   doFolderHeaders(data.folders);
 

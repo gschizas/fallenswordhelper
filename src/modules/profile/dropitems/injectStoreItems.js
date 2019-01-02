@@ -119,7 +119,7 @@ function toggleShowExtraLinks() {
     batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   } else {
     itemsAry.forEach(function(o) {
-      var el = o.injectHere.firstElementChild;
+      var el = o.injectHere.children[0];
       toggleForce(el, !showExtraLinks);
     });
   }

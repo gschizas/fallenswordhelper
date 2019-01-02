@@ -1,5 +1,6 @@
 import buyitem from './app/potionbazaar/buyitem';
 import {getElementById} from './common/getElement';
+import getElementsByTagName from './common/getElementsByTagName';
 import insertElement from './common/insertElement';
 import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
@@ -79,7 +80,7 @@ function buy() { // jQuery.min
 }
 
 function doMiniatures(el, i) {
-  var item = el.firstElementChild;
+  var item = el.children[0];
   var tipped = item.dataset.tipped;
   bazaarTable = bazaarTable
     .replace('@' + i + '@', bazaarItem)
@@ -96,9 +97,9 @@ function evtHandlers() {
 
 export default function injectBazaar() { // TODO stop using getElementById
   if (jQueryNotPresent()) {return;}
-  var pbImg = pCC.getElementsByTagName('IMG')[0];
+  var pbImg = getElementsByTagName('img', pCC)[0];
   pbImg.className = 'fshFloatLeft';
-  var potions = pCC.getElementsByTagName('A');
+  var potions = getElementsByTagName('a', pCC);
   Array.from(potions).forEach(doMiniatures);
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);

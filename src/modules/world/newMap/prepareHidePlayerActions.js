@@ -1,4 +1,5 @@
 import {getElementById} from '../../common/getElement';
+import getElementsByClassName from '../../common/getElementsByClassName';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import setValue from '../../system/setValue';
@@ -15,16 +16,18 @@ export function toggleHidePlayerActions() {
   GameData.fetch(def_fetch_worldRealmActions);
 }
 
+function hideActions(el) {
+  var verbs = getElementsByClassName('verbs', el);
+  if (verbs.length === 1) {
+    hideElement(verbs[0]);
+  }
+}
+
 function doHidePlayerActions() {
   if (!hidePlayerActions) {return;}
   var act = getElementById('actionList');
-  var players = act.getElementsByClassName('player');
-  Array.prototype.forEach.call(players, function(el) {
-    var verbs = el.getElementsByClassName('verbs');
-    if (verbs.length === 1) {
-      hideElement(verbs[0]);
-    }
-  });
+  var players = getElementsByClassName('player', act);
+  Array.from(players).forEach(hideActions);
 }
 
 export function prepareHidePlayerActions() {

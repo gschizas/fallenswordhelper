@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
 import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
@@ -20,7 +21,7 @@ var folderId = 0;
 var perfBox;
 
 function whichTableHasItems() {
-  var allTables = pCC.lastElementChild.getElementsByTagName(def_table);
+  var allTables = getElementsByTagName(def_table, pCC.lastElementChild);
   if (calf.cmd === 'crafting') {
     return allTables[1];
   }
@@ -84,7 +85,7 @@ function enhanceWarehouse() {
 
 function doFolderButtons(folders) {
   var inject = itemTable.parentNode.parentNode
-    .previousElementSibling.firstElementChild;
+    .previousElementSibling.children[0];
   inject.classList.add('fshCenter');
   on(inject, 'click', doHideFolders);
   insertHtmlBeforeEnd(inject, makeFolderSpans(folders, true));
@@ -121,7 +122,7 @@ function inventory(data) {
 
 function getItems() {
   itemTable = whichTableHasItems();
-  var imgList = itemTable.getElementsByTagName('img');
+  var imgList = getElementsByTagName('img', itemTable);
   itemsAry = Array.prototype.map.call(imgList, function(img) {
     var tipped = img.dataset.tipped;
     var matches = tipped.match(itemRE);

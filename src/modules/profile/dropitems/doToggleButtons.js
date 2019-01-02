@@ -1,13 +1,14 @@
 import calf from '../../support/calf';
+import getElementsByTagName from '../../common/getElementsByTagName';
 import {pCC} from '../../support/layout';
 
 var insertHere;
 
 function setInsertHere() {
   if (!insertHere) {
-    var cltn = pCC.getElementsByTagName('form');
+    var cltn = getElementsByTagName('form', pCC);
     if (cltn.length > 0) {
-      insertHere = cltn[0].previousElementSibling.firstElementChild;
+      insertHere = cltn[0].previousElementSibling.children[0];
     }
   }
 }

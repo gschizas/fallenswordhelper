@@ -54,13 +54,17 @@ function customButton(text, fn) {
   return btn;
 }
 
-export function makeInOut() {
-  io = createDiv({id: 'io', className: 'fshSpinner64'});
+function makeIoText() {
   ioText = createTextArea();
   ioText.setAttribute('autocapitalize', 'off');
   ioText.setAttribute('autocomplete', 'off');
   ioText.setAttribute('autocorrect', 'off');
   ioText.setAttribute('spellcheck', 'false');
+}
+
+export function makeInOut() {
+  io = createDiv({id: 'io', className: 'fshSpinner64'});
+  makeIoText();
   saveBtn = customButton('Save', doSave);
   resetBtn = customButton('Reset', doReset);
   insertElement(io, ioText);

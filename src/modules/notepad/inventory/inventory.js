@@ -5,7 +5,7 @@ import clearButton from './clearButton';
 import decorate from './decorate';
 import doTable from './table';
 import eventHandlers from './eventHandlers/eventHandlers';
-import execute from '../../common/execute';
+import executeAll from '../../common/executeAll';
 import {extendOptions} from './options';
 import getForage from '../../ajax/getForage';
 import getMembrList from '../../ajax/getMembrList';
@@ -39,7 +39,7 @@ function rekeyMembrList() {
 }
 
 function prepareLayout() {
-  [
+  executeAll([
     decorate,
     lvlFilter,
     typeFilter,
@@ -48,7 +48,7 @@ function prepareLayout() {
     headers,
     setChecks,
     setLvls
-  ].forEach(execute);
+  ]);
 }
 
 function doInventory() {

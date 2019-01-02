@@ -1,5 +1,7 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from '../common/getElementsByClassName';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import {injectFsBoxContent} from '../misc';
@@ -18,8 +20,8 @@ function getBoxList(boxList) {
 
 function storeFSBox(_boxList) {
   var boxList = getBoxList(_boxList);
-  var fsbox = getElementById('minibox-fsbox')
-    .getElementsByClassName('message')[0].innerHTML;
+  var fsbox = getElementsByClassName('message',
+    getElementById('minibox-fsbox'))[0].innerHTML;
   if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
   if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
   setForage('fsh_fsboxcontent', boxList);
@@ -27,7 +29,7 @@ function storeFSBox(_boxList) {
 
 function fSBoxExists(node) { // jQuery.min
   var nodediv = node.lastElementChild;
-  var playerName = nodediv.getElementsByTagName('a');
+  var playerName = getElementsByTagName('a', nodediv);
   if (playerName.length === 0) {return;}
   getForage('fsh_fsboxcontent').done(storeFSBox);
   playerName = playerName[0].textContent;

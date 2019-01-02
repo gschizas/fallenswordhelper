@@ -17,20 +17,32 @@ var textArea;
 var previewArea;
 var theBox;
 
+function replaceTags(inputText, ary) {
+  var ret = inputText;
+  ary.forEach(function(re) {ret = ret.replace(re[0], re[1]);});
+  return ret;
+}
+
+var basicTagReplacements = [
+  [/</g, '&lt'],
+  [/>/g, '&gt'],
+  [/\n/g, '<br>'],
+  [/\[(\/?)([biu])\]/g, '<$1$2>'],
+  [/\\\\/g, '&#92'],
+  [/\\/g, '']
+];
+
+var guildTagReplacements = [
+  [/\[(\/?)block\]/g, '<$1blockquote>'],
+  [/\[list\]/g, '<ul class="list">'],
+  [/\[\/list\]/g, '</ul>'],
+  [/\[\*\](.*?)<br>/g, '<li>$1</li>']
+];
+
 function convertTextToHtml(inputText) {
-  var ret = inputText
-    .replace(/</g, '&lt')
-    .replace(/>/g, '&gt')
-    .replace(/\n/g, '<br>')
-    .replace(/\[(\/?)([biu])\]/g, '<$1$2>')
-    .replace(/\\\\/g, '&#92')
-    .replace(/\\/g, '');
+  var ret = replaceTags(inputText, basicTagReplacements);
   if (calf.cmd === 'guild') {
-    ret = ret
-      .replace(/\[(\/?)block\]/g, '<$1blockquote>')
-      .replace(/\[list\]/g, '<ul class="list">')
-      .replace(/\[\/list\]/g, '</ul>')
-      .replace(/\[\*\](.*?)<br>/g, '<li>$1</li>');
+    ret = replaceTags(ret, guildTagReplacements);
   }
   return ret;
 }

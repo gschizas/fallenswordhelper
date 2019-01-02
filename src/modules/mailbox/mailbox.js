@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import getElementsByTagName from '../common/getElementsByTagName';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import isFunction from '../common/isFunction';
@@ -160,7 +161,7 @@ function makeQtCheckbox(items, injector) {
 
 export default function injectMailbox() {
   if (jQueryNotPresent()) {return;}
-  var items = pCC.getElementsByTagName('a');
+  var items = getElementsByTagName('a', pCC);
   if (items.length === 0) {return;} // Empty mailbox
   var injector = pCC.lastElementChild;
   makeQtCheckbox(items, injector);

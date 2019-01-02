@@ -1,3 +1,4 @@
+import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
@@ -71,7 +72,7 @@ function processGuildWidgetRow(aRow) { // Legacy
 }
 
 function getMessageHeader() {
-  var nodeList = pCC.getElementsByTagName('TD');
+  var nodeList = getElementsByTagName('td', pCC);
   for (var i = 0; i < nodeList.length; i += 1) {
     if (nodeList[i].textContent === 'Message') {
       return nodeList[i];

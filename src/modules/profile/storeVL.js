@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from '../common/getElementsByClassName';
 import intValue from '../system/intValue';
 import setValue from '../system/setValue';
 import {
@@ -10,7 +11,7 @@ import {
 export default function storeVL() {
   // store the VL of the player
   var virtualLevel = parseInt(getElementById(def_statVl).textContent, 10);
-  if (intValue(document.getElementsByClassName(def_statLevel)[0]
+  if (intValue(getElementsByClassName(def_statLevel, document)[0]
     .nextElementSibling.textContent) === virtualLevel) {
     setValue(def_characterVirtualLevel, ''); // ?
   } else {

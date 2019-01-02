@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import getElementsByTagName from '../common/getElementsByTagName';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import on from '../common/on';
@@ -23,7 +24,7 @@ function removeItem(link) {
 function getNekid() {
   sendEvent('profile', 'nekidBtn');
   var profileBlock = profileCombatSetDiv.nextElementSibling;
-  var aLinks = profileBlock.getElementsByTagName('a');
+  var aLinks = getElementsByTagName('a', profileBlock);
   Array.prototype.forEach.call(aLinks, removeItem);
 }
 

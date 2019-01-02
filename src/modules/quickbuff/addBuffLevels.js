@@ -1,5 +1,6 @@
 import {createSpan} from '../common/cElement';
 import formatLastActivity from '../system/formatLastActivity';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getProfile from '../ajax/getProfile';
 import insertElementAfter from '../common/insertElementAfter';
 import partial from '../common/partial';
@@ -10,7 +11,7 @@ function addStatsQuickBuff(data) {
   var activity = myPlayer.querySelector('span.fshLastActivity');
   if (!activity) {
     activity = createSpan({className: 'fshLastActivity'});
-    var player = myPlayer.getElementsByTagName('h1')[0];
+    var player = getElementsByTagName('h1', myPlayer)[0];
     insertElementAfter(activity, player);
   }
   activity.innerHTML = 'Last Activity: ' +
@@ -39,7 +40,7 @@ function buffRunning(el, playerBuffLevel, playerSpan) {
     playerSpan.innerHTML = '';
     return;
   }
-  var lvlSpan = el.nextElementSibling.firstElementChild.firstElementChild;
+  var lvlSpan = el.nextElementSibling.children[0].children[0];
   var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
   var fshPlayerSpan = newPlayerSpan(el, playerSpan);
   var buffColor = getBuffColor(myLvl, playerBuffLevel);

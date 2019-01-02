@@ -1,3 +1,4 @@
+import getElementsByTagName from '../../common/getElementsByTagName';
 import getInvTable from './getInvTable';
 import {itemRE} from '../../support/constants';
 
@@ -11,7 +12,7 @@ function getComponents(prev, x) {
 
 function getVisibleComponents() {
   if (!visibleCache) {
-    var nodeList = getInvTable().getElementsByTagName('IMG');
+    var nodeList = getElementsByTagName('img', getInvTable());
     visibleCache = Array.from(nodeList).reduce(getComponents, {});
   }
   return visibleCache;

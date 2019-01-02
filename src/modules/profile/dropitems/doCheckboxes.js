@@ -37,8 +37,7 @@ function doCheck(o) {
   if (!o.injectHere) {return;}
   var tr = o.injectHere.parentNode;
   if (tr.classList.contains('fshHide')) {return;}
-  var el = o.el.parentNode.parentNode.previousElementSibling
-    .firstElementChild;
+  var el = o.el.parentNode.parentNode.previousElementSibling.children[0];
   testType(o, el);
 }
 

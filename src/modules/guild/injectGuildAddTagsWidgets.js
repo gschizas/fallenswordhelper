@@ -1,6 +1,7 @@
 import {createInput} from '../common/cElement';
 import {def_table} from '../support/constants';
 import {getElementById} from '../common/getElement';
+import getElementsByTagName from '../common/getElementsByTagName';
 import {imageServer} from '../system/system';
 import injectGuild from './guild';
 import insertElement from '../common/insertElement';
@@ -34,7 +35,7 @@ function takeResult(self, data) {
 
 function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
-    .firstElementChild.value;
+    .children[0].value;
   takeitem(itmId).done(partial(takeResult, el));
   el.textContent = '';
   el.className = 'guildTagSpinner';
@@ -49,7 +50,7 @@ function evtHdlr(e) {
 }
 
 function paintTable() {
-  var nodeList = pCC.getElementsByTagName(def_table);
+  var nodeList = getElementsByTagName(def_table, pCC);
   if (nodeList.length > 0) {
     doItemTable(nodeList[nodeList.length - 1].rows);
   }
@@ -57,7 +58,7 @@ function paintTable() {
 
 function checkAllBtn() {
   var checkAll = createInput({type: 'button', value: 'Check All'});
-  var formTags = pCC.getElementsByTagName('form');
+  var formTags = getElementsByTagName('form', pCC);
   if (formTags.length === 1) {
     insertElement(formTags[0].previousElementSibling.cells[0], checkAll);
   }

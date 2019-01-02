@@ -1,12 +1,13 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import getElementsByClassName from '../common/getElementsByClassName';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import on from '../common/on';
 
 function profileSelectAll() {
   var bpTabs = getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0]
+  var type = getElementsByClassName('tab-selected', bpTabs)[0]
     .getAttribute('data-type');
   var items = document.querySelectorAll('#backpackTab_' + type +
     ' li:not(.hcsPaginate_hidden) .backpackItem');

@@ -83,7 +83,7 @@ function getRankName(rankCell) {
 }
 
 function writeMembers(el) {
-  var rankCell = el.firstElementChild;
+  var rankCell = el.children[0];
   var rankName = getRankName(rankCell);
   hasMembers(rankCell, rankName);
 }
@@ -91,7 +91,7 @@ function writeMembers(el) {
 function findTheRows() {
   var outerTable = pCC.lastElementChild.previousElementSibling;
   if (outerTable.rows && outerTable.rows.length > 7) {
-    return outerTable.rows[7].firstElementChild.firstElementChild.rows;
+    return outerTable.rows[7].children[0].children[0].rows;
   }
 }
 

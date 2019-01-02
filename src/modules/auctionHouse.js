@@ -1,5 +1,6 @@
 import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
+import getElementsByClassName from './common/getElementsByClassName';
 import getValue from './system/getValue';
 import {imageServer} from './system/system';
 import insertElementAfterBegin from './common/insertElementAfterBegin';
@@ -16,14 +17,13 @@ function doRefresh() {
 }
 
 function cancelAllAH() { // jQuery
-  var cancelButtons = getElementById('resultRows')
-    .getElementsByClassName('auctionCancel');
+  var cancelButtons = getElementsByClassName('auctionCancel',
+    getElementById('resultRows'));
   if (cancelButtons.length === 0) {return;}
   var prm = [];
   for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
     var cancelButton = cancelButtons[i];
-    var itemImage = cancelButton.parentNode.parentNode.firstElementChild
-      .firstElementChild;
+    var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
     cancelButton.outerHTML = '<img src="' + imageServer +
       '/skin/loading.gif" width="14" height="14">';
     prm.push(
@@ -42,7 +42,7 @@ function makeCancelAll() {
     textContent: 'Cancel All'
   });
   var fill = getElementById('fill').parentNode.parentNode
-    .nextElementSibling.firstElementChild;
+    .nextElementSibling.children[0];
   fill.classList.add('fshCenter');
   insertHtmlAfterBegin(fill, ']');
   insertElementAfterBegin(fill, cancelAll);

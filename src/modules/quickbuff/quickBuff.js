@@ -31,12 +31,12 @@ function setupEventHandlers() {
 }
 
 function eachLabel(el) {
-  var nameSpan = el.firstElementChild;
+  var nameSpan = el.children[0];
   var dataTipped = nameSpan.dataset.tipped;
   var cost = el.previousElementSibling.dataset.cost;
   nameSpan.dataset.tipped = dataTipped
     .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
-  var lvlSpan = nameSpan.firstElementChild;
+  var lvlSpan = nameSpan.children[0];
   var myLvl = Number(lvlSpan.textContent.replace(/\[|\]/g, ''));
   if (!excludeBuff[el.for] && myLvl < 125) {
     el.classList.add('fshDim');
@@ -60,6 +60,6 @@ export default function injectQuickBuff() { // jQuery.min
   if (jQueryNotPresent()) {return;}
   var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
-  insertHtmlAfterEnd(quickbuffDiv.firstElementChild, quickBuffHeader);
+  insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
   getProfile(window.self).done(getSustain);
 }

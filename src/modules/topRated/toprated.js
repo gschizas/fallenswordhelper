@@ -1,5 +1,6 @@
 import currentGuildId from '../common/currentGuildId';
 import functionPasses from '../common/functionPasses';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
@@ -82,7 +83,7 @@ function addPlayerObjectToGuild(guildId, obj) {
 }
 
 function addPlayerToGuild(tbl, playerName) {
-  var guildHRef = tbl.rows[0].cells[0].firstElementChild.href;
+  var guildHRef = tbl.rows[0].cells[0].children[0].href;
   var guildId = /guild_id=(\d+)/.exec(guildHRef)[1];
   addPlayerObjectToGuild(guildId, {dom: tbl, player: playerName});
 }
@@ -122,12 +123,12 @@ function hideSpinner() {
 }
 
 function findOnlinePlayers() { // jQuery
-  var someTables = pCC.getElementsByTagName(def_table);
+  var someTables = getElementsByTagName(def_table, pCC);
   var prm = [];
   guilds = {};
   Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
     var playerName = tbl.textContent.trim();
-    if (tbl.rows[0].cells[0].firstElementChild) {
+    if (tbl.rows[0].cells[0].children[0]) {
       addPlayerToGuild(tbl, playerName);
     } else {
       stackAjax(prm, playerName, tbl);
@@ -161,8 +162,8 @@ function getMyVL(e) {
 }
 
 function looksLikeTopRated() {
-  var theCell = pCC.getElementsByTagName('TD')[0];
-  theCell.firstElementChild.className = 'fshTopListWrap';
+  var theCell = getElementsByTagName('td', pCC)[0];
+  theCell.children[0].className = 'fshTopListWrap';
   var findBtn = createInput({
     id: 'fshFindOnlinePlayers',
     className: 'custombutton tip-static',
@@ -180,11 +181,11 @@ function looksLikeTopRated() {
 var topRatedTests = [
   function() {return jQueryPresent();},
   function() {return isObject(pCC);},
-  function() {return isObject(pCC.firstElementChild);},
-  function() {return isObject(pCC.firstElementChild.rows);},
-  function() {return pCC.firstElementChild.rows.length > 2;},
+  function() {return isObject(pCC.children[0]);},
+  function() {return isObject(pCC.children[0].rows);},
+  function() {return pCC.children[0].rows.length > 2;},
   function() {
-    return pCC.firstElementChild.rows[1].textContent.indexOf(
+    return pCC.children[0].rows[1].textContent.indexOf(
       'Last Updated') === 0;
   }
 ];

@@ -25,7 +25,7 @@ function backpackRemove(theBackpack, invId) { // jQuery.min
 function fastAction(theBackpack, evt, action, result) { // jQuery.min
   sendEvent('profile', 'fastAction - ' + result);
   var self = evt.target;
-  var invId = self.parentNode.parentNode.firstElementChild.dataset.inv;
+  var invId = self.parentNode.parentNode.children[0].dataset.inv;
   self.textContent = '';
   self.className = 'fastAction fshSpinner fshSpinner12';
   action(invId).done(function(data) {

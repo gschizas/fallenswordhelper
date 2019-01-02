@@ -1,10 +1,11 @@
+import getElementsByTagName from '../../common/getElementsByTagName';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import {pCC} from '../../support/layout';
 
 export default function injectMoveItems() {
-  var flrRow = pCC.getElementsByTagName('form')[0]
+  var flrRow = getElementsByTagName('form', pCC)[0]
     .nextElementSibling.nextElementSibling.nextElementSibling;
-  var folders = flrRow.getElementsByTagName('img');
+  var folders = getElementsByTagName('img', flrRow);
   var flrEnabled;
   var oFlr;
   var options = '<tr><td class="fshCenter">Move selected items to: ' +

@@ -3,7 +3,7 @@ import toggleForce from '../../common/toggleForce';
 export default function hideFolders(itemsAry, invItems, self) {
   var folderId = Number(self.dataset.folder);
   itemsAry.forEach(function(o) {
-    o.el.parentNode.parentNode.previousElementSibling.firstElementChild
+    o.el.parentNode.parentNode.previousElementSibling.children[0]
       .checked = false;
     var tr = o.injectHere.parentNode;
     var separator = tr.nextElementSibling;

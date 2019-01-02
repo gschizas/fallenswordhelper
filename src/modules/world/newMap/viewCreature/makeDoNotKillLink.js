@@ -1,5 +1,6 @@
 import afterUpdateActionList from '../doNotKill/afterUpdateActionList';
 import calf from '../../../support/calf';
+import getElementsByClassName from '../../../common/getElementsByClassName';
 import insertElement from '../../../common/insertElement';
 import on from '../../../common/on';
 import setValue from '../../../system/setValue';
@@ -11,7 +12,7 @@ var doNotKillBtn;
 
 function getCreatureBody(dialogViewCreature) {
   if (!creatureBody) {
-    var bodyCollection = dialogViewCreature.getElementsByClassName('body');
+    var bodyCollection = getElementsByClassName('body', dialogViewCreature);
     if (bodyCollection.length === 1) {
       creatureBody = bodyCollection[0];
     }

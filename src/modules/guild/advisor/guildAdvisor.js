@@ -1,5 +1,7 @@
 import calf from '../../support/calf';
 import {createTFoot} from '../../common/cElement';
+import getElementsByClassName from '../../common/getElementsByClassName';
+import getElementsByTagName from '../../common/getElementsByTagName';
 import getMembrList from '../../ajax/getMembrList';
 import injectAdvisorWeekly from './injectAdvisorWeekly';
 import insertElement from '../../common/insertElement';
@@ -7,7 +9,6 @@ import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
-// import {createButton, createSpan, createTFoot} from '../../common/cElement';
 import {injectTable, playerLevel, playerName, playerRank} from './helpers';
 import {time, timeEnd} from '../../support/debug';
 
@@ -41,20 +42,11 @@ function getData(list, membrList) {
     .map(partial(bodyText, membrList));
 }
 
-// function summaryLink(newDiv) {
 function summaryLink() {
-  var updateInput = pCC.getElementsByClassName('custombutton');
+  var updateInput = getElementsByClassName('custombutton', pCC);
   if (updateInput.length === 0) {return;}
   insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
-  // var btnSpan = createSpan({textContent: ' '});
-  // var theBtn = createButton({
-  //   className: 'fshBl fshBlm',
-  //   textContent: '7-Day Summary'
-  // });
-  // theBtn.addEventListener('click', partial(injectAdvisorWeekly, newDiv));
-  // insertElement(btnSpan, theBtn);
-  // insertElement(updateInput[0].parentNode, btnSpan);
 }
 
 function injectAdvisorDaily(list, membrList) {
@@ -65,8 +57,6 @@ function injectAdvisorDaily(list, membrList) {
   var tfoot = getTfoot(list);
   injectTable(list, tfoot, data);
   summaryLink();
-  // var newDiv = injectTable(list, tfoot, data);
-  // summaryLink(newDiv);
 
   timeEnd('guildAdvisor.injectAdvisorDaily');
 
@@ -84,7 +74,7 @@ function switcher(list) {
 
 export default function injectAdvisor() {
   if (jQueryNotPresent()) {return;}
-  var list = pCC.getElementsByTagName('TABLE')[1];
+  var list = getElementsByTagName('table', pCC)[1];
   if (!list) {return;}
   switcher(list);
 }

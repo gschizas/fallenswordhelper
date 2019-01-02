@@ -86,22 +86,32 @@ export function initTable(theMembers) {
   }
 }
 
-export function makeTg() {
-  var tg = createTable({id: 'tg'});
-  var hrow = tg.createTHead().insertRow(-1);
-  insertHtmlBeforeEnd(hrow, '<th>Date</th>');
-
+function makeMemberHeader() {
   var memberHead = createTh({textContent: 'Member'});
   memberSelect = createDiv();
   insertElement(memberHead, memberSelect);
-  insertElement(hrow, memberHead);
+  return memberHead;
+}
 
+function headerRow(tg) {
+  var hrow = tg.createTHead().insertRow(-1);
+  insertHtmlBeforeEnd(hrow, '<th>Date</th>');
+  var memberHead = makeMemberHeader();
+  insertElement(hrow, memberHead);
   insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
     '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
     '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
+}
 
+function makeActBody(tg) {
   actBody = createTBody();
   insertElement(tg, actBody);
+}
+
+export function makeTg() {
+  var tg = createTable({id: 'tg'});
+  headerRow(tg);
+  makeActBody(tg);
   on(tg, 'change', myChange);
   tgCont = createDiv({className: 'tgCont fshSpinner64'});
   insertElement(tgCont, tg);

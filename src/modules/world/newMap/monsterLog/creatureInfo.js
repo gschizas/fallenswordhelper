@@ -1,5 +1,6 @@
 import calf from '../../../support/calf';
 import {getElementById} from '../../../common/getElement';
+import getElementsByClassName from '../../../common/getElementsByClassName';
 import getValue from '../../../system/getValue';
 import intValue from '../../../system/intValue';
 import setValue from '../../../system/setValue';
@@ -27,7 +28,7 @@ export function toggleShowCreatureInfo() {
 }
 
 function getStatText(statTooltip, statClassName) {
-  return statTooltip.getElementsByClassName(statClassName)[0]
+  return getElementsByClassName(statClassName, statTooltip)[0]
     .nextElementSibling.textContent;
 }
 
@@ -150,8 +151,8 @@ function doCreatureInfo(data) {
     if (bailOut[i](data, actions)) {return;}
   }
   // monster = 0;
-  doMouseOver(data.response.data, actions[data.passback].firstElementChild
-    .firstElementChild.firstElementChild);
+  doMouseOver(data.response.data, actions[data.passback].children[0]
+    .children[0].children[0]);
 }
 
 export function processMouseOver(data) {

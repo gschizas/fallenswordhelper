@@ -49,6 +49,14 @@ function dontHighlight() {
     !highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl;
 }
 
+function doHighlights() {
+  calculateBoundaries();
+  var memList = document.querySelectorAll(
+    '#pCC a[data-tipped*="<td>VL:</td>"]');
+  // Array.prototype.forEach.call(memList, highlightMembers);
+  Array.from(memList).forEach(highlightMembers);
+}
+
 export default function injectViewGuild() {
   add(3, colouredDots);
   removeGuildAvyImgBorder();
@@ -56,8 +64,5 @@ export default function injectViewGuild() {
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
   if (dontHighlight()) {return;}
-  calculateBoundaries();
-  var memList = document.querySelectorAll(
-    '#pCC a[data-tipped*="<td>VL:</td>"]');
-  Array.prototype.forEach.call(memList, highlightMembers);
+  doHighlights();
 }

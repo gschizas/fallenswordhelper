@@ -2,6 +2,7 @@ import calf from '../support/calf';
 import createDocument from '../system/createDocument';
 import {doSendGold} from '../world/newMap/sendGold';
 import {getElementById} from '../common/getElement';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertQuickWear from '../notepad/quickWear/quickWear';
 import jQueryDialog from './jQueryDialog';
@@ -26,7 +27,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
     '#profileCombatSetDiv select[name="combatSetId"]');
 
   // find the combat set id value
-  var allItems = cbsSelect.getElementsByTagName('option');
+  var allItems = getElementsByTagName('option', cbsSelect);
   if (itemIndex >= allItems.length) {return;}
   var cbsIndex = allItems[itemIndex].value;
 
