@@ -1,4 +1,5 @@
 import {createTextArea} from '../common/cElement';
+import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
@@ -21,9 +22,8 @@ function giveFormId() {
 }
 
 function giveInputsId() {
-  var inputList = getElementsByTagName('input', pCC);
-  var filteredList = Array.prototype.slice.call(inputList, 0, 7);
-  filteredList.forEach(function(el) {setDoChat(el);});
+  var filteredList = getArrayByTagName('input', pCC).slice(0, 7);
+  filteredList.forEach(setDoChat);
   return filteredList[5];
 }
 

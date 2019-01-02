@@ -1,5 +1,6 @@
 import getValue from '../system/getValue';
 import hideElement from '../common/hideElement';
+import querySelectorArray from '../common/querySelectorArray';
 import {newGuildLogLoc, newGuildLogUrl} from '../support/constants';
 
 function testForGuildLogMsg(guildLogNode) {
@@ -17,7 +18,7 @@ function hideGuildLogMsg(guildLogNode) {
 }
 
 function gotGuildLogNodes(guildLogNodes) {
-  Array.from(guildLogNodes).forEach(function(el) {
+  guildLogNodes.forEach(function(el) {
     el.href = newGuildLogUrl;
   });
   hideGuildLogMsg(guildLogNodes[guildLogNodes.length - 1]);
@@ -25,7 +26,7 @@ function gotGuildLogNodes(guildLogNodes) {
 
 export default function changeGuildLogHREF() {
   if (!getValue('useNewGuildLog')) {return;}
-  var guildLogNodes = document.querySelectorAll(
+  var guildLogNodes = querySelectorArray(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
   if (guildLogNodes.length > 0) {gotGuildLogNodes(guildLogNodes);}
 }

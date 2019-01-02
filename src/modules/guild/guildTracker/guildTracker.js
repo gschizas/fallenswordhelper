@@ -78,7 +78,7 @@ function makeInnerPopup() {
     name: 'acttabs',
     type: 'radio'
   });
-  once(acttab2, 'change', updateRawData);
+  once([acttab2, 'change', updateRawData]);
   insertElement(dialogPopup, acttab2);
   return dialogPopup;
 }
@@ -166,7 +166,7 @@ function injectTracker() {
     className: 'fsh-dialog-open',
     type: 'checkbox'
   });
-  once(tracker, 'change', openDialog);
+  once([tracker, 'change', openDialog]);
   trDialog = createDiv({className: 'fsh-dialog'});
   insertElement(trDialog, tracker);
   on(document.body, 'keydown', keydownHandler);

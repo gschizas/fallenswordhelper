@@ -3,6 +3,7 @@ import getGroupStats from '../../ajax/getGroupStats';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import partial from '../../common/partial';
+import querySelectorArray from '../../common/querySelectorArray';
 
 function parseGroupData(linkElement, obj) {
   var extraText = '<table class="fshgrpstat">' +
@@ -26,12 +27,13 @@ function parseGroupData(linkElement, obj) {
   insertHtmlBeforeEnd(expiresLocation, extraText);
 }
 
+function thisLink(aLink) {
+  getGroupStats(aLink.href).done(partial(parseGroupData, aLink));
+}
+
 function fetchGroupData(evt) {
   evt.target.disabled = true;
-  var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
-  Array.prototype.forEach.call(allItems, function(aLink) {
-    getGroupStats(aLink.href).done(partial(parseGroupData, aLink));
-  });
+  querySelectorArray('#pCC a[href*="=viewstats&"]').forEach(thisLink);
 }
 
 export default function fetchGroupStatsButton(buttonRow) {

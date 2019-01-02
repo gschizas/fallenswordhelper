@@ -1,5 +1,5 @@
+import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
-import getElementsByTagName from '../../common/getElementsByTagName';
 import getValue from '../../system/getValue';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 
@@ -21,6 +21,5 @@ function findNewGroup(el) {
 }
 
 export default function injectJoinAllLink() {
-  var nodeList = getElementsByTagName('li', getElementById('pCL'));
-  Array.prototype.forEach.call(nodeList, findNewGroup);
+  getArrayByTagName('li', getElementById('pCL')).forEach(findNewGroup);
 }

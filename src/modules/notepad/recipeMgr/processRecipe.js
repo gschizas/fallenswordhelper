@@ -1,6 +1,6 @@
 import createDocument from '../../system/createDocument';
+import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
-import getElementsByTagName from '../../common/getElementsByTagName';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 
@@ -8,8 +8,7 @@ var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
 
 function getTblCells(doc) {
-  var tblCells = getElementsByTagName('td', getElementById('pCC', doc));
-  return Array.from(tblCells);
+  return getArrayByTagName('td', getElementById('pCC', doc));
 }
 
 function background(bgGif, el) {

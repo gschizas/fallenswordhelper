@@ -4,6 +4,7 @@ import getRandomInt from '../system/getRandomInt';
 import {imageServer} from '../system/system';
 import partial from '../common/partial';
 import {publish} from '../support/pubsub';
+import querySelectorAll from '../common/querySelectorAll';
 import setValue from '../system/setValue';
 
 function randomBackgroundImage() {
@@ -21,7 +22,7 @@ function updateInfoDiv(infoDiv, potName) {
 }
 
 function amILast() {
-  var openTemplates = document.querySelectorAll(
+  var openTemplates = querySelectorAll(
     '[id|="composing-template"]:not(#composing-template-multi)');
   if (openTemplates.length === 0) {
     setValue(def_needToCompose, false);

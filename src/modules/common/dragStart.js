@@ -81,7 +81,7 @@ function dragStart(parent, event) {
   timer = 0;
   event.dataTransfer.setData('text/plain', '');
   on(document.body, 'dragover', dragOver, false);
-  once(document.body, 'drop', dragDrop, false);
+  once([document.body, 'drop', dragDrop, false]);
 }
 
 export default function draggable(element, parent) {

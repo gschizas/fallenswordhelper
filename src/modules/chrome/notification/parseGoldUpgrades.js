@@ -1,13 +1,14 @@
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import displayUpgradeMsg from './displayUpgradeMsg';
+import querySelectorAll from '../../common/querySelectorAll';
 import setValue from '../../system/setValue';
 
 function findDoc(data) {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
     return createDocument(data);
   }
-  var boxes = document.querySelectorAll('#pCC input[name="quantity"]');
+  var boxes = querySelectorAll('#pCC input[name="quantity"]');
   boxes[0].value = '100';
   boxes[1].value = '10';
   return document;
@@ -28,7 +29,7 @@ function checkUpgrade(limit) {
 export default function parseGoldUpgrades(data) {
   if (!calf.enableUpgradeAlert) {return;}
   var doc = findDoc(data);
-  var tables = doc.querySelectorAll('#pCC > table');
+  var tables = querySelectorAll('#pCC > table', doc);
   if (tables.length > 0) {
     var limit = tables[tables.length - 1].rows[3].cells[2];
     checkUpgrade(limit);

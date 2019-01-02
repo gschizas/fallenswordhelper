@@ -1,5 +1,5 @@
+import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
-import getElementsByTagName from '../common/getElementsByTagName';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import isFunction from '../common/isFunction';
@@ -145,7 +145,7 @@ function makeQtDiv(itemList) {
 
 function toggleQuickTake(items, injector) {
   makeQtLabel('qtOn', 'Mailbox', injector);
-  var itemList = Array.prototype.reduce.call(items, reduceItems, {});
+  var itemList = items.reduce(reduceItems, {});
   makeQtDiv(itemList);
 }
 
@@ -155,13 +155,13 @@ function makeQtCheckbox(items, injector) {
     type: 'checkbox'
   });
   insertElementBefore(qtCheckbox, injector);
-  once(qtCheckbox, 'change',
-    partial(toggleQuickTake, items, injector));
+  once([qtCheckbox, 'change',
+    partial(toggleQuickTake, items, injector)]);
 }
 
 export default function injectMailbox() {
   if (jQueryNotPresent()) {return;}
-  var items = getElementsByTagName('a', pCC);
+  var items = getArrayByTagName('a', pCC);
   if (items.length === 0) {return;} // Empty mailbox
   var injector = pCC.lastElementChild;
   makeQtCheckbox(items, injector);

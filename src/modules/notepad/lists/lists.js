@@ -86,8 +86,11 @@ function generateManageTable() { // Legacy
     '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
     'class="custombutton"></td></tr>' +
     '</tbody></table>';
-  getElementById(param.id).innerHTML = result;
-  setValueJSON(param.gmname, param.currentItems);
+  var target = getElementById(param.id);
+  if (target) {
+    getElementById(param.id).innerHTML = result;
+    setValueJSON(param.gmname, param.currentItems);
+  }
 }
 
 function deleteQuickItem(self) { // Legacy

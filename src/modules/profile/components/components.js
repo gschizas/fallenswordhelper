@@ -4,8 +4,8 @@ import {createDiv} from '../../common/cElement';
 import decorateButton from './decorateButton';
 import delCompType from './delCompType';
 import delComponent from './delComponent';
-import getElementsByClassName from '../../common/getElementsByClassName';
-import getElementsByTagName from '../../common/getElementsByTagName';
+import getArrayByClassName from '../../common/getArrayByClassName';
+import getArrayByTagName from '../../common/getArrayByTagName';
 import getInvTable from './getInvTable';
 import hideElement from '../../common/hideElement';
 import insertElement from '../../common/insertElement';
@@ -40,15 +40,13 @@ function enableDelComponent(self) {
   hideElement(quickDelDiv);
   var cmDiv = quickDelDiv.parentNode;
   insertElement(cmDiv, decorateButton('Delete All Visible'));
-  var nodeList = getElementsByTagName('img', getInvTable());
-  Array.from(nodeList).forEach(addDelBtn);
+  getArrayByTagName('img', getInvTable()).forEach(addDelBtn);
 }
 
 function delAllComponent(self) {
   sendEvent('components', 'delAllComponent');
   var thisInvTable = self.parentNode.parentNode.parentNode.children[0];
-  var nodeList = getElementsByClassName('compDelBtn', thisInvTable);
-  Array.from(nodeList).forEach(function(el) {
+  getArrayByClassName('compDelBtn', thisInvTable).forEach(function(el) {
     el.click();
   });
 }

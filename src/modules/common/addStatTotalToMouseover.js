@@ -1,6 +1,6 @@
 import {closestTable} from './closest';
 import {createDiv} from './cElement';
-import getElementsByTagName from './getElementsByTagName';
+import getArrayByTagName from './getArrayByTagName';
 import insertHtmlBeforeBegin from './insertHtmlBeforeBegin';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
 
@@ -36,8 +36,7 @@ function getLastIndex(obj, tbl) {
 
 function addStats(el) {
   var statTable = closestTable(el);
-  var statObj = Array.prototype.reduce.call(statTable.rows,
-    reduceStatTable, {});
+  var statObj = Array.from(statTable.rows).reduce(reduceStatTable, {});
   var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
     getVal('Armor', statObj) + getVal('Damage', statObj) +
     getVal('HP', statObj);
@@ -46,14 +45,14 @@ function addStats(el) {
     totalStats + '&nbsp;</td></tr>');
 }
 
+function bonuses(el) {
+  return el.textContent === 'Bonuses';
+}
+
 function fshDataFilter(data) {
   var container = createDiv();
   insertHtmlBeforeEnd(container, data);
-  var bonus = getElementsByTagName('font', container);
-  bonus = Array.prototype.filter.call(bonus, function(el) {
-    return el.textContent === 'Bonuses';
-  });
-  bonus.forEach(addStats);
+  getArrayByTagName('font', container).filter(bonuses).forEach(addStats);
   return container.innerHTML;
 }
 

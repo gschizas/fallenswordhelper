@@ -1,3 +1,4 @@
+import clickThis from '../common/clickThis';
 import {createInput} from '../common/cElement';
 import {def_table} from '../support/constants';
 import {getElementById} from '../common/getElement';
@@ -9,6 +10,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
+import querySelectorArray from '../common/querySelectorArray';
 import takeitem from '../app/guild/inventory/takeitem';
 
 function doItemTable(rows) {
@@ -19,10 +21,7 @@ function doItemTable(rows) {
 }
 
 function doCheckAll() {
-  var boxes = document.querySelectorAll('#pCC input[name="tagIndex[]"]');
-  Array.prototype.forEach.call(boxes, function(el) {
-    el.click();
-  });
+  querySelectorArray('#pCC input[name="tagIndex[]"]').forEach(clickThis);
 }
 
 function takeResult(self, data) {

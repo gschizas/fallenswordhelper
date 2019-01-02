@@ -6,6 +6,7 @@ import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import on from '../common/on';
 import partial from '../common/partial';
+import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
 import useItem from '../ajax/useItem';
 
@@ -73,11 +74,10 @@ function drawButtons(self, theSpan) {
 }
 
 function fastWearLinks(self) {
-  var items = document.querySelectorAll(
+  var items = querySelectorArray(
     '#backpackTab_' + self.type.toString() +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
-  if (items.length === 0) {return;}
-  Array.from(items).forEach(partial(drawButtons, self));
+  items.forEach(partial(drawButtons, self));
 }
 
 function foundBackpack(backpackContainer, theBackpack) {

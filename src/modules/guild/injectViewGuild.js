@@ -4,6 +4,7 @@ import currentGuildId from '../common/currentGuildId';
 import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
 import {lastActivityRE} from '../support/constants';
+import querySelectorArray from '../common/querySelectorArray';
 import {
   calculateBoundaries,
   gvgLowerLevel,
@@ -51,10 +52,8 @@ function dontHighlight() {
 
 function doHighlights() {
   calculateBoundaries();
-  var memList = document.querySelectorAll(
-    '#pCC a[data-tipped*="<td>VL:</td>"]');
-  // Array.prototype.forEach.call(memList, highlightMembers);
-  Array.from(memList).forEach(highlightMembers);
+  querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
+    .forEach(highlightMembers);
 }
 
 export default function injectViewGuild() {

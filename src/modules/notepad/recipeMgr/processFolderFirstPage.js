@@ -1,7 +1,7 @@
 import createDocument from '../../system/createDocument';
+import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
-import getElementsByTagName from '../../common/getElementsByTagName';
 import getFolderImgs from './getFolderImgs';
 import partial from '../../common/partial';
 import processFolderAnyPage from './processFolderAnyPage';
@@ -20,10 +20,9 @@ function notThisPage(el, i) {return i !== 0;}
 function pageNumber(el) {return el.value;}
 
 function otherPages(doc) {
-  var innerPcc = getElementById('pCC', doc);
-  var select = getElementsByClassName('customselect', innerPcc)[0];
-  var options = getElementsByTagName('option', select);
-  return Array.from(options).filter(notThisPage).map(pageNumber);
+  return getArrayByTagName('option',
+    getElementsByClassName('customselect', getElementById('pCC', doc))[0])
+    .filter(notThisPage).map(pageNumber);
 }
 
 function getPage(thisFolder, bindFolderAnyPage, i) {

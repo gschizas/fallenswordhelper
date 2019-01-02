@@ -1,7 +1,7 @@
 import createDocument from '../../system/createDocument';
+import getArrayByTagName from '../../common/getArrayByTagName';
 import getCustomUrlParameter from '../../system/getCustomUrlParameter';
 import {getElementById} from '../../common/getElement';
-import getElementsByTagName from '../../common/getElementsByTagName';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 import processRecipe from './processRecipe';
@@ -10,8 +10,7 @@ import retryAjax from '../../ajax/retryAjax';
 function recipeAry(doc) {
   var innerPcc = getElementById('pCC', doc);
   var scope = innerPcc.children[0].rows[6].cells[0].children[0];
-  var tagList = getElementsByTagName('a', scope);
-  return Array.from(tagList);
+  return getArrayByTagName('a', scope);
 }
 
 function makeRecipe(el) {

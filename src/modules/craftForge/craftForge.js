@@ -1,5 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
+import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
 import hideElement from '../common/hideElement';
@@ -120,14 +121,15 @@ function inventory(data) {
   }
 }
 
+function imgItemId(img) {
+  var tipped = img.dataset.tipped;
+  var matches = tipped.match(itemRE);
+  return [img, matches[2]];
+}
+
 function getItems() {
   itemTable = whichTableHasItems();
-  var imgList = getElementsByTagName('img', itemTable);
-  itemsAry = Array.prototype.map.call(imgList, function(img) {
-    var tipped = img.dataset.tipped;
-    var matches = tipped.match(itemRE);
-    return [img, matches[2]];
-  });
+  itemsAry = getArrayByTagName('img', itemTable).map(imgItemId);
 }
 
 export default function craftForge() {

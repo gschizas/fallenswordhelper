@@ -4,6 +4,7 @@ import getElementsByTagName from '../common/getElementsByTagName';
 import getProfile from '../ajax/getProfile';
 import insertElementAfter from '../common/insertElementAfter';
 import partial from '../common/partial';
+import querySelectorArray from '../common/querySelectorArray';
 
 function addStatsQuickBuff(data) {
   var myPlayer = document.querySelector('div.player[data-username="' +
@@ -73,6 +74,6 @@ export default function addBuffLevels(evt) {
   if (player.tagName !== 'H1') {return;}
   getProfile(player.textContent).done(addStatsQuickBuff);
   var playerData = makeBuffArray(player);
-  var nodeList = document.querySelectorAll('#buff-outer input[name]');
-  Array.from(nodeList).forEach(partial(hazBuff, playerData));
+  querySelectorArray('#buff-outer input[name]')
+    .forEach(partial(hazBuff, playerData));
 }

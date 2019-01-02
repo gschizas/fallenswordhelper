@@ -1,4 +1,5 @@
 import {def_table} from '../support/constants';
+import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 
@@ -11,6 +12,5 @@ function removeStatTable(el) {
 export default function updateStatistics() {
   var charStats = getElementsByTagName(def_table,
     getElementById('profileLeftColumn'))[0];
-  var dodgyTables = getElementsByTagName(def_table, charStats);
-  Array.prototype.forEach.call(dodgyTables, removeStatTable);
+  getArrayByTagName(def_table, charStats).forEach(removeStatTable);
 }

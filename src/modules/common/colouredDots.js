@@ -2,8 +2,7 @@ import batch from './batch';
 import getValue from '../system/getValue';
 import {lastActivityRE} from '../support/constants';
 import onlineDot from './onlineDot';
-
-var dotList;
+import querySelectorAll from './querySelectorAll';
 
 function changeOnlineDot(contactLink) {
   var lastActivity = lastActivityRE
@@ -18,7 +17,6 @@ function changeOnlineDot(contactLink) {
 
 export default function colouredDots() {
   if (!getValue('enhanceOnlineDots')) {return;}
-  dotList = document.querySelectorAll(
-    '#pCC a[data-tipped*="Last Activity"]');
-  batch(3, dotList, 0, changeOnlineDot);
+  batch(3, querySelectorAll('#pCC a[data-tipped*="Last Activity"]'), 0,
+    changeOnlineDot);
 }

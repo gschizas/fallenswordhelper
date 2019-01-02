@@ -85,8 +85,8 @@ export function initMapping(potOpts, panels) {
   if (potOpts.pottab2) {
     drawMapping(potOpts);
   } else {
-    once(panels.parentNode.children[2], 'change',
-      partial(drawMapping, potOpts));
+    once([panels.parentNode.children[2], 'change',
+      partial(drawMapping, potOpts)]);
   }
   insertElement(panels, mapping);
 }

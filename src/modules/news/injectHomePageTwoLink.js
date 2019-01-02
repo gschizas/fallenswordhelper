@@ -1,5 +1,5 @@
 import {createAnchor} from '../common/cElement';
-import getElementsByClassName from '../common/getElementsByClassName';
+import getArrayByClassName from '../common/getArrayByClassName';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
@@ -7,6 +7,7 @@ import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import querySelectorArray from '../common/querySelectorArray';
 import setValue from '../system/setValue';
 
 function pvpLadder(head) {return head.children[1].textContent === 'PvP Ladder';}
@@ -16,26 +17,28 @@ function timestamp(head) {
 }
 
 function lookForPvPLadder() {
-  var rumours = getElementsByClassName('news_head_tavern', pCC);
-  var pvpTimes = Array.from(rumours).filter(pvpLadder).map(timestamp);
+  var rumours = getArrayByClassName('news_head_tavern', pCC);
+  var pvpTimes = rumours.filter(pvpLadder).map(timestamp);
   var logTime = Math.max.apply(null, pvpTimes);
   if (logTime > getValue('lastLadderReset')) {
     setValue('lastLadderReset', logTime);
   }
 }
 
-function addUfsgLinks() {
-  var imgs = document.querySelectorAll(
-    '.news_body img[src^="https://cdn.fallensword.com/creatures/"]');
-  Array.prototype.forEach.call(imgs, function(img) {
-    var myName = encodeURIComponent(img.getAttribute('oldtitle'));
-    var myLink = createAnchor({
-      href: guideUrl + 'creatures&search_name=' + myName,
-      target: '_blank'
-    });
-    insertElementBefore(myLink, img);
-    insertElement(myLink, img);
+function makeUfsgLink(img) {
+  var myName = encodeURIComponent(img.getAttribute('oldtitle'));
+  var myLink = createAnchor({
+    href: guideUrl + 'creatures&search_name=' + myName,
+    target: '_blank'
   });
+  insertElementBefore(myLink, img);
+  insertElement(myLink, img);
+}
+
+function addUfsgLinks() {
+  querySelectorArray(
+    '.news_body img[src^="https://cdn.fallensword.com/creatures/"]')
+    .forEach(makeUfsgLink);
 }
 
 export default function injectHomePageTwoLink() { // Pref

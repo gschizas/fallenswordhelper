@@ -1,6 +1,7 @@
 import batch from '../../common/batch';
 import calf from '../../support/calf';
 import onlineDot from '../../common/onlineDot';
+import querySelectorAll from '../../common/querySelectorAll';
 
 function memberHeader(oldhtml) {
   return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
@@ -17,7 +18,7 @@ function updateMemberHeader(el) {
 }
 
 export default function reportHeader() {
-  var headers = document.querySelectorAll('#pCC table table ' +
+  var headers = querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
   batch(3, headers, 0, updateMemberHeader);
 }

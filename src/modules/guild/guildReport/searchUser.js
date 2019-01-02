@@ -1,5 +1,7 @@
 import batch from '../../common/batch';
 import getUrlParameter from '../../system/getUrlParameter';
+import querySelectorAll from '../../common/querySelectorAll';
+import querySelectorArray from '../../common/querySelectorArray';
 
 var findUser;
 var foundUser;
@@ -13,15 +15,17 @@ function hideOther(el) {
   }
 }
 
+function thisUser(el) {
+  return el.textContent === findUser;
+}
+
 export default function searchUser() {
   findUser = getUrlParameter('user');
   if (!findUser) {return;}
-  var userNodes = document.querySelectorAll(
+  var userNodes = querySelectorArray(
     '#pCC table table td[bgcolor="#DAA534"] b');
-  var userNode = Array.prototype.some.call(userNodes, function(el) {
-    return el.textContent === findUser;
-  });
+  var userNode = userNodes.some(thisUser);
   if (!userNode) {return;}
-  var nodeList = document.querySelectorAll('#pCC table table tr');
+  var nodeList = querySelectorAll('#pCC table table tr');
   batch(2, nodeList, 0, hideOther);
 }

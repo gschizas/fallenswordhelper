@@ -1,6 +1,6 @@
 import createDocument from '../../system/createDocument';
 import {def_statVl} from '../../support/constants';
-import fallback from '../../system/fallback';
+import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import intValue from '../../system/intValue';
@@ -52,20 +52,14 @@ function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
   return uniq(res);
 }
 
+function sustainEnhancement(el) {return el.textContent === 'Sustain';}
+
 function getSustain(doc) {
-  var aLinks = getElementsByTagName('a',
-    getElementById('profileLeftColumn', doc));
-  var sustainLevel;
-  Array.prototype.some.call(aLinks, function(el) {
-    if (el.textContent === 'Sustain') {
-      var sustainText = el.parentNode.parentNode.parentNode.nextElementSibling
-        .children[0].dataset.tipped;
-      sustainLevel = parseInt(sustainLevelRE.exec(sustainText)[1], 10);
-      return true;
-    }
-    return false;
-  });
-  return fallback(sustainLevel, -1);
+  var sustainLink = getArrayByTagName('a',
+    getElementById('profileLeftColumn', doc)).find(sustainEnhancement);
+  var sustainText = sustainLink.parentNode.parentNode.parentNode
+    .nextElementSibling.children[0].dataset.tipped;
+  return parseInt(sustainLevelRE.exec(sustainText)[1], 10) || -1;
 }
 
 function getInnerPlayerName(doc) {

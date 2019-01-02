@@ -1,4 +1,4 @@
-import getElementsByTagName from '../common/getElementsByTagName';
+import getArrayByTagName from '../common/getArrayByTagName';
 import getValue from '../system/getValue';
 import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
@@ -71,13 +71,12 @@ function processGuildWidgetRow(aRow) { // Legacy
   guildInvite(aRow);
 }
 
+function msgHeader(el) {
+  return el.textContent === 'Message';
+}
+
 function getMessageHeader() {
-  var nodeList = getElementsByTagName('td', pCC);
-  for (var i = 0; i < nodeList.length; i += 1) {
-    if (nodeList[i].textContent === 'Message') {
-      return nodeList[i];
-    }
-  }
+  return getArrayByTagName('td', pCC).find(msgHeader);
 }
 
 function guildLogWidgetsEnabled() { // Legacy

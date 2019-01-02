@@ -4,9 +4,9 @@ import createDocument from '../../system/createDocument';
 import {createTable} from '../../common/cElement';
 import eventHandler5 from '../../common/eventHandler5';
 import functionPasses from '../../common/functionPasses';
+import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
-import getElementsByTagName from '../../common/getElementsByTagName';
 import getForage from '../../ajax/getForage';
 import getGuildLogPage from './getGuildLogPage';
 import getValue from '../../system/getValue';
@@ -154,13 +154,12 @@ function buildTable() {
   addGuildLogWidgets();
 }
 
+function doChecked(el) {
+  el.checked = options.checks[el.getAttribute('item')];
+}
+
 function setChecks() {
-  Array.prototype.forEach.call(
-    getElementsByTagName('input', fshNewGuildLog),
-    function(el) {
-      el.checked = options.checks[el.getAttribute('item')];
-    }
-  );
+  getArrayByTagName('input', fshNewGuildLog).forEach(doChecked);
   storeOptions();
 }
 

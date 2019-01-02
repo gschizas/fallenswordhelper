@@ -1,3 +1,4 @@
+import getArrayByClassName from '../../common/getArrayByClassName';
 import {getElementById} from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getValue from '../../system/getValue';
@@ -26,8 +27,7 @@ function hideActions(el) {
 function doHidePlayerActions() {
   if (!hidePlayerActions) {return;}
   var act = getElementById('actionList');
-  var players = getElementsByClassName('player', act);
-  Array.from(players).forEach(hideActions);
+  getArrayByClassName('player', act).forEach(hideActions);
 }
 
 export function prepareHidePlayerActions() {
