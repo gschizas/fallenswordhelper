@@ -1,5 +1,5 @@
 import backgroundCreate from './backgroundCreate';
-import getElementsByClassName from '../common/getElementsByClassName';
+import getArrayByClassName from '../common/getArrayByClassName';
 import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
@@ -8,6 +8,8 @@ import on from '../common/on';
 import once from '../common/once';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
+import querySelectorAll from '../common/querySelectorAll';
+import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
 import {subscribe} from '../support/pubsub';
 import {createDiv, createInput, createTable} from '../common/cElement';
@@ -17,13 +19,13 @@ function doTableClass(myTable, slotsLeft) {
 }
 
 function quickcreate(myTable) {
-  var openTemplates = document.querySelectorAll('.quickCreate .sendLink');
+  var openTemplates = querySelectorAll('.quickCreate .sendLink');
   doTableClass(myTable, openTemplates.length);
 }
 
 function composePots(button, templateId) {
   sendEvent('composing', 'FastComposeButton');
-  var openTemplates = document.querySelectorAll(
+  var openTemplates = querySelectorAll(
     '[id|="composing-template"]:not(#composing-template-multi)');
   for (var i = 0; i < button.value; i += 1) {
     openTemplates[i].value = templateId;
@@ -67,11 +69,11 @@ function buildTable(templates, compSlots, openSlots) {
   return templates.reduce(partial(buildRows, compSlots, openSlots), myTable);
 }
 
+function keyValuePairs(el) {return [el.value, el.text];}
+
 function setupFastCompose(fcDiv, compSlots, openSlots) {
-  var templates = Array.from(
-    document.querySelectorAll('#composing-template-multi option'),
-    function(el) {return [el.value, el.text];}
-  );
+  var templates = querySelectorArray('#composing-template-multi option')
+    .map(keyValuePairs);
   var myTable = buildTable(templates, compSlots, openSlots);
   insertElement(fcDiv, myTable);
   on(pCC, 'click', handleClick);
@@ -83,9 +85,7 @@ function openSlot(e) {return e.textContent === 'ETA: n/a';}
 function drawList(fcDiv) {
   sendEvent('composing', 'FastCompose');
   insertHtmlBeforeEnd(fcDiv, '<br>');
-  var compSlots = Array.from(
-    getElementsByClassName('composing-potion-time', document)
-  );
+  var compSlots = getArrayByClassName('composing-potion-time', document);
   var openSlots = compSlots.filter(openSlot).length;
   if (openSlots > 0) {
     setupFastCompose(fcDiv, compSlots, openSlots);
@@ -103,5 +103,5 @@ export default function fastCompose() {
   insertElementAfter(fcDiv, buttonDiv);
   var fcCheck = createInput({id: 'fast-compose', type: 'checkbox'});
   insertElementAfter(fcCheck, buttonDiv);
-  once(fcCheck, 'change', partial(drawList, fcDiv));
+  once([fcCheck, 'change', partial(drawList, fcDiv)]);
 }

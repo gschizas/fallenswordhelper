@@ -1,5 +1,6 @@
 import {addRows} from './addRows';
 import padZ from '../../../system/padZ';
+import partial from '../../../common/partial';
 import {realmName} from './realm';
 import roundToString from '../../../common/roundToString';
 import {textSpan} from '../../../common/cElement';
@@ -60,16 +61,18 @@ function doTopLabels(ourTitan) {
   cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
 }
 
+function memberRow(ourTitan, member) {
+  return [[
+    [2, textSpan(member.player.name)],
+    [2, textSpan(member.kills.toString())],
+    [2, textSpan(roundToString(member.kills * 100 / ourTitan.kills, 2) + '%')]
+  ]];
+}
+
 function doMemberRows(ourTitan) {
   clearMemberRows();
   if (!ourTitan.contributors) {return;}
-  var memberRows = ourTitan.contributors.map(function(member) {
-    return [[
-      [2, textSpan(member.player.name)],
-      [2, textSpan(member.kills.toString())],
-      [2, textSpan(roundToString(member.kills * 100 / ourTitan.kills, 2) + '%')]
-    ]];
-  });
+  var memberRows = ourTitan.contributors.map(partial(memberRow, ourTitan));
   addRows(titanTbl, memberRows);
 }
 

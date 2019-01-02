@@ -1,6 +1,6 @@
 import {createSpan} from './common/cElement';
+import getArrayByClassName from './common/getArrayByClassName';
 import {getElementById} from './common/getElement';
-import getElementsByClassName from './common/getElementsByClassName';
 import getValue from './system/getValue';
 import {imageServer} from './system/system';
 import insertElementAfterBegin from './common/insertElementAfterBegin';
@@ -16,23 +16,21 @@ function doRefresh() {
   getElementById('refresh').click();
 }
 
+function doCancel(cancelButton) {
+  var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
+  cancelButton.outerHTML = '<img src="' + imageServer +
+    '/skin/loading.gif" width="14" height="14">';
+  return retryAjax({
+    url: 'index.php?no_mobile=1&cmd=auctionhouse&subcmd=cancel',
+    data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
+  });
+}
+
 function cancelAllAH() { // jQuery
-  var cancelButtons = getElementsByClassName('auctionCancel',
+  var cancelButtons = getArrayByClassName('auctionCancel',
     getElementById('resultRows'));
   if (cancelButtons.length === 0) {return;}
-  var prm = [];
-  for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
-    var cancelButton = cancelButtons[i];
-    var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
-    cancelButton.outerHTML = '<img src="' + imageServer +
-      '/skin/loading.gif" width="14" height="14">';
-    prm.push(
-      retryAjax({
-        url: 'index.php?no_mobile=1&cmd=auctionhouse&subcmd=cancel',
-        data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
-      })
-    );
-  }
+  var prm = cancelButtons.map(doCancel);
   when(prm, doRefresh);
 }
 

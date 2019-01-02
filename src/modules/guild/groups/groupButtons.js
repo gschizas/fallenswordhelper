@@ -5,6 +5,7 @@ import fetchGroupStatsButton from './fetchGroupStatsButton';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import on from '../../common/on';
+import querySelectorArray from '../../common/querySelectorArray';
 import retryAjax from '../../ajax/retryAjax';
 import {sendEvent} from '../../support/fshGa';
 
@@ -39,10 +40,7 @@ function doJoinUnderSize(joinButton) {
 
 function joinAllGroupsUnderSize() {
   sendEvent('groups', 'joinAllGroupsUnderSize');
-  var joinButtons = document
-    .querySelectorAll('#pCC a[href*="confirmJoin"]');
-  if (joinButtons.length === 0) {return;}
-  Array.prototype.forEach.call(joinButtons, doJoinUnderSize);
+  querySelectorArray('#pCC a[href*="confirmJoin"]').forEach(doJoinUnderSize);
 }
 
 function joinUnderButton(buttonRow) {

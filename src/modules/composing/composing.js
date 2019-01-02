@@ -9,6 +9,7 @@ import jQueryPresent from '../common/jQueryPresent';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import parseComposing from './parseComposing';
+import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
 
 function moveButtons() {
@@ -48,9 +49,8 @@ function quickCreate(evt) {
 
 function hasJQuery() {
   parseComposing();
-  var buttons = pCC
-    .querySelectorAll('input[id^=create-]:not(#create-multi)');
-  Array.from(buttons).forEach(injectButton);
+  querySelectorArray('input[id^=create-]:not(#create-multi)', pCC)
+    .forEach(injectButton);
   on(pCC, 'click', quickCreate);
   moveButtons();
   fastCompose();

@@ -10,7 +10,17 @@ import {
   statusText,
   totalPct
 } from './placeholders';
-import {createSpan, createTable, textSpan} from '../../../common/cElement';
+import {createSpan, createTable} from '../../../common/cElement';
+import {
+  current,
+  kills,
+  member,
+  pctTotal,
+  status,
+  titanHp,
+  total,
+  yourGuild
+} from './assets';
 
 export var titanTbl;
 
@@ -38,13 +48,13 @@ function makePctWrapper(pct) {
 export function buildTitanInfoTable() {
   titanTbl = createTable({className: 'fshCenter'});
   addRows(titanTbl, [
-    [[[2, textSpan('Titan HP'), true], [4, textSpan('Your Guild'), true]]],
+    [[[2, titanHp, true], [4, yourGuild, true]]],
     [[[2, makeTitanHpWrapper()], [4, guildKills]]],
-    [[[2, textSpan('Current'), true], [4, makePctWrapper(currentPct)]], true],
-    [[[2, textSpan('Total'), true], [4, makePctWrapper(totalPct)]], true],
-    [[[2, textSpan('Status'), true], [4, statusText]], true],
+    [[[2, current, true], [4, makePctWrapper(currentPct)]], true],
+    [[[2, total, true], [4, makePctWrapper(totalPct)]], true],
+    [[[2, status, true], [4, statusText]], true],
     [[[6, cooldownText]]],
-    [[[2, textSpan('Member'), true], [2, textSpan('Kills'), true],
-      [2, textSpan('% of Total'), true]]]
+    [[[2, member, true], [2, kills, true],
+      [2, pctTotal, true]]]
   ]);
 }

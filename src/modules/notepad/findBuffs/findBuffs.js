@@ -11,6 +11,7 @@ import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
 import partial from '../../common/partial';
 import playerName from '../../common/playerName';
+import querySelectorArray from '../../common/querySelectorArray';
 import retryAjax from '../../ajax/retryAjax';
 import setValue from '../../system/setValue';
 import stringSort from '../../system/stringSort';
@@ -153,9 +154,8 @@ function parsePlayerLink(el) {
 
 function findBuffsParseProfilePage(responseText) {
   var doc = createDocument(responseText);
-  var profileAlliesEnemies =
-    doc.querySelectorAll('#profileLeftColumn a[data-tipped*="Last Activity"]');
-  Array.prototype.forEach.call(profileAlliesEnemies, parsePlayerLink);
+  querySelectorArray('#profileLeftColumn a[data-tipped*="Last Activity"]', doc)
+    .forEach(parsePlayerLink);
   // continue with online players
   profilePagesToSearchProcessed += 1;
   if (profilePagesToSearchProcessed ===
@@ -187,8 +187,8 @@ function findBuffsParseProfilePageStart() { // Legacy
 function findBuffsParseGuildManagePage(responseText) {
   var doc = createDocument(responseText);
   if (getElementById('guildMembers').checked) {
-    var memList = doc.querySelectorAll('#pCC a[data-tipped*="<td>VL:</td>"]');
-    Array.prototype.forEach.call(memList, parsePlayerLink);
+    querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]', doc)
+      .forEach(parsePlayerLink);
   }
   // continue with profile pages
   findBuffsParseProfilePageStart();

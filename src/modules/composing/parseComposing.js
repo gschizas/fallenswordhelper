@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import getElementsByClassName from '../common/getElementsByClassName';
+import getArrayByClassName from '../common/getArrayByClassName';
 import setValue from '../system/setValue';
 import {
   def_lastComposeCheck,
@@ -25,8 +25,8 @@ function setNeed(bool) {
 
 export default function parseComposing() {
   if (!calf.enableComposingAlert) {return;}
-  var openSlots = getElementsByClassName('composing-potion-time', document);
-  var times = Array.from(openSlots).reduce(timeRemaining, []);
+  var openSlots = getArrayByClassName('composing-potion-time', document);
+  var times = openSlots.reduce(timeRemaining, []);
   var eta = Math.min.apply(null, times);
   if (eta === 0) {
     setNeed(true);

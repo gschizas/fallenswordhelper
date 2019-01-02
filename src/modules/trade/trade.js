@@ -9,6 +9,7 @@ import getValue from '../system/getValue';
 import insertElementBefore from '../common/insertElementBefore';
 import jsonParse from '../common/jsonParse';
 import on from '../common/on';
+import querySelectorArray from '../common/querySelectorArray';
 
 function getHowMany(itemTables) {
   var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
@@ -43,10 +44,10 @@ function doCheckAll(evt) {
   var itemid = evt.target.id;
   var itemList = getElementById('item-div') ||
     getElementById('item-list');
-  var itemTables = itemList.querySelectorAll('table:not(.fshHide)');
+  var itemTables = querySelectorArray('table:not(.fshHide)', itemList);
   var howMany = getHowMany(itemTables);
   var itemsInSt = findStCheck();
-  Array.prototype.forEach.call(itemTables, function(el) {
+  itemTables.forEach(function(el) { // TODO
     var checkbox = el.children[0].lastElementChild.children[0].children[0];
     if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
       checkbox.checked = true;

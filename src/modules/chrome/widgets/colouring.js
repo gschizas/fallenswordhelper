@@ -1,5 +1,5 @@
-import getElementsByClassName from '../../common/getElementsByClassName';
+import getArrayByClassName from '../../common/getArrayByClassName';
 
 export default function colouring(parent, colourFn) {
-  Array.from(getElementsByClassName('player-name', parent)).forEach(colourFn);
+  getArrayByClassName('player-name', parent).forEach(colourFn);
 }

@@ -1,6 +1,7 @@
 import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
+import querySelectorArray from '../common/querySelectorArray';
 import toggleForce from '../common/toggleForce';
 
 function doServerNode(topbannerStats, miniboxList) {
@@ -33,12 +34,13 @@ function validStatBoxes(topbannerStats, gameStats) {
   return topbannerStats && !hidden && gameStats;
 }
 
+function isGameStats(el) {
+  return el.textContent === 'Game Stats';
+}
+
 export default function injectServerNode() {
   var topbannerStats = getElementById('topbanner-stats');
-  var h3coll = document.querySelectorAll('#pCR h3');
-  var gameStats = Array.prototype.find.call(h3coll, function(el) {
-    return el.textContent === 'Game Stats';
-  });
+  var gameStats = querySelectorArray('#pCR h3').find(isGameStats);
   if (validStatBoxes(topbannerStats, gameStats)) {
     statBoxesExist(topbannerStats, gameStats);
   }

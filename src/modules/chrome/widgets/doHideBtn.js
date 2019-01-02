@@ -1,9 +1,6 @@
 import calf from '../../support/calf';
 import hideNodeList from './hideNodeList';
-
-function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
-  hideNodeList(parent.querySelectorAll(selector));
-}
+import querySelectorAll from '../../common/querySelectorAll';
 
 var hideBtn = [
   {
@@ -31,7 +28,7 @@ var hideBtn = [
 export default function doHideBtn(context, selector) {
   hideBtn.forEach(function(el) {
     if (el.condition()) {
-      hideQuerySelectorAll(context, el[selector]);
+      hideNodeList(querySelectorAll(el[selector], context));
     }
   });
 }

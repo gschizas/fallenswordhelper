@@ -6,6 +6,7 @@ import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
 import populateBuffs from './populateBuffs';
+import querySelectorArray from '../common/querySelectorArray';
 import quickActivate from './quickActivate';
 import {excludeBuff, quickBuffHeader} from './assets';
 
@@ -44,8 +45,7 @@ function eachLabel(el) {
 }
 
 function doLabels() {
-  var labels = document.querySelectorAll('#buff-outer label[for^="skill-"]');
-  Array.from(labels).forEach(eachLabel);
+  querySelectorArray('#buff-outer label[for^="skill-"]').forEach(eachLabel);
 }
 
 function getSustain(responseText) {

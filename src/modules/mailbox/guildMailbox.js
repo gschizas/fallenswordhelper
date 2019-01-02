@@ -1,6 +1,7 @@
+import clickThis from '../common/clickThis';
 import {closestTable} from '../common/closest';
 import dialog from '../ajax/dialog';
-import getElementsByTagName from '../common/getElementsByTagName';
+import getArrayByTagName from '../common/getArrayByTagName';
 import infoBox from '../common/infoBox';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -37,8 +38,7 @@ function guildMailboxEvent(e) { // jQuery.min
     guildMailboxTake(anchor).done(partial(takeResult, self));
   }
   if (self.className === 'sendLink') {
-    var nodeList = getElementsByTagName('img', pCC);
-    Array.prototype.forEach.call(nodeList, function(el) {el.click();});
+    getArrayByTagName('img', pCC).forEach(clickThis);
   }
 }
 

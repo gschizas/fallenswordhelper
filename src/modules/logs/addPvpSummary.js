@@ -7,6 +7,7 @@ import {nowSecs} from '../support/constants';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
 import playerId from '../common/playerId';
+import querySelectorAll from '../common/querySelectorAll';
 import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
@@ -68,7 +69,7 @@ function inSpecialsList(el) {
 }
 
 function whatsMissing(json, html) {
-  var specialHtml = createDocument(html).querySelectorAll('#specialsDiv');
+  var specialHtml = querySelectorAll('#specialsDiv', createDocument(html));
   json.r.specials.forEach(function(el, i) {
     if (!inSpecialsList(el)) {
       //#if _DEV  //  PvP missing Special

@@ -1,6 +1,7 @@
 import add from '../support/task';
 import {def_table} from '../support/constants';
 import fallback from '../system/fallback';
+import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
@@ -10,6 +11,7 @@ import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
+import partial from '../common/partial';
 import {createDiv, createTr} from '../common/cElement';
 import {time, timeEnd} from '../support/debug';
 
@@ -38,24 +40,24 @@ function shouldHide(hidden, all, hasFolder) {
   return !hidden && !all && !hasFolder;
 }
 
+function hideFolderItem(folderid, el) {
+  el.children[0].lastElementChild.children[0].children[0].checked = false;
+  var hidden = el.classList.contains('fshHide');
+  var all = folderid === 'folderid0';
+  var hasFolder = el.classList.contains(folderid);
+  if (shouldShow(hidden, all, hasFolder)) {
+    el.classList.remove('fshHide');
+    el.classList.add('fshBlock'); // show()
+  }
+  if (shouldHide(hidden, all, hasFolder)) {
+    el.classList.remove('fshBlock');
+    hideElement(el); // hide()
+  }
+}
+
 function doHideFolder(evt) {
-  var folderid = evt.target.id;
-  var itemDiv = getItemDiv();
-  var items = getElementsByTagName(def_table, itemDiv);
-  Array.prototype.forEach.call(items, function(el) {
-    el.children[0].lastElementChild.children[0].children[0].checked = false;
-    var hidden = el.classList.contains('fshHide');
-    var all = folderid === 'folderid0';
-    var hasFolder = el.classList.contains(folderid);
-    if (shouldShow(hidden, all, hasFolder)) {
-      el.classList.remove('fshHide');
-      el.classList.add('fshBlock'); // show()
-    }
-    if (shouldHide(hidden, all, hasFolder)) {
-      el.classList.remove('fshBlock');
-      hideElement(el); // hide()
-    }
-  });
+  var items = getArrayByTagName(def_table, getItemDiv());
+  items.forEach(partial(hideFolderItem, evt.target.id));
 }
 
 function hideFolder(evt) {
@@ -109,17 +111,19 @@ function processTrade(data) {
 
   invItems = data.items;
   /* Highlight items in ST */
-  var nodeList = getElementsByTagName(def_table, getElementById('item-list'));
-  Array.prototype.forEach.call(nodeList, forEachInvItem);
+  var nodeList = getArrayByTagName(def_table, getElementById('item-list'));
+  nodeList.forEach(forEachInvItem); // TODO unnecessary DOM manipulation
   doFolderHeaders(data.folders);
 
   timeEnd('trade.processTrade');
 
 }
 
+function gotInventory(data) {
+  add(3, processTrade, [data]);
+}
+
 export default function doFolders() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getInventoryById().done(function(data) {
-    add(3, processTrade, [data]);
-  });
+  getInventoryById().done(gotInventory);
 }

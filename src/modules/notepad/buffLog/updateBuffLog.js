@@ -4,6 +4,7 @@ import {fshBuffLog} from '../../support/constants';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
 import partial from '../../common/partial';
+import querySelectorArray from '../../common/querySelectorArray';
 import setForage from '../../ajax/setForage';
 
 function buff(thisBuff, el) {return el.name === thisBuff;}
@@ -48,8 +49,8 @@ function logFormat(timeStamp, el) {
 
 function buffResult(buffLog) {
   var timeStamp = formatLocalDateTime(new Date());
-  var buffsAttempted = Array.from(document.querySelectorAll(
-    '#quickbuff-report p:not(.back)')).map(partial(logFormat, timeStamp));
+  var buffsAttempted = querySelectorArray('#quickbuff-report p:not(.back)')
+    .map(partial(logFormat, timeStamp));
   setForage(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
 }
 

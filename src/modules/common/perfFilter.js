@@ -1,6 +1,6 @@
 import {createDiv} from './cElement';
+import getArrayByClassName from './getArrayByClassName';
 import {getElementById} from '../common/getElement';
-import getElementsByClassName from './getElementsByClassName';
 import getInventoryById from '../ajax/getInventoryById';
 import insertElement from './insertElement';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
@@ -11,14 +11,16 @@ import {pCC} from '../support/layout';
 var inv;
 var target;
 
+function clickOnPerf(e) {
+  var thisItem = e.id.replace(target + '-item-', '');
+  if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {e.click();}
+}
+
 function selectPerf() {
-  var items = getElementsByClassName('selectable-item',
+  var items = getArrayByClassName('selectable-item',
     getElementById(target + '-items'));
-  if (items.length === 0) {return;}
-  Array.prototype.forEach.call(items, function(e) {
-    var thisItem = e.id.replace(target + '-item-', '');
-    if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {e.click();}
-  });
+  if (items.length === 0) {return;} // ?
+  items.forEach(clickOnPerf);
 }
 
 function drawFilters(data) {

@@ -3,6 +3,7 @@ import contactColour from './contactColour';
 import doHideBtn from './doHideBtn';
 import doHideBuffSelected from './doHideBuffSelected';
 import {getElementById} from '../../common/getElement';
+import querySelectorArray from '../../common/querySelectorArray';
 
 function guildColour(el) {
   contactColour(el, {
@@ -12,15 +13,16 @@ function guildColour(el) {
   });
 }
 
+function isChatLink(el) {
+  return el.textContent === 'Chat';
+}
+
+function makeLink(el) {
+  el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">Chat</a>';
+}
+
 function updateChatLink() {
-  Array.prototype.forEach.call(
-    document.querySelectorAll('#pCR h4'),
-    function(el) {
-      if (el.textContent !== 'Chat') {return;}
-      el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">' +
-        el.textContent + '</a>';
-    }
-  );
+  querySelectorArray('#pCR h4').filter(isChatLink).forEach(makeLink);
 }
 
 export default function addGuildInfoWidgets() {

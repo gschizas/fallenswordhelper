@@ -1,4 +1,4 @@
-import getElementsByTagName from '../common/getElementsByTagName';
+import getArrayByTagName from '../common/getArrayByTagName';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
@@ -23,8 +23,8 @@ function checkForBuffs(myBuffs, el) {
 function postWarnings(myBuffs) {
   var packsRow = pCC.children[0].rows[9];
   if (!packsRow) {return;}
-  var nodeList = getElementsByTagName('a', packsRow.cells[0].children[0]);
-  Array.prototype.forEach.call(nodeList, partial(checkForBuffs, myBuffs));
+  getArrayByTagName('a', packsRow.cells[0].children[0])
+    .forEach(partial(checkForBuffs, myBuffs));
 }
 
 function parseProfile(data) {

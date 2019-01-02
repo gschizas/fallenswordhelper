@@ -7,6 +7,7 @@ import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import partial from '../../common/partial';
+import querySelectorArray from '../../common/querySelectorArray';
 import retryAjax from '../../ajax/retryAjax';
 
 var privLookup = {
@@ -22,33 +23,36 @@ var privLookup = {
   'Can View Advisor': 0.1
 };
 
+function eachWeight(checkbox) {
+  var privName = checkbox.nextElementSibling.textContent.trim();
+  return privLookup[privName] || 1;
+}
+
+function sum(prev, curr) {
+  return prev + curr;
+}
+
 function parseRankData(linkElement, responseText) {
   // Makes a weighted calculation of available permissions and gets tax rate
   var doc = createDocument(responseText);
-  var checkBoxes = doc.querySelectorAll(
-    '#pCC input[type="checkbox"]:checked');
-  var count = 0;
-  Array.prototype.forEach.call(checkBoxes, function(checkbox) {
-    var privName = checkbox.nextElementSibling.textContent.trim();
-    if (privName in privLookup) {
-      count += privLookup[privName];
-    } else {count += 1;}
-  });
+  var checkBoxes =
+    querySelectorArray('#pCC input[type="checkbox"]:checked', doc);
+  var count = checkBoxes.map(eachWeight).reduce(sum, 0);
   var taxRate = doc.querySelector('#pCC input[name="rank_tax"]').value;
   insertHtmlAfterBegin(linkElement, '<span class="fshBlue">(' +
     Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
 
+function ajaxPerms(anItem) {
+  var targetNode = anItem.parentNode.parentNode.previousElementSibling;
+  var href = /window\.location='(.*)';/.exec(anItem.getAttribute('onclick'))[1];
+  retryAjax(href).done(partial(parseRankData, targetNode));
+}
+
 function fetchRankData() { // jQuery.min
   var calcButton = getElementById('getrankweightings');
   hideElement(calcButton);
-  var allItems = document.querySelectorAll('#pCC input[value="Edit"]');
-  Array.prototype.forEach.call(allItems, function(anItem) {
-    var targetNode = anItem.parentNode.parentNode.previousElementSibling;
-    var href = /window\.location='(.*)';/.exec(anItem
-      .getAttribute('onclick'))[1];
-    retryAjax(href).done(partial(parseRankData, targetNode));
-  });
+  querySelectorArray('#pCC input[value="Edit"]').forEach(ajaxPerms);
 }
 
 export default function weightings() {

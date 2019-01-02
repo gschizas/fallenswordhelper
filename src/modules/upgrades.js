@@ -6,6 +6,7 @@ import intValue from './system/intValue';
 import isNaN from './common/isNaN';
 import on from './common/on';
 import partial from './common/partial';
+import querySelectorArray from './common/querySelectorArray';
 import {server} from './system/system';
 import setValue from './system/setValue';
 
@@ -14,8 +15,8 @@ var currentFSP;
 var warehouse = {};
 
 function findText(text) {
-  return Array.prototype.find.call(upgrades, function(el) {
-    return el.textContent.indexOf(text) !== -1;
+  return upgrades.find(function(el) {
+    return el.textContent.includes(text);
   });
 }
 
@@ -115,7 +116,7 @@ function saveUpgradeValue(upgrade, key) {
 }
 
 export default function storePlayerUpgrades() {
-  upgrades = document.querySelectorAll('#pCC > table:last-of-type > tbody > ' +
+  upgrades = querySelectorArray('#pCC > table:last-of-type > tbody > ' +
     'tr:nth-child(even) > td:first-child');
   saveUpgradeValue('+1 Max Allies', 'alliestotal');
   saveUpgradeValue('+1 Max Enemies', 'enemiestotal');

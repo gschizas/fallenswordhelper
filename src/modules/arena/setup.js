@@ -1,5 +1,5 @@
 import {def_table} from '../support/constants';
-import getElementsByTagName from '../common/getElementsByTagName';
+import getArrayByTagName from '../common/getArrayByTagName';
 import {imageServer} from '../system/system';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {moveOptions} from './assets';
@@ -24,9 +24,10 @@ function doPickMove(moveId, slotId) {
   });
 }
 
+function value(el) {return el.value;}
+
 function getAllMoves() {
-  return Array.from(getElementsByTagName('select', selectRow))
-    .map(function(el) {return el.value;});
+  return getArrayByTagName('select', selectRow).map(value);
 }
 
 function resetMove(val, ind) {

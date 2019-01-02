@@ -1,10 +1,13 @@
+import querySelectorArray from '../../common/querySelectorArray';
+
+function gameHelp(el) {
+  return el.textContent === 'Game Help';
+}
+
 function toSettings(el) {
-  if (el.textContent === 'Game Help') {
-    el.innerHTML = '<a href="index.php?cmd=settings">Game Help</a>';
-  }
+  el.innerHTML = '<a href="index.php?cmd=settings">Game Help</a>';
 }
 
 export default function gameHelpLink() {
-  var nodeList = document.querySelectorAll('#pCR h3');
-  Array.from(nodeList).forEach(toSettings);
+  querySelectorArray('#pCR h3').filter(gameHelp).forEach(toSettings);
 }

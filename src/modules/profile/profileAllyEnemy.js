@@ -2,6 +2,7 @@ import {def_table} from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import querySelectorArray from '../common/querySelectorArray';
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   var _c = '';
@@ -33,6 +34,5 @@ function findAllyEnemy(el) {
 
 export default function profileParseAllyEnemy() {
   // Allies/Enemies count/total function
-  Array.prototype.forEach.call(
-    document.querySelectorAll('#profileLeftColumn strong'), findAllyEnemy);
+  querySelectorArray('#profileLeftColumn strong').forEach(findAllyEnemy);
 }

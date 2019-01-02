@@ -1,5 +1,6 @@
 import createDocument from '../system/createDocument';
 import partial from '../common/partial';
+import querySelectorArray from '../common/querySelectorArray';
 import retryAjax from './retryAjax';
 import {defenderMultiplier, mercRE} from '../support/constants';
 
@@ -13,8 +14,7 @@ function addMercStats(prev, merc) {
 }
 
 function addAllMercStats(mercElements) {
-  return Array.prototype.reduce.call(mercElements, addMercStats,
-    [0, 0, 0, 0, 0]);
+  return mercElements.reduce(addMercStats, [0, 0, 0, 0, 0]);
 }
 
 function transform(mercTotal) {
@@ -29,7 +29,7 @@ function transform(mercTotal) {
 
 function parseMercStats(html) {
   var doc = createDocument(html);
-  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
+  var mercElements = querySelectorArray('#pCC img[src*="/merc/"]', doc);
   var mercTotal = addAllMercStats(mercElements);
   return transform(mercTotal);
 }

@@ -3,6 +3,7 @@ import {createSpan} from '../../common/cElement';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';
 import potReport from './potReport/potReport';
+import querySelectorAll from '../../common/querySelectorAll';
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
   'Gut Rot Head Splitter|Serum');
@@ -78,7 +79,7 @@ function finishSpan() {
 }
 
 export default function prepareChildRows() {
-  nodeList = document.querySelectorAll('#pCC table table ' +
+  nodeList = querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td:nth-of-type(3n)');
   potObj = {};
   nodeArray = [];

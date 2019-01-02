@@ -1,4 +1,5 @@
 import buyitem from './app/potionbazaar/buyitem';
+import getArrayByTagName from './common/getArrayByTagName';
 import {getElementById} from './common/getElement';
 import getElementsByTagName from './common/getElementsByTagName';
 import insertElement from './common/insertElement';
@@ -99,8 +100,7 @@ export default function injectBazaar() { // TODO stop using getElementById
   if (jQueryNotPresent()) {return;}
   var pbImg = getElementsByTagName('img', pCC)[0];
   pbImg.className = 'fshFloatLeft';
-  var potions = getElementsByTagName('a', pCC);
-  Array.from(potions).forEach(doMiniatures);
+  getArrayByTagName('a', pCC).forEach(doMiniatures);
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   insertHtmlBeforeEnd(pbImg.parentNode, bazaarTable);
   evtHandlers();

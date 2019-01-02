@@ -1,5 +1,6 @@
 import {getElementById} from '../../common/getElement';
 import isObject from '../../common/isObject';
+import querySelectorAll from '../../common/querySelectorAll';
 import {sendException} from '../../support/fshGa';
 
 function navHeightsIsArray(theNav, myNav) {
@@ -12,7 +13,7 @@ function navHeightsIsArray(theNav, myNav) {
       .length * 22,
     660,
     // Guild
-    document.querySelectorAll('#nav-guild > ul li').length * 22,
+    querySelectorAll('#nav-guild > ul li').length * 22,
     374,
     132,
     132,
