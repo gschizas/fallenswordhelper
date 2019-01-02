@@ -5252,13 +5252,10 @@
   }
 
   function selectedBuff() {
-    var buffBalls = getElementsByClassName(enemyBuffCheckOn,
+    var buffBalls = getArrayByClassName(enemyBuffCheckOn,
       getElementById('fshContactList'));
-    var sendstring = Array.prototype.reduce.call(buffBalls,
-      function(prev, curr) {
-        prev.push(curr.nextElementSibling.textContent);
-        return prev;
-      }, []);
+    var sendstring = buffBalls.map(
+      function(el) {return el.nextElementSibling.textContent;});
     openQuickBuffByName(sendstring.join());
   }
 
@@ -7511,13 +7508,13 @@
     if (isFunction(extraFn)) {extraFn(row);}
   }
 
-  function testRowType(row, rowType, thisArticle, articleTest, extraFn) {
+  function testRowType(row, rowType, thisArticle, param) {
     if (rowType === 0) {
       thisArticle.header = row;
       makeHeaderClickable(row);
-      hasExtraFn(extraFn, row);
+      hasExtraFn(param.extraFn, row);
     }
-    if (articleTest(rowType)) {
+    if (param.articleTest(rowType)) {
       thisArticle.rows[rowType] =
         fallback(thisArticle[rowType], {});
       thisArticle.rows[rowType].row = row;
@@ -7525,13 +7522,13 @@
     }
   }
 
-  function doTagging(articleTest, extraFn, row) {
+  function doTagging(param, row) {
     var rowType = row.rowIndex % headerIndex;
     var articleNo = (row.rowIndex - rowType) / headerIndex;
     warehouse[articleNo] = fallback(warehouse[articleNo], {});
     var thisArticle = warehouse[articleNo];
     thisArticle.rows = thisArticle.rows || [];
-    testRowType(row, rowType, thisArticle, articleTest, extraFn);
+    testRowType(row, rowType, thisArticle, param);
   }
 
   function toggleHeaderClass() {
@@ -7556,8 +7553,7 @@
   function collapse(param) {
     headerIndex = param.headInd;
     setupPref(param.prefName);
-    Array.prototype.forEach.call(param.theTable.rows,
-      partial(doTagging, param.articleTest, param.extraFn));
+    Array.from(param.theTable.rows).forEach(partial(doTagging, param));
     on(param.theTable, 'click', evtHdl);
   }
 
@@ -12026,12 +12022,15 @@
     return tbl.rows[tbl.rows.length - 1];
   }
 
+  function calcTotalStats(statObj) {
+    return ['Attack', 'Defense', 'Armor', 'Damage', 'HP']
+      .reduce(function(prev, curr) {return prev + getVal$1(curr, statObj);}, 0);
+  }
+
   function addStats(el) {
     var statTable = closestTable(el);
     var statObj = Array.from(statTable.rows).reduce(reduceStatTable, {});
-    var totalStats = getVal$1('Attack', statObj) + getVal$1('Defense', statObj) +
-      getVal$1('Armor', statObj) + getVal$1('Damage', statObj) +
-      getVal$1('HP', statObj);
+    var totalStats = calcTotalStats(statObj);
     insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
       '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
       totalStats + '&nbsp;</td></tr>');
@@ -12049,8 +12048,9 @@
   }
 
   function fshPreFilter(options) {
-    if (options.url.indexOf('fetchitem') !== 0) {return;}
-    options.dataFilter = fshDataFilter;
+    if (options.url.startsWith('fetchitem')) {
+      options.dataFilter = fshDataFilter;
+    }
   }
 
   function addStatTotalToMouseover() { // jQuery
@@ -13267,7 +13267,7 @@
   function getItemImg() {
     var allTables = getElementsByTagName(def_table, pCC);
     var lastTable = allTables[allTables.length - 1];
-    return getElementsByTagName('img', lastTable);
+    return getArrayByTagName('img', lastTable);
   }
 
   function getItems$1() {
@@ -13277,7 +13277,7 @@
     var imgList = getItemImg();
     itemsAry$1 = [];
     itemsHash = {};
-    Array.prototype.forEach.call(imgList, function(el) {
+    imgList.forEach(function(el) { // TODO
       var tipped = el.dataset.tipped;
       if (tipped) {
         var matches = tipped.match(itemRE);
@@ -15800,10 +15800,10 @@
   }
 
   function findOnlinePlayers() { // jQuery
-    var someTables = getElementsByTagName(def_table, pCC);
+    var someTables = getArrayByTagName(def_table, pCC);
     var prm = [];
     guilds = {};
-    Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
+    someTables.slice(4).forEach(function(tbl) {
       var playerName = tbl.textContent.trim();
       if (tbl.rows[0].cells[0].children[0]) {
         addPlayerToGuild(tbl, playerName);
@@ -21060,7 +21060,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '75';
+  window.FSH.calf = '76';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

@@ -1,5 +1,6 @@
 import currentGuildId from '../common/currentGuildId';
 import functionPasses from '../common/functionPasses';
+import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
@@ -123,10 +124,10 @@ function hideSpinner() {
 }
 
 function findOnlinePlayers() { // jQuery
-  var someTables = getElementsByTagName(def_table, pCC);
+  var someTables = getArrayByTagName(def_table, pCC);
   var prm = [];
   guilds = {};
-  Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
+  someTables.slice(4).forEach(function(tbl) {
     var playerName = tbl.textContent.trim();
     if (tbl.rows[0].cells[0].children[0]) {
       addPlayerToGuild(tbl, playerName);

@@ -3,8 +3,8 @@ import calf from '../support/calf';
 import {createDiv} from '../common/cElement';
 import fallback from '../system/fallback';
 import formatLastActivity from '../system/formatLastActivity';
+import getArrayByClassName from '../common/getArrayByClassName';
 import {getElementById} from '../common/getElement';
-import getElementsByClassName from '../common/getElementsByClassName';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -180,13 +180,10 @@ function buffPlayer(self) {
 }
 
 function selectedBuff() {
-  var buffBalls = getElementsByClassName(enemyBuffCheckOn,
+  var buffBalls = getArrayByClassName(enemyBuffCheckOn,
     getElementById('fshContactList'));
-  var sendstring = Array.prototype.reduce.call(buffBalls,
-    function(prev, curr) {
-      prev.push(curr.nextElementSibling.textContent);
-      return prev;
-    }, []);
+  var sendstring = buffBalls.map(
+    function(el) {return el.nextElementSibling.textContent;});
   openQuickBuffByName(sendstring.join());
 }
 
