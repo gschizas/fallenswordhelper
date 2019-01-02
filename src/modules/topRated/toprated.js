@@ -1,5 +1,6 @@
 import currentGuildId from '../common/currentGuildId';
 import functionPasses from '../common/functionPasses';
+import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getProfile from '../ajax/getProfile';
 import getValue from '../system/getValue';
@@ -28,7 +29,6 @@ import {
 } from '../common/levelHighlight';
 import {createInput, createSpan} from '../common/cElement';
 import {def_table, nowSecs} from '../support/constants';
-import getArrayByTagName from '../common/getArrayByTagName';
 
 var highlightPlayersNearMyLvl;
 var spinner;
