@@ -35,15 +35,28 @@ function formatTime() {
   return formatLastReset(lastLadderReset);
 }
 
-function lastReset() {
-  var topTable = document.querySelector('#pCC table');
-  var newRow = createTr();
+function makeLeftCell(newRow) {
   var leftCell = newRow.insertCell(-1);
   leftCell.height = 25;
   leftCell.textContent = 'Last Reset:';
+}
+
+function makeRightCell(newRow) {
   var rightCell = newRow.insertCell(-1);
   rightCell.align = 'right';
   rightCell.innerHTML = formatTime();
+}
+
+function makeNewRow() {
+  var newRow = createTr();
+  makeLeftCell(newRow);
+  makeRightCell(newRow);
+  return newRow;
+}
+
+function lastReset() {
+  var topTable = document.querySelector('#pCC table');
+  var newRow = makeNewRow();
   insertElement(topTable, newRow);
 }
 

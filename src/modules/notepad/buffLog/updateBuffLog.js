@@ -1,54 +1,56 @@
 import buffList from '../../support/buffObj';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
 import {fshBuffLog} from '../../support/constants';
-import {getElementById} from '../../common/getElement';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
+import partial from '../../common/partial';
 import setForage from '../../ajax/setForage';
 
-var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
-  ' higher level is currently active on \'(\\w*)\'');
-var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
-  'activated on \'(\\w*)\'');
-
-function rejected(timeStamp, buffsNotCast, buffLog) {
-  if (buffsNotCast) {
-    return timeStamp + ' <span style="color: red;">' +
-      buffsNotCast[0] + '</span><br>' + buffLog;
-  }
-  return buffLog;
-}
+function buff(thisBuff, el) {return el.name === thisBuff;}
 
 function getStamUsed(buffCast) {
-  for (var j = 0; j < buffList.length; j += 1) {
-    if (buffList[j].name === buffCast[1]) {
-      return buffList[j].stam.toString();
-    }
-  }
+  var thisBuff = buffList.find(partial(buff, buffCast[1]));
+  if (thisBuff) {return thisBuff.stam.toString();}
   return '-';
 }
 
-function successfull(timeStamp, buffCast, buffLog) {
-  if (buffCast) {
-    return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
-      ' stamina) <br>' + buffLog;
-  }
-  return buffLog;
+function successfull(timeStamp, buffCast) {
+  return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
+    ' stamina)<br>';
 }
 
-function buffResult(_buffLog) {
-  var buffLog = _buffLog;
-  if (!buffLog) {buffLog = '';}
+function rejected(timeStamp, buffsNotCast) {
+  return timeStamp + ' <span class="fshRed">' + buffsNotCast[0] + '</span><br>';
+}
+
+var transform = [
+  [new RegExp('Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\''),
+    successfull],
+  [new RegExp('The skill ([\\w ]*) of current or higher level is currently ' +
+    'active on \'(\\w*)\''), rejected],
+  [new RegExp('Player \'(\\w*)\' has set their preferences to block the ' +
+    'skill \'([\\w ]*)\' from being cast on them.'), rejected]
+];
+
+function doRegExp(el, pair) {
+  return [
+    pair[0].exec(el.innerText),
+    pair[1]
+  ];
+}
+
+function match(pair) {return pair[0] !== null;}
+
+function logFormat(timeStamp, el) {
+  var transformed = transform.map(partial(doRegExp, el)).find(match);
+  return transformed[1](timeStamp, transformed[0]);
+}
+
+function buffResult(buffLog) {
   var timeStamp = formatLocalDateTime(new Date());
-  var buffsAttempted = getElementById('quickbuff-report')
-    .innerHTML.split('<p>');
-  for (var i = 0; i < buffsAttempted.length; i += 1) {
-    var buffCast = buffsCastRE.exec(buffsAttempted[i]);
-    var buffNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
-    buffLog = successfull(timeStamp, buffCast, buffLog);
-    buffLog = rejected(timeStamp, buffNotCast, buffLog);
-  }
-  setForage(fshBuffLog, buffLog);
+  var buffsAttempted = Array.from(document.querySelectorAll(
+    '#quickbuff-report p:not(.back)')).map(partial(logFormat, timeStamp));
+  setForage(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
 }
 
 export default function updateBuffLog() {

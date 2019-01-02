@@ -1,3 +1,4 @@
+import changeMinMax from '../common/changeMinMax';
 import {defaults} from '../support/dataObj';
 import {fshArenaKey} from './assets';
 import setForage from '../ajax/setForage';
@@ -16,19 +17,19 @@ function newOpts(newMin, newMax) {
   storeOpts();
 }
 
-export function changeLvls() { // jQuery
-  var minLvl = parseInt($('#fshMinLvl').val(), 10);
-  var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
-  if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
-  newOpts(minLvl, maxLvl);
+function redrawTable() {
   $('#arenaTypeTabs table[width="635"]').DataTable().draw();
+}
+
+export function changeLvls() { // jQuery
+  changeMinMax(newOpts, redrawTable);
 }
 
 export function resetLvls() { // jQuery
   newOpts(defaults.arenaMinLvl, defaults.arenaMaxLvl);
   $('#fshMinLvl').val(opts.minLvl);
   $('#fshMaxLvl').val(opts.maxLvl);
-  $('#arenaTypeTabs table[width="635"]').DataTable().draw();
+  redrawTable();
 }
 
 export function hideMoves(evt) { // jQuery
