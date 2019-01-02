@@ -34,12 +34,15 @@ function getLastIndex(obj, tbl) {
   return tbl.rows[tbl.rows.length - 1];
 }
 
+function calcTotalStats(statObj) {
+  return ['Attack', 'Defense', 'Armor', 'Damage', 'HP']
+    .reduce(function(prev, curr) {return prev + getVal(curr, statObj);}, 0);
+}
+
 function addStats(el) {
   var statTable = closestTable(el);
   var statObj = Array.from(statTable.rows).reduce(reduceStatTable, {});
-  var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
-    getVal('Armor', statObj) + getVal('Damage', statObj) +
-    getVal('HP', statObj);
+  var totalStats = calcTotalStats(statObj);
   insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
     '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
     totalStats + '&nbsp;</td></tr>');
@@ -57,8 +60,9 @@ function fshDataFilter(data) {
 }
 
 function fshPreFilter(options) {
-  if (options.url.indexOf('fetchitem') !== 0) {return;}
-  options.dataFilter = fshDataFilter;
+  if (options.url.startsWith('fetchitem')) {
+    options.dataFilter = fshDataFilter;
+  }
 }
 
 export default function addStatTotalToMouseover() { // jQuery

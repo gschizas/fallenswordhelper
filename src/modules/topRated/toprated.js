@@ -28,6 +28,7 @@ import {
 } from '../common/levelHighlight';
 import {createInput, createSpan} from '../common/cElement';
 import {def_table, nowSecs} from '../support/constants';
+import getArrayByTagName from '../common/getArrayByTagName';
 
 var highlightPlayersNearMyLvl;
 var spinner;
@@ -123,10 +124,10 @@ function hideSpinner() {
 }
 
 function findOnlinePlayers() { // jQuery
-  var someTables = getElementsByTagName(def_table, pCC);
+  var someTables = getArrayByTagName(def_table, pCC);
   var prm = [];
   guilds = {};
-  Array.prototype.slice.call(someTables, 4).forEach(function(tbl) {
+  someTables.slice(4).forEach(function(tbl) {
     var playerName = tbl.textContent.trim();
     if (tbl.rows[0].cells[0].children[0]) {
       addPlayerToGuild(tbl, playerName);
