@@ -11,15 +11,20 @@ import lookForHcsData from './lookForHcsData/lookForHcsData';
 import pageSwitcher from './pageSwitcher';
 import {end, screenview, setup, start} from '../support/fshGa';
 
+var cmd;
+var subcmd;
+var subcmd2;
+var type;
+var fromWorld;
 var coreFunction;
 var functionPath;
 
-function getType(cmd) {
-  var type = '-';
-  if (cmd === 'points') {
-    type = fallback(getUrlParameter('type'), '-');
+function getType(_cmd) {
+  var _type = '-';
+  if (_cmd === 'points') {
+    _type = getUrlParameter('type') || '-';
   }
-  return type;
+  return _type;
 }
 
 function newSelector(selector) {
@@ -28,48 +33,53 @@ function newSelector(selector) {
 }
 
 var isValid = [
-  function(cmd) {return pageSwitcher[cmd];},
-  function(cmd, subcmd) {return pageSwitcher[cmd][subcmd];},
-  function(cmd, subcmd, subcmd2) {return pageSwitcher[cmd][subcmd][subcmd2];},
-  function(cmd, subcmd, subcmd2, type) {
-    return pageSwitcher[cmd][subcmd][subcmd2][type];
-  }
+  function() {return pageSwitcher[cmd];},
+  function() {return pageSwitcher[cmd][subcmd];},
+  function() {return pageSwitcher[cmd][subcmd][subcmd2];},
+  function() {return pageSwitcher[cmd][subcmd][subcmd2][type];}
 ];
 
-function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
-  if (isValid.every(function(e) {
-    return isObject(e(cmd, subcmd, subcmd2, type));
-  }) && pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
+function returnsObject(e) {return isObject(e());}
+
+function testCoreFunction() {
+  if (isValid.every(returnsObject) &&
+      pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
     return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
   }
 }
 
-function getCoreFunction() {
-  var cmd;
-  var subcmd;
-  var subcmd2;
-  var type;
-  var fromWorld;
-  if (document.location.search !== '') {
-    cmd = fallback(getUrlParameter('cmd'), '-');
-    subcmd = fallback(getUrlParameter('subcmd'), '-');
-    subcmd2 = fallback(getUrlParameter('subcmd2'), '-');
-    type = getType(cmd);
-    fromWorld = fallback(getUrlParameter('fromworld'), '-');
-  } else {
-    cmd = newSelector('input[name="cmd"]');
-    subcmd = newSelector('input[name="subcmd"]');
-    subcmd2 = newSelector('input[name="subcmd2"]');
-    type = '-';
-    fromWorld = '-';
-  }
+function getParamsFromUrl() {
+  cmd = fallback(getUrlParameter('cmd'), '-');
+  subcmd = fallback(getUrlParameter('subcmd'), '-');
+  subcmd2 = fallback(getUrlParameter('subcmd2'), '-');
+  type = getType(cmd);
+  fromWorld = fallback(getUrlParameter('fromworld'), '-');
+}
+
+function getParamsFromPage() {
+  cmd = newSelector('input[name="cmd"]');
+  subcmd = newSelector('input[name="subcmd"]');
+  subcmd2 = newSelector('input[name="subcmd2"]');
+  type = '-';
+  fromWorld = '-';
+}
+
+function setCalfParams() {
   calf.cmd = cmd;
   calf.subcmd = subcmd;
   calf.subcmd2 = subcmd2;
+}
+
+function getCoreFunction() {
+  if (document.location.search !== '') {
+    getParamsFromUrl();
+  } else {
+    getParamsFromPage();
+  }
+  setCalfParams();
   functionPath = cmd + '/' + subcmd + '/' + subcmd2 + '/' + type + '/' +
     fromWorld;
-
-  coreFunction = testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld);
+  coreFunction = testCoreFunction();
 }
 
 //#if _DEV  //  asyncDispatcher messages
