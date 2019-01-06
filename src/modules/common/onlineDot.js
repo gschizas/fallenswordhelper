@@ -1,17 +1,5 @@
 import {nowSecs} from '../support/constants';
-
-var redDot =
-  '<span class="fshDot redDot tip-static" data-tipped="Offline"></span>';
-var greenDiamond =
-  '<span class="fshDot greenDiamond tip-static" data-tipped="Online"></span>';
-var yellowDiamond =
-  '<span class="fshDot yellowDiamond tip-static" data-tipped="Offline"></span>';
-var orangeDiamond =
-  '<span class="fshDot orangeDiamond tip-static" data-tipped="Offline"></span>';
-var offlineDot =
-  '<span class="fshDot offlineDot tip-static" data-tipped="Offline"></span>';
-var sevenDayDot =
-  '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
+import partial from './partial';
 
 var getMins = [
   function(obj, min) {
@@ -40,20 +28,27 @@ var getMins = [
 ];
 
 var getDot = [
-  {condition: 2, result: greenDiamond},
-  {condition: 5, result: yellowDiamond},
-  {condition: 30, result: orangeDiamond},
-  {condition: 10080, result: offlineDot},
-  {condition: 44640, result: sevenDayDot}
+  [2, 'greenDiamond'],
+  [5, 'yellowDiamond'],
+  [30, 'orangeDiamond'],
+  [10080, 'offlineDot'],
+  [44640, 'sevenDayDot']
 ];
+
+function activity(min, el) {return min < el[0];}
+
+function aDot(type) {
+  var tip = 'Offline';
+  if (type === 'greenDiamond') {tip = 'Online';}
+  return '<span class="fshDot ' + type +
+    ' tip-static" data-tipped="' + tip + '"></span>';
+}
 
 export default function onlineDot(obj) {
   var min = getMins.reduce(function(prev, curr) {
     return curr(obj, prev);
   }, 0);
-  for (var i = 0; i < getDot.length; i += 1) {
-    var el = getDot[i];
-    if (min < el.condition) {return el.result;}
-  }
-  return redDot;
+  var which = getDot.find(partial(activity, min));
+  if (which) {return aDot(which[1], which[2]);}
+  return aDot('redDot');
 }

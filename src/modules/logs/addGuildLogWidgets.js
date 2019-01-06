@@ -1,10 +1,10 @@
+import contains from '../common/contains';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getValue from '../system/getValue';
+import myRows from '../common/myRows';
 import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
-
-var currentPlayerId;
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) {return Number(playerAry[1]);}
@@ -22,15 +22,13 @@ function msgDoesNotIncludePlayer(aRow) {
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);
   return firstPlayer &&
-    firstPlayerID !== currentPlayerId &&
-    secondPlayerID !== currentPlayerId;
+    firstPlayerID !== playerId() &&
+    secondPlayerID !== playerId();
 }
 
 function findPlayers(aRow) { // Legacy
   if (msgDoesNotIncludePlayer(aRow)) {
-    for (var j = 0; j < 3; j += 1) {
-      aRow.cells[j].removeAttribute('class');
-    }
+    Array.from(aRow.cells).forEach(function(el) {el.className = '';});
     aRow.classList.add('fshGrey');
     aRow.classList.add('fshXSmall');
   }
@@ -71,12 +69,8 @@ function processGuildWidgetRow(aRow) { // Legacy
   guildInvite(aRow);
 }
 
-function msgHeader(el) {
-  return el.textContent === 'Message';
-}
-
 function getMessageHeader() {
-  return getArrayByTagName('td', pCC).find(msgHeader);
+  return getArrayByTagName('td', pCC).find(contains('Message'));
 }
 
 function guildLogWidgetsEnabled() { // Legacy
@@ -85,13 +79,7 @@ function guildLogWidgetsEnabled() { // Legacy
   var logTable = messageNameCell.parentNode.parentNode.parentNode;
   messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
     '(Guild Log messages not involving self are dimmed!)</span>';
-
-  currentPlayerId = playerId();
-
-  for (var i = 1; i < logTable.rows.length; i += 2) {
-    var aRow = logTable.rows[i];
-    processGuildWidgetRow(aRow);
-  }
+  Array.from(logTable.rows).filter(myRows(3, 0)).forEach(processGuildWidgetRow);
 }
 
 export default function addGuildLogWidgets() {

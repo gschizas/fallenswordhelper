@@ -149,9 +149,7 @@ var bailOut = [
 ];
 
 function keyPress(evt) {
-  for (var i = 0; i < bailOut.length; i += 1) {
-    if (bailOut[i](evt)) {return;}
-  }
+  if (bailOut.some(function(fn) {return fn(evt);})) {return;}
   handleKey(evt.charCode);
 }
 

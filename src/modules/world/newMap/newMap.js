@@ -14,10 +14,14 @@ import on from '../../common/on';
 import onWorld from './onWorld';
 import partial from '../../common/partial';
 import prepareShop from './shop';
+// import querySelectorArray from '../../common/querySelectorArray';
 import startMonsterLog from './monsterLog/monsterLog';
 import viewCreature from './viewCreature/viewCreature';
 import worldPrefs from './worldPrefs/worldPrefs';
 import {
+  //#if _DEV  //  hide titan combat results
+  def_PvE,
+  //#endif
   def_afterUpdateActionlist,
   def_controlsKeydown,
   def_fetch_playerBackpackCount,
@@ -26,6 +30,34 @@ import {
   def_fetch_worldRealmDynamic
 } from '../../support/constants';
 
+//#if _DEV  //  hide titan combat results
+function didNotExist(data) {
+  return data.response && data.response.msg &&
+    data.response.msg === 'Creature did not exist at that location ' +
+      '(may have been killed by another player).';
+}
+
+function removeAction(data) {
+  if (didNotExist(data)) {
+    GameData.fetch(
+      def_fetch_worldRealmDynamic +
+      def_fetch_worldRealmActions
+    );
+  }
+}
+
+function hideTitanViewCombat(e, data) {
+  // console.log('data', data);
+  removeAction(data);
+  // querySelectorArray('.creature-4 > .quickCombat > .verbs')
+  //   .forEach(function(el) {el.remove();});
+}
+
+function hideTitanCombatResults() {
+  $.subscribe(def_PvE, hideTitanViewCombat); // TODO Pref
+}
+
+//#endif
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
 }
@@ -112,7 +144,10 @@ export default function subscribes() {
     hideMapTooltip,
     initButtons,
     buffInfo,
-    fixDebuff
+    fixDebuff,
+    //#if _DEV  //  hide titan combat results
+    hideTitanCombatResults
+    //#endif
   ]);
 }
 

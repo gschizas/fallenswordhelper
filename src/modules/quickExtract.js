@@ -46,14 +46,13 @@ function quickDoneExtracted(invId, json) {
   outputResult(processResult(json.r), buyResult);
 }
 
+function ajaxExtract(el) {useitem(el).done(partial(quickDoneExtracted, el));}
+
 function doExtract(target) {
-  var InventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
+  var inventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
   target.parentNode.innerHTML = 'extracting all ' +
-    InventoryIDs.length + ' resources';
-  for (var i = 0; i < InventoryIDs.length; i += 1) {
-    useitem(InventoryIDs[i])
-      .done(partial(quickDoneExtracted, InventoryIDs[i]));
-  }
+    inventoryIDs.length + ' resources';
+  inventoryIDs.forEach(ajaxExtract);
 }
 
 function extractAllSimilar(self) {

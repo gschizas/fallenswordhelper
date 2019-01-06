@@ -4,6 +4,7 @@ import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import guideButtons from './guideButtons';
 import hideElement from '../common/hideElement';
+import myRows from '../common/myRows';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import setValue from '../system/setValue';
@@ -119,13 +120,12 @@ function doHideQuests(hideQuests, questName, aRow) {
 }
 
 function forEachQuest(hideQuests, questTable) {
-  for (var i = 2; i < questTable.rows.length; i += 4) {
-    var aRow = questTable.rows[i];
+  Array.from(questTable.rows).filter(myRows(5, 0)).forEach(function(aRow) {
     var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
     doHideQuests(hideQuests, questName, aRow);
     var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
     aRow.cells[4].innerHTML = guideButtons(questID, questName);
-  }
+  });
 }
 
 export default function injectQuestBookFull() {

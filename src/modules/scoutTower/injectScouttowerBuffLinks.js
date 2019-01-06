@@ -1,4 +1,6 @@
+import containsText from '../common/containsText';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import myRows from '../common/myRows';
 import on from '../common/on';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 
@@ -8,22 +10,21 @@ function buffIndividual(self) {
   }
 }
 
+function memberName(el) {return el.cells[0].firstChild.firstChild.textContent;}
+
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;
-  var shortList = [];
-  for (var j = 1; j < titanTable.rows.length; j += 2) {
-    var firstCell = titanTable.rows[j].cells[0].firstChild.firstChild;
-    if (firstCell) {shortList.push(firstCell.textContent);}
-  }
+  var shortList = Array.from(titanTable.rows)
+    .filter(myRows(3, 0)).map(memberName);
   openQuickBuffByName(shortList.join());
 }
 
 function buffEvent(e) {
   var self = e.target;
-  if (self.textContent === '[b]') {
+  if (containsText('[b]', self)) {
     buffIndividual(self);
   }
-  if (self.textContent === 'all') {
+  if (containsText('all', self)) {
     buffAll(self);
   }
 }
@@ -32,22 +33,21 @@ function evtHdl(e) {
   if (e.target.classList.contains('fshBl')) {buffEvent(e);}
 }
 
+function playerBufflink(el) {
+  insertHtmlBeforeEnd(el.cells[0],
+    ' <button class="fshBl fshXSmall">[b]</button>');
+}
+
 function doBuffLinks(titanTable) {
-  for (var j = 1; j < titanTable.rows.length; j += 2) {
-    var firstCell = titanTable.rows[j].cells[0];
-    insertHtmlBeforeEnd(firstCell,
-      ' <button class="fshBl fshXSmall">[b]</button>');
-  }
+  Array.from(titanTable.rows).filter(myRows(3, 0)).forEach(playerBufflink);
   insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
     ' <button class="fshBl fshXSmall">all</button>');
 }
 
+function myTables(el, i) {return el.rows.length > 1 && i > 1;}
+
 function gotTables(titanTables) {
-  for (var i = 2; i < titanTables.length; i += 1) {
-    var titanTable = titanTables[i];
-    if (titanTable.rows.length < 2) {continue;}
-    doBuffLinks(titanTable);
-  }
+  Array.from(titanTables).filter(myTables).forEach(doBuffLinks);
   on(titanTables[1], 'click', evtHdl);
 }
 

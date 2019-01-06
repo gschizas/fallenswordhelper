@@ -1,5 +1,6 @@
 import colouring from './colouring';
 import contactColour from './contactColour';
+import contains from '../../common/contains';
 import doHideBtn from './doHideBtn';
 import doHideBuffSelected from './doHideBuffSelected';
 import {getElementById} from '../../common/getElement';
@@ -13,16 +14,12 @@ function guildColour(el) {
   });
 }
 
-function isChatLink(el) {
-  return el.textContent === 'Chat';
-}
-
 function makeLink(el) {
   el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">Chat</a>';
 }
 
 function updateChatLink() {
-  querySelectorArray('#pCR h4').filter(isChatLink).forEach(makeLink);
+  querySelectorArray('#pCR h4').filter(contains('Chat')).forEach(makeLink);
 }
 
 export default function addGuildInfoWidgets() {

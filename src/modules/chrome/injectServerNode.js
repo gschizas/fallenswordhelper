@@ -1,3 +1,4 @@
+import contains from '../common/contains';
 import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
@@ -34,13 +35,9 @@ function validStatBoxes(topbannerStats, gameStats) {
   return topbannerStats && !hidden && gameStats;
 }
 
-function isGameStats(el) {
-  return el.textContent === 'Game Stats';
-}
-
 export default function injectServerNode() {
   var topbannerStats = getElementById('topbanner-stats');
-  var gameStats = querySelectorArray('#pCR h3').find(isGameStats);
+  var gameStats = querySelectorArray('#pCR h3').find(contains('Game Stats'));
   if (validStatBoxes(topbannerStats, gameStats)) {
     statBoxesExist(topbannerStats, gameStats);
   }

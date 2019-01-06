@@ -1,4 +1,5 @@
 import {closestTable} from './closest';
+import contains from './contains';
 import {createDiv} from './cElement';
 import getArrayByTagName from './getArrayByTagName';
 import insertHtmlBeforeBegin from './insertHtmlBeforeBegin';
@@ -48,14 +49,11 @@ function addStats(el) {
     totalStats + '&nbsp;</td></tr>');
 }
 
-function bonuses(el) {
-  return el.textContent === 'Bonuses';
-}
-
 function fshDataFilter(data) {
   var container = createDiv();
   insertHtmlBeforeEnd(container, data);
-  getArrayByTagName('font', container).filter(bonuses).forEach(addStats);
+  getArrayByTagName('font', container).filter(contains('Bonuses'))
+    .forEach(addStats);
   return container.innerHTML;
 }
 

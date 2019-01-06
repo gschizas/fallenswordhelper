@@ -10,36 +10,30 @@ function guidInvNotEquipped(row) {
 }
 
 var locations = [
-  {
-    test: function(row) {return row.player_id && row.player_id === -1;},
-    res: function(row, act) {
-      return 'takeItem" action="' + act.a;
-    }
-  },
-  {
-    test: function(row) {
-      return row.player_id &&
-        row.player_id !== theInv.current_player_id;
+  [
+    function(row) {return row.player_id && row.player_id === -1;},
+    function(row, act) {return 'takeItem" action="' + act.a;}
+  ],
+  [
+    function(row) {
+      return row.player_id && row.player_id !== theInv.current_player_id;
     },
-    res: function(row, act) {
+    function(row, act) {
       return 'recallItem" playerid="' + row.player_id +
         '" mode="0" action="' + act.a;
     }
-  },
-  {
-    test: function(row) {
-      return userInvNotEquipped(row) || guidInvNotEquipped(row);
-    },
-    res: function(row, act) {return act.c;}
-  }
+  ],
+  [
+    function(row) {return userInvNotEquipped(row) || guidInvNotEquipped(row);},
+    function(row, act) {return act.c;}
+  ]
 ];
 
 function wuRender(row, act) {
-  for (var i = 0; i < locations.length; i += 1) {
-    if (locations[i].test(row)) {
-      return '<span class="fshLink ' + locations[i].res(row, act) +
-        '" invid="' + row.inv_id + '">' + act.b + '</span>';
-    }
+  var location = locations.find(function(el) {return el[0](row);});
+  if (location) {
+    return '<span class="fshLink ' + location[1](row, act) +
+      '" invid="' + row.inv_id + '">' + act.b + '</span>';
   }
   return '';
 }

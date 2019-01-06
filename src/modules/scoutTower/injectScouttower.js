@@ -6,6 +6,7 @@ import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import myRows from '../common/myRows';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import roundToString from '../common/roundToString';
@@ -102,12 +103,11 @@ function gotOldTitans(oldTitans) {
   injectScouttowerBuffLinks(titanTables);
   var titanTable = titanTables[1];
   var newTitans = {};
-  for (var i = 1; i < titanTable.rows.length - 1; i += 6) {
-    var aRow = titanTable.rows[i];
+  Array.from(titanTable.rows).filter(myRows(4, 0)).forEach(function(aRow) {
     killsSummary(aRow);
     cooldownTracker(aRow, newTitans); // Pref
     guideLink(aRow);
-  }
+  });
   addMissingTitansFromOld(oldTitans, newTitans); // Pref
   displayTracker(titanTables[0], newTitans); // Pref
   setForage('fsh_titans', newTitans); // Pref

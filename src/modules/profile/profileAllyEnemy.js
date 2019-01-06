@@ -1,38 +1,36 @@
+import contains from '../common/contains';
 import {def_table} from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 
-function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
-  var _c = '';
-  if (contactsTotal && contactsTotal >= numberOfContacts) {
-    _c = '/' + contactsTotal;
-  }
-  insertHtmlBeforeEnd(target, '<span class="fshBlue">&nbsp;' +
-    numberOfContacts + _c + '</span>');
+function totalKey(isAllies) {
+  if (isAllies) {return 'alliestotal';}
+  return 'enemiestotal';
 }
 
-function countContacts(el, isAllies) {
+function contactSlots(numberOfContacts, contactsTotal) {
+  if (contactsTotal && contactsTotal >= numberOfContacts) {
+    return '/' + contactsTotal;
+  }
+  return '';
+}
+
+function countContacts(isAllies, el) {
   var target = el.parentNode;
   var numberOfContacts = getElementsByTagName(def_table,
     target.nextSibling.nextSibling).length - 1;
-  if (isAllies) {
-    totalAllyEnemy(target, numberOfContacts, getValue('alliestotal'));
-  } else {
-    totalAllyEnemy(target, numberOfContacts, getValue('enemiestotal'));
-  }
-}
-
-function findAllyEnemy(el) {
-  var isAllies = el.textContent === 'Allies';
-  var isEnemies = el.textContent === 'Enemies';
-  if (isAllies || isEnemies) {
-    countContacts(el, isAllies);
-  }
+  insertHtmlBeforeEnd(target,
+    '<span class="fshBlue">&nbsp;' + numberOfContacts.toString() +
+    contactSlots(numberOfContacts, getValue(totalKey(isAllies))) +
+    '</span>');
 }
 
 export default function profileParseAllyEnemy() {
   // Allies/Enemies count/total function
-  querySelectorArray('#profileLeftColumn strong').forEach(findAllyEnemy);
+  var headings = querySelectorArray('#profileLeftColumn strong');
+  headings.filter(contains('Allies')).forEach(partial(countContacts, true));
+  headings.filter(contains('Enemies')).forEach(partial(countContacts, false));
 }

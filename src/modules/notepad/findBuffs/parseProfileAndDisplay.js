@@ -1,3 +1,4 @@
+import contains from '../../common/contains';
 import createDocument from '../../system/createDocument';
 import {def_statVl} from '../../support/constants';
 import getArrayByTagName from '../../common/getArrayByTagName';
@@ -52,14 +53,15 @@ function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
   return uniq(res);
 }
 
-function sustainEnhancement(el) {return el.textContent === 'Sustain';}
-
 function getSustain(doc) {
   var sustainLink = getArrayByTagName('a',
-    getElementById('profileLeftColumn', doc)).find(sustainEnhancement);
-  var sustainText = sustainLink.parentNode.parentNode.parentNode
-    .nextElementSibling.children[0].dataset.tipped;
-  return parseInt(sustainLevelRE.exec(sustainText)[1], 10) || -1;
+    getElementById('profileLeftColumn', doc)).find(contains('Sustain'));
+  if (sustainLink) {
+    var sustainText = sustainLink.parentNode.parentNode.parentNode
+      .nextElementSibling.children[0].dataset.tipped;
+    return parseInt(sustainLevelRE.exec(sustainText)[1], 10) || -1;
+  }
+  return 0;
 }
 
 function getInnerPlayerName(doc) {

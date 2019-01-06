@@ -1,16 +1,26 @@
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {now} from '../support/constants';
-import partial from '../common/partial';
+import {coolTime, cooldownText, seen, titan} from './constants';
 import {createTBody, createTable} from '../common/cElement';
 
-function addRow(theTitans, trackerTable, titan) {
-  if (theTitans[titan].coolTime < now) {return;}
-  insertHtmlBeforeEnd(trackerTable,
-    '<tr><td class="fshCenter">' + titan + '</td>' +
-    '<td class="fshBold fshCenter fshCooldown">' +
-    theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
-    theTitans[titan].seen + '</td></tr>');
+function reformat(el) {
+  return [el[0], el[1].cooldownText, el[1].coolTime, el[1].seen];
+}
+
+function onCd(el) {return el[coolTime] > now;}
+
+function int(a, b) {return a[coolTime] - b[coolTime];}
+
+function makeRow(el) {
+  return '<tr><td class="fshCenter">' + el[titan] +
+    '</td><td class="fshBold fshCenter fshCooldown">' + el[cooldownText] +
+    '</td><td class="fshCenter">' + el[seen] + '</td></tr>';
+}
+
+function makeHtml(theTitans) {
+  return Object.entries(theTitans).map(reformat).filter(onCd).sort(int)
+    .map(makeRow).join('');
 }
 
 function makeTrackerTable(theTitans) {
@@ -21,7 +31,7 @@ function makeTrackerTable(theTitans) {
       '<td class="header fshCenter">Visible</td></tr>'
   });
   insertElement(trackerTable, tBody);
-  Object.keys(theTitans).forEach(partial(addRow, theTitans, tBody));
+  insertHtmlBeforeEnd(tBody, makeHtml(theTitans));
   return trackerTable;
 }
 

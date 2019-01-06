@@ -1,3 +1,4 @@
+import chunk from '../../common/chunk';
 import {componentList} from './prepareComponentList';
 import deleteVisible from './deleteVisible';
 import destroyComponent from '../../app/profile/destroycomponent';
@@ -26,11 +27,8 @@ export default function delCompType(self) { // jQuery.min
   var toDelete = componentList[self.dataset.compid].del;
   var td = self.parentNode;
   doSpinner(td);
-  var batchSize = 40;
-  var prm = [];
-  for (var i = 0; i < toDelete.length; i += batchSize) {
-    prm.push(destroyComponent(toDelete.slice(i, i + batchSize))
-      .done(destroyed));
-  }
+  var prm = chunk(40, toDelete).map(function(el) {
+    return destroyComponent(el).done(destroyed);
+  });
   when(prm, partial(removeSpinner, td));
 }
