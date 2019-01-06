@@ -953,6 +953,14 @@
 
   function jQueryNotPresent() {return !isFunction(window.$);}
 
+  function containsText(text, el) {
+    return el.textContent === text;
+  }
+
+  function contains(text) {
+    return partial(containsText, text);
+  }
+
   function querySelectorAll(selector, scope) {
     if (scope) {return scope.querySelectorAll(selector);}
     return document.querySelectorAll(selector);
@@ -962,16 +970,13 @@
     return Array.from(querySelectorAll(selector, scope));
   }
 
-  function gameHelp(el) {
-    return el.textContent === 'Game Help';
-  }
-
   function toSettings(el) {
     el.innerHTML = '<a href="index.php?cmd=settings">Game Help</a>';
   }
 
   function gameHelpLink() {
-    querySelectorArray('#pCR h3').filter(gameHelp).forEach(toSettings);
+    querySelectorArray('#pCR h3').filter(contains('Game Help'))
+      .forEach(toSettings);
   }
 
   var rarity = [
@@ -1427,7 +1432,7 @@
       'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
       'index.php?cmd=findplayer&search_active=1&search_username=&' +
       'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
-      gvgUpperLevel + '&search_in_guild=-1"><span style="color:blue;">' +
+      gvgUpperLevel + '&search_in_guild=1"><span style="color:blue;">' +
       'Get GvG targets</span></a>');
 
     $('table[class="width_full"]').find('a[href*="player_id"]')
@@ -1889,6 +1894,8 @@
   }
 
   var playerLvlTest = [
+    function(level, min) {return !min;},
+    function(level, min, max) {return !max;},
     function(level, min, max) {return isNaN(min) && isNaN(max);},
     function(level, min, max) {return isNaN(min) && level <= max;},
     function(level, min, max) {return min <= level && isNaN(max);},
@@ -2548,14 +2555,13 @@
     outputResult(processResult(json.r), buyResult);
   }
 
+  function ajaxExtract(el) {useitem(el).done(partial(quickDoneExtracted, el));}
+
   function doExtract(target) {
-    var InventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
+    var inventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
     target.parentNode.innerHTML = 'extracting all ' +
-      InventoryIDs.length + ' resources';
-    for (var i = 0; i < InventoryIDs.length; i += 1) {
-      useitem(InventoryIDs[i])
-        .done(partial(quickDoneExtracted, InventoryIDs[i]));
-    }
+      inventoryIDs.length + ' resources';
+    inventoryIDs.forEach(ajaxExtract);
   }
 
   function extractAllSimilar(self) {
@@ -3963,19 +3969,6 @@
       disclaimer();
   }
 
-  var redDot =
-    '<span class="fshDot redDot tip-static" data-tipped="Offline"></span>';
-  var greenDiamond =
-    '<span class="fshDot greenDiamond tip-static" data-tipped="Online"></span>';
-  var yellowDiamond =
-    '<span class="fshDot yellowDiamond tip-static" data-tipped="Offline"></span>';
-  var orangeDiamond =
-    '<span class="fshDot orangeDiamond tip-static" data-tipped="Offline"></span>';
-  var offlineDot =
-    '<span class="fshDot offlineDot tip-static" data-tipped="Offline"></span>';
-  var sevenDayDot =
-    '<span class="fshDot sevenDayDot tip-static" data-tipped="Offline"></span>';
-
   var getMins = [
     function(obj, min) {
       if (obj.day) {return min + parseInt(obj.day, 10) * 1440;}
@@ -4003,22 +3996,29 @@
   ];
 
   var getDot = [
-    {condition: 2, result: greenDiamond},
-    {condition: 5, result: yellowDiamond},
-    {condition: 30, result: orangeDiamond},
-    {condition: 10080, result: offlineDot},
-    {condition: 44640, result: sevenDayDot}
+    [2, 'greenDiamond'],
+    [5, 'yellowDiamond'],
+    [30, 'orangeDiamond'],
+    [10080, 'offlineDot'],
+    [44640, 'sevenDayDot']
   ];
+
+  function activity(min, el) {return min < el[0];}
+
+  function aDot(type) {
+    var tip = 'Offline';
+    if (type === 'greenDiamond') {tip = 'Online';}
+    return '<span class="fshDot ' + type +
+      ' tip-static" data-tipped="' + tip + '"></span>';
+  }
 
   function onlineDot(obj) {
     var min = getMins.reduce(function(prev, curr) {
       return curr(obj, prev);
     }, 0);
-    for (var i = 0; i < getDot.length; i += 1) {
-      var el = getDot[i];
-      if (min < el.condition) {return el.result;}
-    }
-    return redDot;
+    var which = getDot.find(partial(activity, min));
+    if (which) {return aDot(which[1], which[2]);}
+    return aDot('redDot');
   }
 
   function getMyItem(removeBy, item) {
@@ -4097,14 +4097,15 @@
     return uniq(res);
   }
 
-  function sustainEnhancement(el) {return el.textContent === 'Sustain';}
-
   function getSustain(doc) {
     var sustainLink = getArrayByTagName('a',
-      getElementById('profileLeftColumn', doc)).find(sustainEnhancement);
-    var sustainText = sustainLink.parentNode.parentNode.parentNode
-      .nextElementSibling.children[0].dataset.tipped;
-    return parseInt(sustainLevelRE.exec(sustainText)[1], 10) || -1;
+      getElementById('profileLeftColumn', doc)).find(contains('Sustain'));
+    if (sustainLink) {
+      var sustainText = sustainLink.parentNode.parentNode.parentNode
+        .nextElementSibling.children[0].dataset.tipped;
+      return parseInt(sustainLevelRE.exec(sustainText)[1], 10) || -1;
+    }
+    return 0;
   }
 
   function getInnerPlayerName(doc) {
@@ -4236,17 +4237,16 @@
     return thisPlayerName;
   }
 
+  function makeOptions(el) {
+    return '<option value="' + el.id + '">' + el.name + '</option>';
+  }
+
   var buffCustom = {
     header: 'Buff',
     what: 'buff',
     control: function() {
-      var ret = '<select style="width:140px;" id="selectedBuff">';
-      for (var j = 0; j < buffList.length; j += 1) {
-        ret += '<option value="' + buffList[j].id + '">' +
-          buffList[j].name + '</option>';
-      }
-      ret += '</select>';
-      return ret;
+      return '<select style="width:140px;" id="selectedBuff">' +
+        buffList.map(makeOptions).join('') + '</select>';
     },
     cutoff: '175 buff',
     searched: 'Nicknames of buff searched',
@@ -4291,7 +4291,7 @@
 
   function gotProfile(j, html) {
     parseProfileAndDisplay(html, {
-      href: onlinePlayers$1[j],
+      href: j,
       findBuffNicks: findBuffNicks
     });
   }
@@ -4456,11 +4456,14 @@
     findBuffsParseProfilePageStart();
   }
 
+  function notHeader(el, i) {return i !== 0;}
+
+  function deleteRow(buffTable) {buffTable.deleteRow(-1);}
+
   function findBuffsClearResults() { // Legacy
     var buffTable = getElementById('buffTable');
-    for (var j = buffTable.rows.length; j > 1; j -= 1) {
-      buffTable.deleteRow(j - 1);
-    }
+    Array.from(buffTable.rows).filter(notHeader)
+      .forEach(partial(deleteRow, buffTable));
     getElementById('buffNicks').innerHTML = '';
     updateProgress('Idle.', 'black');
     getElementById('potentialBuffers').innerHTML = '';
@@ -4481,15 +4484,13 @@
       .done(findBuffsParseGuildManagePage);
   }
 
+  function thisBuff(selectedBuff, el) {return selectedBuff === el.id;}
+
   function findBuffsStart() { // Legacy
     var selectedBuff = parseInt($('#selectedBuff').val(), 10);
-    for (var j = 0; j < buffList.length; j += 1) {
-      if (selectedBuff === buffList[j].id) {
-        findBuffNicks = buffList[j].nicks;
-        findBuffMinCastLevel = buffList[j].lvl;
-        break;
-      }
-    }
+    var findThisBuff = buffList.find(partial(thisBuff, selectedBuff));
+    findBuffNicks = findThisBuff.nicks;
+    findBuffMinCastLevel = findThisBuff.lvl;
     findAnyStart('potential buffers');
   }
 
@@ -4710,16 +4711,12 @@
     });
   }
 
-  function isChatLink(el) {
-    return el.textContent === 'Chat';
-  }
-
   function makeLink(el) {
     el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">Chat</a>';
   }
 
   function updateChatLink() {
-    querySelectorArray('#pCR h4').filter(isChatLink).forEach(makeLink);
+    querySelectorArray('#pCR h4').filter(contains('Chat')).forEach(makeLink);
   }
 
   function addGuildInfoWidgets() {
@@ -4990,6 +4987,116 @@
       outputFormat(m, ' mins, ') + s + ' secs';
   }
 
+  var enemyBuffCheckOn = 'enemy-buff-check-on';
+  var enemyBuffCheckOff = 'enemy-buff-check-off';
+  var enemySendMessage = 'enemy-send-message';
+  var enemyQuickbuff = 'enemy-quickbuff';
+  var enemySelectedBuff = 'enemy-quick-buff';
+
+  var contactClass = [
+    [
+      function(n) {return n < 120;},
+      'fshDodgerBlue',
+      'fshRed'
+    ],
+    [
+      function(n) {return n < 300;},
+      'fshDodgerBlue',
+      'fshRed'
+    ],
+    [
+      function() {return true;},
+      'fshPowderBlue',
+      'fshPink'
+    ]
+  ];
+
+  function allyOrEnemy(type, test) {
+    if (type) {return test[1];}
+    return test[2];
+  }
+
+  function contactColor(last_login, type) {
+    var test = contactClass.find(function(ary) {
+      return ary[0](nowSecs - last_login);
+    });
+    if (test) {return allyOrEnemy(type, test);}
+    return 'fshWhite';
+  }
+
+  function playerName$1(val, type) {
+    return '<a class="player-name tip-static ' +
+      contactColor(val.last_login, type) +
+      '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
+      '<td>Level:</td><td>' + val.level + '</td></tr><tr><td>Last ' +
+      'Activity:</td><td>' + formatLastActivity(val.last_login) +
+      '</td></tr></tbody></table>" href="index.php?cmd=profile&player_id=' +
+      val.id + '">' + val.username + '</a>';
+  }
+
+  function doBuffCheck() {
+    if (!calf.hideBuffSelected) {
+      return '<span class="' + enemyBuffCheckOn + '"></span>';
+    }
+    return '';
+  }
+
+  function doMsgButton() {
+    if (!calf.hideGuildInfoMessage) {
+      return '<span class="' + enemySendMessage + ' guild-icon left ' +
+        'guild-minibox-action tip-static" data-tipped="Send Message"></span>';
+    }
+    return '';
+  }
+
+  function doBuffButton() {
+    if (!calf.hideGuildInfoBuff) {
+      return '<span class="' + enemyQuickbuff + ' guild-icon left ' +
+        'guild-minibox-action tip-static" data-tipped="Quick Buff"></span>';
+    }
+    return '';
+  }
+
+  function doSecureButton(val) {
+    if (!calf.hideGuildInfoSecureTrade) {
+      return '<a class="enemy-secure-trade guild-icon left ' +
+        'guild-minibox-action tip-static" href="index.php?cmd=trade' +
+        '&subcmd=createsecure&target_username=' + val.username +
+        '" data-tipped="Secure Trade"></a>';
+    }
+    return '';
+  }
+
+  function doTradeButton(val) {
+    if (!calf.hideGuildInfoTrade) {
+      return '<a class="enemy-trade guild-icon left ' +
+        'guild-minibox-action tip-static" href="index.php?cmd=trade' +
+        '&target_player=' + val.username +
+        '" data-tipped="Send Gold/Items/FSP"></a>';
+    }
+    return '';
+  }
+
+  function recent(val) {
+    return nowSecs - val.last_login < 1800;
+  }
+
+  function addContact(type, val) {
+    return '<li class="player"><div class="player-row">' +
+      doBuffCheck() +
+      playerName$1(val, type) +
+      '</div><div class="guild-minibox-actions">' +
+      doMsgButton() +
+      doBuffButton() +
+      doSecureButton(val) +
+      doTradeButton(val) +
+      '</div></li>';
+  }
+
+  function addContacts(contactList, type) {
+    return contactList.filter(recent).map(partial(addContact, type)).join('');
+  }
+
   function noChildren(parentNode, newNode) {
     if (parentNode.firstChild instanceof Node) {
       return insertElementBefore(newNode, parentNode.firstChild);
@@ -5031,8 +5138,7 @@
   }
 
   function getProfileFromForage(data) {
-    if (!data || data.lastUpdate < now -
-      calf.allyEnemyOnlineRefreshTime) {
+    if (!data || data.lastUpdate < now - calf.allyEnemyOnlineRefreshTime) {
       return getMyProfile();
     }
     return data;
@@ -5048,118 +5154,6 @@
   function openQuickBuffByName(aPlayerName) {
     window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
       'fsQuickBuff', 618, 1000, ',scrollbars');
-  }
-
-  var enemyBuffCheckOn = 'enemy-buff-check-on';
-  var enemyBuffCheckOff = 'enemy-buff-check-off';
-  var enemySendMessage = 'enemy-send-message';
-  var enemyQuickbuff = 'enemy-quickbuff';
-  var enemySelectedBuff = 'enemy-quick-buff';
-  var buffCheck = '<span class="' + enemyBuffCheckOn + '"></span>';
-  var msgButton = '<span class="' + enemySendMessage + ' guild-icon left ' +
-    'guild-minibox-action tip-static" data-tipped="Send Message"></span>';
-  var buffButton = '<span class="' + enemyQuickbuff + ' guild-icon left ' +
-    'guild-minibox-action tip-static" data-tipped="Quick Buff"></span>';
-
-  var contactClass = [
-    {
-      condition: function(n) {return n < 120;},
-      ally: 'fshDodgerBlue',
-      enemy: 'fshRed'
-    },
-    {
-      condition: function(n) {return n < 300;},
-      ally: 'fshDodgerBlue',
-      enemy: 'fshRed'
-    },
-    {
-      condition: function() {return true;},
-      ally: 'fshPowderBlue',
-      enemy: 'fshPink'
-    }
-  ];
-
-  function allyOrEnemy(type, test) {
-    if (type) {return test.ally;}
-    return test.enemy;
-  }
-
-  function contactColor(last_login, type) {
-    for (var i = 0; i < contactClass.length; i += 1) {
-      var test = contactClass[i];
-      if (test.condition(nowSecs - last_login)) {
-        return allyOrEnemy(type, test);
-      }
-    }
-    return 'fshWhite';
-  }
-
-  function playerName$1(val, type) {
-    return '<a class="player-name tip-static ' +
-      contactColor(val.last_login, type) +
-      '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
-      '<td>Level:</td><td>' + val.level + '</td></tr><tr><td>Last ' +
-      'Activity:</td><td>' + formatLastActivity(val.last_login) +
-      '</td></tr></tbody></table>" href="index.php?cmd=profile&player_id=' +
-      val.id + '">' + val.username + '</a>';
-  }
-
-  function doBuffCheck() {
-    if (!calf.hideBuffSelected) {
-      return buffCheck;
-    }
-    return '';
-  }
-
-  function doMsgButton() {
-    if (!calf.hideGuildInfoMessage) {
-      return msgButton;
-    }
-    return '';
-  }
-
-  function doBuffButton() {
-    if (!calf.hideGuildInfoBuff) {
-      return buffButton;
-    }
-    return '';
-  }
-
-  function doSecureButton(val) {
-    if (!calf.hideGuildInfoSecureTrade) {
-      return '<a class="enemy-secure-trade guild-icon left ' +
-        'guild-minibox-action tip-static" href="index.php?cmd=trade' +
-        '&subcmd=createsecure&target_username=' + val.username +
-        '" data-tipped="Secure Trade"></a>';
-    }
-    return '';
-  }
-
-  function doTradeButton(val) {
-    if (!calf.hideGuildInfoTrade) {
-      return '<a class="enemy-trade guild-icon left ' +
-        'guild-minibox-action tip-static" href="index.php?cmd=trade' +
-        '&target_player=' + val.username +
-        '" data-tipped="Send Gold/Items/FSP"></a>';
-    }
-    return '';
-  }
-
-  function addContact(contactList, type) {
-    var output = '';
-    contactList.forEach(function(val) {
-      if (nowSecs - val.last_login > 1800) {return;} // 30 mins
-      output += '<li class="player"><div class="player-row">';
-      output += doBuffCheck();
-      output += playerName$1(val, type);
-      output += '</div><div class="guild-minibox-actions">';
-      output += doMsgButton();
-      output += doBuffButton();
-      output += doSecureButton(val);
-      output += doTradeButton(val);
-      output += '</div></li>';
-    });
-    return output;
   }
 
   var noAlliesTests = [
@@ -5179,10 +5173,10 @@
   function hazAllies(allies, enemies) {
     var output = '';
     if (calf.enableAllyOnlineList) {
-      output += addContact(allies, true);
+      output += addContacts(allies, true);
     }
     if (calf.enableEnemyOnlineList) {
-      output += addContact(enemies, false);
+      output += addContacts(enemies, false);
     }
     var fshContactList = getElementById('fshContactList');
     fshContactList.innerHTML = '';
@@ -5865,7 +5859,10 @@
       Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
   }
 
-  function pvpLadder(head) {return head.children[1].textContent === 'PvP Ladder';}
+  var titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
+    '([^!]*)(!)');
+
+  function pvpLadder(head) {return containsText('PvP Ladder', head.children[1]);}
 
   function timestamp(head) {
     return parseDateAsTimestamp(head.children[2].textContent);
@@ -5880,20 +5877,46 @@
     }
   }
 
+  function makeALink(href, label) {
+    return '<a href="' + href + '" target="_blank">' + label + '</a>';
+  }
+
+  function creatureSearchHref(name) {
+    return guideUrl + 'creatures&search_name=' + name;
+  }
+
+  function realmSearchHref(name) {
+    return guideUrl + 'realms&search_name=' + name;
+  }
+
   function makeUfsgLink(img) {
     var myName = encodeURIComponent(img.getAttribute('oldtitle'));
     var myLink = createAnchor({
-      href: guideUrl + 'creatures&search_name=' + myName,
+      href: creatureSearchHref(myName),
       target: '_blank'
     });
     insertElementBefore(myLink, img);
     insertElement(myLink, img);
   }
 
+  function titanSpotted(el) {
+    return titanRe.test(el.firstChild.nodeValue);
+  }
+
+  function titanLink(el) {
+    var news = el.firstChild.nodeValue.match(titanRe);
+    news[2] = makeALink(creatureSearchHref(news[2]), news[2]);
+    news[4] = makeALink(realmSearchHref(news[4]), news[4]);
+    var newSpan = createSpan({innerHTML: news.slice(1).join('')});
+    el.replaceChild(newSpan, el.firstChild);
+  }
+
   function addUfsgLinks() {
     querySelectorArray(
       '.news_body img[src^="https://cdn.fallensword.com/creatures/"]')
       .forEach(makeUfsgLink);
+    getArrayByClassName('news_body_tavern', pCC)
+      .filter(titanSpotted).forEach(titanLink);
   }
 
   function injectHomePageTwoLink() { // Pref
@@ -6375,13 +6398,9 @@
     return topbannerStats && !hidden && gameStats;
   }
 
-  function isGameStats(el) {
-    return el.textContent === 'Game Stats';
-  }
-
   function injectServerNode() {
     var topbannerStats = getElementById('topbanner-stats');
-    var gameStats = querySelectorArray('#pCR h3').find(isGameStats);
+    var gameStats = querySelectorArray('#pCR h3').find(contains('Game Stats'));
     if (validStatBoxes(topbannerStats, gameStats)) {
       statBoxesExist(topbannerStats, gameStats);
     }
@@ -6948,9 +6967,7 @@
   ];
 
   function keyPress(evt) {
-    for (var i = 0; i < bailOut.length; i += 1) {
-      if (bailOut[i](evt)) {return;}
-    }
+    if (bailOut.some(function(fn) {return fn(evt);})) {return;}
     handleKey(evt.charCode);
   }
 
@@ -7386,14 +7403,18 @@
     }
   }
 
+  function myRows(cols, skip) {
+    return function(el, i) {return el.children.length === cols && i > skip;};
+  }
+
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
-    for (var i = 2; i < topTable.rows.length; i += 4) {
-      var aCell = topTable.rows[i].cells[1];
+    Array.from(topTable.rows).filter(myRows(4, 1)).forEach(function(el) {
+      var aCell = el.cells[1];
       aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
         '&search_show_first=1&search_active=1&search_username=' +
         aCell.textContent + '">' + aCell.textContent + '</a>';
-    }
+    });
   }
 
   var warehouse = [];
@@ -7972,20 +7993,11 @@
     opts.id = {};
   }
 
-  var lvlTests = [
-    function(min) {return !min;},
-    function(min, max) {return !max;},
-    function(min, max) {return isNaN(min) && isNaN(max);},
-    function(min, max, level) {return isNaN(min) && level <= max;},
-    function(min, max, level) {return min <= level && isNaN(max);},
-    function(min, max, level) {return min <= level && level <= max;}
-  ];
-
   function hazOpts(_settings, data) {
     var min = opts.minLvl;
     var max = opts.maxLvl;
     var level = intValue(data[7]);
-    return lvlTests.some(function(fn) {return fn(min, max, level);});
+    return lvlTest(playerLvlTest, level, min, max);
   }
 
   function lvlFilter(_settings, data) {
@@ -8859,13 +8871,11 @@
     subscribe('quickcreate', partial(quickcreate, myTable));
   }
 
-  function openSlot(e) {return e.textContent === 'ETA: n/a';}
-
   function drawList(fcDiv) {
     sendEvent('composing', 'FastCompose');
     insertHtmlBeforeEnd(fcDiv, '<br>');
     var compSlots = getArrayByClassName('composing-potion-time', document);
-    var openSlots = compSlots.filter(openSlot).length;
+    var openSlots = compSlots.filter(contains('ETA: n/a')).length;
     if (openSlots > 0) {
       setupFastCompose(fcDiv, compSlots, openSlots);
     } else {
@@ -9379,23 +9389,32 @@
   var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
   var ajaxUrl = conflictUrl + '&no_mobile=1';
 
+  function makeCell(newRow, html) {
+    newRow.insertCell(-1).innerHTML = html;
+  }
+
+  function buildRow(insertHere, html1, html2) {
+    var newRow = insertHere.insertRow(insertHere.rows.length - 2);
+    makeCell(newRow, html1);
+    makeCell(newRow, html2);
+  }
+
+  function conflictHeader(insertHere) {
+    buildRow(insertHere,
+      '<a href="' + conflictUrl + '">Active Conflicts</a>', 'Score');
+  }
+
+  function conflictRow(insertHere, aRow) {
+    buildRow(insertHere,
+      aRow.cells[0].innerHTML, '<b>' + aRow.cells[6].innerHTML + '</b>');
+  }
+
   function hazConflict(conflictTable, curPage, insertHere) { // Legacy
     if (curPage === 1) {
-      var newNode = insertHere.insertRow(insertHere.rows.length - 2);
-      newNode.insertCell(0);
-      newNode.insertCell(0);
-      newNode.cells[0].innerHTML =
-        '<a href="' + conflictUrl + '">Active Conflicts</a>';
-      newNode.cells[1].innerHTML = 'Score';
+      conflictHeader(insertHere);
     }
-    for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
-      var newRow = insertHere.insertRow(insertHere.rows.length - 2);
-      newRow.insertCell(0);
-      newRow.insertCell(0);
-      newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
-      newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
-        .innerHTML + '</b>';
-    }
+    Array.from(conflictTable.rows).filter(myRows(7, 0))
+      .forEach(partial(conflictRow, insertHere));
   }
 
   function activeConflicts(doc, curPage, insertHere) { // Legacy
@@ -9950,11 +9969,9 @@
     });
   }
 
-  function doItemTable(rows) {
-    for (var i = 1; i < rows.length - 1; i += 2) {
-      insertHtmlBeforeEnd(rows[i].cells[2],
-        '&nbsp;<span class="sendLink">Fast BP</span>');
-    }
+  function doItemTable(checkbox) {
+    insertHtmlBeforeEnd(checkbox.parentNode.nextElementSibling
+      .nextElementSibling, '&nbsp;<span class="sendLink">Fast BP</span>');
   }
 
   function doCheckAll() {
@@ -9986,10 +10003,7 @@
   }
 
   function paintTable() {
-    var nodeList = getElementsByTagName(def_table, pCC);
-    if (nodeList.length > 0) {
-      doItemTable(nodeList[nodeList.length - 1].rows);
-    }
+    querySelectorArray('#pCC input[name="tagIndex[]"]').forEach(doItemTable);
   }
 
   function checkAllBtn() {
@@ -10587,36 +10601,30 @@
   }
 
   var locations = [
-    {
-      test: function(row) {return row.player_id && row.player_id === -1;},
-      res: function(row, act) {
-        return 'takeItem" action="' + act.a;
-      }
-    },
-    {
-      test: function(row) {
-        return row.player_id &&
-          row.player_id !== theInv.current_player_id;
+    [
+      function(row) {return row.player_id && row.player_id === -1;},
+      function(row, act) {return 'takeItem" action="' + act.a;}
+    ],
+    [
+      function(row) {
+        return row.player_id && row.player_id !== theInv.current_player_id;
       },
-      res: function(row, act) {
+      function(row, act) {
         return 'recallItem" playerid="' + row.player_id +
           '" mode="0" action="' + act.a;
       }
-    },
-    {
-      test: function(row) {
-        return userInvNotEquipped(row) || guidInvNotEquipped(row);
-      },
-      res: function(row, act) {return act.c;}
-    }
+    ],
+    [
+      function(row) {return userInvNotEquipped(row) || guidInvNotEquipped(row);},
+      function(row, act) {return act.c;}
+    ]
   ];
 
   function wuRender(row, act) {
-    for (var i = 0; i < locations.length; i += 1) {
-      if (locations[i].test(row)) {
-        return '<span class="fshLink ' + locations[i].res(row, act) +
-          '" invid="' + row.inv_id + '">' + act.b + '</span>';
-      }
+    var location = locations.find(function(el) {return el[0](row);});
+    if (location) {
+      return '<span class="fshLink ' + location[1](row, act) +
+        '" invid="' + row.inv_id + '">' + act.b + '</span>';
     }
     return '';
   }
@@ -11312,6 +11320,14 @@
     syncInvMan();
   }
 
+  function chunk(size, ary) {
+    var ret = [];
+    for (var i = 0; i < ary.length; i += size) {
+      ret.push(ary.slice(i, i + size));
+    }
+    return ret;
+  }
+
   function takeitems(invIdAry) {
     return callApp({
       cmd: 'tempinv',
@@ -11410,13 +11426,15 @@
     takeSuccess(takeResult, json);
   }
 
+  function doTakeItem(takeResult, el) {
+    takeitems(el).done(partial(doneTake, takeResult));
+  }
+
   function takeSimilar(itemList, takeResult, self) { // jQuery.min
     var type = self.dataset.id;
     var invIds = itemList[type].invIds;
     self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
-    for (var i = 0; i < invIds.length; i += 40) {
-      takeitems(invIds.slice(i, i + 40)).done(partial(doneTake, takeResult));
-    }
+    chunk(40, invIds).forEach(partial(doTakeItem, takeResult));
   }
 
   function clickEvt(itemList, takeResult, evt) {
@@ -11469,8 +11487,6 @@
     makeQtLabel('qtOff', 'Quick Take', injector);
   }
 
-  var currentPlayerId$1;
-
   function getPlayer(playerAry) { // Legacy
     if (playerAry) {return Number(playerAry[1]);}
     return 0;
@@ -11487,15 +11503,13 @@
     var firstPlayerID = getPlayer(firstPlayer);
     var secondPlayerID = getPlayer(secondPlayer);
     return firstPlayer &&
-      firstPlayerID !== currentPlayerId$1 &&
-      secondPlayerID !== currentPlayerId$1;
+      firstPlayerID !== playerId() &&
+      secondPlayerID !== playerId();
   }
 
   function findPlayers(aRow) { // Legacy
     if (msgDoesNotIncludePlayer(aRow)) {
-      for (var j = 0; j < 3; j += 1) {
-        aRow.cells[j].removeAttribute('class');
-      }
+      Array.from(aRow.cells).forEach(function(el) {el.className = '';});
       aRow.classList.add('fshGrey');
       aRow.classList.add('fshXSmall');
     }
@@ -11536,12 +11550,8 @@
     guildInvite(aRow);
   }
 
-  function msgHeader(el) {
-    return el.textContent === 'Message';
-  }
-
   function getMessageHeader() {
-    return getArrayByTagName('td', pCC).find(msgHeader);
+    return getArrayByTagName('td', pCC).find(contains('Message'));
   }
 
   function guildLogWidgetsEnabled() { // Legacy
@@ -11550,13 +11560,7 @@
     var logTable = messageNameCell.parentNode.parentNode.parentNode;
     messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
       '(Guild Log messages not involving self are dimmed!)</span>';
-
-    currentPlayerId$1 = playerId();
-
-    for (var i = 1; i < logTable.rows.length; i += 2) {
-      var aRow = logTable.rows[i];
-      processGuildWidgetRow(aRow);
-    }
+    Array.from(logTable.rows).filter(myRows(3, 0)).forEach(processGuildWidgetRow);
   }
 
   function addGuildLogWidgets() {
@@ -11589,7 +11593,7 @@
     }
   }
 
-  function rowColor(aRow, logScreen, dateColumn) { // Legacy
+  function rowColor(logScreen, dateColumn, aRow) { // Legacy
     var addBuffTag = true;
     var cellContents = aRow.cells[dateColumn].textContent;
     var postDateUtc = parseDateAsTimestamp(cellContents);
@@ -11611,13 +11615,8 @@
     nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
     var lastCheckScreen = 'last' + logScreen + 'Check';
     lastCheckUtc = getLastCheck(lastCheckScreen);
-    var increment = 2;
-    if (logScreen === 'Chat') {
-      increment = 4;
-    }
-    for (var i = 1; i < chatTable.rows.length; i += increment) {
-      rowColor(chatTable.rows[i], logScreen, dateColumn);
-    }
+    Array.from(chatTable.rows).filter(myRows(3, 0))
+      .forEach(partial(rowColor, logScreen, dateColumn));
     setValue(lastCheckScreen, nowUtc);
   }
 
@@ -11825,7 +11824,7 @@
     storeOptions();
   }
 
-  function makeCell(row, html) {
+  function makeCell$1(row, html) {
     var thisCell = row.insertCell(-1);
     thisCell.innerHTML = html;
     thisCell.className = 'row';
@@ -11835,11 +11834,11 @@
     var myRow = myTable.insertRow(-1);
     r.push(myRow);
     if (!options$1.checks[r[4]]) {myRow.className = 'fshHide';}
-    makeCell(myRow,
+    makeCell$1(myRow,
       '<span class="newGuildLog" style="background-image: url(\'' +
       imageServer + '/skin/log_1.gif\');"></span>');
-    makeCell(myRow, '<nobr>' + r[2] + '</nobr>');
-    makeCell(myRow, r[3]);
+    makeCell$1(myRow, '<nobr>' + r[2] + '</nobr>');
+    makeCell$1(myRow, r[3]);
   }
 
   function separatorRow(r) {
@@ -11851,7 +11850,7 @@
     sep.colSpan = 3;
   }
 
-  function buildRow(r) {
+  function buildRow$1(r) {
     dataRow(r);
     separatorRow(r);
   }
@@ -11860,7 +11859,7 @@
     myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
     insertHtmlBeforeEnd(myTable, headerRow$1);
 
-    tmpGuildLog.forEach(buildRow);
+    tmpGuildLog.forEach(buildRow$1);
 
     var injector = getElementById('fshInjectHere');
     pCC.replaceChild(myTable, injector);
@@ -12022,14 +12021,11 @@
       totalStats + '&nbsp;</td></tr>');
   }
 
-  function bonuses(el) {
-    return el.textContent === 'Bonuses';
-  }
-
   function fshDataFilter(data) {
     var container = createDiv();
     insertHtmlBeforeEnd(container, data);
-    getArrayByTagName('font', container).filter(bonuses).forEach(addStats);
+    getArrayByTagName('font', container).filter(contains('Bonuses'))
+      .forEach(addStats);
     return container.innerHTML;
   }
 
@@ -12267,12 +12263,9 @@
     var toDelete = componentList[self.dataset.compid].del;
     var td = self.parentNode;
     doSpinner$1(td);
-    var batchSize = 40;
-    var prm = [];
-    for (var i = 0; i < toDelete.length; i += batchSize) {
-      prm.push(destroyComponent(toDelete.slice(i, i + batchSize))
-        .done(destroyed));
-    }
+    var prm = chunk(40, toDelete).map(function(el) {
+      return destroyComponent(el).done(destroyed);
+    });
     when(prm, partial(removeSpinner, td));
   }
 
@@ -12691,42 +12684,38 @@
     insertHtmlAfterEnd(avyImg, newhtml);
   }
 
-  function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
-    var _c = '';
-    if (contactsTotal && contactsTotal >= numberOfContacts) {
-      _c = '/' + contactsTotal;
-    }
-    insertHtmlBeforeEnd(target, '<span class="fshBlue">&nbsp;' +
-      numberOfContacts + _c + '</span>');
+  function totalKey(isAllies) {
+    if (isAllies) {return 'alliestotal';}
+    return 'enemiestotal';
   }
 
-  function countContacts(el, isAllies) {
+  function contactSlots(numberOfContacts, contactsTotal) {
+    if (contactsTotal && contactsTotal >= numberOfContacts) {
+      return '/' + contactsTotal;
+    }
+    return '';
+  }
+
+  function countContacts(isAllies, el) {
     var target = el.parentNode;
     var numberOfContacts = getElementsByTagName(def_table,
       target.nextSibling.nextSibling).length - 1;
-    if (isAllies) {
-      totalAllyEnemy(target, numberOfContacts, getValue('alliestotal'));
-    } else {
-      totalAllyEnemy(target, numberOfContacts, getValue('enemiestotal'));
-    }
-  }
-
-  function findAllyEnemy(el) {
-    var isAllies = el.textContent === 'Allies';
-    var isEnemies = el.textContent === 'Enemies';
-    if (isAllies || isEnemies) {
-      countContacts(el, isAllies);
-    }
+    insertHtmlBeforeEnd(target,
+      '<span class="fshBlue">&nbsp;' + numberOfContacts.toString() +
+      contactSlots(numberOfContacts, getValue(totalKey(isAllies))) +
+      '</span>');
   }
 
   function profileParseAllyEnemy() {
     // Allies/Enemies count/total function
-    querySelectorArray('#profileLeftColumn strong').forEach(findAllyEnemy);
+    var headings = querySelectorArray('#profileLeftColumn strong');
+    headings.filter(contains('Allies')).forEach(partial(countContacts, true));
+    headings.filter(contains('Enemies')).forEach(partial(countContacts, false));
   }
 
   function expandBio() {
     var bioExpander = getElementById('fshBioExpander');
-    if (bioExpander.textContent === 'More ...') {
+    if (containsText('More ...', bioExpander)) {
       bioExpander.textContent = 'Less ...';
     } else {
       bioExpander.textContent = 'More ...';
@@ -13119,14 +13108,6 @@
     });
   }
 
-  function chunk(size, ary) {
-    var ret = [];
-    for (var i = 0; i < ary.length; i += size) {
-      ret.push(ary.slice(i, i + size));
-    }
-    return ret;
-  }
-
   function postApp(data) {
     extend(data, {app: 1});
     return retryAjax({
@@ -13171,7 +13152,9 @@
   }
 
   function removeInvIds(itemsAry, json) {
-    json.r.forEach(partial(removeInvId, itemsAry));
+    if (Array.isArray(json.r)) {
+      json.r.forEach(partial(removeInvId, itemsAry));
+    }
   }
 
   function moveList(itemsAry, folderId, list) {
@@ -13181,7 +13164,7 @@
   function moveItemsToFolder(itemsAry) { // jQuery.min
     var folderId = getElementById('selectFolderId').value;
     chunk(50, itemsAry.filter(checked).map(invid))
-      .map(partial(moveList, itemsAry, folderId));
+      .forEach(partial(moveList, itemsAry, folderId));
   }
 
   function anotherSpinner$1(self) {
@@ -13598,13 +13581,12 @@
   }
 
   function forEachQuest(hideQuests, questTable) {
-    for (var i = 2; i < questTable.rows.length; i += 4) {
-      var aRow = questTable.rows[i];
+    Array.from(questTable.rows).filter(myRows(5, 0)).forEach(function(aRow) {
       var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
       doHideQuests(hideQuests, questName, aRow);
       var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
       aRow.cells[4].innerHTML = guideButtons(questID, questName);
-    }
+    });
   }
 
   function injectQuestBookFull() {
@@ -13924,23 +13906,24 @@
       'You successfully recalled the item</span>';
   }
 
-  function recallInfObj(evt, mode, href) {
+  function recallInfObj(self, mode, href) {
     return {
       invId: href.match(/&id=(\d+)/)[1],
       playerId: href.match(/&player_id=(\d+)/)[1],
       mode: mode,
-      action: evt.target.getAttribute('action')
+      action: self.getAttribute('action')
     };
   }
 
-  function recallItem$2(evt) { // jQuery
-    hideQTip(evt.target);
-    var mode = evt.target.getAttribute('mode');
-    var theTd = evt.target.parentNode.parentNode;
+  function recallItem$2(self) { // jQuery
+    hideQTip(self);
+    var mode = self.getAttribute('mode');
+    var theTd = self.parentNode.parentNode;
     if (mode === '0') {theTd = theTd.parentNode;}
     var href = theTd.children[0].href;
     if (!href) {return;}
-    queueRecallItem(recallInfObj(evt, mode, href)).done(partial(recalled, theTd));
+    queueRecallItem(recallInfObj(self, mode, href))
+      .done(partial(recalled, theTd));
     theTd.innerHTML = spinner;
   }
 
@@ -13949,33 +13932,27 @@
     theTd.innerHTML = '<span class="fastWorn">Worn</span>';
   }
 
-  function wearItem$1(evt) { // jQuery
-    hideQTip(evt.target);
-    var theTd = evt.target.parentNode.parentNode.parentNode;
+  function wearItem$1(self) { // jQuery
+    hideQTip(self);
+    var theTd = self.parentNode.parentNode.parentNode;
     var href = theTd.children[0].href;
     if (!href) {return;}
     equipItem(href.match(/&id=(\d+)/)[1]).done(partial(wornItem, theTd));
     theTd.innerHTML = spinner;
   }
 
-  var events = [
-    {test: 'recall', fn: recallItem$2},
-    {test: 'equip', fn: wearItem$1},
-    {
-      test: 'a-reply',
-      fn: function(evt) {
-        window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
-      }
-    }
+  function replyTo(self) {
+    window.openQuickMsgDialog(self.getAttribute('target_player'));
+  }
+
+  var classEvts$1 = [
+    ['recall', recallItem$2],
+    ['equip', wearItem$1],
+    ['a-reply', replyTo]
   ];
 
-  function eventHandlers$2(evt) {
-    for (var i = 0; i < events.length; i += 1) {
-      if (evt.target.classList.contains(events[i].test)) {
-        events[i].fn(evt);
-        return;
-      }
-    }
+  function eventHandlers$2() {
+    on(getElementsByTagName('table', pCC)[1], 'click', classHandler(classEvts$1));
   }
 
   var inventory$2;
@@ -14082,14 +14059,20 @@
     insertElement(mapTbl.tBodies[0], selectRow);
   }
 
+  function makeButton$1(row, id, val) {
+    var btn = createInput({
+      id: id,
+      type: 'button',
+      value: val
+    });
+    insertElement(row.cells[1], btn);
+  }
+
   function insertFinal(mapTbl) {
     var row = getRow();
-    var input = createInput({
-      id: 'fshReset',
-      type: 'button',
-      value: 'Reset'
-    });
-    insertElement(row.cells[1], input);
+    makeButton$1(row, 'fshIgnoreAll', 'Ignore All');
+    insertHtmlBeforeEnd(row.cells[1], '&nbsp;');
+    makeButton$1(row, 'fshReset', 'Reset');
     insertElement(mapTbl.tBodies[0], row);
     return 0;
   }
@@ -14173,15 +14156,21 @@
     }
   }
 
-  function resetMap(potOpts, potObj) {
-    potOpts.myMap = Object.keys(potObj).reduce(function(prev, pot) {
+  function reMap(ignore, prev, pot) {
+    if (ignore) {
+      prev[pot] = 'Ignore';
+    } else {
       prev[pot] = pot;
-      return prev;
-    }, {});
+    }
+    return prev;
   }
 
-  function doReset$1(potOpts, potObj) {
-    resetMap(potOpts, potObj);
+  function resetMap(potOpts, potObj, ignore) {
+    potOpts.myMap = Object.keys(potObj).reduce(partial(reMap, ignore), {});
+  }
+
+  function doReset$1(potOpts, potObj, ignore) {
+    resetMap(potOpts, potObj, ignore);
     setForage(storeMap, potOpts);
     drawMapping(potOpts);
     drawInventory(potOpts, potObj);
@@ -14196,8 +14185,12 @@
   function clickEvents(potOpts, potObj) {
     return [
       [
+        function(self) {return self.id === 'fshIgnoreAll';},
+        partial(doReset$1, potOpts, potObj, true)
+      ],
+      [
         function(self) {return self.id === 'fshReset';},
-        partial(doReset$1, potOpts, potObj)
+        partial(doReset$1, potOpts, potObj, null)
       ],
       [
         function(self) {return /^pottab\d$/.test(self.id);},
@@ -14358,15 +14351,11 @@
 
   function hideOther(el) {
     if (el.firstChild.hasAttribute('bgcolor')) {
-      foundUser = el.firstChild.children[0].textContent === findUser;
+      foundUser = containsText(findUser, el.firstChild.children[0]);
     }
     if (!foundUser) {
       el.className = 'fshHide';
     }
-  }
-
-  function thisUser(el) {
-    return el.textContent === findUser;
   }
 
   function searchUser() {
@@ -14374,7 +14363,7 @@
     if (!findUser) {return;}
     var userNodes = querySelectorArray(
       '#pCC table table td[bgcolor="#DAA534"] b');
-    var userNode = userNodes.some(thisUser);
+    var userNode = userNodes.some(contains(findUser));
     if (!userNode) {return;}
     var nodeList = querySelectorAll('#pCC table table tr');
     batch(2, nodeList, 0, hideOther);
@@ -14387,7 +14376,7 @@
     });
     add(2, searchUser);
     add(3, prepareChildRows);
-    on(getElementsByTagName('table', pCC)[1], 'click', eventHandlers$2);
+    eventHandlers$2();
   }
 
   function drawBox(content, fshSettings) {
@@ -14417,15 +14406,15 @@
     }
   }
 
+  function buildSettingsObj(prev, curr) {
+    prev[curr] = getValue(curr);
+    return prev;
+  }
+
   function injectSaveSettings() { // Hybrid
     if (jQueryNotPresent()) {return;}
-    var content = pCC;
-    var fshSettings = {};
-    var list = GM_listValues();
-    for (var i = 0; i < list.length; i += 1) {
-      fshSettings[list[i]] = getValue(list[i]);
-    }
-    drawBox(content, fshSettings);
+    var fshSettings = GM_listValues().reduce(buildSettingsObj, {});
+    drawBox(pCC, fshSettings);
     $('#HelperLoadSettings').click(clickHandler$1);
   }
 
@@ -14566,13 +14555,28 @@
     lookForMultiplierCount();
   }
 
-  function addRow$1(theTitans, trackerTable, titan) {
-    if (theTitans[titan].coolTime < now) {return;}
-    insertHtmlBeforeEnd(trackerTable,
-      '<tr><td class="fshCenter">' + titan + '</td>' +
-      '<td class="fshBold fshCenter fshCooldown">' +
-      theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
-      theTitans[titan].seen + '</td></tr>');
+  var titan = 0;
+  var cooldownText = 1;
+  var coolTime = 2;
+  var seen = 3;
+
+  function reformat(el) {
+    return [el[0], el[1].cooldownText, el[1].coolTime, el[1].seen];
+  }
+
+  function onCd(el) {return el[coolTime] > now;}
+
+  function int(a, b) {return a[coolTime] - b[coolTime];}
+
+  function makeRow$2(el) {
+    return '<tr><td class="fshCenter">' + el[titan] +
+      '</td><td class="fshBold fshCenter fshCooldown">' + el[cooldownText] +
+      '</td><td class="fshCenter">' + el[seen] + '</td></tr>';
+  }
+
+  function makeHtml(theTitans) {
+    return Object.entries(theTitans).map(reformat).filter(onCd).sort(int)
+      .map(makeRow$2).join('');
   }
 
   function makeTrackerTable(theTitans) {
@@ -14583,7 +14587,7 @@
         '<td class="header fshCenter">Visible</td></tr>'
     });
     insertElement(trackerTable, tBody);
-    Object.keys(theTitans).forEach(partial(addRow$1, theTitans, tBody));
+    insertHtmlBeforeEnd(tBody, makeHtml(theTitans));
     return trackerTable;
   }
 
@@ -14601,22 +14605,21 @@
     }
   }
 
+  function memberName(el) {return el.cells[0].firstChild.firstChild.textContent;}
+
   function buffAll(self) {
     var titanTable = self.parentNode.parentNode.parentNode.parentNode;
-    var shortList = [];
-    for (var j = 1; j < titanTable.rows.length; j += 2) {
-      var firstCell = titanTable.rows[j].cells[0].firstChild.firstChild;
-      if (firstCell) {shortList.push(firstCell.textContent);}
-    }
+    var shortList = Array.from(titanTable.rows)
+      .filter(myRows(3, 0)).map(memberName);
     openQuickBuffByName(shortList.join());
   }
 
   function buffEvent(e) {
     var self = e.target;
-    if (self.textContent === '[b]') {
+    if (containsText('[b]', self)) {
       buffIndividual(self);
     }
-    if (self.textContent === 'all') {
+    if (containsText('all', self)) {
       buffAll(self);
     }
   }
@@ -14625,22 +14628,21 @@
     if (e.target.classList.contains('fshBl')) {buffEvent(e);}
   }
 
+  function playerBufflink(el) {
+    insertHtmlBeforeEnd(el.cells[0],
+      ' <button class="fshBl fshXSmall">[b]</button>');
+  }
+
   function doBuffLinks$1(titanTable) {
-    for (var j = 1; j < titanTable.rows.length; j += 2) {
-      var firstCell = titanTable.rows[j].cells[0];
-      insertHtmlBeforeEnd(firstCell,
-        ' <button class="fshBl fshXSmall">[b]</button>');
-    }
+    Array.from(titanTable.rows).filter(myRows(3, 0)).forEach(playerBufflink);
     insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
       ' <button class="fshBl fshXSmall">all</button>');
   }
 
+  function myTables(el, i) {return el.rows.length > 1 && i > 1;}
+
   function gotTables(titanTables) {
-    for (var i = 2; i < titanTables.length; i += 1) {
-      var titanTable = titanTables[i];
-      if (titanTable.rows.length < 2) {continue;}
-      doBuffLinks$1(titanTable);
-    }
+    Array.from(titanTables).filter(myTables).forEach(doBuffLinks$1);
     on(titanTables[1], 'click', evtHdl$2);
   }
 
@@ -14752,12 +14754,11 @@
     injectScouttowerBuffLinks(titanTables);
     var titanTable = titanTables[1];
     var newTitans = {};
-    for (var i = 1; i < titanTable.rows.length - 1; i += 6) {
-      var aRow = titanTable.rows[i];
+    Array.from(titanTable.rows).filter(myRows(4, 0)).forEach(function(aRow) {
       killsSummary(aRow);
       cooldownTracker(aRow, newTitans); // Pref
       guideLink(aRow);
-    }
+    });
     addMissingTitansFromOld(oldTitans, newTitans); // Pref
     displayTracker(titanTables[0], newTitans); // Pref
     setForage('fsh_titans', newTitans); // Pref
@@ -17430,7 +17431,7 @@
   var currentPct;
   var totalPct;
   var statusText;
-  var cooldownText;
+  var cooldownText$1;
 
   function initVars$1() {
     currentHp = createSpan();
@@ -17439,7 +17440,7 @@
     currentPct = createSpan();
     totalPct = createSpan();
     statusText = createSpan();
-    cooldownText = createSpan();
+    cooldownText$1 = createSpan();
   }
 
   function clearTitanDiv() {
@@ -17449,7 +17450,7 @@
     currentPct.textContent = '';
     totalPct.textContent = '';
     statusText.innerHTML = '';
-    cooldownText.innerHTML = '';
+    cooldownText$1.innerHTML = '';
   }
 
   var current = textSpan('Current');
@@ -17492,7 +17493,7 @@
       [[[2, current, true], [4, makePctWrapper(currentPct)]], true],
       [[[2, total, true], [4, makePctWrapper(totalPct)]], true],
       [[[2, status, true], [4, statusText]], true],
-      [[[6, cooldownText]]],
+      [[[6, cooldownText$1]]],
       [[[2, member, true], [2, kills, true],
         [2, pctTotal, true]]]
     ]);
@@ -17568,7 +17569,7 @@
     currentPct.textContent = currentPctText(ourTitan);
     totalPct.textContent = totalPctText(ourTitan);
     statusText.innerHTML = statusTextHtml(ourTitan);
-    cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
+    cooldownText$1.innerHTML = getCooldownHtml(ourTitan.cooldown);
   }
 
   function memberRow(ourTitan, member) {
@@ -19154,7 +19155,7 @@
       hideMapTooltip,
       initButtons,
       buffInfo,
-      fixDebuff
+      fixDebuff,
     ]);
   }
 
@@ -19720,7 +19721,7 @@
   var enableSeTracker = 'enableSeTracker';
   var trackerCell;
 
-  function addRow$2(trackerTable, se) {
+  function addRow$1(trackerTable, se) {
     insertHtmlBeforeEnd(trackerTable,
       '<tr><td class="fshCenter">' + se[0] + '</td>' +
       '<td class="fshBold fshCenter fshCooldown">' +
@@ -19734,7 +19735,7 @@
         '<td class="header fshCenter">Last Kill</td></tr>'
     });
     insertElement(trackerTable, tBody);
-    seAry.forEach(partial(addRow$2, tBody));
+    seAry.forEach(partial(addRow$1, tBody));
     return trackerTable;
   }
 
@@ -19896,7 +19897,7 @@
   var lastLadderReset;
 
   function checkForPvPLadder(row) {
-    if (row.children[1].children[0].textContent === 'PvP Ladder') {
+    if (containsText('PvP Ladder', row.children[1].children[0])) {
       var logTime = parseDateAsTimestamp(
         row.children[1].children[2].textContent.replace('Posted: ', ''));
       if (logTime > lastLadderReset) {
@@ -20485,9 +20486,7 @@
   }
 
   function processTableRows(logTable) {
-    for (var i = 1; i < logTable.rows.length; i += 2) {
-      processLogWidgetRow(logTable.rows[i]);
-    }
+    Array.from(logTable.rows).filter(myRows(3, 0)).forEach(processLogWidgetRow);
   }
 
   function openMsgDialog(evt) {
@@ -20963,10 +20962,14 @@
   var coreFunction;
   var functionPath;
 
+  function getParam(param) {
+    return getUrlParameter(param) || '-';
+  }
+
   function getType(_cmd) {
     var _type = '-';
     if (_cmd === 'points') {
-      _type = getUrlParameter('type') || '-';
+      _type = getParam('type');
     }
     return _type;
   }
@@ -20993,11 +20996,11 @@
   }
 
   function getParamsFromUrl() {
-    cmd = fallback(getUrlParameter('cmd'), '-');
-    subcmd = fallback(getUrlParameter('subcmd'), '-');
-    subcmd2 = fallback(getUrlParameter('subcmd2'), '-');
+    cmd = getParam('cmd');
+    subcmd = getParam('subcmd');
+    subcmd2 = getParam('subcmd2');
     type$2 = getType(cmd);
-    fromWorld = fallback(getUrlParameter('fromworld'), '-');
+    fromWorld = getParam('fromworld');
   }
 
   function getParamsFromPage() {
@@ -21036,7 +21039,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '77';
+  window.FSH.calf = '78';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
