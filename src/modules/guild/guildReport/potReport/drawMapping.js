@@ -1,6 +1,7 @@
 import add from '../../../support/task';
 import batch from '../../../common/batch';
 import insertElement from '../../../common/insertElement';
+import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
 import once from '../../../common/once';
 import partial from '../../../common/partial';
 import {sendEvent} from '../../../support/fshGa';
@@ -60,14 +61,20 @@ function insertRows(mapTbl, el, i, ary) {
   insertElement(mapTbl.tBodies[0], selectRow);
 }
 
+function makeButton(row, id, val) {
+  var btn = createInput({
+    id: id,
+    type: 'button',
+    value: val
+  });
+  insertElement(row.cells[1], btn);
+}
+
 function insertFinal(mapTbl) {
   var row = getRow();
-  var input = createInput({
-    id: 'fshReset',
-    type: 'button',
-    value: 'Reset'
-  });
-  insertElement(row.cells[1], input);
+  makeButton(row, 'fshIgnoreAll', 'Ignore All');
+  insertHtmlBeforeEnd(row.cells[1], '&nbsp;');
+  makeButton(row, 'fshReset', 'Reset');
   insertElement(mapTbl.tBodies[0], row);
   return 0;
 }
