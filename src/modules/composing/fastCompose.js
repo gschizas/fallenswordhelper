@@ -1,4 +1,5 @@
 import backgroundCreate from './backgroundCreate';
+import contains from '../common/contains';
 import getArrayByClassName from '../common/getArrayByClassName';
 import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
@@ -80,13 +81,11 @@ function setupFastCompose(fcDiv, compSlots, openSlots) {
   subscribe('quickcreate', partial(quickcreate, myTable));
 }
 
-function openSlot(e) {return e.textContent === 'ETA: n/a';}
-
 function drawList(fcDiv) {
   sendEvent('composing', 'FastCompose');
   insertHtmlBeforeEnd(fcDiv, '<br>');
   var compSlots = getArrayByClassName('composing-potion-time', document);
-  var openSlots = compSlots.filter(openSlot).length;
+  var openSlots = compSlots.filter(contains('ETA: n/a')).length;
   if (openSlots > 0) {
     setupFastCompose(fcDiv, compSlots, openSlots);
   } else {

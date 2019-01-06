@@ -6,6 +6,7 @@ import getMembrList from '../ajax/getMembrList';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import myRows from '../common/myRows';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import quickBuffHref from '../common/quickBuffHref';
@@ -121,9 +122,7 @@ function processLogWidgetRow(aRow) { // Legacy
 }
 
 function processTableRows(logTable) {
-  for (var i = 1; i < logTable.rows.length; i += 2) {
-    processLogWidgetRow(logTable.rows[i]);
-  }
+  Array.from(logTable.rows).filter(myRows(3, 0)).forEach(processLogWidgetRow);
 }
 
 function openMsgDialog(evt) {

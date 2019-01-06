@@ -25,7 +25,7 @@ export function injectFindPlayer() { // Bad jQuery
     'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
     'index.php?cmd=findplayer&search_active=1&search_username=&' +
     'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
-    gvgUpperLevel + '&search_in_guild=-1"><span style="color:blue;">' +
+    gvgUpperLevel + '&search_in_guild=1"><span style="color:blue;">' +
     'Get GvG targets</span></a>');
 
   $('table[class="width_full"]').find('a[href*="player_id"]')

@@ -1,7 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
-import fallback from '../system/fallback';
 import getUrlParameter from '../system/getUrlParameter';
 import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
@@ -19,10 +18,14 @@ var fromWorld;
 var coreFunction;
 var functionPath;
 
+function getParam(param) {
+  return getUrlParameter(param) || '-';
+}
+
 function getType(_cmd) {
   var _type = '-';
   if (_cmd === 'points') {
-    _type = getUrlParameter('type') || '-';
+    _type = getParam('type');
   }
   return _type;
 }
@@ -49,11 +52,11 @@ function testCoreFunction() {
 }
 
 function getParamsFromUrl() {
-  cmd = fallback(getUrlParameter('cmd'), '-');
-  subcmd = fallback(getUrlParameter('subcmd'), '-');
-  subcmd2 = fallback(getUrlParameter('subcmd2'), '-');
+  cmd = getParam('cmd');
+  subcmd = getParam('subcmd');
+  subcmd2 = getParam('subcmd2');
   type = getType(cmd);
-  fromWorld = fallback(getUrlParameter('fromworld'), '-');
+  fromWorld = getParam('fromworld');
 }
 
 function getParamsFromPage() {

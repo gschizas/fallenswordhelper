@@ -1,4 +1,5 @@
 import collapse from '../common/collapse';
+import containsText from '../common/containsText';
 import {def_table} from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
@@ -12,7 +13,7 @@ var ladderResetPref = 'lastLadderReset';
 var lastLadderReset;
 
 function checkForPvPLadder(row) {
-  if (row.children[1].children[0].textContent === 'PvP Ladder') {
+  if (containsText('PvP Ladder', row.children[1].children[0])) {
     var logTime = parseDateAsTimestamp(
       row.children[1].children[2].textContent.replace('Posted: ', ''));
     if (logTime > lastLadderReset) {

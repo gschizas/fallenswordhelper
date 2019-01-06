@@ -75,15 +75,21 @@ function onChange(potOpts, potObj, e) {
   }
 }
 
-function resetMap(potOpts, potObj) {
-  potOpts.myMap = Object.keys(potObj).reduce(function(prev, pot) {
+function reMap(ignore, prev, pot) {
+  if (ignore) {
+    prev[pot] = 'Ignore';
+  } else {
     prev[pot] = pot;
-    return prev;
-  }, {});
+  }
+  return prev;
 }
 
-function doReset(potOpts, potObj) {
-  resetMap(potOpts, potObj);
+function resetMap(potOpts, potObj, ignore) {
+  potOpts.myMap = Object.keys(potObj).reduce(partial(reMap, ignore), {});
+}
+
+function doReset(potOpts, potObj, ignore) {
+  resetMap(potOpts, potObj, ignore);
   setForage(storeMap, potOpts);
   drawMapping(potOpts);
   drawInventory(potOpts, potObj);
@@ -98,8 +104,12 @@ function saveState(potOpts, self) {
 function clickEvents(potOpts, potObj) {
   return [
     [
+      function(self) {return self.id === 'fshIgnoreAll';},
+      partial(doReset, potOpts, potObj, true)
+    ],
+    [
       function(self) {return self.id === 'fshReset';},
-      partial(doReset, potOpts, potObj)
+      partial(doReset, potOpts, potObj, null)
     ],
     [
       function(self) {return /^pottab\d$/.test(self.id);},

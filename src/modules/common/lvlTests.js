@@ -1,4 +1,6 @@
 export var playerLvlTest = [
+  function(level, min) {return !min;},
+  function(level, min, max) {return !max;},
   function(level, min, max) {return isNaN(min) && isNaN(max);},
   function(level, min, max) {return isNaN(min) && level <= max;},
   function(level, min, max) {return min <= level && isNaN(max);},

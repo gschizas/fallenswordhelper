@@ -21,8 +21,7 @@ function getMyProfile() {
 }
 
 function getProfileFromForage(data) {
-  if (!data || data.lastUpdate < now -
-    calf.allyEnemyOnlineRefreshTime) {
+  if (!data || data.lastUpdate < now - calf.allyEnemyOnlineRefreshTime) {
     return getMyProfile();
   }
   return data;

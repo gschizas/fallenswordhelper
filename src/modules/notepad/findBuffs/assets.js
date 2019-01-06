@@ -1,17 +1,16 @@
 import buffList from '../../support/buffObj';
 import getValue from '../../system/getValue';
 
+function makeOptions(el) {
+  return '<option value="' + el.id + '">' + el.name + '</option>';
+}
+
 export var buffCustom = {
   header: 'Buff',
   what: 'buff',
   control: function() {
-    var ret = '<select style="width:140px;" id="selectedBuff">';
-    for (var j = 0; j < buffList.length; j += 1) {
-      ret += '<option value="' + buffList[j].id + '">' +
-        buffList[j].name + '</option>';
-    }
-    ret += '</select>';
-    return ret;
+    return '<select style="width:140px;" id="selectedBuff">' +
+      buffList.map(makeOptions).join('') + '</select>';
   },
   cutoff: '175 buff',
   searched: 'Nicknames of buff searched',

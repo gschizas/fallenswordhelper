@@ -1,3 +1,4 @@
+import chunk from '../common/chunk';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
@@ -109,13 +110,15 @@ function doneTake(takeResult, json) {
   takeSuccess(takeResult, json);
 }
 
+function doTakeItem(takeResult, el) {
+  takeitems(el).done(partial(doneTake, takeResult));
+}
+
 function takeSimilar(itemList, takeResult, self) { // jQuery.min
   var type = self.dataset.id;
   var invIds = itemList[type].invIds;
   self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
-  for (var i = 0; i < invIds.length; i += 40) {
-    takeitems(invIds.slice(i, i + 40)).done(partial(doneTake, takeResult));
-  }
+  chunk(40, invIds).forEach(partial(doTakeItem, takeResult));
 }
 
 function clickEvt(itemList, takeResult, evt) {

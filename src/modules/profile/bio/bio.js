@@ -1,4 +1,5 @@
 import bioEvtHdl from './bioEvtHdl';
+import containsText from '../../common/containsText';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import on from '../../common/on';
@@ -6,7 +7,7 @@ import renderBio from './render';
 
 function expandBio() {
   var bioExpander = getElementById('fshBioExpander');
-  if (bioExpander.textContent === 'More ...') {
+  if (containsText('More ...', bioExpander)) {
     bioExpander.textContent = 'Less ...';
   } else {
     bioExpander.textContent = 'More ...';

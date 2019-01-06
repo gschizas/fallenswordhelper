@@ -1,4 +1,4 @@
-import {createAnchor} from '../common/cElement';
+import containsText from '../common/containsText';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getValue from '../system/getValue';
 import {guideUrl} from '../support/constants';
@@ -9,8 +9,12 @@ import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import querySelectorArray from '../common/querySelectorArray';
 import setValue from '../system/setValue';
+import {createAnchor, createSpan} from '../common/cElement';
 
-function pvpLadder(head) {return head.children[1].textContent === 'PvP Ladder';}
+var titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
+  '([^!]*)(!)');
+
+function pvpLadder(head) {return containsText('PvP Ladder', head.children[1]);}
 
 function timestamp(head) {
   return parseDateAsTimestamp(head.children[2].textContent);
@@ -25,20 +29,46 @@ function lookForPvPLadder() {
   }
 }
 
+function makeALink(href, label) {
+  return '<a href="' + href + '" target="_blank">' + label + '</a>';
+}
+
+function creatureSearchHref(name) {
+  return guideUrl + 'creatures&search_name=' + name;
+}
+
+function realmSearchHref(name) {
+  return guideUrl + 'realms&search_name=' + name;
+}
+
 function makeUfsgLink(img) {
   var myName = encodeURIComponent(img.getAttribute('oldtitle'));
   var myLink = createAnchor({
-    href: guideUrl + 'creatures&search_name=' + myName,
+    href: creatureSearchHref(myName),
     target: '_blank'
   });
   insertElementBefore(myLink, img);
   insertElement(myLink, img);
 }
 
+function titanSpotted(el) {
+  return titanRe.test(el.firstChild.nodeValue);
+}
+
+function titanLink(el) {
+  var news = el.firstChild.nodeValue.match(titanRe);
+  news[2] = makeALink(creatureSearchHref(news[2]), news[2]);
+  news[4] = makeALink(realmSearchHref(news[4]), news[4]);
+  var newSpan = createSpan({innerHTML: news.slice(1).join('')});
+  el.replaceChild(newSpan, el.firstChild);
+}
+
 function addUfsgLinks() {
   querySelectorArray(
     '.news_body img[src^="https://cdn.fallensword.com/creatures/"]')
     .forEach(makeUfsgLink);
+  getArrayByClassName('news_body_tavern', pCC)
+    .filter(titanSpotted).forEach(titanLink);
 }
 
 export default function injectHomePageTwoLink() { // Pref

@@ -1,5 +1,7 @@
 import getValue from '../system/getValue';
+import myRows from '../common/myRows';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import partial from '../common/partial';
 import quickBuffHref from '../common/quickBuffHref';
 import setValue from '../system/setValue';
 
@@ -27,7 +29,7 @@ function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
   }
 }
 
-function rowColor(aRow, logScreen, dateColumn) { // Legacy
+function rowColor(logScreen, dateColumn, aRow) { // Legacy
   var addBuffTag = true;
   var cellContents = aRow.cells[dateColumn].textContent;
   var postDateUtc = parseDateAsTimestamp(cellContents);
@@ -49,13 +51,8 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
   var lastCheckScreen = 'last' + logScreen + 'Check';
   lastCheckUtc = getLastCheck(lastCheckScreen);
-  var increment = 2;
-  if (logScreen === 'Chat') {
-    increment = 4;
-  }
-  for (var i = 1; i < chatTable.rows.length; i += increment) {
-    rowColor(chatTable.rows[i], logScreen, dateColumn);
-  }
+  Array.from(chatTable.rows).filter(myRows(3, 0))
+    .forEach(partial(rowColor, logScreen, dateColumn));
   setValue(lastCheckScreen, nowUtc);
 }
 

@@ -1,6 +1,10 @@
+import classHandler from '../../common/classHandler';
 import equipItem from '../../ajax/equipItem';
+import getElementsByTagName from '../../common/getElementsByTagName';
 import hideQTip from '../../common/hideQTip';
 import {imageServer} from '../../system/system';
+import on from '../../common/on';
+import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import {queueRecallItem} from '../../ajaxQueue/queue';
 
@@ -13,23 +17,24 @@ function recalled(theTd, data) {
     'You successfully recalled the item</span>';
 }
 
-function recallInfObj(evt, mode, href) {
+function recallInfObj(self, mode, href) {
   return {
     invId: href.match(/&id=(\d+)/)[1],
     playerId: href.match(/&player_id=(\d+)/)[1],
     mode: mode,
-    action: evt.target.getAttribute('action')
+    action: self.getAttribute('action')
   };
 }
 
-function recallItem(evt) { // jQuery
-  hideQTip(evt.target);
-  var mode = evt.target.getAttribute('mode');
-  var theTd = evt.target.parentNode.parentNode;
+function recallItem(self) { // jQuery
+  hideQTip(self);
+  var mode = self.getAttribute('mode');
+  var theTd = self.parentNode.parentNode;
   if (mode === '0') {theTd = theTd.parentNode;}
   var href = theTd.children[0].href;
   if (!href) {return;}
-  queueRecallItem(recallInfObj(evt, mode, href)).done(partial(recalled, theTd));
+  queueRecallItem(recallInfObj(self, mode, href))
+    .done(partial(recalled, theTd));
   theTd.innerHTML = spinner;
 }
 
@@ -38,31 +43,25 @@ function wornItem(theTd, data) {
   theTd.innerHTML = '<span class="fastWorn">Worn</span>';
 }
 
-function wearItem(evt) { // jQuery
-  hideQTip(evt.target);
-  var theTd = evt.target.parentNode.parentNode.parentNode;
+function wearItem(self) { // jQuery
+  hideQTip(self);
+  var theTd = self.parentNode.parentNode.parentNode;
   var href = theTd.children[0].href;
   if (!href) {return;}
   equipItem(href.match(/&id=(\d+)/)[1]).done(partial(wornItem, theTd));
   theTd.innerHTML = spinner;
 }
 
-var events = [
-  {test: 'recall', fn: recallItem},
-  {test: 'equip', fn: wearItem},
-  {
-    test: 'a-reply',
-    fn: function(evt) {
-      window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
-    }
-  }
+function replyTo(self) {
+  window.openQuickMsgDialog(self.getAttribute('target_player'));
+}
+
+var classEvts = [
+  ['recall', recallItem],
+  ['equip', wearItem],
+  ['a-reply', replyTo]
 ];
 
-export default function eventHandlers(evt) {
-  for (var i = 0; i < events.length; i += 1) {
-    if (evt.target.classList.contains(events[i].test)) {
-      events[i].fn(evt);
-      return;
-    }
-  }
+export default function eventHandlers() {
+  on(getElementsByTagName('table', pCC)[1], 'click', classHandler(classEvts));
 }

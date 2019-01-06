@@ -29,7 +29,7 @@ var profilePagesToSearchProcessed;
 
 function gotProfile(j, html) {
   parseProfileAndDisplay(html, {
-    href: onlinePlayers[j],
+    href: j,
     findBuffNicks: findBuffNicks
   });
 }
@@ -194,11 +194,14 @@ function findBuffsParseGuildManagePage(responseText) {
   findBuffsParseProfilePageStart();
 }
 
+function notHeader(el, i) {return i !== 0;}
+
+function deleteRow(buffTable) {buffTable.deleteRow(-1);}
+
 function findBuffsClearResults() { // Legacy
   var buffTable = getElementById('buffTable');
-  for (var j = buffTable.rows.length; j > 1; j -= 1) {
-    buffTable.deleteRow(j - 1);
-  }
+  Array.from(buffTable.rows).filter(notHeader)
+    .forEach(partial(deleteRow, buffTable));
   getElementById('buffNicks').innerHTML = '';
   updateProgress('Idle.', 'black');
   getElementById('potentialBuffers').innerHTML = '';
@@ -219,15 +222,13 @@ function findAnyStart(progMsg) { // jQuery
     .done(findBuffsParseGuildManagePage);
 }
 
+function thisBuff(selectedBuff, el) {return selectedBuff === el.id;}
+
 function findBuffsStart() { // Legacy
   var selectedBuff = parseInt($('#selectedBuff').val(), 10);
-  for (var j = 0; j < buffList.length; j += 1) {
-    if (selectedBuff === buffList[j].id) {
-      findBuffNicks = buffList[j].nicks;
-      findBuffMinCastLevel = buffList[j].lvl;
-      break;
-    }
-  }
+  var findThisBuff = buffList.find(partial(thisBuff, selectedBuff));
+  findBuffNicks = findThisBuff.nicks;
+  findBuffMinCastLevel = findThisBuff.lvl;
   findAnyStart('potential buffers');
 }
 

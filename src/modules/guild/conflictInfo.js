@@ -1,27 +1,37 @@
 import createDocument from '../system/createDocument';
+import myRows from '../common/myRows';
 import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 
 var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
 var ajaxUrl = conflictUrl + '&no_mobile=1';
 
+function makeCell(newRow, html) {
+  newRow.insertCell(-1).innerHTML = html;
+}
+
+function buildRow(insertHere, html1, html2) {
+  var newRow = insertHere.insertRow(insertHere.rows.length - 2);
+  makeCell(newRow, html1);
+  makeCell(newRow, html2);
+}
+
+function conflictHeader(insertHere) {
+  buildRow(insertHere,
+    '<a href="' + conflictUrl + '">Active Conflicts</a>', 'Score');
+}
+
+function conflictRow(insertHere, aRow) {
+  buildRow(insertHere,
+    aRow.cells[0].innerHTML, '<b>' + aRow.cells[6].innerHTML + '</b>');
+}
+
 function hazConflict(conflictTable, curPage, insertHere) { // Legacy
   if (curPage === 1) {
-    var newNode = insertHere.insertRow(insertHere.rows.length - 2);
-    newNode.insertCell(0);
-    newNode.insertCell(0);
-    newNode.cells[0].innerHTML =
-      '<a href="' + conflictUrl + '">Active Conflicts</a>';
-    newNode.cells[1].innerHTML = 'Score';
+    conflictHeader(insertHere);
   }
-  for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
-    var newRow = insertHere.insertRow(insertHere.rows.length - 2);
-    newRow.insertCell(0);
-    newRow.insertCell(0);
-    newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
-    newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
-      .innerHTML + '</b>';
-  }
+  Array.from(conflictTable.rows).filter(myRows(7, 0))
+    .forEach(partial(conflictRow, insertHere));
 }
 
 function activeConflicts(doc, curPage, insertHere) { // Legacy

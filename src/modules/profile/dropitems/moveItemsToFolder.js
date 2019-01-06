@@ -28,7 +28,9 @@ function removeInvId(itemsAry, invId) {
 }
 
 function removeInvIds(itemsAry, json) {
-  json.r.forEach(partial(removeInvId, itemsAry));
+  if (Array.isArray(json.r)) {
+    json.r.forEach(partial(removeInvId, itemsAry));
+  }
 }
 
 function moveList(itemsAry, folderId, list) {
@@ -38,5 +40,5 @@ function moveList(itemsAry, folderId, list) {
 export default function moveItemsToFolder(itemsAry) { // jQuery.min
   var folderId = getElementById('selectFolderId').value;
   chunk(50, itemsAry.filter(checked).map(invid))
-    .map(partial(moveList, itemsAry, folderId));
+    .forEach(partial(moveList, itemsAry, folderId));
 }

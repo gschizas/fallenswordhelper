@@ -35,14 +35,14 @@ function clickHandler() {
   }
 }
 
+function buildSettingsObj(prev, curr) {
+  prev[curr] = getValue(curr);
+  return prev;
+}
+
 export default function injectSaveSettings() { // Hybrid
   if (jQueryNotPresent()) {return;}
-  var content = pCC;
-  var fshSettings = {};
-  var list = GM_listValues();
-  for (var i = 0; i < list.length; i += 1) {
-    fshSettings[list[i]] = getValue(list[i]);
-  }
-  drawBox(content, fshSettings);
+  var fshSettings = GM_listValues().reduce(buildSettingsObj, {});
+  drawBox(pCC, fshSettings);
   $('#HelperLoadSettings').click(clickHandler);
 }
