@@ -86,3 +86,5 @@ export var def_statDamage = 'stat-damage';
 export var def_statArmor = 'stat-armor';
 export var def_statHp = 'stat-hp';
 export var def_statVl = 'stat-vl';
+
+export var GMSTORAGE_PATH = 'GM_';

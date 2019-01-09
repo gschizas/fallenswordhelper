@@ -1,10 +1,9 @@
 import insertElement from '../../../common/insertElement';
 
-/*
-  colSpan = attributes[0]
-  anElement = attributes[1]
-  isHeader = attributes[2]
-*/
+// colSpan = attributes[0]
+// anElement = attributes[1]
+// isHeader = attributes[2]
+
 function addNextCell(row, attributes) {
   var aCell = row.insertCell(-1);
   aCell.colSpan = attributes[0];

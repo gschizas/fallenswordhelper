@@ -32,8 +32,7 @@ function forageSet(forage, data, dfr) {
 }
 
 export default function setForage(forage, data) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
+  // Wrap in jQuery Deferred because we're using 1.7 rather than using ES6 promise
   var dfr = $.Deferred();
   if (window.localforage) {
     forageSet(forage, data, dfr);

@@ -26,7 +26,7 @@ export default function addGuildInfoWidgets() {
   var guildMembrList = getElementById('minibox-guild-members-list');
   if (!guildMembrList) {return;} // list exists
   // hide guild info links
-  doHideBtn(guildMembrList, 'guildSelector');
+  doHideBtn(guildMembrList, 1);
   doHideBuffSelected(guildMembrList, 'guild-buff-check-on', 'guild-quick-buff');
   // add coloring for offline time
   colouring(guildMembrList, guildColour);
