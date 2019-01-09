@@ -4,7 +4,7 @@ import {imageServer} from '../../system/system';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import once from '../../common/once';
 import retryAjax from '../../ajax/retryAjax';
-import setValue from '../../system/setValue';
+import saveTempleSettings from './saveTempleSettings';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +
@@ -31,9 +31,7 @@ var godsNotification =
 
 function havePrayed() {
   getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
-  setValue('needToPray', false);
-  setValue('lastTempleCheck', new Date()
-    .setUTCHours(23, 59, 59, 999) + 1); // Midnight
+  saveTempleSettings(false);
 }
 
 function prayToGods(e) { // jQuery

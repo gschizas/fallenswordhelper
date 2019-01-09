@@ -2,7 +2,7 @@ import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import displayDisconnectedFromGodsMessage
   from './displayDisconnectedFromGodsMessage';
-import setValue from '../../system/setValue';
+import saveTempleSettings from './saveTempleSettings';
 
 function templeAlertEnabled(responseText) {
   var checkNeedToPray;
@@ -18,9 +18,7 @@ function templeAlertEnabled(responseText) {
     displayDisconnectedFromGodsMessage();
     needToPray = true;
   }
-  setValue('needToPray', needToPray);
-  setValue('lastTempleCheck', new Date()
-    .setUTCHours(23, 59, 59, 999) + 1); // midnight
+  saveTempleSettings(needToPray);
 }
 
 export function parseTemplePage(responseText) {

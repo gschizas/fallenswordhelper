@@ -20,7 +20,6 @@ import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 import {time, timeEnd} from '../../support/debug';
 
 function doSpinner() { // jQuery
-  // $('#pCC').html('<span id="fshInvMan"><img src = "' +
   pCC.innerHTML = '<span id="fshInvMan"><img src = "' +
   imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
     'Getting inventory data...</span>';

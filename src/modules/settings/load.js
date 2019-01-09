@@ -4,6 +4,7 @@ import getValue from '../system/getValue';
 import isObject from '../common/isObject';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonParse from '../common/jsonParse';
+import {listValues} from '../system/listValues';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import setValue from '../system/setValue';
@@ -42,7 +43,7 @@ function buildSettingsObj(prev, curr) {
 
 export default function injectSaveSettings() { // Hybrid
   if (jQueryNotPresent()) {return;}
-  var fshSettings = GM_listValues().reduce(buildSettingsObj, {});
+  var fshSettings = listValues().reduce(buildSettingsObj, {});
   drawBox(pCC, fshSettings);
   $('#HelperLoadSettings').click(clickHandler);
 }

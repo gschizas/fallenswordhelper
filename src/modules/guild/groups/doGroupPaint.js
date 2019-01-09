@@ -20,7 +20,7 @@ function dateFromUTC(x, curYear) {
 function groupLocalTime(row) { // jQuery
   var theDateCell = $('td', row).eq(2);
   var x = xRE.exec(theDateCell.text());
-  var curYear = new Date().getFullYear(); // Boundary condition
+  var curYear = new Date().getFullYear(); // TODO Boundary condition
   theDateCell.append('<br><span class="fshBlue fshXSmall">' +
     'Local: ' + dateFromUTC(x, curYear).toString().substr(0, 21) + '</span>');
 }

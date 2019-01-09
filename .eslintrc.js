@@ -29,10 +29,7 @@ module.exports = {
     $: false,
     jQuery: false,
 
-    GM_getValue: false,
     GM_info: false,
-    GM_listValues: false,
-    GM_setValue: false,
 
     FSH: true,
     localforage: false,
@@ -176,9 +173,6 @@ module.exports = {
     'multiline-ternary': ['off'],
     'new-cap': ['error', {
       capIsNewExceptions: [
-        'GM_getValue',
-        'GM_setValue',
-        'GM_listValues',
         'Deferred',
         'DataTable'
       ]

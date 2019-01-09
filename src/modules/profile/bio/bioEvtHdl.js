@@ -1,116 +1,9 @@
-import calf from '../../support/calf';
+import formatCost from './formatCost';
+import getBuffsToBuy from './getBuffsToBuy';
 import {getElementById} from '../../common/getElement';
-import getElementsByTagName from '../../common/getElementsByTagName';
-import getValue from '../../system/getValue';
-import {pCC} from '../../support/layout';
-import playerName from '../../common/playerName';
-import {sendEvent} from '../../support/fshGa';
+import getPrice from './getPrice';
 
 var buffCost = {count: 0, buffs: {}};
-var numRE = /[^a-zA-Z0-9.,+\- ]/g;
-var priceRE =
-  /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
-
-function profileBuyBuffsEvent() {
-  if (calf.subcmd === '-') {sendEvent('profile', 'formatBuffsToBuy');}
-}
-
-function getTargetPlayer() {
-  var targetPlayer = getElementsByTagName('h1', pCC);
-  if (targetPlayer.length !== 0) {
-    targetPlayer = targetPlayer[0].textContent;
-  } else {
-    targetPlayer = playerName();
-  }
-  return targetPlayer;
-}
-
-function formatBuffsToBuy() { // Legacy
-  profileBuyBuffsEvent();
-  var targetPlayer = getTargetPlayer();
-  var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
-  var greetingText = getValue('buyBuffsGreeting').trim();
-  var hasBuffTag = greetingText.indexOf('{buffs}') !== -1;
-  var hasCostTag = greetingText.indexOf('{cost}') !== -1;
-  greetingText = greetingText.replace(/{playername}/g, targetPlayer);
-  if (!hasBuffTag) {
-    greetingText += ' ' + buffsToBuy;
-  } else if (!hasCostTag) {
-    greetingText = greetingText
-      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`');
-  } else {
-    greetingText = greetingText
-      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`')
-      .replace(/{cost}/g, buffCost.buffCostTotalText);
-  }
-  window.openQuickMsgDialog(targetPlayer, greetingText, '');
-}
-
-function getBuffsToBuy() { // Legacy
-  if (buffCost.count > 0) {formatBuffsToBuy();}
-}
-
-var costFormatter = [
-  {
-    condition: function(total) {
-      return total.fsp > 0;
-    },
-    result: function(total) {
-      return String(Math.round(total.fsp * 100) / 100) + ' FSP';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.fsp > 0 && total.k > 0;
-    },
-    result: function() {
-      return ' and ';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.k > 0;
-    },
-    result: function(total) {
-      return total.k + ' k';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.stam > 0 && (total.fsp > 0 || total.k > 0);
-    },
-    result: function() {
-      return ' and ';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.stam > 0;
-    },
-    result: function(total) {
-      return total.stam + ' Stam(' +
-        String(Math.round(total.stam / 25 * 10) / 10) + 'fsp)';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.unknown > 0;
-    },
-    result: function(total) {
-      return ' (' + total.unknown + ' buff(s) with unknown cost)';
-    }
-  }
-];
-
-function formatCost(total) {
-  return costFormatter.reduce(function(prev, el) {
-    var ret = prev;
-    if (el.condition(total)) {
-      ret += el.result(total);
-    }
-    return ret;
-  }, '');
-}
 
 function hazBuffs() { // Legacy
   var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
@@ -144,48 +37,17 @@ function updateBuffCost() { // Legacy
 }
 
 function priceUnit(price) {
-  if (price[0].indexOf('k') > 0) {
+  if (price[0].includes('k')) {
     return 'k';
   }
-  if (price[0].indexOf('f') > 0) {
+  if (price[0].includes('f')) {
     return 'fsp';
   }
   return 'stam';
 }
 
-function thisLine(node) {
-  return node && node.nodeName.toLowerCase() !== 'br';
-}
-
-function priceBeforeName(buffNameNode, price) {
-  if (!price) { // some players have prices BEFORE the buff names
-    var newtext;
-    var text = '';
-    var node = buffNameNode;
-    while (thisLine(node)) {
-      newtext = node.textContent;
-      node = node.previousSibling;
-      text = newtext + text;
-    }
-    return text.replace(numRE, '').toLowerCase().match(priceRE);
-  }
-  return price;
-}
-
 function getBuffCost(buffNameNode) {
-  var node = buffNameNode;
-  var buffName = node.textContent;
-  var newtext;
-  var text = '';
-  // get the whole line from the buff name towards the end (even after
-  // the ',', in case of 'AL, Lib, Mer: 10k each'
-  while (thisLine(node)) {
-    newtext = node.textContent;
-    node = node.nextSibling;
-    text += newtext;
-  }
-  var price = text.replace(numRE, '').toLowerCase().match(priceRE);
-  price = priceBeforeName(buffNameNode, price);
+  var price = getPrice(buffNameNode);
   var type;
   var cost;
   if (price) {
@@ -195,21 +57,15 @@ function getBuffCost(buffNameNode) {
     type = 'unknown';
     cost = '1';
   }
-  buffCost.buffs[buffName] = [parseFloat(cost), type];
+  buffCost.buffs[buffNameNode.textContent] = [parseFloat(cost), type];
   buffCost.count += 1;
 }
 
-function toggleBuffsToBuy(evt) { // Legacy
-  // This is also called by bio preview
-  var buffNameNode = evt.target;
-  while (buffNameNode.tagName.toLowerCase() !== 'span') {
-    buffNameNode = buffNameNode.parentNode;
-  }
-  var node = buffNameNode;
-  var selected = node.classList.contains('fshBlue');
-  node.classList.toggle('fshBlue');
-  node.classList.toggle('fshYellow');
-  var buffName = node.textContent;
+function toggleBuffsToBuy(buffNameNode) { // Legacy
+  var selected = buffNameNode.classList.contains('fshBlue');
+  buffNameNode.classList.toggle('fshBlue');
+  buffNameNode.classList.toggle('fshYellow');
+  var buffName = buffNameNode.textContent;
   if (selected) {
     getBuffCost(buffNameNode);
   } else {
@@ -221,8 +77,7 @@ function toggleBuffsToBuy(evt) { // Legacy
 
 function getBuffNameNode(e) {
   var buffNameNode = e.target;
-  while (buffNameNode.tagName &&
-      buffNameNode.tagName.toLowerCase() !== 'span') {
+  while (buffNameNode.tagName && buffNameNode.tagName !== 'SPAN') {
     buffNameNode = buffNameNode.parentNode;
   }
   return buffNameNode;
@@ -234,10 +89,11 @@ function isBuffLink(buffNameNode) {
 }
 
 export default function bioEvtHdl(e) {
+  // This is also called by bio preview
   var buffNameNode = getBuffNameNode(e);
   if (isBuffLink(buffNameNode)) {
-    toggleBuffsToBuy(e);
+    toggleBuffsToBuy(buffNameNode);
   } else if (e.target.id === 'fshSendBuffMsg') {
-    getBuffsToBuy(e);
+    getBuffsToBuy(buffCost);
   }
 }

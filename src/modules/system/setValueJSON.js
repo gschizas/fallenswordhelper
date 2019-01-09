@@ -1,3 +1,5 @@
+import setValue from './setValue';
+
 export default function setValueJSON(name, value) {
-  GM_setValue(name, JSON.stringify(value));
+  setValue(name, JSON.stringify(value));
 }

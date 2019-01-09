@@ -110,7 +110,7 @@ function processTrade(data) {
   time('trade.processTrade');
 
   invItems = data.items;
-  /* Highlight items in ST */
+  // Highlight items in ST
   var nodeList = getArrayByTagName(def_table, getElementById('item-list'));
   nodeList.forEach(forEachInvItem); // TODO unnecessary DOM manipulation
   doFolderHeaders(data.folders);

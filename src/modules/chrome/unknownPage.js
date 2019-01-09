@@ -7,51 +7,41 @@ import updateBuffLog from '../notepad/buffLog/updateBuffLog';
 import xPath from '../common/xPath';
 
 var unknown = [
-  {
-    condition: function() {
-      return getElementById('quickbuff-report');
-    },
-    result: function() {
+  [
+    function() {return getElementById('quickbuff-report');},
+    function() {
       screenview('unknown.buffLog.updateBuffLog');
       updateBuffLog();
     }
-  },
-  {
-    condition: function() {
-      return xPath('//td[.="Quest Name"]');
-    },
-    result: function() {
+  ],
+  [
+    function() {return xPath('//td[.="Quest Name"]');},
+    function() {
       screenview('unknown.questBook.injectQuestBookFull');
       injectQuestBookFull();
     }
-  },
-  {
-    condition: function() {
-      return $('#pCC img[title="Inventing"]').length > 0;
-    },
-    result: function() {
+  ],
+  [
+    function() {return $('#pCC img[title="Inventing"]').length > 0;},
+    function() {
       screenview('unknown.recipes.inventing');
       inventing();
     }
   //#if _DEV  //  Fell through!
-  },
-  {
-    condition: function() {return true;},
-    result: function() {console.log('Fell through!');} // eslint-disable-line no-console
+  ],
+  [
+    function() {return true;},
+    function() {console.log('Fell through!');} // eslint-disable-line no-console
   //#endif
-  }
+  ]
 ];
+
+function aMatch(el) {return el[0];}
 
 export default function unknownPage() { // Legacy
   if (jQueryNotPresent()) {return;}
   //#if _DEV  //  unknownPage
   console.log('unknownPage'); // eslint-disable-line no-console
   //#endif
-  unknown.some(function(el) {
-    if (el.condition()) {
-      el.result();
-      return true;
-    }
-    return false;
-  });
+  unknown.find(aMatch)[1]();
 }

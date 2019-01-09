@@ -12,6 +12,12 @@ import xPath from '../common/xPath';
 
 var expandMenuOnKeyPress;
 
+function expandMenu(section) {
+  if (expandMenuOnKeyPress) {
+    localStorage.setItem('hcs.nav.openIndex', section);
+  }
+}
+
 function movePage(dir) { // Legacy
   var dirButton = xPath('//input[@value="' + dir + '"]');
   if (!dirButton) {return;}
@@ -41,9 +47,7 @@ function changeCombatSet(responseText, itemIndex) { // jQuery.min
       submit: 'Use'
     },
     success: function() {
-      if (expandMenuOnKeyPress) {
-        localStorage.setItem('hcs.nav.openIndex', '2');
-      }
+      expandMenu('2');
       location.href = 'index.php?cmd=profile';
     }
   });
@@ -57,23 +61,23 @@ function doRepair() {
 }
 
 function createGroup() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '4');}
+  expandMenu('4');
   location.href =
     'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 }
 
 function logPage() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
+  expandMenu('2');
   location.href = 'index.php?cmd=log';
 }
 
 function gotoGuild() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '4');}
+  expandMenu('4');
   location.href = 'index.php?cmd=guild&subcmd=manage';
 }
 
 function joinAllGroup() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '4');}
+  expandMenu('4');
   if (!getValue('enableMaxGroupSizeToJoin')) {
     location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
   } else {
@@ -83,7 +87,7 @@ function joinAllGroup() {
 }
 
 function backpack() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
+  expandMenu('2');
   location.href = 'index.php?cmd=profile&subcmd=dropitems';
 }
 
@@ -95,7 +99,7 @@ function fastWearMgr() {
 }
 
 function profile() {
-  if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
+  expandMenu('2');
   location.href = 'index.php?cmd=profile';
 }
 
