@@ -6,51 +6,19 @@ import {getElementById} from '../../common/getElement';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import intValue from '../../system/intValue';
 import onlineDot from '../../common/onlineDot';
-import uniq from '../../common/uniq';
 import {updateProgress} from './bufferProgress';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
 
-function getPrevBr(bioCellHtml, runningTotalPosition) { // Legacy
-  var prevBR = bioCellHtml.lastIndexOf('<br>', runningTotalPosition - 1);
-  if (prevBR === -1) {return 0;}
-  return prevBR;
-}
-
-function getNextBr(bioCellHtml, runningTotalPosition) { // Legacy
-  var nextBR = bioCellHtml.indexOf('<br>', runningTotalPosition);
-  if (nextBR === -1 && bioCellHtml.indexOf('<br>') !== -1) {
-    return bioCellHtml.length - 5;
-  }
-  return nextBR;
-}
-
-function extractLine(bioCellHtml, runningTotalPosition) {
-  var prevBR = getPrevBr(bioCellHtml, runningTotalPosition);
-  var nextBR = getNextBr(bioCellHtml, runningTotalPosition);
-  var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
-  return textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
-}
-
-function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
+function getBioLines(bioCellHtml, findBuffNicks) {
+  var myRe = new RegExp('^.*\\b(?:(?:' +
+    findBuffNicks.replace(/,/g, ')|(?:') + '))\\b.*$', 'gim');
+  var myArray;
   var res = [];
-  var buffPosition = 0;
-  var startingPosition = 0;
-  var runningTotalPosition = 0;
-  var bioTextToSearch = ' ' + bioCellHtml + ' ';
-  var buffRE = new RegExp('[^a-zA-Z]((' +
-    findBuffNicks.replace(/,/g, ')|(') + '))[^a-zA-Z]', 'i');
-  while (buffPosition !== -1) {
-    bioTextToSearch = bioTextToSearch.substr(startingPosition,
-      bioTextToSearch.length);
-    buffPosition = bioTextToSearch.search(buffRE);
-    if (buffPosition !== -1) {
-      startingPosition = buffPosition + 1;
-      runningTotalPosition += buffPosition;
-      res.push(extractLine(bioCellHtml, runningTotalPosition));
-    }
+  while ((myArray = myRe.exec(bioCellHtml)) !== null) {
+    res.push(myArray[0]);
   }
-  return uniq(res);
+  return res;
 }
 
 function getSustain(doc) {
@@ -173,7 +141,6 @@ export default function parseProfileAndDisplay(responseText, callback) { // Hybr
   var doc = createDocument(responseText);
   var bioCellHtml = getElementById('profile-bio', doc).innerHTML;
   var textLineArray = getBioLines(bioCellHtml, callback.findBuffNicks);
-
   // add row to table
   if (textLineArray.length > 0) {
     addRowToTable(bioCellHtml, callback, doc, textLineArray);
