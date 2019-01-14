@@ -1,46 +1,44 @@
 import badData from '../badData';
-import {def_afterUpdateActionlist} from '../../../support/constants';
-import retryAjax from '../../../ajax/retryAjax';
-import {
-  getCreaturePrefs,
-  getMyStats,
-  processMouseOver,
-  showCreatureInfo
-} from './creatureInfo';
+import calf from '../../../support/calf';
+import getCreatureStats from '../getCreatureStats/getCreatureStats';
+import partial from '../../../common/partial';
+import {sendEvent} from '../../../support/fshGa';
 import {
   getMonsterPrefs,
-  processMonsterLog,
-  showMonsterLog
+  processMonsterLog
 } from './processMonsterLog';
 
+var processedMonsters = [];
+
 function processMonster(data) {
-  if (badData(data)) {return;} // creature is null
-  processMouseOver(data);
+  if (badData(data)) {return;}
+  sendEvent('NewMap', 'MonsterLog');
   processMonsterLog(data.response.data);
 }
 
-function loopActions(e, i) { // jQuery.min
-  if (e.type !== 6) {return;}
-  retryAjax({
-    url: 'fetchdata.php?a=1&id=' + e.data.id + '&passback=' + i,
-    dataType: 'json'
-  }).done(processMonster);
+function thisMob(e, el) {return e.id === el.id;}
+
+function seenBefore(e) {
+  if (processedMonsters.find(partial(thisMob, e.data))) {return true;}
+  processedMonsters.push(e.data);
 }
 
-function getCreatures() {
-  if (showCreatureInfo) {getMyStats();}
-  GameData.actions().forEach(loopActions);
+function loopActions(e, i) { // jQuery.min
+  if (e.type !== 6 || seenBefore(e)) {return;}
+  getCreatureStats(e.data.id, i).done(processMonster);
 }
 
 function initMonsterLog() {
-  if (showCreatureInfo || showMonsterLog) {
-    getCreatures();
+  if (calf.showMonsterLog) {
+    GameData.actions().forEach(loopActions);
   }
 }
 
 export default function startMonsterLog() { // jQuery.min
-  getCreaturePrefs();
   getMonsterPrefs();
-  $.subscribe(def_afterUpdateActionlist, initMonsterLog);
+  $.subscribe('-1-success.action-response ' +
+    '4-success.action-response ' +
+    '5-success.action-response ' +
+    '25-success.action-response', initMonsterLog);
   initMonsterLog();
 }

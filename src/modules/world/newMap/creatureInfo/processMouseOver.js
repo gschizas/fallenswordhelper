@@ -1,50 +1,14 @@
+import badData from '../badData';
 import calf from '../../../support/calf';
-import {getElementById} from '../../../common/getElement';
-import getElementsByClassName from '../../../common/getElementsByClassName';
-import getValue from '../../../system/getValue';
-import intValue from '../../../system/intValue';
-import setValue from '../../../system/setValue';
 import {
-  def_statArmor,
-  def_statAttack,
-  def_statDamage,
-  def_statDefense,
-  def_statHp,
-  def_statLevel,
-  def_statbarLevel
-} from '../../../support/constants';
-
-export var showCreatureInfo;
-var statLevel;
-var statDefense;
-var statAttack;
-var statDamage;
-var statArmor;
-var statHp;
-
-export function toggleShowCreatureInfo() {
-  showCreatureInfo = !showCreatureInfo;
-  setValue('showCreatureInfo', showCreatureInfo);
-}
-
-function getStatText(statTooltip, statClassName) {
-  return getElementsByClassName(statClassName, statTooltip)[0]
-    .nextElementSibling.textContent;
-}
-
-function getTooltipStats(statTooltip) {
-  statDefense = getStatText(statTooltip, def_statDefense);
-  statAttack = getStatText(statTooltip, def_statAttack);
-  statDamage = getStatText(statTooltip, def_statDamage);
-  statArmor = getStatText(statTooltip, def_statArmor);
-  statHp = getStatText(statTooltip, def_statHp);
-}
-
-export function getMyStats() {
-  statLevel = intValue(getStatText(
-    getElementById(def_statbarLevel), def_statLevel));
-  getTooltipStats(getElementById('statbar-character-tooltip-stats'));
-}
+  getMyStats,
+  statArmor,
+  statAttack,
+  statDamage,
+  statDefense,
+  statHp,
+  statLevel
+} from './getMyStats';
 
 function tipHeader(creature) {
   return '<table><tr><td>' +
@@ -120,45 +84,16 @@ function makeMonsterTip(creature, oneHitNumber, myLvlClas) {
     tipFooter(creature);
 }
 
-function doMouseOver(creature, monster) {
+function doMouseOver(creature) {
   var oneHitNumber = Math.ceil(creature.hp * calf.hpVariable + creature.armor *
     calf.generalVariable);
   var myLvlClas = 'fshYellow';
+  getMyStats();
   if (statLevel > creature.level) {myLvlClas = 'fshRed';}
-  monster.dataset.tipped = makeMonsterTip(creature, oneHitNumber, myLvlClas);
+  return makeMonsterTip(creature, oneHitNumber, myLvlClas);
 }
 
-var bailOut = [
-  function(data, actions) {
-    return actions.length === 1 &&
-      actions[0].classList.contains('hcs-state-disabled'); // In motion
-  },
-  function(data, actions) {
-    return actions.length - 1 < data.passback; // Not enough actions
-  },
-  function(data) {
-    return !GameData.actions()[data.passback];
-  },
-  function(data) {
-    return data.response.data.id !==
-      GameData.actions()[data.passback].data.id.toString(); // Different action list
-  }
-];
-
-function doCreatureInfo(data) {
-  var actions = getElementById('actionList').children;
-  for (var i = 0; i < bailOut.length; i += 1) {
-    if (bailOut[i](data, actions)) {return;}
-  }
-  // monster = 0;
-  doMouseOver(data.response.data, actions[data.passback].children[0]
-    .children[0].children[0]);
-}
-
-export function processMouseOver(data) {
-  if (showCreatureInfo) {doCreatureInfo(data);}
-}
-
-export function getCreaturePrefs() {
-  showCreatureInfo = getValue('showCreatureInfo');
+export default function processMouseOver(data) {
+  if (badData(data)) {return;}
+  return doMouseOver(data.response.data);
 }

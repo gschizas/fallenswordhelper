@@ -7,26 +7,48 @@ import interceptXHR from './interceptXHR';
 import {prepareHidePlayerActions} from '../prepareHidePlayerActions';
 import shouldBeArray from '../../../system/shouldBeArray';
 
-function arrayType() {
+function mappedArrays() {
   [
     ['buffs', 'huntingBuffs'],
     ['buffs2', 'huntingBuffs2'],
-    ['buffs3', 'huntingBuffs3'],
-    ['doNotKillList', 'doNotKillList']
+    ['buffs3', 'huntingBuffs3']
   ].forEach(function(a) {calf[a[0]] = shouldBeArray(a[1]);});
 }
 
-function valueType() {
+function straightArrays() {
+  [
+    'doNotKillList'
+  ].forEach(function(a) {calf[a] = shouldBeArray(a);});
+}
+
+function arrayType() {
+  mappedArrays();
+  straightArrays();
+}
+
+function mappedValues() {
   [
     ['buffsName', 'huntingBuffsName'],
     ['buffs2Name', 'huntingBuffs2Name'],
     ['buffs3Name', 'huntingBuffs3Name'],
-    ['enabledHuntingMode', 'enabledHuntingMode'],
-    ['hideSubLvlCreature', 'hideSubLvlCreature'],
-    ['showBuffs', 'showHuntingBuffs'],
-    ['showTitanInfo', 'showTitanInfo'],
-    ['showBuffInfo', 'showBuffInfo'],
+    ['showBuffs', 'showHuntingBuffs']
   ].forEach(function(a) {calf[a[0]] = getValue(a[1]);});
+}
+
+function straightValues() {
+  [
+    'enabledHuntingMode',
+    'hideSubLvlCreature',
+    'showTitanInfo',
+    'showBuffInfo',
+    'showMonsterLog',
+    'showCreatureInfo'
+  ].forEach(function(a) {calf[a] = getValue(a);});
+}
+
+function valueType() {
+  mappedValues();
+  straightValues();
 }
 
 function getPrefs() {
