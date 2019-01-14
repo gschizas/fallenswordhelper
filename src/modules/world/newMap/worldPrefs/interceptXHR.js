@@ -42,5 +42,7 @@ function xhrPreFilter(options, originalOptions) {
 
 export default function interceptXHR() { // jQuery.min
   $.ajaxPrefilter('JSON', xhrPreFilter);
-  GameData.fetch(def_fetch_worldRealmActions);
+  if (calf.hideSubLvlCreature) {
+    GameData.fetch(def_fetch_worldRealmActions);
+  }
 }

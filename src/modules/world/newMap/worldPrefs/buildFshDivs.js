@@ -9,9 +9,9 @@ import {simpleCheckboxHtml} from '../../../settings/simpleCheckbox';
 import {toggleBuffInfo} from '../buffInfo/buffInfo';
 import toggleEnabledHuntingMode from './toggleEnabledHuntingMode';
 import {toggleHidePlayerActions} from '../prepareHidePlayerActions';
-import {toggleShowCreatureInfo} from '../monsterLog/creatureInfo';
+import toggleShowCreatureInfo from './toggleShowCreatureInfo';
 import toggleShowHuntingBuffs from './toggleShowHuntingBuffs';
-import {toggleShowMonsterLog} from '../monsterLog/processMonsterLog';
+import toggleShowMonsterLog from './toggleShowMonsterLog';
 import {toggleShowTitanInfo} from '../titanStats/titanStats';
 import toggleSubLvlCreature from './toggleSubLvlCreature';
 

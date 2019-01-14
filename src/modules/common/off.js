@@ -1,3 +1,5 @@
 export default function off(target, type, listener, options) {
-  target.removeEventListener(type, listener, options);
+  if (target instanceof EventTarget) {
+    target.removeEventListener(type, listener, options);
+  }
 }

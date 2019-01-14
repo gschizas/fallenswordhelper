@@ -9,6 +9,7 @@ module.exports = {
 
     DOMParser: false,
     Element: false,
+    EventTarget: false,
     HTMLDocument: false,
     HTMLTableElement: false,
     Image: false,

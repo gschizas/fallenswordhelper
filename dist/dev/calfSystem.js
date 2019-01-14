@@ -12,7 +12,9 @@
   function isUndefined(e) {return isType(e, 'undefined');}
 
   function on(target, type, listener, options) {
-    target.addEventListener(type, listener, options);
+    if (target instanceof EventTarget) {
+      target.addEventListener(type, listener, options);
+    }
   }
 
   function getElementById(id, doc) {
@@ -321,7 +323,9 @@
   var calf = {};
 
   function off(target, type, listener, options) {
-    target.removeEventListener(type, listener, options);
+    if (target instanceof EventTarget) {
+      target.removeEventListener(type, listener, options);
+    }
   }
 
   var target = 0;
@@ -2436,10 +2440,9 @@
   }
 
   function callApp(data) {
-    extend(data, {app: 1});
     return retryAjax({
       url: 'app.php',
-      data: data,
+      data: extend(data, {app: 1}),
       dataType: 'json'
     });
   }
@@ -3954,25 +3957,6 @@
     return aDot('redDot');
   }
 
-  function getMyItem(removeBy, item) {
-    if (removeBy) {
-      return item[removeBy];
-    }
-    return item;
-  }
-
-  function genericFilter(removeBy, seen, item) {
-    var myItem = getMyItem(removeBy, item);
-    if (!seen[myItem]) {
-      seen[myItem] = true;
-      return true;
-    }
-  }
-
-  function uniq(arr, removeBy) {
-    return arr.filter(partial(genericFilter, removeBy, {}));
-  }
-
   var bufferProgress;
 
   function getBufferProgress() {
@@ -3988,46 +3972,15 @@
 
   var sustainLevelRE = /Level<br>(\d+)%/;
 
-  function getPrevBr(bioCellHtml, runningTotalPosition) { // Legacy
-    var prevBR = bioCellHtml.lastIndexOf('<br>', runningTotalPosition - 1);
-    if (prevBR === -1) {return 0;}
-    return prevBR;
-  }
-
-  function getNextBr(bioCellHtml, runningTotalPosition) { // Legacy
-    var nextBR = bioCellHtml.indexOf('<br>', runningTotalPosition);
-    if (nextBR === -1 && bioCellHtml.indexOf('<br>') !== -1) {
-      return bioCellHtml.length - 5;
-    }
-    return nextBR;
-  }
-
-  function extractLine(bioCellHtml, runningTotalPosition) {
-    var prevBR = getPrevBr(bioCellHtml, runningTotalPosition);
-    var nextBR = getNextBr(bioCellHtml, runningTotalPosition);
-    var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
-    return textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
-  }
-
-  function getBioLines(bioCellHtml, findBuffNicks) { // Legacy
+  function getBioLines(bioCellHtml, findBuffNicks) {
+    var myRe = new RegExp('^.*\\b(?:(?:' +
+      findBuffNicks.replace(/,/g, ')|(?:') + '))\\b.*$', 'gim');
+    var myArray;
     var res = [];
-    var buffPosition = 0;
-    var startingPosition = 0;
-    var runningTotalPosition = 0;
-    var bioTextToSearch = ' ' + bioCellHtml + ' ';
-    var buffRE = new RegExp('[^a-zA-Z]((' +
-      findBuffNicks.replace(/,/g, ')|(') + '))[^a-zA-Z]', 'i');
-    while (buffPosition !== -1) {
-      bioTextToSearch = bioTextToSearch.substr(startingPosition,
-        bioTextToSearch.length);
-      buffPosition = bioTextToSearch.search(buffRE);
-      if (buffPosition !== -1) {
-        startingPosition = buffPosition + 1;
-        runningTotalPosition += buffPosition;
-        res.push(extractLine(bioCellHtml, runningTotalPosition));
-      }
+    while ((myArray = myRe.exec(bioCellHtml)) !== null) {
+      res.push(myArray[0]);
     }
-    return uniq(res);
+    return res;
   }
 
   function getSustain(doc) {
@@ -4150,7 +4103,6 @@
     var doc = createDocument(responseText);
     var bioCellHtml = getElementById('profile-bio', doc).innerHTML;
     var textLineArray = getBioLines(bioCellHtml, callback.findBuffNicks);
-
     // add row to table
     if (textLineArray.length > 0) {
       addRowToTable(bioCellHtml, callback, doc, textLineArray);
@@ -5963,38 +5915,22 @@
     }
   }
 
-  function navHeightExists(theNav, myNav) {
-    if (Array.isArray(myNav.heights)) {
-      navHeightsIsArray(theNav, myNav);
-    } else {
-      sendException('$(\'#nav\').data(\'nav\').heights is not an Array', false);
-    }
-  }
-
   function navDataExists(theNav, myNav) {
     if ('heights' in myNav) {
-      navHeightExists(theNav, myNav);
+      navHeightsIsArray(theNav, myNav);
     } else {
       sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
-    }
-  }
-
-  function navExists(theNav) { // jQuery
-    var myNav = $(theNav).data('nav');
-    if (isObject(myNav)) {
-      navDataExists(theNav, myNav);
-    } else {
-      sendException('$(\'#nav\').data(\'nav\') is not an object', false);
     }
   }
 
   function adjustHeight() {
     // adjust the menu height for the newly added items
     var theNav = getElementById('nav');
-    if (theNav instanceof Element) {
-      navExists(theNav);
+    var myNav = $(theNav).data('nav');
+    if (isObject(myNav)) {
+      navDataExists(theNav, myNav);
     } else {
-      sendException('#nav is not an Element', false);
+      sendException('$(\'#nav\').data(\'nav\') is not an object', false);
     }
   }
 
@@ -15583,6 +15519,25 @@
     return obj;
   }
 
+  function getMyItem(removeBy, item) {
+    if (removeBy) {
+      return item[removeBy];
+    }
+    return item;
+  }
+
+  function genericFilter(removeBy, seen, item) {
+    var myItem = getMyItem(removeBy, item);
+    if (!seen[myItem]) {
+      seen[myItem] = true;
+      return true;
+    }
+  }
+
+  function uniq(arr, removeBy) {
+    return arr.filter(partial(genericFilter, removeBy, {}));
+  }
+
   var highlightPlayersNearMyLvl$1;
   var spinner$1;
   var validPvP = nowSecs - 604800;
@@ -15947,6 +15902,10 @@
     add(3, injectTradeOld);
   }
 
+  function compressHistory() {
+    compressBio(getArrayByTagName(def_table, pCC).slice(-2, -1)[0]);
+  }
+
   var highlightPlayersNearMyLvl$2;
   var highlightGvGPlayersNearMyLvl;
 
@@ -15978,15 +15937,17 @@
     if (lastActDays < 7) {isActive(el, tipped);}
   }
 
-  function dontHighlight() {
-    return Number(getUrlParameter('guild_id')) === currentGuildId() ||
-      !highlightPlayersNearMyLvl$2 && !highlightGvGPlayersNearMyLvl;
+  function shouldHighlight() {
+    return Number(getUrlParameter('guild_id')) !== currentGuildId() &&
+      (highlightPlayersNearMyLvl$2 || highlightGvGPlayersNearMyLvl);
   }
 
   function doHighlights() {
-    calculateBoundaries();
-    querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
-      .forEach(highlightMembers);
+    if (shouldHighlight()) {
+      calculateBoundaries();
+      querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
+        .forEach(highlightMembers);
+    }
   }
 
   function injectViewGuild() {
@@ -15995,8 +15956,8 @@
     guildXPLock(getXpLock());
     highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
     highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
-    if (dontHighlight()) {return;}
     doHighlights();
+    compressHistory();
   }
 
   var containerDiv;
@@ -17277,6 +17238,220 @@
     $.subscribe(def_relicView, viewRelic);
   }
 
+  function fetchdata(data) {
+    return retryAjax({
+      cache: false,
+      url: 'fetchdata.php',
+      data: extend(data, {_rnd: rnd()}),
+      dataType: 'json'
+    });
+  }
+
+  var creatureCache = [];
+
+  function cacheResult(json) {
+    if (badData$1(json)) {return;}
+    creatureCache.push(json);
+  }
+
+  function thisMob(id, el) {
+    return id === Number(el.response.data.id);
+  }
+
+  function async(dfd, result) {dfd.resolve(result);}
+
+  function fromCache(cached) {
+    var dfd = $.Deferred();
+    add(3, async, [dfd, cached]);
+    return dfd.promise();
+  }
+
+  function getCreatureStats(id, passback) {
+    var cached = creatureCache.find(partial(thisMob, id));
+    if (cached) {
+      return fromCache(cached);
+    }
+    return fetchdata({
+      a: 1,
+      id: id,
+      passback: passback
+    }).done(cacheResult);
+  }
+
+  var statLevel;
+  var statDefense;
+  var statAttack;
+  var statDamage;
+  var statArmor;
+  var statHp;
+
+  function getStatText(statTooltip, statClassName) {
+    return getElementsByClassName(statClassName, statTooltip)[0]
+      .nextElementSibling.textContent;
+  }
+
+  function getTooltipStats(statTooltip) {
+    statAttack = getStatText(statTooltip, def_statAttack);
+    statDefense = getStatText(statTooltip, def_statDefense);
+    statArmor = getStatText(statTooltip, def_statArmor);
+    statDamage = getStatText(statTooltip, def_statDamage);
+    statHp = getStatText(statTooltip, def_statHp);
+  }
+
+  function getMyStats() {
+    statLevel = GameData.player().level;
+    getTooltipStats(getElementById('statbar-character-tooltip-stats'));
+  }
+
+  function tipHeader(creature) {
+    return '<table><tr><td>' +
+      '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
+      '.jpg" height="200" width="200"></td><td rowspan="2">' +
+      '<table width="400"><tr>' +
+      '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>';
+  }
+
+  function tipClassLevel(creature, myLvlClas) {
+    return '<tr><td>Class:&nbsp;</td><td width="40%">' + creature.creature_class +
+      '</td><td>Level:&nbsp;</td><td width="40%">' + creature.level +
+      ' (your level:<span class="' + myLvlClas + '">' + statLevel +
+      '</span>)</td></tr>';
+  }
+
+  function tipAttackDefense(creature) {
+    return '<tr><td>Attack:&nbsp;</td><td width="40%">' + creature.attack +
+      ' (your defense:<span class="fshYellow">' + statDefense +
+      '</span>)</td><td>Defense:&nbsp;</td><td width="40%">' + creature.defense +
+      ' (your attack:<span class="fshYellow">' + statAttack +
+      '</span>)</td></tr>';
+  }
+
+  function tipArmorDamage(creature) {
+    return '<tr><td>Armor:&nbsp;</td><td width="40%">' + creature.armor +
+      ' (your damage:<span class="fshYellow">' + statDamage +
+      '</span>)</td><td>Damage:&nbsp;</td><td width="40%">' + creature.damage +
+      ' (your armor:<span class="fshYellow">' + statArmor + '</span>)</td></tr>';
+  }
+
+  function tipHp(creature, oneHitNumber) {
+    return '<tr><td>HP:&nbsp;</td><td width="40%">' + creature.hp +
+      ' (your HP:<span class="fshYellow">' + statHp +
+      '</span>)(1H: <span class="fshRed">' + oneHitNumber +
+      '</span>)</td><td>Gold:&nbsp;</td><td width="40%">' + creature.gold +
+      '</td></tr>';
+  }
+
+  var tipSpacer = '<tr><td colspan="4" height="5"></td></tr><tr>' +
+    '<td class="header" colspan="4" class="fshCenter">Enhancements</td></tr>';
+
+  function tipEnhancements(creature) {
+    var ret = '';
+    if (creature.enhancements.length === 0) {
+      ret += '<tr><td colspan="4">[no enhancements]</td></tr>';
+    } else {
+      creature.enhancements.forEach(function(e) {
+        ret += '<tr><td colspan="2">' + e.name +
+          ':</td><td colspan="2">' + e.value + '</td></tr>';
+      });
+    }
+    return ret;
+  }
+
+  function tipFooter(creature) {
+    return '<tr><td colspan="4" height="5"></td></tr><tr>' +
+    '<td class="header" colspan="4" class="fshCenter">Description</td>' +
+    '</tr><tr><td colspan="4">' + creature.description + '</td></tr>' +
+    '<tr><td colspan="4" height="5"></td></tr></table></td></tr>' +
+    '<tr><td class="fshCenter"><b>' + creature.name + '</b></td></tr>' +
+    '</table>';
+  }
+
+  function makeMonsterTip(creature, oneHitNumber, myLvlClas) {
+    return tipHeader(creature) +
+      tipClassLevel(creature, myLvlClas) +
+      tipAttackDefense(creature) +
+      tipArmorDamage(creature) +
+      tipHp(creature, oneHitNumber) +
+      tipSpacer +
+      tipEnhancements(creature) +
+      tipFooter(creature);
+  }
+
+  function doMouseOver(creature) {
+    var oneHitNumber = Math.ceil(creature.hp * calf.hpVariable + creature.armor *
+      calf.generalVariable);
+    var myLvlClas = 'fshYellow';
+    getMyStats();
+    if (statLevel > creature.level) {myLvlClas = 'fshRed';}
+    return makeMonsterTip(creature, oneHitNumber, myLvlClas);
+  }
+
+  function processMouseOver(data) {
+    if (badData$1(data)) {return;}
+    return doMouseOver(data.response.data);
+  }
+
+  var creatureViewTests = ['verb', 'view', 'tip-static'];
+
+  function setQTip(monster, qtipText) { // jQuery
+    $(monster).qtip({
+      overwrite: true,
+      show: {
+        event: 'mouseover',
+        ready: true
+      },
+      style: {classes: 'qtip-tipsy qtip-custom'},
+      position: {
+        my: 'center right',
+        at: 'center left',
+        effect: false,
+        viewport: $(window)
+      },
+      content: {text: qtipText},
+      hide: {effect: false}
+    });
+  }
+
+  function getIndex(element) {
+    return Array.from(element.parentNode.children).indexOf(element);
+  }
+
+  function displayJson(api, data) {
+    var content = processMouseOver(data);
+    api.set('content.text', content);
+  }
+
+  function getJson(passback, event, api) { // jQuery.min
+    getCreatureStats(GameData.actions()[passback].data.id, passback)
+      .done(partial(displayJson, api));
+    return 'Loading...';
+  }
+
+  function makeMouseOver$2(self, listItem) {
+    sendEvent('NewMap', 'CreatureInfo');
+    var passback = getIndex(listItem);
+    self.classList.add('fshTip');
+    setQTip(self, partial(getJson, passback));
+  }
+
+  function isViewCreature(self, listItem) {
+    return hasClasses(creatureViewTests, self) && !hasClass('fshTip', self) &&
+      hasClass('creature', listItem);
+  }
+
+  function moEvt(evt) {
+    if (!calf.showCreatureInfo) {return;}
+    var self = evt.target;
+    var listItem = self.parentNode.parentNode.parentNode;
+    if (isViewCreature(self, listItem)) {
+      makeMouseOver$2(self, listItem);
+    }
+  }
+
+  function interceptMouseEvents() {
+    on(getElementById('actionList'), 'mouseover', moEvt);
+  }
+
   // colSpan = attributes[0]
   // anElement = attributes[1]
   // isHeader = attributes[2]
@@ -17575,17 +17750,11 @@
   var resultDiv;
 
   function quickBuy() {
-    return retryAjax({
-      cache: false,
-      url: 'fetchdata.php',
-      data: {
-        a: 14,
-        d: 0,
-        id: shoppingData.id,
-        item_id: shoppingData.itemId,
-        _rnd: rnd()
-      },
-      dataType: 'json'
+    return fetchdata({
+      a: 14,
+      d: 0,
+      id: shoppingData.id,
+      item_id: shoppingData.itemId
     });
   }
 
@@ -17660,191 +17829,50 @@
     $.subscribe(def_shopPrompt, worldDialogShop);
   }
 
-  var showCreatureInfo;
-  var statLevel;
-  var statDefense;
-  var statAttack;
-  var statDamage;
-  var statArmor;
-  var statHp;
-
-  function toggleShowCreatureInfo() {
-    showCreatureInfo = !showCreatureInfo;
-    setValue('showCreatureInfo', showCreatureInfo);
-  }
-
-  function getStatText(statTooltip, statClassName) {
-    return getElementsByClassName(statClassName, statTooltip)[0]
-      .nextElementSibling.textContent;
-  }
-
-  function getTooltipStats(statTooltip) {
-    statDefense = getStatText(statTooltip, def_statDefense);
-    statAttack = getStatText(statTooltip, def_statAttack);
-    statDamage = getStatText(statTooltip, def_statDamage);
-    statArmor = getStatText(statTooltip, def_statArmor);
-    statHp = getStatText(statTooltip, def_statHp);
-  }
-
-  function getMyStats() {
-    statLevel = intValue(getStatText(
-      getElementById(def_statbarLevel), def_statLevel));
-    getTooltipStats(getElementById('statbar-character-tooltip-stats'));
-  }
-
-  function tipHeader(creature) {
-    return '<table><tr><td>' +
-      '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
-      '.jpg" height="200" width="200"></td><td rowspan="2">' +
-      '<table width="400"><tr>' +
-      '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>';
-  }
-
-  function tipClassLevel(creature, myLvlClas) {
-    return '<tr><td>Class:&nbsp;</td><td width="40%">' + creature.creature_class +
-      '</td><td>Level:&nbsp;</td><td width="40%">' + creature.level +
-      ' (your level:<span class="' + myLvlClas + '">' + statLevel +
-      '</span>)</td></tr>';
-  }
-
-  function tipAttackDefense(creature) {
-    return '<tr><td>Attack:&nbsp;</td><td width="40%">' + creature.attack +
-      ' (your defense:<span class="fshYellow">' + statDefense +
-      '</span>)</td><td>Defense:&nbsp;</td><td width="40%">' + creature.defense +
-      ' (your attack:<span class="fshYellow">' + statAttack +
-      '</span>)</td></tr>';
-  }
-
-  function tipArmorDamage(creature) {
-    return '<tr><td>Armor:&nbsp;</td><td width="40%">' + creature.armor +
-      ' (your damage:<span class="fshYellow">' + statDamage +
-      '</span>)</td><td>Damage:&nbsp;</td><td width="40%">' + creature.damage +
-      ' (your armor:<span class="fshYellow">' + statArmor + '</span>)</td></tr>';
-  }
-
-  function tipHp(creature, oneHitNumber) {
-    return '<tr><td>HP:&nbsp;</td><td width="40%">' + creature.hp +
-      ' (your HP:<span class="fshYellow">' + statHp +
-      '</span>)(1H: <span class="fshRed">' + oneHitNumber +
-      '</span>)</td><td>Gold:&nbsp;</td><td width="40%">' + creature.gold +
-      '</td></tr>';
-  }
-
-  var tipSpacer = '<tr><td colspan="4" height="5"></td></tr><tr>' +
-    '<td class="header" colspan="4" class="fshCenter">Enhancements</td></tr>';
-
-  function tipEnhancements(creature) {
-    var ret = '';
-    if (creature.enhancements.length === 0) {
-      ret += '<tr><td colspan="4">[no enhancements]</td></tr>';
-    } else {
-      creature.enhancements.forEach(function(e) {
-        ret += '<tr><td colspan="2">' + e.name +
-          ':</td><td colspan="2">' + e.value + '</td></tr>';
-      });
-    }
-    return ret;
-  }
-
-  function tipFooter(creature) {
-    return '<tr><td colspan="4" height="5"></td></tr><tr>' +
-    '<td class="header" colspan="4" class="fshCenter">Description</td>' +
-    '</tr><tr><td colspan="4">' + creature.description + '</td></tr>' +
-    '<tr><td colspan="4" height="5"></td></tr></table></td></tr>' +
-    '<tr><td class="fshCenter"><b>' + creature.name + '</b></td></tr>' +
-    '</table>';
-  }
-
-  function makeMonsterTip(creature, oneHitNumber, myLvlClas) {
-    return tipHeader(creature) +
-      tipClassLevel(creature, myLvlClas) +
-      tipAttackDefense(creature) +
-      tipArmorDamage(creature) +
-      tipHp(creature, oneHitNumber) +
-      tipSpacer +
-      tipEnhancements(creature) +
-      tipFooter(creature);
-  }
-
-  function doMouseOver(creature, monster) {
-    var oneHitNumber = Math.ceil(creature.hp * calf.hpVariable + creature.armor *
-      calf.generalVariable);
-    var myLvlClas = 'fshYellow';
-    if (statLevel > creature.level) {myLvlClas = 'fshRed';}
-    monster.dataset.tipped = makeMonsterTip(creature, oneHitNumber, myLvlClas);
-  }
-
-  var bailOut$1 = [
-    function(data, actions) {
-      return actions.length === 1 &&
-        actions[0].classList.contains('hcs-state-disabled'); // In motion
-    },
-    function(data, actions) {
-      return actions.length - 1 < data.passback; // Not enough actions
-    },
-    function(data) {
-      return !GameData.actions()[data.passback];
-    },
-    function(data) {
-      return data.response.data.id !==
-        GameData.actions()[data.passback].data.id.toString(); // Different action list
-    }
-  ];
-
-  function doCreatureInfo(data) {
-    var actions = getElementById('actionList').children;
-    for (var i = 0; i < bailOut$1.length; i += 1) {
-      if (bailOut$1[i](data, actions)) {return;}
-    }
-    // monster = 0;
-    doMouseOver(data.response.data, actions[data.passback].children[0]
-      .children[0].children[0]);
-  }
-
-  function processMouseOver(data) {
-    if (showCreatureInfo) {doCreatureInfo(data);}
-  }
-
-  function getCreaturePrefs() {
-    showCreatureInfo = getValue('showCreatureInfo');
-  }
-
-  var showMonsterLog;
   var monsterLog;
 
-  function toggleShowMonsterLog() {
-    showMonsterLog = !showMonsterLog;
-    setValue('showMonsterLog', showMonsterLog);
+  function storeDescription(creature, logCreature) {
+    logCreature.creature_class = creature.creature_class;
+    logCreature.image_id = creature.image_id;
+    logCreature.level = Number(creature.level);
+    logCreature.type = creature.type;
   }
 
-  function storeDescription(creature, logCreature) {
-    logCreature.creature_class = fallback(logCreature.creature_class,
-      creature.creature_class);
-    logCreature.image_id = fallback(logCreature.image_id, creature.image_id);
-    logCreature.level = fallback(logCreature.level, Number(creature.level));
-    logCreature.type = fallback(logCreature.type, creature.type);
+  function setupMob(creature) {
+    if (!monsterLog[creature.name]) {
+      monsterLog[creature.name] = {seen: 1};
+      storeDescription(creature, monsterLog[creature.name]);
+    } else if (monsterLog[creature.name].seen) {
+      monsterLog[creature.name].seen += 1;
+    }
+  }
+
+  function getStat(fn, stat, creatureStat) {
+    if (stat) {
+      return fn(stat, creatureStat);
+    }
+    return creatureStat;
   }
 
   function updateMinMax(_logStat, creatureStat) {
-    var logStat = fallback(_logStat, {});
-    if (logStat.min) {
-      logStat.min = Math.min(logStat.min, creatureStat);
-    } else {
-      logStat.min = creatureStat;
-    }
-    if (logStat.max) {
-      logStat.max = Math.max(logStat.max, creatureStat);
-    } else {
-      logStat.max = creatureStat;
-    }
+    var logStat = _logStat || {};
+    logStat.min = getStat(Math.min, logStat.min, creatureStat);
+    logStat.max = getStat(Math.max, logStat.max, creatureStat);
     return logStat;
   }
 
   var stats = ['attack', 'armor', 'damage', 'defense', 'hp'];
 
+  function statChanged(logStat, newStat) {
+    return !logStat || logStat.min !== newStat.min || logStat.max !== newStat.max;
+  }
+
   function storeStats(creature, logCreature) {
     stats.forEach(function(stat) {
-      logCreature[stat] = updateMinMax(logCreature[stat], Number(creature[stat]));
+      var newStat = updateMinMax(logCreature[stat], Number(creature[stat]));
+      if (statChanged(logCreature[stat], newStat)) {
+        logCreature[stat] = newStat;
+      }
     });
   }
 
@@ -17864,54 +17892,56 @@
 
   function doMonsterLog(creature) {
     if (!monsterLog) {monsterLog = {};}
-    monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
-    var logCreature = monsterLog[creature.name];
-    storeDescription(creature, logCreature);
-    storeStats(creature, logCreature);
-    storeEnhancements$1(creature, logCreature);
+    setupMob(creature);
+    storeStats(creature, monsterLog[creature.name]);
+    storeEnhancements$1(creature, monsterLog[creature.name]);
     setForage('fsh_monsterLog', monsterLog);
   }
 
   function processMonsterLog(creature) {
-    if (showMonsterLog) {doMonsterLog(creature);}
+    if (calf.showMonsterLog) {doMonsterLog(creature);}
+  }
+
+  function initLog(data) {
+    monsterLog = data || {};
   }
 
   function getMonsterPrefs() {
-    showMonsterLog = getValue('showMonsterLog');
-    getForage('fsh_monsterLog').done(function(data) {
-      monsterLog = data || {};
-    });
+    getForage('fsh_monsterLog').done(initLog);
   }
 
+  var processedMonsters = [];
+
   function processMonster(data) {
-    if (badData$1(data)) {return;} // creature is null
-    processMouseOver(data);
+    if (badData$1(data)) {return;}
+    sendEvent('NewMap', 'MonsterLog');
     processMonsterLog(data.response.data);
   }
 
-  function loopActions(e, i) { // jQuery.min
-    if (e.type !== 6) {return;}
-    retryAjax({
-      url: 'fetchdata.php?a=1&id=' + e.data.id + '&passback=' + i,
-      dataType: 'json'
-    }).done(processMonster);
+  function thisMob$1(e, el) {return e.id === el.id;}
+
+  function seenBefore(e) {
+    if (processedMonsters.find(partial(thisMob$1, e.data))) {return true;}
+    processedMonsters.push(e.data);
   }
 
-  function getCreatures() {
-    if (showCreatureInfo) {getMyStats();}
-    GameData.actions().forEach(loopActions);
+  function loopActions(e, i) { // jQuery.min
+    if (e.type !== 6 || seenBefore(e)) {return;}
+    getCreatureStats(e.data.id, i).done(processMonster);
   }
 
   function initMonsterLog() {
-    if (showCreatureInfo || showMonsterLog) {
-      getCreatures();
+    if (calf.showMonsterLog) {
+      GameData.actions().forEach(loopActions);
     }
   }
 
   function startMonsterLog() { // jQuery.min
-    getCreaturePrefs();
     getMonsterPrefs();
-    $.subscribe(def_afterUpdateActionlist, initMonsterLog);
+    $.subscribe('-1-success.action-response ' +
+      '4-success.action-response ' +
+      '5-success.action-response ' +
+      '25-success.action-response', initMonsterLog);
     initMonsterLog();
   }
 
@@ -18742,10 +18772,20 @@
     doHidePlayerActions();
   }
 
+  function toggleShowCreatureInfo() {
+    calf.showCreatureInfo = !calf.showCreatureInfo;
+    setValue('showCreatureInfo', calf.showCreatureInfo);
+  }
+
   function toggleShowHuntingBuffs() {
     calf.showBuffs = !calf.showBuffs;
     setValue('showHuntingBuffs', calf.showBuffs);
     GameData.fetch(def_fetch_playerBuffs);
+  }
+
+  function toggleShowMonsterLog() {
+    calf.showMonsterLog = !calf.showMonsterLog;
+    setValue('showMonsterLog', calf.showMonsterLog);
   }
 
   function toggleSubLvlCreature() {
@@ -18919,29 +18959,53 @@
 
   function interceptXHR() { // jQuery.min
     $.ajaxPrefilter('JSON', xhrPreFilter);
-    GameData.fetch(def_fetch_worldRealmActions);
+    if (calf.hideSubLvlCreature) {
+      GameData.fetch(def_fetch_worldRealmActions);
+    }
   }
 
-  function arrayType() {
+  function mappedArrays() {
     [
       ['buffs', 'huntingBuffs'],
       ['buffs2', 'huntingBuffs2'],
-      ['buffs3', 'huntingBuffs3'],
-      ['doNotKillList', 'doNotKillList']
+      ['buffs3', 'huntingBuffs3']
     ].forEach(function(a) {calf[a[0]] = shouldBeArray(a[1]);});
   }
 
-  function valueType() {
+  function straightArrays() {
+    [
+      'doNotKillList'
+    ].forEach(function(a) {calf[a] = shouldBeArray(a);});
+  }
+
+  function arrayType() {
+    mappedArrays();
+    straightArrays();
+  }
+
+  function mappedValues() {
     [
       ['buffsName', 'huntingBuffsName'],
       ['buffs2Name', 'huntingBuffs2Name'],
       ['buffs3Name', 'huntingBuffs3Name'],
-      ['enabledHuntingMode', 'enabledHuntingMode'],
-      ['hideSubLvlCreature', 'hideSubLvlCreature'],
-      ['showBuffs', 'showHuntingBuffs'],
-      ['showTitanInfo', 'showTitanInfo'],
-      ['showBuffInfo', 'showBuffInfo'],
+      ['showBuffs', 'showHuntingBuffs']
     ].forEach(function(a) {calf[a[0]] = getValue(a[1]);});
+  }
+
+  function straightValues() {
+    [
+      'enabledHuntingMode',
+      'hideSubLvlCreature',
+      'showTitanInfo',
+      'showBuffInfo',
+      'showMonsterLog',
+      'showCreatureInfo'
+    ].forEach(function(a) {calf[a] = getValue(a);});
+  }
+
+  function valueType() {
+    mappedValues();
+    straightValues();
   }
 
   function getPrefs$1() {
@@ -19071,6 +19135,7 @@
       initButtons,
       buffInfo,
       fixDebuff,
+      interceptMouseEvents,
       hideTitanCombatResults
     ]);
   }
@@ -20963,7 +21028,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '79';
+  window.FSH.calf = '80';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

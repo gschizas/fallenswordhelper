@@ -1,12 +1,11 @@
 import addCommas from '../../system/addCommas';
 import {def_shopPrompt} from '../../support/constants';
 import fallback from '../../system/fallback';
+import fetchdata from '../../ajax/fetchdata';
 import {getElementById} from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
-import retryAjax from '../../ajax/retryAjax';
-import rnd from '../../system/rnd';
 import testQuant from '../../system/testQuant';
 import when from '../../common/when';
 import {createButton, createDiv, createInput} from '../../common/cElement';
@@ -20,17 +19,11 @@ var qbBtn;
 var resultDiv;
 
 function quickBuy() {
-  return retryAjax({
-    cache: false,
-    url: 'fetchdata.php',
-    data: {
-      a: 14,
-      d: 0,
-      id: shoppingData.id,
-      item_id: shoppingData.itemId,
-      _rnd: rnd()
-    },
-    dataType: 'json'
+  return fetchdata({
+    a: 14,
+    d: 0,
+    id: shoppingData.id,
+    item_id: shoppingData.itemId
   });
 }
 

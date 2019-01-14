@@ -1,5 +1,8 @@
 import add from '../support/task';
 import colouredDots from '../common/colouredDots';
+//#if _DEV  //  compress history
+import compressHistory from './compressHistory';
+//#endif
 import currentGuildId from '../common/currentGuildId';
 import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
@@ -45,15 +48,17 @@ function highlightMembers(el) {
   if (lastActDays < 7) {isActive(el, tipped);}
 }
 
-function dontHighlight() {
-  return Number(getUrlParameter('guild_id')) === currentGuildId() ||
-    !highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl;
+function shouldHighlight() {
+  return Number(getUrlParameter('guild_id')) !== currentGuildId() &&
+    (highlightPlayersNearMyLvl || highlightGvGPlayersNearMyLvl);
 }
 
 function doHighlights() {
-  calculateBoundaries();
-  querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
-    .forEach(highlightMembers);
+  if (shouldHighlight()) {
+    calculateBoundaries();
+    querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
+      .forEach(highlightMembers);
+  }
 }
 
 export default function injectViewGuild() {
@@ -62,6 +67,8 @@ export default function injectViewGuild() {
   guildXPLock(getXpLock());
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
-  if (dontHighlight()) {return;}
   doHighlights();
+  //#if _DEV  //  compress history
+  compressHistory();
+  //#endif
 }

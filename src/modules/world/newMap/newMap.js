@@ -10,6 +10,7 @@ import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
 import {injectSendGoldOnWorld} from './sendGold';
 import insertElement from '../../common/insertElement';
+import {interceptMouseEvents} from './creatureInfo/interceptMouseEvents';
 import on from '../../common/on';
 import onWorld from './onWorld';
 import partial from '../../common/partial';
@@ -145,6 +146,7 @@ export default function subscribes() {
     initButtons,
     buffInfo,
     fixDebuff,
+    interceptMouseEvents,
     //#if _DEV  //  hide titan combat results
     hideTitanCombatResults
     //#endif
