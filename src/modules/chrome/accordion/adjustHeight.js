@@ -26,37 +26,21 @@ function navHeightsIsArray(theNav, myNav) {
   }
 }
 
-function navHeightExists(theNav, myNav) {
-  if (Array.isArray(myNav.heights)) {
-    navHeightsIsArray(theNav, myNav);
-  } else {
-    sendException('$(\'#nav\').data(\'nav\').heights is not an Array', false);
-  }
-}
-
 function navDataExists(theNav, myNav) {
   if ('heights' in myNav) {
-    navHeightExists(theNav, myNav);
+    navHeightsIsArray(theNav, myNav);
   } else {
     sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
-  }
-}
-
-function navExists(theNav) { // jQuery
-  var myNav = $(theNav).data('nav');
-  if (isObject(myNav)) {
-    navDataExists(theNav, myNav);
-  } else {
-    sendException('$(\'#nav\').data(\'nav\') is not an object', false);
   }
 }
 
 export default function adjustHeight() {
   // adjust the menu height for the newly added items
   var theNav = getElementById('nav');
-  if (theNav instanceof Element) {
-    navExists(theNav);
+  var myNav = $(theNav).data('nav');
+  if (isObject(myNav)) {
+    navDataExists(theNav, myNav);
   } else {
-    sendException('#nav is not an Element', false);
+    sendException('$(\'#nav\').data(\'nav\') is not an object', false);
   }
 }
