@@ -13,7 +13,9 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
 import partial from '../common/partial';
 import {createDiv, createTr} from '../common/cElement';
+//#if _BETA  //  Timing output
 import {time, timeEnd} from '../support/debug';
+//#endif
 
 var invItems;
 
@@ -106,17 +108,21 @@ function forEachInvItem(el) {
 }
 
 function processTrade(data) {
+  //#if _BETA  //  Timing output
 
   time('trade.processTrade');
 
+  //#endif
   invItems = data.items;
   // Highlight items in ST
   var nodeList = getArrayByTagName(def_table, getElementById('item-list'));
   nodeList.forEach(forEachInvItem); // TODO unnecessary DOM manipulation
   doFolderHeaders(data.folders);
+  //#if _BETA  //  Timing output
 
   timeEnd('trade.processTrade');
 
+  //#endif
 }
 
 function gotInventory(data) {

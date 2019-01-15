@@ -6,7 +6,9 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 import when from '../../common/when';
 import {injectTable, playerName, playerRank} from './helpers';
+//#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
+//#endif
 
 function returnAdvisorPage(list, e, response) {
   insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
@@ -78,9 +80,11 @@ function addAdvisorPages(list) {
 }
 
 export default function injectAdvisorWeekly(list) { // jQuery
+  //#if _BETA  //  Timing output
 
   time('guildAdvisor.injectAdvisorWeekly');
 
+  //#endif
   list.innerHTML = '<span class="fshCurveContainer fshFlex">' +
     '<span class="fshCurveEle fshCurveLbl fshOldSpinner"></span>' +
     '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>' +
@@ -90,7 +94,9 @@ export default function injectAdvisorWeekly(list) { // jQuery
     .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
 
   when(prm, partial(addAdvisorPages, list));
+  //#if _BETA  //  Timing output
 
   timeEnd('guildAdvisor.injectAdvisorWeekly');
 
+  //#endif
 }
