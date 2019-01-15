@@ -20969,6 +20969,7 @@
   var cmd;
   var subcmd;
   var subcmd2;
+  var type$2 = '';
   var coreFunction;
   var functionPath;
 
@@ -20997,6 +20998,7 @@
     cmd = getParam('cmd');
     subcmd = getParam('subcmd');
     subcmd2 = getParam('subcmd2');
+    if (cmd === 'points') {type$2 = '/' + getParam('type');}
   }
 
   function getParamsFromPage() {
@@ -21018,7 +21020,7 @@
       getParamsFromPage();
     }
     setCalfParams();
-    functionPath = cmd + '/' + subcmd + '/' + subcmd2;
+    functionPath = cmd + '/' + subcmd + '/' + subcmd2 + type$2;
     coreFunction = testCoreFunction();
   }
 
@@ -21044,7 +21046,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '81';
+  window.FSH.calf = '82';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
