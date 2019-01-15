@@ -10,7 +10,9 @@ import jQueryNotPresent from '../../common/jQueryNotPresent';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import {injectTable, playerLevel, playerName, playerRank} from './helpers';
+//#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
+//#endif
 
 function getTfoot(list) {
   var totalRow = list.rows[list.rows.length - 1];
@@ -50,16 +52,20 @@ function summaryLink() {
 }
 
 function injectAdvisorDaily(list, membrList) {
+  //#if _BETA  //  Timing output
 
   time('guildAdvisor.injectAdvisorDaily');
 
+  //#endif
   var data = getData(list, membrList);
   var tfoot = getTfoot(list);
   injectTable(list, tfoot, data);
   summaryLink();
+  //#if _BETA  //  Timing output
 
   timeEnd('guildAdvisor.injectAdvisorDaily');
 
+  //#endif
 }
 
 function switcher(list) {

@@ -7130,28 +7130,6 @@
     tabs.on('click', sortClasses, sortHandler);
   }
 
-  var timers = {};
-  var footWrap = getElementById('foot-wrap');
-
-  function log(text, value) {
-    if (footWrap) {
-      insertHtmlBeforeEnd(footWrap,
-        '<br>' + text + ': ' + value + ' (' + typeof value + ')');
-    }
-  }
-
-  function time(name) {
-    if (name) {timers[name] = performance.now() * 1000;}
-  }
-
-  function timeEnd(name) {
-    if (timers[name]) {
-      log(name, Math.round(performance.now() * 1000 -
-        timers[name]) / 1000 + 'ms');
-      delete timers[name];
-    }
-  }
-
   var theTables;
 
   function redoHead(i, e) { // jQuery
@@ -7177,9 +7155,7 @@
   }
 
   function process(tabs, arena) { // jQuery
-    time('arena.process');
     arenaDataTable(tabs, arena);
-    timeEnd('arena.process');
   }
 
   function injectArena() { // jQuery
@@ -8173,9 +8149,6 @@
   }
 
   function injectAdvisorWeekly(list) { // jQuery
-
-    time('guildAdvisor.injectAdvisorWeekly');
-
     list.innerHTML = '<span class="fshCurveContainer fshFlex">' +
       '<span class="fshCurveEle fshCurveLbl fshOldSpinner"></span>' +
       '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>' +
@@ -8185,9 +8158,6 @@
       .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
 
     when(prm, partial(addAdvisorPages, list));
-
-    timeEnd('guildAdvisor.injectAdvisorWeekly');
-
   }
 
   function getTfoot(list) {
@@ -8228,16 +8198,10 @@
   }
 
   function injectAdvisorDaily(list, membrList) {
-
-    time('guildAdvisor.injectAdvisorDaily');
-
     var data = getData(list, membrList);
     var tfoot = getTfoot(list);
     injectTable(list, tfoot, data);
     summaryLink();
-
-    timeEnd('guildAdvisor.injectAdvisorDaily');
-
   }
 
   function switcher(list) {
@@ -8469,14 +8433,8 @@
   }
 
   function doGroupPaint(m) { // jQuery
-
-    time('groups.doGroupPaint');
-
     $('#pCC table table table tr').has('.group-action-container')
       .each(partial(doGroupRow, m));
-
-    timeEnd('groups.doGroupPaint');
-
   }
 
   function addButton(target, val) {
@@ -17310,7 +17268,7 @@
     lastReset();
   }
 
-  var log$1 = {
+  var log = {
     '-': {'-': playerLog},
     outbox: {'-': outbox}
   };
@@ -18651,9 +18609,7 @@
   }
 
   function getInvMan() {
-    time('inventory.getInvMan');
     doInventory$1();
-    timeEnd('inventory.getInvMan');
   }
 
   function asyncCall() {
@@ -20762,17 +20718,11 @@
   }
 
   function processTrade(data) {
-
-    time('trade.processTrade');
-
     invItems$3 = data.items;
     // Highlight items in ST
     var nodeList = getArrayByTagName(def_table, getElementById('item-list'));
     nodeList.forEach(forEachInvItem); // TODO unnecessary DOM manipulation
     doFolderHeaders(data.folders);
-
-    timeEnd('trade.processTrade');
-
   }
 
   function gotInventory(data) {
@@ -20884,7 +20834,7 @@
     auctionhouse: auctionhouse,
     guild: guild$2,
     bank: {'-': {'-': injectBank}},
-    log: log$1,
+    log: log,
     potionbazaar: {'-': {'-': injectBazaar}},
     marketplace: {createreq: {'-': marketplace}},
     quickbuff: {'-': {'-': injectQuickBuff}}, // No ga
@@ -20981,7 +20931,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '82';
+  window.FSH.calf = '83';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

@@ -17,7 +17,9 @@ import setChecks from './setChecks';
 import setLvls from './setLvls';
 import when from '../../common/when';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
+//#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
+//#endif
 
 function doSpinner() { // jQuery
   pCC.innerHTML = '<span id="fshInvMan"><img src = "' +
@@ -61,9 +63,17 @@ function doInventory() {
 }
 
 function getInvMan() {
+  //#if _BETA  //  Timing output
+
   time('inventory.getInvMan');
+
+  //#endif
   doInventory();
+  //#if _BETA  //  Timing output
+
   timeEnd('inventory.getInvMan');
+
+  //#endif
 }
 
 function asyncCall() {

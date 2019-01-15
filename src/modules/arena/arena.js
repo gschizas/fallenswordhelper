@@ -10,7 +10,9 @@ import {
   setOpts,
   storeOpts
 } from './setOpts';
+//#if _BETA  //  Timing output
 import {time, timeEnd} from '../support/debug';
+//#endif
 
 var theTables;
 
@@ -37,9 +39,17 @@ function arenaDataTable(tabs, arena) {
 }
 
 function process(tabs, arena) { // jQuery
+  //#if _BETA  //  Timing output
+
   time('arena.process');
+
+  //#endif
   arenaDataTable(tabs, arena);
+  //#if _BETA  //  Timing output
+
   timeEnd('arena.process');
+
+  //#endif
 }
 
 export function injectArena() { // jQuery
