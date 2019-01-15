@@ -1,12 +1,11 @@
+import getUrlParameter from '../../system/getUrlParameter';
 import parseGoldUpgrades from '../notification/parseGoldUpgrades';
 import storePlayerUpgrades from '../../upgrades';
 
-export default {
-  '-': {
-    '-': {
-      '-': storePlayerUpgrades,
-      '0': storePlayerUpgrades,
-      '1': parseGoldUpgrades
-    }
+export default function points() {
+  if (getUrlParameter('type') === '1') {
+    parseGoldUpgrades();
+  } else {
+    storePlayerUpgrades();
   }
-};
+}

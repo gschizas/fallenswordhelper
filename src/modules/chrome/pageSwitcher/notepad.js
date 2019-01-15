@@ -19,21 +19,21 @@ import {
 } from '../../misc';
 
 export default {
-  showlogs: {'-': {'-': injectNotepadShowLogs}}, // done
-  invmanagernew: {'-': {'-': injectInventoryManagerNew}},
-  guildinvmgr: {'-': {'-': injectInventoryManagerNew}},
-  recipemanager: {'-': {'-': injectRecipeManager}}, // done
-  auctionsearch: {'-': {'-': injectAuctionSearch}}, // done
-  onlineplayers: {'-': {'-': injectOnlinePlayers}}, // done
-  quicklinkmanager: {'-': {'-': injectQuickLinkManager}}, // done
-  monsterlog: {'-': {'-': injectMonsterLog}}, // done
-  quickextract: {'-': {'-': insertQuickExtract}}, // done
-  quickwear: {'-': {'-': insertQuickWear}}, // done
-  fsboxcontent: {'-': {'-': injectFsBoxContent}}, // done
-  bufflogcontent: {'-': {'-': injectBuffLog}}, // done
-  newguildlog: {'-': {'-': injectNewGuildLog}},
-  findbuffs: {'-': {'-': injectFindBuffs}}, // done
-  findother: {'-': {'-': injectFindOther}}, // done
-  savesettings: {'-': {'-': injectSaveSettings}},
-  '-': {'-': {'-': injectNotepad}}
+  showlogs: {'-': injectNotepadShowLogs}, // done
+  invmanagernew: {'-': injectInventoryManagerNew},
+  guildinvmgr: {'-': injectInventoryManagerNew},
+  recipemanager: {'-': injectRecipeManager}, // done
+  auctionsearch: {'-': injectAuctionSearch}, // done
+  onlineplayers: {'-': injectOnlinePlayers}, // done
+  quicklinkmanager: {'-': injectQuickLinkManager}, // done
+  monsterlog: {'-': injectMonsterLog}, // done
+  quickextract: {'-': insertQuickExtract}, // done
+  quickwear: {'-': insertQuickWear}, // done
+  fsboxcontent: {'-': injectFsBoxContent}, // done
+  bufflogcontent: {'-': injectBuffLog}, // done
+  newguildlog: {'-': injectNewGuildLog},
+  findbuffs: {'-': injectFindBuffs}, // done
+  findother: {'-': injectFindOther}, // done
+  savesettings: {'-': injectSaveSettings},
+  '-': {'-': injectNotepad}
 };

@@ -4,11 +4,11 @@ import injectProfileDropItems from
   '../../profile/dropitems/injectProfileDropItems';
 
 export default {
-  '-': {'-': {'-': injectProfile}},
-  managecombatset: {'-': {'-': injectProfile}},
-  report: {'-': {'-': injectProfile}},
-  equipitem: {'-': {'-': injectProfile}},
-  useitem: {'-': {'-': injectProfile}},
-  changebio: {'-': {'-': injectBioWidgets}},
-  dropitems: {'-': {'-': injectProfileDropItems}}
+  '-': {'-': injectProfile},
+  managecombatset: {'-': injectProfile},
+  report: {'-': injectProfile},
+  equipitem: {'-': injectProfile},
+  useitem: {'-': injectProfile},
+  changebio: {'-': injectBioWidgets},
+  dropitems: {'-': injectProfileDropItems}
 };
