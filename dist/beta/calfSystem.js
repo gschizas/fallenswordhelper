@@ -7179,9 +7179,13 @@
   }
 
   function process(tabs, arena) { // jQuery
+
     time('arena.process');
+
     arenaDataTable(tabs, arena);
+
     timeEnd('arena.process');
+
   }
 
   function injectArena() { // jQuery
@@ -18653,9 +18657,13 @@
   }
 
   function getInvMan() {
+
     time('inventory.getInvMan');
+
     doInventory$1();
+
     timeEnd('inventory.getInvMan');
+
   }
 
   function asyncCall() {
@@ -20983,7 +20991,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '82';
+  window.FSH.calf = '83';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
