@@ -13,6 +13,7 @@ import {end, screenview, setup, start} from '../support/fshGa';
 var cmd;
 var subcmd;
 var subcmd2;
+var type = '';
 var coreFunction;
 var functionPath;
 
@@ -41,6 +42,7 @@ function getParamsFromUrl() {
   cmd = getParam('cmd');
   subcmd = getParam('subcmd');
   subcmd2 = getParam('subcmd2');
+  if (cmd === 'points') {type = '/' + getParam('type');}
 }
 
 function getParamsFromPage() {
@@ -62,7 +64,7 @@ function getCoreFunction() {
     getParamsFromPage();
   }
   setCalfParams();
-  functionPath = cmd + '/' + subcmd + '/' + subcmd2;
+  functionPath = cmd + '/' + subcmd + '/' + subcmd2 + type;
   coreFunction = testCoreFunction();
 }
 
