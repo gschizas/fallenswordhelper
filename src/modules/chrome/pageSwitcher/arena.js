@@ -4,9 +4,9 @@ import setupMoves from '../../arena/setup';
 import storeMoves from '../../arena/store';
 
 export default {
-  '-': {'-': {'-': {'-': injectArena}}},
-  join: {'-': {'-': {'-': injectArena}}},
-  completed: {'-': {'-': {'-': completedArenas}}},
-  pickmove: {'-': {'-': {'-': storeMoves}}},
-  setup: {'-': {'-': {'-': setupMoves}}}
+  '-': {'-': {'-': injectArena}},
+  join: {'-': {'-': injectArena}},
+  completed: {'-': {'-': completedArenas}},
+  pickmove: {'-': {'-': storeMoves}},
+  setup: {'-': {'-': setupMoves}}
 };

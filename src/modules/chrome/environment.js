@@ -14,7 +14,6 @@ var cmd;
 var subcmd;
 var subcmd2;
 var type;
-var fromWorld;
 var coreFunction;
 var functionPath;
 
@@ -38,16 +37,15 @@ function newSelector(selector) {
 var isValid = [
   function() {return pageSwitcher[cmd];},
   function() {return pageSwitcher[cmd][subcmd];},
-  function() {return pageSwitcher[cmd][subcmd][subcmd2];},
-  function() {return pageSwitcher[cmd][subcmd][subcmd2][type];}
+  function() {return pageSwitcher[cmd][subcmd][subcmd2];}
 ];
 
 function returnsObject(e) {return isObject(e());}
 
 function testCoreFunction() {
   if (isValid.every(returnsObject) &&
-      pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
-    return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
+      pageSwitcher[cmd][subcmd][subcmd2][type]) {
+    return pageSwitcher[cmd][subcmd][subcmd2][type];
   }
 }
 
@@ -56,7 +54,6 @@ function getParamsFromUrl() {
   subcmd = getParam('subcmd');
   subcmd2 = getParam('subcmd2');
   type = getType(cmd);
-  fromWorld = getParam('fromworld');
 }
 
 function getParamsFromPage() {
@@ -64,7 +61,6 @@ function getParamsFromPage() {
   subcmd = newSelector('input[name="subcmd"]');
   subcmd2 = newSelector('input[name="subcmd2"]');
   type = '-';
-  fromWorld = '-';
 }
 
 function setCalfParams() {
@@ -80,8 +76,7 @@ function getCoreFunction() {
     getParamsFromPage();
   }
   setCalfParams();
-  functionPath = cmd + '/' + subcmd + '/' + subcmd2 + '/' + type + '/' +
-    fromWorld;
+  functionPath = cmd + '/' + subcmd + '/' + subcmd2 + '/' + type;
   coreFunction = testCoreFunction();
 }
 

@@ -4,9 +4,9 @@ import storePlayerUpgrades from '../../upgrades';
 export default {
   '-': {
     '-': {
-      '-': {'-': storePlayerUpgrades},
-      '0': {'-': storePlayerUpgrades},
-      '1': {'-': parseGoldUpgrades}
+      '-': storePlayerUpgrades,
+      '0': storePlayerUpgrades,
+      '1': parseGoldUpgrades
     }
   }
 };
