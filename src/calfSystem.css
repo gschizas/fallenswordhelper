@@ -509,8 +509,7 @@
 
 /* Trade */
 .itemDiv {width: 427px;}
-.isInST {border: 3px solid red;}
-.tradeItemMargin {margin: 2.4px;}
+.isInST {background-color: red;}
 
 /* Quest Page */
 .parent {

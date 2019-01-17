@@ -93,7 +93,7 @@ function doFolderHeaders(folders) {
 function stColor(el, item) {
   if (item.is_in_st) {
     el.classList.add('isInST');
-  } else {el.classList.add('tradeItemMargin');}
+  }
 }
 
 function forEachInvItem(el) {

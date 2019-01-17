@@ -3,36 +3,30 @@ import calf from '../support/calf';
 import {createTr} from '../common/cElement';
 import {defaults} from '../support/dataObj';
 import doFolders from './doFolders';
-import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
+import hasClass from '../common/hasClass';
 import insertElementBefore from '../common/insertElementBefore';
 import jsonParse from '../common/jsonParse';
 import on from '../common/on';
+import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 
 function getHowMany(itemTables) {
   var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
   if (isNaN(howMany)) {return itemTables.length;}
-  // maximum of 100 items in an ST
   if (calf.subcmd !== '-') {return Math.min(100, howMany);}
   return howMany;
 }
 
 function itemType(itemid, checkbox) {
-  return itemid === 'itemid-2' && checkbox.classList.contains('itemtype12');
+  return itemid === 'itemid-2' && hasClass('itemtype12', checkbox);
 }
 
-function shouldBeChecked(itemid, checkbox) {
+function thisType(itemid, checkbox) {
   return itemid === 'itemid-1' ||
     itemType(itemid, checkbox) ||
-    checkbox.classList.contains(itemid);
-}
-
-function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
-  return howMany &&
-    fallback(itemsInSt, !el.classList.contains('isInST')) &&
-    shouldBeChecked(itemid, checkbox);
+    hasClass(itemid, checkbox);
 }
 
 function findStCheck() {
@@ -40,50 +34,68 @@ function findStCheck() {
   if (cbox) {return cbox.checked;}
 }
 
+function notInSt(itemsInSt, el) {
+  return itemsInSt || !hasClass('isInST', el);
+}
+
+function getCheckbox(el) {
+  return el.children[0].lastElementChild.children[0].children[0];
+}
+
+function doCheck(bool, checkbox) {
+  checkbox.checked = bool;
+}
+
+function unCheckAll(checkbox) {
+  doCheck(false, checkbox);
+}
+
+function checkAll(checkbox) {
+  doCheck(true, checkbox);
+}
+
 function doCheckAll(evt) {
-  var itemid = evt.target.id;
   var itemList = getElementById('item-div') ||
     getElementById('item-list');
   var itemTables = querySelectorArray('table:not(.fshHide)', itemList);
-  var howMany = getHowMany(itemTables);
-  var itemsInSt = findStCheck();
-  itemTables.forEach(function(el) { // TODO
-    var checkbox = el.children[0].lastElementChild.children[0].children[0];
-    if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
-      checkbox.checked = true;
-      howMany -= 1;
-      return;
-    }
-    checkbox.checked = false;
-  });
+  itemTables.map(getCheckbox).forEach(unCheckAll);
+  itemTables
+    .filter(partial(notInSt, findStCheck()))
+    .map(getCheckbox)
+    .filter(partial(thisType, evt.target.id))
+    .slice(0, getHowMany(itemTables))
+    .forEach(checkAll);
 }
 
 function toggleAllPlants(evt) {
-  if (evt.target.classList.contains('fshCheckAll')) {doCheckAll(evt);}
+  if (hasClass('fshCheckAll', evt.target)) {doCheckAll(evt);}
+}
+
+function arrayfromList(classes) {
+  return jsonParse('[' + classes + ']');
 }
 
 function getItemList() {
   var sendClasses = getValue('sendClasses');
-  var itemList = jsonParse('[' + sendClasses + ']');
+  var itemList = arrayfromList(sendClasses);
   if (itemList) {return itemList;}
-  return jsonParse('[' + defaults.sendClasses + ']');
+  return arrayfromList(defaults.sendClasses);
+}
+
+function makeSpan(el) {
+  return ' &ensp;<span id="itemid' + el[1] +
+    '" class="fshCheckAll fshLink fshNoWrap">' + el[0] + '</span>';
 }
 
 function injectTradeOld() {
-  var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
-    'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
-    '<span id="itemid-2" ' +
-    'class="fshCheckAll fshLink fshNoWrap">All Resources</span>';
-  var itemList = getItemList();
-  itemList.forEach(function(el) {
-    myTd += ' &ensp;<span id="itemid' + el[1] +
-      '" class="fshCheckAll fshLink fshNoWrap">' + el[0] + '</span>';
-  });
-  myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
-    'class="custominput" value="all" size=3></td>';
   var multiple = createTr({
     id: 'fshSelectMultiple',
-    innerHTML: myTd
+    innerHTML: '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
+      'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
+      '<span id="itemid-2" class="fshCheckAll fshLink fshNoWrap">' +
+      'All Resources</span>' + getItemList().map(makeSpan).join('') +
+      ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
+      'class="custominput" value="all" size=3></td>'
   });
   on(multiple, 'click', toggleAllPlants);
   var el = getElementById('item-list').parentNode.parentNode;
