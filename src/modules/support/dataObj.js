@@ -185,10 +185,10 @@ export var defaults = {
     '["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
     '["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ' +
     '["Dark Shade", "5564"], ["Deathbloom", "9140"], ' +
-    '["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ' +
+    '["Deathly Mold", "9153"], ["Greenskin Fungus", "9148"], ' +
     '["Heffle", "5565"], ["Jademare", "5566"], ' +
     '["Ruby Thistle", "9143"], ["Toad Corpse","9288"], ' +
-    '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
+    '["Trinettle", "5567"], ["Viridian Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
   quickSearchList: def_quickSearch(),
