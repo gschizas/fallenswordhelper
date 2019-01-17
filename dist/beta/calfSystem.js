@@ -754,10 +754,10 @@
       '["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
       '["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ' +
       '["Dark Shade", "5564"], ["Deathbloom", "9140"], ' +
-      '["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ' +
+      '["Deathly Mold", "9153"], ["Greenskin Fungus", "9148"], ' +
       '["Heffle", "5565"], ["Jademare", "5566"], ' +
       '["Ruby Thistle", "9143"], ["Toad Corpse","9288"], ' +
-      '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
+      '["Trinettle", "5567"], ["Viridian Vine", "9151"], ' +
       '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
     quickSearchList: def_quickSearch(),
@@ -5005,7 +5005,9 @@
   }
 
   function addLastUpdateDate(data) {
-    data.lastUpdate = now;
+    if (data) {
+      data.lastUpdate = now;
+    }
     return data;
   }
 
@@ -5136,12 +5138,11 @@
     injectAllyEnemyList(data);
   }
 
+  function nextTick(data) {if (data) {add(3, makeDiv, [data]);}}
+
   function prepareAllyEnemyList() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    myStats(false)
-      .done(function(data) {
-        add(3, makeDiv, [data]);
-      });
+    myStats(false).done(nextTick);
   }
 
   function rewardType(theCells) {
@@ -12034,9 +12035,9 @@
   }
 
   function isLadderReset(aRow) {
-    return aRow.cells[2].children[0] &&
-      aRow.cells[2].children[0].tagName === 'IMG' &&
-      aRow.cells[2].children[0].src.indexOf('pvp_icon.gif') !== -1;
+    return aRow.cells[2] &&
+      /You ranked \w{3} in your PvP Band! You have gained \d x PvP Ladder Token/
+        .test(aRow.cells[2].textContent);
   }
 
   function saveLastResetTime(aRow) {
@@ -20757,7 +20758,7 @@
   function stColor(el, item) {
     if (item.is_in_st) {
       el.classList.add('isInST');
-    } else {el.classList.add('tradeItemMargin');}
+    }
   }
 
   function forEachInvItem(el) {
@@ -20797,25 +20798,18 @@
   function getHowMany(itemTables) {
     var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
     if (isNaN(howMany)) {return itemTables.length;}
-    // maximum of 100 items in an ST
     if (calf.subcmd !== '-') {return Math.min(100, howMany);}
     return howMany;
   }
 
   function itemType$1(itemid, checkbox) {
-    return itemid === 'itemid-2' && checkbox.classList.contains('itemtype12');
+    return itemid === 'itemid-2' && hasClass('itemtype12', checkbox);
   }
 
-  function shouldBeChecked(itemid, checkbox) {
+  function thisType(itemid, checkbox) {
     return itemid === 'itemid-1' ||
       itemType$1(itemid, checkbox) ||
-      checkbox.classList.contains(itemid);
-  }
-
-  function canBeChecked(howMany, itemsInSt, el, itemid, checkbox) {
-    return howMany &&
-      fallback(itemsInSt, !el.classList.contains('isInST')) &&
-      shouldBeChecked(itemid, checkbox);
+      hasClass(itemid, checkbox);
   }
 
   function findStCheck() {
@@ -20823,50 +20817,68 @@
     if (cbox) {return cbox.checked;}
   }
 
+  function notInSt(itemsInSt, el) {
+    return itemsInSt || !hasClass('isInST', el);
+  }
+
+  function getCheckbox(el) {
+    return el.children[0].lastElementChild.children[0].children[0];
+  }
+
+  function doCheck$1(bool, checkbox) {
+    checkbox.checked = bool;
+  }
+
+  function unCheckAll(checkbox) {
+    doCheck$1(false, checkbox);
+  }
+
+  function checkAll$1(checkbox) {
+    doCheck$1(true, checkbox);
+  }
+
   function doCheckAll$1(evt) {
-    var itemid = evt.target.id;
     var itemList = getElementById('item-div') ||
       getElementById('item-list');
     var itemTables = querySelectorArray('table:not(.fshHide)', itemList);
-    var howMany = getHowMany(itemTables);
-    var itemsInSt = findStCheck();
-    itemTables.forEach(function(el) { // TODO
-      var checkbox = el.children[0].lastElementChild.children[0].children[0];
-      if (canBeChecked(howMany, itemsInSt, el, itemid, checkbox)) {
-        checkbox.checked = true;
-        howMany -= 1;
-        return;
-      }
-      checkbox.checked = false;
-    });
+    itemTables.map(getCheckbox).forEach(unCheckAll);
+    itemTables
+      .filter(partial(notInSt, findStCheck()))
+      .map(getCheckbox)
+      .filter(partial(thisType, evt.target.id))
+      .slice(0, getHowMany(itemTables))
+      .forEach(checkAll$1);
   }
 
   function toggleAllPlants(evt) {
-    if (evt.target.classList.contains('fshCheckAll')) {doCheckAll$1(evt);}
+    if (hasClass('fshCheckAll', evt.target)) {doCheckAll$1(evt);}
+  }
+
+  function arrayfromList(classes) {
+    return jsonParse('[' + classes + ']');
   }
 
   function getItemList() {
     var sendClasses = getValue('sendClasses');
-    var itemList = jsonParse('[' + sendClasses + ']');
+    var itemList = arrayfromList(sendClasses);
     if (itemList) {return itemList;}
-    return jsonParse('[' + defaults.sendClasses + ']');
+    return arrayfromList(defaults.sendClasses);
+  }
+
+  function makeSpan(el) {
+    return ' &ensp;<span id="itemid' + el[1] +
+      '" class="fshCheckAll fshLink fshNoWrap">' + el[0] + '</span>';
   }
 
   function injectTradeOld() {
-    var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
-      'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
-      '<span id="itemid-2" ' +
-      'class="fshCheckAll fshLink fshNoWrap">All Resources</span>';
-    var itemList = getItemList();
-    itemList.forEach(function(el) {
-      myTd += ' &ensp;<span id="itemid' + el[1] +
-        '" class="fshCheckAll fshLink fshNoWrap">' + el[0] + '</span>';
-    });
-    myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
-      'class="custominput" value="all" size=3></td>';
     var multiple = createTr({
       id: 'fshSelectMultiple',
-      innerHTML: myTd
+      innerHTML: '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
+        'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
+        '<span id="itemid-2" class="fshCheckAll fshLink fshNoWrap">' +
+        'All Resources</span>' + getItemList().map(makeSpan).join('') +
+        ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
+        'class="custominput" value="all" size=3></td>'
     });
     on(multiple, 'click', toggleAllPlants);
     var el = getElementById('item-list').parentNode.parentNode;
@@ -20991,7 +21003,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '83';
+  window.FSH.calf = '84';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
