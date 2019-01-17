@@ -10,7 +10,9 @@ function sendMyProfileToForage(data) {
 }
 
 function addLastUpdateDate(data) {
-  data.lastUpdate = now;
+  if (data) {
+    data.lastUpdate = now;
+  }
   return data;
 }
 

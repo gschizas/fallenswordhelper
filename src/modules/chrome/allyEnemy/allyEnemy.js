@@ -122,10 +122,9 @@ function makeDiv(data) {
   injectAllyEnemyList(data);
 }
 
+function nextTick(data) {if (data) {add(3, makeDiv, [data]);}}
+
 export default function prepareAllyEnemyList() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  myStats(false)
-    .done(function(data) {
-      add(3, makeDiv, [data]);
-    });
+  myStats(false).done(nextTick);
 }
