@@ -20777,17 +20777,23 @@
     doCheck$1(true, checkbox);
   }
 
+  function doTheChecks(itemid, itemTables) {
+    itemTables
+      .filter(partial(notInSt, findStCheck()))
+      .map(getCheckbox)
+      .filter(partial(thisType, itemid))
+      .slice(0, getHowMany(itemTables))
+      .forEach(checkAll$1);
+  }
+
   function doCheckAll$1(evt) {
     var itemList = getElementById('item-div') ||
       getElementById('item-list');
     var itemTables = querySelectorArray('table:not(.fshHide)', itemList);
-    itemTables.map(getCheckbox).forEach(unCheckAll);
     itemTables
-      .filter(partial(notInSt, findStCheck()))
       .map(getCheckbox)
-      .filter(partial(thisType, evt.target.id))
-      .slice(0, getHowMany(itemTables))
-      .forEach(checkAll$1);
+      .forEach(unCheckAll);
+    doTheChecks(evt.target.id, itemTables);
   }
 
   function toggleAllPlants(evt) {
@@ -20855,7 +20861,7 @@
     trade: trade,
     titan: {'-': {'-': injectTitan}},
     toprated: toprated,
-    inventing: {viewrecipe: {'-': {'-': inventing}}},
+    inventing: {viewrecipe: {'-': inventing}},
     tempinv: {'-': {'-': injectMailbox}},
     findplayer: {'-': {'-': injectFindPlayer}},
     quests: quests, // UFSG
@@ -20943,7 +20949,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '84';
+  window.FSH.calf = '85';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

@@ -54,17 +54,23 @@ function checkAll(checkbox) {
   doCheck(true, checkbox);
 }
 
+function doTheChecks(itemid, itemTables) {
+  itemTables
+    .filter(partial(notInSt, findStCheck()))
+    .map(getCheckbox)
+    .filter(partial(thisType, itemid))
+    .slice(0, getHowMany(itemTables))
+    .forEach(checkAll);
+}
+
 function doCheckAll(evt) {
   var itemList = getElementById('item-div') ||
     getElementById('item-list');
   var itemTables = querySelectorArray('table:not(.fshHide)', itemList);
-  itemTables.map(getCheckbox).forEach(unCheckAll);
   itemTables
-    .filter(partial(notInSt, findStCheck()))
     .map(getCheckbox)
-    .filter(partial(thisType, evt.target.id))
-    .slice(0, getHowMany(itemTables))
-    .forEach(checkAll);
+    .forEach(unCheckAll);
+  doTheChecks(evt.target.id, itemTables);
 }
 
 function toggleAllPlants(evt) {

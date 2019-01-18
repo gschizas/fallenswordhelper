@@ -1,6 +1,6 @@
 import {getElementById} from '../common/getElement';
 import injectQuestBookFull from '../questbook/injectQuestBookFull';
-import inventing from '../recipes/inventing';
+import inventing from '../inventing/inventing';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {screenview} from '../support/fshGa';
 import updateBuffLog from '../notepad/buffLog/updateBuffLog';

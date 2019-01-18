@@ -12,7 +12,7 @@ import injectQuickBuff from '../../quickbuff/quickBuff';
 import injectSettings from '../../settings/injectSettings';
 import injectTitan from '../../scoutTower/injectTitan';
 import injectWorld from '../../world/injectWorld';
-import inventing from '../../recipes/inventing';
+import inventing from '../../inventing/inventing';
 import ladder from '../../ladder';
 import log from './log';
 import marketplace from '../../marketplace';
@@ -48,7 +48,7 @@ export default {
   trade: trade,
   titan: {'-': {'-': injectTitan}},
   toprated: toprated,
-  inventing: {viewrecipe: {'-': {'-': inventing}}},
+  inventing: {viewrecipe: {'-': inventing}},
   tempinv: {'-': {'-': injectMailbox}},
   findplayer: {'-': {'-': injectFindPlayer}},
   quests: quests, // UFSG
