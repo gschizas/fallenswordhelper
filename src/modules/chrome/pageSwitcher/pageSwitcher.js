@@ -13,6 +13,7 @@ import injectSettings from '../../settings/injectSettings';
 import injectTitan from '../../scoutTower/injectTitan';
 import injectWorld from '../../world/injectWorld';
 import inventing from '../../inventing/inventing';
+import items from './items';
 import ladder from '../../ladder';
 import log from './log';
 import marketplace from '../../marketplace';
@@ -52,7 +53,7 @@ export default {
   tempinv: {'-': {'-': injectMailbox}},
   findplayer: {'-': {'-': injectFindPlayer}},
   quests: quests, // UFSG
-  items: {'-': {'-': allowBack}}, // UFSG
+  items: items, // UFSG
   creatures: {'-': {'-': allowBack}}, // UFSG
   masterrealms: {'-': {'-': allowBack}}, // UFSG
   realms: {'-': {'-': allowBack}}, // UFSG

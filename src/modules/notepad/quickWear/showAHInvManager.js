@@ -1,3 +1,4 @@
+import {ahSeachUrl} from '../../support/constants';
 import {createDiv} from '../../common/cElement';
 import getValueJSON from '../../system/getValueJSON';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -12,7 +13,7 @@ function foundInvItem(invCount, name) {
 }
 
 function ahLink(searchname, nickname) {
-  return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
+  return '<a href="' + ahSeachUrl + searchname +
     '">' + nickname + '</a>';
 }
 
