@@ -10,7 +10,7 @@ import getInvTable from './getInvTable';
 import hideElement from '../../common/hideElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import insertQuickExtract from '../../quickExtract';
+import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import jQueryDialog from '../../chrome/jQueryDialog';
 import on from '../../common/on';
 import {sendEvent} from '../../support/fshGa';
