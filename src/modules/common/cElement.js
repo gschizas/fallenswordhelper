@@ -49,6 +49,10 @@ export function createUl(props) {
   return cElement('ul', props);
 }
 
+export function createOl(props) {
+  return cElement('ol', props);
+}
+
 export function createLi(props) {
   return cElement('li', props);
 }

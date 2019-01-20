@@ -1,8 +1,16 @@
 import doinvent from '../app/inventing/doinvent';
-import {getElementById} from '../common/getElement';
+import insertElement from '../common/insertElement';
+import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jsonFail from '../common/jsonFail';
 import on from '../common/on';
 import outputResult from '../common/outputResult';
+import {pCC} from '../support/layout';
+import querySelector from '../common/querySelector';
+import {createInput, createOl, createSpan} from '../common/cElement';
+
+var invAmount;
+var invResultHeader;
+var invResults;
 
 function processResult(r) {
   if (r.item) {
@@ -13,31 +21,77 @@ function processResult(r) {
 }
 
 function quickInventDone(json) {
-  var inventResult = getElementById('invent_Result');
-  if (jsonFail(json, inventResult)) {return;}
-  outputResult(processResult(json.r), inventResult);
+  if (jsonFail(json, invResults)) {return;}
+  outputResult(processResult(json.r), invResults);
 }
 
-function quickInvent() { // Legacy
-  var amountToInvent = $('#invent_amount').attr('value');
-  var recipeID = $('input[name="recipe_id"]').attr('value');
-  $('#invet_Result_label').html('Inventing ' + amountToInvent + ' Items');
+function initResults(str) {
+  invResultHeader.innerHTML = str;
+  invResults.innerHTML = '';
+}
+
+function quickInvent() {
+  var amountToInvent = Number(invAmount.value);
+  if (!amountToInvent) {
+    initResults('');
+    return;
+  }
+  var recipeID = querySelector('input[name="recipe_id"]').value;
+  initResults('Inventing ' + String(amountToInvent) + ' Items');
   for (var i = 0; i < amountToInvent; i += 1) {
     doinvent(recipeID).done(quickInventDone);
   }
 }
 
-export default function injectInvent() { // Bad jQuery
-  var selector = '<tr><td align="center">Select how many to quick ' +
-    'invent<input value=1 id="invent_amount" name="invent_amount" ' +
-    'size=3 class="custominput"></td></tr>' +
-    '<tr><td align="center"><input id="quickInvent" value="Quick ' +
-    'invent items" class="custombutton" type="submit"></td></tr>' + // button to invent
-    '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
-    '</span><ol id="invent_Result"></ol></td></tr>';
-  $('input[name="recipe_id"]').closest('tbody').append(selector);
-  var qi = getElementById('quickInvent');
-  if (qi) {
-    on(qi, 'click', quickInvent, true);
-  }
+function makeCell(injector) {
+  var myRow = injector.insertRow(-1);
+  var myCell = myRow.insertCell(-1);
+  myCell.className = 'fshCenter';
+  return myCell;
+}
+
+function makeInvAmount(myCell) {
+  insertTextBeforeEnd(myCell, 'Select how many to quick invent');
+  invAmount = createInput({
+    className: 'custominput fshNumberInput',
+    min: 0,
+    type: 'number',
+    value: 1
+  });
+  insertElement(myCell, invAmount);
+}
+
+function makeQuickInv(myCell) {
+  var quickInv = createInput({
+    className: 'custombutton',
+    type: 'button',
+    value: 'Quick invent items'
+  });
+  insertElement(myCell, quickInv);
+  on(quickInv, 'click', quickInvent);
+}
+
+function makeInvResultHeader(myCell) {
+  invResultHeader = createSpan();
+  insertElement(myCell, invResultHeader);
+}
+
+function makeInvResults(myCell) {
+  invResults = createOl();
+  insertElement(myCell, invResults);
+}
+
+function resultContainer(myCell) {
+  makeInvResultHeader(myCell);
+  makeInvResults(myCell);
+}
+
+function makeLayout(injector) {
+  makeInvAmount(makeCell(injector));
+  makeQuickInv(makeCell(injector));
+  resultContainer(makeCell(injector));
+}
+
+export default function injectInvent() {
+  makeLayout(pCC.lastElementChild);
 }
