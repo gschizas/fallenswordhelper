@@ -49,6 +49,6 @@ export default function onlineDot(obj) {
     return curr(obj, prev);
   }, 0);
   var which = getDot.find(partial(activity, min));
-  if (which) {return aDot(which[1], which[2]);}
+  if (which) {return aDot(which[1]);}
   return aDot('redDot');
 }
