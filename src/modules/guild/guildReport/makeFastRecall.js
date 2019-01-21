@@ -39,7 +39,7 @@ var lookup = [
   [true, true, fastWearableBp],
   [true, false, fastWearableGs],
   [false, true, fastBp],
-  [false, true, fastGs]
+  [false, false, fastGs]
 ];
 
 function theArray(thisWearable, thisBp, arr) {
