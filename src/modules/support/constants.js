@@ -35,6 +35,7 @@ export var newGuildLogUrl = 'index.php' + newGuildLogLoc;
 export var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
 export var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
+export var ahSeachUrl = 'index.php?cmd=auctionhouse&search=';
 
 export var def_afterUpdateActionlist = 'after-update.actionlist';
 export var def_playerBuffs = 'buffs.player';

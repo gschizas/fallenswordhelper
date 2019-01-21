@@ -7,7 +7,7 @@ import injectOnlinePlayers from
   '../../notepad/onlinePlayers/injectOnlinePlayers';
 import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
 import injectSaveSettings from '../../settings/load';
-import insertQuickExtract from '../../quickExtract';
+import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../../notepad/quickWear/quickWear';
 import {injectAuctionSearch, injectQuickLinkManager} from
   '../../notepad/lists/lists';

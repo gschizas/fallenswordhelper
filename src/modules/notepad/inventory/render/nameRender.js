@@ -1,6 +1,6 @@
 import canRecall from './canRecall';
-import {rarity} from '../../../support/constants';
 import {theInv} from '../buildInv';
+import {ahSeachUrl, rarity} from '../../../support/constants';
 
 function getT(row) {
   if (row.player_id === -1) {return 4;}
@@ -32,7 +32,7 @@ function nameRenderDisplay(data, row) {
       '">set</span>)';
   }
 
-  return '<a href="index.php?cmd=auctionhouse&search=' + data +
+  return '<a href="' + ahSeachUrl + data +
     '" class="fshInvItem tip-dynamic ' +
     rarity[row.rarity].clas + '" ' +
     'data-tipped="fetchitem.php?item_id=' + row.item_id +

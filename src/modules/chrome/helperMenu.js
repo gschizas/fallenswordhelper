@@ -12,7 +12,7 @@ import injectRecipeManager from '../notepad/recipeMgr/recipeMgr';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import insertQuickExtract from '../quickExtract';
+import insertQuickExtract from '../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../notepad/quickWear/quickWear';
 import isFunction from '../common/isFunction';
 import jQueryDialog from './jQueryDialog';

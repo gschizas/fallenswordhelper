@@ -18,6 +18,7 @@ import {pCC} from '../../support/layout';
 import quickAction from './quickAction';
 import senditems from '../../app/trade/senditems';
 import toggleForce from '../../common/toggleForce';
+import {ahSeachUrl, guideUrl, rarity} from '../../support/constants';
 import {
   disableItemColoring,
   setShowExtraLinks,
@@ -27,7 +28,6 @@ import {
   showQuickSendLinks
 } from './getPrefs';
 import {getItems, itemsAry, itemsHash} from './getItems';
-import {guideUrl, rarity} from '../../support/constants';
 
 var extraLinks;
 var checkAll;
@@ -40,7 +40,7 @@ function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {return;}
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
-    pattern += '[<a href="index.php?cmd=auctionhouse&search=' +
+    pattern += '[<a href="' + ahSeachUrl +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
   pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +
