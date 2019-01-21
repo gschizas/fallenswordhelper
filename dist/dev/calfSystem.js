@@ -479,6 +479,7 @@
   var beginFolderSpanElement =
     '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
   var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
+  var ahSeachUrl = 'index.php?cmd=auctionhouse&search=';
 
   var def_afterUpdateActionlist = 'after-update.actionlist';
   var def_playerBuffs = 'buffs.player';
@@ -957,8 +958,14 @@
 
   function jQueryNotPresent() {return !isFunction(window.$);}
 
+  function textContent(node) {
+    if (node instanceof Node) {
+      return node.textContent;
+    }
+  }
+
   function containsText(text, el) {
-    return el.textContent === text;
+    return textContent(el) === text;
   }
 
   function contains(text) {
@@ -1029,6 +1036,10 @@
 
   function createUl(props) {
     return cElement('ul', props);
+  }
+
+  function createOl(props) {
+    return cElement('ol', props);
   }
 
   function createLi(props) {
@@ -2725,7 +2736,7 @@
   }
 
   function ahLink(searchname, nickname) {
-    return '<a href="index.php?cmd=auctionhouse&search=' + searchname +
+    return '<a href="' + ahSeachUrl + searchname +
       '">' + nickname + '</a>';
   }
 
@@ -3953,7 +3964,7 @@
       return curr(obj, prev);
     }, 0);
     var which = getDot.find(partial(activity, min));
-    if (which) {return aDot(which[1], which[2]);}
+    if (which) {return aDot(which[1]);}
     return aDot('redDot');
   }
 
@@ -6082,10 +6093,10 @@
     doAccordion();
   }
 
-  function passingTest$1(self, el) {return hasClass(el[0], self);}
+  function classPair(self, el) {return hasClass(el[0], self);}
 
   function classHandler(evtAry) {
-    return partial(handleEvent, passingTest$1, evtAry);
+    return partial(handleEvent, classPair, evtAry);
   }
 
   var enterForSendMessage;
@@ -10784,59 +10795,140 @@
   var spinner = '<span class="guildReportSpinner" style="background-image: ' +
     'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
 
-  function recalled(theTd, data) {
-    if (data.r === 1) {return;}
+  function recalled(theTd) {
     theTd.innerHTML = '<span class="fastWorn">' +
       'You successfully recalled the item</span>';
   }
 
-  function recallInfObj(self, mode, href) {
-    return {
-      invId: href.match(/&id=(\d+)/)[1],
-      playerId: href.match(/&player_id=(\d+)/)[1],
-      mode: mode,
-      action: self.getAttribute('action')
-    };
-  }
-
-  function recallItem$1(self) { // jQuery
-    hideQTip(self);
-    var mode = self.getAttribute('mode');
-    var theTd = self.parentNode.parentNode;
-    if (mode === '0') {theTd = theTd.parentNode;}
-    var href = theTd.children[0].href;
-    if (!href) {return;}
-    queueRecallItem(recallInfObj(self, mode, href))
-      .done(partial(recalled, theTd));
-    theTd.innerHTML = spinner;
-  }
-
-  function wornItem(theTd, data) {
-    if (data.r === 1) {return;}
+  function wornItem(theTd) {
     theTd.innerHTML = '<span class="fastWorn">Worn</span>';
-  }
-
-  function wearItem(self) { // jQuery
-    hideQTip(self);
-    var theTd = self.parentNode.parentNode.parentNode;
-    var href = theTd.children[0].href;
-    if (!href) {return;}
-    equipItem(href.match(/&id=(\d+)/)[1]).done(partial(wornItem, theTd));
-    theTd.innerHTML = spinner;
   }
 
   function replyTo(self) {
     window.openQuickMsgDialog(self.getAttribute('target_player'));
   }
 
+  function itemId(href) {
+    return href.match(/&id=(\d+)/)[1];
+  }
+
+  function targetPlayerId(href) {
+    return href.match(/&player_id=(\d+)/)[1];
+  }
+
+  function recallResult(action, theTd, data) {
+    if (data.r === 1) {return;}
+    if (action === 'recall') {
+      recalled(theTd);
+    } else {
+      wornItem(theTd);
+    }
+  }
+
+  function doRecall(theTd, href, mode, action) {
+    queueRecallItem({
+      invId: itemId(href),
+      playerId: targetPlayerId(href),
+      mode: mode,
+      action: action
+    }).done(partial(recallResult, action, theTd));
+  }
+
+  function recallTo(theTd, href, mode) {
+    doRecall(theTd, href, mode, 'recall');
+  }
+
+  function doFastBp(theTd, href) {
+    sendEvent('GuildReport', 'Fast BP');
+    recallTo(theTd, href, 0);
+  }
+
+  function doFastGs(theTd, href) {
+    sendEvent('GuildReport', 'Fast GS');
+    recallTo(theTd, href, 1);
+  }
+
+  function doFastWear(theTd, href) {
+    sendEvent('GuildReport', 'Fast Wear');
+    if (Number(targetPlayerId(href)) === playerId()) {
+      equipItem(itemId(href)).done(partial(wornItem, theTd));
+    } else {
+      doRecall(theTd, href, 0, 'wear');
+    }
+  }
+
+  var subClass = [
+    ['fast-bp', doFastBp],
+    ['fast-gs', doFastGs],
+    ['fast-wear', doFastWear]
+  ];
+
+  function doFastRecall(self) {
+    var theTd = self.parentNode.parentNode;
+    var href = theTd.children[0].href;
+    if (!href) {return;}
+    subClass.find(partial(classPair, self))[1](theTd, href);
+    theTd.innerHTML = spinner;
+  }
+
   var classEvts = [
-    ['recall', recallItem$1],
-    ['equip', wearItem],
+    ['sendLink', doFastRecall],
     ['a-reply', replyTo]
   ];
 
   function eventHandlers$1() {
     on(getElementsByTagName('table', pCC)[1], 'click', classHandler(classEvts));
+  }
+
+  var fastBpHtml = '<span class="sendLink fast-bp">Fast BP</span> | ';
+  var fastGsHtml = '<span class="sendLink fast-gs">Fast GS</span>';
+  var fastWearHtml = ' | <span class="sendLink fast-wear">Fast Wear</span>';
+  var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
+    'Gut Rot Head Splitter|Serum');
+  var gs;
+  var bp;
+  var wearableBp;
+  var wearableGs;
+
+  function fastBp$1() {
+    if (!bp) {bp = createDiv({innerHTML: fastBpHtml + fastGsHtml});}
+    return bp.cloneNode(true);
+  }
+
+  function fastWearableBp() {
+    if (!wearableBp) {
+      wearableBp = createDiv({innerHTML: fastBpHtml + fastGsHtml + fastWearHtml});
+    }
+    return wearableBp.cloneNode(true);
+  }
+
+  function fastGs() {
+    if (!gs) {gs = createDiv({innerHTML: fastGsHtml});}
+    return gs.cloneNode(true);
+  }
+
+  function fastWearableGs() {
+    if (!wearableGs) {
+      wearableGs = createDiv({innerHTML: fastGsHtml + fastWearHtml});
+    }
+    return wearableGs.cloneNode(true);
+  }
+
+  var lookup = [
+    [true, true, fastWearableBp],
+    [true, false, fastWearableGs],
+    [false, true, fastBp$1],
+    [false, true, fastGs]
+  ];
+
+  function theArray(thisWearable, thisBp, arr) {
+    return arr[0] === thisWearable && arr[1] === thisBp;
+  }
+
+  function makeFastRecall(el) {
+    var thisWearable = !wearRE.test(el.previousElementSibling.innerHTML);
+    var thisBp = el.children.length === 2;
+    return lookup.find(partial(theArray, thisWearable, thisBp))[2]();
   }
 
   var inventory$1;
@@ -11129,8 +11221,6 @@
     }
   }
 
-  var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
-    'Gut Rot Head Splitter|Serum');
   var nodeArray;
   var nodeList;
   var potObj;
@@ -11140,62 +11230,16 @@
     insertElement(el, inject);
   }
 
-  function hideElement$1(test) {
-    if (test) {return ' class="fshHide"';}
-    return '';
-  }
-
-  function isEquipable(test) {
-    if (test) {return 'recall';}
-    return 'equip';
-  }
-
   function addPotObj(item) {
-    if (item.indexOf(' (Potion)') !== -1) {
-      var itemName = item.replace(' (Potion)', '');
-      if (potObj[itemName]) {
-        potObj[itemName] += 1;
-      } else {
-        potObj[itemName] = 1;
-      }
+    if (item.endsWith(' (Potion)')) {
+      var itemName = item.slice(0, -9);
+      potObj[itemName] = (potObj[itemName] || 0) + 1;
     }
   }
 
-  function mySpan(el) {
-    var secondHref = el.children.length === 2;
-    var firstHref = hideElement$1(!secondHref);
-    var itemName = el.previousElementSibling.innerHTML;
-    addPotObj(itemName);
-    var wearable = hideElement$1(wearRE.test(itemName));
-    var equipable = isEquipable(secondHref);
-    return createSpan({
-      innerHTML: '<span' + firstHref +
-      '> | <span class="sendLink recall tip-static" data-tipped="' +
-      'Click to recall to backpack" mode="0" action="recall">Fast BP' +
-      '</span></span>' +
-      ' | <span class="sendLink recall tip-static" ' +
-      'data-tipped="Click to recall to guild store" mode="1" ' +
-      'action="recall">Fast GS</span>' +
-      '<span' + wearable +
-      '> | <span class="sendLink ' +
-      equipable +
-      '" mode="0" action="wear">Fast Wear</span></span>'
-    });
-  }
-
-  function removeWidth(el) {
-    if (el instanceof Element) {el.removeAttribute('width');}
-  }
-
-  function doSpan(el, localCounter) {
-    if (localCounter === 0) {
-      el.previousSibling.width = '200px';
-      el.width = '370px';
-    } else {
-      removeWidth(el.previousSibling);
-      removeWidth(el);
-    }
-    nodeArray.push(mySpan(el));
+  function doSpan(el) {
+    nodeArray.push(makeFastRecall(el));
+    addPotObj(el.previousElementSibling.innerHTML);
   }
 
   function finishSpan() {
@@ -11265,7 +11309,7 @@
 
   var invItems$1;
   var type$1;
-  var itemId;
+  var itemId$1;
 
   function tickElement(o, el) {
     el.checked = !el.disabled && !el.checked;
@@ -11281,7 +11325,7 @@
     {
       c: function(o) {
         return type$1 === 'item' && invItems$1[o.invid] &&
-          invItems$1[o.invid].item_id === itemId;
+          invItems$1[o.invid].item_id === itemId$1;
       },
       r: tickElement
     },
@@ -11309,7 +11353,7 @@
   function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
     invItems$1 = invItems_;
     type$1 = type_;
-    itemId = Number(itemId_);
+    itemId$1 = Number(itemId_);
     itemsAry.forEach(doCheck);
   }
 
@@ -11647,7 +11691,7 @@
     if (fallback(extraLinks, !showExtraLinks)) {return;}
     var pattern = '<span><span class="aHLink">';
     if (!item.bound) {
-      pattern += '[<a href="index.php?cmd=auctionhouse&search=' +
+      pattern += '[<a href="' + ahSeachUrl +
         encodeURIComponent(item.item_name) + '">AH</a>]';
     }
     pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +
@@ -14231,6 +14275,7 @@
 
   var cdDiv;
   var cooldownSpan;
+  var lastTp;
 
   function initCdDiv(containerDiv, cd) {
     cdDiv = containerDiv.children[5];
@@ -14253,12 +14298,18 @@
     }
   }
 
-  function doCountdown(secs) {
+  function updateCooldown() {
+    var secs = Math.max(Math.ceil((lastTp - Date.now()) / 1000), 0);
+    cooldownSpan.textContent = secs.toString();
+    if (secs > 0) {
+      setTimeout(updateCooldown, 500);
+    }
+  }
+
+  function doCountdown(teleportCooldown) {
     if (cooldownSpan) {
-      cooldownSpan.textContent = secs.toString();
-      if (secs > 0) {
-        setTimeout(doCountdown, 1000, secs - 1);
-      }
+      lastTp = Date.now() + teleportCooldown * 1000;
+      updateCooldown();
     }
   }
 
@@ -17236,6 +17287,15 @@
     });
   }
 
+  function querySelector(selector, scope) {
+    if (scope) {return scope.querySelector(selector);}
+    return document.querySelector(selector);
+  }
+
+  var invAmount;
+  var invResultHeader;
+  var invResults;
+
   function processResult$2(r) {
     if (r.item) {
       return '<span class="fshGreen">You successfully invented the item [' +
@@ -17245,131 +17305,124 @@
   }
 
   function quickInventDone(json) {
-    var inventResult = getElementById('invent_Result');
-    if (jsonFail(json, inventResult)) {return;}
-    outputResult(processResult$2(json.r), inventResult);
+    if (jsonFail(json, invResults)) {return;}
+    outputResult(processResult$2(json.r), invResults);
   }
 
-  function quickInvent() { // Legacy
-    var amountToInvent = $('#invent_amount').attr('value');
-    var recipeID = $('input[name="recipe_id"]').attr('value');
-    $('#invet_Result_label').html('Inventing ' + amountToInvent + ' Items');
+  function initResults(str) {
+    invResultHeader.innerHTML = str;
+    invResults.innerHTML = '';
+  }
+
+  function quickInvent() {
+    var amountToInvent = Number(invAmount.value);
+    if (!amountToInvent) {
+      initResults('');
+      return;
+    }
+    var recipeID = querySelector('input[name="recipe_id"]').value;
+    initResults('Inventing ' + String(amountToInvent) + ' Items');
     for (var i = 0; i < amountToInvent; i += 1) {
       doinvent(recipeID).done(quickInventDone);
     }
   }
 
-  function injectInvent() { // Bad jQuery
-    var selector = '<tr><td align="center">Select how many to quick ' +
-      'invent<input value=1 id="invent_amount" name="invent_amount" ' +
-      'size=3 class="custominput"></td></tr>' +
-      '<tr><td align="center"><input id="quickInvent" value="Quick ' +
-      'invent items" class="custombutton" type="submit"></td></tr>' + // button to invent
-      '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
-      '</span><ol id="invent_Result"></ol></td></tr>';
-    $('input[name="recipe_id"]').closest('tbody').append(selector);
-    var qi = getElementById('quickInvent');
-    if (qi) {
-      on(qi, 'click', quickInvent, true);
-    }
+  function makeCell$1(injector) {
+    var myRow = injector.insertRow(-1);
+    var myCell = myRow.insertCell(-1);
+    myCell.className = 'fshCenter';
+    return myCell;
   }
 
-  function invalidResult(result) {
-    return !result || !result.snapshotLength || result.snapshotLength === 0;
+  function makeInvAmount(myCell) {
+    insertTextBeforeEnd(myCell, 'Select how many to quick invent');
+    invAmount = createInput({
+      className: 'custominput fshNumberInput',
+      min: 0,
+      type: 'number',
+      value: 1
+    });
+    insertElement(myCell, invAmount);
   }
 
-  function xPathAll(expr, doc, context) {
-    var result = xPathEvaluate(XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-      expr, doc, context);
-    if (invalidResult(result)) {return;}
-    var a = [];
-    for (var i = 0; i < result.snapshotLength; i += 1) {
-      a.push(result.snapshotItem(i));
-    }
-    return a;
+  function makeQuickInv(myCell) {
+    var quickInv = createInput({
+      className: 'custombutton',
+      type: 'button',
+      value: 'Quick invent items'
+    });
+    insertElement(myCell, quickInv);
+    on(quickInv, 'click', quickInvent);
   }
 
-  var itemRE$1 = /<b>([^<]+)<\/b>/i;
-  var plantFromComponentHash = {
-    'Amber Essense': 'Amber Plant',
-    'Blood Bloom Flower': 'Blood Bloom Plant',
-    'Dark Shade ': 'Dark Shade Plant',
-    'Snake Eye': 'Elya Snake Head',
-    'Snake Venom Fang': 'Elya Snake Head',
-    'Heffle Wart': 'Heffle Wart Plant',
-    'Jademare Blossom': 'Jademare Plant',
-    'Trinettle Leaf': 'Trinettle Plant',
-    'Purplet Flower': 'Purplet Plant',
-  };
-
-  function getItemName(responseText) { // Legacy
-    var itemName = itemRE$1.exec(responseText);
-    if (itemName) {return itemName[1];}
+  function makeInvResultHeader(myCell) {
+    invResultHeader = createSpan();
+    insertElement(myCell, invResultHeader);
   }
 
-  function linkFromMouseoverCustom(mouseOver) { // Legacy
-    var reParams =
-      /item_id=(\d+)&inv_id=([-0-9]*)&t=(\d+)&p=(\d+)&vcode=([a-z0-9]*)/i;
-    var reResult = reParams.exec(mouseOver);
-    if (reResult === null) {
-      return null;
-    }
-    var itemId = reResult[1];
-    var invId = reResult[2];
-    var type = reResult[3];
-    var pid = reResult[4];
-    var vcode = reResult[5];
-    var theUrl = 'fetchitem.php?item_id=' + itemId + '&inv_id=' + invId +
-      '&t=' + type + '&p=' + pid + '&vcode=' + vcode;
-    theUrl = server + theUrl;
-    return theUrl;
+  function makeInvResults(myCell) {
+    invResults = createOl();
+    insertElement(myCell, invResults);
   }
 
-  function injectViewRecipeLinks(responseText, callback) { // Legacy
-    var itemName = getItemName(responseText);
-    var plantFromComponent = fallback(plantFromComponentHash[itemName],
-      itemName);
-    if (itemName !== plantFromComponent) {
-      var itemLinks = createTd({
-        innerHTML: '<a href="' + server +
-          '?cmd=auctionhouse&search=' +
-          encodeURI(plantFromComponent) + '">AH</a>'
-      });
-      var counter = xPath('../../../../tr[2]/td', document, callback);
-      counter.setAttribute('colspan', '2');
-      insertElement(callback.parentNode.parentNode.parentNode, itemLinks);
-    }
+  function resultContainer(myCell) {
+    makeInvResultHeader(myCell);
+    makeInvResults(myCell);
   }
 
-  function processMouseOver$1(compI, html) {
-    injectViewRecipeLinks(html, compI);
+  function makeLayout(injector) {
+    makeInvAmount(makeCell$1(injector));
+    makeQuickInv(makeCell$1(injector));
+    resultContainer(makeCell$1(injector));
   }
 
-  function processComponents(compI) {
-    var mo = compI.dataset.tipped;
-    retryAjax(linkFromMouseoverCustom(mo)).done(partial(processMouseOver$1, compI));
-    var componentCountElement = compI.parentNode.parentNode
-      .parentNode.nextSibling.firstChild;
-    componentCountElement.innerHTML = '<nobr>' +
-      componentCountElement.innerHTML + '</nobr>';
+  function injectInvent() {
+    makeLayout(pCC.lastElementChild);
   }
 
-  function injectViewRecipe() { // Legacy
-    var recipe = $('#pCC table table b').first();
-    var name = recipe.html();
-    if (name) {
-      var searchName = name.replace(/ /g, '%20');
-      recipe.html('<a href="' + guideUrl +
-        'items&subcmd=view&search_name=' + searchName + '">' + name +
-        '</a>');
-    }
+  function getItemId(el) {
+    var match = el.src.match(/\/items\/(\d+)\.gif/);
+    if (match) {return match[1];}
+  }
 
-    var components = xPathAll(
-      './/b[.="Components Required"]/../../following-sibling::tr[2]//img',
-      document, pCC);
-    if (components) {
-      components.forEach(processComponents);
-    }
+  function guideItemHref(itemId) {
+    return guideUrl + 'items&subcmd=view&item_id=' + itemId;
+  }
+
+  function makeGuideItemAnchor(itemId) {
+    return createAnchor({
+      href: guideItemHref(itemId),
+      target: '_blank'
+    });
+  }
+
+  function wrapInGuideLink(el, source) {
+    var itemId = getItemId(source);
+    if (!itemId) {return;}
+    var myLink = makeGuideItemAnchor(itemId);
+    insertElementBefore(myLink, el);
+    insertElement(myLink, el);
+  }
+
+  function wrapImgInGuideLink(el) {
+    wrapInGuideLink(el, el);
+  }
+
+  function makeNameLink() {
+    var source = xPath(
+      './/b[.="Target Invention"]/../../following-sibling::*[1]//img');
+    var recipe = querySelector('#pCC b');
+    wrapInGuideLink(recipe, source);
+  }
+
+  function makeIngredientLinks() {
+    var ingredients = querySelectorArray('#pCC img[src*="/items/"]');
+    ingredients.forEach(wrapImgInGuideLink);
+  }
+
+  function injectViewRecipe() {
+    makeNameLink();
+    makeIngredientLinks();
   }
 
   function inventing() {
@@ -17378,6 +17431,36 @@
       injectInvent();
     }
   }
+
+  function isNotBound() {
+    return !xPath('.//*[text() = "This item is bound"]');
+  }
+
+  function isNotComponent() {
+    return textContent(
+      xPath('.//tr[td/b/text() = "Type:"]/td[2]')) !== 'Component';
+  }
+
+  function ahItemHref(name) {
+    return 'https://www.fallensword.com/' + ahSeachUrl + name;
+  }
+
+  function insertAhLink(target) {
+    insertHtmlBeforeEnd(target.parentNode, ' [<a href="' +
+      ahItemHref(textContent(target)) +
+      '" target="_blank"><b class="fshBlue">AH</b></a>]');
+  }
+
+  function itemsView() {
+    if (isNotBound() && isNotComponent()) {
+      insertAhLink(querySelector('.tHeader').children[0]);
+    }
+  }
+
+  var items = {
+    '-': {'-': allowBack},
+    view: {'-': itemsView}
+  };
 
   function updateUrl$1(e) {
     e.preventDefault();
@@ -18190,7 +18273,7 @@
         '">set</span>)';
     }
 
-    return '<a href="index.php?cmd=auctionhouse&search=' + data +
+    return '<a href="' + ahSeachUrl + data +
       '" class="fshInvItem tip-dynamic ' +
       rarity[row.rarity].clas + '" ' +
       'data-tipped="fetchitem.php?item_id=' + row.item_id +
@@ -18601,7 +18684,7 @@
     );
   }
 
-  function recallItem$2(e) { // jQuery
+  function recallItem$1(e) { // jQuery
     var self = $(e.target);
     doAction$3(
       partial(queueRecallItem, {
@@ -18614,7 +18697,7 @@
     );
   }
 
-  function wearItem$1(e) { // jQuery
+  function wearItem(e) { // jQuery
     var self = $(e.target);
     doAction$3(partial(equipItem, self.attr('invid')), self);
   }
@@ -18657,8 +18740,8 @@
     [
       ['setName', partial(setName$1, fshInv)],
       ['takeItem', takeItem$1],
-      ['recallItem', recallItem$2],
-      ['wearItem', wearItem$1],
+      ['recallItem', recallItem$1],
+      ['wearItem', wearItem],
       ['useItem', doUseItem$1],
       ['dropItem', doDropItem],
       ['sendItem', doSendItem],
@@ -18824,7 +18907,7 @@
     });
   }
 
-  var lookup = [
+  var lookup$1 = [
     [],
     ['(Potion)'],
     ['recalled the item', 'took the item', 'auto-returned the',
@@ -18865,7 +18948,7 @@
   function logType(data, ary) {return ary.some(partial(isMatch, data));}
 
   function rowProfile(data) {
-    var myIndex = lookup.findIndex(partial(logType, data));
+    var myIndex = lookup$1.findIndex(partial(logType, data));
     if (myIndex === -1) {return 0;}
     return myIndex;
   }
@@ -19012,7 +19095,7 @@
     storeOptions();
   }
 
-  function makeCell$1(row, html) {
+  function makeCell$2(row, html) {
     var thisCell = row.insertCell(-1);
     thisCell.innerHTML = html;
     thisCell.className = 'row';
@@ -19022,11 +19105,11 @@
     var myRow = myTable.insertRow(-1);
     r.push(myRow);
     if (!options$1.checks[r[4]]) {myRow.className = 'fshHide';}
-    makeCell$1(myRow,
+    makeCell$2(myRow,
       '<span class="newGuildLog" style="background-image: url(\'' +
       imageServer + '/skin/log_1.gif\');"></span>');
-    makeCell$1(myRow, '<nobr>' + r[2] + '</nobr>');
-    makeCell$1(myRow, r[3]);
+    makeCell$2(myRow, '<nobr>' + r[2] + '</nobr>');
+    makeCell$2(myRow, r[3]);
   }
 
   function separatorRow(r) {
@@ -19355,7 +19438,7 @@
 
   var bpc;
 
-  function bp() {
+  function bp$1() {
     if (!bpc) {
       bpc = getElementById('backpackContainer');
     }
@@ -19393,7 +19476,7 @@
   function toggleSection(self) {
     var sectionId = Number(getCustomUrlParameter(self.href, 'section_id'));
     if (sectionId === 5) {
-      toggleTarget(bp());
+      toggleTarget(bp$1());
     } else {
       toggleTarget(self.parentNode.parentNode.nextElementSibling);
     }
@@ -20949,6 +21032,7 @@
 
   var trade = {
     '-': {'-': injectTrade},
+    sendgold: {'-': injectTrade},
     createsecure: {'-': injectTrade},
     docreatesecure: {'-': injectTrade}
   };
@@ -20976,7 +21060,7 @@
     tempinv: {'-': {'-': injectMailbox}},
     findplayer: {'-': {'-': injectFindPlayer}},
     quests: quests, // UFSG
-    items: {'-': {'-': allowBack}}, // UFSG
+    items: items, // UFSG
     creatures: {'-': {'-': allowBack}}, // UFSG
     masterrealms: {'-': {'-': allowBack}}, // UFSG
     realms: {'-': {'-': allowBack}}, // UFSG
@@ -21072,7 +21156,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '85';
+  window.FSH.calf = '86';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
