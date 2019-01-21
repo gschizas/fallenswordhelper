@@ -4,6 +4,7 @@ import toggleForce from '../../../common/toggleForce';
 
 var cdDiv;
 var cooldownSpan;
+var lastTp;
 
 function initCdDiv(containerDiv, cd) {
   cdDiv = containerDiv.children[5];
@@ -26,12 +27,18 @@ function hideCd() {
   }
 }
 
-export function doCountdown(secs) {
+function updateCooldown() {
+  var secs = Math.max(Math.ceil((lastTp - Date.now()) / 1000), 0);
+  cooldownSpan.textContent = secs.toString();
+  if (secs > 0) {
+    setTimeout(updateCooldown, 500);
+  }
+}
+
+export function doCountdown(teleportCooldown) {
   if (cooldownSpan) {
-    cooldownSpan.textContent = secs.toString();
-    if (secs > 0) {
-      setTimeout(doCountdown, 1000, secs - 1);
-    }
+    lastTp = Date.now() + teleportCooldown * 1000;
+    updateCooldown();
   }
 }
 
