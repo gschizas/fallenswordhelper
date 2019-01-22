@@ -6,7 +6,7 @@ import getValue from '../../system/getValue';
 import injectHelperMenu from '../helperMenu';
 import jsonParse from '../../common/jsonParse';
 import notHuntMode from './notHuntMode';
-import replaceKeyHandler from '../keyHandler';
+import replaceKeyHandler from '../keyHandler/keyHandler';
 
 function prepareEnv() {
   if (getValue('gameHelpLink')) {
