@@ -474,12 +474,24 @@
   var defenderMultiplier = 0.2;
   var now = Date.now();
   var nowSecs = Math.floor(now / 1000);
+
+  var indexPhp = 'index.php';
   var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
-  var newGuildLogUrl = 'index.php' + newGuildLogLoc;
+  var newGuildLogUrl = indexPhp + newGuildLogLoc;
+  var ahSeachUrl = indexPhp + '?cmd=auctionhouse&search=';
+  var logUrl = indexPhp + '?cmd=log';
+  var doAddIgnore = logUrl + '&subcmd=doaddignore&ignore_username=';
+  var profileUrl = indexPhp + '?cmd=profile';
+  var playerIdUrl = profileUrl + '&player_id=';
+  var tradeUrl = indexPhp + '?cmd=trade&target_player=';
+  var secureUrl = indexPhp +
+    '?cmd=trade&subcmd=createsecure&target_username=';
+  var arenaUrl = indexPhp + '?cmd=arena&subcmd=';
+
+  var guideUrl = 'https://guide.fallensword.com/index.php?cmd=';
+
   var beginFolderSpanElement =
     '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
-  var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
-  var ahSeachUrl = 'index.php?cmd=auctionhouse&search=';
 
   var def_afterUpdateActionlist = 'after-update.actionlist';
   var def_playerBuffs = 'buffs.player';
@@ -2420,14 +2432,18 @@
     return partial(handleEvent, passingTest, evtAry);
   }
 
+  function indexAjax(options) {
+    return retryAjax(extend({url: indexPhp}, options));
+  }
+
   function getInventory() {
-    var subcmd = 'inventory';
+    var subcmd = {subcmd: 'inventory'};
     if (calf.subcmd === 'guildinvmgr') {
-      subcmd = 'guild_store&inc_tagged=1';
+      subcmd = {subcmd: 'guild_store', inc_tagged: '1'};
     }
-    return retryAjax({
+    return indexAjax({
       dataType: 'json',
-      url: 'index.php?cmd=export&subcmd=' + subcmd
+      data: extend({cmd: 'export'}, subcmd)
     });
   }
 
@@ -2701,8 +2717,7 @@
   }
 
   function equipItem(backpackInvId) {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         cmd: 'profile',
         subcmd: 'equipitem',
@@ -4325,7 +4340,7 @@
   function findBuffsParseProfilePageStart() { // Legacy
     // if option enabled then parse profiles
     profilePagesToSearch = [];
-    profilePagesToSearch.push('index.php?cmd=profile'); // ???
+    profilePagesToSearch.push(profileUrl); // ???
     var extraProfileArray = extraProfile.split(',');
     extraProfileArray.forEach(function(el) {
       profilePagesToSearch.push('index.php?cmd=findplayer' + // ???
@@ -4450,7 +4465,7 @@
     '<li><span class="fshLink">FS Box Log</span></li>' +
     '</ul><h3>FSH developer quick links</h3><ul>' +
     '<li><span class="a-reply" target_player="PointyHair">PM</span> ' +
-    '<a href="index.php?cmd=profile&player_id=1963510">PointyHair</a></li>' +
+    '<a href="' + playerIdUrl + '1963510">PointyHair</a></li>' +
     '</ul></div>';
 
   function toggleMenu(evt) {
@@ -4744,7 +4759,7 @@
     '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
     'style="background-image: url(\'' + imageServer +
     '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
-    '<a href="index.php?cmd=temple">' +
+    '<a href="' + indexPhp + '?cmd=temple">' +
     '<p class="notification-content">Bow down to the gods</p>' +
     '</a></span></li>';
 
@@ -4756,7 +4771,7 @@
   function prayToGods(e) { // jQuery
     var myGod = e.target.getAttribute('praytype');
     if (!myGod) {return;}
-    retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
+    indexAjax({data: {cmd: 'temple', subcmd: 'pray', type: myGod, no_mobile: 1}})
       .done(havePrayed);
     hideQTip(e.target);
   }
@@ -4793,7 +4808,7 @@
 
   function doWeNeedToParse() {
     if (checkLastUpdate(getValue('lastTempleCheck'))) {
-      retryAjax('index.php?no_mobile=1&cmd=temple').done(parseTemplePage);
+      indexAjax({data: {cmd: 'temple', no_mobile: 1}}).done(parseTemplePage);
     } else if (getValue('needToPray')) {
       displayDisconnectedFromGodsMessage();
     }
@@ -4926,12 +4941,11 @@
 
   function playerName$1(val, type) {
     return '<a class="player-name tip-static ' +
-      contactColor(val.last_login, type) +
-      '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
-      '<td>Level:</td><td>' + val.level + '</td></tr><tr><td>Last ' +
-      'Activity:</td><td>' + formatLastActivity(val.last_login) +
-      '</td></tr></tbody></table>" href="index.php?cmd=profile&player_id=' +
-      val.id + '">' + val.username + '</a>';
+      contactColor(val.last_login, type) + '" data-tipped="<b>' + val.username +
+      '</b><br><table><tbody><tr><td>Level:</td><td>' + val.level +
+      '</td></tr><tr><td>Last Activity:</td><td>' +
+      formatLastActivity(val.last_login) + '</td></tr></tbody></table>" href="' +
+      playerIdUrl + val.id + '">' + val.username + '</a>';
   }
 
   function doBuffCheck() {
@@ -4960,9 +4974,8 @@
   function doSecureButton(val) {
     if (!calf.hideGuildInfoSecureTrade) {
       return '<a class="enemy-secure-trade guild-icon left ' +
-        'guild-minibox-action tip-static" href="index.php?cmd=trade' +
-        '&subcmd=createsecure&target_username=' + val.username +
-        '" data-tipped="Secure Trade"></a>';
+        'guild-minibox-action tip-static" href="' + secureUrl +
+        val.username + '" data-tipped="Secure Trade"></a>';
     }
     return '';
   }
@@ -4970,9 +4983,8 @@
   function doTradeButton(val) {
     if (!calf.hideGuildInfoTrade) {
       return '<a class="enemy-trade guild-icon left ' +
-        'guild-minibox-action tip-static" href="index.php?cmd=trade' +
-        '&target_player=' + val.username +
-        '" data-tipped="Send Gold/Items/FSP"></a>';
+        'guild-minibox-action tip-static" href="' + tradeUrl +
+        val.username + '" data-tipped="Send Gold/Items/FSP"></a>';
     }
     return '';
   }
@@ -5011,8 +5023,7 @@
   }
 
   function getProfile$1(username) {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         cmd: 'export',
         subcmd: 'profile',
@@ -5726,8 +5737,7 @@
     getForage('fsh_fsboxcontent').done(storeFSBox);
     playerName = playerName[0].textContent;
     insertHtmlBeforeEnd(nodediv,
-      '<br><span class="fshPaleVioletRed">' +
-      '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
+      '<br><span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
       playerName + '">Ignore</a> ]</span> ');
     var log = createSpan({
       className: 'fshYellow',
@@ -6025,9 +6035,9 @@
   function newGuildLogLink() {
     if (currentGuildId() && !getValue('useNewGuildLog')) {
       // if not using the new guild log, show it as a separate menu entry
-      insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
+      insertAfterParent('nav-guild-ledger-advisor', insertHtmlAfterEnd,
         '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="index.php' + newGuildLogUrl + '"' +
+        'href="' + newGuildLogUrl + '"' +
         '>New Guild Log</a></li>');
     }
   }
@@ -6372,7 +6382,7 @@
   }
 
   function statbar() {
-    statbarWrapper('index.php?cmd=profile', 'statbar-character');
+    statbarWrapper(profileUrl, 'statbar-character');
     statbarWrapper('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
     statbarWrapper('index.php?cmd=blacksmith', 'statbar-equipment');
     statbarWrapper('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
@@ -6570,6 +6580,69 @@
     ]);
   }
 
+  function expandMenu(section) {
+    if (getValue('expandMenuOnKeyPress')) {
+      localStorage.setItem('hcs.nav.openIndex', section);
+    }
+  }
+
+  function keyHandlerEvent(func) {
+    sendEvent('keyHandler', func);
+  }
+
+  function backpack() {
+    keyHandlerEvent('backpack');
+    expandMenu('2');
+    location.href = 'index.php?cmd=profile&subcmd=dropitems';
+  }
+
+  function view() {
+    return profile({subcmd: 'view'});
+  }
+
+  var jsonTests = [
+    function(itemIndex, json) {return json;},
+    function(itemIndex, json) {return json.s;},
+    function(itemIndex, json) {return json.r;},
+    function(itemIndex, json) {return json.r.equip_sets;},
+    function(itemIndex, json) {return json.r.equip_sets.length > itemIndex;}
+  ];
+
+  function funcPasses(itemIndex, json, fn) {return fn(itemIndex, json);}
+
+  function goodData(itemIndex, json) {
+    return jsonTests.every(partial(funcPasses, itemIndex, json));
+  }
+
+  function changeCombatSet(itemIndex, json) {
+    if (goodData(itemIndex, json)) {
+      var cbsIndex = json.r.equip_sets[itemIndex].id;
+      expandMenu('2');
+      location.href = 'index.php?cmd=profile&combatSetId=' + cbsIndex +
+        '&subcmd=managecombatset&submit=Use';
+    }
+  }
+
+  function combatSetKey(itemIndex) {
+    keyHandlerEvent('changeCombatSet');
+    view().done(partial(changeCombatSet, itemIndex));
+  }
+
+  function createGroup() {
+    keyHandlerEvent('createGroup');
+    expandMenu('4');
+    location.href =
+      'index.php?cmd=guild&subcmd=groups&subcmd2=create';
+  }
+
+  function doRepair() {
+    // do not use repair link for new map
+    if (!getElementById('worldPage')) {
+      keyHandlerEvent('doRepair');
+      location.href = 'index.php?cmd=blacksmith&subcmd=repairall';
+    }
+  }
+
   function infoBox(documentText) {
     var doc = createDocument(documentText);
     var result;
@@ -6590,8 +6663,7 @@
 
   function doSendGold() { // jQuery
     if (!sendGoldonWorld) {return;}
-    retryAjax({
-      url: 'index.php',
+    indexAjax({
       data: {
         no_mobile: 1,
         cmd: 'trade',
@@ -6650,90 +6722,21 @@
     if (sendGoldonWorld) {prepareSendGoldOnWorld();}
   }
 
-  function getDoc(doc, context) {
-    if (doc instanceof HTMLDocument) {return doc;}
-    if (context) {return context.ownerDocument;}
-    return document;
-  }
-
-  function xPathEvaluate(type, expr, _doc, _context) {
-    var doc = getDoc(_doc, _context);
-    var context = fallback(_context, doc);
-    return doc.evaluate(expr, context, null, type, null);
-  }
-
-  function xPath(expr, doc, context) {
-    return xPathEvaluate(XPathResult.ANY_UNORDERED_NODE_TYPE,
-      expr, doc, context).singleNodeValue;
-  }
-
-  var expandMenuOnKeyPress;
-
-  function expandMenu(section) {
-    if (expandMenuOnKeyPress) {
-      localStorage.setItem('hcs.nav.openIndex', section);
+  function fastWearMgr() {
+    if (!('dialogIsClosed' in calf) || calf.dialogIsClosed()) {
+      keyHandlerEvent('insertQuickWear');
+      jQueryDialog(insertQuickWear);
     }
-  }
-
-  function movePage(dir) { // Legacy
-    var dirButton = xPath('//input[@value="' + dir + '"]');
-    if (!dirButton) {return;}
-    var url = dirButton.getAttribute('onClick');
-    url = url.replace(/^[^']*'/m, '').replace(/';$/m, '');
-    location.href = url;
-  }
-
-  function changeCombatSet(responseText, itemIndex) { // jQuery.min
-    var doc = createDocument(responseText);
-
-    var cbsSelect = doc.querySelector(
-      '#profileCombatSetDiv select[name="combatSetId"]');
-
-    // find the combat set id value
-    var allItems = getElementsByTagName('option', cbsSelect);
-    if (itemIndex >= allItems.length) {return;}
-    var cbsIndex = allItems[itemIndex].value;
-
-    retryAjax({
-      url: 'index.php',
-      data: {
-        no_mobile: 1,
-        cmd: 'profile',
-        subcmd: 'managecombatset',
-        combatSetId: cbsIndex,
-        submit: 'Use'
-      },
-      success: function() {
-        expandMenu('2');
-        location.href = 'index.php?cmd=profile';
-      }
-    });
-  }
-
-  function doRepair() {
-    // do not use repair link for new map
-    if (!getElementById('worldPage')) {
-      location.href = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
-    }
-  }
-
-  function createGroup() {
-    expandMenu('4');
-    location.href =
-      'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
-  }
-
-  function logPage() {
-    expandMenu('2');
-    location.href = 'index.php?cmd=log';
   }
 
   function gotoGuild() {
+    keyHandlerEvent('gotoGuild');
     expandMenu('4');
     location.href = 'index.php?cmd=guild&subcmd=manage';
   }
 
   function joinAllGroup() {
+    keyHandlerEvent('joinAllGroup');
     expandMenu('4');
     if (!getValue('enableMaxGroupSizeToJoin')) {
       location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
@@ -6743,64 +6746,70 @@
     }
   }
 
-  function backpack() {
+  function logPage() {
+    keyHandlerEvent('logPage');
     expandMenu('2');
-    location.href = 'index.php?cmd=profile&subcmd=dropitems';
+    location.href = logUrl;
   }
 
-  function fastWearMgr() {
-    if (!('dialogIsClosed' in calf) || calf.dialogIsClosed()) {
-      sendEvent('keyHandler', 'insertQuickWear');
-      jQueryDialog(insertQuickWear);
-    }
+  function querySelector(selector, scope) {
+    if (scope) {return scope.querySelector(selector);}
+    return document.querySelector(selector);
+  }
+
+  function movePage(dir) {
+    var dirButton = querySelector('#pCC input[value="' + dir + '"]');
+    if (!dirButton) {return;}
+    keyHandlerEvent('movePage');
+    dirButton.click();
   }
 
   function profile$1() {
+    keyHandlerEvent('profile');
     expandMenu('2');
-    location.href = 'index.php?cmd=profile';
+    location.href = profileUrl;
   }
 
-  function combatSetKey(itemIndex) {
-    retryAjax('index.php?no_mobile=1&cmd=profile').done(function(data) {
-      changeCombatSet(data, itemIndex);
-    });
-  }
+  var keyLookup = [
+    [33, combatSetKey, 0], // Shift+1
+    [64, combatSetKey, 1], // Shift+2
+    [34, combatSetKey, 1], // Shift+2 -- for UK keyboards, I think
+    [35, combatSetKey, 2], // Shift+3
+    [36, combatSetKey, 3], // Shift+4
+    [37, combatSetKey, 4], // Shift+5
+    [94, combatSetKey, 5], // Shift+6
+    [38, combatSetKey, 6], // Shift+7
+    [42, combatSetKey, 7], // Shift+8
+    [40, combatSetKey, 8], // Shift+9
+    [60, movePage, '<'], // move to prev page [<]
+    [62, movePage, '>'], // move to next page [>]
+    [71, createGroup], // create group [G]
+    [76, logPage], // Log Page [L]
+    [98, backpack], // backpack [b]
+    [103, gotoGuild], // go to guild [g]
+    [106, joinAllGroup], // join all group [j]
+    [108, logPage], // Log Page [l]
+    [112, profile$1], // profile [p]
+    [114, doRepair], // repair [r]
+    [118, fastWearMgr], // fast wear manager [v]
+    [121, doSendGold], // fast send gold [y]
+    [163, combatSetKey, 2] // Shift+3 -- for UK keyboards
+  ];
 
-  var keyDict = {
-    '33': {fn: combatSetKey, arg: 1}, // Shift+1
-    '64': {fn: combatSetKey, arg: 2}, // Shift+2
-    '34': {fn: combatSetKey, arg: 2}, // Shift+2 -- for UK keyboards, I think
-    '35': {fn: combatSetKey, arg: 3}, // Shift+3
-    '36': {fn: combatSetKey, arg: 4}, // Shift+4
-    '37': {fn: combatSetKey, arg: 5}, // Shift+5
-    '94': {fn: combatSetKey, arg: 6}, // Shift+6
-    '38': {fn: combatSetKey, arg: 7}, // Shift+7
-    '42': {fn: combatSetKey, arg: 8}, // Shift+8
-    '40': {fn: combatSetKey, arg: 9}, // Shift+9
-    '60': {fn: movePage, arg: '<'}, // move to prev page [<]
-    '62': {fn: movePage, arg: '>'}, // move to next page [>]
-    '71': {fn: createGroup}, // create group [G]
-    '76': {fn: logPage}, // Log Page [L]
-    '98': {fn: backpack}, // backpack [b]
-    '103': {fn: gotoGuild}, // go to guild [g]
-    '106': {fn: joinAllGroup}, // join all group [j]
-    '108': {fn: logPage}, // Log Page [l]
-    '112': {fn: profile$1}, // profile [p]
-    '114': {fn: doRepair}, // repair [r]
-    '118': {fn: fastWearMgr}, // fast wear manager [v]
-    '121': {fn: doSendGold}, // fast send gold [y]
-    '163': {fn: combatSetKey, arg: 3}, // Shift+3 -- for UK keyboards
-  };
+  function thisCharCode(charCode, arr) {return charCode === arr[0];}
 
-  function handleKey(r) {
-    if (r in keyDict) {
-      keyDict[r].fn(keyDict[r].arg);
+  function handleKey(charCode) {
+    var mapping = keyLookup.find(partial(thisCharCode, charCode));
+    if (mapping) {
+      mapping[1](mapping[2]);
     }
   }
 
+  function notTagName(evt, tag) {return evt.target.tagName !== tag;}
+
   var bailOut = [
     function(evt) {
-      return evt.target.tagName !== 'HTML' && evt.target.tagName !== 'BODY';
+      return ['HTML', 'BODY'].every(partial(notTagName, evt));
     },
     /* ignore control, alt and meta keys
     (I think meta is the command key in Macintoshes) */
@@ -6809,13 +6818,18 @@
     function(evt) {return evt.altKey;}
   ];
 
+  function reason(evt, fn) {return fn(evt);}
+
+  function doNotHandle(evt) {
+    return bailOut.some(partial(reason, evt));
+  }
+
   function keyPress(evt) {
-    if (bailOut.some(function(fn) {return fn(evt);})) {return;}
+    if (doNotHandle(evt)) {return;}
     handleKey(evt.charCode);
   }
 
   function replaceKeyHandler() {
-    expandMenuOnKeyPress = getValue('expandMenuOnKeyPress');
     document.onkeypress = keyPress;
   }
 
@@ -6905,13 +6919,11 @@
     var self = $(e.target);
     var pvpId = self.prev().val();
     var subcmd = self.prev().prev().val();
-    window.location = 'index.php?cmd=arena&subcmd=' + subcmd +
-      '&pvp_id=' + pvpId;
+    window.location = arenaUrl + subcmd + '&pvp_id=' + pvpId;
   }
 
   function gotoPage(pageId) {
-    window.location = 'index.php?cmd=arena&subcmd=completed&page=' +
-      pageId;
+    window.location = arenaUrl + 'completed&page=' + pageId;
   }
 
   function lastPage$1() {
@@ -7228,8 +7240,7 @@
   var selectRow;
 
   function doPickMove(moveId, slotId) {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         no_mobile: 1,
         cmd: 'arena',
@@ -7262,7 +7273,7 @@
   }
 
   function pageRefresh() {
-    window.location = 'index.php?cmd=arena&subcmd=setup';
+    window.location = arenaUrl + 'setup';
   }
 
   function changeMoves(newMoves) {
@@ -7587,10 +7598,9 @@
   }
 
   function createPotionFromTemplate(tempId) {
-    return retryAjax({
+    return indexAjax({
       cache: false,
       dataType: 'json',
-      url: 'index.php',
       data: {
         cmd: 'composing',
         subcmd: 'createajax',
@@ -7989,9 +7999,8 @@
   }
 
   function getGuild(guildId) {
-    return retryAjax({
+    return indexAjax({
       dataType: 'json',
-      url: 'index.php',
       data: {
         cmd: 'export',
         subcmd: 'guild_members',
@@ -8082,8 +8091,7 @@
 
   function playerName$2(f, membrList) {
     if (!membrList[f]) {return f;}
-    return '<a href="index.php?cmd=profile&player_id=' +
-      membrList[f].id + '">' + f + '</a>';
+    return '<a href="' + playerIdUrl + membrList[f].id + '">' + f + '</a>';
   }
 
   function playerLevel(f, membrList) {
@@ -8252,7 +8260,7 @@
   function summaryLink() {
     var updateInput = getElementsByClassName('custombutton', pCC);
     if (updateInput.length === 0) {return;}
-    insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
+    insertHtmlAfterEnd(updateInput[0], '<span> <a href="' + indexPhp +
       '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
   }
 
@@ -8322,8 +8330,11 @@
   }
 
   function getMercStats() {
-    return retryAjax(
-      'index.php?no_mobile=1&cmd=guild&subcmd=mercs').pipe(parseMercStats);
+    return indexAjax({
+      cmd: 'guild',
+      subcmd: 'mercs',
+      no_mobile: '1'
+    }).pipe(parseMercStats);
   }
 
   var attackElement;
@@ -8438,9 +8449,8 @@
     var creator = $('b', row).text();
     if (membrlist[creator]) {
       return onlineDot({last_login: membrlist[creator].last_login}) +
-        '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
-        membrlist[creator].id + '"><b>' + creator + '</b></a> [' +
-        membrlist[creator].level + ']';
+        '&nbsp;<a href="' + playerIdUrl + membrlist[creator].id +
+        '"><b>' + creator + '</b></a> [' + membrlist[creator].level + ']';
     }
     return '<b>' + creator + '</b>';
   }
@@ -8462,8 +8472,7 @@
 
   function profileLink(membrlist, name) {
     if (!membrlist[name]) {return name;}
-    return '<a href="index.php?cmd=profile&player_id=' +
-      membrlist[name].id + '">' + name + '</a>';
+    return '<a href="' + playerIdUrl + membrlist[name].id + '">' + name + '</a>';
   }
 
   function groupMembers(membrlist, membersCell) {
@@ -9290,8 +9299,7 @@
 
   function buffLinks$1() {
     // TODO preference
-    var members = querySelectorAll(
-      '#pCC a[href^="index.php?cmd=profile&player_id="]');
+    var members = querySelectorAll('#pCC a[href^="' + playerIdUrl + '"]');
     batch(3, members, 0, insertBuffLink);
     on(pCC, 'click', openQuickBuff);
   }
@@ -9983,7 +9991,7 @@
   }
 
   function doAjax$2(oData) {
-    retryAjax({url: 'index.php', data: oData}).done(transResponse);
+    indexAjax({data: oData}).done(transResponse);
   }
 
   function bankDeposit(e) { // jQuery
@@ -10693,8 +10701,7 @@
   }
 
   function backpack$1() {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {cmd: 'profile', subcmd: 'fetchinv'},
       dataType: 'json'
     });
@@ -10714,8 +10721,7 @@
   }
 
   function takeItem(invId) {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         cmd: 'guild',
         subcmd: 'inventory',
@@ -11256,7 +11262,7 @@
 
   function memberHeader(oldhtml) {
     return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
-      '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
+      '<a href="' + playerIdUrl + calf.membrList[oldhtml].id +
       '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
       oldhtml + '>m</span> ]';
   }
@@ -11410,8 +11416,7 @@
   }
 
   function dropItem(invIdList) {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         cmd: 'profile',
         subcmd: 'dodropitems',
@@ -11933,10 +11938,10 @@
   function msgDoesNotIncludePlayer(aRow) {
     var messageHTML = aRow.cells[2].innerHTML;
     var doublerPlayerMessageRE =
-      /member\s<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
+      /member\s<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
     var secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
     var singlePlayerMessageRE =
-      /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
+      /<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
     var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
     var firstPlayerID = getPlayer(firstPlayer);
     var secondPlayerID = getPlayer(secondPlayer);
@@ -12076,9 +12081,8 @@
     var dateLastPart = dateHTML
       .substring(dateHTML.indexOf('Message</a>') + 11, dateHTML.length);
     if (!isGuildMate) {
-      extraPart = ' | <a title="Add to Ignore List" href="index.php?cmd' +
-        '=log&subcmd=doaddignore&ignore_username=' + playerName +
-        '">Ignore</a>';
+      extraPart = ' | <a title="Add to Ignore List" href="' + doAddIgnore +
+        playerName + '">Ignore</a>';
     }
     aRow.cells[1].innerHTML = dateFirstPart + '</a>' + extraPart +
       dateLastPart;
@@ -12115,10 +12119,9 @@
   }
 
   function makeExtraPart(playerName) {
-    return ' | <a href="index.php?cmd=trade&target_player=' +
-    playerName + '">Trade</a> | <a title="Secure Trade" ' +
-    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
-    playerName + '">ST</a>';
+    return ' | <a href="' + tradeUrl + playerName +
+      '">Trade</a> | <a title="Secure Trade" href="' +
+      secureUrl + playerName + '">ST</a>';
   }
 
   function getThirdPart(messageHTML) { // Legacy
@@ -12476,8 +12479,7 @@
   function canIgnore(aRow, playerName, isGuildMate) {
     if (!isGuildMate) {
       var dateExtraText = '<nobr><span style="font-size:x-small;">' +
-        '[ <a title="Add to Ignore List" href="index.php?cmd=log' +
-        '&subcmd=doaddignore&ignore_username=' + playerName +
+        '[ <a title="Add to Ignore List" href="' + doAddIgnore + playerName +
         '">Ignore</a> ]</span></nobr>';
       aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' +
         dateExtraText;
@@ -12494,9 +12496,8 @@
     var extraText = ' <span style="font-size:x-small;"><nobr>' +
       '[ <span style="cursor:pointer;text-decoration:underline" ' +
       'class="a-reply" target_player="' + buffingPlayerName +
-      '">Reply</span> | <a href="index.php?cmd=trade&target_player=' +
-      buffingPlayerName + '">Trade</a> | <a title="Secure Trade" ' +
-      'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+      '">Reply</span> | <a href="' + tradeUrl + buffingPlayerName +
+      '">Trade</a> | <a title="Secure Trade" href="' + secureUrl +
       buffingPlayerName + '">ST</a>';
     extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
       '>Buff</a>';
@@ -13741,7 +13742,7 @@
   }
 
   function coderLink(prev, curr, ind, ary) {
-    var ret = prev + '<a href="index.php?cmd=profile&player_id=' + curr[0] +
+    var ret = prev + '<a href="' + playerIdUrl + curr[0] +
       '">' + curr[1] + '</a>';
     if (ind === ary.length - 2) {
       ret += ' and ';
@@ -14863,8 +14864,8 @@
   }
 
   function makeLinks(key) {
-    return '<a href="index.php?cmd=profile&player_id=' +
-      guildMemberList[key].id + '">' + key + '</a>';
+    return '<a href="' + playerIdUrl + guildMemberList[key].id + '">' + key +
+      '</a>';
   }
 
   function missingMembers(membrList) {
@@ -15292,8 +15293,7 @@
   }
 
   function getGroups() {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         no_mobile: 1,
         cmd: 'guild',
@@ -15303,8 +15303,7 @@
   }
 
   function getGuild$1() {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         no_mobile: 1,
         cmd: 'guild',
@@ -15788,7 +15787,7 @@
     }
   }
 
-  function goodData(data) {
+  function goodData$1(data) {
     return data.s && Array.isArray(data.r);
   }
 
@@ -15797,7 +15796,7 @@
   }
 
   function processScoutTower(ast, data) {
-    if (!goodData(data)) {return;}
+    if (!goodData$1(data)) {return;}
     processTitans(data.r);
     if (titanToShow(GameData.realm().dynamic)) {
       timeoutId$1 = window.setTimeout(ast, 30000);
@@ -17287,11 +17286,6 @@
     });
   }
 
-  function querySelector(selector, scope) {
-    if (scope) {return scope.querySelector(selector);}
-    return document.querySelector(selector);
-  }
-
   var invAmount;
   var invResultHeader;
   var invResults;
@@ -17378,6 +17372,23 @@
 
   function injectInvent() {
     makeLayout(pCC.lastElementChild);
+  }
+
+  function getDoc(doc, context) {
+    if (doc instanceof HTMLDocument) {return doc;}
+    if (context) {return context.ownerDocument;}
+    return document;
+  }
+
+  function xPathEvaluate(type, expr, _doc, _context) {
+    var doc = getDoc(_doc, _context);
+    var context = fallback(_context, doc);
+    return doc.evaluate(expr, context, null, type, null);
+  }
+
+  function xPath(expr, doc, context) {
+    return xPathEvaluate(XPathResult.ANY_UNORDERED_NODE_TYPE,
+      expr, doc, context).singleNodeValue;
   }
 
   function getItemId(el) {
@@ -18379,7 +18390,7 @@
 
   function whereRenderGuildDisplay(row) {
     if (row.player_id === -1) {return 'GS';}
-    return '<a class="fshMaroon" href="index.php?cmd=profile&player_id=' +
+    return '<a class="fshMaroon" href="' + playerIdUrl +
       row.player_id + '">' + playerName$3(row.player_id) + '</a>';
   }
 
@@ -18632,8 +18643,7 @@
   }
 
   function moveItem(invIdList, folderId) {
-    return retryAjax({
-      url: 'index.php',
+    return indexAjax({
       data: {
         cmd: 'profile',
         subcmd: 'sendtofolder',
@@ -18900,10 +18910,13 @@
   }
 
   function getGuildLogPage(page) {
-    return retryAjax({
-      url: 'index.php',
-      data: {no_mobile: 1, cmd: 'guild', subcmd: 'log', page: page},
-      datatype: 'html'
+    return indexAjax({
+      data: {
+        cmd: 'guild',
+        subcmd: 'log',
+        page: page,
+        no_mobile: 1
+      }
     });
   }
 
@@ -20070,8 +20083,7 @@
       '" data-tipped="Go to ' + playername +
       '\'s auctions" style="background-image: url(\'' +
       imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
-    newhtml += '<a class="quickButton tip-static" ' +
-      'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+    newhtml += '<a class="quickButton tip-static" href="' + secureUrl +
       playername + '" data-tipped="Create Secure Trade to ' + playername +
       '" style="background-image: url(\'' + imageServer +
       '/temple/2.gif\');"></a>&nbsp;&nbsp;';
@@ -21156,7 +21168,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '87';
+  window.FSH.calf = '88';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
