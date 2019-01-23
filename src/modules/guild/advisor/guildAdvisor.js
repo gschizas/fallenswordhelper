@@ -3,6 +3,7 @@ import {createTFoot} from '../../common/cElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getMembrList from '../../ajax/getMembrList';
+import {indexPhp} from '../../support/constants';
 import injectAdvisorWeekly from './injectAdvisorWeekly';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
@@ -12,7 +13,6 @@ import partial from '../../common/partial';
 import {injectTable, playerLevel, playerName, playerRank} from './helpers';
 //#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
-import {indexPhp} from '../../support/constants';
 //#endif
 
 function getTfoot(list) {
