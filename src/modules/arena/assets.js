@@ -1,3 +1,5 @@
+import {arenaUrl} from '../support/constants';
+
 export var moveOptions =
   '<td colspan=3 ' +
   'style="padding-top: 2px;padding-bottom: 2px;">' +
@@ -45,6 +47,5 @@ export function dontPost(e) { // jQuery
   var self = $(e.target);
   var pvpId = self.prev().val();
   var subcmd = self.prev().prev().val();
-  window.location = 'index.php?cmd=arena&subcmd=' + subcmd +
-    '&pvp_id=' + pvpId;
+  window.location = arenaUrl + subcmd + '&pvp_id=' + pvpId;
 }

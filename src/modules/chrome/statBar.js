@@ -3,6 +3,7 @@ import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import on from '../common/on';
+import {profileUrl} from '../support/constants';
 
 function statbarWrapper(href, id) {
   var character = getElementById(id);
@@ -17,7 +18,7 @@ function statbarWrapper(href, id) {
 }
 
 export default function statbar() {
-  statbarWrapper('index.php?cmd=profile', 'statbar-character');
+  statbarWrapper(profileUrl, 'statbar-character');
   statbarWrapper('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
   statbarWrapper('index.php?cmd=blacksmith', 'statbar-equipment');
   statbarWrapper('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');

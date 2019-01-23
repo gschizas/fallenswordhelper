@@ -11,6 +11,7 @@ import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import quickBuffHref from '../common/quickBuffHref';
 import {addPvpSummary, initCache} from './addPvpSummary';
+import {doAddIgnore, secureUrl, tradeUrl} from '../support/constants';
 import {getKeys, playerColor, prepareAlliesEnemies} from './playerColour';
 
 function getCalfVars() {
@@ -41,8 +42,7 @@ function buildNickList(prev, curr) {
 function canIgnore(aRow, playerName, isGuildMate) {
   if (!isGuildMate) {
     var dateExtraText = '<nobr><span style="font-size:x-small;">' +
-      '[ <a title="Add to Ignore List" href="index.php?cmd=log' +
-      '&subcmd=doaddignore&ignore_username=' + playerName +
+      '[ <a title="Add to Ignore List" href="' + doAddIgnore + playerName +
       '">Ignore</a> ]</span></nobr>';
     aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' +
       dateExtraText;
@@ -59,9 +59,8 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   var extraText = ' <span style="font-size:x-small;"><nobr>' +
     '[ <span style="cursor:pointer;text-decoration:underline" ' +
     'class="a-reply" target_player="' + buffingPlayerName +
-    '">Reply</span> | <a href="index.php?cmd=trade&target_player=' +
-    buffingPlayerName + '">Trade</a> | <a title="Secure Trade" ' +
-    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+    '">Reply</span> | <a href="' + tradeUrl + buffingPlayerName +
+    '">Trade</a> | <a title="Secure Trade" href="' + secureUrl +
     buffingPlayerName + '">ST</a>';
   extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
     '>Buff</a>';

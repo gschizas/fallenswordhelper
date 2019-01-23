@@ -1,8 +1,7 @@
 import doBuffLinks from '../../common/doBuffLinks';
-import {months} from '../../support/constants';
 import onlineDot from '../../common/onlineDot';
 import partial from '../../common/partial';
-import {server} from '../../system/system';
+import {months, playerIdUrl} from '../../support/constants';
 //#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
 //#endif
@@ -31,9 +30,8 @@ function creatorDotAndLink(membrlist, row) {
   var creator = $('b', row).text();
   if (membrlist[creator]) {
     return onlineDot({last_login: membrlist[creator].last_login}) +
-      '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
-      membrlist[creator].id + '"><b>' + creator + '</b></a> [' +
-      membrlist[creator].level + ']';
+      '&nbsp;<a href="' + playerIdUrl + membrlist[creator].id +
+      '"><b>' + creator + '</b></a> [' + membrlist[creator].level + ']';
   }
   return '<b>' + creator + '</b>';
 }
@@ -55,8 +53,7 @@ function byMemberLevel(membrlist, a, b) {
 
 function profileLink(membrlist, name) {
   if (!membrlist[name]) {return name;}
-  return '<a href="index.php?cmd=profile&player_id=' +
-    membrlist[name].id + '">' + name + '</a>';
+  return '<a href="' + playerIdUrl + membrlist[name].id + '">' + name + '</a>';
 }
 
 function groupMembers(membrlist, membersCell) {

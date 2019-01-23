@@ -1,10 +1,11 @@
 import isSelected from '../../../system/isSelected';
+import {playerIdUrl} from '../../../support/constants';
 import playerName from './playerName';
 import {theInv} from '../buildInv';
 
 function whereRenderGuildDisplay(row) {
   if (row.player_id === -1) {return 'GS';}
-  return '<a class="fshMaroon" href="index.php?cmd=profile&player_id=' +
+  return '<a class="fshMaroon" href="' + playerIdUrl +
     row.player_id + '">' + playerName(row.player_id) + '</a>';
 }
 

@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import quickBuffHref from '../common/quickBuffHref';
+import {doAddIgnore, secureUrl, tradeUrl} from '../support/constants';
 
 function removeHTML(buffName) {
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
@@ -13,9 +14,8 @@ function reportIgnore(aRow, isGuildMate, playerName) { // Legacy
   var dateLastPart = dateHTML
     .substring(dateHTML.indexOf('Message</a>') + 11, dateHTML.length);
   if (!isGuildMate) {
-    extraPart = ' | <a title="Add to Ignore List" href="index.php?cmd' +
-      '=log&subcmd=doaddignore&ignore_username=' + playerName +
-      '">Ignore</a>';
+    extraPart = ' | <a title="Add to Ignore List" href="' + doAddIgnore +
+      playerName + '">Ignore</a>';
   }
   aRow.cells[1].innerHTML = dateFirstPart + '</a>' + extraPart +
     dateLastPart;
@@ -52,10 +52,9 @@ function makeMsgReplyTo(playerName, firstPart) {
 }
 
 function makeExtraPart(playerName) {
-  return ' | <a href="index.php?cmd=trade&target_player=' +
-  playerName + '">Trade</a> | <a title="Secure Trade" ' +
-  'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
-  playerName + '">ST</a>';
+  return ' | <a href="' + tradeUrl + playerName +
+    '">Trade</a> | <a title="Secure Trade" href="' +
+    secureUrl + playerName + '">ST</a>';
 }
 
 function getThirdPart(messageHTML) { // Legacy

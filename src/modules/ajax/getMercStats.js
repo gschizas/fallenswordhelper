@@ -1,7 +1,7 @@
 import createDocument from '../system/createDocument';
+import indexAjax from './indexAjax';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
-import retryAjax from './retryAjax';
 import {defenderMultiplier, mercRE} from '../support/constants';
 
 function addMercStat(mouseover, stat, i) {
@@ -35,6 +35,9 @@ function parseMercStats(html) {
 }
 
 export default function getMercStats() {
-  return retryAjax(
-    'index.php?no_mobile=1&cmd=guild&subcmd=mercs').pipe(parseMercStats);
+  return indexAjax({
+    cmd: 'guild',
+    subcmd: 'mercs',
+    no_mobile: '1'
+  }).pipe(parseMercStats);
 }

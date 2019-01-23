@@ -1,9 +1,8 @@
 import dialog from './dialog';
-import retryAjax from './retryAjax';
+import indexAjax from './indexAjax';
 
 export default function moveItem(invIdList, folderId) {
-  return retryAjax({
-    url: 'index.php',
+  return indexAjax({
     data: {
       cmd: 'profile',
       subcmd: 'sendtofolder',

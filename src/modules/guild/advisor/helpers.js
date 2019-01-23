@@ -1,6 +1,7 @@
 import add from '../../support/task';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';
+import {playerIdUrl} from '../../support/constants';
 import {createDiv, createTable} from '../../common/cElement';
 
 export var advisorColumns = [
@@ -23,8 +24,7 @@ export var advisorColumns = [
 
 export function playerName(f, membrList) {
   if (!membrList[f]) {return f;}
-  return '<a href="index.php?cmd=profile&player_id=' +
-    membrList[f].id + '">' + f + '</a>';
+  return '<a href="' + playerIdUrl + membrList[f].id + '">' + f + '</a>';
 }
 
 export function playerLevel(f, membrList) {

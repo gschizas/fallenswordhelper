@@ -1,7 +1,7 @@
 import createDocument from './system/createDocument';
 import {def_table} from './support/constants';
+import indexAjax from './ajax/indexAjax';
 import jQueryPresent from './common/jQueryPresent';
-import retryAjax from './ajax/retryAjax';
 
 var playerBank = {
   headText: 'Bank',
@@ -97,7 +97,7 @@ function invalidAmount(o, amount) { // jQuery
 }
 
 function doAjax(oData) {
-  retryAjax({url: 'index.php', data: oData}).done(transResponse);
+  indexAjax({data: oData}).done(transResponse);
 }
 
 function bankDeposit(e) { // jQuery

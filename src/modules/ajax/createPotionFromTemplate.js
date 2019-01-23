@@ -1,11 +1,10 @@
-import retryAjax from './retryAjax';
+import indexAjax from './indexAjax';
 import rnd from '../system/rnd';
 
 export default function createPotionFromTemplate(tempId) {
-  return retryAjax({
+  return indexAjax({
     cache: false,
     dataType: 'json',
-    url: 'index.php',
     data: {
       cmd: 'composing',
       subcmd: 'createajax',

@@ -5,7 +5,6 @@ import getValue from '../../../system/getValue';
 import hideElement from '../../../common/hideElement';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
-import {nowSecs} from '../../../support/constants';
 import {atkStats, defStats, proc} from './assets';
 import {
   containerDiv,
@@ -13,6 +12,7 @@ import {
   leftDiv,
   myDefenders
 } from './primaryElements';
+import {nowSecs, playerIdUrl} from '../../../support/constants';
 
 var guildMemberList;
 var twoMinutesAgo;
@@ -71,8 +71,8 @@ function availableMembers(key) {
 }
 
 function makeLinks(key) {
-  return '<a href="index.php?cmd=profile&player_id=' +
-    guildMemberList[key].id + '">' + key + '</a>';
+  return '<a href="' + playerIdUrl + guildMemberList[key].id + '">' + key +
+    '</a>';
 }
 
 function missingMembers(membrList) {

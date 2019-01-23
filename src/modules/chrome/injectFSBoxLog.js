@@ -1,4 +1,5 @@
 import {createSpan} from '../common/cElement';
+import {doAddIgnore} from '../support/constants';
 import {getElementById} from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
@@ -34,8 +35,7 @@ function fSBoxExists(node) { // jQuery.min
   getForage('fsh_fsboxcontent').done(storeFSBox);
   playerName = playerName[0].textContent;
   insertHtmlBeforeEnd(nodediv,
-    '<br><span class="fshPaleVioletRed">' +
-    '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
+    '<br><span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
     playerName + '">Ignore</a> ]</span> ');
   var log = createSpan({
     className: 'fshYellow',

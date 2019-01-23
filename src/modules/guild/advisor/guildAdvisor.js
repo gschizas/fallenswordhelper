@@ -3,6 +3,7 @@ import {createTFoot} from '../../common/cElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getMembrList from '../../ajax/getMembrList';
+import {indexPhp} from '../../support/constants';
 import injectAdvisorWeekly from './injectAdvisorWeekly';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
@@ -47,7 +48,7 @@ function getData(list, membrList) {
 function summaryLink() {
   var updateInput = getElementsByClassName('custombutton', pCC);
   if (updateInput.length === 0) {return;}
-  insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
+  insertHtmlAfterEnd(updateInput[0], '<span> <a href="' + indexPhp +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
 }
 

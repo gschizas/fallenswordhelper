@@ -1,9 +1,9 @@
+import {arenaUrl} from '../support/constants';
 import {dontPost} from './assets';
 import jQueryPresent from '../common/jQueryPresent';
 
 function gotoPage(pageId) {
-  window.location = 'index.php?cmd=arena&subcmd=completed&page=' +
-    pageId;
+  window.location = arenaUrl + 'completed&page=' + pageId;
 }
 
 function lastPage() {

@@ -4,9 +4,9 @@ import {def_relicView} from '../../../support/constants';
 import getGroupStats from '../../../ajax/getGroupStats';
 import getMercStats from '../../../ajax/getMercStats';
 import getProfile from '../../../ajax/getProfile';
+import indexAjax from '../../../ajax/indexAjax';
 import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
-import retryAjax from '../../../ajax/retryAjax';
 import when from '../../../common/when';
 import {
   doCalculations,
@@ -56,8 +56,7 @@ function parseGroups(html) {
 }
 
 function getGroups() {
-  return retryAjax({
-    url: 'index.php',
+  return indexAjax({
     data: {
       no_mobile: 1,
       cmd: 'guild',
@@ -67,8 +66,7 @@ function getGroups() {
 }
 
 function getGuild() {
-  return retryAjax({
-    url: 'index.php',
+  return indexAjax({
     data: {
       no_mobile: 1,
       cmd: 'guild',

@@ -1,11 +1,12 @@
 import batch from '../../common/batch';
 import calf from '../../support/calf';
 import onlineDot from '../../common/onlineDot';
+import {playerIdUrl} from '../../support/constants';
 import querySelectorAll from '../../common/querySelectorAll';
 
 function memberHeader(oldhtml) {
   return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
-    '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
+    '<a href="' + playerIdUrl + calf.membrList[oldhtml].id +
     '">' + oldhtml + '</a> [ <span class="a-reply fshLink" target_player=' +
     oldhtml + '>m</span> ]';
 }

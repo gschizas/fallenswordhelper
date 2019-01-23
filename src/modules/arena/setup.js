@@ -1,19 +1,18 @@
-import {def_table} from '../support/constants';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {imageServer} from '../system/system';
+import indexAjax from '../ajax/indexAjax';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {moveOptions} from './assets';
 import partial from '../common/partial';
-import retryAjax from '../ajax/retryAjax';
 import when from '../common/when';
+import {arenaUrl, def_table} from '../support/constants';
 
 var oldMoves = [];
 var imgNodes;
 var selectRow;
 
 function doPickMove(moveId, slotId) {
-  return retryAjax({
-    url: 'index.php',
+  return indexAjax({
     data: {
       no_mobile: 1,
       cmd: 'arena',
@@ -46,7 +45,7 @@ function newMove(val, ind) {
 }
 
 function pageRefresh() {
-  window.location = 'index.php?cmd=arena&subcmd=setup';
+  window.location = arenaUrl + 'setup';
 }
 
 function changeMoves(newMoves) {
