@@ -1,7 +1,7 @@
 import addCommas from '../../system/addCommas';
 import getValue from '../../system/getValue';
+import indexAjax from '../../ajax/indexAjax';
 import infoBox from '../../common/infoBox';
-import retryAjax from '../../ajax/retryAjax';
 import setValue from '../../system/setValue';
 import {def_fetch_playerStats, def_playerGold} from '../../support/constants';
 
@@ -10,8 +10,7 @@ var sendGoldonWorld;
 
 export function doSendGold() { // jQuery
   if (!sendGoldonWorld) {return;}
-  retryAjax({
-    url: 'index.php',
+  indexAjax({
     data: {
       no_mobile: 1,
       cmd: 'trade',

@@ -1,16 +1,15 @@
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
 import getForage from './getForage';
+import indexAjax from './indexAjax';
 import isObject from '../common/isObject';
 import {now} from '../support/constants';
 import partial from '../common/partial';
-import retryAjax from './retryAjax';
 import setForage from './setForage';
 
 function getGuild(guildId) {
-  return retryAjax({
+  return indexAjax({
     dataType: 'json',
-    url: 'index.php',
     data: {
       cmd: 'export',
       subcmd: 'guild_members',

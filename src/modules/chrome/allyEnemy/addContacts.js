@@ -1,12 +1,17 @@
 import calf from '../../support/calf';
 import formatLastActivity from '../../system/formatLastActivity';
-import {nowSecs} from '../../support/constants';
 import partial from '../../common/partial';
 import {
   enemyBuffCheckOn,
   enemyQuickbuff,
   enemySendMessage
 } from './constants';
+import {
+  nowSecs,
+  playerIdUrl,
+  secureUrl,
+  tradeUrl
+} from '../../support/constants';
 
 export var contactClass = [
   [
@@ -41,12 +46,11 @@ function contactColor(last_login, type) {
 
 function playerName(val, type) {
   return '<a class="player-name tip-static ' +
-    contactColor(val.last_login, type) +
-    '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
-    '<td>Level:</td><td>' + val.level + '</td></tr><tr><td>Last ' +
-    'Activity:</td><td>' + formatLastActivity(val.last_login) +
-    '</td></tr></tbody></table>" href="index.php?cmd=profile&player_id=' +
-    val.id + '">' + val.username + '</a>';
+    contactColor(val.last_login, type) + '" data-tipped="<b>' + val.username +
+    '</b><br><table><tbody><tr><td>Level:</td><td>' + val.level +
+    '</td></tr><tr><td>Last Activity:</td><td>' +
+    formatLastActivity(val.last_login) + '</td></tr></tbody></table>" href="' +
+    playerIdUrl + val.id + '">' + val.username + '</a>';
 }
 
 function doBuffCheck() {
@@ -75,9 +79,8 @@ function doBuffButton() {
 function doSecureButton(val) {
   if (!calf.hideGuildInfoSecureTrade) {
     return '<a class="enemy-secure-trade guild-icon left ' +
-      'guild-minibox-action tip-static" href="index.php?cmd=trade' +
-      '&subcmd=createsecure&target_username=' + val.username +
-      '" data-tipped="Secure Trade"></a>';
+      'guild-minibox-action tip-static" href="' + secureUrl +
+      val.username + '" data-tipped="Secure Trade"></a>';
   }
   return '';
 }
@@ -85,9 +88,8 @@ function doSecureButton(val) {
 function doTradeButton(val) {
   if (!calf.hideGuildInfoTrade) {
     return '<a class="enemy-trade guild-icon left ' +
-      'guild-minibox-action tip-static" href="index.php?cmd=trade' +
-      '&target_player=' + val.username +
-      '" data-tipped="Send Gold/Items/FSP"></a>';
+      'guild-minibox-action tip-static" href="' + tradeUrl +
+      val.username + '" data-tipped="Send Gold/Items/FSP"></a>';
   }
   return '';
 }

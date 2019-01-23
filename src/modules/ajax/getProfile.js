@@ -1,8 +1,7 @@
-import retryAjax from './retryAjax';
+import indexAjax from './indexAjax';
 
 export default function getProfile(username) {
-  return retryAjax({
-    url: 'index.php',
+  return indexAjax({
     data: {
       cmd: 'export',
       subcmd: 'profile',

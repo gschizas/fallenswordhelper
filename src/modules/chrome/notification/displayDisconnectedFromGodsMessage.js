@@ -1,9 +1,10 @@
 import {getElementById} from '../../common/getElement';
 import hideQTip from '../../common/hideQTip';
 import {imageServer} from '../../system/system';
+import indexAjax from '../../ajax/indexAjax';
+import {indexPhp} from '../../support/constants';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import once from '../../common/once';
-import retryAjax from '../../ajax/retryAjax';
 import saveTempleSettings from './saveTempleSettings';
 
 var havePrayedMsg =
@@ -25,7 +26,7 @@ var godsNotification =
   '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
   'style="background-image: url(\'' + imageServer +
   '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
-  '<a href="index.php?cmd=temple">' +
+  '<a href="' + indexPhp + '?cmd=temple">' +
   '<p class="notification-content">Bow down to the gods</p>' +
   '</a></span></li>';
 
@@ -37,7 +38,7 @@ function havePrayed() {
 function prayToGods(e) { // jQuery
   var myGod = e.target.getAttribute('praytype');
   if (!myGod) {return;}
-  retryAjax('index.php?no_mobile=1&cmd=temple&subcmd=pray&type=' + myGod)
+  indexAjax({data: {cmd: 'temple', subcmd: 'pray', type: myGod, no_mobile: 1}})
     .done(havePrayed);
   hideQTip(e.target);
 }

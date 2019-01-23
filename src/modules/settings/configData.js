@@ -6,6 +6,7 @@ import generalPrefs from './generalPrefs';
 import guildPrefs from './guildPrefs';
 import logPrefs from './logPrefs';
 import otherPrefs from './otherPrefs';
+import {playerIdUrl} from '../support/constants';
 import {prefs} from './worldPrefs';
 import profilePrefs from './profilePrefs';
 import questPrefs from './questPrefs';
@@ -33,7 +34,7 @@ function linkToWebsite() {
 }
 
 function coderLink(prev, curr, ind, ary) {
-  var ret = prev + '<a href="index.php?cmd=profile&player_id=' + curr[0] +
+  var ret = prev + '<a href="' + playerIdUrl + curr[0] +
     '">' + curr[1] + '</a>';
   if (ind === ary.length - 2) {
     ret += ' and ';

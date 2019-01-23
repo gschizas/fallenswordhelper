@@ -88,9 +88,9 @@ function creatureLogLink() {
 function newGuildLogLink() {
   if (currentGuildId() && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    insertAfterParent('nav-guild-ledger-guildlog', insertHtmlAfterEnd,
+    insertAfterParent('nav-guild-ledger-advisor', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" ' +
-      'href="index.php' + newGuildLogUrl + '"' +
+      'href="' + newGuildLogUrl + '"' +
       '>New Guild Log</a></li>');
   }
 }

@@ -2,6 +2,7 @@ import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import quickBuffHref from '../common/quickBuffHref';
+import {secureUrl} from '../support/constants';
 import {currentGuildRelationship, guildId} from './profileInjectGuildRel';
 
 function joinGroups() {
@@ -55,8 +56,7 @@ export default function profileInjectQuickButton(avyImg, playerid, playername) {
     '" data-tipped="Go to ' + playername +
     '\'s auctions" style="background-image: url(\'' +
     imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
-  newhtml += '<a class="quickButton tip-static" ' +
-    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+  newhtml += '<a class="quickButton tip-static" href="' + secureUrl +
     playername + '" data-tipped="Create Secure Trade to ' + playername +
     '" style="background-image: url(\'' + imageServer +
     '/temple/2.gif\');"></a>&nbsp;&nbsp;';

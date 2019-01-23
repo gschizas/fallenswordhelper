@@ -12,6 +12,7 @@ import partial from '../../common/partial';
 import {injectTable, playerLevel, playerName, playerRank} from './helpers';
 //#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
+import {indexPhp} from '../../support/constants';
 //#endif
 
 function getTfoot(list) {
@@ -47,7 +48,7 @@ function getData(list, membrList) {
 function summaryLink() {
   var updateInput = getElementsByClassName('custombutton', pCC);
   if (updateInput.length === 0) {return;}
-  insertHtmlAfterEnd(updateInput[0], '<span> <a href="index.php' +
+  insertHtmlAfterEnd(updateInput[0], '<span> <a href="' + indexPhp +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
 }
 

@@ -30,12 +30,24 @@ export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
 export var defenderMultiplier = 0.2;
 export var now = Date.now();
 export var nowSecs = Math.floor(now / 1000);
+
+export var indexPhp = 'index.php';
 export var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
-export var newGuildLogUrl = 'index.php' + newGuildLogLoc;
+export var newGuildLogUrl = indexPhp + newGuildLogLoc;
+export var ahSeachUrl = indexPhp + '?cmd=auctionhouse&search=';
+export var logUrl = indexPhp + '?cmd=log';
+export var doAddIgnore = logUrl + '&subcmd=doaddignore&ignore_username=';
+export var profileUrl = indexPhp + '?cmd=profile';
+export var playerIdUrl = profileUrl + '&player_id=';
+export var tradeUrl = indexPhp + '?cmd=trade&target_player=';
+export var secureUrl = indexPhp +
+  '?cmd=trade&subcmd=createsecure&target_username=';
+export var arenaUrl = indexPhp + '?cmd=arena&subcmd=';
+
+export var guideUrl = 'https://guide.fallensword.com/index.php?cmd=';
+
 export var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
-export var guideUrl = 'https://guide.fallensword.com/index.php?&cmd=';
-export var ahSeachUrl = 'index.php?cmd=auctionhouse&search=';
 
 export var def_afterUpdateActionlist = 'after-update.actionlist';
 export var def_playerBuffs = 'buffs.player';

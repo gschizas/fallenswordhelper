@@ -4,7 +4,6 @@ import createDocument from '../../system/createDocument';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import {lastActivityRE} from '../../support/constants';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import pageLayout from './pageLayout';
@@ -18,6 +17,7 @@ import stringSort from '../../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
 import {calcMinLvl, setMinLvl} from './minLvl';
 import {getBufferProgress, updateProgress} from './bufferProgress';
+import {lastActivityRE, profileUrl} from '../../support/constants';
 
 var findBuffNicks;
 var findBuffMinCastLevel;
@@ -167,7 +167,7 @@ function findBuffsParseProfilePage(responseText) {
 function findBuffsParseProfilePageStart() { // Legacy
   // if option enabled then parse profiles
   profilePagesToSearch = [];
-  profilePagesToSearch.push('index.php?cmd=profile'); // ???
+  profilePagesToSearch.push(profileUrl); // ???
   var extraProfileArray = extraProfile.split(',');
   extraProfileArray.forEach(function(el) {
     profilePagesToSearch.push('index.php?cmd=findplayer' + // ???

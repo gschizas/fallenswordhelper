@@ -14,10 +14,10 @@ function getPlayer(playerAry) { // Legacy
 function msgDoesNotIncludePlayer(aRow) {
   var messageHTML = aRow.cells[2].innerHTML;
   var doublerPlayerMessageRE =
-    /member\s<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
+    /member\s<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
   var secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
   var singlePlayerMessageRE =
-    /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
+    /<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
   var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
   var firstPlayerID = getPlayer(firstPlayer);
   var secondPlayerID = getPlayer(secondPlayer);

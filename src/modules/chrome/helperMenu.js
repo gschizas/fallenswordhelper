@@ -19,6 +19,7 @@ import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
 import on from '../common/on';
 import once from '../common/once';
+import {playerIdUrl} from '../support/constants';
 import {sendEvent} from '../support/fshGa';
 import {injectAuctionSearch, injectQuickLinkManager} from
   '../notepad/lists/lists';
@@ -42,7 +43,7 @@ var helperMenuBlob =
   '<li><span class="fshLink">FS Box Log</span></li>' +
   '</ul><h3>FSH developer quick links</h3><ul>' +
   '<li><span class="a-reply" target_player="PointyHair">PM</span> ' +
-  '<a href="index.php?cmd=profile&player_id=1963510">PointyHair</a></li>' +
+  '<a href="' + playerIdUrl + '1963510">PointyHair</a></li>' +
   '</ul></div>';
 
 function toggleMenu(evt) {
