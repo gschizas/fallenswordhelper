@@ -467,20 +467,49 @@
   var now = Date.now();
   var nowSecs = Math.floor(now / 1000);
 
-  var indexPhp = 'index.php';
-  var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
-  var newGuildLogUrl = indexPhp + newGuildLogLoc;
-  var ahSeachUrl = indexPhp + '?cmd=auctionhouse&search=';
-  var logUrl = indexPhp + '?cmd=log';
-  var doAddIgnore = logUrl + '&subcmd=doaddignore&ignore_username=';
-  var profileUrl = indexPhp + '?cmd=profile';
-  var playerIdUrl = profileUrl + '&player_id=';
-  var tradeUrl = indexPhp + '?cmd=trade&target_player=';
-  var secureUrl = indexPhp +
-    '?cmd=trade&subcmd=createsecure&target_username=';
-  var arenaUrl = indexPhp + '?cmd=arena&subcmd=';
+  var def_joinallgroupsundersize = 'joinallgroupsundersize';
 
-  var guideUrl = 'https://guide.fallensword.com/index.php?cmd=';
+  var indexPhp = 'index.php';
+  var def_cmd = '?cmd=';
+  var cmdUrl = indexPhp + def_cmd;
+  var def_subcmd = '&subcmd=';
+  var def_targetUsername = '&target_username=';
+  var notepadBlank = def_cmd + 'notepad&blank=1' + def_subcmd;
+  var newGuildLogLoc = notepadBlank + 'newguildlog';
+  var newGuildLogUrl = indexPhp + newGuildLogLoc;
+  var auctionhouseUrl = cmdUrl + 'auctionhouse';
+  var ahSearchUrl = auctionhouseUrl + '&search=';
+  var logUrl = cmdUrl + 'log';
+  var doAddIgnore = logUrl + def_subcmd + 'doaddignore&ignore_username=';
+  var profileUrl = cmdUrl + 'profile';
+  var playerIdUrl = profileUrl + '&player_id=';
+  var dropItemsUrl = profileUrl + def_subcmd + 'dropitems';
+  var tradeUrl = cmdUrl + 'trade&target_player=';
+  var secureUrl = cmdUrl + 'trade' + def_subcmd + 'createsecure' +
+    def_targetUsername;
+  var arenaUrl = cmdUrl + 'arena' + def_subcmd;
+  var notepadBlankUrl = indexPhp + notepadBlank;
+  var auctionSearchUrl = notepadBlankUrl + 'auctionsearch';
+  var pointsUrl = cmdUrl + 'points';
+  var guildSubcmdUrl = cmdUrl + 'guild' + def_subcmd;
+  var guildLogUrl = guildSubcmdUrl + 'log';
+  var scouttowerUrl = guildSubcmdUrl + 'scouttower';
+  var groupsSubcmdUrl = guildSubcmdUrl + 'groups&subcmd2=';
+  var recallUserUrl = guildSubcmdUrl + 'inventory&subcmd2=report&user=';
+  var joinallUrl = groupsSubcmdUrl + 'joinall';
+  var joinUnderUrl = groupsSubcmdUrl + def_joinallgroupsundersize;
+  var worldUrl = cmdUrl + 'world';
+  var searchPlayerUrl = cmdUrl + 'findplayer';
+  var showPlayerUrl = searchPlayerUrl +
+    '&search_show_first=1&search_username=';
+  var blacksmithUrl = cmdUrl + 'blacksmith';
+  var quickbuffUrl = cmdUrl + 'quickbuff';
+  var composingUrl = cmdUrl + 'composing';
+  var attackplayerUrl = cmdUrl + 'attackplayer' + def_targetUsername;
+  var updateArchiveUrl = cmdUrl + def_subcmd + 'viewupdatearchive';
+  var archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
+
+  var guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
 
   var beginFolderSpanElement =
     '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
@@ -983,7 +1012,7 @@
   }
 
   function toSettings(el) {
-    el.innerHTML = '<a href="index.php?cmd=settings">Game Help</a>';
+    el.innerHTML = '<a href="' + cmdUrl + 'settings">Game Help</a>';
   }
 
   function gameHelpLink() {
@@ -1261,9 +1290,8 @@
   function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
     var passthru = '';
     if (buffList) {passthru = '&blist=' + buffList;}
-    return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-      'quickbuff&tid=' + aPlayerId + passthru +
-      '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
+    return 'href=\'javascript:window.openWindow("' + quickbuffUrl + '&tid=' +
+      aPlayerId + passthru + '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
   }
 
   function getElementsByClassName(names, element) {
@@ -1352,25 +1380,27 @@
     gvgUpperLevel = calcUpperGvgLevel(levelToTest);
   }
 
+  function searchUrl(min, max, guild) {
+    return searchPlayerUrl +
+      '&search_level_min=' + min +
+      '&search_level_max=' + max +
+      '&search_in_guild=' + guild;
+  }
+
   function injectFindPlayer() { // Bad jQuery
     if (jQueryNotPresent()) {return;}
     calculateBoundaries();
     var findPlayerButton = $('input[value="Find Player"]');
-    findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
-      'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
-      pvpLowerLevel + '&search_level_max=' +
-      pvpUpperLevel + '&search_in_guild=-1"><span ' +
-      'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
-      'index.php?cmd=findplayer&search_active=1&search_username=&' +
-      'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
-      gvgUpperLevel + '&search_in_guild=1"><span style="color:blue;">' +
-      'Get GvG targets</span></a>');
+    findPlayerButton.parent().append('&nbsp;<a class="fshBlue" href="' +
+      searchUrl(pvpLowerLevel, pvpUpperLevel, '-1') +
+      '">Get PvP targets</a>&nbsp;<a class="fshBlue" href="' +
+      searchUrl(gvgLowerLevel, gvgUpperLevel, '1') +
+      '">Get GvG targets</a>');
 
     $('table[class="width_full"]').find('a[href*="player_id"]')
       .each(function(i, e) {
         var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
-        $(e).after('<a style="color:blue;font-size:10px;" ' +
-          quickBuffHref(id[1]) + '>[b]</a>');
+        $(e).after(' <a class="fshBf" ' + quickBuffHref(id[1]) + '>[b]</a>');
       });
   }
 
@@ -1887,14 +1917,6 @@
       '</div><table id="fshInv" class="allow stripe hover"></table>');
   }
 
-  function resetEvt(context) {
-    setValue('onlinePlayerMinLvl', defaults.onlinePlayerMinLvl);
-    setValue('onlinePlayerMaxLvl', defaults.onlinePlayerMaxLvl);
-    $('#fshMinLvl', context).val(defaults.onlinePlayerMinLvl);
-    $('#fshMaxLvl', context).val(defaults.onlinePlayerMaxLvl);
-    tableDraw();
-  }
-
   var paused$1 = true;
   var queue = [];
 
@@ -1964,6 +1986,30 @@
     });
   }
 
+  function indexAjax(options) {
+    mixin(options, {url: indexPhp, data: {no_mobile: 1}});
+    return retryAjax(options);
+  }
+
+  function indexAjaxData(data) {
+    return indexAjax({data: data});
+  }
+
+  function onlinePlayersPage(page) {
+    return indexAjaxData({
+      cmd: 'onlineplayers',
+      page: page
+    });
+  }
+
+  function resetEvt(context) {
+    setValue('onlinePlayerMinLvl', defaults.onlinePlayerMinLvl);
+    setValue('onlinePlayerMaxLvl', defaults.onlinePlayerMaxLvl);
+    $('#fshMinLvl', context).val(defaults.onlinePlayerMinLvl);
+    $('#fshMaxLvl', context).val(defaults.onlinePlayerMaxLvl);
+    tableDraw();
+  }
+
   var context;
   var onlinePlayers;
   var onlinePages;
@@ -1979,7 +2025,7 @@
   function checkLastPage() {
     if (onlinePages === lastPage) {
       setForage('fsh_onlinePlayers', onlinePlayers);
-      gotOnlinePlayers();
+      gotOnlinePlayers(onlinePlayers);
     }
   }
 
@@ -2018,8 +2064,7 @@
   function getOtherPages(callback, input) {
     lastPage = getLastPage(input);
     for (var i = 2; i <= lastPage; i += 1) {
-      retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' + i)
-        .done(callback);
+      onlinePlayersPage(i).done(callback);
     }
   }
 
@@ -2043,8 +2088,7 @@
     $('#fshRefresh', context).hide();
     onlinePages = 0;
     onlinePlayers = {};
-    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
-      .done(getOnlinePlayers);
+    onlinePlayersPage(1).done(getOnlinePlayers);
     setValue('lastOnlineCheck', now);
     updateStatus('Parsing online players...');
   }
@@ -2342,7 +2386,7 @@
     recipebook = {};
     recipebook.recipe = [];
     output.innerHTML = '<br>Parsing inventing screen ...<br>';
-    retryAjax('index.php?no_mobile=1&cmd=inventing')
+    indexAjaxData({cmd: 'inventing'})
       .pipe(partial(processFirstPage, output, recipebook))
       .done(displayStuff);
   }
@@ -2421,8 +2465,8 @@
     return partial(handleEvent, passingTest, evtAry);
   }
 
-  function indexAjax(options) {
-    return retryAjax(extend({url: indexPhp}, options));
+  function indexAjaxJson(data) {
+    return indexAjax({data: data, dataType: 'json'});
   }
 
   function getInventory() {
@@ -2430,10 +2474,7 @@
     if (calf.subcmd === 'guildinvmgr') {
       subcmd = {subcmd: 'guild_store', inc_tagged: '1'};
     }
-    return indexAjax({
-      dataType: 'json',
-      data: extend({cmd: 'export'}, subcmd)
-    });
+    return indexAjaxJson(extend({cmd: 'export'}, subcmd));
   }
 
   function outputResult(result, handle) {
@@ -2706,14 +2747,11 @@
   }
 
   function equipItem(backpackInvId) {
-    return indexAjax({
-      data: {
-        cmd: 'profile',
-        subcmd: 'equipitem',
-        inventory_id: backpackInvId,
-        ajax: 1
-      },
-      dataType: 'json'
+    return indexAjaxJson({
+      cmd: 'profile',
+      subcmd: 'equipitem',
+      inventory_id: backpackInvId,
+      ajax: 1
     }).done(dialog);
   }
 
@@ -2740,7 +2778,7 @@
   }
 
   function ahLink(searchname, nickname) {
-    return '<a href="' + ahSeachUrl + searchname +
+    return '<a href="' + ahSearchUrl + searchname +
       '">' + nickname + '</a>';
   }
 
@@ -2781,7 +2819,7 @@
     // TODO this is going to need significant rebuild
     return '<table width="100%" cellspacing="2" cellpadding="2"><thead>' +
       '<tr><th colspan="5" class="fshCenter">Items from ' +
-      '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
+      '<a href="' + auctionSearchUrl + '">' +
       'AH Quick Search</a> found in your inventory</th></tr>' +
       '<tr><th>Name</th><th>Nick Name</th><th>Inv Count</th>' +
       '<th>AH Min Price</th><th>AH BuyNow Price</th></tr></thead><tbody>' +
@@ -2793,7 +2831,7 @@
       displayNotFound(quickSL) +
       '</td></tr><tr><td colspan="5"><hr></td></tr></tbody>' +
       '<thead><tr><th colspan="5" class="fshCenter">Items NOT from ' +
-      '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
+      '<a href="' + auctionSearchUrl + '">' +
       'AH Quick Search</a> found in your inventory</td></thead><tbody>' +
       // show inv & counter for item with nickname NOT found
       displayOtherCount(invCount) +
@@ -3509,7 +3547,7 @@
       fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
       tags: ['text', 'text', 'text', 'checkbox'],
       url: ['', '',
-        'index.php?cmd=auctionhouse&amp;type=-1&amp;search=@replaceme@', ''],
+        ahSearchUrl + '@replaceme@', ''],
       currentItems: getValueJSON('quickSearchList'),
       gmname: 'quickSearchList',
       categoryField: 'category',
@@ -3827,6 +3865,13 @@
     {name: 'Teleport',            stam: 40, lvl: 2500, id: 168, nicks: 'teleport'},
     {name: 'Invigorate',          stam: 40, lvl: 3000, id: 169, nicks: 'invigorate'}
   ];
+
+  function guildManage() {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'manage'
+    });
+  }
 
   function header(o) {
     return '<tr><td rowspan="2" colspan="2" class="headCell"><h1>Find ' +
@@ -4260,8 +4305,7 @@
   function nextPage(curPage, maxPage, callback) {
     var newPage = calcNextPage(curPage, maxPage);
     updateProgress('Parsing online page ' + curPage + ' ...');
-    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
-      newPage.toString()).done(callback);
+    onlinePlayersPage(newPage).done(callback);
   }
 
   function findBuffsParseOnlinePlayers(responseText) { // Legacy
@@ -4284,8 +4328,7 @@
     onlinePlayersSetting =
       parseInt(getElementById('onlinePlayers').value, 10);
     if (onlinePlayersSetting !== 0) {
-      retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
-        .done(findBuffsParseOnlinePlayers);
+      onlinePlayersPage(1).done(findBuffsParseOnlinePlayers);
     } else {
       findBuffsParsePlayersForBuffs();
     }
@@ -4332,9 +4375,7 @@
     profilePagesToSearch.push(profileUrl); // ???
     var extraProfileArray = extraProfile.split(',');
     extraProfileArray.forEach(function(el) {
-      profilePagesToSearch.push('index.php?cmd=findplayer' + // ???
-        '&search_active=1&search_level_max=&search_level_min=' +
-        '&search_username=' + el + '&search_show_first=1');
+      profilePagesToSearch.push(showPlayerUrl + el);
     });
     profilePagesToSearchProcessed = 0;
     if (getElementById('alliesEnemies').checked) {
@@ -4380,8 +4421,7 @@
     extraProfile = getElementById('extraProfile').value;
     setValue('extraProfile', extraProfile);
     // get list of players to search, starting with guild>manage page
-    retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=manage')
-      .done(findBuffsParseGuildManagePage);
+    guildManage().done(findBuffsParseGuildManagePage);
   }
 
   function thisBuff(selectedBuff, el) {return selectedBuff === el.id;}
@@ -4614,7 +4654,7 @@
   }
 
   function makeLink(el) {
-    el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">Chat</a>';
+    el.innerHTML = '<a href="' + guildSubcmdUrl + 'chat">Chat</a>';
   }
 
   function updateChatLink() {
@@ -4662,7 +4702,7 @@
   }
 
   var composeMsg =
-    '<li class="notification"><a href="index.php?cmd=composing"><span' +
+    '<li class="notification"><a href="' + composingUrl + '"><span' +
     ' class="notification-icon"></span><p class="notification-content">' +
     'Composing to do</p></a></li>';
 
@@ -4748,7 +4788,7 @@
     '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
     'style="background-image: url(\'' + imageServer +
     '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
-    '<a href="' + indexPhp + '?cmd=temple">' +
+    '<a href="' + cmdUrl + 'temple">' +
     '<p class="notification-content">Bow down to the gods</p>' +
     '</a></span></li>';
 
@@ -4760,7 +4800,7 @@
   function prayToGods(e) { // jQuery
     var myGod = e.target.getAttribute('praytype');
     if (!myGod) {return;}
-    indexAjax({data: {cmd: 'temple', subcmd: 'pray', type: myGod, no_mobile: 1}})
+    indexAjaxData({cmd: 'temple', subcmd: 'pray', type: myGod})
       .done(havePrayed);
     hideQTip(e.target);
   }
@@ -4797,7 +4837,7 @@
 
   function doWeNeedToParse() {
     if (checkLastUpdate(getValue('lastTempleCheck'))) {
-      indexAjax({data: {cmd: 'temple', no_mobile: 1}}).done(parseTemplePage);
+      indexAjaxData({cmd: 'temple'}).done(parseTemplePage);
     } else if (getValue('needToPray')) {
       displayDisconnectedFromGodsMessage();
     }
@@ -4809,19 +4849,23 @@
     doWeNeedToParse();
   }
 
+  function notGoldUpgradesPage() {
+    return location.search.indexOf('cmd=points&type=1') === -1;
+  }
+
   var goldUpgradeMsg =
-  '<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
+  '<li class="notification"><a href="' + pointsUrl + '&type=1"><span' +
   ' class="notification-icon"></span><p class="notification-content">Up' +
   'grade stamina with gold</p></a></li>';
 
   function displayUpgradeMsg() {
-    if (location.search.indexOf('cmd=points&type=1') === -1) {
+    if (notGoldUpgradesPage()) {
       insertHtmlAfterBegin(getElementById('notifications'), goldUpgradeMsg);
     }
   }
 
   function findDoc(data) {
-    if (location.search.indexOf('cmd=points&type=1') === -1) {
+    if (notGoldUpgradesPage()) {
       return createDocument(data);
     }
     var boxes = querySelectorAll('#pCC input[name="quantity"]');
@@ -4852,10 +4896,17 @@
     }
   }
 
+  function upgradesGold() {
+    return indexAjaxData({
+      cmd: 'points',
+      type: 1
+    });
+  }
+
   function checkLastUpgrade() {
     var lastUpgradeCheck = getValue('lastUpgradeCheck');
     if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
-    retryAjax('index.php?no_mobile=1&cmd=points&type=1').done(function(data) {
+    upgradesGold().done(function(data) {
       add(3, parseGoldUpgrades, [data]);
     });
   }
@@ -4869,7 +4920,7 @@
   }
 
   function injectUpgradeAlert() { // jQuery
-    if (jQueryPresent() && location.search.indexOf('cmd=points&type=1') === -1) {
+    if (jQueryPresent() && notGoldUpgradesPage()) {
       notUpgradesPage();
     }
   }
@@ -5012,13 +5063,10 @@
   }
 
   function getProfile$1(username) {
-    return indexAjax({
-      data: {
-        cmd: 'export',
-        subcmd: 'profile',
-        player_username: username
-      },
-      dataType: 'json'
+    return indexAjaxJson({
+      cmd: 'export',
+      subcmd: 'profile',
+      player_username: username
     });
   }
 
@@ -5054,7 +5102,7 @@
   }
 
   function openQuickBuffByName(aPlayerName) {
-    window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
+    window.openWindow(quickbuffUrl + '&t=' + aPlayerName,
       'fsQuickBuff', 618, 1000, ',scrollbars');
   }
 
@@ -5167,6 +5215,13 @@
     myStats(false).done(nextTick);
   }
 
+  function bountyPage(page) {
+    return indexAjaxData({
+      cmd: 'bounty',
+      page: page
+    });
+  }
+
   function rewardType(theCells) {
     return theCells[2].firstChild.firstChild.firstChild.firstChild
       .nextSibling.firstChild.title;
@@ -5192,7 +5247,6 @@
   var bwNeedsRefresh;
   var wantedNames;
   var wantedArray;
-  var bountyUrl = 'index.php?no_mobile=1&cmd=bounty&page=';
 
   function hasActiveBounties(activeTable) {
     return !/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML);
@@ -5432,8 +5486,7 @@
     if (calf.enableWantedList) {
       getWantedBountyList(doc);
       if (curPage < maxPage) {
-        retryAjax(bountyUrl + (curPage + 1).toString())
-          .done(parseBountyPageForWorld);
+        bountyPage(curPage + 1).done(parseBountyPageForWorld);
       } else {
         injectWantedList();
       }
@@ -5467,7 +5520,7 @@
     invalidateCache();
     if (needsRefresh()) {
       doRefresh();
-      retryAjax(bountyUrl + '1').done(parseBountyPageForWorld);
+      bountyPage(1).done(parseBountyPageForWorld);
     } else {
       notRefreshed(enableActiveList, enableWantedList);
     }
@@ -5564,7 +5617,7 @@
     return callApp(extend({cmd: 'guild'}, data));
   }
 
-  function guildManage() {
+  function guildManage$1() {
     return guild({subcmd: 'manage'});
   }
 
@@ -5667,7 +5720,7 @@
       oldArchive = {lastUpdate: 0, members: {}};
     }
     if (nowSecs > fallback(oldArchive.lastUpdate, 0) + 300) { // 5 mins - probably want to increase
-      guildManage().done(gotGuild);
+      guildManage$1().done(gotGuild);
     }
   }
 
@@ -5701,7 +5754,7 @@
   function changeGuildLogHREF() {
     if (!getValue('useNewGuildLog')) {return;}
     var guildLogNodes = querySelectorArray(
-      '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
+      '#pCL a[href="' + guildLogUrl + '"]');
     if (guildLogNodes.length > 0) {gotGuildLogNodes(guildLogNodes);}
   }
 
@@ -5821,15 +5874,13 @@
 
   function injectHomePageTwoLink() { // Pref
     var archiveLink = document.querySelector(
-      '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
+      '#pCC a[href="' + updateArchiveUrl + '"]');
     if (!archiveLink) {return;}
-    insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
-      '&subcmd=viewupdatearchive&subcmd2=&page=2&search_text=">' +
-      'View Updates Page 2</a>');
-    archiveLink = document.querySelector(
-      '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
-    insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
-      '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
+    insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="' + updateArchiveUrl +
+      '&page=2">View Updates Page 2</a>');
+    archiveLink = document.querySelector('#pCC a[href="' + archiveUrl + '"]');
+    insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="' + archiveUrl +
+      '&page=2">View News Page 2</a>');
     lookForPvPLadder(); // Pref
     addUfsgLinks(); // Pref
   }
@@ -5838,15 +5889,15 @@
     if (el.textContent.indexOf('New attack group created.') === -1) {return;}
     var groupJoinHTML = '';
     if (!getValue('enableMaxGroupSizeToJoin')) {
-      groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
-        'subcmd2=joinall"><span class="notification-icon"></span>' +
-        '<p class="notification-content">Join all attack groups.</p></a>';
+      groupJoinHTML = '<a href="' + joinallUrl + '"><span ' +
+        'class="notification-icon"></span><p class="notification-content">' +
+        'Join all attack groups.</p></a>';
     } else {
       var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-      groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
-        'subcmd2=joinallgroupsundersize"><span class="notification-icon">' +
-        '</span><p class="notification-content">Join all attack groups ' +
-        'less than size ' + maxGroupSizeToJoin + '.</p></a>';
+      groupJoinHTML = '<a href="' + joinUnderUrl + '"><span ' +
+        'class="notification-icon"></span><p class="notification-content">' +
+        'Join all attack groups less than size ' + maxGroupSizeToJoin +
+        '.</p></a>';
     }
     insertHtmlAfterEnd(el, '<li class="notification">' + groupJoinHTML + '</li>');
   }
@@ -6035,8 +6086,8 @@
     if (currentGuildId()) {
       insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
         '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-        'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
-        '&subcmd=guildinvmgr">Guild Inventory</a></li>');
+        'guild-guildinvmanager" href="' + notepadBlankUrl +
+        'guildinvmgr">Guild Inventory</a></li>');
     }
   }
 
@@ -6044,11 +6095,11 @@
     anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
     insertAfterParent('nav-character-log', insertHtmlAfterEnd,
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-medalguide" href="index.php?cmd=profile&subcmd=' +
+      'character-medalguide" href="' + profileUrl + def_subcmd +
       'medalguide">Medal Guide</a></li>' +
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=invmanagernew">Inventory Manager</a></li>');
+      'character-invmanager" href="' + notepadBlankUrl +
+      'invmanagernew">Inventory Manager</a></li>');
     buffLogLink();
     combatLogLink();
     creatureLogLink();
@@ -6070,8 +6121,8 @@
   function topRatedLink() {
     insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
-      'Top 250 Players</a></li>');
+      'toprated-top250" href="' + cmdUrl + 'toprated' + def_subcmd +
+      'xp">Top 250 Players</a></li>');
   }
 
   function doAccordion() {
@@ -6350,9 +6401,8 @@
     var spoils = getElementById('minibox-spoilsofwar');
     if (spoils) {
       var parent = spoils.children[1].children[0];
-      insertHtmlBeforeEnd(parent, '&nbsp;' +
-        '<a href="index.php?cmd=guild&subcmd=scouttower" ' +
-        'class="tip-static" data-tipped="View Scout Report">' +
+      insertHtmlBeforeEnd(parent, '&nbsp;<a href="' + scouttowerUrl +
+        '" class="tip-static" data-tipped="View Scout Report">' +
         '<img id="fshScoutTower" ' +
         'src="https://cdn.fallensword.com/structures/27.gif"></a>');
     }
@@ -6372,11 +6422,11 @@
 
   function statbar() {
     statbarWrapper(profileUrl, 'statbar-character');
-    statbarWrapper('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
-    statbarWrapper('index.php?cmd=blacksmith', 'statbar-equipment');
-    statbarWrapper('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
-    statbarWrapper('index.php?cmd=points', 'statbar-fsp');
-    statbarWrapper('index.php?cmd=bank', 'statbar-gold');
+    statbarWrapper(pointsUrl + def_subcmd + 'reserve', 'statbar-stamina');
+    statbarWrapper(blacksmithUrl, 'statbar-equipment');
+    statbarWrapper(dropItemsUrl, 'statbar-inventory');
+    statbarWrapper(pointsUrl, 'statbar-fsp');
+    statbarWrapper(cmdUrl + 'bank', 'statbar-gold');
   }
 
   function priorityThree() {
@@ -6582,7 +6632,7 @@
   function backpack() {
     keyHandlerEvent('backpack');
     expandMenu('2');
-    location.href = 'index.php?cmd=profile&subcmd=dropitems';
+    location.href = dropItemsUrl;
   }
 
   function view() {
@@ -6607,8 +6657,8 @@
     if (goodData(itemIndex, json)) {
       var cbsIndex = json.r.equip_sets[itemIndex].id;
       expandMenu('2');
-      location.href = 'index.php?cmd=profile&combatSetId=' + cbsIndex +
-        '&subcmd=managecombatset&submit=Use';
+      location.href = profileUrl + def_subcmd +
+        'managecombatset&submit=Use&combatSetId=' + cbsIndex;
     }
   }
 
@@ -6620,8 +6670,7 @@
   function createGroup() {
     keyHandlerEvent('createGroup');
     expandMenu('4');
-    location.href =
-      'index.php?cmd=guild&subcmd=groups&subcmd2=create';
+    location.href = groupsSubcmdUrl + 'create';
   }
 
   function notWorld(type, href) {
@@ -6633,7 +6682,7 @@
 
   function doRepair() {
     // do not use repair link for new map
-    notWorld('doRepair', 'index.php?cmd=blacksmith&subcmd=repairall');
+    notWorld('doRepair', blacksmithUrl + def_subcmd + 'repairall');
   }
 
   function infoBox(documentText) {
@@ -6656,15 +6705,12 @@
 
   function doSendGold() { // jQuery
     if (!sendGoldonWorld) {return;}
-    indexAjax({
-      data: {
-        no_mobile: 1,
-        cmd: 'trade',
-        subcmd: 'sendgold',
-        xc: window.ajaxXC,
-        target_username: $('#HelperSendTo').html(),
-        gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
-      }
+    indexAjaxData({
+      cmd: 'trade',
+      subcmd: 'sendgold',
+      xc: window.ajaxXC,
+      target_username: $('#HelperSendTo').html(),
+      gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
     }).done(function(data) {
       var info = infoBox(data);
       if (info === 'You successfully sent gold!' || info === '') {
@@ -6725,17 +6771,16 @@
   function gotoGuild() {
     keyHandlerEvent('gotoGuild');
     expandMenu('4');
-    location.href = 'index.php?cmd=guild&subcmd=manage';
+    location.href = guildSubcmdUrl + 'manage';
   }
 
   function joinAllGroup() {
     keyHandlerEvent('joinAllGroup');
     expandMenu('4');
     if (!getValue('enableMaxGroupSizeToJoin')) {
-      location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
+      location.href = joinallUrl;
     } else {
-      location.href =
-        'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize';
+      location.href = joinUnderUrl;
     }
   }
 
@@ -6765,7 +6810,7 @@
 
   function toWorld() {
     // do not use for new map
-    notWorld('toWorld', 'index.php?cmd=world');
+    notWorld('toWorld', worldUrl);
   }
 
   var keyLookup = [
@@ -7239,14 +7284,11 @@
   var selectRow;
 
   function doPickMove(moveId, slotId) {
-    return indexAjax({
-      data: {
-        no_mobile: 1,
-        cmd: 'arena',
-        subcmd: 'dopickmove',
-        move_id: moveId,
-        slot_id: slotId
-      }
+    return indexAjaxData({
+      cmd: 'arena',
+      subcmd: 'dopickmove',
+      move_id: moveId,
+      slot_id: slotId
     });
   }
 
@@ -7417,9 +7459,10 @@
     var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
     cancelButton.outerHTML = '<img src="' + imageServer +
       '/skin/loading.gif" width="14" height="14">';
-    return retryAjax({
-      url: 'index.php?no_mobile=1&cmd=auctionhouse&subcmd=cancel',
-      data: {auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]}
+    return indexAjaxData({
+      cmd: 'auctionhouse',
+      subcmd: 'cancel',
+      auction_id: /inv_id=(\d+)/.exec(itemImage.dataset.tipped)[1]
     });
   }
 
@@ -7467,6 +7510,18 @@
     quickcreate: {'-': quickCreate}
   };
 
+  function doBreakdown(selectedList) {
+    return indexAjax({
+      type: 'POST',
+      data: {
+        cmd: 'composing',
+        subcmd: 'dobreakdown',
+        item_list: selectedList
+      },
+      dataType: 'json'
+    });
+  }
+
   var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
   var disableBreakdownPrompts;
   var selectedList = [];
@@ -7508,18 +7563,16 @@
     setTimeout(fadeAway, 5000);
   }
 
+  function handleResponse(response) {
+    if (response.error !== 0) {
+      showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
+    } else {
+      window.location = composingUrl + def_subcmd + 'breakdown&m=1';
+    }
+  }
+
   function breakItems() { // jQuery.min
-    return retryAjax({
-      type: 'POST',
-      url: 'index.php?cmd=composing&subcmd=dobreakdown',
-      data: {'item_list[]': selectedList},
-      dataType: 'json'
-    }).done(function(response) {
-      if (response.error !== 0) {
-        showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
-      }
-      window.location = 'index.php?cmd=composing&subcmd=breakdown&m=1';
-    });
+    return doBreakdown(selectedList).done(handleResponse);
   }
 
   function validBreakEvent(evt) {
@@ -7998,13 +8051,10 @@
   }
 
   function getGuild(guildId) {
-    return indexAjax({
-      dataType: 'json',
-      data: {
-        cmd: 'export',
-        subcmd: 'guild_members',
-        guild_id: guildId
-      }
+    return indexAjaxJson({
+      cmd: 'export',
+      subcmd: 'guild_members',
+      guild_id: guildId
     });
   }
 
@@ -8259,8 +8309,8 @@
   function summaryLink() {
     var updateInput = getElementsByClassName('custombutton', pCC);
     if (updateInput.length === 0) {return;}
-    insertHtmlAfterEnd(updateInput[0], '<span> <a href="' + indexPhp +
-      '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
+    insertHtmlAfterEnd(updateInput[0], '<span> <a href="' + cmdUrl +
+      'guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
   }
 
   function injectAdvisorDaily(list, membrList) {
@@ -8329,10 +8379,9 @@
   }
 
   function getMercStats() {
-    return indexAjax({
+    return indexAjaxData({
       cmd: 'guild',
-      subcmd: 'mercs',
-      no_mobile: '1'
+      subcmd: 'mercs'
     }).pipe(parseMercStats);
   }
 
@@ -8577,8 +8626,12 @@
   function filterMercs(e) {return !e.includes('#000099');}
 
   function joinGroup(groupID, container) { // jQuery.min
-    return retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=groups' +
-      '&subcmd2=join&group_id=' + groupID).done(function() {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'groups',
+      subcmd2: 'join',
+      group_id: groupID
+    }).done(function() {
       container.innerHTML = '<span class="fshXSmall fshBlue" ' +
         'style="line-height: 19px;">Joined</span>';
     });
@@ -8625,7 +8678,7 @@
 
     fetchGroupStatsButton(buttonRow);
 
-    if (calf.subcmd2 === 'joinallgroupsundersize') {
+    if (calf.subcmd2 === def_joinallgroupsundersize) {
       joinAllGroupsUnderSize();
     }
   }
@@ -8683,7 +8736,7 @@
   }
 
   function guildMailboxTake(href) {
-    return retryAjax({url: href}).pipe(translateReturnInfo).done(dialog);
+    return retryAjax(href).pipe(translateReturnInfo).done(dialog);
   }
 
   function takeResult(self, data) {
@@ -9320,12 +9373,17 @@
       changeOnlineDot);
   }
 
+  function conflicts(page) {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'conflicts',
+      page: page
+    });
+  }
+
   function myRows(cols, skip) {
     return function(el, i) {return el.children.length === cols && i > skip;};
   }
-
-  var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
-  var ajaxUrl = conflictUrl + '&no_mobile=1';
 
   function makeCell(newRow, html) {
     newRow.insertCell(-1).innerHTML = html;
@@ -9338,8 +9396,8 @@
   }
 
   function conflictHeader(insertHere) {
-    buildRow(insertHere,
-      '<a href="' + conflictUrl + '">Active Conflicts</a>', 'Score');
+    buildRow(insertHere, '<a href="' + guildSubcmdUrl +
+      'conflicts">Active Conflicts</a>', 'Score');
   }
 
   function conflictRow(insertHere, aRow) {
@@ -9368,8 +9426,7 @@
   }
 
   function getNextPage(curPage, fn, callback) {
-    retryAjax(ajaxUrl + 'page=' + (curPage + 1).toString())
-      .done(partial(fn, callback));
+    conflicts(curPage + 1).done(partial(fn, callback));
   }
 
   function gotConflictInfo(callback, responseText) { // Legacy
@@ -9388,7 +9445,7 @@
     var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
       .firstChild.nextSibling;
     if (statCtrl) {
-      retryAjax(ajaxUrl).done(partial(gotConflictInfo, {node: statCtrl}));
+      conflicts(1).done(partial(gotConflictInfo, {node: statCtrl}));
     }
   }
 
@@ -9851,8 +9908,7 @@
     var getLi = getElementsByTagName('li', leftHandSideColumnTable);
     var selfRecall = getLi[getLi.length - 1].parentNode;
     insertHtmlBeforeEnd(selfRecall,
-      '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
-      'user=' + playerName() +
+      '<li><a href="' + recallUserUrl + playerName() +
       '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
   }
 
@@ -9902,7 +9958,6 @@
     depoPos: 2,
     balPos: 1,
     data: {
-      no_mobile: 1,
       cmd: 'bank',
       subcmd: 'transaction'
     },
@@ -9914,7 +9969,6 @@
     depoPos: 3,
     balPos: 2,
     data: {
-      no_mobile: 1,
       cmd: 'guild',
       subcmd: 'bank',
       subcmd2: 'transaction'
@@ -9990,7 +10044,7 @@
   }
 
   function doAjax$2(oData) {
-    indexAjax({data: oData}).done(transResponse);
+    indexAjaxData(oData).done(transResponse);
   }
 
   function bankDeposit(e) { // jQuery
@@ -10016,7 +10070,7 @@
   function linkToGuildBank(o, bank) { // jQuery
     if (o.appLink) {
       bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
-        '<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
+        '<a href="' + guildSubcmdUrl + 'bank">Go to Guild Bank</a>' +
         '</td></tr>');
     }
   }
@@ -10617,9 +10671,9 @@
   }
 
   function backpack$1() {
-    return indexAjax({
-      data: {cmd: 'profile', subcmd: 'fetchinv'},
-      dataType: 'json'
+    return indexAjaxJson({
+      cmd: 'profile',
+      subcmd: 'fetchinv'
     });
   }
 
@@ -10637,15 +10691,12 @@
   }
 
   function takeItem(invId) {
-    return indexAjax({
-      data: {
-        cmd: 'guild',
-        subcmd: 'inventory',
-        subcmd2: 'takeitem',
-        guildstore_id: invId,
-        ajax: 1
-      },
-      dataType: 'json'
+    return indexAjaxJson({
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'takeitem',
+      guildstore_id: invId,
+      ajax: 1
     }).done(dialog);
   }
 
@@ -11330,14 +11381,11 @@
   }
 
   function dropItem(invIdList) {
-    return indexAjax({
-      data: {
-        cmd: 'profile',
-        subcmd: 'dodropitems',
-        removeIndex: invIdList,
-        ajax: 1
-      },
-      dataType: 'json'
+    return indexAjaxJson({
+      cmd: 'profile',
+      subcmd: 'dodropitems',
+      removeIndex: invIdList,
+      ajax: 1
     }).done(dialog);
   }
 
@@ -11369,13 +11417,8 @@
   }
 
   function postApp(data) {
-    extend(data, {app: 1});
-    return retryAjax({
-      type: 'POST',
-      url: 'app.php',
-      data: data,
-      dataType: 'json'
-    });
+    extend(data, {type: 'POST'});
+    return callApp(data);
   }
 
   function sendtofolder(folderId, itemsAry) {
@@ -11610,11 +11653,11 @@
     if (fallback(extraLinks, !showExtraLinks)) {return;}
     var pattern = '<span><span class="aHLink">';
     if (!item.bound) {
-      pattern += '[<a href="' + ahSeachUrl +
+      pattern += '[<a href="' + ahSearchUrl +
         encodeURIComponent(item.item_name) + '">AH</a>]';
     }
-    pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +
-      item.item_id + '" target="_blank">UFSG</a>]</span>';
+    pattern += '</span>[<a href="' + guideUrl + 'items' + def_subcmd +
+      'view&item_id=' + item.item_id + '" target="_blank">UFSG</a>]</span>';
     insertHtmlAfterBegin(o.injectHere, pattern);
   }
 
@@ -11880,9 +11923,8 @@
   }
 
   function searchPlayerHref(targetPlayerName) {
-    return '<a href="index.php?cmd=findplayer&search_active=1&' +
-      'search_level_max=&search_level_min=&search_username=' +
-      targetPlayerName + '&search_show_first=1">' + targetPlayerName + '</a>';
+    return '<a href="' + showPlayerUrl + targetPlayerName + '">' +
+      targetPlayerName + '</a>';
   }
 
   function likeInvite(aRow, hasInvited) {
@@ -12055,8 +12097,7 @@
 
   function getAttackPart(playerName) { // Legacy
     if (calf.addAttackLinkToLog) {
-      return ' | <a href="index.php?cmd=attackplayer&target_username=' +
-        playerName + '">Attack</a>';
+      return ' | <a href="' + attackplayerUrl + playerName + '">Attack</a>';
     }
     return '';
   }
@@ -12107,6 +12148,14 @@
     if (messageType === 'Notification' && isLadderReset(aRow)) {
       saveLastResetTime(aRow);
     }
+  }
+
+  function combatView(id) {
+    return indexAjaxData({
+      cmd: 'combat',
+      subcmd: 'view',
+      combat_id: id
+    });
   }
 
   /* eslint-disable max-len */
@@ -12215,8 +12264,7 @@
 
   function unknownSpecials(json) {
     if (!json.r.specials.every(inSpecialsList)) {
-      retryAjax('index.php?cmd=combat&subcmd=view&combat_id=' + json.r.id)
-        .done(partial(whatsMissing, json));
+      combatView(json.r.id).done(partial(whatsMissing, json));
     }
   }
 
@@ -12415,8 +12463,8 @@
     extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
       '>Buff</a>';
     if (calf.addAttackLinkToLog) {
-      extraText += ' | <a href="index.php?cmd=attackplayer' +
-        '&target_username=' + buffingPlayerName + '">Attack</a>';
+      extraText += ' | <a href="' + attackplayerUrl + buffingPlayerName +
+        '">Attack</a>';
     }
     extraText += ' ]</nobr></span>';
 
@@ -13714,9 +13762,8 @@
       '<tr><td colspan="2" align=center><input type="button" class=' +
         '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
       // Export or Load Settings
-      // http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
       '<tr><td colspan="2" align=center>' +
-        '<a href="index.php?cmd=notepad&blank=1&subcmd=savesettings">' +
+        '<a href="' + notepadBlankUrl + 'savesettings">' +
         'Export or Load Settings!</a></td></tr>' +
       codedBy() +
       '</table></form>';
@@ -13900,7 +13947,7 @@
     insertHtmlBeforeEnd(newRow, '<br>');
     newRow = titanTable.insertRow(3);
     insertHtmlBeforeEnd(newRow, '<td class="fshCenter fshBold">[ ' +
-      '<a href="index.php?cmd=guild&subcmd=scouttower">Scout Tower</a> ]</td>');
+      '<a href="' + scouttowerUrl + '">Scout Tower</a> ]</td>');
   }
 
   var containerDiv;
@@ -14474,13 +14521,15 @@
   }
 
   function openRealmMap() {
-    window.open('index.php?cmd=world&subcmd=map', 'fsMap');
+    window.open(worldUrl + def_subcmd + 'map', 'fsMap');
   }
 
   function openUfsgMap() {
     var gameRealm = GameData.realm();
-    window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
-      'mapUfsg');
+    window.open(
+      guideUrl + 'realms' + def_subcmd + 'view&realm_id=' + gameRealm.id,
+      'mapUfsg'
+    );
   }
 
   function toggleSound() {
@@ -15206,23 +15255,17 @@
   }
 
   function getGroups() {
-    return indexAjax({
-      data: {
-        no_mobile: 1,
-        cmd: 'guild',
-        subcmd: 'groups'
-      }
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'groups'
     }).pipe(parseGroups);
   }
 
   function getGuild$1() {
-    return indexAjax({
-      data: {
-        no_mobile: 1,
-        cmd: 'guild',
-        subcmd: 'view',
-        guild_id: relicData.controlled_by.guild_id
-      }
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'view',
+      guild_id: relicData.controlled_by.guild_id
     }).done(parseGuild);
   }
 
@@ -17283,7 +17326,7 @@
   }
 
   function guideItemHref(itemId) {
-    return guideUrl + 'items&subcmd=view&item_id=' + itemId;
+    return guideUrl + 'items' + def_subcmd + 'view&item_id=' + itemId;
   }
 
   function makeGuideItemAnchor(itemId) {
@@ -17339,7 +17382,7 @@
   }
 
   function ahItemHref(name) {
-    return 'https://www.fallensword.com/' + ahSeachUrl + name;
+    return 'https://www.fallensword.com/' + ahSearchUrl + name;
   }
 
   function insertAhLink(target) {
@@ -17361,7 +17404,7 @@
 
   function updateUrl$1(e) {
     e.preventDefault();
-    window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
+    window.location = cmdUrl + 'pvpladder&viewing_band_id=' +
       document.querySelector('#pCC select[name="viewing_band_id"]').value;
   }
 
@@ -17569,7 +17612,7 @@
     var sortby = form[4].value;
     var sortbydir = form[5].value;
     var page = form[6].value;
-    window.location = 'index.php?cmd=questbook&type=' + type + '&mode=' + mode +
+    window.location = cmdUrl + 'questbook&type=' + type + '&mode=' + mode +
       '&page=' + page + '&letter=' + letter + '&sortby=' + sortby +
       '&sortbydir=' + sortbydir;
   }
@@ -18165,7 +18208,7 @@
         '">set</span>)';
     }
 
-    return '<a href="' + ahSeachUrl + data +
+    return '<a href="' + ahSearchUrl + data +
       '" class="fshInvItem tip-dynamic ' +
       rarity[row.rarity].clas + '" ' +
       'data-tipped="fetchitem.php?item_id=' + row.item_id +
@@ -18524,15 +18567,12 @@
   }
 
   function moveItem(invIdList, folderId) {
-    return indexAjax({
-      data: {
-        cmd: 'profile',
-        subcmd: 'sendtofolder',
-        inv_list: JSON.stringify(invIdList),
-        folder_id: folderId,
-        ajax: 1
-      },
-      dataType: 'json'
+    return indexAjaxJson({
+      cmd: 'profile',
+      subcmd: 'sendtofolder',
+      inv_list: JSON.stringify(invIdList),
+      folder_id: folderId,
+      ajax: 1
     }).done(dialog);
   }
 
@@ -18791,13 +18831,10 @@
   }
 
   function getGuildLogPage(page) {
-    return indexAjax({
-      data: {
-        cmd: 'guild',
-        subcmd: 'log',
-        page: page,
-        no_mobile: 1
-      }
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'log',
+      page: page
     });
   }
 
@@ -18851,7 +18888,7 @@
     '<table id="fshNewGuildLog" class="fshInvFilter"><thead><tr>' +
     '<th colspan="11"><b>Guild Log Version 4</b></th>' +
     '<th colspan="3"><span id="rfsh" class="sendLink">Reset</span> ' +
-    '<a href="index.php?cmd=guild&subcmd=log" class="sendLink">' +
+    '<a href="' + guildLogUrl + '" class="sendLink">' +
     'Old Guild Log</a></th>' +
     '</tr></thead><tbody>' +
     '<tr><td rowspan="3"><b>&nbsp;Filters:</b></td>' +
@@ -19300,8 +19337,8 @@
     currentFSP = intValue(getElementById('statbar-fsp').textContent);
     injectUpgradeHelper('Current');
     injectUpgradeHelper('Maximum');
-    getInputCell('Gold').innerHTML = '<a href="' + server +
-      'index.php?cmd=marketplace">Sell at Marketplace</a>';
+    getInputCell('Gold').innerHTML = '<a href="' + server + cmdUrl +
+      'marketplace">Sell at Marketplace</a>';
   }
 
   function saveUpgradeValue(upgrade, key) {
@@ -19699,7 +19736,7 @@
   function highlightPvpProtection() {
     if (!getValue('highlightPvpProtection')) {return;}
     var pvpp = document
-      .querySelector('#profileLeftColumn a[href="index.php?cmd=points"]');
+      .querySelector('#profileLeftColumn a[href="' + pointsUrl + '"]');
     if (pvpp.parentNode.nextSibling.textContent.trim() !== 'N/A') {
       pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red';
     }
@@ -19907,7 +19944,7 @@
 
   function profileInjectGuildRel(self) {
     var aLink = document.querySelector(
-      '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
+      '#pCC a[href^="' + guildSubcmdUrl + 'view&guild_id="]');
     if (aLink) {foundGuildLink(aLink);} else if (self) {
       setValue('guildSelf', '');
     }
@@ -19916,24 +19953,21 @@
   function joinGroups() {
     if (!getValue('enableMaxGroupSizeToJoin')) {
       return '<a class="quickButton buttonJoinAll tip-static" ' +
-        'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
+        'href="' + joinallUrl + '" ' +
         'data-tipped="Join All Groups" style="background-image: url(\'' +
         imageServer +
         '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
     }
     var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    return '<a class="quickButton buttonJoinUnder tip-static" ' +
-      'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
-      'joinallgroupsundersize" data-tipped="Join All Groups < ' +
-      maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
-      imageServer +
+    return '<a class="quickButton buttonJoinUnder tip-static" href="' +
+      joinUnderUrl + '" data-tipped="Join All Groups < ' + maxGroupSizeToJoin +
+      ' Members" style="background-image: url(\'' + imageServer +
       '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
   }
 
   function showRecallButton(playername) {
     if (currentGuildRelationship === 'self') {
-      return '<a class="quickButton tip-static" ' +
-        'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
+      return '<a class="quickButton tip-static" href="' + recallUserUrl +
         playername + '" data-tipped="Recall items from ' + playername +
         '" style="background-image: url(\'' + imageServer +
         '/temple/3.gif\');"></a>&nbsp;&nbsp;';
@@ -19944,7 +19978,7 @@
   function showRankButton(playerid, playername) {
     if (currentGuildRelationship === 'self' && getValue('showAdmin')) {
       return '<a class="quickButton buttonGuildRank tip-static" href="' +
-        'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
+        guildSubcmdUrl + 'members&subcmd2=changerank&member_id=' +
         playerid + '" data-tipped="Rank ' + playername +
         '" style="background-image: url(\'' + imageServer +
         '/guilds/' + guildId$1 + '_mini.png\');"></a>&nbsp;&nbsp;';
@@ -19960,7 +19994,7 @@
       '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
     newhtml += joinGroups();
     newhtml += '<a class="quickButton tip-static" ' +
-      'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid +
+      'href="' + auctionhouseUrl + '&type=-3&tid=' + playerid +
       '" data-tipped="Go to ' + playername +
       '\'s auctions" style="background-image: url(\'' +
       imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
@@ -20123,7 +20157,7 @@
   function quickWearLink() {
     // quick wear manager link
     var node = document.querySelector('#profileRightColumn ' +
-      'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
+      'a[href="' + cmdUrl + 'profile&subcmd=togglesection&section_id=2"]');
     if (!node) {return;}
     var wrap = createSpan({innerHTML: '&nbsp;['});
     var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});
@@ -20148,8 +20182,8 @@
 
   function selectAllLink() {
     // select all link
-    var node = document.querySelector('#profileRightColumn' +
-      ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
+    var node = document.querySelector('#profileRightColumn a[href="' +
+      dropItemsUrl + '"]');
     if (!node) {return;}
     var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
     on(allSpan, 'click', profileSelectAll);
@@ -20363,7 +20397,7 @@
 
   function setLastScav(caveId, gold) {
     setValue('lastScavPage',
-      '?cmd=scavenging&cave_id=' + caveId + '&gold=' + gold);
+      def_cmd + 'scavenging&cave_id=' + caveId + '&gold=' + gold);
   }
 
   function dontPost$3(e) {
@@ -20373,8 +20407,8 @@
       var caveId = caveEle.value;
       var gold = getElementById('gold').value;
       setLastScav(caveId, gold);
-      window.location = 'index.php?cmd=scavenging&subcmd=process&cave_id=' +
-        caveId + '&gold=' + gold + '&submit=Scavenge';
+      window.location = cmdUrl + 'scavenging' + def_subcmd +
+        'process&cave_id=' + caveId + '&gold=' + gold + '&submit=Scavenge';
     }
   }
 
@@ -20578,8 +20612,7 @@
     var topTable = getElementsByTagName(def_table, pCC)[3];
     Array.from(topTable.rows).filter(myRows(4, 1)).forEach(function(el) {
       var aCell = el.cells[1];
-      aCell.innerHTML = '<a href="index.php?cmd=findplayer' +
-        '&search_show_first=1&search_active=1&search_username=' +
+      aCell.innerHTML = '<a href="' + showPlayerUrl +
         aCell.textContent + '">' + aCell.textContent + '</a>';
     });
   }
@@ -21113,7 +21146,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '89';
+  window.FSH.calf = '90';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
