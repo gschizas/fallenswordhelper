@@ -5,6 +5,7 @@ import makePageTemplate from './notepad/lists/makePageTemplate';
 import on from './common/on';
 import {pCC} from './support/layout';
 import quickBuffHref from './common/quickBuffHref';
+import {searchPlayerUrl} from './support/constants';
 import setForage from './ajax/setForage';
 import {
   calculateBoundaries,
@@ -14,25 +15,27 @@ import {
   pvpUpperLevel
 } from './common/levelHighlight';
 
+function searchUrl(min, max, guild) {
+  return searchPlayerUrl +
+    '&search_level_min=' + min +
+    '&search_level_max=' + max +
+    '&search_in_guild=' + guild;
+}
+
 export function injectFindPlayer() { // Bad jQuery
   if (jQueryNotPresent()) {return;}
   calculateBoundaries();
   var findPlayerButton = $('input[value="Find Player"]');
-  findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
-    'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
-    pvpLowerLevel + '&search_level_max=' +
-    pvpUpperLevel + '&search_in_guild=-1"><span ' +
-    'style="color:blue;">Get PvP targets</span></a>&nbsp;<a href="' +
-    'index.php?cmd=findplayer&search_active=1&search_username=&' +
-    'search_level_min=' + gvgLowerLevel + '&search_level_max=' +
-    gvgUpperLevel + '&search_in_guild=1"><span style="color:blue;">' +
-    'Get GvG targets</span></a>');
+  findPlayerButton.parent().append('&nbsp;<a class="fshBlue" href="' +
+    searchUrl(pvpLowerLevel, pvpUpperLevel, '-1') +
+    '">Get PvP targets</a>&nbsp;<a class="fshBlue" href="' +
+    searchUrl(gvgLowerLevel, gvgUpperLevel, '1') +
+    '">Get GvG targets</a>');
 
   $('table[class="width_full"]').find('a[href*="player_id"]')
     .each(function(i, e) {
       var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
-      $(e).after('<a style="color:blue;font-size:10px;" ' +
-        quickBuffHref(id[1]) + '>[b]</a>');
+      $(e).after(' <a class="fshBf" ' + quickBuffHref(id[1]) + '>[b]</a>');
     });
 }
 

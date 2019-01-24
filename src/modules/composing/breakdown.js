@@ -1,3 +1,4 @@
+import doBreakdown from '../ajax/doBreakdown';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -6,9 +7,9 @@ import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import perfFilter from '../common/perfFilter';
-import retryAjax from '../ajax/retryAjax';
 import setValue from '../system/setValue';
 import {simpleCheckbox} from '../settings/simpleCheckbox';
+import {composingUrl, def_subcmd} from '../support/constants';
 
 var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
 var disableBreakdownPrompts;
@@ -51,18 +52,16 @@ function showComposingMessage(message, bgcolor) { // jQuery
   setTimeout(fadeAway, 5000);
 }
 
+function handleResponse(response) {
+  if (response.error !== 0) {
+    showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
+  } else {
+    window.location = composingUrl + def_subcmd + 'breakdown&m=1';
+  }
+}
+
 function breakItems() { // jQuery.min
-  return retryAjax({
-    type: 'POST',
-    url: 'index.php?cmd=composing&subcmd=dobreakdown',
-    data: {'item_list[]': selectedList},
-    dataType: 'json'
-  }).done(function(response) {
-    if (response.error !== 0) {
-      showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
-    }
-    window.location = 'index.php?cmd=composing&subcmd=breakdown&m=1';
-  });
+  return doBreakdown(selectedList).done(handleResponse);
 }
 
 function validBreakEvent(evt) {

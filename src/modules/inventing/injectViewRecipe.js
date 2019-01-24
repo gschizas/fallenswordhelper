@@ -1,10 +1,10 @@
 import {createAnchor} from '../common/cElement';
-import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import querySelector from '../common/querySelector';
 import querySelectorArray from '../common/querySelectorArray';
 import xPath from '../common/xPath';
+import {def_subcmd, guideUrl} from '../support/constants';
 
 function getItemId(el) {
   var match = el.src.match(/\/items\/(\d+)\.gif/);
@@ -12,7 +12,7 @@ function getItemId(el) {
 }
 
 function guideItemHref(itemId) {
-  return guideUrl + 'items&subcmd=view&item_id=' + itemId;
+  return guideUrl + 'items' + def_subcmd + 'view&item_id=' + itemId;
 }
 
 function makeGuideItemAnchor(itemId) {

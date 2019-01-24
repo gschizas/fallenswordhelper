@@ -1,7 +1,7 @@
 import createDocument from './system/createDocument';
-import {def_table} from './support/constants';
-import indexAjax from './ajax/indexAjax';
+import indexAjaxData from './ajax/indexAjaxData';
 import jQueryPresent from './common/jQueryPresent';
+import {def_table, guildSubcmdUrl} from './support/constants';
 
 var playerBank = {
   headText: 'Bank',
@@ -9,7 +9,6 @@ var playerBank = {
   depoPos: 2,
   balPos: 1,
   data: {
-    no_mobile: 1,
     cmd: 'bank',
     subcmd: 'transaction'
   },
@@ -21,7 +20,6 @@ var guildBank = {
   depoPos: 3,
   balPos: 2,
   data: {
-    no_mobile: 1,
     cmd: 'guild',
     subcmd: 'bank',
     subcmd2: 'transaction'
@@ -97,7 +95,7 @@ function invalidAmount(o, amount) { // jQuery
 }
 
 function doAjax(oData) {
-  indexAjax({data: oData}).done(transResponse);
+  indexAjaxData(oData).done(transResponse);
 }
 
 function bankDeposit(e) { // jQuery
@@ -123,7 +121,7 @@ function bankWithdrawal(e) { // jQuery
 function linkToGuildBank(o, bank) { // jQuery
   if (o.appLink) {
     bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
-      '<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
+      '<a href="' + guildSubcmdUrl + 'bank">Go to Guild Bank</a>' +
       '</td></tr>');
   }
 }

@@ -18,7 +18,12 @@ import {pCC} from '../../support/layout';
 import quickAction from './quickAction';
 import senditems from '../../app/trade/senditems';
 import toggleForce from '../../common/toggleForce';
-import {ahSeachUrl, guideUrl, rarity} from '../../support/constants';
+import {
+  ahSearchUrl,
+  def_subcmd,
+  guideUrl,
+  rarity
+} from '../../support/constants';
 import {
   disableItemColoring,
   setShowExtraLinks,
@@ -40,11 +45,11 @@ function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {return;}
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
-    pattern += '[<a href="' + ahSeachUrl +
+    pattern += '[<a href="' + ahSearchUrl +
       encodeURIComponent(item.item_name) + '">AH</a>]';
   }
-  pattern += '</span>[<a href="' + guideUrl + 'items&subcmd=view&item_id=' +
-    item.item_id + '" target="_blank">UFSG</a>]</span>';
+  pattern += '</span>[<a href="' + guideUrl + 'items' + def_subcmd +
+    'view&item_id=' + item.item_id + '" target="_blank">UFSG</a>]</span>';
   insertHtmlAfterBegin(o.injectHere, pattern);
 }
 

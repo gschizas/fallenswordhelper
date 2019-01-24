@@ -1,4 +1,4 @@
-import {ahSeachUrl} from '../support/constants';
+import {ahSearchUrl} from '../support/constants';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import querySelector from '../common/querySelector';
 import textContent from '../common/textContent';
@@ -14,7 +14,7 @@ function isNotComponent() {
 }
 
 function ahItemHref(name) {
-  return 'https://www.fallensword.com/' + ahSeachUrl + name;
+  return 'https://www.fallensword.com/' + ahSearchUrl + name;
 }
 
 function insertAhLink(target) {

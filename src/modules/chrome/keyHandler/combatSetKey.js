@@ -2,6 +2,7 @@ import expandMenu from './expandMenu';
 import keyHandlerEvent from './keyHandlerEvent';
 import partial from '../../common/partial';
 import view from '../../app/profile/view';
+import {def_subcmd, profileUrl} from '../../support/constants';
 
 var jsonTests = [
   function(itemIndex, json) {return json;},
@@ -21,8 +22,8 @@ function changeCombatSet(itemIndex, json) {
   if (goodData(itemIndex, json)) {
     var cbsIndex = json.r.equip_sets[itemIndex].id;
     expandMenu('2');
-    location.href = 'index.php?cmd=profile&combatSetId=' + cbsIndex +
-      '&subcmd=managecombatset&submit=Use';
+    location.href = profileUrl + def_subcmd +
+      'managecombatset&submit=Use&combatSetId=' + cbsIndex;
   }
 }
 

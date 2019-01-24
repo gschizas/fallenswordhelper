@@ -2,7 +2,7 @@ import calf from '../../support/calf';
 import displayDisconnectedFromGodsMessage
   from './displayDisconnectedFromGodsMessage';
 import getValue from '../../system/getValue';
-import indexAjax from '../../ajax/indexAjax';
+import indexAjaxData from '../../ajax/indexAjaxData';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import {now} from '../../support/constants';
 import {parseTemplePage} from './parseTemplePage';
@@ -13,7 +13,7 @@ function checkLastUpdate(templeAlertLastUpdate) {
 
 function doWeNeedToParse() {
   if (checkLastUpdate(getValue('lastTempleCheck'))) {
-    indexAjax({data: {cmd: 'temple', no_mobile: 1}}).done(parseTemplePage);
+    indexAjaxData({cmd: 'temple'}).done(parseTemplePage);
   } else if (getValue('needToPray')) {
     displayDisconnectedFromGodsMessage();
   }

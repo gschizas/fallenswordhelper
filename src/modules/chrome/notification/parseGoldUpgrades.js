@@ -1,11 +1,12 @@
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import displayUpgradeMsg from './displayUpgradeMsg';
+import notGoldUpgradesPage from './notGoldUpgradesPage';
 import querySelectorAll from '../../common/querySelectorAll';
 import setValue from '../../system/setValue';
 
 function findDoc(data) {
-  if (location.search.indexOf('cmd=points&type=1') === -1) {
+  if (notGoldUpgradesPage()) {
     return createDocument(data);
   }
   var boxes = querySelectorAll('#pCC input[name="quantity"]');

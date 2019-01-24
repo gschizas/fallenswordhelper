@@ -1,13 +1,13 @@
 import {createTr} from './common/cElement';
 import getValue from './system/getValue';
 import insertElement from './common/insertElement';
-import {now} from './support/constants';
 import on from './common/on';
 import outputFormat from './system/outputFormat';
+import {cmdUrl, now} from './support/constants';
 
 function updateUrl(e) {
   e.preventDefault();
-  window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
+  window.location = cmdUrl + 'pvpladder&viewing_band_id=' +
     document.querySelector('#pCC select[name="viewing_band_id"]').value;
 }
 

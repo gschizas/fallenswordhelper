@@ -9,9 +9,9 @@ import getForage from '../../ajax/getForage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import {now} from '../../support/constants';
 import on from '../../common/on';
+import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import partial from '../../common/partial';
 import resetEvt from './resetEvt';
-import retryAjax from '../../ajax/retryAjax';
 import setForage from '../../ajax/setForage';
 import setValue from '../../system/setValue';
 
@@ -30,7 +30,7 @@ function gotOnlinePlayers(value) { // jQuery
 function checkLastPage() {
   if (onlinePages === lastPage) {
     setForage('fsh_onlinePlayers', onlinePlayers);
-    gotOnlinePlayers();
+    gotOnlinePlayers(onlinePlayers);
   }
 }
 
@@ -69,8 +69,7 @@ function getLastPage(input) {
 function getOtherPages(callback, input) {
   lastPage = getLastPage(input);
   for (var i = 2; i <= lastPage; i += 1) {
-    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' + i)
-      .done(callback);
+    onlinePlayersPage(i).done(callback);
   }
 }
 
@@ -94,8 +93,7 @@ function refreshEvt() { // Bad jQuery
   $('#fshRefresh', context).hide();
   onlinePages = 0;
   onlinePlayers = {};
-  retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
-    .done(getOnlinePlayers);
+  onlinePlayersPage(1).done(getOnlinePlayers);
   setValue('lastOnlineCheck', now);
   updateStatus('Parsing online players...');
 }

@@ -4,6 +4,7 @@ import contains from '../../common/contains';
 import doHideBtn from './doHideBtn';
 import doHideBuffSelected from './doHideBuffSelected';
 import {getElementById} from '../../common/getElement';
+import {guildSubcmdUrl} from '../../support/constants';
 import querySelectorArray from '../../common/querySelectorArray';
 
 function guildColour(el) {
@@ -15,7 +16,7 @@ function guildColour(el) {
 }
 
 function makeLink(el) {
-  el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">Chat</a>';
+  el.innerHTML = '<a href="' + guildSubcmdUrl + 'chat">Chat</a>';
 }
 
 function updateChatLink() {

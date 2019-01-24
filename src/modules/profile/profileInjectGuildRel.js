@@ -1,5 +1,6 @@
 import currentGuildId from '../common/currentGuildId';
 import getValue from '../system/getValue';
+import {guildSubcmdUrl} from '../support/constants';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import partial from '../common/partial';
 import setValue from '../system/setValue';
@@ -63,7 +64,7 @@ function foundGuildLink(aLink) {
 
 export function profileInjectGuildRel(self) {
   var aLink = document.querySelector(
-    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
+    '#pCC a[href^="' + guildSubcmdUrl + 'view&guild_id="]');
   if (aLink) {foundGuildLink(aLink);} else if (self) {
     setValue('guildSelf', '');
   }

@@ -1,8 +1,10 @@
+import {guildLogUrl} from '../../support/constants';
+
 export var guildLogFilter =
   '<table id="fshNewGuildLog" class="fshInvFilter"><thead><tr>' +
   '<th colspan="11"><b>Guild Log Version 4</b></th>' +
   '<th colspan="3"><span id="rfsh" class="sendLink">Reset</span> ' +
-  '<a href="index.php?cmd=guild&subcmd=log" class="sendLink">' +
+  '<a href="' + guildLogUrl + '" class="sendLink">' +
   'Old Guild Log</a></th>' +
   '</tr></thead><tbody>' +
   '<tr><td rowspan="3"><b>&nbsp;Filters:</b></td>' +

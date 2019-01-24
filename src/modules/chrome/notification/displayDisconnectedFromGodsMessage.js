@@ -1,8 +1,8 @@
+import {cmdUrl} from '../../support/constants';
 import {getElementById} from '../../common/getElement';
 import hideQTip from '../../common/hideQTip';
 import {imageServer} from '../../system/system';
-import indexAjax from '../../ajax/indexAjax';
-import {indexPhp} from '../../support/constants';
+import indexAjaxData from '../../ajax/indexAjaxData';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import once from '../../common/once';
 import saveTempleSettings from './saveTempleSettings';
@@ -26,7 +26,7 @@ var godsNotification =
   '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
   'style="background-image: url(\'' + imageServer +
   '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
-  '<a href="' + indexPhp + '?cmd=temple">' +
+  '<a href="' + cmdUrl + 'temple">' +
   '<p class="notification-content">Bow down to the gods</p>' +
   '</a></span></li>';
 
@@ -38,7 +38,7 @@ function havePrayed() {
 function prayToGods(e) { // jQuery
   var myGod = e.target.getAttribute('praytype');
   if (!myGod) {return;}
-  indexAjax({data: {cmd: 'temple', subcmd: 'pray', type: myGod, no_mobile: 1}})
+  indexAjaxData({cmd: 'temple', subcmd: 'pray', type: myGod})
     .done(havePrayed);
   hideQTip(e.target);
 }

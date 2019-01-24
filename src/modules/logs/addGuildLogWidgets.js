@@ -5,6 +5,7 @@ import myRows from '../common/myRows';
 import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
+import {showPlayerUrl} from '../support/constants';
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) {return Number(playerAry[1]);}
@@ -42,9 +43,8 @@ function dimIfNotMe(aRow, hasInvited, targetPlayerName) {
 }
 
 function searchPlayerHref(targetPlayerName) {
-  return '<a href="index.php?cmd=findplayer&search_active=1&' +
-    'search_level_max=&search_level_min=&search_username=' +
-    targetPlayerName + '&search_show_first=1">' + targetPlayerName + '</a>';
+  return '<a href="' + showPlayerUrl + targetPlayerName + '">' +
+    targetPlayerName + '</a>';
 }
 
 function likeInvite(aRow, hasInvited) {

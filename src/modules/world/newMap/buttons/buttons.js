@@ -19,7 +19,9 @@ import {
 import {
   def_playerLevel,
   def_realmUpdate,
-  guideUrl
+  def_subcmd,
+  guideUrl,
+  worldUrl
 } from '../../../support/constants';
 
 var buttonContainer;
@@ -42,13 +44,15 @@ function openQuickBuff() {
 }
 
 function openRealmMap() {
-  window.open('index.php?cmd=world&subcmd=map', 'fsMap');
+  window.open(worldUrl + def_subcmd + 'map', 'fsMap');
 }
 
 function openUfsgMap() {
   var gameRealm = GameData.realm();
-  window.open(guideUrl + 'realms&subcmd=view&realm_id=' + gameRealm.id,
-    'mapUfsg');
+  window.open(
+    guideUrl + 'realms' + def_subcmd + 'view&realm_id=' + gameRealm.id,
+    'mapUfsg'
+  );
 }
 
 function toggleSound() {

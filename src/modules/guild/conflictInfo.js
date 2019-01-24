@@ -1,10 +1,8 @@
+import conflicts from '../ajax/conflicts';
 import createDocument from '../system/createDocument';
+import {guildSubcmdUrl} from '../support/constants';
 import myRows from '../common/myRows';
 import partial from '../common/partial';
-import retryAjax from '../ajax/retryAjax';
-
-var conflictUrl = 'index.php?cmd=guild&subcmd=conflicts';
-var ajaxUrl = conflictUrl + '&no_mobile=1';
 
 function makeCell(newRow, html) {
   newRow.insertCell(-1).innerHTML = html;
@@ -17,8 +15,8 @@ function buildRow(insertHere, html1, html2) {
 }
 
 function conflictHeader(insertHere) {
-  buildRow(insertHere,
-    '<a href="' + conflictUrl + '">Active Conflicts</a>', 'Score');
+  buildRow(insertHere, '<a href="' + guildSubcmdUrl +
+    'conflicts">Active Conflicts</a>', 'Score');
 }
 
 function conflictRow(insertHere, aRow) {
@@ -47,8 +45,7 @@ function getMaxPage(page) {
 }
 
 function getNextPage(curPage, fn, callback) {
-  retryAjax(ajaxUrl + 'page=' + (curPage + 1).toString())
-    .done(partial(fn, callback));
+  conflicts(curPage + 1).done(partial(fn, callback));
 }
 
 function gotConflictInfo(callback, responseText) { // Legacy
@@ -67,6 +64,6 @@ export default function conflictInfo(leftHandSideColumnTable) { // jQuery.min
   var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
     .firstChild.nextSibling;
   if (statCtrl) {
-    retryAjax(ajaxUrl).done(partial(gotConflictInfo, {node: statCtrl}));
+    conflicts(1).done(partial(gotConflictInfo, {node: statCtrl}));
   }
 }

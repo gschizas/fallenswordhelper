@@ -1,6 +1,6 @@
 import addCommas from '../../system/addCommas';
 import getValue from '../../system/getValue';
-import indexAjax from '../../ajax/indexAjax';
+import indexAjaxData from '../../ajax/indexAjaxData';
 import infoBox from '../../common/infoBox';
 import setValue from '../../system/setValue';
 import {def_fetch_playerStats, def_playerGold} from '../../support/constants';
@@ -10,15 +10,12 @@ var sendGoldonWorld;
 
 export function doSendGold() { // jQuery
   if (!sendGoldonWorld) {return;}
-  indexAjax({
-    data: {
-      no_mobile: 1,
-      cmd: 'trade',
-      subcmd: 'sendgold',
-      xc: window.ajaxXC,
-      target_username: $('#HelperSendTo').html(),
-      gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
-    }
+  indexAjaxData({
+    cmd: 'trade',
+    subcmd: 'sendgold',
+    xc: window.ajaxXC,
+    target_username: $('#HelperSendTo').html(),
+    gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
   }).done(function(data) {
     var info = infoBox(data);
     if (info === 'You successfully sent gold!' || info === '') {

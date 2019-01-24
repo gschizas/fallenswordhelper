@@ -1,12 +1,13 @@
 import addButton from './addButton';
 import calf from '../../support/calf';
 import {createDiv} from '../../common/cElement';
+import {def_joinallgroupsundersize} from '../../support/constants';
 import fetchGroupStatsButton from './fetchGroupStatsButton';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
+import indexAjaxData from '../../ajax/indexAjaxData';
 import on from '../../common/on';
 import querySelectorArray from '../../common/querySelectorArray';
-import retryAjax from '../../ajax/retryAjax';
 import {sendEvent} from '../../support/fshGa';
 
 var maxGroupSizeToJoin;
@@ -14,8 +15,12 @@ var maxGroupSizeToJoin;
 function filterMercs(e) {return !e.includes('#000099');}
 
 function joinGroup(groupID, container) { // jQuery.min
-  return retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=groups' +
-    '&subcmd2=join&group_id=' + groupID).done(function() {
+  return indexAjaxData({
+    cmd: 'guild',
+    subcmd: 'groups',
+    subcmd2: 'join',
+    group_id: groupID
+  }).done(function() {
     container.innerHTML = '<span class="fshXSmall fshBlue" ' +
       'style="line-height: 19px;">Joined</span>';
   });
@@ -62,7 +67,7 @@ export default function groupButtons() {
 
   fetchGroupStatsButton(buttonRow);
 
-  if (calf.subcmd2 === 'joinallgroupsundersize') {
+  if (calf.subcmd2 === def_joinallgroupsundersize) {
     joinAllGroupsUnderSize();
   }
 }

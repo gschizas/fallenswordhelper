@@ -1,3 +1,4 @@
+import {cmdUrl} from '../support/constants';
 import {createSpan} from '../common/cElement';
 import insertElement from '../common/insertElement';
 import insertQuickWear from '../notepad/quickWear/quickWear';
@@ -14,7 +15,7 @@ function openQwDialog() {
 export default function quickWearLink() {
   // quick wear manager link
   var node = document.querySelector('#profileRightColumn ' +
-    'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
+    'a[href="' + cmdUrl + 'profile&subcmd=togglesection&section_id=2"]');
   if (!node) {return;}
   var wrap = createSpan({innerHTML: '&nbsp;['});
   var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});

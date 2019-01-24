@@ -1,6 +1,11 @@
 import calf from '../support/calf';
 import quickBuffHref from '../common/quickBuffHref';
-import {doAddIgnore, secureUrl, tradeUrl} from '../support/constants';
+import {
+  attackplayerUrl,
+  doAddIgnore,
+  secureUrl,
+  tradeUrl
+} from '../support/constants';
 
 function removeHTML(buffName) {
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
@@ -74,8 +79,7 @@ function getThirdPart(messageHTML) { // Legacy
 
 function getAttackPart(playerName) { // Legacy
   if (calf.addAttackLinkToLog) {
-    return ' | <a href="index.php?cmd=attackplayer&target_username=' +
-      playerName + '">Attack</a>';
+    return ' | <a href="' + attackplayerUrl + playerName + '">Attack</a>';
   }
   return '';
 }

@@ -11,7 +11,12 @@ import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import quickBuffHref from '../common/quickBuffHref';
 import {addPvpSummary, initCache} from './addPvpSummary';
-import {doAddIgnore, secureUrl, tradeUrl} from '../support/constants';
+import {
+  attackplayerUrl,
+  doAddIgnore,
+  secureUrl,
+  tradeUrl
+} from '../support/constants';
 import {getKeys, playerColor, prepareAlliesEnemies} from './playerColour';
 
 function getCalfVars() {
@@ -65,8 +70,8 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
     '>Buff</a>';
   if (calf.addAttackLinkToLog) {
-    extraText += ' | <a href="index.php?cmd=attackplayer' +
-      '&target_username=' + buffingPlayerName + '">Attack</a>';
+    extraText += ' | <a href="' + attackplayerUrl + buffingPlayerName +
+      '">Attack</a>';
   }
   extraText += ' ]</nobr></span>';
 

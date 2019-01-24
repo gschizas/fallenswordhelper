@@ -1,15 +1,12 @@
 import dialog from './dialog';
-import indexAjax from './indexAjax';
+import indexAjaxJson from './indexAjaxJson';
 
 export default function takeItem(invId) {
-  return indexAjax({
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'takeitem',
-      guildstore_id: invId,
-      ajax: 1
-    },
-    dataType: 'json'
+  return indexAjaxJson({
+    cmd: 'guild',
+    subcmd: 'inventory',
+    subcmd2: 'takeitem',
+    guildstore_id: invId,
+    ajax: 1
   }).done(dialog);
 }

@@ -1,3 +1,5 @@
+import {cmdUrl} from '../support/constants';
+
 export default function dontPost(e) {
   if (e.target.type !== 'submit') {return;}
   e.preventDefault();
@@ -8,7 +10,7 @@ export default function dontPost(e) {
   var sortby = form[4].value;
   var sortbydir = form[5].value;
   var page = form[6].value;
-  window.location = 'index.php?cmd=questbook&type=' + type + '&mode=' + mode +
+  window.location = cmdUrl + 'questbook&type=' + type + '&mode=' + mode +
     '&page=' + page + '&letter=' + letter + '&sortby=' + sortby +
     '&sortbydir=' + sortbydir;
 }

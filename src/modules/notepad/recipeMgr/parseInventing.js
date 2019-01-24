@@ -1,10 +1,10 @@
 import {createDiv} from '../../common/cElement';
 import generateRecipeTable from './generateRecipeTable';
+import indexAjaxData from '../../ajax/indexAjaxData';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 import processFirstPage from './processFirstPage';
-import retryAjax from '../../ajax/retryAjax';
 import setForage from '../../ajax/setForage';
 
 export var recipebook;
@@ -20,7 +20,7 @@ export function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
-  retryAjax('index.php?no_mobile=1&cmd=inventing')
+  indexAjaxData({cmd: 'inventing'})
     .pipe(partial(processFirstPage, output, recipebook))
     .done(displayStuff);
 }
