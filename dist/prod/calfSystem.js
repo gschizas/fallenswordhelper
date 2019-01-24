@@ -6600,12 +6600,16 @@
       'index.php?cmd=guild&subcmd=groups&subcmd2=create';
   }
 
+  function notWorld(type, href) {
+    if (!getElementById('worldPage')) {
+      keyHandlerEvent(type);
+      location.href = href;
+    }
+  }
+
   function doRepair() {
     // do not use repair link for new map
-    if (!getElementById('worldPage')) {
-      keyHandlerEvent('doRepair');
-      location.href = 'index.php?cmd=blacksmith&subcmd=repairall';
-    }
+    notWorld('doRepair', 'index.php?cmd=blacksmith&subcmd=repairall');
   }
 
   function infoBox(documentText) {
@@ -6735,6 +6739,11 @@
     location.href = profileUrl;
   }
 
+  function toWorld() {
+    // do not use for new map
+    notWorld('toWorld', 'index.php?cmd=world');
+  }
+
   var keyLookup = [
     [33, combatSetKey, 0], // Shift+1
     [64, combatSetKey, 1], // Shift+2
@@ -6746,6 +6755,7 @@
     [38, combatSetKey, 6], // Shift+7
     [42, combatSetKey, 7], // Shift+8
     [40, combatSetKey, 8], // Shift+9
+    [48, toWorld], // go to world [0]
     [60, movePage, '<'], // move to prev page [<]
     [62, movePage, '>'], // move to next page [>]
     [71, createGroup], // create group [G]
@@ -11080,9 +11090,7 @@
   }
 
   function potReport(potObj) {
-    if (isFunction(Object.entries)) {
-      getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
-    }
+    getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
   }
 
   var nodeArray;
@@ -21036,7 +21044,7 @@
   }
 
   function asyncDispatcher() {
-    if (isFunction(coreFunction)) {
+    if (isFunction(Object.entries) && isFunction(coreFunction)) {
       screenview(functionPath);
       start('JS Perf', functionPath);
       coreFunction();
@@ -21045,7 +21053,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '88';
+  window.FSH.calf = '89';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

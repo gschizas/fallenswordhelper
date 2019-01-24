@@ -1,10 +1,6 @@
-import {getElementById} from '../../common/getElement';
-import keyHandlerEvent from './keyHandlerEvent';
+import notWorld from './notWorld';
 
 export default function doRepair() {
   // do not use repair link for new map
-  if (!getElementById('worldPage')) {
-    keyHandlerEvent('doRepair');
-    location.href = 'index.php?cmd=blacksmith&subcmd=repairall';
-  }
+  notWorld('doRepair', 'index.php?cmd=blacksmith&subcmd=repairall');
 }

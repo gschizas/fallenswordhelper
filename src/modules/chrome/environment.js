@@ -85,7 +85,7 @@ function asyncDispatcher() {
   //#if _DEV  //  asyncDispatcher messages
   devHooks();
   //#endif
-  if (isFunction(coreFunction)) {
+  if (isFunction(Object.entries) && isFunction(coreFunction)) {
     screenview(functionPath);
     start('JS Perf', functionPath);
     coreFunction();
