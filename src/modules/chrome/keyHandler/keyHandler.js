@@ -10,6 +10,7 @@ import logPage from './logPage';
 import movePage from './movePage';
 import partial from '../../common/partial';
 import profile from './profile';
+import toWorld from './toWorld';
 
 var keyLookup = [
   [33, combatSetKey, 0], // Shift+1
@@ -22,6 +23,7 @@ var keyLookup = [
   [38, combatSetKey, 6], // Shift+7
   [42, combatSetKey, 7], // Shift+8
   [40, combatSetKey, 8], // Shift+9
+  [48, toWorld], // go to world [0]
   [60, movePage, '<'], // move to prev page [<]
   [62, movePage, '>'], // move to next page [>]
   [71, createGroup], // create group [G]
