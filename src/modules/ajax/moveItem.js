@@ -1,15 +1,12 @@
 import dialog from './dialog';
-import indexAjax from './indexAjax';
+import indexAjaxJson from './indexAjaxJson';
 
 export default function moveItem(invIdList, folderId) {
-  return indexAjax({
-    data: {
-      cmd: 'profile',
-      subcmd: 'sendtofolder',
-      inv_list: JSON.stringify(invIdList),
-      folder_id: folderId,
-      ajax: 1
-    },
-    dataType: 'json'
+  return indexAjaxJson({
+    cmd: 'profile',
+    subcmd: 'sendtofolder',
+    inv_list: JSON.stringify(invIdList),
+    folder_id: folderId,
+    ajax: 1
   }).done(dialog);
 }

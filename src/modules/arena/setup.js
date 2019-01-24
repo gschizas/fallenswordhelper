@@ -1,6 +1,6 @@
 import getArrayByTagName from '../common/getArrayByTagName';
 import {imageServer} from '../system/system';
-import indexAjax from '../ajax/indexAjax';
+import indexAjaxData from '../ajax/indexAjaxData';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {moveOptions} from './assets';
 import partial from '../common/partial';
@@ -12,14 +12,11 @@ var imgNodes;
 var selectRow;
 
 function doPickMove(moveId, slotId) {
-  return indexAjax({
-    data: {
-      no_mobile: 1,
-      cmd: 'arena',
-      subcmd: 'dopickmove',
-      move_id: moveId,
-      slot_id: slotId
-    }
+  return indexAjaxData({
+    cmd: 'arena',
+    subcmd: 'dopickmove',
+    move_id: moveId,
+    slot_id: slotId
   });
 }
 

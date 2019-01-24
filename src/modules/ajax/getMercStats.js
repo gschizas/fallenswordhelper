@@ -1,5 +1,5 @@
 import createDocument from '../system/createDocument';
-import indexAjax from './indexAjax';
+import indexAjaxData from './indexAjaxData';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import {defenderMultiplier, mercRE} from '../support/constants';
@@ -35,9 +35,8 @@ function parseMercStats(html) {
 }
 
 export default function getMercStats() {
-  return indexAjax({
+  return indexAjaxData({
     cmd: 'guild',
-    subcmd: 'mercs',
-    no_mobile: '1'
+    subcmd: 'mercs'
   }).pipe(parseMercStats);
 }

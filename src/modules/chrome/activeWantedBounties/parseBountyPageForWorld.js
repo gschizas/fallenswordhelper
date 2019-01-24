@@ -1,11 +1,11 @@
+import bountyPage from '../../ajax/bountyPage';
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import findTarget from './findTarget';
 import {getElementById} from '../../common/getElement';
 import {injectBountyList} from './injectBountyList';
 import {injectWantedList} from './injectWantedList';
-import retryAjax from '../../ajax/retryAjax';
-import {activeBountyListPosted, bountyUrl, getActiveBountyList} from './lists';
+import {activeBountyListPosted, getActiveBountyList} from './lists';
 
 var curPage;
 var maxPage;
@@ -33,8 +33,7 @@ export function parseBountyPageForWorld(details) {
   if (calf.enableWantedList) {
     getWantedBountyList(doc);
     if (curPage < maxPage) {
-      retryAjax(bountyUrl + (curPage + 1).toString())
-        .done(parseBountyPageForWorld);
+      bountyPage(curPage + 1).done(parseBountyPageForWorld);
     } else {
       injectWantedList();
     }

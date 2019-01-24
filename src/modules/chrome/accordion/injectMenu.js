@@ -14,8 +14,14 @@ import insertElementAfter from '../../common/insertElementAfter';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import jQueryDialog from '../jQueryDialog';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import {newGuildLogUrl} from '../../support/constants';
 import on from '../../common/on';
+import {
+  cmdUrl,
+  def_subcmd,
+  newGuildLogUrl,
+  notepadBlankUrl,
+  profileUrl
+} from '../../support/constants';
 import {createAnchor, createLi} from '../../common/cElement';
 import {injectAuctionSearch, injectQuickLinkManager} from
   '../../notepad/lists/lists';
@@ -99,8 +105,8 @@ function guildInventory() {
   if (currentGuildId()) {
     insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=guildinvmgr">Guild Inventory</a></li>');
+      'guild-guildinvmanager" href="' + notepadBlankUrl +
+      'guildinvmgr">Guild Inventory</a></li>');
   }
 }
 
@@ -108,11 +114,11 @@ function characterButtons() {
   anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   insertAfterParent('nav-character-log', insertHtmlAfterEnd,
     '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-    'character-medalguide" href="index.php?cmd=profile&subcmd=' +
+    'character-medalguide" href="' + profileUrl + def_subcmd +
     'medalguide">Medal Guide</a></li>' +
     '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-    'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-    'subcmd=invmanagernew">Inventory Manager</a></li>');
+    'character-invmanager" href="' + notepadBlankUrl +
+    'invmanagernew">Inventory Manager</a></li>');
   buffLogLink();
   combatLogLink();
   creatureLogLink();
@@ -134,8 +140,8 @@ function actionButtons() {
 function topRatedLink() {
   insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
     '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-    'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
-    'Top 250 Players</a></li>');
+    'toprated-top250" href="' + cmdUrl + 'toprated' + def_subcmd +
+    'xp">Top 250 Players</a></li>');
 }
 
 function doAccordion() {

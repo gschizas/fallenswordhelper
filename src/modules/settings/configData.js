@@ -6,10 +6,10 @@ import generalPrefs from './generalPrefs';
 import guildPrefs from './guildPrefs';
 import logPrefs from './logPrefs';
 import otherPrefs from './otherPrefs';
-import {playerIdUrl} from '../support/constants';
 import {prefs} from './worldPrefs';
 import profilePrefs from './profilePrefs';
 import questPrefs from './questPrefs';
+import {notepadBlankUrl, playerIdUrl} from '../support/constants';
 
 function storageDetails() {
   return '<tr><td align=center><input id="fshClearStorage" type="button" ' +
@@ -93,9 +93,8 @@ export default function setupConfigData() {
     '<tr><td colspan="2" align=center><input type="button" class=' +
       '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
     // Export or Load Settings
-    // http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
     '<tr><td colspan="2" align=center>' +
-      '<a href="index.php?cmd=notepad&blank=1&subcmd=savesettings">' +
+      '<a href="' + notepadBlankUrl + 'savesettings">' +
       'Export or Load Settings!</a></td></tr>' +
     codedBy() +
     '</table></form>';

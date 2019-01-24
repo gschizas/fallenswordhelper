@@ -1,7 +1,11 @@
 import getValue from '../system/getValue';
 import hideElement from '../common/hideElement';
 import querySelectorArray from '../common/querySelectorArray';
-import {newGuildLogLoc, newGuildLogUrl} from '../support/constants';
+import {
+  guildLogUrl,
+  newGuildLogLoc,
+  newGuildLogUrl
+} from '../support/constants';
 
 function testForGuildLogMsg(guildLogNode) {
   return location.search !== newGuildLogLoc ||
@@ -27,6 +31,6 @@ function gotGuildLogNodes(guildLogNodes) {
 export default function changeGuildLogHREF() {
   if (!getValue('useNewGuildLog')) {return;}
   var guildLogNodes = querySelectorArray(
-    '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
+    '#pCL a[href="' + guildLogUrl + '"]');
   if (guildLogNodes.length > 0) {gotGuildLogNodes(guildLogNodes);}
 }

@@ -1,8 +1,9 @@
+import {cmdUrl} from '../../support/constants';
 import contains from '../../common/contains';
 import querySelectorArray from '../../common/querySelectorArray';
 
 function toSettings(el) {
-  el.innerHTML = '<a href="index.php?cmd=settings">Game Help</a>';
+  el.innerHTML = '<a href="' + cmdUrl + 'settings">Game Help</a>';
 }
 
 export default function gameHelpLink() {

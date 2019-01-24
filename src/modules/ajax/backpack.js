@@ -1,8 +1,8 @@
-import indexAjax from './indexAjax';
+import indexAjaxJson from './indexAjaxJson';
 
 export default function backpack() {
-  return indexAjax({
-    data: {cmd: 'profile', subcmd: 'fetchinv'},
-    dataType: 'json'
+  return indexAjaxJson({
+    cmd: 'profile',
+    subcmd: 'fetchinv'
   });
 }

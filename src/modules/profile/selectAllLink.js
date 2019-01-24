@@ -1,5 +1,6 @@
 import clickThis from '../common/clickThis';
 import {createSpan} from '../common/cElement';
+import {dropItemsUrl} from '../support/constants';
 import {getElementById} from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import insertElement from '../common/insertElement';
@@ -22,8 +23,8 @@ function profileSelectAll() {
 
 export default function selectAllLink() {
   // select all link
-  var node = document.querySelector('#profileRightColumn' +
-    ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
+  var node = document.querySelector('#profileRightColumn a[href="' +
+    dropItemsUrl + '"]');
   if (!node) {return;}
   var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
   on(allSpan, 'click', profileSelectAll);

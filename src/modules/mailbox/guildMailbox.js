@@ -20,7 +20,7 @@ function translateReturnInfo(data) {
 }
 
 function guildMailboxTake(href) {
-  return retryAjax({url: href}).pipe(translateReturnInfo).done(dialog);
+  return retryAjax(href).pipe(translateReturnInfo).done(dialog);
 }
 
 function takeResult(self, data) {

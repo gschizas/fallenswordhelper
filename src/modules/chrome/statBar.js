@@ -3,7 +3,14 @@ import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import on from '../common/on';
-import {profileUrl} from '../support/constants';
+import {
+  blacksmithUrl,
+  cmdUrl,
+  def_subcmd,
+  dropItemsUrl,
+  pointsUrl,
+  profileUrl
+} from '../support/constants';
 
 function statbarWrapper(href, id) {
   var character = getElementById(id);
@@ -19,9 +26,9 @@ function statbarWrapper(href, id) {
 
 export default function statbar() {
   statbarWrapper(profileUrl, 'statbar-character');
-  statbarWrapper('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
-  statbarWrapper('index.php?cmd=blacksmith', 'statbar-equipment');
-  statbarWrapper('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
-  statbarWrapper('index.php?cmd=points', 'statbar-fsp');
-  statbarWrapper('index.php?cmd=bank', 'statbar-gold');
+  statbarWrapper(pointsUrl + def_subcmd + 'reserve', 'statbar-stamina');
+  statbarWrapper(blacksmithUrl, 'statbar-equipment');
+  statbarWrapper(dropItemsUrl, 'statbar-inventory');
+  statbarWrapper(pointsUrl, 'statbar-fsp');
+  statbarWrapper(cmdUrl + 'bank', 'statbar-gold');
 }

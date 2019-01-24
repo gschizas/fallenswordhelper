@@ -1,3 +1,4 @@
+import {cmdUrl} from './support/constants';
 import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
 import insertElement from './common/insertElement';
@@ -101,8 +102,8 @@ function injectPoints() {
   currentFSP = intValue(getElementById('statbar-fsp').textContent);
   injectUpgradeHelper('Current');
   injectUpgradeHelper('Maximum');
-  getInputCell('Gold').innerHTML = '<a href="' + server +
-    'index.php?cmd=marketplace">Sell at Marketplace</a>';
+  getInputCell('Gold').innerHTML = '<a href="' + server + cmdUrl +
+    'marketplace">Sell at Marketplace</a>';
 }
 
 function saveUpgradeValue(upgrade, key) {

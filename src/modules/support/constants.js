@@ -31,20 +31,49 @@ export var defenderMultiplier = 0.2;
 export var now = Date.now();
 export var nowSecs = Math.floor(now / 1000);
 
-export var indexPhp = 'index.php';
-export var newGuildLogLoc = '?cmd=notepad&blank=1&subcmd=newguildlog';
-export var newGuildLogUrl = indexPhp + newGuildLogLoc;
-export var ahSeachUrl = indexPhp + '?cmd=auctionhouse&search=';
-export var logUrl = indexPhp + '?cmd=log';
-export var doAddIgnore = logUrl + '&subcmd=doaddignore&ignore_username=';
-export var profileUrl = indexPhp + '?cmd=profile';
-export var playerIdUrl = profileUrl + '&player_id=';
-export var tradeUrl = indexPhp + '?cmd=trade&target_player=';
-export var secureUrl = indexPhp +
-  '?cmd=trade&subcmd=createsecure&target_username=';
-export var arenaUrl = indexPhp + '?cmd=arena&subcmd=';
+export var def_joinallgroupsundersize = 'joinallgroupsundersize';
 
-export var guideUrl = 'https://guide.fallensword.com/index.php?cmd=';
+export var indexPhp = 'index.php';
+export var def_cmd = '?cmd=';
+export var cmdUrl = indexPhp + def_cmd;
+export var def_subcmd = '&subcmd=';
+var def_targetUsername = '&target_username=';
+var notepadBlank = def_cmd + 'notepad&blank=1' + def_subcmd;
+export var newGuildLogLoc = notepadBlank + 'newguildlog';
+export var newGuildLogUrl = indexPhp + newGuildLogLoc;
+export var auctionhouseUrl = cmdUrl + 'auctionhouse';
+export var ahSearchUrl = auctionhouseUrl + '&search=';
+export var logUrl = cmdUrl + 'log';
+export var doAddIgnore = logUrl + def_subcmd + 'doaddignore&ignore_username=';
+export var profileUrl = cmdUrl + 'profile';
+export var playerIdUrl = profileUrl + '&player_id=';
+export var dropItemsUrl = profileUrl + def_subcmd + 'dropitems';
+export var tradeUrl = cmdUrl + 'trade&target_player=';
+export var secureUrl = cmdUrl + 'trade' + def_subcmd + 'createsecure' +
+  def_targetUsername;
+export var arenaUrl = cmdUrl + 'arena' + def_subcmd;
+export var notepadBlankUrl = indexPhp + notepadBlank;
+export var auctionSearchUrl = notepadBlankUrl + 'auctionsearch';
+export var pointsUrl = cmdUrl + 'points';
+export var guildSubcmdUrl = cmdUrl + 'guild' + def_subcmd;
+export var guildLogUrl = guildSubcmdUrl + 'log';
+export var scouttowerUrl = guildSubcmdUrl + 'scouttower';
+export var groupsSubcmdUrl = guildSubcmdUrl + 'groups&subcmd2=';
+export var recallUserUrl = guildSubcmdUrl + 'inventory&subcmd2=report&user=';
+export var joinallUrl = groupsSubcmdUrl + 'joinall';
+export var joinUnderUrl = groupsSubcmdUrl + def_joinallgroupsundersize;
+export var worldUrl = cmdUrl + 'world';
+export var searchPlayerUrl = cmdUrl + 'findplayer';
+export var showPlayerUrl = searchPlayerUrl +
+  '&search_show_first=1&search_username=';
+export var blacksmithUrl = cmdUrl + 'blacksmith';
+export var quickbuffUrl = cmdUrl + 'quickbuff';
+export var composingUrl = cmdUrl + 'composing';
+export var attackplayerUrl = cmdUrl + 'attackplayer' + def_targetUsername;
+export var updateArchiveUrl = cmdUrl + def_subcmd + 'viewupdatearchive';
+export var archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
+
+export var guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
 
 export var beginFolderSpanElement =
   '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';

@@ -1,6 +1,7 @@
 import {getElementById} from '../common/getElement';
 import on from '../common/on';
 import setLastScav from './setLastScav';
+import {cmdUrl, def_subcmd} from '../support/constants';
 
 function dontPost(e) {
   var caveEle = document.querySelector('#pCC input[name="cave_id"]:checked');
@@ -9,8 +10,8 @@ function dontPost(e) {
     var caveId = caveEle.value;
     var gold = getElementById('gold').value;
     setLastScav(caveId, gold);
-    window.location = 'index.php?cmd=scavenging&subcmd=process&cave_id=' +
-      caveId + '&gold=' + gold + '&submit=Scavenge';
+    window.location = cmdUrl + 'scavenging' + def_subcmd +
+      'process&cave_id=' + caveId + '&gold=' + gold + '&submit=Scavenge';
   }
 }
 

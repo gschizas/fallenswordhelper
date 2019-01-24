@@ -1,15 +1,5 @@
 import {def_table} from '../support/constants';
-import isObject from './isObject';
-
-export function mixin(obj, mixins) {
-  Object.keys(mixins).forEach(function(key) {
-    if (isObject(mixins[key]) && mixins[key] !== null) {
-      mixin(obj[key], mixins[key]);
-    } else {
-      obj[key] = mixins[key];
-    }
-  });
-}
+import mixin from './mixin';
 
 function cElement(type, props) {
   var el = document.createElement(type);

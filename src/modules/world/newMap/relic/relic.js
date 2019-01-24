@@ -4,7 +4,7 @@ import {def_relicView} from '../../../support/constants';
 import getGroupStats from '../../../ajax/getGroupStats';
 import getMercStats from '../../../ajax/getMercStats';
 import getProfile from '../../../ajax/getProfile';
-import indexAjax from '../../../ajax/indexAjax';
+import indexAjaxData from '../../../ajax/indexAjaxData';
 import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
 import when from '../../../common/when';
@@ -56,23 +56,17 @@ function parseGroups(html) {
 }
 
 function getGroups() {
-  return indexAjax({
-    data: {
-      no_mobile: 1,
-      cmd: 'guild',
-      subcmd: 'groups'
-    }
+  return indexAjaxData({
+    cmd: 'guild',
+    subcmd: 'groups'
   }).pipe(parseGroups);
 }
 
 function getGuild() {
-  return indexAjax({
-    data: {
-      no_mobile: 1,
-      cmd: 'guild',
-      subcmd: 'view',
-      guild_id: relicData.controlled_by.guild_id
-    }
+  return indexAjaxData({
+    cmd: 'guild',
+    subcmd: 'view',
+    guild_id: relicData.controlled_by.guild_id
   }).done(parseGuild);
 }
 

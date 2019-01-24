@@ -3,8 +3,10 @@ import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
+import guildManage from '../../ajax/guildManage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
+import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import {pCC} from '../../support/layout';
 import pageLayout from './pageLayout';
 import parseProfileAndDisplay from './parseProfileAndDisplay';
@@ -17,7 +19,11 @@ import stringSort from '../../system/stringSort';
 import {buffCustom, otherCustom} from './assets';
 import {calcMinLvl, setMinLvl} from './minLvl';
 import {getBufferProgress, updateProgress} from './bufferProgress';
-import {lastActivityRE, profileUrl} from '../../support/constants';
+import {
+  lastActivityRE,
+  profileUrl,
+  showPlayerUrl
+} from '../../support/constants';
 
 var findBuffNicks;
 var findBuffMinCastLevel;
@@ -98,8 +104,7 @@ function playerRows(doc) {
 function nextPage(curPage, maxPage, callback) {
   var newPage = calcNextPage(curPage, maxPage);
   updateProgress('Parsing online page ' + curPage + ' ...');
-  retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=' +
-    newPage.toString()).done(callback);
+  onlinePlayersPage(newPage).done(callback);
 }
 
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
@@ -122,8 +127,7 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   onlinePlayersSetting =
     parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
-    retryAjax('index.php?no_mobile=1&cmd=onlineplayers&page=1')
-      .done(findBuffsParseOnlinePlayers);
+    onlinePlayersPage(1).done(findBuffsParseOnlinePlayers);
   } else {
     findBuffsParsePlayersForBuffs();
   }
@@ -170,9 +174,7 @@ function findBuffsParseProfilePageStart() { // Legacy
   profilePagesToSearch.push(profileUrl); // ???
   var extraProfileArray = extraProfile.split(',');
   extraProfileArray.forEach(function(el) {
-    profilePagesToSearch.push('index.php?cmd=findplayer' + // ???
-      '&search_active=1&search_level_max=&search_level_min=' +
-      '&search_username=' + el + '&search_show_first=1');
+    profilePagesToSearch.push(showPlayerUrl + el);
   });
   profilePagesToSearchProcessed = 0;
   if (getElementById('alliesEnemies').checked) {
@@ -218,8 +220,7 @@ function findAnyStart(progMsg) { // jQuery
   extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
-  retryAjax('index.php?no_mobile=1&cmd=guild&subcmd=manage')
-    .done(findBuffsParseGuildManagePage);
+  guildManage().done(findBuffsParseGuildManagePage);
 }
 
 function thisBuff(selectedBuff, el) {return selectedBuff === el.id;}

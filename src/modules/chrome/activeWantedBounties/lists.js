@@ -13,7 +13,6 @@ var bountyListRefreshTime;
 export var bwNeedsRefresh;
 var wantedNames;
 export var wantedArray;
-export var bountyUrl = 'index.php?no_mobile=1&cmd=bounty&page=';
 
 function hasActiveBounties(activeTable) {
   return !/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML);

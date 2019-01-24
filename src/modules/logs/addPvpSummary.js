@@ -1,5 +1,6 @@
 import addCommas from '../system/addCommas';
 import calf from '../support/calf';
+import combatView from '../ajax/combatView';
 import createDocument from '../system/createDocument';
 import getForage from '../ajax/getForage';
 import insertElement from '../common/insertElement';
@@ -8,7 +9,6 @@ import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
 import playerId from '../common/playerId';
 import querySelectorAll from '../common/querySelectorAll';
-import retryAjax from '../ajax/retryAjax';
 import {sendEvent} from '../support/fshGa';
 import setForage from '../ajax/setForage';
 import {specials} from '../support/specials';
@@ -83,8 +83,7 @@ function whatsMissing(json, html) {
 
 function unknownSpecials(json) {
   if (!json.r.specials.every(inSpecialsList)) {
-    retryAjax('index.php?cmd=combat&subcmd=view&combat_id=' + json.r.id)
-      .done(partial(whatsMissing, json));
+    combatView(json.r.id).done(partial(whatsMissing, json));
   }
 }
 

@@ -9,6 +9,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import playerName from '../common/playerName';
+import {recallUserUrl} from '../support/constants';
 import {getXpLock, guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 import {logoToggle, statToggle, structureToggle} from './panelToggle';
 
@@ -17,8 +18,7 @@ function selfRecallLink(leftHandSideColumnTable) {
   var getLi = getElementsByTagName('li', leftHandSideColumnTable);
   var selfRecall = getLi[getLi.length - 1].parentNode;
   insertHtmlBeforeEnd(selfRecall,
-    '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
-    'user=' + playerName() +
+    '<li><a href="' + recallUserUrl + playerName() +
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 

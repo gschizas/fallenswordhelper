@@ -1,12 +1,9 @@
-import indexAjax from './indexAjax';
+import indexAjaxJson from './indexAjaxJson';
 
 export default function getProfile(username) {
-  return indexAjax({
-    data: {
-      cmd: 'export',
-      subcmd: 'profile',
-      player_username: username
-    },
-    dataType: 'json'
+  return indexAjaxJson({
+    cmd: 'export',
+    subcmd: 'profile',
+    player_username: username
   });
 }

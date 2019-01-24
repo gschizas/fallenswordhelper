@@ -1,3 +1,4 @@
+import {ahSearchUrl} from '../../support/constants';
 import getValueJSON from '../../system/getValueJSON';
 
 export var auctionSearchBlurb =
@@ -20,7 +21,7 @@ export function auctionSearchParams() {
     fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
     tags: ['text', 'text', 'text', 'checkbox'],
     url: ['', '',
-      'index.php?cmd=auctionhouse&amp;type=-1&amp;search=@replaceme@', ''],
+      ahSearchUrl + '@replaceme@', ''],
     currentItems: getValueJSON('quickSearchList'),
     gmname: 'quickSearchList',
     categoryField: 'category',

@@ -1,12 +1,9 @@
-import indexAjax from '../../ajax/indexAjax';
+import indexAjaxData from '../../ajax/indexAjaxData';
 
 export default function getGuildLogPage(page) {
-  return indexAjax({
-    data: {
-      cmd: 'guild',
-      subcmd: 'log',
-      page: page,
-      no_mobile: 1
-    }
+  return indexAjaxData({
+    cmd: 'guild',
+    subcmd: 'log',
+    page: page
   });
 }

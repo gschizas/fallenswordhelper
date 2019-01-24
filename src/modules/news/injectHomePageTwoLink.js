@@ -1,7 +1,6 @@
 import containsText from '../common/containsText';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getValue from '../system/getValue';
-import {guideUrl} from '../support/constants';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
@@ -9,6 +8,7 @@ import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import querySelectorArray from '../common/querySelectorArray';
 import setValue from '../system/setValue';
+import {archiveUrl, guideUrl, updateArchiveUrl} from '../support/constants';
 import {createAnchor, createSpan} from '../common/cElement';
 
 var titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
@@ -73,15 +73,13 @@ function addUfsgLinks() {
 
 export default function injectHomePageTwoLink() { // Pref
   var archiveLink = document.querySelector(
-    '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
+    '#pCC a[href="' + updateArchiveUrl + '"]');
   if (!archiveLink) {return;}
-  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
-    '&subcmd=viewupdatearchive&subcmd2=&page=2&search_text=">' +
-    'View Updates Page 2</a>');
-  archiveLink = document.querySelector(
-    '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
-  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="index.php?cmd=' +
-    '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
+  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="' + updateArchiveUrl +
+    '&page=2">View Updates Page 2</a>');
+  archiveLink = document.querySelector('#pCC a[href="' + archiveUrl + '"]');
+  insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="' + archiveUrl +
+    '&page=2">View News Page 2</a>');
   lookForPvPLadder(); // Pref
   addUfsgLinks(); // Pref
 }

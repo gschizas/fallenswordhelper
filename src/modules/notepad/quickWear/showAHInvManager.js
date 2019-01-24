@@ -1,8 +1,8 @@
-import {ahSeachUrl} from '../../support/constants';
 import {createDiv} from '../../common/cElement';
 import getValueJSON from '../../system/getValueJSON';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
+import {ahSearchUrl, auctionSearchUrl} from '../../support/constants';
 
 function foundInvItem(invCount, name) {
   if (invCount[name]) {
@@ -13,7 +13,7 @@ function foundInvItem(invCount, name) {
 }
 
 function ahLink(searchname, nickname) {
-  return '<a href="' + ahSeachUrl + searchname +
+  return '<a href="' + ahSearchUrl + searchname +
     '">' + nickname + '</a>';
 }
 
@@ -54,7 +54,7 @@ function buildHTML(invCount, quickSL) {
   // TODO this is going to need significant rebuild
   return '<table width="100%" cellspacing="2" cellpadding="2"><thead>' +
     '<tr><th colspan="5" class="fshCenter">Items from ' +
-    '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
+    '<a href="' + auctionSearchUrl + '">' +
     'AH Quick Search</a> found in your inventory</th></tr>' +
     '<tr><th>Name</th><th>Nick Name</th><th>Inv Count</th>' +
     '<th>AH Min Price</th><th>AH BuyNow Price</th></tr></thead><tbody>' +
@@ -66,7 +66,7 @@ function buildHTML(invCount, quickSL) {
     displayNotFound(quickSL) +
     '</td></tr><tr><td colspan="5"><hr></td></tr></tbody>' +
     '<thead><tr><th colspan="5" class="fshCenter">Items NOT from ' +
-    '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
+    '<a href="' + auctionSearchUrl + '">' +
     'AH Quick Search</a> found in your inventory</td></thead><tbody>' +
     // show inv & counter for item with nickname NOT found
     displayOtherCount(invCount) +

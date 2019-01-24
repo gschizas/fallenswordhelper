@@ -1,12 +1,11 @@
+import bountyPage from '../../ajax/bountyPage';
 import calf from '../../support/calf';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import {parseBountyPageForWorld} from './parseBountyPageForWorld';
-import retryAjax from '../../ajax/retryAjax';
 import setValueJSON from '../../system/setValueJSON';
 import {
   bountyList,
-  bountyUrl,
   bwNeedsRefresh,
   doRefresh,
   invalidateCache,
@@ -43,7 +42,7 @@ function retrieveBountyInfo(enableActiveList, enableWantedList) {
   invalidateCache();
   if (needsRefresh()) {
     doRefresh();
-    retryAjax(bountyUrl + '1').done(parseBountyPageForWorld);
+    bountyPage(1).done(parseBountyPageForWorld);
   } else {
     notRefreshed(enableActiveList, enableWantedList);
   }

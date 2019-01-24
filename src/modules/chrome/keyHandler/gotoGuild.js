@@ -1,8 +1,9 @@
 import expandMenu from './expandMenu';
+import {guildSubcmdUrl} from '../../support/constants';
 import keyHandlerEvent from './keyHandlerEvent';
 
 export default function gotoGuild() {
   keyHandlerEvent('gotoGuild');
   expandMenu('4');
-  location.href = 'index.php?cmd=guild&subcmd=manage';
+  location.href = guildSubcmdUrl + 'manage';
 }
