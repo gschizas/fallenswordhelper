@@ -5,7 +5,7 @@ import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
 import injectMonsterLog from '../../notepad/monstorLog/monstorLog';
-import injectNotepadShowLogs from '../../combatLog';
+import injectNotepadShowLogs from '../../notepad/combatLog';
 import injectOnlinePlayers from
   '../../notepad/onlinePlayers/injectOnlinePlayers';
 import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';

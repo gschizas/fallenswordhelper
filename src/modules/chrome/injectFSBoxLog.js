@@ -5,7 +5,7 @@ import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
-import {injectFsBoxContent} from '../misc';
+import injectFsBoxContent from '../notepad/injectFsBoxContent';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';

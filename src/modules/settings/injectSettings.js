@@ -4,7 +4,7 @@ import getCalfPrefs from '../common/getCalfPrefs';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import injectMonsterLog from '../notepad/monstorLog/monstorLog';
-import injectNotepadShowLogs from '../combatLog';
+import injectNotepadShowLogs from '../notepad/combatLog';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jConfirm from '../common/jConfirm';

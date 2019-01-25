@@ -1,8 +1,10 @@
 import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
+import injectFsBoxContent from '../../notepad/injectFsBoxContent';
 import {injectInventoryManagerNew} from '../../notepad/inventory/inventory';
 import injectMonsterLog from '../../notepad/monstorLog/monstorLog';
 import injectNewGuildLog from '../../guild/newGuildLog/newGuildLog';
-import injectNotepadShowLogs from '../../combatLog';
+import injectNotepad from '../../notepad/injectNotepad';
+import injectNotepadShowLogs from '../../notepad/combatLog';
 import injectOnlinePlayers from
   '../../notepad/onlinePlayers/injectOnlinePlayers';
 import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
@@ -13,10 +15,6 @@ import {injectAuctionSearch, injectQuickLinkManager} from
   '../../notepad/lists/lists';
 import {injectFindBuffs, injectFindOther}
   from '../../notepad/findBuffs/findBuffs';
-import {
-  injectFsBoxContent,
-  injectNotepad
-} from '../../misc';
 
 export default {
   showlogs: {'-': injectNotepadShowLogs}, // done
