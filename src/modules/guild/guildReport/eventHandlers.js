@@ -44,12 +44,8 @@ function recallResult(action, theTd, data) {
 }
 
 function doRecall(theTd, href, mode, action) {
-  queueRecallItem({
-    invId: itemId(href),
-    playerId: targetPlayerId(href),
-    mode: mode,
-    action: action
-  }).done(partial(recallResult, action, theTd));
+  queueRecallItem(itemId(href), targetPlayerId(href), mode, action)
+    .done(partial(recallResult, action, theTd));
 }
 
 function recallTo(theTd, href, mode) {

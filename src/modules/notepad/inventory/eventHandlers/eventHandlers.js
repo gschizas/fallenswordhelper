@@ -21,23 +21,14 @@ function setName(fshInv, e) { // jQuery
 
 function takeItem(e) { // jQuery
   var self = $(e.target);
-  doAction(
-    partial(queueTakeItem, self.attr('invid'), self.attr('action')),
-    self
-  );
+  doAction(partial(queueTakeItem, self.attr('invid'), self.attr('action')),
+    self);
 }
 
 function recallItem(e) { // jQuery
   var self = $(e.target);
-  doAction(
-    partial(queueRecallItem, {
-      invId: self.attr('invid'),
-      playerId: self.attr('playerid'),
-      mode: self.attr('mode'),
-      action: self.attr('action')
-    }),
-    self
-  );
+  doAction(partial(queueRecallItem, self.attr('invid'), self.attr('playerid'),
+    self.attr('mode'), self.attr('action')), self);
 }
 
 function wearItem(e) { // jQuery
