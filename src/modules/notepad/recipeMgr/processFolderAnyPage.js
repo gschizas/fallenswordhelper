@@ -2,6 +2,7 @@ import createDocument from '../../system/createDocument';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import getCustomUrlParameter from '../../system/getCustomUrlParameter';
 import {getElementById} from '../../common/getElement';
+import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 import processRecipe from './processRecipe';
@@ -17,13 +18,13 @@ function makeRecipe(el) {
   return {
     img: el.parentNode.previousElementSibling.children[0].getAttribute('src'),
     link: el.href,
-    name: el.textContent,
+    name: getText(el),
     id: getCustomUrlParameter(el.href, 'recipe_id')
   };
 }
 
 function getRecipe(output, recipebook, el) {
-  insertHtmlBeforeEnd(output, 'Found blueprint "' + el.textContent + '".<br>');
+  insertHtmlBeforeEnd(output, 'Found blueprint "' + getText(el) + '".<br>');
   var recipe = makeRecipe(el);
   return retryAjax(el.href)
     .pipe(partial(processRecipe, output, recipebook, recipe));

@@ -3,6 +3,7 @@ import calf from '../../../support/calf';
 import getElementsByClassName from '../../../common/getElementsByClassName';
 import insertElement from '../../../common/insertElement';
 import on from '../../../common/on';
+import setText from '../../../common/setText';
 import setValue from '../../../system/setValue';
 import {createButton, createDiv} from '../../../common/cElement';
 
@@ -26,6 +27,10 @@ function doNotKillText() {
   return 'Add to the do not kill list';
 }
 
+function updateText() {
+  setText(doNotKillText(), doNotKillBtn);
+}
+
 function addRemoveCreature() {
   var index = calf.doNotKillList.indexOf(dnkName);
   if (index === -1) {
@@ -33,7 +38,7 @@ function addRemoveCreature() {
   } else {
     calf.doNotKillList.splice(index, 1);
   }
-  doNotKillBtn.textContent = doNotKillText();
+  updateText();
   setValue('doNotKillList', calf.doNotKillList.join());
   afterUpdateActionList(); // refresh the action list
 }
@@ -58,7 +63,7 @@ function doNotKillLink() {
   if (!doNotKillBtn) {
     makeDnkBtn();
   } else {
-    doNotKillBtn.textContent = doNotKillText();
+    updateText();
   }
 }
 

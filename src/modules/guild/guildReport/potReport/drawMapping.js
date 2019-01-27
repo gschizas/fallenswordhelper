@@ -5,6 +5,7 @@ import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
 import once from '../../../common/once';
 import partial from '../../../common/partial';
 import {sendEvent} from '../../../support/fshGa';
+import setText from '../../../common/setText';
 import {
   createDiv,
   createInput,
@@ -54,7 +55,7 @@ function getSelectRow(ary) {
 
 function insertRows(mapTbl, el, i, ary) {
   var selectRow = getSelectRow(ary);
-  selectRow.cells[0].textContent = el[0];
+  setText(el[0], selectRow.cells[0]);
   var select = selectRow.cells[1].children[0];
   select.name = el[0];
   select.value = el[1];

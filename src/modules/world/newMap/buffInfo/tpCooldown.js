@@ -1,4 +1,5 @@
 import insertElement from '../../../common/insertElement';
+import setText from '../../../common/setText';
 import {textSpan} from '../../../common/cElement';
 import toggleForce from '../../../common/toggleForce';
 
@@ -8,7 +9,7 @@ var lastTp;
 
 function initCdDiv(containerDiv, cd) {
   cdDiv = containerDiv.children[5];
-  cdDiv.textContent = 'Teleport Cooldown: ';
+  setText('Teleport Cooldown: ', cdDiv);
   cooldownSpan = textSpan(cd.toString());
   insertElement(cdDiv, cooldownSpan);
 }
@@ -29,7 +30,7 @@ function hideCd() {
 
 function updateCooldown() {
   var secs = Math.max(Math.ceil((lastTp - Date.now()) / 1000), 0);
-  cooldownSpan.textContent = secs.toString();
+  setText(secs, cooldownSpan);
   if (secs > 0) {
     setTimeout(updateCooldown, 500);
   }

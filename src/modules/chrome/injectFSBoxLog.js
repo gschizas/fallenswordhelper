@@ -4,8 +4,9 @@ import {getElementById} from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getForage from '../ajax/getForage';
+import getText from '../common/getText';
 import getValue from '../system/getValue';
-import {injectFsBoxContent} from '../misc';
+import injectFsBoxContent from '../notepad/injectFsBoxContent';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';
@@ -33,7 +34,7 @@ function fSBoxExists(node) { // jQuery.min
   var playerName = getElementsByTagName('a', nodediv);
   if (playerName.length === 0) {return;}
   getForage('fsh_fsboxcontent').done(storeFSBox);
-  playerName = playerName[0].textContent;
+  playerName = getText(playerName[0]);
   insertHtmlBeforeEnd(nodediv,
     '<br><span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
     playerName + '">Ignore</a> ]</span> ');

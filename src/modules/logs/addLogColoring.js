@@ -1,3 +1,4 @@
+import getText from '../common/getText';
 import getValue from '../system/getValue';
 import myRows from '../common/myRows';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
@@ -31,7 +32,7 @@ function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
 
 function rowColor(logScreen, dateColumn, aRow) { // Legacy
   var addBuffTag = true;
-  var cellContents = aRow.cells[dateColumn].textContent;
+  var cellContents = getText(aRow.cells[dateColumn]);
   var postDateUtc = parseDateAsTimestamp(cellContents);
   var postAgeMins = (nowUtc - postDateUtc) / (1000 * 60);
   if (postDateUtc > lastCheckUtc) {

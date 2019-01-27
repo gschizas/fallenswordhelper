@@ -1,8 +1,9 @@
 import {getElementById} from '../common/getElement';
+import getTextTrim from '../common/getTextTrim';
 import {def_statAttack, def_statDefense} from '../support/constants';
 
 function getDefStat() {
-  return Number(getElementById(def_statDefense).firstChild.textContent.trim());
+  return Number(getTextTrim(getElementById(def_statDefense).firstChild));
 }
 
 function calcNmvEffect(atkStat, oldTipped) {
@@ -24,7 +25,7 @@ function gotAtk(nmvImg, atkStat) {
 function gotImg(nmvImg) {
   var atkEl = getElementById(def_statAttack);
   if (!atkEl) {return;}
-  var atkStat = Number(atkEl.firstChild.textContent.trim());
+  var atkStat = Number(getTextTrim(atkEl.firstChild));
   if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
 }
 

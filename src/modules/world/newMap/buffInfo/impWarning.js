@@ -7,6 +7,7 @@ import on from '../../../common/on';
 import playerName from '../../../common/playerName';
 import quickbuff from '../../../app/quickbuff';
 import quickbuffSuccess from '../../../common/quickbuffSuccess';
+import setText from '../../../common/setText';
 import toggleForce from '../../../common/toggleForce';
 
 var impDiv;
@@ -42,7 +43,7 @@ function getImpWarningStyle(impsRem) {
 
 function initImpDiv(containerDiv) {
   impDiv = containerDiv.children[0];
-  impDiv.textContent = 'Shield Imps Remaining: ';
+  setText('Shield Imps Remaining: ', impDiv);
   impRemainingSpan = createSpan();
   insertElement(impDiv, impRemainingSpan);
   insertHtmlBeforeEnd(impDiv, '&nbsp;');
@@ -59,7 +60,7 @@ function hasImp(containerDiv, imp) {
   }
   var impsRem = getImpsRemaining(imp);
   impDiv.className = getImpWarningStyle(impsRem);
-  impRemainingSpan.textContent = impsRem.toString();
+  setText(impsRem, impRemainingSpan);
 }
 
 function hideImpWarning() {

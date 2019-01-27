@@ -1,5 +1,6 @@
 import createDocument from '../../../system/createDocument';
 import querySelectorAll from '../../../common/querySelectorAll';
+import setText from '../../../common/setText';
 import {lDPercentageElement, relicCountElement} from './secondaryElements';
 
 export var relicMultiplier;
@@ -13,7 +14,7 @@ export function parseGuild(html) {
   var doc = createDocument(html);
   var nodeList = querySelectorAll('#pCC img[src*="/relics/"]', doc);
   var relicCount = nodeList.length;
-  relicCountElement.textContent = relicCount.toString();
+  setText(relicCount, relicCountElement);
   relicMultiplier = calcRelicMultiplier(relicCount);
-  lDPercentageElement.textContent = (relicMultiplier * 100).toString() + '%';
+  setText(String(relicMultiplier * 100) + '%', lDPercentageElement);
 }

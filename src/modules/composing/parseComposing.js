@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import getArrayByClassName from '../common/getArrayByClassName';
+import getText from '../common/getText';
 import setValue from '../system/setValue';
 import {
   def_lastComposeCheck,
@@ -10,7 +11,7 @@ import {
 var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
 
 function timeRemaining(times, el) {
-  var timeArr = timeRE.exec(el.textContent);
+  var timeArr = timeRE.exec(getText(el));
   if (timeArr) {
     var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
       1000 + now;

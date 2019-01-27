@@ -3,6 +3,8 @@ import functionPasses from '../common/functionPasses';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getProfile from '../ajax/getProfile';
+import getText from '../common/getText';
+import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import guildView from '../app/guild/view';
 import hideElement from '../common/hideElement';
@@ -128,7 +130,7 @@ function findOnlinePlayers() { // jQuery
   var prm = [];
   guilds = {};
   someTables.slice(4).forEach(function(tbl) {
-    var playerName = tbl.textContent.trim();
+    var playerName = getTextTrim(tbl);
     if (tbl.rows[0].cells[0].children[0]) {
       addPlayerToGuild(tbl, playerName);
     } else {
@@ -186,8 +188,7 @@ var topRatedTests = [
   function() {return isObject(pCC.children[0].rows);},
   function() {return pCC.children[0].rows.length > 2;},
   function() {
-    return pCC.children[0].rows[1].textContent.indexOf(
-      'Last Updated') === 0;
+    return getText(pCC.children[0].rows[1]).startsWith('Last Updated');
   }
 ];
 

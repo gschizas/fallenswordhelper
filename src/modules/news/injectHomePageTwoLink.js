@@ -1,5 +1,6 @@
 import containsText from '../common/containsText';
 import getArrayByClassName from '../common/getArrayByClassName';
+import getText from '../common/getText';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
@@ -17,7 +18,7 @@ var titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
 function pvpLadder(head) {return containsText('PvP Ladder', head.children[1]);}
 
 function timestamp(head) {
-  return parseDateAsTimestamp(head.children[2].textContent);
+  return parseDateAsTimestamp(getText(head.children[2]));
 }
 
 function lookForPvPLadder() {

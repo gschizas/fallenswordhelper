@@ -2,11 +2,13 @@ import classHandler from '../common/classHandler';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
+import getText from '../common/getText';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
+import setText from '../common/setText';
 import setValueJSON from '../system/setValueJSON';
 
 var enterForSendMessage;
@@ -37,7 +39,7 @@ function getTable() {
 
 function setName(name) {
   targetPlayer = name;
-  getElementById('quickMsgDialog_targetUsername').textContent = name;
+  setText(name, getElementById('quickMsgDialog_targetUsername'));
 }
 
 function setMsg(msg) {
@@ -71,7 +73,7 @@ function getValidateTips() {
 function doValidateTip(text) {
   getValidateTips();
   if (validateTips) {
-    validateTips.textContent = text;
+    setText(text, validateTips);
   }
 }
 
@@ -114,7 +116,7 @@ function addNewTemplate(self) {
 }
 
 function insertTemplate(self) {
-  dialogMsg.value += self.textContent
+  dialogMsg.value += getText(self)
     .replace(/\{playername\}/g, targetPlayer) + '\n';
 }
 

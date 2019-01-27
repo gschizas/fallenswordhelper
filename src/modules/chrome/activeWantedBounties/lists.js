@@ -1,6 +1,7 @@
 import basicBounty from './basicBounty';
 import extend from '../../common/extend';
 import {getElementById} from '../../common/getElement';
+import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import getValueJSON from '../../system/getValueJSON';
 import {nowSecs} from '../../support/constants';
@@ -19,7 +20,7 @@ function hasActiveBounties(activeTable) {
 }
 
 function bountyData(theCells) {
-  return extend(basicBounty(theCells), {progress: theCells[5].textContent});
+  return extend(basicBounty(theCells), {progress: getText(theCells[5])});
 }
 
 function getAllBounties(activeTable) {

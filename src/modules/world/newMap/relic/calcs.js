@@ -1,9 +1,10 @@
-import addCommas from '../../../system/addCommas';
 import {defenderMultiplier} from '../../../support/constants';
 import fallback from '../../../system/fallback';
 import playerDataObject from '../../../common/playerDataObject';
 import reduceBuffArray from '../../../common/reduceBuffArray';
 import {relicMultiplier} from './parseGuild';
+import setText from '../../../common/setText';
+import setTextCommas from '../../../common/setTextCommas';
 import {
   armorBuffedElement,
   armorElement,
@@ -67,23 +68,23 @@ function updateDefenderValues() {
 }
 
 function updateDefenderElements() {
-  attackElement.textContent = addCommas(defRawAttack);
-  defenseElement.textContent = addCommas(defRawDefense);
-  armorElement.textContent = addCommas(defRawArmor);
-  damageElement.textContent = addCommas(defRawDamage);
-  hpElement.textContent = addCommas(defRawHp);
-  defCloakedElement.textContent = defCloaked.toString();
+  setTextCommas(defRawAttack, attackElement);
+  setTextCommas(defRawDefense, defenseElement);
+  setTextCommas(defRawArmor, armorElement);
+  setTextCommas(defRawDamage, damageElement);
+  setTextCommas(defRawHp, hpElement);
+  setText(defCloaked, defCloakedElement);
   defProcessed += 1;
-  defProcessedElement.textContent = defProcessed.toString();
+  setText(defProcessed, defProcessedElement);
 }
 
 function updateGroupValues() {
   if (!groupStats) {return;}
-  groupAttackElement.textContent = addCommas(groupStats.attack);
-  groupDefenseElement.textContent = addCommas(groupStats.defense);
-  groupArmorElement.textContent = addCommas(groupStats.armor);
-  groupDamageElement.textContent = addCommas(groupStats.damage);
-  groupHPElement.textContent = addCommas(groupStats.hp);
+  setTextCommas(groupStats.attack, groupAttackElement);
+  setTextCommas(groupStats.defense, groupDefenseElement);
+  setTextCommas(groupStats.armor, groupArmorElement);
+  setTextCommas(groupStats.damage, groupDamageElement);
+  setTextCommas(groupStats.hp, groupHPElement);
 }
 
 function calcNmvEffect(buffs) {
@@ -94,8 +95,8 @@ function calcNmvEffect(buffs) {
 function doGroupAttackBuffedElement() {
   var storedFlinchEffectValue = Math.ceil(groupStats.attack *
     leadDefender.flinchLevel * 0.001);
-  groupAttackBuffedElement.textContent = addCommas(groupStats.attack -
-    storedFlinchEffectValue);
+  setTextCommas(groupStats.attack - storedFlinchEffectValue,
+    groupAttackBuffedElement);
 }
 
 function calcDefWithConst(buffs) {
@@ -104,12 +105,12 @@ function calcDefWithConst(buffs) {
 }
 
 function doGroupDefenseBuffedElement(nmv, defConst) {
-  groupDefenseBuffedElement.textContent = addCommas(defConst + nmv);
+  setTextCommas(defConst + nmv, groupDefenseBuffedElement);
 }
 
 function doGroupArmorBuffedElement(buffs) {
-  groupArmorBuffedElement.textContent = addCommas(groupStats.armor +
-    Math.floor(groupStats.armor * fallback(buffs.Sanctuary, 0) * 0.001));
+  setTextCommas(groupStats.armor + Math.floor(groupStats.armor *
+    fallback(buffs.Sanctuary, 0) * 0.001), groupArmorBuffedElement);
 }
 
 function calcFortitudeBonusHP(buffs, defenseWithConstitution) {
@@ -118,8 +119,7 @@ function calcFortitudeBonusHP(buffs, defenseWithConstitution) {
 }
 
 function doGroupHPBuffedElement(fortitudeBonusHP) {
-  groupHPBuffedElement.textContent = addCommas(groupStats.hp +
-    fortitudeBonusHP);
+  setTextCommas(groupStats.hp + fortitudeBonusHP, groupHPBuffedElement);
 }
 
 function doGroupDamageBuffedElement(buffs, fortitudeBonusHP) {
@@ -127,8 +127,8 @@ function doGroupDamageBuffedElement(buffs, fortitudeBonusHP) {
     fallback(buffs['Chi Strike'], 0) * 0.001);
   var storedTerrorizeEffectValue = Math.ceil(
     groupStats.damage * leadDefender.terrorizeLevel * 0.001);
-  groupDamageBuffedElement.textContent = addCommas(groupStats.damage +
-    chiStrikeBonusDamage - storedTerrorizeEffectValue);
+  setTextCommas(groupStats.damage + chiStrikeBonusDamage -
+    storedTerrorizeEffectValue, groupDamageBuffedElement);
 }
 
 function doGroupAttributeElements(buffs) {
@@ -146,26 +146,24 @@ function doGroupAttributeElements(buffs) {
 function flinchEffectOnDefenders(buffs) {
   var flinchEffectValue = Math.ceil(defBuffedAttack *
     fallback(buffs.Flinch, 0) * 0.001);
-  attackBuffedElement.textContent = addCommas(defBuffedAttack -
-    flinchEffectValue);
+  setTextCommas(defBuffedAttack - flinchEffectValue, attackBuffedElement);
 }
 
 function terrorizeEffectOnDefenders(buffs) {
   var terrorizeEffectValue = Math.ceil(defBuffedDamage *
     fallback(buffs.Terrorize, 0) * 0.001);
-  damageBuffedElement.textContent = addCommas(defBuffedDamage -
-    terrorizeEffectValue);
+  setTextCommas(defBuffedDamage - terrorizeEffectValue, damageBuffedElement);
 }
 
 function calculateGroup() {
-  processingStatus.textContent = 'Processing attacking group stats ... ';
+  setText('Processing attacking group stats ... ', processingStatus);
   if (mercStats) {deductMercStats();}
   updateGroupValues();
   var buffs = reduceBuffArray(GameData.player().buffs);
   doGroupAttributeElements(buffs);
   flinchEffectOnDefenders(buffs); // Effect on defending group from Flinch on attacking group.
   terrorizeEffectOnDefenders(buffs);
-  processingStatus.textContent = 'Done.';
+  setText('Done.', processingStatus);
 }
 
 function calcDefenderNmvEffect() {
@@ -179,21 +177,19 @@ function calcDefenderDefenseWithConst() {
 
 function updateDefenderBuffedAttack(nmvEffect) {
   defBuffedAttack = defRawAttack - nmvEffect;
-  attackBuffedElement.textContent = addCommas(defBuffedAttack);
+  setTextCommas(defBuffedAttack, attackBuffedElement);
 }
 
 function updateDefenderBuffedDefense(nmv, defWithConst) {
   var defBuffedDefense = defWithConst + nmv;
-  defenseBuffedElement.textContent = addCommas(defBuffedDefense);
-  dc225Element.textContent = addCommas(Math.ceil(
-    defBuffedDefense * 0.55));
-  dc175Element.textContent = addCommas(Math.ceil(
-    defBuffedDefense * 0.65));
+  setTextCommas(defBuffedDefense, defenseBuffedElement);
+  setTextCommas(Math.ceil(defBuffedDefense * 0.55), dc225Element);
+  setTextCommas(Math.ceil(defBuffedDefense * 0.65), dc175Element);
 }
 
 function updateDefenderBuffedArmor() {
-  armorBuffedElement.textContent = addCommas(defRawArmor +
-    Math.floor(defRawArmor * leadDefender.sanctuaryLevel * 0.001));
+  setTextCommas(defRawArmor + Math.floor(
+    defRawArmor * leadDefender.sanctuaryLevel * 0.001), armorBuffedElement);
 }
 
 function calcDefenderFortitudeBonusHp(defWithConst) {
@@ -201,20 +197,18 @@ function calcDefenderFortitudeBonusHp(defWithConst) {
 }
 
 function updateDefenderBuffedDamage(defBuffedHp) {
-  var chiStrikeBonusDamage = Math.ceil(defBuffedHp *
-    leadDefender.chiStrikeLevel * 0.001);
-  defBuffedDamage = defRawDamage + chiStrikeBonusDamage;
-  damageBuffedElement.textContent = addCommas(defBuffedDamage);
+  setTextCommas(defRawDamage + Math.ceil(
+    defBuffedHp * leadDefender.chiStrikeLevel * 0.001), damageBuffedElement);
 }
 
 function isLeadDefenderCloaked() {
   if (leadDefender.cloakLevel !== 0) {
-    lDCloakedElement.textContent = 'Yes';
+    setText('Yes', lDCloakedElement);
   }
 }
 
 export function doCalculations() {
-  processingStatus.textContent = 'Processing defending guild stats ... ';
+  setText('Processing defending guild stats ... ', processingStatus);
   updateDefenderValues();
   updateDefenderElements();
   var nmvEffect = calcDefenderNmvEffect();
@@ -223,13 +217,13 @@ export function doCalculations() {
   updateDefenderBuffedDefense(nmvEffect, defWithConst);
   updateDefenderBuffedArmor();
   var defBuffedHp = defRawHp + calcDefenderFortitudeBonusHp(defWithConst);
-  hpBuffedElement.textContent = addCommas(defBuffedHp);
+  setTextCommas(defBuffedHp, hpBuffedElement);
   updateDefenderBuffedDamage(defBuffedHp);
   isLeadDefenderCloaked();
   if (GameData.player().hasGroup) {
     calculateGroup();
   } else {
-    processingStatus.textContent = 'Done.';
+    setText('Done.', processingStatus);
   }
 }
 

@@ -1,9 +1,10 @@
 import calf from '../../../support/calf';
 import getArrayByClassName from '../../../common/getArrayByClassName';
 import {getElementById} from '../../../common/getElement';
+import getText from '../../../common/getText';
 
 function doNotKillBlue(el) {
-  el.classList.toggle('fshBlue', calf.doNotKillList.includes(el.textContent));
+  el.classList.toggle('fshBlue', calf.doNotKillList.includes(getText(el)));
 }
 
 export default function afterUpdateActionList() {

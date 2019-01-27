@@ -4,6 +4,8 @@ import {createTFoot} from '../../common/cElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getMembrList from '../../ajax/getMembrList';
+import getText from '../../common/getText';
+import getTextTrim from '../../common/getTextTrim';
 import injectAdvisorWeekly from './injectAdvisorWeekly';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
@@ -28,9 +30,9 @@ function getTfoot(list) {
 
 function cellText(cell, i) {
   if (i === 0) {
-    return cell.textContent.trim();
+    return getTextTrim(cell);
   }
-  return cell.textContent;
+  return getText(cell);
 }
 
 function bodyText(membrList, row) {

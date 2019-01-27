@@ -12,6 +12,7 @@ import partial from '../common/partial';
 import querySelectorAll from '../common/querySelectorAll';
 import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
+import setText from '../common/setText';
 import {subscribe} from '../support/pubsub';
 import {createDiv, createInput, createTable} from '../common/cElement';
 
@@ -51,7 +52,9 @@ function buildButton(val, templateId) {
 }
 
 function buildCells(template, myRow, compSlot, i) {
-  if (i === 0) {myRow.insertCell(-1).textContent = template[1];}
+  if (i === 0) {
+    setText(template[1], myRow.insertCell(-1));
+  }
   insertElement(
     myRow.insertCell(-1),
     buildButton((i + 1).toString(), template[0])

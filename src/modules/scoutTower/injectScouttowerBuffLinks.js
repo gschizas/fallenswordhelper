@@ -1,4 +1,5 @@
 import containsText from '../common/containsText';
+import getText from '../common/getText';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import myRows from '../common/myRows';
 import on from '../common/on';
@@ -6,11 +7,11 @@ import openQuickBuffByName from '../common/openQuickBuffByName';
 
 function buffIndividual(self) {
   if (self.previousElementSibling) {
-    openQuickBuffByName(self.previousElementSibling.textContent);
+    openQuickBuffByName(getText(self.previousElementSibling));
   }
 }
 
-function memberName(el) {return el.cells[0].firstChild.firstChild.textContent;}
+function memberName(el) {return getText(el.cells[0].firstChild.firstChild);}
 
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;

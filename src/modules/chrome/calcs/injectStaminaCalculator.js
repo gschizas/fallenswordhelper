@@ -4,7 +4,7 @@ import getElementsByClassName from '../../common/getElementsByClassName';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import intValue from '../../system/intValue';
 import timeBox from './timeBox';
-import valueText from './valueText';
+import valueText from '../../common/valueText';
 
 function getStamVals(staminaMouseover) {
   return /([,0-9]+)\s\/\s([,0-9]+)/.exec(

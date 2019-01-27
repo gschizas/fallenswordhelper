@@ -2,6 +2,7 @@ import formatCost from './formatCost';
 import getBuffsToBuy from './getBuffsToBuy';
 import {getElementById} from '../../common/getElement';
 import getPrice from './getPrice';
+import getText from '../../common/getText';
 
 var buffCost = {count: 0, buffs: {}};
 
@@ -57,7 +58,7 @@ function getBuffCost(buffNameNode) {
     type = 'unknown';
     cost = '1';
   }
-  buffCost.buffs[buffNameNode.textContent] = [parseFloat(cost), type];
+  buffCost.buffs[getText(buffNameNode)] = [parseFloat(cost), type];
   buffCost.count += 1;
 }
 
@@ -65,7 +66,7 @@ function toggleBuffsToBuy(buffNameNode) { // Legacy
   var selected = buffNameNode.classList.contains('fshBlue');
   buffNameNode.classList.toggle('fshBlue');
   buffNameNode.classList.toggle('fshYellow');
-  var buffName = buffNameNode.textContent;
+  var buffName = getText(buffNameNode);
   if (selected) {
     getBuffCost(buffNameNode);
   } else {

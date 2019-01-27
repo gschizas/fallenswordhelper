@@ -1,6 +1,7 @@
 import {createDiv} from './cElement';
 import {getElementById} from './getElement';
 import insertElement from './insertElement';
+import setText from './setText';
 
 function makeFshMsg() {
   var fshMsg = getElementById('fshmsg');
@@ -33,6 +34,6 @@ function openFshMsg(title, fn, fshMsg) {
 
 export default function jConfirm(title, msgText, fn) { // jQuery
   var fshMsg = makeFshMsg();
-  fshMsg.textContent = msgText;
+  setText(msgText, fshMsg);
   openFshMsg(title, fn, fshMsg);
 }

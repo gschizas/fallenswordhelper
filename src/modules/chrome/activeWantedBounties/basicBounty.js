@@ -1,3 +1,5 @@
+import getText from '../../common/getText';
+
 function rewardType(theCells) {
   return theCells[2].firstChild.firstChild.firstChild.firstChild
     .nextSibling.firstChild.title;
@@ -6,12 +8,12 @@ function rewardType(theCells) {
 export default function basicBounty(theCells) {
   var targetData = theCells[0].firstChild.firstChild;
   return {
-    target: targetData.firstChild.textContent,
+    target: getText(targetData.firstChild),
     link: targetData.href,
-    lvl: targetData.nextSibling.textContent.replace(/[[|\]]/, ''),
-    reward: theCells[2].textContent,
+    lvl: getText(targetData.nextSibling).replace(/[[|\]]/, ''),
+    reward: getText(theCells[2]),
     rewardType: rewardType(theCells),
-    posted: theCells[3].textContent,
-    xpLoss: theCells[4].textContent,
+    posted: getText(theCells[3]),
+    xpLoss: getText(theCells[4]),
   };
 }

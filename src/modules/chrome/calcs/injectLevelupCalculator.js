@@ -4,7 +4,7 @@ import {getElementById} from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import timeBox from './timeBox';
-import valueText from './valueText';
+import valueText from '../../common/valueText';
 
 export default function injectLevelupCalculator() {
   var nextGain = getElementsByClassName('stat-xp-nextGain');

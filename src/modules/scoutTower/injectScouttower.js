@@ -2,6 +2,7 @@ import {createAnchor} from '../common/cElement';
 import displayTracker from './displayTracker';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getForage from '../ajax/getForage';
+import getText from '../common/getText';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -20,7 +21,7 @@ function getTitanName(aRow) {
 function cooldownTracker(aRow, theTitans) {
   var myName = getTitanName(aRow).replace(' (Titan)', '');
   if (!theTitans[myName]) {
-    var cooldown = aRow.nextElementSibling.cells[0].textContent;
+    var cooldown = getText(aRow.nextElementSibling.cells[0]);
     var coolTime = 0;
     if (cooldown.indexOf('until') !== -1) {
       coolTime = parseDateAsTimestamp(
@@ -65,7 +66,7 @@ export function getKillsPct(currentNumberOfKills, guildKills) {
 }
 
 function injectSummary(aRow, titanHP) {
-  var guildKills = Number(aRow.cells[3].textContent);
+  var guildKills = Number(getText(aRow.cells[3]));
   var titanHPArray = titanHP.split('/');
   var currentHP = Number(titanHPArray[0]);
   var totalHP = Number(titanHPArray[1]);
@@ -77,7 +78,7 @@ function injectSummary(aRow, titanHP) {
 }
 
 function killsSummary(aRow) {
-  var titanHP = aRow.cells[2].textContent;
+  var titanHP = getText(aRow.cells[2]);
   if (titanHP.indexOf('-') !== -1) {return;}
   injectSummary(aRow, titanHP);
 }
@@ -93,7 +94,7 @@ function guideLink(aRow) {
   insertElement(aRow.cells[0], myLink);
 
   var realmCell = aRow.cells[1];
-  var realmName = realmCell.textContent;
+  var realmName = getText(realmCell);
   realmCell.innerHTML = '<a href="' + guideUrl + 'realms&search_name=' +
     realmName + '" target="_blank">' + realmName + '</a>';
 }

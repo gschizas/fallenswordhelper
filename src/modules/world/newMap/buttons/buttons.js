@@ -10,6 +10,7 @@ import makeToggleBtn from './makeToggleBtn';
 import on from '../../../common/on';
 import openQuickBuffByName from '../../../common/openQuickBuffByName';
 import playerName from '../../../common/playerName';
+import setText from '../../../common/setText';
 import setValue from '../../../system/setValue';
 import {
   createButton,
@@ -178,13 +179,13 @@ function injectButtons() {
 function realmUpdate(e, data) {
   if (realmLvl && data.b.minlevel) {
     fixTeleport();
-    realmLvl.textContent = data.b.minlevel.toString();
+    setText(data.b.minlevel, realmLvl);
   }
 }
 
 function levelStats(e, data) {
   if (yourLvl) {
-    yourLvl.textContent = data.b;
+    setText(data.b, yourLvl);
   }
 }
 

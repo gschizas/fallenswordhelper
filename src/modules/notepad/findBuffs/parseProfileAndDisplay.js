@@ -4,6 +4,7 @@ import {def_statVl} from '../../support/constants';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
 import getElementsByTagName from '../../common/getElementsByTagName';
+import getText from '../../common/getText';
 import intValue from '../../system/intValue';
 import onlineDot from '../../common/onlineDot';
 import {updateProgress} from './bufferProgress';
@@ -33,16 +34,16 @@ function getSustain(doc) {
 }
 
 function getInnerPlayerName(doc) {
-  return getElementsByTagName('h1', getElementById('pCC', doc))[0].textContent;
+  return getText(getElementsByTagName('h1', getElementById('pCC', doc))[0]);
 }
 
 function getInnerLevelValue(doc) {
-  return intValue(getElementById('profileLeftColumn', doc)
-    .children[4].children[0].rows[0].cells[1].textContent);
+  return intValue(getText(getElementById('profileLeftColumn', doc)
+    .children[4].children[0].rows[0].cells[1]));
 }
 
 function getInnerVirtualLevel(doc) {
-  return parseInt(getElementById(def_statVl, doc).textContent, 10);
+  return parseInt(getText(getElementById(def_statVl, doc)), 10);
 }
 
 function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
@@ -104,8 +105,8 @@ function buffCell(newRow, textLineArray) {
 function updateProcessed() {
   var processedBuffers = getElementById('buffersProcessed');
   var potentialBuffers =
-    parseInt(getElementById('potentialBuffers').textContent, 10);
-  var processedBuffersCount = parseInt(processedBuffers.textContent, 10);
+    parseInt(getText(getElementById('potentialBuffers')), 10);
+  var processedBuffersCount = parseInt(getText(processedBuffers), 10);
   processedBuffers.innerHTML = processedBuffersCount + 1;
   if (potentialBuffers === processedBuffersCount + 1) {
     updateProgress('Done.', 'blue');
@@ -115,7 +116,7 @@ function updateProcessed() {
 function calcLastActivity(doc) {
   var innerPcc = getElementById('pCC', doc);
   var lastActivityElement = getElementsByTagName('p', innerPcc)[0];
-  return /(\d+) mins, (\d+) secs/.exec(lastActivityElement.textContent);
+  return /(\d+) mins, (\d+) secs/.exec(getText(lastActivityElement));
 }
 
 function getExtend(doc) {

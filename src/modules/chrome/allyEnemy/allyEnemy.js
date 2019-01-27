@@ -5,6 +5,7 @@ import {createDiv} from '../../common/cElement';
 import fallback from '../../system/fallback';
 import getArrayByClassName from '../../common/getArrayByClassName';
 import {getElementById} from '../../common/getElement';
+import getText from '../../common/getText';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
@@ -64,20 +65,20 @@ function toggleBuffSelected(self) {
 }
 
 function msgPlayer(self) {
-  window.openQuickMsgDialog(self.parentNode.previousElementSibling
-    .lastElementChild.textContent);
+  window.openQuickMsgDialog(getText(self.parentNode.previousElementSibling
+    .lastElementChild));
 }
 
 function buffPlayer(self) {
-  openQuickBuffByName(self.parentNode
-    .previousElementSibling.lastElementChild.textContent);
+  openQuickBuffByName(getText(self.parentNode
+    .previousElementSibling.lastElementChild));
 }
 
 function selectedBuff() {
   var buffBalls = getArrayByClassName(enemyBuffCheckOn,
     getElementById('fshContactList'));
   var sendstring = buffBalls.map(
-    function(el) {return el.nextElementSibling.textContent;});
+    function(el) {return getText(el.nextElementSibling);});
   openQuickBuffByName(sendstring.join());
 }
 

@@ -6,6 +6,7 @@ import {getElementById} from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
+import setText from '../../common/setText';
 import testQuant from '../../system/testQuant';
 import when from '../../common/when';
 import {createButton, createDiv, createInput} from '../../common/cElement';
@@ -91,7 +92,9 @@ function worldDialogShop(e, data) {
     getElementById('shopDialogConfirm'));
   if (!dialog) {return;}
   jDialog = fallback(jDialog, $(dialog).data('worldDialogShopConfirm'));
-  if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}
+  if (!fshDiv) {injectQuickBuy();} else {
+    setText('', resultDiv);
+  }
 }
 
 export default function prepareShop() {

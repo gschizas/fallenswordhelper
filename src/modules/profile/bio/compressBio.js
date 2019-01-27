@@ -2,6 +2,7 @@ import containsText from '../../common/containsText';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import on from '../../common/on';
+import setText from '../../common/setText';
 
 var lineBreak = '';
 
@@ -10,7 +11,7 @@ function getNumberOfLine(bioContents, maxCharactersToShow) {
 }
 
 function bioIsTooSmall(bio, maxChar, lines, maxRows) {
-  return bio.length <= maxChar && lines < maxRows;
+  return bio.length <= maxChar && lines <= maxRows;
 }
 
 function findStartPosition(bioContents, maxRowsToShow) {
@@ -18,12 +19,17 @@ function findStartPosition(bioContents, maxRowsToShow) {
     .join('<br>\n').length;
 }
 
+function breakOnSpace(bioContents, maxCharactersToShow) {
+  var breakPoint = bioContents.indexOf(' ', maxCharactersToShow) + 1;
+  if (breakPoint === 0) {breakPoint = maxCharactersToShow;}
+  lineBreak = '<br>';
+  return breakPoint;
+}
+
 function getBreakpoint(bioContents, maxCharactersToShow) {
   var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
-  if (breakPoint === 3) {
-    breakPoint = bioContents.indexOf(' ', maxCharactersToShow) + 1;
-    if (breakPoint === 0) {breakPoint = maxCharactersToShow;}
-    lineBreak = '<br>';
+  if (breakPoint === 3 || breakPoint > maxCharactersToShow + 65) {
+    breakPoint = breakOnSpace(bioContents, maxCharactersToShow);
   }
   return breakPoint;
 }
@@ -47,9 +53,9 @@ function getExtraCloseTags(bioEnd) {
 function expandBio() {
   var bioExpander = getElementById('fshBioExpander');
   if (containsText('More ...', bioExpander)) {
-    bioExpander.textContent = 'Less ...';
+    setText('Less ...', bioExpander);
   } else {
-    bioExpander.textContent = 'More ...';
+    setText('More ...', bioExpander);
   }
   getElementById('fshBioHidden').classList.toggle('fshHide');
 }
@@ -70,8 +76,8 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
 
 export default function compressBio(bioCell) {
   var bioContents = bioCell.innerHTML;
-  var maxCharactersToShow = getValue('maxCompressedCharacters');
-  var maxRowsToShow = getValue('maxCompressedLines');
+  var maxCharactersToShow = Number(getValue('maxCompressedCharacters'));
+  var maxRowsToShow = Number(getValue('maxCompressedLines'));
   var numberOfLines = getNumberOfLine(bioContents, maxCharactersToShow);
   if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
     maxRowsToShow)) {return;}

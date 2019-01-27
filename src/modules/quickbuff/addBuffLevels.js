@@ -2,7 +2,9 @@ import {createSpan} from '../common/cElement';
 import formatLastActivity from '../system/formatLastActivity';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getProfile from '../ajax/getProfile';
+import getText from '../common/getText';
 import insertElementAfter from '../common/insertElementAfter';
+import parseBuffLevel from './parseBuffLevel';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 
@@ -42,7 +44,7 @@ function buffRunning(el, playerBuffLevel, playerSpan) {
     return;
   }
   var lvlSpan = el.nextElementSibling.children[0].children[0];
-  var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
+  var myLvl = parseBuffLevel(lvlSpan);
   var fshPlayerSpan = newPlayerSpan(el, playerSpan);
   var buffColor = getBuffColor(myLvl, playerBuffLevel);
   fshPlayerSpan.innerHTML = ' <span class="' + buffColor +
@@ -59,7 +61,7 @@ function hazBuff(playerData, el) {
 }
 
 function makeBuffArray(player) {
-  var buffList = player.parentNode.lastElementChild.textContent.split(',');
+  var buffList = getText(player.parentNode.lastElementChild).split(',');
   return buffList.reduce(function(prev, curr) {
     if (curr.indexOf(' [') !== -1) {
       var foo = curr.split(' [');
@@ -72,7 +74,7 @@ function makeBuffArray(player) {
 export default function addBuffLevels(evt) {
   var player = evt.target;
   if (player.tagName !== 'H1') {return;}
-  getProfile(player.textContent).done(addStatsQuickBuff);
+  getProfile(getText(player)).done(addStatsQuickBuff);
   var playerData = makeBuffArray(player);
   querySelectorArray('#buff-outer input[name]')
     .forEach(partial(hazBuff, playerData));

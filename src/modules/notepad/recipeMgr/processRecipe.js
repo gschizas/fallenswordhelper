@@ -1,6 +1,7 @@
 import createDocument from '../../system/createDocument';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
+import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 
@@ -31,7 +32,7 @@ function buildResult(img, mouseOverRX) {
 
 function hasAmounts(result, amounts) {
   if (amounts) {
-    var resultAmounts = amounts.textContent.split('/');
+    var resultAmounts = getText(amounts).split('/');
     result.amountPresent = parseInt(resultAmounts[0], 10);
     result.amountNeeded = parseInt(resultAmounts[1], 10);
   }

@@ -1,4 +1,5 @@
 import getElementsByTagName from '../common/getElementsByTagName';
+import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
 import guideButtons from './guideButtons';
@@ -13,7 +14,7 @@ export default function injectQuestTracker() {
   }
   var questID = getUrlParameter('quest_id');
   var injectHere = getElementsByTagName('td', pCC)[0];
-  var questName = getElementsByTagName('font', injectHere)[1].textContent
+  var questName = getText(getElementsByTagName('font', injectHere)[1])
     .replace(/"/g, '');
   insertHtmlBeforeEnd(injectHere, guideButtons(questID, questName));
 }

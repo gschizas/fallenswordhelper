@@ -1,6 +1,7 @@
 import add from '../../support/task';
 import batch from '../../common/batch';
 import getMembrList from '../../ajax/getMembrList';
+import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import insertElementBefore from '../../common/insertElementBefore';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -79,7 +80,7 @@ function hasMembers(rankCell, rankName) {
 
 function getRankName(rankCell) {
   if (rankCell.parentNode.rowIndex === 1) {return 'Guild Founder';}
-  return rankCell.textContent;
+  return getText(rankCell);
 }
 
 function writeMembers(el) {

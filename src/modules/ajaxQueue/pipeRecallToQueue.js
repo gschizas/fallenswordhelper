@@ -1,0 +1,32 @@
+import backpack from './backpack';
+import doAction from './doAction';
+import equipItem from '../ajax/equipItem';
+import errorDialog from '../app/errorDialog';
+import partial from '../common/partial';
+import recallItem from '../ajax/recallItem';
+import useItem from '../ajax/useItem';
+
+function gotBackpack(action, data, bpData) {
+  // TODO assuming backpack is successful...
+  var lastBackpackItem = bpData.items[bpData.items.length - 1].a;
+  if (action === 'wear') {
+    return doAction(equipItem, lastBackpackItem, data);
+    // Return recall status irrespective of the status of the equipitem
+  }
+  if (action === 'use') {
+    return doAction(useItem, lastBackpackItem, data);
+    // Return recall status irrespective of the status of the useitem
+  }
+}
+
+function recallItemStatus(action, data) {
+  if (data.r === 0 && action !== 'recall') {
+    return backpack().pipe(partial(gotBackpack, action, data));
+  }
+  return data;
+}
+
+export default function pipeRecallToQueue(invId, playerId, mode, action) {
+  return recallItem(invId, playerId, mode).pipe(errorDialog)
+    .pipe(partial(recallItemStatus, action));
+}

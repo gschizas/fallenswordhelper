@@ -1,12 +1,13 @@
 import {createDiv} from '../common/cElement';
 import draggable from '../common/dragStart';
 import {getElementById} from '../common/getElement';
+import getText from '../common/getText';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import injectBuffLog from '../notepad/buffLog/injectBuffLog';
-import {injectFsBoxContent} from '../misc';
+import injectFsBoxContent from '../notepad/injectFsBoxContent';
 import injectMonsterLog from '../notepad/monstorLog/monstorLog';
-import injectNotepadShowLogs from '../combatLog';
+import injectNotepadShowLogs from '../notepad/combatLog';
 import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
 import injectRecipeManager from '../notepad/recipeMgr/recipeMgr';
 import insertElement from '../common/insertElement';
@@ -68,7 +69,7 @@ var functionLookup = {
 };
 
 function callHelperFunction(evt) {
-  var functionPath = evt.target.textContent;
+  var functionPath = getText(evt.target);
   var fn = functionLookup[functionPath];
   if (jQueryPresent() && isFunction(fn)) {
     sendEvent('helperMenu', functionPath);

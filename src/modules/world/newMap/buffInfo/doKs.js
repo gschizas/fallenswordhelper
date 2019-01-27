@@ -1,6 +1,7 @@
-import addCommas from '../../../system/addCommas';
 import {createSpan} from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
+import setText from '../../../common/setText';
+import setTextCommas from '../../../common/setTextCommas';
 import toggleForce from '../../../common/toggleForce';
 
 var ksDiv;
@@ -8,7 +9,7 @@ var killStreakSpan;
 
 function initKsDiv(containerDiv) {
   ksDiv = containerDiv.children[1];
-  ksDiv.textContent = 'Kill Streak: ';
+  setText('Kill Streak: ', ksDiv);
   killStreakSpan = createSpan();
   insertElement(ksDiv, killStreakSpan);
 }
@@ -19,7 +20,7 @@ function showKs(containerDiv, ks) {
   } else {
     initKsDiv(containerDiv);
   }
-  killStreakSpan.textContent = addCommas(ks);
+  setTextCommas(ks, killStreakSpan);
 }
 
 function hideKs() {

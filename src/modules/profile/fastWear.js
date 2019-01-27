@@ -2,12 +2,14 @@ import add from '../support/task';
 import {createDiv} from '../common/cElement';
 import equipItem from '../ajax/equipItem';
 import {getElementById} from '../common/getElement';
+import getText from '../common/getText';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import on from '../common/on';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
+import setText from '../common/setText';
 import useItem from '../ajax/useItem';
 
 function restyleBackpack() {
@@ -27,7 +29,7 @@ function fastAction(theBackpack, evt, action, result) { // jQuery.min
   sendEvent('profile', 'fastAction - ' + result);
   var self = evt.target;
   var invId = self.parentNode.parentNode.children[0].dataset.inv;
-  self.textContent = '';
+  setText('', self);
   self.className = 'fastAction fshSpinner fshSpinner12';
   action(invId).done(function(data) {
     if (data.r !== 0) {
@@ -87,7 +89,7 @@ function foundBackpack(backpackContainer, theBackpack) {
     oldShow.call(theBackpack, type, page);
     fastWearLinks(theBackpack);
   };
-  if (getElementById('backpack_current').textContent.length !== 0) {
+  if (getText(getElementById('backpack_current')).length !== 0) {
     add(3, fastWearLinks, [theBackpack]);
   }
   on(backpackContainer, 'click', partial(evtHdl, theBackpack));

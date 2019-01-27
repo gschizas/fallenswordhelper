@@ -1,7 +1,9 @@
 import destroyComponent from '../../app/profile/destroycomponent';
 import errorDialog from '../../app/errorDialog';
+import getText from '../../common/getText';
 import {itemRE} from '../../support/constants';
 import partial from '../../common/partial';
+import setText from '../../common/setText';
 import updateUsedCount from './updateUsedCount';
 
 function updateComponentCounts(itemId) {
@@ -9,8 +11,8 @@ function updateComponentCounts(itemId) {
     '"]');
   if (!delBtn) {return;}
   var countDom = delBtn.parentNode.parentNode.children[1];
-  var count = Number(countDom.textContent) - 1;
-  countDom.textContent = count.toString();
+  var count = Number(getText(countDom)) - 1;
+  setText(count, countDom);
 }
 
 function compDeleted(self, itemId, data) {

@@ -1,9 +1,10 @@
 import {getElementById} from '../common/getElement';
+import getText from '../common/getText';
 import on from '../common/on';
 
 function setMaxVal() {
   getElementById('composing-skill-level-input').value =
-    getElementById('composing-skill-level-max').textContent;
+    getText(getElementById('composing-skill-level-max'));
 }
 
 export default function composingCreate() {

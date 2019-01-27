@@ -1,5 +1,6 @@
 import {getElementById} from '../../../common/getElement';
 import getElementsByClassName from '../../../common/getElementsByClassName';
+import valueText from '../../../common/valueText';
 import {
   def_statArmor,
   def_statAttack,
@@ -16,8 +17,7 @@ export var statArmor;
 export var statHp;
 
 function getStatText(statTooltip, statClassName) {
-  return getElementsByClassName(statClassName, statTooltip)[0]
-    .nextElementSibling.textContent;
+  return valueText(getElementsByClassName(statClassName, statTooltip));
 }
 
 function getTooltipStats(statTooltip) {

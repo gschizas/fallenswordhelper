@@ -1,4 +1,6 @@
 import getInvTable from './getInvTable';
+import getText from '../../common/getText';
+import setText from '../../common/setText';
 
 export default function updateUsedCount(del) {
   var invTableParent = getInvTable().parentNode;
@@ -7,7 +9,7 @@ export default function updateUsedCount(del) {
   if (fshTally.tagName !== 'TABLE') {return;}
   var tallyRows = fshTally.rows;
   var usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
-  var usedCount = Number(usedCountDom.textContent);
+  var usedCount = Number(getText(usedCountDom));
   usedCount -= del;
-  usedCountDom.textContent = usedCount.toString();
+  setText(usedCount, usedCountDom);
 }

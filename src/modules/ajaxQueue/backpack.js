@@ -1,4 +1,4 @@
-import indexAjaxJson from './indexAjaxJson';
+import indexAjaxJson from '../ajax/indexAjaxJson';
 
 export default function backpack() {
   return indexAjaxJson({
