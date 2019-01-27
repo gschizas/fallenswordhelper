@@ -1,18 +1,18 @@
-import {createAnchor} from '../common/cElement';
+import {createAnchor} from '../../common/cElement';
 import displayTracker from './displayTracker';
-import getElementsByTagName from '../common/getElementsByTagName';
-import getForage from '../ajax/getForage';
-import getText from '../common/getText';
+import getElementsByTagName from '../../common/getElementsByTagName';
+import getForage from '../../ajax/getForage';
+import getText from '../../common/getText';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
-import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import myRows from '../common/myRows';
-import {pCC} from '../support/layout';
-import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
-import roundToString from '../common/roundToString';
-import setForage from '../ajax/setForage';
-import {def_table, guideUrl, now} from '../support/constants';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
+import myRows from '../../common/myRows';
+import {pCC} from '../../support/layout';
+import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
+import roundToString from '../../common/roundToString';
+import setForage from '../../ajax/setForage';
+import {def_table, guideUrl, now} from '../../support/constants';
 
 function getTitanName(aRow) {
   return aRow.cells[0].children[0].getAttribute('oldtitle');
