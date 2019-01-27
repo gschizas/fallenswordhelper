@@ -197,8 +197,9 @@ function calcDefenderFortitudeBonusHp(defWithConst) {
 }
 
 function updateDefenderBuffedDamage(defBuffedHp) {
-  setTextCommas(defRawDamage + Math.ceil(
-    defBuffedHp * leadDefender.chiStrikeLevel * 0.001), damageBuffedElement);
+  defBuffedDamage = defRawDamage +
+    Math.ceil(defBuffedHp * leadDefender.chiStrikeLevel * 0.001);
+  setTextCommas(defBuffedDamage);
 }
 
 function isLeadDefenderCloaked() {
