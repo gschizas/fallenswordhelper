@@ -9,6 +9,7 @@ import {getElementById} from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getForage from '../../ajax/getForage';
 import getGuildLogPage from './getGuildLogPage';
+import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import {imageServer} from '../../system/system';
@@ -19,6 +20,7 @@ import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import {rowProfile} from './profiler';
 import setForage from '../../ajax/setForage';
+import setText from '../../common/setText';
 import toggleForce from '../../common/toggleForce';
 import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
 
@@ -38,9 +40,9 @@ function parsePage(data) {
   doc = createDocument(data);
   var pageInput = doc.querySelector('input[name="page"]');
   currPage = Number(pageInput.value);
-  lastPage = Number(/\d+/.exec(pageInput.parentNode.textContent)[0]);
+  lastPage = Number(/\d+/.exec(getText(pageInput.parentNode))[0]);
   if (currPage === 1) {maxPage = Math.min(lastPage, maxPagesToFetch);}
-  fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage + '...';
+  setText('Loading ' + currPage + ' of ' + maxPage + '...', fshOutput);
 }
 
 function seenRowBefore(timestamp, myMsg) {
@@ -59,7 +61,7 @@ function getTableList(tableList) {
   var limit = theTable.rows.length - 1;
   for (var i = 1; i < limit; i += 2) {
     var myRow = theTable.rows[i];
-    var myDate = myRow.cells[1].textContent;
+    var myDate = getText(myRow.cells[1]);
     var timestamp = parseDateAsTimestamp(myDate);
     var myMsg = myRow.cells[2].innerHTML;
     if (seenRowBefore(timestamp, myMsg)) {
@@ -169,7 +171,7 @@ function gotOtherPages() {
       return a[0] - b[0];
     });
   }
-  fshOutput.textContent = 'Loading complete.';
+  setText('Loading complete.', fshOutput);
   updateOptionsLog();
   buildTable();
 }
@@ -216,7 +218,7 @@ function selectNone() {
 function refresh() {
   options.log = false;
   storeOptions();
-  fshOutput.textContent = 'Loading Page 1 ...';
+  setText('Loading Page 1 ...', fshOutput);
   tmpGuildLog = [];
   completeReload = true;
   getElementById('fshInjectHere').innerHTML = '';

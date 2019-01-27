@@ -10,6 +10,7 @@ import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
+import setText from '../common/setText';
 import takeitem from '../app/guild/inventory/takeitem';
 
 function doItemTable(checkbox) {
@@ -25,7 +26,7 @@ function takeResult(self, data) {
   if (data.s) {
     self.removeAttribute('style');
     self.className = 'fshGreen';
-    self.textContent = 'Taken';
+    setText('Taken', self);
   }
 }
 
@@ -33,7 +34,7 @@ function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
     .children[0].value;
   takeitem(itmId).done(partial(takeResult, el));
-  el.textContent = '';
+  setText('', el);
   el.className = 'guildTagSpinner';
   el.style.backgroundImage = 'url(\'' + imageServer +
     '/skin/loading.gif\')';

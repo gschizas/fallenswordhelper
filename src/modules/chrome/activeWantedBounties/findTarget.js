@@ -1,11 +1,13 @@
 import basicBounty from './basicBounty';
 import calf from '../../support/calf';
 import extend from '../../common/extend';
+import getText from '../../common/getText';
+import getTextTrim from '../../common/getTextTrim';
 import {wantedArray, wantedList} from './lists';
 
 function acceptBtn(theCells) {
   var cell = theCells[6];
-  if (cell.textContent.trim() !== '[n/a]') {
+  if (getTextTrim(cell) !== '[n/a]') {
     return cell.firstChild.firstChild.getAttribute('onclick');
   }
   return '';
@@ -13,8 +15,8 @@ function acceptBtn(theCells) {
 
 function getTarget(theCells) {
   return extend(basicBounty(theCells), {
-    offerer: theCells[1].firstChild.firstChild.firstChild.textContent,
-    tickets: theCells[5].textContent,
+    offerer: getText(theCells[1].firstChild.firstChild.firstChild),
+    tickets: getText(theCells[5]),
     accept: acceptBtn(theCells)
   });
 }
@@ -23,13 +25,12 @@ var isWanted = [
   function() {return wantedArray.includes('*');},
   function(target) {return wantedArray.includes(target);},
   function(target, theRow) {
-    return calf.wantedGuildMembers &&
-      theRow.cells[6].textContent.trim() === '[n/a]';
+    return calf.wantedGuildMembers && getTextTrim(theRow.cells[6]) === '[n/a]';
   }
 ];
 
 function wanted(target, theRow) {
-  return theRow.cells[6].textContent.trim() !== '[active]' &&
+  return getTextTrim(theRow.cells[6]) !== '[active]' &&
     isWanted.some(function(el) {return el(target, theRow);});
 }
 
@@ -42,8 +43,7 @@ function wantedTarget(target, theRow) {
 export default function findTarget(activeTable) {
   for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
     var theRow = activeTable.rows[i];
-    var target = theRow.cells[0].firstChild
-      .firstChild.firstChild.textContent;
+    var target = getText(theRow.cells[0].firstChild.firstChild.firstChild);
     if (target === '[ No bounties available. ]') {break;}
     wantedTarget(target, theRow);
   }

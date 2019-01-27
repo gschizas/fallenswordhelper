@@ -1,6 +1,7 @@
 import {createDiv} from '../common/cElement';
 import draggable from '../common/dragStart';
 import {getElementById} from '../common/getElement';
+import getText from '../common/getText';
 import getValue from '../system/getValue';
 import {imageServer} from '../system/system';
 import injectBuffLog from '../notepad/buffLog/injectBuffLog';
@@ -68,7 +69,7 @@ var functionLookup = {
 };
 
 function callHelperFunction(evt) {
-  var functionPath = evt.target.textContent;
+  var functionPath = getText(evt.target);
   var fn = functionLookup[functionPath];
   if (jQueryPresent() && isFunction(fn)) {
     sendEvent('helperMenu', functionPath);

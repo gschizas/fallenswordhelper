@@ -2,21 +2,21 @@ import {closestTable} from './closest';
 import contains from './contains';
 import {createDiv} from './cElement';
 import getArrayByTagName from './getArrayByTagName';
+import getText from './getText';
+import getTextTrim from './getTextTrim';
 import insertHtmlBeforeBegin from './insertHtmlBeforeBegin';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
 
 function cellOneHazText(curr) {
-  return curr.cells[1] && curr.cells[1].textContent;
+  return curr.cells[1] && getText(curr.cells[1]);
 }
 
 function reduceStatTable(prev, curr, index) {
-  var key = curr.cells[0].textContent.trim().replace(':', '');
+  var key = getTextTrim(curr.cells[0]).replace(':', '');
   if (!key) {return prev;}
   prev[key] = {ind: index};
   if (cellOneHazText(curr)) {
-    prev[key].value = Number(
-      curr.cells[1].textContent.trim().replace('+', '')
-    );
+    prev[key].value = Number(getTextTrim(curr.cells[1]).replace('+', ''));
   }
   return prev;
 }

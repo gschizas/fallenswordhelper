@@ -1,6 +1,7 @@
 import {createSpan} from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
+import setText from '../../../common/setText';
 import toggleForce from '../../../common/toggleForce';
 
 var ddDiv;
@@ -8,7 +9,7 @@ var ddSpan;
 
 function initDdDiv(containerDiv) {
   ddDiv = containerDiv.children[2];
-  ddDiv.textContent = 'Damage bonus: ';
+  setText('Damage bonus: ', ddDiv);
   ddSpan = createSpan();
   insertElement(ddDiv, ddSpan);
   insertTextBeforeEnd(ddDiv, '%');
@@ -33,7 +34,7 @@ function hasDd(containerDiv, dd, ks) {
   } else {
     initDdDiv(containerDiv);
   }
-  ddSpan.textContent = getDdBonus(dd, Number(ks));
+  setText(getDdBonus(dd, Number(ks)), ddSpan);
 }
 
 function hideDd() {

@@ -1,12 +1,13 @@
 import contains from '../common/contains';
 import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import getText from '../common/getText';
 import insertElement from '../common/insertElement';
 import querySelectorArray from '../common/querySelectorArray';
 import toggleForce from '../common/toggleForce';
 
 function doServerNode(topbannerStats, miniboxList) {
-  var nodeName = miniboxList.children[7].textContent;
+  var nodeName = getText(miniboxList.children[7]);
   var serverDiv = createDiv({
     className: 'tip-static',
     dataset: {tipped: 'Server'},

@@ -7,6 +7,7 @@ import getProfile from '../../../ajax/getProfile';
 import indexAjaxData from '../../../ajax/indexAjaxData';
 import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
+import setText from '../../../common/setText';
 import when from '../../../common/when';
 import {
   doCalculations,
@@ -29,8 +30,7 @@ import {
 var relicData;
 
 function ajaxFailure(jqXHR) {
-  processingStatus.textContent = jqXHR.status.toString() + ' ' +
-    jqXHR.statusText;
+  setText(String(jqXHR.status) + ' ' + jqXHR.statusText, processingStatus);
 }
 
 function hasMerc(disband) {

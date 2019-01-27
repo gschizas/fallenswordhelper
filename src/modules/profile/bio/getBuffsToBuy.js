@@ -1,5 +1,6 @@
 import calf from '../../support/calf';
 import getElementsByTagName from '../../common/getElementsByTagName';
+import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
@@ -13,7 +14,7 @@ function profileBuyBuffsEvent() {
 function getTargetPlayer() {
   var targetPlayer = getElementsByTagName('h1', pCC);
   if (targetPlayer.length !== 0) {
-    targetPlayer = targetPlayer[0].textContent;
+    targetPlayer = getText(targetPlayer[0]);
   } else {
     targetPlayer = playerName();
   }

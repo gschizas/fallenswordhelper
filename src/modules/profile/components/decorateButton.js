@@ -1,5 +1,6 @@
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import setText from '../../common/setText';
 import {createDiv, createSpan} from '../../common/cElement';
 
 export default function decorateButton(label) {
@@ -8,7 +9,7 @@ export default function decorateButton(label) {
     className: 'sendLink ' + label.toLowerCase().replace(/ /g, '-'),
     textContent: label
   });
-  parentDiv.textContent = '[';
+  setText('[', parentDiv);
   insertElement(parentDiv, innerSpan);
   insertHtmlBeforeEnd(parentDiv, ']');
   return parentDiv;

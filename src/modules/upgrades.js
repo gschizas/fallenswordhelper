@@ -1,6 +1,7 @@
 import {cmdUrl} from './support/constants';
 import {createSpan} from './common/cElement';
 import {getElementById} from './common/getElement';
+import getText from './common/getText';
 import insertElement from './common/insertElement';
 import insertTextBeforeEnd from './common/insertTextBeforeEnd';
 import intValue from './system/intValue';
@@ -9,16 +10,19 @@ import on from './common/on';
 import partial from './common/partial';
 import querySelectorArray from './common/querySelectorArray';
 import {server} from './system/system';
+import setText from './common/setText';
 import setValue from './system/setValue';
 
 var upgrades;
 var currentFSP;
 var warehouse = {};
 
+function includesText(text, el) {
+  return getText(el).includes(text);
+}
+
 function findText(text) {
-  return upgrades.find(function(el) {
-    return el.textContent.includes(text);
-  });
+  return upgrades.find(partial(includesText, text));
 }
 
 function getInputCell(label) {
@@ -41,7 +45,7 @@ function getRe(type, label) {
 function getValue(type, element, label) {
   if (!warehouse[type][label]) {
     var valRe = getRe(type, label);
-    var value = element.textContent.match(valRe)[1];
+    var value = getText(element).match(valRe)[1];
     warehouse[type][label] = value;
   }
   return warehouse[type][label];
@@ -78,7 +82,7 @@ function doStamCount(type, upgrade, quantity, cell) {
     extraStam = Math.floor(currentFSP / cost) * amount;
     cell.className = 'fshRed';
   }
-  cell.textContent = '(+' + extraStam + ' stamina)';
+  setText('(+' + extraStam + ' stamina)', cell);
 }
 
 function updateStamCount(type, upgrade, evt) {
@@ -99,7 +103,7 @@ function injectUpgradeHelper(type) {
 }
 
 function injectPoints() {
-  currentFSP = intValue(getElementById('statbar-fsp').textContent);
+  currentFSP = intValue(getText(getElementById('statbar-fsp')));
   injectUpgradeHelper('Current');
   injectUpgradeHelper('Maximum');
   getInputCell('Gold').innerHTML = '<a href="' + server + cmdUrl +

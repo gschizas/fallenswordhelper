@@ -2,6 +2,7 @@ import buffList from '../../support/buffObj';
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import {getElementById} from '../../common/getElement';
+import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import guildManage from '../../ajax/guildManage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
@@ -152,7 +153,7 @@ function parsePlayerLink(el) {
   var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
   var minPlayerVirtualLevel = calcMinLvl();
   if (isValidPlayer(lastActivityMinutes, vlevel, minPlayerVirtualLevel)) {
-    addPlayerToSearchList(el.href, el.textContent);
+    addPlayerToSearchList(el.href, getText(el));
   }
 }
 

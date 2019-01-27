@@ -3,6 +3,7 @@ import getValue from './system/getValue';
 import insertElement from './common/insertElement';
 import on from './common/on';
 import outputFormat from './system/outputFormat';
+import setText from './common/setText';
 import {cmdUrl, now} from './support/constants';
 
 function updateUrl(e) {
@@ -38,7 +39,7 @@ function formatTime() {
 function makeLeftCell(newRow) {
   var leftCell = newRow.insertCell(-1);
   leftCell.height = 25;
-  leftCell.textContent = 'Last Reset:';
+  setText('Last Reset:', leftCell);
 }
 
 function makeRightCell(newRow) {

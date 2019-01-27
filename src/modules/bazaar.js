@@ -2,6 +2,7 @@ import buyitem from './app/potionbazaar/buyitem';
 import getArrayByTagName from './common/getArrayByTagName';
 import {getElementById} from './common/getElement';
 import getElementsByTagName from './common/getElementsByTagName';
+import getText from './common/getText';
 import insertElement from './common/insertElement';
 import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
@@ -9,6 +10,7 @@ import jsonFail from './common/jsonFail';
 import on from './common/on';
 import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
+import setText from './common/setText';
 import testQuant from './system/testQuant';
 
 var ItemId;
@@ -37,7 +39,7 @@ function testBuyAmount() {
 }
 
 function buyTarget(target, theValue) {
-  getElementById('quantity').textContent = theValue;
+  setText(theValue, getElementById('quantity'));
   ItemId = target.getAttribute('itemid');
   getElementById('fshBazaarWarning').removeAttribute('class');
   var dupNode = target.cloneNode(false);
@@ -58,7 +60,7 @@ function select(evt) {
 function quantity() {
   var theValue = testBuyAmount();
   if (theValue) {
-    getElementById('quantity').textContent = theValue;
+    setText(theValue, getElementById('quantity'));
   }
 }
 
@@ -72,9 +74,8 @@ function done(json) {
 
 function buy() { // jQuery.min
   if (!ItemId) {return;}
-  var buyAmount = getElementById('quantity').textContent;
-  getElementById('buyResultLabel').textContent =
-    'Buying ' + buyAmount + ' items';
+  var buyAmount = getText(getElementById('quantity'));
+  setText('Buying ' + buyAmount + ' items', getElementById('buyResultLabel'));
   for (var i = 0; i < buyAmount; i += 1) {
     buyitem(ItemId).done(done);
   }

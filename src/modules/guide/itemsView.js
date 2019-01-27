@@ -1,7 +1,8 @@
 import {ahSearchUrl} from '../support/constants';
+import containsText from '../common/containsText';
+import getText from '../common/getText';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import querySelector from '../common/querySelector';
-import textContent from '../common/textContent';
 import xPath from '../common/xPath';
 
 function isNotBound() {
@@ -9,8 +10,8 @@ function isNotBound() {
 }
 
 function isNotComponent() {
-  return textContent(
-    xPath('.//tr[td/b/text() = "Type:"]/td[2]')) !== 'Component';
+  return !containsText('Component',
+    xPath('.//tr[td/b/text() = "Type:"]/td[2]'));
 }
 
 function ahItemHref(name) {
@@ -19,7 +20,7 @@ function ahItemHref(name) {
 
 function insertAhLink(target) {
   insertHtmlBeforeEnd(target.parentNode, ' [<a href="' +
-    ahItemHref(textContent(target)) +
+    ahItemHref(getText(target)) +
     '" target="_blank"><b class="fshBlue">AH</b></a>]');
 }
 

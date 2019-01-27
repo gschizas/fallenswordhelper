@@ -1,3 +1,5 @@
+import getText from '../../common/getText';
+
 var numRE = /[^a-zA-Z0-9.,+\- ]/g;
 var priceRE =
   /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
@@ -16,7 +18,7 @@ function priceAfterName(buffNameNode) {
   // get the whole line from the buff name towards the end (even after
   // the ',', in case of 'AL, Lib, Mer: 10k each'
   while (thisLine(node)) {
-    var newtext = node.textContent;
+    var newtext = getText(node);
     node = node.nextSibling;
     text += newtext;
   }
@@ -27,7 +29,7 @@ function priceBeforeName(buffNameNode) {
   var text = '';
   var node = buffNameNode;
   while (thisLine(node)) {
-    var newtext = node.textContent;
+    var newtext = getText(node);
     node = node.previousSibling;
     text = newtext + text;
   }

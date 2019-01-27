@@ -1,5 +1,6 @@
 import {createSpan} from '../common/cElement';
 import {getElementById} from '../common/getElement';
+import getText from '../common/getText';
 import insertElement from '../common/insertElement';
 import intValue from '../system/intValue';
 import on from '../common/on';
@@ -14,7 +15,7 @@ function setMaxTimes() {
     maxTimes.innerHTML = '';
     var scoutGold = Number(gold.value);
     if (scoutGold !== 0) {
-      var myGold = intValue(statbarGold.textContent);
+      var myGold = intValue(getText(statbarGold));
       var times = Math.floor(myGold / scoutGold).toString();
       maxTimes.innerHTML = '&nbsp;&nbsp;Max: ' + times + ' times';
     }

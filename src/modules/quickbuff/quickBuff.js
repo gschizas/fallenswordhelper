@@ -5,6 +5,7 @@ import getProfile from '../ajax/getProfile';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
+import parseBuffLevel from './parseBuffLevel';
 import populateBuffs from './populateBuffs';
 import querySelectorArray from '../common/querySelectorArray';
 import quickActivate from './quickActivate';
@@ -38,7 +39,7 @@ function eachLabel(el) {
   nameSpan.dataset.tipped = dataTipped
     .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
   var lvlSpan = nameSpan.children[0];
-  var myLvl = Number(lvlSpan.textContent.replace(/\[|\]/g, ''));
+  var myLvl = parseBuffLevel(lvlSpan);
   if (!excludeBuff[el.for] && myLvl < 125) {
     el.classList.add('fshDim');
   }

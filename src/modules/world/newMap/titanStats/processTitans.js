@@ -3,6 +3,7 @@ import padZ from '../../../system/padZ';
 import partial from '../../../common/partial';
 import {realmName} from './realm';
 import roundToString from '../../../common/roundToString';
+import setText from '../../../common/setText';
 import {textSpan} from '../../../common/cElement';
 import {titanId} from './hasTitan';
 import {clearMemberRows, titanTbl} from './buildTitanInfoTable';
@@ -52,11 +53,11 @@ function statusTextHtml(ourTitan) {
 }
 
 function doTopLabels(ourTitan) {
-  currentHp.textContent = ourTitan.current_hp.toString();
-  maxHp.textContent = ourTitan.max_hp.toString();
-  guildKills.textContent = ourTitan.kills.toString();
-  currentPct.textContent = currentPctText(ourTitan);
-  totalPct.textContent = totalPctText(ourTitan);
+  setText(ourTitan.current_hp, currentHp);
+  setText(ourTitan.max_hp, maxHp);
+  setText(ourTitan.kills, guildKills);
+  setText(currentPctText(ourTitan), currentPct);
+  setText(totalPctText(ourTitan), totalPct);
   statusText.innerHTML = statusTextHtml(ourTitan);
   cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
 }

@@ -1,6 +1,7 @@
 import createDocument from '../../system/createDocument';
 import getCustomUrlParameter from '../../system/getCustomUrlParameter';
 import getFolderImgs from './getFolderImgs';
+import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 import processFolderFirstPage from './processFolderFirstPage';
@@ -11,8 +12,8 @@ function notUnassigned(el) {
 }
 
 function noQuests(output, el) {
-  var folderName = el.parentNode.nextElementSibling.nextElementSibling
-    .firstChild.textContent;
+  var folderName = getText(
+    el.parentNode.nextElementSibling.nextElementSibling.firstChild);
   var hasQuest = /quest/i.test(folderName);
   if (hasQuest) {
     insertHtmlBeforeEnd(output, 'Skipping folder "' +

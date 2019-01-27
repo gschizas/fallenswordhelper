@@ -1,11 +1,12 @@
 import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
+import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import {joinUnderUrl, joinallUrl} from '../../support/constants';
 
 function findNewGroup(el) {
-  if (el.textContent.indexOf('New attack group created.') === -1) {return;}
+  if (!getText(el).includes('New attack group created.')) {return;}
   var groupJoinHTML = '';
   if (!getValue('enableMaxGroupSizeToJoin')) {
     groupJoinHTML = '<a href="' + joinallUrl + '"><span ' +

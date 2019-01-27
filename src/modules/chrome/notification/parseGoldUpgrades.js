@@ -1,6 +1,7 @@
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import displayUpgradeMsg from './displayUpgradeMsg';
+import getText from '../../common/getText';
 import notGoldUpgradesPage from './notGoldUpgradesPage';
 import querySelectorAll from '../../common/querySelectorAll';
 import setValue from '../../system/setValue';
@@ -16,14 +17,14 @@ function findDoc(data) {
 }
 
 function checkUpgrade(limit) {
-  var checkDoneUpgrade = limit.textContent.split(' / ');
+  var checkDoneUpgrade = getText(limit).split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
     displayUpgradeMsg();
     setValue('needToDoUpgrade', true);
   } else {
     setValue('needToDoUpgrade', false);
     setValue('lastUpgradeCheck',
-      Date.parse(limit.nextElementSibling.textContent + ' GMT'));
+      Date.parse(getText(limit.nextElementSibling) + ' GMT'));
   }
 }
 

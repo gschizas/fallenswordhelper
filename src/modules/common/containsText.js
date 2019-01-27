@@ -1,5 +1,5 @@
-import textContent from './textContent';
+import getText from './getText';
 
 export default function containsText(text, el) {
-  return textContent(el) === text;
+  return getText(el) === text;
 }

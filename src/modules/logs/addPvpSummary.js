@@ -3,6 +3,7 @@ import calf from '../support/calf';
 import combatView from '../ajax/combatView';
 import createDocument from '../system/createDocument';
 import getForage from '../ajax/getForage';
+import getText from '../common/getText';
 import insertElement from '../common/insertElement';
 import {nowSecs} from '../support/constants';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
@@ -72,11 +73,11 @@ function whatsMissing(json, html) {
   var specialHtml = querySelectorAll('#specialsDiv', createDocument(html));
   json.r.specials.forEach(function(el, i) {
     if (!inSpecialsList(el)) {
+      var label = JSON.stringify(el) + ' ' + getText(specialHtml[i]);
       //#if _DEV  //  PvP missing Special
-      console.log(JSON.stringify(el) + ' ' + specialHtml[i].textContent); // eslint-disable-line no-console
+      console.log(label); // eslint-disable-line no-console
       //#endif
-      sendEvent('Logs', 'Missing PvP Special',
-        JSON.stringify(el) + ' ' + specialHtml[i].textContent);
+      sendEvent('Logs', 'Missing PvP Special', label);
     }
   });
 }
@@ -89,7 +90,7 @@ function unknownSpecials(json) {
 
 function cacheCombat(aRow, json) {
   if (!json.s) {return;}
-  var cellContents = aRow.cells[1].textContent;
+  var cellContents = getText(aRow.cells[1]);
   json.logTime = parseDateAsTimestamp(cellContents) / 1000;
   combatCache[json.r.id] = json;
   setForage('fsh_pvpCombat', combatCache);
@@ -140,7 +141,7 @@ var combatRowTests = [
     return aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML);
   },
   function(aRow) {
-    return !/\(Guild Conflict\)/.test(aRow.cells[2].textContent);
+    return !/\(Guild Conflict\)/.test(getText(aRow.cells[2]));
   }
 ];
 

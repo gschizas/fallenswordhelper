@@ -14,6 +14,7 @@ import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import {sendEvent} from '../../support/fshGa';
+import setText from '../../common/setText';
 import setValue from '../../system/setValue';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
@@ -26,7 +27,7 @@ var itemList;
 
 function doAction(self, fn, verb) { // jQuery.min
   sendEvent('QuickWear', 'doAction - ' + verb);
-  self.textContent = '';
+  setText('', self);
   self.classList.remove('smallLink');
   self.classList.add('fshSpinner', 'fshSpin12');
   fn(self.dataset.itemid).done(function(data) {

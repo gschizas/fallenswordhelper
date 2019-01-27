@@ -1,5 +1,6 @@
 import getArrayByTagName from '../../common/getArrayByTagName';
 import getElementsByTagName from '../../common/getElementsByTagName';
+import getText from '../../common/getText';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import {pCC} from '../../support/layout';
 
@@ -10,7 +11,7 @@ function otherFolders(el) {
 function makeOption(e) {
   return '<option value=' +
     e.parentNode.href.match(/&folder_id=(-?\d+)/i)[1] + '>' +
-    e.parentNode.parentNode.textContent + '</option>';
+    getText(e.parentNode.parentNode) + '</option>';
 }
 
 export default function injectMoveItems() {

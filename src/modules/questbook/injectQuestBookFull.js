@@ -1,6 +1,7 @@
 import {def_table} from '../support/constants';
 import dontPost from './dontPost';
 import getElementsByTagName from '../common/getElementsByTagName';
+import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import guideButtons from './guideButtons';
 import hideElement from '../common/hideElement';
@@ -121,7 +122,7 @@ function doHideQuests(hideQuests, questName, aRow) {
 
 function forEachQuest(hideQuests, questTable) {
   Array.from(questTable.rows).filter(myRows(5, 0)).forEach(function(aRow) {
-    var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
+    var questName = getTextTrim(aRow.cells[0]).replace(/ {2}/g, ' ');
     doHideQuests(hideQuests, questName, aRow);
     var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
     aRow.cells[4].innerHTML = guideButtons(questID, questName);

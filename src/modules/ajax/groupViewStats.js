@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import getText from '../common/getText';
 import intValue from '../system/intValue';
 import {
   def_statArmor,
@@ -24,7 +25,7 @@ function getElements(doc) {
 
 function statAsNumber(el) {
   if (el) {
-    return intValue(el.textContent);
+    return intValue(getText(el));
   }
   return 0;
 }

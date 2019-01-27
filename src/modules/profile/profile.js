@@ -6,6 +6,7 @@ import components from './components/components';
 import fallback from '../system/fallback';
 import fastDebuff from './debuff';
 import getElementsByTagName from '../common/getElementsByTagName';
+import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
 import highlightPvpProtection from './highlightPvpProtection';
 import injectFastWear from './fastWear';
@@ -63,7 +64,7 @@ export default function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
-  var playername = getElementsByTagName('h1', pCC)[0].textContent;
+  var playername = getText(getElementsByTagName('h1', pCC)[0]);
   var self = playername === playerName();
   updateDom(avyImg, playername, self);
 }

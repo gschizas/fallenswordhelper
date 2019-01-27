@@ -1,11 +1,12 @@
 import contains from '../common/contains';
 import getArrayByTagName from '../common/getArrayByTagName';
+import getText from '../common/getText';
 import getValue from '../system/getValue';
 import myRows from '../common/myRows';
 import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
-import {showPlayerUrl} from '../support/constants';
+import searchPlayerHref from '../common/searchPlayerHref';
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) {return Number(playerAry[1]);}
@@ -42,11 +43,6 @@ function dimIfNotMe(aRow, hasInvited, targetPlayerName) {
   }
 }
 
-function searchPlayerHref(targetPlayerName) {
-  return '<a href="' + showPlayerUrl + targetPlayerName + '">' +
-    targetPlayerName + '</a>';
-}
-
 function likeInvite(aRow, hasInvited) {
   var message = aRow.cells[2].innerHTML;
   var parts = message.split('\'');
@@ -57,9 +53,9 @@ function likeInvite(aRow, hasInvited) {
 }
 
 function guildInvite(aRow) { // Legacy
-  var hasInvited = aRow.cells[2].textContent
-    .search('has invited the player') !== -1;
-  if (aRow.cells[2].textContent.charAt(0) === '\'' || hasInvited) {
+  var msg = getText(aRow.cells[2]);
+  var hasInvited = msg.includes('has invited the player');
+  if (msg.charAt(0) === '\'' || hasInvited) {
     likeInvite(aRow, hasInvited);
   }
 }

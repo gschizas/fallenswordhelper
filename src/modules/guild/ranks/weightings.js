@@ -1,6 +1,7 @@
 import createDocument from '../../system/createDocument';
 import {createInput} from '../../common/cElement';
 import {getElementById} from '../../common/getElement';
+import getTextTrim from '../../common/getTextTrim';
 import hideElement from '../../common/hideElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
@@ -24,7 +25,7 @@ var privLookup = {
 };
 
 function eachWeight(checkbox) {
-  var privName = checkbox.nextElementSibling.textContent.trim();
+  var privName = getTextTrim(checkbox.nextElementSibling);
   return privLookup[privName] || 1;
 }
 

@@ -1,4 +1,4 @@
-export default function textContent(node) {
+export default function getText(node) {
   if (node instanceof Node) {
     return node.textContent;
   }

@@ -1,5 +1,6 @@
 import batch from '../../common/batch';
 import calf from '../../support/calf';
+import getText from '../../common/getText';
 import onlineDot from '../../common/onlineDot';
 import {playerIdUrl} from '../../support/constants';
 import querySelectorAll from '../../common/querySelectorAll';
@@ -12,7 +13,7 @@ function memberHeader(oldhtml) {
 }
 
 function updateMemberHeader(el) {
-  var oldhtml = el.textContent;
+  var oldhtml = getText(el);
   if (calf.membrList[oldhtml]) {
     el.innerHTML = memberHeader(oldhtml);
   }

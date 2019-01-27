@@ -3,6 +3,7 @@ import calf from '../../support/calf';
 import {createDiv} from '../../common/cElement';
 import {def_joinallgroupsundersize} from '../../support/constants';
 import fetchGroupStatsButton from './fetchGroupStatsButton';
+import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import indexAjaxData from '../../ajax/indexAjaxData';
@@ -28,7 +29,7 @@ function joinGroup(groupID, container) { // jQuery.min
 
 function doJoinUnderSize(joinButton) {
   var memList = joinButton.parentNode.parentNode.parentNode.cells[1];
-  var memListArrayWithMercs = memList.textContent.split(',');
+  var memListArrayWithMercs = getText(memList).split(',');
   var memListArrayWithoutMercs = memListArrayWithMercs
     .filter(filterMercs);
   if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
