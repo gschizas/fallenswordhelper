@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import quickBuffHref from '../common/quickBuffHref';
+import doBuffLink from './doBuffLink';
 import {
   attackplayerUrl,
   doAddIgnore,
@@ -24,22 +24,6 @@ function reportIgnore(aRow, isGuildMate, playerName) { // Legacy
   }
   aRow.cells[1].innerHTML = dateFirstPart + '</a>' + extraPart +
     dateLastPart;
-}
-
-function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
-  var quickBuff = '';
-  var buffsSent = _buffsSent[0].replace('`~', '').replace('~`', '')
-    .split(/\s*,\s*/);
-  buffsSent.reduce(function(prev, el) {
-    var ret = prev;
-    var nick = el.toLowerCase();
-    if (calf.nickList[nick]) {
-      ret += calf.nickList[nick].toString() + ';';
-    }
-    return ret;
-  }, '');
-  return ' | <a ' + quickBuffHref(targetPlayerID, quickBuff) +
-      '>Buff</a></span>';
 }
 
 function makeFirstPart(messageHTML) {
@@ -67,12 +51,7 @@ function getThirdPart(messageHTML) { // Legacy
     messageHTML.indexOf('>Buff</a>') + 9);
   var targetPlayerRE = /quickBuff\((\d+)\)/.exec(thirdPart);
   if (targetPlayerRE) {
-    var targetPlayerID = targetPlayerRE[1];
-    var buffsSent = messageHTML.match(/`~.*?~`/);
-    if (buffsSent) {
-      return doBuffLink(buffsSent, targetPlayerID);
-    }
-    return ' | <a ' + quickBuffHref(targetPlayerID) + '>Buff</a></span>';
+    return doBuffLink(targetPlayerRE[1], messageHTML.match(/`~.*?~`/));
   }
   return '';
 }

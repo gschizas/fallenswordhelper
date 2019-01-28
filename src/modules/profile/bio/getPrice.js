@@ -1,4 +1,5 @@
 import getText from '../../common/getText';
+import toLowerCase from '../../common/toLowerCase';
 
 var numRE = /[^a-zA-Z0-9.,+\- ]/g;
 var priceRE =
@@ -9,7 +10,7 @@ function thisLine(node) {
 }
 
 function formatPrice(text) {
-  return text.replace(numRE, '').toLowerCase().match(priceRE);
+  return toLowerCase(text.replace(numRE, '')).match(priceRE);
 }
 
 function priceAfterName(buffNameNode) {

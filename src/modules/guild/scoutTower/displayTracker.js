@@ -1,8 +1,8 @@
-import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import {now} from '../support/constants';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import {now} from '../../support/constants';
 import {coolTime, cooldownText, seen, titan} from './constants';
-import {createTBody, createTable} from '../common/cElement';
+import {createTBody, createTable} from '../../common/cElement';
 
 function reformat(el) {
   return [el[0], el[1].cooldownText, el[1].coolTime, el[1].seen];

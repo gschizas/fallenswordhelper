@@ -1,6 +1,6 @@
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import {pCC} from '../support/layout';
-import {scouttowerUrl} from '../support/constants';
+import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
+import {pCC} from './support/layout';
+import {scouttowerUrl} from './support/constants';
 
 export default function injectTitan() {
   var titanTable = pCC.children[0];

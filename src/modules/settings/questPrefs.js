@@ -10,7 +10,7 @@ export default function questPrefs() {
     '<tr><td class="fshRight">Hide Specific Quests' +
       helpLink('Hide Specific Quests',
         'If enabled, this hides quests whose name matches the list ' +
-        '(separated by commas). This works on Quest Manager and Quest Book.') +
+        '(separated by commas).') +
       ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
       'value="on"' +
       isValueChecked('hideQuests') + '>' +

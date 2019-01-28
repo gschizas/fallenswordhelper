@@ -1,9 +1,9 @@
-import containsText from '../common/containsText';
-import getText from '../common/getText';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import myRows from '../common/myRows';
-import on from '../common/on';
-import openQuickBuffByName from '../common/openQuickBuffByName';
+import containsText from '../../common/containsText';
+import getText from '../../common/getText';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import myRows from '../../common/myRows';
+import on from '../../common/on';
+import openQuickBuffByName from '../../common/openQuickBuffByName';
 
 function buffIndividual(self) {
   if (self.previousElementSibling) {

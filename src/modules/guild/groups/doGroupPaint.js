@@ -1,3 +1,4 @@
+import csvSplit from '../../common/csvSplit';
 import doBuffLinks from '../../common/doBuffLinks';
 import onlineDot from '../../common/onlineDot';
 import partial from '../../common/partial';
@@ -57,7 +58,7 @@ function profileLink(membrlist, name) {
 }
 
 function groupMembers(membrlist, membersCell) {
-  var listArr = membersCell.html().split(', ');
+  var listArr = csvSplit(membersCell.html());
   if (listArr.length > 1) {listArr.sort(partial(byMemberLevel, membrlist));}
   return listArr;
 }

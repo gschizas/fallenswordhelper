@@ -1,18 +1,18 @@
-import {createAnchor} from '../common/cElement';
+import {createAnchor} from '../../common/cElement';
 import displayTracker from './displayTracker';
-import getElementsByTagName from '../common/getElementsByTagName';
-import getForage from '../ajax/getForage';
-import getText from '../common/getText';
+import getElementsByTagName from '../../common/getElementsByTagName';
+import getForage from '../../ajax/getForage';
+import getText from '../../common/getText';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
-import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import myRows from '../common/myRows';
-import {pCC} from '../support/layout';
-import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
-import roundToString from '../common/roundToString';
-import setForage from '../ajax/setForage';
-import {def_table, guideUrl, now} from '../support/constants';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
+import myRows from '../../common/myRows';
+import {pCC} from '../../support/layout';
+import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
+import roundToString from '../../common/roundToString';
+import setForage from '../../ajax/setForage';
+import {def_table, guideUrl, now} from '../../support/constants';
 
 function getTitanName(aRow) {
   return aRow.cells[0].children[0].getAttribute('oldtitle');
@@ -65,16 +65,18 @@ export function getKillsPct(currentNumberOfKills, guildKills) {
   return guildKills * 100 / currentNumberOfKills;
 }
 
-function injectSummary(aRow, titanHP) {
-  var guildKills = Number(getText(aRow.cells[3]));
-  var titanHPArray = titanHP.split('/');
-  var currentHP = Number(titanHPArray[0]);
-  var totalHP = Number(titanHPArray[1]);
-  insertHtmlBeforeEnd(aRow.cells[3],
-    '<br><span class="fshBlue"> (' +
+function summaryHtml(guildKills, currentHP, totalHP) {
+  return '<br><span class="fshBlue"> (' +
     roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
     '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
-    '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
+    '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')';
+}
+
+function injectSummary(aRow, titanHP) {
+  var titanHPArray = titanHP.split('/');
+  insertHtmlBeforeEnd(aRow.cells[3],
+    summaryHtml(Number(getText(aRow.cells[3])), Number(titanHPArray[0]),
+      Number(titanHPArray[1])));
 }
 
 function killsSummary(aRow) {

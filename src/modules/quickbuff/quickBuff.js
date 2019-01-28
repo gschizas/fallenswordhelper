@@ -1,66 +1,29 @@
 import addBuffLevels from './addBuffLevels';
+import doLabels from './doLabels';
+import doPassThru from './doPassThru';
 import firstPlayerStats from './firstPlayerStats';
 import {getElementById} from '../common/getElement';
 import getProfile from '../ajax/getProfile';
+import getSustain from './getSustain';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
-import parseBuffLevel from './parseBuffLevel';
-import populateBuffs from './populateBuffs';
-import querySelectorArray from '../common/querySelectorArray';
 import quickActivate from './quickActivate';
-import {excludeBuff, quickBuffHeader} from './assets';
-
-function getEnhancement(doc, enh, inject) {
-  var enhLevel = doc[enh] || 0;
-  var enhClass = 'fshLime';
-  if (enhLevel < 100) {enhClass = 'fshRed';}
-  inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
-}
-
-function populateEnhancements(responseText) {
-  var enh = responseText._enhancements.reduce(function(prev, curr) {
-    prev[curr.name] = curr.value;
-    return prev;
-  }, {});
-  getEnhancement(enh, 'Sustain', getElementById('fshSus'));
-  getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
-}
+import {quickBuffHeader} from './assets';
 
 function setupEventHandlers() {
   on(getElementById('helperQBheader'), 'click', quickActivate);
   on(getElementById('players'), 'click', addBuffLevels);
 }
 
-function eachLabel(el) {
-  var nameSpan = el.children[0];
-  var dataTipped = nameSpan.dataset.tipped;
-  var cost = el.previousElementSibling.dataset.cost;
-  nameSpan.dataset.tipped = dataTipped
-    .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
-  var lvlSpan = nameSpan.children[0];
-  var myLvl = parseBuffLevel(lvlSpan);
-  if (!excludeBuff[el.for] && myLvl < 125) {
-    el.classList.add('fshDim');
-  }
-}
-
-function doLabels() {
-  querySelectorArray('#buff-outer label[for^="skill-"]').forEach(eachLabel);
-}
-
-function getSustain(responseText) {
-  populateEnhancements(responseText);
-  populateBuffs(responseText);
-  setupEventHandlers();
-  doLabels();
-  firstPlayerStats();
-}
-
 export default function injectQuickBuff() { // jQuery.min
   if (jQueryNotPresent()) {return;}
   var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
-  insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
   getProfile(window.self).done(getSustain);
+  insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
+  doLabels();
+  doPassThru();
+  setupEventHandlers();
+  firstPlayerStats();
 }

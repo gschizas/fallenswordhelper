@@ -5,7 +5,8 @@ function reverseSort(headerClicked) {
   return calf.sortBy && calf.sortBy === headerClicked;
 }
 
-export default function doSortParams(headerClicked) {
+export default function doSortParams(target) {
+  var headerClicked = target.getAttribute('sortKey');
   if (isUndefined(calf.sortAsc)) {calf.sortAsc = true;}
   if (reverseSort(headerClicked)) {
     calf.sortAsc = !calf.sortAsc;

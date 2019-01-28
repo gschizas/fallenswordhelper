@@ -1,15 +1,11 @@
 import {beginFolderSpanElement} from '../../support/constants';
+import calf from '../../support/calf';
 import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
+import stringSort from '../../system/stringSort';
 import {createDiv, createTBody, createTable} from '../../common/cElement';
-
-function alpha(a, b) {
-  if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
-  if (a.n.toLowerCase() > b.n.toLowerCase()) {return 1;}
-  return 0;
-}
 
 function isUseable(item) {
   if ([10, 12, 15, 16].indexOf(item.t) !== -1 ||
@@ -48,16 +44,22 @@ function tableRows(tbl, currentPlayerId, item) {
     item.n + '</td>';
 }
 
+function folderHtml(folderObj) {
+  return ' &ensp;' + beginFolderSpanElement + String(folderObj.id) + '">' +
+    folderObj.name + '</span>';
+}
+
 function makeFolderSpans(appInv) {
   return beginFolderSpanElement + '0">All</span>' +
-    appInv.r.reduce(function(prev, folderObj) {
-      return prev + ' &ensp;' + beginFolderSpanElement +
-        folderObj.id.toString() + '">' + folderObj.name + '</span>';
-    }, '');
+    appInv.r.map(folderHtml).join('');
+}
+
+function sortedRows(tbody, currentPlayerId, aFolder) {
+  aFolder.items.sort(stringSort);
+  aFolder.items.forEach(partial(tableRows, tbody, currentPlayerId));
 }
 
 export default function createQuickWear(appInv) {
-  var currentPlayerId = playerId();
   var tbl = createTable({
     width: '100%',
     innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
@@ -67,10 +69,9 @@ export default function createQuickWear(appInv) {
   });
   var tbody = createTBody();
   insertElement(tbl, tbody);
-  appInv.r.forEach(function(aFolder) {
-    aFolder.items.sort(alpha);
-    aFolder.items.forEach(partial(tableRows, tbody, currentPlayerId));
-  });
+  calf.sortBy = 'n';
+  calf.sortAsc = true;
+  appInv.r.forEach(partial(sortedRows, tbody, playerId()));
   var qw = createDiv({
     id: 'invTabs-qw',
     className: 'ui-tabs-panel ui-corner-bottom'

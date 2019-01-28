@@ -1,28 +1,12 @@
+import addStatsQuickBuff from './addStatsQuickBuff';
 import {createSpan} from '../common/cElement';
-import formatLastActivity from '../system/formatLastActivity';
-import getElementsByTagName from '../common/getElementsByTagName';
+import csvSplit from '../common/csvSplit';
 import getProfile from '../ajax/getProfile';
 import getText from '../common/getText';
 import insertElementAfter from '../common/insertElementAfter';
 import parseBuffLevel from './parseBuffLevel';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
-
-function addStatsQuickBuff(data) {
-  var myPlayer = document.querySelector('div.player[data-username="' +
-    data.username + '"]');
-  var activity = myPlayer.querySelector('span.fshLastActivity');
-  if (!activity) {
-    activity = createSpan({className: 'fshLastActivity'});
-    var player = getElementsByTagName('h1', myPlayer)[0];
-    insertElementAfter(activity, player);
-  }
-  activity.innerHTML = 'Last Activity: ' +
-    formatLastActivity(data.last_login) +
-    '<br>Stamina: ' + data.current_stamina + ' / ' +
-    data.stamina + ' ( ' + Math.floor(data.current_stamina /
-    data.stamina * 100) + '% )';
-}
 
 function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
@@ -51,24 +35,30 @@ function buffRunning(el, playerBuffLevel, playerSpan) {
     '">[' + playerBuffLevel + ']</span>';
 }
 
-function hazBuff(playerData, el) {
+function thisBuff(myBuffName, arr) {
+  return arr[0] === myBuffName;
+}
+
+function thisBuffLevel(playerData, el) {
   var myBuffName = el.getAttribute('data-name');
-  var playerBuffLevel = playerData[myBuffName];
+  var buffArr = playerData.find(partial(thisBuff, myBuffName));
+  if (buffArr) {return buffArr[1];}
+}
+
+function hazBuff(playerData, el) {
+  var playerBuffLevel = thisBuffLevel(playerData, el);
   var playerSpan = el.nextElementSibling.nextElementSibling;
   if (playerBuffLevel || playerSpan) {
     buffRunning(el, playerBuffLevel, playerSpan);
   }
 }
 
+function shred(str) {
+  return str.split(/ \[|]/);
+}
+
 function makeBuffArray(player) {
-  var buffList = getText(player.parentNode.lastElementChild).split(',');
-  return buffList.reduce(function(prev, curr) {
-    if (curr.indexOf(' [') !== -1) {
-      var foo = curr.split(' [');
-      prev[foo[0].trim()] = parseInt(foo[1].replace(']', ''), 10);
-    }
-    return prev;
-  }, {});
+  return csvSplit(getText(player.parentNode.lastElementChild)).map(shred);
 }
 
 export default function addBuffLevels(evt) {

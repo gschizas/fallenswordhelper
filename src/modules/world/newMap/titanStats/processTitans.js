@@ -19,7 +19,7 @@ import {
 import {
   getKillsPct,
   getTitanString
-} from '../../../scoutTower/injectScouttower';
+} from '../../../guild/scoutTower/injectScouttower';
 import {months, now} from '../../../support/constants';
 
 function formatOffset(secs) {

@@ -10,7 +10,7 @@ import injectFindPlayer from '../../injectFindPlayer';
 import injectMailbox from '../../mailbox/mailbox';
 import injectQuickBuff from '../../quickbuff/quickBuff';
 import injectSettings from '../../settings/injectSettings';
-import injectTitan from '../../scoutTower/injectTitan';
+import injectTitan from '../../injectTitan';
 import injectWorld from '../../world/injectWorld';
 import inventing from '../../inventing/inventing';
 import items from './items';

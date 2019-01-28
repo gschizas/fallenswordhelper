@@ -1,5 +1,5 @@
-import buffList from '../support/buffObj';
 import calf from '../support/calf';
+import doBuffLink from './doBuffLink';
 import doChat from './doChat';
 import fallback from '../system/fallback';
 import getMembrList from '../ajax/getMembrList';
@@ -9,7 +9,6 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import myRows from '../common/myRows';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
-import quickBuffHref from '../common/quickBuffHref';
 import {addPvpSummary, initCache} from './addPvpSummary';
 import {
   attackplayerUrl,
@@ -32,16 +31,6 @@ function doMsgHeader(logTable) {
       '<span class="fshWhite">(Guild mates show up in ' +
       '<span class="fshGreen">green</span>)</span>');
   }
-}
-
-function buildNickList(prev, curr) {
-  var ret = prev;
-  var nicks = curr.nicks.split(',');
-  nicks.forEach(function(el) {
-    var nick = el.toLowerCase();
-    ret[nick] = curr.id;
-  });
-  return ret;
 }
 
 function canIgnore(aRow, playerName, isGuildMate) {
@@ -67,8 +56,7 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
     '">Reply</span> | <a href="' + tradeUrl + buffingPlayerName +
     '">Trade</a> | <a title="Secure Trade" href="' + secureUrl +
     buffingPlayerName + '">ST</a>';
-  extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
-    '>Buff</a>';
+  extraText += doBuffLink(buffingPlayerID);
   if (calf.addAttackLinkToLog) {
     extraText += ' | <a href="' + attackplayerUrl + buffingPlayerName +
       '">Attack</a>';
@@ -142,7 +130,6 @@ function foundLogTable(logTable) { // Legacy
 }
 
 function addLogWidgetsOld() { // Legacy
-  calf.nickList = buffList.reduce(buildNickList, {});
   calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
   var logTable = document.querySelector('#pCC > table:last-of-type');
   if (logTable) {foundLogTable(logTable);}

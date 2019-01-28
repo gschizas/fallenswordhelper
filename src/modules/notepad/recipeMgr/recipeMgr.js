@@ -2,7 +2,6 @@ import doSortParams from '../../common/doSortParams';
 import generateRecipeTable from './generateRecipeTable';
 import getForage from '../../ajax/getForage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import numberSort from '../../system/numberSort';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
@@ -14,25 +13,9 @@ import {
   recipebook
 } from './parseInventing';
 
-function testSortType(evt) {
-  var sortType = evt.target.getAttribute('sorttype');
-  if (!sortType) {sortType = 'string';}
-  sortType = sortType.toLowerCase();
-  return sortType;
-}
-
-function sortRecipeBook(sortType) {
-  if (sortType === 'number') {
-    recipebook.recipe.sort(numberSort);
-  } else {
-    recipebook.recipe.sort(stringSort);
-  }
-}
-
 function sortRecipeTable(evt) { // Legacy
-  doSortParams(evt.target.getAttribute('sortKey'));
-  var sortType = testSortType(evt);
-  sortRecipeBook(sortType);
+  doSortParams(evt.target);
+  recipebook.recipe.sort(stringSort);
   generateRecipeTable(output, recipebook);
 }
 
