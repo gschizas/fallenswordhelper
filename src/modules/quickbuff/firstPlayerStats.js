@@ -19,7 +19,6 @@ function haveTargets() {
 }
 
 export default function firstPlayerStats() {
-  var targets = getElementById('targetPlayers')
-    .getAttribute('value');
-  if (targets && targets !== '') {haveTargets();}
+  var targets = getElementById('targetPlayers').value;
+  if (targets) {haveTargets();}
 }
