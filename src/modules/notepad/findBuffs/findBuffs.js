@@ -1,6 +1,7 @@
 import buffList from '../../support/buffObj';
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
+import csvSplit from '../../common/csvSplit';
 import {getElementById} from '../../common/getElement';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
@@ -25,7 +26,6 @@ import {
   profileUrl,
   showPlayerUrl
 } from '../../support/constants';
-import csvSplit from '../../common/csvSplit';
 
 var findBuffNicks;
 var findBuffMinCastLevel;
