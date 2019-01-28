@@ -1389,7 +1389,8 @@
     return calf.sortBy && calf.sortBy === headerClicked;
   }
 
-  function doSortParams(headerClicked) {
+  function doSortParams(target) {
+    var headerClicked = target.getAttribute('sortKey');
     if (isUndefined(calf.sortAsc)) {calf.sortAsc = true;}
     if (reverseSort(headerClicked)) {
       calf.sortAsc = !calf.sortAsc;
@@ -1404,7 +1405,8 @@
     var _path = aPath.split('.');
     var len = _path.length;
     for (var i = 0; i < len; i += 1) {
-      if (fallback(!_obj, typeof _obj !== 'object')) {return def;}
+      // if (fallback(!_obj, typeof _obj !== 'object')) {return def;}
+      if (fallback(!_obj, !isObject(_obj))) {return def;}
       _obj = _obj[_path[i]];
     }
     return _obj;
@@ -1447,13 +1449,20 @@
     return sortDesc(result);
   }
 
-  function stringSort(a, b) {
-    var result = 0;
-    var _a = path(a, calf.sortBy, 'a');
-    var _b = path(b, calf.sortBy, 'a');
-    if (_a.toLowerCase() < _b.toLowerCase()) {result = -1;}
-    if (_a.toLowerCase() > _b.toLowerCase()) {result = 1;}
-    return sortDesc(result);
+  function toLowerCase(str) {
+    return str.toLowerCase();
+  }
+
+  function alpha(a, b) {
+    if (toLowerCase(a) < toLowerCase(b)) {return -1;}
+    if (toLowerCase(a) > toLowerCase(b)) {return 1;}
+    return 0;
+  }
+
+  function stringSort(aa, bb) {
+    var a = path(aa, calf.sortBy, 'a');
+    var b = path(bb, calf.sortBy, 'a');
+    return sortDesc(alpha(a, b));
   }
 
   var content;
@@ -1501,21 +1510,27 @@
   }
 
   function sortCol(target) {
-    doSortParams(target.getAttribute('sortKey'));
+    doSortParams(target);
     var sortType = findSortType(target);
     sortMonsterAry(sortType);
     drawMobs();
   }
 
-  function doHandlers(evt) { // jQuery.min
+  function isSortHeader(target) {
+    return target.classList.contains('fshLink') &&
+      target.hasAttribute('sortkey');
+  }
+
+  function doHandlers(evt) {
     var target = evt.target;
     if (target.id === 'clearEntityLog') {
       setForage('fsh_monsterLog', '');
       noMobs();
       return;
     }
-    if (!target.classList.contains('fshLink')) {return;}
-    sortCol(target);
+    if (isSortHeader(target)) {
+      sortCol(target);
+    }
   }
 
   function drawTable() {
@@ -2098,9 +2113,13 @@
     injectOnlinePlayersNew();
   }
 
+  function csvSplit(csv) {
+    return csv.split(/\s*,\s*/);
+  }
+
   function shouldBeArray(pref) {
     var stored = getValue(pref);
-    if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
+    if (stored) {return csvSplit(stored);}
     return [];
   }
 
@@ -2389,25 +2408,9 @@
     }
   }
 
-  function testSortType(evt) {
-    var sortType = evt.target.getAttribute('sorttype');
-    if (!sortType) {sortType = 'string';}
-    sortType = sortType.toLowerCase();
-    return sortType;
-  }
-
-  function sortRecipeBook(sortType) {
-    if (sortType === 'number') {
-      recipebook.recipe.sort(numberSort);
-    } else {
-      recipebook.recipe.sort(stringSort);
-    }
-  }
-
   function sortRecipeTable(evt) { // Legacy
-    doSortParams(evt.target.getAttribute('sortKey'));
-    var sortType = testSortType(evt);
-    sortRecipeBook(sortType);
+    doSortParams(evt.target);
+    recipebook.recipe.sort(stringSort);
     generateRecipeTable(output, recipebook);
   }
 
@@ -2648,12 +2651,6 @@
     getInventory().done(prepInv);
   }
 
-  function alpha(a, b) {
-    if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
-    if (a.n.toLowerCase() > b.n.toLowerCase()) {return 1;}
-    return 0;
-  }
-
   function isUseable(item) {
     if ([10, 12, 15, 16].indexOf(item.t) !== -1 ||
         item.n === 'Zombie Coffin') {
@@ -2691,16 +2688,22 @@
       item.n + '</td>';
   }
 
+  function folderHtml(folderObj) {
+    return ' &ensp;' + beginFolderSpanElement + String(folderObj.id) + '">' +
+      folderObj.name + '</span>';
+  }
+
   function makeFolderSpans(appInv) {
     return beginFolderSpanElement + '0">All</span>' +
-      appInv.r.reduce(function(prev, folderObj) {
-        return prev + ' &ensp;' + beginFolderSpanElement +
-          folderObj.id.toString() + '">' + folderObj.name + '</span>';
-      }, '');
+      appInv.r.map(folderHtml).join('');
+  }
+
+  function sortedRows(tbody, currentPlayerId, aFolder) {
+    aFolder.items.sort(stringSort);
+    aFolder.items.forEach(partial(tableRows$1, tbody, currentPlayerId));
   }
 
   function createQuickWear(appInv) {
-    var currentPlayerId = playerId();
     var tbl = createTable({
       width: '100%',
       innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
@@ -2710,10 +2713,9 @@
     });
     var tbody = createTBody();
     insertElement(tbl, tbody);
-    appInv.r.forEach(function(aFolder) {
-      aFolder.items.sort(alpha);
-      aFolder.items.forEach(partial(tableRows$1, tbody, currentPlayerId));
-    });
+    calf.sortBy = 'n';
+    calf.sortAsc = true;
+    appInv.r.forEach(partial(sortedRows, tbody, playerId()));
     var qw = createDiv({
       id: 'invTabs-qw',
       className: 'ui-tabs-panel ui-corner-bottom'
@@ -4354,7 +4356,7 @@
     // if option enabled then parse profiles
     profilePagesToSearch = [];
     profilePagesToSearch.push(profileUrl); // ???
-    var extraProfileArray = extraProfile.split(',');
+    var extraProfileArray = csvSplit(extraProfile);
     extraProfileArray.forEach(function(el) {
       profilePagesToSearch.push(showPlayerUrl + el);
     });
@@ -5230,7 +5232,6 @@
   var activeBountyListPosted;
   var bountyListRefreshTime;
   var bwNeedsRefresh;
-  var wantedNames;
   var wantedArray;
 
   function hasActiveBounties(activeTable) {
@@ -5299,8 +5300,7 @@
     wantedList.isRefreshed = true;
     wantedList.lastUpdate = nowSecs;
     activeBountyListPosted = false;
-    wantedNames = getValue('wantedNames');
-    wantedArray = wantedNames.split(/\s*,\s*/);
+    wantedArray = shouldBeArray('wantedNames');
     setValue('bwNeedsRefresh', false);
   }
 
@@ -8505,7 +8505,7 @@
   }
 
   function groupMembers(membrlist, membersCell) {
-    var listArr = membersCell.html().split(', ');
+    var listArr = csvSplit(membersCell.html());
     if (listArr.length > 1) {listArr.sort(partial(byMemberLevel, membrlist));}
     return listArr;
   }
@@ -8620,7 +8620,7 @@
 
   function doJoinUnderSize(joinButton) {
     var memList = joinButton.parentNode.parentNode.parentNode.cells[1];
-    var memListArrayWithMercs = getText(memList).split(',');
+    var memListArrayWithMercs = csvSplit(getText(memList));
     var memListArrayWithoutMercs = memListArrayWithMercs
       .filter(filterMercs);
     if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
@@ -9007,7 +9007,7 @@
   }
 
   function formatPrice(text) {
-    return text.replace(numRE, '').toLowerCase().match(priceRE);
+    return toLowerCase(text.replace(numRE, '')).match(priceRE);
   }
 
   function priceAfterName(buffNameNode) {
@@ -9430,12 +9430,6 @@
     }
   }
 
-  function alpha$1(a, b) {
-    if (a.toLowerCase() < b.toLowerCase()) {return -1;}
-    if (a.toLowerCase() > b.toLowerCase()) {return 1;}
-    return 0;
-  }
-
   function formatDateTime(dateParts) {
     return dateParts[0] + '-' + dateParts[1] + '-' + dateParts[2] + ' ' +
       dateParts[3] + ':' + dateParts[4] + ':' + dateParts[5];
@@ -9475,7 +9469,7 @@
   function buildOptions(ourMembers) {
     return '<select name="member">' +
       '<option value="- All -" selected>- All -</option>' +
-      Object.keys(ourMembers).sort(alpha$1).reduce(function(prev, member) {
+      Object.keys(ourMembers).sort(alpha).reduce(function(prev, member) {
         return prev + '<option value="' + member + '">' + member + '</option>';
       }, '') + '</select>';
   }
@@ -10189,7 +10183,7 @@
 
   function shuffleRows(evt, thisRankRow, targetRowNum) {
     var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
-    rankPosition(evt.target.value.toLowerCase(), matchRankId[1]);
+    rankPosition(toLowerCase(evt.target.value), matchRankId[1]);
     var injectRow = thisRankRow.parentNode.rows[targetRowNum];
     insertElementBefore(thisRankRow, injectRow);
     var pxScroll = getPxScroll(evt.target.value);
@@ -10474,16 +10468,18 @@
     return guildKills * 100 / currentNumberOfKills;
   }
 
-  function injectSummary(aRow, titanHP) {
-    var guildKills = Number(getText(aRow.cells[3]));
-    var titanHPArray = titanHP.split('/');
-    var currentHP = Number(titanHPArray[0]);
-    var totalHP = Number(titanHPArray[1]);
-    insertHtmlBeforeEnd(aRow.cells[3],
-      '<br><span class="fshBlue"> (' +
+  function summaryHtml(guildKills, currentHP, totalHP) {
+    return '<br><span class="fshBlue"> (' +
       roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
       '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
-      '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
+      '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')';
+  }
+
+  function injectSummary(aRow, titanHP) {
+    var titanHPArray = titanHP.split('/');
+    insertHtmlBeforeEnd(aRow.cells[3],
+      summaryHtml(Number(getText(aRow.cells[3])), Number(titanHPArray[0]),
+        Number(titanHPArray[1])));
   }
 
   function killsSummary(aRow) {
@@ -11124,7 +11120,7 @@
   };
 
   function sortKeys(obj) {
-    return Object.keys(obj).sort(alpha$1).reduce(function(result, key) {
+    return Object.keys(obj).sort(alpha).reduce(function(result, key) {
       result[key] = obj[key];
       return result;
     }, {});
@@ -12098,6 +12094,25 @@
     if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
   }
 
+  function thisNick(nick, buffObj) {
+    return csvSplit(buffObj.nicks).includes(toLowerCase(nick));
+  }
+
+  function getBuffId(nick) {
+    return buffList.find(partial(thisNick, nick)).id;
+  }
+
+  function doBuffLink(targetPlayerID, buffsSent) {
+    var href = '';
+    if (buffsSent) {
+      href = quickBuffHref(targetPlayerID,
+        csvSplit(buffsSent[0].replace(/`~|~`/g, '')).map(getBuffId).join(';'));
+    } else {
+      href = quickBuffHref(targetPlayerID);
+    }
+    return ' | <a ' + href + '>Buff</a></span>';
+  }
+
   function removeHTML(buffName) {
     return buffName.replace(/<\/?[^>]+(>|$)/g, '');
   }
@@ -12115,22 +12130,6 @@
     }
     aRow.cells[1].innerHTML = dateFirstPart + '</a>' + extraPart +
       dateLastPart;
-  }
-
-  function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
-    var quickBuff = '';
-    var buffsSent = _buffsSent[0].replace('`~', '').replace('~`', '')
-      .split(/\s*,\s*/);
-    buffsSent.reduce(function(prev, el) {
-      var ret = prev;
-      var nick = el.toLowerCase();
-      if (calf.nickList[nick]) {
-        ret += calf.nickList[nick].toString() + ';';
-      }
-      return ret;
-    }, '');
-    return ' | <a ' + quickBuffHref(targetPlayerID, quickBuff) +
-        '>Buff</a></span>';
   }
 
   function makeFirstPart(messageHTML) {
@@ -12158,12 +12157,7 @@
       messageHTML.indexOf('>Buff</a>') + 9);
     var targetPlayerRE = /quickBuff\((\d+)\)/.exec(thirdPart);
     if (targetPlayerRE) {
-      var targetPlayerID = targetPlayerRE[1];
-      var buffsSent = messageHTML.match(/`~.*?~`/);
-      if (buffsSent) {
-        return doBuffLink(buffsSent, targetPlayerID);
-      }
-      return ' | <a ' + quickBuffHref(targetPlayerID) + '>Buff</a></span>';
+      return doBuffLink(targetPlayerRE[1], messageHTML.match(/`~.*?~`/));
     }
     return '';
   }
@@ -12501,16 +12495,6 @@
     }
   }
 
-  function buildNickList(prev, curr) {
-    var ret = prev;
-    var nicks = curr.nicks.split(',');
-    nicks.forEach(function(el) {
-      var nick = el.toLowerCase();
-      ret[nick] = curr.id;
-    });
-    return ret;
-  }
-
   function canIgnore(aRow, playerName, isGuildMate) {
     if (!isGuildMate) {
       var dateExtraText = '<nobr><span style="font-size:x-small;">' +
@@ -12534,8 +12518,7 @@
       '">Reply</span> | <a href="' + tradeUrl + buffingPlayerName +
       '">Trade</a> | <a title="Secure Trade" href="' + secureUrl +
       buffingPlayerName + '">ST</a>';
-    extraText += ' | <a ' + quickBuffHref(buffingPlayerID) +
-      '>Buff</a>';
+    extraText += doBuffLink(buffingPlayerID);
     if (calf.addAttackLinkToLog) {
       extraText += ' | <a href="' + attackplayerUrl + buffingPlayerName +
         '">Attack</a>';
@@ -12609,7 +12592,6 @@
   }
 
   function addLogWidgetsOld() { // Legacy
-    calf.nickList = buffList.reduce(buildNickList, {});
     calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
     var logTable = document.querySelector('#pCC > table:last-of-type');
     if (logTable) {foundLogTable(logTable);}
@@ -12953,24 +12935,29 @@
     makeQtLabel('qtOff', 'Quick Take', injector);
   }
 
-  function parseBuffLevel(el) {
-    return Number(getText(el).replace(/\[|\]/g, ''));
-  }
-
-  function addStatsQuickBuff(data) {
-    var myPlayer = document.querySelector('div.player[data-username="' +
-      data.username + '"]');
+  function getActivitySpan(myPlayer) {
     var activity = myPlayer.querySelector('span.fshLastActivity');
     if (!activity) {
       activity = createSpan({className: 'fshLastActivity'});
       var player = getElementsByTagName('h1', myPlayer)[0];
       insertElementAfter(activity, player);
     }
+    return activity;
+  }
+
+  function addStatsQuickBuff(data) {
+    var myPlayer = document.querySelector('div.player[data-username="' +
+      data.username + '"]');
+    var activity = getActivitySpan(myPlayer);
     activity.innerHTML = 'Last Activity: ' +
       formatLastActivity(data.last_login) +
       '<br>Stamina: ' + data.current_stamina + ' / ' +
       data.stamina + ' ( ' + Math.floor(data.current_stamina /
       data.stamina * 100) + '% )';
+  }
+
+  function parseBuffLevel(el) {
+    return Number(getText(el).replace(/\[|\]/g, ''));
   }
 
   function newPlayerSpan(el, playerSpan) {
@@ -13000,24 +12987,30 @@
       '">[' + playerBuffLevel + ']</span>';
   }
 
-  function hazBuff(playerData, el) {
+  function thisBuff$1(myBuffName, arr) {
+    return arr[0] === myBuffName;
+  }
+
+  function thisBuffLevel(playerData, el) {
     var myBuffName = el.getAttribute('data-name');
-    var playerBuffLevel = playerData[myBuffName];
+    var buffArr = playerData.find(partial(thisBuff$1, myBuffName));
+    if (buffArr) {return buffArr[1];}
+  }
+
+  function hazBuff(playerData, el) {
+    var playerBuffLevel = thisBuffLevel(playerData, el);
     var playerSpan = el.nextElementSibling.nextElementSibling;
     if (playerBuffLevel || playerSpan) {
       buffRunning(el, playerBuffLevel, playerSpan);
     }
   }
 
+  function shred(str) {
+    return str.split(/ \[|]/);
+  }
+
   function makeBuffArray(player) {
-    var buffList = getText(player.parentNode.lastElementChild).split(',');
-    return buffList.reduce(function(prev, curr) {
-      if (curr.indexOf(' [') !== -1) {
-        var foo = curr.split(' [');
-        prev[foo[0].trim()] = parseInt(foo[1].replace(']', ''), 10);
-      }
-      return prev;
-    }, {});
+    return csvSplit(getText(player.parentNode.lastElementChild)).map(shred);
   }
 
   function addBuffLevels(evt) {
@@ -13027,6 +13020,77 @@
     var playerData = makeBuffArray(player);
     querySelectorArray('#buff-outer input[name]')
       .forEach(partial(hazBuff, playerData));
+  }
+
+  var quickBuffHeader =
+    '<div id="helperQBheader"><table class="quickbuffTable"><thead><tr>' +
+    '<th class="quickbuffTableHeader">Sustain</th>' +
+    '<th class="quickbuffTableHeader">Fury Caster</th>' +
+    '<th class="quickbuffTableHeader">Guild Buffer</th>' +
+    '<th class="quickbuffTableHeader">Buff Master</th>' +
+    '<th class="quickbuffTableHeader">Extend</th>' +
+    '<th class="quickbuffTableHeader">Reinforce</th>' +
+    '</tr></thead><tbody><tr>' +
+    '<td id="fshSus" class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshFur" class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshGB"  class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshBM"  class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshExt" class="quickbuffTableDetail">&nbsp;</td>' +
+    '<td id="fshRI"  class="quickbuffTableDetail">&nbsp;</td>' +
+    '</tr></tbody></table></div>';
+  var excludeBuff = [
+    50, // Death Dealer
+    54, // Counter Attack
+    55, // Summon Shield Imp
+    56, // Vision
+    60, // Nightmare Visage
+    61, // Quest Finder
+    98, // Barricade
+    101 // Severe Condition
+  ];
+
+  function addStamCost(el, nameSpan) {
+    var dataTipped = nameSpan.dataset.tipped;
+    var cost = el.previousElementSibling.dataset.cost;
+    nameSpan.dataset.tipped = dataTipped
+      .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
+  }
+
+  function canBeDimmed(el, nameSpan) {
+    return !excludeBuff.includes(Number(el.htmlFor.slice(6))) &&
+      parseBuffLevel(nameSpan.children[0]) < 125;
+  }
+
+  function dimPreReqs(el, nameSpan) {
+    if (canBeDimmed(el, nameSpan)) {
+      el.classList.add('fshDim');
+    }
+  }
+
+  function decorate(el) {
+    var nameSpan = el.children[0];
+    addStamCost(el, nameSpan);
+    dimPreReqs(el, nameSpan);
+  }
+
+  function doLabels() {
+    querySelectorArray('#buff-outer label[for^="skill-"]').forEach(decorate);
+  }
+
+  function tickBuff(id) {
+    var thisBuff = getElementById('skill-' + id);
+    if (thisBuff) {
+      thisBuff.checked = true;
+    }
+  }
+
+  function tickBuffs(passThru) {
+    passThru.split(';').forEach(tickBuff);
+  }
+
+  function doPassThru() {
+    var passThru = getUrlParameter('blist');
+    if (passThru) {tickBuffs(passThru);}
   }
 
   var retries = 0;
@@ -13047,9 +13111,8 @@
   }
 
   function firstPlayerStats() {
-    var targets = getElementById('targetPlayers')
-      .getAttribute('value');
-    if (targets && targets !== '') {haveTargets();}
+    var targets = getElementById('targetPlayers').value;
+    if (targets) {haveTargets();}
   }
 
   function timeUnit(value, unit) {
@@ -13095,6 +13158,33 @@
     getBuff(skl, 'Reinforce', getElementById('fshRI'));
   }
 
+  function thisName(name, enhancement) {
+    return enhancement.name === name;
+  }
+
+  function thisEnhancementLevel(enhancements, name) {
+    var thisEnhancement = enhancements.find(partial(thisName, name));
+    return thisEnhancement && thisEnhancement.value || 0;
+  }
+
+  function getEnhancement(enhancements, name, inject) {
+    var enhLevel = thisEnhancementLevel(enhancements, name);
+    var enhClass = 'fshLime';
+    if (enhLevel < 100) {enhClass = 'fshRed';}
+    inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
+  }
+
+  function populateEnhancements(responseText) {
+    var enh = responseText._enhancements;
+    getEnhancement(enh, 'Sustain', getElementById('fshSus'));
+    getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
+  }
+
+  function getSustain$1(responseText) {
+    populateEnhancements(responseText);
+    populateBuffs(responseText);
+  }
+
   function quickbuff(userAry, buffAry) {
     return callApp({
       cmd: 'quickbuff',
@@ -13122,85 +13212,21 @@
       .done(partial(processResult$1, trigger));
   }
 
-  var quickBuffHeader =
-    '<div id="helperQBheader"><table class="quickbuffTable"><thead><tr>' +
-    '<th class="quickbuffTableHeader">Sustain</th>' +
-    '<th class="quickbuffTableHeader">Fury Caster</th>' +
-    '<th class="quickbuffTableHeader">Guild Buffer</th>' +
-    '<th class="quickbuffTableHeader">Buff Master</th>' +
-    '<th class="quickbuffTableHeader">Extend</th>' +
-    '<th class="quickbuffTableHeader">Reinforce</th>' +
-    '</tr></thead><tbody><tr>' +
-    '<td id="fshSus" class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshFur" class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshGB"  class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshBM"  class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshExt" class="quickbuffTableDetail">&nbsp;</td>' +
-    '<td id="fshRI"  class="quickbuffTableDetail">&nbsp;</td>' +
-    '</tr></tbody></table></div>';
-  var excludeBuff = {
-    'skill-50': 'Death Dealer',
-    'skill-54': 'Counter Attack',
-    'skill-55': 'Summon Shield Imp',
-    'skill-56': 'Vision',
-    'skill-60': 'Nightmare Visage',
-    'skill-61': 'Quest Finder',
-    'skill-98': 'Barricade',
-    'skill-101': 'Severe Condition'
-  };
-
-  function getEnhancement(doc, enh, inject) {
-    var enhLevel = doc[enh] || 0;
-    var enhClass = 'fshLime';
-    if (enhLevel < 100) {enhClass = 'fshRed';}
-    inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
-  }
-
-  function populateEnhancements(responseText) {
-    var enh = responseText._enhancements.reduce(function(prev, curr) {
-      prev[curr.name] = curr.value;
-      return prev;
-    }, {});
-    getEnhancement(enh, 'Sustain', getElementById('fshSus'));
-    getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
-  }
-
   function setupEventHandlers() {
     on(getElementById('helperQBheader'), 'click', quickActivate);
     on(getElementById('players'), 'click', addBuffLevels);
-  }
-
-  function eachLabel(el) {
-    var nameSpan = el.children[0];
-    var dataTipped = nameSpan.dataset.tipped;
-    var cost = el.previousElementSibling.dataset.cost;
-    nameSpan.dataset.tipped = dataTipped
-      .replace('</center>', '<br>Stamina Cost: ' + cost + '$&');
-    var lvlSpan = nameSpan.children[0];
-    var myLvl = parseBuffLevel(lvlSpan);
-    if (!excludeBuff[el.for] && myLvl < 125) {
-      el.classList.add('fshDim');
-    }
-  }
-
-  function doLabels() {
-    querySelectorArray('#buff-outer label[for^="skill-"]').forEach(eachLabel);
-  }
-
-  function getSustain$1(responseText) {
-    populateEnhancements(responseText);
-    populateBuffs(responseText);
-    setupEventHandlers();
-    doLabels();
-    firstPlayerStats();
   }
 
   function injectQuickBuff() { // jQuery.min
     if (jQueryNotPresent()) {return;}
     var quickbuffDiv = getElementById('quickbuff');
     if (!quickbuffDiv) {return;}
-    insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
     getProfile$1(window.self).done(getSustain$1);
+    insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
+    doLabels();
+    doPassThru();
+    setupEventHandlers();
+    firstPlayerStats();
   }
 
   function concatSimple(prev, curr) {
@@ -13235,7 +13261,7 @@
       '> Refresh time is same as Active Bounties';
   }
 
-  function wantedNames$1() {
+  function wantedNames() {
     return '<tr><td align= "right">Wanted Names' +
       helpLink('Wanted Names',
         'The names of the people you want to see on the bounty board ' +
@@ -13249,7 +13275,7 @@
     return '<tr><th colspan="2"><b>Bounty hunting preferences</b></th></tr>' +
       showActiveBounties() +
       showWantedBounties() +
-      wantedNames$1() +
+      wantedNames() +
       bunchOfSimple([
         'wantedGuildMembers',
         'enableAttackHelper',
@@ -13772,7 +13798,7 @@
       '<tr><td class="fshRight">Hide Specific Quests' +
         helpLink('Hide Specific Quests',
           'If enabled, this hides quests whose name matches the list ' +
-          '(separated by commas). This works on Quest Manager and Quest Book.') +
+          '(separated by commas).') +
         ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
         'value="on"' +
         isValueChecked('hideQuests') + '>' +
@@ -15263,8 +15289,9 @@
   }
 
   function updateDefenderBuffedDamage(defBuffedHp) {
-    setTextCommas(defRawDamage + Math.ceil(
-      defBuffedHp * leadDefender.chiStrikeLevel * 0.001), damageBuffedElement);
+    defBuffedDamage = defRawDamage +
+      Math.ceil(defBuffedHp * leadDefender.chiStrikeLevel * 0.001);
+    setTextCommas(defBuffedDamage);
   }
 
   function isLeadDefenderCloaked() {
@@ -17764,6 +17791,41 @@
       '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
   }
 
+  function replaceDoubleSpace(str) {
+    return str.replace(/\s\s+/g, ' ');
+  }
+
+  function isHideQuests() {
+    if (getValue('hideQuests')) {
+      return shouldBeArray('hideQuestNames');
+    }
+    return [];
+  }
+
+  function doHideQuests(hideQuests, questName, aRow) {
+    if (hideQuests.includes(questName)) {
+      var target = aRow;
+      hideElement(target);
+      for (var i = 0; i < 3; i++) {
+        target = target.nextElementSibling;
+        hideElement(target);
+      }
+    }
+  }
+
+  function decorate$1(questsToHide, aRow) {
+    var questName = replaceDoubleSpace(getTextTrim(aRow.cells[0]));
+    doHideQuests(questsToHide, questName, aRow);
+    var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
+    aRow.cells[4].innerHTML = guideButtons(questID, questName);
+  }
+
+  function injectQuestRow(questTable) {
+    var questsToHide = isHideQuests();
+    Array.from(questTable.rows).filter(myRows(5, 0))
+      .forEach(partial(decorate$1, questsToHide));
+  }
+
   var normalLink;
   var seasonLink;
   var activeLink;
@@ -17858,38 +17920,12 @@
     }
   }
 
-  function isHideQuests() {
-    if (getValue('hideQuests')) {
-      return getValue('hideQuestNames').split(',');
-    }
-    return [];
-  }
-
-  function doHideQuests(hideQuests, questName, aRow) {
-    if (hideQuests.indexOf(questName) >= 0) {
-      hideElement(aRow);
-      hideElement(aRow.nextElementSibling);
-      hideElement(aRow.nextElementSibling.nextElementSibling);
-      hideElement(aRow.nextElementSibling.nextElementSibling.nextElementSibling);
-    }
-  }
-
-  function forEachQuest(hideQuests, questTable) {
-    Array.from(questTable.rows).filter(myRows(5, 0)).forEach(function(aRow) {
-      var questName = getTextTrim(aRow.cells[0]).replace(/ {2}/g, ' ');
-      doHideQuests(hideQuests, questName, aRow);
-      var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-      aRow.cells[4].innerHTML = guideButtons(questID, questName);
-    });
-  }
-
   function injectQuestBookFull() {
     on(pCC, 'click', dontPost$2);
     storeQuestPage();
     var questTable = getElementsByTagName(def_table, pCC)[5];
     if (!questTable) {return;}
-    var hideQuests = isHideQuests();
-    forEachQuest(hideQuests, questTable);
+    injectQuestRow(questTable);
   }
 
   function buff(thisBuff, el) {return el.name === thisBuff;}
@@ -18066,7 +18102,7 @@
     });
   }
 
-  function decorate() {
+  function decorate$2() {
     if (theInv.folders) {
       theInv.folders['-1'] = 'Main';
     }
@@ -18906,7 +18942,7 @@
 
   function prepareLayout() {
     executeAll([
-      decorate,
+      decorate$2,
       lvlFilter$1,
       typeFilter,
       setFilter,
@@ -19651,7 +19687,7 @@
   function decorateButton(label) {
     var parentDiv = createDiv();
     var innerSpan = createSpan({
-      className: 'sendLink ' + label.toLowerCase().replace(/ /g, '-'),
+      className: 'sendLink ' + toLowerCase(label).replace(/ /g, '-'),
       textContent: label
     });
     setText('[', parentDiv);
@@ -20026,35 +20062,43 @@
 
   var guildId$1;
   var currentGuildRelationship;
-  var guildMessages = {
-    self: {color: 'fshGreen', message: getValue('guildSelfMessage')},
-    friendly: {color: 'fshOliveDrab', message: getValue('guildFrndMessage')},
-    old: {color: 'fshDarkCyan', message: getValue('guildPastMessage')},
-    enemy: {color: 'fshRed', message: getValue('guildEnmyMessage')}
-  };
+  var myGuildMsgs = [
+    ['self', 'fshGreen', 'guildSelfMessage'],
+    ['friendly', 'fshOliveDrab', 'guildFrndMessage'],
+    ['old', 'fshDarkCyan', 'guildPastMessage'],
+    ['enemy', 'fshRed', 'guildEnmyMessage']
+  ];
+  var typeMapping = [
+    ['guildFrnd', 'friendly'],
+    ['guildPast', 'old'],
+    ['guildEnmy', 'enemy']
+  ];
 
-  function guildAry(val) {
+  function guildAry(pref) {
+    var val = shouldBeArray(pref);
     if (val) {
-      return val.toLowerCase().replace(/\s\s*/g, ' ').split(/\s*,\s*/);
+      return val.map(replaceDoubleSpace).map(toLowerCase);
     }
     return [];
   }
 
-  function buildScenario() {
-    return [
-      {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
-      {test: guildAry(getValue('guildPast')), type: 'old'},
-      {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
-    ];
+  function expandList(arr) {
+    return [guildAry(arr[0]), arr[1]];
   }
 
-  function hasRelationship(txt, el) {return el.test.includes(txt);}
+  function buildScenario() {
+    return typeMapping.map(expandList);
+  }
+
+  function hasRelationship(txt, el) {
+    return el[0].includes(txt);
+  }
 
   function externalRelationship(_txt) {
     var scenario = buildScenario();
-    var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
+    var txt = replaceDoubleSpace(toLowerCase(_txt));
     var relObj = scenario.find(partial(hasRelationship, txt));
-    if (relObj) {return relObj.type;}
+    if (relObj) {return relObj[1];}
   }
 
   function thisGuildId(aLink) {
@@ -20065,26 +20109,33 @@
   function guildRelationship(aLink) {
     guildId$1 = thisGuildId(aLink);
     if (guildId$1 && guildId$1 === currentGuildId()) {
-      setValue('guildSelf', aLink.text);
+      setValue('guildSelf', getText(aLink));
       return 'self';
     }
-    return externalRelationship(aLink.text);
+    return externalRelationship(getText(aLink));
+  }
+
+  function whichMsg(arr) {return arr[0] === currentGuildRelationship;}
+
+  function setMsg$1(aLink) {
+    var thisGuildRel = myGuildMsgs.find(whichMsg);
+    aLink.parentNode.classList.add(thisGuildRel[1]);
+    insertHtmlBeforeEnd(aLink.parentNode, '<br>' + getValue(thisGuildRel[2]));
   }
 
   function foundGuildLink(aLink) {
     currentGuildRelationship = guildRelationship(aLink);
     if (currentGuildRelationship) {
-      aLink.parentNode.classList.add(
-        guildMessages[currentGuildRelationship].color);
-      insertHtmlBeforeEnd(aLink.parentNode, '<br>' +
-        guildMessages[currentGuildRelationship].message);
+      setMsg$1(aLink);
     }
   }
 
   function profileInjectGuildRel(self) {
     var aLink = document.querySelector(
       '#pCC a[href^="' + guildSubcmdUrl + 'view&guild_id="]');
-    if (aLink) {foundGuildLink(aLink);} else if (self) {
+    if (aLink) {
+      foundGuildLink(aLink);
+    } else if (self) {
       setValue('guildSelf', '');
     }
   }
@@ -20397,17 +20448,24 @@
     dropitems: {'-': injectProfileDropItems}
   };
 
-  function injectQuestTracker() {
+  function updateBackHref() {
     var lastActiveQuestPage = getValue('lastActiveQuestPage');
     if (lastActiveQuestPage.length > 0) {
-      getElementsByTagName('a', pCC)[0]
-        .setAttribute('href', lastActiveQuestPage);
+      getElementsByTagName('a', pCC)[0].href = lastActiveQuestPage;
     }
-    var questID = getUrlParameter('quest_id');
+  }
+
+  function injectGuideButtons() {
     var injectHere = getElementsByTagName('td', pCC)[0];
     var questName = getText(getElementsByTagName('font', injectHere)[1])
       .replace(/"/g, '');
-    insertHtmlBeforeEnd(injectHere, guideButtons(questID, questName));
+    insertHtmlBeforeEnd(injectHere,
+      guideButtons(getUrlParameter('quest_id'), questName));
+  }
+
+  function injectQuestTracker() {
+    updateBackHref();
+    injectGuideButtons();
   }
 
   var questbook = {
@@ -20522,7 +20580,7 @@
   function gotGains(gains) {
     var ret = '<br>' + gains.length + ' item(s):';
     var gainHash = buildGainHash(gains);
-    Object.keys(gainHash).sort(alpha$1).forEach(function(item) {
+    Object.keys(gainHash).sort(alpha).forEach(function(item) {
       ret += '<br>' + gainHash[item] + ' ' + item + '(s), ';
     });
     return ret;
@@ -21225,7 +21283,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '91';
+  window.FSH.calf = '92';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
