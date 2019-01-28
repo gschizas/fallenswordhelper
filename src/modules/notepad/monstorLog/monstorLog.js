@@ -56,21 +56,27 @@ function sortMonsterAry(sortType) {
 }
 
 function sortCol(target) {
-  doSortParams(target.getAttribute('sortKey'));
+  doSortParams(target);
   var sortType = findSortType(target);
   sortMonsterAry(sortType);
   drawMobs();
 }
 
-function doHandlers(evt) { // jQuery.min
+function isSortHeader(target) {
+  return target.classList.contains('fshLink') &&
+    target.hasAttribute('sortkey');
+}
+
+function doHandlers(evt) {
   var target = evt.target;
   if (target.id === 'clearEntityLog') {
     setForage('fsh_monsterLog', '');
     noMobs();
     return;
   }
-  if (!target.classList.contains('fshLink')) {return;}
-  sortCol(target);
+  if (isSortHeader(target)) {
+    sortCol(target);
+  }
 }
 
 function drawTable() {

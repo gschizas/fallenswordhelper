@@ -25,6 +25,7 @@ import {
   profileUrl,
   showPlayerUrl
 } from '../../support/constants';
+import csvSplit from '../../common/csvSplit';
 
 var findBuffNicks;
 var findBuffMinCastLevel;
@@ -173,7 +174,7 @@ function findBuffsParseProfilePageStart() { // Legacy
   // if option enabled then parse profiles
   profilePagesToSearch = [];
   profilePagesToSearch.push(profileUrl); // ???
-  var extraProfileArray = extraProfile.split(',');
+  var extraProfileArray = csvSplit(extraProfile);
   extraProfileArray.forEach(function(el) {
     profilePagesToSearch.push(showPlayerUrl + el);
   });

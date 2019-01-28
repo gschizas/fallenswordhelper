@@ -65,16 +65,18 @@ export function getKillsPct(currentNumberOfKills, guildKills) {
   return guildKills * 100 / currentNumberOfKills;
 }
 
-function injectSummary(aRow, titanHP) {
-  var guildKills = Number(getText(aRow.cells[3]));
-  var titanHPArray = titanHP.split('/');
-  var currentHP = Number(titanHPArray[0]);
-  var totalHP = Number(titanHPArray[1]);
-  insertHtmlBeforeEnd(aRow.cells[3],
-    '<br><span class="fshBlue"> (' +
+function summaryHtml(guildKills, currentHP, totalHP) {
+  return '<br><span class="fshBlue"> (' +
     roundToString(getKillsPct(totalHP - currentHP, guildKills), 2) +
     '% Current <br>' + roundToString(guildKills * 100 / totalHP, 2) +
-    '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')');
+    '% Total<br>' + getTitanString(guildKills, totalHP, currentHP) + ')';
+}
+
+function injectSummary(aRow, titanHP) {
+  var titanHPArray = titanHP.split('/');
+  insertHtmlBeforeEnd(aRow.cells[3],
+    summaryHtml(Number(getText(aRow.cells[3])), Number(titanHPArray[0]),
+      Number(titanHPArray[1])));
 }
 
 function killsSummary(aRow) {

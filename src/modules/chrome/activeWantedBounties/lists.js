@@ -6,13 +6,13 @@ import getValue from '../../system/getValue';
 import getValueJSON from '../../system/getValueJSON';
 import {nowSecs} from '../../support/constants';
 import setValue from '../../system/setValue';
+import shouldBeArray from '../../system/shouldBeArray';
 
 export var bountyList;
 export var wantedList;
 export var activeBountyListPosted;
 var bountyListRefreshTime;
 export var bwNeedsRefresh;
-var wantedNames;
 export var wantedArray;
 
 function hasActiveBounties(activeTable) {
@@ -81,7 +81,6 @@ export function doRefresh() {
   wantedList.isRefreshed = true;
   wantedList.lastUpdate = nowSecs;
   activeBountyListPosted = false;
-  wantedNames = getValue('wantedNames');
-  wantedArray = wantedNames.split(/\s*,\s*/);
+  wantedArray = shouldBeArray('wantedNames');
   setValue('bwNeedsRefresh', false);
 }

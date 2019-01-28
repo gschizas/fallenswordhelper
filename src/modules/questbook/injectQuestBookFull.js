@@ -1,11 +1,8 @@
 import {def_table} from '../support/constants';
 import dontPost from './dontPost';
 import getElementsByTagName from '../common/getElementsByTagName';
-import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
-import guideButtons from './guideButtons';
-import hideElement from '../common/hideElement';
-import myRows from '../common/myRows';
+import injectQuestRow from './injectQuestRow';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import setValue from '../system/setValue';
@@ -104,36 +101,10 @@ function storeQuestPage() {
   }
 }
 
-function isHideQuests() {
-  if (getValue('hideQuests')) {
-    return getValue('hideQuestNames').split(',');
-  }
-  return [];
-}
-
-function doHideQuests(hideQuests, questName, aRow) {
-  if (hideQuests.indexOf(questName) >= 0) {
-    hideElement(aRow);
-    hideElement(aRow.nextElementSibling);
-    hideElement(aRow.nextElementSibling.nextElementSibling);
-    hideElement(aRow.nextElementSibling.nextElementSibling.nextElementSibling);
-  }
-}
-
-function forEachQuest(hideQuests, questTable) {
-  Array.from(questTable.rows).filter(myRows(5, 0)).forEach(function(aRow) {
-    var questName = getTextTrim(aRow.cells[0]).replace(/ {2}/g, ' ');
-    doHideQuests(hideQuests, questName, aRow);
-    var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-    aRow.cells[4].innerHTML = guideButtons(questID, questName);
-  });
-}
-
 export default function injectQuestBookFull() {
   on(pCC, 'click', dontPost);
   storeQuestPage();
   var questTable = getElementsByTagName(def_table, pCC)[5];
   if (!questTable) {return;}
-  var hideQuests = isHideQuests();
-  forEachQuest(hideQuests, questTable);
+  injectQuestRow(questTable);
 }

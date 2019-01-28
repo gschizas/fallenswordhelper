@@ -6,15 +6,22 @@ import guideButtons from './guideButtons';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {pCC} from '../support/layout';
 
-export default function injectQuestTracker() {
+function updateBackHref() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
-    getElementsByTagName('a', pCC)[0]
-      .setAttribute('href', lastActiveQuestPage);
+    getElementsByTagName('a', pCC)[0].href = lastActiveQuestPage;
   }
-  var questID = getUrlParameter('quest_id');
+}
+
+function injectGuideButtons() {
   var injectHere = getElementsByTagName('td', pCC)[0];
   var questName = getText(getElementsByTagName('font', injectHere)[1])
     .replace(/"/g, '');
-  insertHtmlBeforeEnd(injectHere, guideButtons(questID, questName));
+  insertHtmlBeforeEnd(injectHere,
+    guideButtons(getUrlParameter('quest_id'), questName));
+}
+
+export default function injectQuestTracker() {
+  updateBackHref();
+  injectGuideButtons();
 }
