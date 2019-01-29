@@ -7,6 +7,11 @@ import playerId from '../../common/playerId';
 import stringSort from '../../system/stringSort';
 import {createDiv, createTBody, createTable} from '../../common/cElement';
 
+function initSort() {
+  calf.sortBy = 'n';
+  calf.sortAsc = true;
+}
+
 function isUseable(item) {
   if ([10, 12, 15, 16].indexOf(item.t) !== -1 ||
       item.n === 'Zombie Coffin') {
@@ -54,12 +59,12 @@ function makeFolderSpans(appInv) {
     appInv.r.map(folderHtml).join('');
 }
 
-function sortedRows(tbody, currentPlayerId, aFolder) {
-  aFolder.items.sort(stringSort);
-  aFolder.items.forEach(partial(tableRows, tbody, currentPlayerId));
+function addRows(tbody, currentPlayerId, aFolder) {
+  aFolder.items.sort(stringSort)
+    .forEach(partial(tableRows, tbody, currentPlayerId));
 }
 
-export default function createQuickWear(appInv) {
+function makeQwTable(appInv) {
   var tbl = createTable({
     width: '100%',
     innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
@@ -69,9 +74,13 @@ export default function createQuickWear(appInv) {
   });
   var tbody = createTBody();
   insertElement(tbl, tbody);
-  calf.sortBy = 'n';
-  calf.sortAsc = true;
-  appInv.r.forEach(partial(sortedRows, tbody, playerId()));
+  initSort();
+  appInv.r.forEach(partial(addRows, tbody, playerId()));
+  return tbl;
+}
+
+export default function createQuickWear(appInv) {
+  var tbl = makeQwTable(appInv);
   var qw = createDiv({
     id: 'invTabs-qw',
     className: 'ui-tabs-panel ui-corner-bottom'

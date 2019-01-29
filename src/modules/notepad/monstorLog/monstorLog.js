@@ -106,7 +106,7 @@ function prepMonster(data) {
 }
 
 function prepAry(data) {
-  if (!data || data === '') {
+  if (!data) {
     noMobs();
     return;
   }

@@ -18,11 +18,11 @@ import {injectWantedList, wantedListReset} from './injectWantedList';
 function notRefreshed(enableActiveBountyList, enableWantedList) {
   if (enableWantedList) {
     wantedList.isRefreshed = false;
-    injectWantedList(wantedList);
+    injectWantedList();
   }
   if (enableActiveBountyList) {
     bountyList.isRefreshed = false;
-    injectBountyList(bountyList);
+    injectBountyList();
   }
 }
 

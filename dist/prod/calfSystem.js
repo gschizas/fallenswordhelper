@@ -1525,7 +1525,7 @@
   }
 
   function prepAry(data) {
-    if (!data || data === '') {
+    if (!data) {
       noMobs();
       return;
     }
@@ -2617,6 +2617,11 @@
     getInventory().done(prepInv);
   }
 
+  function initSort() {
+    calf.sortBy = 'n';
+    calf.sortAsc = true;
+  }
+
   function isUseable(item) {
     if ([10, 12, 15, 16].indexOf(item.t) !== -1 ||
         item.n === 'Zombie Coffin') {
@@ -2664,12 +2669,12 @@
       appInv.r.map(folderHtml).join('');
   }
 
-  function sortedRows(tbody, currentPlayerId, aFolder) {
-    aFolder.items.sort(stringSort);
-    aFolder.items.forEach(partial(tableRows$1, tbody, currentPlayerId));
+  function addRows(tbody, currentPlayerId, aFolder) {
+    aFolder.items.sort(stringSort)
+      .forEach(partial(tableRows$1, tbody, currentPlayerId));
   }
 
-  function createQuickWear(appInv) {
+  function makeQwTable(appInv) {
     var tbl = createTable({
       width: '100%',
       innerHTML: '<thead><tr><th class="fshCenter" colspan="3">' +
@@ -2679,9 +2684,13 @@
     });
     var tbody = createTBody();
     insertElement(tbl, tbody);
-    calf.sortBy = 'n';
-    calf.sortAsc = true;
-    appInv.r.forEach(partial(sortedRows, tbody, playerId()));
+    initSort();
+    appInv.r.forEach(partial(addRows, tbody, playerId()));
+    return tbl;
+  }
+
+  function createQuickWear(appInv) {
+    var tbl = makeQwTable(appInv);
     var qw = createDiv({
       id: 'invTabs-qw',
       className: 'ui-tabs-panel ui-corner-bottom'
@@ -5445,11 +5454,11 @@
   function notRefreshed(enableActiveBountyList, enableWantedList) {
     if (enableWantedList) {
       wantedList.isRefreshed = false;
-      injectWantedList(wantedList);
+      injectWantedList();
     }
     if (enableActiveBountyList) {
       bountyList.isRefreshed = false;
-      injectBountyList(bountyList);
+      injectBountyList();
     }
   }
 
@@ -6274,8 +6283,9 @@
   }
 
   function validStatBoxes(topbannerStats, gameStats) {
-    var hidden = topbannerStats.classList.contains('topbanner-stats-hidden');
-    return topbannerStats && !hidden && gameStats;
+    var hidden = topbannerStats &&
+      hasClass('topbanner-stats-hidden', topbannerStats);
+    return !hidden && gameStats;
   }
 
   function injectServerNode() {
@@ -8987,7 +8997,7 @@
   function getPrice(buffNameNode) {
     var price = priceAfterName(buffNameNode);
     if (!price) { // some players have prices BEFORE the buff names
-      price = priceBeforeName(buffNameNode, price);
+      price = priceBeforeName(buffNameNode);
     }
     return price;
   }
@@ -15527,7 +15537,7 @@
     return aRow;
   }
 
-  function addRows(tbl, rows) {
+  function addRows$1(tbl, rows) {
     rows.forEach(function(row) {
       addNextRow(tbl, row[0], row[1]);
     });
@@ -15601,7 +15611,7 @@
 
   function buildTitanInfoTable() {
     titanTbl = createTable({className: 'fshCenter'});
-    addRows(titanTbl, [
+    addRows$1(titanTbl, [
       [[[2, titanHp, true], [4, yourGuild, true]]],
       [[[2, makeTitanHpWrapper()], [4, guildKills]]],
       [[[2, current, true], [4, makePctWrapper(currentPct)]], true],
@@ -15698,7 +15708,7 @@
     clearMemberRows();
     if (!ourTitan.contributors) {return;}
     var memberRows = ourTitan.contributors.map(partial(memberRow, ourTitan));
-    addRows(titanTbl, memberRows);
+    addRows$1(titanTbl, memberRows);
   }
 
   function currentTitan(el) {
@@ -20380,28 +20390,47 @@
     view: {'-': showAllQuestSteps}
   };
 
-  function setMaxTimes(maxTimes, statbarGold, gold) {
-    if (maxTimes) {
-      maxTimes.innerHTML = '';
-      var scoutGold = Number(gold.value);
-      if (scoutGold !== 0) {
-        var myGold = intValue(getText(statbarGold));
-        var times = Math.floor(myGold / scoutGold).toString();
-        maxTimes.innerHTML = '&nbsp;&nbsp;Max: ' + times + ' times';
-      }
+  function clearWidth(multCnt) {
+    var parentTable = closestTable(multCnt);
+    parentTable.removeAttribute('width');
+  }
+
+  function makeMaxTimes(multCnt) {
+    var maxTimes = createSpan();
+    insertElement(multCnt.parentNode, maxTimes);
+    return maxTimes;
+  }
+
+  function updateMaxTimes(maxTimes, statbarGold, scoutGold) {
+    var myGold = intValue(getText(statbarGold));
+    var times = Math.floor(myGold / scoutGold).toString();
+    maxTimes.innerHTML = '&nbsp;&nbsp;Max: ' + times + ' times';
+  }
+
+  function redrawMaxTimes(maxTimes, statbarGold, gold) {
+    maxTimes.innerHTML = '';
+    var scoutGold = Number(gold.value);
+    if (!isNaN(scoutGold) && scoutGold !== 0) {
+      updateMaxTimes(maxTimes, statbarGold, scoutGold);
     }
   }
 
-  function foundMultiplierCount(multCnt) {
-    var parentTable = closestTable(multCnt);
-    parentTable.removeAttribute('width');
-    var maxTimes = createSpan();
-    insertElement(multCnt.parentNode, maxTimes);
-    var statbarGold = getElementById('statbar-gold');
-    var gold = getElementById('gold');
+  function setMaxTimes(maxTimes, statbarGold, gold) {
+    if (maxTimes) {
+      redrawMaxTimes(maxTimes, statbarGold, gold);
+    }
+  }
+
+  function initMaxTimes(maxTimes, statbarGold, gold) {
     var boundSet = partial(setMaxTimes, maxTimes, statbarGold, gold);
     boundSet();
     on(gold, 'keyup', boundSet);
+  }
+
+  function foundMultiplierCount(multCnt) {
+    clearWidth(multCnt);
+    initMaxTimes(makeMaxTimes(multCnt), getElementById('statbar-gold'),
+      getElementById('gold'));
   }
 
   function lookForMultiplierCount() {
@@ -21143,7 +21172,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '94';
+  window.FSH.calf = '95';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
