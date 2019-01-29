@@ -1937,6 +1937,7 @@
       if (retries > 0 && jqXhr.status === 503) {
         setTimeout(fn, 100, opt, retries - 1, dfr);
       } else {
+        sendException(jqXhr.status + ' (' + errorThrown + ')', false);
         dfr.reject(jqXhr, textStatus, errorThrown);
       }
     };
@@ -21265,7 +21266,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '93';
+  window.FSH.calf = '94';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
