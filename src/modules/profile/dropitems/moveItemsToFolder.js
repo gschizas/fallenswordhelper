@@ -39,6 +39,6 @@ function moveList(itemsAry, folderId, list) {
 
 export default function moveItemsToFolder(itemsAry) { // jQuery.min
   var folderId = getElementById('selectFolderId').value;
-  chunk(50, itemsAry.filter(checked).map(invid))
+  chunk(30, itemsAry.filter(checked).map(invid))
     .forEach(partial(moveList, itemsAry, folderId));
 }

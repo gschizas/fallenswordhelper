@@ -1,7 +1,7 @@
-import postApp from '../postApp';
+import callApp from '../callApp';
 
 export default function sendtofolder(folderId, itemsAry) {
-  return postApp({
+  return callApp({
     cmd: 'profile',
     subcmd: 'sendtofolder',
     folder_id: folderId,
