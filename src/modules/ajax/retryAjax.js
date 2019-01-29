@@ -1,5 +1,6 @@
 import on from '../common/on';
 import partial from '../common/partial';
+import {sendException} from '../support/fshGa';
 
 var paused = true;
 var queue = [];
@@ -25,6 +26,7 @@ function failFilter(fn, opt, retries, dfr) {
     if (retries > 0 && jqXhr.status === 503) {
       setTimeout(fn, 100, opt, retries - 1, dfr);
     } else {
+      sendException(jqXhr.status + ' (' + errorThrown + ')', false);
       dfr.reject(jqXhr, textStatus, errorThrown);
     }
   };
