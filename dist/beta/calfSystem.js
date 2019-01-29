@@ -6869,19 +6869,84 @@
     }
   }
 
-  function makeUrl(prev, e) {
-    return prev + '&' + e.name + '=' + e.value;
+  function urlParam(e) {
+    return e.name + '=' + e.value;
+  }
+
+  function dontPost(scope) {
+    var validInputs = querySelectorArray(
+      'input:not([type="submit"]):not([type="button"]):not([type="checkbox"]), ' +
+      'select, input[type="checkbox"]:checked', scope);
+    window.location = indexPhp + '?' + validInputs.map(urlParam).join('&');
   }
 
   function updateUrl(evt) {
     evt.preventDefault();
-    var validInputs = querySelectorArray('input:not([type="submit"])' +
-      ':not([type="checkbox"]), select, input[type="checkbox"]:checked');
-    window.location = validInputs.reduce(makeUrl, 'index.php?');
+    dontPost();
   }
 
   function allowBack() {
     on(document.querySelector('input[type="submit"]'), 'click', updateUrl);
+  }
+
+  function updateGoUrl(e) {
+    e.preventDefault();
+    dontPost(querySelector('#pCC input[value="completed"]').parentNode);
+  }
+
+  function updateUrl$1(e) {
+    e.preventDefault();
+    dontPost(e.target.parentNode);
+  }
+
+  function gotoPage(pageId) {
+    window.location = arenaUrl + 'completed&page=' + pageId;
+  }
+
+  function lastPage$1() { // jQuery
+    return $('#pCC input[value="Go"]').closest('td').prev().text()
+      .replace(/\D/g, '');
+  }
+
+  function injectStartButton() { // jQuery
+    var prevButton = $('#pCC input[value="<"]');
+    if (prevButton.length === 1) {
+      var startButton = $('<input value="<<" type="button">');
+      prevButton.before(startButton).before('&nbsp;');
+      startButton.click(function() {gotoPage(1);});
+    }
+  }
+
+  function injectFinishButton() { // jQuery
+    var nextButton = $('#pCC input[value=">"]');
+    if (nextButton.length === 1) {
+      var finishButton = $('<input value=">>" type="button">');
+      nextButton.after(finishButton).after('&nbsp;');
+      finishButton.click(function() {gotoPage(lastPage$1());});
+    }
+  }
+
+  function overrideButtons() { // jQuery
+    injectStartButton();
+    injectFinishButton();
+    $('#pCC input[value="View"]').click(updateUrl$1);
+    on(querySelector('#pCC input[value="Go"]'), 'click', updateGoUrl);
+  }
+
+  function completedArenas() { // jQuery
+    if (jQueryPresent()) {overrideButtons();}
+  }
+
+  function getIntVal(selector) {
+    return parseInt($(selector).val(), 10);
+  }
+
+  function changeMinMax(newOpts, redraw) {
+    var minLvl = getIntVal('#fshMinLvl');
+    var maxLvl = getIntVal('#fshMaxLvl');
+    if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
+    newOpts(minLvl, maxLvl);
+    redraw();
   }
 
   var moveOptions =
@@ -6925,63 +6990,6 @@
     '<input id="fshReset" class="custombutton" type="button" ' +
     'value="Reset"></span></td></tr></tbody></table>';
   var fshArenaKey = 'fsh_arena';
-
-  function dontPost(e) { // jQuery
-    e.preventDefault();
-    var self = $(e.target);
-    var pvpId = self.prev().val();
-    var subcmd = self.prev().prev().val();
-    window.location = arenaUrl + subcmd + '&pvp_id=' + pvpId;
-  }
-
-  function gotoPage(pageId) {
-    window.location = arenaUrl + 'completed&page=' + pageId;
-  }
-
-  function lastPage$1() {
-    return $('#pCC input[value="Go"]').closest('td').prev().text()
-      .replace(/\D/g, '');
-  }
-
-  function injectStartButton() {
-    var prevButton = $('#pCC input[value="<"]');
-    if (prevButton.length === 1) {
-      var startButton = $('<input value="<<" type="button">');
-      prevButton.before(startButton).before('&nbsp;');
-      startButton.click(function() {gotoPage(1);});
-    }
-  }
-
-  function injectFinishButton() {
-    var nextButton = $('#pCC input[value=">"]');
-    if (nextButton.length === 1) {
-      var finishButton = $('<input value=">>" type="button">');
-      nextButton.after(finishButton).after('&nbsp;');
-      finishButton.click(function() {gotoPage(lastPage$1());});
-    }
-  }
-
-  function overrideButtons() {
-    injectStartButton();
-    injectFinishButton();
-    $('#pCC input[value="View"]').click(dontPost);
-  }
-
-  function completedArenas() { // jQuery
-    if (jQueryPresent()) {overrideButtons();}
-  }
-
-  function getIntVal(selector) {
-    return parseInt($(selector).val(), 10);
-  }
-
-  function changeMinMax(newOpts, redraw) {
-    var minLvl = getIntVal('#fshMinLvl');
-    var maxLvl = getIntVal('#fshMaxLvl');
-    if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
-    newOpts(minLvl, maxLvl);
-    redraw();
-  }
 
   var opts;
   var oldIds;
@@ -7215,17 +7223,17 @@
     doLvlFilter();
   }
 
-  function arenaDataTable(tabs, arena) {
+  function arenaDataTable(tabs, arena) { // jQuery
     theTables.each(redoHead);
     setOpts$1(arena);
     orderData(theTables);
     prepareEnv$1();
     theTables.DataTable(tableOpts$1);
     redoSort(tabs);
-    tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
+    tabs.on('click', 'input.custombutton[type="submit"]', updateUrl$1);
   }
 
-  function process(tabs, arena) { // jQuery
+  function process(tabs, arena) {
 
     time('arena.process');
 
@@ -11381,13 +11389,8 @@
     return ret;
   }
 
-  function postApp(data) {
-    extend(data, {type: 'POST'});
-    return callApp(data);
-  }
-
   function sendtofolder(folderId, itemsAry) {
-    return postApp({
+    return callApp({
       cmd: 'profile',
       subcmd: 'sendtofolder',
       folder_id: folderId,
@@ -11431,7 +11434,7 @@
 
   function moveItemsToFolder(itemsAry) { // jQuery.min
     var folderId = getElementById('selectFolderId').value;
-    chunk(50, itemsAry.filter(checked).map(invid))
+    chunk(30, itemsAry.filter(checked).map(invid))
       .forEach(partial(moveList, itemsAry, folderId));
   }
 
@@ -17435,16 +17438,15 @@
     view: {'-': itemsView}
   };
 
-  function updateUrl$1(e) {
+  function updateUrl$2(e) {
     e.preventDefault();
-    window.location = cmdUrl + 'pvpladder&viewing_band_id=' +
-      document.querySelector('#pCC select[name="viewing_band_id"]').value;
+    dontPost(pCC);
   }
 
-  function dontPost$1() {
-    var submitButton = document.querySelector('#pCC input[type="submit"]');
+  function allowBack$1() {
+    var submitButton = pCC.querySelector('input[type="submit"]');
     if (submitButton) {
-      on(submitButton, 'click', updateUrl$1);
+      on(submitButton, 'click', updateUrl$2);
     }
   }
 
@@ -17491,7 +17493,7 @@
   }
 
   function ladder() {
-    dontPost$1();
+    allowBack$1();
     lastReset();
   }
 
@@ -17635,21 +17637,6 @@
     viewarchive: {'-': viewArchive}
   };
 
-  function dontPost$2(e) {
-    if (e.target.type !== 'submit') {return;}
-    e.preventDefault();
-    var form = e.target.form;
-    var mode = form[1].value;
-    var type = form[2].value;
-    var letter = form[3].value;
-    var sortby = form[4].value;
-    var sortbydir = form[5].value;
-    var page = form[6].value;
-    window.location = cmdUrl + 'questbook&type=' + type + '&mode=' + mode +
-      '&page=' + page + '&letter=' + letter + '&sortby=' + sortby +
-      '&sortbydir=' + sortbydir;
-  }
-
   function guideButtons(questID, questName) {
     return '<div class="parent">' +
       '<a href="' + guideUrl + 'quests&' +
@@ -17697,6 +17684,14 @@
     var questsToHide = isHideQuests();
     Array.from(questTable.rows).filter(myRows(5, 0))
       .forEach(partial(decorate$1, questsToHide));
+  }
+
+  function updateUrl$3(evt) {
+    if (evt.target.type !== 'submit') {
+      return;
+    }
+    evt.preventDefault();
+    dontPost(closestTable(evt.target).parentNode);
   }
 
   var normalLink;
@@ -17794,7 +17789,7 @@
   }
 
   function injectQuestBookFull() {
-    on(pCC, 'click', dontPost$2);
+    on(pCC, 'click', updateUrl$3);
     storeQuestPage();
     var questTable = getElementsByTagName(def_table, pCC)[5];
     if (!questTable) {return;}
@@ -20438,57 +20433,38 @@
     view: {'-': showAllQuestSteps}
   };
 
-  var multCnt;
-  var maxTimes;
-  var statbarGold$1;
-  var gold;
-
-  function setMaxTimes() {
+  function setMaxTimes(maxTimes, statbarGold, gold) {
     if (maxTimes) {
       maxTimes.innerHTML = '';
       var scoutGold = Number(gold.value);
       if (scoutGold !== 0) {
-        var myGold = intValue(getText(statbarGold$1));
+        var myGold = intValue(getText(statbarGold));
         var times = Math.floor(myGold / scoutGold).toString();
         maxTimes.innerHTML = '&nbsp;&nbsp;Max: ' + times + ' times';
       }
     }
   }
 
-  function foundMultiplierCount() {
-    maxTimes = createSpan();
+  function foundMultiplierCount(multCnt) {
+    var parentTable = closestTable(multCnt);
+    parentTable.removeAttribute('width');
+    var maxTimes = createSpan();
     insertElement(multCnt.parentNode, maxTimes);
-    statbarGold$1 = getElementById('statbar-gold');
-    gold = getElementById('gold');
-    setMaxTimes();
-    on(gold, 'keyup', setMaxTimes);
+    var statbarGold = getElementById('statbar-gold');
+    var gold = getElementById('gold');
+    var boundSet = partial(setMaxTimes, maxTimes, statbarGold, gold);
+    boundSet();
+    on(gold, 'keyup', boundSet);
   }
 
   function lookForMultiplierCount() {
-    multCnt = getElementById('multiplier_count');
-    if (multCnt) {foundMultiplierCount();}
+    var multCnt = getElementById('multiplier_count');
+    if (multCnt) {foundMultiplierCount(multCnt);}
   }
 
   function setLastScav(caveId, gold) {
     setValue('lastScavPage',
       def_cmd + 'scavenging&cave_id=' + caveId + '&gold=' + gold);
-  }
-
-  function dontPost$3(e) {
-    var caveEle = document.querySelector('#pCC input[name="cave_id"]:checked');
-    if (caveEle) {
-      e.preventDefault();
-      var caveId = caveEle.value;
-      var gold = getElementById('gold').value;
-      setLastScav(caveId, gold);
-      window.location = cmdUrl + 'scavenging' + def_subcmd +
-        'process&cave_id=' + caveId + '&gold=' + gold + '&submit=Scavenge';
-    }
-  }
-
-  function lookForScavBtn() {
-    var scavBtn = document.querySelector('#pCC input[value="Scavenge"]');
-    if (scavBtn) {on(scavBtn, 'click', dontPost$3);}
   }
 
   /* global sendRequest:true */
@@ -20570,7 +20546,6 @@
   }
 
   function injectScavenging() {
-    lookForScavBtn();
     lookForSendRequest();
     lookForMultiplierCount();
   }
@@ -20682,6 +20657,12 @@
     }
   }
 
+  function allowBack$2(topTable) { // jQuery
+    var thisSelect = getElementsByTagName('select', topTable)[0];
+    $(thisSelect).off();
+    on(thisSelect, 'change', partial(dontPost, pCC));
+  }
+
   function playerLink(el) {
     var aCell = el.cells[1];
     aCell.innerHTML = searchPlayerHref(getText(aCell));
@@ -20689,6 +20670,7 @@
 
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
+    allowBack$2(topTable);
     Array.from(topTable.rows).filter(myRows(4, 1)).forEach(playerLink);
   }
 
@@ -21220,7 +21202,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '92';
+  window.FSH.calf = '93';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

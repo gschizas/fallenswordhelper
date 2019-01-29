@@ -1,5 +1,3 @@
-import {arenaUrl} from '../support/constants';
-
 export var moveOptions =
   '<td colspan=3 ' +
   'style="padding-top: 2px;padding-bottom: 2px;">' +
@@ -41,11 +39,3 @@ export var arenaFilter =
   '<input id="fshReset" class="custombutton" type="button" ' +
   'value="Reset"></span></td></tr></tbody></table>';
 export var fshArenaKey = 'fsh_arena';
-
-export function dontPost(e) { // jQuery
-  e.preventDefault();
-  var self = $(e.target);
-  var pvpId = self.prev().val();
-  var subcmd = self.prev().prev().val();
-  window.location = arenaUrl + subcmd + '&pvp_id=' + pvpId;
-}

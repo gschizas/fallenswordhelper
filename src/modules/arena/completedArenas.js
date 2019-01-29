@@ -1,17 +1,20 @@
 import {arenaUrl} from '../support/constants';
-import {dontPost} from './assets';
 import jQueryPresent from '../common/jQueryPresent';
+import on from '../common/on';
+import querySelector from '../common/querySelector';
+import updateGoUrl from './updateGoUrl';
+import updateUrl from './updateUrl';
 
 function gotoPage(pageId) {
   window.location = arenaUrl + 'completed&page=' + pageId;
 }
 
-function lastPage() {
+function lastPage() { // jQuery
   return $('#pCC input[value="Go"]').closest('td').prev().text()
     .replace(/\D/g, '');
 }
 
-function injectStartButton() {
+function injectStartButton() { // jQuery
   var prevButton = $('#pCC input[value="<"]');
   if (prevButton.length === 1) {
     var startButton = $('<input value="<<" type="button">');
@@ -20,7 +23,7 @@ function injectStartButton() {
   }
 }
 
-function injectFinishButton() {
+function injectFinishButton() { // jQuery
   var nextButton = $('#pCC input[value=">"]');
   if (nextButton.length === 1) {
     var finishButton = $('<input value=">>" type="button">');
@@ -29,10 +32,11 @@ function injectFinishButton() {
   }
 }
 
-function overrideButtons() {
+function overrideButtons() { // jQuery
   injectStartButton();
   injectFinishButton();
-  $('#pCC input[value="View"]').click(dontPost);
+  $('#pCC input[value="View"]').click(updateUrl);
+  on(querySelector('#pCC input[value="Go"]'), 'click', updateGoUrl);
 }
 
 export default function completedArenas() { // jQuery

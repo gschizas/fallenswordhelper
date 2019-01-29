@@ -1,23 +1,10 @@
-import {createTr} from './common/cElement';
-import getValue from './system/getValue';
-import insertElement from './common/insertElement';
-import on from './common/on';
-import outputFormat from './system/outputFormat';
-import setText from './common/setText';
-import {cmdUrl, now} from './support/constants';
-
-function updateUrl(e) {
-  e.preventDefault();
-  window.location = cmdUrl + 'pvpladder&viewing_band_id=' +
-    document.querySelector('#pCC select[name="viewing_band_id"]').value;
-}
-
-function dontPost() {
-  var submitButton = document.querySelector('#pCC input[type="submit"]');
-  if (submitButton) {
-    on(submitButton, 'click', updateUrl);
-  }
-}
+import allowBack from './allowBack';
+import {createTr} from '../common/cElement';
+import getValue from '../system/getValue';
+import insertElement from '../common/insertElement';
+import {now} from '../support/constants';
+import outputFormat from '../system/outputFormat';
+import setText from '../common/setText';
 
 function formatLastReset(lastLadderReset) {
   var m = Math.floor((now - lastLadderReset) / 60000);
@@ -62,6 +49,6 @@ function lastReset() {
 }
 
 export default function ladder() {
-  dontPost();
+  allowBack();
   lastReset();
 }

@@ -14,7 +14,7 @@ import injectTitan from '../../injectTitan';
 import injectWorld from '../../world/injectWorld';
 import inventing from '../../inventing/inventing';
 import items from './items';
-import ladder from '../../ladder';
+import ladder from '../../ladder/ladder';
 import log from './log';
 import marketplace from '../../marketplace';
 import news from './news';

@@ -5,7 +5,8 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import orderData from './orderData';
 import partial from '../common/partial';
 import redoSort from './redoSort';
-import {dontPost, fshArenaKey, tableOpts} from './assets';
+import updateUrl from './updateUrl';
+import {fshArenaKey, tableOpts} from './assets';
 import {
   setOpts,
   storeOpts
@@ -28,17 +29,17 @@ function prepareEnv() {
   doLvlFilter();
 }
 
-function arenaDataTable(tabs, arena) {
+function arenaDataTable(tabs, arena) { // jQuery
   theTables.each(redoHead);
   setOpts(arena);
   orderData(theTables);
   prepareEnv();
   theTables.DataTable(tableOpts);
   redoSort(tabs);
-  tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
+  tabs.on('click', 'input.custombutton[type="submit"]', updateUrl);
 }
 
-function process(tabs, arena) { // jQuery
+function process(tabs, arena) {
   //#if _BETA  //  Timing output
 
   time('arena.process');

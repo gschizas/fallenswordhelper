@@ -1,3 +1,4 @@
+import allowBack from './allowBack';
 import {def_table} from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
@@ -12,5 +13,6 @@ function playerLink(el) {
 
 export default function globalQuest() {
   var topTable = getElementsByTagName(def_table, pCC)[3];
+  allowBack(topTable);
   Array.from(topTable.rows).filter(myRows(4, 1)).forEach(playerLink);
 }

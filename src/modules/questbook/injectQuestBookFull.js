@@ -1,11 +1,11 @@
 import {def_table} from '../support/constants';
-import dontPost from './dontPost';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import injectQuestRow from './injectQuestRow';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import setValue from '../system/setValue';
+import updateUrl from './updateUrl';
 
 var normalLink;
 var seasonLink;
@@ -102,7 +102,7 @@ function storeQuestPage() {
 }
 
 export default function injectQuestBookFull() {
-  on(pCC, 'click', dontPost);
+  on(pCC, 'click', updateUrl);
   storeQuestPage();
   var questTable = getElementsByTagName(def_table, pCC)[5];
   if (!questTable) {return;}
