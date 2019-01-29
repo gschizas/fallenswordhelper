@@ -2,6 +2,7 @@ import contains from '../common/contains';
 import {createDiv} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import getText from '../common/getText';
+import hasClass from '../common/hasClass';
 import insertElement from '../common/insertElement';
 import querySelectorArray from '../common/querySelectorArray';
 import toggleForce from '../common/toggleForce';
@@ -32,8 +33,9 @@ function statBoxesExist(topbannerStats, gameStats) {
 }
 
 function validStatBoxes(topbannerStats, gameStats) {
-  var hidden = topbannerStats.classList.contains('topbanner-stats-hidden');
-  return topbannerStats && !hidden && gameStats;
+  var hidden = topbannerStats &&
+    hasClass('topbanner-stats-hidden', topbannerStats);
+  return !hidden && gameStats;
 }
 
 export default function injectServerNode() {
