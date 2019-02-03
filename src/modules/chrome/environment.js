@@ -74,7 +74,7 @@ function devHooks() {
   console.log('functionPath', functionPath);
   if (!coreFunction) {
     console.log('No Core Function.');
-  } else if (typeof coreFunction !== 'function') {
+  } else if (!isFunction(coreFunction)) {
     console.log('Not Core Function.');
   }
   /* eslint-enable no-console */
