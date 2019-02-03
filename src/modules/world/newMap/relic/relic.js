@@ -71,11 +71,13 @@ function getGuild() {
   }).done(parseGuild);
 }
 
+function getDefenderProfile(el, i) {
+  if (i === 0) {return getProfile(el).done(storeLeadDefender);}
+  return getProfile(el).done(parseDefender).fail(ajaxFailure);
+}
+
 function getDefenders() {
-  return myDefenders.map(function(el, i) {
-    if (i === 0) {return getProfile(el).done(storeLeadDefender);}
-    return getProfile(el).done(parseDefender).fail(ajaxFailure);
-  });
+  return myDefenders.map(getDefenderProfile);
 }
 
 function buildStatPrm() {

@@ -1,4 +1,5 @@
 import insertElement from '../../../common/insertElement';
+import partial from '../../../common/partial';
 
 // colSpan = attributes[0]
 // anElement = attributes[1]
@@ -13,9 +14,7 @@ function addNextCell(row, attributes) {
 }
 
 function addRowCells(aRow, someCells) {
-  someCells.forEach(function(cell) {
-    addNextCell(aRow, cell);
-  });
+  someCells.forEach(partial(addNextCell, aRow));
 }
 
 function addNextRow(tbl, cells, isBlue) {
@@ -25,8 +24,10 @@ function addNextRow(tbl, cells, isBlue) {
   return aRow;
 }
 
+function addRow(tbl, row) {
+  addNextRow(tbl, row[0], row[1]);
+}
+
 export function addRows(tbl, rows) {
-  rows.forEach(function(row) {
-    addNextRow(tbl, row[0], row[1]);
-  });
+  rows.forEach(partial(addRow, tbl));
 }

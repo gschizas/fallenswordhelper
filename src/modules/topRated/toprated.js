@@ -46,10 +46,10 @@ var highlightTests = [
   function(guildId, data) {return data.virtual_level <= pvpUpperLevel;}
 ];
 
+function condition(guildId, data, el) {return el(guildId, data);}
+
 function pvpHighlight(guildId, data) {
-  return highlightTests.every(function(el) {
-    return el(guildId, data);
-  });
+  return highlightTests.every(partial(condition, guildId, data));
 }
 
 function doOnlineDot(aTable, guildId, data) {

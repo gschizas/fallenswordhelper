@@ -30,21 +30,25 @@ var thePotions = [
   ['Potion of Supreme Luck', 'FI 1k']
 ];
 
+function plantFormat(el) {
+  return {category: 'Plants', searchname: el, nickname: ''};
+}
+
 function plants() {
-  return thePlants.map(function(el) {
-    return {category: 'Plants', searchname: el, nickname: ''};
-  });
+  return thePlants.map(plantFormat);
+}
+
+function potionFormat(el) {
+  return {
+    category: 'Potions',
+    searchname: el[0],
+    nickname: el[1],
+    displayOnAH: true
+  };
 }
 
 function potions() {
-  return thePotions.map(function(el) {
-    return {
-      category: 'Potions',
-      searchname: el[0],
-      nickname: el[1],
-      displayOnAH: true
-    };
-  });
+  return thePotions.map(potionFormat);
 }
 
 export function def_quickSearch() {

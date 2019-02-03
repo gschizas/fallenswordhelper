@@ -75,13 +75,15 @@ var hideGroupTypes = [
   'hideLegendaryGroup'
 ];
 
+function groupType(el, i) {
+  if (getValue(el)) {
+    hideGroupSubscribe(i + 1);
+    hideGroupByType(i + 1);
+  }
+}
+
 function hideGroupButton() {
-  hideGroupTypes.forEach(function(el, i) {
-    if (getValue(el)) {
-      hideGroupSubscribe(i + 1);
-      hideGroupByType(i + 1);
-    }
-  });
+  hideGroupTypes.forEach(groupType);
 }
 
 function injectMonsterStyle() {

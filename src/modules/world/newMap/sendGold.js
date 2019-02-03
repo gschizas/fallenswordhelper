@@ -8,6 +8,16 @@ import {def_fetch_playerStats, def_playerGold} from '../../support/constants';
 var goldAmount;
 var sendGoldonWorld;
 
+function doneSendGold(data) {
+  var info = infoBox(data);
+  if (info === 'You successfully sent gold!' || info === '') {
+    setValue('currentGoldSentTotal',
+      parseInt(getValue('currentGoldSentTotal'), 10) +
+      parseInt(getValue('goldAmount'), 10));
+    GameData.fetch(def_fetch_playerStats);
+  }
+}
+
 export function doSendGold() { // jQuery
   if (!sendGoldonWorld) {return;}
   indexAjaxData({
@@ -16,15 +26,7 @@ export function doSendGold() { // jQuery
     xc: window.ajaxXC,
     target_username: $('#HelperSendTo').html(),
     gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
-  }).done(function(data) {
-    var info = infoBox(data);
-    if (info === 'You successfully sent gold!' || info === '') {
-      setValue('currentGoldSentTotal',
-        parseInt(getValue('currentGoldSentTotal'), 10) +
-        parseInt(getValue('goldAmount'), 10));
-      GameData.fetch(def_fetch_playerStats);
-    }
-  });
+  }).done(doneSendGold);
 }
 
 function statbarGoldBackground(colour) {

@@ -5,6 +5,7 @@ import getValue from '../../../system/getValue';
 import hideElement from '../../../common/hideElement';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
+import partial from '../../../common/partial';
 import {atkStats, defStats, proc} from './assets';
 import {
   containerDiv,
@@ -66,8 +67,10 @@ var available = [
   }
 ];
 
+function condition(key, fn) {return fn(key);}
+
 function availableMembers(key) {
-  return available.every(function(fn) {return fn(key);});
+  return available.every(partial(condition, key));
 }
 
 function makeLinks(key) {

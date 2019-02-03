@@ -9,11 +9,11 @@ import partial from '../common/partial';
 var topics = {};
 var subUid = -1;
 
+function execute(args, el) {add(3, el.func, [args]);}
+
 export function publish(topic, args) {
   if (!topics[topic]) {return;}
-  topics[topic].forEach(function(el) {
-    add(3, el.func, [args]);
-  });
+  topics[topic].forEach(partial(execute, args));
   return true; // probably not needed
 }
 

@@ -35,21 +35,24 @@ function getDefeats(report) {
   return '';
 }
 
-function buildGainHash(gains) {
-  return gains.reduce(function(prev, curr) {
-    var itemName = curr.match(/>([^<]+)</)[1];
-    prev[itemName] = (prev[itemName] || 0) + 1;
-    return prev;
-  }, {});
+function makeHash(prev, curr) {
+  var itemName = curr.match(/>([^<]+)</)[1];
+  prev[itemName] = (prev[itemName] || 0) + 1;
+  return prev;
 }
 
+function buildGainHash(gains) {
+  return gains.reduce(makeHash, {});
+}
+
+function alphaEntries(a, b) {return alpha(a[0], b[0]);}
+
+function summary(pair) {return '<br>' + pair[1] + ' ' + pair[0] + '(s), ';}
+
 function gotGains(gains) {
-  var ret = '<br>' + gains.length + ' item(s):';
   var gainHash = buildGainHash(gains);
-  Object.keys(gainHash).sort(alpha).forEach(function(item) {
-    ret += '<br>' + gainHash[item] + ' ' + item + '(s), ';
-  });
-  return ret;
+  return '<br>' + gains.length + ' item(s):' +
+    Object.entries(gainHash).sort(alphaEntries).map(summary).join('');
 }
 
 function getGains(report) {
