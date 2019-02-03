@@ -6,25 +6,26 @@ import getText from '../../common/getText';
 
 var buffCost = {count: 0, buffs: {}};
 
-function hazBuffs() { // Legacy
-  var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
-  var tip = 'This is an estimated cost based on how the script finds ' +
-    'the cost associated with buffs from viewing bio.' +
-    'It can be incorrect, please use with discretion.<br><hr>' +
-    '<table border=0>';
+function buffRows(pair) {
+  return '<tr><td>' + pair[0] + '</td><td>: ' + pair[1][0] +
+    pair[1][1] + '</td></tr>';
+}
 
-  Object.keys(buffCost.buffs).forEach(function(buff) {
-    total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
-    tip += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
-      buffCost.buffs[buff][1] + '</td></tr>';
-  });
+function totalCost(prev, pair) {
+  prev[pair[1][1]] += pair[1][0];
+  return prev;
+}
 
-  var totalText = formatCost(total);
-
-  tip += '</table><b>Total: ' + totalText + '</b>';
-  getElementById('buffCost').innerHTML = '<br/><span ' +
-    'class="tip-static" data-tipped="' + tip + '">Estimated Cost: <b>' +
-    totalText + '</b></span>';
+function hazBuffs() {
+  var myEntries = Object.entries(buffCost.buffs);
+  var totalText = formatCost(myEntries.reduce(totalCost,
+    {k: 0, fsp: 0, stam: 0, unknown: 0}));
+  getElementById('buffCost').innerHTML = '<br><span class="tip-static" ' +
+    'data-tipped="This is an estimated cost based on how the script finds ' +
+    'the cost associated with buffs from viewing bio. It can be incorrect, ' +
+    'please use with discretion.<br><hr><table border=0>' +
+    myEntries.map(buffRows).join('') + '</table><b>Total: ' + totalText +
+    '</b>">Estimated Cost: <b>' + totalText + '</b></span>';
   buffCost.buffCostTotalText = totalText;
 }
 
