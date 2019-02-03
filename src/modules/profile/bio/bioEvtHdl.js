@@ -8,22 +8,22 @@ var buffCost = {count: 0, buffs: {}};
 
 function hazBuffs() { // Legacy
   var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
-  var html = 'This is an estimated cost based on how the script finds ' +
+  var tip = 'This is an estimated cost based on how the script finds ' +
     'the cost associated with buffs from viewing bio.' +
     'It can be incorrect, please use with discretion.<br><hr>' +
     '<table border=0>';
 
   Object.keys(buffCost.buffs).forEach(function(buff) {
     total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
-    html += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
+    tip += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
       buffCost.buffs[buff][1] + '</td></tr>';
   });
 
   var totalText = formatCost(total);
 
-  html += '</table><b>Total: ' + totalText + '</b>';
+  tip += '</table><b>Total: ' + totalText + '</b>';
   getElementById('buffCost').innerHTML = '<br/><span ' +
-    'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
+    'class="tip-static" data-tipped="' + tip + '">Estimated Cost: <b>' +
     totalText + '</b></span>';
   buffCost.buffCostTotalText = totalText;
 }
@@ -53,7 +53,7 @@ function getBuffCost(buffNameNode) {
   var cost;
   if (price) {
     type = priceUnit(price);
-    cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
+    cost = price[0].match(/([+-]?[.\d]+)/)[0];
   } else {
     type = 'unknown';
     cost = '1';
@@ -76,12 +76,9 @@ function toggleBuffsToBuy(buffNameNode) { // Legacy
   updateBuffCost();
 }
 
-function getBuffNameNode(e) {
-  var buffNameNode = e.target;
-  while (buffNameNode.tagName && buffNameNode.tagName !== 'SPAN') {
-    buffNameNode = buffNameNode.parentNode;
-  }
-  return buffNameNode;
+function closestSpan(el) {
+  if (!el.tagName || el.tagName === 'SPAN') {return el;}
+  return closestSpan(el.parentNode);
 }
 
 function isBuffLink(buffNameNode) {
@@ -91,10 +88,12 @@ function isBuffLink(buffNameNode) {
 
 export default function bioEvtHdl(e) {
   // This is also called by bio preview
-  var buffNameNode = getBuffNameNode(e);
+  if (e.target.id === 'fshSendBuffMsg') {
+    getBuffsToBuy(buffCost);
+    return;
+  }
+  var buffNameNode = closestSpan(e.target);
   if (isBuffLink(buffNameNode)) {
     toggleBuffsToBuy(buffNameNode);
-  } else if (e.target.id === 'fshSendBuffMsg') {
-    getBuffsToBuy(buffCost);
   }
 }
