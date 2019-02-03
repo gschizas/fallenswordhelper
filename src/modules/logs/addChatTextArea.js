@@ -1,3 +1,4 @@
+import clickThis from '../common/clickThis';
 import {createTextArea} from '../common/cElement';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
@@ -40,7 +41,7 @@ function rearrangeTable(btnMass) {
 function keypress(sendBtn, evt) {
   if (evt.key === 'Enter' && !evt.shiftKey) {
     evt.preventDefault();
-    sendBtn.click();
+    clickThis(sendBtn);
   }
 }
 
