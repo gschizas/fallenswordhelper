@@ -1,5 +1,6 @@
 import {getElementById} from '../common/getElement';
 import getTextTrim from '../common/getTextTrim';
+import querySelector from '../common/querySelector';
 import {def_statAttack, def_statDefense} from '../support/constants';
 
 function getDefStat() {
@@ -30,7 +31,6 @@ function gotImg(nmvImg) {
 }
 
 export default function updateNmv() {
-  var nmvImg = document.querySelector(
-    '#profileRightColumn img[src$="/60_sm.gif"]');
+  var nmvImg = querySelector('#profileRightColumn img[src$="/60_sm.gif"]');
   if (nmvImg) {gotImg(nmvImg);}
 }

@@ -7,6 +7,7 @@ import insertElement from '../common/insertElement';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
+import querySelector from '../common/querySelector';
 
 function removeCrlf(fshTxt) {
   fshTxt.value = fshTxt.value.replace(/\r\n|\n|\r/g, ' ');
@@ -29,7 +30,7 @@ function giveInputsId() {
 }
 
 function rearrangeTable(btnMass) {
-  var theTable = document.querySelector('#pCC table table');
+  var theTable = querySelector('#pCC table table');
   theTable.rows[0].cells[0].remove();
   var myCell = theTable.insertRow(-1).insertCell(-1);
   insertElement(myCell, btnMass);
@@ -58,7 +59,7 @@ function makeTextArea(sendBtn) {
 }
 
 function hasTextEntry() {
-  var btnMass = document.querySelector('input[value="Send As Mass"]');
+  var btnMass = querySelector('input[value="Send As Mass"]');
   if (!btnMass) {return;}
   var theForm = giveFormId();
   var sendBtn = giveInputsId();

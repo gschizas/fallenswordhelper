@@ -1,6 +1,7 @@
 import addCommas from '../system/addCommas';
 import getIntFromRegExp from '../system/getIntFromRegExp';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import querySelector from '../common/querySelector';
 
 function wrapUrl(guildLogo) {
   var url = guildLogo.nextElementSibling.nextElementSibling;
@@ -8,7 +9,7 @@ function wrapUrl(guildLogo) {
 }
 
 export function removeGuildAvyImgBorder() {
-  var guildLogo = document.querySelector('#pCC img[oldtitle$="\'s Logo"]');
+  var guildLogo = querySelector('#pCC img[oldtitle$="\'s Logo"]');
   guildLogo.removeAttribute('style');
   wrapUrl(guildLogo);
 }
@@ -26,5 +27,5 @@ export function guildXPLock(xpLock) {
 }
 
 export function getXpLock() {
-  return document.querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+  return querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
 }

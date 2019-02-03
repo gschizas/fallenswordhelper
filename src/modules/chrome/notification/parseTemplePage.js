@@ -2,6 +2,7 @@ import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import displayDisconnectedFromGodsMessage
   from './displayDisconnectedFromGodsMessage';
+import querySelector from '../../common/querySelector';
 import saveTempleSettings from './saveTempleSettings';
 
 function templeAlertEnabled(responseText) {
@@ -12,7 +13,7 @@ function templeAlertEnabled(responseText) {
   } else {
     doc = document;
   }
-  checkNeedToPray = doc.querySelector('input[value="Pray to Osverin"]');
+  checkNeedToPray = querySelector('input[value="Pray to Osverin"]', doc);
   var needToPray = false;
   if (checkNeedToPray) {
     displayDisconnectedFromGodsMessage();

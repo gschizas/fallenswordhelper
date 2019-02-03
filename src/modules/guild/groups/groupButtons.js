@@ -10,6 +10,7 @@ import hideElement from '../../common/hideElement';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import on from '../../common/on';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import querySelectorArray from '../../common/querySelectorArray';
 import {sendEvent} from '../../support/fshGa';
 
@@ -60,8 +61,7 @@ function joinUnderButton(buttonRow) {
 }
 
 export default function groupButtons() {
-  var joinAll = document
-    .querySelector('#pCC input[value="Join All Available Groups"]');
+  var joinAll = querySelector('#pCC input[value="Join All Available Groups"]');
   var buttonRow = joinAll.parentNode;
   var enableMaxGroupSizeToJoin = getValue('enableMaxGroupSizeToJoin');
   if (enableMaxGroupSizeToJoin) {

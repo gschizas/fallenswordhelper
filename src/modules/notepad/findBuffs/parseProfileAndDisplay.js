@@ -8,6 +8,7 @@ import getText from '../../common/getText';
 import intValue from '../../system/intValue';
 import onlineDot from '../../common/onlineDot';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import {updateProgress} from './bufferProgress';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
@@ -125,7 +126,7 @@ function calcLastActivity(doc) {
 }
 
 function getExtend(doc) {
-  return doc.querySelector('img.tip-static[data-tipped*="Extend"]');
+  return querySelector('img.tip-static[data-tipped*="Extend"]', doc);
 }
 
 function addRowToTable(bioCellHtml, callback, doc, textLineArray) {

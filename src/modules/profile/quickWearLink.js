@@ -5,6 +5,7 @@ import insertQuickWear from '../notepad/quickWear/quickWear';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
 import on from '../common/on';
+import querySelector from '../common/querySelector';
 import {sendEvent} from '../support/fshGa';
 
 function openQwDialog() {
@@ -14,8 +15,8 @@ function openQwDialog() {
 
 export default function quickWearLink() {
   // quick wear manager link
-  var node = document.querySelector('#profileRightColumn ' +
-    'a[href="' + cmdUrl + 'profile&subcmd=togglesection&section_id=2"]');
+  var node = querySelector('#profileRightColumn a[href="' + cmdUrl +
+    'profile&subcmd=togglesection&section_id=2"]');
   if (!node) {return;}
   var wrap = createSpan({innerHTML: '&nbsp;['});
   var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});

@@ -8,6 +8,7 @@ import isObject from '../common/isObject';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import lookForHcsData from './lookForHcsData/lookForHcsData';
 import pageSwitcher from './pageSwitcher/pageSwitcher';
+import querySelector from '../common/querySelector';
 import {end, screenview, setup, start} from '../support/fshGa';
 
 var cmd;
@@ -22,7 +23,7 @@ function getParam(param) {
 }
 
 function newSelector(selector) {
-  var test_cmd = document.querySelector(selector);
+  var test_cmd = querySelector(selector);
   return test_cmd && test_cmd.value || '-';
 }
 

@@ -9,6 +9,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import myRows from '../common/myRows';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
+import querySelector from '../common/querySelector';
 import {addPvpSummary, initCache} from './addPvpSummary';
 import {
   attackplayerUrl,
@@ -131,7 +132,7 @@ function foundLogTable(logTable) { // Legacy
 
 function addLogWidgetsOld() { // Legacy
   calf.addAttackLinkToLog = getValue('addAttackLinkToLog');
-  var logTable = document.querySelector('#pCC > table:last-of-type');
+  var logTable = querySelector('#pCC > table:last-of-type');
   if (logTable) {foundLogTable(logTable);}
 }
 

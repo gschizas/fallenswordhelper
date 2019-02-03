@@ -7,6 +7,7 @@ import getProfile from '../../../ajax/getProfile';
 import indexAjaxData from '../../../ajax/indexAjaxData';
 import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
+import querySelector from '../../../common/querySelector';
 import setText from '../../../common/setText';
 import when from '../../../common/when';
 import {
@@ -49,7 +50,7 @@ function buildGroupPrm(disband) {
 
 function parseGroups(html) {
   var doc = createDocument(html);
-  var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
+  var disband = querySelector('#pCC a[href*="confirmDisband"]', doc);
   if (!disband) {return;}
   var prm = buildGroupPrm(disband);
   return $.when.apply($, prm);

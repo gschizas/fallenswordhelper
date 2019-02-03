@@ -4,6 +4,7 @@ import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import {now} from '../support/constants';
 import outputFormat from '../system/outputFormat';
+import querySelector from '../common/querySelector';
 import setText from '../common/setText';
 
 function formatLastReset(lastLadderReset) {
@@ -43,7 +44,7 @@ function makeNewRow() {
 }
 
 function lastReset() {
-  var topTable = document.querySelector('#pCC table');
+  var topTable = querySelector('#pCC table');
   var newRow = makeNewRow();
   insertElement(topTable, newRow);
 }

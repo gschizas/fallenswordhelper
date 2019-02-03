@@ -19,6 +19,7 @@ import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import {rowProfile} from './profiler';
 import setForage from '../../ajax/setForage';
 import setText from '../../common/setText';
@@ -39,7 +40,7 @@ var myTable;
 
 function parsePage(data) {
   doc = createDocument(data);
-  var pageInput = doc.querySelector('input[name="page"]');
+  var pageInput = querySelector('input[name="page"]', doc);
   if (pageInput) {
     currPage = Number(pageInput.value);
     lastPage = Number(/\d+/.exec(getText(pageInput.parentNode))[0]);

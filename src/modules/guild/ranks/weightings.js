@@ -7,6 +7,7 @@ import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import ranks from '../../app/guild/ranks/ranks';
 import roundToString from '../../common/roundToString';
 
@@ -73,7 +74,7 @@ function injectWeightButton(theRows, addNewRank) {
 
 export default function weightings(theRows) {
   // gather rank info button
-  var addNewRank = document.querySelector('#pCC a[href*="=ranks&subcmd2=add"]');
+  var addNewRank = querySelector('#pCC a[href*="=ranks&subcmd2=add"]');
   if (addNewRank) {
     injectWeightButton(theRows, addNewRank);
   }

@@ -1,5 +1,6 @@
 import dontPost from '../common/dontPost';
 import on from '../common/on';
+import querySelector from '../common/querySelector';
 
 function updateUrl(evt) {
   evt.preventDefault();
@@ -7,5 +8,5 @@ function updateUrl(evt) {
 }
 
 export default function allowBack() {
-  on(document.querySelector('input[type="submit"]'), 'click', updateUrl);
+  on(querySelector('input[type="submit"]'), 'click', updateUrl);
 }

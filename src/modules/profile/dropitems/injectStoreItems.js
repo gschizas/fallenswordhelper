@@ -16,6 +16,7 @@ import moveItemsToFolder from './moveItemsToFolder';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import quickAction from './quickAction';
 import senditems from '../../app/trade/senditems';
 import toggleForce from '../../common/toggleForce';
@@ -130,7 +131,7 @@ function toggleShowExtraLinks() {
 }
 
 function toggleDropLinks(o) {
-  toggleForce(o.injectHere.querySelector('.dropLink'), !showQuickDropLinks);
+  toggleForce(querySelector('.dropLink', o.injectHere), !showQuickDropLinks);
 }
 
 function toggleShowQuickDropLinks() {

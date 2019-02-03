@@ -4,6 +4,7 @@ import getValue from '../system/getValue';
 import {guildSubcmdUrl} from '../support/constants';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import partial from '../common/partial';
+import querySelector from '../common/querySelector';
 import replaceDoubleSpace from '../common/replaceDoubleSpace';
 import setValue from '../system/setValue';
 import shouldBeArray from '../system/shouldBeArray';
@@ -80,7 +81,7 @@ function foundGuildLink(aLink) {
 }
 
 export function profileInjectGuildRel(self) {
-  var aLink = document.querySelector(
+  var aLink = querySelector(
     '#pCC a[href^="' + guildSubcmdUrl + 'view&guild_id="]');
   if (aLink) {
     foundGuildLink(aLink);

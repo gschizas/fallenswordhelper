@@ -9,6 +9,7 @@ import on from '../common/on';
 import once from '../common/once';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
+import querySelector from '../common/querySelector';
 import querySelectorAll from '../common/querySelectorAll';
 import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
@@ -97,7 +98,7 @@ function drawList(fcDiv) {
 }
 
 export default function fastCompose() {
-  var buttonDiv = document.querySelector('#pCC div.centered');
+  var buttonDiv = querySelector('#pCC div.centered');
   insertHtmlAfterEnd(buttonDiv.children[1],
     ' | <label for="fast-compose"><span class="sendLink">' +
     'Fast Compose</span></label>');

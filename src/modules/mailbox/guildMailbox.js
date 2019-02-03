@@ -8,6 +8,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
+import querySelector from '../common/querySelector';
 import retryAjax from '../ajax/retryAjax';
 
 function translateReturnInfo(data) {
@@ -45,6 +46,6 @@ function guildMailboxEvent(e) { // jQuery.min
 export default function guildMailbox() {
   if (jQueryNotPresent()) {return;}
   on(pCC, 'click', guildMailboxEvent);
-  insertHtmlBeforeEnd(document.querySelector('#pCC td[height="25"]'),
+  insertHtmlBeforeEnd(querySelector('#pCC td[height="25"]'),
     '<span class="sendLink">Take All</span>');
 }

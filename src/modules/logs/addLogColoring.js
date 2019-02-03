@@ -3,6 +3,7 @@ import getValue from '../system/getValue';
 import myRows from '../common/myRows';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
+import querySelector from '../common/querySelector';
 import quickBuffHref from '../common/quickBuffHref';
 import setValue from '../system/setValue';
 
@@ -10,9 +11,9 @@ var nowUtc;
 var lastCheckUtc;
 
 function findChatTable() {
-  var chatTable = document.querySelector('#pCC table table table table'); // Guild Chat
+  var chatTable = querySelector('#pCC table table table table'); // Guild Chat
   if (!chatTable) {
-    chatTable = document.querySelector('#pCC > table:last-of-type'); // Outbox, Guild Log & personal log
+    chatTable = querySelector('#pCC > table:last-of-type'); // Outbox, Guild Log & personal log
   }
   return chatTable;
 }

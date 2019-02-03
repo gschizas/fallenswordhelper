@@ -11,6 +11,7 @@ import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
+import querySelector from '../common/querySelector';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';
 import setValue from '../system/setValue';
@@ -19,8 +20,7 @@ import toggleVisibilty from '../common/toggleVisibilty';
 import {createBr, createSpan} from '../common/cElement';
 
 function findEl(el, name) {
-  return document.querySelector(
-    '#fshSettingsTable ' + el + '[name="' + name + '"]');
+  return querySelector('#fshSettingsTable ' + el + '[name="' + name + '"]');
 }
 
 function findInput(name) {
@@ -187,5 +187,5 @@ export default function injectSettings() { // jQuery
   createEventListeners();
 
   setValue('minGroupLevel',
-    document.querySelector('input[name="min_group_level"]').value);
+    querySelector('input[name="min_group_level"]').value);
 }

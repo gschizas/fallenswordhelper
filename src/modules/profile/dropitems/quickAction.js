@@ -1,6 +1,7 @@
 import hideQTip from '../../common/hideQTip';
 import {imageServer} from '../../system/system';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 
 function anotherSpinner(self) {
   self.innerHTML = '<img class="quickActionSpinner" src="' +
@@ -20,7 +21,7 @@ function doAction(self, fn, success) {
 }
 
 function disableOtherButton(theTd, otherClass) {
-  var otherButton = theTd.querySelector(otherClass);
+  var otherButton = querySelector(otherClass, theTd);
   if (otherButton) {
     otherButton.className = 'quickAction';
     otherButton.innerHTML = '';

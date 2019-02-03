@@ -2,9 +2,10 @@ import {createSpan} from '../common/cElement';
 import formatLastActivity from '../system/formatLastActivity';
 import getElementsByTagName from '../common/getElementsByTagName';
 import insertElementAfter from '../common/insertElementAfter';
+import querySelector from '../common/querySelector';
 
 function getActivitySpan(myPlayer) {
-  var activity = myPlayer.querySelector('span.fshLastActivity');
+  var activity = querySelector('span.fshLastActivity', myPlayer);
   if (!activity) {
     activity = createSpan({className: 'fshLastActivity'});
     var player = getElementsByTagName('h1', myPlayer)[0];
@@ -14,7 +15,7 @@ function getActivitySpan(myPlayer) {
 }
 
 export default function addStatsQuickBuff(data) {
-  var myPlayer = document.querySelector('div.player[data-username="' +
+  var myPlayer = querySelector('div.player[data-username="' +
     data.username + '"]');
   var activity = getActivitySpan(myPlayer);
   activity.innerHTML = 'Last Activity: ' +
