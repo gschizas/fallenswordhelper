@@ -1,122 +1,65 @@
-import add from '../../support/task';
 import batch from '../../common/batch';
 import getMembrList from '../../ajax/getMembrList';
 import getText from '../../common/getText';
-import getValue from '../../system/getValue';
-import insertElementBefore from '../../common/insertElementBefore';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import on from '../../common/on';
+import notLastUpdate from '../../common/notLastUpdate';
 import {pCC} from '../../support/layout';
-import playerName from '../../common/playerName';
-import rankPosition from '../../app/guild/ranks/position';
-import toLowerCase from '../../common/toLowerCase';
+import partial from '../../common/partial';
 import weightings from './weightings';
-
-var ranks;
-var myRank;
-var theRows;
-var characterRow;
-
-function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
-  return characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
-    targetRowNum < 1 ||
-    targetRowNum > parentTable.rows.length;
-}
-
-function getTargetRowNumber(val) {
-  if (val === 'Up') {return -1;}
-  return 2;
-}
-
-function getPxScroll(val) {
-  if (val === 'Up') {return -22;}
-  return 22;
-}
-
-function shuffleRows(evt, thisRankRow, targetRowNum) {
-  var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
-  rankPosition(toLowerCase(evt.target.value), matchRankId[1]);
-  var injectRow = thisRankRow.parentNode.rows[targetRowNum];
-  insertElementBefore(thisRankRow, injectRow);
-  var pxScroll = getPxScroll(evt.target.value);
-  window.scrollBy(0, pxScroll);
-  evt.stopPropagation();
-}
-
-function overrideUpDown(evt) {
-  var thisRankRow = evt.target.parentNode.parentNode.parentNode;
-  var targetRowNum = thisRankRow.rowIndex +
-    getTargetRowNumber(evt.target.value);
-  if (notValidRow(
-    thisRankRow.rowIndex, targetRowNum, thisRankRow.parentNode
-  )) {return;}
-  shuffleRows(evt, thisRankRow, targetRowNum);
-}
-
-function ajaxifyRankControls(evt) {
-  if (['Up', 'Down'].includes(evt.target.value)) {overrideUpDown(evt);}
-}
-
-function doButtons() {
-  weightings();
-  if (getValue('ajaxifyRankControls')) {
-    on(pCC, 'click', ajaxifyRankControls, true);
-  }
-}
-
-function isMyRank(rankCell, rankName) {
-  if (rankName === myRank) {
-    characterRow = rankCell.parentNode.rowIndex; // limit for ajaxify later
-  }
-}
-
-function hasMembers(rankCell, rankName) {
-  if (ranks[rankName]) { // has members
-    isMyRank(rankCell, rankName);
-    insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
-      ranks[rankName].join(', ') + '</span>');
-  }
-}
-
-function getRankName(rankCell) {
-  if (rankCell.parentNode.rowIndex === 1) {return 'Guild Founder';}
-  return getText(rankCell);
-}
-
-function writeMembers(el) {
-  var rankCell = el.children[0];
-  var rankName = getRankName(rankCell);
-  hasMembers(rankCell, rankName);
-}
+import {doButtons, setCharacterRow} from './doButtons';
 
 function findTheRows() {
   var outerTable = pCC.lastElementChild.previousElementSibling;
   if (outerTable.rows && outerTable.rows.length > 7) {
-    return outerTable.rows[7].children[0].children[0].rows;
+    return Array.from(outerTable.rows[7].children[0].children[0].rows).slice(1);
   }
 }
 
-function getRanks(membrList) {
-  ranks = Object.keys(membrList).reduce(function(prev, curr) {
-    if (curr !== 'lastUpdate') {
-      var rankName = membrList[curr].rank_name;
-      prev[rankName] = prev[rankName] || [];
-      prev[rankName].push(curr);
-    }
-    return prev;
-  }, {});
-  myRank = membrList[playerName()].rank_name;
-  theRows = findTheRows();
-  if (theRows) {
-    batch(3, theRows, 1, writeMembers);
+function aRank(rank_name, memberRanks) {return memberRanks[0] === rank_name;}
+
+function hasMembers(thisRank) {return thisRank && thisRank[1].length > 0;}
+
+function getRankName(row, rankCell) {
+  if (row.rowIndex === 1) {return 'Guild Founder';}
+  return getText(rankCell);
+}
+
+function writeRanks(memberRanks, row) {
+  var rankCell = row.children[0];
+  var rankName = getRankName(row, rankCell);
+  var thisRank = memberRanks.find(partial(aRank, rankName));
+  setCharacterRow(row, thisRank);
+  if (hasMembers(thisRank)) {
+    insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
+      thisRank[1].join(', ') + '</span>');
   }
+}
+
+function gotMembers(memberRanks) {
+  var theRows = findTheRows();
+  if (theRows) {
+    batch(3, theRows, 1, partial(writeRanks, memberRanks));
+    weightings(theRows);
+    doButtons();
+  }
+}
+
+function rankArray(prev, ary) {
+  var thisRank = prev.find(partial(aRank, ary[1].rank_name));
+  if (thisRank) {
+    thisRank[1].push(ary[0]);
+  } else {
+    prev.push([ary[1].rank_name, [ary[0]]]);
+  }
+  return prev;
+}
+
+function makeRanks(json) {
+  return Object.entries(json).filter(notLastUpdate).reduce(rankArray, []);
 }
 
 export default function injectGuildRanks() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getMembrList(true).done(function(membrList) {
-    add(3, getRanks, [membrList]);
-  });
-  add(3, doButtons);
+  getMembrList(false).pipe(makeRanks).done(gotMembers);
 }
