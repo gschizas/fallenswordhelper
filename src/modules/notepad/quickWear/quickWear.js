@@ -25,15 +25,17 @@ var disableQuickWearPrompts;
 var content;
 var itemList;
 
+function actionResult(self, verb, data) {
+  if (data.r !== 0) {return;}
+  self.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
+}
+
 function doAction(self, fn, verb) { // jQuery.min
   sendEvent('QuickWear', 'doAction - ' + verb);
   setText('', self);
   self.classList.remove('smallLink');
   self.classList.add('fshSpinner', 'fshSpin12');
-  fn(self.dataset.itemid).done(function(data) {
-    if (data.r !== 0) {return;}
-    self.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
-  });
+  fn(self.dataset.itemid).done(partial(actionResult, self, verb));
 }
 
 function doUseItem(self) {

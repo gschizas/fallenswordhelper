@@ -17,11 +17,14 @@ function doInventory() {
   return getInventory().done(cacheTheInv);
 }
 
+function itemsFromFolder(el) {return el.items;}
+
+function composedPot(el) {return el.t === 15;}
+
 function getComposedFromBp(data) {
   if (!Array.isArray(data.r)) {return;}
-  composed = data.r.map(function(el) {return el.items;})
-    .reduce(function(a, b) {return a.concat(b);})
-    .filter(function(el) {return el.t === 15;});
+  composed = Array.prototype.concat.apply([], data.r.map(itemsFromFolder))
+    .filter(composedPot);
 }
 
 function doComposedFromBp() {
@@ -30,7 +33,7 @@ function doComposedFromBp() {
 
 function getComposedFromGs(data) {
   if (!Array.isArray(data.r)) {return;}
-  composed = composed.concat(data.r.filter(function(el) {return el.t === 15;}));
+  composed = composed.concat(data.r.filter(composedPot));
 }
 
 function doGs() {

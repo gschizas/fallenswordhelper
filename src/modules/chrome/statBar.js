@@ -12,6 +12,10 @@ import {
   profileUrl
 } from '../support/constants';
 
+function preventHcs(evt) {
+  evt.stopPropagation();
+}
+
 function statbarWrapper(href, id) {
   var character = getElementById(id);
   if (!character) {return;}
@@ -19,9 +23,7 @@ function statbarWrapper(href, id) {
   var statWrapper = character.parentNode;
   insertElement(myWrapper, character);
   insertElementBefore(myWrapper, statWrapper.firstChild);
-  on(myWrapper, 'click', function(evt) {
-    evt.stopPropagation();
-  }, true);
+  on(myWrapper, 'click', preventHcs, true);
 }
 
 export default function statbar() {

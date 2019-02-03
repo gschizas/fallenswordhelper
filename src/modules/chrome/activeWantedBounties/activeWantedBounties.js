@@ -1,5 +1,6 @@
 import bountyPage from '../../ajax/bountyPage';
 import calf from '../../support/calf';
+import functionPasses from '../../common/functionPasses';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import {parseBountyPageForWorld} from './parseBountyPageForWorld';
@@ -33,9 +34,7 @@ var refreshConditions = [
 ];
 
 function needsRefresh() {
-  return refreshConditions.some(function(el) {
-    return el();
-  });
+  return refreshConditions.some(functionPasses);
 }
 
 function retrieveBountyInfo(enableActiveList, enableWantedList) {

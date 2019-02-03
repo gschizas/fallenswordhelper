@@ -170,19 +170,19 @@ function findBuffsParseProfilePage(responseText) {
   }
 }
 
+function addExtraProfile(el) {profilePagesToSearch.push(showPlayerUrl + el);}
+
+function getAlliesEnemies(el) {retryAjax(el).done(findBuffsParseProfilePage);}
+
 function findBuffsParseProfilePageStart() { // Legacy
   // if option enabled then parse profiles
   profilePagesToSearch = [];
   profilePagesToSearch.push(profileUrl); // ???
   var extraProfileArray = csvSplit(extraProfile);
-  extraProfileArray.forEach(function(el) {
-    profilePagesToSearch.push(showPlayerUrl + el);
-  });
+  extraProfileArray.forEach(addExtraProfile);
   profilePagesToSearchProcessed = 0;
   if (getElementById('alliesEnemies').checked) {
-    profilePagesToSearch.forEach(function(el) {
-      retryAjax(el).done(findBuffsParseProfilePage);
-    });
+    profilePagesToSearch.forEach(getAlliesEnemies);
   } else {
     findBuffsParseOnlinePlayersStart();
   }

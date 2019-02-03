@@ -4,26 +4,27 @@ import getValue from '../system/getValue';
 import hideQTip from '../common/hideQTip';
 import jConfirm from '../common/jConfirm';
 import on from '../common/on';
+import partial from '../common/partial';
 import removeskill from '../app/profile/removeskill';
 import {sendEvent} from '../support/fshGa';
 
 var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
+function debuffSuccess(aLink, json) {
+  if (json.s) {aLink.parentNode.innerHTML = '';}
+}
+
 function doDebuff(aLink) { // jQuery.min
   sendEvent('profile', 'doDebuff');
   var buffId = aLink.href.match(/(\d+)$/)[1];
-  removeskill(buffId).done(errorDialog).done(function(json) {
-    if (json.s) {aLink.parentNode.innerHTML = '';}
-  });
+  removeskill(buffId).done(errorDialog).done(partial(debuffSuccess, aLink));
 }
 
 function doPrompt(aLink) {
   var onclick = aLink.getAttribute('onclick');
   var warn = onclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
-  jConfirm('Remove Skill', warn, function() {
-    doDebuff(aLink);
-  });
+  jConfirm('Remove Skill', warn, partial(doDebuff, aLink));
 }
 
 function checkForPrompt(aLink) {

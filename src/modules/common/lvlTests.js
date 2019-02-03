@@ -1,3 +1,5 @@
+import partial from './partial';
+
 export var playerLvlTest = [
   function(level, min) {return !min;},
   function(level, min, max) {return !max;},
@@ -10,6 +12,8 @@ export var playerLvlTest = [
 export var itemLvlTest;
 itemLvlTest = [function(level) {return level === 0;}].concat(playerLvlTest);
 
+function condition(level, min, max, fn) {return fn(level, min, max);}
+
 export function lvlTest(ary, level, min, max) {
-  return ary.some(function(fn) {return fn(level, min, max);});
+  return ary.some(partial(condition, level, min, max));
 }

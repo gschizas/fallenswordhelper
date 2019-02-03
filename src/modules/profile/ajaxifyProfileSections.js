@@ -3,6 +3,7 @@ import {getElementById} from '../common/getElement';
 import hideElement from '../common/hideElement';
 import on from '../common/on';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 
 var bpc;
@@ -20,10 +21,10 @@ var elementTests = [
   function(self) {return self.href.includes('togglesection');}
 ];
 
+function condition(self, fn) {return fn(self);}
+
 function isSectionToggle(self) {
-  return elementTests.every(function(el) {
-    return el(self);
-  });
+  return elementTests.every(partial(condition, self));
 }
 
 function oldStyleDiv(target) {

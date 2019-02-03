@@ -1,6 +1,7 @@
 import createDocument from './system/createDocument';
 import indexAjaxData from './ajax/indexAjaxData';
 import jQueryPresent from './common/jQueryPresent';
+import partial from './common/partial';
 import {def_table, guildSubcmdUrl} from './support/constants';
 
 var playerBank = {
@@ -45,21 +46,25 @@ function doInfoBox(infoBox) { // jQuery
   }
 }
 
+function eachGoldValue(doc, index) {
+  return $(statbarGoldTooltip, doc).eq(index).text();
+}
+
 function doStatBarGold(doc) {
   $(statbarGold).text($(statbarGold, doc).text());
-  $(statbarGoldTooltip).text(function(index) {
-    return $(statbarGoldTooltip, doc).eq(index).text();
-  });
+  $(statbarGoldTooltip).text(partial(eachGoldValue, doc));
 }
 
-function doBoldText(doc, o) {
-  $(pccB).slice(o.balPos).text(function(index) {
-    return $(pccB, doc).slice(o.balPos).eq(index).text();
-  });
+function newStats(doc, balPos, index) {
+  return $(pccB, doc).slice(balPos).eq(index).text();
 }
 
-function disableDepo(o) { // jQuery
-  if ($(pccB).eq(o.depoPos).text() === '0') {
+function doBoldText(doc, balPos) {
+  $(pccB).slice(balPos).text(partial(newStats, doc, balPos));
+}
+
+function disableDepo(depoPos) { // jQuery
+  if ($(pccB).eq(depoPos).text() === '0') {
     $(inputDepo).prop(disabled, true);
   }
 }
@@ -76,8 +81,8 @@ function replaceValues(doc, infoBox) {
   doInfoBox(infoBox);
   doStatBarGold(doc);
   var o = bankSettings;
-  doBoldText(doc, o);
-  disableDepo(o);
+  doBoldText(doc, o.balPos);
+  disableDepo(o.depoPos);
   updateDepoAmount(o, doc);
   $(withdrawAmount).val(o.initWithdraw);
 }

@@ -126,12 +126,12 @@ var classEvents = [
   ['add-template', insertTemplate],
 ];
 
+function makeRows(text) {addTemplateRow(-1, text);}
+
 function showMsgTemplate() {
   if (!showingTemplates) {
     getTable();
-    fshTemplate.forEach(function(text) {
-      addTemplateRow(-1, text);
-    });
+    fshTemplate.forEach(makeRows);
     addRow(-1,
       fshButton('add', 'Add'),
       '<input id="newTmpl" class="ui-widget-content fshTmpl">');

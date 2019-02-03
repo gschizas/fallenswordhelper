@@ -7,6 +7,7 @@ import getElementsByTagName from '../../common/getElementsByTagName';
 import getText from '../../common/getText';
 import intValue from '../../system/intValue';
 import onlineDot from '../../common/onlineDot';
+import partial from '../../common/partial';
 import {updateProgress} from './bufferProgress';
 
 var sustainLevelRE = /Level<br>(\d+)%/;
@@ -65,14 +66,16 @@ function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
     '&nbsp;(' + virtualLevelValue + ')';
 }
 
+function openMsg(evt) {
+  window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+}
+
 function doNameCell(o) {
   var newCell = o.newRow.insertCell(0);
   newCell.style.verticalAlign = 'top';
   newCell.innerHTML = nameCell(o.doc, o.callback, o.lastActivity,
     o.bioCellHtml);
-  $('.a-reply').click(function(evt) {
-    window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
-  });
+  $('.a-reply').click(openMsg);
 }
 
 function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
@@ -95,11 +98,13 @@ function playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff) {
   newCell.style.verticalAlign = 'top';
 }
 
+function injectTextLine(newCell, el) {
+  newCell.innerHTML += el + '<br>';
+}
+
 function buffCell(newRow, textLineArray) {
   var newCell = newRow.insertCell(2);
-  textLineArray.forEach(function(el) {
-    newCell.innerHTML += el + '<br>';
-  });
+  textLineArray.forEach(partial(injectTextLine, newCell));
 }
 
 function updateProcessed() {

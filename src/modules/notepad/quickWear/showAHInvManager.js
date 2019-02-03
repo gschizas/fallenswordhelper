@@ -13,41 +13,38 @@ function foundInvItem(invCount, name) {
 }
 
 function ahLink(searchname, nickname) {
-  return '<a href="' + ahSearchUrl + searchname +
-    '">' + nickname + '</a>';
+  return '<a href="' + ahSearchUrl + searchname + '">' + nickname + '</a>';
 }
 
-function toHtml(invCount, prev, key) {
-  if (invCount[key].nicknameList.length !== 0) {
-    return prev + '<tr><td>' + key + '</td><td>' +
-      invCount[key].nicknameList.map(partial(ahLink, key)).join(' ') +
-      '</td><td>' +
-      invCount[key].count + '</td><td></td><td></td></tr>';
-  }
-  return prev;
+function found(pair) {return pair[1].nicknameList.length > 0;}
+
+function foundHtml(pair) {
+  return '<tr><td>' + pair[0] + '</td><td>' +
+    pair[1].nicknameList.map(partial(ahLink, pair[0])).join(' ') +
+    '</td><td>' + pair[1].count + '</td><td></td><td></td></tr>';
 }
 
 function displayFoundCount(invCount) {
-  return Object.keys(invCount).reduce(partial(toHtml, invCount), '');
+  return Object.entries(invCount).filter(found).map(foundHtml).join('');
 }
 
+function notFound(item) {return item.displayOnAH && !item.found;}
+
+function notFoundHtml(item) {return ahLink(item.searchname, item.nickname);}
+
 function displayNotFound(quickSL) {
-  return quickSL.reduce(function(prev, item) {
-    if (item.displayOnAH && !item.found) {
-      return prev + ahLink(item.searchname, item.nickname) + ', ';
-    }
-    return prev;
-  }, '');
+  return quickSL.filter(notFound).map(notFoundHtml).join(', ');
+}
+
+function others(pair) {return pair[1].nicknameList.length === 0;}
+
+function otherHtml(pair) {
+  return '<tr><td>' + pair[0] + '</td><td></td><td>' + pair[1].count +
+    '</td><td></td><td></td></tr>';
 }
 
 function displayOtherCount(invCount) {
-  return Object.keys(invCount).reduce(function(prev, key) {
-    if (invCount[key].nicknameList.length === 0) {
-      return prev + '<tr><td>' + key + '</td><td></td><td>' +
-        invCount[key].count + '</td><td></td><td></td><td></td></tr>';
-    }
-    return prev;
-  }, '');
+  return Object.entries(invCount).filter(others).map(otherHtml).join('');
 }
 
 function buildHTML(invCount, quickSL) {
@@ -88,13 +85,15 @@ function testItemList(invCount, quickSL, item) {
   quickSL.forEach(partial(inQuickSearchList, invCount, name));
 }
 
+function folder(invCount, quickSL, aFolder) {
+  aFolder.items.forEach(partial(testItemList, invCount, quickSL));
+}
+
 export default function showAHInvManager(itemList) {
   var invCount = {};
   var quickSL = getValueJSON('quickSearchList');
   // fill up the Inv Counter
-  itemList.r.forEach(function(aFolder) {
-    aFolder.items.forEach(partial(testItemList, invCount, quickSL));
-  });
+  itemList.r.forEach(partial(folder, invCount, quickSL));
   var im = createDiv({
     id: 'invTabs-ah',
     className: 'ui-tabs-panel ui-corner-bottom'

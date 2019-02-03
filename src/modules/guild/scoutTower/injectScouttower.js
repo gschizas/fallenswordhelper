@@ -10,6 +10,7 @@ import jQueryNotPresent from '../../common/jQueryNotPresent';
 import myRows from '../../common/myRows';
 import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
+import partial from '../../common/partial';
 import roundToString from '../../common/roundToString';
 import setForage from '../../ajax/setForage';
 import {def_table, guideUrl, now} from '../../support/constants';
@@ -18,7 +19,7 @@ function getTitanName(aRow) {
   return aRow.cells[0].children[0].getAttribute('oldtitle');
 }
 
-function cooldownTracker(aRow, theTitans) {
+function cooldownTracker(theTitans, aRow) {
   var myName = getTitanName(aRow).replace(' (Titan)', '');
   if (!theTitans[myName]) {
     var cooldown = getText(aRow.nextElementSibling.cells[0]);
@@ -35,17 +36,19 @@ function cooldownTracker(aRow, theTitans) {
   }
 }
 
+function anyMissing(newTitans, oldTitan, i, oldTitans) {
+  if (newTitans[oldTitan]) {return;}
+  if (oldTitans[oldTitan].coolTime <= now) {return;}
+  newTitans[oldTitan] = {
+    cooldownText: oldTitans[oldTitan].cooldownText,
+    coolTime: oldTitans[oldTitan].coolTime,
+    seen: 'no'
+  };
+}
+
 function addMissingTitansFromOld(oldTitans, newTitans) {
   if (!oldTitans) {return;}
-  Object.keys(oldTitans).forEach(function(oldTitan) {
-    if (newTitans[oldTitan]) {return;}
-    if (oldTitans[oldTitan].coolTime <= now) {return;}
-    newTitans[oldTitan] = {
-      cooldownText: oldTitans[oldTitan].cooldownText,
-      coolTime: oldTitans[oldTitan].coolTime,
-      seen: 'no'
-    };
-  });
+  Object.keys(oldTitans).forEach(partial(anyMissing, newTitans));
 }
 
 export function getTitanString(guildKills, totalHP, currentHP) {
@@ -101,16 +104,19 @@ function guideLink(aRow) {
     realmName + '" target="_blank">' + realmName + '</a>';
 }
 
+function decorate(newTitans, aRow) {
+  killsSummary(aRow);
+  cooldownTracker(newTitans, aRow); // Pref
+  guideLink(aRow);
+}
+
 function gotOldTitans(oldTitans) {
   var titanTables = getElementsByTagName(def_table, pCC);
   injectScouttowerBuffLinks(titanTables);
   var titanTable = titanTables[1];
   var newTitans = {};
-  Array.from(titanTable.rows).filter(myRows(4, 0)).forEach(function(aRow) {
-    killsSummary(aRow);
-    cooldownTracker(aRow, newTitans); // Pref
-    guideLink(aRow);
-  });
+  Array.from(titanTable.rows).filter(myRows(4, 0))
+    .forEach(partial(decorate, newTitans));
   addMissingTitansFromOld(oldTitans, newTitans); // Pref
   displayTracker(titanTables[0], newTitans); // Pref
   setForage('fsh_titans', newTitans); // Pref

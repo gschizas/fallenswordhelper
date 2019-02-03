@@ -1,11 +1,14 @@
 import jConfirm from '../common/jConfirm';
+import partial from '../common/partial';
 import {sendException} from '../support/fshGa';
 import stringifyError from '../common/stringifyError';
 
+function clearError(err) {
+  sendException('localforage.clear error ' + stringifyError(err), false);
+}
+
 function clearForage() {
-  localforage.clear().catch(function(err) {
-    sendException('localforage.clear error ' + stringifyError(err), false);
-  });
+  localforage.clear().catch(clearError);
 }
 
 function setForageError(forage, err) {
@@ -20,15 +23,17 @@ function setForageError(forage, err) {
   }
 }
 
+function setItemCallback(forage, dfr, err, _data) {
+  if (err) {
+    setForageError(forage, err);
+    dfr.reject(err);
+  } else {
+    dfr.resolve(_data);
+  }
+}
+
 function forageSet(forage, data, dfr) {
-  localforage.setItem(forage, data, function setItemCallback(err, _data) {
-    if (err) {
-      setForageError(forage, err);
-      dfr.reject(err);
-    } else {
-      dfr.resolve(_data);
-    }
-  });
+  localforage.setItem(forage, data, partial(setItemCallback, forage, dfr));
 }
 
 export default function setForage(forage, data) {

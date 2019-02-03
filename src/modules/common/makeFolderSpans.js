@@ -1,14 +1,17 @@
-import {beginFolderSpanElement} from '../support/constants';
+import makeFolderSpan from './makeFolderSpan';
+
+function wornSelector(needsWorn) {
+  if (needsWorn) {return makeFolderSpan('-2', 'Worn');}
+  return '';
+}
+
+function folderSpan(ary) {
+  return makeFolderSpan(ary[0], ary[1]);
+}
 
 export default function makeFolderSpans(folders, needsWorn) {
-  var wornSelector = '';
-  if (needsWorn) {
-    wornSelector = ' &ensp;' + beginFolderSpanElement + '-2">Worn</span>';
-  }
-  return beginFolderSpanElement + '0">All</span>' + wornSelector +
-    ' &ensp;' + beginFolderSpanElement + '-1">Main</span>' +
-    Object.keys(folders).reduce(function(prev, key) {
-      return prev + ' &ensp;' + beginFolderSpanElement + key + '">' +
-        folders[key] + '</span>';
-    }, '');
+  return makeFolderSpan('0', 'All') +
+    wornSelector(needsWorn) +
+    makeFolderSpan('-1', 'Main') +
+    Object.entries(folders).map(folderSpan).join('');
 }

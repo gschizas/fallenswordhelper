@@ -8,6 +8,8 @@ function removeClass(self) {
     .removeClass();
 }
 
+function clear(td, i) {td.eq(i).empty();} // jQuery
+
 function clearButtons(td) {
   [
     2, // Where
@@ -16,7 +18,7 @@ function clearButtons(td) {
     14, // W/U - Tag
     15, // Tag - Drop
     16 // ? - Send
-  ].forEach(function(i) {td.eq(i).empty();});
+  ].forEach(partial(clear, td));
 }
 
 function killRow(self, data) { // jQuery
@@ -27,7 +29,7 @@ function killRow(self, data) { // jQuery
   tr.css('text-decoration', 'line-through');
 }
 
-function anotherSpinner(self) {
+function anotherSpinner(self) { // jQuery
   self.empty().append('<img src="' + imageServer +
     '/skin/loading.gif" width="11" height="11">');
 }

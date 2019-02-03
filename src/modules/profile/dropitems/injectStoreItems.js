@@ -15,6 +15,7 @@ import jQueryNotPresent from '../../common/jQueryNotPresent';
 import moveItemsToFolder from './moveItemsToFolder';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
+import partial from '../../common/partial';
 import quickAction from './quickAction';
 import senditems from '../../app/trade/senditems';
 import toggleForce from '../../common/toggleForce';
@@ -60,44 +61,41 @@ function itemColouring(o, item) {
 }
 
 var buildTrailer = [
-  {
-    test: function(item) {return !checkAll && itemsHash[item.item_id] !== 1;},
-    act: function(o, item) {
+  [
+    function(item) {return !checkAll && itemsHash[item.item_id] !== 1;},
+    function(o, item) {
       return ' [<span linkto="' + item.item_id +
         '" class="fshLink">Check all</span>]';
     }
-  },
-  {
-    test: function(item) {
-      return !sendLinks && showQuickSendLinks && !item.bound;
-    },
-    act: function(o) {
+  ],
+  [
+    function(item) {return !sendLinks && showQuickSendLinks && !item.bound;},
+    function(o) {
       return ' <span class="quickAction sendLink tip-static" ' +
         'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
         'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
     }
-  },
-  {
-    test: function(item) {
+  ],
+  [
+    function(item) {
       return !dropLinks && showQuickDropLinks && item.guild_tag === -1;
     },
-    act: function(o) {
+    function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
         o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
         'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
     }
-  }
+  ]
 ];
+
+function condition(item, pair) {return pair[0](item);}
+
+function generateHtml(o, item, pair) {return pair[1](o, item);}
 
 function beforeend(o, item) {
   itemColouring(o, item);
-  var pattern = buildTrailer.reduce(function(prev, el) {
-    var ret = prev;
-    if (el.test(item)) {
-      ret += el.act(o, item);
-    }
-    return ret;
-  }, '');
+  var pattern = buildTrailer.filter(partial(condition, item))
+    .map(partial(generateHtml, o, item)).join('');
   if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
 }
 
@@ -117,17 +115,22 @@ function doneInvPaint() {
   sendLinks = true;
 }
 
+function toggleExtraLinks(o) {
+  toggleForce(o.injectHere.children[0], !showExtraLinks);
+}
+
 function toggleShowExtraLinks() {
   setShowExtraLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
     batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   } else {
-    itemsAry.forEach(function(o) {
-      var el = o.injectHere.children[0];
-      toggleForce(el, !showExtraLinks);
-    });
+    itemsAry.forEach(toggleExtraLinks);
   }
+}
+
+function toggleDropLinks(o) {
+  toggleForce(o.injectHere.querySelector('.dropLink'), !showQuickDropLinks);
 }
 
 function toggleShowQuickDropLinks() {
@@ -136,10 +139,7 @@ function toggleShowQuickDropLinks() {
   if (!dropLinks) {
     batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   } else {
-    itemsAry.forEach(function(o) {
-      var el = o.injectHere.querySelector('.dropLink');
-      toggleForce(el, !showQuickDropLinks);
-    });
+    itemsAry.forEach(toggleDropLinks);
   }
 }
 

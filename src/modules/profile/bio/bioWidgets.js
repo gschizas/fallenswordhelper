@@ -17,27 +17,25 @@ var textArea;
 var previewArea;
 var theBox;
 
-function replaceTags(inputText, ary) {
-  var ret = inputText;
-  ary.forEach(function(re) {ret = ret.replace(re[0], re[1]);});
-  return ret;
-}
-
 var basicTagReplacements = [
   [/</g, '&lt'],
   [/>/g, '&gt'],
   [/\n/g, '<br>'],
-  [/\[(\/?)([biu])\]/g, '<$1$2>'],
+  [/\[(\/?[biu])\]/g, '<$1>'],
   [/\\\\/g, '&#92'],
   [/\\/g, '']
 ];
 
 var guildTagReplacements = [
-  [/\[(\/?)block\]/g, '<$1blockquote>'],
+  [/\[(\/?block)\]/g, '<$1quote>'],
   [/\[list\]/g, '<ul class="list">'],
   [/\[\/list\]/g, '</ul>'],
   [/\[\*\](.*?)<br>/g, '<li>$1</li>']
 ];
+
+function replaceTag(prev, re) {return prev.replace(re[0], re[1]);}
+
+function replaceTags(inputText, ary) {return ary.reduce(replaceTag, inputText);}
 
 function convertTextToHtml(inputText) {
   var ret = replaceTags(inputText, basicTagReplacements);

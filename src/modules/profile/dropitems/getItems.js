@@ -19,26 +19,38 @@ function getItemImg() {
   return getArrayByTagName('img', lastTable);
 }
 
+function hasTip(el) {return el.dataset.tipped;}
+
+function getIds(el) {
+  var matches = el.dataset.tipped.match(itemRE);
+  return [
+    el,
+    matches[1],
+    matches[2]
+  ];
+}
+
+function tally(prev, curr) {
+  prev[curr[1]] = (prev[curr[1]] || 0) + 1;
+  return prev;
+}
+
+function getInjector(ary) {
+  return {
+    el: ary[0],
+    invid: ary[2],
+    injectHere: ary[0].parentNode.parentNode.nextElementSibling
+  };
+}
+
 export function getItems() {
   addStatTotalToMouseover();
   getPrefs();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   var imgList = getItemImg();
-  itemsAry = [];
-  itemsHash = {};
-  imgList.forEach(function(el) { // TODO
-    var tipped = el.dataset.tipped;
-    if (tipped) {
-      var matches = tipped.match(itemRE);
-      itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
-      var injectHere = el.parentNode.parentNode.nextElementSibling;
-      itemsAry.push({
-        el: el,
-        invid: matches[2],
-        injectHere: injectHere
-      });
-    }
-  });
+  var fromTips = imgList.filter(hasTip).map(getIds);
+  itemsAry = fromTips.map(getInjector);
+  itemsHash = fromTips.reduce(tally, {});
   // Exclude composed pots
   itemsHash[13699] = 1;
 }

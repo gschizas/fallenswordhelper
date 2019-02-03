@@ -21,14 +21,13 @@ var selectMain;
 var resourceList;
 var buyResult;
 
+function thisItem(invId, el) {return el.inv_id === invId;}
+
 function backpackRemove(invId) {
-  extractInv.some(function(el, i, ary) {
-    if (el.inv_id === invId) {
-      ary.splice(i, 1);
-      return true;
-    }
-    return false;
-  });
+  var thisIndex = extractInv.findIndex(partial(thisItem, invId));
+  if (thisIndex >= 0) {
+    extractInv.splice(thisIndex, 1);
+  }
 }
 
 function processResult(r) {
@@ -111,18 +110,15 @@ function showQuickExtract() {
   buyResult = getElementById('qeresult');
 }
 
-function isExtractable(curr) {
-  return curr.item_name === 'Zombie Coffin' ||
-    curr.type === 12 ||
-    curr.type === 16;
+function isExtractable(item) {
+  return item.item_name === 'Zombie Coffin' ||
+    item.type === 12 ||
+    item.type === 16;
 }
 
 function prepInv(data) {
   playerId = data.player_id;
-  extractInv = data.items.reduce(function(prev, curr) {
-    if (isExtractable(curr)) {prev.push(curr);}
-    return prev;
-  }, []);
+  extractInv = data.items.filter(isExtractable);
   showQuickExtract();
 }
 

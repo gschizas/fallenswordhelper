@@ -61,14 +61,18 @@ function doSendItem(e) { // jQuery
   doAction(partial(senditems, [self.data('inv')]), self);
 }
 
+function elClick(fshInv, el) {$(el[0]).click(partial(el[1], fshInv));} // jQuery
+
 function elementClickHandlers(fshInv) {
   [
     ['#fshReset', resetLvls],
     ['#fshAll', allChecks],
     ['#fshNone', clearChecks],
     ['#fshDefault', resetChecks]
-  ].forEach(function(el) {$(el[0]).click(partial(el[1], fshInv));});
+  ].forEach(partial(elClick, fshInv));
 }
+
+function spanClick(fshInv, el) {$(fshInv).on('click', 'span.' + el[0], el[1]);} // jQuery
 
 function spanClickHandlers(fshInv) {
   [
@@ -80,10 +84,10 @@ function spanClickHandlers(fshInv) {
     ['dropItem', doDropItem],
     ['sendItem', doSendItem],
     ['storeItem', doStoreItem]
-  ].forEach(function(el) {$(fshInv).on('click', 'span.' + el[0], el[1]);});
+  ].forEach(partial(spanClick, fshInv));
 }
 
-function setupClickHandlers(fshInv) {
+function setupClickHandlers(fshInv) { // jQuery
   elementClickHandlers(fshInv);
   $('table.fshInvFilter').on('click', 'input[type="checkbox"]',
     partial(getChecks, fshInv));

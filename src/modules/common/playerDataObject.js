@@ -1,4 +1,4 @@
-import fallback from '../system/fallback';
+import partial from './partial';
 import reduceBuffArray from './reduceBuffArray';
 
 function cloakGuess(bonus, level) {
@@ -32,10 +32,10 @@ var statList = [
   ['killStreakValue', 'killstreak']
 ];
 
+function assignStats(obj, json, arr) {obj[arr[0]] = Number(json[arr[1]]);}
+
 function importStats(obj, json) {
-  statList.forEach(function(el) {
-    obj[el[0]] = Number(json[el[1]]);
-  });
+  statList.forEach(partial(assignStats, obj, json));
 }
 
 var buffList = [
@@ -60,10 +60,10 @@ var buffList = [
   ['cloakLevel', 'Cloak']
 ];
 
+function assignBuffs(obj, buffs, arr) {obj[arr[0]] = buffs[arr[1]] || 0;}
+
 function importBuffs(obj, buffs) {
-  buffList.forEach(function(el) {
-    obj[el[0]] = fallback(buffs[el[1]], 0);
-  });
+  buffList.forEach(partial(assignBuffs, obj, buffs));
 }
 
 export default function playerDataObject(json) {

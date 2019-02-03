@@ -15,28 +15,34 @@ function getGuild(guildId) {
   });
 }
 
+function saveMembrListInForage(membrList, data) {
+  var oldMemList = data || {};
+  setForage('fsh_membrList', $.extend(oldMemList, membrList));
+}
+
 function addMembrListToForage(membrList) {
   getForage('fsh_membrList')
-    .done(function saveMembrListInForage(data) {
-      var oldMemList = data || {};
-      setForage('fsh_membrList', $.extend(oldMemList, membrList));
-    });
+    .done(partial(saveMembrListInForage, membrList));
+}
+
+function memberToObject(membrList, guildId, ele) {
+  membrList[guildId][ele.username] = ele;
+}
+
+function membrListToHash(guildId, data) {
+  var membrList = {};
+  membrList[guildId] = {};
+  membrList[guildId].lastUpdate = now;
+  data.forEach(partial(memberToObject, membrList, guildId));
+  return membrList;
 }
 
 function getGuildMembers(guildId) {
-  return getGuild(guildId).pipe(function membrListToHash(data) {
-    var membrList = {};
-    membrList[guildId] = {};
-    membrList[guildId].lastUpdate = now;
-    data.forEach(function memberToObject(ele) {
-      membrList[guildId][ele.username] = ele;
-    });
-    return membrList;
-  });
+  return getGuild(guildId).pipe(partial(membrListToHash, guildId));
 }
 
 var testList = [
-  function(guildId, membrList) {return Boolean(membrList);},
+  function(guildId, membrList) {return membrList;},
   function(guildId, membrList) {return isObject(membrList);},
   function(guildId, membrList) {return isObject(membrList[guildId]);},
   function(guildId, membrList) {
@@ -47,8 +53,14 @@ var testList = [
   }
 ];
 
+function condition(guildId, membrList, e) {return e(guildId, membrList);}
+
+function isValid(guildId, membrList) {
+  return testList.every(partial(condition, guildId, membrList));
+}
+
 function getMembrListFromForage(guildId, membrList) {
-  if (testList.every(function(e) {return e(guildId, membrList);})) {
+  if (isValid(guildId, membrList)) {
     return membrList;
   }
   return getGuildMembers(guildId).done(addMembrListToForage);

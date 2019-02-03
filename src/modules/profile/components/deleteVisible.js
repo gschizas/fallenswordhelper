@@ -1,6 +1,7 @@
 import getArrayByTagName from '../../common/getArrayByTagName';
 import getInvTable from './getInvTable';
 import {itemRE} from '../../support/constants';
+import partial from '../../common/partial';
 
 var visibleCache;
 
@@ -18,9 +19,10 @@ function getVisibleComponents() {
   return visibleCache;
 }
 
+function blatElement(visibleComponents, a) {
+  if (visibleComponents[a]) {visibleComponents[a].innerHTML = '';}
+}
+
 export default function deleteVisible(ary) {
-  var visibleComponents = getVisibleComponents();
-  ary.forEach(function(a) {
-    if (visibleComponents[a]) {visibleComponents[a].innerHTML = '';}
-  });
+  ary.forEach(partial(blatElement, getVisibleComponents()));
 }

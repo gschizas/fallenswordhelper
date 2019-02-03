@@ -8,6 +8,7 @@ import guildTracker from './guildTracker/guildTracker';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import playerName from '../common/playerName';
 import {recallUserUrl} from '../support/constants';
 import {getXpLock, guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
@@ -26,13 +27,17 @@ function getLhsColTab() {
   return pCC.lastElementChild.rows[2].cells[0].children[0];
 }
 
+function lhsAdd(leftHandSideColumnTable, fn) {
+  add(3, fn, [leftHandSideColumnTable]);
+}
+
 function lhsAdditions(leftHandSideColumnTable) {
   [
     logoToggle,
     statToggle,
     structureToggle,
     selfRecallLink
-  ].forEach(function(fn) {add(3, fn, [leftHandSideColumnTable]);});
+  ].forEach(partial(lhsAdd, leftHandSideColumnTable));
 }
 
 function ajaxStuff(leftHandSideColumnTable) {

@@ -10,7 +10,7 @@ var removeOptions = 4;
 // https://stackoverflow.com/a/34325394
 
 export default function once(ary) {
-  on(ary[target], ary[type], function fn() {
+  on(ary[target], ary[type], function fn() { // Closure
     off(ary[target], ary[type], fn, ary[removeOptions]);
     ary[listener].apply(this, arguments); // eslint-disable-line no-invalid-this
   }, ary[addOptions]);

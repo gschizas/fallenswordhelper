@@ -1,14 +1,15 @@
 import {options} from '../options';
 import setChecks from '../setChecks';
 
+function gearOnly(pair) {return Number(pair[0]) >= 100;}
+
+function hydrate(prev, curr) {
+  prev[curr[0]] = curr[1];
+  return prev;
+}
+
 function clearGearOnly(checkedElements) {
-  var newEle = {};
-  Object.keys(checkedElements).forEach(function(key) {
-    if (parseInt(key, 10) >= 100) {
-      newEle[key] = checkedElements[key];
-    }
-  });
-  return newEle;
+  return Object.entries(checkedElements).filter(gearOnly).reduce(hydrate, {});
 }
 
 export default function clearChecks(fshInv) { // jQuery

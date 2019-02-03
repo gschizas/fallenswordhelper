@@ -13,6 +13,8 @@ import navMenu from '../navMenu';
 import scoutTowerLink from '../scoutTowerLink';
 import statbar from '../statBar';
 
+function asyncPThree(fn) {add(3, fn);}
+
 export default function priorityThree() {
   [
     navMenu,
@@ -28,5 +30,5 @@ export default function priorityThree() {
     injectQuickMsgDialogJQ,
     injectServerNode,
     scoutTowerLink
-  ].forEach(function(fn) {add(3, fn);});
+  ].forEach(asyncPThree);
 }

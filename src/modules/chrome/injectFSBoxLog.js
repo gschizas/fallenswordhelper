@@ -29,6 +29,11 @@ function storeFSBox(_boxList) {
   setForage('fsh_fsboxcontent', boxList);
 }
 
+function openDialog() {
+  sendEvent('injectFSBoxLog', 'injectFsBoxContent');
+  jQueryDialog(injectFsBoxContent);
+}
+
 function fSBoxExists(node) { // jQuery.min
   var nodediv = node.lastElementChild;
   var playerName = getElementsByTagName('a', nodediv);
@@ -42,10 +47,7 @@ function fSBoxExists(node) { // jQuery.min
     className: 'fshYellow',
     innerHTML: '[ <span class="fshLink">Log</span> ]'
   });
-  on(log, 'click', function() {
-    sendEvent('injectFSBoxLog', 'injectFsBoxContent');
-    jQueryDialog(injectFsBoxContent);
-  });
+  on(log, 'click', openDialog);
   insertElement(nodediv, log);
 }
 

@@ -1,3 +1,4 @@
+import partial from '../../../common/partial';
 import {theInv} from '../buildInv';
 
 function userInvNotEquipped(row) {
@@ -29,8 +30,10 @@ var locations = [
   ]
 ];
 
+function thisType(row, el) {return el[0](row);}
+
 function wuRender(row, act) {
-  var location = locations.find(function(el) {return el[0](row);});
+  var location = locations.find(partial(thisType, row));
   if (location) {
     return '<span class="fshLink ' + location[1](row, act) +
       '" invid="' + row.inv_id + '">' + act.b + '</span>';

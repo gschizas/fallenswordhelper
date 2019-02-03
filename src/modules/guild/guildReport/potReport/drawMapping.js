@@ -32,15 +32,17 @@ function setOption(value) {
   return option;
 }
 
+function insertOption(selectTmp, el) {
+  insertElement(selectTmp, setOption(el[0]));
+}
+
 function getSelect(ary) {
   var selectTmp = createSelect({
     className: 'tip-static',
     dataset: {tipped: 'Set to "Ignore" to exclude from report'}
   });
   insertElement(selectTmp, setOption('Ignore'));
-  ary.forEach(function(el) {
-    insertElement(selectTmp, setOption(el[0]));
-  });
+  ary.forEach(partial(insertOption, selectTmp));
   return selectTmp;
 }
 

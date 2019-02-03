@@ -69,17 +69,19 @@ function inSpecialsList(el) {
   return el.id in specials;
 }
 
+function check(specialHtml, el, i) {
+  if (!inSpecialsList(el)) {
+    var label = JSON.stringify(el) + ' ' + getText(specialHtml[i]);
+    //#if _DEV  //  PvP missing Special
+    console.log(label); // eslint-disable-line no-console
+    //#endif
+    sendEvent('Logs', 'Missing PvP Special', label);
+  }
+}
+
 function whatsMissing(json, html) {
   var specialHtml = querySelectorAll('#specialsDiv', createDocument(html));
-  json.r.specials.forEach(function(el, i) {
-    if (!inSpecialsList(el)) {
-      var label = JSON.stringify(el) + ' ' + getText(specialHtml[i]);
-      //#if _DEV  //  PvP missing Special
-      console.log(label); // eslint-disable-line no-console
-      //#endif
-      sendEvent('Logs', 'Missing PvP Special', label);
-    }
-  });
+  json.r.specials.forEach(partial(check, specialHtml));
 }
 
 function unknownSpecials(json) {
@@ -145,8 +147,10 @@ var combatRowTests = [
   }
 ];
 
+function condition(aRow, messageType, e) {return e(aRow, messageType);}
+
 function isCombatRow(aRow, messageType) {
-  return combatRowTests.every(function(e) {return e(aRow, messageType);});
+  return combatRowTests.every(partial(condition, aRow, messageType));
 }
 
 export function addPvpSummary(aRow, messageType) {
@@ -159,14 +163,17 @@ function currentCombatRecord(data, combatId, sevenDays) {
     data[combatId].logTime > sevenDays;
 }
 
+function keepRecent(data, sevenDays, prev, combatId) {
+  if (currentCombatRecord(data, combatId, sevenDays)) {
+    prev[combatId] = data[combatId];
+  }
+  return prev;
+}
+
 function cleanCache(data) {
   var sevenDays = nowSecs - 7 * 24 * 60 * 60;
-  combatCache = Object.keys(data).reduce(function(prev, combatId) {
-    if (currentCombatRecord(data, combatId, sevenDays)) {
-      prev[combatId] = data[combatId];
-    }
-    return prev;
-  }, {});
+  combatCache = Object.keys(data)
+    .reduce(partial(keepRecent, data, sevenDays), {});
   combatCache.lastCheck = nowSecs;
   setForage('fsh_pvpCombat', combatCache);
 }
