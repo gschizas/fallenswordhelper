@@ -54,34 +54,41 @@ var type2tests = [
   }
 ];
 
+function change(archiveRecord, member, test) {
+  return test(archiveRecord, member);
+}
+
+function hasChanged(archiveRecord, member) {
+  return type2tests.some(partial(change, archiveRecord, member));
+}
+
+function upsert(archiveRecord, member) {
+  if (hasChanged(archiveRecord, member)) {
+    pushNewRecord(member);
+  } else {
+    archiveRecord[act] = Math.floor((nowSecs - member.last_activity) / 86400);
+    archiveRecord[utc] = nowSecs;
+  }
+}
+
 function processMemberRecord(newArchive, member) {
   initMember(member);
   var archiveMember = oldArchive.members[member.name];
-  var archiveLength = archiveMember.length;
-  var archiveRecord = archiveMember[archiveLength - 1];
+  var archiveRecord = archiveMember[archiveMember.length - 1];
   var archiveAge = nowSecs - archiveRecord[utc];
   if (archiveAge >= 86100) {
-    var type2change = type2tests.some(function(test) {
-      if (test(archiveRecord, member)) {
-        return true;
-      }
-      return false;
-    });
-    if (type2change) {
-      pushNewRecord(member);
-    } else {
-      archiveRecord[act] = Math.floor((nowSecs - member.last_activity) / 86400);
-      archiveRecord[utc] = nowSecs;
-    }
+    upsert(archiveRecord, member);
   }
   newArchive.members[member.name] = oldArchive.members[member.name];
 }
 
+function processRank(newArchive, rank) {
+  rank.members.forEach(partial(processMemberRecord, newArchive));
+}
+
 function doMerge() { // jQuery.min
   var newArchive = {lastUpdate: nowSecs, members: {}};
-  guild.r.ranks.forEach(function(rank) {
-    rank.members.forEach(partial(processMemberRecord, newArchive));
-  });
+  guild.r.ranks.forEach(partial(processRank, newArchive));
   setForage('fsh_guildActivity', newArchive);
 }
 

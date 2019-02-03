@@ -5,40 +5,35 @@ import isFunction from './isFunction';
 import on from './on';
 import partial from './partial';
 import setValue from '../system/setValue';
+import toggleForce from './toggleForce';
 
 var warehouse = [];
 var prefValue;
 var headerIndex;
 
+function hideRow(el) {hideElement(el.row);}
+
 function collapseArt(article) {
-  article.rows.forEach(function(el) {
-    hideElement(el.row);
-  });
+  article.rows.forEach(hideRow);
   article.open = false;
 }
 
-function collapseAll() {
-  warehouse.forEach(function(article) {
-    if (article.open) {collapseArt(article);}
-  });
-}
+function needsCollapse(article) {if (article.open) {collapseArt(article);}}
+
+function collapseAll() {warehouse.forEach(needsCollapse);}
+
+function show(el) {toggleForce(el.row, false);}
 
 function expandArt(article) {
-  article.rows.forEach(function(el) {
-    el.row.classList.remove('fshHide');
-  });
+  article.rows.forEach(show);
   article.open = true;
 }
 
-function expandAll() {
-  warehouse.forEach(function(article) {
-    if (!article.open) {expandArt(article);}
-  });
-}
+function needsExpand(article) {if (!article.open) {expandArt(article);}}
 
-function isHeader(el) {
-  if (el.rowIndex % headerIndex === 0) {return el;}
-}
+function expandAll() {warehouse.forEach(needsExpand);}
+
+function isHeader(el) {if (el.rowIndex % headerIndex === 0) {return el;}}
 
 function closestTr(el) {
   if (el.tagName === 'TR') {
@@ -61,9 +56,7 @@ function evtEnabled(evt) {
   }
 }
 
-function evtHdl(evt) {
-  if (prefValue) {evtEnabled(evt);}
-}
+function evtHdl(evt) {if (prefValue) {evtEnabled(evt);}}
 
 function makeHeaderClickable(row) {
   if (prefValue) {row.classList.add('fshPoint');}
@@ -78,9 +71,7 @@ function collapseDuringAnalysis(row, thisArticle) {
   }
 }
 
-function hasExtraFn(extraFn, row) {
-  if (isFunction(extraFn)) {extraFn(row);}
-}
+function hasExtraFn(extraFn, row) {if (isFunction(extraFn)) {extraFn(row);}}
 
 function testRowType(row, rowType, thisArticle, param) {
   if (rowType === 0) {
@@ -105,10 +96,10 @@ function doTagging(param, row) {
   testRowType(row, rowType, thisArticle, param);
 }
 
+function togglePointer(article) {article.header.classList.toggle('fshPoint');}
+
 function toggleHeaderClass() {
-  warehouse.forEach(function(article) {
-    article.header.classList.toggle('fshPoint');
-  });
+  warehouse.forEach(togglePointer);
 }
 
 function togglePref(prefName) {

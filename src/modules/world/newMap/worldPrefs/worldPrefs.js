@@ -7,18 +7,22 @@ import interceptXHR from './interceptXHR';
 import {prepareHidePlayerActions} from '../prepareHidePlayerActions';
 import shouldBeArray from '../../../system/shouldBeArray';
 
+function mappedArray(a) {calf[a[0]] = shouldBeArray(a[1]);}
+
 function mappedArrays() {
   [
     ['buffs', 'huntingBuffs'],
     ['buffs2', 'huntingBuffs2'],
     ['buffs3', 'huntingBuffs3']
-  ].forEach(function(a) {calf[a[0]] = shouldBeArray(a[1]);});
+  ].forEach(mappedArray);
 }
+
+function straightArray(a) {calf[a] = shouldBeArray(a);}
 
 function straightArrays() {
   [
     'doNotKillList'
-  ].forEach(function(a) {calf[a] = shouldBeArray(a);});
+  ].forEach(straightArray);
 }
 
 function arrayType() {
@@ -26,14 +30,18 @@ function arrayType() {
   straightArrays();
 }
 
+function mappedValue(a) {calf[a[0]] = getValue(a[1]);}
+
 function mappedValues() {
   [
     ['buffsName', 'huntingBuffsName'],
     ['buffs2Name', 'huntingBuffs2Name'],
     ['buffs3Name', 'huntingBuffs3Name'],
     ['showBuffs', 'showHuntingBuffs']
-  ].forEach(function(a) {calf[a[0]] = getValue(a[1]);});
+  ].forEach(mappedValue);
 }
+
+function straightValue(a) {calf[a] = getValue(a);}
 
 function straightValues() {
   [
@@ -43,7 +51,7 @@ function straightValues() {
     'showBuffInfo',
     'showMonsterLog',
     'showCreatureInfo'
-  ].forEach(function(a) {calf[a] = getValue(a);});
+  ].forEach(straightValue);
 }
 
 function valueType() {

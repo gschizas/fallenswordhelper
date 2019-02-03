@@ -15,6 +15,7 @@ import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import jQueryDialog from '../jQueryDialog';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
+import partial from '../../common/partial';
 import {
   cmdUrl,
   def_subcmd,
@@ -57,16 +58,18 @@ function insertAfterParent(target, fn, listItem) {
   } else {sendException('#' + target + ' is not a Node', false);}
 }
 
+function openDialog(text, fn) {
+  sendEvent('accordion', text);
+  jQueryDialog(fn);
+}
+
 function anchorButton(navLvl, text, fn, target) {
   var li = createLi({className: 'nav-level-' + navLvl});
   var al = createAnchor({
     className: 'nav-link fshPoint',
     textContent: text
   });
-  on(al, 'click', function() {
-    sendEvent('accordion', text);
-    jQueryDialog(fn);
-  });
+  on(al, 'click', partial(openDialog, text, fn));
   insertElement(li, al);
   insertAfterParent(target, insertAdjElement, li);
 }

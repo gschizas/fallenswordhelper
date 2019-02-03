@@ -75,9 +75,6 @@ export var archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
 
 export var guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
 
-export var beginFolderSpanElement =
-  '<span class="fshLink fshNoWrap fshFolder fshVMid" data-folder="';
-
 export var def_afterUpdateActionlist = 'after-update.actionlist';
 export var def_playerBuffs = 'buffs.player';
 export var def_playerUpdate = 'update.player';

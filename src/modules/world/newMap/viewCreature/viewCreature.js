@@ -15,6 +15,7 @@ import groupsViewStats from '../../../app/guild/groups/viewStats';
 import insertElement from '../../../common/insertElement';
 import makeDoNotKillLink from './makeDoNotKillLink';
 import myStats from '../../../ajax/myStats';
+import partial from '../../../common/partial';
 import playerDataObject from '../../../common/playerDataObject';
 import playerName from '../../../common/playerName';
 
@@ -137,25 +138,25 @@ function getGroupId(json) {
   return json.r.find(myGroup).id;
 }
 
-function getGroupStats(data, playerJson, groupId) {
-  groupsViewStats(groupId).done(function(groupJson) {
-    if (!groupJson.r || !groupJson.r.attributes) {return;}
-    var attr = groupJson.r.attributes;
-    doCombatEval(data, playerJson, {
-      groupExists: true,
-      groupAttackValue: attr[0].value,
-      groupDefenseValue: attr[1].value,
-      groupArmorValue: attr[2].value,
-      groupDamageValue: attr[3].value,
-      groupHPValue: attr[4].value
-    });
+function processGroupStats(data, playerJson, groupJson) {
+  if (!groupJson.r || !groupJson.r.attributes) {return;}
+  var attr = groupJson.r.attributes;
+  doCombatEval(data, playerJson, {
+    groupExists: true,
+    groupAttackValue: attr[0].value,
+    groupDefenseValue: attr[1].value,
+    groupArmorValue: attr[2].value,
+    groupDamageValue: attr[3].value,
+    groupHPValue: attr[4].value
   });
 }
 
+function getGroupStats(data, playerJson, groupId) {
+  groupsViewStats(groupId).done(partial(processGroupStats, data, playerJson));
+}
+
 function processGroup(data, playerJson) {
-  groupsView().pipe(getGroupId).done(function(groupId) {
-    getGroupStats(data, playerJson, groupId);
-  });
+  groupsView().pipe(getGroupId).done(partial(getGroupStats, data, playerJson));
 }
 
 function processPlayer(data, playerJson) {
@@ -174,7 +175,7 @@ function processCreature(e, data) {
   setGroupEvalalutor('');
   if (isValidData(data)) {
     makeDoNotKillLink(data.response.data.name, dialogViewCreature);
-    myStats(true).done(function(playerJson) {processPlayer(data, playerJson);});
+    myStats(true).done(partial(processPlayer, data));
   }
 }
 

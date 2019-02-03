@@ -1,6 +1,7 @@
 import currentGuildId from '../../common/currentGuildId';
 import getValue from '../../system/getValue';
 import intValue from '../../system/intValue';
+import partial from '../../common/partial';
 import {
   pvpLowerLevel,
   pvpUpperLevel
@@ -21,10 +22,10 @@ var highlightTests = [
   function(data) {return intValue(data[2]) <= pvpUpperLevel;}
 ];
 
+function condition(data, el) {return el(data);}
+
 function pvpHighlight(data) {
-  return highlightTests.every(function(el) {
-    return el(data);
-  });
+  return highlightTests.every(partial(condition, data));
 }
 
 function createdRow(row, data) {

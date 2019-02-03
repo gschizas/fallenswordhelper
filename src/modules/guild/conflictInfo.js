@@ -3,6 +3,7 @@ import createDocument from '../system/createDocument';
 import {guildSubcmdUrl} from '../support/constants';
 import myRows from '../common/myRows';
 import partial from '../common/partial';
+import querySelector from '../common/querySelector';
 
 function makeCell(newRow, html) {
   newRow.insertCell(-1).innerHTML = html;
@@ -33,8 +34,8 @@ function hazConflict(conflictTable, curPage, insertHere) { // Legacy
 }
 
 function activeConflicts(doc, curPage, insertHere) { // Legacy
-  var conflictTable = doc.querySelector(
-    '#pCC > table > tbody > tr > td > table');
+  var conflictTable = querySelector(
+    '#pCC > table > tbody > tr > td > table', doc);
   if (conflictTable && conflictTable.rows.length > 3) {
     hazConflict(conflictTable, curPage, insertHere);
   }
@@ -50,7 +51,7 @@ function getNextPage(curPage, fn, callback) {
 
 function gotConflictInfo(callback, responseText) { // Legacy
   var doc = createDocument(responseText);
-  var page = doc.querySelector('#pCC input[name="page"]');
+  var page = querySelector('#pCC input[name="page"]', doc);
   if (!page) {return;}
   var curPage = Number(page.value);
   var maxPage = getMaxPage(page);

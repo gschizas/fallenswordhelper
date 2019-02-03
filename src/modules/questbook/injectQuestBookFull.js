@@ -4,6 +4,7 @@ import getValue from '../system/getValue';
 import injectQuestRow from './injectQuestRow';
 import on from '../common/on';
 import {pCC} from '../support/layout';
+import partial from '../common/partial';
 import setValue from '../system/setValue';
 import updateUrl from './updateUrl';
 
@@ -14,13 +15,7 @@ var completeLink;
 var notStartedLink;
 var currentPageValue;
 
-var currentLocationValue = [
-  {value: 0},
-  {value: 3},
-  {value: 0},
-  {value: 1},
-  {value: 2}
-];
+var currentLocationValue = [0, 3, 0, 1, 2];
 
 var savePrefKey = [
   'lastNormalActiveQuestPage',
@@ -31,6 +26,13 @@ var savePrefKey = [
   'lastSeasonalNotStartedQuestPage'
 ];
 
+function pageCombo(aLinks, prev, curr, i) {
+  if (aLinks[i].children[0].getAttribute('color') === '#FF0000') {
+    return prev + curr;
+  }
+  return prev;
+}
+
 function whereAmI() {
   var aLinks = getElementsByTagName('a', pCC);
   normalLink = aLinks[0];
@@ -38,13 +40,7 @@ function whereAmI() {
   activeLink = aLinks[2];
   completeLink = aLinks[3];
   notStartedLink = aLinks[4];
-  currentPageValue = currentLocationValue.reduce(function(prev, curr, i) {
-    var ret = prev;
-    if (aLinks[i].children[0].getAttribute('color') === '#FF0000') {
-      ret += curr.value;
-    }
-    return ret;
-  }, 0);
+  currentPageValue = currentLocationValue.reduce(partial(pageCombo, aLinks), 0);
 }
 
 function storeLoc() {
@@ -53,8 +49,10 @@ function storeLoc() {
   setValue(savePrefKey[currentPageValue], lastQBPage);
 }
 
+function getPref(pref) {return getValue(pref);}
+
 function getPrevVals() {
-  return savePrefKey.map(function(pref) {return getValue(pref);});
+  return savePrefKey.map(getPref);
 }
 
 function oppositeType(lastPages) {

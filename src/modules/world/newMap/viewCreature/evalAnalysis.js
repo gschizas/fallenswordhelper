@@ -1,3 +1,5 @@
+import partial from '../../../common/partial';
+
 function evalMiss(combat) {
   if (combat.numberOfCreatureHitsTillDead - combat.numberOfHitsRequired <= 1) {
     return ', dies on miss';
@@ -34,34 +36,39 @@ function evalCreatureHits(combat) {
 }
 
 var evalFightStatus = [
-  {
-    test: function(combat) {
+  [
+    function(combat) {
       return combat.playerHits === '-' && combat.creatureHits === '-';
     },
-    fStatus: function() {return 'Unresolved';}
-  },
-  {
-    test: function(combat) {return combat.playerHits === '-';},
-    fStatus: function() {return 'Player dies';}
-  },
-  {
-    test: function(combat) {return combat.playerHits === 1;},
-    fStatus: function(combat) {return 'Player 1 hits' + evalMiss(combat);}
-  },
-  {
-    test: function(combat) {return combat.playerHits > 1;},
-    fStatus: function(combat) {return 'Player > 1 hits' + evalMiss(combat);}
-  }
+    function() {return 'Unresolved';}
+  ],
+  [
+    function(combat) {return combat.playerHits === '-';},
+    function() {return 'Player dies';}
+  ],
+  [
+    function(combat) {return combat.playerHits === 1;},
+    function(combat) {return 'Player 1 hits' + evalMiss(combat);}
+  ],
+  [
+    function(combat) {return combat.playerHits > 1;},
+    function(combat) {return 'Player > 1 hits' + evalMiss(combat);}
+  ]
 ];
+
+function condition(combat, el) {return el[0](combat);}
+
+function getStatus(combat) {
+  var status = evalFightStatus.find(partial(condition, combat));
+  if (status) {
+    return status[1](combat);
+  }
+  return 'Unknown';
+}
 
 export default function evalAnalysis(combat) {
   // Analysis:
   combat.playerHits = evalPlayerHits(combat);
   combat.creatureHits = evalCreatureHits(combat);
-  var status = evalFightStatus.find(function(el) {return el.test(combat);});
-  if (status) {
-    combat.fightStatus = status.fStatus(combat);
-  } else {
-    combat.fightStatus = 'Unknown';
-  }
+  combat.fightStatus = getStatus(combat);
 }

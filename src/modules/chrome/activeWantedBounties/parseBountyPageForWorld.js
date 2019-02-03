@@ -5,13 +5,14 @@ import findTarget from './findTarget';
 import {getElementById} from '../../common/getElement';
 import {injectBountyList} from './injectBountyList';
 import {injectWantedList} from './injectWantedList';
+import querySelector from '../../common/querySelector';
 import {activeBountyListPosted, getActiveBountyList} from './lists';
 
 var curPage;
 var maxPage;
 
 function getWantedBountyList(doc) {
-  var page = doc.querySelector('#pCC input[name="page"]');
+  var page = querySelector('#pCC input[name="page"]', doc);
   if (!page) {return;}
   curPage = Number(page.value);
   maxPage = Number(page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1]);

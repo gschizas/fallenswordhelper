@@ -7,6 +7,7 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import once from '../../common/once';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import {sendEvent} from '../../support/fshGa';
 import setValue from '../../system/setValue';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
@@ -155,7 +156,7 @@ function makeNewTr(gs) {
 }
 
 function injectShowTracker() {
-  var gs = document.querySelector('#pCC img.guild_openGuildStore');
+  var gs = querySelector('#pCC img.guild_openGuildStore');
   var oldTr = gs.parentNode.parentNode;
   oldTr.parentNode.replaceChild(makeNewTr(gs), oldTr);
 }

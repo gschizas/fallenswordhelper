@@ -1,6 +1,7 @@
 import add from '../../support/task';
 import addContacts from './addContacts';
 import calf from '../../support/calf';
+import classHandler from '../../common/classHandler';
 import {createDiv} from '../../common/cElement';
 import fallback from '../../system/fallback';
 import getArrayByClassName from '../../common/getArrayByClassName';
@@ -13,6 +14,7 @@ import myStats from '../../ajax/myStats';
 import on from '../../common/on';
 import openQuickBuffByName from '../../common/openQuickBuffByName';
 import {pCR} from '../../support/layout';
+import partial from '../../common/partial';
 import {
   enemyBuffCheckOff,
   enemyBuffCheckOn,
@@ -31,8 +33,10 @@ var noAlliesTests = [
   }
 ];
 
+function condition(allies, enemies, e) {return e(allies, enemies) === 0;}
+
 function noAllies(allies, enemies) {
-  return noAlliesTests.every(function(e) {return e(allies, enemies) === 0;});
+  return noAlliesTests.every(partial(condition, allies, enemies));
 }
 
 function hazAllies(allies, enemies) {
@@ -83,11 +87,11 @@ function selectedBuff() {
 }
 
 var classEvt = [
-  {className: enemyBuffCheckOn, handler: toggleBuffSelected},
-  {className: enemyBuffCheckOff, handler: toggleBuffSelected},
-  {className: enemySendMessage, handler: msgPlayer},
-  {className: enemyQuickbuff, handler: buffPlayer},
-  {className: enemySelectedBuff, handler: selectedBuff}
+  [enemyBuffCheckOn, toggleBuffSelected],
+  [enemyBuffCheckOff, toggleBuffSelected],
+  [enemySendMessage, msgPlayer],
+  [enemyQuickbuff, buffPlayer],
+  [enemySelectedBuff, selectedBuff]
 ];
 
 function eventHandler(evt) {
@@ -96,13 +100,7 @@ function eventHandler(evt) {
     resetList();
     return;
   }
-  classEvt.some(function(test) {
-    if (self.classList.contains(test.className)) {
-      test.handler(self);
-      return true;
-    }
-    return false;
-  });
+  classHandler(classEvt)(evt);
 }
 
 function makeDiv(data) {

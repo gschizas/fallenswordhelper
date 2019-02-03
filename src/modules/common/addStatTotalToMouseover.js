@@ -6,6 +6,7 @@ import getText from './getText';
 import getTextTrim from './getTextTrim';
 import insertHtmlBeforeBegin from './insertHtmlBeforeBegin';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
+import partial from './partial';
 
 function cellOneHazText(curr) {
   return curr.cells[1] && getText(curr.cells[1]);
@@ -35,9 +36,11 @@ function getLastIndex(obj, tbl) {
   return tbl.rows[tbl.rows.length - 1];
 }
 
+function sum(statObj, prev, curr) {return prev + getVal(curr, statObj);}
+
 function calcTotalStats(statObj) {
   return ['Attack', 'Defense', 'Armor', 'Damage', 'HP']
-    .reduce(function(prev, curr) {return prev + getVal(curr, statObj);}, 0);
+    .reduce(partial(sum, statObj), 0);
 }
 
 function addStats(el) {

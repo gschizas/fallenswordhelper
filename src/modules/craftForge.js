@@ -20,6 +20,7 @@ var itemsAry;
 var invItems;
 var folderId = 0;
 var perfBox;
+var itemGrid;
 
 function whichTableHasItems() {
   var allTables = getElementsByTagName(def_table, pCC.lastElementChild);
@@ -29,16 +30,18 @@ function whichTableHasItems() {
   return allTables[0];
 }
 
+function insertItem(item) {
+  var itemDiv = createDiv();
+  var aLink = item[0].parentNode;
+  insertElement(itemDiv, aLink);
+  insertElement(itemGrid, itemDiv);
+}
+
 function drawingNewItemTable() {
-  if (!drawingNewItemTable.itemGrid) {
-    drawingNewItemTable.itemGrid = createDiv({className: 'fshItemGrid'});
-    itemsAry.forEach(function(item) {
-      var itemDiv = createDiv();
-      var aLink = item[0].parentNode;
-      insertElement(itemDiv, aLink);
-      insertElement(drawingNewItemTable.itemGrid, itemDiv);
-    });
-    insertElementAfterBegin(itemTable.parentNode, drawingNewItemTable.itemGrid);
+  if (!itemGrid) {
+    itemGrid = createDiv({className: 'fshItemGrid'});
+    itemsAry.forEach(insertItem);
+    insertElementAfterBegin(itemTable.parentNode, itemGrid);
     hideElement(itemTable);
   }
 }
@@ -75,13 +78,15 @@ function getFolderId(item) {
   return item.folder_id;
 }
 
+function addProps(item) {
+  var invItem = invItems[item[1]];
+  if (invItem) {
+    item.push(getFolderId(invItem), invItem.craft);
+  }
+}
+
 function enhanceWarehouse() {
-  itemsAry.forEach(function(item) {
-    var invItem = invItems[item[1]];
-    if (invItem) {
-      item.push(getFolderId(invItem), invItem.craft);
-    }
-  });
+  itemsAry.forEach(addProps);
 }
 
 function doFolderButtons(folders) {

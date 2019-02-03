@@ -23,12 +23,14 @@ function destroyed(data) {
 
 function removeSpinner(td) {td.parentNode.remove();}
 
+function destroy(el) {
+  return destroyComponent(el).done(destroyed);
+}
+
 export default function delCompType(self) { // jQuery.min
   var toDelete = componentList[self.dataset.compid].del;
   var td = self.parentNode;
   doSpinner(td);
-  var prm = chunk(40, toDelete).map(function(el) {
-    return destroyComponent(el).done(destroyed);
-  });
+  var prm = chunk(40, toDelete).map(destroy);
   when(prm, partial(removeSpinner, td));
 }

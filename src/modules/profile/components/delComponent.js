@@ -3,12 +3,12 @@ import errorDialog from '../../app/errorDialog';
 import getText from '../../common/getText';
 import {itemRE} from '../../support/constants';
 import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import setText from '../../common/setText';
 import updateUsedCount from './updateUsedCount';
 
 function updateComponentCounts(itemId) {
-  var delBtn = document.querySelector('#fshTally [data-compid="' + itemId +
-    '"]');
+  var delBtn = querySelector('#fshTally [data-compid="' + itemId + '"]');
   if (!delBtn) {return;}
   var countDom = delBtn.parentNode.parentNode.children[1];
   var count = Number(getText(countDom)) - 1;

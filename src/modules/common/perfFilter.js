@@ -1,3 +1,4 @@
+import clickThis from './clickThis';
 import {createDiv} from './cElement';
 import getArrayByClassName from './getArrayByClassName';
 import {getElementById} from '../common/getElement';
@@ -11,9 +12,9 @@ import {pCC} from '../support/layout';
 var inv;
 var target;
 
-function clickOnPerf(e) {
-  var thisItem = e.id.replace(target + '-item-', '');
-  if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {e.click();}
+function clickOnPerf(el) {
+  var thisItem = el.id.replace(target + '-item-', '');
+  if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {clickThis(el);}
 }
 
 function selectPerf() {

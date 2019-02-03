@@ -6,34 +6,38 @@ import shouldBeArray from '../../system/shouldBeArray';
 var currentPlayerId;
 var hideRecipes = [];
 
+function itemImg(itm) {
+  return '<div class="rmItem"><img class="tip-dynamic" ' +
+    'data-tipped="fetchitem.php?item_id=' +
+    itm.id + '&inv_id=-1&t=2&p=' +
+    currentPlayerId + '&vcode=' +
+    itm.verify + '" src="' +
+    itm.img + '" height="20px" width="20px"><p>' +
+    itm.amountPresent + '/' +
+    itm.amountNeeded + '</p></div>';
+}
+
 function getRecipeItems(recipe) {
   if (recipe.items) {
-    return recipe.items.reduce(function(prev, itm) {
-      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
-        'data-tipped="fetchitem.php?item_id=' +
-        itm.id + '&inv_id=-1&t=2&p=' +
-        currentPlayerId + '&vcode=' +
-        itm.verify + '" src="' +
-        itm.img + '" height="20px" width="20px"><p>' +
-        itm.amountPresent + '/' +
-        itm.amountNeeded + '</p></div>';
-    }, '');
+    return recipe.items.map(itemImg).join('');
   }
   return '';
 }
 
+function componentImg(comp) {
+  return '<div class="rmItem"><img class="tip-dynamic" ' +
+    'data-tipped="fetchitem.php?item_id=' +
+    comp.id + '&inv_id=-1&t=2&p=' +
+    currentPlayerId + '&vcode=' +
+    comp.verify + '" src="' +
+    comp.img + '" height="20px" width="20px"><p>' +
+    comp.amountPresent + '/' +
+    comp.amountNeeded + '</p></div>';
+}
+
 function getComponents(recipe) {
   if (recipe.components) {
-    return recipe.components.reduce(function(prev, comp) {
-      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
-        'data-tipped="fetchitem.php?item_id=' +
-        comp.id + '&inv_id=-1&t=2&p=' +
-        currentPlayerId + '&vcode=' +
-        comp.verify + '" src="' +
-        comp.img + '" height="20px" width="20px"><p>' +
-        comp.amountPresent + '/' +
-        comp.amountNeeded + '</p></div>';
-    }, '');
+    return recipe.components.map(componentImg).join('');
   }
   return '';
 }

@@ -7,6 +7,7 @@ import getProfile from '../../../ajax/getProfile';
 import indexAjaxData from '../../../ajax/indexAjaxData';
 import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
+import querySelector from '../../../common/querySelector';
 import setText from '../../../common/setText';
 import when from '../../../common/when';
 import {
@@ -49,7 +50,7 @@ function buildGroupPrm(disband) {
 
 function parseGroups(html) {
   var doc = createDocument(html);
-  var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
+  var disband = querySelector('#pCC a[href*="confirmDisband"]', doc);
   if (!disband) {return;}
   var prm = buildGroupPrm(disband);
   return $.when.apply($, prm);
@@ -70,11 +71,13 @@ function getGuild() {
   }).done(parseGuild);
 }
 
+function getDefenderProfile(el, i) {
+  if (i === 0) {return getProfile(el).done(storeLeadDefender);}
+  return getProfile(el).done(parseDefender).fail(ajaxFailure);
+}
+
 function getDefenders() {
-  return myDefenders.map(function(el, i) {
-    if (i === 0) {return getProfile(el).done(storeLeadDefender);}
-    return getProfile(el).done(parseDefender).fail(ajaxFailure);
-  });
+  return myDefenders.map(getDefenderProfile);
 }
 
 function buildStatPrm() {

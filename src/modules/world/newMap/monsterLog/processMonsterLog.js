@@ -1,6 +1,6 @@
 import calf from '../../../support/calf';
-import fallback from '../../../system/fallback';
 import getForage from '../../../ajax/getForage';
+import partial from '../../../common/partial';
 import setForage from '../../../ajax/setForage';
 
 var monsterLog;
@@ -41,26 +41,30 @@ function statChanged(logStat, newStat) {
   return !logStat || logStat.min !== newStat.min || logStat.max !== newStat.max;
 }
 
+function updateStat(creature, logCreature, stat) {
+  var newStat = updateMinMax(logCreature[stat], Number(creature[stat]));
+  if (statChanged(logCreature[stat], newStat)) {
+    logCreature[stat] = newStat;
+  }
+}
+
 function storeStats(creature, logCreature) {
-  stats.forEach(function(stat) {
-    var newStat = updateMinMax(logCreature[stat], Number(creature[stat]));
-    if (statChanged(logCreature[stat], newStat)) {
-      logCreature[stat] = newStat;
-    }
-  });
+  stats.forEach(partial(updateStat, creature, logCreature));
 }
 
 function creatureHazEnhancements(creature) {
   return creature.enhancements && creature.enhancements.length > 0;
 }
 
+function updateEnhancements(logEnh, e) {
+  logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
+}
+
 function storeEnhancements(creature, logCreature) {
   if (creatureHazEnhancements(creature)) {
-    logCreature.enhancements = fallback(logCreature.enhancements, {});
-    var logEnh = logCreature.enhancements;
-    creature.enhancements.forEach(function(e) {
-      logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
-    });
+    logCreature.enhancements = logCreature.enhancements || {};
+    creature.enhancements.forEach(
+      partial(updateEnhancements, logCreature.enhancements));
   }
 }
 

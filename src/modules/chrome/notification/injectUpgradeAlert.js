@@ -7,12 +7,12 @@ import {now} from '../../support/constants';
 import parseGoldUpgrades from './parseGoldUpgrades';
 import upgradesGold from '../../ajax/upgradesGold';
 
+function asyncParse(data) {add(3, parseGoldUpgrades, [data]);}
+
 function checkLastUpgrade() {
   var lastUpgradeCheck = getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
-  upgradesGold().done(function(data) {
-    add(3, parseGoldUpgrades, [data]);
-  });
+  upgradesGold().done(asyncParse);
 }
 
 function notUpgradesPage() {

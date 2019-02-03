@@ -6,8 +6,10 @@ import toggleForce from '../../../common/toggleForce';
 
 var containerDiv;
 
+function value(e) {return e;}
+
 function wantsBuffInfo(ary) {
-  return calf.showBuffInfo && ary.some(function(e) {return e;});
+  return calf.showBuffInfo && ary.some(value);
 }
 
 function drawBuffInfo() {

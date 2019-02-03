@@ -6,6 +6,7 @@ import getElementsByClassName from '../common/getElementsByClassName';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import on from '../common/on';
+import querySelector from '../common/querySelector';
 import querySelectorArray from '../common/querySelectorArray';
 
 function profileSelectAll() {
@@ -23,7 +24,7 @@ function profileSelectAll() {
 
 export default function selectAllLink() {
   // select all link
-  var node = document.querySelector('#profileRightColumn a[href="' +
+  var node = querySelector('#profileRightColumn a[href="' +
     dropItemsUrl + '"]');
   if (!node) {return;}
   var allSpan = createSpan({className: 'smallLink', textContent: 'All'});

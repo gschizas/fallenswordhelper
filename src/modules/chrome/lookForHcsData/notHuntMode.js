@@ -74,11 +74,13 @@ function doMoveDailyQuest() {
   }
 }
 
+function asyncPFour(fn) {add(4, fn);}
+
 function priorityFour() {
   [
     guildActivity,
     seLog
-  ].forEach(function(fn) {add(4, fn);});
+  ].forEach(asyncPFour);
 }
 
 export default function notHuntMode() {

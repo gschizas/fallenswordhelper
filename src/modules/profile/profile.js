@@ -19,6 +19,7 @@ import {profileInjectGuildRel} from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
 import profileParseAllyEnemy from './profileAllyEnemy';
 import profileRenderBio from './bio/bio';
+import querySelector from '../common/querySelector';
 import quickWearLink from './quickWearLink';
 import selectAllLink from './selectAllLink';
 import storeVL from './storeVL';
@@ -61,8 +62,7 @@ function updateDom(avyImg, playername, self) {
 
 export default function injectProfile() { // Legacy
   if (jQueryNotPresent()) {return;}
-  var avyImg = document
-    .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
+  var avyImg = querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
   var playername = getText(getElementsByTagName('h1', pCC)[0]);
   var self = playername === playerName();

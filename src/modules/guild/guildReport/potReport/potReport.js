@@ -24,17 +24,21 @@ var defaultOpts = {
   maxpoint: 20
 };
 
+function cloneObj(obj, result, key) {
+  result[key] = obj[key];
+  return result;
+}
+
 function sortKeys(obj) {
-  return Object.keys(obj).sort(alpha).reduce(function(result, key) {
-    result[key] = obj[key];
-    return result;
-  }, {});
+  return Object.keys(obj).sort(alpha).reduce(partial(cloneObj, obj), {});
+}
+
+function update(potOpts, pot) {
+  if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
 }
 
 function buildMap(potOpts, potObj) {
-  Object.keys(potObj).forEach(function(pot) {
-    if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
-  });
+  Object.keys(potObj).forEach(partial(update, potOpts));
   return sortKeys(potOpts.myMap);
 }
 

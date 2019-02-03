@@ -9,6 +9,8 @@ import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import on from '../../common/on';
+import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import querySelectorArray from '../../common/querySelectorArray';
 import {sendEvent} from '../../support/fshGa';
 
@@ -16,16 +18,18 @@ var maxGroupSizeToJoin;
 
 function filterMercs(e) {return !e.includes('#000099');}
 
+function joined(container) {
+  container.innerHTML = '<span class="fshXSmall fshBlue" ' +
+    'style="line-height: 19px;">Joined</span>';
+}
+
 function joinGroup(groupID, container) { // jQuery.min
   return indexAjaxData({
     cmd: 'guild',
     subcmd: 'groups',
     subcmd2: 'join',
     group_id: groupID
-  }).done(function() {
-    container.innerHTML = '<span class="fshXSmall fshBlue" ' +
-      'style="line-height: 19px;">Joined</span>';
-  });
+  }).done(partial(joined, container));
 }
 
 function doJoinUnderSize(joinButton) {
@@ -57,8 +61,7 @@ function joinUnderButton(buttonRow) {
 }
 
 export default function groupButtons() {
-  var joinAll = document
-    .querySelector('#pCC input[value="Join All Available Groups"]');
+  var joinAll = querySelector('#pCC input[value="Join All Available Groups"]');
   var buttonRow = joinAll.parentNode;
   var enableMaxGroupSizeToJoin = getValue('enableMaxGroupSizeToJoin');
   if (enableMaxGroupSizeToJoin) {

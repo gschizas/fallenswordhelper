@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import isUndefined from '../common/isUndefined';
 import path from './path';
 import sortDesc from './sortDesc';
 
@@ -10,11 +11,11 @@ function intFromString(val) {
 }
 
 function aIsNotEquipment(a) {
-  return typeof a.type !== 'undefined' && a.type > 8;
+  return !isUndefined(a.type) && a.type > 8;
 }
 
 function bIsNotEquipment(a, b) {
-  return typeof a.type !== 'undefined' && b.type > 8;
+  return !isUndefined(a.type) && b.type > 8;
 }
 
 export default function numberSort(a, b) {

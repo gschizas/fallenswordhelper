@@ -3,6 +3,7 @@ import calf from '../../support/calf';
 import extend from '../../common/extend';
 import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
+import partial from '../../common/partial';
 import {wantedArray, wantedList} from './lists';
 
 function acceptBtn(theCells) {
@@ -29,9 +30,11 @@ var isWanted = [
   }
 ];
 
+function condition(target, theRow, el) {return el(target, theRow);}
+
 function wanted(target, theRow) {
   return getTextTrim(theRow.cells[6]) !== '[active]' &&
-    isWanted.some(function(el) {return el(target, theRow);});
+    isWanted.some(partial(condition, target, theRow));
 }
 
 function wantedTarget(target, theRow) {

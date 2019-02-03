@@ -12,6 +12,7 @@ import getMembrList from '../../ajax/getMembrList';
 import headers from './headers';
 import {imageServer} from '../../system/system';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
+import notLastUpdate from '../../common/notLastUpdate';
 import {pCC} from '../../support/layout';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
@@ -27,16 +28,15 @@ function doSpinner() { // jQuery
     'Getting inventory data...</span>';
 }
 
+function hydrate(prev, pair) {
+  prev[pair[1].id] = pair[1];
+  return prev;
+}
+
 function rekeyMembrList() {
-  calf.membrList = Object.keys(calf.membrList)
-    // Using reduce() to rekey the membrList from names to id's
-    .reduce(function(prev, curr) {
-      if (curr !== 'lastUpdate') {
-        prev[calf.membrList[curr].id] =
-          calf.membrList[curr];
-      }
-      return prev;
-    }, {});
+  // Rekey membrList from names to id's
+  calf.membrList = Object.entries(calf.membrList).filter(notLastUpdate)
+    .reduce(hydrate, {});
 }
 
 function prepareLayout() {
@@ -53,7 +53,6 @@ function prepareLayout() {
 }
 
 function doInventory() {
-  if (calf.membrList) {rekeyMembrList();}
   prepareLayout();
   var fshInv = doTable();
   eventHandlers(fshInv);
@@ -84,10 +83,9 @@ function syncInvMan() { // jQuery
   var prm = [];
   prm.push(buildInv());
   if (calf.subcmd === 'guildinvmgr') {
-    prm.push(getMembrList(false));
+    prm.push(getMembrList(false).done(rekeyMembrList));
   }
-  prm.push(getForage('fsh_' + calf.subcmd)
-    .done(extendOptions)
+  prm.push(getForage('fsh_' + calf.subcmd).done(extendOptions)
   );
   when(prm, asyncCall);
 }

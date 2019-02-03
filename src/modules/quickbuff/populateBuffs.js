@@ -1,5 +1,5 @@
-import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
+import querySelector from '../common/querySelector';
 
 function timeUnit(value, unit) {
   if (value > 0) {return value.toString() + unit;}
@@ -15,29 +15,38 @@ function buffTimeLeft(_s) {
   return buffTimeToExpire;
 }
 
-function getBuff(doc, buff, inject) {
-  var s = fallback(doc[buff], 0);
-  if (s) {
-    var buffTimeToExpire = buffTimeLeft(s);
-    inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
-      'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
-  } else {
-    var elem = document.querySelector('#buff-outer input[data-name="' +
-      buff + '"]');
-    if (elem) {
-      inject.innerHTML = '<span class="quickbuffActivate" data-buffid="' +
-        elem.value + '">Activate</span>';
-    } else {
-      inject.innerHTML = '<span class="fshRed;">Off</span>';
-    }
+function timeToExpire(s) {
+  var buffTimeToExpire = buffTimeLeft(s);
+  return '<span class="fshLime">On</span>&nbsp;<span class="fshBuffOn">(' +
+    buffTimeToExpire + ')</span>';
+}
+
+function isAvailable(buff) {
+  var elem = querySelector('#buff-outer input[data-name="' + buff + '"]');
+  if (elem) {
+    return '<span class="quickbuffActivate" data-buffid="' + elem.value +
+      '">Activate</span>';
   }
+  return '<span class="fshRed;">Off</span>';
+}
+
+function buffRunning(dict, buff) {
+  var s = dict[buff] || 0;
+  if (s) {return timeToExpire(s);}
+  return isAvailable(buff);
+}
+
+function getBuff(dict, buff, inject) {
+  inject.innerHTML = buffRunning(dict, buff);
+}
+
+function makeDictionary(prev, curr) {
+  prev[curr.name] = curr.duration;
+  return prev;
 }
 
 export default function populateBuffs(responseText) {
-  var skl = responseText._skills.reduce(function(prev, curr) {
-    prev[curr.name] = curr.duration;
-    return prev;
-  }, {});
+  var skl = responseText._skills.reduce(makeDictionary, {});
   getBuff(skl, 'Guild Buffer', getElementById('fshGB'));
   getBuff(skl, 'Buff Master', getElementById('fshBM'));
   getBuff(skl, 'Extend', getElementById('fshExt'));

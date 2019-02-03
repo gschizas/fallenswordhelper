@@ -36,10 +36,12 @@ function allyOrEnemy(type, test) {
   return test[2];
 }
 
+function band(last_login, ary) {
+  return ary[0](nowSecs - last_login);
+}
+
 function contactColor(last_login, type) {
-  var test = contactClass.find(function(ary) {
-    return ary[0](nowSecs - last_login);
-  });
+  var test = contactClass.find(partial(band, last_login));
   if (test) {return allyOrEnemy(type, test);}
   return 'fshWhite';
 }

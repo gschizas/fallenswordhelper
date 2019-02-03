@@ -18,6 +18,8 @@ import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
+import partial from '../../common/partial';
+import querySelector from '../../common/querySelector';
 import {rowProfile} from './profiler';
 import setForage from '../../ajax/setForage';
 import setText from '../../common/setText';
@@ -38,11 +40,13 @@ var myTable;
 
 function parsePage(data) {
   doc = createDocument(data);
-  var pageInput = doc.querySelector('input[name="page"]');
-  currPage = Number(pageInput.value);
-  lastPage = Number(/\d+/.exec(getText(pageInput.parentNode))[0]);
-  if (currPage === 1) {maxPage = Math.min(lastPage, maxPagesToFetch);}
-  setText('Loading ' + currPage + ' of ' + maxPage + '...', fshOutput);
+  var pageInput = querySelector('input[name="page"]', doc);
+  if (pageInput) {
+    currPage = Number(pageInput.value);
+    lastPage = Number(/\d+/.exec(getText(pageInput.parentNode))[0]);
+    if (currPage === 1) {maxPage = Math.min(lastPage, maxPagesToFetch);}
+    setText('Loading ' + currPage + ' of ' + maxPage + '...', fshOutput);
+  }
 }
 
 function seenRowBefore(timestamp, myMsg) {
@@ -83,6 +87,8 @@ function processPage(data) {
   parseTable();
 }
 
+function useCache(e) {tmpGuildLog.push([0].concat(e));}
+
 function getOtherPages() {
   var prm = [];
   if (completeReload) {
@@ -90,26 +96,22 @@ function getOtherPages() {
       prm.push(getGuildLogPage(i).done(processPage));
     }
   } else {
-    options.log.forEach(function(e) {
-      tmpGuildLog.push([0, e[0], e[1], e[2], e[3]]);
-    });
+    options.log.forEach(useCache);
   }
   return $.when.apply($, prm);
 }
 
-function storeOptions() {
-  setForage('fsh_guildLog', options);
-}
+function storeOptions() {setForage('fsh_guildLog', options);}
+
+function notThisMinute(nowUtc, ary) {return ary[1] !== nowUtc;}
+
+function cacheValues(ary) {return ary.slice(1, 5);}
 
 function updateOptionsLog() {
   // Don't cache current minute as it may be incomplete
-  var nowUtc = (new Date()).setSeconds(0, 0);
-  options.log = tmpGuildLog.reduce(function(prev, curr) {
-    if (curr[1] !== nowUtc) {
-      prev.push([curr[1], curr[2], curr[3], curr[4]]);
-    }
-    return prev;
-  }, []);
+  options.log = tmpGuildLog
+    .filter(partial(notThisMinute, (new Date()).setSeconds(0, 0)))
+    .map(cacheValues);
   storeOptions();
 }
 
@@ -165,12 +167,10 @@ function setChecks() {
   storeOptions();
 }
 
+function byFirstElement(a, b) {return a[0] - b[0];}
+
 function gotOtherPages() {
-  if (completeReload) {
-    tmpGuildLog.sort(function(a, b) {
-      return a[0] - b[0];
-    });
-  }
+  if (completeReload) {tmpGuildLog.sort(byFirstElement);}
   setText('Loading complete.', fshOutput);
   updateOptionsLog();
   buildTable();
@@ -181,38 +181,43 @@ function processFirstPage(data) {
   getOtherPages().done(gotOtherPages);
 }
 
+function toggle(item, hide, r) {
+  if (r[4] !== item) {return;}
+  toggleForce(r[5], hide);
+  toggleForce(r[6], hide);
+}
+
 function toggleItem(self) {
   var item = Number(self.getAttribute('item'));
   options.checks[item] = !options.checks[item];
   storeOptions();
-  var hide = !options.checks[item];
-  tmpGuildLog.forEach(function(r) {
-    if (r[4] !== item) {return;}
-    toggleForce(r[5], hide);
-    toggleForce(r[6], hide);
-  });
+  tmpGuildLog.forEach(partial(toggle, item, !options.checks[item]));
 }
 
 function removeHide(el) {
   if (el && el.classList) {el.classList.remove('fshHide');}
 }
 
+function show(r) {
+  removeHide(r[5]);
+  removeHide(r[6]);
+}
+
 function selectAll() {
   options.checks = defChecks.slice(0);
   setChecks();
-  tmpGuildLog.forEach(function(r) {
-    removeHide(r[5]);
-    removeHide(r[6]);
-  });
+  tmpGuildLog.forEach(show);
+}
+
+function doHide(r) {
+  hideElement(r[5]);
+  hideElement(r[6]);
 }
 
 function selectNone() {
   options.checks = noChecks.slice(0);
   setChecks();
-  tmpGuildLog.forEach(function(r) {
-    hideElement(r[5]);
-    hideElement(r[6]);
-  });
+  tmpGuildLog.forEach(doHide);
 }
 
 function refresh() {

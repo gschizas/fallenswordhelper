@@ -21,10 +21,10 @@ function hideGuildLogMsg(guildLogNode) {
   }
 }
 
+function updateHref(el) {el.href = newGuildLogUrl;}
+
 function gotGuildLogNodes(guildLogNodes) {
-  guildLogNodes.forEach(function(el) {
-    el.href = newGuildLogUrl;
-  });
+  guildLogNodes.forEach(updateHref);
   hideGuildLogMsg(guildLogNodes[guildLogNodes.length - 1]);
 }
 

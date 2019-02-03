@@ -1,4 +1,5 @@
 import dialogMsg from '../common/dialogMsg';
+import partial from '../common/partial';
 import {sendException} from '../support/fshGa';
 import stringifyError from '../common/stringifyError';
 
@@ -14,16 +15,18 @@ function getForageError(forage, err) {
   }
 }
 
+function getItemCallback(forage, dfr, err, data) {
+  if (err) {
+    getForageError(forage, err);
+    dfr.reject(err);
+  } else {
+    // returns null if key does not exist
+    dfr.resolve(data);
+  }
+}
+
 function forageGet(forage, dfr) {
-  localforage.getItem(forage, function getItemCallback(err, data) {
-    if (err) {
-      getForageError(forage, err);
-      dfr.reject(err);
-    } else {
-      // returns null if key does not exist
-      dfr.resolve(data);
-    }
-  });
+  localforage.getItem(forage, partial(getItemCallback, forage, dfr));
 }
 
 export default function getForage(forage) {

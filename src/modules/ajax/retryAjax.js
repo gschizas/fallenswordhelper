@@ -1,3 +1,4 @@
+import isUndefined from '../common/isUndefined';
 import on from '../common/on';
 import partial from '../common/partial';
 import {sendException} from '../support/fshGa';
@@ -21,13 +22,29 @@ function beforeSend(xhr) {
   on(window, 'beforeunload', partial(clearXhr, xhr));
 }
 
+var ignoreFailureStatus = [0, 200];
+
+function url(opt) {
+  if (opt.data) {return $.param(opt.data);}
+  return opt.url;
+}
+
+function handleFailure(opt, jqXhr, errorThrown) {
+  if (!ignoreFailureStatus.includes(jqXhr.status)) {
+    sendException(
+      jqXhr.status + ' (' + errorThrown + ') - ' + url(opt),
+      false
+    );
+  }
+}
+
 function failFilter(fn, opt, retries, dfr) {
-  return function(jqXhr, textStatus, errorThrown) {
+  return function(jqXhr, textStatus, errorThrown) { // Closure
     if (retries > 0 && jqXhr.status === 503) {
       setTimeout(fn, 100, opt, retries - 1, dfr);
     } else {
-      sendException(jqXhr.status + ' (' + errorThrown + ')', false);
       dfr.reject(jqXhr, textStatus, errorThrown);
+      handleFailure(opt, jqXhr, errorThrown);
     }
   };
 }
@@ -66,8 +83,6 @@ export default function retryAjax(options) {
   return dfr.promise();
 }
 
-if (typeof jQuery !== 'undefined') {
-  $(document).ajaxComplete(function() {
-    taskRunner();
-  });
+if (!isUndefined(jQuery)) {
+  $(document).ajaxComplete(taskRunner);
 }

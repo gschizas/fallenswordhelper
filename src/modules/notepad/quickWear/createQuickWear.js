@@ -1,7 +1,7 @@
-import {beginFolderSpanElement} from '../../support/constants';
 import calf from '../../support/calf';
 import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
+import makeFolderSpan from '../../common/makeFolderSpan';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
 import stringSort from '../../system/stringSort';
@@ -50,13 +50,11 @@ function tableRows(tbl, currentPlayerId, item) {
 }
 
 function folderHtml(folderObj) {
-  return ' &ensp;' + beginFolderSpanElement + String(folderObj.id) + '">' +
-    folderObj.name + '</span>';
+  return makeFolderSpan(String(folderObj.id), folderObj.name);
 }
 
 function makeFolderSpans(appInv) {
-  return beginFolderSpanElement + '0">All</span>' +
-    appInv.r.map(folderHtml).join('');
+  return makeFolderSpan('0', 'All') + appInv.r.map(folderHtml).join('');
 }
 
 function addRows(tbody, currentPlayerId, aFolder) {

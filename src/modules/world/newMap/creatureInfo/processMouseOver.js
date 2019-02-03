@@ -51,17 +51,16 @@ function tipHp(creature, oneHitNumber) {
 var tipSpacer = '<tr><td colspan="4" height="5"></td></tr><tr>' +
   '<td class="header" colspan="4" class="fshCenter">Enhancements</td></tr>';
 
+function enhancementRow(e) {
+  return '<tr><td colspan="2">' + e.name +
+    ':</td><td colspan="2">' + e.value + '</td></tr>';
+}
+
 function tipEnhancements(creature) {
-  var ret = '';
   if (creature.enhancements.length === 0) {
-    ret += '<tr><td colspan="4">[no enhancements]</td></tr>';
-  } else {
-    creature.enhancements.forEach(function(e) {
-      ret += '<tr><td colspan="2">' + e.name +
-        ':</td><td colspan="2">' + e.value + '</td></tr>';
-    });
+    return '<tr><td colspan="4">[no enhancements]</td></tr>';
   }
-  return ret;
+  return creature.enhancements.map(enhancementRow).join('');
 }
 
 function tipFooter(creature) {

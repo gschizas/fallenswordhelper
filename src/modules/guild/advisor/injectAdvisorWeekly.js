@@ -24,11 +24,13 @@ function addElements(ary, v, i) {
   return v + ary[i];
 }
 
+function addAll(curr, el, i) {
+  el.stats = el.stats.map(partial(addElements, curr[i].stats));
+  return el;
+}
+
 function addStuff(prev, curr) {
-  return prev.map(function(el, i) {
-    el.stats = el.stats.map(partial(addElements, curr[i].stats));
-    return el;
-  });
+  return prev.map(partial(addAll, curr));
 }
 
 function reorgStats(el) {

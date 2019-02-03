@@ -12,17 +12,35 @@ import {sendEvent} from '../support/fshGa';
 import setText from '../common/setText';
 import useItem from '../ajax/useItem';
 
+var THEBACKPACK = 0;
+var RESULT = 1;
+var SELF = 2;
+var INVID = 3;
+
 function restyleBackpack() {
   var bpBack = getElementById('backpack');
   bpBack.className = 'fshBackpack';
   bpBack.removeAttribute('style');
 }
 
+function thisInvId(_invId, el) {return el.a === _invId;}
+
 function backpackRemove(theBackpack, invId) { // jQuery.min
   var _invId = Number(invId);
   // remove from srcData
-  var i = theBackpack.srcData.findIndex(function(el) {return el.a === _invId;});
+  var i = theBackpack.srcData.findIndex(partial(thisInvId, _invId));
   if (i !== -1) {theBackpack.srcData.splice(i, 1);}
+}
+
+function actionResult(ary, data) {
+  if (data.r !== 0) {
+    ary[SELF].remove();
+    return;
+  }
+  backpackRemove(ary[THEBACKPACK], ary[INVID]);
+  ary[SELF].classList.remove('fshSpinner');
+  ary[SELF].parentNode.innerHTML = '<span class="fastWorn">' +
+    ary[RESULT] + '</span>';
 }
 
 function fastAction(theBackpack, evt, action, result) { // jQuery.min
@@ -31,15 +49,7 @@ function fastAction(theBackpack, evt, action, result) { // jQuery.min
   var invId = self.parentNode.parentNode.children[0].dataset.inv;
   setText('', self);
   self.className = 'fastAction fshSpinner fshSpinner12';
-  action(invId).done(function(data) {
-    if (data.r !== 0) {
-      self.remove();
-      return;
-    }
-    backpackRemove(theBackpack, invId);
-    self.classList.remove('fshSpinner');
-    self.parentNode.innerHTML = '<span class="fastWorn">' + result + '</span>';
-  });
+  action(invId).done(partial(actionResult, [theBackpack, result, self, invId]));
 }
 
 function evtHdl(theBackpack, evt) {

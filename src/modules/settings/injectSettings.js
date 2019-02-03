@@ -11,6 +11,7 @@ import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
+import querySelector from '../common/querySelector';
 import {saveBoxes} from './settingObj';
 import {sendEvent} from '../support/fshGa';
 import setValue from '../system/setValue';
@@ -19,8 +20,7 @@ import toggleVisibilty from '../common/toggleVisibilty';
 import {createBr, createSpan} from '../common/cElement';
 
 function findEl(el, name) {
-  return document.querySelector(
-    '#fshSettingsTable ' + el + '[name="' + name + '"]');
+  return querySelector('#fshSettingsTable ' + el + '[name="' + name + '"]');
 }
 
 function findInput(name) {
@@ -31,6 +31,8 @@ function findSelect(name) {
   return findEl('select', name);
 }
 
+function mapCalfPref(el) {calf[el[0]] = getValue(el[1]);}
+
 function mappedVars() {
   [
     ['showBuffs', 'showHuntingBuffs'],
@@ -40,9 +42,7 @@ function mappedVars() {
     ['buffs2Name', 'huntingBuffs2Name'],
     ['buffs3', 'huntingBuffs3'],
     ['buffs3Name', 'huntingBuffs3Name']
-  ].forEach(function(el) {
-    calf[el[0]] = getValue(el[1]);
-  });
+  ].forEach(mapCalfPref);
 }
 
 function simpleVars() {
@@ -147,16 +147,18 @@ function doTickAll() {
   insertElement(inject, tickAll);
 }
 
+function listener(el) {on(getElementById(el[0]), 'click', el[1]);}
+
 function clickHandlers() {
   [
     ['fshClearStorage', clearStorage],
     ['Helper:SaveOptions', saveConfig],
     ['Helper:ShowLogs', showLogs],
     ['Helper:ShowMonsterLogs', showMonsterLogs]
-  ].forEach(function(el) {
-    on(getElementById(el[0]), 'click', el[1]);
-  });
+  ].forEach(listener);
 }
+
+function toggleListener(id) {on(getElementById(id), 'click', toggleVisibilty);}
 
 function onVisibilityToggle() {
   [
@@ -164,9 +166,7 @@ function onVisibilityToggle() {
     'toggleShowGuildFrndMessage',
     'toggleShowGuildPastMessage',
     'toggleShowGuildEnmyMessage'
-  ].forEach(function(id) {
-    on(getElementById(id), 'click', toggleVisibilty);
-  });
+  ].forEach(toggleListener);
 }
 
 function createEventListeners() { // Legacy
@@ -187,5 +187,5 @@ export default function injectSettings() { // jQuery
   createEventListeners();
 
   setValue('minGroupLevel',
-    document.querySelector('input[name="min_group_level"]').value);
+    querySelector('input[name="min_group_level"]').value);
 }

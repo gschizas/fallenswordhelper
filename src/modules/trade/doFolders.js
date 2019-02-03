@@ -67,19 +67,19 @@ function hideFolder(evt) {
       evt.target.id.indexOf('folderid') !== -1) {doHideFolder(evt);}
 }
 
+function folderSpan(pair) {
+  return ' &ensp;<span id="folderid' + pair[0] +
+    '" class="fshLink fshNoWrap" fid=' + pair[0] + '>' +
+    pair[1] + '</span> ';
+}
+
 function doFolderHeaders(folders) {
-  var folderCell = '<td colspan=6>';
-  // append main folder
-  folderCell += '<span id="folderid0" class="fshLink" fid=0>All</span>' +
-    ' &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>';
-  Object.keys(folders).forEach(function(key) {
-    folderCell += ' &ensp;<span id="folderid' + key +
-      '" class="fshLink fshNoWrap" fid=' + key + '>' +
-      folders[key] + '</span> ';
-  });
   var foldersRow = createTr({
     id: 'fshFolderSelect',
-    innerHTML: folderCell
+    innerHTML: '<td colspan=6>' +
+      '<span id="folderid0" class="fshLink" fid=0>All</span>' +
+      ' &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>' +
+      Object.entries(folders).map(folderSpan).join('')
   });
   on(foldersRow, 'click', hideFolder);
   var el = getElementById('item-list').parentNode.parentNode;

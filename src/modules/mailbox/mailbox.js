@@ -67,7 +67,8 @@ function makeTakeResult(qt) {
   return takeResult;
 }
 
-function makeItemBox(itemTbl, id, item) {
+function makeItemBox(itemTbl, pair) {
+  var item = pair[1];
   var container = createDiv();
   var itemDiv = createDiv({
     innerHTML: '<img src="' + item.src + '" class="tip-dynamic" ' +
@@ -75,7 +76,7 @@ function makeItemBox(itemTbl, id, item) {
   });
   insertElement(container, itemDiv);
   var buttonDiv = createDiv({
-    innerHTML: '<button class="fshBl fshBls" data-id="' + id +
+    innerHTML: '<button class="fshBl fshBls" data-id="' + pair[0] +
       '">Take All ' + item.invIds.length + '</button>'
   });
   insertElement(container, buttonDiv);
@@ -83,9 +84,7 @@ function makeItemBox(itemTbl, id, item) {
 }
 
 function makeItemBoxes(itemTbl, itemList) {
-  Object.entries(itemList).forEach(function(pair) {
-    makeItemBox(itemTbl, pair[0], pair[1]);
-  });
+  Object.entries(itemList).forEach(partial(makeItemBox, itemTbl));
 }
 
 function killQTip(itemId) { // jQuery
@@ -106,7 +105,7 @@ function takeSuccess(takeResult, json) {
 
 function doneTake(takeResult, json) {
   if (jsonFail(json, takeResult)) {return;}
-  takeSuccess(takeResult, json);
+  if (Array.isArray(json.r)) {takeSuccess(takeResult, json);}
 }
 
 function doTakeItem(takeResult, el) {

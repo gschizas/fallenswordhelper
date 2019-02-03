@@ -44,10 +44,10 @@ function aDot(type) {
     ' tip-static" data-tipped="' + tip + '"></span>';
 }
 
+function sum(obj, prev, curr) {return curr(obj, prev);}
+
 export default function onlineDot(obj) {
-  var min = getMins.reduce(function(prev, curr) {
-    return curr(obj, prev);
-  }, 0);
+  var min = getMins.reduce(partial(sum, obj), 0);
   var which = getDot.find(partial(activity, min));
   if (which) {return aDot(which[1]);}
   return aDot('redDot');

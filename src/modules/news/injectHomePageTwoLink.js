@@ -7,6 +7,7 @@ import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import {pCC} from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
+import querySelector from '../common/querySelector';
 import querySelectorArray from '../common/querySelectorArray';
 import setValue from '../system/setValue';
 import {archiveUrl, guideUrl, updateArchiveUrl} from '../support/constants';
@@ -73,12 +74,11 @@ function addUfsgLinks() {
 }
 
 export default function injectHomePageTwoLink() { // Pref
-  var archiveLink = document.querySelector(
-    '#pCC a[href="' + updateArchiveUrl + '"]');
+  var archiveLink = querySelector('#pCC a[href="' + updateArchiveUrl + '"]');
   if (!archiveLink) {return;}
   insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="' + updateArchiveUrl +
     '&page=2">View Updates Page 2</a>');
-  archiveLink = document.querySelector('#pCC a[href="' + archiveUrl + '"]');
+  archiveLink = querySelector('#pCC a[href="' + archiveUrl + '"]');
   insertHtmlAfterEnd(archiveLink, '&nbsp;<a href="' + archiveUrl +
     '&page=2">View News Page 2</a>');
   lookForPvPLadder(); // Pref

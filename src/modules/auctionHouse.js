@@ -1,3 +1,4 @@
+import clickThis from './common/clickThis';
 import {createSpan} from './common/cElement';
 import getArrayByClassName from './common/getArrayByClassName';
 import {getElementById} from './common/getElement';
@@ -13,7 +14,7 @@ import perfFilter from './common/perfFilter';
 import when from './common/when';
 
 function doRefresh() {
-  getElementById('refresh').click();
+  clickThis(getElementById('refresh'));
 }
 
 function doCancel(cancelButton) {
@@ -59,7 +60,7 @@ export function injectAuctionHouse() {
   if (jQueryNotPresent() || !pCC) {return;}
   makeCancelAll();
   autoFill();
-  getElementById('sort0').click();
+  clickThis(getElementById('sort0'));
 }
 
 export function quickCreate() {

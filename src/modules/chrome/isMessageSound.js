@@ -1,16 +1,16 @@
 import add from '../support/task';
 import getValue from '../system/getValue';
+import partial from '../common/partial';
+
+function makeSound(soundLocation, i, e) {
+  $(e).after('<audio src="' + soundLocation + '" autoplay=true />');
+}
 
 function doMsgSound() { // jQuery
   var soundLocation = getValue('defaultMessageSound');
-  $('a:contains("New log messages"):first').each(function(i, e) {
-    $(e).after('<audio src="' + soundLocation +
-    '" autoplay=true />');
-  });
-  $('a:contains("New Guild chat message"):first').each(function(i, e) {
-    $(e).after('<audio src="' + soundLocation +
-    '" autoplay=true />');
-  });
+  var boundSound = partial(makeSound, soundLocation);
+  $('a:contains("New log messages"):first').each(boundSound);
+  $('a:contains("New Guild chat message"):first').each(boundSound);
 }
 
 export default function isMessageSound() {

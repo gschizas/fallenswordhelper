@@ -4,6 +4,7 @@ import {initTable} from './trackerTable';
 import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
 import on from '../../common/on';
+import partial from '../../common/partial';
 import setForage from '../../ajax/setForage';
 import {
   createBr,
@@ -33,16 +34,16 @@ function doReset() {
   ioText.value = '{"lastUpdate": 0, "members": {}}';
 }
 
+function successMsg(newData) {
+  dialogMsg('Update successful');
+  initTable(newData.members);
+}
+
 function doSave() {
   var newData = jsonParse(ioText.value);
   setForage('fsh_guildActivity', newData)
-    .done(function() {
-      dialogMsg('Update successful');
-      initTable(newData.members);
-    })
-    .fail(function(err) {
-      dialogMsg(err);
-    });
+    .done(partial(successMsg, newData))
+    .fail(dialogMsg);
 }
 
 function customButton(text, fn) {

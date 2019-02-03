@@ -1,4 +1,5 @@
 import classHandler from '../../common/classHandler';
+import clickThis from '../../common/clickThis';
 import countComponent from './countComponent';
 import {createDiv} from '../../common/cElement';
 import decorateButton from './decorateButton';
@@ -15,13 +16,19 @@ import jQueryDialog from '../../chrome/jQueryDialog';
 import on from '../../common/on';
 import {sendEvent} from '../../support/fshGa';
 
+var buttonLabels = [
+  'Enable Quick Del',
+  'Count Components',
+  'Quick Extract Components'
+];
+
+function addButtons(prev, el) {
+  insertElement(prev, decorateButton(el));
+  return prev;
+}
+
 function componentBtnContainer() {
-  var cmDiv = createDiv({className: 'fshCenter'});
-  ['Enable Quick Del', 'Count Components', 'Quick Extract Components'
-  ].forEach(function(el) {
-    insertElement(cmDiv, decorateButton(el));
-  });
-  return cmDiv;
+  return buttonLabels.reduce(addButtons, createDiv({className: 'fshCenter'}));
 }
 
 function quickExtractHandler() {
@@ -46,9 +53,7 @@ function enableDelComponent(self) {
 function delAllComponent(self) {
   sendEvent('components', 'delAllComponent');
   var thisInvTable = self.parentNode.parentNode.parentNode.children[0];
-  getArrayByClassName('compDelBtn', thisInvTable).forEach(function(el) {
-    el.click();
-  });
+  getArrayByClassName('compDelBtn', thisInvTable).forEach(clickThis);
 }
 
 var classEvts = [

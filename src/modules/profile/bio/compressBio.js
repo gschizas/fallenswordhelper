@@ -2,6 +2,7 @@ import containsText from '../../common/containsText';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import on from '../../common/on';
+import partial from '../../common/partial';
 import setText from '../../common/setText';
 
 var lineBreak = '';
@@ -39,15 +40,17 @@ function foundHangingTag(closeTagIndex, openTagIndex) {
     (openTagIndex === -1 || openTagIndex > closeTagIndex);
 }
 
+var closeTags = ['b', 'i', 'u', 'span'];
+
+function hangingTags(bioEnd, tag) {
+  return foundHangingTag(bioEnd.indexOf('</' + tag + '>'),
+    bioEnd.indexOf('<' + tag + '>'));
+}
+
+function closeTag(tag) {return '</' + tag + '>';}
+
 function getExtraCloseTags(bioEnd) {
-  return ['b', 'i', 'u', 'span'].reduce(function(prev, tag) {
-    var closeTagIndex = bioEnd.indexOf('</' + tag + '>');
-    var openTagIndex = bioEnd.indexOf('<' + tag + '>');
-    if (foundHangingTag(closeTagIndex, openTagIndex)) {
-      return prev + '</' + tag + '>';
-    }
-    return prev;
-  }, '');
+  return closeTags.filter(partial(hangingTags, bioEnd)).map(closeTag).join('');
 }
 
 function expandBio() {

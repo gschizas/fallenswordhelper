@@ -28,9 +28,11 @@ function msgDoesNotIncludePlayer(aRow) {
     secondPlayerID !== playerId();
 }
 
+function stripClassName(el) {el.className = '';}
+
 function findPlayers(aRow) { // Legacy
   if (msgDoesNotIncludePlayer(aRow)) {
-    Array.from(aRow.cells).forEach(function(el) {el.className = '';});
+    Array.from(aRow.cells).forEach(stripClassName);
     aRow.classList.add('fshGrey');
     aRow.classList.add('fshXSmall');
   }

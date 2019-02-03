@@ -20,12 +20,14 @@ var tgCont;
 var memberSelect;
 var myMembers;
 
+function addOption(prev, member) {
+  return prev + '<option value="' + member + '">' + member + '</option>';
+}
+
 function buildOptions(ourMembers) {
   return '<select name="member">' +
     '<option value="- All -" selected>- All -</option>' +
-    Object.keys(ourMembers).sort(alpha).reduce(function(prev, member) {
-      return prev + '<option value="' + member + '">' + member + '</option>';
-    }, '') + '</select>';
+    Object.keys(ourMembers).sort(alpha).reduce(addOption, '') + '</select>';
 }
 
 function toText(val) {
@@ -55,12 +57,14 @@ function aMembersActivityRows(memberKey, inside, activity) {
     '</tr>';
 }
 
+function selectedMember(outside, memberKey) {
+  if (memberFilter(memberKey)) {return outside;}
+  return outside +
+    myMembers[memberKey].reduce(partial(aMembersActivityRows, memberKey), '');
+}
+
 function memberRows() {
-  return Object.keys(myMembers).reduce(function(outside, memberKey) {
-    if (memberFilter(memberKey)) {return outside;}
-    return outside +
-      myMembers[memberKey].reduce(partial(aMembersActivityRows, memberKey), '');
-  }, '');
+  return Object.keys(myMembers).reduce(selectedMember, '');
 }
 
 function drawRows() {

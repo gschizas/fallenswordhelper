@@ -8,10 +8,10 @@ export var leftDiv;
 export var fetchStatsBtn;
 export var myDefenders;
 
+function playerName(x) {return x.player_name;}
+
 function defendersSetup(relicData) {
-  myDefenders = relicData.defenders.map(function(x) {
-    return x.player_name;
-  });
+  myDefenders = relicData.defenders.map(playerName);
 }
 
 function containerSetup() {

@@ -1,6 +1,7 @@
 import {arenaUrl} from '../support/constants';
 import jQueryPresent from '../common/jQueryPresent';
 import on from '../common/on';
+import partial from '../common/partial';
 import querySelector from '../common/querySelector';
 import updateGoUrl from './updateGoUrl';
 import updateUrl from './updateUrl';
@@ -19,16 +20,18 @@ function injectStartButton() { // jQuery
   if (prevButton.length === 1) {
     var startButton = $('<input value="<<" type="button">');
     prevButton.before(startButton).before('&nbsp;');
-    startButton.click(function() {gotoPage(1);});
+    startButton.click(partial(gotoPage, 1));
   }
 }
+
+function gotoLastPage() {gotoPage(lastPage());}
 
 function injectFinishButton() { // jQuery
   var nextButton = $('#pCC input[value=">"]');
   if (nextButton.length === 1) {
     var finishButton = $('<input value=">>" type="button">');
     nextButton.after(finishButton).after('&nbsp;');
-    finishButton.click(function() {gotoPage(lastPage());});
+    finishButton.click(gotoLastPage);
   }
 }
 

@@ -1,3 +1,4 @@
+import clickThis from '../common/clickThis';
 import {getElementById} from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 
@@ -15,7 +16,7 @@ function haveTargets() {
     return;
   }
   if (!firstPlayer) {return;}
-  firstPlayer.click();
+  clickThis(firstPlayer);
 }
 
 export default function firstPlayerStats() {
