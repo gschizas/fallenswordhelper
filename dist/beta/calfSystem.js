@@ -20890,6 +20890,57 @@
     Array.from(topTable.rows).filter(myRows(4, 1)).forEach(playerLink);
   }
 
+  function findplayer(username) {
+    return callApp({
+      cmd: 'findplayer',
+      subcmd: 'view',
+      search_username: username
+    });
+  }
+
+  function getGuild$2(tbl) {
+    if (tbl.rows[0].cells[0].children[0]) {
+      return Number(
+        /guild_id=(\d+)/.exec(tbl.rows[0].cells[0].children[0].href)[1]);
+    }
+    return -1;
+  }
+
+  function enumeratePlayers(playerTable) {
+    return [playerTable, getTextTrim(playerTable), getGuild$2(playerTable)];
+  }
+
+  function aGuild(player, ary) {return ary[0] === player[2];}
+
+  function aggGuilds(prev, player) {
+    var thisGuild = prev.find(partial(aGuild, player));
+    if (thisGuild) {
+      thisGuild[1].push(player);
+    } else {
+      prev.push([player[2], [player]]);
+    }
+    return prev;
+  }
+
+  function smallGuild(guildId, guild) {return guild[0] === guildId;}
+
+  function rollupSmallGuilds(prev, guild) {
+    var guildId = guild[0];
+    if (guild[1].length < 5) {guildId = -1;}
+    var thisGuild = prev.find(partial(smallGuild, guildId));
+    if (thisGuild) {
+      thisGuild[1] = thisGuild[1].concat(guild[1]);
+    } else {
+      prev.push([guildId, guild[1]]);
+    }
+    return prev;
+  }
+
+  function getPlayersByGuild() {
+    return getArrayByTagName(def_table, pCC).slice(4).map(enumeratePlayers)
+      .reduce(aggGuilds, []).reduce(rollupSmallGuilds, []);
+  }
+
   function guildView(guildId) {
     return guild({subcmd: 'view', guild_id: guildId});
   }
@@ -20914,15 +20965,12 @@
   }
 
   var highlightPlayersNearMyLvl$2;
-  var spinner$1;
-  var validPvP = nowSecs - 604800;
-  var guilds;
   var myGuildId;
 
   var highlightTests$1 = [
     function() {return highlightPlayersNearMyLvl$2;},
     function(guildId) {return isUndefined(guildId) || guildId !== myGuildId;},
-    function(guildId, data) {return data.last_login >= validPvP;},
+    function(guildId, data) {return data.last_login >= nowSecs - 604800;},
     function(guildId, data) {return data.virtual_level >= pvpLowerLevel;},
     function(guildId, data) {return data.virtual_level <= pvpUpperLevel;}
   ];
@@ -20933,7 +20981,7 @@
     return highlightTests$1.every(partial(condition$a, guildId, data));
   }
 
-  function doOnlineDot(aTable, guildId, data) {
+  function decoratePlayer(aTable, guildId, data) {
     insertHtmlBeforeEnd(aTable.rows[0],
       '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
     if (pvpHighlight$1(guildId, data)) {
@@ -20941,104 +20989,95 @@
     }
   }
 
-  function parsePlayer(aTable, guildId, data, jqXhr) {
-    if (data) {
-      doOnlineDot(aTable, guildId, data);
-    } else {
-      insertHtmlBeforeEnd(aTable.rows[0],
-        '<td class="fshBkRed">' + jqXhr.status + '</td>');
-    }
-  }
-
-  function failFilter$1(jqXhr) {
-    return $.Deferred().resolve(null, jqXhr).promise();
-  }
-
-  function addPlayerObjectToGuild(guildId, obj) {
-    if (guilds[guildId]) {
-      guilds[guildId].push(obj);
-    } else {
-      guilds[guildId] = [obj];
-    }
-  }
-
-  function addPlayerToGuild(tbl, playerName) {
-    var guildHRef = tbl.rows[0].cells[0].children[0].href;
-    var guildId = /guild_id=(\d+)/.exec(guildHRef)[1];
-    addPlayerObjectToGuild(guildId, {dom: tbl, player: playerName});
-  }
-
-  function stackAjax(prm, playerName, tbl, guildId) {
-    prm.push(getProfile$1(playerName)
-      .pipe(null, failFilter$1)
-      .done(partial(parsePlayer, tbl, guildId))
-    );
-  }
-
-  function eachPlayer(member, guildId, player) {
-    if (member.name === player.player) {
-      doOnlineDot(player.dom, guildId, {
-        last_login: member.last_activity.toString(),
-        virtual_level: member.vl
-      });
-    }
-  }
-
-  function eachMember(guildId, member) {
-    guilds[guildId].forEach(partial(eachPlayer, member, guildId));
-  }
-
-  function eachRank(guildId, rank) {
-    rank.members.forEach(partial(eachMember, guildId));
-  }
-
-  function parseGuild$1(data) {
-    var guildId = data.r.id;
-    // data.r.ranks.forEach(partial(eachRank, guildId));
-    uniq(data.r.ranks, 'id').forEach(partial(eachRank, guildId)); // BUG
-  }
-
-  function hideSpinner() {
-    hideElement(spinner$1);
-  }
-
-  function findOnlinePlayers() { // TODO
-    var someTables = getArrayByTagName(def_table, pCC);
-    var prm = [];
-    guilds = {};
-    someTables.slice(4).forEach(function(tbl) {
-      var playerName = getTextTrim(tbl);
-      if (tbl.rows[0].cells[0].children[0]) {
-        addPlayerToGuild(tbl, playerName);
-      } else {
-        stackAjax(prm, playerName, tbl);
-      }
-    });
-    Object.keys(guilds).forEach(function(guildId) {
-      if (guilds[guildId].length === 1) {
-        stackAjax(prm, guilds[guildId][0].player, guilds[guildId][0].dom,
-          guildId);
-      } else {
-        guildView(guildId).done(parseGuild$1);
-      }
-    });
-    when(prm, hideSpinner);
-  }
-
-  function getMyVL(e) {
-    sendEvent('toprated', 'FindOnlinePlayers');
-    hideQTip(e.target);
-    spinner$1 = createSpan({
-      className: 'fshCurveContainer fshTopListSpinner',
-      innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
-    });
-    e.target.parentNode.replaceChild(spinner$1, e.target);
+  function initDecorate() {
     highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
     if (highlightPlayersNearMyLvl$2) {
       calculateBoundaries();
       myGuildId = currentGuildId();
     }
-    findOnlinePlayers();
+  }
+
+  var spinner$1;
+
+  function hideSpinner() {
+    hideElement(spinner$1);
+  }
+
+  function displaySpinner(target) {
+    hideQTip(target);
+    spinner$1 = createSpan({
+      className: 'fshCurveContainer fshTopListSpinner',
+      innerHTML: '<div class="fshCurveEle fshCurveLbl fshOldSpinner"></div>'
+    });
+    target.parentNode.replaceChild(spinner$1, target);
+  }
+
+  function parsePlayer(player, data) {
+    decoratePlayer(player[0], player[2], {
+      last_login: String(data.last_activity),
+      virtual_level: data.vl
+    });
+  }
+
+  function thisMember(player, member) {return member.name === player[1];}
+
+  function guildPlayer(guildMembers, player) {
+    var member = guildMembers.find(partial(thisMember, player));
+    if (member) {parsePlayer(player, member);}
+  }
+
+  function returnPlayer(player, json) {
+    if (json.s && Array.isArray(json.r)) {parsePlayer(player, json.r[0]);}
+  }
+
+  function returnSelf(player, json) {
+    if (json.s) {
+      parsePlayer(player, {
+        last_activity: nowSecs - json.r.last_activity,
+        vl: json.r.virtual_level
+      });
+    }
+  }
+
+  function big(guild) {return guild[0] !== -1;}
+
+  function getMembers(prev, curr) {return prev.concat(curr.members);}
+
+  function parseGuild$1(guild, json) {
+    var guildMembers = uniq(json.r.ranks, 'id').reduce(getMembers, []);
+    guild[1].forEach(partial(guildPlayer, guildMembers));
+  }
+
+  function returnGuild(guild, json) {if (json.s) {parseGuild$1(guild, json);}}
+
+  function ajaxGuild(guild) {
+    return guildView(guild[0]).done(partial(returnGuild, guild));
+  }
+
+  function small(guild) {return guild[0] === -1;}
+
+  function ajaxPlayer(player) {
+    if (player[1] !== playerName()) {
+      return findplayer(player[1]).done(partial(returnPlayer, player));
+    }
+    return view().done(partial(returnSelf, player));
+  }
+
+  function prepareAjax() {
+    var guilds = getPlayersByGuild();
+    var prm = guilds.filter(big).map(ajaxGuild);
+    var singles = guilds.find(small);
+    if (singles) {
+      prm = prm.concat(guilds.find(small)[1].map(ajaxPlayer));
+    }
+    when(prm, hideSpinner);
+  }
+
+  function findOnlinePlayers(e) {
+    sendEvent('toprated', 'FindOnlinePlayers');
+    displaySpinner(e.target);
+    initDecorate();
+    prepareAjax();
   }
 
   function looksLikeTopRated() {
@@ -21055,7 +21094,7 @@
       }
     });
     insertElementAfterBegin(theCell, findBtn);
-    on(findBtn, 'click', getMyVL);
+    on(findBtn, 'click', findOnlinePlayers);
   }
 
   var topRatedTests = [
@@ -21418,7 +21457,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '96';
+  window.FSH.calf = '97';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
