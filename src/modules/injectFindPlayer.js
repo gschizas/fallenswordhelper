@@ -40,18 +40,29 @@ function shortcuts() {
     '">Get GvG targets</a>';
 }
 
+function doShortcuts(findPlayerButton) {
+  findPlayerButton.parent().append(shortcuts());
+}
+
+function doFindPlayer() {
+  var findPlayerButton = $('input[value="Find Player"]');
+  allowBack(findPlayerButton[0]);
+  doShortcuts(findPlayerButton);
+}
+
 function addBuffLinks(i, e) {
   var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
   $(e).after(' <a class="fshBf" ' + quickBuffHref(id[1]) + '>[b]</a>');
 }
 
+function doBuffLinks() {
+  $('table[class="width_full"]').find('a[href*="player_id"]')
+    .each(addBuffLinks);
+}
+
 export default function injectFindPlayer() { // Bad jQuery
   if (jQueryNotPresent()) {return;}
   calculateBoundaries();
-  var findPlayerButton = $('input[value="Find Player"]');
-  allowBack(findPlayerButton[0]);
-  findPlayerButton.parent().append(shortcuts());
-
-  $('table[class="width_full"]').find('a[href*="player_id"]')
-    .each(addBuffLinks);
+  doFindPlayer();
+  doBuffLinks();
 }

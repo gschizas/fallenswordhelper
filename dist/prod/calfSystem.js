@@ -2495,10 +2495,21 @@
     }
   }
 
+  var composingFragmentType = [
+    'Common', 'Rare', 'Unique', 'Legendary', 'Super Elite', 'Crystalline'];
+
+  function expandFrags(frag) {
+    return frag.amount + ' x ' + composingFragmentType[frag.type];
+  }
+
   function processResult(r) {
     if (r.item) {
       return 'You successfully extracted 1 \'' + r.item.n +
         '\' component(s) from 1 resource(s).</span>';
+    }
+    if (r.frags) {
+      return 'You gained ' + r.frags.map(expandFrags).join(', ') +
+        ' Fragments by opening the Fragment Stash.';
     }
     return '<span class="fshRed">You failed to extract any components from ' +
       'resource(s).</span>';
@@ -10559,13 +10570,17 @@
     guideLink(aRow);
   }
 
+  function doTooMuch(titanTable, newTitans) {
+    Array.from(titanTable.rows).filter(myRows(4, 0))
+      .forEach(partial(decorate, newTitans));
+  }
+
   function gotOldTitans(oldTitans) {
     var titanTables = getElementsByTagName(def_table, pCC);
     injectScouttowerBuffLinks(titanTables);
     var titanTable = titanTables[1];
     var newTitans = {};
-    Array.from(titanTable.rows).filter(myRows(4, 0))
-      .forEach(partial(decorate, newTitans));
+    doTooMuch(titanTable, newTitans);
     addMissingTitansFromOld(oldTitans, newTitans); // Pref
     displayTracker(titanTables[0], newTitans); // Pref
     setForage('fsh_titans', newTitans); // Pref
@@ -12759,20 +12774,31 @@
       '">Get GvG targets</a>';
   }
 
+  function doShortcuts(findPlayerButton) {
+    findPlayerButton.parent().append(shortcuts());
+  }
+
+  function doFindPlayer() {
+    var findPlayerButton = $('input[value="Find Player"]');
+    allowBack$1(findPlayerButton[0]);
+    doShortcuts(findPlayerButton);
+  }
+
   function addBuffLinks(i, e) {
     var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
     $(e).after(' <a class="fshBf" ' + quickBuffHref(id[1]) + '>[b]</a>');
   }
 
+  function doBuffLinks$2() {
+    $('table[class="width_full"]').find('a[href*="player_id"]')
+      .each(addBuffLinks);
+  }
+
   function injectFindPlayer() { // Bad jQuery
     if (jQueryNotPresent()) {return;}
     calculateBoundaries();
-    var findPlayerButton = $('input[value="Find Player"]');
-    allowBack$1(findPlayerButton[0]);
-    findPlayerButton.parent().append(shortcuts());
-
-    $('table[class="width_full"]').find('a[href*="player_id"]')
-      .each(addBuffLinks);
+    doFindPlayer();
+    doBuffLinks$2();
   }
 
   function takeitems(invIdAry) {
@@ -21397,7 +21423,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '97';
+  window.FSH.calf = '98';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

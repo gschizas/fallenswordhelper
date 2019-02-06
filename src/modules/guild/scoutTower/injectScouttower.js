@@ -110,13 +110,17 @@ function decorate(newTitans, aRow) {
   guideLink(aRow);
 }
 
+function doTooMuch(titanTable, newTitans) {
+  Array.from(titanTable.rows).filter(myRows(4, 0))
+    .forEach(partial(decorate, newTitans));
+}
+
 function gotOldTitans(oldTitans) {
   var titanTables = getElementsByTagName(def_table, pCC);
   injectScouttowerBuffLinks(titanTables);
   var titanTable = titanTables[1];
   var newTitans = {};
-  Array.from(titanTable.rows).filter(myRows(4, 0))
-    .forEach(partial(decorate, newTitans));
+  doTooMuch(titanTable, newTitans);
   addMissingTitansFromOld(oldTitans, newTitans); // Pref
   displayTracker(titanTables[0], newTitans); // Pref
   setForage('fsh_titans', newTitans); // Pref
