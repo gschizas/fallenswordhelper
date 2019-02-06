@@ -30,10 +30,21 @@ function backpackRemove(invId) {
   }
 }
 
+var composingFragmentType = [
+  'Common', 'Rare', 'Unique', 'Legendary', 'Super Elite', 'Crystalline'];
+
+function expandFrags(frag) {
+  return frag.amount + ' x ' + composingFragmentType[frag.type];
+}
+
 function processResult(r) {
   if (r.item) {
     return 'You successfully extracted 1 \'' + r.item.n +
       '\' component(s) from 1 resource(s).</span>';
+  }
+  if (r.frags) {
+    return 'You gained ' + r.frags.map(expandFrags).join(', ') +
+      ' Fragments by opening the Fragment Stash.';
   }
   return '<span class="fshRed">You failed to extract any components from ' +
     'resource(s).</span>';
