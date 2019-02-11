@@ -17,6 +17,19 @@
     }
   }
 
+  function parseStack(e) {
+    var concatStack = e.stack.replace(/\n +/g, '|');
+    if (e.stack.includes(e.message)) {
+      return concatStack;
+    }
+    return e.message + '|' + concatStack;
+  }
+
+  function parseError(e) {
+    if (e.stack) {return parseStack(e);}
+    return e.message;
+  }
+
   function getElementById(id, doc) {
     if (doc) {return doc.getElementById(id);}
     return document.getElementById(id);
@@ -33,10 +46,15 @@
   }
 
   var timers = {};
-  var footWrap = getElementById('foot-wrap');
+  var footWrap;
+
+  function getFootWrap() {
+    if (!footWrap) {footWrap = getElementById('foot-wrap');}
+    return footWrap;
+  }
 
   function log(text, value) {
-    if (footWrap) {
+    if (getFootWrap()) {
       insertHtmlBeforeEnd(footWrap,
         '<br>' + text + ': ' + value + ' (' + typeof value + ')');
     }
@@ -243,6 +261,7 @@
 
   var paused = true;
   var message = 'fshMessage';
+  var messageHandler;
 
   function taskRunner() {
     if (getLength() === 0) {
@@ -251,36 +270,6 @@
       paused = false;
       window.postMessage(message, '*');
     }
-  }
-
-  function devLog(args) {
-    if (args && !Array.isArray(args)) {
-      // eslint-disable-next-line no-console
-      console.log('addTask Array.isArray(args)', Array.isArray(args));
-    }
-  }
-
-  function add(priority, fn, args, scope) {
-    devLog(args);
-    if (isFunction(fn)) {
-      var _scope = fallback(scope, window);
-      var _args = fallback(args, []);
-      push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
-      if (paused) {taskRunner();}
-    }
-  }
-
-  function parseStack(e) {
-    var concatStack = e.stack.replace(/\n +/g, '|');
-    if (e.stack.includes(e.message)) {
-      return concatStack;
-    }
-    return e.message + '|' + concatStack;
-  }
-
-  function parseError(e) {
-    if (e.stack) {return parseStack(e);}
-    return e.message;
   }
 
   function popError(fn) {
@@ -313,18 +302,30 @@
     }
   }
 
-  on(window, 'message', callback);
-
-  function logError(e) {
-    if (e.error) {
-      var msg = parseError(e.error);
-      if (msg.includes('calfSystem')) {
-        sendException(msg, true);
-      }
+  function initMessageHandler() {
+    if (!messageHandler) {
+      on(window, 'message', callback);
+      messageHandler = true;
     }
   }
 
-  on(window, 'error', logError);
+  function devLog(args) {
+    if (args && !Array.isArray(args)) {
+      // eslint-disable-next-line no-console
+      console.log('addTask Array.isArray(args)', Array.isArray(args));
+    }
+  }
+
+  function add(priority, fn, args, scope) {
+    devLog(args);
+    if (isFunction(fn)) {
+      initMessageHandler();
+      var _scope = fallback(scope, window);
+      var _args = fallback(args, []);
+      push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
+      if (paused) {taskRunner();}
+    }
+  }
 
   var calf = {};
 
@@ -478,8 +479,6 @@
 
   var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
   var defenderMultiplier = 0.2;
-  var now = Date.now();
-  var nowSecs = Math.floor(now / 1000);
 
   var def_joinallgroupsundersize = 'joinallgroupsundersize';
 
@@ -569,62 +568,57 @@
 
   var GMSTORAGE_PATH = 'GM_';
 
-  var thePlants = [
-    'Amber',
-    'Blood Bloom',
-    'Jademare',
-    'Dark Shade',
-    'Trinettle',
-    'Heffle Wart'
-  ];
-  var thePotions = [
-    ['Sludge Brew', 'DC 200'],
-    ['Potion of Black Death', 'DC 225'],
-    ['Potion of Aid', 'Assist'],
-    ['Potion of Supreme Doubling', 'DB 450'],
-    ['Potion of Acceleration', 'DB 500'],
-    ['Potion of Lesser Death Dealer', 'DD'],
-    ['Runic Potion', 'FI 250'],
-    ['Potion of the Bookworm', 'Lib 225'],
-    ['Potion of Truth', 'EW 1k'],
-    ['Dull Edge', 'DE 25'],
-    ['Notched Blade', 'DE 80'],
-    ['Potion of Death', 'DW 125'],
-    ['Potion of Decay', 'WI 150'],
-    ['Potion of Fatality', 'WI 350'],
-    ['Potion of Annihilation', 'DW 150'],
-    ['Potion of the Wise', 'Lib 200'],
-    ['Potion of Shattering', 'SA'],
-    ['Dragons Blood Potion', 'ZK 200'],
-    ['Berserkers Potion', 'ZK 300'],
-    ['Potion of Fury', 'ZK 350'],
-    ['Potion of Supreme Luck', 'FI 1k']
-  ];
-
-  function plantFormat(el) {
-    return {category: 'Plants', searchname: el, nickname: ''};
-  }
-
-  function plants() {
-    return thePlants.map(plantFormat);
-  }
-
-  function potionFormat(el) {
-    return {
-      category: 'Potions',
-      searchname: el[0],
-      nickname: el[1],
-      displayOnAH: true
-    };
-  }
-
-  function potions() {
-    return thePotions.map(potionFormat);
-  }
-
-  function def_quickSearch() {
-    return JSON.stringify(plants().concat(potions()));
-  }
+  var defQuickSearch =
+    '[' +
+      '{"category":"Plants","searchname":"Amber","nickname":""},' +
+      '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
+      '{"category":"Plants","searchname":"Jademare","nickname":""},' +
+      '{"category":"Plants","searchname":"Dark Shade","nickname":""},' +
+      '{"category":"Plants","searchname":"Trinettle","nickname":""},' +
+      '{"category":"Plants","searchname":"Heffle Wart","nickname":""},' +
+      '{"category":"Potions","searchname":"Sludge Brew",' +
+        '"nickname":"DC 200","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Black Death",' +
+        '"nickname":"DC 225","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Aid",' +
+        '"nickname":"Assist","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Supreme Doubling",' +
+        '"nickname":"DB 450","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Acceleration",' +
+        '"nickname":"DB 500","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Lesser Death Dealer",' +
+        '"nickname":"DD","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Runic Potion",' +
+        '"nickname":"FI 250","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of the Bookworm",' +
+        '"nickname":"Lib 225","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Truth",' +
+        '"nickname":"EW 1k","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Dull Edge",' +
+        '"nickname":"DE 25","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Notched Blade",' +
+        '"nickname":"DE 80","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Death",' +
+        '"nickname":"DW 125","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Decay",' +
+        '"nickname":"WI 150","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Fatality",' +
+        '"nickname":"WI 350","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Annihilation",' +
+        '"nickname":"DW 150","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of the Wise",' +
+        '"nickname":"Lib 200","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Shattering",' +
+        '"nickname":"SA","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Dragons Blood Potion",' +
+        '"nickname":"ZK 200","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Berserkers Potion",' +
+        '"nickname":"ZK 300","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Fury",' +
+        '"nickname":"ZK 350","displayOnAH":true},' +
+      '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
+        '"nickname":"FI 1k","displayOnAH":true}' +
+    ']';
 
   /* eslint-disable max-lines */
   var defaults = {
@@ -817,7 +811,7 @@
       '["Trinettle", "5567"], ["Viridian Vine", "9151"], ' +
       '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-    quickSearchList: def_quickSearch(),
+    quickSearchList: defQuickSearch,
 
     arenaMoves: '[]',
     arenaMatches: '[]',
@@ -982,6 +976,44 @@
   function getUrlParameter(sParam) {
     var sPageURL = decodeURIComponent(window.location.search.substring(1));
     return getCustomUrlParameter(sPageURL, sParam);
+  }
+
+  var enabled;
+
+  function logError(e) {
+    if (e.error) {
+      var msg = parseError(e.error);
+      if (msg.includes('calfSystem')) {
+        sendException(msg, true);
+      }
+    }
+  }
+
+  function globalErrorHandler() {
+    if (!enabled) {
+      on(window, 'error', logError);
+      enabled = true;
+    }
+  }
+
+  var now;
+  var nowSecs;
+
+  function initNow() {
+    if (!now) {
+      now = Date.now();
+      nowSecs = Math.floor(now / 1000);
+    }
+  }
+
+  var pCC;
+  var pCR;
+
+  function initPcc() {
+    if (!pCC) {
+      pCC = getElementById('pCC');
+      pCR = getElementById('pCR');
+    }
   }
 
   function makeSound(soundLocation, i, e) {
@@ -1196,9 +1228,6 @@
     return makePageHeader(o.title, o.comment, o.spanId, o.button) +
       '<div class="fshSmall" id="' + o.divId + '"></div>';
   }
-
-  var pCC = getElementById('pCC');
-  var pCR = getElementById('pCR');
 
   function insertElement(parent, child) {
     if (parent instanceof Node && child instanceof Node) {
@@ -1870,9 +1899,6 @@
     function(level, min, max) {return min <= level && level <= max;}
   ];
 
-  var itemLvlTest;
-  itemLvlTest = [function(level) {return level === 0;}].concat(playerLvlTest);
-
   function condition$1(level, min, max, fn) {return fn(level, min, max);}
 
   function lvlTest(ary, level, min, max) {
@@ -1910,6 +1936,7 @@
 
   var paused$1 = true;
   var queue = [];
+  var globalHandler;
 
   function setOpts(options) {
     if (typeof options === 'string') {
@@ -1977,19 +2004,23 @@
     }
   }
 
+  function initGlobalHandler() {
+    if (!globalHandler) {
+      $(document).ajaxComplete(taskRunner$1);
+      globalHandler = true;
+    }
+  }
+
   function add$1(options, retries, dfr) {
     queue.push([options, retries, dfr]);
     if (paused$1) {taskRunner$1();}
   }
 
   function retryAjax(options) {
+    initGlobalHandler();
     var dfr = $.Deferred();
     if (options) {add$1(options, 10, dfr);}
     return dfr.promise();
-  }
-
-  if (!isUndefined(jQuery)) {
-    $(document).ajaxComplete(taskRunner$1);
   }
 
   function indexAjax(options) {
@@ -2494,6 +2525,14 @@
     if (!json.s) {return true;}
   }
 
+  function idTest(id, self) {
+    return self.id === id;
+  }
+
+  function selfIdIs(id) {
+    return partial(idTest, id);
+  }
+
   function callApp(data) {
     return retryAjax({
       url: 'app.php',
@@ -2633,26 +2672,25 @@
     showQuickExtract();
   }
 
-  var extractEvents = [
-    [
-      function(self) {return self.id === 'fshInSt';},
-      function() {
-        selectST = !selectST;
-        showQuickExtract();
-      }
-    ],
-    [
-      function(self) {return self.id === 'fshInMain';},
-      function() {
-        selectMain = !selectMain;
-        showQuickExtract();
-      }
-    ],
-    [
-      function(self) {return self.id.indexOf('fshExtr') === 0;},
-      extractAllSimilar
-    ]
-  ];
+  function toggleSelectSt() {
+    selectST = !selectST;
+    showQuickExtract();
+  }
+
+  function toggleSelectMain() {
+    selectMain = !selectMain;
+    showQuickExtract();
+  }
+
+  function extractable(self) {return self.id.startsWith('fshExtr');}
+
+  function extractEvents() {
+    return [
+      [selfIdIs('fshInSt'), toggleSelectSt],
+      [selfIdIs('fshInMain'), toggleSelectMain],
+      [extractable, extractAllSimilar]
+    ];
+  }
 
   function insertQuickExtract(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
@@ -2668,7 +2706,7 @@
     insertElement(content, extTbl);
     selectST = true;
     selectMain = true;
-    on(content, 'click', eventHandler5(extractEvents));
+    on(content, 'click', eventHandler5(extractEvents()));
     getInventory().done(prepInv);
   }
 
@@ -3467,24 +3505,14 @@
     setValue('disableQuickWearPrompts', disableQuickWearPrompts);
   }
 
-  var evts5 = [
-    [
-      function(self) {return hasClasses(['smallLink', 'fshEq'], self);},
-      equipProfileInventoryItem
-    ],
-    [
-      function(self) {return hasClasses(['smallLink', 'fshUse'], self);},
-      useProfileInventoryItem
-    ],
-    [
-      function(self) {return hasClass('fshFolder', self);},
-      hideFolders
-    ],
-    [
-      function(self) {return self.id === 'disableQuickWearPrompts';},
-      togglePref
-    ]
-  ];
+  function evts5() {
+    return [
+      [partial(hasClasses, ['smallLink', 'fshEq']), equipProfileInventoryItem],
+      [partial(hasClasses, ['smallLink', 'fshUse']), useProfileInventoryItem],
+      [partial(hasClass, 'fshFolder'), hideFolders],
+      [selfIdIs('disableQuickWearPrompts'), togglePref]
+    ];
+  }
 
   function createInvTabs() {
     return createDiv({
@@ -3512,7 +3540,7 @@
     insertElement(invTabs, invTabsQw);
     content$2.innerHTML = '';
     insertElement(content$2, invTabs);
-    on(invTabs, 'click', eventHandler5(evts5));
+    on(invTabs, 'click', eventHandler5(evts5()));
     insertElement(invTabs, showAHInvManager(appInv));
   }
 
@@ -3707,15 +3735,17 @@
     generateManageTable();
   }
 
-  var listEvents = [
-    [function(self) {return self.id === 'fshReset';}, resetRawEditor],
-    [function(self) {return self.id === 'fshSave';}, saveRawEditor],
-    [function(self) {return self.id === 'fshAdd';}, addQuickItem],
-    [function(self) {return self.id.indexOf('fshDel') === 0;}, deleteQuickItem]
-  ];
+  function listEvents() {
+    return [
+      [selfIdIs('fshReset'), resetRawEditor],
+      [selfIdIs('fshSave'), saveRawEditor],
+      [selfIdIs('fshAdd'), addQuickItem],
+      [function(self) {return self.id.startsWith('fshDel');}, deleteQuickItem]
+    ];
+  }
 
   function setupEventHandler(content) {
-    on(content, 'click', eventHandler5(listEvents));
+    on(content, 'click', eventHandler5(listEvents()));
   }
 
   function injectAuctionSearch(injector) { // Legacy
@@ -5859,8 +5889,15 @@
       Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
   }
 
-  var titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
-    '([^!]*)(!)');
+  var titanRe;
+
+  function getTitanRe() {
+    if (!titanRe) {
+      titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
+        '([^!]*)(!)');
+    }
+    return titanRe;
+  }
 
   function pvpLadder(head) {return containsText('PvP Ladder', head.children[1]);}
 
@@ -5900,11 +5937,11 @@
   }
 
   function titanSpotted(el) {
-    return titanRe.test(el.firstChild.nodeValue);
+    return getTitanRe().test(el.firstChild.nodeValue);
   }
 
   function titanLink(el) {
-    var news = el.firstChild.nodeValue.match(titanRe);
+    var news = el.firstChild.nodeValue.match(getTitanRe());
     news[2] = makeALink(creatureSearchHref(news[2]), news[2]);
     news[4] = makeALink(realmSearchHref(news[4]), news[4]);
     var newSpan = createSpan({innerHTML: news.slice(1).join('')});
@@ -10946,19 +10983,25 @@
     return takeItem(invId).pipe(partial(takeItemStatus, action));
   }
 
-  var deferred = window.jQuery && jQuery.when();
+  var dfr;
+
+  function getDfr() {
+    // return window.jQuery && jQuery.when();
+    if (!dfr) {dfr = $.when();}
+    return dfr;
+  }
 
   function queueTakeItem(invId, action) {
     // You have to chain them because they could be modifying the backpack
-    deferred = deferred.pipe(partial(pipeTakeToQueue, invId, action));
-    return deferred;
+    dfr = getDfr().pipe(partial(pipeTakeToQueue, invId, action));
+    return dfr;
   }
 
   function queueRecallItem(invId, playerId, mode, action) {
     // You have to chain them because they could be modifying the backpack
-    deferred = deferred.pipe(partial(pipeRecallToQueue,
+    dfr = getDfr().pipe(partial(pipeRecallToQueue,
       invId, playerId, mode, action));
-    return deferred;
+    return dfr;
   }
 
   var spinner = '<span class="guildReportSpinner" style="background-image: ' +
@@ -11048,12 +11091,19 @@
   var fastBpHtml = '<span class="sendLink fast-bp">Fast BP</span> | ';
   var fastGsHtml = '<span class="sendLink fast-gs">Fast GS</span>';
   var fastWearHtml = ' | <span class="sendLink fast-wear">Fast Wear</span>';
-  var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
-    'Gut Rot Head Splitter|Serum');
+  var wearRE;
   var gs;
   var bp;
   var wearableBp;
   var wearableGs;
+
+  function getWearRe() {
+    if (!wearRE) {
+      wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
+        'Gut Rot Head Splitter|Serum');
+    }
+    return wearRE;
+  }
 
   function fastBp$1() {
     if (!bp) {bp = createDiv({innerHTML: fastBpHtml + fastGsHtml});}
@@ -11091,7 +11141,7 @@
   }
 
   function makeFastRecall(el) {
-    var thisWearable = !wearRE.test(el.previousElementSibling.innerHTML);
+    var thisWearable = !getWearRe().test(el.previousElementSibling.innerHTML);
     var thisBp = el.children.length === 2;
     return lookup.find(partial(theArray, thisWearable, thisBp))[2]();
   }
@@ -11323,6 +11373,8 @@
     drawInventory(potOpts, potObj);
   }
 
+  function toggleTab(self) {return /^pottab\d$/.test(self.id);}
+
   function saveState(potOpts, self) {
     var option = self.id;
     potOpts[option] = self.checked;
@@ -11331,18 +11383,9 @@
 
   function clickEvents(potOpts, potObj) {
     return [
-      [
-        function(self) {return self.id === 'fshIgnoreAll';},
-        partial(doReset$1, potOpts, potObj, true)
-      ],
-      [
-        function(self) {return self.id === 'fshReset';},
-        partial(doReset$1, potOpts, potObj, null)
-      ],
-      [
-        function(self) {return /^pottab\d$/.test(self.id);},
-        partial(saveState, potOpts)
-      ]
+      [selfIdIs('fshIgnoreAll'), partial(doReset$1, potOpts, potObj, true)],
+      [selfIdIs('fshReset'), partial(doReset$1, potOpts, potObj, null)],
+      [toggleTab, partial(saveState, potOpts)]
     ];
   }
 
@@ -11686,7 +11729,7 @@
     checkbox.disabled = true;
   }
 
-  function quickAction(self, fn, success, otherClass) {
+  function quickAction(fn, success, otherClass, self) {
     self.className = 'quickAction';
     doAction$2(self, fn, success);
     hideQTip(self);
@@ -11947,46 +11990,31 @@
     }
   }
 
-  var evts = [
-    [
-      function(self) {return self.id === 'fshShowExtraLinks';},
-      toggleShowExtraLinks
-    ],
-    [
-      function(self) {return self.id === 'fshShowQuickDropLinks';},
-      toggleShowQuickDropLinks
-    ],
-    [
-      function(self) {return self.id === 'fshSelectAllGuildLocked';},
-      function() {doCheckboxes(itemsAry$1, invItems$2, 'guild');}
-    ],
-    [
-      function(self) {return self.id === 'fshMove';},
-      function() {moveItemsToFolder(itemsAry$1);}
-    ],
-    [
-      function(self) {return self.hasAttribute('linkto');},
-      function(self) {
-        doCheckboxes(itemsAry$1, invItems$2, 'item', self.getAttribute('linkto'));
-      }
-    ],
-    [
-      function(self) {return hasClass('sendLink', self);},
-      function(self) {quickAction(self, senditems, 'Sent', '.dropLink');}
-    ],
-    [
-      function(self) {return hasClass('dropLink', self);},
-      function(self) {quickAction(self, dropItem, 'Dropped', '.sendLink');}
-    ],
-    [
-      function(self) {return hasClass('fshFolder', self);},
-      function(self) {hideFolders$1(itemsAry$1, invItems$2, self);}
-    ],
-    [
-      function(self) {return self.id === 'fshChkAll';},
-      function() {doCheckboxes(itemsAry$1, invItems$2, 'checkAll');}
-    ]
-  ];
+  function doCheckboxesByType(type, itemId) {
+    doCheckboxes(itemsAry$1, invItems$2, type, itemId);
+  }
+
+  function evts() {
+    return [
+      [selfIdIs('fshShowExtraLinks'), toggleShowExtraLinks],
+      [selfIdIs('fshShowQuickDropLinks'), toggleShowQuickDropLinks],
+      [selfIdIs('fshSelectAllGuildLocked'),
+        partial(doCheckboxesByType, 'guild', null)],
+      [selfIdIs('fshMove'), partial(moveItemsToFolder, itemsAry$1)],
+      [
+        function(self) {return self.hasAttribute('linkto');},
+        function(self) {
+          doCheckboxesByType('item', self.getAttribute('linkto'));
+        }
+      ],
+      [partial(hasClass, 'sendLink'),
+        partial(quickAction, senditems, 'Sent', '.dropLink')],
+      [partial(hasClass, 'dropLink'),
+        partial(quickAction, dropItem, 'Dropped', '.sendLink')],
+      [partial(hasClass, 'fshFolder'), partial(hideFolders$1, itemsAry$1, invItems$2)],
+      [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)]
+    ];
+  }
 
   function badData(data) {
     return !data || !data.items || !data.folders;
@@ -12002,7 +12030,7 @@
     sendLinks = false;
     batch(3, itemsAry$1, 0, itemWidgets, doneInvPaint);
     doFolderButtons$1(data.folders);
-    on(pCC, 'click', eventHandler5(evts));
+    on(pCC, 'click', eventHandler5(evts()));
   }
 
   function injectStoreItems() {
@@ -15866,6 +15894,26 @@
     realmName = data;
   }
 
+  var current;
+  var kills;
+  var member;
+  var pctTotal;
+  var status;
+  var titanHp;
+  var total;
+  var yourGuild;
+
+  function buildAssets() {
+    current = textSpan('Current');
+    kills = textSpan('Kills');
+    member = textSpan('Member');
+    pctTotal = textSpan('% of Total');
+    status = textSpan('Status');
+    titanHp = textSpan('Titan HP');
+    total = textSpan('Total');
+    yourGuild = textSpan('Your Guild');
+  }
+
   var currentHp;
   var maxHp;
   var guildKills;
@@ -15894,15 +15942,6 @@
     cooldownText$1.innerHTML = '';
   }
 
-  var current = textSpan('Current');
-  var kills = textSpan('Kills');
-  var member = textSpan('Member');
-  var pctTotal = textSpan('% of Total');
-  var status = textSpan('Status');
-  var titanHp = textSpan('Titan HP');
-  var total = textSpan('Total');
-  var yourGuild = textSpan('Your Guild');
-
   var titanTbl;
 
   function clearMemberRows() {
@@ -15928,6 +15967,7 @@
 
   function buildTitanInfoTable() {
     titanTbl = createTable({className: 'fshCenter'});
+    buildAssets();
     addRows$1(titanTbl, [
       [[[2, titanHp, true], [4, yourGuild, true]]],
       [[[2, makeTitanHpWrapper()], [4, guildKills]]],
@@ -18132,14 +18172,18 @@
     return timeStamp + ' <span class="fshRed">' + buffsNotCast[0] + '</span><br>';
   }
 
-  var transform$1 = [
-    [new RegExp('Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\''),
-      successfull],
-    [new RegExp('The skill ([\\w ]*) of current or higher level is currently ' +
-      'active on \'(\\w*)\''), rejected],
-    [new RegExp('Player \'(\\w*)\' has set their preferences to block the ' +
-      'skill \'([\\w ]*)\' from being cast on them.'), rejected]
-  ];
+  var transform$1;
+
+  function buildTransform() {
+    return [
+      [new RegExp('Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\''),
+        successfull],
+      [new RegExp('The skill ([\\w ]*) of current or higher level is currently ' +
+        'active on \'(\\w*)\''), rejected],
+      [new RegExp('Player \'(\\w*)\' has set their preferences to block the ' +
+        'skill \'([\\w ]*)\' from being cast on them.'), rejected]
+    ];
+  }
 
   function doRegExp(el, pair) {
     return [
@@ -18165,6 +18209,7 @@
   function updateBuffLog() {
     if (!getValue('keepBuffLog')) {return;}
     getForage(fshBuffLog).done(buffResult);
+    transform$1 = buildTransform();
   }
 
   var unknown = [
@@ -19082,12 +19127,15 @@
     $('#fshMaxLvl').val(options.fshMaxLvl);
   }
 
+  var itemLvlTest;
+
   function doLvlFilter$1(_settings, data) {
     return lvlTest(itemLvlTest, intValue(data[1]),
       options.fshMinLvl, options.fshMaxLvl);
   }
 
   function lvlFilter$1() { // jQuery
+    itemLvlTest = [function(level) {return level === 0;}].concat(playerLvlTest);
     /* Custom filtering function which will search
     data in column 2 between two values */
     $.fn.dataTable.ext.search.push(doLvlFilter$1);
@@ -19508,12 +19556,14 @@
     getGuildLogPage(1).done(processFirstPage$1);
   }
 
-  var guildLogEvents = [
-    [function(self) {return self.tagName === 'INPUT';}, toggleItem],
-    [function(self) {return self.id === 'fshAll';}, selectAll],
-    [function(self) {return self.id === 'fshNone';}, selectNone],
-    [function(self) {return self.id === 'rfsh';}, refresh]
-  ];
+  function guildLogEvents() {
+    return [
+      [function(self) {return self.tagName === 'INPUT';}, toggleItem],
+      [selfIdIs('fshAll'), selectAll],
+      [selfIdIs('fshNone'), selectNone],
+      [selfIdIs('rfsh'), refresh]
+    ];
+  }
 
   function setOpts$2(guildLog) {
     options$1 = guildLog || options$1;
@@ -19534,7 +19584,7 @@
     setOpts$2(guildLog);
     pCC.innerHTML = guildLogFilter;
     getElements$1();
-    on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents));
+    on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
     setChecks$1();
     setMaxPage();
     getGuildLogPage(1).done(processFirstPage$1);
@@ -20074,7 +20124,7 @@
     });
   }
 
-  var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
+  var disableDeactivatePrompts;
 
   function debuffSuccess(aLink, json) {
     if (json.s) {aLink.parentNode.innerHTML = '';}
@@ -20115,6 +20165,7 @@
   function fastDebuff() {
     var profileRightColumn = getElementById('profileRightColumn');
     if (profileRightColumn) {
+      disableDeactivatePrompts = getValue('disableDeactivatePrompts');
       on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
     }
   }
@@ -21544,14 +21595,17 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '98';
+  window.FSH.calf = '99';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
 
+    globalErrorHandler();
     setup();
     start('JS Perf', 'FSH.dispatch');
 
+    initNow();
+    initPcc();
     getCoreFunction();
     lookForHcsData();
     add(3, asyncDispatcher);
