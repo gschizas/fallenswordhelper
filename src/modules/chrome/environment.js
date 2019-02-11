@@ -8,7 +8,6 @@ import {initPcc} from '../support/layout';
 import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
 import isObject from '../common/isObject';
-import jQueryNotPresent from '../common/jQueryNotPresent';
 import lookForHcsData from './lookForHcsData/lookForHcsData';
 import pageSwitcher from './pageSwitcher/pageSwitcher';
 import querySelector from '../common/querySelector';
@@ -97,30 +96,26 @@ function asyncDispatcher() {
   }
 }
 
-window.FSH = window.FSH || {};
-window.FSH.calf = '$_CALFVER';
-
-// main event dispatcher
-window.FSH.dispatch = function dispatch() {
-
-  globalErrorHandler();
-  setup();
-  start('JS Perf', 'FSH.dispatch');
-
+function runCore() {
   initNow();
   initPcc();
   getCoreFunction();
   lookForHcsData();
   add(3, asyncDispatcher);
-
-  if (jQueryNotPresent()) {return;}
-
   isMessageSound();
-
   /* This must be at the end in order not to
   screw up other findNode calls (Issue 351) */
   doQuickLinks();
+}
 
+window.FSH = window.FSH || {};
+window.FSH.calf = '$_CALFVER';
+
+// main event dispatcher
+window.FSH.dispatch = function dispatch() {
+  globalErrorHandler();
+  setup();
+  start('JS Perf', 'FSH.dispatch');
+  runCore();
   end('JS Perf', 'FSH.dispatch');
-
 };

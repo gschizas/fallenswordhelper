@@ -9,13 +9,21 @@ export var titanHp;
 export var total;
 export var yourGuild;
 
-export function buildAssets() {
+function partOne() {
   current = textSpan('Current');
   kills = textSpan('Kills');
   member = textSpan('Member');
   pctTotal = textSpan('% of Total');
+}
+
+function partTwo() {
   status = textSpan('Status');
   titanHp = textSpan('Titan HP');
   total = textSpan('Total');
   yourGuild = textSpan('Your Guild');
+}
+
+export function buildAssets() {
+  partOne();
+  partTwo();
 }

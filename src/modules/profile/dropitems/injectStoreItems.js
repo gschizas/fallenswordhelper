@@ -149,13 +149,19 @@ function doCheckboxesByType(type, itemId) {
   doCheckboxes(itemsAry, invItems, type, itemId);
 }
 
-function evts() {
+function selfIds() {
   return [
     [selfIdIs('fshShowExtraLinks'), toggleShowExtraLinks],
     [selfIdIs('fshShowQuickDropLinks'), toggleShowQuickDropLinks],
     [selfIdIs('fshSelectAllGuildLocked'),
       partial(doCheckboxesByType, 'guild', null)],
     [selfIdIs('fshMove'), partial(moveItemsToFolder, itemsAry)],
+    [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)]
+  ];
+}
+
+function evts() {
+  return selfIds().concat([
     [
       function(self) {return self.hasAttribute('linkto');},
       function(self) {
@@ -166,9 +172,8 @@ function evts() {
       partial(quickAction, senditems, 'Sent', '.dropLink')],
     [partial(hasClass, 'dropLink'),
       partial(quickAction, dropItem, 'Dropped', '.sendLink')],
-    [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)],
-    [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)]
-  ];
+    [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)]
+  ]);
 }
 
 function badData(data) {
