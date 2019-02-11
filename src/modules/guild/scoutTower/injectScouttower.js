@@ -8,12 +8,13 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import myRows from '../../common/myRows';
+import {now} from '../../support/now';
 import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import roundToString from '../../common/roundToString';
 import setForage from '../../ajax/setForage';
-import {def_table, guideUrl, now} from '../../support/constants';
+import {def_table, guideUrl} from '../../support/constants';
 
 function getTitanName(aRow) {
   return aRow.cells[0].children[0].getAttribute('oldtitle');

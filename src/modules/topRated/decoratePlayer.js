@@ -2,7 +2,7 @@ import currentGuildId from '../common/currentGuildId';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import isUndefined from '../common/isUndefined';
-import {nowSecs} from '../support/constants';
+import {nowSecs} from '../support/now';
 import onlineDot from '../common/onlineDot';
 import partial from '../common/partial';
 import {

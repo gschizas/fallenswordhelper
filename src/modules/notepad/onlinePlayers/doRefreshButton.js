@@ -1,5 +1,5 @@
 import getValue from '../../system/getValue';
-import {now} from '../../support/constants';
+import {now} from '../../support/now';
 
 export default function doRefreshButton() {
   var lastCheck = getValue('lastOnlineCheck');

@@ -4,7 +4,7 @@ import {getElementById} from '../../common/getElement';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import getValueJSON from '../../system/getValueJSON';
-import {nowSecs} from '../../support/constants';
+import {nowSecs} from '../../support/now';
 import setValue from '../../system/setValue';
 import shouldBeArray from '../../system/shouldBeArray';
 

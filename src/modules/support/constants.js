@@ -28,8 +28,6 @@ export var lastActivityRE =
 
 export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
 export var defenderMultiplier = 0.2;
-export var now = Date.now();
-export var nowSecs = Math.floor(now / 1000);
 
 export var def_joinallgroupsundersize = 'joinallgroupsundersize';
 

@@ -1,4 +1,4 @@
-import {nowSecs} from '../support/constants';
+import {nowSecs} from '../support/now';
 import partial from './partial';
 
 var getMins = [

@@ -2,6 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import getUrlParameter from '../system/getUrlParameter';
+import {initNow} from '../support/now';
 import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
 import isObject from '../common/isObject';
@@ -103,6 +104,7 @@ window.FSH.dispatch = function dispatch() {
   setup();
   start('JS Perf', 'FSH.dispatch');
 
+  initNow();
   getCoreFunction();
   lookForHcsData();
   add(3, asyncDispatcher);

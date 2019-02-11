@@ -5,7 +5,7 @@ import createDocument from '../system/createDocument';
 import getForage from '../ajax/getForage';
 import getText from '../common/getText';
 import insertElement from '../common/insertElement';
-import {nowSecs} from '../support/constants';
+import {nowSecs} from '../support/now';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
 import playerId from '../common/playerId';

@@ -3,7 +3,7 @@ import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import guildManage from '../app/guild/manage';
 import jQueryPresent from '../common/jQueryPresent';
-import {nowSecs} from '../support/constants';
+import {nowSecs} from '../support/now';
 import partial from '../common/partial';
 import setForage from '../ajax/setForage';
 import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';

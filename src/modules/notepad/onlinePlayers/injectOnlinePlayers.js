@@ -7,7 +7,7 @@ import {doTable} from './doTable';
 import filterHeaderOnlinePlayers from './filterHeaderOnlinePlayers';
 import getForage from '../../ajax/getForage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import {now} from '../../support/constants';
+import {now} from '../../support/now';
 import on from '../../common/on';
 import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import partial from '../../common/partial';

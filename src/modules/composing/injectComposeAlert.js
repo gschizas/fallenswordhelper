@@ -3,11 +3,11 @@ import composingView from '../app/composing/view';
 import displayComposeMsg from './displayComposeMsg';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';
+import {now} from '../support/now';
 import setValue from '../system/setValue';
 import {
   def_lastComposeCheck,
-  def_needToCompose,
-  now
+  def_needToCompose
 } from '../support/constants';
 
 function getTime(pot) {

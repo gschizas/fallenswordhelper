@@ -1,5 +1,6 @@
 import calf from '../../support/calf';
 import formatLastActivity from '../../system/formatLastActivity';
+import {nowSecs} from '../../support/now';
 import partial from '../../common/partial';
 import {
   enemyBuffCheckOn,
@@ -7,7 +8,6 @@ import {
   enemySendMessage
 } from './constants';
 import {
-  nowSecs,
   playerIdUrl,
   secureUrl,
   tradeUrl

@@ -3,7 +3,7 @@ import displayUpgradeMsg from './displayUpgradeMsg';
 import getValue from '../../system/getValue';
 import jQueryPresent from '../../common/jQueryPresent';
 import notGoldUpgradesPage from './notGoldUpgradesPage';
-import {now} from '../../support/constants';
+import {now} from '../../support/now';
 import parseGoldUpgrades from './parseGoldUpgrades';
 import upgradesGold from '../../ajax/upgradesGold';
 

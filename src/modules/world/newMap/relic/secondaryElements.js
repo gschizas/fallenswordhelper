@@ -5,7 +5,9 @@ import getValue from '../../../system/getValue';
 import hideElement from '../../../common/hideElement';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
+import {nowSecs} from '../../../support/now';
 import partial from '../../../common/partial';
+import {playerIdUrl} from '../../../support/constants';
 import {atkStats, defStats, proc} from './assets';
 import {
   containerDiv,
@@ -13,7 +15,6 @@ import {
   leftDiv,
   myDefenders
 } from './primaryElements';
-import {nowSecs, playerIdUrl} from '../../../support/constants';
 
 var guildMemberList;
 var twoMinutesAgo;

@@ -3,7 +3,7 @@ import currentGuildId from '../common/currentGuildId';
 import getForage from './getForage';
 import indexAjaxJson from './indexAjaxJson';
 import isObject from '../common/isObject';
-import {now} from '../support/constants';
+import {now} from '../support/now';
 import partial from '../common/partial';
 import setForage from './setForage';
 

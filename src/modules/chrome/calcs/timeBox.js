@@ -1,5 +1,6 @@
+import {months} from '../../support/constants';
+import {now} from '../../support/now';
 import padZ from '../../system/padZ';
-import {months, now} from '../../support/constants';
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
