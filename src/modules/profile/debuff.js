@@ -8,7 +8,7 @@ import partial from '../common/partial';
 import removeskill from '../app/profile/removeskill';
 import {sendEvent} from '../support/fshGa';
 
-var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
+var disableDeactivatePrompts;
 
 function debuffSuccess(aLink, json) {
   if (json.s) {aLink.parentNode.innerHTML = '';}
@@ -49,6 +49,7 @@ function interceptDebuff(e) {
 export default function fastDebuff() {
   var profileRightColumn = getElementById('profileRightColumn');
   if (profileRightColumn) {
+    disableDeactivatePrompts = getValue('disableDeactivatePrompts');
     on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
   }
 }
