@@ -24,14 +24,18 @@ function rejected(timeStamp, buffsNotCast) {
   return timeStamp + ' <span class="fshRed">' + buffsNotCast[0] + '</span><br>';
 }
 
-var transform = [
-  [new RegExp('Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\''),
-    successfull],
-  [new RegExp('The skill ([\\w ]*) of current or higher level is currently ' +
-    'active on \'(\\w*)\''), rejected],
-  [new RegExp('Player \'(\\w*)\' has set their preferences to block the ' +
-    'skill \'([\\w ]*)\' from being cast on them.'), rejected]
-];
+var transform;
+
+function buildTransform() {
+  return [
+    [new RegExp('Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\''),
+      successfull],
+    [new RegExp('The skill ([\\w ]*) of current or higher level is currently ' +
+      'active on \'(\\w*)\''), rejected],
+    [new RegExp('Player \'(\\w*)\' has set their preferences to block the ' +
+      'skill \'([\\w ]*)\' from being cast on them.'), rejected]
+  ];
+}
 
 function doRegExp(el, pair) {
   return [
@@ -57,4 +61,5 @@ function buffResult(buffLog) {
 export default function updateBuffLog() {
   if (!getValue('keepBuffLog')) {return;}
   getForage(fshBuffLog).done(buffResult);
+  transform = buildTransform();
 }
