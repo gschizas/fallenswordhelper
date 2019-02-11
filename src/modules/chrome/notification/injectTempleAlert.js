@@ -4,7 +4,7 @@ import displayDisconnectedFromGodsMessage
 import getValue from '../../system/getValue';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import {now} from '../../support/constants';
+import {now} from '../../support/now';
 import {parseTemplePage} from './parseTemplePage';
 
 function checkLastUpdate(templeAlertLastUpdate) {

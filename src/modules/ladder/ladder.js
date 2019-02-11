@@ -2,7 +2,7 @@ import allowBack from './allowBack';
 import {createTr} from '../common/cElement';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
-import {now} from '../support/constants';
+import {now} from '../support/now';
 import outputFormat from '../system/outputFormat';
 import querySelector from '../common/querySelector';
 import setText from '../common/setText';

@@ -2,10 +2,15 @@ import {getElementById} from '../common/getElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 var timers = {};
-var footWrap = getElementById('foot-wrap');
+var footWrap;
+
+function getFootWrap() {
+  if (!footWrap) {footWrap = getElementById('foot-wrap');}
+  return footWrap;
+}
 
 export function log(text, value) {
-  if (footWrap) {
+  if (getFootWrap()) {
     insertHtmlBeforeEnd(footWrap,
       '<br>' + text + ': ' + value + ' (' + typeof value + ')');
   }

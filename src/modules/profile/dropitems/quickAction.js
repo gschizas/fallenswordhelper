@@ -34,7 +34,7 @@ function disableCheckbox(theTd) {
   checkbox.disabled = true;
 }
 
-export default function quickAction(self, fn, success, otherClass) {
+export default function quickAction(fn, success, otherClass, self) {
   self.className = 'quickAction';
   doAction(self, fn, success);
   hideQTip(self);

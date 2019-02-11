@@ -1,4 +1,4 @@
-import {nowSecs} from '../support/constants';
+import {nowSecs} from '../support/now';
 import outputFormat from './outputFormat';
 
 export default function formatLastActivity(last_login) {

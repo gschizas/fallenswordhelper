@@ -2,16 +2,7 @@ import {addRows} from './addRows';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import {
-  cooldownText,
-  currentHp,
-  currentPct,
-  guildKills,
-  maxHp,
-  statusText,
-  totalPct
-} from './placeholders';
-import {createSpan, createTable} from '../../../common/cElement';
-import {
+  buildAssets,
   current,
   kills,
   member,
@@ -21,6 +12,16 @@ import {
   total,
   yourGuild
 } from './assets';
+import {
+  cooldownText,
+  currentHp,
+  currentPct,
+  guildKills,
+  maxHp,
+  statusText,
+  totalPct
+} from './placeholders';
+import {createSpan, createTable} from '../../../common/cElement';
 
 export var titanTbl;
 
@@ -47,6 +48,7 @@ function makePctWrapper(pct) {
 
 export function buildTitanInfoTable() {
   titanTbl = createTable({className: 'fshCenter'});
+  buildAssets();
   addRows(titanTbl, [
     [[[2, titanHp, true], [4, yourGuild, true]]],
     [[[2, makeTitanHpWrapper()], [4, guildKills]]],

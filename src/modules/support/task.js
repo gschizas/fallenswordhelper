@@ -2,11 +2,13 @@ import fallback from '../system/fallback';
 import isFunction from '../common/isFunction';
 import isUndefined from '../common/isUndefined';
 import on from '../common/on';
+import parseError from './parseError';
 import {sendException} from './fshGa';
 import {getLength, pop, push} from './sch';
 
 var paused = true;
 var message = 'fshMessage';
+var messageHandler;
 
 function taskRunner() {
   if (getLength() === 0) {
@@ -15,40 +17,6 @@ function taskRunner() {
     paused = false;
     window.postMessage(message, '*');
   }
-}
-
-//#if _DEV  //  Not sending args as Array
-function devLog(args) {
-  if (args && !Array.isArray(args)) {
-    // eslint-disable-next-line no-console
-    console.log('addTask Array.isArray(args)', Array.isArray(args));
-  }
-}
-
-//#endif
-export default function add(priority, fn, args, scope) {
-  //#if _DEV  //  Not sending args as Array
-  devLog(args);
-  //#endif
-  if (isFunction(fn)) {
-    var _scope = fallback(scope, window);
-    var _args = fallback(args, []);
-    push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
-    if (paused) {taskRunner();}
-  }
-}
-
-function parseStack(e) {
-  var concatStack = e.stack.replace(/\n +/g, '|');
-  if (e.stack.includes(e.message)) {
-    return concatStack;
-  }
-  return e.message + '|' + concatStack;
-}
-
-function parseError(e) {
-  if (e.stack) {return parseStack(e);}
-  return e.message;
 }
 
 function popError(fn) {
@@ -81,15 +49,31 @@ function callback(event) {
   }
 }
 
-on(window, 'message', callback);
-
-function logError(e) {
-  if (e.error) {
-    var msg = parseError(e.error);
-    if (msg.includes('calfSystem')) {
-      sendException(msg, true);
-    }
+function initMessageHandler() {
+  if (!messageHandler) {
+    on(window, 'message', callback);
+    messageHandler = true;
   }
 }
 
-on(window, 'error', logError);
+//#if _DEV  //  Not sending args as Array
+function devLog(args) {
+  if (args && !Array.isArray(args)) {
+    // eslint-disable-next-line no-console
+    console.log('addTask Array.isArray(args)', Array.isArray(args));
+  }
+}
+
+//#endif
+export default function add(priority, fn, args, scope) {
+  //#if _DEV  //  Not sending args as Array
+  devLog(args);
+  //#endif
+  if (isFunction(fn)) {
+    initMessageHandler();
+    var _scope = fallback(scope, window);
+    var _args = fallback(args, []);
+    push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
+    if (paused) {taskRunner();}
+  }
+}

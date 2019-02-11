@@ -4,12 +4,19 @@ import partial from '../../common/partial';
 var fastBpHtml = '<span class="sendLink fast-bp">Fast BP</span> | ';
 var fastGsHtml = '<span class="sendLink fast-gs">Fast GS</span>';
 var fastWearHtml = ' | <span class="sendLink fast-wear">Fast Wear</span>';
-var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
-  'Gut Rot Head Splitter|Serum');
+var wearRE;
 var gs;
 var bp;
 var wearableBp;
 var wearableGs;
+
+function getWearRe() {
+  if (!wearRE) {
+    wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
+      'Gut Rot Head Splitter|Serum');
+  }
+  return wearRE;
+}
 
 function fastBp() {
   if (!bp) {bp = createDiv({innerHTML: fastBpHtml + fastGsHtml});}
@@ -47,7 +54,7 @@ function theArray(thisWearable, thisBp, arr) {
 }
 
 export default function makeFastRecall(el) {
-  var thisWearable = !wearRE.test(el.previousElementSibling.innerHTML);
+  var thisWearable = !getWearRe().test(el.previousElementSibling.innerHTML);
   var thisBp = el.children.length === 2;
   return lookup.find(partial(theArray, thisWearable, thisBp))[2]();
 }

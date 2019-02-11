@@ -1,11 +1,11 @@
 import calf from '../support/calf';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getText from '../common/getText';
+import {now} from '../support/now';
 import setValue from '../system/setValue';
 import {
   def_lastComposeCheck,
-  def_needToCompose,
-  now
+  def_needToCompose
 } from '../support/constants';
 
 var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;

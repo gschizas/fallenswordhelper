@@ -18,6 +18,7 @@ import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import quickAction from './quickAction';
+import selfIdIs from '../../common/selfIdIs';
 import senditems from '../../app/trade/senditems';
 import toggleForce from '../../common/toggleForce';
 import {
@@ -144,46 +145,31 @@ function toggleShowQuickDropLinks() {
   }
 }
 
-var evts = [
-  [
-    function(self) {return self.id === 'fshShowExtraLinks';},
-    toggleShowExtraLinks
-  ],
-  [
-    function(self) {return self.id === 'fshShowQuickDropLinks';},
-    toggleShowQuickDropLinks
-  ],
-  [
-    function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    function() {doCheckboxes(itemsAry, invItems, 'guild');}
-  ],
-  [
-    function(self) {return self.id === 'fshMove';},
-    function() {moveItemsToFolder(itemsAry);}
-  ],
-  [
-    function(self) {return self.hasAttribute('linkto');},
-    function(self) {
-      doCheckboxes(itemsAry, invItems, 'item', self.getAttribute('linkto'));
-    }
-  ],
-  [
-    function(self) {return hasClass('sendLink', self);},
-    function(self) {quickAction(self, senditems, 'Sent', '.dropLink');}
-  ],
-  [
-    function(self) {return hasClass('dropLink', self);},
-    function(self) {quickAction(self, dropItem, 'Dropped', '.sendLink');}
-  ],
-  [
-    function(self) {return hasClass('fshFolder', self);},
-    function(self) {hideFolders(itemsAry, invItems, self);}
-  ],
-  [
-    function(self) {return self.id === 'fshChkAll';},
-    function() {doCheckboxes(itemsAry, invItems, 'checkAll');}
-  ]
-];
+function doCheckboxesByType(type, itemId) {
+  doCheckboxes(itemsAry, invItems, type, itemId);
+}
+
+function evts() {
+  return [
+    [selfIdIs('fshShowExtraLinks'), toggleShowExtraLinks],
+    [selfIdIs('fshShowQuickDropLinks'), toggleShowQuickDropLinks],
+    [selfIdIs('fshSelectAllGuildLocked'),
+      partial(doCheckboxesByType, 'guild', null)],
+    [selfIdIs('fshMove'), partial(moveItemsToFolder, itemsAry)],
+    [
+      function(self) {return self.hasAttribute('linkto');},
+      function(self) {
+        doCheckboxesByType('item', self.getAttribute('linkto'));
+      }
+    ],
+    [partial(hasClass, 'sendLink'),
+      partial(quickAction, senditems, 'Sent', '.dropLink')],
+    [partial(hasClass, 'dropLink'),
+      partial(quickAction, dropItem, 'Dropped', '.sendLink')],
+    [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)],
+    [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)]
+  ];
+}
 
 function badData(data) {
   return !data || !data.items || !data.folders;
@@ -199,7 +185,7 @@ function inventory(data) {
   sendLinks = false;
   batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   doFolderButtons(data.folders);
-  on(pCC, 'click', eventHandler5(evts));
+  on(pCC, 'click', eventHandler5(evts()));
 }
 
 export default function injectStoreItems() {

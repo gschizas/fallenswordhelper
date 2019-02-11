@@ -1,10 +1,10 @@
-import isUndefined from '../common/isUndefined';
 import on from '../common/on';
 import partial from '../common/partial';
 import {sendException} from '../support/fshGa';
 
 var paused = true;
 var queue = [];
+var globalHandler;
 
 function setOpts(options) {
   if (typeof options === 'string') {
@@ -72,17 +72,21 @@ function taskRunner() {
   }
 }
 
+function initGlobalHandler() {
+  if (!globalHandler) {
+    $(document).ajaxComplete(taskRunner);
+    globalHandler = true;
+  }
+}
+
 function add(options, retries, dfr) {
   queue.push([options, retries, dfr]);
   if (paused) {taskRunner();}
 }
 
 export default function retryAjax(options) {
+  initGlobalHandler();
   var dfr = $.Deferred();
   if (options) {add(options, 10, dfr);}
   return dfr.promise();
-}
-
-if (!isUndefined(jQuery)) {
-  $(document).ajaxComplete(taskRunner);
 }

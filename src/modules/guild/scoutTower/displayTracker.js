@@ -1,6 +1,6 @@
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import {now} from '../../support/constants';
+import {now} from '../../support/now';
 import {coolTime, cooldownText, seen, titan} from './constants';
 import {createTBody, createTable} from '../../common/cElement';
 

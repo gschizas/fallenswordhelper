@@ -13,8 +13,15 @@ import setValue from '../system/setValue';
 import {archiveUrl, guideUrl, updateArchiveUrl} from '../support/constants';
 import {createAnchor, createSpan} from '../common/cElement';
 
-var titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
-  '([^!]*)(!)');
+var titanRe;
+
+function getTitanRe() {
+  if (!titanRe) {
+    titanRe = new RegExp('(\\s*A \')([^\']*)(\' titan has been spotted in )' +
+      '([^!]*)(!)');
+  }
+  return titanRe;
+}
 
 function pvpLadder(head) {return containsText('PvP Ladder', head.children[1]);}
 
@@ -54,11 +61,11 @@ function makeUfsgLink(img) {
 }
 
 function titanSpotted(el) {
-  return titanRe.test(el.firstChild.nodeValue);
+  return getTitanRe().test(el.firstChild.nodeValue);
 }
 
 function titanLink(el) {
-  var news = el.firstChild.nodeValue.match(titanRe);
+  var news = el.firstChild.nodeValue.match(getTitanRe());
   news[2] = makeALink(creatureSearchHref(news[2]), news[2]);
   news[4] = makeALink(realmSearchHref(news[4]), news[4]);
   var newSpan = createSpan({innerHTML: news.slice(1).join('')});

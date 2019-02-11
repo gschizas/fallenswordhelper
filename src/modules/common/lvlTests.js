@@ -9,9 +9,6 @@ export var playerLvlTest = [
   function(level, min, max) {return min <= level && level <= max;}
 ];
 
-export var itemLvlTest;
-itemLvlTest = [function(level) {return level === 0;}].concat(playerLvlTest);
-
 function condition(level, min, max, fn) {return fn(level, min, max);}
 
 export function lvlTest(ary, level, min, max) {

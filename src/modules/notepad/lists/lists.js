@@ -8,6 +8,7 @@ import makePageHeader from './makePageHeader';
 import makePageTemplate from './makePageTemplate';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
+import selfIdIs from '../../common/selfIdIs';
 import setValueJSON from '../../system/setValueJSON';
 import {auctionSearchBlurb, auctionSearchParams} from './assets';
 
@@ -141,15 +142,17 @@ function resetRawEditor() { // Legacy
   generateManageTable();
 }
 
-var listEvents = [
-  [function(self) {return self.id === 'fshReset';}, resetRawEditor],
-  [function(self) {return self.id === 'fshSave';}, saveRawEditor],
-  [function(self) {return self.id === 'fshAdd';}, addQuickItem],
-  [function(self) {return self.id.indexOf('fshDel') === 0;}, deleteQuickItem]
-];
+function listEvents() {
+  return [
+    [selfIdIs('fshReset'), resetRawEditor],
+    [selfIdIs('fshSave'), saveRawEditor],
+    [selfIdIs('fshAdd'), addQuickItem],
+    [function(self) {return self.id.startsWith('fshDel');}, deleteQuickItem]
+  ];
+}
 
 function setupEventHandler(content) {
-  on(content, 'click', eventHandler5(listEvents));
+  on(content, 'click', eventHandler5(listEvents()));
 }
 
 export function injectAuctionSearch(injector) { // Legacy

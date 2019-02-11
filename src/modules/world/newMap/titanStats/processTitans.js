@@ -1,4 +1,6 @@
 import {addRows} from './addRows';
+import {months} from '../../../support/constants';
+import {now} from '../../../support/now';
 import padZ from '../../../system/padZ';
 import partial from '../../../common/partial';
 import {realmName} from './realm';
@@ -20,7 +22,6 @@ import {
   getKillsPct,
   getTitanString
 } from '../../../guild/scoutTower/injectScouttower';
-import {months, now} from '../../../support/constants';
 
 function formatOffset(secs) {
   var aDate = new Date(now + secs * 1000);
