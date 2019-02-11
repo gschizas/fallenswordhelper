@@ -3,6 +3,7 @@ import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import getUrlParameter from '../system/getUrlParameter';
 import {initNow} from '../support/now';
+import {initPcc} from '../support/layout';
 import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
 import isObject from '../common/isObject';
@@ -105,6 +106,7 @@ window.FSH.dispatch = function dispatch() {
   start('JS Perf', 'FSH.dispatch');
 
   initNow();
+  initPcc();
   getCoreFunction();
   lookForHcsData();
   add(3, asyncDispatcher);
