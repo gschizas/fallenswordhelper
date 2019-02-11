@@ -21,6 +21,7 @@ import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import {rowProfile} from './profiler';
+import selfIdIs from '../../common/selfIdIs';
 import setForage from '../../ajax/setForage';
 import setText from '../../common/setText';
 import toggleForce from '../../common/toggleForce';
@@ -230,12 +231,14 @@ function refresh() {
   getGuildLogPage(1).done(processFirstPage);
 }
 
-var guildLogEvents = [
-  [function(self) {return self.tagName === 'INPUT';}, toggleItem],
-  [function(self) {return self.id === 'fshAll';}, selectAll],
-  [function(self) {return self.id === 'fshNone';}, selectNone],
-  [function(self) {return self.id === 'rfsh';}, refresh]
-];
+function guildLogEvents() {
+  return [
+    [function(self) {return self.tagName === 'INPUT';}, toggleItem],
+    [selfIdIs('fshAll'), selectAll],
+    [selfIdIs('fshNone'), selectNone],
+    [selfIdIs('rfsh'), refresh]
+  ];
+}
 
 function setOpts(guildLog) {
   options = guildLog || options;
@@ -256,7 +259,7 @@ function gotOptions(guildLog) {
   setOpts(guildLog);
   pCC.innerHTML = guildLogFilter;
   getElements();
-  on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents));
+  on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
   setChecks();
   setMaxPage();
   getGuildLogPage(1).done(processFirstPage);

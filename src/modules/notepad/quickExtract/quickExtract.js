@@ -11,6 +11,7 @@ import on from '../../common/on';
 import outputResult from '../../common/outputResult';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
+import selfIdIs from '../../common/selfIdIs';
 import useitem from '../../app/profile/useitem';
 
 var extTbl;
@@ -133,26 +134,25 @@ function prepInv(data) {
   showQuickExtract();
 }
 
-var extractEvents = [
-  [
-    function(self) {return self.id === 'fshInSt';},
-    function() {
-      selectST = !selectST;
-      showQuickExtract();
-    }
-  ],
-  [
-    function(self) {return self.id === 'fshInMain';},
-    function() {
-      selectMain = !selectMain;
-      showQuickExtract();
-    }
-  ],
-  [
-    function(self) {return self.id.indexOf('fshExtr') === 0;},
-    extractAllSimilar
-  ]
-];
+function toggleSelectSt() {
+  selectST = !selectST;
+  showQuickExtract();
+}
+
+function toggleSelectMain() {
+  selectMain = !selectMain;
+  showQuickExtract();
+}
+
+function extractable(self) {return self.id.startsWith('fshExtr');}
+
+function extractEvents() {
+  return [
+    [selfIdIs('fshInSt'), toggleSelectSt],
+    [selfIdIs('fshInMain'), toggleSelectMain],
+    [extractable, extractAllSimilar]
+  ];
+}
 
 export default function insertQuickExtract(injector) { // jQuery.min
   if (jQueryNotPresent()) {return;}
@@ -168,6 +168,6 @@ export default function insertQuickExtract(injector) { // jQuery.min
   insertElement(content, extTbl);
   selectST = true;
   selectMain = true;
-  on(content, 'click', eventHandler5(extractEvents));
+  on(content, 'click', eventHandler5(extractEvents()));
   getInventory().done(prepInv);
 }

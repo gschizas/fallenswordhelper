@@ -13,6 +13,7 @@ import loadInventory from '../../app/profile/loadInventory';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
+import selfIdIs from '../../common/selfIdIs';
 import {sendEvent} from '../../support/fshGa';
 import setText from '../../common/setText';
 import setValue from '../../system/setValue';
@@ -82,24 +83,14 @@ function togglePref() {
   setValue('disableQuickWearPrompts', disableQuickWearPrompts);
 }
 
-var evts5 = [
-  [
-    function(self) {return hasClasses(['smallLink', 'fshEq'], self);},
-    equipProfileInventoryItem
-  ],
-  [
-    function(self) {return hasClasses(['smallLink', 'fshUse'], self);},
-    useProfileInventoryItem
-  ],
-  [
-    function(self) {return hasClass('fshFolder', self);},
-    hideFolders
-  ],
-  [
-    function(self) {return self.id === 'disableQuickWearPrompts';},
-    togglePref
-  ]
-];
+function evts5() {
+  return [
+    [partial(hasClasses, ['smallLink', 'fshEq']), equipProfileInventoryItem],
+    [partial(hasClasses, ['smallLink', 'fshUse']), useProfileInventoryItem],
+    [partial(hasClass, 'fshFolder'), hideFolders],
+    [selfIdIs('disableQuickWearPrompts'), togglePref]
+  ];
+}
 
 function createInvTabs() {
   return createDiv({
@@ -127,7 +118,7 @@ function showQuickWear(appInv) {
   insertElement(invTabs, invTabsQw);
   content.innerHTML = '';
   insertElement(content, invTabs);
-  on(invTabs, 'click', eventHandler5(evts5));
+  on(invTabs, 'click', eventHandler5(evts5()));
   insertElement(invTabs, showAHInvManager(appInv));
 }
 

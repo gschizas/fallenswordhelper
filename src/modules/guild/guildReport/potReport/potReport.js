@@ -9,6 +9,7 @@ import isChecked from '../../../system/isChecked';
 import on from '../../../common/on';
 import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
+import selfIdIs from '../../../common/selfIdIs';
 import setForage from '../../../ajax/setForage';
 import testRange from '../../../system/testRange';
 import {drawInventory, initInventory} from './drawInventory';
@@ -98,6 +99,8 @@ function doReset(potOpts, potObj, ignore) {
   drawInventory(potOpts, potObj);
 }
 
+function toggleTab(self) {return /^pottab\d$/.test(self.id);}
+
 function saveState(potOpts, self) {
   var option = self.id;
   potOpts[option] = self.checked;
@@ -106,18 +109,9 @@ function saveState(potOpts, self) {
 
 function clickEvents(potOpts, potObj) {
   return [
-    [
-      function(self) {return self.id === 'fshIgnoreAll';},
-      partial(doReset, potOpts, potObj, true)
-    ],
-    [
-      function(self) {return self.id === 'fshReset';},
-      partial(doReset, potOpts, potObj, null)
-    ],
-    [
-      function(self) {return /^pottab\d$/.test(self.id);},
-      partial(saveState, potOpts)
-    ]
+    [selfIdIs('fshIgnoreAll'), partial(doReset, potOpts, potObj, true)],
+    [selfIdIs('fshReset'), partial(doReset, potOpts, potObj, null)],
+    [toggleTab, partial(saveState, potOpts)]
   ];
 }
 
