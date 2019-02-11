@@ -2,6 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import getUrlParameter from '../system/getUrlParameter';
+import globalErrorHandler from '../support/globalErrorHandler';
 import {initNow} from '../support/now';
 import {initPcc} from '../support/layout';
 import isFunction from '../common/isFunction';
@@ -102,6 +103,7 @@ window.FSH.calf = '$_CALFVER';
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
 
+  globalErrorHandler();
   setup();
   start('JS Perf', 'FSH.dispatch');
 
