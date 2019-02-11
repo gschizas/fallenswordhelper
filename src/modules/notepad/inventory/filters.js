@@ -1,6 +1,8 @@
 import intValue from '../../system/intValue';
 import {options} from './options';
-import {itemLvlTest, lvlTest} from '../../common/lvlTests';
+import {lvlTest, playerLvlTest} from '../../common/lvlTests';
+
+var itemLvlTest;
 
 function doLvlFilter(_settings, data) {
   return lvlTest(itemLvlTest, intValue(data[1]),
@@ -8,6 +10,7 @@ function doLvlFilter(_settings, data) {
 }
 
 export function lvlFilter() { // jQuery
+  itemLvlTest = [function(level) {return level === 0;}].concat(playerLvlTest);
   /* Custom filtering function which will search
   data in column 2 between two values */
   $.fn.dataTable.ext.search.push(doLvlFilter);
