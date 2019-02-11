@@ -1,4 +1,4 @@
-import {def_quickSearch} from './defaultQuickSearchList';
+import {defQuickSearch} from './defQuickSearch';
 
 /* eslint-disable max-lines */
 export var defaults = {
@@ -191,7 +191,7 @@ export var defaults = {
     '["Trinettle", "5567"], ["Viridian Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-  quickSearchList: def_quickSearch(),
+  quickSearchList: defQuickSearch,
 
   arenaMoves: '[]',
   arenaMatches: '[]',
