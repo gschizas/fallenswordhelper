@@ -1,5 +1,3 @@
-import add from '../support/task';
-import colouredDots from '../common/colouredDots';
 //#if _DEV  //  compress history
 import compressHistory from './compressHistory';
 //#endif
@@ -15,7 +13,6 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from '../common/levelHighlight';
-import {getXpLock, guildXPLock, removeGuildAvyImgBorder} from './guildUtils';
 
 var highlightPlayersNearMyLvl;
 var highlightGvGPlayersNearMyLvl;
@@ -62,9 +59,6 @@ function doHighlights() {
 }
 
 export default function injectViewGuild() {
-  add(3, colouredDots);
-  removeGuildAvyImgBorder();
-  guildXPLock(getXpLock());
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
   doHighlights();

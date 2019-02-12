@@ -14,18 +14,17 @@ export function removeGuildAvyImgBorder() {
   wrapUrl(guildLogo);
 }
 
-export function guildXPLock(xpLock) {
+function injectLock(xpLock) {
   var xpLockmouseover = xpLock.dataset.tipped;
-  var xpLockXP = getIntFromRegExp(xpLockmouseover,
-    /XP Lock: <b>(\d*)/);
-  var actualXP = getIntFromRegExp(xpLockmouseover,
-    /XP: <b>(\d*)/);
+  var xpLockXP = getIntFromRegExp(xpLockmouseover, /XP Lock: <b>(\d*)/);
+  var actualXP = getIntFromRegExp(xpLockmouseover, /XP: <b>(\d*)/);
   if (actualXP < xpLockXP) {
     insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
       ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
   }
 }
 
-export function getXpLock() {
-  return querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+export function guildXPLock() {
+  var xpLock = querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+  if (xpLock) {injectLock(xpLock);}
 }
