@@ -88,7 +88,7 @@ function asyncDispatcher() {
   //#if _DEV  //  asyncDispatcher messages
   devHooks();
   //#endif
-  if (isFunction(Object.entries) && isFunction(coreFunction)) {
+  if (isFunction(coreFunction)) {
     screenview(functionPath);
     start('JS Perf', functionPath);
     coreFunction();
@@ -113,6 +113,7 @@ window.FSH.calf = '$_CALFVER';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
+  if (!isFunction(Object.entries)) {return;}
   globalErrorHandler();
   setup();
   start('JS Perf', 'FSH.dispatch');
