@@ -1005,6 +1005,8 @@
     }
   }
 
+  function jQueryPresent() {return isFunction(window.$);}
+
   function makeSound(soundLocation, i, e) {
     $(e).after('<audio src="' + soundLocation + '" autoplay=true />');
   }
@@ -1017,14 +1019,12 @@
   }
 
   function isMessageSound() {
-    if (getValue('playNewMessageSound')) {
+    if (jQueryPresent() && getValue('playNewMessageSound')) {
       add(3, doMsgSound);
     }
   }
 
   function isObject(e) {return isType(e, 'object');}
-
-  function jQueryNotPresent() {return !isFunction(window.$);}
 
   function containsText(text, el) {
     return getText(el) === text;
@@ -1198,6 +1198,8 @@
     }
     return dfr.promise();
   }
+
+  function jQueryNotPresent() {return !isFunction(window.$);}
 
   function makePageHeader(title, comment, spanId, button) {
     var _comment = '';
@@ -1427,8 +1429,6 @@
     }
     calf.sortBy = headerClicked;
   }
-
-  function jQueryPresent() {return isFunction(window.$);}
 
   function getPath(obj, aPath, def) {
     var _obj = obj;
@@ -2464,9 +2464,13 @@
     on(content, 'click', rmEvtHdl);
   }
 
+  function validRef(referenceNode) {
+    return (referenceNode instanceof Node || referenceNode === null) &&
+    referenceNode.parentNode instanceof Node;
+  }
+
   function insertElementBefore(newNode, referenceNode) {
-    if (referenceNode instanceof Node &&
-        referenceNode.parentNode instanceof Node) {
+    if (validRef(referenceNode)) {
       return referenceNode.parentNode.insertBefore(newNode, referenceNode);
     }
   }
@@ -4033,6 +4037,12 @@
     }
   ];
 
+  function sum(obj, prev, curr) {return curr(obj, prev);}
+
+  function lastActivityMins(obj) {
+    return getMins.reduce(partial(sum, obj), 0);
+  }
+
   var getDot = [
     [2, 'greenDiamond'],
     [5, 'yellowDiamond'],
@@ -4050,10 +4060,8 @@
       ' tip-static" data-tipped="' + tip + '"></span>';
   }
 
-  function sum(obj, prev, curr) {return curr(obj, prev);}
-
   function onlineDot(obj) {
-    var min = getMins.reduce(partial(sum, obj), 0);
+    var min = lastActivityMins(obj);
     var which = getDot.find(partial(activity, min));
     if (which) {return aDot(which[1]);}
     return aDot('redDot');
@@ -5929,11 +5937,15 @@
     return getTitanRe().test(el.firstChild.nodeValue);
   }
 
-  function titanLink(el) {
+  function reformatNews(el) {
     var news = el.firstChild.nodeValue.match(getTitanRe());
     news[2] = makeALink(creatureSearchHref(news[2]), news[2]);
     news[4] = makeALink(realmSearchHref(news[4]), news[4]);
-    var newSpan = createSpan({innerHTML: news.slice(1).join('')});
+    return news.slice(1).join('');
+  }
+
+  function titanLink(el) {
+    var newSpan = createSpan({innerHTML: reformatNews(el)});
     el.replaceChild(newSpan, el.firstChild);
   }
 
@@ -9412,6 +9424,39 @@
     post: injectBioWidgets
   };
 
+  var ACTIVE = 0;
+  var STAMINA = 1;
+
+  function countActive(prev, curr) {
+    var lastActivity = lastActivityRE.exec(curr.dataset.tipped);
+    var mins = lastActivityMins({
+      min: lastActivity[3],
+      hour: lastActivity[2],
+      day: lastActivity[1]
+    });
+    if (mins < 44640) {
+      prev[ACTIVE] += 1;
+      prev[STAMINA] +=
+        Number(/Stamina:<\/td><td>(\d+)/.exec(curr.dataset.tipped)[1]);
+    }
+    return prev;
+  }
+
+  function getActive(dots) {
+    return dots.reduce(countActive, [0, 0]);
+  }
+
+  function activeMembers() {
+    var members = getArrayByTagName('b', pCC).find(contains('Members'));
+    if (members) {
+      var dots = querySelectorArray('#pCC a[data-tipped*="Last Activity"]');
+      var memberStats = getActive(dots);
+      members.classList.add('tip-static');
+      members.dataset.tipped = 'Active: ' + memberStats[ACTIVE] + '<br>' +
+        'Stamina: ' + addCommas(memberStats[STAMINA]);
+    }
+  }
+
   function moreToDo(limit, cntr, list) {
     return list && performance.now() < limit && cntr < list.length;
   }
@@ -9434,22 +9479,6 @@
     }
   }
 
-  function insertBuffLink(el) {
-    insertHtmlBeforeEnd(el.parentNode, ' <span class="smallLink">[b]</span>');
-  }
-
-  function openQuickBuff(evt) {
-    if (evt.target.className !== 'smallLink') {return;}
-    openQuickBuffByName(evt.target.previousElementSibling.text);
-  }
-
-  function buffLinks$1() {
-    // TODO preference
-    var members = querySelectorAll('#pCC a[href^="' + playerIdUrl + '"]');
-    batch(3, members, 0, insertBuffLink);
-    on(pCC, 'click', openQuickBuff);
-  }
-
   function changeOnlineDot(contactLink) {
     var lastActivity = lastActivityRE
       .exec(contactLink.dataset.tipped);
@@ -9465,6 +9494,72 @@
     if (!getValue('enhanceOnlineDots')) {return;}
     batch(3, querySelectorAll('#pCC a[data-tipped*="Last Activity"]'), 0,
       changeOnlineDot);
+  }
+
+  var highlightPlayersNearMyLvl$1;
+  var highlightGvGPlayersNearMyLvl;
+
+  function isPvpTarget(vlevel) {
+    return highlightPlayersNearMyLvl$1 &&
+      vlevel >= pvpLowerLevel &&
+      vlevel <= pvpUpperLevel;
+  }
+
+  function isGvgTarget(vlevel) {
+    return highlightGvGPlayersNearMyLvl &&
+      vlevel >= gvgLowerLevel &&
+      vlevel <= gvgUpperLevel;
+  }
+
+  function isActive(el, tipped) {
+    var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
+    var aRow = el.parentNode.parentNode;
+    if (isPvpTarget(vlevel)) {
+      aRow.classList.add('lvlHighlight');
+    } else if (isGvgTarget(vlevel)) {
+      aRow.classList.add('lvlGvGHighlight');
+    }
+  }
+
+  function highlightMembers(el) {
+    var tipped = el.dataset.tipped;
+    var lastActDays = lastActivityRE.exec(tipped)[1];
+    if (lastActDays < 7) {isActive(el, tipped);}
+  }
+
+  function shouldHighlight() {
+    return Number(getUrlParameter('guild_id')) !== currentGuildId() &&
+      (highlightPlayersNearMyLvl$1 || highlightGvGPlayersNearMyLvl);
+  }
+
+  function doHighlights() {
+    if (shouldHighlight()) {
+      calculateBoundaries();
+      querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
+        .forEach(highlightMembers);
+    }
+  }
+
+  function injectViewGuild() {
+    highlightPlayersNearMyLvl$1 = getValue('highlightPlayersNearMyLvl');
+    highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
+    doHighlights();
+  }
+
+  function insertBuffLink(el) {
+    insertHtmlBeforeEnd(el.parentNode, ' <span class="smallLink">[b]</span>');
+  }
+
+  function openQuickBuff(evt) {
+    if (evt.target.className !== 'smallLink') {return;}
+    openQuickBuffByName(evt.target.previousElementSibling.text);
+  }
+
+  function buffLinks$1() {
+    // TODO preference
+    var members = querySelectorAll('#pCC a[href^="' + playerIdUrl + '"]');
+    batch(3, members, 0, insertBuffLink);
+    on(pCC, 'click', openQuickBuff);
   }
 
   function conflicts(page) {
@@ -9859,29 +9954,18 @@
     makePopup();
   }
 
-  function makeCellOne(gs, newTr) {
-    var cellOne = newTr.insertCell(-1);
-    insertElement(cellOne, gs);
-  }
-
-  function makeCellTwo(newTr) {
-    var cellTwo = newTr.insertCell(-1);
-    cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
-      '&nbsp;<label class="custombutton" for="tracker">Show</label>';
-  }
-
-  function makeNewTr(gs) {
-    var newTr = createTr();
-    makeCellOne(gs, newTr);
-    makeCellTwo(newTr);
-    on(newTr, 'change', togglePref$3);
-    return newTr;
-  }
-
   function injectShowTracker() {
     var gs = querySelector('#pCC img.guild_openGuildStore');
-    var oldTr = gs.parentNode.parentNode;
-    oldTr.parentNode.replaceChild(makeNewTr(gs), oldTr);
+    var td = gs.parentNode;
+    var container = createDiv({className: 'fsh-tracker'});
+    var myDiv = createDiv({
+      innerHTML: simpleCheckboxHtml('enableGuildActivityTracker') +
+      '&nbsp;<label class="custombutton" for="tracker">Show</label>'
+    });
+    on(myDiv, 'change', togglePref$3);
+    insertElement(container, gs);
+    insertElement(container, myDiv);
+    insertElement(td, container);
   }
 
   function injectTracker() {
@@ -9900,44 +9984,6 @@
   function guildTracker() {
     injectShowTracker();
     injectTracker();
-  }
-
-  function getIntFromRegExp(theText, rxSearch) {
-    var result;
-    var matches = theText.replace(/,/g, '').match(rxSearch);
-    if (matches) {
-      result = parseInt(matches[1], 10);
-    } else {
-      result = 0;
-    }
-    return result;
-  }
-
-  function wrapUrl(guildLogo) {
-    var url = guildLogo.nextElementSibling.nextElementSibling;
-    if (url) {url.classList.add('fshBreakAll');}
-  }
-
-  function removeGuildAvyImgBorder() {
-    var guildLogo = querySelector('#pCC img[oldtitle$="\'s Logo"]');
-    guildLogo.removeAttribute('style');
-    wrapUrl(guildLogo);
-  }
-
-  function guildXPLock(xpLock) {
-    var xpLockmouseover = xpLock.dataset.tipped;
-    var xpLockXP = getIntFromRegExp(xpLockmouseover,
-      /XP Lock: <b>(\d*)/);
-    var actualXP = getIntFromRegExp(xpLockmouseover,
-      /XP: <b>(\d*)/);
-    if (actualXP < xpLockXP) {
-      insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
-        ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
-    }
-  }
-
-  function getXpLock() {
-    return querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   }
 
   function toggleVisibilty(evt) {
@@ -10030,22 +10076,58 @@
     add(4, guildTracker);
   }
 
-  function guildWidgets(xpLock) {
-    add(3, colouredDots);
-    add(3, removeGuildAvyImgBorder);
-    add(3, guildXPLock, [xpLock]);
-
+  function manage() {
     var leftHandSideColumnTable = getLhsColTab();
     lhsAdditions(leftHandSideColumnTable);
-
     add(3, buffLinks$1);
-
     ajaxStuff(leftHandSideColumnTable);
   }
 
+  function getIntFromRegExp(theText, rxSearch) {
+    var result;
+    var matches = theText.replace(/,/g, '').match(rxSearch);
+    if (matches) {
+      result = parseInt(matches[1], 10);
+    } else {
+      result = 0;
+    }
+    return result;
+  }
+
+  function wrapUrl(guildLogo) {
+    var url = guildLogo.nextElementSibling.nextElementSibling;
+    if (url) {url.classList.add('fshBreakAll');}
+  }
+
+  function removeGuildAvyImgBorder() {
+    var guildLogo = querySelector('#pCC img[oldtitle$="\'s Logo"]');
+    guildLogo.removeAttribute('style');
+    wrapUrl(guildLogo);
+  }
+
+  function injectLock(xpLock) {
+    var xpLockmouseover = xpLock.dataset.tipped;
+    var xpLockXP = getIntFromRegExp(xpLockmouseover, /XP Lock: <b>(\d*)/);
+    var actualXP = getIntFromRegExp(xpLockmouseover, /XP: <b>(\d*)/);
+    if (actualXP < xpLockXP) {
+      insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
+        ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
+    }
+  }
+
+  function guildXPLock() {
+    var xpLock = querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+    if (xpLock) {injectLock(xpLock);}
+  }
+
   function injectGuild() {
-    var xpLock = getXpLock();
-    if (xpLock) {guildWidgets(xpLock);}
+    add(3, colouredDots);
+    add(3, removeGuildAvyImgBorder);
+    add(3, guildXPLock);
+    add(3, activeMembers);
+
+    if (calf.subcmd === 'manage') {manage();}
+    if (calf.subcmd === 'view') {injectViewGuild();}
   }
 
   var playerBank = {
@@ -10674,59 +10756,6 @@
   function injectScouttower() { // jQuery.min
     if (jQueryNotPresent()) {return;}
     getForage('fsh_titans').done(gotOldTitans); // Pref
-  }
-
-  var highlightPlayersNearMyLvl$1;
-  var highlightGvGPlayersNearMyLvl;
-
-  function isPvpTarget(vlevel) {
-    return highlightPlayersNearMyLvl$1 &&
-      vlevel >= pvpLowerLevel &&
-      vlevel <= pvpUpperLevel;
-  }
-
-  function isGvgTarget(vlevel) {
-    return highlightGvGPlayersNearMyLvl &&
-      vlevel >= gvgLowerLevel &&
-      vlevel <= gvgUpperLevel;
-  }
-
-  function isActive(el, tipped) {
-    var vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
-    var aRow = el.parentNode.parentNode;
-    if (isPvpTarget(vlevel)) {
-      aRow.classList.add('lvlHighlight');
-    } else if (isGvgTarget(vlevel)) {
-      aRow.classList.add('lvlGvGHighlight');
-    }
-  }
-
-  function highlightMembers(el) {
-    var tipped = el.dataset.tipped;
-    var lastActDays = lastActivityRE.exec(tipped)[1];
-    if (lastActDays < 7) {isActive(el, tipped);}
-  }
-
-  function shouldHighlight() {
-    return Number(getUrlParameter('guild_id')) !== currentGuildId() &&
-      (highlightPlayersNearMyLvl$1 || highlightGvGPlayersNearMyLvl);
-  }
-
-  function doHighlights() {
-    if (shouldHighlight()) {
-      calculateBoundaries();
-      querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
-        .forEach(highlightMembers);
-    }
-  }
-
-  function injectViewGuild() {
-    add(3, colouredDots);
-    removeGuildAvyImgBorder();
-    guildXPLock(getXpLock());
-    highlightPlayersNearMyLvl$1 = getValue('highlightPlayersNearMyLvl');
-    highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
-    doHighlights();
   }
 
   function guildInventory$1(data) {
@@ -11893,13 +11922,19 @@
     doCheckboxes(itemsAry$1, invItems$2, type, itemId);
   }
 
-  function evts() {
+  function selfIds() {
     return [
       [selfIdIs('fshShowExtraLinks'), toggleShowExtraLinks],
       [selfIdIs('fshShowQuickDropLinks'), toggleShowQuickDropLinks],
       [selfIdIs('fshSelectAllGuildLocked'),
         partial(doCheckboxesByType, 'guild', null)],
       [selfIdIs('fshMove'), partial(moveItemsToFolder, itemsAry$1)],
+      [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)]
+    ];
+  }
+
+  function evts() {
+    return selfIds().concat([
       [
         function(self) {return self.hasAttribute('linkto');},
         function(self) {
@@ -11910,9 +11945,8 @@
         partial(quickAction, senditems, 'Sent', '.dropLink')],
       [partial(hasClass, 'dropLink'),
         partial(quickAction, dropItem, 'Dropped', '.sendLink')],
-      [partial(hasClass, 'fshFolder'), partial(hideFolders$1, itemsAry$1, invItems$2)],
-      [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)]
-    ];
+      [partial(hasClass, 'fshFolder'), partial(hideFolders$1, itemsAry$1, invItems$2)]
+    ]);
   }
 
   function badData(data) {
@@ -12710,7 +12744,7 @@
     manage: {'-': injectGuild},
     advisor: advisor,
     history: {'-': injectBioWidgets},
-    view: {'-': injectViewGuild},
+    view: {'-': injectGuild},
     scouttower: {'-': injectScouttower},
     mailbox: {'-': guildMailbox},
     ranks: {'-': injectGuildRanks},
@@ -15159,8 +15193,7 @@
   }
 
   function cloakGuess(bonus, level) {
-    if (bonus > level * 10 ||
-        bonus < level) {
+    if (bonus > level * 10 || bonus < level) {
       return bonus;
     }
     return level * 10;
@@ -15230,7 +15263,7 @@
     importBuffs(obj, buffs);
     obj.superEliteSlayerMultiplier = Math.round(0.002 *
       obj.superEliteSlayerLevel * 100) / 100;
-    if (obj.cloakLevel !== 0) {updateForCloak(obj);}
+    if (isNaN$1(obj.armorValue)) {updateForCloak(obj);}
     return obj;
   }
 
@@ -15801,15 +15834,23 @@
   var total;
   var yourGuild;
 
-  function buildAssets() {
+  function partOne() {
     current = textSpan('Current');
     kills = textSpan('Kills');
     member = textSpan('Member');
     pctTotal = textSpan('% of Total');
+  }
+
+  function partTwo() {
     status = textSpan('Status');
     titanHp = textSpan('Titan HP');
     total = textSpan('Total');
     yourGuild = textSpan('Your Guild');
+  }
+
+  function buildAssets() {
+    partOne();
+    partTwo();
   }
 
   var currentHp;
@@ -21525,7 +21566,7 @@
   }
 
   function asyncDispatcher() {
-    if (isFunction(Object.entries) && isFunction(coreFunction)) {
+    if (isFunction(coreFunction)) {
       screenview(functionPath);
       start('JS Perf', functionPath);
       coreFunction();
@@ -21533,32 +21574,29 @@
     }
   }
 
-  window.FSH = window.FSH || {};
-  window.FSH.calf = '99';
-
-  // main event dispatcher
-  window.FSH.dispatch = function dispatch() {
-
-    globalErrorHandler();
-    setup();
-    start('JS Perf', 'FSH.dispatch');
-
+  function runCore() {
     initNow();
     initPcc();
     getCoreFunction();
     lookForHcsData();
     add(3, asyncDispatcher);
-
-    if (jQueryNotPresent()) {return;}
-
     isMessageSound();
-
     /* This must be at the end in order not to
     screw up other findNode calls (Issue 351) */
     doQuickLinks();
+  }
 
+  window.FSH = window.FSH || {};
+  window.FSH.calf = '100';
+
+  // main event dispatcher
+  window.FSH.dispatch = function dispatch() {
+    if (!isFunction(Object.entries)) {return;}
+    globalErrorHandler();
+    setup();
+    start('JS Perf', 'FSH.dispatch');
+    runCore();
     end('JS Perf', 'FSH.dispatch');
-
   };
 
 }());
