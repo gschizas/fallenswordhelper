@@ -1,9 +1,9 @@
+import isNaN from './isNaN';
 import partial from './partial';
 import reduceBuffArray from './reduceBuffArray';
 
 function cloakGuess(bonus, level) {
-  if (bonus > level * 10 ||
-      bonus < level) {
+  if (bonus > level * 10 || bonus < level) {
     return bonus;
   }
   return level * 10;
@@ -73,6 +73,6 @@ export default function playerDataObject(json) {
   importBuffs(obj, buffs);
   obj.superEliteSlayerMultiplier = Math.round(0.002 *
     obj.superEliteSlayerLevel * 100) / 100;
-  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
+  if (isNaN(obj.armorValue)) {updateForCloak(obj);}
   return obj;
 }

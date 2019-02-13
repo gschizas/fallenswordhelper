@@ -14,7 +14,6 @@ import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
   createDiv,
   createInput,
-  createTr,
   createUl
 } from '../../common/cElement';
 import {initTable, makeTg} from './trackerTable';
@@ -136,29 +135,18 @@ function openDialog() {
   makePopup();
 }
 
-function makeCellOne(gs, newTr) {
-  var cellOne = newTr.insertCell(-1);
-  insertElement(cellOne, gs);
-}
-
-function makeCellTwo(newTr) {
-  var cellTwo = newTr.insertCell(-1);
-  cellTwo.innerHTML = simpleCheckboxHtml('enableGuildActivityTracker') +
-    '&nbsp;<label class="custombutton" for="tracker">Show</label>';
-}
-
-function makeNewTr(gs) {
-  var newTr = createTr();
-  makeCellOne(gs, newTr);
-  makeCellTwo(newTr);
-  on(newTr, 'change', togglePref);
-  return newTr;
-}
-
 function injectShowTracker() {
   var gs = querySelector('#pCC img.guild_openGuildStore');
-  var oldTr = gs.parentNode.parentNode;
-  oldTr.parentNode.replaceChild(makeNewTr(gs), oldTr);
+  var td = gs.parentNode;
+  var container = createDiv({className: 'fsh-tracker'});
+  var myDiv = createDiv({
+    innerHTML: simpleCheckboxHtml('enableGuildActivityTracker') +
+    '&nbsp;<label class="custombutton" for="tracker">Show</label>'
+  });
+  on(myDiv, 'change', togglePref);
+  insertElement(container, gs);
+  insertElement(container, myDiv);
+  insertElement(td, container);
 }
 
 function injectTracker() {

@@ -64,11 +64,15 @@ function titanSpotted(el) {
   return getTitanRe().test(el.firstChild.nodeValue);
 }
 
-function titanLink(el) {
+function reformatNews(el) {
   var news = el.firstChild.nodeValue.match(getTitanRe());
   news[2] = makeALink(creatureSearchHref(news[2]), news[2]);
   news[4] = makeALink(realmSearchHref(news[4]), news[4]);
-  var newSpan = createSpan({innerHTML: news.slice(1).join('')});
+  return news.slice(1).join('');
+}
+
+function titanLink(el) {
+  var newSpan = createSpan({innerHTML: reformatNews(el)});
   el.replaceChild(newSpan, el.firstChild);
 }
 

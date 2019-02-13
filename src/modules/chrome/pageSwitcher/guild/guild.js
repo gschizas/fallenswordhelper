@@ -8,7 +8,6 @@ import {injectGuildBank} from '../../../bank';
 import injectGuildRanks from '../../../guild/ranks/rank';
 import injectRPUpgrades from '../../../guild/injectRPUpgrades';
 import injectScouttower from '../../../guild/scoutTower/injectScouttower';
-import injectViewGuild from '../../../guild/injectViewGuild';
 import inventory from './inventory';
 import {guildChat, guildLog} from '../../../logs/logs';
 
@@ -21,7 +20,7 @@ export default {
   manage: {'-': injectGuild},
   advisor: advisor,
   history: {'-': injectBioWidgets},
-  view: {'-': injectViewGuild},
+  view: {'-': injectGuild},
   scouttower: {'-': injectScouttower},
   mailbox: {'-': guildMailbox},
   ranks: {'-': injectGuildRanks},

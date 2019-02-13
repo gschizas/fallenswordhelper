@@ -191,6 +191,11 @@
 }
 
 /* Guild Manage */
+.fsh-tracker {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
 .fsh-dialog-overlay {
   position: fixed;
   top: 0;

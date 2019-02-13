@@ -1,5 +1,6 @@
 import add from '../support/task';
 import getValue from '../system/getValue';
+import jQueryPresent from '../common/jQueryPresent';
 import partial from '../common/partial';
 
 function makeSound(soundLocation, i, e) {
@@ -14,7 +15,7 @@ function doMsgSound() { // jQuery
 }
 
 export default function isMessageSound() {
-  if (getValue('playNewMessageSound')) {
+  if (jQueryPresent() && getValue('playNewMessageSound')) {
     add(3, doMsgSound);
   }
 }
