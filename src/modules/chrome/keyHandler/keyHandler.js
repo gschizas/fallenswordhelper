@@ -8,44 +8,43 @@ import gotoGuild from './gotoGuild';
 import joinAllGroup from './joinAllGroup';
 import logPage from './logPage';
 import movePage from './movePage';
+import on from '../../common/on';
 import partial from '../../common/partial';
 import profile from './profile';
 import toWorld from './toWorld';
 
 var keyLookup = [
-  [33, combatSetKey, 0], // Shift+1
-  [64, combatSetKey, 1], // Shift+2
-  [34, combatSetKey, 1], // Shift+2 -- for UK keyboards, I think
-  [35, combatSetKey, 2], // Shift+3
-  [36, combatSetKey, 3], // Shift+4
-  [37, combatSetKey, 4], // Shift+5
-  [94, combatSetKey, 5], // Shift+6
-  [38, combatSetKey, 6], // Shift+7
-  [42, combatSetKey, 7], // Shift+8
-  [40, combatSetKey, 8], // Shift+9
-  [48, toWorld], // go to world [0]
-  [60, movePage, '<'], // move to prev page [<]
-  [62, movePage, '>'], // move to next page [>]
-  [71, createGroup], // create group [G]
-  [76, logPage], // Log Page [L]
-  [98, backpack], // backpack [b]
-  [103, gotoGuild], // go to guild [g]
-  [106, joinAllGroup], // join all group [j]
-  [108, logPage], // Log Page [l]
-  [112, profile], // profile [p]
-  [114, doRepair], // repair [r]
-  [118, fastWearMgr], // fast wear manager [v]
-  [121, doSendGold], // fast send gold [y]
-  [163, combatSetKey, 2] // Shift+3 -- for UK keyboards
+  ['!', combatSetKey, 0], // Shift+1
+  ['@', combatSetKey, 1], // Shift+2
+  ['"', combatSetKey, 1], // Shift+2 -- for UK keyboards
+  ['#', combatSetKey, 2], // Shift+3
+  ['£', combatSetKey, 2], // Shift+3 -- for UK keyboards
+  ['$', combatSetKey, 3], // Shift+4
+  ['%', combatSetKey, 4], // Shift+5
+  ['^', combatSetKey, 5], // Shift+6
+  ['&', combatSetKey, 6], // Shift+7
+  ['*', combatSetKey, 7], // Shift+8
+  ['(', combatSetKey, 8], // Shift+9
+  ['0', toWorld], // go to world [0]
+  ['<', movePage, '<'], // move to prev page [<]
+  ['>', movePage, '>'], // move to next page [>]
+  ['G', createGroup], // create group [G]
+  ['L', logPage], // Log Page [L]
+  ['b', backpack], // backpack [b]
+  ['g', gotoGuild], // go to guild [g]
+  ['j', joinAllGroup], // join all group [j]
+  ['l', logPage], // Log Page [l]
+  ['p', profile], // profile [p]
+  ['r', doRepair], // repair [r]
+  ['v', fastWearMgr], // fast wear manager [v]
+  ['y', doSendGold] // fast send gold [y]
 ];
 
-function thisCharCode(charCode, arr) {return charCode === arr[0];}
+function thisKey(key, arr) {return key === arr[0];}
 
-function handleKey(charCode) {
-  var mapping = keyLookup.find(partial(thisCharCode, charCode));
-  if (mapping) {
-    mapping[1](mapping[2]);
-  }
+function handleKey(key) {
+  var mapping = keyLookup.find(partial(thisKey, key));
+  if (mapping) {mapping[1](mapping[2]);}
 }
 
 function notTagName(evt, tag) {return evt.target.tagName !== tag;}
@@ -67,11 +66,11 @@ function doNotHandle(evt) {
   return bailOut.some(partial(reason, evt));
 }
 
-function keyPress(evt) {
-  if (doNotHandle(evt)) {return;}
-  handleKey(evt.charCode);
+function handleKeyUp(e) {
+  if (doNotHandle(e)) {return;}
+  handleKey(e.key);
 }
 
 export default function replaceKeyHandler() {
-  document.onkeypress = keyPress;
+  on(document, 'keyup', handleKeyUp);
 }
