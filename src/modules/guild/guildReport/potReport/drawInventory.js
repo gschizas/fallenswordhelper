@@ -3,6 +3,7 @@ import insertElement from '../../../common/insertElement';
 import once from '../../../common/once';
 import partial from '../../../common/partial';
 import {sendEvent} from '../../../support/fshGa';
+import sortKeys from './sortKeys';
 
 var inventory;
 
@@ -43,8 +44,8 @@ function makeRowsFromPivot(potOpts, pivot, prev, pot) {
 
 export function drawInventory(potOpts, potObj) {
   sendEvent('potReport', 'drawInventory');
-  var pivot = Object.keys(potObj)
-    .reduce(partial(pivotPotObj, potOpts, potObj), {});
+  var pivot = sortKeys(Object.keys(potObj)
+    .reduce(partial(pivotPotObj, potOpts, potObj), {}));
   inventory.innerHTML = '<table><tbody>' +
     Object.keys(pivot).reduce(partial(makeRowsFromPivot, potOpts, pivot), '') +
     '</tbody></table>';

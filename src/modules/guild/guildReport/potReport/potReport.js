@@ -1,4 +1,3 @@
-import alpha from '../../../common/alpha';
 import {createDiv} from '../../../common/cElement';
 import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';
@@ -11,6 +10,7 @@ import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
 import selfIdIs from '../../../common/selfIdIs';
 import setForage from '../../../ajax/setForage';
+import sortKeys from './sortKeys';
 import testRange from '../../../system/testRange';
 import {drawInventory, initInventory} from './drawInventory';
 import {drawMapping, initMapping} from './drawMapping';
@@ -24,15 +24,6 @@ var defaultOpts = {
   minpoint: 12,
   maxpoint: 20
 };
-
-function cloneObj(obj, result, key) {
-  result[key] = obj[key];
-  return result;
-}
-
-function sortKeys(obj) {
-  return Object.keys(obj).sort(alpha).reduce(partial(cloneObj, obj), {});
-}
 
 function update(potOpts, pot) {
   if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
@@ -156,5 +147,6 @@ function gotMap(potObj, data) {
 }
 
 export default function potReport(potObj) {
-  getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+  // getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+  getForage(storeMap).done(partial(gotMap, potObj));
 }
