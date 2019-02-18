@@ -1,4 +1,4 @@
-import {defaults} from '../../support/dataObj';
+import defaults from '../../support/dataObj.json';
 import setValue from '../../system/setValue';
 import {tableDraw} from './doTable';
 

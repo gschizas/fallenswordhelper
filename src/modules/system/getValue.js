@@ -1,5 +1,5 @@
 import {GMSTORAGE_PATH} from '../support/constants';
-import {defaults} from '../support/dataObj';
+import defaults from '../support/dataObj.json';
 import isUndefined from '../common/isUndefined';
 import partial from '../common/partial';
 
