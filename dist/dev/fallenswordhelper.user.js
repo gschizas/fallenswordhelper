@@ -27,7 +27,7 @@ function fshMain(ver) {
   var cssFiles = ['https://localhost:9966/src/calfSystem.css'];
   var scriptFiles = [
     'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.6.0/localforage.nopromises.min.js',
-    'https://localhost:9966/dist/dev/calfSystem.js'
+    'https://localhost:9966/dist/dev/calfSystem.min.js'
   ];
   if (typeof window.jQuery !== 'undefined') {
     scriptFiles.push('https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
