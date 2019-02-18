@@ -3,7 +3,7 @@ import serve from 'rollup-plugin-serve';
 
 const fs = require('fs');
 
-const options = rollupCalf('dist/dev/calfSystem.js', true, true);
+const options = rollupCalf('dist/watch/calfSystem.js', true, true);
 options.treeshake = false;
 options.watch = {include: 'src/**/*.js'};
 

@@ -309,7 +309,15 @@
     }
   }
 
+  function devLog(args) {
+    if (args && !Array.isArray(args)) {
+      // eslint-disable-next-line no-console
+      console.log('addTask Array.isArray(args)', Array.isArray(args));
+    }
+  }
+
   function add(priority, fn, args, scope) {
+    devLog(args);
     if (isFunction(fn)) {
       initMessageHandler();
       var _scope = fallback(scope, window);
@@ -501,6 +509,7 @@
   var scouttowerUrl = guildSubcmdUrl + 'scouttower';
   var groupsSubcmdUrl = guildSubcmdUrl + 'groups&subcmd2=';
   var recallUserUrl = guildSubcmdUrl + 'inventory&subcmd2=report&user=';
+  var guildViewUrl = guildSubcmdUrl + 'view&guild_id=';
   var joinallUrl = groupsSubcmdUrl + 'joinall';
   var joinUnderUrl = groupsSubcmdUrl + def_joinallgroupsundersize;
   var worldUrl = cmdUrl + 'world';
@@ -533,13 +542,22 @@
   var def_stairway = '5' + def_suffixSuccessActionResponse;
   var def_teleport = '25' + def_suffixSuccessActionResponse;
 
+  var def_creatureCombat = 2;
+  var def_repairAll = 15;
+
   var def_fetch_playerStats = 1;
   var def_fetch_playerBackpackCount = 2;
+  var def_fetch_playerBackpackItems = 4;
+  var def_fetch_playerPrefs = 8;
 
   var def_fetch_playerBuffs = 16;
+  var def_fetch_worldDefines = 32;
+  var def_fetch_worldRealmStatic = 64;
   var def_fetch_worldRealmDynamic = 128;
 
   var def_fetch_worldRealmActions = 256;
+  var def_fetch_playerEquipment = 512;
+  var def_fetch_playerNotifications = 1024;
 
   var def_needToCompose = 'needToCompose';
   var def_lastComposeCheck = 'lastComposeCheck';
@@ -560,278 +578,7 @@
 
   var GMSTORAGE_PATH = 'GM_';
 
-  var defQuickSearch =
-    '[' +
-      '{"category":"Plants","searchname":"Amber","nickname":""},' +
-      '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
-      '{"category":"Plants","searchname":"Jademare","nickname":""},' +
-      '{"category":"Plants","searchname":"Dark Shade","nickname":""},' +
-      '{"category":"Plants","searchname":"Trinettle","nickname":""},' +
-      '{"category":"Plants","searchname":"Heffle Wart","nickname":""},' +
-      '{"category":"Potions","searchname":"Sludge Brew",' +
-        '"nickname":"DC 200","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Black Death",' +
-        '"nickname":"DC 225","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Aid",' +
-        '"nickname":"Assist","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Supreme Doubling",' +
-        '"nickname":"DB 450","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Acceleration",' +
-        '"nickname":"DB 500","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Lesser Death Dealer",' +
-        '"nickname":"DD","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Runic Potion",' +
-        '"nickname":"FI 250","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of the Bookworm",' +
-        '"nickname":"Lib 225","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Truth",' +
-        '"nickname":"EW 1k","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Dull Edge",' +
-        '"nickname":"DE 25","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Notched Blade",' +
-        '"nickname":"DE 80","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Death",' +
-        '"nickname":"DW 125","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Decay",' +
-        '"nickname":"WI 150","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Fatality",' +
-        '"nickname":"WI 350","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Annihilation",' +
-        '"nickname":"DW 150","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of the Wise",' +
-        '"nickname":"Lib 200","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Shattering",' +
-        '"nickname":"SA","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Dragons Blood Potion",' +
-        '"nickname":"ZK 200","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Berserkers Potion",' +
-        '"nickname":"ZK 300","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Fury",' +
-        '"nickname":"ZK 350","displayOnAH":true},' +
-      '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
-        '"nickname":"FI 1k","displayOnAH":true}' +
-    ']';
-
-  /* eslint-disable max-lines */
-  var defaults = {
-    lastScavPage: '',
-    lastActiveQuestPage: '',
-    lastNormalActiveQuestPage: '',
-    lastNormalCompletedQuestPage: '',
-    lastNormalNotStartedQuestPage: '',
-    lastSeasonalActiveQuestPage: '',
-    lastSeasonalCompletedQuestPage: '',
-    lastSeasonalNotStartedQuestPage: '',
-
-    enableLogColoring: false,
-    enableChatParsing: false,
-    enableCreatureColoring: false,
-    showCombatLog: false,
-    showCreatureInfo: false,
-    keepLogs: false,
-
-    showExtraLinks: false,
-    huntingBuffs: 'Doubler,Librarian,Adept Learner,Merchant,' +
-      'Treasure Hunter,Animal Magnetism,Conserve',
-    huntingBuffsName: 'default',
-    huntingBuffs2: 'Deflect',
-    huntingBuffs2Name: 'PvP',
-    huntingBuffs3: 'Super Elite Slayer',
-    huntingBuffs3Name: 'SE',
-    showHuntingBuffs: false,
-    moveFSBox: false,
-    moveDailyQuest: false,
-
-    guildSelf: '',
-    guildSelfMessage: 'Member of your own guild!',
-    guildFrnd: '',
-    guildFrndMessage: 'Do not attack - Guild is friendly!',
-    guildPast: '',
-    guildPastMessage: 'Do not attack - You\'ve been in that guild once!',
-    guildEnmy: '',
-    guildEnmyMessage: 'Enemy guild. Attack at will!',
-    goldRecipient: '',
-    goldAmount: '',
-    sendGoldonWorld: false,
-
-    hideQuests: false,
-    hideQuestNames: '',
-    hideRecipes: false,
-    hideRecipeNames: '',
-    enableGuildInfoWidgets: false,
-    enableOnlineAlliesWidgets: false,
-    guildOnlineRefreshTime: 300,
-    hideGuildInfoSecureTrade: false,
-    hideGuildInfoTrade: false,
-    hideGuildInfoMessage: false,
-    hideGuildInfoBuff: false,
-
-    buyBuffsGreeting: 'Hello {playername}, can I buy {buffs} for {cost} please?',
-    renderSelfBio: false,
-    bioEditLines: 10,
-    renderOtherBios: false,
-    playNewMessageSound: false,
-    showSpeakerOnWorld: false,
-    defaultMessageSound: 'https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav',
-    highlightPlayersNearMyLvl: false,
-    highlightGvGPlayersNearMyLvl: false,
-    detailedConflictInfo: false,
-    gameHelpLink: true,
-    navigateToLogAfterMsg: false,
-
-    enableAllyOnlineList: false,
-    enableEnemyOnlineList: false,
-    allyEnemyOnlineRefreshTime: 300,
-    moveGuildList: false,
-    moveOnlineAlliesList: false,
-
-    hideMatchesForCompletedMoves: false,
-    doNotKillList: '',
-    enableBioCompressor: false,
-    maxCompressedCharacters: 250,
-    maxCompressedLines: 10,
-
-    currentGoldSentTotal: 0,
-    keepBuffLog: false,
-    buffLog: '',
-
-    enableActiveBountyList: false,
-    bountyListRefreshTime: 300,
-    enableWantedList: false,
-    wantedNames: '',
-    wantedGuildMembers: false,
-    bwNeedsRefresh: true,
-
-    fsboxlog: false,
-    fsboxcontent: '',
-    itemRecipient: '',
-    quickLinks: '[]',
-    enableAttackHelper: false,
-    minGroupLevel: 1,
-    combatEvaluatorBias: 0,
-    huntingMode: false,
-    enabledHuntingMode: '1',
-    hideRelicOffline: false,
-
-    enterForSendMessage: false,
-    trackKillStreak: false,
-    storeLastQuestPage: false,
-    addAttackLinkToLog: false,
-    showStatBonusTotal: false,
-
-    newGuildLogHistoryPages: 3,
-    useNewGuildLog: false,
-    enhanceChatTextEntry: false,
-
-    ajaxifyRankControls: false,
-
-    enableMaxGroupSizeToJoin: false,
-    maxGroupSizeToJoin: 11,
-
-    enableTempleAlert: false,
-    enableUpgradeAlert: false,
-    enableComposingAlert: false,
-    autoFillMinBidPrice: false,
-    showPvPSummaryInLog: false,
-    enableQuickDrink: false,
-    enhanceOnlineDots: false,
-    hideBuffSelected: false,
-    hideHelperMenu: false,
-    keepHelperMenuOnScreen: true,
-    draggableHelperMenu: false,
-    quickLinksTopPx: 22,
-    quickLinksLeftPx: 0,
-    draggableQuickLinks: false,
-    showNextQuestSteps: true,
-
-    showRecallMessages: true,
-    showRelicMessages: true,
-    showMercenaryMessages: true,
-    showGroupCombatMessages: true,
-    showDonationMessages: true,
-    showRankingMessages: true,
-    showGvGMessages: true,
-    showTaggingMessages: true,
-    showTitanMessages: true,
-
-    showQuickDropLinks: false,
-
-    onlinePlayerMinLvl: 1,
-    onlinePlayerMaxLvl: 9999,
-    arenaMinLvl: 1,
-    arenaMaxLvl: 9999,
-    showMonsterLog: false,
-    lastTempleCheck: 0,
-    needToPray: false,
-    lastChatCheck: '0',
-    lastGuildLogCheck: '0',
-    lastOutBoxCheck: '0',
-    lastPlayerLogCheck: '0',
-    showAdmin: false,
-    alliestotal: 0,
-    enemiestotal: 0,
-    footprints: false,
-    hideNonPlayerGuildLogMessages: false,
-    listOfAllies: '',
-    listOfEnemies: '',
-    contactList: '',
-    lastUpgradeCheck: 0,
-    needToDoUpgrade: false,
-    characterVirtualLevel: 0,
-    guildLogoControl: false,
-    statisticsControl: false,
-    guildStructureControl: false,
-    lastMembrListCheck: 0,
-    disableItemColoring: true,
-    showQuickSendLinks: false,
-    needToCompose: false,
-    lastComposeCheck: 0,
-    lastOnlineCheck: 0,
-    bountyList: '',
-    wantedList: '',
-    lowestLevelInTop250: 0,
-
-    quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
-
-    sendClasses: '["Composed Pots", "13699"], ["Amber", "5611"], ' +
-      '["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
-      '["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ' +
-      '["Dark Shade", "5564"], ["Deathbloom", "9140"], ' +
-      '["Deathly Mold", "9153"], ["Greenskin Fungus", "9148"], ' +
-      '["Heffle", "5565"], ["Jademare", "5566"], ' +
-      '["Ruby Thistle", "9143"], ["Toad Corpse","9288"], ' +
-      '["Trinettle", "5567"], ["Viridian Vine", "9151"], ' +
-      '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
-
-    quickSearchList: defQuickSearch,
-
-    arenaMoves: '[]',
-    arenaMatches: '[]',
-    CombatLog: '',
-    hideChampionsGroup: false,
-    hideElitesGroup: false,
-    hideSEGroup: false,
-    hideTitanGroup: false,
-    hideLegendaryGroup: false,
-    disableDeactivatePrompts: false,
-    moveComposingButtons: false,
-    expandMenuOnKeyPress: false,
-    disableBreakdownPrompts: false,
-    collapseNewsArchive: false,
-    collapseHallPosts: false,
-    lastmyGuildLogCheck: 0,
-    hideSubLvlCreature: false,
-    hidePlayerActions: false,
-    extraProfile: '',
-    textToSearchFor: '',
-    lastLadderReset: 0,
-    disableQuickWearPrompts: false,
-    enableGuildActivityTracker: false,
-    enableSeTracker: false,
-    showTitanInfo: false,
-    highlightPvpProtection: false,
-    showBuffInfo: false
-  };
+  var lastScavPage="";var lastActiveQuestPage="";var lastNormalActiveQuestPage="";var lastNormalCompletedQuestPage="";var lastNormalNotStartedQuestPage="";var lastSeasonalActiveQuestPage="";var lastSeasonalCompletedQuestPage="";var lastSeasonalNotStartedQuestPage="";var enableLogColoring=false;var enableChatParsing=false;var enableCreatureColoring=false;var showCombatLog=false;var showCreatureInfo=false;var keepLogs=false;var showExtraLinks=false;var huntingBuffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve";var huntingBuffsName="default";var huntingBuffs2="Deflect";var huntingBuffs2Name="PvP";var huntingBuffs3="Super Elite Slayer";var huntingBuffs3Name="SE";var showHuntingBuffs=false;var moveFSBox=false;var moveDailyQuest=false;var guildSelf="";var guildSelfMessage="Member of your own guild!";var guildFrnd="";var guildFrndMessage="Do not attack - Guild is friendly!";var guildPast="";var guildPastMessage="Do not attack - You've been in that guild once!";var guildEnmy="";var guildEnmyMessage="Enemy guild. Attack at will!";var goldRecipient="";var goldAmount="";var sendGoldonWorld=false;var hideQuests=false;var hideQuestNames="";var hideRecipes=false;var hideRecipeNames="";var enableGuildInfoWidgets=false;var enableOnlineAlliesWidgets=false;var guildOnlineRefreshTime=300;var hideGuildInfoSecureTrade=false;var hideGuildInfoTrade=false;var hideGuildInfoMessage=false;var hideGuildInfoBuff=false;var buyBuffsGreeting="Hello {playername}, can I buy {buffs} for {cost} please?";var renderSelfBio=false;var bioEditLines=10;var renderOtherBios=false;var playNewMessageSound=false;var showSpeakerOnWorld=false;var defaultMessageSound="https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav";var highlightPlayersNearMyLvl=false;var highlightGvGPlayersNearMyLvl=false;var detailedConflictInfo=false;var gameHelpLink=true;var navigateToLogAfterMsg=false;var enableAllyOnlineList=false;var enableEnemyOnlineList=false;var allyEnemyOnlineRefreshTime=300;var moveGuildList=false;var moveOnlineAlliesList=false;var hideMatchesForCompletedMoves=false;var doNotKillList="";var enableBioCompressor=false;var maxCompressedCharacters=250;var maxCompressedLines=10;var currentGoldSentTotal=0;var keepBuffLog=false;var buffLog="";var enableActiveBountyList=false;var bountyListRefreshTime=300;var enableWantedList=false;var wantedNames="";var wantedGuildMembers=false;var bwNeedsRefresh=true;var fsboxlog=false;var fsboxcontent="";var itemRecipient="";var quickLinks="[]";var enableAttackHelper=false;var minGroupLevel=1;var combatEvaluatorBias=0;var huntingMode=false;var enabledHuntingMode="1";var hideRelicOffline=false;var enterForSendMessage=false;var trackKillStreak=false;var storeLastQuestPage=false;var addAttackLinkToLog=false;var showStatBonusTotal=false;var newGuildLogHistoryPages=3;var useNewGuildLog=false;var enhanceChatTextEntry=false;var ajaxifyRankControls=false;var enableMaxGroupSizeToJoin=false;var maxGroupSizeToJoin=11;var enableTempleAlert=false;var enableUpgradeAlert=false;var enableComposingAlert=false;var autoFillMinBidPrice=false;var showPvPSummaryInLog=false;var enableQuickDrink=false;var enhanceOnlineDots=false;var hideBuffSelected=false;var hideHelperMenu=false;var keepHelperMenuOnScreen=true;var draggableHelperMenu=false;var quickLinksTopPx=22;var quickLinksLeftPx=0;var draggableQuickLinks=false;var showNextQuestSteps=true;var showRecallMessages=true;var showRelicMessages=true;var showMercenaryMessages=true;var showGroupCombatMessages=true;var showDonationMessages=true;var showRankingMessages=true;var showGvGMessages=true;var showTaggingMessages=true;var showTitanMessages=true;var showQuickDropLinks=false;var onlinePlayerMinLvl=1;var onlinePlayerMaxLvl=9999;var arenaMinLvl=1;var arenaMaxLvl=9999;var showMonsterLog=false;var lastTempleCheck=0;var needToPray=false;var lastChatCheck="0";var lastGuildLogCheck="0";var lastOutBoxCheck="0";var lastPlayerLogCheck="0";var showAdmin=false;var alliestotal=0;var enemiestotal=0;var footprints=false;var hideNonPlayerGuildLogMessages=false;var listOfAllies="";var listOfEnemies="";var contactList="";var lastUpgradeCheck=0;var needToDoUpgrade=false;var characterVirtualLevel=0;var guildLogoControl=false;var statisticsControl=false;var guildStructureControl=false;var lastMembrListCheck=0;var disableItemColoring=true;var showQuickSendLinks=false;var needToCompose=false;var lastComposeCheck=0;var lastOnlineCheck=0;var bountyList="";var wantedList="";var lowestLevelInTop250=0;var quickMsg="[\"Thank you very much ^_^\",\"Happy hunting, {playername}\"]";var sendClasses="[\"Composed Pots\", \"13699\"], [\"Amber\", \"5611\"], [\"Amethyst Weed\", \"9145\"], [\"Blood Bloom\", \"5563\"], [\"Cerulean Rose\", \"9156\"], [\"Coleoptera Body\", \"9287\"], [\"Dark Shade\", \"5564\"], [\"Deathbloom\", \"9140\"], [\"Deathly Mold\", \"9153\"], [\"Greenskin Fungus\", \"9148\"], [\"Heffle\", \"5565\"], [\"Jademare\", \"5566\"], [\"Ruby Thistle\", \"9143\"], [\"Toad Corpse\",\"9288\"], [\"Trinettle\", \"5567\"], [\"Viridian Vine\", \"9151\"], [\"Mortar & Pestle\", \"9157\"], [\"Beetle Juice\", \"9158\"]";var quickSearchList=[{category:"Plants",searchname:"Amber",nickname:""},{category:"Plants",searchname:"Blood Bloom",nickname:""},{category:"Plants",searchname:"Jademare",nickname:""},{category:"Plants",searchname:"Dark Shade",nickname:""},{category:"Plants",searchname:"Trinettle",nickname:""},{category:"Plants",searchname:"Heffle Wart",nickname:""},{category:"Potions",searchname:"Sludge Brew",nickname:"DC 200",displayOnAH:true},{category:"Potions",searchname:"Potion of Black Death",nickname:"DC 225",displayOnAH:true},{category:"Potions",searchname:"Potion of Aid",nickname:"Assist",displayOnAH:true},{category:"Potions",searchname:"Potion of Supreme Doubling",nickname:"DB 450",displayOnAH:true},{category:"Potions",searchname:"Potion of Acceleration",nickname:"DB 500",displayOnAH:true},{category:"Potions",searchname:"Potion of Lesser Death Dealer",nickname:"DD",displayOnAH:true},{category:"Potions",searchname:"Runic Potion",nickname:"FI 250",displayOnAH:true},{category:"Potions",searchname:"Potion of the Bookworm",nickname:"Lib 225",displayOnAH:true},{category:"Potions",searchname:"Potion of Truth",nickname:"EW 1k",displayOnAH:true},{category:"Potions",searchname:"Dull Edge",nickname:"DE 25",displayOnAH:true},{category:"Potions",searchname:"Notched Blade",nickname:"DE 80",displayOnAH:true},{category:"Potions",searchname:"Potion of Death",nickname:"DW 125",displayOnAH:true},{category:"Potions",searchname:"Potion of Decay",nickname:"WI 150",displayOnAH:true},{category:"Potions",searchname:"Potion of Fatality",nickname:"WI 350",displayOnAH:true},{category:"Potions",searchname:"Potion of Annihilation",nickname:"DW 150",displayOnAH:true},{category:"Potions",searchname:"Potion of the Wise",nickname:"Lib 200",displayOnAH:true},{category:"Potions",searchname:"Potion of Shattering",nickname:"SA",displayOnAH:true},{category:"Potions",searchname:"Dragons Blood Potion",nickname:"ZK 200",displayOnAH:true},{category:"Potions",searchname:"Berserkers Potion",nickname:"ZK 300",displayOnAH:true},{category:"Potions",searchname:"Potion of Fury",nickname:"ZK 350",displayOnAH:true},{category:"Potions",searchname:"Potion of Supreme Luck",nickname:"FI 1k",displayOnAH:true}];var arenaMoves="[]";var arenaMatches="[]";var CombatLog="";var hideChampionsGroup=false;var hideElitesGroup=false;var hideSEGroup=false;var hideTitanGroup=false;var hideLegendaryGroup=false;var disableDeactivatePrompts=false;var moveComposingButtons=false;var expandMenuOnKeyPress=false;var disableBreakdownPrompts=false;var collapseNewsArchive=false;var collapseHallPosts=false;var lastmyGuildLogCheck=0;var hideSubLvlCreature=false;var hidePlayerActions=false;var extraProfile="";var textToSearchFor="";var lastLadderReset=0;var disableQuickWearPrompts=false;var enableGuildActivityTracker=false;var enableSeTracker=false;var showTitanInfo=false;var highlightPvpProtection=false;var showBuffInfo=false;var defaults = {lastScavPage:lastScavPage,lastActiveQuestPage:lastActiveQuestPage,lastNormalActiveQuestPage:lastNormalActiveQuestPage,lastNormalCompletedQuestPage:lastNormalCompletedQuestPage,lastNormalNotStartedQuestPage:lastNormalNotStartedQuestPage,lastSeasonalActiveQuestPage:lastSeasonalActiveQuestPage,lastSeasonalCompletedQuestPage:lastSeasonalCompletedQuestPage,lastSeasonalNotStartedQuestPage:lastSeasonalNotStartedQuestPage,enableLogColoring:enableLogColoring,enableChatParsing:enableChatParsing,enableCreatureColoring:enableCreatureColoring,showCombatLog:showCombatLog,showCreatureInfo:showCreatureInfo,keepLogs:keepLogs,showExtraLinks:showExtraLinks,huntingBuffs:huntingBuffs,huntingBuffsName:huntingBuffsName,huntingBuffs2:huntingBuffs2,huntingBuffs2Name:huntingBuffs2Name,huntingBuffs3:huntingBuffs3,huntingBuffs3Name:huntingBuffs3Name,showHuntingBuffs:showHuntingBuffs,moveFSBox:moveFSBox,moveDailyQuest:moveDailyQuest,guildSelf:guildSelf,guildSelfMessage:guildSelfMessage,guildFrnd:guildFrnd,guildFrndMessage:guildFrndMessage,guildPast:guildPast,guildPastMessage:guildPastMessage,guildEnmy:guildEnmy,guildEnmyMessage:guildEnmyMessage,goldRecipient:goldRecipient,goldAmount:goldAmount,sendGoldonWorld:sendGoldonWorld,hideQuests:hideQuests,hideQuestNames:hideQuestNames,hideRecipes:hideRecipes,hideRecipeNames:hideRecipeNames,enableGuildInfoWidgets:enableGuildInfoWidgets,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets,guildOnlineRefreshTime:guildOnlineRefreshTime,hideGuildInfoSecureTrade:hideGuildInfoSecureTrade,hideGuildInfoTrade:hideGuildInfoTrade,hideGuildInfoMessage:hideGuildInfoMessage,hideGuildInfoBuff:hideGuildInfoBuff,buyBuffsGreeting:buyBuffsGreeting,renderSelfBio:renderSelfBio,bioEditLines:bioEditLines,renderOtherBios:renderOtherBios,playNewMessageSound:playNewMessageSound,showSpeakerOnWorld:showSpeakerOnWorld,defaultMessageSound:defaultMessageSound,highlightPlayersNearMyLvl:highlightPlayersNearMyLvl,highlightGvGPlayersNearMyLvl:highlightGvGPlayersNearMyLvl,detailedConflictInfo:detailedConflictInfo,gameHelpLink:gameHelpLink,navigateToLogAfterMsg:navigateToLogAfterMsg,enableAllyOnlineList:enableAllyOnlineList,enableEnemyOnlineList:enableEnemyOnlineList,allyEnemyOnlineRefreshTime:allyEnemyOnlineRefreshTime,moveGuildList:moveGuildList,moveOnlineAlliesList:moveOnlineAlliesList,hideMatchesForCompletedMoves:hideMatchesForCompletedMoves,doNotKillList:doNotKillList,enableBioCompressor:enableBioCompressor,maxCompressedCharacters:maxCompressedCharacters,maxCompressedLines:maxCompressedLines,currentGoldSentTotal:currentGoldSentTotal,keepBuffLog:keepBuffLog,buffLog:buffLog,enableActiveBountyList:enableActiveBountyList,bountyListRefreshTime:bountyListRefreshTime,enableWantedList:enableWantedList,wantedNames:wantedNames,wantedGuildMembers:wantedGuildMembers,bwNeedsRefresh:bwNeedsRefresh,fsboxlog:fsboxlog,fsboxcontent:fsboxcontent,itemRecipient:itemRecipient,quickLinks:quickLinks,enableAttackHelper:enableAttackHelper,minGroupLevel:minGroupLevel,combatEvaluatorBias:combatEvaluatorBias,huntingMode:huntingMode,enabledHuntingMode:enabledHuntingMode,hideRelicOffline:hideRelicOffline,enterForSendMessage:enterForSendMessage,trackKillStreak:trackKillStreak,storeLastQuestPage:storeLastQuestPage,addAttackLinkToLog:addAttackLinkToLog,showStatBonusTotal:showStatBonusTotal,newGuildLogHistoryPages:newGuildLogHistoryPages,useNewGuildLog:useNewGuildLog,enhanceChatTextEntry:enhanceChatTextEntry,ajaxifyRankControls:ajaxifyRankControls,enableMaxGroupSizeToJoin:enableMaxGroupSizeToJoin,maxGroupSizeToJoin:maxGroupSizeToJoin,enableTempleAlert:enableTempleAlert,enableUpgradeAlert:enableUpgradeAlert,enableComposingAlert:enableComposingAlert,autoFillMinBidPrice:autoFillMinBidPrice,showPvPSummaryInLog:showPvPSummaryInLog,enableQuickDrink:enableQuickDrink,enhanceOnlineDots:enhanceOnlineDots,hideBuffSelected:hideBuffSelected,hideHelperMenu:hideHelperMenu,keepHelperMenuOnScreen:keepHelperMenuOnScreen,draggableHelperMenu:draggableHelperMenu,quickLinksTopPx:quickLinksTopPx,quickLinksLeftPx:quickLinksLeftPx,draggableQuickLinks:draggableQuickLinks,showNextQuestSteps:showNextQuestSteps,showRecallMessages:showRecallMessages,showRelicMessages:showRelicMessages,showMercenaryMessages:showMercenaryMessages,showGroupCombatMessages:showGroupCombatMessages,showDonationMessages:showDonationMessages,showRankingMessages:showRankingMessages,showGvGMessages:showGvGMessages,showTaggingMessages:showTaggingMessages,showTitanMessages:showTitanMessages,showQuickDropLinks:showQuickDropLinks,onlinePlayerMinLvl:onlinePlayerMinLvl,onlinePlayerMaxLvl:onlinePlayerMaxLvl,arenaMinLvl:arenaMinLvl,arenaMaxLvl:arenaMaxLvl,showMonsterLog:showMonsterLog,lastTempleCheck:lastTempleCheck,needToPray:needToPray,lastChatCheck:lastChatCheck,lastGuildLogCheck:lastGuildLogCheck,lastOutBoxCheck:lastOutBoxCheck,lastPlayerLogCheck:lastPlayerLogCheck,showAdmin:showAdmin,alliestotal:alliestotal,enemiestotal:enemiestotal,footprints:footprints,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages,listOfAllies:listOfAllies,listOfEnemies:listOfEnemies,contactList:contactList,lastUpgradeCheck:lastUpgradeCheck,needToDoUpgrade:needToDoUpgrade,characterVirtualLevel:characterVirtualLevel,guildLogoControl:guildLogoControl,statisticsControl:statisticsControl,guildStructureControl:guildStructureControl,lastMembrListCheck:lastMembrListCheck,disableItemColoring:disableItemColoring,showQuickSendLinks:showQuickSendLinks,needToCompose:needToCompose,lastComposeCheck:lastComposeCheck,lastOnlineCheck:lastOnlineCheck,bountyList:bountyList,wantedList:wantedList,lowestLevelInTop250:lowestLevelInTop250,quickMsg:quickMsg,sendClasses:sendClasses,quickSearchList:quickSearchList,arenaMoves:arenaMoves,arenaMatches:arenaMatches,CombatLog:CombatLog,hideChampionsGroup:hideChampionsGroup,hideElitesGroup:hideElitesGroup,hideSEGroup:hideSEGroup,hideTitanGroup:hideTitanGroup,hideLegendaryGroup:hideLegendaryGroup,disableDeactivatePrompts:disableDeactivatePrompts,moveComposingButtons:moveComposingButtons,expandMenuOnKeyPress:expandMenuOnKeyPress,disableBreakdownPrompts:disableBreakdownPrompts,collapseNewsArchive:collapseNewsArchive,collapseHallPosts:collapseHallPosts,lastmyGuildLogCheck:lastmyGuildLogCheck,hideSubLvlCreature:hideSubLvlCreature,hidePlayerActions:hidePlayerActions,extraProfile:extraProfile,textToSearchFor:textToSearchFor,lastLadderReset:lastLadderReset,disableQuickWearPrompts:disableQuickWearPrompts,enableGuildActivityTracker:enableGuildActivityTracker,enableSeTracker:enableSeTracker,showTitanInfo:showTitanInfo,highlightPvpProtection:highlightPvpProtection,showBuffInfo:showBuffInfo};
 
   var reviver = [
     ['S]', function(value) {return value.substr(2);}],
@@ -854,6 +601,9 @@
   }
 
   function getValue(name) {
+    if (isUndefined(defaults[name])) {
+      console.log('No default setting available', name, defaults[name]); // eslint-disable-line no-console
+    }
     return fshGetValue(name, defaults[name]);
   }
 
@@ -1047,7 +797,7 @@
     el.innerHTML = '<a href="' + cmdUrl + 'settings">Game Help</a>';
   }
 
-  function gameHelpLink() {
+  function gameHelpLink$1() {
     querySelectorArray('#pCR h3').filter(contains('Game Help'))
       .forEach(toSettings);
   }
@@ -1778,7 +1528,7 @@
     return guildId;
   }
 
-  var highlightPlayersNearMyLvl;
+  var highlightPlayersNearMyLvl$1;
   var table;
 
   function guildNumber(html) {
@@ -1787,7 +1537,7 @@
   }
 
   var highlightTests = [
-    function() {return highlightPlayersNearMyLvl;},
+    function() {return highlightPlayersNearMyLvl$1;},
     function(data) {return guildNumber(data[0]) !== currentGuildId();},
     function(data) {return intValue(data[2]) >= pvpLowerLevel;},
     function(data) {return intValue(data[2]) <= pvpUpperLevel;}
@@ -1825,7 +1575,7 @@
   }
 
   function doTable(context, onlineData) {
-    highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
+    highlightPlayersNearMyLvl$1 = getValue('highlightPlayersNearMyLvl');
     table = $('#fshInv', context).DataTable(tableOpts(onlineData));
   }
 
@@ -2154,7 +1904,7 @@
   }
 
   var currentPlayerId;
-  var hideRecipes = [];
+  var hideRecipes$1 = [];
 
   function itemImg(itm) {
     return '<div class="rmItem"><img class="tip-dynamic" ' +
@@ -2205,7 +1955,7 @@
   }
 
   function hidden(recipe) {
-    return !hideRecipes.includes(recipe.name);
+    return !hideRecipes$1.includes(recipe.name);
   }
 
   function makeRow$1(recipe) {
@@ -2239,7 +1989,7 @@
   function generateRecipeTable(output, recipebook) { // Legacy
     if (recipebook) {
       if (getValue('hideRecipes')) {
-        hideRecipes = shouldBeArray('hideRecipeNames');
+        hideRecipes$1 = shouldBeArray('hideRecipeNames');
       }
       drawRecipeTable(output, recipebook);
     }
@@ -2929,327 +2679,7 @@
     return isChecked(getValue(pref));
   }
 
-  /* eslint-disable max-lines */
-  var mySimpleCheckboxes = {
-    moveGuildList: {
-      helpTitle: 'Move Guild Info List',
-      helpText: 'This will Move the Guild Info List higher ' +
-        'on the bar on the right'
-    },
-    moveOnlineAlliesList: {
-      helpTitle: 'Move Online Allies List',
-      helpText: 'This will Move the Online Allies List higher ' +
-        'on the bar on the right'
-    },
-    enableOnlineAlliesWidgets: {
-      helpTitle: 'Enable Online Allies Widgets',
-      helpText: 'Enabling this option will enable the Allies List ' +
-        'Widgets (coloring on the Allies List panel)'
-    },
-    moveFSBox: {
-      helpTitle: 'Move FS box',
-      helpText: 'This will move the FS box to the left, under the menu, ' +
-        'for better visibility (unless it is already hidden.)'
-    },
-    moveDailyQuest: {
-      helpTitle: 'Move Daily Quest',
-      helpText: 'This will move the Daily Quest to the left, under the menu, ' +
-        'for better visibility (unless it is already hidden.)'
-    },
-    gameHelpLink: {
-      helpTitle: '&quot;Game Help&quot; Settings Link',
-      helpText: 'This turns the Game Help text in the lower ' +
-        'right box into a link to this settings page.'
-    },
-    enableTempleAlert: {
-      helpTitle: 'Enable Temple Alert',
-      helpText: 'Puts an alert on the LHS if you have not ' +
-        'prayed at the temple today.',
-      network: true
-    },
-    enableUpgradeAlert: {
-      helpTitle: 'Enable Gold Upgrade Alert',
-      helpText: 'Puts an alert on the LHS if you have not upgraded your ' +
-        'stamina with gold today.',
-      network: true
-    },
-    enableComposingAlert: {
-      helpTitle: 'Enable Composing Alert',
-      helpText: 'Puts an alert on the LHS if you have composing ' +
-        'slots available.',
-      network: true
-    },
-    enhanceOnlineDots: {
-      helpTitle: 'Enhance Online Dots',
-      helpText: 'Enhances the green/grey dots by player names to show ' +
-        'online/offline status.'
-    },
-    hideBuffSelected: {
-      helpTitle: 'Hide Buff Selected',
-      helpText: 'Hides the buff selected functionality in the online allies ' +
-        'and guild info section.'
-    },
-    hideHelperMenu: {
-      helpTitle: 'Hide Helper Menu',
-      helpText: 'Hides the helper menu from top left.'
-    },
-    keepHelperMenuOnScreen: {
-      helpTitle: 'Keep Helper Menu On Screen',
-      helpText: 'Keeps helper menu on screen as you scroll (helper ' +
-        'menu must be enabled to work). Also works with quick links.'
-    },
-    showAdmin: {
-      helpTitle: 'Show rank controls',
-      helpText: 'Show ranking controls for guild managemenet in member ' +
-        'profile page - this works for guild founders only'
-    },
-    ajaxifyRankControls: {
-      helpTitle: 'AJAXify rank controls',
-      helpText: 'Enables guild founders with ranking rights to change rank ' +
-        'positions without a screen refresh.'
-    },
-    detailedConflictInfo: {
-      helpTitle: 'Show Conflict Details',
-      helpText: 'Inserts detailed conflict information onto your guild\'s ' +
-        'manage page. Currently displays the target guild as well as ' +
-        'the current score.',
-      network: true
-    },
-    showCombatLog: {
-      helpTitle: 'Show Combat Log',
-      helpText: 'This will show the combat log for each automatic ' +
-        'battle below the monster list.'
-    },
-    enableCreatureColoring: {
-      helpTitle: 'Color Special Creatures',
-      helpText: 'Creatures will be colored according to their rarity. ' +
-        'Champions will be colored green, Elites yellow and Super Elites red.'
-    },
-    showCreatureInfo: {
-      helpTitle: 'Show Creature Info',
-      helpText: 'This will show the information from the view creature ' +
-        'link when you mouseover the link.',
-      network: true
-    },
-    fsboxlog: {
-      helpTitle: 'Enable FS Box Log',
-      helpText: 'This enables the functionality to keep a log of ' +
-        'recent seen FS Box message.'
-    },
-    keepBuffLog: {
-      helpTitle: 'Enable Buff Log',
-      helpText: 'This enables the functionality to keep a log of ' +
-        'recently casted buffs'
-    },
-    huntingMode: {
-      helpTitle: 'Enable Hunting Mode',
-      helpText: 'This disable menu and some visual features to ' +
-        'speed up the calf.'
-    },
-    hideNonPlayerGuildLogMessages: {
-      helpTitle: 'Cleanup Guild Log',
-      helpText: 'Any log messages not related to the current player ' +
-        'will be dimmed (e.g. recall messages from guild store)'
-    },
-    useNewGuildLog: {
-      helpTitle: 'Use New Guild Log',
-      helpText: 'This will replace the standard guild log with the ' +
-        'helper version of the guild log.'
-    },
-    enableLogColoring: {
-      helpTitle: 'Enable Log Coloring',
-      helpText: 'Three logs will be colored if this is enabled, ' +
-        'Guild Chat, Guild Log and Player Log. It will show any new ' +
-        'messages in yellow and anything 20 minutes old ones in brown.'
-    },
-    enableChatParsing: {
-      helpTitle: 'Enable Chat Parsing',
-      helpText: 'If this is checked, your character log will be parsed for ' +
-        'chat messages and show the chat message on the screen if you reply ' +
-        'to that message.'
-    },
-    addAttackLinkToLog: {
-      helpTitle: 'Add attack link to log',
-      helpText: 'If checked, this will add an Attack link to each message ' +
-        'in your log.'
-    },
-    enhanceChatTextEntry: {
-      helpTitle: 'Enhance Chat Text Entry',
-      helpText: 'If checked, this will enhance the entry field for entering ' +
-        'chat text on the guild chat page.'
-    },
-    showExtraLinks: {
-      helpTitle: 'Show Extra Links',
-      helpText: 'If checked, this will add AH and UFSG ' +
-        'links to equipment screens.'
-    },
-    disableItemColoring: {
-      helpTitle: 'Disable Item Coloring',
-      helpText: 'Disable the code that colors the item text based on the ' +
-        'rarity of the item.'
-    },
-    showQuickDropLinks: {
-      helpTitle: 'Show Quick Drop Item',
-      helpText: 'This will show a link beside each item which gives the ' +
-        'option to drop the item.  WARNING: NO REFUNDS ON ERROR'
-    },
-    storeLastQuestPage: {
-      helpTitle: 'Store Last Quest Page',
-      helpText: 'This will store the page and sort order of each of the ' +
-        'three quest selection pages for next time you visit. If you need ' +
-        'to reset the links, turn this option off, click on the link you ' +
-        'wish to reset and then turn this option back on again.'
-    },
-    showNextQuestSteps: {
-      helpTitle: 'Show Next Quest Steps',
-      helpText: 'Shows all quest steps in the UFSG.'
-    },
-    renderSelfBio: {
-      helpTitle: 'Render self bio',
-      helpText: 'This determines if your own bio will render the FSH ' +
-        'special bio tags.'
-    },
-    renderOtherBios: {
-      helpTitle: 'Render other players&#39; bios',
-      helpText: 'This determines if other players bios will render the FSH ' +
-        'special bio tags.'
-    },
-    showStatBonusTotal: {
-      helpTitle: 'Show Stat Bonus Total',
-      helpText: 'This will show a total of the item stats when you ' +
-        'mouseover an item on the profile screen.'
-    },
-    enableQuickDrink: {
-      helpTitle: 'Enable Quick Drink/Wear',
-      helpText: 'This enables the quick drink/wear functionality on the ' +
-        'profile page.'
-    },
-    disableDeactivatePrompts: {
-      helpTitle: 'Disable Deactivate Prompts',
-      helpText: 'This disables the prompts for deactivating buffs on ' +
-        'the profile page.'
-    },
-    enableAttackHelper: {
-      helpTitle: 'Show Attack Helper',
-      helpText: 'This will show extra information on the attack player ' +
-        'screen about stats and buffs on you and your target',
-      network: true
-    },
-    showPvPSummaryInLog: {
-      helpTitle: 'Show PvP Summary in Log',
-      helpText: 'This will show a summary of the PvP results in the log.',
-      network: true
-    },
-    autoFillMinBidPrice: {
-      helpTitle: 'Auto Fill Min Bid Price',
-      helpText: 'This enables the functionality to automatically fill in ' +
-        'the min bid price so you just have to hit bid and your bid will ' +
-        'be placed.'
-    },
-    hideRelicOffline: {
-      helpTitle: 'Hide Relic Offline',
-      helpText: 'This hides the relic offline defenders checker.'
-    },
-    enterForSendMessage: {
-      helpTitle: 'Enter Sends Message',
-      helpText: 'If enabled, will send a message from the Send Message ' +
-        'screen if you press enter. You can still insert a new line by ' +
-        'holding down shift when you press enter.'
-    },
-    navigateToLogAfterMsg: {
-      helpTitle: 'Navigate After Message Sent',
-      helpText: 'If enabled, will navigate to the referring page after a ' +
-        'successful message is sent. Example:  if you are on the world ' +
-        'screen and hit message on the guild info panel after you send the ' +
-        'message, it will return you to the world screen.'
-    },
-    moveComposingButtons: {
-      helpTitle: 'Move Composing Buttons',
-      helpText: 'If enabled, will move composing buttons to the top of ' +
-        'the composing screen.'
-    },
-    draggableHelperMenu: {
-      helpTitle: 'Draggable Helper Menu',
-      helpText: 'If enabled, allows the helper menu to ' +
-        'be dragged around the screen.'
-    },
-    draggableQuickLinks: {
-      helpTitle: 'Draggable Quick Links',
-      helpText: 'If enabled, allows the quick link box to ' +
-        'be dragged around the screen.'
-    },
-    expandMenuOnKeyPress: {
-      helpTitle: 'Expand Menu on Key Press',
-      helpText: 'If enabled, expands the left hand menu ' +
-        'when you use hotkeys.'
-    },
-    disableBreakdownPrompts: {
-      helpTitle: 'Disable Breakdown Prompts',
-      helpText: 'If enabled, will disable prompts when you breakdown items.' +
-        '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
-    },
-    collapseNewsArchive: {
-      helpTitle: 'Collapse News Archive',
-      helpText: 'If enabled, will collapse news archives.'
-    },
-    collapseHallPosts: {
-      helpTitle: 'Collapse Hall Posts',
-      helpText: 'If enabled, will collapse hall posts.'
-    },
-    hideSubLvlCreature: {
-      helpTitle: 'Hide Sub Level Creatures',
-      helpText: 'If enabled, will hide creatures that are ' +
-        'lower than the current realm level.'
-    },
-    hidePlayerActions: {
-      helpTitle: 'Hide Player Actions',
-      helpText: 'If enabled, will hide player actions.'
-    },
-    disableQuickWearPrompts: {
-      helpTitle: 'Disable Use/Ext Prompts',
-      helpText: 'If enabled, will disable prompts when you Use/Ext items.' +
-        '<br>NO REFUNDS OR DO-OVERS! Use at own risk.',
-      title: 'Disable Use/Ext<br>Prompts'
-    },
-    enableGuildActivityTracker: {
-      helpTitle: 'Enable Guild Activity Tracker',
-      helpText: 'If enabled, will track guild member activity over time.',
-      network: true,
-      title: 'Enable Tracker'
-    },
-    enableSeTracker: {
-      helpTitle: 'Enable SE Tracker',
-      helpText: 'If enabled, will track the last time each SE was killed.<br>' +
-        'This is DIFFERENT from the usual FSH network activity.<br>' +
-        'When this is enabled, if you have ANY game page open in a<br>' +
-        'browser tab it will scan the SE Log every 10 minutes.<br>' +
-        'You do not need auto-refresh for this to work.',
-      network: true
-    },
-    showMonsterLog: {
-      helpTitle: 'Keep Creature Log',
-      helpText: 'This will show the creature log for each creature you see ' +
-        'when you travel.',
-      network: true
-    },
-    showTitanInfo: {
-      helpTitle: 'Show Titan Info',
-      helpText: 'This will show titan info in the action list.',
-      network: true
-    },
-    wantedGuildMembers: {
-      helpTitle: 'Show Guild Members',
-      helpText: 'If enabled, will show guild members in the wanted bounty list.'
-    },
-    highlightPvpProtection: {
-      helpTitle: 'Highlight Pvp Protection',
-      helpText: 'If enabled, will put a red box around PvP Protection.'
-    },
-    showBuffInfo: {
-      helpTitle: 'Show Buff Info',
-      helpText: 'This will show buff info in the action list.',
-    }
-  };
+  var moveGuildList$1={helpTitle:"Move Guild Info List",helpText:"This will Move the Guild Info List higher on the bar on the right"};var moveOnlineAlliesList$1={helpTitle:"Move Online Allies List",helpText:"This will Move the Online Allies List higher on the bar on the right"};var enableOnlineAlliesWidgets$1={helpTitle:"Enable Online Allies Widgets",helpText:"Enabling this option will enable the Allies List Widgets (coloring on the Allies List panel)"};var moveFSBox$1={helpTitle:"Move FS box",helpText:"This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)"};var moveDailyQuest$1={helpTitle:"Move Daily Quest",helpText:"This will move the Daily Quest to the left, under the menu, for better visibility (unless it is already hidden.)"};var gameHelpLink$2={helpTitle:"&quot;Game Help&quot; Settings Link",helpText:"This turns the Game Help text in the lower right box into a link to this settings page."};var enableTempleAlert$1={helpTitle:"Enable Temple Alert",helpText:"Puts an alert on the LHS if you have not prayed at the temple today.",network:true};var enableUpgradeAlert$1={helpTitle:"Enable Gold Upgrade Alert",helpText:"Puts an alert on the LHS if you have not upgraded your stamina with gold today.",network:true};var enableComposingAlert$1={helpTitle:"Enable Composing Alert",helpText:"Puts an alert on the LHS if you have composing slots available.",network:true};var enhanceOnlineDots$1={helpTitle:"Enhance Online Dots",helpText:"Enhances the green/grey dots by player names to show online/offline status."};var hideBuffSelected$1={helpTitle:"Hide Buff Selected",helpText:"Hides the buff selected functionality in the online allies and guild info section."};var hideHelperMenu$1={helpTitle:"Hide Helper Menu",helpText:"Hides the helper menu from top left."};var keepHelperMenuOnScreen$1={helpTitle:"Keep Helper Menu On Screen",helpText:"Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links."};var showAdmin$1={helpTitle:"Show rank controls",helpText:"Show ranking controls for guild managemenet in member profile page - this works for guild founders only"};var ajaxifyRankControls$1={helpTitle:"AJAXify rank controls",helpText:"Enables guild founders with ranking rights to change rank positions without a screen refresh."};var detailedConflictInfo$1={helpTitle:"Show Conflict Details",helpText:"Inserts detailed conflict information onto your guild's manage page. Currently displays the target guild as well as the current score.",network:true};var showCombatLog$1={helpTitle:"Show Combat Log",helpText:"This will show the combat log for each automatic battle below the monster list."};var enableCreatureColoring$1={helpTitle:"Color Special Creatures",helpText:"Creatures will be colored according to their rarity. Champions will be colored green, Elites yellow and Super Elites red."};var showCreatureInfo$1={helpTitle:"Show Creature Info",helpText:"This will show the information from the view creature link when you mouseover the link.",network:true};var fsboxlog$1={helpTitle:"Enable FS Box Log",helpText:"This enables the functionality to keep a log of recent seen FS Box message."};var keepBuffLog$1={helpTitle:"Enable Buff Log",helpText:"This enables the functionality to keep a log of recently casted buffs"};var huntingMode$1={helpTitle:"Enable Hunting Mode",helpText:"This disable menu and some visual features to speed up the calf."};var hideNonPlayerGuildLogMessages$1={helpTitle:"Cleanup Guild Log",helpText:"Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)"};var useNewGuildLog$1={helpTitle:"Use New Guild Log",helpText:"This will replace the standard guild log with the helper version of the guild log."};var enableLogColoring$1={helpTitle:"Enable Log Coloring",helpText:"Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown."};var enableChatParsing$1={helpTitle:"Enable Chat Parsing",helpText:"If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message."};var addAttackLinkToLog$1={helpTitle:"Add attack link to log",helpText:"If checked, this will add an Attack link to each message in your log."};var enhanceChatTextEntry$1={helpTitle:"Enhance Chat Text Entry",helpText:"If checked, this will enhance the entry field for entering chat text on the guild chat page."};var showExtraLinks$1={helpTitle:"Show Extra Links",helpText:"If checked, this will add AH and UFSG links to equipment screens."};var disableItemColoring$1={helpTitle:"Disable Item Coloring",helpText:"Disable the code that colors the item text based on the rarity of the item."};var showQuickDropLinks$1={helpTitle:"Show Quick Drop Item",helpText:"This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR"};var storeLastQuestPage$1={helpTitle:"Store Last Quest Page",helpText:"This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, click on the link you wish to reset and then turn this option back on again."};var showNextQuestSteps$1={helpTitle:"Show Next Quest Steps",helpText:"Shows all quest steps in the UFSG."};var renderSelfBio$1={helpTitle:"Render self bio",helpText:"This determines if your own bio will render the FSH special bio tags."};var renderOtherBios$1={helpTitle:"Render other players&#39; bios",helpText:"This determines if other players bios will render the FSH special bio tags."};var showStatBonusTotal$1={helpTitle:"Show Stat Bonus Total",helpText:"This will show a total of the item stats when you mouseover an item on the profile screen."};var enableQuickDrink$1={helpTitle:"Enable Quick Drink/Wear",helpText:"This enables the quick drink/wear functionality on the profile page."};var disableDeactivatePrompts$1={helpTitle:"Disable Deactivate Prompts",helpText:"This disables the prompts for deactivating buffs on the profile page."};var enableAttackHelper$1={helpTitle:"Show Attack Helper",helpText:"This will show extra information on the attack player screen about stats and buffs on you and your target",network:true};var showPvPSummaryInLog$1={helpTitle:"Show PvP Summary in Log",helpText:"This will show a summary of the PvP results in the log.",network:true};var autoFillMinBidPrice$1={helpTitle:"Auto Fill Min Bid Price",helpText:"This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed."};var hideRelicOffline$1={helpTitle:"Hide Relic Offline",helpText:"This hides the relic offline defenders checker."};var enterForSendMessage$1={helpTitle:"Enter Sends Message",helpText:"If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift when you press enter."};var navigateToLogAfterMsg$1={helpTitle:"Navigate After Message Sent",helpText:"If enabled, will navigate to the referring page after a successful message is sent. Example:  if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen."};var moveComposingButtons$1={helpTitle:"Move Composing Buttons",helpText:"If enabled, will move composing buttons to the top of the composing screen."};var draggableHelperMenu$1={helpTitle:"Draggable Helper Menu",helpText:"If enabled, allows the helper menu to be dragged around the screen."};var draggableQuickLinks$1={helpTitle:"Draggable Quick Links",helpText:"If enabled, allows the quick link box to be dragged around the screen."};var expandMenuOnKeyPress$1={helpTitle:"Expand Menu on Key Press",helpText:"If enabled, expands the left hand menu when you use hotkeys."};var disableBreakdownPrompts$1={helpTitle:"Disable Breakdown Prompts",helpText:"If enabled, will disable prompts when you breakdown items.<br>NO REFUNDS OR DO-OVERS! Use at own risk."};var collapseNewsArchive$1={helpTitle:"Collapse News Archive",helpText:"If enabled, will collapse news archives."};var collapseHallPosts$1={helpTitle:"Collapse Hall Posts",helpText:"If enabled, will collapse hall posts."};var hideSubLvlCreature$1={helpTitle:"Hide Sub Level Creatures",helpText:"If enabled, will hide creatures that are lower than the current realm level."};var hidePlayerActions$1={helpTitle:"Hide Player Actions",helpText:"If enabled, will hide player actions."};var disableQuickWearPrompts$1={helpTitle:"Disable Use/Ext Prompts",helpText:"If enabled, will disable prompts when you Use/Ext items.<br>NO REFUNDS OR DO-OVERS! Use at own risk.",title:"Disable Use/Ext<br>Prompts"};var enableGuildActivityTracker$1={helpTitle:"Enable Guild Activity Tracker",helpText:"If enabled, will track guild member activity over time.",network:true,title:"Enable Tracker"};var enableSeTracker$1={helpTitle:"Enable SE Tracker",helpText:"If enabled, will track the last time each SE was killed.<br>This is DIFFERENT from the usual FSH network activity.<br>When this is enabled, if you have ANY game page open in a<br>browser tab it will scan the SE Log every 10 minutes.<br>You do not need auto-refresh for this to work.",network:true};var showMonsterLog$1={helpTitle:"Keep Creature Log",helpText:"This will show the creature log for each creature you see when you travel.",network:true};var showTitanInfo$1={helpTitle:"Show Titan Info",helpText:"This will show titan info in the action list.",network:true};var wantedGuildMembers$1={helpTitle:"Show Guild Members",helpText:"If enabled, will show guild members in the wanted bounty list."};var highlightPvpProtection$1={helpTitle:"Highlight Pvp Protection",helpText:"If enabled, will put a red box around PvP Protection."};var showBuffInfo$1={helpTitle:"Show Buff Info",helpText:"This will show buff info in the action list."};var mySimpleCheckboxes = {moveGuildList:moveGuildList$1,moveOnlineAlliesList:moveOnlineAlliesList$1,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets$1,moveFSBox:moveFSBox$1,moveDailyQuest:moveDailyQuest$1,gameHelpLink:gameHelpLink$2,enableTempleAlert:enableTempleAlert$1,enableUpgradeAlert:enableUpgradeAlert$1,enableComposingAlert:enableComposingAlert$1,enhanceOnlineDots:enhanceOnlineDots$1,hideBuffSelected:hideBuffSelected$1,hideHelperMenu:hideHelperMenu$1,keepHelperMenuOnScreen:keepHelperMenuOnScreen$1,showAdmin:showAdmin$1,ajaxifyRankControls:ajaxifyRankControls$1,detailedConflictInfo:detailedConflictInfo$1,showCombatLog:showCombatLog$1,enableCreatureColoring:enableCreatureColoring$1,showCreatureInfo:showCreatureInfo$1,fsboxlog:fsboxlog$1,keepBuffLog:keepBuffLog$1,huntingMode:huntingMode$1,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages$1,useNewGuildLog:useNewGuildLog$1,enableLogColoring:enableLogColoring$1,enableChatParsing:enableChatParsing$1,addAttackLinkToLog:addAttackLinkToLog$1,enhanceChatTextEntry:enhanceChatTextEntry$1,showExtraLinks:showExtraLinks$1,disableItemColoring:disableItemColoring$1,showQuickDropLinks:showQuickDropLinks$1,storeLastQuestPage:storeLastQuestPage$1,showNextQuestSteps:showNextQuestSteps$1,renderSelfBio:renderSelfBio$1,renderOtherBios:renderOtherBios$1,showStatBonusTotal:showStatBonusTotal$1,enableQuickDrink:enableQuickDrink$1,disableDeactivatePrompts:disableDeactivatePrompts$1,enableAttackHelper:enableAttackHelper$1,showPvPSummaryInLog:showPvPSummaryInLog$1,autoFillMinBidPrice:autoFillMinBidPrice$1,hideRelicOffline:hideRelicOffline$1,enterForSendMessage:enterForSendMessage$1,navigateToLogAfterMsg:navigateToLogAfterMsg$1,moveComposingButtons:moveComposingButtons$1,draggableHelperMenu:draggableHelperMenu$1,draggableQuickLinks:draggableQuickLinks$1,expandMenuOnKeyPress:expandMenuOnKeyPress$1,disableBreakdownPrompts:disableBreakdownPrompts$1,collapseNewsArchive:collapseNewsArchive$1,collapseHallPosts:collapseHallPosts$1,hideSubLvlCreature:hideSubLvlCreature$1,hidePlayerActions:hidePlayerActions$1,disableQuickWearPrompts:disableQuickWearPrompts$1,enableGuildActivityTracker:enableGuildActivityTracker$1,enableSeTracker:enableSeTracker$1,showMonsterLog:showMonsterLog$1,showTitanInfo:showTitanInfo$1,wantedGuildMembers:wantedGuildMembers$1,highlightPvpProtection:highlightPvpProtection$1,showBuffInfo:showBuffInfo$1};
 
   var networkIcon =
     '<img class="networkIcon tip-static" ' +
@@ -3437,7 +2867,7 @@
     return useitem(backpackInvId).pipe(errorDialog).pipe(ajaxReturnCode);
   }
 
-  var disableQuickWearPrompts;
+  var disableQuickWearPrompts$2;
   var content$2;
   var itemList;
 
@@ -3459,7 +2889,7 @@
   }
 
   function useProfileInventoryItem(self) {
-    if (disableQuickWearPrompts) {
+    if (disableQuickWearPrompts$2) {
       doUseItem(self);
     } else {
       jConfirm('Use/Extract Item',
@@ -3494,8 +2924,8 @@
   }
 
   function togglePref() {
-    disableQuickWearPrompts = !disableQuickWearPrompts;
-    setValue('disableQuickWearPrompts', disableQuickWearPrompts);
+    disableQuickWearPrompts$2 = !disableQuickWearPrompts$2;
+    setValue('disableQuickWearPrompts', disableQuickWearPrompts$2);
   }
 
   function evts5() {
@@ -3542,7 +2972,7 @@
     if (!content$2) {return;}
     insertHtmlBeforeEnd(content$2, 'Getting item list from backpack...');
     loadInventory().done(showQuickWear);
-    disableQuickWearPrompts = getValue('disableQuickWearPrompts');
+    disableQuickWearPrompts$2 = getValue('disableQuickWearPrompts');
   }
 
   function insertQuickWear(injector) {
@@ -3777,140 +3207,140 @@
     setupEventHandler(content);
   }
 
-  /* eslint-disable no-multi-spaces, max-len */
   var buffList = [
-    {name: 'Rage',                stam: 10, lvl: 1,    id: 0,   nicks: 'rage'},
-    {name: 'Stun',                stam: 15, lvl: 1,    id: 1,   nicks: 'stun,st'},
-    {name: 'Fury',                stam: 10, lvl: 25,   id: 2,   nicks: 'fury'},
-    {name: 'Blood Thirst',        stam: 10, lvl: 25,   id: 4,   nicks: 'blood thirst,bloodthirst,bt'},
-    {name: 'Enchant Weapon',      stam: 10, lvl: 25,   id: 5,   nicks: 'enchant weapon,ew'},
-    {name: 'Berserk',             stam: 15, lvl: 75,   id: 3,   nicks: 'berserk'},
-    {name: 'Holy Flame',          stam: 15, lvl: 75,   id: 6,   nicks: 'holy flame,hf'},
-    {name: 'Dark Curse',          stam: 20, lvl: 150,  id: 7,   nicks: 'dark curse,dc'},
-    {name: 'Shockwave',           stam: 20, lvl: 200,  id: 29,  nicks: 'shockwave,sw,shock'},
-    {name: 'Ignite',              stam: 10, lvl: 200,  id: 30,  nicks: 'ignite,ign'},
-    {name: 'Super Elite Slayer',  stam: 25, lvl: 250,  id: 31,  nicks: 'super elite slayer,ses,se slayer'},
-    {name: 'Wither',              stam: 15, lvl: 250,  id: 32,  nicks: 'wither,with'},
-    {name: 'Shatter Armor',       stam: 20, lvl: 300,  id: 33,  nicks: 'shatter armor,sa'},
-    {name: 'Death Wish',          stam: 20, lvl: 300,  id: 34,  nicks: 'deathwish,dw,deathw,death wish'},
-    {name: 'Spell Breaker',       stam: 35, lvl: 300,  id: 35,  nicks: 'spell breaker,sb'},
-    {name: 'Spectral Knight',     stam: 15, lvl: 400,  id: 48,  nicks: 'spectral knight,sk,spec knight'},
-    {name: 'Keen Edge',           stam: 10, lvl: 400,  id: 47,  nicks: 'keen edge,ke'},
-    {name: 'Arterial Strike',     stam: 20, lvl: 500,  id: 49,  nicks: 'arterial strike,as,art strike,art str'},
-    {name: 'Death Dealer',        stam: 20, lvl: 500,  id: 50,  nicks: 'death dealer,dd'},
-    {name: 'Savagery',            stam: 15, lvl: 600,  id: 51,  nicks: 'savagery,savage'},
-    {name: 'Chi Strike',          stam: 20, lvl: 700,  id: 52,  nicks: 'chi strike,chi,chis,chi str'},
-    {name: 'Shield Strike',       stam: 20, lvl: 700,  id: 53,  nicks: 'shield strike,ss,sh str'},
-    {name: 'Demoralize',          stam: 25, lvl: 800,  id: 73,  nicks: 'demoralize,dem'},
-    {name: 'Poison',              stam: 25, lvl: 800,  id: 70,  nicks: 'poison,poi'},
-    {name: 'Iron Fist',           stam: 25, lvl: 900,  id: 74,  nicks: 'iron fist,if'},
-    {name: 'Spell Leech',         stam: 50, lvl: 900,  id: 79,  nicks: 'spell leech,sl'},
-    {name: 'Distraction',         stam: 25, lvl: 900,  id: 78,  nicks: 'distraction,dis'},
-    {name: 'Coordinated Attack',  stam: 30, lvl: 1000, id: 118, nicks: 'coordinated attack,coorda'},
-    {name: 'Undermine',           stam: 30, lvl: 1000, id: 108, nicks: 'undermine,um'},
-    {name: 'Cursed Rune',         stam: 30, lvl: 1000, id: 89,  nicks: 'cursed rune,crune'},
-    {name: 'Anti Deflect',        stam: 30, lvl: 1000, id: 105, nicks: 'anti deflect,ad'},
-    {name: 'Overkill',            stam: 30, lvl: 1200, id: 109, nicks: 'overkill,ok'},
-    {name: 'Smashing Hammer',     stam: 30, lvl: 1200, id: 111, nicks: 'smashing hammer,sh'},
-    {name: 'Mighty Vigor',        stam: 35, lvl: 1200, id: 113, nicks: 'mighty vigor,mv'},
-    {name: 'Fist Fight',          stam: 30, lvl: 1200, id: 115, nicks: 'fist fight,ff'},
-    {name: 'Cursed Ring',         stam: 30, lvl: 1400, id: 88,  nicks: 'cursed ring,cring'},
-    {name: 'Sharpen',             stam: 30, lvl: 1400, id: 106, nicks: 'sharpen,sharp'},
-    {name: 'Balanced Attack',     stam: 30, lvl: 1400, id: 116, nicks: 'balanced attack,ba'},
-    {name: 'Heavy Weight',        stam: 20, lvl: 1600, id: 146, nicks: 'heavy weight, hw'},
-    {name: 'Armored Strike',      stam: 30, lvl: 1600, id: 130, nicks: 'armored strike, armstr'},
-    {name: 'Invert',              stam: 40, lvl: 2000, id: 173, nicks: 'invert'},
-    {name: 'Reign of Terror',     stam: 40, lvl: 2500, id: 174, nicks: 'reign of terror'},
-    {name: 'Critical Strike',     stam: 40, lvl: 3000, id: 175, nicks: 'critical strike'},
-    {name: 'Great Vigor',         stam: 10, lvl: 1,    id: 12,  nicks: 'great vigor,vigor,gv'},
-    {name: 'Fortify',             stam: 10, lvl: 25,   id: 8,   nicks: 'fortify'},
-    {name: 'Evade',               stam: 10, lvl: 25,   id: 10,  nicks: 'evade'},
-    {name: 'Absorb',              stam: 20, lvl: 25,   id: 13,  nicks: 'absorb,abs'},
-    {name: 'Rock Skin',           stam: 15, lvl: 75,   id: 11,  nicks: 'rock skin,rs'},
-    {name: 'Enchanted Armor',     stam: 10, lvl: 75,   id: 9,   nicks: 'enchanted armor,enchant armor,ea,ench arm,ench armor'},
-    {name: 'Aura of Protection',  stam: 20, lvl: 150,  id: 15,  nicks: 'aura of protection,aop,aofp'},
-    {name: 'Deflect',             stam: 25, lvl: 150,  id: 14,  nicks: 'deflect,defl'},
-    {name: 'Force Shield',        stam: 10, lvl: 200,  id: 27,  nicks: 'force shield,fs'},
-    {name: 'Unbreakable',         stam: 20, lvl: 200,  id: 28,  nicks: 'unbreakable,ub,unb,unbr'},
-    {name: 'Honor',               stam: 10, lvl: 800,  id: 82,  nicks: 'honor'},
-    {name: 'Assist',              stam: 30, lvl: 250,  id: 36,  nicks: 'assist,ass'},
-    {name: 'Constitution',        stam: 25, lvl: 300,  id: 37,  nicks: 'constitution,const'},
-    {name: 'Counter Attack',      stam: 20, lvl: 400,  id: 54,  nicks: 'counter attack,ca'},
-    {name: 'Summon Shield Imp',   stam: 50, lvl: 400,  id: 55,  nicks: 'summon shield imp,ssi,imp'},
-    {name: 'Vision',              stam: 20, lvl: 500,  id: 56,  nicks: 'vision,vis'},
-    {name: 'Fortitude',           stam: 15, lvl: 500,  id: 57,  nicks: 'fortitude,fort'},
-    {name: 'Flinch',              stam: 20, lvl: 600,  id: 58,  nicks: 'flinch'},
-    {name: 'Terrorize',           stam: 20, lvl: 700,  id: 59,  nicks: 'terrorize,terror'},
-    {name: 'Nightmare Visage',    stam: 40, lvl: 700,  id: 60,  nicks: 'nightmare visage,nv,visage'},
-    {name: 'Sanctuary',           stam: 25, lvl: 800,  id: 44,  nicks: 'sanctuary,sanc'},
-    {name: 'Dull Edge',           stam: 10, lvl: 800,  id: 46,  nicks: 'dull edge,de'},
-    {name: 'Erosion',             stam: 25, lvl: 900,  id: 80,  nicks: 'erosion,ero'},
-    {name: 'Avert Gaze',          stam: 10, lvl: 900,  id: 71,  nicks: 'avert gaze,ag'},
-    {name: 'Enchant Shield',      stam: 25, lvl: 900,  id: 77,  nicks: 'enchant shield,es'},
-    {name: 'Smite',               stam: 30, lvl: 1000, id: 97,  nicks: 'smite,sm'},
-    {name: 'Balanced Defense',    stam: 30, lvl: 1000, id: 117, nicks: 'balanced defense,bd'},
-    {name: 'Bastion',             stam: 30, lvl: 1000, id: 122, nicks: 'bastion,bast'},
-    {name: 'Side Step',           stam: 30, lvl: 1000, id: 86,  nicks: 'side step,sstep'},
-    {name: 'High Guard',          stam: 30, lvl: 1200, id: 96,  nicks: 'high guard,hg'},
-    {name: 'Barricade',           stam: 30, lvl: 1200, id: 98,  nicks: 'barricade,bar'},
-    {name: 'Coordinated Defense', stam: 30, lvl: 1200, id: 119, nicks: 'coordinated defense,cd'},
-    {name: 'Degrade',             stam: 30, lvl: 1200, id: 121, nicks: 'degrade,deg,dg'},
-    {name: 'Retaliate',           stam: 30, lvl: 1400, id: 123, nicks: 'retaliate,ret'},
-    {name: 'Shame',               stam: 35, lvl: 1400, id: 110, nicks: 'shame'},
-    {name: 'Dispel Curse',        stam: 35, lvl: 1400, id: 114, nicks: 'dispel curse,dispel'},
-    {name: 'Anchored',            stam: 30, lvl: 1600, id: 154, nicks: 'anchored, anch, anchor'},
-    {name: 'Hardened',            stam: 30, lvl: 1600, id: 153, nicks: 'hardened, hard, harden'},
-    {name: 'Armor Boost',         stam: 30, lvl: 1600, id: 136, nicks: 'armor boost, armbst, arm bst, armb'},
-    {name: 'Shield Wall',         stam: 30, lvl: 1600, id: 135, nicks: 'shield wall, shldwll, sw'},
-    {name: 'Layered Armor',       stam: 40, lvl: 2000, id: 170, nicks: 'layered armor'},
-    {name: 'Defensive Aura',      stam: 40, lvl: 2500, id: 171, nicks: 'defensive aura'},
-    {name: 'Fumble',              stam: 40, lvl: 3000, id: 172, nicks: 'fumble'},
-    {name: 'Find Item',           stam: 10, lvl: 1,    id: 16,  nicks: 'find item,fi'},
-    {name: 'Treasure Hunter',     stam: 15, lvl: 1,    id: 17,  nicks: 'treasure hunter,th,treas hunter'},
-    {name: 'Deep Pockets',        stam: 10, lvl: 1,    id: 22,  nicks: 'deep pockets,dp'},
-    {name: 'Quest Finder',        stam: 5,  lvl: 1,    id: 61,  nicks: 'quest finder,qf'},
-    {name: 'Adept Learner',       stam: 10, lvl: 25,   id: 19,  nicks: 'adept learner,al'},
-    {name: 'Defiance',            stam: 15, lvl: 25,   id: 18,  nicks: 'defiance'},
-    {name: 'Librarian',           stam: 10, lvl: 75,   id: 20,  nicks: 'librarian,lib,libr'},
-    {name: 'Merchant',            stam: 10, lvl: 75,   id: 21,  nicks: 'merchant,merch,merc'},
-    {name: 'Last Ditch',          stam: 15, lvl: 150,  id: 23,  nicks: 'last ditch,ld'},
-    {name: 'Animal Magnetism',    stam: 10, lvl: 200,  id: 24,  nicks: 'animal magnetism,animag,ani mag,am'},
-    {name: 'Empower',             stam: 20, lvl: 200,  id: 25,  nicks: 'empower,emp'},
-    {name: 'Doubler',             stam: 5,  lvl: 200,  id: 26,  nicks: 'doubler,doub,db'},
-    {name: 'Conserve',            stam: 10, lvl: 250,  id: 39,  nicks: 'conserve,cons,consv,con'},
-    {name: 'Brewing Master',      stam: 10, lvl: 250,  id: 40,  nicks: 'brewing master,bm,brm,brewm'},
-    {name: 'Four Leaf',           stam: 20, lvl: 250,  id: 41,  nicks: 'four leaf,4l,fl'},
-    {name: 'Extend',              stam: 30, lvl: 300,  id: 42,  nicks: 'extend,ext'},
-    {name: 'Inventor',            stam: 15, lvl: 400,  id: 62,  nicks: 'inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1'},
-    {name: 'Extractor',           stam: 15, lvl: 400,  id: 63,  nicks: 'extractor,extr'},
-    {name: 'Inventor II',         stam: 20, lvl: 500,  id: 64,  nicks: 'inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2'},
-    {name: 'Buff Master',         stam: 10, lvl: 500,  id: 65,  nicks: 'buff master,buffm,bum'},
-    {name: 'Reflection',          stam: 10, lvl: 600,  id: 66,  nicks: 'reflection,ref,refl,reflect'},
-    {name: 'Guild Buffer',        stam: 10, lvl: 600,  id: 160, nicks: 'guild buffer, gldbfr, gb'},
-    {name: 'Light Foot',          stam: 15, lvl: 700,  id: 67,  nicks: 'light foot,lf'},
-    {name: 'Mesmerize',           stam: 20, lvl: 700,  id: 68,  nicks: 'mesmerize,mesmer,mes,mez'},
-    {name: 'Resource Finder',     stam: 25, lvl: 800,  id: 76,  nicks: 'resource finder,rf'},
-    {name: 'Quest Hunter',        stam: 25, lvl: 800,  id: 166, nicks: 'quest hunter'},
-    {name: 'Gloat',               stam: 10, lvl: 900,  id: 81,  nicks: 'gloat'},
-    {name: 'Sacrifice',           stam: 25, lvl: 900,  id: 75,  nicks: 'sacrifice,sac'},
-    {name: 'Reckoning',           stam: 25, lvl: 900,  id: 72,  nicks: 'reckoning,rec,rek'},
-    {name: 'Reinforce',           stam: 30, lvl: 1000, id: 126, nicks: 'reinforce,rein'},
-    {name: 'Bodyguard',           stam: 30, lvl: 1000, id: 120, nicks: 'bodyguard,bg'},
-    {name: 'Riposte',             stam: 30, lvl: 1000, id: 124, nicks: 'riposte,rip'},
-    {name: 'Severe Condition',    stam: 30, lvl: 1000, id: 101, nicks: 'severe condition,sc'},
-    {name: 'Sealed',              stam: 35, lvl: 1200, id: 112, nicks: 'sealed,seal'},
-    {name: 'Righteous',           stam: 30, lvl: 1200, id: 107, nicks: 'righteous,right'},
-    {name: 'Epic Forge',          stam: 30, lvl: 1200, id: 102, nicks: 'epic forge,ef'},
-    {name: 'Golden Shield',       stam: 30, lvl: 1200, id: 103, nicks: 'golden shield,gs'},
-    {name: 'Stalker',             stam: 35, lvl: 1400, id: 125, nicks: 'stalker,stalk'},
-    {name: 'Ageless',             stam: 30, lvl: 1400, id: 100, nicks: 'ageless,age'},
-    {name: 'Extractor II',        stam: 30, lvl: 1400, id: 104, nicks: 'extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2'},
-    {name: 'Epic Craft',          stam: 30, lvl: 1600, id: 159, nicks: 'epic craft, epc crft, epccrft, ec'},
-    {name: 'Gold Foot',           stam: 20, lvl: 1600, id: 137, nicks: 'gold foot, goldfoot, gldft, gf'},
-    {name: 'Titan Doubler',       stam: 40, lvl: 2000, id: 167, nicks: 'titan doubler'},
-    {name: 'Teleport',            stam: 40, lvl: 2500, id: 168, nicks: 'teleport'},
-    {name: 'Invigorate',          stam: 40, lvl: 3000, id: 169, nicks: 'invigorate'}
-  ];
+    {"name": "Rage",                "stam": 10, "lvl": 1,    "id": 0,   "nicks": "rage"},
+    {"name": "Stun",                "stam": 15, "lvl": 1,    "id": 1,   "nicks": "stun,st"},
+    {"name": "Fury",                "stam": 10, "lvl": 25,   "id": 2,   "nicks": "fury"},
+    {"name": "Blood Thirst",        "stam": 10, "lvl": 25,   "id": 4,   "nicks": "blood thirst,bloodthirst,bt"},
+    {"name": "Enchant Weapon",      "stam": 10, "lvl": 25,   "id": 5,   "nicks": "enchant weapon,ew"},
+    {"name": "Berserk",             "stam": 15, "lvl": 75,   "id": 3,   "nicks": "berserk"},
+    {"name": "Holy Flame",          "stam": 15, "lvl": 75,   "id": 6,   "nicks": "holy flame,hf"},
+    {"name": "Dark Curse",          "stam": 20, "lvl": 150,  "id": 7,   "nicks": "dark curse,dc"},
+    {"name": "Shockwave",           "stam": 20, "lvl": 200,  "id": 29,  "nicks": "shockwave,sw,shock"},
+    {"name": "Ignite",              "stam": 10, "lvl": 200,  "id": 30,  "nicks": "ignite,ign"},
+    {"name": "Super Elite Slayer",  "stam": 25, "lvl": 250,  "id": 31,  "nicks": "super elite slayer,ses,se slayer"},
+    {"name": "Wither",              "stam": 15, "lvl": 250,  "id": 32,  "nicks": "wither,with"},
+    {"name": "Shatter Armor",       "stam": 20, "lvl": 300,  "id": 33,  "nicks": "shatter armor,sa"},
+    {"name": "Death Wish",          "stam": 20, "lvl": 300,  "id": 34,  "nicks": "deathwish,dw,deathw,death wish"},
+    {"name": "Spell Breaker",       "stam": 35, "lvl": 300,  "id": 35,  "nicks": "spell breaker,sb"},
+    {"name": "Spectral Knight",     "stam": 15, "lvl": 400,  "id": 48,  "nicks": "spectral knight,sk,spec knight"},
+    {"name": "Keen Edge",           "stam": 10, "lvl": 400,  "id": 47,  "nicks": "keen edge,ke"},
+    {"name": "Arterial Strike",     "stam": 20, "lvl": 500,  "id": 49,  "nicks": "arterial strike,as,art strike,art str"},
+    {"name": "Death Dealer",        "stam": 20, "lvl": 500,  "id": 50,  "nicks": "death dealer,dd"},
+    {"name": "Savagery",            "stam": 15, "lvl": 600,  "id": 51,  "nicks": "savagery,savage"},
+    {"name": "Chi Strike",          "stam": 20, "lvl": 700,  "id": 52,  "nicks": "chi strike,chi,chis,chi str"},
+    {"name": "Shield Strike",       "stam": 20, "lvl": 700,  "id": 53,  "nicks": "shield strike,ss,sh str"},
+    {"name": "Demoralize",          "stam": 25, "lvl": 800,  "id": 73,  "nicks": "demoralize,dem"},
+    {"name": "Poison",              "stam": 25, "lvl": 800,  "id": 70,  "nicks": "poison,poi"},
+    {"name": "Iron Fist",           "stam": 25, "lvl": 900,  "id": 74,  "nicks": "iron fist,if"},
+    {"name": "Spell Leech",         "stam": 50, "lvl": 900,  "id": 79,  "nicks": "spell leech,sl"},
+    {"name": "Distraction",         "stam": 25, "lvl": 900,  "id": 78,  "nicks": "distraction,dis"},
+    {"name": "Coordinated Attack",  "stam": 30, "lvl": 1000, "id": 118, "nicks": "coordinated attack,coorda"},
+    {"name": "Undermine",           "stam": 30, "lvl": 1000, "id": 108, "nicks": "undermine,um"},
+    {"name": "Cursed Rune",         "stam": 30, "lvl": 1000, "id": 89,  "nicks": "cursed rune,crune"},
+    {"name": "Anti Deflect",        "stam": 30, "lvl": 1000, "id": 105, "nicks": "anti deflect,ad"},
+    {"name": "Overkill",            "stam": 30, "lvl": 1200, "id": 109, "nicks": "overkill,ok"},
+    {"name": "Smashing Hammer",     "stam": 30, "lvl": 1200, "id": 111, "nicks": "smashing hammer,sh"},
+    {"name": "Mighty Vigor",        "stam": 35, "lvl": 1200, "id": 113, "nicks": "mighty vigor,mv"},
+    {"name": "Fist Fight",          "stam": 30, "lvl": 1200, "id": 115, "nicks": "fist fight,ff"},
+    {"name": "Cursed Ring",         "stam": 30, "lvl": 1400, "id": 88,  "nicks": "cursed ring,cring"},
+    {"name": "Sharpen",             "stam": 30, "lvl": 1400, "id": 106, "nicks": "sharpen,sharp"},
+    {"name": "Balanced Attack",     "stam": 30, "lvl": 1400, "id": 116, "nicks": "balanced attack,ba"},
+    {"name": "Heavy Weight",        "stam": 20, "lvl": 1600, "id": 146, "nicks": "heavy weight, hw"},
+    {"name": "Armored Strike",      "stam": 30, "lvl": 1600, "id": 130, "nicks": "armored strike, armstr"},
+    {"name": "Invert",              "stam": 40, "lvl": 2000, "id": 173, "nicks": "invert"},
+    {"name": "Reign of Terror",     "stam": 40, "lvl": 2500, "id": 174, "nicks": "reign of terror"},
+    {"name": "Critical Strike",     "stam": 40, "lvl": 3000, "id": 175, "nicks": "critical strike"},
+    {"name": "Great Vigor",         "stam": 10, "lvl": 1,    "id": 12,  "nicks": "great vigor,vigor,gv"},
+    {"name": "Fortify",             "stam": 10, "lvl": 25,   "id": 8,   "nicks": "fortify"},
+    {"name": "Evade",               "stam": 10, "lvl": 25,   "id": 10,  "nicks": "evade"},
+    {"name": "Absorb",              "stam": 20, "lvl": 25,   "id": 13,  "nicks": "absorb,abs"},
+    {"name": "Rock Skin",           "stam": 15, "lvl": 75,   "id": 11,  "nicks": "rock skin,rs"},
+    {"name": "Enchanted Armor",     "stam": 10, "lvl": 75,   "id": 9,   "nicks": "enchanted armor,enchant armor,ea,ench arm,ench armor"},
+    {"name": "Aura of Protection",  "stam": 20, "lvl": 150,  "id": 15,  "nicks": "aura of protection,aop,aofp"},
+    {"name": "Deflect",             "stam": 25, "lvl": 150,  "id": 14,  "nicks": "deflect,defl"},
+    {"name": "Force Shield",        "stam": 10, "lvl": 200,  "id": 27,  "nicks": "force shield,fs"},
+    {"name": "Unbreakable",         "stam": 20, "lvl": 200,  "id": 28,  "nicks": "unbreakable,ub,unb,unbr"},
+    {"name": "Honor",               "stam": 10, "lvl": 800,  "id": 82,  "nicks": "honor"},
+    {"name": "Assist",              "stam": 30, "lvl": 250,  "id": 36,  "nicks": "assist,ass"},
+    {"name": "Constitution",        "stam": 25, "lvl": 300,  "id": 37,  "nicks": "constitution,const"},
+    {"name": "Counter Attack",      "stam": 20, "lvl": 400,  "id": 54,  "nicks": "counter attack,ca"},
+    {"name": "Summon Shield Imp",   "stam": 50, "lvl": 400,  "id": 55,  "nicks": "summon shield imp,ssi,imp"},
+    {"name": "Vision",              "stam": 20, "lvl": 500,  "id": 56,  "nicks": "vision,vis"},
+    {"name": "Fortitude",           "stam": 15, "lvl": 500,  "id": 57,  "nicks": "fortitude,fort"},
+    {"name": "Flinch",              "stam": 20, "lvl": 600,  "id": 58,  "nicks": "flinch"},
+    {"name": "Terrorize",           "stam": 20, "lvl": 700,  "id": 59,  "nicks": "terrorize,terror"},
+    {"name": "Nightmare Visage",    "stam": 40, "lvl": 700,  "id": 60,  "nicks": "nightmare visage,nv,visage"},
+    {"name": "Sanctuary",           "stam": 25, "lvl": 800,  "id": 44,  "nicks": "sanctuary,sanc"},
+    {"name": "Dull Edge",           "stam": 10, "lvl": 800,  "id": 46,  "nicks": "dull edge,de"},
+    {"name": "Erosion",             "stam": 25, "lvl": 900,  "id": 80,  "nicks": "erosion,ero"},
+    {"name": "Avert Gaze",          "stam": 10, "lvl": 900,  "id": 71,  "nicks": "avert gaze,ag"},
+    {"name": "Enchant Shield",      "stam": 25, "lvl": 900,  "id": 77,  "nicks": "enchant shield,es"},
+    {"name": "Smite",               "stam": 30, "lvl": 1000, "id": 97,  "nicks": "smite,sm"},
+    {"name": "Balanced Defense",    "stam": 30, "lvl": 1000, "id": 117, "nicks": "balanced defense,bd"},
+    {"name": "Bastion",             "stam": 30, "lvl": 1000, "id": 122, "nicks": "bastion,bast"},
+    {"name": "Side Step",           "stam": 30, "lvl": 1000, "id": 86,  "nicks": "side step,sstep"},
+    {"name": "High Guard",          "stam": 30, "lvl": 1200, "id": 96,  "nicks": "high guard,hg"},
+    {"name": "Barricade",           "stam": 30, "lvl": 1200, "id": 98,  "nicks": "barricade,bar"},
+    {"name": "Coordinated Defense", "stam": 30, "lvl": 1200, "id": 119, "nicks": "coordinated defense,cd"},
+    {"name": "Degrade",             "stam": 30, "lvl": 1200, "id": 121, "nicks": "degrade,deg,dg"},
+    {"name": "Retaliate",           "stam": 30, "lvl": 1400, "id": 123, "nicks": "retaliate,ret"},
+    {"name": "Shame",               "stam": 35, "lvl": 1400, "id": 110, "nicks": "shame"},
+    {"name": "Dispel Curse",        "stam": 35, "lvl": 1400, "id": 114, "nicks": "dispel curse,dispel"},
+    {"name": "Anchored",            "stam": 30, "lvl": 1600, "id": 154, "nicks": "anchored, anch, anchor"},
+    {"name": "Hardened",            "stam": 30, "lvl": 1600, "id": 153, "nicks": "hardened, hard, harden"},
+    {"name": "Armor Boost",         "stam": 30, "lvl": 1600, "id": 136, "nicks": "armor boost, armbst, arm bst, armb"},
+    {"name": "Shield Wall",         "stam": 30, "lvl": 1600, "id": 135, "nicks": "shield wall, shldwll, sw"},
+    {"name": "Layered Armor",       "stam": 40, "lvl": 2000, "id": 170, "nicks": "layered armor"},
+    {"name": "Defensive Aura",      "stam": 40, "lvl": 2500, "id": 171, "nicks": "defensive aura"},
+    {"name": "Fumble",              "stam": 40, "lvl": 3000, "id": 172, "nicks": "fumble"},
+    {"name": "Find Item",           "stam": 10, "lvl": 1,    "id": 16,  "nicks": "find item,fi"},
+    {"name": "Treasure Hunter",     "stam": 15, "lvl": 1,    "id": 17,  "nicks": "treasure hunter,th,treas hunter"},
+    {"name": "Deep Pockets",        "stam": 10, "lvl": 1,    "id": 22,  "nicks": "deep pockets,dp"},
+    {"name": "Quest Finder",        "stam": 5,  "lvl": 1,    "id": 61,  "nicks": "quest finder,qf"},
+    {"name": "Adept Learner",       "stam": 10, "lvl": 25,   "id": 19,  "nicks": "adept learner,al"},
+    {"name": "Defiance",            "stam": 15, "lvl": 25,   "id": 18,  "nicks": "defiance"},
+    {"name": "Librarian",           "stam": 10, "lvl": 75,   "id": 20,  "nicks": "librarian,lib,libr"},
+    {"name": "Merchant",            "stam": 10, "lvl": 75,   "id": 21,  "nicks": "merchant,merch,merc"},
+    {"name": "Last Ditch",          "stam": 15, "lvl": 150,  "id": 23,  "nicks": "last ditch,ld"},
+    {"name": "Animal Magnetism",    "stam": 10, "lvl": 200,  "id": 24,  "nicks": "animal magnetism,animag,ani mag,am"},
+    {"name": "Empower",             "stam": 20, "lvl": 200,  "id": 25,  "nicks": "empower,emp"},
+    {"name": "Doubler",             "stam": 5,  "lvl": 200,  "id": 26,  "nicks": "doubler,doub,db"},
+    {"name": "Conserve",            "stam": 10, "lvl": 250,  "id": 39,  "nicks": "conserve,cons,consv,con"},
+    {"name": "Brewing Master",      "stam": 10, "lvl": 250,  "id": 40,  "nicks": "brewing master,bm,brm,brewm"},
+    {"name": "Four Leaf",           "stam": 20, "lvl": 250,  "id": 41,  "nicks": "four leaf,4l,fl"},
+    {"name": "Extend",              "stam": 30, "lvl": 300,  "id": 42,  "nicks": "extend,ext"},
+    {"name": "Inventor",            "stam": 15, "lvl": 400,  "id": 62,  "nicks": "inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1"},
+    {"name": "Extractor",           "stam": 15, "lvl": 400,  "id": 63,  "nicks": "extractor,extr"},
+    {"name": "Inventor II",         "stam": 20, "lvl": 500,  "id": 64,  "nicks": "inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2"},
+    {"name": "Buff Master",         "stam": 10, "lvl": 500,  "id": 65,  "nicks": "buff master,buffm,bum"},
+    {"name": "Reflection",          "stam": 10, "lvl": 600,  "id": 66,  "nicks": "reflection,ref,refl,reflect"},
+    {"name": "Guild Buffer",        "stam": 10, "lvl": 600,  "id": 160, "nicks": "guild buffer, gldbfr, gb"},
+    {"name": "Light Foot",          "stam": 15, "lvl": 700,  "id": 67,  "nicks": "light foot,lf"},
+    {"name": "Mesmerize",           "stam": 20, "lvl": 700,  "id": 68,  "nicks": "mesmerize,mesmer,mes,mez"},
+    {"name": "Resource Finder",     "stam": 25, "lvl": 800,  "id": 76,  "nicks": "resource finder,rf"},
+    {"name": "Quest Hunter",        "stam": 25, "lvl": 800,  "id": 166, "nicks": "quest hunter"},
+    {"name": "Gloat",               "stam": 10, "lvl": 900,  "id": 81,  "nicks": "gloat"},
+    {"name": "Sacrifice",           "stam": 25, "lvl": 900,  "id": 75,  "nicks": "sacrifice,sac"},
+    {"name": "Reckoning",           "stam": 25, "lvl": 900,  "id": 72,  "nicks": "reckoning,rec,rek"},
+    {"name": "Reinforce",           "stam": 30, "lvl": 1000, "id": 126, "nicks": "reinforce,rein"},
+    {"name": "Bodyguard",           "stam": 30, "lvl": 1000, "id": 120, "nicks": "bodyguard,bg"},
+    {"name": "Riposte",             "stam": 30, "lvl": 1000, "id": 124, "nicks": "riposte,rip"},
+    {"name": "Severe Condition",    "stam": 30, "lvl": 1000, "id": 101, "nicks": "severe condition,sc"},
+    {"name": "Sealed",              "stam": 35, "lvl": 1200, "id": 112, "nicks": "sealed,seal"},
+    {"name": "Righteous",           "stam": 30, "lvl": 1200, "id": 107, "nicks": "righteous,right"},
+    {"name": "Epic Forge",          "stam": 30, "lvl": 1200, "id": 102, "nicks": "epic forge,ef"},
+    {"name": "Golden Shield",       "stam": 30, "lvl": 1200, "id": 103, "nicks": "golden shield,gs"},
+    {"name": "Stalker",             "stam": 35, "lvl": 1400, "id": 125, "nicks": "stalker,stalk"},
+    {"name": "Ageless",             "stam": 30, "lvl": 1400, "id": 100, "nicks": "ageless,age"},
+    {"name": "Extractor II",        "stam": 30, "lvl": 1400, "id": 104, "nicks": "extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2"},
+    {"name": "Epic Craft",          "stam": 30, "lvl": 1600, "id": 159, "nicks": "epic craft, epc crft, epccrft, ec"},
+    {"name": "Gold Foot",           "stam": 20, "lvl": 1600, "id": 137, "nicks": "gold foot, goldfoot, gldft, gf"},
+    {"name": "Titan Doubler",       "stam": 40, "lvl": 2000, "id": 167, "nicks": "titan doubler"},
+    {"name": "Teleport",            "stam": 40, "lvl": 2500, "id": 168, "nicks": "teleport"},
+    {"name": "Invigorate",          "stam": 40, "lvl": 3000, "id": 169, "nicks": "invigorate"}
+  ]
+  ;
 
   function guildManage() {
     return indexAjaxData({
@@ -4289,7 +3719,7 @@
   var findBuffMinCastLevel;
   var onlinePlayers$1;
   var onlinePlayersSetting;
-  var extraProfile;
+  var extraProfile$1;
   var profilePagesToSearch;
   var profilePagesToSearchProcessed;
 
@@ -4436,7 +3866,7 @@
     // if option enabled then parse profiles
     profilePagesToSearch = [];
     profilePagesToSearch.push(profileUrl); // ???
-    var extraProfileArray = csvSplit(extraProfile);
+    var extraProfileArray = csvSplit(extraProfile$1);
     extraProfileArray.forEach(addExtraProfile);
     profilePagesToSearchProcessed = 0;
     if (getElementById('alliesEnemies').checked) {
@@ -4477,8 +3907,8 @@
     setMinLvl();
     getElementById('buffersProcessed').innerHTML = 0;
     onlinePlayers$1 = [];
-    extraProfile = getElementById('extraProfile').value;
-    setValue('extraProfile', extraProfile);
+    extraProfile$1 = getElementById('extraProfile').value;
+    setValue('extraProfile', extraProfile$1);
     // get list of players to search, starting with guild>manage page
     guildManage().done(findBuffsParseGuildManagePage);
   }
@@ -4502,7 +3932,7 @@
   }
 
   function getExtraProfile() {
-    extraProfile = getValue('extraProfile');
+    extraProfile$1 = getValue('extraProfile');
   }
 
   function setupFindEvent(fn) {
@@ -4520,7 +3950,7 @@
     calf.sortAsc = true;
     buffList.sort(stringSort);
     getExtraProfile();
-    content.innerHTML = pageLayout(buffCustom, extraProfile);
+    content.innerHTML = pageLayout(buffCustom, extraProfile$1);
     getBufferProgress();
     setupFindEvent(findBuffsStart);
     setupClearEvent();
@@ -4529,7 +3959,7 @@
   function injectFindOther(injector) { // Native - Bad
     var content = injector || pCC;
     getExtraProfile();
-    content.innerHTML = pageLayout(otherCustom, extraProfile);
+    content.innerHTML = pageLayout(otherCustom, extraProfile$1);
     getBufferProgress();
     setupFindEvent(findOtherStart);
     setupClearEvent();
@@ -4986,19 +4416,26 @@
 
   function outputFormat(value, suffix) {
     if (value === 0) {return '';}
-    return value.toString() + suffix;
+    return String(value) + suffix;
   }
 
-  function formatLastActivity(last_login) {
-    var s = Math.abs(nowSecs - last_login);
+  function splitTime(timeInSecs) {
+    var s = timeInSecs;
     var m = Math.floor(s / 60);
     s %= 60;
     var h = Math.floor(m / 60);
     m %= 60;
     var d = Math.floor(h / 24);
     h %= 24;
-    return outputFormat(d, ' days, ') + outputFormat(h, ' hours, ') +
-      outputFormat(m, ' mins, ') + s + ' secs';
+    return [d, h, m, s];
+  }
+
+  function formatLastActivity(last_login) {
+    var timeAry = splitTime(Math.abs(nowSecs - last_login));
+    return outputFormat(timeAry[0], ' days, ') +
+      outputFormat(timeAry[1], ' hours, ') +
+      outputFormat(timeAry[2], ' mins, ') +
+      timeAry[3] + ' secs';
   }
 
   var enemyBuffCheckOn = 'enemy-buff-check-on';
@@ -5309,11 +4746,11 @@
     return getText(node).trim();
   }
 
-  var bountyList;
-  var wantedList;
+  var bountyList$1;
+  var wantedList$1;
   var activeBountyListPosted;
-  var bountyListRefreshTime;
-  var bwNeedsRefresh;
+  var bountyListRefreshTime$1;
+  var bwNeedsRefresh$1;
   var wantedArray;
 
   function hasActiveBounties(activeTable) {
@@ -5328,7 +4765,7 @@
     for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
       var theCells = activeTable.rows[i].cells;
       var thisBounty = bountyData(theCells);
-      bountyList.bounty.push(thisBounty);
+      bountyList$1.bounty.push(thisBounty);
     }
   }
 
@@ -5343,22 +4780,22 @@
     if (!bountyInfo) {return;}
     var activeTable = bountyInfo.parentNode.parentNode
       .previousElementSibling.children[0].children[0];
-    bountyList = {};
-    bountyList.bounty = [];
-    bountyList.isRefreshed = true;
-    bountyList.lastUpdate = nowSecs;
+    bountyList$1 = {};
+    bountyList$1.bounty = [];
+    bountyList$1.isRefreshed = true;
+    bountyList$1.lastUpdate = nowSecs;
     if (activeTable) {parseActiveBounty(activeTable);}
     activeBountyListPosted = true;
   }
 
   function testBountyList() {
-    return bountyList &&
-      nowSecs - bountyList.lastUpdate > bountyListRefreshTime;
+    return bountyList$1 &&
+      nowSecs - bountyList$1.lastUpdate > bountyListRefreshTime$1;
   }
 
   function testWantedList() {
-    return wantedList &&
-      nowSecs - wantedList.lastUpdate > bountyListRefreshTime;
+    return wantedList$1 &&
+      nowSecs - wantedList$1.lastUpdate > bountyListRefreshTime$1;
   }
 
   function testCacheInvalid() {
@@ -5366,21 +4803,21 @@
   }
 
   function invalidateCache() {
-    bountyList = getValueJSON('bountyList');
-    wantedList = getValueJSON('wantedList');
-    bountyListRefreshTime = getValue('bountyListRefreshTime');
-    bwNeedsRefresh = getValue('bwNeedsRefresh');
-    if (bwNeedsRefresh) {return;}
+    bountyList$1 = getValueJSON('bountyList');
+    wantedList$1 = getValueJSON('wantedList');
+    bountyListRefreshTime$1 = getValue('bountyListRefreshTime');
+    bwNeedsRefresh$1 = getValue('bwNeedsRefresh');
+    if (bwNeedsRefresh$1) {return;}
     if (testCacheInvalid()) {
-      bwNeedsRefresh = true; // invalidate cache
+      bwNeedsRefresh$1 = true; // invalidate cache
     }
   }
 
   function doRefresh() {
-    wantedList = {};
-    wantedList.bounty = [];
-    wantedList.isRefreshed = true;
-    wantedList.lastUpdate = nowSecs;
+    wantedList$1 = {};
+    wantedList$1.bounty = [];
+    wantedList$1.isRefreshed = true;
+    wantedList$1.lastUpdate = nowSecs;
     activeBountyListPosted = false;
     wantedArray = shouldBeArray('wantedNames');
     setValue('bwNeedsRefresh', false);
@@ -5419,7 +4856,7 @@
 
   function wantedTarget(target, theRow) {
     if (wanted(target, theRow)) {
-      wantedList.bounty.push(getTarget(theRow.cells));
+      wantedList$1.bounty.push(getTarget(theRow.cells));
     }
   }
 
@@ -5460,7 +4897,7 @@
   }
 
   function injectBountyList() { // Legacy
-    setValueJSON('bountyList', bountyList);
+    setValueJSON('bountyList', bountyList$1);
 
     bountyListDiv.innerHTML = '';
 
@@ -5470,14 +4907,14 @@
     insertElement(bountyListDiv, heading);
 
     var output = '';
-    if (bountyList.bounty.length === 0) {
+    if (bountyList$1.bounty.length === 0) {
       output += '<div class="xsOrange">[No active bounties]</div>';
     } else {
-      for (var i = 0; i < bountyList.bounty.length; i += 1) {
-        output += '<a href="' + bountyList.bounty[i].link +
+      for (var i = 0; i < bountyList$1.bounty.length; i += 1) {
+        output += '<a href="' + bountyList$1.bounty[i].link +
           '" class="tip-static" data-tipped="' +
-          makeMouseOver(bountyList.bounty[i]) + '">' +
-          bountyList.bounty[i].target + '</a><br>';
+          makeMouseOver(bountyList$1.bounty[i]) + '">' +
+          bountyList$1.bounty[i].target + '</a><br>';
       }
     }
     insertHtmlBeforeEnd(bountyListDiv, output);
@@ -5503,7 +4940,7 @@
   }
 
   function injectWantedList() { // Legacy
-    setValueJSON('wantedList', wantedList);
+    setValueJSON('wantedList', wantedList$1);
 
     wantedListDiv.innerHTML = '';
 
@@ -5513,15 +4950,15 @@
     insertElement(wantedListDiv, heading);
 
     var output = '';
-    if (wantedList.bounty.length === 0) {
+    if (wantedList$1.bounty.length === 0) {
       output += '<div class="xsOrange">[No wanted bounties]</div>';
     } else {
-      for (var i = 0; i < wantedList.bounty.length; i += 1) {
-        output += acceptBtn$1(wantedList.bounty[i]) +
+      for (var i = 0; i < wantedList$1.bounty.length; i += 1) {
+        output += acceptBtn$1(wantedList$1.bounty[i]) +
           '<a class="xsKhaki tip-static" data-tipped="' +
-          makeMouseOver$1(wantedList.bounty[i]) +
-          '" href="' + wantedList.bounty[i].link + '">' +
-          wantedList.bounty[i].target + '</a><br>';
+          makeMouseOver$1(wantedList$1.bounty[i]) +
+          '" href="' + wantedList$1.bounty[i].link + '">' +
+          wantedList$1.bounty[i].target + '</a><br>';
       }
     }
     insertHtmlBeforeEnd(wantedListDiv, output);
@@ -5562,19 +4999,19 @@
 
   function notRefreshed(enableActiveBountyList, enableWantedList) {
     if (enableWantedList) {
-      wantedList.isRefreshed = false;
+      wantedList$1.isRefreshed = false;
       injectWantedList();
     }
     if (enableActiveBountyList) {
-      bountyList.isRefreshed = false;
+      bountyList$1.isRefreshed = false;
       injectBountyList();
     }
   }
 
   var refreshConditions = [
-    function() {return !bountyList;},
-    function() {return !wantedList;},
-    function() {return bwNeedsRefresh;}
+    function() {return !bountyList$1;},
+    function() {return !wantedList$1;},
+    function() {return bwNeedsRefresh$1;}
   ];
 
   function needsRefresh() {
@@ -6225,7 +5662,7 @@
     doAccordion();
   }
 
-  var enterForSendMessage;
+  var enterForSendMessage$2;
   var quickMsgDialog;
   var $quickMessageDialog;
   var fshTemplate;
@@ -6270,7 +5707,7 @@
   }
 
   function captureEnter() {
-    if (enterForSendMessage) {
+    if (enterForSendMessage$2) {
       on(dialogMsg$1, 'keypress', keypress);
     }
   }
@@ -6375,7 +5812,7 @@
 
   function injectQuickMsgDialogJQ() {
     if (jQueryNotPresent()) {return;}
-    enterForSendMessage = getValue('enterForSendMessage');
+    enterForSendMessage$2 = getValue('enterForSendMessage');
     window.openQuickMsgDialog = openQuickMsgDialog;
   }
 
@@ -6783,8 +6220,8 @@
     return result;
   }
 
-  var goldAmount;
-  var sendGoldonWorld;
+  var goldAmount$1;
+  var sendGoldonWorld$1;
 
   function doneSendGold(data) {
     var info = infoBox(data);
@@ -6797,7 +6234,7 @@
   }
 
   function doSendGold() { // jQuery
-    if (!sendGoldonWorld) {return;}
+    if (!sendGoldonWorld$1) {return;}
     indexAjaxData({
       cmd: 'trade',
       subcmd: 'sendgold',
@@ -6813,7 +6250,7 @@
 
   function updateSendGoldOnWorld() { // jQuery
     $('#HelperSendTotal').html(addCommas(getValue('currentGoldSentTotal')));
-    if (Number(GameData.player().gold) > goldAmount) {
+    if (Number(GameData.player().gold) > goldAmount$1) {
       statbarGoldBackground('red');
     } else {
       statbarGoldBackground('inherit');
@@ -6824,7 +6261,7 @@
     return '<dt class="stat-gold-sendTo">Send To:</dt>' +
       '<dd id="HelperSendTo">' + getValue('goldRecipient') + '</dd>' +
       '<dt class="stat-gold-sendAmt">Amount:</dt>' +
-      '<dd id="HelperSendAmt">' + addCommas(goldAmount) + '</dd>' +
+      '<dd id="HelperSendAmt">' + addCommas(goldAmount$1) + '</dd>' +
       '<dt class="stat-gold-sendTo">Send?</dt>' +
       '<dd><input id="HelperSendGold" value="Send!" class="custombutton" ' +
       'type="submit"><input type="hidden" id="xc" value=""</dd>' +
@@ -6834,7 +6271,7 @@
   }
 
   function prepareSendGoldOnWorld() {
-    goldAmount = getValue('goldAmount');
+    goldAmount$1 = getValue('goldAmount');
     $('#statbar-gold-tooltip-general').append(extraHtml());
     $('#HelperSendGold').click(doSendGold);
     updateSendGoldOnWorld();
@@ -6842,8 +6279,8 @@
   }
 
   function injectSendGoldOnWorld() { // jQuery
-    sendGoldonWorld = getValue('sendGoldonWorld');
-    if (sendGoldonWorld) {prepareSendGoldOnWorld();}
+    sendGoldonWorld$1 = getValue('sendGoldonWorld');
+    if (sendGoldonWorld$1) {prepareSendGoldOnWorld();}
   }
 
   function fastWearMgr() {
@@ -6898,39 +6335,37 @@
   }
 
   var keyLookup = [
-    [33, combatSetKey, 0], // Shift+1
-    [64, combatSetKey, 1], // Shift+2
-    [34, combatSetKey, 1], // Shift+2 -- for UK keyboards, I think
-    [35, combatSetKey, 2], // Shift+3
-    [36, combatSetKey, 3], // Shift+4
-    [37, combatSetKey, 4], // Shift+5
-    [94, combatSetKey, 5], // Shift+6
-    [38, combatSetKey, 6], // Shift+7
-    [42, combatSetKey, 7], // Shift+8
-    [40, combatSetKey, 8], // Shift+9
-    [48, toWorld], // go to world [0]
-    [60, movePage, '<'], // move to prev page [<]
-    [62, movePage, '>'], // move to next page [>]
-    [71, createGroup], // create group [G]
-    [76, logPage], // Log Page [L]
-    [98, backpack], // backpack [b]
-    [103, gotoGuild], // go to guild [g]
-    [106, joinAllGroup], // join all group [j]
-    [108, logPage], // Log Page [l]
-    [112, profile$1], // profile [p]
-    [114, doRepair], // repair [r]
-    [118, fastWearMgr], // fast wear manager [v]
-    [121, doSendGold], // fast send gold [y]
-    [163, combatSetKey, 2] // Shift+3 -- for UK keyboards
+    ['!', combatSetKey, 0], // Shift+1
+    ['@', combatSetKey, 1], // Shift+2
+    ['"', combatSetKey, 1], // Shift+2 -- for UK keyboards
+    ['#', combatSetKey, 2], // Shift+3
+    ['£', combatSetKey, 2], // Shift+3 -- for UK keyboards
+    ['$', combatSetKey, 3], // Shift+4
+    ['%', combatSetKey, 4], // Shift+5
+    ['^', combatSetKey, 5], // Shift+6
+    ['&', combatSetKey, 6], // Shift+7
+    ['*', combatSetKey, 7], // Shift+8
+    ['(', combatSetKey, 8], // Shift+9
+    ['0', toWorld], // go to world [0]
+    ['<', movePage, '<'], // move to prev page [<]
+    ['>', movePage, '>'], // move to next page [>]
+    ['G', createGroup], // create group [G]
+    ['L', logPage], // Log Page [L]
+    ['b', backpack], // backpack [b]
+    ['g', gotoGuild], // go to guild [g]
+    ['j', joinAllGroup], // join all group [j]
+    ['l', logPage], // Log Page [l]
+    ['p', profile$1], // profile [p]
+    ['r', doRepair], // repair [r]
+    ['v', fastWearMgr], // fast wear manager [v]
+    ['y', doSendGold] // fast send gold [y]
   ];
 
-  function thisCharCode(charCode, arr) {return charCode === arr[0];}
+  function thisKey(key, arr) {return key === arr[0];}
 
-  function handleKey(charCode) {
-    var mapping = keyLookup.find(partial(thisCharCode, charCode));
-    if (mapping) {
-      mapping[1](mapping[2]);
-    }
+  function handleKey(key) {
+    var mapping = keyLookup.find(partial(thisKey, key));
+    if (mapping) {mapping[1](mapping[2]);}
   }
 
   function notTagName(evt, tag) {return evt.target.tagName !== tag;}
@@ -6952,18 +6387,18 @@
     return bailOut.some(partial(reason, evt));
   }
 
-  function keyPress(evt) {
-    if (doNotHandle(evt)) {return;}
-    handleKey(evt.charCode);
+  function handleKeyUp(e) {
+    if (doNotHandle(e)) {return;}
+    handleKey(e.key);
   }
 
   function replaceKeyHandler() {
-    document.onkeypress = keyPress;
+    on(document, 'keyup', handleKeyUp);
   }
 
   function prepareEnv() {
     if (getValue('gameHelpLink')) {
-      add(3, gameHelpLink);
+      add(3, gameHelpLink$1);
     }
     calf.huntingMode = getValue('huntingMode');
     add(3, replaceKeyHandler);
@@ -7621,7 +7056,7 @@
   }
 
   var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
-  var disableBreakdownPrompts;
+  var disableBreakdownPrompts$2;
   var selectedList = [];
 
   function disappearance(self) {self.hide();}
@@ -7683,7 +7118,7 @@
   }
 
   function breakEvt(evt) {
-    if (disableBreakdownPrompts &&
+    if (disableBreakdownPrompts$2 &&
         evt.target.id === 'breakdown-selected-items') {
       validBreakEvent(evt);
     }
@@ -7701,8 +7136,8 @@
   }
 
   function togglePref$1() {
-    disableBreakdownPrompts = !disableBreakdownPrompts;
-    setValue(prefDisableBreakdownPrompts, disableBreakdownPrompts);
+    disableBreakdownPrompts$2 = !disableBreakdownPrompts$2;
+    setValue(prefDisableBreakdownPrompts, disableBreakdownPrompts$2);
   }
 
   function prefBox() {
@@ -7722,7 +7157,7 @@
   function composingBreakdown() {
     if (jQueryNotPresent()) {return;}
     perfFilter('composing');
-    disableBreakdownPrompts = getValue(prefDisableBreakdownPrompts);
+    disableBreakdownPrompts$2 = getValue(prefDisableBreakdownPrompts);
     prefBox();
     setupHandlers();
   }
@@ -7782,6 +7217,21 @@
     var token = subUid.toString();
     topics[topic].push({token: token, func: func});
     return token;
+  }
+
+  function hasSub(token, subs, el, i) {
+    if (el.token === token) {
+      subs.splice(i, 1);
+      return true;
+    }
+  }
+
+  function hasTopic(token, subs) {
+    return subs.some(partial(hasSub, token, subs));
+  }
+
+  function unsubscribe(token) {
+    if (topics.values().some(partial(hasTopic, token))) {return token;}
   }
 
   function randomBackgroundImage() {
@@ -8741,7 +8191,7 @@
     on(fetchStats, 'click', fetchGroupData);
   }
 
-  var maxGroupSizeToJoin;
+  var maxGroupSizeToJoin$1;
 
   function filterMercs(e) {return !e.includes('#000099');}
 
@@ -8764,7 +8214,7 @@
     var memListArrayWithMercs = csvSplit(getText(memList));
     var memListArrayWithoutMercs = memListArrayWithMercs
       .filter(filterMercs);
-    if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
+    if (memListArrayWithoutMercs.length < maxGroupSizeToJoin$1) {
       var container = createDiv({
         className: 'group-action-link fshRelative',
         innerHTML: '<span class="fshSpinner fshSpinner12"></span>',
@@ -8783,7 +8233,7 @@
 
   function joinUnderButton(buttonRow) {
     var joinUnder = addButton(buttonRow,
-      'Join All Groups < ' + maxGroupSizeToJoin + ' Members');
+      'Join All Groups < ' + maxGroupSizeToJoin$1 + ' Members');
     on(joinUnder, 'click', joinAllGroupsUnderSize);
   }
 
@@ -8792,7 +8242,7 @@
     var buttonRow = joinAll.parentNode;
     var enableMaxGroupSizeToJoin = getValue('enableMaxGroupSizeToJoin');
     if (enableMaxGroupSizeToJoin) {
-      maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+      maxGroupSizeToJoin$1 = getValue('maxGroupSizeToJoin');
       hideElement(joinAll);
       joinUnderButton(buttonRow);
     }
@@ -9302,7 +8752,7 @@
     return testRange(aValue, 0, 100);
   }
 
-  var bioEditLines;
+  var bioEditLines$1;
   var textArea$1;
   var previewArea;
   var theBox;
@@ -9376,15 +8826,15 @@
   function changeHeight() {
     var boxVal = testQuant(theBox.value);
     if (boxVal) {
-      bioEditLines = boxVal;
+      bioEditLines$1 = boxVal;
       setValue('bioEditLines', boxVal);
-      textArea$1.rows = bioEditLines;
+      textArea$1.rows = bioEditLines$1;
     }
   }
 
   function bioHeight() {
     var bioEditLinesDiv = createDiv({innerHTML: '<br>Display '});
-    theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines});
+    theBox = createInput({min: 1, max: 99, type: 'number', value: bioEditLines$1});
     insertElement(bioEditLinesDiv, theBox);
     insertTextBeforeEnd(bioEditLinesDiv, ' Lines ');
     var saveLines = createInput({
@@ -9404,13 +8854,13 @@
   }
 
   function injectBioWidgets() {
-    bioEditLines = getValue('bioEditLines');
+    bioEditLines$1 = getValue('bioEditLines');
     textArea$1 = getElementById('textInputBox');
     if (!textArea$1) {return;}
     bioPreview();
     bioWords();
     bioHeight();
-    textArea$1.rows = bioEditLines;
+    textArea$1.rows = bioEditLines$1;
     if (calf.cmd === 'profile') {
       on(textArea$1.parentNode, 'click', bioEvtHdl);
     }
@@ -9496,17 +8946,106 @@
       changeOnlineDot);
   }
 
-  var highlightPlayersNearMyLvl$1;
-  var highlightGvGPlayersNearMyLvl;
+  var lineBreak = '';
+
+  function getNumberOfLine(bioContents, maxCharactersToShow) {
+    return bioContents.substr(0, maxCharactersToShow).split('<br>\n').length - 1;
+  }
+
+  function bioIsTooSmall(bio, maxChar, lines, maxRows) {
+    return bio.length <= maxChar && lines <= maxRows;
+  }
+
+  function findStartPosition(bioContents, maxRowsToShow) {
+    return bioContents.split('<br>\n').slice(0, maxRowsToShow)
+      .join('<br>\n').length;
+  }
+
+  function breakOnSpace(bioContents, maxCharactersToShow) {
+    var breakPoint = bioContents.indexOf(' ', maxCharactersToShow) + 1;
+    if (breakPoint === 0) {breakPoint = maxCharactersToShow;}
+    lineBreak = '<br>';
+    return breakPoint;
+  }
+
+  function getBreakpoint(bioContents, maxCharactersToShow) {
+    var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
+    if (breakPoint === 3 || breakPoint > maxCharactersToShow + 65) {
+      breakPoint = breakOnSpace(bioContents, maxCharactersToShow);
+    }
+    return breakPoint;
+  }
+
+  function foundHangingTag(closeTagIndex, openTagIndex) {
+    return closeTagIndex !== -1 &&
+      (openTagIndex === -1 || openTagIndex > closeTagIndex);
+  }
+
+  var closeTags = ['b', 'i', 'u', 'span'];
+
+  function hangingTags(bioEnd, tag) {
+    return foundHangingTag(bioEnd.indexOf('</' + tag + '>'),
+      bioEnd.indexOf('<' + tag + '>'));
+  }
+
+  function closeTag(tag) {return '</' + tag + '>';}
+
+  function getExtraCloseTags(bioEnd) {
+    return closeTags.filter(partial(hangingTags, bioEnd)).map(closeTag).join('');
+  }
+
+  function expandBio() {
+    var bioExpander = getElementById('fshBioExpander');
+    if (containsText('More ...', bioExpander)) {
+      setText('Less ...', bioExpander);
+    } else {
+      setText('More ...', bioExpander);
+    }
+    getElementById('fshBioHidden').classList.toggle('fshHide');
+  }
+
+  function doCompression(bioCell, bioContents, maxCharactersToShow) {
+    // find the end of next HTML tag after the max characters to show.
+    var breakPoint = getBreakpoint(bioContents, maxCharactersToShow);
+    var bioStart = bioContents.substring(0, breakPoint);
+    var bioEnd = bioContents.substring(breakPoint, bioContents.length);
+    var extraCloseHtml = getExtraCloseTags(bioEnd);
+    var extraOpenHtml = extraCloseHtml.replace('/', '');
+    bioCell.innerHTML = bioStart + extraCloseHtml + lineBreak +
+      '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
+      '<span class="fshHide" id="fshBioHidden">' + extraOpenHtml + bioEnd +
+      '</span>';
+    on(getElementById('fshBioExpander'), 'click', expandBio);
+  }
+
+  function compressBio(bioCell) {
+    var bioContents = bioCell.innerHTML;
+    var maxCharactersToShow = Number(getValue('maxCompressedCharacters'));
+    var maxRowsToShow = Number(getValue('maxCompressedLines'));
+    var numberOfLines = getNumberOfLine(bioContents, maxCharactersToShow);
+    if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
+      maxRowsToShow)) {return;}
+    if (numberOfLines >= maxRowsToShow) {
+      maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
+    }
+    doCompression(bioCell, bioContents, maxCharactersToShow);
+  }
+
+  function compressHistory() {
+    compressBio(getArrayByTagName(def_table, pCC).slice(-2, -1)[0]);
+  }
+
+  var highlightPlayersNearMyLvl$2;
+  var highlightGvGPlayersNearMyLvl$1;
 
   function isPvpTarget(vlevel) {
-    return highlightPlayersNearMyLvl$1 &&
+    return highlightPlayersNearMyLvl$2 &&
       vlevel >= pvpLowerLevel &&
       vlevel <= pvpUpperLevel;
   }
 
   function isGvgTarget(vlevel) {
-    return highlightGvGPlayersNearMyLvl &&
+    return highlightGvGPlayersNearMyLvl$1 &&
       vlevel >= gvgLowerLevel &&
       vlevel <= gvgUpperLevel;
   }
@@ -9529,7 +9068,7 @@
 
   function shouldHighlight() {
     return Number(getUrlParameter('guild_id')) !== currentGuildId() &&
-      (highlightPlayersNearMyLvl$1 || highlightGvGPlayersNearMyLvl);
+      (highlightPlayersNearMyLvl$2 || highlightGvGPlayersNearMyLvl$1);
   }
 
   function doHighlights() {
@@ -9541,9 +9080,10 @@
   }
 
   function injectViewGuild() {
-    highlightPlayersNearMyLvl$1 = getValue('highlightPlayersNearMyLvl');
-    highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
+    highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
+    highlightGvGPlayersNearMyLvl$1 = getValue('highlightGvGPlayersNearMyLvl');
     doHighlights();
+    compressHistory();
   }
 
   function insertBuffLink(el) {
@@ -10434,13 +9974,13 @@
     return ['Up', 'Down'].includes(evt.target.value);
   }
 
-  function ajaxifyRankControls(evt) {
+  function ajaxifyRankControls$2(evt) {
     if (upOrDown(evt)) {overrideUpDown(evt);}
   }
 
   function doButtons() {
     if (characterRow && getValue('ajaxifyRankControls')) {
-      on(pCC, 'click', ajaxifyRankControls, true);
+      on(pCC, 'click', ajaxifyRankControls$2, true);
     }
   }
 
@@ -11074,6 +10614,15 @@
     return lookup.find(partial(theArray, thisWearable, thisBp))[2]();
   }
 
+  function cloneObj(obj, result, key) {
+    result[key] = obj[key];
+    return result;
+  }
+
+  function sortKeys(obj) {
+    return Object.keys(obj).sort(alpha).reduce(partial(cloneObj, obj), {});
+  }
+
   var inventory$1;
 
   function pivotPotObj(potOpts, potObj, prev, pot) {
@@ -11113,8 +10662,8 @@
 
   function drawInventory(potOpts, potObj) {
     sendEvent('potReport', 'drawInventory');
-    var pivot = Object.keys(potObj)
-      .reduce(partial(pivotPotObj, potOpts, potObj), {});
+    var pivot = sortKeys(Object.keys(potObj)
+      .reduce(partial(pivotPotObj, potOpts, potObj), {}));
     inventory$1.innerHTML = '<table><tbody>' +
       Object.keys(pivot).reduce(partial(makeRowsFromPivot, potOpts, pivot), '') +
       '</tbody></table>';
@@ -11226,15 +10775,6 @@
     minpoint: 12,
     maxpoint: 20
   };
-
-  function cloneObj(obj, result, key) {
-    result[key] = obj[key];
-    return result;
-  }
-
-  function sortKeys(obj) {
-    return Object.keys(obj).sort(alpha).reduce(partial(cloneObj, obj), {});
-  }
 
   function update(potOpts, pot) {
     if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
@@ -11358,7 +10898,8 @@
   }
 
   function potReport(potObj) {
-    getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+    // getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
+    getForage(storeMap).done(partial(gotMap, potObj));
   }
 
   var nodeArray;
@@ -11677,26 +11218,26 @@
     }).pipe(ajaxReturnCode);
   }
 
-  var disableItemColoring;
-  var showExtraLinks;
-  var showQuickDropLinks;
-  var showQuickSendLinks;
+  var disableItemColoring$2;
+  var showExtraLinks$2;
+  var showQuickDropLinks$2;
+  var showQuickSendLinks$1;
 
   function setShowExtraLinks() {
-    showExtraLinks = !showExtraLinks;
-    setValue('showExtraLinks', showExtraLinks);
+    showExtraLinks$2 = !showExtraLinks$2;
+    setValue('showExtraLinks', showExtraLinks$2);
   }
 
   function setShowQuickDropLinks() {
-    showQuickDropLinks = !showQuickDropLinks;
-    setValue('showQuickDropLinks', showQuickDropLinks);
+    showQuickDropLinks$2 = !showQuickDropLinks$2;
+    setValue('showQuickDropLinks', showQuickDropLinks$2);
   }
 
   function getPrefs() {
-    disableItemColoring = getValue('disableItemColoring');
-    showExtraLinks = getValue('showExtraLinks');
-    showQuickDropLinks = getValue('showQuickDropLinks');
-    showQuickSendLinks = getValue('showQuickSendLinks');
+    disableItemColoring$2 = getValue('disableItemColoring');
+    showExtraLinks$2 = getValue('showExtraLinks');
+    showQuickDropLinks$2 = getValue('showQuickDropLinks');
+    showQuickSendLinks$1 = getValue('showQuickSendLinks');
   }
 
   function insertHtmlBeforeBegin(parent, html) {
@@ -11801,7 +11342,7 @@
   function getItems$1() {
     addStatTotalToMouseover();
     getPrefs();
-    doToggleButtons(showExtraLinks, showQuickDropLinks);
+    doToggleButtons(showExtraLinks$2, showQuickDropLinks$2);
     var imgList = getItemImg();
     var fromTips = imgList.filter(hasTip).map(getIds);
     itemsAry$1 = fromTips.map(getInjector);
@@ -11818,7 +11359,7 @@
   var sendLinks;
 
   function afterbegin(o, item) {
-    if (fallback(extraLinks, !showExtraLinks)) {return;}
+    if (fallback(extraLinks, !showExtraLinks$2)) {return;}
     var pattern = '<span><span class="aHLink">';
     if (!item.bound) {
       pattern += '[<a href="' + ahSearchUrl +
@@ -11830,7 +11371,7 @@
   }
 
   function itemColouring(o, item) {
-    if (!colouring$1 && !disableItemColoring) {
+    if (!colouring$1 && !disableItemColoring$2) {
       o.injectHere.classList.add(rarity[item.rarity].clas);
     }
   }
@@ -11844,7 +11385,7 @@
       }
     ],
     [
-      function(item) {return !sendLinks && showQuickSendLinks && !item.bound;},
+      function(item) {return !sendLinks && showQuickSendLinks$1 && !item.bound;},
       function(o) {
         return ' <span class="quickAction sendLink tip-static" ' +
           'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
@@ -11853,7 +11394,7 @@
     ],
     [
       function(item) {
-        return !dropLinks && showQuickDropLinks && item.guild_tag === -1;
+        return !dropLinks && showQuickDropLinks$2 && item.guild_tag === -1;
       },
       function(o) {
         return ' <span class="quickAction dropLink tip-static" itemInvId="' +
@@ -11883,20 +11424,20 @@
   }
 
   function doneInvPaint() {
-    if (showExtraLinks) {extraLinks = true;}
+    if (showExtraLinks$2) {extraLinks = true;}
     checkAll = true;
     colouring$1 = true;
-    if (showQuickDropLinks) {dropLinks = true;}
+    if (showQuickDropLinks$2) {dropLinks = true;}
     sendLinks = true;
   }
 
   function toggleExtraLinks(o) {
-    toggleForce(o.injectHere.children[0], !showExtraLinks);
+    toggleForce(o.injectHere.children[0], !showExtraLinks$2);
   }
 
   function toggleShowExtraLinks() {
     setShowExtraLinks();
-    doToggleButtons(showExtraLinks, showQuickDropLinks);
+    doToggleButtons(showExtraLinks$2, showQuickDropLinks$2);
     if (!extraLinks) {
       batch(3, itemsAry$1, 0, itemWidgets, doneInvPaint);
     } else {
@@ -11905,12 +11446,12 @@
   }
 
   function toggleDropLinks(o) {
-    toggleForce(querySelector('.dropLink', o.injectHere), !showQuickDropLinks);
+    toggleForce(querySelector('.dropLink', o.injectHere), !showQuickDropLinks$2);
   }
 
   function toggleShowQuickDropLinks() {
     setShowQuickDropLinks();
-    doToggleButtons(showExtraLinks, showQuickDropLinks);
+    doToggleButtons(showExtraLinks$2, showQuickDropLinks$2);
     if (!dropLinks) {
       batch(3, itemsAry$1, 0, itemWidgets, doneInvPaint);
     } else {
@@ -12419,6 +11960,7 @@
   function check(specialHtml, el, i) {
     if (!inSpecialsList(el)) {
       var label = JSON.stringify(el) + ' ' + getText(specialHtml[i]);
+      console.log(label); // eslint-disable-line no-console
       sendEvent('Logs', 'Missing PvP Special', label);
     }
   }
@@ -12540,21 +12082,21 @@
   }
 
   var memberNamesAsStrings;
-  var listOfAllies;
-  var listOfEnemies;
+  var listOfAllies$1;
+  var listOfEnemies$1;
 
   function setColour(el, col) {
     el.classList.add(col);
   }
 
   function isEnemy(playerName, playerElement) {
-    if (listOfEnemies.includes(playerName)) {
+    if (listOfEnemies$1.includes(playerName)) {
       setColour(playerElement, 'fshRed');
     }
   }
 
   function isAlly(playerName, playerElement) {
-    if (listOfAllies.includes(playerName)) {
+    if (listOfAllies$1.includes(playerName)) {
       setColour(playerElement, 'fshBlue');
     }
   }
@@ -12579,8 +12121,8 @@
   }
 
   function prepareAlliesEnemies(data) {
-    listOfAllies = data._allies.map(justUsername);
-    listOfEnemies = data._enemies.map(justUsername);
+    listOfAllies$1 = data._allies.map(justUsername);
+    listOfEnemies$1 = data._enemies.map(justUsername);
   }
 
   function getCalfVars() {
@@ -13245,17 +12787,12 @@
     if (targets) {haveTargets();}
   }
 
-  function timeUnit(value, unit) {
-    if (value > 0) {return value.toString() + unit;}
-    return '';
-  }
-
   function buffTimeLeft(_s) {
     var m = Math.floor(_s / 60);
     var s = _s % 60;
-    var buffTimeToExpire = timeUnit(m, 'm');
+    var buffTimeToExpire = outputFormat(m, 'm');
     if (m > 0 && s > 0) {buffTimeToExpire += ' ';}
-    buffTimeToExpire += timeUnit(s, 's');
+    buffTimeToExpire += outputFormat(s, 's');
     return buffTimeToExpire;
   }
 
@@ -13400,7 +12937,7 @@
       '> Refresh time is same as Active Bounties';
   }
 
-  function wantedNames() {
+  function wantedNames$1() {
     return '<tr><td align= "right">Wanted Names' +
       helpLink('Wanted Names',
         'The names of the people you want to see on the bounty board ' +
@@ -13414,7 +12951,7 @@
     return '<tr><th colspan="2"><b>Bounty hunting preferences</b></th></tr>' +
       showActiveBounties() +
       showWantedBounties() +
-      wantedNames() +
+      wantedNames$1() +
       bunchOfSimple([
         'wantedGuildMembers',
         'enableAttackHelper',
@@ -13831,7 +13368,7 @@
     return huntBuff() + huntBuffCheck() + ' ' + huntMode();
   }
 
-  function huntingBuffs() {
+  function huntingBuffs$1() {
     return '<tr><td class="fshRight">' + huntBuff() + '</td><td colspan="3">' +
       huntBuffCheck() + ' ' + huntMode() + '</td></tr>';
   }
@@ -13862,7 +13399,7 @@
       keepCreatureLog(),
       showSendGold(),
       theDoNotKillList(),
-      huntingBuffs(),
+      huntingBuffs$1(),
       huntingBuffsLists()
     ].join('');
   }
@@ -14867,7 +14404,7 @@
     ufsgMap = doBtn('fshTempleOne', 'Search map in Ultimate FSG', worldName);
   }
 
-  function showSpeakerOnWorld(worldName) {
+  function showSpeakerOnWorld$1(worldName) {
     if (getValue('showSpeakerOnWorld')) {
       var msgSounds = getValue('playNewMessageSound');
       soundCheck = makeToggleBtn({
@@ -14897,7 +14434,7 @@
 
   function addButtons() {
     showQuickLinks(buttonContainer);
-    showSpeakerOnWorld(buttonContainer);
+    showSpeakerOnWorld$1(buttonContainer);
     showHuntMode(buttonContainer);
   }
 
@@ -17093,8 +16630,8 @@
     $.subscribe(def_viewCreature, processCreature);
   }
 
-  var huntingBuffs$1;
-  var huntingBuffsName;
+  var huntingBuffs$2;
+  var huntingBuffsName$1;
 
   function setCurrentBuffList() {
     var lookup = [, // eslint-disable-line no-sparse-arrays
@@ -17103,8 +16640,8 @@
       [calf.buffs3, calf.buffs3Name]
     ][calf.enabledHuntingMode];
     if (Array.isArray(lookup)) {
-      huntingBuffs$1 = lookup[0];
-      huntingBuffsName = lookup[1];
+      huntingBuffs$2 = lookup[0];
+      huntingBuffsName$1 = lookup[1];
     }
   }
 
@@ -17116,11 +16653,11 @@
     GameData.fetch(def_fetch_playerBuffs);
   }
 
-  var hidePlayerActions;
+  var hidePlayerActions$2;
 
   function toggleHidePlayerActions() {
-    hidePlayerActions = !hidePlayerActions;
-    setValue('hidePlayerActions', hidePlayerActions);
+    hidePlayerActions$2 = !hidePlayerActions$2;
+    setValue('hidePlayerActions', hidePlayerActions$2);
     GameData.fetch(def_fetch_worldRealmActions);
   }
 
@@ -17132,13 +16669,13 @@
   }
 
   function doHidePlayerActions() {
-    if (!hidePlayerActions) {return;}
+    if (!hidePlayerActions$2) {return;}
     var act = getElementById('actionList');
     getArrayByClassName('player', act).forEach(hideActions);
   }
 
   function prepareHidePlayerActions() {
-    hidePlayerActions = getValue('hidePlayerActions');
+    hidePlayerActions$2 = getValue('hidePlayerActions');
     $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
     doHidePlayerActions();
   }
@@ -17221,7 +16758,7 @@
   }
 
   function displayMissingBuffs(missingBuffsDiv, missingBuffs) {
-    missingBuffsDiv.innerHTML = 'You are missing some ' + huntingBuffsName +
+    missingBuffsDiv.innerHTML = 'You are missing some ' + huntingBuffsName$1 +
       ' hunting buffs<br>(' + missingBuffs.join(', ') + ')';
   }
 
@@ -17231,7 +16768,7 @@
 
   function lookForMissingBuffs(missingBuffsDiv, data) {
     var buffHash = data.b.reduce(buildBuffHash, {});
-    var missingBuffs = huntingBuffs$1.reduce(
+    var missingBuffs = huntingBuffs$2.reduce(
       partial(findMissingBuffs, buffHash), []);
     if (missingBuffs.length > 0) {
       displayMissingBuffs(missingBuffsDiv, missingBuffs);
@@ -17249,7 +16786,7 @@
   }
 
   function dataEventsPlayerBuffs(missingBuffsDiv, evt, data) {
-    if (huntingBuffs$1) {huntingBuffsEnabled(missingBuffsDiv, evt, data);}
+    if (huntingBuffs$2) {huntingBuffsEnabled(missingBuffsDiv, evt, data);}
   }
 
   function doHuntingBuffs(missingBuffsDiv) { // jQuery.min
@@ -17397,6 +16934,32 @@
     prepareHidePlayerActions();
   }
 
+  function didNotExist(data) {
+    return data.response && data.response.msg &&
+      data.response.msg.startsWith('Creature did not exist at that location');
+  }
+
+  function removeAction(data) {
+    if (didNotExist(data)) {
+      GameData.fetch(
+        def_fetch_worldRealmDynamic +
+        def_fetch_worldRealmActions
+      );
+    }
+  }
+
+  function removeElement(el) {el.remove();}
+
+  function hideTitanViewCombat(e, data) {
+    removeAction(data);
+    querySelectorArray('.creature-4 > .quickCombat > .verbs')
+      .forEach(removeElement);
+  }
+
+  function hideTitanCombatResults() {
+    $.subscribe(def_PvE, hideTitanViewCombat); // TODO Pref
+  }
+
   function hideGroupByType(type) { // jQuery
     $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
   }
@@ -17487,6 +17050,7 @@
       buffInfo,
       fixDebuff,
       interceptMouseEvents,
+      hideTitanCombatResults
     ]);
   }
 
@@ -17832,15 +17396,15 @@
   }
 
   var ladderResetPref = 'lastLadderReset';
-  var lastLadderReset;
+  var lastLadderReset$1;
 
   function checkForPvPLadder(row) {
     if (containsText('PvP Ladder', row.children[1].children[0])) {
       var logTime = parseDateAsTimestamp(
         getText(row.children[1].children[2]).replace('Posted: ', ''));
-      if (logTime > lastLadderReset) {
+      if (logTime > lastLadderReset$1) {
         setValue(ladderResetPref, logTime);
-        lastLadderReset = logTime;
+        lastLadderReset$1 = logTime;
       }
     }
   }
@@ -17852,7 +17416,7 @@
   }
 
   function viewArchive() {
-    lastLadderReset = getValue(ladderResetPref);
+    lastLadderReset$1 = getValue(ladderResetPref);
     var prefName = 'collapseNewsArchive';
     var theTables = getElementsByTagName(def_table, pCC);
     if (theTables.length > 2) {
@@ -18145,6 +17709,10 @@
         screenview('unknown.recipes.inventing');
         inventing();
       }
+    ],
+    [
+      function() {return true;},
+      function() {console.log('Fell through!');} // eslint-disable-line no-console
     ]
   ];
 
@@ -18152,6 +17720,7 @@
 
   function unknownPage() { // Legacy
     if (jQueryNotPresent()) {return;}
+    console.log('unknownPage'); // eslint-disable-line no-console
     unknown.find(aMatch)[1]();
   }
 
@@ -18674,14 +18243,14 @@
   }
 
   var options;
-  var showQuickDropLinks$1;
-  var showQuickSendLinks$1;
+  var showQuickDropLinks$3;
+  var showQuickSendLinks$2;
 
   function extendOptions(data) {
     options = extend({}, defaultOptions);
     extend(options, fallback(data, {}));
-    showQuickDropLinks$1 = getValue('showQuickDropLinks');
-    showQuickSendLinks$1 = getValue('showQuickSendLinks');
+    showQuickDropLinks$3 = getValue('showQuickDropLinks');
+    showQuickSendLinks$2 = getValue('showQuickSendLinks');
   }
 
   var tblCols = [
@@ -18784,8 +18353,8 @@
 
   function hideCols(table) {
     table.column(12).visible('current_player_id' in theInv);
-    table.column(17).visible(isUserInv() && showQuickDropLinks$1);
-    table.column(18).visible(isUserInv() && showQuickSendLinks$1);
+    table.column(17).visible(isUserInv() && showQuickDropLinks$3);
+    table.column(18).visible(isUserInv() && showQuickSendLinks$2);
   }
 
   function doTable$2() {
@@ -19561,6 +19130,101 @@
     $('#HelperLoadSettings').click(clickHandler$1);
   }
 
+  function getRelicList(offset, myList) {
+    return guild({
+      subcmd: 'reliclist',
+      offset: fallback(offset, 0)
+    }).pipe(function(json) {
+      var someRelics = json.r.relics;
+      var newList = fallback(myList, []).concat(someRelics);
+      if (json.r.remaining_relics > 0) {
+        return getRelicList(fallback(offset, 0) + someRelics.length, newList);
+      }
+      return newList;
+    });
+  }
+
+  function relicName(relic) {
+    return '<a href="' + guideUrl + 'relics' + def_subcmd +
+      'view&relic_id=' + relic.id + '">' + relic.name + '</a>';
+  }
+
+  function guildName(relicGuild) {
+    if (relicGuild) {
+      return '<a href="' + guildViewUrl + relicGuild.id + '">' +
+        relicGuild.name + '</a>';
+    }
+    return '';
+  }
+
+  function attrib(id, att) {return att.id === id;}
+
+  function stamGain(relic) {
+    return relic.attributes && relic.attributes.find(partial(attrib, 6));
+  }
+
+  function makeAttrib(attribs, id) {
+    if (attribs) {
+      var thisAttrib = attribs.find(partial(attrib, id));
+      if (thisAttrib) {
+        return thisAttrib.value;
+      }
+    }
+    return '';
+  }
+
+  function allAttribs(attribs) {
+    return [6, 0, 4, 5, 7, 8].map(partial(makeAttrib, attribs)).join('</td><td>');
+  }
+
+  function formatTime$1(time) {
+    var t = splitTime(time);
+    return padZ(t[0]) + 'd ' +
+      padZ(t[1]) + 'h ' +
+      padZ(t[2]) + 'm ' +
+      padZ(t[3]) + 's';
+  }
+
+  function makeRow$3(relic) {
+    return '<tr>' +
+      '<td>' + relic.min_level + '</td>' +
+      '<td>' + relicName(relic) + '</td>' +
+      '<td>' + guildName(relic.guild) + '</td>' +
+      '<td>' + allAttribs(relic.attributes) + '</td>' +
+      '<td>' + formatTime$1(relic.time) + '</td>' +
+      '</tr>';
+  }
+
+  function makeTable(relicList) {
+    return '<style>' +
+      '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}' +
+      'table, th, td {border: 1px solid black;}' +
+      'th, td {padding: 5px;}' +
+      '</style><table class="reliclist"><thead><tr>' +
+      '<th>Level</th>' +
+      '<th>Name</th>' +
+      '<th>Guild</th>' +
+      '<th>Stam<br>Gain</th>' +
+      '<th>Atk</th>' +
+      '<th>Dmg</th>' +
+      '<th>Stam</th>' +
+      '<th>Gold<br>Gain</th>' +
+      '<th>XP<br>Gain</th>' +
+      '<th>Time</th>' +
+      '</tr></thead><tbody>' +
+      relicList.filter(stamGain).map(makeRow$3).join('') +
+      '</tbody></table>';
+  }
+
+  function processRelicList(relicList) {
+    pCC.innerHTML = makeTable(relicList);
+  }
+
+  function reliclist() {
+    pCC.innerHTML = 'Loading...';
+    getRelicList().done(processRelicList);
+  }
+
   var notepad = {
     showlogs: {'-': injectNotepadShowLogs}, // done
     invmanagernew: {'-': injectInventoryManagerNew},
@@ -19578,6 +19242,7 @@
     findbuffs: {'-': injectFindBuffs}, // done
     findother: {'-': injectFindOther}, // done
     savesettings: {'-': injectSaveSettings},
+    reliclist: {'-': reliclist},
     '-': {'-': injectNotepad}
   };
 
@@ -20031,7 +19696,7 @@
     });
   }
 
-  var disableDeactivatePrompts;
+  var disableDeactivatePrompts$2;
 
   function debuffSuccess(aLink, json) {
     if (json.s) {aLink.parentNode.innerHTML = '';}
@@ -20051,7 +19716,7 @@
   }
 
   function checkForPrompt(aLink) {
-    if (!disableDeactivatePrompts) {
+    if (!disableDeactivatePrompts$2) {
       doPrompt(aLink);
     } else {
       doDebuff(aLink);
@@ -20072,12 +19737,12 @@
   function fastDebuff() {
     var profileRightColumn = getElementById('profileRightColumn');
     if (profileRightColumn) {
-      disableDeactivatePrompts = getValue('disableDeactivatePrompts');
+      disableDeactivatePrompts$2 = getValue('disableDeactivatePrompts');
       on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
     }
   }
 
-  function highlightPvpProtection() {
+  function highlightPvpProtection$2() {
     if (!getValue('highlightPvpProtection')) {return;}
     var pvpp = querySelector('#profileLeftColumn a[href="' + pointsUrl + '"]');
     if (getTextTrim(pvpp.parentNode.nextSibling) !== 'N/A') {
@@ -20310,7 +19975,7 @@
 
   function profileInjectGuildRel(self) {
     var aLink = querySelector(
-      '#pCC a[href^="' + guildSubcmdUrl + 'view&guild_id="]');
+      '#pCC a[href^="' + guildViewUrl + '"]');
     if (aLink) {
       foundGuildLink(aLink);
     } else if (self) {
@@ -20403,91 +20068,6 @@
     var headings = querySelectorArray('#profileLeftColumn strong');
     headings.filter(contains('Allies')).forEach(partial(countContacts, true));
     headings.filter(contains('Enemies')).forEach(partial(countContacts, false));
-  }
-
-  var lineBreak = '';
-
-  function getNumberOfLine(bioContents, maxCharactersToShow) {
-    return bioContents.substr(0, maxCharactersToShow).split('<br>\n').length - 1;
-  }
-
-  function bioIsTooSmall(bio, maxChar, lines, maxRows) {
-    return bio.length <= maxChar && lines <= maxRows;
-  }
-
-  function findStartPosition(bioContents, maxRowsToShow) {
-    return bioContents.split('<br>\n').slice(0, maxRowsToShow)
-      .join('<br>\n').length;
-  }
-
-  function breakOnSpace(bioContents, maxCharactersToShow) {
-    var breakPoint = bioContents.indexOf(' ', maxCharactersToShow) + 1;
-    if (breakPoint === 0) {breakPoint = maxCharactersToShow;}
-    lineBreak = '<br>';
-    return breakPoint;
-  }
-
-  function getBreakpoint(bioContents, maxCharactersToShow) {
-    var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
-    if (breakPoint === 3 || breakPoint > maxCharactersToShow + 65) {
-      breakPoint = breakOnSpace(bioContents, maxCharactersToShow);
-    }
-    return breakPoint;
-  }
-
-  function foundHangingTag(closeTagIndex, openTagIndex) {
-    return closeTagIndex !== -1 &&
-      (openTagIndex === -1 || openTagIndex > closeTagIndex);
-  }
-
-  var closeTags = ['b', 'i', 'u', 'span'];
-
-  function hangingTags(bioEnd, tag) {
-    return foundHangingTag(bioEnd.indexOf('</' + tag + '>'),
-      bioEnd.indexOf('<' + tag + '>'));
-  }
-
-  function closeTag(tag) {return '</' + tag + '>';}
-
-  function getExtraCloseTags(bioEnd) {
-    return closeTags.filter(partial(hangingTags, bioEnd)).map(closeTag).join('');
-  }
-
-  function expandBio() {
-    var bioExpander = getElementById('fshBioExpander');
-    if (containsText('More ...', bioExpander)) {
-      setText('Less ...', bioExpander);
-    } else {
-      setText('More ...', bioExpander);
-    }
-    getElementById('fshBioHidden').classList.toggle('fshHide');
-  }
-
-  function doCompression(bioCell, bioContents, maxCharactersToShow) {
-    // find the end of next HTML tag after the max characters to show.
-    var breakPoint = getBreakpoint(bioContents, maxCharactersToShow);
-    var bioStart = bioContents.substring(0, breakPoint);
-    var bioEnd = bioContents.substring(breakPoint, bioContents.length);
-    var extraCloseHtml = getExtraCloseTags(bioEnd);
-    var extraOpenHtml = extraCloseHtml.replace('/', '');
-    bioCell.innerHTML = bioStart + extraCloseHtml + lineBreak +
-      '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
-      '<span class="fshHide" id="fshBioHidden">' + extraOpenHtml + bioEnd +
-      '</span>';
-    on(getElementById('fshBioExpander'), 'click', expandBio);
-  }
-
-  function compressBio(bioCell) {
-    var bioContents = bioCell.innerHTML;
-    var maxCharactersToShow = Number(getValue('maxCompressedCharacters'));
-    var maxRowsToShow = Number(getValue('maxCompressedLines'));
-    var numberOfLines = getNumberOfLine(bioContents, maxCharactersToShow);
-    if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
-      maxRowsToShow)) {return;}
-    if (numberOfLines >= maxRowsToShow) {
-      maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
-    }
-    doCompression(bioCell, bioContents, maxCharactersToShow);
   }
 
   function doRender(bioCell) {
@@ -20655,7 +20235,7 @@
     guildRelationship$1(avyImg, playername, self);
     updateNmv();
     updateStatistics();
-    highlightPvpProtection();
+    highlightPvpProtection$2();
     profileRenderBio(self);
     addStatTotalToMouseover();
     add(3, colouredDots);
@@ -20912,7 +20492,7 @@
     }
   }
 
-  var enableSeTracker = 'enableSeTracker';
+  var enableSeTracker$2 = 'enableSeTracker';
   var trackerCell;
 
   function addRow$2(trackerTable, se) {
@@ -20967,9 +20547,9 @@
   }
 
   function togglePref$4(evt) {
-    if (evt.target.id === enableSeTracker) {
+    if (evt.target.id === enableSeTracker$2) {
       calf.enableSeTracker = !calf.enableSeTracker;
-      setValue(enableSeTracker, calf.enableSeTracker);
+      setValue(enableSeTracker$2, calf.enableSeTracker);
       killTable();
     }
   }
@@ -20984,7 +20564,7 @@
     newCell.height = 20;
     newCell = insertNewRow();
     newCell.className = 'fshCenter';
-    newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
+    newCell.innerHTML = simpleCheckboxHtml(enableSeTracker$2);
     on(newCell, 'change', togglePref$4);
     if (calf.enableSeTracker) {
       getFshSeLog().done(waitForLog);
@@ -21082,11 +20662,11 @@
     return arr.filter(partial(genericFilter, removeBy, {}));
   }
 
-  var highlightPlayersNearMyLvl$2;
+  var highlightPlayersNearMyLvl$3;
   var myGuildId;
 
   var highlightTests$1 = [
-    function() {return highlightPlayersNearMyLvl$2;},
+    function() {return highlightPlayersNearMyLvl$3;},
     function(guildId) {return isUndefined(guildId) || guildId !== myGuildId;},
     function(guildId, data) {return data.last_login >= nowSecs - 604800;},
     function(guildId, data) {return data.virtual_level >= pvpLowerLevel;},
@@ -21108,8 +20688,8 @@
   }
 
   function initDecorate() {
-    highlightPlayersNearMyLvl$2 = getValue('highlightPlayersNearMyLvl');
-    if (highlightPlayersNearMyLvl$2) {
+    highlightPlayersNearMyLvl$3 = getValue('highlightPlayersNearMyLvl');
+    if (highlightPlayersNearMyLvl$3) {
       calculateBoundaries();
       myGuildId = currentGuildId();
     }
@@ -21565,7 +21145,19 @@
     coreFunction = testCoreFunction();
   }
 
+  function devHooks() {
+    /* eslint-disable no-console */
+    console.log('functionPath', functionPath);
+    if (!coreFunction) {
+      console.log('No Core Function.');
+    } else if (!isFunction(coreFunction)) {
+      console.log('Not Core Function.');
+    }
+    /* eslint-enable no-console */
+  }
+
   function asyncDispatcher() {
+    devHooks();
     if (isFunction(coreFunction)) {
       screenview(functionPath);
       start('JS Perf', functionPath);
