@@ -1,17 +1,13 @@
 import {getElementById} from '../common/getElement';
+import outputFormat from '../system/outputFormat';
 import querySelector from '../common/querySelector';
-
-function timeUnit(value, unit) {
-  if (value > 0) {return value.toString() + unit;}
-  return '';
-}
 
 function buffTimeLeft(_s) {
   var m = Math.floor(_s / 60);
   var s = _s % 60;
-  var buffTimeToExpire = timeUnit(m, 'm');
+  var buffTimeToExpire = outputFormat(m, 'm');
   if (m > 0 && s > 0) {buffTimeToExpire += ' ';}
-  buffTimeToExpire += timeUnit(s, 's');
+  buffTimeToExpire += outputFormat(s, 's');
   return buffTimeToExpire;
 }
 
