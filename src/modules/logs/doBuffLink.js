@@ -1,4 +1,4 @@
-import buffList from '../support/buffObj';
+import buffList from '../support/buffObj.json';
 import csvSplit from '../common/csvSplit';
 import partial from '../common/partial';
 import quickBuffHref from '../common/quickBuffHref';

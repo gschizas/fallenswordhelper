@@ -1,4 +1,4 @@
-import buffList from '../../support/buffObj';
+import buffList from '../../support/buffObj.json';
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import csvSplit from '../../common/csvSplit';

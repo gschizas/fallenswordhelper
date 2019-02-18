@@ -1,4 +1,4 @@
-import buffList from '../../support/buffObj';
+import buffList from '../../support/buffObj.json';
 import getValue from '../../system/getValue';
 
 function makeOptions(el) {
