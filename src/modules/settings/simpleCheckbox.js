@@ -1,6 +1,6 @@
 import fallback from '../system/fallback';
 import isValueChecked from './isValueChecked';
-import mySimpleCheckboxes from './simple';
+import mySimpleCheckboxes from './simple.json';
 import {networkIcon} from './settingObj';
 
 export function helpLink(title, text) {

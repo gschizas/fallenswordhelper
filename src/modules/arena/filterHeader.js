@@ -1,5 +1,5 @@
 import {arenaFilter} from './assets';
-import {defaults} from '../support/dataObj';
+import defaults from '../support/dataObj.json';
 import {changeLvls, hideMoves, opts, resetLvls} from './setOpts';
 
 function makeTheRow() {

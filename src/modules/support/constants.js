@@ -58,6 +58,7 @@ export var guildLogUrl = guildSubcmdUrl + 'log';
 export var scouttowerUrl = guildSubcmdUrl + 'scouttower';
 export var groupsSubcmdUrl = guildSubcmdUrl + 'groups&subcmd2=';
 export var recallUserUrl = guildSubcmdUrl + 'inventory&subcmd2=report&user=';
+export var guildViewUrl = guildSubcmdUrl + 'view&guild_id=';
 export var joinallUrl = groupsSubcmdUrl + 'joinall';
 export var joinUnderUrl = groupsSubcmdUrl + def_joinallgroupsundersize;
 export var worldUrl = cmdUrl + 'world';

@@ -1,5 +1,5 @@
 import changeMinMax from '../common/changeMinMax';
-import {defaults} from '../support/dataObj';
+import defaults from '../support/dataObj.json';
 import {fshArenaKey} from './assets';
 import setForage from '../ajax/setForage';
 

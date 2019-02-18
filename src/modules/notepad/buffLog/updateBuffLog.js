@@ -1,4 +1,4 @@
-import buffList from '../../support/buffObj';
+import buffList from '../../support/buffObj.json';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
 import {fshBuffLog} from '../../support/constants';
 import getForage from '../../ajax/getForage';

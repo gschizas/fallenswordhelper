@@ -11,6 +11,9 @@ import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
 import injectSaveSettings from '../../settings/load';
 import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../../notepad/quickWear/quickWear';
+//#if _DEV  //  reliclist
+import reliclist from '../../notepad/reliclist/reliclist';
+//#endif
 import {injectAuctionSearch, injectQuickLinkManager} from
   '../../notepad/lists/lists';
 import {injectFindBuffs, injectFindOther}
@@ -33,5 +36,8 @@ export default {
   findbuffs: {'-': injectFindBuffs}, // done
   findother: {'-': injectFindOther}, // done
   savesettings: {'-': injectSaveSettings},
+  //#if _DEV  //  reliclist
+  reliclist: {'-': reliclist},
+  //#endif
   '-': {'-': injectNotepad}
 };

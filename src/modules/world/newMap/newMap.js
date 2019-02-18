@@ -15,7 +15,9 @@ import on from '../../common/on';
 import onWorld from './onWorld';
 import partial from '../../common/partial';
 import prepareShop from './shop';
-// import querySelectorArray from '../../common/querySelectorArray';
+//#if _DEV  //  hide titan combat results
+import querySelectorArray from '../../common/querySelectorArray';
+//#endif
 import startMonsterLog from './monsterLog/monsterLog';
 import viewCreature from './viewCreature/viewCreature';
 import worldPrefs from './worldPrefs/worldPrefs';
@@ -34,8 +36,7 @@ import {
 //#if _DEV  //  hide titan combat results
 function didNotExist(data) {
   return data.response && data.response.msg &&
-    data.response.msg === 'Creature did not exist at that location ' +
-      '(may have been killed by another player).';
+    data.response.msg.startsWith('Creature did not exist at that location');
 }
 
 function removeAction(data) {
@@ -47,11 +48,12 @@ function removeAction(data) {
   }
 }
 
+function removeElement(el) {el.remove();}
+
 function hideTitanViewCombat(e, data) {
-  // console.log('data', data);
   removeAction(data);
-  // querySelectorArray('.creature-4 > .quickCombat > .verbs')
-  //   .forEach(function(el) {el.remove();});
+  querySelectorArray('.creature-4 > .quickCombat > .verbs')
+    .forEach(removeElement);
 }
 
 function hideTitanCombatResults() {

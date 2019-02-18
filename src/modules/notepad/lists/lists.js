@@ -1,4 +1,4 @@
-import {defaults} from '../../support/dataObj';
+import defaults from '../../support/dataObj.json';
 import eventHandler5 from '../../common/eventHandler5';
 import {getElementById} from '../../common/getElement';
 import getValueJSON from '../../system/getValueJSON';
