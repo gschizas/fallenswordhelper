@@ -9893,9 +9893,11 @@
     var rankCell = row.children[0];
     var rankName = getText(rankCell.firstChild);
     var thisRank = memberRanks.find(partial(rankObj, rankName));
-    insertHtmlAfterBegin(rankCell, '<span class="fshBlue">(' +
-      calcPermWeight(thisRank.permissions) +
-      ') Tax:(' + thisRank.tax + '%)</span> ');
+    if (thisRank) {
+      insertHtmlAfterBegin(rankCell, '<span class="fshBlue">(' +
+        calcPermWeight(thisRank.permissions) +
+        ') Tax:(' + thisRank.tax + '%)</span> ');
+    }
   }
 
   function gotRankData(theRows, json) {
@@ -19598,7 +19600,7 @@
     var toDelete = componentList[self.dataset.compid].del;
     var td = self.parentNode;
     doSpinner$1(td);
-    var prm = chunk(40, toDelete).map(destroy);
+    var prm = chunk(30, toDelete).map(destroy);
     when(prm, partial(removeSpinner, td));
   }
 
@@ -21179,7 +21181,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '100';
+  window.FSH.calf = '101';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
