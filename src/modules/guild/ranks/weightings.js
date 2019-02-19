@@ -43,9 +43,11 @@ function parseRankData(memberRanks, row) {
   var rankCell = row.children[0];
   var rankName = getText(rankCell.firstChild);
   var thisRank = memberRanks.find(partial(rankObj, rankName));
-  insertHtmlAfterBegin(rankCell, '<span class="fshBlue">(' +
-    calcPermWeight(thisRank.permissions) +
-    ') Tax:(' + thisRank.tax + '%)</span> ');
+  if (thisRank) {
+    insertHtmlAfterBegin(rankCell, '<span class="fshBlue">(' +
+      calcPermWeight(thisRank.permissions) +
+      ') Tax:(' + thisRank.tax + '%)</span> ');
+  }
 }
 
 function gotRankData(theRows, json) {

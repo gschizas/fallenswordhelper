@@ -31,6 +31,6 @@ export default function delCompType(self) { // jQuery.min
   var toDelete = componentList[self.dataset.compid].del;
   var td = self.parentNode;
   doSpinner(td);
-  var prm = chunk(40, toDelete).map(destroy);
+  var prm = chunk(30, toDelete).map(destroy);
   when(prm, partial(removeSpinner, td));
 }
