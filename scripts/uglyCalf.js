@@ -1,5 +1,5 @@
 import rollupCalf from './rollupCalf';
-import {uglify} from 'rollup-plugin-uglify';
+import {terser} from 'rollup-plugin-terser';
 
 export default function uglyCalf(outdir, beta, dev) {
   const options = rollupCalf(
@@ -9,7 +9,7 @@ export default function uglyCalf(outdir, beta, dev) {
   );
 
   options.output.sourcemapFile = 'src/calfSystem.min.js.map';
-  options.plugins.push(uglify({
+  options.plugins.push(terser({
     output: {
       beautify: false,
       semicolons: false
