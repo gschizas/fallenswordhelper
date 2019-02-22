@@ -25,7 +25,12 @@ function isDraggable(draggableQuickLinks) {
   }
 }
 
+function invalid(link) {
+  return !('newWindow' in link) || !link.url || !link.name;
+}
+
 function linkHtml(link) {
+  if (invalid(link)) {return '';}
   var newWindow = retBool(link.newWindow, ' target="new"', '');
   return '<li><a href="' + escapeHtml(link.url) + '"' +
     newWindow + '>' + link.name + '</a></li>';

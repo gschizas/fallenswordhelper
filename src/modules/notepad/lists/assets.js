@@ -22,7 +22,7 @@ export function auctionSearchParams() {
     tags: ['text', 'text', 'text', 'checkbox'],
     url: ['', '',
       ahSearchUrl + '@replaceme@', ''],
-    currentItems: getValueJSON('quickSearchList'),
+    currentItems: getValueJSON('quickSearchList') || [],
     gmname: 'quickSearchList',
     categoryField: 'category',
   };

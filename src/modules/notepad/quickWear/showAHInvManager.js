@@ -91,7 +91,7 @@ function folder(invCount, quickSL, aFolder) {
 
 export default function showAHInvManager(itemList) {
   var invCount = {};
-  var quickSL = getValueJSON('quickSearchList');
+  var quickSL = getValueJSON('quickSearchList') || [];
   // fill up the Inv Counter
   itemList.r.forEach(partial(folder, invCount, quickSL));
   var im = createDiv({

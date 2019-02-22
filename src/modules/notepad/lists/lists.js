@@ -184,7 +184,7 @@ export function injectQuickLinkManager(injector) { // Legacy
       'data-tipped="Open page in a new window">?</span>]'],
     fields: ['name', 'url', 'newWindow'],
     tags: ['text', 'text', 'checkbox'],
-    currentItems: getValueJSON('quickLinks'),
+    currentItems: getValueJSON('quickLinks') || [],
     gmname: 'quickLinks',
   };
   generateManageTable();
