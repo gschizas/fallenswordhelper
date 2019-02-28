@@ -16,6 +16,7 @@ import jQueryDialog from '../jQueryDialog';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import partial from '../../common/partial';
+import preFlight from './preFlight';
 import {
   cmdUrl,
   def_subcmd,
@@ -33,16 +34,14 @@ import {sendEvent, sendException} from '../../support/fshGa';
 function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
-    getElementById('nav-character-questbook')
-      .setAttribute('href', lastActiveQuestPage);
+    getElementById('nav-character-questbook').href = lastActiveQuestPage;
   }
 }
 
 function updateScavLink() {
   var lastScavPage = getValue('lastScavPage');
   if (lastScavPage.length > 0) {
-    getElementById('nav-actions-artisanship-scavenging')
-      .setAttribute('href', lastScavPage);
+    getElementById('nav-actions-artisanship-scavenging').href = lastScavPage;
   }
 }
 
@@ -147,7 +146,7 @@ function topRatedLink() {
     'xp">Top 250 Players</a></li>');
 }
 
-function doAccordion() {
+function injectItems() {
   executeAll([
     updateQuestLink,
     updateScavLink,
@@ -155,9 +154,16 @@ function doAccordion() {
     guildInventory,
     newGuildLogLink,
     topRatedLink,
-    actionButtons,
-    adjustHeight,
+    actionButtons
   ]);
+}
+
+function doAccordion() {
+  const [theNav, myNav] = preFlight();
+  if (theNav && myNav) {
+    injectItems();
+    adjustHeight(theNav, myNav);
+  }
 }
 
 export default function injectMenu() {

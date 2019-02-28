@@ -5476,7 +5476,7 @@
     );
   }
 
-  function navHeightsIsArray(theNav, myNav) {
+  function adjustHeight(theNav, myNav) {
     // first the closed saved variables
     myNav.heights = [
       null,
@@ -5499,25 +5499,6 @@
     }
   }
 
-  function navDataExists(theNav, myNav) {
-    if ('heights' in myNav) {
-      navHeightsIsArray(theNav, myNav);
-    } else {
-      sendException('$(\'#nav\').data(\'nav\').heights does not exist', false);
-    }
-  }
-
-  function adjustHeight() {
-    // adjust the menu height for the newly added items
-    var theNav = getElementById('nav');
-    var myNav = $(theNav).data('nav');
-    if (isObject(myNav)) {
-      navDataExists(theNav, myNav);
-    } else {
-      sendException('$(\'#nav\').data(\'nav\') is not an object', false);
-    }
-  }
-
   function refIsLast(newNode, referenceNode) {
     if (referenceNode.nextSibling instanceof Node) {
       return insertElementBefore(newNode, referenceNode.nextSibling);
@@ -5532,19 +5513,40 @@
     }
   }
 
+  function foundNav(myNav) {
+    if (isObject(myNav)) {return true;}
+    sendException('$(\'#nav\').data(\'hcsNav\') is not an object', false);
+  }
+
+  function foundHeights(myNav) {
+    if ('heights' in myNav) {return true;}
+    sendException('$(\'#nav\').data(\'hcsNav\').heights does not exist', false);
+  }
+
+  function foundWidget(myNav) {
+    if (foundNav(myNav) && foundHeights(myNav)) {return true;}
+  }
+
+  function preFlight() {
+    var theNav = getElementById('nav');
+    var myNav = $(theNav).data('hcsNav');
+    if (foundWidget(myNav)) {
+      return [theNav, myNav];
+    }
+    return [];
+  }
+
   function updateQuestLink() {
     var lastActiveQuestPage = getValue('lastActiveQuestPage');
     if (lastActiveQuestPage.length > 0) {
-      getElementById('nav-character-questbook')
-        .setAttribute('href', lastActiveQuestPage);
+      getElementById('nav-character-questbook').href = lastActiveQuestPage;
     }
   }
 
   function updateScavLink() {
     var lastScavPage = getValue('lastScavPage');
     if (lastScavPage.length > 0) {
-      getElementById('nav-actions-artisanship-scavenging')
-        .setAttribute('href', lastScavPage);
+      getElementById('nav-actions-artisanship-scavenging').href = lastScavPage;
     }
   }
 
@@ -5649,7 +5651,7 @@
       'xp">Top 250 Players</a></li>');
   }
 
-  function doAccordion() {
+  function injectItems() {
     executeAll([
       updateQuestLink,
       updateScavLink,
@@ -5657,9 +5659,16 @@
       guildInventory,
       newGuildLogLink,
       topRatedLink,
-      actionButtons,
-      adjustHeight,
+      actionButtons
     ]);
+  }
+
+  function doAccordion() {
+    const [theNav, myNav] = preFlight();
+    if (theNav && myNav) {
+      injectItems();
+      adjustHeight(theNav, myNav);
+    }
   }
 
   function injectMenu() {
@@ -21186,7 +21195,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '102';
+  window.FSH.calf = '104';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
