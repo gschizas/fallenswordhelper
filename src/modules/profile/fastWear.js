@@ -107,7 +107,7 @@ function foundBackpack(backpackContainer, theBackpack) {
 
 function initialiseFastWear() {
   var backpackContainer = getElementById('backpackContainer');
-  var theBackpack = $(backpackContainer).data('backpack');
+  var theBackpack = $(backpackContainer).data('hcsBackpack');
   if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
 }
 
