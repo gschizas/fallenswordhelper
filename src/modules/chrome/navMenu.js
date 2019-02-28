@@ -2,7 +2,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 
 export default function navMenu() { // jQuery
   if (jQueryNotPresent()) {return;}
-  var myNav = $('#nav').data('nav');
+  var myNav = $('#nav').data('hcsNav');
   if (!myNav) {return;}
   var oldSave = myNav._saveState;
   myNav._saveState = function(_id) {
