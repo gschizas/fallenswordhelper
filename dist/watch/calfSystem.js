@@ -5914,7 +5914,7 @@
 
   function navMenu() { // jQuery
     if (jQueryNotPresent()) {return;}
-    var myNav = $('#nav').data('nav');
+    var myNav = $('#nav').data('hcsNav');
     if (!myNav) {return;}
     var oldSave = myNav._saveState;
     myNav._saveState = function(_id) {
@@ -12921,6 +12921,156 @@
     firstPlayerStats();
   }
 
+  function findEl(el, name) {
+    return querySelector('#fshSettingsTable ' + el + '[name="' + name + '"]');
+  }
+
+  function findInput(name) {
+    return findEl('input', name);
+  }
+
+  function findSelect(name) {
+    return findEl('select', name);
+  }
+
+  function toggleTickAllBuffs(e) { // jQuery
+    var allItems = $('input[name^="blockedSkillList"]:visible',
+      '#settingsTabs-4');
+    var tckTxt = $(e.target);
+    allItems.prop('checked', tckTxt.text() === 'Tick all buffs');
+    if (tckTxt.text() === 'Tick all buffs') {
+      tckTxt.text('Untick all buffs');
+    } else {
+      tckTxt.text('Tick all buffs');
+    }
+  }
+
+  function clearStorage() {
+    jConfirm('Clear localStorage',
+      'Are you sure you want to clear you localStorage?',
+      function() {localStorage.clear();}
+    );
+  }
+
+  function saveValueForm(name) {
+    var formElement = findInput(name);
+    if (formElement.type === 'checkbox') {
+      setValue(name, formElement.checked);
+    } else {
+      setValue(name, formElement.value);
+    }
+  }
+
+  function saveNumeric(name) {
+    var formElement = findSelect(name);
+    setValue(name, Number(formElement.value));
+  }
+
+  function saveOther(name) {
+    var formElement = findSelect(name);
+    setValue(name, formElement.value);
+  }
+
+  function checkNumeric(name, min, def) {
+    var myInput = findInput(name);
+    var inputValue = Number(myInput.value);
+    if (isNaN(inputValue) || inputValue <= min) {
+      myInput.value = def;
+    }
+  }
+
+  function saveConfig() { // jQuery
+    checkNumeric('maxCompressedCharacters', 50, 1500);
+    checkNumeric('maxCompressedLines', 1, 25);
+    checkNumeric('newGuildLogHistoryPages', 1, 25);
+    checkNumeric('maxGroupSizeToJoin', 1, 11);
+    saveNumeric('combatEvaluatorBias');
+    saveOther('enabledHuntingMode');
+    saveBoxes.forEach(saveValueForm);
+    dialogMsg('FS Helper Settings Saved');
+  }
+
+  function showLogs() {
+    sendEvent('settingsPage', 'injectNotepadShowLogs');
+    jQueryDialog(injectNotepadShowLogs);
+  }
+
+  function showMonsterLogs() {
+    sendEvent('settingsPage', 'injectMonsterLog');
+    jQueryDialog(injectMonsterLog);
+  }
+
+  function doTickAll() {
+    var tickAll = createSpan({
+      id: 'fshAllBuffs',
+      className: 'fshLink',
+      textContent: 'Tick all buffs'
+    });
+    on(tickAll, 'click', toggleTickAllBuffs);
+    var inject = getElementById('settingsTabs-4').children[0].rows[0].cells[0];
+    insertElement(inject, createBr());
+    insertElement(inject, tickAll);
+  }
+
+  function listener$1(el) {on(getElementById(el[0]), 'click', el[1]);}
+
+  function clickHandlers() {
+    [
+      ['fshClearStorage', clearStorage],
+      ['Helper:SaveOptions', saveConfig],
+      ['Helper:ShowLogs', showLogs],
+      ['Helper:ShowMonsterLogs', showMonsterLogs]
+    ].forEach(listener$1);
+  }
+
+  function toggleListener(id) {on(getElementById(id), 'click', toggleVisibilty);}
+
+  function onVisibilityToggle() {
+    [
+      'toggleShowGuildSelfMessage',
+      'toggleShowGuildFrndMessage',
+      'toggleShowGuildPastMessage',
+      'toggleShowGuildEnmyMessage'
+    ].forEach(toggleListener);
+  }
+
+  function createEventListeners() { // Legacy
+    doTickAll();
+    clickHandlers();
+    onVisibilityToggle();
+  }
+
+  function mapCalfPref(el) {calf[el[0]] = getValue(el[1]);}
+
+  function mappedVars() {
+    [
+      ['showBuffs', 'showHuntingBuffs'],
+      ['buffs', 'huntingBuffs'],
+      ['buffsName', 'huntingBuffsName'],
+      ['buffs2', 'huntingBuffs2'],
+      ['buffs2Name', 'huntingBuffs2Name'],
+      ['buffs3', 'huntingBuffs3'],
+      ['buffs3Name', 'huntingBuffs3Name']
+    ].forEach(mapCalfPref);
+  }
+
+  function simpleVars() {
+    [
+      'doNotKillList',
+      'bountyListRefreshTime',
+      'wantedNames',
+      'combatEvaluatorBias',
+      'enabledHuntingMode'
+    ].forEach(getCalfPrefs);
+  }
+
+  function getVars() {
+    mappedVars();
+    simpleVars();
+    calf.storage = (JSON.stringify(localStorage).length /
+      (5 * 1024 * 1024) * 100).toFixed(2);
+  }
+
   function concatSimple(prev, curr) {
     return prev + simpleCheckbox(curr);
   }
@@ -13590,175 +13740,27 @@
       '</table></form>';
   }
 
-  function findEl(el, name) {
-    return querySelector('#fshSettingsTable ' + el + '[name="' + name + '"]');
+  function addTab(tabs) { // jQuery
+    tabs.find('.ui-tabs-nav')
+      .append('<li><a href="#fshSettings">FSH Settings</a></li>');
+    tabs.append('<div id="fshSettings"><p>' + calf.configData + '</p></div>');
+    tabs.tabs('refresh');
   }
 
-  function findInput(name) {
-    return findEl('input', name);
-  }
-
-  function findSelect(name) {
-    return findEl('select', name);
-  }
-
-  function mapCalfPref(el) {calf[el[0]] = getValue(el[1]);}
-
-  function mappedVars() {
-    [
-      ['showBuffs', 'showHuntingBuffs'],
-      ['buffs', 'huntingBuffs'],
-      ['buffsName', 'huntingBuffsName'],
-      ['buffs2', 'huntingBuffs2'],
-      ['buffs2Name', 'huntingBuffs2Name'],
-      ['buffs3', 'huntingBuffs3'],
-      ['buffs3Name', 'huntingBuffs3Name']
-    ].forEach(mapCalfPref);
-  }
-
-  function simpleVars() {
-    [
-      'doNotKillList',
-      'bountyListRefreshTime',
-      'wantedNames',
-      'combatEvaluatorBias',
-      'enabledHuntingMode'
-    ].forEach(getCalfPrefs);
-  }
-
-  function getVars() {
-    mappedVars();
-    simpleVars();
-    calf.storage = (JSON.stringify(localStorage).length /
-      (5 * 1024 * 1024) * 100).toFixed(2);
-  }
-
-  function toggleTickAllBuffs(e) { // jQuery
-    var allItems = $('input[name^="blockedSkillList"]:visible',
-      '#settingsTabs-4');
-    var tckTxt = $(e.target);
-    allItems.prop('checked', tckTxt.text() === 'Tick all buffs');
-    if (tckTxt.text() === 'Tick all buffs') {
-      tckTxt.text('Untick all buffs');
-    } else {
-      tckTxt.text('Tick all buffs');
-    }
-  }
-
-  function clearStorage() {
-    jConfirm('Clear localStorage',
-      'Are you sure you want to clear you localStorage?',
-      function() {localStorage.clear();}
-    );
-  }
-
-  function saveValueForm(name) {
-    var formElement = findInput(name);
-    if (formElement.type === 'checkbox') {
-      setValue(name, formElement.checked);
-    } else {
-      setValue(name, formElement.value);
-    }
-  }
-
-  function saveNumeric(name) {
-    var formElement = findSelect(name);
-    setValue(name, Number(formElement.value));
-  }
-
-  function saveOther(name) {
-    var formElement = findSelect(name);
-    setValue(name, formElement.value);
-  }
-
-  function checkNumeric(name, min, def) {
-    var myInput = findInput(name);
-    var inputValue = Number(myInput.value);
-    if (isNaN(inputValue) || inputValue <= min) {
-      myInput.value = def;
-    }
-  }
-
-  function saveConfig() { // jQuery
-    checkNumeric('maxCompressedCharacters', 50, 1500);
-    checkNumeric('maxCompressedLines', 1, 25);
-    checkNumeric('newGuildLogHistoryPages', 1, 25);
-    checkNumeric('maxGroupSizeToJoin', 1, 11);
-    saveNumeric('combatEvaluatorBias');
-    saveOther('enabledHuntingMode');
-    saveBoxes.forEach(saveValueForm);
-    dialogMsg('FS Helper Settings Saved');
-  }
-
-  function showLogs() {
-    sendEvent('settingsPage', 'injectNotepadShowLogs');
-    jQueryDialog(injectNotepadShowLogs);
-  }
-
-  function showMonsterLogs() {
-    sendEvent('settingsPage', 'injectMonsterLog');
-    jQueryDialog(injectMonsterLog);
-  }
-
-  function insertFshTab(settingsTabs) {
-    if ($(settingsTabs).tabs('length') > 0) {
-      $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
-    }
-  }
-
-  function doTickAll() {
-    var tickAll = createSpan({
-      id: 'fshAllBuffs',
-      className: 'fshLink',
-      textContent: 'Tick all buffs'
-    });
-    on(tickAll, 'click', toggleTickAllBuffs);
-    var inject = getElementById('settingsTabs-4').children[0].rows[0].cells[0];
-    insertElement(inject, createBr());
-    insertElement(inject, tickAll);
-  }
-
-  function listener$1(el) {on(getElementById(el[0]), 'click', el[1]);}
-
-  function clickHandlers() {
-    [
-      ['fshClearStorage', clearStorage],
-      ['Helper:SaveOptions', saveConfig],
-      ['Helper:ShowLogs', showLogs],
-      ['Helper:ShowMonsterLogs', showMonsterLogs]
-    ].forEach(listener$1);
-  }
-
-  function toggleListener(id) {on(getElementById(id), 'click', toggleVisibilty);}
-
-  function onVisibilityToggle() {
-    [
-      'toggleShowGuildSelfMessage',
-      'toggleShowGuildFrndMessage',
-      'toggleShowGuildPastMessage',
-      'toggleShowGuildEnmyMessage'
-    ].forEach(toggleListener);
-  }
-
-  function createEventListeners() { // Legacy
-    doTickAll();
-    clickHandlers();
-    onVisibilityToggle();
+  function doFshSettings(settingsTabs) {
+    getVars();
+    setupConfigData();
+    addTab(settingsTabs);
+    createEventListeners();
+    setValue('minGroupLevel',
+      querySelector('input[name="min_group_level"]').value);
   }
 
   function injectSettings() { // jQuery
     if (jQueryNotPresent()) {return;}
-    getVars();
-    setupConfigData();
-    var settingsTabs = getElementById('settingsTabs');
-    insertHtmlBeforeEnd(settingsTabs, '<div id="fshSettings">' +
-      calf.configData + '</div>');
-    insertFshTab(settingsTabs);
-
-    createEventListeners();
-
-    setValue('minGroupLevel',
-      querySelector('input[name="min_group_level"]').value);
+    var settingsTabs = $('#settingsTabs');
+    var tabsInstance = settingsTabs.tabs('instance');
+    if (tabsInstance) {doFshSettings(settingsTabs);}
   }
 
   function injectTitan() {
@@ -19861,7 +19863,7 @@
 
   function initialiseFastWear() {
     var backpackContainer = getElementById('backpackContainer');
-    var theBackpack = $(backpackContainer).data('backpack');
+    var theBackpack = $(backpackContainer).data('hcsBackpack');
     if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
   }
 
@@ -21195,7 +21197,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '104';
+  window.FSH.calf = '105';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
