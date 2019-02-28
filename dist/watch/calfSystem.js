@@ -15727,15 +15727,28 @@
     insertElement(dialog$1, fshDiv);
   }
 
-  function worldDialogShop(e, data) {
-    shoppingData = data;
-    dialog$1 = fallback(dialog$1,
-      getElementById('shopDialogConfirm'));
-    if (!dialog$1) {return;}
-    jDialog = fallback(jDialog, $(dialog$1).data('worldDialogShopConfirm'));
-    if (!fshDiv) {injectQuickBuy();} else {
+  function getDialog() {
+    return dialog$1 || getElementById('shopDialogConfirm');
+  }
+
+  function getJDialog() { // jQuery
+    return jDialog || $(dialog$1).data('hcsWorldDialogShopConfirm');
+  }
+
+  function initQuickBuy() {
+    if (!fshDiv) {
+      injectQuickBuy();
+    } else {
       setText('', resultDiv);
     }
+  }
+
+  function worldDialogShop(e, data) {
+    shoppingData = data;
+    dialog$1 = getDialog();
+    if (!dialog$1) {return;}
+    jDialog = getJDialog();
+    if (jDialog) {initQuickBuy();}
   }
 
   function prepareShop() {
@@ -21197,7 +21210,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '105';
+  window.FSH.calf = '106';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
