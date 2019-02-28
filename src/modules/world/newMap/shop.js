@@ -1,6 +1,5 @@
 import addCommas from '../../system/addCommas';
 import {def_shopPrompt} from '../../support/constants';
-import fallback from '../../system/fallback';
 import fetchdata from '../../ajax/fetchdata';
 import {getElementById} from '../../common/getElement';
 import insertElement from '../../common/insertElement';
@@ -86,15 +85,28 @@ function injectQuickBuy() {
   insertElement(dialog, fshDiv);
 }
 
-function worldDialogShop(e, data) {
-  shoppingData = data;
-  dialog = fallback(dialog,
-    getElementById('shopDialogConfirm'));
-  if (!dialog) {return;}
-  jDialog = fallback(jDialog, $(dialog).data('worldDialogShopConfirm'));
-  if (!fshDiv) {injectQuickBuy();} else {
+function getDialog() {
+  return dialog || getElementById('shopDialogConfirm');
+}
+
+function getJDialog() { // jQuery
+  return jDialog || $(dialog).data('hcsWorldDialogShopConfirm');
+}
+
+function initQuickBuy() {
+  if (!fshDiv) {
+    injectQuickBuy();
+  } else {
     setText('', resultDiv);
   }
+}
+
+function worldDialogShop(e, data) {
+  shoppingData = data;
+  dialog = getDialog();
+  if (!dialog) {return;}
+  jDialog = getJDialog();
+  if (jDialog) {initQuickBuy();}
 }
 
 export default function prepareShop() {
