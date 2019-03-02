@@ -14,7 +14,7 @@ function injectSettingsGuildData(guildType) {
     getValue('guild' + guildType) + '"' + disabled + '>' +
 
     '<span class="fshPoint" ' +
-    'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
+    'id="toggleShowGuild' + guildType + 'Message" data-linkto="showGuild' +
     guildType + 'Message"> &#x00bb;</span>' +
 
     '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
