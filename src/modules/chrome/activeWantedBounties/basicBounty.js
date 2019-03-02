@@ -1,16 +1,16 @@
 import getText from '../../common/getText';
+import querySelector from '../../common/querySelector';
 
 function rewardType(theCells) {
-  return theCells[2].firstChild.firstChild.firstChild.firstChild
-    .nextSibling.firstChild.title;
+  return querySelector('img', theCells[2]).title;
 }
 
 export default function basicBounty(theCells) {
-  var targetData = theCells[0].firstChild.firstChild;
+  var targetData = theCells[0].children[0].children[0];
   return {
-    target: getText(targetData.firstChild),
+    target: getText(targetData),
     link: targetData.href,
-    lvl: getText(targetData.nextSibling).replace(/[[|\]]/, ''),
+    lvl: getText(targetData.nextSibling).replace(/[[|\]]/, ''), // Text Node
     reward: getText(theCells[2]),
     rewardType: rewardType(theCells),
     posted: getText(theCells[3]),
