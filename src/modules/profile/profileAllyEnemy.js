@@ -21,7 +21,7 @@ function contactSlots(numberOfContacts, contactsTotal) {
 function countContacts(isAllies, el) {
   var target = el.parentNode;
   var numberOfContacts = getElementsByTagName(def_table,
-    target.nextSibling.nextSibling).length - 1;
+    target.nextElementSibling).length - 1;
   insertHtmlBeforeEnd(target,
     '<span class="fshBlue">&nbsp;' + numberOfContacts.toString() +
     contactSlots(numberOfContacts, getValue(totalKey(isAllies))) +
