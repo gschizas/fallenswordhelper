@@ -113,7 +113,7 @@ function processCombat(aRow) {
 
 function replaceLeadingText(msgCell, newHtml) {
   var replaceText = createSpan({innerHTML: newHtml});
-  msgCell.replaceChild(replaceText, msgCell.firstChild);
+  msgCell.replaceChild(replaceText, msgCell.firstChild); // Text Node
 }
 
 function parseCombatWinner(msgCell) {

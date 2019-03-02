@@ -11,7 +11,7 @@ function buffIndividual(self) {
   }
 }
 
-function memberName(el) {return getText(el.cells[0].firstChild.firstChild);}
+function memberName(el) {return getText(el.cells[0].children[0].children[0]);}
 
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;

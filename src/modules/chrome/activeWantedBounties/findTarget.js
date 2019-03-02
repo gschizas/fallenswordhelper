@@ -1,7 +1,6 @@
 import basicBounty from './basicBounty';
 import calf from '../../support/calf';
 import extend from '../../common/extend';
-import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
 import partial from '../../common/partial';
 import {wantedArray, wantedList} from './lists';
@@ -9,15 +8,15 @@ import {wantedArray, wantedList} from './lists';
 function acceptBtn(theCells) {
   var cell = theCells[6];
   if (getTextTrim(cell) !== '[n/a]') {
-    return cell.firstChild.firstChild.getAttribute('onclick');
+    return cell.children[0].children[0].getAttribute('onclick');
   }
   return '';
 }
 
 function getTarget(theCells) {
   return extend(basicBounty(theCells), {
-    offerer: getText(theCells[1].firstChild.firstChild.firstChild),
-    tickets: getText(theCells[5]),
+    offerer: getTextTrim(theCells[1].children[0].children[0]),
+    tickets: getTextTrim(theCells[5]),
     accept: acceptBtn(theCells)
   });
 }
@@ -46,7 +45,7 @@ function wantedTarget(target, theRow) {
 export default function findTarget(activeTable) {
   for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
     var theRow = activeTable.rows[i];
-    var target = getText(theRow.cells[0].firstChild.firstChild.firstChild);
+    var target = getTextTrim(theRow.cells[0].children[0].children[0]);
     if (target === '[ No bounties available. ]') {break;}
     wantedTarget(target, theRow);
   }

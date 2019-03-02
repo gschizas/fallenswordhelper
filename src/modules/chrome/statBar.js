@@ -1,7 +1,7 @@
 import {createAnchor} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
-import insertElementBefore from '../common/insertElementBefore';
+import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import on from '../common/on';
 import {
   blacksmithUrl,
@@ -19,10 +19,10 @@ function preventHcs(evt) {
 function statbarWrapper(href, id) {
   var character = getElementById(id);
   if (!character) {return;}
-  var myWrapper = createAnchor({href: href});
+  var myWrapper = createAnchor({href});
   var statWrapper = character.parentNode;
   insertElement(myWrapper, character);
-  insertElementBefore(myWrapper, statWrapper.firstChild);
+  insertElementAfterBegin(statWrapper, myWrapper);
   on(myWrapper, 'click', preventHcs, true);
 }
 

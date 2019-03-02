@@ -13,7 +13,7 @@ function notUnassigned(el) {
 
 function noQuests(output, el) {
   var folderName = getText(
-    el.parentNode.nextElementSibling.nextElementSibling.firstChild);
+    el.parentNode.nextElementSibling.nextElementSibling.firstChild); // Text Node
   var hasQuest = /quest/i.test(folderName);
   if (hasQuest) {
     insertHtmlBeforeEnd(output, 'Skipping folder "' +

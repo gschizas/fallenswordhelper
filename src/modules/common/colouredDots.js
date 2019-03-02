@@ -5,9 +5,8 @@ import onlineDot from './onlineDot';
 import querySelectorAll from './querySelectorAll';
 
 function changeOnlineDot(contactLink) {
-  var lastActivity = lastActivityRE
-    .exec(contactLink.dataset.tipped);
-  contactLink.parentNode.previousSibling.innerHTML =
+  var lastActivity = lastActivityRE.exec(contactLink.dataset.tipped);
+  contactLink.parentNode.previousElementSibling.innerHTML =
     onlineDot({
       min: lastActivity[3],
       hour: lastActivity[2],

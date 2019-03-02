@@ -1,8 +1,9 @@
 import calf from '../support/calf';
 import doBuffLink from './doBuffLink';
 import doChat from './doChat';
-import fallback from '../system/fallback';
+import getCalfPrefs from '../common/getCalfPrefs';
 import getMembrList from '../ajax/getMembrList';
+import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -20,9 +21,11 @@ import {
 import {getKeys, playerColor, prepareAlliesEnemies} from './playerColour';
 
 function getCalfVars() {
-  calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
-  calf.lastLadderReset = getValue('lastLadderReset');
-  calf.enableChatParsing = getValue('enableChatParsing');
+  [
+    'showPvPSummaryInLog',
+    'lastLadderReset',
+    'enableChatParsing'
+  ].forEach(getCalfPrefs);
 }
 
 function doMsgHeader(logTable) {
@@ -49,8 +52,7 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   var buffingPlayerIDRE = /player_id=(\d+)/;
   var buffingPlayerID = buffingPlayerIDRE
     .exec(aRow.cells[2].innerHTML)[1];
-  var buffingPlayerName = aRow.cells[2].firstChild.nextSibling
-    .innerHTML;
+  var buffingPlayerName = getTextTrim(aRow.cells[2].children[0]);
   var extraText = ' <span style="font-size:x-small;"><nobr>' +
     '[ <span style="cursor:pointer;text-decoration:underline" ' +
     'class="a-reply" target_player="' + buffingPlayerName +
@@ -68,19 +70,13 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
 }
 
 function hasPlayerLink(aRow) {
-  return aRow.cells[2].firstChild.nextSibling &&
-    aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-    /player_id/.test(aRow.cells[2].firstChild.nextSibling.href);
-}
-
-function otherMsgType(aRow, messageType) {
-  return fallback(messageType === 'General', messageType === 'Notification') &&
-    hasPlayerLink(aRow);
+  return aRow.cells[2].children[0] &&
+    aRow.cells[2].children[0].nodeName === 'A' &&
+    /player_id/.test(aRow.cells[2].children[0].href);
 }
 
 function doExtraStuff(aRow, messageType, playerName, isGuildMate) {
-  if (messageType === 'Notification' &&
-      hasPlayerLink(aRow)) {
+  if (messageType === 'Notification' && hasPlayerLink(aRow)) {
     addExtraStuff(aRow, playerName, isGuildMate);
   }
 }
@@ -89,14 +85,9 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
   var playerElement;
   var playerName;
   var colorPlayerName = false;
-  if (messageType === 'Chat') {
-    playerElement = aRow.cells[2].firstChild;
-    playerName = playerElement.innerHTML;
-    colorPlayerName = true;
-  }
-  if (otherMsgType(aRow, messageType)) {
-    playerElement = aRow.cells[2].firstChild.nextSibling;
-    playerName = playerElement.innerHTML;
+  if (hasPlayerLink(aRow)) {
+    playerElement = aRow.cells[2].children[0];
+    playerName = getTextTrim(playerElement);
     colorPlayerName = true;
   }
   var isGuildMate = playerColor(colorPlayerName, playerName, playerElement);
@@ -105,8 +96,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
 }
 
 function processLogWidgetRow(aRow) { // Legacy
-  // Valid Types: General, Chat, Guild
-  var messageType = aRow.cells[0].firstChild.getAttribute('oldtitle');
+  var messageType = aRow.cells[0].children[0].getAttribute('oldtitle');
   if (messageType) {
     doLogWidgetRow(aRow, messageType);
     addPvpSummary(aRow, messageType);

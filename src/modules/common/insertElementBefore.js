@@ -1,5 +1,5 @@
 function validRef(referenceNode) {
-  return (referenceNode instanceof Node || referenceNode === null) &&
+  return referenceNode === null || referenceNode instanceof Node &&
   referenceNode.parentNode instanceof Node;
 }
 

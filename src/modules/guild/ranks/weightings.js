@@ -41,7 +41,7 @@ function calcPermWeight(perms) {
 function parseRankData(memberRanks, row) {
   // Makes a weighted calculation of available permissions and gets tax rate
   var rankCell = row.children[0];
-  var rankName = getText(rankCell.firstChild);
+  var rankName = getText(rankCell.firstChild); // Text Node
   var thisRank = memberRanks.find(partial(rankObj, rankName));
   if (thisRank) {
     insertHtmlAfterBegin(rankCell, '<span class="fshBlue">(' +

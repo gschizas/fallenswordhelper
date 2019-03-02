@@ -20,7 +20,7 @@ function priceAfterName(buffNameNode) {
   // the ',', in case of 'AL, Lib, Mer: 10k each'
   while (thisLine(node)) {
     var newtext = getText(node);
-    node = node.nextSibling;
+    node = node.nextSibling; // Text Node
     text += newtext;
   }
   return formatPrice(text);
@@ -31,7 +31,7 @@ function priceBeforeName(buffNameNode) {
   var node = buffNameNode;
   while (thisLine(node)) {
     var newtext = getText(node);
-    node = node.previousSibling;
+    node = node.previousSibling; // Text Node
     text = newtext + text;
   }
   return formatPrice(text);

@@ -2133,7 +2133,7 @@
 
   function noQuests(output, el) {
     var folderName = getText(
-      el.parentNode.nextElementSibling.nextElementSibling.firstChild);
+      el.parentNode.nextElementSibling.nextElementSibling.firstChild); // Text Node
     var hasQuest = /quest/i.test(folderName);
     if (hasQuest) {
       insertHtmlBeforeEnd(output, 'Skipping folder "' +
@@ -2220,7 +2220,7 @@
   }
 
   function validRef(referenceNode) {
-    return (referenceNode instanceof Node || referenceNode === null) &&
+    return referenceNode === null || referenceNode instanceof Node &&
     referenceNode.parentNode instanceof Node;
   }
 
@@ -4358,6 +4358,10 @@
     }
   }
 
+  function getTextTrim(node) {
+    return getText(node).trim();
+  }
+
   function findDoc(data) {
     if (notGoldUpgradesPage()) {
       return createDocument(data);
@@ -4369,14 +4373,14 @@
   }
 
   function checkUpgrade(limit) {
-    var checkDoneUpgrade = getText(limit).split(' / ');
+    var checkDoneUpgrade = getTextTrim(limit).split(' / ');
     if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
       displayUpgradeMsg();
       setValue('needToDoUpgrade', true);
     } else {
       setValue('needToDoUpgrade', false);
       setValue('lastUpgradeCheck',
-        Date.parse(getText(limit.nextElementSibling) + ' GMT'));
+        Date.parse(getTextTrim(limit.nextElementSibling) + ' GMT'));
     }
   }
 
@@ -4559,8 +4563,8 @@
   }
 
   function noChildren(parentNode, newNode) {
-    if (parentNode.firstChild instanceof Node) {
-      return insertElementBefore(newNode, parentNode.firstChild);
+    if (parentNode.firstChild instanceof Node) { // Text Node
+      return insertElementBefore(newNode, parentNode.firstChild); // Text Node
     }
     return insertElement(parentNode, newNode);
   }
@@ -4730,25 +4734,20 @@
   function functionPasses(fn) {return fn();}
 
   function rewardType(theCells) {
-    return theCells[2].firstChild.firstChild.firstChild.firstChild
-      .nextSibling.firstChild.title;
+    return querySelector('img', theCells[2]).title;
   }
 
   function basicBounty(theCells) {
-    var targetData = theCells[0].firstChild.firstChild;
+    var targetData = theCells[0].children[0].children[0];
     return {
-      target: getText(targetData.firstChild),
+      target: getText(targetData),
       link: targetData.href,
-      lvl: getText(targetData.nextSibling).replace(/[[|\]]/, ''),
+      lvl: getText(targetData.nextSibling).replace(/[[|\]]/, ''), // Text Node
       reward: getText(theCells[2]),
       rewardType: rewardType(theCells),
       posted: getText(theCells[3]),
       xpLoss: getText(theCells[4]),
     };
-  }
-
-  function getTextTrim(node) {
-    return getText(node).trim();
   }
 
   var bountyList$1;
@@ -4831,15 +4830,15 @@
   function acceptBtn(theCells) {
     var cell = theCells[6];
     if (getTextTrim(cell) !== '[n/a]') {
-      return cell.firstChild.firstChild.getAttribute('onclick');
+      return cell.children[0].children[0].getAttribute('onclick');
     }
     return '';
   }
 
   function getTarget(theCells) {
     return extend(basicBounty(theCells), {
-      offerer: getText(theCells[1].firstChild.firstChild.firstChild),
-      tickets: getText(theCells[5]),
+      offerer: getTextTrim(theCells[1].children[0].children[0]),
+      tickets: getTextTrim(theCells[5]),
       accept: acceptBtn(theCells)
     });
   }
@@ -4868,7 +4867,7 @@
   function findTarget(activeTable) {
     for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
       var theRow = activeTable.rows[i];
-      var target = getText(theRow.cells[0].firstChild.firstChild.firstChild);
+      var target = getTextTrim(theRow.cells[0].children[0].children[0]);
       if (target === '[ No bounties available. ]') {break;}
       wantedTarget(target, theRow);
     }
@@ -5376,11 +5375,11 @@
   }
 
   function titanSpotted(el) {
-    return getTitanRe().test(el.firstChild.nodeValue);
+    return getTitanRe().test(el.firstChild.nodeValue); // Text Node
   }
 
   function reformatNews(el) {
-    var news = el.firstChild.nodeValue.match(getTitanRe());
+    var news = el.firstChild.nodeValue.match(getTitanRe()); // Text Node
     news[2] = makeALink(creatureSearchHref(news[2]), news[2]);
     news[4] = makeALink(realmSearchHref(news[4]), news[4]);
     return news.slice(1).join('');
@@ -5388,7 +5387,7 @@
 
   function titanLink(el) {
     var newSpan = createSpan({innerHTML: reformatNews(el)});
-    el.replaceChild(newSpan, el.firstChild);
+    el.replaceChild(newSpan, el.firstChild); // Text Node
   }
 
   function addUfsgLinks() {
@@ -5500,8 +5499,8 @@
   }
 
   function refIsLast(newNode, referenceNode) {
-    if (referenceNode.nextSibling instanceof Node) {
-      return insertElementBefore(newNode, referenceNode.nextSibling);
+    if (referenceNode.nextSibling instanceof Node) { // Text Node
+      return insertElementBefore(newNode, referenceNode.nextSibling); // Text Node
     }
     return insertElement(referenceNode.parentNode, newNode);
   }
@@ -5943,10 +5942,10 @@
   function statbarWrapper(href, id) {
     var character = getElementById(id);
     if (!character) {return;}
-    var myWrapper = createAnchor({href: href});
+    var myWrapper = createAnchor({href});
     var statWrapper = character.parentNode;
     insertElement(myWrapper, character);
-    insertElementBefore(myWrapper, statWrapper.firstChild);
+    insertElementAfterBegin(statWrapper, myWrapper);
     on(myWrapper, 'click', preventHcs, true);
   }
 
@@ -8607,7 +8606,7 @@
     // the ',', in case of 'AL, Lib, Mer: 10k each'
     while (thisLine(node)) {
       var newtext = getText(node);
-      node = node.nextSibling;
+      node = node.nextSibling; // Text Node
       text += newtext;
     }
     return formatPrice(text);
@@ -8618,7 +8617,7 @@
     var node = buffNameNode;
     while (thisLine(node)) {
       var newtext = getText(node);
-      node = node.previousSibling;
+      node = node.previousSibling; // Text Node
       text = newtext + text;
     }
     return formatPrice(text);
@@ -8944,9 +8943,8 @@
   }
 
   function changeOnlineDot(contactLink) {
-    var lastActivity = lastActivityRE
-      .exec(contactLink.dataset.tipped);
-    contactLink.parentNode.previousSibling.innerHTML =
+    var lastActivity = lastActivityRE.exec(contactLink.dataset.tipped);
+    contactLink.parentNode.previousElementSibling.innerHTML =
       onlineDot({
         min: lastActivity[3],
         hour: lastActivity[2],
@@ -9185,8 +9183,7 @@
   }
 
   function conflictInfo(leftHandSideColumnTable) { // jQuery.min
-    var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
-      .firstChild.nextSibling;
+    var statCtrl = leftHandSideColumnTable.rows[6].cells[0].children[0];
     if (statCtrl) {
       conflicts(1).done(partial(gotConflictInfo, {node: statCtrl}));
     }
@@ -9541,7 +9538,7 @@
   }
 
   function toggleVisibilty(evt) {
-    var anItemId = evt.target.getAttribute('linkto');
+    var anItemId = evt.target.dataset.linkto;
     var anItem = getElementById(anItemId);
     var currentVisibility = anItem.classList.contains('fshHide');
     anItem.classList.toggle('fshHide');
@@ -9552,47 +9549,48 @@
     }
   }
 
-  function logoToggle(leftHandSideColumnTable) { // Legacy
-    var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
-    insertHtmlBeforeEnd(changeLogoCell, '[ <span class="fshLink' +
-      ' tip-static" id="toggleGuildLogoControl" ' +
-      'linkto="guildLogoControl" data-tipped="Toggle Section">X</span> ]');
-    var guildLogoElement = leftHandSideColumnTable.rows[2].cells[0]
-      .firstChild.nextSibling;
-    guildLogoElement.id = 'guildLogoControl';
-    if (getValue('guildLogoControl')) {
-      hideElement(guildLogoElement);
-    }
-    on(getElementById('toggleGuildLogoControl'), 'click', toggleVisibilty);
+  function makeButton(linkto) {
+    return createSpan({
+      className: 'fshLink tip-static',
+      dataset: {linkto: linkto, tipped: 'Toggle Section'},
+      textContent: 'X'
+    });
   }
 
-  function statToggle(leftHandSideColumnTable) { // Legacy
-    var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
-    insertHtmlBeforeEnd(leaveGuildCell, '<span class="fshNoWrap">' +
-      '[ <span class="fshLink tip-static" id="toggleStatisticsControl" ' +
-      'linkto="statisticsControl" data-tipped="Toggle Section">X</span> ]' +
-      '</span>');
-    var statisticsControlElement = leftHandSideColumnTable.rows[6].cells[0]
-      .firstChild.nextSibling;
-    statisticsControlElement.id = 'statisticsControl';
-    if (getValue('statisticsControl')) {
-      hideElement(statisticsControlElement);
-    }
-    on(getElementById('toggleStatisticsControl'), 'click', toggleVisibilty);
+  function wrapper(btn) {
+    var wrap = createSpan({innerHTML: '[&nbsp;'});
+    insertElement(wrap, btn);
+    insertHtmlBeforeEnd(wrap, '&nbsp;]');
+    return wrap;
   }
 
-  function structureToggle(leftHandSideColumnTable) { // Legacy
-    var buildCell = leftHandSideColumnTable.rows[15].cells[1].firstChild;
-    insertHtmlBeforeEnd(buildCell, '[ <span class="fshLink ' +
-      'tip-static" id="toggleGuildStructureControl" ' +
-      'linkto="guildStructureControl" data-tipped="Toggle Section">X</span> ]');
-    var guildStructureControlElement = leftHandSideColumnTable.rows[17]
-      .cells[0].firstChild.nextSibling;
-    guildStructureControlElement.id = 'guildStructureControl';
-    if (getValue('guildStructureControl')) {
-      hideElement(guildStructureControlElement);
-    }
-    on(getElementById('toggleGuildStructureControl'), 'click', toggleVisibilty);
+  function thisToggle(inject, panel, linkto) {
+    var thisButton = makeButton(linkto);
+    insertElement(inject, wrapper(thisButton));
+    panel.id = linkto;
+    if (getValue(linkto)) {hideElement(panel);}
+    on(thisButton, 'click', toggleVisibilty);
+  }
+
+  function logoToggle(leftHandSideColumnTable) {
+    thisToggle(
+      leftHandSideColumnTable.rows[0].cells[1].children[0],
+      leftHandSideColumnTable.rows[2].cells[0].children[0],
+      'guildLogoControl');
+  }
+
+  function statToggle(leftHandSideColumnTable) {
+    var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].children[0];
+    leaveGuildCell.innerHTML = leaveGuildCell.innerHTML.trim();
+    thisToggle(leaveGuildCell,
+      leftHandSideColumnTable.rows[6].cells[0].children[0],
+      'statisticsControl');
+  }
+
+  function structureToggle(leftHandSideColumnTable) {
+    thisToggle(leftHandSideColumnTable.rows[15].cells[1].children[0],
+      leftHandSideColumnTable.rows[17].cells[0].children[0],
+      'guildStructureControl');
   }
 
   function selfRecallLink(leftHandSideColumnTable) {
@@ -9905,7 +9903,7 @@
   function parseRankData(memberRanks, row) {
     // Makes a weighted calculation of available permissions and gets tax rate
     var rankCell = row.children[0];
-    var rankName = getText(rankCell.firstChild);
+    var rankName = getText(rankCell.firstChild); // Text Node
     var thisRank = memberRanks.find(partial(rankObj, rankName));
     if (thisRank) {
       insertHtmlAfterBegin(rankCell, '<span class="fshBlue">(' +
@@ -10153,7 +10151,7 @@
     }
   }
 
-  function memberName(el) {return getText(el.cells[0].firstChild.firstChild);}
+  function memberName(el) {return getText(el.cells[0].children[0].children[0]);}
 
   function buffAll(self) {
     var titanTable = self.parentNode.parentNode.parentNode.parentNode;
@@ -10219,19 +10217,19 @@
     }
   }
 
-  function anyMissing(newTitans, oldTitan, i, oldTitans) {
-    if (newTitans[oldTitan]) {return;}
-    if (oldTitans[oldTitan].coolTime <= now) {return;}
-    newTitans[oldTitan] = {
-      cooldownText: oldTitans[oldTitan].cooldownText,
-      coolTime: oldTitans[oldTitan].coolTime,
+  function anyMissing(newTitans, pair) {
+    if (newTitans[pair[0]]) {return;}
+    if (pair[1].coolTime <= now) {return;}
+    newTitans[pair[0]] = {
+      cooldownText: pair[1].cooldownText,
+      coolTime: pair[1].coolTime,
       seen: 'no'
     };
   }
 
   function addMissingTitansFromOld(oldTitans, newTitans) {
     if (!oldTitans) {return;}
-    Object.keys(oldTitans).forEach(partial(anyMissing, newTitans));
+    Object.entries(oldTitans).forEach(partial(anyMissing, newTitans));
   }
 
   function getTitanString(guildKills, totalHP, currentHP) {
@@ -10745,7 +10743,7 @@
     insertElement(mapTbl.tBodies[0], selectRow);
   }
 
-  function makeButton(row, id, val) {
+  function makeButton$1(row, id, val) {
     var btn = createInput({
       id: id,
       type: 'button',
@@ -10756,9 +10754,9 @@
 
   function insertFinal(mapTbl) {
     var row = getRow();
-    makeButton(row, 'fshIgnoreAll', 'Ignore All');
+    makeButton$1(row, 'fshIgnoreAll', 'Ignore All');
     insertHtmlBeforeEnd(row.cells[1], '&nbsp;');
-    makeButton(row, 'fshReset', 'Reset');
+    makeButton$1(row, 'fshReset', 'Reset');
     insertElement(mapTbl.tBodies[0], row);
     return 0;
   }
@@ -10975,8 +10973,8 @@
   var foundUser;
 
   function hideOther(el) {
-    if (el.firstChild.hasAttribute('bgcolor')) {
-      foundUser = containsText(findUser, el.firstChild.children[0]);
+    if (el.children[0].hasAttribute('bgcolor')) {
+      foundUser = containsText(findUser, el.children[0].children[0]);
     }
     if (!foundUser) {
       el.className = 'fshHide';
@@ -11858,7 +11856,7 @@
   }
 
   function saveLastResetTime(aRow) {
-    var logTime = parseDateAsTimestamp(getText(aRow.cells[1]));
+    var logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1]));
     if (logTime > calf.lastLadderReset) {
       setValue('lastLadderReset', logTime);
       calf.lastLadderReset = logTime;
@@ -12015,7 +12013,7 @@
 
   function replaceLeadingText(msgCell, newHtml) {
     var replaceText = createSpan({innerHTML: newHtml});
-    msgCell.replaceChild(replaceText, msgCell.firstChild);
+    msgCell.replaceChild(replaceText, msgCell.firstChild); // Text Node
   }
 
   function parseCombatWinner(msgCell) {
@@ -12142,9 +12140,11 @@
   }
 
   function getCalfVars() {
-    calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
-    calf.lastLadderReset = getValue('lastLadderReset');
-    calf.enableChatParsing = getValue('enableChatParsing');
+    [
+      'showPvPSummaryInLog',
+      'lastLadderReset',
+      'enableChatParsing'
+    ].forEach(getCalfPrefs);
   }
 
   function doMsgHeader(logTable) {
@@ -12171,8 +12171,7 @@
     var buffingPlayerIDRE = /player_id=(\d+)/;
     var buffingPlayerID = buffingPlayerIDRE
       .exec(aRow.cells[2].innerHTML)[1];
-    var buffingPlayerName = aRow.cells[2].firstChild.nextSibling
-      .innerHTML;
+    var buffingPlayerName = getTextTrim(aRow.cells[2].children[0]);
     var extraText = ' <span style="font-size:x-small;"><nobr>' +
       '[ <span style="cursor:pointer;text-decoration:underline" ' +
       'class="a-reply" target_player="' + buffingPlayerName +
@@ -12190,19 +12189,13 @@
   }
 
   function hasPlayerLink(aRow) {
-    return aRow.cells[2].firstChild.nextSibling &&
-      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      /player_id/.test(aRow.cells[2].firstChild.nextSibling.href);
-  }
-
-  function otherMsgType(aRow, messageType) {
-    return fallback(messageType === 'General', messageType === 'Notification') &&
-      hasPlayerLink(aRow);
+    return aRow.cells[2].children[0] &&
+      aRow.cells[2].children[0].nodeName === 'A' &&
+      /player_id/.test(aRow.cells[2].children[0].href);
   }
 
   function doExtraStuff(aRow, messageType, playerName, isGuildMate) {
-    if (messageType === 'Notification' &&
-        hasPlayerLink(aRow)) {
+    if (messageType === 'Notification' && hasPlayerLink(aRow)) {
       addExtraStuff(aRow, playerName, isGuildMate);
     }
   }
@@ -12211,14 +12204,9 @@
     var playerElement;
     var playerName;
     var colorPlayerName = false;
-    if (messageType === 'Chat') {
-      playerElement = aRow.cells[2].firstChild;
-      playerName = playerElement.innerHTML;
-      colorPlayerName = true;
-    }
-    if (otherMsgType(aRow, messageType)) {
-      playerElement = aRow.cells[2].firstChild.nextSibling;
-      playerName = playerElement.innerHTML;
+    if (hasPlayerLink(aRow)) {
+      playerElement = aRow.cells[2].children[0];
+      playerName = getTextTrim(playerElement);
       colorPlayerName = true;
     }
     var isGuildMate = playerColor(colorPlayerName, playerName, playerElement);
@@ -12227,8 +12215,7 @@
   }
 
   function processLogWidgetRow(aRow) { // Legacy
-    // Valid Types: General, Chat, Guild
-    var messageType = aRow.cells[0].firstChild.getAttribute('oldtitle');
+    var messageType = aRow.cells[0].children[0].getAttribute('oldtitle');
     if (messageType) {
       doLogWidgetRow(aRow, messageType);
       addPvpSummary(aRow, messageType);
@@ -13258,7 +13245,7 @@
       getValue('guild' + guildType) + '"' + disabled + '>' +
 
       '<span class="fshPoint" ' +
-      'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
+      'id="toggleShowGuild' + guildType + 'Message" data-linkto="showGuild' +
       guildType + 'Message"> &#x00bb;</span>' +
 
       '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
@@ -19776,7 +19763,7 @@
   function highlightPvpProtection$2() {
     if (!getValue('highlightPvpProtection')) {return;}
     var pvpp = querySelector('#profileLeftColumn a[href="' + pointsUrl + '"]');
-    if (getTextTrim(pvpp.parentNode.nextSibling) !== 'N/A') {
+    if (getTextTrim(pvpp.parentNode.nextSibling) !== 'N/A') { // Text Node
       pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red'; // TODO
     }
   }
@@ -19913,7 +19900,7 @@
     getArrayByTagName('a', profileBlock).forEach(removeItem);
   }
 
-  function makeButton$1() {
+  function makeButton$2() {
     var nekidDiv = createDiv({className: 'fshCenter'});
     var theBtn = createButton({
       className: 'fshBl fshBls',
@@ -19930,7 +19917,7 @@
     var profileRightColumn = getElementById('profileRightColumn');
     profileCombatSetDiv = getElementById('profileCombatSetDiv');
     var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
-    var nekidDiv = makeButton$1();
+    var nekidDiv = makeButton$2();
     profileRightColumn.replaceChild(nekidDiv, targetBr);
   }
 
@@ -20087,7 +20074,7 @@
   function countContacts(isAllies, el) {
     var target = el.parentNode;
     var numberOfContacts = getElementsByTagName(def_table,
-      target.nextSibling.nextSibling).length - 1;
+      target.nextElementSibling).length - 1;
     insertHtmlBeforeEnd(target,
       '<span class="fshBlue">&nbsp;' + numberOfContacts.toString() +
       contactSlots(numberOfContacts, getValue(totalKey(isAllies))) +
@@ -20195,7 +20182,7 @@
   }
 
   function getDefStat() {
-    return Number(getTextTrim(getElementById(def_statDefense).firstChild));
+    return Number(getTextTrim(getElementById(def_statDefense)));
   }
 
   function calcNmvEffect$1(atkStat, oldTipped) {
@@ -20217,7 +20204,7 @@
   function gotImg(nmvImg) {
     var atkEl = getElementById(def_statAttack);
     if (!atkEl) {return;}
-    var atkStat = Number(getTextTrim(atkEl.firstChild));
+    var atkStat = Number(getTextTrim(atkEl));
     if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
   }
 
@@ -20228,8 +20215,9 @@
 
   function removeStatTable(el) {
     var tde = getElementsByTagName('td', el);
-    el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
-      '<div class="profile-stat-bonus">' + getText(tde[1]) + '</div>';
+    el.parentNode.innerHTML = '<span id="' + tde[0].id + '">' +
+      tde[0].innerHTML.replace(/&nbsp;/g, ' ').trim() +
+      '</span> <div class="profile-stat-bonus">' + getText(tde[1]) + '</div>';
   }
 
   function updateStatistics() {
@@ -21210,7 +21198,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '106';
+  window.FSH.calf = '107';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
