@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import getText from '../common/getText';
+import getTextTrim from '../common/getTextTrim';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import setValue from '../system/setValue';
 
@@ -10,7 +11,7 @@ function isLadderReset(aRow) {
 }
 
 function saveLastResetTime(aRow) {
-  var logTime = parseDateAsTimestamp(getText(aRow.cells[1]));
+  var logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1]));
   if (logTime > calf.lastLadderReset) {
     setValue('lastLadderReset', logTime);
     calf.lastLadderReset = logTime;
