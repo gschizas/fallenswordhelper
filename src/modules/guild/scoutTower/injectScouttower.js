@@ -37,19 +37,19 @@ function cooldownTracker(theTitans, aRow) {
   }
 }
 
-function anyMissing(newTitans, oldTitan, i, oldTitans) {
-  if (newTitans[oldTitan]) {return;}
-  if (oldTitans[oldTitan].coolTime <= now) {return;}
-  newTitans[oldTitan] = {
-    cooldownText: oldTitans[oldTitan].cooldownText,
-    coolTime: oldTitans[oldTitan].coolTime,
+function anyMissing(newTitans, pair) {
+  if (newTitans[pair[0]]) {return;}
+  if (pair[1].coolTime <= now) {return;}
+  newTitans[pair[0]] = {
+    cooldownText: pair[1].cooldownText,
+    coolTime: pair[1].coolTime,
     seen: 'no'
   };
 }
 
 function addMissingTitansFromOld(oldTitans, newTitans) {
   if (!oldTitans) {return;}
-  Object.keys(oldTitans).forEach(partial(anyMissing, newTitans));
+  Object.entries(oldTitans).forEach(partial(anyMissing, newTitans));
 }
 
 export function getTitanString(guildKills, totalHP, currentHP) {
