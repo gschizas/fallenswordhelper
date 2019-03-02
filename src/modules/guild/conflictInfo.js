@@ -62,8 +62,7 @@ function gotConflictInfo(callback, responseText) { // Legacy
 }
 
 export default function conflictInfo(leftHandSideColumnTable) { // jQuery.min
-  var statCtrl = leftHandSideColumnTable.rows[6].cells[0]
-    .firstChild.nextSibling;
+  var statCtrl = leftHandSideColumnTable.rows[6].cells[0].children[0];
   if (statCtrl) {
     conflicts(1).done(partial(gotConflictInfo, {node: statCtrl}));
   }
