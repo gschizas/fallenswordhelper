@@ -9,8 +9,8 @@ var findUser;
 var foundUser;
 
 function hideOther(el) {
-  if (el.firstChild.hasAttribute('bgcolor')) {
-    foundUser = containsText(findUser, el.firstChild.children[0]);
+  if (el.children[0].hasAttribute('bgcolor')) {
+    foundUser = containsText(findUser, el.children[0].children[0]);
   }
   if (!foundUser) {
     el.className = 'fshHide';

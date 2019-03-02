@@ -6,8 +6,9 @@ import getText from '../common/getText';
 
 function removeStatTable(el) {
   var tde = getElementsByTagName('td', el);
-  el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
-    '<div class="profile-stat-bonus">' + getText(tde[1]) + '</div>';
+  el.parentNode.innerHTML = '<span id="' + tde[0].id + '">' +
+    tde[0].innerHTML.replace(/&nbsp;/g, ' ').trim() +
+    '</span> <div class="profile-stat-bonus">' + getText(tde[1]) + '</div>';
 }
 
 export default function updateStatistics() {
