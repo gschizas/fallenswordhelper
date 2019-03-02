@@ -2,8 +2,8 @@ import insertElement from './insertElement';
 import insertElementBefore from './insertElementBefore';
 
 function refIsLast(newNode, referenceNode) {
-  if (referenceNode.nextSibling instanceof Node) {
-    return insertElementBefore(newNode, referenceNode.nextSibling);
+  if (referenceNode.nextSibling instanceof Node) { // Text Node
+    return insertElementBefore(newNode, referenceNode.nextSibling); // Text Node
   }
   return insertElement(referenceNode.parentNode, newNode);
 }
