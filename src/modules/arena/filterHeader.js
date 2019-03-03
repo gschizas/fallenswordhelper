@@ -37,7 +37,7 @@ function maxLvlValue(aTable) { // jQuery
 }
 
 function eventHandlers(aTable) {
-  $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
+  $('#fshMinLvl, #fshMaxLvl', aTable).on('keyup', changeLvls);
   $('#fshReset', aTable).on('click', resetLvls);
 }
 
