@@ -25,7 +25,7 @@ function cooldownTracker(theTitans, aRow) {
   if (!theTitans[myName]) {
     var cooldown = getText(aRow.nextElementSibling.cells[0]);
     var coolTime = 0;
-    if (cooldown.indexOf('until') !== -1) {
+    if (cooldown.includes('until')) {
       coolTime = parseDateAsTimestamp(
         cooldown.replace('Cooldown until: ', ''));
     }
