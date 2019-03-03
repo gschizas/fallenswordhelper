@@ -4,6 +4,7 @@ import combatView from '../ajax/combatView';
 import createDocument from '../system/createDocument';
 import getForage from '../ajax/getForage';
 import getText from '../common/getText';
+import getTextTrim from '../common/getTextTrim';
 import insertElement from '../common/insertElement';
 import {nowSecs} from '../support/now';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
@@ -92,8 +93,7 @@ function unknownSpecials(json) {
 
 function cacheCombat(aRow, json) {
   if (!json.s) {return;}
-  var cellContents = getText(aRow.cells[1]);
-  json.logTime = parseDateAsTimestamp(cellContents) / 1000;
+  json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
   combatCache[json.r.id] = json;
   setForage('fsh_pvpCombat', combatCache);
   unknownSpecials(json);

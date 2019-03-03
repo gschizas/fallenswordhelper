@@ -10,6 +10,7 @@ import getElementsByClassName from '../../common/getElementsByClassName';
 import getForage from '../../ajax/getForage';
 import getGuildLogPage from './getGuildLogPage';
 import getText from '../../common/getText';
+import getTextTrim from '../../common/getTextTrim';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import {imageServer} from '../../system/system';
@@ -66,7 +67,7 @@ function getTableList(tableList) {
   var limit = theTable.rows.length - 1;
   for (var i = 1; i < limit; i += 2) {
     var myRow = theTable.rows[i];
-    var myDate = getText(myRow.cells[1]);
+    var myDate = getTextTrim(myRow.cells[1]);
     var timestamp = parseDateAsTimestamp(myDate);
     var myMsg = myRow.cells[2].innerHTML;
     if (seenRowBefore(timestamp, myMsg)) {
