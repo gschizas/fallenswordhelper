@@ -10205,7 +10205,7 @@
     if (!theTitans[myName]) {
       var cooldown = getText(aRow.nextElementSibling.cells[0]);
       var coolTime = 0;
-      if (cooldown.indexOf('until') !== -1) {
+      if (cooldown.includes('until')) {
         coolTime = parseDateAsTimestamp(
           cooldown.replace('Cooldown until: ', ''));
       }
@@ -11715,8 +11715,7 @@
 
   function rowColor(logScreen, dateColumn, aRow) { // Legacy
     var addBuffTag = true;
-    var cellContents = getText(aRow.cells[dateColumn]);
-    var postDateUtc = parseDateAsTimestamp(cellContents);
+    var postDateUtc = parseDateAsTimestamp(getTextTrim(aRow.cells[dateColumn]));
     var postAgeMins = (nowUtc - postDateUtc) / (1000 * 60);
     if (postDateUtc > lastCheckUtc) {
       aRow.classList.add('fshNr');
@@ -11992,8 +11991,7 @@
 
   function cacheCombat(aRow, json) {
     if (!json.s) {return;}
-    var cellContents = getText(aRow.cells[1]);
-    json.logTime = parseDateAsTimestamp(cellContents) / 1000;
+    json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
     combatCache[json.r.id] = json;
     setForage('fsh_pvpCombat', combatCache);
     unknownSpecials(json);
@@ -18885,7 +18883,7 @@
     var limit = theTable.rows.length - 1;
     for (var i = 1; i < limit; i += 2) {
       var myRow = theTable.rows[i];
-      var myDate = getText(myRow.cells[1]);
+      var myDate = getTextTrim(myRow.cells[1]);
       var timestamp = parseDateAsTimestamp(myDate);
       var myMsg = myRow.cells[2].innerHTML;
       if (seenRowBefore(timestamp, myMsg)) {
@@ -21198,7 +21196,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '107';
+  window.FSH.calf = '108';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
