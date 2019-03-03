@@ -12,5 +12,5 @@ function rekeyInventory(data) {
 }
 
 export default function getInventoryById() {
-  return getInventory().pipe(rekeyInventory);
+  return getInventory().then(rekeyInventory);
 }

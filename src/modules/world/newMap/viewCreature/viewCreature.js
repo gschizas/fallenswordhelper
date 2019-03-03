@@ -156,7 +156,7 @@ function getGroupStats(data, playerJson, groupId) {
 }
 
 function processGroup(data, playerJson) {
-  groupsView().pipe(getGroupId).done(partial(getGroupStats, data, playerJson));
+  groupsView().then(getGroupId).done(partial(getGroupStats, data, playerJson));
 }
 
 function processPlayer(data, playerJson) {

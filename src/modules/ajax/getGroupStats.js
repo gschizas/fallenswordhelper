@@ -8,5 +8,5 @@ function parseGroupStats(html) {
 }
 
 export default function getGroupStats(viewStats) {
-  return retryAjax(viewStats).pipe(parseGroupStats);
+  return retryAjax(viewStats).then(parseGroupStats);
 }

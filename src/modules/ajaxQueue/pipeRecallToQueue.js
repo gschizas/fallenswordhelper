@@ -21,12 +21,12 @@ function gotBackpack(action, data, bpData) {
 
 function recallItemStatus(action, data) {
   if (data.r === 0 && action !== 'recall') {
-    return backpack().pipe(partial(gotBackpack, action, data));
+    return backpack().then(partial(gotBackpack, action, data));
   }
   return data;
 }
 
 export default function pipeRecallToQueue(invId, playerId, mode, action) {
-  return recallItem(invId, playerId, mode).pipe(errorDialog)
-    .pipe(partial(recallItemStatus, action));
+  return recallItem(invId, playerId, mode).then(errorDialog)
+    .then(partial(recallItemStatus, action));
 }

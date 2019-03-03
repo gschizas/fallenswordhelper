@@ -9,5 +9,5 @@ export default function senditems(invIdAry) {
     xc: window.ajaxXC,
     target_username: getValue('itemRecipient'),
     items: invIdAry
-  }).pipe(ajaxReturnCode);
+  }).then(ajaxReturnCode);
 }

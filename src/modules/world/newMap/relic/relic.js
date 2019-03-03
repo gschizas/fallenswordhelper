@@ -60,7 +60,7 @@ function getGroups() {
   return indexAjaxData({
     cmd: 'guild',
     subcmd: 'groups'
-  }).pipe(parseGroups);
+  }).then(parseGroups);
 }
 
 function getGuild() {

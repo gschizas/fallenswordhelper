@@ -52,7 +52,7 @@ function failFilter(fn, opt, retries, dfr) {
 function doAjax(options, retries, dfr) {
   var opt = setOpts(options);
   opt.beforeSend = beforeSend;
-  return $.ajax(opt).pipe(dfr.resolve, failFilter(doAjax, opt, retries, dfr));
+  return $.ajax(opt).then(dfr.resolve, failFilter(doAjax, opt, retries, dfr));
 }
 
 function attemptTask(runner) {

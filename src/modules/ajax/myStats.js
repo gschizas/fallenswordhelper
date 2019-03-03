@@ -18,7 +18,7 @@ function addLastUpdateDate(data) {
 
 function getMyProfile() {
   return getProfile(playerName())
-    .pipe(addLastUpdateDate)
+    .then(addLastUpdateDate)
     .done(sendMyProfileToForage);
 }
 
@@ -33,5 +33,5 @@ export default function myStats(force) {
   if (force) {return getMyProfile();}
   // jQuery 1.7 uses pipe instead of then
   return getForage('fsh_selfProfile')
-    .pipe(getProfileFromForage);
+    .then(getProfileFromForage);
 }

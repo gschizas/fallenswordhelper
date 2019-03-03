@@ -27,7 +27,7 @@ function otherPages(doc) {
 
 function getPage(thisFolder, bindFolderAnyPage, i) {
   return retryAjax(thisFolder + '&page=' + i)
-    .pipe(bindFolderAnyPage);
+    .then(bindFolderAnyPage);
 }
 
 function ajaxOtherPages(doc, thisFolder, bindFolderAnyPage) {
@@ -39,6 +39,6 @@ export default function processFolderFirstPage(output, recipebook, html) { // jQ
   var thisFolder = thisFolderHref(doc);
   var bindFolderAnyPage = partial(processFolderAnyPage, output, recipebook);
   var prm = ajaxOtherPages(doc, thisFolder, bindFolderAnyPage);
-  prm.push($.when(html).pipe(bindFolderAnyPage));
+  prm.push($.when(html).then(bindFolderAnyPage));
   return $.when.apply($, prm);
 }

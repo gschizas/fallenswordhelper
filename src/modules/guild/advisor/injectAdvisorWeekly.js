@@ -17,7 +17,7 @@ function returnAdvisorPage(list, e, response) {
 }
 
 function getAdvisorPage(list, e) { // jQuery.min
-  return advisorView(e).pipe(partial(returnAdvisorPage, list, e));
+  return advisorView(e).then(partial(returnAdvisorPage, list, e));
 }
 
 function addElements(ary, v, i) {

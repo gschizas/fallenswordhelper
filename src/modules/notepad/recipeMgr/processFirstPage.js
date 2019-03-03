@@ -23,7 +23,7 @@ function noQuests(output, el) {
 }
 
 function doAjax(bindFolderFirstPage, el) {
-  return retryAjax(el.parentNode.href).pipe(bindFolderFirstPage);
+  return retryAjax(el.parentNode.href).then(bindFolderFirstPage);
 }
 
 function buildPrm(output, html, bindFolderFirstPage) {
@@ -38,6 +38,6 @@ function buildPrm(output, html, bindFolderFirstPage) {
 export default function processFirstPage(output, recipebook, html) { // jQuery.min
   var bindFolderFirstPage = partial(processFolderFirstPage, output, recipebook);
   var prm = buildPrm(output, html, bindFolderFirstPage);
-  prm.push($.when(html).pipe(bindFolderFirstPage));
+  prm.push($.when(html).then(bindFolderFirstPage));
   return $.when.apply($, prm);
 }

@@ -38,7 +38,7 @@ function membrListToHash(guildId, data) {
 }
 
 function getGuildMembers(guildId) {
-  return getGuild(guildId).pipe(partial(membrListToHash, guildId));
+  return getGuild(guildId).then(partial(membrListToHash, guildId));
 }
 
 var testList = [
@@ -71,7 +71,7 @@ function guildMembers(force, guildId) {
     return getGuildMembers(guildId).done(addMembrListToForage);
   }
   return getForage('fsh_membrList')
-    .pipe(partial(getMembrListFromForage, guildId));
+    .then(partial(getMembrListFromForage, guildId));
 }
 
 function setHelperMembrList(guildId, membrList) {
@@ -82,5 +82,5 @@ function setHelperMembrList(guildId, membrList) {
 export default function getMembrList(force) {
   var guildId = currentGuildId();
   return guildMembers(force, guildId)
-    .pipe(partial(setHelperMembrList, guildId));
+    .then(partial(setHelperMembrList, guildId));
 }

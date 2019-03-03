@@ -23,5 +23,5 @@ function takeItemStatus(action, data) {
 }
 
 export default function pipeTakeToQueue(invId, action) {
-  return takeItem(invId).pipe(partial(takeItemStatus, action));
+  return takeItem(invId).then(partial(takeItemStatus, action));
 }
