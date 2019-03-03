@@ -73,7 +73,7 @@ function getGuild() {
 
 function getDefenderProfile(el, i) {
   if (i === 0) {return getProfile(el).done(storeLeadDefender);}
-  return getProfile(el).done(parseDefender).fail(ajaxFailure);
+  return getProfile(el).done(parseDefender).catch(ajaxFailure);
 }
 
 function getDefenders() {

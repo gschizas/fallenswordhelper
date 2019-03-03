@@ -43,7 +43,7 @@ function doSave() {
   var newData = jsonParse(ioText.value);
   setForage('fsh_guildActivity', newData)
     .done(partial(successMsg, newData))
-    .fail(dialogMsg);
+    .catch(dialogMsg);
 }
 
 function customButton(text, fn) {
