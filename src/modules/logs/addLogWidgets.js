@@ -117,7 +117,7 @@ function foundLogTable(logTable) { // Legacy
   getCalfVars();
   doMsgHeader(logTable);
   processTableRows(logTable);
-  $('.a-reply').click(openMsgDialog);
+  $('.a-reply').on('click', openMsgDialog);
 }
 
 function addLogWidgetsOld() { // Legacy

@@ -58,7 +58,7 @@ function extraHtml() {
 function prepareSendGoldOnWorld() {
   goldAmount = getValue('goldAmount');
   $('#statbar-gold-tooltip-general').append(extraHtml());
-  $('#HelperSendGold').click(doSendGold);
+  $('#HelperSendGold').on('click', doSendGold);
   updateSendGoldOnWorld();
   $.subscribe(def_playerGold, updateSendGoldOnWorld);
 }

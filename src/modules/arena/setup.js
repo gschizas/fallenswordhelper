@@ -61,7 +61,7 @@ function updateButton(table) { // jQuery
     'style="padding-top: 2px;padding-bottom: 2px;">' +
     '<input class="custombutton" value="Update" type="button">' +
     '</td></tr>');
-  $('input', row).click(updateMoves);
+  $('input', row).on('click', updateMoves);
   table.append(row);
 }
 
@@ -104,5 +104,5 @@ export default function setupMoves() { // jQuery
   var node = $('#pCC b:contains("Setup Combat Moves")');
   if (node.length !== 1) {return;}
   node.addClass('fshLink fshGreen');
-  node.click(selectMoves);
+  node.on('click', selectMoves);
 }

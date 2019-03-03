@@ -61,7 +61,9 @@ function doSendItem(e) { // jQuery
   doAction(partial(senditems, [self.data('inv')]), self);
 }
 
-function elClick(fshInv, el) {$(el[0]).click(partial(el[1], fshInv));} // jQuery
+function elClick(fshInv, el) { // jQuery
+  $(el[0]).on('click', partial(el[1], fshInv));
+}
 
 function elementClickHandlers(fshInv) {
   [

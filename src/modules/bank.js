@@ -135,9 +135,9 @@ function captureButtons(o, depo, withdraw) { // jQuery
   if ($(pccB).eq(o.depoPos).text() === '0') { // Check Deposits Available
     depo.prop(disabled, true);
   } else {
-    depo.click(bankDeposit);
+    depo.on('click', bankDeposit);
   }
-  withdraw.click(bankWithdrawal);
+  withdraw.on('click', bankWithdrawal);
 }
 
 function appLink(o, bank) { // jQuery

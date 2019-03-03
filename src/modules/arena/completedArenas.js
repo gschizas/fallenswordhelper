@@ -20,7 +20,7 @@ function injectStartButton() { // jQuery
   if (prevButton.length === 1) {
     var startButton = $('<input value="<<" type="button">');
     prevButton.before(startButton).before('&nbsp;');
-    startButton.click(partial(gotoPage, 1));
+    startButton.on('click', partial(gotoPage, 1));
   }
 }
 
@@ -31,14 +31,14 @@ function injectFinishButton() { // jQuery
   if (nextButton.length === 1) {
     var finishButton = $('<input value=">>" type="button">');
     nextButton.after(finishButton).after('&nbsp;');
-    finishButton.click(gotoLastPage);
+    finishButton.on('click', gotoLastPage);
   }
 }
 
 function overrideButtons() { // jQuery
   injectStartButton();
   injectFinishButton();
-  $('#pCC input[value="View"]').click(updateUrl);
+  $('#pCC input[value="View"]').on('click', updateUrl);
   on(querySelector('#pCC input[value="Go"]'), 'click', updateGoUrl);
 }
 

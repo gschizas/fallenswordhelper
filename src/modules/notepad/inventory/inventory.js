@@ -57,7 +57,7 @@ function doInventory() {
   var fshInv = doTable();
   eventHandlers(fshInv);
   // eslint-disable-next-line no-use-before-define
-  $('#fshRefresh').click(injectInventoryManagerNew);
+  $('#fshRefresh').on('click', injectInventoryManagerNew);
   clearButton(fshInv);
 }
 

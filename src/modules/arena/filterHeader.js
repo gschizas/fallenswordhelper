@@ -15,7 +15,7 @@ function hideMovesCheckbox(aTable) { // jQuery
     fshHideMoves.prop('checked', opts.hideMoves);
     $('.moveMax').toggle(!opts.hideMoves);
   }
-  fshHideMoves.click(hideMoves);
+  fshHideMoves.on('click', hideMoves);
 }
 
 function minLvlValue(aTable) { // jQuery
@@ -38,7 +38,7 @@ function maxLvlValue(aTable) { // jQuery
 
 function eventHandlers(aTable) {
   $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
-  $('#fshReset', aTable).click(resetLvls);
+  $('#fshReset', aTable).on('click', resetLvls);
 }
 
 export default function filterHeader() { // jQuery

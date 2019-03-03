@@ -45,5 +45,5 @@ export default function injectSaveSettings() { // Hybrid
   if (jQueryNotPresent()) {return;}
   var fshSettings = listValues().reduce(buildSettingsObj, {});
   drawBox(pCC, fshSettings);
-  $('#HelperLoadSettings').click(clickHandler);
+  $('#HelperLoadSettings').on('click', clickHandler);
 }
