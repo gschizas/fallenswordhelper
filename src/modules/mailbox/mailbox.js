@@ -109,7 +109,7 @@ function doneTake(takeResult, json) {
 }
 
 function doTakeItem(takeResult, el) {
-  takeitems(el).done(partial(doneTake, takeResult));
+  takeitems(el).then(partial(doneTake, takeResult));
 }
 
 function takeSimilar(itemList, takeResult, self) { // jQuery.min

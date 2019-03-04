@@ -1,10 +1,10 @@
+import allthen from '../common/allthen';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {imageServer} from '../system/system';
 import indexAjaxData from '../ajax/indexAjaxData';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {moveOptions} from './assets';
 import partial from '../common/partial';
-import when from '../common/when';
 import {arenaUrl, def_table} from '../support/constants';
 
 var oldMoves = [];
@@ -47,13 +47,13 @@ function pageRefresh() {
 
 function changeMoves(newMoves) {
   var prm = newMoves.map(newMove);
-  when(prm, pageRefresh);
+  allthen(prm, pageRefresh);
 }
 
 function updateMoves() { // jQuery
   var newMoves = getAllMoves();
   var prm = newMoves.map(resetMove);
-  when(prm, partial(changeMoves, newMoves));
+  allthen(prm, partial(changeMoves, newMoves));
 }
 
 function updateButton(table) { // jQuery
@@ -61,7 +61,7 @@ function updateButton(table) { // jQuery
     'style="padding-top: 2px;padding-bottom: 2px;">' +
     '<input class="custombutton" value="Update" type="button">' +
     '</td></tr>');
-  $('input', row).click(updateMoves);
+  $('input', row).on('click', updateMoves);
   table.append(row);
 }
 
@@ -104,5 +104,5 @@ export default function setupMoves() { // jQuery
   var node = $('#pCC b:contains("Setup Combat Moves")');
   if (node.length !== 1) {return;}
   node.addClass('fshLink fshGreen');
-  node.click(selectMoves);
+  node.on('click', selectMoves);
 }

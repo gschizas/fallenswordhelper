@@ -76,7 +76,7 @@ function doNameCell(o) {
   newCell.style.verticalAlign = 'top';
   newCell.innerHTML = nameCell(o.doc, o.callback, o.lastActivity,
     o.bioCellHtml);
-  $('.a-reply').click(openMsg);
+  $('.a-reply').on('click', openMsg);
 }
 
 function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy

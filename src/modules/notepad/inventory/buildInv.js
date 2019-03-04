@@ -1,10 +1,10 @@
+import allthen from '../../common/allthen';
 import calf from '../../support/calf';
 import fetchinv from '../../app/guild/fetchinv';
 import getInventory from '../../ajax/getInventory';
 import loadInventory from '../../app/profile/loadInventory';
 import partial from '../../common/partial';
 import report from '../../app/guild/inventory/report';
-import when from '../../common/when';
 
 export var theInv;
 var composed = [];
@@ -14,7 +14,7 @@ function cacheTheInv(data) {
 }
 
 function doInventory() {
-  return getInventory().done(cacheTheInv);
+  return getInventory().then(cacheTheInv);
 }
 
 function itemsFromFolder(el) {return el.items;}
@@ -28,7 +28,7 @@ function getComposedFromBp(data) {
 }
 
 function doComposedFromBp() {
-  return loadInventory().done(getComposedFromBp);
+  return loadInventory().then(getComposedFromBp);
 }
 
 function getComposedFromGs(data) {
@@ -37,11 +37,11 @@ function getComposedFromGs(data) {
 }
 
 function doGs() {
-  return fetchinv().done(getComposedFromGs);
+  return fetchinv().then(getComposedFromGs);
 }
 
 function doReport() {
-  return report().done(getComposedFromGs);
+  return report().then(getComposedFromGs);
 }
 
 function thisPot(inv_id, pot) {return pot.a === inv_id;}
@@ -66,5 +66,5 @@ export function buildInv() {
     prm.push(doGs());
     prm.push(doReport());
   }
-  return when(prm, gotSomeStuff);
+  return allthen(prm, gotSomeStuff);
 }

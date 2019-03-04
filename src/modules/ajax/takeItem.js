@@ -8,5 +8,5 @@ export default function takeItem(invId) {
     subcmd2: 'takeitem',
     guildstore_id: invId,
     ajax: 1
-  }).done(dialog);
+  }).then(dialog);
 }

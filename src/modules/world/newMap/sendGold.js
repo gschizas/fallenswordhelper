@@ -26,7 +26,7 @@ export function doSendGold() { // jQuery
     xc: window.ajaxXC,
     target_username: $('#HelperSendTo').html(),
     gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
-  }).done(doneSendGold);
+  }).then(doneSendGold);
 }
 
 function statbarGoldBackground(colour) {
@@ -58,7 +58,7 @@ function extraHtml() {
 function prepareSendGoldOnWorld() {
   goldAmount = getValue('goldAmount');
   $('#statbar-gold-tooltip-general').append(extraHtml());
-  $('#HelperSendGold').click(doSendGold);
+  $('#HelperSendGold').on('click', doSendGold);
   updateSendGoldOnWorld();
   $.subscribe(def_playerGold, updateSendGoldOnWorld);
 }

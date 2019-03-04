@@ -60,7 +60,7 @@ function injectAllyEnemyList(data) {
 }
 
 function resetList() { // jQuery.min
-  myStats(true).done(injectAllyEnemyList);
+  myStats(true).then(injectAllyEnemyList);
 }
 
 function toggleBuffSelected(self) {
@@ -121,9 +121,13 @@ function makeDiv(data) {
   injectAllyEnemyList(data);
 }
 
-function nextTick(data) {if (data) {add(3, makeDiv, [data]);}}
+function nextTick(data) {
+  if (data) {
+    add(3, makeDiv, [data]);
+  }
+}
 
 export default function prepareAllyEnemyList() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  myStats(false).done(nextTick);
+  myStats(false).then(nextTick);
 }

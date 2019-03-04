@@ -38,5 +38,5 @@ export default function getMercStats() {
   return indexAjaxData({
     cmd: 'guild',
     subcmd: 'mercs'
-  }).pipe(parseMercStats);
+  }).then(parseMercStats);
 }

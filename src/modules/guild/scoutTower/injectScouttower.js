@@ -129,5 +129,5 @@ function gotOldTitans(oldTitans) {
 
 export default function injectScouttower() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getForage('fsh_titans').done(gotOldTitans); // Pref
+  getForage('fsh_titans').then(gotOldTitans); // Pref
 }

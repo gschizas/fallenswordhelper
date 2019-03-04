@@ -931,27 +931,8 @@
     }
   }
 
-  function getItemCallback(forage, dfr, err, data) {
-    if (err) {
-      getForageError(forage, err);
-      dfr.reject(err);
-    } else {
-      // returns null if key does not exist
-      dfr.resolve(data);
-    }
-  }
-
-  function forageGet(forage, dfr) {
-    localforage.getItem(forage, partial(getItemCallback, forage, dfr));
-  }
-
   function getForage(forage) {
-    // Wrap in jQuery Deferred because we're using 1.7 rather than using ES6 promise
-    var dfr = $.Deferred();
-    if (window.localforage) {
-      forageGet(forage, dfr);
-    }
-    return dfr.promise();
+    return localforage.getItem(forage).catch(partial(getForageError, forage));
   }
 
   function jQueryNotPresent() {return !isFunction(window.$);}
@@ -1043,26 +1024,9 @@
     }
   }
 
-  function setItemCallback(forage, dfr, err, _data) {
-    if (err) {
-      setForageError(forage, err);
-      dfr.reject(err);
-    } else {
-      dfr.resolve(_data);
-    }
-  }
-
-  function forageSet(forage, data, dfr) {
-    localforage.setItem(forage, data, partial(setItemCallback, forage, dfr));
-  }
-
   function setForage(forage, data) {
-    // Wrap in jQuery Deferred because we're using 1.7 rather than using ES6 promise
-    var dfr = $.Deferred();
-    if (window.localforage) {
-      forageSet(forage, data, dfr);
-    }
-    return dfr.promise();
+    return localforage.setItem(forage, data)
+      .catch(partial(setForageError, forage));
   }
 
   function displayBuffLog(buffLog) {
@@ -1070,7 +1034,7 @@
   }
 
   function clearBuffLog() {
-    setForage(fshBuffLog, '').done(displayBuffLog);
+    setForage(fshBuffLog, '').then(displayBuffLog);
   }
 
   function injectBuffLog(injector) { // jQuery.min
@@ -1084,7 +1048,7 @@
       divId: 'bufflog'
     });
     on(getElementById('clearBuffs'), 'click', clearBuffLog);
-    getForage(fshBuffLog).done(displayBuffLog);
+    getForage(fshBuffLog).then(displayBuffLog);
   }
 
   function inject(fsboxcontent) {
@@ -1106,7 +1070,7 @@
       button: 'Clear',
       divId: 'fsboxdetail'
     });
-    getForage('fsh_fsboxcontent').done(inject);
+    getForage('fsh_fsboxcontent').then(inject);
     on(getElementById('fsboxclear'), 'click', clearFsBox, true);
   }
 
@@ -1360,7 +1324,7 @@
   function haveJquery(injector) { // jQuery.min
     content = injector || pCC;
     if (!content) {return;}
-    getForage('fsh_monsterLog').done(prepAry);
+    getForage('fsh_monsterLog').then(prepAry);
   }
 
   function injectMonsterLog(injector) {
@@ -1421,7 +1385,7 @@
   function injectNotepadShowLogs(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     content$1 = injector || pCC;
-    getForage('fsh_combatLog').done(gotCombatLog);
+    getForage('fsh_combatLog').then(gotCombatLog);
   }
 
   function onlinePlayer(onlinePlayers, player) {
@@ -1705,30 +1669,31 @@
     return opt.url;
   }
 
-  function handleFailure(opt, jqXhr, errorThrown) {
+  function handleFailure(opt, jqXhr) {
     if (!ignoreFailureStatus.includes(jqXhr.status)) {
       sendException(
-        jqXhr.status + ' (' + errorThrown + ') - ' + url(opt),
+        jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt),
         false
       );
     }
   }
 
-  function failFilter(fn, opt, retries, dfr) {
-    return function(jqXhr, textStatus, errorThrown) { // Closure
+  function failFilter([fn, opt, retries, resolve, reject]) {
+    return function(jqXhr) { // Closure
       if (retries > 0 && jqXhr.status === 503) {
-        setTimeout(fn, 100, opt, retries - 1, dfr);
+        setTimeout(fn, 100, opt, retries - 1, resolve, reject);
       } else {
-        dfr.reject(jqXhr, textStatus, errorThrown);
-        handleFailure(opt, jqXhr, errorThrown);
+        reject(jqXhr);
+        handleFailure(opt, jqXhr);
       }
     };
   }
 
-  function doAjax(options, retries, dfr) {
+  function doAjax(options, retries, resolve, reject) {
     var opt = setOpts(options);
     opt.beforeSend = beforeSend;
-    return $.ajax(opt).pipe(dfr.resolve, failFilter(doAjax, opt, retries, dfr));
+    return $.ajax(opt).then(resolve)
+      .catch(failFilter([doAjax, opt, retries, resolve, reject]));
   }
 
   function attemptTask(runner) {
@@ -1755,16 +1720,18 @@
     }
   }
 
-  function add$1(options, retries, dfr) {
-    queue.push([options, retries, dfr]);
+  function add$1(options, retries, resolve, reject) {
+    queue.push([options, retries, resolve, reject]);
     if (paused$1) {taskRunner$1();}
   }
 
   function retryAjax(options) {
     initGlobalHandler();
-    var dfr = $.Deferred();
-    if (options) {add$1(options, 10, dfr);}
-    return dfr.promise();
+    if (options) {
+      return new Promise(function(resolve, reject) {
+        add$1(options, 10, resolve, reject);
+      });
+    }
   }
 
   function indexAjax(options) {
@@ -1845,7 +1812,7 @@
   function getOtherPages(callback, input) {
     lastPage = getLastPage(input);
     for (var i = 2; i <= lastPage; i += 1) {
-      onlinePlayersPage(i).done(callback);
+      onlinePlayersPage(i).then(callback);
     }
   }
 
@@ -1869,7 +1836,7 @@
     $('#fshRefresh', context).hide();
     onlinePages = 0;
     onlinePlayers = {};
-    onlinePlayersPage(1).done(getOnlinePlayers);
+    onlinePlayersPage(1).then(getOnlinePlayers);
     setValue('lastOnlineCheck', now);
     updateStatus('Parsing online players...');
   }
@@ -1883,7 +1850,7 @@
     context.html(
       '<span><b>Online Players</b></span>' + doRefreshButton() +
       '<div id="fshOutput"></div>');
-    getForage('fsh_onlinePlayers').done(gotOnlinePlayers);
+    getForage('fsh_onlinePlayers').then(gotOnlinePlayers);
     on(context[0], 'click', clickHandler);
     on(context[0], 'keyup', changeLvl);
   }
@@ -2000,6 +1967,10 @@
     }
   }
 
+  function all(prm) {
+    return Promise.all(prm);
+  }
+
   function getFolderImgs(doc) {
     var el = getElementById('pCC', doc).children[0].rows[4].cells[0].children[0];
     return getArrayByTagName('img', el);
@@ -2082,13 +2053,13 @@
     insertHtmlBeforeEnd(output, 'Found blueprint "' + getText(el) + '".<br>');
     var recipe = makeRecipe(el);
     return retryAjax(el.href)
-      .pipe(partial(processRecipe, output, recipebook, recipe));
+      .then(partial(processRecipe, output, recipebook, recipe));
   }
 
   function processFolderAnyPage(output, recipebook, html) { // jQuery.min
     var doc = createDocument(html);
     var prm = recipeAry(doc).map(partial(getRecipe, output, recipebook));
-    return $.when.apply($, prm);
+    return all(prm);
   }
 
   function thisInventFolder(el) {
@@ -2111,7 +2082,7 @@
 
   function getPage(thisFolder, bindFolderAnyPage, i) {
     return retryAjax(thisFolder + '&page=' + i)
-      .pipe(bindFolderAnyPage);
+      .then(bindFolderAnyPage);
   }
 
   function ajaxOtherPages(doc, thisFolder, bindFolderAnyPage) {
@@ -2123,8 +2094,8 @@
     var thisFolder = thisFolderHref(doc);
     var bindFolderAnyPage = partial(processFolderAnyPage, output, recipebook);
     var prm = ajaxOtherPages(doc, thisFolder, bindFolderAnyPage);
-    prm.push($.when(html).pipe(bindFolderAnyPage));
-    return $.when.apply($, prm);
+    prm.push(bindFolderAnyPage(html));
+    return all(prm);
   }
 
   function notUnassigned(el) {
@@ -2143,7 +2114,7 @@
   }
 
   function doAjax$1(bindFolderFirstPage, el) {
-    return retryAjax(el.parentNode.href).pipe(bindFolderFirstPage);
+    return retryAjax(el.parentNode.href).then(bindFolderFirstPage);
   }
 
   function buildPrm(output, html, bindFolderFirstPage) {
@@ -2158,8 +2129,8 @@
   function processFirstPage(output, recipebook, html) { // jQuery.min
     var bindFolderFirstPage = partial(processFolderFirstPage, output, recipebook);
     var prm = buildPrm(output, html, bindFolderFirstPage);
-    prm.push($.when(html).pipe(bindFolderFirstPage));
-    return $.when.apply($, prm);
+    prm.push(bindFolderFirstPage(html));
+    return all(prm);
   }
 
   var recipebook;
@@ -2176,8 +2147,8 @@
     recipebook.recipe = [];
     output.innerHTML = '<br>Parsing inventing screen ...<br>';
     indexAjaxData({cmd: 'inventing'})
-      .pipe(partial(processFirstPage, output, recipebook))
-      .done(displayStuff);
+      .then(partial(processFirstPage, output, recipebook))
+      .then(displayStuff);
   }
 
   function gotRecipeBook(content, data) {
@@ -2215,13 +2186,13 @@
   function injectRecipeManager(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     var content = injector || pCC;
-    getForage('fsh_recipeBook').done(partial(gotRecipeBook, content));
+    getForage('fsh_recipeBook').then(partial(gotRecipeBook, content));
     on(content, 'click', rmEvtHdl);
   }
 
   function validRef(referenceNode) {
-    return referenceNode === null || referenceNode instanceof Node &&
-    referenceNode.parentNode instanceof Node;
+    return referenceNode instanceof Node &&
+      referenceNode.parentNode instanceof Node;
   }
 
   function insertElementBefore(newNode, referenceNode) {
@@ -2343,7 +2314,7 @@
     outputResult(processResult(json.r), buyResult);
   }
 
-  function ajaxExtract(el) {useitem(el).done(partial(quickDoneExtracted, el));}
+  function ajaxExtract(el) {useitem(el).then(partial(quickDoneExtracted, el));}
 
   function doExtract(target) {
     var inventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
@@ -2455,7 +2426,7 @@
     selectST = true;
     selectMain = true;
     on(content, 'click', eventHandler5(extractEvents()));
-    getInventory().done(prepInv);
+    getInventory().then(prepInv);
   }
 
   function spacer(key) {
@@ -2550,8 +2521,10 @@
   }
 
   function dialog(data) {
-    if (data.r === 0) {return;}
-    dialogMsg(data.m);
+    if (data.r !== 0) {
+      dialogMsg(data.m);
+    }
+    return data;
   }
 
   function equipItem(backpackInvId) {
@@ -2560,7 +2533,7 @@
       subcmd: 'equipitem',
       inventory_id: backpackInvId,
       ajax: 1
-    }).done(dialog);
+    }).then(dialog);
   }
 
   function hasClass(className, el) {
@@ -2869,7 +2842,7 @@
   }
 
   function useItem(backpackInvId) {
-    return useitem(backpackInvId).pipe(errorDialog).pipe(ajaxReturnCode);
+    return useitem(backpackInvId).then(errorDialog).then(ajaxReturnCode);
   }
 
   var disableQuickWearPrompts$2;
@@ -2886,7 +2859,7 @@
     setText('', self);
     self.classList.remove('smallLink');
     self.classList.add('fshSpinner', 'fshSpin12');
-    fn(self.dataset.itemid).done(partial(actionResult, self, verb));
+    fn(self.dataset.itemid).then(partial(actionResult, self, verb));
   }
 
   function doUseItem(self) {
@@ -2961,22 +2934,28 @@
     });
   }
 
+  function goodData(appInv) {
+    return appInv && appInv.s && Array.isArray(appInv.r);
+  }
+
   function showQuickWear(appInv) {
-    itemList = appInv;
-    var invTabs = createInvTabs();
-    var invTabsQw = createQuickWear(appInv);
-    insertElement(invTabs, invTabsQw);
-    content$2.innerHTML = '';
-    insertElement(content$2, invTabs);
-    on(invTabs, 'click', eventHandler5(evts5()));
-    insertElement(invTabs, showAHInvManager(appInv));
+    if (goodData(appInv)) {
+      itemList = appInv;
+      var invTabs = createInvTabs();
+      var invTabsQw = createQuickWear(appInv);
+      insertElement(invTabs, invTabsQw);
+      content$2.innerHTML = '';
+      insertElement(content$2, invTabs);
+      on(invTabs, 'click', eventHandler5(evts5()));
+      insertElement(invTabs, showAHInvManager(appInv));
+    }
   }
 
   function hasJquery(injector) { // jQuery.min
     content$2 = injector || pCC;
     if (!content$2) {return;}
     insertHtmlBeforeEnd(content$2, 'Getting item list from backpack...');
-    loadInventory().done(showQuickWear);
+    loadInventory().then(showQuickWear);
     disableQuickWearPrompts$2 = getValue('disableQuickWearPrompts');
   }
 
@@ -3585,7 +3564,7 @@
     newCell.style.verticalAlign = 'top';
     newCell.innerHTML = nameCell(o.doc, o.callback, o.lastActivity,
       o.bioCellHtml);
-    $('.a-reply').click(openMsg);
+    $('.a-reply').on('click', openMsg);
   }
 
   function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
@@ -3736,7 +3715,7 @@
   }
 
   function getProfile(j) {
-    retryAjax(j).done(partial(gotProfile, j));
+    retryAjax(j).then(partial(gotProfile, j));
   }
 
   function findBuffsParsePlayersForBuffs() { // Legacy
@@ -3799,7 +3778,7 @@
   function nextPage(curPage, maxPage, callback) {
     var newPage = calcNextPage(curPage, maxPage);
     updateProgress('Parsing online page ' + curPage + ' ...');
-    onlinePlayersPage(newPage).done(callback);
+    onlinePlayersPage(newPage).then(callback);
   }
 
   function findBuffsParseOnlinePlayers(responseText) { // Legacy
@@ -3822,7 +3801,7 @@
     onlinePlayersSetting =
       parseInt(getElementById('onlinePlayers').value, 10);
     if (onlinePlayersSetting !== 0) {
-      onlinePlayersPage(1).done(findBuffsParseOnlinePlayers);
+      onlinePlayersPage(1).then(findBuffsParseOnlinePlayers);
     } else {
       findBuffsParsePlayersForBuffs();
     }
@@ -3865,7 +3844,7 @@
 
   function addExtraProfile(el) {profilePagesToSearch.push(showPlayerUrl + el);}
 
-  function getAlliesEnemies(el) {retryAjax(el).done(findBuffsParseProfilePage);}
+  function getAlliesEnemies(el) {retryAjax(el).then(findBuffsParseProfilePage);}
 
   function findBuffsParseProfilePageStart() { // Legacy
     // if option enabled then parse profiles
@@ -3915,7 +3894,7 @@
     extraProfile$1 = getElementById('extraProfile').value;
     setValue('extraProfile', extraProfile$1);
     // get list of players to search, starting with guild>manage page
-    guildManage().done(findBuffsParseGuildManagePage);
+    guildManage().then(findBuffsParseGuildManagePage);
   }
 
   function thisBuff(selectedBuff, el) {return selectedBuff === el.id;}
@@ -4238,7 +4217,7 @@
   function checkLastCompose() { // jQuery.min
     var lastComposeCheck = getValue(def_lastComposeCheck);
     if (lastComposeCheck && now < lastComposeCheck) {return;}
-    composingView().done(checkAppResponse);
+    composingView().then(checkAppResponse);
   }
 
   function composeAlert() {
@@ -4295,7 +4274,7 @@
     var myGod = e.target.getAttribute('praytype');
     if (!myGod) {return;}
     indexAjaxData({cmd: 'temple', subcmd: 'pray', type: myGod})
-      .done(havePrayed);
+      .then(havePrayed);
     hideQTip(e.target);
   }
 
@@ -4331,7 +4310,7 @@
 
   function doWeNeedToParse() {
     if (checkLastUpdate(getValue('lastTempleCheck'))) {
-      indexAjaxData({cmd: 'temple'}).done(parseTemplePage);
+      indexAjaxData({cmd: 'temple'}).then(parseTemplePage);
     } else if (getValue('needToPray')) {
       displayDisconnectedFromGodsMessage();
     }
@@ -4401,12 +4380,14 @@
     });
   }
 
-  function asyncParse(data) {add(3, parseGoldUpgrades, [data]);}
+  function asyncParse(data) {
+    add(3, parseGoldUpgrades, [data]);
+  }
 
   function checkLastUpgrade() {
     var lastUpgradeCheck = getValue('lastUpgradeCheck');
     if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
-    upgradesGold().done(asyncParse);
+    upgradesGold().then(asyncParse);
   }
 
   function notUpgradesPage() {
@@ -4585,6 +4566,7 @@
 
   function sendMyProfileToForage(data) {
     setForage('fsh_selfProfile', data);
+    return data;
   }
 
   function addLastUpdateDate(data) {
@@ -4596,8 +4578,8 @@
 
   function getMyProfile() {
     return getProfile$1(playerName())
-      .pipe(addLastUpdateDate)
-      .done(sendMyProfileToForage);
+      .then(addLastUpdateDate)
+      .then(sendMyProfileToForage);
   }
 
   function getProfileFromForage(data) {
@@ -4611,7 +4593,7 @@
     if (force) {return getMyProfile();}
     // jQuery 1.7 uses pipe instead of then
     return getForage('fsh_selfProfile')
-      .pipe(getProfileFromForage);
+      .then(getProfileFromForage);
   }
 
   function openQuickBuffByName(aPlayerName) {
@@ -4656,7 +4638,7 @@
   }
 
   function resetList() { // jQuery.min
-    myStats(true).done(injectAllyEnemyList);
+    myStats(true).then(injectAllyEnemyList);
   }
 
   function toggleBuffSelected(self) {
@@ -4717,11 +4699,15 @@
     injectAllyEnemyList(data);
   }
 
-  function nextTick(data) {if (data) {add(3, makeDiv, [data]);}}
+  function nextTick(data) {
+    if (data) {
+      add(3, makeDiv, [data]);
+    }
+  }
 
   function prepareAllyEnemyList() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    myStats(false).done(nextTick);
+    myStats(false).then(nextTick);
   }
 
   function bountyPage(page) {
@@ -4994,7 +4980,7 @@
     if (calf.enableWantedList) {
       getWantedBountyList(doc);
       if (curPage < maxPage) {
-        bountyPage(curPage + 1).done(parseBountyPageForWorld);
+        bountyPage(curPage + 1).then(parseBountyPageForWorld);
       } else {
         injectWantedList();
       }
@@ -5026,7 +5012,7 @@
     invalidateCache();
     if (needsRefresh()) {
       doRefresh();
-      bountyPage(1).done(parseBountyPageForWorld);
+      bountyPage(1).then(parseBountyPageForWorld);
     } else {
       notRefreshed(enableActiveList, enableWantedList);
     }
@@ -5233,13 +5219,13 @@
       oldArchive = {lastUpdate: 0, members: {}};
     }
     if (nowSecs > fallback(oldArchive.lastUpdate, 0) + 300) { // 5 mins - probably want to increase
-      guildManage$1().done(gotGuild);
+      guildManage$1().then(gotGuild);
     }
   }
 
   function guildActivity() { // jQuery.min
     if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
-      getForage('fsh_guildActivity').done(gotActivity);
+      getForage('fsh_guildActivity').then(gotActivity);
     }
   }
 
@@ -5285,20 +5271,25 @@
     setForage('fsh_fsboxcontent', boxList);
   }
 
+  function storeMsg(nodediv) {
+    var playerName = getElementsByTagName('a', nodediv);
+    if (playerName.length === 0) {return;}
+    getForage('fsh_fsboxcontent').then(storeFSBox);
+    playerName = getText(playerName[0]);
+    insertHtmlBeforeEnd(nodediv,
+      '<span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
+      playerName + '">Ignore</a> ]</span> ');
+  }
+
   function openDialog() {
     sendEvent('injectFSBoxLog', 'injectFsBoxContent');
     jQueryDialog(injectFsBoxContent);
   }
 
-  function fSBoxExists(node) { // jQuery.min
+  function fSBoxExists(node) {
     var nodediv = node.lastElementChild;
-    var playerName = getElementsByTagName('a', nodediv);
-    if (playerName.length === 0) {return;}
-    getForage('fsh_fsboxcontent').done(storeFSBox);
-    playerName = getText(playerName[0]);
-    insertHtmlBeforeEnd(nodediv,
-      '<br><span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
-      playerName + '">Ignore</a> ]</span> ');
+    insertHtmlBeforeEnd(nodediv, '<br>');
+    storeMsg(nodediv);
     var log = createSpan({
       className: 'fshYellow',
       innerHTML: '[ <span class="fshLink">Log</span> ]'
@@ -6025,7 +6016,7 @@
   }
 
   function getSeLog() { // jQuery.min
-    return superelite().done(gotSe);
+    return superelite().then(gotSe);
   }
 
   function doBackgroundCheck() {
@@ -6053,7 +6044,7 @@
   }
 
   function getFshSeLog() { // jQuery.min
-    return getForage('fsh_seLog').done(gotLog);
+    return getForage('fsh_seLog').then(gotLog);
   }
 
   function shouldLog() {
@@ -6062,7 +6053,7 @@
 
   function seLog() { // jQuery.min
     if (shouldLog()) {
-      getFshSeLog().done(setupBackgroundCheck);
+      getFshSeLog().then(setupBackgroundCheck);
     }
   }
 
@@ -6182,12 +6173,12 @@
 
   function funcPasses(itemIndex, json, fn) {return fn(itemIndex, json);}
 
-  function goodData(itemIndex, json) {
+  function goodData$1(itemIndex, json) {
     return jsonTests.every(partial(funcPasses, itemIndex, json));
   }
 
   function changeCombatSet(itemIndex, json) {
-    if (goodData(itemIndex, json)) {
+    if (goodData$1(itemIndex, json)) {
       var cbsIndex = json.r.equip_sets[itemIndex].id;
       expandMenu('2');
       location.href = profileUrl + def_subcmd +
@@ -6197,7 +6188,7 @@
 
   function combatSetKey(itemIndex) {
     keyHandlerEvent('changeCombatSet');
-    view().done(partial(changeCombatSet, itemIndex));
+    view().then(partial(changeCombatSet, itemIndex));
   }
 
   function createGroup() {
@@ -6254,7 +6245,7 @@
       xc: window.ajaxXC,
       target_username: $('#HelperSendTo').html(),
       gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
-    }).done(doneSendGold);
+    }).then(doneSendGold);
   }
 
   function statbarGoldBackground(colour) {
@@ -6286,7 +6277,7 @@
   function prepareSendGoldOnWorld() {
     goldAmount$1 = getValue('goldAmount');
     $('#statbar-gold-tooltip-general').append(extraHtml());
-    $('#HelperSendGold').click(doSendGold);
+    $('#HelperSendGold').on('click', doSendGold);
     updateSendGoldOnWorld();
     $.subscribe(def_playerGold, updateSendGoldOnWorld);
   }
@@ -6423,13 +6414,22 @@
 
   function findHcsData() {
     var hcsHtml = getElementById('html');
-    if (hcsHtml) {return hcsHtml.dataset.hcs;}
+    if (hcsHtml && hcsHtml.dataset) {
+      return hcsHtml.dataset.hcs;
+    }
+  }
+
+  function lookForUi(hcsData) {
+    var thisJson = jsonParse(hcsData);
+    if (thisJson && thisJson['new-ui']) {
+      prepareEnv();
+    }
   }
 
   function lookForHcsData() {
     var hcsData = findHcsData();
-    if (hcsData && jsonParse(hcsData)['new-ui']) {
-      prepareEnv();
+    if (hcsData) {
+      lookForUi(hcsData);
     }
   }
 
@@ -6477,7 +6477,7 @@
     if (prevButton.length === 1) {
       var startButton = $('<input value="<<" type="button">');
       prevButton.before(startButton).before('&nbsp;');
-      startButton.click(partial(gotoPage, 1));
+      startButton.on('click', partial(gotoPage, 1));
     }
   }
 
@@ -6488,14 +6488,14 @@
     if (nextButton.length === 1) {
       var finishButton = $('<input value=">>" type="button">');
       nextButton.after(finishButton).after('&nbsp;');
-      finishButton.click(gotoLastPage);
+      finishButton.on('click', gotoLastPage);
     }
   }
 
   function overrideButtons() { // jQuery
     injectStartButton();
     injectFinishButton();
-    $('#pCC input[value="View"]').click(updateUrl$1);
+    $('#pCC input[value="View"]').on('click', updateUrl$1);
     on(querySelector('#pCC input[value="Go"]'), 'click', updateGoUrl);
   }
 
@@ -6628,7 +6628,7 @@
       fshHideMoves.prop('checked', opts.hideMoves);
       $('.moveMax').toggle(!opts.hideMoves);
     }
-    fshHideMoves.click(hideMoves);
+    fshHideMoves.on('click', hideMoves);
   }
 
   function minLvlValue(aTable) { // jQuery
@@ -6650,8 +6650,8 @@
   }
 
   function eventHandlers(aTable) {
-    $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
-    $('#fshReset', aTable).click(resetLvls);
+    $('#fshMinLvl, #fshMaxLvl', aTable).on('keyup', changeLvls);
+    $('#fshReset', aTable).on('click', resetLvls);
   }
 
   function filterHeader() { // jQuery
@@ -6814,11 +6814,11 @@
     var tabs = $('#arenaTypeTabs');
     if (tabs.length !== 1) {return;} // Join error screen
     theTables = $('table[width="635"]', tabs);
-    getForage(fshArenaKey).done(partial(process, tabs));
+    getForage(fshArenaKey).then(partial(process, tabs));
   }
 
-  function when(prm, callback) {
-    return $.when.apply($, prm).done(callback);
+  function allthen(prm, callback) {
+    return all(prm).then(callback);
   }
 
   var oldMoves = [];
@@ -6861,13 +6861,13 @@
 
   function changeMoves(newMoves) {
     var prm = newMoves.map(newMove);
-    when(prm, pageRefresh);
+    allthen(prm, pageRefresh);
   }
 
   function updateMoves() { // jQuery
     var newMoves = getAllMoves();
     var prm = newMoves.map(resetMove);
-    when(prm, partial(changeMoves, newMoves));
+    allthen(prm, partial(changeMoves, newMoves));
   }
 
   function updateButton(table) { // jQuery
@@ -6875,7 +6875,7 @@
       'style="padding-top: 2px;padding-bottom: 2px;">' +
       '<input class="custombutton" value="Update" type="button">' +
       '</td></tr>');
-    $('input', row).click(updateMoves);
+    $('input', row).on('click', updateMoves);
     table.append(row);
   }
 
@@ -6918,7 +6918,7 @@
     var node = $('#pCC b:contains("Setup Combat Moves")');
     if (node.length !== 1) {return;}
     node.addClass('fshLink fshGreen');
-    node.click(selectMoves);
+    node.on('click', selectMoves);
   }
 
   function getCounts(moves, i, e) {
@@ -6941,7 +6941,7 @@
 
   function storeMoves() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getForage(fshArenaKey).done(gotMoves);
+    getForage(fshArenaKey).then(gotMoves);
   }
 
   var arena = {
@@ -6964,7 +6964,7 @@
   }
 
   function getInventoryById() {
-    return getInventory().pipe(rekeyInventory);
+    return getInventory().then(rekeyInventory);
   }
 
   var inv;
@@ -6994,7 +6994,7 @@
   function perfFilter(loc) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     target$1 = loc;
-    getInventoryById().done(drawFilters);
+    getInventoryById().then(drawFilters);
   }
 
   function doRefresh$1() {
@@ -7017,7 +7017,7 @@
       getElementById('resultRows'));
     if (cancelButtons.length === 0) {return;}
     var prm = cancelButtons.map(doCancel);
-    when(prm, doRefresh$1);
+    allthen(prm, doRefresh$1);
   }
 
   function makeCancelAll() {
@@ -7118,7 +7118,7 @@
   }
 
   function breakItems() { // jQuery.min
-    return doBreakdown(selectedList).done(handleResponse);
+    doBreakdown(selectedList).then(handleResponse);
   }
 
   function validBreakEvent(evt) {
@@ -7290,7 +7290,7 @@
   }
 
   function createPotion(temp) { // jQuery.min
-    createPotionFromTemplate(temp.value).done(partial(potionDone, temp));
+    createPotionFromTemplate(temp.value).then(partial(potionDone, temp));
     // setTimeout(partial(potionDone, temp, {}, 'faked'), 200);
   }
 
@@ -7616,7 +7616,7 @@
 
   function craftForge() {
     if (jQueryPresent()) {
-      getInventoryById().done(inventory);
+      getInventoryById().then(inventory);
       add(3, getItems);
     }
   }
@@ -7636,7 +7636,8 @@
 
   function addMembrListToForage(membrList) {
     getForage('fsh_membrList')
-      .done(partial(saveMembrListInForage, membrList));
+      .then(partial(saveMembrListInForage, membrList));
+    return membrList;
   }
 
   function memberToObject(membrList, guildId, ele) {
@@ -7652,7 +7653,11 @@
   }
 
   function getGuildMembers(guildId) {
-    return getGuild(guildId).pipe(partial(membrListToHash, guildId));
+    return getGuild(guildId).then(partial(membrListToHash, guildId));
+  }
+
+  function getAndCacheGuildMembers(guildId) {
+    return getGuildMembers(guildId).then(addMembrListToForage);
   }
 
   var testList = [
@@ -7677,15 +7682,15 @@
     if (isValid(guildId, membrList)) {
       return membrList;
     }
-    return getGuildMembers(guildId).done(addMembrListToForage);
+    return getAndCacheGuildMembers(guildId);
   }
 
   function guildMembers(force, guildId) {
     if (force) {
-      return getGuildMembers(guildId).done(addMembrListToForage);
+      return getAndCacheGuildMembers(guildId);
     }
     return getForage('fsh_membrList')
-      .pipe(partial(getMembrListFromForage, guildId));
+      .then(partial(getMembrListFromForage, guildId));
   }
 
   function setHelperMembrList(guildId, membrList) {
@@ -7696,7 +7701,7 @@
   function getMembrList(force) {
     var guildId = currentGuildId();
     return guildMembers(force, guildId)
-      .pipe(partial(setHelperMembrList, guildId));
+      .then(partial(setHelperMembrList, guildId));
   }
 
   function advisorView(period) {
@@ -7779,7 +7784,7 @@
   }
 
   function getAdvisorPage(list, e) { // jQuery.min
-    return advisorView(e).pipe(partial(returnAdvisorPage, list, e));
+    return advisorView(e).then(partial(returnAdvisorPage, list, e));
   }
 
   function addElements(ary, v, i) {
@@ -7804,7 +7809,7 @@
   }
 
   function addUpStats(args) {
-    return args.slice(2).reduce(addStuff, args[1]).map(reorgStats);
+    return args.slice(1).reduce(addStuff, args[0]).map(reorgStats);
   }
 
   function makeTotal(prev, curr) {
@@ -7834,12 +7839,11 @@
     ].concat(stats);
   }
 
-  function addAdvisorPages(list) {
-    var args = Array.from(arguments).slice(1);
+  function addAdvisorPages(list, [membrList, ...args]) {
     var added = addUpStats(args);
     injectTable(list,
       makeTfoot(added),
-      added.map(partial(makeData, args[0]))
+      added.map(partial(makeData, membrList))
     );
   }
 
@@ -7855,7 +7859,7 @@
     var prm = [getMembrList(false)]
       .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
 
-    when(prm, partial(addAdvisorPages, list));
+    allthen(prm, partial(addAdvisorPages, list));
 
     timeEnd('guildAdvisor.injectAdvisorWeekly');
 
@@ -7915,7 +7919,7 @@
     if (calf.subcmd2 === 'weekly') {
       injectAdvisorWeekly(list);
     } else {
-      getMembrList(false).done(partial(injectAdvisorDaily, list));
+      getMembrList(false).then(partial(injectAdvisorDaily, list));
     }
   }
 
@@ -7965,7 +7969,7 @@
     return indexAjaxData({
       cmd: 'guild',
       subcmd: 'mercs'
-    }).pipe(parseMercStats);
+    }).then(parseMercStats);
   }
 
   var attackElement;
@@ -8024,7 +8028,7 @@
     if (jQueryNotPresent()) {return;}
     groupStats = groupViewStats(document);
     if (groupStats.attackElement) {
-      getMercStats().done(parseMercStats$1);
+      getMercStats().then(parseMercStats$1);
     }
   }
 
@@ -8165,7 +8169,7 @@
   }
 
   function getGroupStats(viewStats) {
-    return retryAjax(viewStats).pipe(parseGroupStats);
+    return retryAjax(viewStats).then(parseGroupStats);
   }
 
   function parseGroupData(linkElement, obj) {
@@ -8191,7 +8195,7 @@
   }
 
   function thisLink(aLink) {
-    getGroupStats(aLink.href).done(partial(parseGroupData, aLink));
+    getGroupStats(aLink.href).then(partial(parseGroupData, aLink));
   }
 
   function fetchGroupData(evt) {
@@ -8214,12 +8218,12 @@
   }
 
   function joinGroup(groupID, container) { // jQuery.min
-    return indexAjaxData({
+    indexAjaxData({
       cmd: 'guild',
       subcmd: 'groups',
       subcmd2: 'join',
       group_id: groupID
-    }).done(partial(joined, container));
+    }).then(partial(joined, container));
   }
 
   function doJoinUnderSize(joinButton) {
@@ -8287,8 +8291,7 @@
 
   function injectGroups() { // jQuery
     if (jQueryNotPresent()) {return;}
-    getMembrList(false)
-      .done(doGroupPaint);
+    getMembrList(false).then(doGroupPaint);
     displayMinGroupLevel();
     groupButtons();
     fixTable();
@@ -8316,7 +8319,7 @@
   }
 
   function guildMailboxTake(href) {
-    return retryAjax(href).pipe(translateReturnInfo).done(dialog);
+    return retryAjax(href).then(translateReturnInfo).then(dialog);
   }
 
   function takeResult(self, data) {
@@ -8331,7 +8334,7 @@
     if (self.tagName === 'IMG') {
       e.preventDefault();
       var anchor = self.parentNode.href;
-      guildMailboxTake(anchor).done(partial(takeResult, self));
+      guildMailboxTake(anchor).then(partial(takeResult, self));
     }
     if (self.className === 'sendLink') {
       getArrayByTagName('img', pCC).forEach(clickThis);
@@ -9167,7 +9170,7 @@
   }
 
   function getNextPage(curPage, fn, callback) {
-    conflicts(curPage + 1).done(partial(fn, callback));
+    conflicts(curPage + 1).then(partial(fn, callback));
   }
 
   function gotConflictInfo(callback, responseText) { // Legacy
@@ -9185,7 +9188,7 @@
   function conflictInfo(leftHandSideColumnTable) { // jQuery.min
     var statCtrl = leftHandSideColumnTable.rows[6].cells[0].children[0];
     if (statCtrl) {
-      conflicts(1).done(partial(gotConflictInfo, {node: statCtrl}));
+      conflicts(1).then(partial(gotConflictInfo, {node: statCtrl}));
     }
   }
 
@@ -9356,8 +9359,8 @@
   function doSave() {
     var newData = jsonParse(ioText.value);
     setForage('fsh_guildActivity', newData)
-      .done(partial(successMsg, newData))
-      .fail(dialogMsg);
+      .then(partial(successMsg, newData))
+      .catch(dialogMsg);
   }
 
   function customButton(text, fn) {
@@ -9499,7 +9502,7 @@
 
   function openDialog$2() {
     sendEvent('guildTracker', 'openDialog');
-    getForage('fsh_guildActivity').done(gotActivity$1);
+    getForage('fsh_guildActivity').then(gotActivity$1);
     calf.dialogIsClosed = isClosed;
     addOverlay();
     makePopup();
@@ -9778,7 +9781,7 @@
   }
 
   function doAjax$2(oData) {
-    indexAjaxData(oData).done(transResponse);
+    indexAjaxData(oData).then(transResponse);
   }
 
   function bankDeposit(e) { // jQuery
@@ -9813,9 +9816,9 @@
     if ($(pccB).eq(o.depoPos).text() === '0') { // Check Deposits Available
       depo.prop(disabled, true);
     } else {
-      depo.click(bankDeposit);
+      depo.on('click', bankDeposit);
     }
-    withdraw.click(bankWithdrawal);
+    withdraw.on('click', bankWithdrawal);
   }
 
   function appLink(o, bank) { // jQuery
@@ -9920,7 +9923,7 @@
 
   function fetchRankData(theRows, weightButton) { // jQuery.min
     hideElement(weightButton);
-    ranks().done(partial(gotRankData, theRows));
+    ranks().then(partial(gotRankData, theRows));
   }
 
   function injectWeightButton(theRows, addNewRank) {
@@ -10056,7 +10059,7 @@
 
   function injectGuildRanks() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getMembrList(false).pipe(makeRanks).done(gotMembers);
+    getMembrList(false).then(makeRanks).then(gotMembers);
   }
 
   function pair(prev, curr) {
@@ -10098,7 +10101,7 @@
 
   function injectRPUpgrades() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    myStats().done(parseProfile);
+    myStats().then(parseProfile);
   }
 
   var titan = 0;
@@ -10309,7 +10312,7 @@
 
   function injectScouttower() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getForage('fsh_titans').done(gotOldTitans); // Pref
+    getForage('fsh_titans').then(gotOldTitans); // Pref
   }
 
   function guildInventory$1(data) {
@@ -10343,7 +10346,7 @@
   function fastBp(el) {
     var itmId = el.parentNode.previousElementSibling.previousElementSibling
       .children[0].value;
-    takeitem(itmId).done(partial(takeResult$1, el));
+    takeitem(itmId).then(partial(takeResult$1, el));
     setText('', el);
     el.className = 'guildTagSpinner';
     el.style.backgroundImage = 'url(\'' + imageServer +
@@ -10392,7 +10395,7 @@
   function itemStatus(data) {return data;}
 
   function doAction$1(fn, item, data) {
-    return fn(item).pipe(partial(itemStatus, data));
+    return fn(item).then(partial(itemStatus, data));
   }
 
   function recall(invId, playerId, mode) {
@@ -10405,7 +10408,7 @@
   }
 
   function recallItem(invId, playerId, mode) {
-    return recall(invId, playerId, mode).pipe(ajaxReturnCode);
+    return recall(invId, playerId, mode).then(ajaxReturnCode);
   }
 
   function gotBackpack(action, data, bpData) {
@@ -10423,14 +10426,14 @@
 
   function recallItemStatus(action, data) {
     if (data.r === 0 && action !== 'recall') {
-      return backpack$1().pipe(partial(gotBackpack, action, data));
+      return backpack$1().then(partial(gotBackpack, action, data));
     }
     return data;
   }
 
   function pipeRecallToQueue(invId, playerId, mode, action) {
-    return recallItem(invId, playerId, mode).pipe(errorDialog)
-      .pipe(partial(recallItemStatus, action));
+    return recallItem(invId, playerId, mode).then(errorDialog)
+      .then(partial(recallItemStatus, action));
   }
 
   function takeItem(invId) {
@@ -10440,7 +10443,7 @@
       subcmd2: 'takeitem',
       guildstore_id: invId,
       ajax: 1
-    }).done(dialog);
+    }).then(dialog);
   }
 
   function additionalAction(action, data) {
@@ -10462,26 +10465,25 @@
   }
 
   function pipeTakeToQueue(invId, action) {
-    return takeItem(invId).pipe(partial(takeItemStatus, action));
+    return takeItem(invId).then(partial(takeItemStatus, action));
   }
 
   var dfr;
 
   function getDfr() {
-    // return window.jQuery && jQuery.when();
-    if (!dfr) {dfr = $.when();}
+    if (!dfr) {dfr = Promise.resolve();}
     return dfr;
   }
 
   function queueTakeItem(invId, action) {
     // You have to chain them because they could be modifying the backpack
-    dfr = getDfr().pipe(partial(pipeTakeToQueue, invId, action));
+    dfr = getDfr().then(partial(pipeTakeToQueue, invId, action));
     return dfr;
   }
 
   function queueRecallItem(invId, playerId, mode, action) {
     // You have to chain them because they could be modifying the backpack
-    dfr = getDfr().pipe(partial(pipeRecallToQueue,
+    dfr = getDfr().then(partial(pipeRecallToQueue,
       invId, playerId, mode, action));
     return dfr;
   }
@@ -10521,7 +10523,7 @@
 
   function doRecall(theTd, href, mode, action) {
     queueRecallItem(itemId(href), targetPlayerId(href), mode, action)
-      .done(partial(recallResult, action, theTd));
+      .then(partial(recallResult, action, theTd));
   }
 
   function recallTo(theTd, href, mode) {
@@ -10541,7 +10543,7 @@
   function doFastWear(theTd, href) {
     sendEvent('GuildReport', 'Fast Wear');
     if (Number(targetPlayerId(href)) === playerId()) {
-      equipItem(itemId(href)).done(partial(wornItem, theTd));
+      equipItem(itemId(href)).then(partial(wornItem, theTd));
     } else {
       doRecall(theTd, href, 0, 'wear');
     }
@@ -10912,8 +10914,7 @@
   }
 
   function potReport(potObj) {
-    // getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
-    getForage(storeMap).done(partial(gotMap, potObj));
+    getForage(storeMap).then(partial(gotMap, potObj));
   }
 
   var nodeArray;
@@ -10996,7 +10997,7 @@
 
   function injectReportPaint() { // jQuery
     if (jQueryNotPresent()) {return;}
-    getMembrList(false).done(doReportHeader);
+    getMembrList(false).then(doReportHeader);
     add(2, searchUser);
     add(3, prepareChildRows);
     eventHandlers$1();
@@ -11100,7 +11101,7 @@
       subcmd: 'dodropitems',
       removeIndex: invIdList,
       ajax: 1
-    }).done(dialog);
+    }).then(dialog);
   }
 
   function clearCheck(el) {
@@ -11147,7 +11148,7 @@
       .children[0].checked;
   }
 
-  function invid(o) {return o.invid;}
+  const invid = (o) => o.invid;
 
   function itemByInvId(invId, item) {
     return invId.toString() === item.invid;
@@ -11172,7 +11173,7 @@
   }
 
   function moveList(itemsAry, folderId, list) {
-    return sendtofolder(folderId, list).done(partial(removeInvIds, itemsAry));
+    sendtofolder(folderId, list).then(partial(removeInvIds, itemsAry));
   }
 
   function moveItemsToFolder(itemsAry) { // jQuery.min
@@ -11195,7 +11196,7 @@
 
   function doAction$2(self, fn, success) {
     var itemInvId = self.getAttribute('itemInvId');
-    fn([itemInvId]).done(partial(actionReturn, self, success));
+    fn([itemInvId]).then(partial(actionReturn, self, success));
   }
 
   function disableOtherButton(theTd, otherClass) {
@@ -11229,7 +11230,7 @@
       xc: window.ajaxXC,
       target_username: getValue('itemRecipient'),
       items: invIdAry
-    }).pipe(ajaxReturnCode);
+    }).then(ajaxReturnCode);
   }
 
   var disableItemColoring$2;
@@ -11523,7 +11524,7 @@
 
   function injectStoreItems() {
     if (jQueryNotPresent()) {return;}
-    getInventoryById().done(inventory$2);
+    getInventoryById().then(inventory$2);
     add(3, getItems$1);
   }
 
@@ -11985,16 +11986,18 @@
 
   function unknownSpecials(json) {
     if (!json.r.specials.every(inSpecialsList)) {
-      combatView(json.r.id).done(partial(whatsMissing, json));
+      combatView(json.r.id).then(partial(whatsMissing, json));
     }
   }
 
   function cacheCombat(aRow, json) {
-    if (!json.s) {return;}
-    json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
-    combatCache[json.r.id] = json;
-    setForage('fsh_pvpCombat', combatCache);
-    unknownSpecials(json);
+    if (json.s) {
+      json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
+      combatCache[json.r.id] = json;
+      setForage('fsh_pvpCombat', combatCache);
+      unknownSpecials(json);
+    }
+    return json;
   }
 
   function processCombat(aRow) {
@@ -12004,8 +12007,8 @@
     if (combatCache[combatID] && combatCache[combatID].logTime) {
       parseCombat(combatSummary, combatCache[combatID]);
     } else {
-      viewCombat(combatID).done(partial(cacheCombat, aRow))
-        .done(partial(parseCombat, combatSummary));
+      viewCombat(combatID).then(partial(cacheCombat, aRow))
+        .then(partial(parseCombat, combatSummary));
     }
   }
 
@@ -12090,7 +12093,7 @@
   }
 
   function initCache() {
-    return getForage('fsh_pvpCombat').done(checkCache);
+    return getForage('fsh_pvpCombat').then(checkCache);
   }
 
   var memberNamesAsStrings;
@@ -12234,7 +12237,7 @@
     getCalfVars();
     doMsgHeader(logTable);
     processTableRows(logTable);
-    $('.a-reply').click(openMsgDialog);
+    $('.a-reply').on('click', openMsgDialog);
   }
 
   function addLogWidgetsOld() { // Legacy
@@ -12245,11 +12248,11 @@
 
   function addLogWidgets() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    $.when(
-      getMembrList(false).done(getKeys),
-      myStats(false).done(prepareAlliesEnemies),
+    allthen([
+      getMembrList(false).then(getKeys),
+      myStats(false).then(prepareAlliesEnemies),
       initCache()
-    ).done(addLogWidgetsOld);
+    ], addLogWidgetsOld);
   }
 
   function guildChatStyling() {
@@ -12368,7 +12371,7 @@
     var buyAmount = getText(getElementById('quantity'));
     setText('Buying ' + buyAmount + ' items', getElementById('buyResultLabel'));
     for (var i = 0; i < buyAmount; i += 1) {
-      buyitem(ItemId).done(done);
+      buyitem(ItemId).then(done);
     }
   }
 
@@ -12552,7 +12555,7 @@
   }
 
   function doTakeItem(takeResult, el) {
-    takeitems(el).done(partial(doneTake, takeResult));
+    takeitems(el).then(partial(doneTake, takeResult));
   }
 
   function takeSimilar(itemList, takeResult, self) { // jQuery.min
@@ -12689,7 +12692,7 @@
   function addBuffLevels(evt) {
     var player = evt.target;
     if (player.tagName !== 'H1') {return;}
-    getProfile$1(getText(player)).done(addStatsQuickBuff);
+    getProfile$1(getText(player)).then(addStatsQuickBuff);
     var playerData = makeBuffArray(player);
     querySelectorArray('#buff-outer input[name]')
       .forEach(partial(hazBuff, playerData));
@@ -12886,7 +12889,7 @@
     var trigger = evt.target;
     if (trigger.className !== 'quickbuffActivate') {return;}
     quickbuff([window.self], [trigger.dataset.buffid])
-      .done(partial(processResult$1, trigger));
+      .then(partial(processResult$1, trigger));
   }
 
   function setupEventHandlers() {
@@ -12898,7 +12901,7 @@
     if (jQueryNotPresent()) {return;}
     var quickbuffDiv = getElementById('quickbuff');
     if (!quickbuffDiv) {return;}
-    getProfile$1(window.self).done(getSustain$1);
+    getProfile$1(window.self).then(getSustain$1);
     insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
     doLabels();
     doPassThru();
@@ -13986,7 +13989,7 @@
 
   function recastClick() {
     if (getBuff$1('Summon Shield Imp')) {return;}
-    quickbuff([playerName()], [55]).done(refreshBuffs);
+    quickbuff([playerName()], [55]).then(refreshBuffs);
   }
 
   function getImpsRemaining(imp) {
@@ -14205,7 +14208,7 @@
 
   function combatLogger() { // jQuery.min
     if (getValue('keepLogs')) {
-      getForage('fsh_combatLog').done(gotCombatLog$1);
+      getForage('fsh_combatLog').then(gotCombatLog$1);
     }
   }
 
@@ -14698,7 +14701,7 @@
     hideElement(fetchStatsBtn);
     var hideRelicOffline = getValue('hideRelicOffline');
     if (relicData.is_owner && !hideRelicOffline) {
-      getMembrList(true).done(missingMembers);
+      getMembrList(true).then(missingMembers);
     }
     insertHtmlBeforeEnd(leftDiv, proc);
     processingStatus = getElementById('ProcessingStatus');
@@ -15048,9 +15051,9 @@
 
   function buildGroupPrm(disband) {
     var viewStats = disband.previousElementSibling.href;
-    var prm = [getGroupStats(viewStats).done(storeGroupStats)];
+    var prm = [getGroupStats(viewStats).then(storeGroupStats)];
     if (hasMerc(disband)) {
-      prm.push(getMercStats().done(storeMercStats));
+      prm.push(getMercStats().then(storeMercStats));
     }
     return prm;
   }
@@ -15060,14 +15063,14 @@
     var disband = querySelector('#pCC a[href*="confirmDisband"]', doc);
     if (!disband) {return;}
     var prm = buildGroupPrm(disband);
-    return $.when.apply($, prm);
+    return all(prm);
   }
 
   function getGroups() {
     return indexAjaxData({
       cmd: 'guild',
       subcmd: 'groups'
-    }).pipe(parseGroups);
+    }).then(parseGroups);
   }
 
   function getGuild$1() {
@@ -15075,12 +15078,12 @@
       cmd: 'guild',
       subcmd: 'view',
       guild_id: relicData.controlled_by.guild_id
-    }).done(parseGuild);
+    }).then(parseGuild);
   }
 
   function getDefenderProfile(el, i) {
-    if (i === 0) {return getProfile$1(el).done(storeLeadDefender);}
-    return getProfile$1(el).done(parseDefender).fail(ajaxFailure);
+    if (i === 0) {return getProfile$1(el).then(storeLeadDefender);}
+    return getProfile$1(el).then(parseDefender).catch(ajaxFailure);
   }
 
   function getDefenders() {
@@ -15100,7 +15103,7 @@
     prepareSecondaryDivs(relicData);
     resetCounters();
     var prm = buildStatPrm();
-    when(prm, doCalculations);
+    allthen(prm, doCalculations);
   }
 
   function viewRelic(e, data) {
@@ -15128,20 +15131,22 @@
   var creatureCache = [];
 
   function cacheResult(json) {
-    if (badData$1(json)) {return;}
-    creatureCache.push(json);
+    if (!badData$1(json)) {
+      creatureCache.push(json);
+    }
+    return json;
   }
 
   function thisMob(id, el) {
     return id === Number(el.response.data.id);
   }
 
-  function async(dfd, result) {dfd.resolve(result);}
+  function nextTick$1(resolve, cached) {resolve(cached);}
 
   function fromCache(cached) {
-    var dfd = $.Deferred();
-    add(3, async, [dfd, cached]);
-    return dfd.promise();
+    return new Promise(function(resolve) {
+      add(3, nextTick$1, [resolve, cached]);
+    });
   }
 
   function getCreatureStats(id, passback) {
@@ -15153,7 +15158,7 @@
       a: 1,
       id: id,
       passback: passback
-    }).done(cacheResult);
+    }).then(cacheResult);
   }
 
   var statLevel;
@@ -15299,7 +15304,7 @@
 
   function getJson(passback, event, api) { // jQuery.min
     getCreatureStats(GameData.actions()[passback].data.id, passback)
-      .done(partial(displayJson, api));
+      .then(partial(displayJson, api));
     return 'Loading...';
   }
 
@@ -15572,7 +15577,7 @@
     }
   }
 
-  function goodData$1(data) {
+  function goodData$2(data) {
     return data.s && Array.isArray(data.r);
   }
 
@@ -15581,7 +15586,7 @@
   }
 
   function processScoutTower(ast, data) {
-    if (!goodData$1(data)) {return;}
+    if (!goodData$2(data)) {return;}
     processTitans(data.r);
     if (titanToShow(GameData.realm().dynamic)) {
       timeoutId$1 = window.setTimeout(ast, 30000);
@@ -15591,7 +15596,7 @@
   }
 
   function ajaxScoutTower() {
-    scouttower().done(partial(processScoutTower, ajaxScoutTower));
+    scouttower().then(partial(processScoutTower, ajaxScoutTower));
   }
 
   function testDynamics(dynamic) {
@@ -15685,9 +15690,9 @@
     if (!theValue) {return;}
     var prm = [];
     for (var i = 1; i < theValue; i += 1) {
-      prm.push(quickBuy().done(quickDone));
+      prm.push(quickBuy().then(quickDone));
     }
-    when(prm, normalBuy);
+    allthen(prm, normalBuy);
   }
 
   function injectQuickBuy() {
@@ -15822,7 +15827,7 @@
   }
 
   function getMonsterPrefs() {
-    getForage('fsh_monsterLog').done(initLog);
+    getForage('fsh_monsterLog').then(initLog);
   }
 
   var processedMonsters = [];
@@ -15842,7 +15847,7 @@
 
   function loopActions(e, i) { // jQuery.min
     if (e.type !== 6 || seenBefore(e)) {return;}
-    getCreatureStats(e.data.id, i).done(processMonster);
+    getCreatureStats(e.data.id, i).then(processMonster);
   }
 
   function initMonsterLog() {
@@ -16615,11 +16620,11 @@
   }
 
   function getGroupStats$1(data, playerJson, groupId) {
-    groupsViewStats(groupId).done(partial(processGroupStats, data, playerJson));
+    groupsViewStats(groupId).then(partial(processGroupStats, data, playerJson));
   }
 
   function processGroup(data, playerJson) {
-    groupsView().pipe(getGroupId).done(partial(getGroupStats$1, data, playerJson));
+    groupsView().then(getGroupId).then(partial(getGroupStats$1, data, playerJson));
   }
 
   function processPlayer(data, playerJson) {
@@ -16638,7 +16643,7 @@
     setGroupEvalalutor('');
     if (isValidData(data)) {
       makeDoNotKillLink(data.response.data.name, dialogViewCreature);
-      myStats(true).done(partial(processPlayer, data));
+      myStats(true).then(partial(processPlayer, data));
     }
   }
 
@@ -17136,7 +17141,7 @@
     var recipeID = querySelector('input[name="recipe_id"]').value;
     initResults('Inventing ' + String(amountToInvent) + ' Items');
     for (var i = 0; i < amountToInvent; i += 1) {
-      doinvent(recipeID).done(quickInventDone);
+      doinvent(recipeID).then(quickInventDone);
     }
   }
 
@@ -17700,7 +17705,7 @@
 
   function updateBuffLog() {
     if (!getValue('keepBuffLog')) {return;}
-    getForage(fshBuffLog).done(buffResult);
+    getForage(fshBuffLog).then(buffResult);
     transform$1 = buildTransform();
   }
 
@@ -17762,7 +17767,7 @@
   }
 
   function doInventory() {
-    return getInventory().done(cacheTheInv);
+    return getInventory().then(cacheTheInv);
   }
 
   function itemsFromFolder(el) {return el.items;}
@@ -17776,7 +17781,7 @@
   }
 
   function doComposedFromBp() {
-    return loadInventory().done(getComposedFromBp);
+    return loadInventory().then(getComposedFromBp);
   }
 
   function getComposedFromGs(data) {
@@ -17785,11 +17790,11 @@
   }
 
   function doGs() {
-    return fetchinv().done(getComposedFromGs);
+    return fetchinv().then(getComposedFromGs);
   }
 
   function doReport() {
-    return report().done(getComposedFromGs);
+    return report().then(getComposedFromGs);
   }
 
   function thisPot(inv_id, pot) {return pot.a === inv_id;}
@@ -17814,7 +17819,7 @@
       prm.push(doGs());
       prm.push(doReport());
     }
-    return when(prm, gotSomeStuff);
+    return allthen(prm, gotSomeStuff);
   }
 
   function clearSearch(fshInv, input) {
@@ -17828,7 +17833,7 @@
     var clear = $('<span>&times;</span>');
     input.wrap($('<span class="text-input-wrapper"/>'));
     input.after(clear);
-    clear.click(partial(clearSearch, fshInv, input));
+    clear.on('click', partial(clearSearch, fshInv, input));
   }
 
   function decorate$3() {
@@ -18464,7 +18469,7 @@
   function doAction$3(fn, self) { // jQuery
     hideQTip(self);
     removeClass(self);
-    fn().done(partial(killRow, self));
+    fn().then(partial(killRow, self));
     anotherSpinner$1(self);
   }
 
@@ -18485,7 +18490,7 @@
       inv_list: JSON.stringify(invIdList),
       folder_id: folderId,
       ajax: 1
-    }).done(dialog);
+    }).then(dialog);
   }
 
   function resetChecks(fshInv) { // jQuery
@@ -18511,12 +18516,12 @@
   }
 
   function storeItems(invIdAry) {
-    return dostoreitems(invIdAry).pipe(errorDialog).pipe(ajaxReturnCode);
+    return dostoreitems(invIdAry).then(errorDialog).then(ajaxReturnCode);
   }
 
   function setName$1(fshInv, e) { // jQuery
     $(fshInv).DataTable().search($(e.target).attr('set')).draw();
-    $('#' + fshInv.id + '_filter input').focus();
+    $('#' + fshInv.id + '_filter input').trigger('focus');
   }
 
   function takeItem$1(e) { // jQuery
@@ -18561,7 +18566,9 @@
     doAction$3(partial(senditems, [self.data('inv')]), self);
   }
 
-  function elClick(fshInv, el) {$(el[0]).click(partial(el[1], fshInv));} // jQuery
+  function elClick(fshInv, el) { // jQuery
+    $(el[0]).on('click', partial(el[1], fshInv));
+  }
 
   function elementClickHandlers(fshInv) {
     [
@@ -18595,7 +18602,7 @@
   }
 
   function eventHandlers$2(fshInv) { // jQuery
-    $('#fshMinLvl, #fshMaxLvl').keyup(partial(changeLvls$1, fshInv));
+    $('#fshMinLvl, #fshMaxLvl').on('keyup', partial(changeLvls$1, fshInv));
     $(fshInv).on('change', 'select.fshMoveItem', doMoveItem);
     setupClickHandlers(fshInv);
   }
@@ -18702,7 +18709,7 @@
     var fshInv = doTable$2();
     eventHandlers$2(fshInv);
     // eslint-disable-next-line no-use-before-define
-    $('#fshRefresh').click(injectInventoryManagerNew);
+    $('#fshRefresh').on('click', injectInventoryManagerNew);
     clearButton(fshInv);
   }
 
@@ -18724,11 +18731,11 @@
     var prm = [];
     prm.push(buildInv());
     if (calf.subcmd === 'guildinvmgr') {
-      prm.push(getMembrList(false).done(rekeyMembrList));
+      prm.push(getMembrList(false).then(rekeyMembrList));
     }
-    prm.push(getForage('fsh_' + calf.subcmd).done(extendOptions)
+    prm.push(getForage('fsh_' + calf.subcmd).then(extendOptions)
     );
-    when(prm, asyncCall);
+    allthen(prm, asyncCall);
   }
 
   function injectInventoryManagerNew() {
@@ -18911,12 +18918,12 @@
     var prm = [];
     if (completeReload) {
       for (var i = 2; i <= maxPage$1; i += 1) {
-        prm.push(getGuildLogPage(i).done(processPage));
+        prm.push(getGuildLogPage(i).then(processPage));
       }
     } else {
       options$1.log.forEach(useCache);
     }
-    return $.when.apply($, prm);
+    return all(prm);
   }
 
   function storeOptions() {setForage('fsh_guildLog', options$1);}
@@ -18996,7 +19003,7 @@
 
   function processFirstPage$1(data) {
     processPage(data);
-    getOtherPages$1().done(gotOtherPages);
+    getOtherPages$1().then(gotOtherPages);
   }
 
   function toggle(item, hide, r) {
@@ -19045,7 +19052,7 @@
     tmpGuildLog = [];
     completeReload = true;
     getElementById('fshInjectHere').innerHTML = '';
-    getGuildLogPage(1).done(processFirstPage$1);
+    getGuildLogPage(1).then(processFirstPage$1);
   }
 
   function guildLogEvents() {
@@ -19079,12 +19086,12 @@
     on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
     setChecks$1();
     setMaxPage();
-    getGuildLogPage(1).done(processFirstPage$1);
+    getGuildLogPage(1).then(processFirstPage$1);
   }
 
   function injectNewGuildLog() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getForage('fsh_guildLog').done(gotOptions);
+    getForage('fsh_guildLog').then(gotOptions);
   }
 
   function injectNotepad() { // jQuery
@@ -19143,14 +19150,14 @@
     if (jQueryNotPresent()) {return;}
     var fshSettings = listValues().reduce(buildSettingsObj, {});
     drawBox(pCC, fshSettings);
-    $('#HelperLoadSettings').click(clickHandler$1);
+    $('#HelperLoadSettings').on('click', clickHandler$1);
   }
 
   function getRelicList(offset, myList) {
     return guild({
       subcmd: 'reliclist',
       offset: fallback(offset, 0)
-    }).pipe(function(json) {
+    }).then(function(json) {
       var someRelics = json.r.relics;
       var newList = fallback(myList, []).concat(someRelics);
       if (json.r.remaining_relics > 0) {
@@ -19238,7 +19245,7 @@
 
   function reliclist() {
     pCC.innerHTML = 'Loading...';
-    getRelicList().done(processRelicList);
+    getRelicList().then(processRelicList);
   }
 
   var notepad = {
@@ -19524,7 +19531,7 @@
 
   function countComponent(self) { // jQuery.min
     sendEvent('components', 'countComponent');
-    loadComponents().done(partial(displayComponentTally, self));
+    loadComponents().then(partial(displayComponentTally, self));
   }
 
   function decorateButton(label) {
@@ -19607,7 +19614,7 @@
   function removeSpinner(td) {td.parentNode.remove();}
 
   function destroy(el) {
-    return destroyComponent(el).done(destroyed);
+    return destroyComponent(el).then(destroyed);
   }
 
   function delCompType(self) { // jQuery.min
@@ -19615,7 +19622,7 @@
     var td = self.parentNode;
     doSpinner$1(td);
     var prm = chunk(30, toDelete).map(destroy);
-    when(prm, partial(removeSpinner, td));
+    allthen(prm, partial(removeSpinner, td));
   }
 
   function updateComponentCounts(itemId) {
@@ -19640,8 +19647,8 @@
     var itemId = matches[1];
     var componentId = matches[2];
     destroyComponent([componentId])
-      .pipe(errorDialog)
-      .done(partial(compDeleted, self, itemId));
+      .then(errorDialog)
+      .then(partial(compDeleted, self, itemId));
   }
 
   var buttonLabels = [
@@ -19721,7 +19728,7 @@
   function doDebuff(aLink) { // jQuery.min
     sendEvent('profile', 'doDebuff');
     var buffId = aLink.href.match(/(\d+)$/)[1];
-    removeskill(buffId).done(errorDialog).done(partial(debuffSuccess, aLink));
+    removeskill(buffId).then(errorDialog).then(partial(debuffSuccess, aLink));
   }
 
   function doPrompt(aLink) {
@@ -19803,7 +19810,7 @@
     var invId = self.parentNode.parentNode.children[0].dataset.inv;
     setText('', self);
     self.className = 'fastAction fshSpinner fshSpinner12';
-    action(invId).done(partial(actionResult$1, [theBackpack, result, self, invId]));
+    action(invId).then(partial(actionResult$1, [theBackpack, result, self, invId]));
   }
 
   function evtHdl$2(theBackpack, evt) {
@@ -19880,15 +19887,16 @@
 
   var profileCombatSetDiv;
 
-  function removeItem(link) {
-    function clearBox(json) {
-      if (json.s) {
-        link.parentNode.innerHTML = '';
-      }
+  function clearBox(link, json) {
+    if (json.s) {
+      link.parentNode.innerHTML = '';
     }
+  }
+
+  function removeItem(link) {
     var item = /inventory_id=(\d+)/.exec(link.href)[1];
     if (item) {
-      unequipitem(item).done(clearBox);
+      unequipitem(item).then(partial(clearBox, link));
     }
   }
 
@@ -20559,7 +20567,7 @@
       }
       disableBackgroundChecks();
     } else {
-      doBackgroundCheck().always(gotSeLog);
+      doBackgroundCheck().finally(gotSeLog);
     }
   }
 
@@ -20572,7 +20580,7 @@
   }
 
   function waitForLog() {
-    doBackgroundCheck().always(gotSeLog);
+    doBackgroundCheck().finally(gotSeLog);
   }
 
   function superelite$1() {
@@ -20584,7 +20592,7 @@
     newCell.innerHTML = simpleCheckboxHtml(enableSeTracker$2);
     on(newCell, 'change', togglePref$4);
     if (calf.enableSeTracker) {
-      getFshSeLog().done(waitForLog);
+      getFshSeLog().then(waitForLog);
     }
   }
 
@@ -20766,16 +20774,16 @@
   function returnGuild(guild, json) {if (json.s) {parseGuild$1(guild, json);}}
 
   function ajaxGuild(guild) {
-    return guildView(guild[0]).done(partial(returnGuild, guild));
+    return guildView(guild[0]).then(partial(returnGuild, guild));
   }
 
   function small(guild) {return guild[0] === -1;}
 
   function ajaxPlayer(player) {
     if (player[1] !== playerName()) {
-      return findplayer(player[1]).done(partial(returnPlayer, player));
+      return findplayer(player[1]).then(partial(returnPlayer, player));
     }
-    return view().done(partial(returnSelf, player));
+    return view().then(partial(returnSelf, player));
   }
 
   function prepareAjax() {
@@ -20785,7 +20793,7 @@
     if (singles) {
       prm = prm.concat(guilds.find(small)[1].map(ajaxPlayer));
     }
-    when(prm, hideSpinner);
+    allthen(prm, hideSpinner);
   }
 
   function findOnlinePlayers(e) {
@@ -20819,7 +20827,7 @@
     function() {return isObject(pCC.children[0].rows);},
     function() {return pCC.children[0].rows.length > 2;},
     function() {
-      return getText(pCC.children[0].rows[1]).startsWith('Last Updated');
+      return getTextTrim(pCC.children[0].rows[1]).startsWith('Last Updated');
     }
   ];
 
@@ -20954,7 +20962,7 @@
 
   function doFolders() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getInventoryById().done(gotInventory);
+    getInventoryById().then(gotInventory);
   }
 
   function getHowMany(itemTables) {
@@ -21196,11 +21204,11 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '108';
+  window.FSH.calf = '109';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
-    if (!isFunction(Object.entries)) {return;}
+    if (!isFunction(Promise.prototype.finally)) {return;}
     globalErrorHandler();
     setup();
     start('JS Perf', 'FSH.dispatch');

@@ -11,5 +11,5 @@ export default function clearButton(fshInv) { // jQuery
   var clear = $('<span>&times;</span>');
   input.wrap($('<span class="text-input-wrapper"/>'));
   input.after(clear);
-  clear.click(partial(clearSearch, fshInv, input));
+  clear.on('click', partial(clearSearch, fshInv, input));
 }

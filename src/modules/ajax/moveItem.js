@@ -8,5 +8,5 @@ export default function moveItem(invIdList, folderId) {
     inv_list: JSON.stringify(invIdList),
     folder_id: folderId,
     ajax: 1
-  }).done(dialog);
+  }).then(dialog);
 }

@@ -1,3 +1,5 @@
+import all from '../../../common/all';
+import allthen from '../../../common/allthen';
 import badData from '../badData';
 import createDocument from '../../../system/createDocument';
 import {def_relicView} from '../../../support/constants';
@@ -9,7 +11,6 @@ import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
 import querySelector from '../../../common/querySelector';
 import setText from '../../../common/setText';
-import when from '../../../common/when';
 import {
   doCalculations,
   parseDefender,
@@ -41,9 +42,9 @@ function hasMerc(disband) {
 
 function buildGroupPrm(disband) {
   var viewStats = disband.previousElementSibling.href;
-  var prm = [getGroupStats(viewStats).done(storeGroupStats)];
+  var prm = [getGroupStats(viewStats).then(storeGroupStats)];
   if (hasMerc(disband)) {
-    prm.push(getMercStats().done(storeMercStats));
+    prm.push(getMercStats().then(storeMercStats));
   }
   return prm;
 }
@@ -53,14 +54,14 @@ function parseGroups(html) {
   var disband = querySelector('#pCC a[href*="confirmDisband"]', doc);
   if (!disband) {return;}
   var prm = buildGroupPrm(disband);
-  return $.when.apply($, prm);
+  return all(prm);
 }
 
 function getGroups() {
   return indexAjaxData({
     cmd: 'guild',
     subcmd: 'groups'
-  }).pipe(parseGroups);
+  }).then(parseGroups);
 }
 
 function getGuild() {
@@ -68,12 +69,12 @@ function getGuild() {
     cmd: 'guild',
     subcmd: 'view',
     guild_id: relicData.controlled_by.guild_id
-  }).done(parseGuild);
+  }).then(parseGuild);
 }
 
 function getDefenderProfile(el, i) {
-  if (i === 0) {return getProfile(el).done(storeLeadDefender);}
-  return getProfile(el).done(parseDefender).fail(ajaxFailure);
+  if (i === 0) {return getProfile(el).then(storeLeadDefender);}
+  return getProfile(el).then(parseDefender).catch(ajaxFailure);
 }
 
 function getDefenders() {
@@ -93,7 +94,7 @@ export function getStats() {
   prepareSecondaryDivs(relicData);
   resetCounters();
   var prm = buildStatPrm();
-  when(prm, doCalculations);
+  allthen(prm, doCalculations);
 }
 
 function viewRelic(e, data) {

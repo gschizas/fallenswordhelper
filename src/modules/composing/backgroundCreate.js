@@ -50,7 +50,7 @@ function potionDone(temp, data, textStatus) {
 }
 
 function createPotion(temp) { // jQuery.min
-  createPotionFromTemplate(temp.value).done(partial(potionDone, temp));
+  createPotionFromTemplate(temp.value).then(partial(potionDone, temp));
   // setTimeout(partial(potionDone, temp, {}, 'faked'), 200);
 }
 

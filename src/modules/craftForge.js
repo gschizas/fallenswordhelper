@@ -139,7 +139,7 @@ function getItems() {
 
 export default function craftForge() {
   if (jQueryPresent()) {
-    getInventoryById().done(inventory);
+    getInventoryById().then(inventory);
     add(3, getItems);
   }
 }

@@ -75,7 +75,7 @@ function switcher(list) {
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly(list);
   } else {
-    getMembrList(false).done(partial(injectAdvisorDaily, list));
+    getMembrList(false).then(partial(injectAdvisorDaily, list));
   }
 }
 

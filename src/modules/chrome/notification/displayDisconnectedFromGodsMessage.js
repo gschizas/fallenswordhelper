@@ -39,7 +39,7 @@ function prayToGods(e) { // jQuery
   var myGod = e.target.getAttribute('praytype');
   if (!myGod) {return;}
   indexAjaxData({cmd: 'temple', subcmd: 'pray', type: myGod})
-    .done(havePrayed);
+    .then(havePrayed);
   hideQTip(e.target);
 }
 

@@ -6,20 +6,22 @@ import partial from '../../../common/partial';
 var creatureCache = [];
 
 function cacheResult(json) {
-  if (badData(json)) {return;}
-  creatureCache.push(json);
+  if (!badData(json)) {
+    creatureCache.push(json);
+  }
+  return json;
 }
 
 function thisMob(id, el) {
   return id === Number(el.response.data.id);
 }
 
-function async(dfd, result) {dfd.resolve(result);}
+function nextTick(resolve, cached) {resolve(cached);}
 
 function fromCache(cached) {
-  var dfd = $.Deferred();
-  add(3, async, [dfd, cached]);
-  return dfd.promise();
+  return new Promise(function(resolve) {
+    add(3, nextTick, [resolve, cached]);
+  });
 }
 
 export default function getCreatureStats(id, passback) {
@@ -31,5 +33,5 @@ export default function getCreatureStats(id, passback) {
     a: 1,
     id: id,
     passback: passback
-  }).done(cacheResult);
+  }).then(cacheResult);
 }

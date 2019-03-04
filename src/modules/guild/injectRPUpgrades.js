@@ -36,5 +36,5 @@ function parseProfile(data) {
 
 export default function injectRPUpgrades() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  myStats().done(parseProfile);
+  myStats().then(parseProfile);
 }

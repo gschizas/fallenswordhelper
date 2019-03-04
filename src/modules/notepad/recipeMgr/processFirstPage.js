@@ -1,3 +1,4 @@
+import all from '../../common/all';
 import createDocument from '../../system/createDocument';
 import getCustomUrlParameter from '../../system/getCustomUrlParameter';
 import getFolderImgs from './getFolderImgs';
@@ -23,7 +24,7 @@ function noQuests(output, el) {
 }
 
 function doAjax(bindFolderFirstPage, el) {
-  return retryAjax(el.parentNode.href).pipe(bindFolderFirstPage);
+  return retryAjax(el.parentNode.href).then(bindFolderFirstPage);
 }
 
 function buildPrm(output, html, bindFolderFirstPage) {
@@ -38,6 +39,6 @@ function buildPrm(output, html, bindFolderFirstPage) {
 export default function processFirstPage(output, recipebook, html) { // jQuery.min
   var bindFolderFirstPage = partial(processFolderFirstPage, output, recipebook);
   var prm = buildPrm(output, html, bindFolderFirstPage);
-  prm.push($.when(html).pipe(bindFolderFirstPage));
-  return $.when.apply($, prm);
+  prm.push(bindFolderFirstPage(html));
+  return all(prm);
 }

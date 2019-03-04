@@ -3,21 +3,23 @@ import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import on from '../common/on';
+import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
 import unequipitem from '../app/profile/unequipitem';
 import {createButton, createDiv} from '../common/cElement';
 
 var profileCombatSetDiv;
 
-function removeItem(link) {
-  function clearBox(json) {
-    if (json.s) {
-      link.parentNode.innerHTML = '';
-    }
+function clearBox(link, json) {
+  if (json.s) {
+    link.parentNode.innerHTML = '';
   }
+}
+
+function removeItem(link) {
   var item = /inventory_id=(\d+)/.exec(link.href)[1];
   if (item) {
-    unequipitem(item).done(clearBox);
+    unequipitem(item).then(partial(clearBox, link));
   }
 }
 

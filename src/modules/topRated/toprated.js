@@ -2,7 +2,7 @@ import {createInput} from '../common/cElement';
 import findOnlinePlayers from './findOnlinePlayers';
 import functionPasses from '../common/functionPasses';
 import getElementsByTagName from '../common/getElementsByTagName';
-import getText from '../common/getText';
+import getTextTrim from '../common/getTextTrim';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import isObject from '../common/isObject';
 import jQueryPresent from '../common/jQueryPresent';
@@ -33,7 +33,7 @@ var topRatedTests = [
   function() {return isObject(pCC.children[0].rows);},
   function() {return pCC.children[0].rows.length > 2;},
   function() {
-    return getText(pCC.children[0].rows[1]).startsWith('Last Updated');
+    return getTextTrim(pCC.children[0].rows[1]).startsWith('Last Updated');
   }
 ];
 

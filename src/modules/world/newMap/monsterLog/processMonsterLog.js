@@ -85,5 +85,5 @@ function initLog(data) {
 }
 
 export function getMonsterPrefs() {
-  getForage('fsh_monsterLog').done(initLog);
+  getForage('fsh_monsterLog').then(initLog);
 }

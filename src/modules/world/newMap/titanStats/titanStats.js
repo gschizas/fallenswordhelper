@@ -34,7 +34,7 @@ function processScoutTower(ast, data) {
 }
 
 function ajaxScoutTower() {
-  scouttower().done(partial(processScoutTower, ajaxScoutTower));
+  scouttower().then(partial(processScoutTower, ajaxScoutTower));
 }
 
 function testDynamics(dynamic) {

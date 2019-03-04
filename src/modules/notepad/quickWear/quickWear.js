@@ -36,7 +36,7 @@ function doAction(self, fn, verb) { // jQuery.min
   setText('', self);
   self.classList.remove('smallLink');
   self.classList.add('fshSpinner', 'fshSpin12');
-  fn(self.dataset.itemid).done(partial(actionResult, self, verb));
+  fn(self.dataset.itemid).then(partial(actionResult, self, verb));
 }
 
 function doUseItem(self) {
@@ -111,22 +111,28 @@ function createInvTabs() {
   });
 }
 
+function goodData(appInv) {
+  return appInv && appInv.s && Array.isArray(appInv.r);
+}
+
 function showQuickWear(appInv) {
-  itemList = appInv;
-  var invTabs = createInvTabs();
-  var invTabsQw = createQuickWear(appInv);
-  insertElement(invTabs, invTabsQw);
-  content.innerHTML = '';
-  insertElement(content, invTabs);
-  on(invTabs, 'click', eventHandler5(evts5()));
-  insertElement(invTabs, showAHInvManager(appInv));
+  if (goodData(appInv)) {
+    itemList = appInv;
+    var invTabs = createInvTabs();
+    var invTabsQw = createQuickWear(appInv);
+    insertElement(invTabs, invTabsQw);
+    content.innerHTML = '';
+    insertElement(content, invTabs);
+    on(invTabs, 'click', eventHandler5(evts5()));
+    insertElement(invTabs, showAHInvManager(appInv));
+  }
 }
 
 function hasJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
   insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
-  loadInventory().done(showQuickWear);
+  loadInventory().then(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
 }
 

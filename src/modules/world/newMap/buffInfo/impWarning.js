@@ -21,7 +21,7 @@ function refreshBuffs(json) {
 
 function recastClick() {
   if (getBuff('Summon Shield Imp')) {return;}
-  quickbuff([playerName()], [55]).done(refreshBuffs);
+  quickbuff([playerName()], [55]).then(refreshBuffs);
 }
 
 function getImpsRemaining(imp) {

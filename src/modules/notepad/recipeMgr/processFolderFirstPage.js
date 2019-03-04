@@ -1,3 +1,4 @@
+import all from '../../common/all';
 import createDocument from '../../system/createDocument';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
@@ -27,7 +28,7 @@ function otherPages(doc) {
 
 function getPage(thisFolder, bindFolderAnyPage, i) {
   return retryAjax(thisFolder + '&page=' + i)
-    .pipe(bindFolderAnyPage);
+    .then(bindFolderAnyPage);
 }
 
 function ajaxOtherPages(doc, thisFolder, bindFolderAnyPage) {
@@ -39,6 +40,6 @@ export default function processFolderFirstPage(output, recipebook, html) { // jQ
   var thisFolder = thisFolderHref(doc);
   var bindFolderAnyPage = partial(processFolderAnyPage, output, recipebook);
   var prm = ajaxOtherPages(doc, thisFolder, bindFolderAnyPage);
-  prm.push($.when(html).pipe(bindFolderAnyPage));
-  return $.when.apply($, prm);
+  prm.push(bindFolderAnyPage(html));
+  return all(prm);
 }

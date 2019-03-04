@@ -28,7 +28,7 @@ function parseGroupData(linkElement, obj) {
 }
 
 function thisLink(aLink) {
-  getGroupStats(aLink.href).done(partial(parseGroupData, aLink));
+  getGroupStats(aLink.href).then(partial(parseGroupData, aLink));
 }
 
 function fetchGroupData(evt) {

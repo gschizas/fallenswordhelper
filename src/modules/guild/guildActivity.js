@@ -106,12 +106,12 @@ function gotActivity(data) { // jQuery.min
     oldArchive = {lastUpdate: 0, members: {}};
   }
   if (nowSecs > fallback(oldArchive.lastUpdate, 0) + 300) { // 5 mins - probably want to increase
-    guildManage().done(gotGuild);
+    guildManage().then(gotGuild);
   }
 }
 
 export default function guildActivity() { // jQuery.min
   if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
-    getForage('fsh_guildActivity').done(gotActivity);
+    getForage('fsh_guildActivity').then(gotActivity);
   }
 }

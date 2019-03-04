@@ -60,6 +60,6 @@ function buffResult(buffLog) {
 
 export default function updateBuffLog() {
   if (!getValue('keepBuffLog')) {return;}
-  getForage(fshBuffLog).done(buffResult);
+  getForage(fshBuffLog).then(buffResult);
   transform = buildTransform();
 }

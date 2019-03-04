@@ -69,7 +69,7 @@ function getLastPage(input) {
 function getOtherPages(callback, input) {
   lastPage = getLastPage(input);
   for (var i = 2; i <= lastPage; i += 1) {
-    onlinePlayersPage(i).done(callback);
+    onlinePlayersPage(i).then(callback);
   }
 }
 
@@ -93,7 +93,7 @@ function refreshEvt() { // Bad jQuery
   $('#fshRefresh', context).hide();
   onlinePages = 0;
   onlinePlayers = {};
-  onlinePlayersPage(1).done(getOnlinePlayers);
+  onlinePlayersPage(1).then(getOnlinePlayers);
   setValue('lastOnlineCheck', now);
   updateStatus('Parsing online players...');
 }
@@ -107,7 +107,7 @@ function injectOnlinePlayersNew() { // jQuery
   context.html(
     '<span><b>Online Players</b></span>' + doRefreshButton() +
     '<div id="fshOutput"></div>');
-  getForage('fsh_onlinePlayers').done(gotOnlinePlayers);
+  getForage('fsh_onlinePlayers').then(gotOnlinePlayers);
   on(context[0], 'click', clickHandler);
   on(context[0], 'keyup', changeLvl);
 }

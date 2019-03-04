@@ -9,7 +9,7 @@ function checked(o) {
     .children[0].checked;
 }
 
-function invid(o) {return o.invid;}
+const invid = (o) => o.invid;
 
 function itemByInvId(invId, item) {
   return invId.toString() === item.invid;
@@ -34,7 +34,7 @@ function removeInvIds(itemsAry, json) {
 }
 
 function moveList(itemsAry, folderId, list) {
-  return sendtofolder(folderId, list).done(partial(removeInvIds, itemsAry));
+  sendtofolder(folderId, list).then(partial(removeInvIds, itemsAry));
 }
 
 export default function moveItemsToFolder(itemsAry) { // jQuery.min

@@ -20,7 +20,7 @@ export default function injectQuickBuff() { // jQuery.min
   if (jQueryNotPresent()) {return;}
   var quickbuffDiv = getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
-  getProfile(window.self).done(getSustain);
+  getProfile(window.self).then(getSustain);
   insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
   doLabels();
   doPassThru();

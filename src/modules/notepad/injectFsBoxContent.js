@@ -25,6 +25,6 @@ export default function injectFsBoxContent(injector) { // jQuery.min
     button: 'Clear',
     divId: 'fsboxdetail'
   });
-  getForage('fsh_fsboxcontent').done(inject);
+  getForage('fsh_fsboxcontent').then(inject);
   on(getElementById('fsboxclear'), 'click', clearFsBox, true);
 }

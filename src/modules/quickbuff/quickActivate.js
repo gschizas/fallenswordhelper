@@ -13,5 +13,5 @@ export default function quickActivate(evt) { // jQuery.min
   var trigger = evt.target;
   if (trigger.className !== 'quickbuffActivate') {return;}
   quickbuff([window.self], [trigger.dataset.buffid])
-    .done(partial(processResult, trigger));
+    .then(partial(processResult, trigger));
 }

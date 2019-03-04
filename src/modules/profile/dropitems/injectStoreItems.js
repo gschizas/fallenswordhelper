@@ -195,6 +195,6 @@ function inventory(data) {
 
 export default function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
-  getInventoryById().done(inventory);
+  getInventoryById().then(inventory);
   add(3, getItems);
 }

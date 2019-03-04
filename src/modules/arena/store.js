@@ -24,5 +24,5 @@ function gotMoves(_arena) { // jQuery
 
 export default function storeMoves() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getForage(fshArenaKey).done(gotMoves);
+  getForage(fshArenaKey).then(gotMoves);
 }

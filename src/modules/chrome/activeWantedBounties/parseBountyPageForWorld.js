@@ -34,7 +34,7 @@ export function parseBountyPageForWorld(details) {
   if (calf.enableWantedList) {
     getWantedBountyList(doc);
     if (curPage < maxPage) {
-      bountyPage(curPage + 1).done(parseBountyPageForWorld);
+      bountyPage(curPage + 1).then(parseBountyPageForWorld);
     } else {
       injectWantedList();
     }

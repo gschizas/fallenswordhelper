@@ -1,3 +1,4 @@
+import allthen from '../common/allthen';
 import findplayer from '../app/findplayer';
 import getPlayersByGuild from './getPlayersByGuild';
 import guildView from '../app/guild/view';
@@ -7,7 +8,6 @@ import playerName from '../common/playerName';
 import {sendEvent} from '../support/fshGa';
 import uniq from '../common/uniq';
 import view from '../app/profile/view';
-import when from '../common/when';
 import {decoratePlayer, initDecorate} from './decoratePlayer';
 import {displaySpinner, hideSpinner} from './displaySpinner';
 
@@ -50,16 +50,16 @@ function parseGuild(guild, json) {
 function returnGuild(guild, json) {if (json.s) {parseGuild(guild, json);}}
 
 function ajaxGuild(guild) {
-  return guildView(guild[0]).done(partial(returnGuild, guild));
+  return guildView(guild[0]).then(partial(returnGuild, guild));
 }
 
 function small(guild) {return guild[0] === -1;}
 
 function ajaxPlayer(player) {
   if (player[1] !== playerName()) {
-    return findplayer(player[1]).done(partial(returnPlayer, player));
+    return findplayer(player[1]).then(partial(returnPlayer, player));
   }
-  return view().done(partial(returnSelf, player));
+  return view().then(partial(returnSelf, player));
 }
 
 function prepareAjax() {
@@ -69,7 +69,7 @@ function prepareAjax() {
   if (singles) {
     prm = prm.concat(guilds.find(small)[1].map(ajaxPlayer));
   }
-  when(prm, hideSpinner);
+  allthen(prm, hideSpinner);
 }
 
 export default function findOnlinePlayers(e) {

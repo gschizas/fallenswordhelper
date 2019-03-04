@@ -12,7 +12,7 @@ function displayBuffLog(buffLog) {
 }
 
 function clearBuffLog() {
-  setForage(fshBuffLog, '').done(displayBuffLog);
+  setForage(fshBuffLog, '').then(displayBuffLog);
 }
 
 export default function injectBuffLog(injector) { // jQuery.min
@@ -26,5 +26,5 @@ export default function injectBuffLog(injector) { // jQuery.min
     divId: 'bufflog'
   });
   on(getElementById('clearBuffs'), 'click', clearBuffLog);
-  getForage(fshBuffLog).done(displayBuffLog);
+  getForage(fshBuffLog).then(displayBuffLog);
 }

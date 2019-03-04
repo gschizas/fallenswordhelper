@@ -16,7 +16,7 @@ import {queueRecallItem, queueTakeItem} from '../../../ajaxQueue/queue';
 
 function setName(fshInv, e) { // jQuery
   $(fshInv).DataTable().search($(e.target).attr('set')).draw();
-  $('#' + fshInv.id + '_filter input').focus();
+  $('#' + fshInv.id + '_filter input').trigger('focus');
 }
 
 function takeItem(e) { // jQuery
@@ -61,7 +61,9 @@ function doSendItem(e) { // jQuery
   doAction(partial(senditems, [self.data('inv')]), self);
 }
 
-function elClick(fshInv, el) {$(el[0]).click(partial(el[1], fshInv));} // jQuery
+function elClick(fshInv, el) { // jQuery
+  $(el[0]).on('click', partial(el[1], fshInv));
+}
 
 function elementClickHandlers(fshInv) {
   [
@@ -95,7 +97,7 @@ function setupClickHandlers(fshInv) { // jQuery
 }
 
 export default function eventHandlers(fshInv) { // jQuery
-  $('#fshMinLvl, #fshMaxLvl').keyup(partial(changeLvls, fshInv));
+  $('#fshMinLvl, #fshMaxLvl').on('keyup', partial(changeLvls, fshInv));
   $(fshInv).on('change', 'select.fshMoveItem', doMoveItem);
   setupClickHandlers(fshInv);
 }

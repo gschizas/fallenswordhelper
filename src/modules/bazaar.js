@@ -77,7 +77,7 @@ function buy() { // jQuery.min
   var buyAmount = getText(getElementById('quantity'));
   setText('Buying ' + buyAmount + ' items', getElementById('buyResultLabel'));
   for (var i = 0; i < buyAmount; i += 1) {
-    buyitem(ItemId).done(done);
+    buyitem(ItemId).then(done);
   }
 }
 

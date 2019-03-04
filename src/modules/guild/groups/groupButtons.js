@@ -24,12 +24,12 @@ function joined(container) {
 }
 
 function joinGroup(groupID, container) { // jQuery.min
-  return indexAjaxData({
+  indexAjaxData({
     cmd: 'guild',
     subcmd: 'groups',
     subcmd2: 'join',
     group_id: groupID
-  }).done(partial(joined, container));
+  }).then(partial(joined, container));
 }
 
 function doJoinUnderSize(joinButton) {

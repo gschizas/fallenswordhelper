@@ -10,7 +10,7 @@ function getRelicList(offset, myList) {
   return guild({
     subcmd: 'reliclist',
     offset: fallback(offset, 0)
-  }).pipe(function(json) {
+  }).then(function(json) {
     var someRelics = json.r.relics;
     var newList = fallback(myList, []).concat(someRelics);
     if (json.r.remaining_relics > 0) {
@@ -98,5 +98,5 @@ function processRelicList(relicList) {
 
 export default function reliclist() {
   pCC.innerHTML = 'Loading...';
-  getRelicList().done(processRelicList);
+  getRelicList().then(processRelicList);
 }

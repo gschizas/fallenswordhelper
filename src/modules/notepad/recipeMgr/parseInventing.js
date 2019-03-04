@@ -21,8 +21,8 @@ export function parseInventingStart() { // jQuery.min
   recipebook.recipe = [];
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
   indexAjaxData({cmd: 'inventing'})
-    .pipe(partial(processFirstPage, output, recipebook))
-    .done(displayStuff);
+    .then(partial(processFirstPage, output, recipebook))
+    .then(displayStuff);
 }
 
 export function gotRecipeBook(content, data) {
