@@ -1,4 +1,5 @@
 import addCommas from '../../system/addCommas';
+import allthen from '../../common/allthen';
 import {def_shopPrompt} from '../../support/constants';
 import fetchdata from '../../ajax/fetchdata';
 import {getElementById} from '../../common/getElement';
@@ -7,7 +8,6 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import setText from '../../common/setText';
 import testQuant from '../../system/testQuant';
-import when from '../../common/when';
 import {createButton, createDiv, createInput} from '../../common/cElement';
 
 var shoppingData;
@@ -58,9 +58,9 @@ function qBuy() {
   if (!theValue) {return;}
   var prm = [];
   for (var i = 1; i < theValue; i += 1) {
-    prm.push(quickBuy().done(quickDone));
+    prm.push(quickBuy().then(quickDone));
   }
-  when(prm, normalBuy);
+  allthen(prm, normalBuy);
 }
 
 function injectQuickBuy() {

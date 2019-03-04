@@ -1,3 +1,4 @@
+import all from '../../common/all';
 import createDocument from '../../system/createDocument';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import getCustomUrlParameter from '../../system/getCustomUrlParameter';
@@ -33,5 +34,5 @@ function getRecipe(output, recipebook, el) {
 export default function processFolderAnyPage(output, recipebook, html) { // jQuery.min
   var doc = createDocument(html);
   var prm = recipeAry(doc).map(partial(getRecipe, output, recipebook));
-  return $.when.apply($, prm);
+  return all(prm);
 }

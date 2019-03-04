@@ -1,3 +1,5 @@
+import all from '../../../common/all';
+import allthen from '../../../common/allthen';
 import badData from '../badData';
 import createDocument from '../../../system/createDocument';
 import {def_relicView} from '../../../support/constants';
@@ -9,7 +11,6 @@ import once from '../../../common/once';
 import {parseGuild} from './parseGuild';
 import querySelector from '../../../common/querySelector';
 import setText from '../../../common/setText';
-import when from '../../../common/when';
 import {
   doCalculations,
   parseDefender,
@@ -53,7 +54,7 @@ function parseGroups(html) {
   var disband = querySelector('#pCC a[href*="confirmDisband"]', doc);
   if (!disband) {return;}
   var prm = buildGroupPrm(disband);
-  return $.when.apply($, prm);
+  return all(prm);
 }
 
 function getGroups() {
@@ -93,7 +94,7 @@ export function getStats() {
   prepareSecondaryDivs(relicData);
   resetCounters();
   var prm = buildStatPrm();
-  when(prm, doCalculations);
+  allthen(prm, doCalculations);
 }
 
 function viewRelic(e, data) {

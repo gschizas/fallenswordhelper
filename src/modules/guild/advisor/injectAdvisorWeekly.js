@@ -1,10 +1,10 @@
 import addCommas from '../../system/addCommas';
 import advisorView from '../../app/guild/advisorView';
+import allthen from '../../common/allthen';
 import {createTFoot} from '../../common/cElement';
 import getMembrList from '../../ajax/getMembrList';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
-import when from '../../common/when';
 import {injectTable, playerName, playerRank} from './helpers';
 //#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
@@ -42,7 +42,7 @@ function reorgStats(el) {
 }
 
 function addUpStats(args) {
-  return args.slice(2).reduce(addStuff, args[1]).map(reorgStats);
+  return args.slice(1).reduce(addStuff, args[0]).map(reorgStats);
 }
 
 function makeTotal(prev, curr) {
@@ -72,12 +72,11 @@ function makeData(membrList, el) {
   ].concat(stats);
 }
 
-function addAdvisorPages(list) {
-  var args = Array.from(arguments).slice(1);
+function addAdvisorPages(list, [membrList, ...args]) {
   var added = addUpStats(args);
   injectTable(list,
     makeTfoot(added),
-    added.map(partial(makeData, args[0]))
+    added.map(partial(makeData, membrList))
   );
 }
 
@@ -95,7 +94,7 @@ export default function injectAdvisorWeekly(list) { // jQuery
   var prm = [getMembrList(false)]
     .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
 
-  when(prm, partial(addAdvisorPages, list));
+  allthen(prm, partial(addAdvisorPages, list));
   //#if _BETA  //  Timing output
 
   timeEnd('guildAdvisor.injectAdvisorWeekly');

@@ -1,5 +1,6 @@
 import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
 import addLogColoring from '../../logs/addLogColoring';
+import all from '../../common/all';
 import createDocument from '../../system/createDocument';
 import {createTable} from '../../common/cElement';
 import eventHandler5 from '../../common/eventHandler5';
@@ -100,7 +101,7 @@ function getOtherPages() {
   } else {
     options.log.forEach(useCache);
   }
-  return $.when.apply($, prm);
+  return all(prm);
 }
 
 function storeOptions() {setForage('fsh_guildLog', options);}

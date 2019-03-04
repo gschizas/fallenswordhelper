@@ -1,3 +1,4 @@
+import allthen from '../common/allthen';
 import calf from '../support/calf';
 import doBuffLink from './doBuffLink';
 import doChat from './doChat';
@@ -128,9 +129,9 @@ function addLogWidgetsOld() { // Legacy
 
 export default function addLogWidgets() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  $.when(
-    getMembrList(false).done(getKeys),
-    myStats(false).done(prepareAlliesEnemies),
+  allthen([
+    getMembrList(false).then(getKeys),
+    myStats(false).then(prepareAlliesEnemies),
     initCache()
-  ).done(addLogWidgetsOld);
+  ], addLogWidgetsOld);
 }

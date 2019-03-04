@@ -1,10 +1,10 @@
+import allthen from '../../common/allthen';
 import calf from '../../support/calf';
 import fetchinv from '../../app/guild/fetchinv';
 import getInventory from '../../ajax/getInventory';
 import loadInventory from '../../app/profile/loadInventory';
 import partial from '../../common/partial';
 import report from '../../app/guild/inventory/report';
-import when from '../../common/when';
 
 export var theInv;
 var composed = [];
@@ -66,5 +66,5 @@ export function buildInv() {
     prm.push(doGs());
     prm.push(doReport());
   }
-  return when(prm, gotSomeStuff);
+  return allthen(prm, gotSomeStuff);
 }

@@ -1,4 +1,5 @@
 import add from '../../support/task';
+import allthen from '../../common/allthen';
 import {buildInv} from './buildInv';
 import calf from '../../support/calf';
 import clearButton from './clearButton';
@@ -16,7 +17,6 @@ import notLastUpdate from '../../common/notLastUpdate';
 import {pCC} from '../../support/layout';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
-import when from '../../common/when';
 import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
 //#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
@@ -87,7 +87,7 @@ function syncInvMan() { // jQuery
   }
   prm.push(getForage('fsh_' + calf.subcmd).then(extendOptions)
   );
-  when(prm, asyncCall);
+  allthen(prm, asyncCall);
 }
 
 export function injectInventoryManagerNew() {

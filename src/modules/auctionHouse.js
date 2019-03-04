@@ -1,3 +1,4 @@
+import allthen from './common/allthen';
 import clickThis from './common/clickThis';
 import {createSpan} from './common/cElement';
 import getArrayByClassName from './common/getArrayByClassName';
@@ -11,7 +12,6 @@ import jQueryNotPresent from './common/jQueryNotPresent';
 import on from './common/on';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
-import when from './common/when';
 
 function doRefresh() {
   clickThis(getElementById('refresh'));
@@ -33,7 +33,7 @@ function cancelAllAH() { // jQuery
     getElementById('resultRows'));
   if (cancelButtons.length === 0) {return;}
   var prm = cancelButtons.map(doCancel);
-  when(prm, doRefresh);
+  allthen(prm, doRefresh);
 }
 
 function makeCancelAll() {
