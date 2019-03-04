@@ -22,12 +22,21 @@ function prepareEnv() {
 
 function findHcsData() {
   var hcsHtml = getElementById('html');
-  if (hcsHtml) {return hcsHtml.dataset.hcs;}
+  if (hcsHtml && hcsHtml.dataset) {
+    return hcsHtml.dataset.hcs;
+  }
+}
+
+function lookForUi(hcsData) {
+  var thisJson = jsonParse(hcsData);
+  if (thisJson && thisJson['new-ui']) {
+    prepareEnv();
+  }
 }
 
 export default function lookForHcsData() {
   var hcsData = findHcsData();
-  if (hcsData && jsonParse(hcsData)['new-ui']) {
-    prepareEnv();
+  if (hcsData) {
+    lookForUi(hcsData);
   }
 }
