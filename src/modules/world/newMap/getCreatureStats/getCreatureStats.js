@@ -16,12 +16,12 @@ function thisMob(id, el) {
   return id === Number(el.response.data.id);
 }
 
-function async(dfd, result) {dfd.resolve(result);}
+function nextTick(resolve, cached) {resolve(cached);}
 
 function fromCache(cached) {
-  var dfd = $.Deferred();
-  add(3, async, [dfd, cached]);
-  return dfd.promise();
+  return new Promise(function(resolve) {
+    add(3, nextTick, [resolve, cached]);
+  });
 }
 
 export default function getCreatureStats(id, passback) {

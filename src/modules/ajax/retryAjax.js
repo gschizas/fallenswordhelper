@@ -29,30 +29,31 @@ function url(opt) {
   return opt.url;
 }
 
-function handleFailure(opt, jqXhr, errorThrown) {
+function handleFailure(opt, jqXhr) {
   if (!ignoreFailureStatus.includes(jqXhr.status)) {
     sendException(
-      jqXhr.status + ' (' + errorThrown + ') - ' + url(opt),
+      jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt),
       false
     );
   }
 }
 
-function failFilter(fn, opt, retries, dfr) {
-  return function(jqXhr, textStatus, errorThrown) { // Closure
+function failFilter([fn, opt, retries, resolve, reject]) {
+  return function(jqXhr) { // Closure
     if (retries > 0 && jqXhr.status === 503) {
-      setTimeout(fn, 100, opt, retries - 1, dfr);
+      setTimeout(fn, 100, opt, retries - 1, resolve, reject);
     } else {
-      dfr.reject(jqXhr, textStatus, errorThrown);
-      handleFailure(opt, jqXhr, errorThrown);
+      reject(jqXhr);
+      handleFailure(opt, jqXhr);
     }
   };
 }
 
-function doAjax(options, retries, dfr) {
+function doAjax(options, retries, resolve, reject) {
   var opt = setOpts(options);
   opt.beforeSend = beforeSend;
-  return $.ajax(opt).then(dfr.resolve, failFilter(doAjax, opt, retries, dfr));
+  return $.ajax(opt).then(resolve)
+    .catch(failFilter([doAjax, opt, retries, resolve, reject]));
 }
 
 function attemptTask(runner) {
@@ -79,14 +80,16 @@ function initGlobalHandler() {
   }
 }
 
-function add(options, retries, dfr) {
-  queue.push([options, retries, dfr]);
+function add(options, retries, resolve, reject) {
+  queue.push([options, retries, resolve, reject]);
   if (paused) {taskRunner();}
 }
 
 export default function retryAjax(options) {
   initGlobalHandler();
-  var dfr = $.Deferred();
-  if (options) {add(options, 10, dfr);}
-  return dfr.promise();
+  if (options) {
+    return new Promise(function(resolve, reject) {
+      add(options, 10, resolve, reject);
+    });
+  }
 }

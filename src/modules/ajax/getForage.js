@@ -15,25 +15,6 @@ function getForageError(forage, err) {
   }
 }
 
-function getItemCallback(forage, dfr, err, data) {
-  if (err) {
-    getForageError(forage, err);
-    dfr.reject(err);
-  } else {
-    // returns null if key does not exist
-    dfr.resolve(data);
-  }
-}
-
-function forageGet(forage, dfr) {
-  localforage.getItem(forage, partial(getItemCallback, forage, dfr));
-}
-
 export default function getForage(forage) {
-  // Wrap in jQuery Deferred because we're using 1.7 rather than using ES6 promise
-  var dfr = $.Deferred();
-  if (window.localforage) {
-    forageGet(forage, dfr);
-  }
-  return dfr.promise();
+  return localforage.getItem(forage).catch(partial(getForageError, forage));
 }

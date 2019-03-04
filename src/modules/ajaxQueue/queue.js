@@ -5,8 +5,7 @@ import pipeTakeToQueue from './pipeTakeToQueue';
 var dfr;
 
 function getDfr() {
-  // return window.jQuery && jQuery.when();
-  if (!dfr) {dfr = $.when();}
+  if (!dfr) {dfr = Promise.resolve();}
   return dfr;
 }
 

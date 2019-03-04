@@ -23,24 +23,7 @@ function setForageError(forage, err) {
   }
 }
 
-function setItemCallback(forage, dfr, err, _data) {
-  if (err) {
-    setForageError(forage, err);
-    dfr.reject(err);
-  } else {
-    dfr.resolve(_data);
-  }
-}
-
-function forageSet(forage, data, dfr) {
-  localforage.setItem(forage, data, partial(setItemCallback, forage, dfr));
-}
-
 export default function setForage(forage, data) {
-  // Wrap in jQuery Deferred because we're using 1.7 rather than using ES6 promise
-  var dfr = $.Deferred();
-  if (window.localforage) {
-    forageSet(forage, data, dfr);
-  }
-  return dfr.promise();
+  return localforage.setItem(forage, data)
+    .catch(partial(setForageError, forage));
 }
