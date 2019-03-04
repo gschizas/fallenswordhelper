@@ -29,20 +29,25 @@ function storeFSBox(_boxList) {
   setForage('fsh_fsboxcontent', boxList);
 }
 
-function openDialog() {
-  sendEvent('injectFSBoxLog', 'injectFsBoxContent');
-  jQueryDialog(injectFsBoxContent);
-}
-
-function fSBoxExists(node) { // jQuery.min
-  var nodediv = node.lastElementChild;
+function storeMsg(nodediv) {
   var playerName = getElementsByTagName('a', nodediv);
   if (playerName.length === 0) {return;}
   getForage('fsh_fsboxcontent').then(storeFSBox);
   playerName = getText(playerName[0]);
   insertHtmlBeforeEnd(nodediv,
-    '<br><span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
+    '<span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
     playerName + '">Ignore</a> ]</span> ');
+}
+
+function openDialog() {
+  sendEvent('injectFSBoxLog', 'injectFsBoxContent');
+  jQueryDialog(injectFsBoxContent);
+}
+
+function fSBoxExists(node) {
+  var nodediv = node.lastElementChild;
+  insertHtmlBeforeEnd(nodediv, '<br>');
+  storeMsg(nodediv);
   var log = createSpan({
     className: 'fshYellow',
     innerHTML: '[ <span class="fshLink">Log</span> ]'
