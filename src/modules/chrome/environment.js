@@ -113,7 +113,7 @@ window.FSH.calf = '$_CALFVER';
 
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
-  if (!isFunction(Object.entries)) {return;}
+  if (!isFunction(Promise.prototype.finally)) {return;}
   globalErrorHandler();
   setup();
   start('JS Perf', 'FSH.dispatch');

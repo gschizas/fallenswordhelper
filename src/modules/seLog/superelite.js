@@ -66,7 +66,7 @@ function killTable() {
     }
     disableBackgroundChecks();
   } else {
-    doBackgroundCheck().always(gotSeLog);
+    doBackgroundCheck().finally(gotSeLog);
   }
 }
 
@@ -79,7 +79,7 @@ function togglePref(evt) {
 }
 
 function waitForLog() {
-  doBackgroundCheck().always(gotSeLog);
+  doBackgroundCheck().finally(gotSeLog);
 }
 
 export default function superelite() {
