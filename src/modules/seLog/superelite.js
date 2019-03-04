@@ -91,6 +91,6 @@ export default function superelite() {
   newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
   on(newCell, 'change', togglePref);
   if (calf.enableSeTracker) {
-    getFshSeLog().done(waitForLog);
+    getFshSeLog().then(waitForLog);
   }
 }

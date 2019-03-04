@@ -25,7 +25,7 @@ function seenBefore(e) {
 
 function loopActions(e, i) { // jQuery.min
   if (e.type !== 6 || seenBefore(e)) {return;}
-  getCreatureStats(e.data.id, i).done(processMonster);
+  getCreatureStats(e.data.id, i).then(processMonster);
 }
 
 function initMonsterLog() {

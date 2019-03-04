@@ -33,7 +33,7 @@ function takeResult(self, data) {
 function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
     .children[0].value;
-  takeitem(itmId).done(partial(takeResult, el));
+  takeitem(itmId).then(partial(takeResult, el));
   setText('', el);
   el.className = 'guildTagSpinner';
   el.style.backgroundImage = 'url(\'' + imageServer +

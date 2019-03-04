@@ -36,7 +36,7 @@ function doAction(self, fn, verb) { // jQuery.min
   setText('', self);
   self.classList.remove('smallLink');
   self.classList.add('fshSpinner', 'fshSpin12');
-  fn(self.dataset.itemid).done(partial(actionResult, self, verb));
+  fn(self.dataset.itemid).then(partial(actionResult, self, verb));
 }
 
 function doUseItem(self) {
@@ -126,7 +126,7 @@ function hasJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
   insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
-  loadInventory().done(showQuickWear);
+  loadInventory().then(showQuickWear);
   disableQuickWearPrompts = getValue('disableQuickWearPrompts');
 }
 

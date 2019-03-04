@@ -129,7 +129,7 @@ function togglePref(evt) {
 
 function openDialog() {
   sendEvent('guildTracker', 'openDialog');
-  getForage('fsh_guildActivity').done(gotActivity);
+  getForage('fsh_guildActivity').then(gotActivity);
   calf.dialogIsClosed = isClosed;
   addOverlay();
   makePopup();

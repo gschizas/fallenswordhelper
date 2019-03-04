@@ -44,7 +44,7 @@ function checkAppResponse(json) {
 function checkLastCompose() { // jQuery.min
   var lastComposeCheck = getValue(def_lastComposeCheck);
   if (lastComposeCheck && now < lastComposeCheck) {return;}
-  composingView().done(checkAppResponse);
+  composingView().then(checkAppResponse);
 }
 
 function composeAlert() {

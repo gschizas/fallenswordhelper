@@ -41,7 +41,7 @@ function retrieveBountyInfo(enableActiveList, enableWantedList) {
   invalidateCache();
   if (needsRefresh()) {
     doRefresh();
-    bountyPage(1).done(parseBountyPageForWorld);
+    bountyPage(1).then(parseBountyPageForWorld);
   } else {
     notRefreshed(enableActiveList, enableWantedList);
   }

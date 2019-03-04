@@ -61,7 +61,7 @@ function handleResponse(response) {
 }
 
 function breakItems() { // jQuery.min
-  return doBreakdown(selectedList).done(handleResponse);
+  doBreakdown(selectedList).then(handleResponse);
 }
 
 function validBreakEvent(evt) {

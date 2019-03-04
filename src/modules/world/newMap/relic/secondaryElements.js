@@ -130,7 +130,7 @@ export function prepareSecondaryDivs(relicData) {
   hideElement(fetchStatsBtn);
   var hideRelicOffline = getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
-    getMembrList(true).done(missingMembers);
+    getMembrList(true).then(missingMembers);
   }
   insertHtmlBeforeEnd(leftDiv, proc);
   processingStatus = getElementById('ProcessingStatus');

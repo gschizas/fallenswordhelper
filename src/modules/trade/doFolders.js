@@ -131,5 +131,5 @@ function gotInventory(data) {
 
 export default function doFolders() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getInventoryById().done(gotInventory);
+  getInventoryById().then(gotInventory);
 }

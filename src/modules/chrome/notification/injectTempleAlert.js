@@ -13,7 +13,7 @@ function checkLastUpdate(templeAlertLastUpdate) {
 
 function doWeNeedToParse() {
   if (checkLastUpdate(getValue('lastTempleCheck'))) {
-    indexAjaxData({cmd: 'temple'}).done(parseTemplePage);
+    indexAjaxData({cmd: 'temple'}).then(parseTemplePage);
   } else if (getValue('needToPray')) {
     displayDisconnectedFromGodsMessage();
   }

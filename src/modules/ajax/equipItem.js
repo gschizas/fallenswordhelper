@@ -7,5 +7,5 @@ export default function equipItem(backpackInvId) {
     subcmd: 'equipitem',
     inventory_id: backpackInvId,
     ajax: 1
-  }).done(dialog);
+  }).then(dialog);
 }

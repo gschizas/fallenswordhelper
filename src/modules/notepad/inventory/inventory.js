@@ -83,9 +83,9 @@ function syncInvMan() { // jQuery
   var prm = [];
   prm.push(buildInv());
   if (calf.subcmd === 'guildinvmgr') {
-    prm.push(getMembrList(false).done(rekeyMembrList));
+    prm.push(getMembrList(false).then(rekeyMembrList));
   }
-  prm.push(getForage('fsh_' + calf.subcmd).done(extendOptions)
+  prm.push(getForage('fsh_' + calf.subcmd).then(extendOptions)
   );
   when(prm, asyncCall);
 }

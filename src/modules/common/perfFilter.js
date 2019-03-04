@@ -36,5 +36,5 @@ function drawFilters(data) {
 export default function perfFilter(loc) { // jQuery.min
   if (jQueryNotPresent()) {return;}
   target = loc;
-  getInventoryById().done(drawFilters);
+  getInventoryById().then(drawFilters);
 }

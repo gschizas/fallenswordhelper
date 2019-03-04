@@ -45,7 +45,7 @@ function recallResult(action, theTd, data) {
 
 function doRecall(theTd, href, mode, action) {
   queueRecallItem(itemId(href), targetPlayerId(href), mode, action)
-    .done(partial(recallResult, action, theTd));
+    .then(partial(recallResult, action, theTd));
 }
 
 function recallTo(theTd, href, mode) {
@@ -65,7 +65,7 @@ function doFastGs(theTd, href) {
 function doFastWear(theTd, href) {
   sendEvent('GuildReport', 'Fast Wear');
   if (Number(targetPlayerId(href)) === playerId()) {
-    equipItem(itemId(href)).done(partial(wornItem, theTd));
+    equipItem(itemId(href)).then(partial(wornItem, theTd));
   } else {
     doRecall(theTd, href, 0, 'wear');
   }

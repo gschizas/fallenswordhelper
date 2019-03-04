@@ -147,6 +147,5 @@ function gotMap(potObj, data) {
 }
 
 export default function potReport(potObj) {
-  // getForage(storeMap).done(partial(gotMap, sortKeys(potObj)));
-  getForage(storeMap).done(partial(gotMap, potObj));
+  getForage(storeMap).then(partial(gotMap, potObj));
 }

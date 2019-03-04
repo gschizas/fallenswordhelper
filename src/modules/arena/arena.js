@@ -58,5 +58,5 @@ export function injectArena() { // jQuery
   var tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) {return;} // Join error screen
   theTables = $('table[width="635"]', tabs);
-  getForage(fshArenaKey).done(partial(process, tabs));
+  getForage(fshArenaKey).then(partial(process, tabs));
 }

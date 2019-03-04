@@ -17,7 +17,7 @@ function actionReturn(self, success, data) {
 
 function doAction(self, fn, success) {
   var itemInvId = self.getAttribute('itemInvId');
-  fn([itemInvId]).done(partial(actionReturn, self, success));
+  fn([itemInvId]).then(partial(actionReturn, self, success));
 }
 
 function disableOtherButton(theTd, otherClass) {

@@ -26,7 +26,7 @@ export function doSendGold() { // jQuery
     xc: window.ajaxXC,
     target_username: $('#HelperSendTo').html(),
     gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
-  }).done(doneSendGold);
+  }).then(doneSendGold);
 }
 
 function statbarGoldBackground(colour) {

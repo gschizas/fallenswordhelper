@@ -17,7 +17,7 @@ function debuffSuccess(aLink, json) {
 function doDebuff(aLink) { // jQuery.min
   sendEvent('profile', 'doDebuff');
   var buffId = aLink.href.match(/(\d+)$/)[1];
-  removeskill(buffId).done(errorDialog).done(partial(debuffSuccess, aLink));
+  removeskill(buffId).then(errorDialog).then(partial(debuffSuccess, aLink));
 }
 
 function doPrompt(aLink) {

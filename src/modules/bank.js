@@ -100,7 +100,7 @@ function invalidAmount(o, amount) { // jQuery
 }
 
 function doAjax(oData) {
-  indexAjaxData(oData).done(transResponse);
+  indexAjaxData(oData).then(transResponse);
 }
 
 function bankDeposit(e) { // jQuery

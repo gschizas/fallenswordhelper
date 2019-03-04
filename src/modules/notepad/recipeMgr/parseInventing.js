@@ -22,7 +22,7 @@ export function parseInventingStart() { // jQuery.min
   output.innerHTML = '<br>Parsing inventing screen ...<br>';
   indexAjaxData({cmd: 'inventing'})
     .then(partial(processFirstPage, output, recipebook))
-    .done(displayStuff);
+    .then(displayStuff);
 }
 
 export function gotRecipeBook(content, data) {

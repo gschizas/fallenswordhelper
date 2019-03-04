@@ -63,6 +63,6 @@ function gotCombatLog(data) { // jQuery.min
 
 export default function combatLogger() { // jQuery.min
   if (getValue('keepLogs')) {
-    getForage('fsh_combatLog').done(gotCombatLog);
+    getForage('fsh_combatLog').then(gotCombatLog);
   }
 }

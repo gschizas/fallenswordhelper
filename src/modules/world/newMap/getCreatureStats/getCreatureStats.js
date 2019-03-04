@@ -6,8 +6,10 @@ import partial from '../../../common/partial';
 var creatureCache = [];
 
 function cacheResult(json) {
-  if (badData(json)) {return;}
-  creatureCache.push(json);
+  if (!badData(json)) {
+    creatureCache.push(json);
+  }
+  return json;
 }
 
 function thisMob(id, el) {
@@ -31,5 +33,5 @@ export default function getCreatureStats(id, passback) {
     a: 1,
     id: id,
     passback: passback
-  }).done(cacheResult);
+  }).then(cacheResult);
 }

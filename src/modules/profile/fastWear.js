@@ -49,7 +49,7 @@ function fastAction(theBackpack, evt, action, result) { // jQuery.min
   var invId = self.parentNode.parentNode.children[0].dataset.inv;
   setText('', self);
   self.className = 'fastAction fshSpinner fshSpinner12';
-  action(invId).done(partial(actionResult, [theBackpack, result, self, invId]));
+  action(invId).then(partial(actionResult, [theBackpack, result, self, invId]));
 }
 
 function evtHdl(theBackpack, evt) {

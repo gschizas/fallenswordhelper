@@ -41,9 +41,9 @@ function hasMerc(disband) {
 
 function buildGroupPrm(disband) {
   var viewStats = disband.previousElementSibling.href;
-  var prm = [getGroupStats(viewStats).done(storeGroupStats)];
+  var prm = [getGroupStats(viewStats).then(storeGroupStats)];
   if (hasMerc(disband)) {
-    prm.push(getMercStats().done(storeMercStats));
+    prm.push(getMercStats().then(storeMercStats));
   }
   return prm;
 }
@@ -68,12 +68,12 @@ function getGuild() {
     cmd: 'guild',
     subcmd: 'view',
     guild_id: relicData.controlled_by.guild_id
-  }).done(parseGuild);
+  }).then(parseGuild);
 }
 
 function getDefenderProfile(el, i) {
-  if (i === 0) {return getProfile(el).done(storeLeadDefender);}
-  return getProfile(el).done(parseDefender).catch(ajaxFailure);
+  if (i === 0) {return getProfile(el).then(storeLeadDefender);}
+  return getProfile(el).then(parseDefender).catch(ajaxFailure);
 }
 
 function getDefenders() {

@@ -49,7 +49,7 @@ function gotSe(data) {
 }
 
 function getSeLog() { // jQuery.min
-  return superelite().done(gotSe);
+  return superelite().then(gotSe);
 }
 
 export function doBackgroundCheck() {
@@ -77,7 +77,7 @@ function gotLog(data) {
 }
 
 export function getFshSeLog() { // jQuery.min
-  return getForage('fsh_seLog').done(gotLog);
+  return getForage('fsh_seLog').then(gotLog);
 }
 
 function shouldLog() {
@@ -86,6 +86,6 @@ function shouldLog() {
 
 export function seLog() { // jQuery.min
   if (shouldLog()) {
-    getFshSeLog().done(setupBackgroundCheck);
+    getFshSeLog().then(setupBackgroundCheck);
   }
 }

@@ -61,5 +61,5 @@ function makeRanks(json) {
 
 export default function injectGuildRanks() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getMembrList(false).then(makeRanks).done(gotMembers);
+  getMembrList(false).then(makeRanks).then(gotMembers);
 }

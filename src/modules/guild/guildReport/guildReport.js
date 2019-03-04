@@ -10,7 +10,7 @@ function doReportHeader() {add(3, reportHeader);}
 
 export default function injectReportPaint() { // jQuery
   if (jQueryNotPresent()) {return;}
-  getMembrList(false).done(doReportHeader);
+  getMembrList(false).then(doReportHeader);
   add(2, searchUser);
   add(3, prepareChildRows);
   eventHandlers();

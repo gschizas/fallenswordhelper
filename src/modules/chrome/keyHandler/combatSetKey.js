@@ -29,5 +29,5 @@ function changeCombatSet(itemIndex, json) {
 
 export default function combatSetKey(itemIndex) {
   keyHandlerEvent('changeCombatSet');
-  view().done(partial(changeCombatSet, itemIndex));
+  view().then(partial(changeCombatSet, itemIndex));
 }

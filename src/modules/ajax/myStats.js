@@ -7,6 +7,7 @@ import setForage from './setForage';
 
 function sendMyProfileToForage(data) {
   setForage('fsh_selfProfile', data);
+  return data;
 }
 
 function addLastUpdateDate(data) {
@@ -19,7 +20,7 @@ function addLastUpdateDate(data) {
 function getMyProfile() {
   return getProfile(playerName())
     .then(addLastUpdateDate)
-    .done(sendMyProfileToForage);
+    .then(sendMyProfileToForage);
 }
 
 function getProfileFromForage(data) {

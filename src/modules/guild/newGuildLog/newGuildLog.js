@@ -95,7 +95,7 @@ function getOtherPages() {
   var prm = [];
   if (completeReload) {
     for (var i = 2; i <= maxPage; i += 1) {
-      prm.push(getGuildLogPage(i).done(processPage));
+      prm.push(getGuildLogPage(i).then(processPage));
     }
   } else {
     options.log.forEach(useCache);
@@ -180,7 +180,7 @@ function gotOtherPages() {
 
 function processFirstPage(data) {
   processPage(data);
-  getOtherPages().done(gotOtherPages);
+  getOtherPages().then(gotOtherPages);
 }
 
 function toggle(item, hide, r) {
@@ -229,7 +229,7 @@ function refresh() {
   tmpGuildLog = [];
   completeReload = true;
   getElementById('fshInjectHere').innerHTML = '';
-  getGuildLogPage(1).done(processFirstPage);
+  getGuildLogPage(1).then(processFirstPage);
 }
 
 function guildLogEvents() {
@@ -263,10 +263,10 @@ function gotOptions(guildLog) {
   on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
   setChecks();
   setMaxPage();
-  getGuildLogPage(1).done(processFirstPage);
+  getGuildLogPage(1).then(processFirstPage);
 }
 
 export default function injectNewGuildLog() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getForage('fsh_guildLog').done(gotOptions);
+  getForage('fsh_guildLog').then(gotOptions);
 }

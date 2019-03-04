@@ -37,6 +37,6 @@ function anotherSpinner(self) { // jQuery
 export default function doAction(fn, self) { // jQuery
   hideQTip(self);
   removeClass(self);
-  fn().done(partial(killRow, self));
+  fn().then(partial(killRow, self));
   anotherSpinner(self);
 }

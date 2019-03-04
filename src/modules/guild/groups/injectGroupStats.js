@@ -22,6 +22,6 @@ export default function injectGroupStats() { // jQuery
   if (jQueryNotPresent()) {return;}
   groupStats = groupViewStats(document);
   if (groupStats.attackElement) {
-    getMercStats().done(parseMercStats);
+    getMercStats().then(parseMercStats);
   }
 }

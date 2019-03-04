@@ -39,7 +39,7 @@ function quickInvent() {
   var recipeID = querySelector('input[name="recipe_id"]').value;
   initResults('Inventing ' + String(amountToInvent) + ' Items');
   for (var i = 0; i < amountToInvent; i += 1) {
-    doinvent(recipeID).done(quickInventDone);
+    doinvent(recipeID).then(quickInventDone);
   }
 }
 

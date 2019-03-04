@@ -152,11 +152,11 @@ function processGroupStats(data, playerJson, groupJson) {
 }
 
 function getGroupStats(data, playerJson, groupId) {
-  groupsViewStats(groupId).done(partial(processGroupStats, data, playerJson));
+  groupsViewStats(groupId).then(partial(processGroupStats, data, playerJson));
 }
 
 function processGroup(data, playerJson) {
-  groupsView().then(getGroupId).done(partial(getGroupStats, data, playerJson));
+  groupsView().then(getGroupId).then(partial(getGroupStats, data, playerJson));
 }
 
 function processPlayer(data, playerJson) {
@@ -175,7 +175,7 @@ function processCreature(e, data) {
   setGroupEvalalutor('');
   if (isValidData(data)) {
     makeDoNotKillLink(data.response.data.name, dialogViewCreature);
-    myStats(true).done(partial(processPlayer, data));
+    myStats(true).then(partial(processPlayer, data));
   }
 }
 

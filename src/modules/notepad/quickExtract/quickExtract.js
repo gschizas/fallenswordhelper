@@ -57,7 +57,7 @@ function quickDoneExtracted(invId, json) {
   outputResult(processResult(json.r), buyResult);
 }
 
-function ajaxExtract(el) {useitem(el).done(partial(quickDoneExtracted, el));}
+function ajaxExtract(el) {useitem(el).then(partial(quickDoneExtracted, el));}
 
 function doExtract(target) {
   var inventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
@@ -169,5 +169,5 @@ export default function insertQuickExtract(injector) { // jQuery.min
   selectST = true;
   selectMain = true;
   on(content, 'click', eventHandler5(extractEvents()));
-  getInventory().done(prepInv);
+  getInventory().then(prepInv);
 }

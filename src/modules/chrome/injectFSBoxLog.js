@@ -38,7 +38,7 @@ function fSBoxExists(node) { // jQuery.min
   var nodediv = node.lastElementChild;
   var playerName = getElementsByTagName('a', nodediv);
   if (playerName.length === 0) {return;}
-  getForage('fsh_fsboxcontent').done(storeFSBox);
+  getForage('fsh_fsboxcontent').then(storeFSBox);
   playerName = getText(playerName[0]);
   insertHtmlBeforeEnd(nodediv,
     '<br><span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +

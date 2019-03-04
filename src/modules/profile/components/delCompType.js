@@ -24,7 +24,7 @@ function destroyed(data) {
 function removeSpinner(td) {td.parentNode.remove();}
 
 function destroy(el) {
-  return destroyComponent(el).done(destroyed);
+  return destroyComponent(el).then(destroyed);
 }
 
 export default function delCompType(self) { // jQuery.min

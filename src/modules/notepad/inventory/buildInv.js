@@ -14,7 +14,7 @@ function cacheTheInv(data) {
 }
 
 function doInventory() {
-  return getInventory().done(cacheTheInv);
+  return getInventory().then(cacheTheInv);
 }
 
 function itemsFromFolder(el) {return el.items;}
@@ -28,7 +28,7 @@ function getComposedFromBp(data) {
 }
 
 function doComposedFromBp() {
-  return loadInventory().done(getComposedFromBp);
+  return loadInventory().then(getComposedFromBp);
 }
 
 function getComposedFromGs(data) {
@@ -37,11 +37,11 @@ function getComposedFromGs(data) {
 }
 
 function doGs() {
-  return fetchinv().done(getComposedFromGs);
+  return fetchinv().then(getComposedFromGs);
 }
 
 function doReport() {
-  return report().done(getComposedFromGs);
+  return report().then(getComposedFromGs);
 }
 
 function thisPot(inv_id, pot) {return pot.a === inv_id;}

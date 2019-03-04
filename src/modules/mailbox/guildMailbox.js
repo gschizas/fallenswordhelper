@@ -21,7 +21,7 @@ function translateReturnInfo(data) {
 }
 
 function guildMailboxTake(href) {
-  return retryAjax(href).then(translateReturnInfo).done(dialog);
+  return retryAjax(href).then(translateReturnInfo).then(dialog);
 }
 
 function takeResult(self, data) {
@@ -36,7 +36,7 @@ function guildMailboxEvent(e) { // jQuery.min
   if (self.tagName === 'IMG') {
     e.preventDefault();
     var anchor = self.parentNode.href;
-    guildMailboxTake(anchor).done(partial(takeResult, self));
+    guildMailboxTake(anchor).then(partial(takeResult, self));
   }
   if (self.className === 'sendLink') {
     getArrayByTagName('img', pCC).forEach(clickThis);

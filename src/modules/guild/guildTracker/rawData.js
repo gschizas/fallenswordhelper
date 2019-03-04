@@ -42,7 +42,7 @@ function successMsg(newData) {
 function doSave() {
   var newData = jsonParse(ioText.value);
   setForage('fsh_guildActivity', newData)
-    .done(partial(successMsg, newData))
+    .then(partial(successMsg, newData))
     .catch(dialogMsg);
 }
 

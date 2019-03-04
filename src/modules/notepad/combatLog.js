@@ -60,5 +60,5 @@ function gotCombatLog(data) {
 export default function injectNotepadShowLogs(injector) { // jQuery.min
   if (jQueryNotPresent()) {return;}
   content = injector || pCC;
-  getForage('fsh_combatLog').done(gotCombatLog);
+  getForage('fsh_combatLog').then(gotCombatLog);
 }

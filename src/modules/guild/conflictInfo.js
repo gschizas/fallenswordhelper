@@ -46,7 +46,7 @@ function getMaxPage(page) {
 }
 
 function getNextPage(curPage, fn, callback) {
-  conflicts(curPage + 1).done(partial(fn, callback));
+  conflicts(curPage + 1).then(partial(fn, callback));
 }
 
 function gotConflictInfo(callback, responseText) { // Legacy
@@ -64,6 +64,6 @@ function gotConflictInfo(callback, responseText) { // Legacy
 export default function conflictInfo(leftHandSideColumnTable) { // jQuery.min
   var statCtrl = leftHandSideColumnTable.rows[6].cells[0].children[0];
   if (statCtrl) {
-    conflicts(1).done(partial(gotConflictInfo, {node: statCtrl}));
+    conflicts(1).then(partial(gotConflictInfo, {node: statCtrl}));
   }
 }

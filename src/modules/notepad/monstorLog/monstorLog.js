@@ -121,7 +121,7 @@ function prepAry(data) {
 function haveJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
-  getForage('fsh_monsterLog').done(prepAry);
+  getForage('fsh_monsterLog').then(prepAry);
 }
 
 export default function injectMonsterLog(injector) {

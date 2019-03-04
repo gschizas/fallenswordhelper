@@ -87,16 +87,18 @@ function whatsMissing(json, html) {
 
 function unknownSpecials(json) {
   if (!json.r.specials.every(inSpecialsList)) {
-    combatView(json.r.id).done(partial(whatsMissing, json));
+    combatView(json.r.id).then(partial(whatsMissing, json));
   }
 }
 
 function cacheCombat(aRow, json) {
-  if (!json.s) {return;}
-  json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
-  combatCache[json.r.id] = json;
-  setForage('fsh_pvpCombat', combatCache);
-  unknownSpecials(json);
+  if (json.s) {
+    json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
+    combatCache[json.r.id] = json;
+    setForage('fsh_pvpCombat', combatCache);
+    unknownSpecials(json);
+  }
+  return json;
 }
 
 function processCombat(aRow) {
@@ -106,8 +108,8 @@ function processCombat(aRow) {
   if (combatCache[combatID] && combatCache[combatID].logTime) {
     parseCombat(combatSummary, combatCache[combatID]);
   } else {
-    viewCombat(combatID).done(partial(cacheCombat, aRow))
-      .done(partial(parseCombat, combatSummary));
+    viewCombat(combatID).then(partial(cacheCombat, aRow))
+      .then(partial(parseCombat, combatSummary));
   }
 }
 
@@ -192,5 +194,5 @@ function checkCache(data) {
 }
 
 export function initCache() {
-  return getForage('fsh_pvpCombat').done(checkCache);
+  return getForage('fsh_pvpCombat').then(checkCache);
 }

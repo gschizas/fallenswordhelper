@@ -43,7 +43,7 @@ function gotProfile(j, html) {
 }
 
 function getProfile(j) {
-  retryAjax(j).done(partial(gotProfile, j));
+  retryAjax(j).then(partial(gotProfile, j));
 }
 
 function findBuffsParsePlayersForBuffs() { // Legacy
@@ -106,7 +106,7 @@ function playerRows(doc) {
 function nextPage(curPage, maxPage, callback) {
   var newPage = calcNextPage(curPage, maxPage);
   updateProgress('Parsing online page ' + curPage + ' ...');
-  onlinePlayersPage(newPage).done(callback);
+  onlinePlayersPage(newPage).then(callback);
 }
 
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
@@ -129,7 +129,7 @@ function findBuffsParseOnlinePlayersStart() { // Legacy
   onlinePlayersSetting =
     parseInt(getElementById('onlinePlayers').value, 10);
   if (onlinePlayersSetting !== 0) {
-    onlinePlayersPage(1).done(findBuffsParseOnlinePlayers);
+    onlinePlayersPage(1).then(findBuffsParseOnlinePlayers);
   } else {
     findBuffsParsePlayersForBuffs();
   }
@@ -172,7 +172,7 @@ function findBuffsParseProfilePage(responseText) {
 
 function addExtraProfile(el) {profilePagesToSearch.push(showPlayerUrl + el);}
 
-function getAlliesEnemies(el) {retryAjax(el).done(findBuffsParseProfilePage);}
+function getAlliesEnemies(el) {retryAjax(el).then(findBuffsParseProfilePage);}
 
 function findBuffsParseProfilePageStart() { // Legacy
   // if option enabled then parse profiles
@@ -222,7 +222,7 @@ function findAnyStart(progMsg) { // jQuery
   extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
   // get list of players to search, starting with guild>manage page
-  guildManage().done(findBuffsParseGuildManagePage);
+  guildManage().then(findBuffsParseGuildManagePage);
 }
 
 function thisBuff(selectedBuff, el) {return selectedBuff === el.id;}

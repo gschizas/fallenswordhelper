@@ -98,5 +98,5 @@ function processRelicList(relicList) {
 
 export default function reliclist() {
   pCC.innerHTML = 'Loading...';
-  getRelicList().done(processRelicList);
+  getRelicList().then(processRelicList);
 }

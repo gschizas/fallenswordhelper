@@ -50,16 +50,16 @@ function parseGuild(guild, json) {
 function returnGuild(guild, json) {if (json.s) {parseGuild(guild, json);}}
 
 function ajaxGuild(guild) {
-  return guildView(guild[0]).done(partial(returnGuild, guild));
+  return guildView(guild[0]).then(partial(returnGuild, guild));
 }
 
 function small(guild) {return guild[0] === -1;}
 
 function ajaxPlayer(player) {
   if (player[1] !== playerName()) {
-    return findplayer(player[1]).done(partial(returnPlayer, player));
+    return findplayer(player[1]).then(partial(returnPlayer, player));
   }
-  return view().done(partial(returnSelf, player));
+  return view().then(partial(returnSelf, player));
 }
 
 function prepareAjax() {

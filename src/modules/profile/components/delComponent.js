@@ -30,5 +30,5 @@ export default function delComponent(self) { // jQuery.min
   var componentId = matches[2];
   destroyComponent([componentId])
     .then(errorDialog)
-    .done(partial(compDeleted, self, itemId));
+    .then(partial(compDeleted, self, itemId));
 }

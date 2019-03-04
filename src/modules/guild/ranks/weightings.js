@@ -58,7 +58,7 @@ function gotRankData(theRows, json) {
 
 function fetchRankData(theRows, weightButton) { // jQuery.min
   hideElement(weightButton);
-  ranks().done(partial(gotRankData, theRows));
+  ranks().then(partial(gotRankData, theRows));
 }
 
 function injectWeightButton(theRows, addNewRank) {

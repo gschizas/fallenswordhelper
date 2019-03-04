@@ -31,6 +31,6 @@ function rmEvtHdl(evt) {
 export default function injectRecipeManager(injector) { // jQuery.min
   if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
-  getForage('fsh_recipeBook').done(partial(gotRecipeBook, content));
+  getForage('fsh_recipeBook').then(partial(gotRecipeBook, content));
   on(content, 'click', rmEvtHdl);
 }

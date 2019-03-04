@@ -24,8 +24,7 @@ function fixTable() { // jQuery
 
 export default function injectGroups() { // jQuery
   if (jQueryNotPresent()) {return;}
-  getMembrList(false)
-    .done(doGroupPaint);
+  getMembrList(false).then(doGroupPaint);
   displayMinGroupLevel();
   groupButtons();
   fixTable();
