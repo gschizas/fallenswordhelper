@@ -9,7 +9,7 @@ import injectQuickMsgDialogJQ from '../messaging';
 import injectServerNode from '../injectServerNode';
 import injectStaminaCalculator from '../calcs/injectStaminaCalculator';
 import interceptQuickBuff from '../interceptQuickBuff';
-import navMenu from '../navMenu';
+import navMenu from '../accordion/navMenu';
 import scoutTowerLink from '../scoutTowerLink';
 import statbar from '../statBar';
 

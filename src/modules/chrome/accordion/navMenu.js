@@ -1,4 +1,4 @@
-import jQueryNotPresent from '../common/jQueryNotPresent';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
 
 export default function navMenu() { // jQuery
   if (jQueryNotPresent()) {return;}
