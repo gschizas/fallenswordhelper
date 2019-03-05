@@ -9,7 +9,6 @@ import injectQuickMsgDialogJQ from '../messaging';
 import injectServerNode from '../injectServerNode';
 import injectStaminaCalculator from '../calcs/injectStaminaCalculator';
 import interceptQuickBuff from '../interceptQuickBuff';
-import navMenu from '../accordion/navMenu';
 import scoutTowerLink from '../scoutTowerLink';
 import statbar from '../statBar';
 
@@ -17,7 +16,6 @@ function asyncPThree(fn) {add(3, fn);}
 
 export default function priorityThree() {
   [
-    navMenu,
     statbar,
     injectStaminaCalculator,
     injectLevelupCalculator,
