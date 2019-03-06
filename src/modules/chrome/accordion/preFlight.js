@@ -19,7 +19,7 @@ function foundWidget(myNav) {
 export default function preFlight() {
   var theNav = getElementById('nav');
   var myNav = $(theNav).data('hcsNav');
-  if (foundWidget(myNav)) {
+  if (myNav && foundWidget(myNav)) {
     return [theNav, myNav];
   }
   return [];
