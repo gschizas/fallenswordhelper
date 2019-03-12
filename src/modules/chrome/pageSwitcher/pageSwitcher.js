@@ -4,7 +4,7 @@ import auctionhouse from './auctionhouse';
 import composing from './composing';
 import craftForge from '../../craftForge';
 import guild from './guild/guild';
-import {injectBank} from '../../bank';
+import injectBank from '../../bank/injectBank';
 import injectBazaar from '../../bazaar';
 import injectFindPlayer from '../../injectFindPlayer';
 import injectMailbox from '../../mailbox/mailbox';
