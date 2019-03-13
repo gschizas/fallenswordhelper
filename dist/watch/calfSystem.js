@@ -27,7 +27,8 @@
 
   function parseError(e) {
     if (e.stack) {return parseStack(e);}
-    return e.message;
+    if (e.message) {return e.message;}
+    return String(e);
   }
 
   function getElementById(id, doc) {
@@ -725,20 +726,24 @@
   var enabled;
 
   function handleMsgStack(stuff) {
+    var msg = parseError(stuff);
+    if (msg.includes('calfSystem')) {
+      sendException(msg, true);
+    }
+  }
+
+  function handleError(stuff) {
     if (stuff) {
-      var msg = parseError(stuff);
-      if (msg.includes('calfSystem')) {
-        sendException(msg, true);
-      }
+      handleMsgStack(stuff);
     }
   }
 
   function logError(e) {
-    handleMsgStack(e.error);
+    handleError(e.error);
   }
 
   function unhandledrejection(e) {
-    handleMsgStack(e.reason);
+    handleError(e.reason);
   }
 
   function globalErrorHandler() {
@@ -1671,19 +1676,22 @@
     on(window, 'beforeunload', partial(clearXhr, xhr));
   }
 
-  var ignoreFailureStatus = [0, 200];
+  var ignoreFailureStatus = [0];
 
   function url(opt) {
     if (opt.data) {return $.param(opt.data);}
     return opt.url;
   }
 
-  function handleFailure(opt, jqXhr) {
+  function handleFailure(opt, resolve, reject, jqXhr) {
     if (!ignoreFailureStatus.includes(jqXhr.status)) {
       sendException(
         jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt),
         false
       );
+      reject(new Error(
+        jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt)
+      ));
     }
   }
 
@@ -1692,8 +1700,7 @@
       if (retries > 0 && jqXhr.status === 503) {
         setTimeout(fn, 100, opt, retries - 1, resolve, reject);
       } else {
-        reject(jqXhr);
-        handleFailure(opt, jqXhr);
+        handleFailure(opt, resolve, reject, jqXhr);
       }
     };
   }
@@ -6936,13 +6943,13 @@
     node.on('click', selectMoves);
   }
 
-  function getCounts(moves, i, e) {
+  function getCounts(moves, i, e) { // jQuery
     var self = $(e);
     var src = self.attr('src');
     var moveId = /(\d+)\.gif/.exec(src)[1];
     moves[moveId] = {};
     moves[moveId].count = Number(/(\d)$/
-      .exec(self.closest('td').html())[1]);
+      .exec(self.closest('td').html().trim())[1]);
     moves[moveId].href = src;
   }
 
@@ -6954,7 +6961,7 @@
     setForage(fshArenaKey, arena);
   }
 
-  function storeMoves() { // jQuery.min
+  function storeMoves() {
     if (jQueryNotPresent()) {return;}
     getForage(fshArenaKey).then(gotMoves);
   }
@@ -10004,7 +10011,7 @@
   function findTheRows() {
     var outerTable = pCC.lastElementChild.previousElementSibling;
     if (outerTable.rows && outerTable.rows.length > 7) {
-      return Array.from(outerTable.rows[7].children[0].children[0].rows).slice(1);
+      return Array.from(outerTable.rows[7].children[0].children[0].rows);
     }
   }
 
@@ -10021,8 +10028,8 @@
     var rankCell = row.children[0];
     var rankName = getRankName(row, rankCell);
     var thisRank = memberRanks.find(partial(aRank, rankName));
-    setCharacterRow(row, thisRank);
     if (hasMembers(thisRank)) {
+      setCharacterRow(row, thisRank);
       insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
         thisRank[1].join(', ') + '</span>');
     }
@@ -15049,8 +15056,8 @@
 
   var relicData;
 
-  function ajaxFailure(jqXHR) {
-    setText(String(jqXHR.status) + ' ' + jqXHR.statusText, processingStatus);
+  function ajaxFailure(err) {
+    setText(err.message, processingStatus);
   }
 
   function hasMerc(disband) {
@@ -21213,7 +21220,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '110';
+  window.FSH.calf = '111';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
