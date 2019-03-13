@@ -22,19 +22,22 @@ function beforeSend(xhr) {
   on(window, 'beforeunload', partial(clearXhr, xhr));
 }
 
-var ignoreFailureStatus = [0, 200];
+var ignoreFailureStatus = [0];
 
 function url(opt) {
   if (opt.data) {return $.param(opt.data);}
   return opt.url;
 }
 
-function handleFailure(opt, jqXhr) {
+function handleFailure(opt, resolve, reject, jqXhr) {
   if (!ignoreFailureStatus.includes(jqXhr.status)) {
     sendException(
       jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt),
       false
     );
+    reject(new Error(
+      jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt)
+    ));
   }
 }
 
@@ -43,8 +46,7 @@ function failFilter([fn, opt, retries, resolve, reject]) {
     if (retries > 0 && jqXhr.status === 503) {
       setTimeout(fn, 100, opt, retries - 1, resolve, reject);
     } else {
-      reject(jqXhr);
-      handleFailure(opt, jqXhr);
+      handleFailure(opt, resolve, reject, jqXhr);
     }
   };
 }
