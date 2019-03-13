@@ -724,18 +724,27 @@
 
   var enabled;
 
-  function logError(e) {
-    if (e.error) {
-      var msg = parseError(e.error);
+  function handleMsgStack(stuff) {
+    if (stuff) {
+      var msg = parseError(stuff);
       if (msg.includes('calfSystem')) {
         sendException(msg, true);
       }
     }
   }
 
+  function logError(e) {
+    handleMsgStack(e.error);
+  }
+
+  function unhandledrejection(e) {
+    handleMsgStack(e.reason);
+  }
+
   function globalErrorHandler() {
     if (!enabled) {
       on(window, 'error', logError);
+      on(window, 'unhandledrejection', unhandledrejection);
       enabled = true;
     }
   }
@@ -2938,16 +2947,20 @@
     return appInv && appInv.s && Array.isArray(appInv.r);
   }
 
+  function buildQuickWear(appInv) {
+    var invTabs = createInvTabs();
+    var invTabsQw = createQuickWear(appInv);
+    insertElement(invTabs, invTabsQw);
+    content$2.innerHTML = '';
+    insertElement(content$2, invTabs);
+    on(invTabs, 'click', eventHandler5(evts5()));
+    insertElement(invTabs, showAHInvManager(appInv));
+  }
+
   function showQuickWear(appInv) {
     if (goodData(appInv)) {
       itemList = appInv;
-      var invTabs = createInvTabs();
-      var invTabsQw = createQuickWear(appInv);
-      insertElement(invTabs, invTabsQw);
-      content$2.innerHTML = '';
-      insertElement(content$2, invTabs);
-      on(invTabs, 'click', eventHandler5(evts5()));
-      insertElement(invTabs, showAHInvManager(appInv));
+      buildQuickWear(appInv);
     }
   }
 
@@ -4719,16 +4732,21 @@
 
   function functionPasses(fn) {return fn();}
 
+  function getTarget(firstCell) {
+    if (firstCell.children[0].tagName === 'A') {return firstCell.children[0];}
+    return firstCell.children[0].children[0];
+  }
+
   function rewardType(theCells) {
     return querySelector('img', theCells[2]).title;
   }
 
   function basicBounty(theCells) {
-    var targetData = theCells[0].children[0].children[0];
+    var targetData = getTarget(theCells[0]);
     return {
       target: getText(targetData),
       link: targetData.href,
-      lvl: getText(targetData.nextSibling).replace(/[[|\]]/, ''), // Text Node
+      lvl: getText(targetData.nextSibling).replace(/[[|\]]/g, ''), // Text Node
       reward: getText(theCells[2]),
       rewardType: rewardType(theCells),
       posted: getText(theCells[3]),
@@ -4821,7 +4839,7 @@
     return '';
   }
 
-  function getTarget(theCells) {
+  function getTarget$1(theCells) {
     return extend(basicBounty(theCells), {
       offerer: getTextTrim(theCells[1].children[0].children[0]),
       tickets: getTextTrim(theCells[5]),
@@ -4846,7 +4864,7 @@
 
   function wantedTarget(target, theRow) {
     if (wanted(target, theRow)) {
-      wantedList$1.bounty.push(getTarget(theRow.cells));
+      wantedList$1.bounty.push(getTarget$1(theRow.cells));
     }
   }
 
@@ -5466,6 +5484,59 @@
     );
   }
 
+  function insertAfterParent(target, fn, listItem) {
+    var tgt = getElementById(target);
+    if (tgt instanceof Node) {
+      var parent = tgt.parentNode;
+      fn(parent, listItem);
+    } else {sendException('#' + target + ' is not a Node', false);}
+  }
+
+  function refIsLast(newNode, referenceNode) {
+    if (referenceNode.nextSibling instanceof Node) { // Text Node
+      return insertElementBefore(newNode, referenceNode.nextSibling); // Text Node
+    }
+    return insertElement(referenceNode.parentNode, newNode);
+  }
+
+  function insertElementAfter(newNode, referenceNode) {
+    if (referenceNode instanceof Node &&
+        referenceNode.parentNode instanceof Node) {
+      return refIsLast(newNode, referenceNode);
+    }
+  }
+
+  function openDialog$1(text, fn) {
+    sendEvent('accordion', text);
+    jQueryDialog(fn);
+  }
+
+  function insertAdjElement(parent, listItem) {
+    insertElementAfter(listItem, parent);
+  }
+
+  function anchorButton(navLvl, text, fn, target) {
+    var li = createLi({className: 'nav-level-' + navLvl});
+    var al = createAnchor({
+      className: 'nav-link fshPoint',
+      textContent: text
+    });
+    on(al, 'click', partial(openDialog$1, text, fn));
+    insertElement(li, al);
+    insertAfterParent(target, insertAdjElement, li);
+  }
+
+  function actionButtons() {
+    anchorButton('2', 'AH Quick Search', injectAuctionSearch,
+      'nav-actions-trade-auctionhouse');
+    anchorButton('2', 'Online Players', injectOnlinePlayers,
+      'nav-actions-interaction-findplayer');
+    anchorButton('2', 'Find Other', injectFindOther,
+      'nav-actions-interaction-findplayer');
+    anchorButton('2', 'Find Buffs', injectFindBuffs,
+      'nav-actions-interaction-findplayer');
+  }
+
   function adjustHeight(theNav, myNav) {
     // first the closed saved variables
     myNav.heights = [
@@ -5489,85 +5560,6 @@
     }
   }
 
-  function refIsLast(newNode, referenceNode) {
-    if (referenceNode.nextSibling instanceof Node) { // Text Node
-      return insertElementBefore(newNode, referenceNode.nextSibling); // Text Node
-    }
-    return insertElement(referenceNode.parentNode, newNode);
-  }
-
-  function insertElementAfter(newNode, referenceNode) {
-    if (referenceNode instanceof Node &&
-        referenceNode.parentNode instanceof Node) {
-      return refIsLast(newNode, referenceNode);
-    }
-  }
-
-  function foundNav(myNav) {
-    if (isObject(myNav)) {return true;}
-    sendException('$(\'#nav\').data(\'hcsNav\') is not an object', false);
-  }
-
-  function foundHeights(myNav) {
-    if ('heights' in myNav) {return true;}
-    sendException('$(\'#nav\').data(\'hcsNav\').heights does not exist', false);
-  }
-
-  function foundWidget(myNav) {
-    if (foundNav(myNav) && foundHeights(myNav)) {return true;}
-  }
-
-  function preFlight() {
-    var theNav = getElementById('nav');
-    var myNav = $(theNav).data('hcsNav');
-    if (foundWidget(myNav)) {
-      return [theNav, myNav];
-    }
-    return [];
-  }
-
-  function updateQuestLink() {
-    var lastActiveQuestPage = getValue('lastActiveQuestPage');
-    if (lastActiveQuestPage.length > 0) {
-      getElementById('nav-character-questbook').href = lastActiveQuestPage;
-    }
-  }
-
-  function updateScavLink() {
-    var lastScavPage = getValue('lastScavPage');
-    if (lastScavPage.length > 0) {
-      getElementById('nav-actions-artisanship-scavenging').href = lastScavPage;
-    }
-  }
-
-  function insertAdjElement(parent, listItem) {
-    insertElementAfter(listItem, parent);
-  }
-
-  function insertAfterParent(target, fn, listItem) {
-    var tgt = getElementById(target);
-    if (tgt instanceof Node) {
-      var parent = tgt.parentNode;
-      fn(parent, listItem);
-    } else {sendException('#' + target + ' is not a Node', false);}
-  }
-
-  function openDialog$1(text, fn) {
-    sendEvent('accordion', text);
-    jQueryDialog(fn);
-  }
-
-  function anchorButton(navLvl, text, fn, target) {
-    var li = createLi({className: 'nav-level-' + navLvl});
-    var al = createAnchor({
-      className: 'nav-link fshPoint',
-      textContent: text
-    });
-    on(al, 'click', partial(openDialog$1, text, fn));
-    insertElement(li, al);
-    insertAfterParent(target, insertAdjElement, li);
-  }
-
   function buffLogLink() {
     if (getValue('keepBuffLog')) {
       anchorButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
@@ -5588,25 +5580,6 @@
     }
   }
 
-  function newGuildLogLink() {
-    if (currentGuildId() && !getValue('useNewGuildLog')) {
-      // if not using the new guild log, show it as a separate menu entry
-      insertAfterParent('nav-guild-ledger-advisor', insertHtmlAfterEnd,
-        '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="' + newGuildLogUrl + '"' +
-        '>New Guild Log</a></li>');
-    }
-  }
-
-  function guildInventory() {
-    if (currentGuildId()) {
-      insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
-        '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-        'guild-guildinvmanager" href="' + notepadBlankUrl +
-        'guildinvmgr">Guild Inventory</a></li>');
-    }
-  }
-
   function characterButtons() {
     anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
     insertAfterParent('nav-character-log', insertHtmlAfterEnd,
@@ -5623,15 +5596,70 @@
       'nav-character-notepad');
   }
 
-  function actionButtons() {
-    anchorButton('2', 'AH Quick Search', injectAuctionSearch,
-      'nav-actions-trade-auctionhouse');
-    anchorButton('2', 'Online Players', injectOnlinePlayers,
-      'nav-actions-interaction-findplayer');
-    anchorButton('2', 'Find Other', injectFindOther,
-      'nav-actions-interaction-findplayer');
-    anchorButton('2', 'Find Buffs', injectFindBuffs,
-      'nav-actions-interaction-findplayer');
+  function navMenu(myNav) { // jQuery
+    var oldSave = myNav._saveState;
+    myNav._saveState = function(_id) {
+      var id = _id;
+      var myHeight = $('li.nav-level-0', '#nav').eq(id).find('ul').height();
+      if (myHeight === 0) {id = -1;}
+      oldSave.call(myNav, id);
+    };
+  }
+
+  function foundNav(myNav) {
+    if (isObject(myNav)) {return true;}
+    sendException('$(\'#nav\').data(\'hcsNav\') is not an object', false);
+  }
+
+  function foundHeights(myNav) {
+    if ('heights' in myNav) {return true;}
+    sendException('$(\'#nav\').data(\'hcsNav\').heights does not exist', false);
+  }
+
+  function foundWidget(myNav) {
+    if (foundNav(myNav) && foundHeights(myNav)) {return true;}
+  }
+
+  function preFlight() {
+    var theNav = getElementById('nav');
+    var myNav = $(theNav).data('hcsNav');
+    if (myNav && foundWidget(myNav)) {
+      return [theNav, myNav];
+    }
+    return [];
+  }
+
+  function updateQuestLink() {
+    var lastActiveQuestPage = getValue('lastActiveQuestPage');
+    if (lastActiveQuestPage.length > 0) {
+      getElementById('nav-character-questbook').href = lastActiveQuestPage;
+    }
+  }
+
+  function updateScavLink() {
+    var lastScavPage = getValue('lastScavPage');
+    if (lastScavPage.length > 0) {
+      getElementById('nav-actions-artisanship-scavenging').href = lastScavPage;
+    }
+  }
+
+  function guildInventory() {
+    if (currentGuildId()) {
+      insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
+        '<li class="nav-level-2"><a class="nav-link" id="nav-' +
+        'guild-guildinvmanager" href="' + notepadBlankUrl +
+        'guildinvmgr">Guild Inventory</a></li>');
+    }
+  }
+
+  function newGuildLogLink() {
+    if (currentGuildId() && !getValue('useNewGuildLog')) {
+      // if not using the new guild log, show it as a separate menu entry
+      insertAfterParent('nav-guild-ledger-advisor', insertHtmlAfterEnd,
+        '<li class="nav-level-2"><a class="nav-link" ' +
+        'href="' + newGuildLogUrl + '"' +
+        '>New Guild Log</a></li>');
+    }
   }
 
   function topRatedLink() {
@@ -5658,6 +5686,7 @@
     if (theNav && myNav) {
       injectItems();
       adjustHeight(theNav, myNav);
+      navMenu(myNav);
     }
   }
 
@@ -5902,19 +5931,6 @@
     window.openWindow = fshOpen;
   }
 
-  function navMenu() { // jQuery
-    if (jQueryNotPresent()) {return;}
-    var myNav = $('#nav').data('hcsNav');
-    if (!myNav) {return;}
-    var oldSave = myNav._saveState;
-    myNav._saveState = function(_id) {
-      var id = _id;
-      var myHeight = $('li.nav-level-0', '#nav').eq(id).find('ul').height();
-      if (myHeight === 0) {id = -1;}
-      oldSave.call(myNav, id);
-    };
-  }
-
   function scoutTowerLink() {
     var spoils = getElementById('minibox-spoilsofwar');
     if (spoils) {
@@ -5953,7 +5969,6 @@
 
   function priorityThree() {
     [
-      navMenu,
       statbar,
       injectStaminaCalculator,
       injectLevelupCalculator,
@@ -7269,23 +7284,23 @@
     }
   }
 
-  function createSuccess(temp, textStatus) {
+  function createSuccess(temp) {
     var myParent = temp.parentNode;
     if (!myParent) {return;}
-    myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
+    myParent.innerHTML = '<div class="fshScs">Success</div>';
     updateInfoDiv(myParent.previousElementSibling.previousElementSibling,
       temp[temp.selectedIndex].text);
     amILast();
   }
 
-  function potionDone(temp, data, textStatus) {
+  function potionDone(temp, data) {
     var resultNode = temp.parentNode;
     if (!resultNode) {return;}
     if (data.error) {
       resultNode.innerHTML = '<div class="fshScs">' +
         data.error + '</div>';
     } else {
-      createSuccess(temp, textStatus);
+      createSuccess(temp);
     }
   }
 
@@ -9656,6 +9671,7 @@
 
   function removeGuildAvyImgBorder() {
     var guildLogo = querySelector('#pCC img[oldtitle$="\'s Logo"]');
+    if (!guildLogo) {return;}
     guildLogo.removeAttribute('style');
     wrapUrl(guildLogo);
   }
@@ -9685,30 +9701,6 @@
     if (calf.subcmd === 'view') {injectViewGuild();}
   }
 
-  var playerBank = {
-    headText: 'Bank',
-    appLink: true,
-    depoPos: 2,
-    balPos: 1,
-    data: {
-      cmd: 'bank',
-      subcmd: 'transaction'
-    },
-    initWithdraw: ''
-  };
-  var guildBank = {
-    headText: 'Guild Bank',
-    appLink: false,
-    depoPos: 3,
-    balPos: 2,
-    data: {
-      cmd: 'guild',
-      subcmd: 'bank',
-      subcmd2: 'transaction'
-    },
-    initWithdraw: '1'
-  };
-  var bankSettings;
   var statbarGold = '#pH #statbar-gold';
   var statbarGoldTooltip = '#pH #statbar-gold-tooltip-general dd';
   var pccB = '#pCC b';
@@ -9758,21 +9750,20 @@
     }
   }
 
-  function replaceValues(doc, infoBox) {
+  function replaceValues(bankSettings, doc, infoBox) {
     doInfoBox(infoBox);
     doStatBarGold(doc);
-    var o = bankSettings;
-    doBoldText(doc, o.balPos);
-    disableDepo(o.depoPos);
-    updateDepoAmount(o, doc);
-    $(withdrawAmount).val(o.initWithdraw);
+    doBoldText(doc, bankSettings.balPos);
+    disableDepo(bankSettings.depoPos);
+    updateDepoAmount(bankSettings, doc);
+    $(withdrawAmount).val(bankSettings.initWithdraw);
   }
 
-  function transResponse(response) { // jQuery
+  function transResponse(bankSettings, response) { // jQuery
     var doc = createDocument(response);
     var infoBox = $(infoMsg, doc);
     if (infoBox.length === 0) {return;}
-    replaceValues(doc, infoBox);
+    replaceValues(bankSettings, doc, infoBox);
   }
 
   function invalidAmount(o, amount) { // jQuery
@@ -9780,76 +9771,79 @@
       !$.isNumeric(amount) || amount < 1;
   }
 
-  function doAjax$2(oData) {
-    indexAjaxData(oData).then(transResponse);
+  function doAjax$2(bankSettings) {
+    indexAjaxData(bankSettings.data).then(partial(transResponse, bankSettings));
   }
 
-  function bankDeposit(e) { // jQuery
+  function bankDeposit(bankSettings, e) { // jQuery
     e.preventDefault();
-    var o = bankSettings;
     var amount = $(depositAmount).val();
-    if (invalidAmount(o, amount)) {return;}
-    o.data.mode = 'deposit';
-    o.data.amount = amount;
-    doAjax$2(o.data);
+    if (invalidAmount(bankSettings, amount)) {return;}
+    bankSettings.data.mode = 'deposit';
+    bankSettings.data.amount = amount;
+    doAjax$2(bankSettings);
   }
 
-  function bankWithdrawal(e) { // jQuery
+  function bankWithdrawal(bankSettings, e) { // jQuery
     e.preventDefault();
-    var o = bankSettings;
     var amount = $(withdrawAmount).val();
     if (!$.isNumeric(amount) || amount < 1) {return;}
-    o.data.mode = 'withdraw';
-    o.data.amount = amount;
-    doAjax$2(o.data);
+    bankSettings.data.mode = 'withdraw';
+    bankSettings.data.amount = amount;
+    doAjax$2(bankSettings);
   }
 
-  function linkToGuildBank(o, bank) { // jQuery
-    if (o.appLink) {
-      bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
+  function linkToGuildBank(bankSettings, bank) { // jQuery
+    if (bankSettings.appLink) {
+      bank.after('<div class="fshCenter">' +
         '<a href="' + guildSubcmdUrl + 'bank">Go to Guild Bank</a>' +
-        '</td></tr>');
+        '</div>');
     }
   }
 
-  function captureButtons(o, depo, withdraw) { // jQuery
-    if ($(pccB).eq(o.depoPos).text() === '0') { // Check Deposits Available
+  function captureButtons(bankSettings, depo, withdraw) { // jQuery
+    if ($(pccB).eq(bankSettings.depoPos).text() === '0') { // Check Deposits Available
       depo.prop(disabled, true);
     } else {
-      depo.on('click', bankDeposit);
+      depo.on('click', partial(bankDeposit, bankSettings));
     }
-    withdraw.on('click', bankWithdrawal);
+    withdraw.on('click', partial(bankWithdrawal, bankSettings));
   }
 
-  function appLink(o, bank) { // jQuery
-    linkToGuildBank(o, bank);
+  function appLink(bankSettings, bank) { // jQuery
+    linkToGuildBank(bankSettings, bank);
     var depo = $(inputDepo);
     if (depo.length !== 1) {return;}
     var withdraw = $('#pCC input[value="Withdraw"]');
     if (withdraw.length !== 1) {return;}
-    captureButtons(o, depo, withdraw);
+    captureButtons(bankSettings, depo, withdraw);
   }
 
-  function hasJquery$1() { // jQuery
-    var o = bankSettings;
-    var bank = $(pccB);
-    if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
-      appLink(o, bank);
+  function hasJquery$1(bankSettings) { // jQuery
+    var bank = $(bankSettings.headSelector);
+    if (bank.length !== 0 && bank.eq(0).text() === bankSettings.headText) {
+      appLink(bankSettings, bank);
     }
   }
 
-  function ajaxifyBank() {
-    if (jQueryPresent()) {hasJquery$1();}
+  function ajaxifyBank(bankSettings) {
+    if (jQueryPresent()) {hasJquery$1(bankSettings);}
   }
 
   function injectGuildBank() {
-    bankSettings = guildBank;
-    ajaxifyBank();
-  }
-
-  function injectBank() {
-    bankSettings = playerBank;
-    ajaxifyBank();
+    ajaxifyBank({
+      headSelector: '#pCC b',
+      headText: 'Guild Bank',
+      appLink: false,
+      depoPos: 3,
+      balPos: 2,
+      data: {
+        cmd: 'guild',
+        subcmd: 'bank',
+        subcmd2: 'transaction'
+      },
+      initWithdraw: '1'
+    });
   }
 
   function notLastUpdate(pair) {return pair[0] !== 'lastUpdate';}
@@ -12298,6 +12292,21 @@
     bank: {'-': injectGuildBank},
     hall: hall
   };
+
+  function injectBank() {
+    ajaxifyBank({
+      headSelector: '#pCC h2',
+      headText: 'Bank',
+      appLink: true,
+      depoPos: 1,
+      balPos: 0,
+      data: {
+        cmd: 'bank',
+        subcmd: 'transaction'
+      },
+      initWithdraw: ''
+    });
+  }
 
   function buyitem(item) {
     return callApp({
@@ -21204,7 +21213,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '109';
+  window.FSH.calf = '110';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
