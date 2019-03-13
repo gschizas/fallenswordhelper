@@ -12,7 +12,7 @@ import {doButtons, setCharacterRow} from './doButtons';
 function findTheRows() {
   var outerTable = pCC.lastElementChild.previousElementSibling;
   if (outerTable.rows && outerTable.rows.length > 7) {
-    return Array.from(outerTable.rows[7].children[0].children[0].rows).slice(1);
+    return Array.from(outerTable.rows[7].children[0].children[0].rows);
   }
 }
 
@@ -29,8 +29,8 @@ function writeRanks(memberRanks, row) {
   var rankCell = row.children[0];
   var rankName = getRankName(row, rankCell);
   var thisRank = memberRanks.find(partial(aRank, rankName));
-  setCharacterRow(row, thisRank);
   if (hasMembers(thisRank)) {
+    setCharacterRow(row, thisRank);
     insertHtmlBeforeEnd(rankCell, ' <span class="fshBlue">- ' +
       thisRank[1].join(', ') + '</span>');
   }
