@@ -5,20 +5,24 @@ import {sendException} from './fshGa';
 var enabled;
 
 function handleMsgStack(stuff) {
+  var msg = parseError(stuff);
+  if (msg.includes('calfSystem')) {
+    sendException(msg, true);
+  }
+}
+
+function handleError(stuff) {
   if (stuff) {
-    var msg = parseError(stuff);
-    if (msg.includes('calfSystem')) {
-      sendException(msg, true);
-    }
+    handleMsgStack(stuff);
   }
 }
 
 function logError(e) {
-  handleMsgStack(e.error);
+  handleError(e.error);
 }
 
 function unhandledrejection(e) {
-  handleMsgStack(e.reason);
+  handleError(e.reason);
 }
 
 export default function globalErrorHandler() {

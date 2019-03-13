@@ -31,8 +31,8 @@ import {
 
 var relicData;
 
-function ajaxFailure(jqXHR) {
-  setText(String(jqXHR.status) + ' ' + jqXHR.statusText, processingStatus);
+function ajaxFailure(err) {
+  setText(err.message, processingStatus);
 }
 
 function hasMerc(disband) {

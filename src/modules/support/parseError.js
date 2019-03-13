@@ -8,5 +8,6 @@ function parseStack(e) {
 
 export default function parseError(e) {
   if (e.stack) {return parseStack(e);}
-  return e.message;
+  if (e.message) {return e.message;}
+  return String(e);
 }
