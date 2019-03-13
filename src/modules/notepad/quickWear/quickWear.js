@@ -115,16 +115,20 @@ function goodData(appInv) {
   return appInv && appInv.s && Array.isArray(appInv.r);
 }
 
+function buildQuickWear(appInv) {
+  var invTabs = createInvTabs();
+  var invTabsQw = createQuickWear(appInv);
+  insertElement(invTabs, invTabsQw);
+  content.innerHTML = '';
+  insertElement(content, invTabs);
+  on(invTabs, 'click', eventHandler5(evts5()));
+  insertElement(invTabs, showAHInvManager(appInv));
+}
+
 function showQuickWear(appInv) {
   if (goodData(appInv)) {
     itemList = appInv;
-    var invTabs = createInvTabs();
-    var invTabsQw = createQuickWear(appInv);
-    insertElement(invTabs, invTabsQw);
-    content.innerHTML = '';
-    insertElement(content, invTabs);
-    on(invTabs, 'click', eventHandler5(evts5()));
-    insertElement(invTabs, showAHInvManager(appInv));
+    buildQuickWear(appInv);
   }
 }
 

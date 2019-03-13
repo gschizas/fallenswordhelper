@@ -29,23 +29,23 @@ function amILast() {
   }
 }
 
-function createSuccess(temp, textStatus) {
+function createSuccess(temp) {
   var myParent = temp.parentNode;
   if (!myParent) {return;}
-  myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
+  myParent.innerHTML = '<div class="fshScs">Success</div>';
   updateInfoDiv(myParent.previousElementSibling.previousElementSibling,
     temp[temp.selectedIndex].text);
   amILast();
 }
 
-function potionDone(temp, data, textStatus) {
+function potionDone(temp, data) {
   var resultNode = temp.parentNode;
   if (!resultNode) {return;}
   if (data.error) {
     resultNode.innerHTML = '<div class="fshScs">' +
       data.error + '</div>';
   } else {
-    createSuccess(temp, textStatus);
+    createSuccess(temp);
   }
 }
 

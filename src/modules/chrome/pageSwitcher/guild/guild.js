@@ -4,7 +4,7 @@ import guildMailbox from '../../../mailbox/guildMailbox';
 import hall from './hall';
 import injectBioWidgets from '../../../profile/bio/bioWidgets';
 import injectGuild from '../../../guild/guild';
-import {injectGuildBank} from '../../../bank';
+import injectGuildBank from '../../../bank/injectGuildBank';
 import injectGuildRanks from '../../../guild/ranks/rank';
 import injectRPUpgrades from '../../../guild/injectRPUpgrades';
 import injectScouttower from '../../../guild/scoutTower/injectScouttower';

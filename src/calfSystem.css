@@ -310,7 +310,6 @@
 #tg tbody {
   display: block;
   height: 60vh;
-  /* overflow: auto; */
   overflow-y: scroll;
   width: 100%;
 }
