@@ -4,13 +4,13 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import partial from '../common/partial';
 import setForage from '../ajax/setForage';
 
-function getCounts(moves, i, e) {
+function getCounts(moves, i, e) { // jQuery
   var self = $(e);
   var src = self.attr('src');
   var moveId = /(\d+)\.gif/.exec(src)[1];
   moves[moveId] = {};
   moves[moveId].count = Number(/(\d)$/
-    .exec(self.closest('td').html())[1]);
+    .exec(self.closest('td').html().trim())[1]);
   moves[moveId].href = src;
 }
 
@@ -22,7 +22,7 @@ function gotMoves(_arena) { // jQuery
   setForage(fshArenaKey, arena);
 }
 
-export default function storeMoves() { // jQuery.min
+export default function storeMoves() {
   if (jQueryNotPresent()) {return;}
   getForage(fshArenaKey).then(gotMoves);
 }
