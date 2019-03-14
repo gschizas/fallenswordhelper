@@ -4,25 +4,25 @@ import {sendException} from './fshGa';
 
 var enabled;
 
-function handleMsgStack(stuff) {
+function handleMsgStack(type, stuff) {
   var msg = parseError(stuff);
   if (msg.includes('calfSystem')) {
-    sendException(msg, true);
+    sendException(type + msg, true);
   }
 }
 
-function handleError(stuff) {
+function handleError(type, stuff) {
   if (stuff) {
-    handleMsgStack(stuff);
+    handleMsgStack(type, stuff);
   }
 }
 
 function logError(e) {
-  handleError(e.error);
+  handleError('window onerror', e.error);
 }
 
 function unhandledrejection(e) {
-  handleError(e.reason);
+  handleError('Uncaught (in promise) ', e.reason);
 }
 
 export default function globalErrorHandler() {
