@@ -1,4 +1,5 @@
 import on from '../common/on';
+import parseError from '../support/parseError';
 import partial from '../common/partial';
 import {sendException} from '../support/fshGa';
 
@@ -22,31 +23,33 @@ function beforeSend(xhr) {
   on(window, 'beforeunload', partial(clearXhr, xhr));
 }
 
-var ignoreFailureStatus = [0];
+var ignoreFailureStatus = ['abort'];
 
 function url(opt) {
   if (opt.data) {return $.param(opt.data);}
   return opt.url;
 }
 
-function handleFailure(opt, resolve, reject, jqXhr) {
-  if (!ignoreFailureStatus.includes(jqXhr.status)) {
-    sendException(
-      jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt),
-      false
-    );
-    reject(new Error(
-      jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt)
-    ));
+function cantIgnore(opt, reject, textStatus, errorThrown) {
+  sendException(
+    textStatus + ': ' + errorThrown + ' - ' + url(opt),
+    false
+  );
+  reject(new Error(textStatus + ' (' + errorThrown + ') - ' + url(opt)));
+}
+
+function handleFailure(opt, reject, textStatus, errorThrown) {
+  if (!ignoreFailureStatus.includes(textStatus)) {
+    cantIgnore(opt, reject, textStatus, errorThrown);
   }
 }
 
 function failFilter([fn, opt, retries, resolve, reject]) {
-  return function(jqXhr) { // Closure
+  return function ajaxFail(jqXhr, textStatus, errorThrown) { // Closure
     if (retries > 0 && jqXhr.status === 503) {
       setTimeout(fn, 100, opt, retries - 1, resolve, reject);
     } else {
-      handleFailure(opt, resolve, reject, jqXhr);
+      handleFailure(opt, reject, textStatus, errorThrown);
     }
   };
 }
