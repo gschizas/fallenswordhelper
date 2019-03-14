@@ -725,25 +725,25 @@
 
   var enabled;
 
-  function handleMsgStack(stuff) {
+  function handleMsgStack(type, stuff) {
     var msg = parseError(stuff);
     if (msg.includes('calfSystem')) {
-      sendException(msg, true);
+      sendException(type + msg, true);
     }
   }
 
-  function handleError(stuff) {
+  function handleError(type, stuff) {
     if (stuff) {
-      handleMsgStack(stuff);
+      handleMsgStack(type, stuff);
     }
   }
 
   function logError(e) {
-    handleError(e.error);
+    handleError('window onerror', e.error);
   }
 
   function unhandledrejection(e) {
-    handleError(e.reason);
+    handleError('Uncaught (in promise) ', e.reason);
   }
 
   function globalErrorHandler() {
@@ -1676,31 +1676,33 @@
     on(window, 'beforeunload', partial(clearXhr, xhr));
   }
 
-  var ignoreFailureStatus = [0];
+  var ignoreFailureStatus = ['abort'];
 
   function url(opt) {
     if (opt.data) {return $.param(opt.data);}
     return opt.url;
   }
 
-  function handleFailure(opt, resolve, reject, jqXhr) {
-    if (!ignoreFailureStatus.includes(jqXhr.status)) {
-      sendException(
-        jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt),
-        false
-      );
-      reject(new Error(
-        jqXhr.status + ' (' + jqXhr.statusText + ') - ' + url(opt)
-      ));
+  function cantIgnore(opt, reject, textStatus, errorThrown) {
+    sendException(
+      textStatus + ': ' + errorThrown + ' - ' + url(opt),
+      false
+    );
+    reject(new Error(textStatus + ' (' + errorThrown + ') - ' + url(opt)));
+  }
+
+  function handleFailure(opt, reject, textStatus, errorThrown) {
+    if (!ignoreFailureStatus.includes(textStatus)) {
+      cantIgnore(opt, reject, textStatus, errorThrown);
     }
   }
 
   function failFilter([fn, opt, retries, resolve, reject]) {
-    return function(jqXhr) { // Closure
+    return function ajaxFail(jqXhr, textStatus, errorThrown) { // Closure
       if (retries > 0 && jqXhr.status === 503) {
         setTimeout(fn, 100, opt, retries - 1, resolve, reject);
       } else {
-        handleFailure(opt, resolve, reject, jqXhr);
+        handleFailure(opt, reject, textStatus, errorThrown);
       }
     };
   }
@@ -21220,7 +21222,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '111';
+  window.FSH.calf = '112';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

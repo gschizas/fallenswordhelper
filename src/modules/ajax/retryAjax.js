@@ -1,5 +1,4 @@
 import on from '../common/on';
-import parseError from '../support/parseError';
 import partial from '../common/partial';
 import {sendException} from '../support/fshGa';
 
