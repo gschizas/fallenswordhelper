@@ -1,3 +1,4 @@
+import AjaxError from './AjaxError';
 import on from '../common/on';
 import partial from '../common/partial';
 import {sendException} from '../support/fshGa';
@@ -24,22 +25,10 @@ function beforeSend(xhr) {
 
 var ignoreFailureStatus = ['abort'];
 
-function url(opt) {
-  if (opt.data) {return $.param(opt.data);}
-  return opt.url;
-}
-
-function cantIgnore(opt, reject, textStatus, errorThrown) {
-  sendException(
-    textStatus + ': ' + errorThrown + ' - ' + url(opt),
-    false
-  );
-  reject(new Error(textStatus + ' (' + errorThrown + ') - ' + url(opt)));
-}
-
-function handleFailure(opt, reject, textStatus, errorThrown) {
-  if (!ignoreFailureStatus.includes(textStatus)) {
-    cantIgnore(opt, reject, textStatus, errorThrown);
+function handleFailure(reject, ajaxErr) {
+  if (!ignoreFailureStatus.includes(ajaxErr.jqTextStatus)) {
+    sendException(ajaxErr.toString(), false);
+    reject(ajaxErr);
   }
 }
 
@@ -48,7 +37,8 @@ function failFilter([fn, opt, retries, resolve, reject]) {
     if (retries > 0 && jqXhr.status === 503) {
       setTimeout(fn, 100, opt, retries - 1, resolve, reject);
     } else {
-      handleFailure(opt, reject, textStatus, errorThrown);
+      handleFailure(reject,
+        new AjaxError(opt, jqXhr, textStatus, errorThrown));
     }
   };
 }
