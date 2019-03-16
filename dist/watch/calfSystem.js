@@ -729,21 +729,24 @@
     var msg = parseError(stuff);
     if (msg.includes('calfSystem')) {
       sendException(type + msg, true);
+      return true;
     }
   }
 
   function handleError(type, stuff) {
     if (stuff) {
-      handleMsgStack(type, stuff);
+      return handleMsgStack(type, stuff);
     }
   }
 
   function logError(e) {
-    handleError('window onerror', e.error);
+    handleError('window onerror ', e.error);
   }
 
   function unhandledrejection(e) {
-    handleError('Uncaught (in promise) ', e.reason);
+    if (handleError('Uncaught (in promise) ', e.reason)) {
+      e.preventDefault();
+    }
   }
 
   function globalErrorHandler() {
@@ -1656,6 +1659,37 @@
       '</div><table id="fshInv" class="allow stripe hover"></table>');
   }
 
+  function url(opt) {
+    if (opt.data) {return $.param(opt.data);}
+    return opt.url;
+  }
+
+  function buildErrorMsg(opt, jqXhr, textStatus, errorThrown) {
+    if (jqXhr.statusText === errorThrown.toString()) {
+      return jqXhr.status + ' ' + jqXhr.statusText + ' - ' + url(opt);
+    }
+    return jqXhr.status + ' ' + jqXhr.statusText + ' - ' +
+      textStatus + ' ' + errorThrown + ' - ' + url(opt);
+  }
+
+  class AjaxError extends Error {
+    constructor(opt, jqXhr, textStatus, errorThrown, ...params) {
+      // Pass remaining arguments (including vendor specific ones) to parent constructor
+      super(buildErrorMsg(opt, jqXhr, textStatus, errorThrown), ...params);
+
+      // Maintains proper stack trace for where our error was thrown (only available on V8)
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, AjaxError);
+      }
+
+      // Custom debugging information
+      this.jqSettings = opt;
+      this.jqXhr = jqXhr;
+      this.jqTextStatus = textStatus;
+      this.jqErrorThrown = errorThrown;
+    }
+  }
+
   var paused$1 = true;
   var queue = [];
   var globalHandler;
@@ -1678,22 +1712,10 @@
 
   var ignoreFailureStatus = ['abort'];
 
-  function url(opt) {
-    if (opt.data) {return $.param(opt.data);}
-    return opt.url;
-  }
-
-  function cantIgnore(opt, reject, textStatus, errorThrown) {
-    sendException(
-      textStatus + ': ' + errorThrown + ' - ' + url(opt),
-      false
-    );
-    reject(new Error(textStatus + ' (' + errorThrown + ') - ' + url(opt)));
-  }
-
-  function handleFailure(opt, reject, textStatus, errorThrown) {
-    if (!ignoreFailureStatus.includes(textStatus)) {
-      cantIgnore(opt, reject, textStatus, errorThrown);
+  function handleFailure(reject, ajaxErr) {
+    if (!ignoreFailureStatus.includes(ajaxErr.jqTextStatus)) {
+      sendException(ajaxErr.toString(), false);
+      reject(ajaxErr);
     }
   }
 
@@ -1702,7 +1724,8 @@
       if (retries > 0 && jqXhr.status === 503) {
         setTimeout(fn, 100, opt, retries - 1, resolve, reject);
       } else {
-        handleFailure(opt, reject, textStatus, errorThrown);
+        handleFailure(reject,
+          new AjaxError(opt, jqXhr, textStatus, errorThrown));
       }
     };
   }
@@ -21222,7 +21245,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '112';
+  window.FSH.calf = '113';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
