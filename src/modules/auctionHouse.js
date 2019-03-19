@@ -17,7 +17,7 @@ function doRefresh() {
   clickThis(getElementById('refresh'));
 }
 
-function doCancel(cancelButton) {
+function doCancel(cancelButton) { // jQuery.min
   var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
   cancelButton.outerHTML = '<img src="' + imageServer +
     '/skin/loading.gif" width="14" height="14">';
@@ -28,7 +28,7 @@ function doCancel(cancelButton) {
   });
 }
 
-function cancelAllAH() { // jQuery
+function cancelAllAH() {
   var cancelButtons = getArrayByClassName('auctionCancel',
     getElementById('resultRows'));
   if (cancelButtons.length === 0) {return;}
