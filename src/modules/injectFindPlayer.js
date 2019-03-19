@@ -1,3 +1,4 @@
+import {closestForm} from './common/closest';
 import dontPost from './common/dontPost';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import on from './common/on';
@@ -10,11 +11,6 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from './common/levelHighlight';
-
-function closestForm(el) {
-  if (el.tagName === 'FORM') {return el;}
-  return closestForm(el.parentNode);
-}
 
 function updateUrl(evt) {
   evt.preventDefault();
