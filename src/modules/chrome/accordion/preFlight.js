@@ -16,7 +16,7 @@ function foundWidget(myNav) {
   if (foundNav(myNav) && foundHeights(myNav)) {return true;}
 }
 
-export default function preFlight() {
+export default function preFlight() { // jQuery.min
   var theNav = getElementById('nav');
   var myNav = $(theNav).data('hcsNav');
   if (myNav && foundWidget(myNav)) {

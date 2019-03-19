@@ -9,6 +9,7 @@ import insertAfterParent from './insertAfterParent';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import navMenu from './navMenu';
+import {pCL} from '../../support/layout';
 import preFlight from './preFlight';
 import {
   cmdUrl,
@@ -79,6 +80,6 @@ function doAccordion() {
 }
 
 export default function injectMenu() {
-  if (!getElementById('pCL') || jQueryNotPresent()) {return;}
+  if (!pCL || jQueryNotPresent()) {return;}
   doAccordion();
 }

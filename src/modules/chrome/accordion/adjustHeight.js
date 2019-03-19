@@ -17,7 +17,7 @@ export default function adjustHeight(theNav, myNav) {
     132,
     null
   ];
-  if (myNav.state !== '-1' && myNav.state !== -1) {
+  if (Number(myNav.state) !== -1) {
     // and now the open one
     theNav.children[myNav.state].children[1].style.height =
       myNav.heights[myNav.state] + 'px';
