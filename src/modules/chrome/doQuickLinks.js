@@ -40,7 +40,7 @@ function makeQuickLinks(quickLinks) {
   return quickLinks.map(linkHtml).join('');
 }
 
-function haveLinks(quickLinks) { // Native ?
+function haveLinks(quickLinks) {
   var draggableQuickLinks = getValue('draggableQuickLinks');
   var html = '<div style="top:' + getValue('quickLinksTopPx') + 'px; left:' +
     getValue('quickLinksLeftPx') + 'px; background-image:url(\'' + imageServer +
@@ -57,7 +57,7 @@ function haveNode() {
   if (quickLinks.length > 0) {haveLinks(quickLinks);}
 }
 
-function injectQuickLinks() { // Native ?
+function injectQuickLinks() {
   var node = getElementById('statbar-container');
   if (node) {haveNode();}
 }
