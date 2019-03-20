@@ -65,8 +65,6 @@
   "hideMatchesForCompletedMoves":false,
   "doNotKillList":"",
   "enableBioCompressor":false,
-  "maxCompressedCharacters":250,
-  "maxCompressedLines":10,
   "currentGoldSentTotal":0,
   "keepBuffLog":false,
   "buffLog":"",

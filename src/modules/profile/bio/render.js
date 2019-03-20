@@ -13,7 +13,7 @@ export default function renderBio(_bioContents) {
   if (bioContents.indexOf('[cmd]') < 0) {bioContents += '[cmd]';}
   bioContents = bioContents.replace('[cmd]',
     '<br><input id="fshSendBuffMsg" ' +
-    'class="custombutton" type="button" value="Ask For Buffs">' +
-    '<span id="buffCost" class="fshRed"></span>');
+    'class="custombutton" type="button" value="Ask For Buffs"><br>' +
+    '<span id="buffCost" class="fshRed">&nbsp;</span>');
   return bioContents;
 }

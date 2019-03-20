@@ -10,6 +10,7 @@ module.exports = {
     DOMParser: false,
     Element: false,
     EventTarget: false,
+    getComputedStyle: false,
     HTMLDocument: false,
     HTMLTableElement: false,
     Image: false,

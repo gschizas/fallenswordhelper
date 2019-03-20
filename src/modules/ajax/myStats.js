@@ -32,7 +32,6 @@ function getProfileFromForage(data) {
 
 export default function myStats(force) {
   if (force) {return getMyProfile();}
-  // jQuery 1.7 uses pipe instead of then
   return getForage('fsh_selfProfile')
     .then(getProfileFromForage);
 }

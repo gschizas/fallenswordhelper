@@ -1,28 +1,30 @@
+import {closestTd} from '../common/closest';
 import {fshArenaKey} from './assets';
 import getForage from '../ajax/getForage';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import partial from '../common/partial';
+import getTextTrim from '../common/getTextTrim';
+import querySelectorArray from '../common/querySelectorArray';
 import setForage from '../ajax/setForage';
 
-function getCounts(moves, i, e) { // jQuery
-  var self = $(e);
-  var src = self.attr('src');
-  var moveId = /(\d+)\.gif/.exec(src)[1];
-  moves[moveId] = {};
-  moves[moveId].count = Number(/(\d)$/
-    .exec(self.closest('td').html().trim())[1]);
-  moves[moveId].href = src;
+function getCount(moveImg) {
+  return /(\d)$/.exec(getTextTrim(closestTd(moveImg)))[1];
 }
 
-function gotMoves(_arena) { // jQuery
+function getCounts(prev, moveImg) {
+  var moveId = /(\d+)\.gif/.exec(moveImg.src)[1];
+  prev[moveId] = {
+    count: Number(getCount(moveImg)),
+    href: moveImg.src
+  };
+  return prev;
+}
+
+function gotMoves(_arena) {
   var arena = _arena || {};
-  arena.moves = {};
-  var arenaMoves = $('#pCC img[vspace="4"]').slice(1);
-  arenaMoves.each(partial(getCounts, arena.moves));
+  var arenaMoves = querySelectorArray('#pCC img[vspace="4"]').slice(1);
+  arena.moves = arenaMoves.reduce(getCounts, {});
   setForage(fshArenaKey, arena);
 }
 
 export default function storeMoves() {
-  if (jQueryNotPresent()) {return;}
   getForage(fshArenaKey).then(gotMoves);
 }

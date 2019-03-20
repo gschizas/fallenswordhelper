@@ -25,7 +25,7 @@ function notUpgradesPage() {
   checkLastUpgrade();
 }
 
-export default function injectUpgradeAlert() { // jQuery
+export default function injectUpgradeAlert() {
   if (jQueryPresent() && notGoldUpgradesPage()) {
     notUpgradesPage();
   }

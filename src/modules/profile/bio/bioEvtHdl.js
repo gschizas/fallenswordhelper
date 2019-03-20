@@ -20,7 +20,7 @@ function hazBuffs() {
   var myEntries = Object.entries(buffCost.buffs);
   var totalText = formatCost(myEntries.reduce(totalCost,
     {k: 0, fsp: 0, stam: 0, unknown: 0}));
-  getElementById('buffCost').innerHTML = '<br><span class="tip-static" ' +
+  getElementById('buffCost').innerHTML = '<span class="tip-static" ' +
     'data-tipped="This is an estimated cost based on how the script finds ' +
     'the cost associated with buffs from viewing bio. It can be incorrect, ' +
     'please use with discretion.<br><hr><table border=0>' +
@@ -33,7 +33,7 @@ function updateBuffCost() { // Legacy
   if (buffCost.count > 0) {
     hazBuffs();
   } else {
-    getElementById('buffCost').innerHTML = '';
+    getElementById('buffCost').innerHTML = '&nbsp;';
     buffCost.buffCostTotalText = '';
   }
 }

@@ -4,15 +4,19 @@ function url(opt) {
 }
 
 function buildErrorMsg(opt, jqXhr, textStatus, errorThrown) {
+  var xhrStatus = jqXhr.status + ' ' + jqXhr.statusText + ' - ';
   if (jqXhr.statusText === errorThrown.toString()) {
-    return jqXhr.status + ' ' + jqXhr.statusText + ' - ' + url(opt);
+    return xhrStatus + url(opt);
   }
-  return jqXhr.status + ' ' + jqXhr.statusText + ' - ' +
-    textStatus + ' ' + errorThrown + ' - ' + url(opt);
+  var jqStatus = xhrStatus + textStatus + ' ' + errorThrown + ' - ' + url(opt);
+  if (textStatus === 'parsererror') {
+    return jqStatus + ' - ' + jqXhr.responseText;
+  }
+  return jqStatus;
 }
 
 export default class AjaxError extends Error {
-  constructor(opt, jqXhr, textStatus, errorThrown, ...params) {
+  constructor([opt, jqXhr, textStatus, errorThrown], ...params) {
     // Pass remaining arguments (including vendor specific ones) to parent constructor
     super(buildErrorMsg(opt, jqXhr, textStatus, errorThrown), ...params);
 

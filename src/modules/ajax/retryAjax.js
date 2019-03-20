@@ -23,10 +23,16 @@ function beforeSend(xhr) {
   on(window, 'beforeunload', partial(clearXhr, xhr));
 }
 
-var ignoreFailureStatus = ['abort'];
+var ignoreStatus = [0];
+var ignoreTextStatus = ['abort'];
+
+function cantIgnore(ajaxErr) {
+  return !ignoreStatus.includes(ajaxErr.jqXhr.status) ||
+    !ignoreTextStatus.includes(ajaxErr.jqTextStatus);
+}
 
 function handleFailure(reject, ajaxErr) {
-  if (!ignoreFailureStatus.includes(ajaxErr.jqTextStatus)) {
+  if (cantIgnore(ajaxErr)) {
     sendException(ajaxErr.toString(), false);
     reject(ajaxErr);
   }
@@ -38,7 +44,7 @@ function failFilter([fn, opt, retries, resolve, reject]) {
       setTimeout(fn, 100, opt, retries - 1, resolve, reject);
     } else {
       handleFailure(reject,
-        new AjaxError(opt, jqXhr, textStatus, errorThrown));
+        new AjaxError([opt, jqXhr, textStatus, errorThrown]));
     }
   };
 }

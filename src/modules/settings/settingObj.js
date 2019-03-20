@@ -66,8 +66,6 @@ export var saveBoxes = [
   'hideRecipeNames',
   'doNotKillList',
   'enableBioCompressor',
-  'maxCompressedCharacters',
-  'maxCompressedLines',
   'sendGoldonWorld',
   'goldRecipient',
   'goldAmount',

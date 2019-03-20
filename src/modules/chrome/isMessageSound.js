@@ -1,21 +1,20 @@
 import add from '../support/task';
+import getArrayByTagName from '../common/getArrayByTagName';
 import getValue from '../system/getValue';
-import jQueryPresent from '../common/jQueryPresent';
-import partial from '../common/partial';
+import includes from '../common/includes';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import {pCL} from '../support/layout';
 
-function makeSound(soundLocation, i, e) {
-  $(e).after('<audio src="' + soundLocation + '" autoplay=true />');
-}
-
-function doMsgSound() { // jQuery
-  var soundLocation = getValue('defaultMessageSound');
-  var boundSound = partial(makeSound, soundLocation);
-  $('a:contains("New log messages"):first').each(boundSound);
-  $('a:contains("New Guild chat message"):first').each(boundSound);
+function doMsgSound() {
+  var msg = getArrayByTagName('a', pCL).filter(includes('message'));
+  if (msg.length) {
+    insertHtmlBeforeEnd(document.body,
+      '<audio src="' + getValue('defaultMessageSound') + '" autoplay=true />');
+  }
 }
 
 export default function isMessageSound() {
-  if (jQueryPresent() && getValue('playNewMessageSound')) {
+  if (getValue('playNewMessageSound')) {
     add(3, doMsgSound);
   }
 }

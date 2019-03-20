@@ -59,7 +59,7 @@ function injectAllyEnemyList(data) {
   hazAllies(allies, enemies);
 }
 
-function resetList() { // jQuery.min
+function resetList() {
   myStats(true).then(injectAllyEnemyList);
 }
 
@@ -127,7 +127,7 @@ function nextTick(data) {
   }
 }
 
-export default function prepareAllyEnemyList() { // jQuery.min
+export default function prepareAllyEnemyList() {
   if (jQueryNotPresent()) {return;}
   myStats(false).then(nextTick);
 }
