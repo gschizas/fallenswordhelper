@@ -1,91 +1,26 @@
-import containsText from '../../common/containsText';
-import {getElementById} from '../../common/getElement';
-import getValue from '../../system/getValue';
-import on from '../../common/on';
-import partial from '../../common/partial';
-import setText from '../../common/setText';
+import insertElement from '../../common/insertElement';
+import {createDiv, createInput, createLabel} from '../../common/cElement';
 
-var lineBreak = '';
-
-function getNumberOfLine(bioContents, maxCharactersToShow) {
-  return bioContents.substr(0, maxCharactersToShow).split('<br>\n').length - 1;
+function doCompression(bioCell) {
+  var fshCompressor = createDiv({className: 'fshCompressor'});
+  insertElement(fshCompressor,
+    createInput({id: 'fshCompressToggle', type: 'checkbox'}));
+  insertElement(fshCompressor,
+    createLabel({className: 'sendLink', htmlFor: 'fshCompressToggle'}));
+  var fshCompress = insertElement(fshCompressor,
+    createDiv({className: 'fshCompress'}));
+  fshCompress.innerHTML = bioCell.innerHTML;
+  bioCell.innerHTML = '';
+  insertElement(bioCell, fshCompressor);
 }
 
-function bioIsTooSmall(bio, maxChar, lines, maxRows) {
-  return bio.length <= maxChar && lines <= maxRows;
-}
-
-function findStartPosition(bioContents, maxRowsToShow) {
-  return bioContents.split('<br>\n').slice(0, maxRowsToShow)
-    .join('<br>\n').length;
-}
-
-function breakOnSpace(bioContents, maxCharactersToShow) {
-  var breakPoint = bioContents.indexOf(' ', maxCharactersToShow) + 1;
-  if (breakPoint === 0) {breakPoint = maxCharactersToShow;}
-  lineBreak = '<br>';
-  return breakPoint;
-}
-
-function getBreakpoint(bioContents, maxCharactersToShow) {
-  var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
-  if (breakPoint === 3 || breakPoint > maxCharactersToShow + 65) {
-    breakPoint = breakOnSpace(bioContents, maxCharactersToShow);
-  }
-  return breakPoint;
-}
-
-function foundHangingTag(closeTagIndex, openTagIndex) {
-  return closeTagIndex !== -1 &&
-    (openTagIndex === -1 || openTagIndex > closeTagIndex);
-}
-
-var closeTags = ['b', 'i', 'u', 'span'];
-
-function hangingTags(bioEnd, tag) {
-  return foundHangingTag(bioEnd.indexOf('</' + tag + '>'),
-    bioEnd.indexOf('<' + tag + '>'));
-}
-
-function closeTag(tag) {return '</' + tag + '>';}
-
-function getExtraCloseTags(bioEnd) {
-  return closeTags.filter(partial(hangingTags, bioEnd)).map(closeTag).join('');
-}
-
-function expandBio() {
-  var bioExpander = getElementById('fshBioExpander');
-  if (containsText('More ...', bioExpander)) {
-    setText('Less ...', bioExpander);
-  } else {
-    setText('More ...', bioExpander);
-  }
-  getElementById('fshBioHidden').classList.toggle('fshHide');
-}
-
-function doCompression(bioCell, bioContents, maxCharactersToShow) {
-  // find the end of next HTML tag after the max characters to show.
-  var breakPoint = getBreakpoint(bioContents, maxCharactersToShow);
-  var bioStart = bioContents.substring(0, breakPoint);
-  var bioEnd = bioContents.substring(breakPoint, bioContents.length);
-  var extraCloseHtml = getExtraCloseTags(bioEnd);
-  var extraOpenHtml = extraCloseHtml.replace('/', '');
-  bioCell.innerHTML = bioStart + extraCloseHtml + lineBreak +
-    '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
-    '<span class="fshHide" id="fshBioHidden">' + extraOpenHtml + bioEnd +
-    '</span>';
-  on(getElementById('fshBioExpander'), 'click', expandBio);
+function getFontSize(bioCell) {
+  var computedStyle = getComputedStyle(bioCell);
+  return parseInt(computedStyle.getPropertyValue('font-size'), 10);
 }
 
 export default function compressBio(bioCell) {
-  var bioContents = bioCell.innerHTML;
-  var maxCharactersToShow = Number(getValue('maxCompressedCharacters'));
-  var maxRowsToShow = Number(getValue('maxCompressedLines'));
-  var numberOfLines = getNumberOfLine(bioContents, maxCharactersToShow);
-  if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
-    maxRowsToShow)) {return;}
-  if (numberOfLines >= maxRowsToShow) {
-    maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
+  if (bioCell.clientHeight / getFontSize(bioCell) > 10) {
+    doCompression(bioCell);
   }
-  doCompression(bioCell, bioContents, maxCharactersToShow);
 }

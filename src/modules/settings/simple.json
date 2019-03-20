@@ -144,6 +144,10 @@
     "helpTitle":"Render other players&#39; bios",
     "helpText":"This determines if other players bios will render the FSH special bio tags."
   },
+  "enableBioCompressor":{
+    "helpTitle":"Enable Bio Compressor",
+    "helpText":"This will compress long bios and provide a link to expand the compressed section."
+  },
   "showStatBonusTotal":{
     "helpTitle":"Show Stat Bonus Total",
     "helpText":"This will show a total of the item stats when you mouseover an item on the profile screen."

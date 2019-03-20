@@ -72,8 +72,6 @@ function checkNumeric(name, min, def) {
 }
 
 function saveConfig() { // jQuery
-  checkNumeric('maxCompressedCharacters', 50, 1500);
-  checkNumeric('maxCompressedLines', 1, 25);
   checkNumeric('newGuildLogHistoryPages', 1, 25);
   checkNumeric('maxGroupSizeToJoin', 1, 11);
   saveNumeric('combatEvaluatorBias');
