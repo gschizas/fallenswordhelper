@@ -579,7 +579,7 @@
 
   var GMSTORAGE_PATH = 'GM_';
 
-  var lastScavPage="";var lastActiveQuestPage="";var lastNormalActiveQuestPage="";var lastNormalCompletedQuestPage="";var lastNormalNotStartedQuestPage="";var lastSeasonalActiveQuestPage="";var lastSeasonalCompletedQuestPage="";var lastSeasonalNotStartedQuestPage="";var enableLogColoring=false;var enableChatParsing=false;var enableCreatureColoring=false;var showCombatLog=false;var showCreatureInfo=false;var keepLogs=false;var showExtraLinks=false;var huntingBuffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve";var huntingBuffsName="default";var huntingBuffs2="Deflect";var huntingBuffs2Name="PvP";var huntingBuffs3="Super Elite Slayer";var huntingBuffs3Name="SE";var showHuntingBuffs=false;var moveFSBox=false;var moveDailyQuest=false;var guildSelf="";var guildSelfMessage="Member of your own guild!";var guildFrnd="";var guildFrndMessage="Do not attack - Guild is friendly!";var guildPast="";var guildPastMessage="Do not attack - You've been in that guild once!";var guildEnmy="";var guildEnmyMessage="Enemy guild. Attack at will!";var goldRecipient="";var goldAmount="";var sendGoldonWorld=false;var hideQuests=false;var hideQuestNames="";var hideRecipes=false;var hideRecipeNames="";var enableGuildInfoWidgets=false;var enableOnlineAlliesWidgets=false;var guildOnlineRefreshTime=300;var hideGuildInfoSecureTrade=false;var hideGuildInfoTrade=false;var hideGuildInfoMessage=false;var hideGuildInfoBuff=false;var buyBuffsGreeting="Hello {playername}, can I buy {buffs} for {cost} please?";var renderSelfBio=false;var bioEditLines=10;var renderOtherBios=false;var playNewMessageSound=false;var showSpeakerOnWorld=false;var defaultMessageSound="https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav";var highlightPlayersNearMyLvl=false;var highlightGvGPlayersNearMyLvl=false;var detailedConflictInfo=false;var gameHelpLink=true;var navigateToLogAfterMsg=false;var enableAllyOnlineList=false;var enableEnemyOnlineList=false;var allyEnemyOnlineRefreshTime=300;var moveGuildList=false;var moveOnlineAlliesList=false;var hideMatchesForCompletedMoves=false;var doNotKillList="";var enableBioCompressor=false;var maxCompressedCharacters=250;var maxCompressedLines=10;var currentGoldSentTotal=0;var keepBuffLog=false;var buffLog="";var enableActiveBountyList=false;var bountyListRefreshTime=300;var enableWantedList=false;var wantedNames="";var wantedGuildMembers=false;var bwNeedsRefresh=true;var fsboxlog=false;var fsboxcontent="";var itemRecipient="";var quickLinks="[]";var enableAttackHelper=false;var minGroupLevel=1;var combatEvaluatorBias=0;var huntingMode=false;var enabledHuntingMode="1";var hideRelicOffline=false;var enterForSendMessage=false;var trackKillStreak=false;var storeLastQuestPage=false;var addAttackLinkToLog=false;var showStatBonusTotal=false;var newGuildLogHistoryPages=3;var useNewGuildLog=false;var enhanceChatTextEntry=false;var ajaxifyRankControls=false;var enableMaxGroupSizeToJoin=false;var maxGroupSizeToJoin=11;var enableTempleAlert=false;var enableUpgradeAlert=false;var enableComposingAlert=false;var autoFillMinBidPrice=false;var showPvPSummaryInLog=false;var enableQuickDrink=false;var enhanceOnlineDots=false;var hideBuffSelected=false;var hideHelperMenu=false;var keepHelperMenuOnScreen=true;var draggableHelperMenu=false;var quickLinksTopPx=22;var quickLinksLeftPx=0;var draggableQuickLinks=false;var showNextQuestSteps=true;var showRecallMessages=true;var showRelicMessages=true;var showMercenaryMessages=true;var showGroupCombatMessages=true;var showDonationMessages=true;var showRankingMessages=true;var showGvGMessages=true;var showTaggingMessages=true;var showTitanMessages=true;var showQuickDropLinks=false;var onlinePlayerMinLvl=1;var onlinePlayerMaxLvl=9999;var arenaMinLvl=1;var arenaMaxLvl=9999;var showMonsterLog=false;var lastTempleCheck=0;var needToPray=false;var lastChatCheck="0";var lastGuildLogCheck="0";var lastOutBoxCheck="0";var lastPlayerLogCheck="0";var showAdmin=false;var alliestotal=0;var enemiestotal=0;var footprints=false;var hideNonPlayerGuildLogMessages=false;var listOfAllies="";var listOfEnemies="";var contactList="";var lastUpgradeCheck=0;var needToDoUpgrade=false;var characterVirtualLevel=0;var guildLogoControl=false;var statisticsControl=false;var guildStructureControl=false;var lastMembrListCheck=0;var disableItemColoring=true;var showQuickSendLinks=false;var needToCompose=false;var lastComposeCheck=0;var lastOnlineCheck=0;var bountyList="";var wantedList="";var lowestLevelInTop250=0;var quickMsg="[\"Thank you very much ^_^\",\"Happy hunting, {playername}\"]";var sendClasses="[\"Composed Pots\", \"13699\"], [\"Amber\", \"5611\"], [\"Amethyst Weed\", \"9145\"], [\"Blood Bloom\", \"5563\"], [\"Cerulean Rose\", \"9156\"], [\"Coleoptera Body\", \"9287\"], [\"Dark Shade\", \"5564\"], [\"Deathbloom\", \"9140\"], [\"Deathly Mold\", \"9153\"], [\"Greenskin Fungus\", \"9148\"], [\"Heffle\", \"5565\"], [\"Jademare\", \"5566\"], [\"Ruby Thistle\", \"9143\"], [\"Toad Corpse\",\"9288\"], [\"Trinettle\", \"5567\"], [\"Viridian Vine\", \"9151\"], [\"Mortar & Pestle\", \"9157\"], [\"Beetle Juice\", \"9158\"]";var quickSearchList="[{\"category\":\"Plants\",\"searchname\":\"Amber\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Blood Bloom\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Jademare\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Dark Shade\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Trinettle\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Heffle Wart\",\"nickname\":\"\"},{\"category\":\"Potions\",\"searchname\":\"Sludge Brew\",\"nickname\":\"DC 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Black Death\",\"nickname\":\"DC 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Aid\",\"nickname\":\"Assist\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Doubling\",\"nickname\":\"DB 450\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Acceleration\",\"nickname\":\"DB 500\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Lesser Death Dealer\",\"nickname\":\"DD\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Runic Potion\",\"nickname\":\"FI 250\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Bookworm\",\"nickname\":\"Lib 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Truth\",\"nickname\":\"EW 1k\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dull Edge\",\"nickname\":\"DE 25\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Notched Blade\",\"nickname\":\"DE 80\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Death\",\"nickname\":\"DW 125\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Decay\",\"nickname\":\"WI 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fatality\",\"nickname\":\"WI 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Annihilation\",\"nickname\":\"DW 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Wise\",\"nickname\":\"Lib 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Shattering\",\"nickname\":\"SA\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dragons Blood Potion\",\"nickname\":\"ZK 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Berserkers Potion\",\"nickname\":\"ZK 300\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fury\",\"nickname\":\"ZK 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Luck\",\"nickname\":\"FI 1k\",\"displayOnAH\":true}]";var arenaMoves="[]";var arenaMatches="[]";var CombatLog="";var hideChampionsGroup=false;var hideElitesGroup=false;var hideSEGroup=false;var hideTitanGroup=false;var hideLegendaryGroup=false;var disableDeactivatePrompts=false;var moveComposingButtons=false;var expandMenuOnKeyPress=false;var disableBreakdownPrompts=false;var collapseNewsArchive=false;var collapseHallPosts=false;var lastmyGuildLogCheck=0;var hideSubLvlCreature=false;var hidePlayerActions=false;var extraProfile="";var textToSearchFor="";var lastLadderReset=0;var disableQuickWearPrompts=false;var enableGuildActivityTracker=false;var enableSeTracker=false;var showTitanInfo=false;var highlightPvpProtection=false;var showBuffInfo=false;var defaults = {lastScavPage:lastScavPage,lastActiveQuestPage:lastActiveQuestPage,lastNormalActiveQuestPage:lastNormalActiveQuestPage,lastNormalCompletedQuestPage:lastNormalCompletedQuestPage,lastNormalNotStartedQuestPage:lastNormalNotStartedQuestPage,lastSeasonalActiveQuestPage:lastSeasonalActiveQuestPage,lastSeasonalCompletedQuestPage:lastSeasonalCompletedQuestPage,lastSeasonalNotStartedQuestPage:lastSeasonalNotStartedQuestPage,enableLogColoring:enableLogColoring,enableChatParsing:enableChatParsing,enableCreatureColoring:enableCreatureColoring,showCombatLog:showCombatLog,showCreatureInfo:showCreatureInfo,keepLogs:keepLogs,showExtraLinks:showExtraLinks,huntingBuffs:huntingBuffs,huntingBuffsName:huntingBuffsName,huntingBuffs2:huntingBuffs2,huntingBuffs2Name:huntingBuffs2Name,huntingBuffs3:huntingBuffs3,huntingBuffs3Name:huntingBuffs3Name,showHuntingBuffs:showHuntingBuffs,moveFSBox:moveFSBox,moveDailyQuest:moveDailyQuest,guildSelf:guildSelf,guildSelfMessage:guildSelfMessage,guildFrnd:guildFrnd,guildFrndMessage:guildFrndMessage,guildPast:guildPast,guildPastMessage:guildPastMessage,guildEnmy:guildEnmy,guildEnmyMessage:guildEnmyMessage,goldRecipient:goldRecipient,goldAmount:goldAmount,sendGoldonWorld:sendGoldonWorld,hideQuests:hideQuests,hideQuestNames:hideQuestNames,hideRecipes:hideRecipes,hideRecipeNames:hideRecipeNames,enableGuildInfoWidgets:enableGuildInfoWidgets,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets,guildOnlineRefreshTime:guildOnlineRefreshTime,hideGuildInfoSecureTrade:hideGuildInfoSecureTrade,hideGuildInfoTrade:hideGuildInfoTrade,hideGuildInfoMessage:hideGuildInfoMessage,hideGuildInfoBuff:hideGuildInfoBuff,buyBuffsGreeting:buyBuffsGreeting,renderSelfBio:renderSelfBio,bioEditLines:bioEditLines,renderOtherBios:renderOtherBios,playNewMessageSound:playNewMessageSound,showSpeakerOnWorld:showSpeakerOnWorld,defaultMessageSound:defaultMessageSound,highlightPlayersNearMyLvl:highlightPlayersNearMyLvl,highlightGvGPlayersNearMyLvl:highlightGvGPlayersNearMyLvl,detailedConflictInfo:detailedConflictInfo,gameHelpLink:gameHelpLink,navigateToLogAfterMsg:navigateToLogAfterMsg,enableAllyOnlineList:enableAllyOnlineList,enableEnemyOnlineList:enableEnemyOnlineList,allyEnemyOnlineRefreshTime:allyEnemyOnlineRefreshTime,moveGuildList:moveGuildList,moveOnlineAlliesList:moveOnlineAlliesList,hideMatchesForCompletedMoves:hideMatchesForCompletedMoves,doNotKillList:doNotKillList,enableBioCompressor:enableBioCompressor,maxCompressedCharacters:maxCompressedCharacters,maxCompressedLines:maxCompressedLines,currentGoldSentTotal:currentGoldSentTotal,keepBuffLog:keepBuffLog,buffLog:buffLog,enableActiveBountyList:enableActiveBountyList,bountyListRefreshTime:bountyListRefreshTime,enableWantedList:enableWantedList,wantedNames:wantedNames,wantedGuildMembers:wantedGuildMembers,bwNeedsRefresh:bwNeedsRefresh,fsboxlog:fsboxlog,fsboxcontent:fsboxcontent,itemRecipient:itemRecipient,quickLinks:quickLinks,enableAttackHelper:enableAttackHelper,minGroupLevel:minGroupLevel,combatEvaluatorBias:combatEvaluatorBias,huntingMode:huntingMode,enabledHuntingMode:enabledHuntingMode,hideRelicOffline:hideRelicOffline,enterForSendMessage:enterForSendMessage,trackKillStreak:trackKillStreak,storeLastQuestPage:storeLastQuestPage,addAttackLinkToLog:addAttackLinkToLog,showStatBonusTotal:showStatBonusTotal,newGuildLogHistoryPages:newGuildLogHistoryPages,useNewGuildLog:useNewGuildLog,enhanceChatTextEntry:enhanceChatTextEntry,ajaxifyRankControls:ajaxifyRankControls,enableMaxGroupSizeToJoin:enableMaxGroupSizeToJoin,maxGroupSizeToJoin:maxGroupSizeToJoin,enableTempleAlert:enableTempleAlert,enableUpgradeAlert:enableUpgradeAlert,enableComposingAlert:enableComposingAlert,autoFillMinBidPrice:autoFillMinBidPrice,showPvPSummaryInLog:showPvPSummaryInLog,enableQuickDrink:enableQuickDrink,enhanceOnlineDots:enhanceOnlineDots,hideBuffSelected:hideBuffSelected,hideHelperMenu:hideHelperMenu,keepHelperMenuOnScreen:keepHelperMenuOnScreen,draggableHelperMenu:draggableHelperMenu,quickLinksTopPx:quickLinksTopPx,quickLinksLeftPx:quickLinksLeftPx,draggableQuickLinks:draggableQuickLinks,showNextQuestSteps:showNextQuestSteps,showRecallMessages:showRecallMessages,showRelicMessages:showRelicMessages,showMercenaryMessages:showMercenaryMessages,showGroupCombatMessages:showGroupCombatMessages,showDonationMessages:showDonationMessages,showRankingMessages:showRankingMessages,showGvGMessages:showGvGMessages,showTaggingMessages:showTaggingMessages,showTitanMessages:showTitanMessages,showQuickDropLinks:showQuickDropLinks,onlinePlayerMinLvl:onlinePlayerMinLvl,onlinePlayerMaxLvl:onlinePlayerMaxLvl,arenaMinLvl:arenaMinLvl,arenaMaxLvl:arenaMaxLvl,showMonsterLog:showMonsterLog,lastTempleCheck:lastTempleCheck,needToPray:needToPray,lastChatCheck:lastChatCheck,lastGuildLogCheck:lastGuildLogCheck,lastOutBoxCheck:lastOutBoxCheck,lastPlayerLogCheck:lastPlayerLogCheck,showAdmin:showAdmin,alliestotal:alliestotal,enemiestotal:enemiestotal,footprints:footprints,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages,listOfAllies:listOfAllies,listOfEnemies:listOfEnemies,contactList:contactList,lastUpgradeCheck:lastUpgradeCheck,needToDoUpgrade:needToDoUpgrade,characterVirtualLevel:characterVirtualLevel,guildLogoControl:guildLogoControl,statisticsControl:statisticsControl,guildStructureControl:guildStructureControl,lastMembrListCheck:lastMembrListCheck,disableItemColoring:disableItemColoring,showQuickSendLinks:showQuickSendLinks,needToCompose:needToCompose,lastComposeCheck:lastComposeCheck,lastOnlineCheck:lastOnlineCheck,bountyList:bountyList,wantedList:wantedList,lowestLevelInTop250:lowestLevelInTop250,quickMsg:quickMsg,sendClasses:sendClasses,quickSearchList:quickSearchList,arenaMoves:arenaMoves,arenaMatches:arenaMatches,CombatLog:CombatLog,hideChampionsGroup:hideChampionsGroup,hideElitesGroup:hideElitesGroup,hideSEGroup:hideSEGroup,hideTitanGroup:hideTitanGroup,hideLegendaryGroup:hideLegendaryGroup,disableDeactivatePrompts:disableDeactivatePrompts,moveComposingButtons:moveComposingButtons,expandMenuOnKeyPress:expandMenuOnKeyPress,disableBreakdownPrompts:disableBreakdownPrompts,collapseNewsArchive:collapseNewsArchive,collapseHallPosts:collapseHallPosts,lastmyGuildLogCheck:lastmyGuildLogCheck,hideSubLvlCreature:hideSubLvlCreature,hidePlayerActions:hidePlayerActions,extraProfile:extraProfile,textToSearchFor:textToSearchFor,lastLadderReset:lastLadderReset,disableQuickWearPrompts:disableQuickWearPrompts,enableGuildActivityTracker:enableGuildActivityTracker,enableSeTracker:enableSeTracker,showTitanInfo:showTitanInfo,highlightPvpProtection:highlightPvpProtection,showBuffInfo:showBuffInfo};
+  var lastScavPage="";var lastActiveQuestPage="";var lastNormalActiveQuestPage="";var lastNormalCompletedQuestPage="";var lastNormalNotStartedQuestPage="";var lastSeasonalActiveQuestPage="";var lastSeasonalCompletedQuestPage="";var lastSeasonalNotStartedQuestPage="";var enableLogColoring=false;var enableChatParsing=false;var enableCreatureColoring=false;var showCombatLog=false;var showCreatureInfo=false;var keepLogs=false;var showExtraLinks=false;var huntingBuffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve";var huntingBuffsName="default";var huntingBuffs2="Deflect";var huntingBuffs2Name="PvP";var huntingBuffs3="Super Elite Slayer";var huntingBuffs3Name="SE";var showHuntingBuffs=false;var moveFSBox=false;var moveDailyQuest=false;var guildSelf="";var guildSelfMessage="Member of your own guild!";var guildFrnd="";var guildFrndMessage="Do not attack - Guild is friendly!";var guildPast="";var guildPastMessage="Do not attack - You've been in that guild once!";var guildEnmy="";var guildEnmyMessage="Enemy guild. Attack at will!";var goldRecipient="";var goldAmount="";var sendGoldonWorld=false;var hideQuests=false;var hideQuestNames="";var hideRecipes=false;var hideRecipeNames="";var enableGuildInfoWidgets=false;var enableOnlineAlliesWidgets=false;var guildOnlineRefreshTime=300;var hideGuildInfoSecureTrade=false;var hideGuildInfoTrade=false;var hideGuildInfoMessage=false;var hideGuildInfoBuff=false;var buyBuffsGreeting="Hello {playername}, can I buy {buffs} for {cost} please?";var renderSelfBio=false;var bioEditLines=10;var renderOtherBios=false;var playNewMessageSound=false;var showSpeakerOnWorld=false;var defaultMessageSound="https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav";var highlightPlayersNearMyLvl=false;var highlightGvGPlayersNearMyLvl=false;var detailedConflictInfo=false;var gameHelpLink=true;var navigateToLogAfterMsg=false;var enableAllyOnlineList=false;var enableEnemyOnlineList=false;var allyEnemyOnlineRefreshTime=300;var moveGuildList=false;var moveOnlineAlliesList=false;var hideMatchesForCompletedMoves=false;var doNotKillList="";var enableBioCompressor=false;var currentGoldSentTotal=0;var keepBuffLog=false;var buffLog="";var enableActiveBountyList=false;var bountyListRefreshTime=300;var enableWantedList=false;var wantedNames="";var wantedGuildMembers=false;var bwNeedsRefresh=true;var fsboxlog=false;var fsboxcontent="";var itemRecipient="";var quickLinks="[]";var enableAttackHelper=false;var minGroupLevel=1;var combatEvaluatorBias=0;var huntingMode=false;var enabledHuntingMode="1";var hideRelicOffline=false;var enterForSendMessage=false;var trackKillStreak=false;var storeLastQuestPage=false;var addAttackLinkToLog=false;var showStatBonusTotal=false;var newGuildLogHistoryPages=3;var useNewGuildLog=false;var enhanceChatTextEntry=false;var ajaxifyRankControls=false;var enableMaxGroupSizeToJoin=false;var maxGroupSizeToJoin=11;var enableTempleAlert=false;var enableUpgradeAlert=false;var enableComposingAlert=false;var autoFillMinBidPrice=false;var showPvPSummaryInLog=false;var enableQuickDrink=false;var enhanceOnlineDots=false;var hideBuffSelected=false;var hideHelperMenu=false;var keepHelperMenuOnScreen=true;var draggableHelperMenu=false;var quickLinksTopPx=22;var quickLinksLeftPx=0;var draggableQuickLinks=false;var showNextQuestSteps=true;var showRecallMessages=true;var showRelicMessages=true;var showMercenaryMessages=true;var showGroupCombatMessages=true;var showDonationMessages=true;var showRankingMessages=true;var showGvGMessages=true;var showTaggingMessages=true;var showTitanMessages=true;var showQuickDropLinks=false;var onlinePlayerMinLvl=1;var onlinePlayerMaxLvl=9999;var arenaMinLvl=1;var arenaMaxLvl=9999;var showMonsterLog=false;var lastTempleCheck=0;var needToPray=false;var lastChatCheck="0";var lastGuildLogCheck="0";var lastOutBoxCheck="0";var lastPlayerLogCheck="0";var showAdmin=false;var alliestotal=0;var enemiestotal=0;var footprints=false;var hideNonPlayerGuildLogMessages=false;var listOfAllies="";var listOfEnemies="";var contactList="";var lastUpgradeCheck=0;var needToDoUpgrade=false;var characterVirtualLevel=0;var guildLogoControl=false;var statisticsControl=false;var guildStructureControl=false;var lastMembrListCheck=0;var disableItemColoring=true;var showQuickSendLinks=false;var needToCompose=false;var lastComposeCheck=0;var lastOnlineCheck=0;var bountyList="";var wantedList="";var lowestLevelInTop250=0;var quickMsg="[\"Thank you very much ^_^\",\"Happy hunting, {playername}\"]";var sendClasses="[\"Composed Pots\", \"13699\"], [\"Amber\", \"5611\"], [\"Amethyst Weed\", \"9145\"], [\"Blood Bloom\", \"5563\"], [\"Cerulean Rose\", \"9156\"], [\"Coleoptera Body\", \"9287\"], [\"Dark Shade\", \"5564\"], [\"Deathbloom\", \"9140\"], [\"Deathly Mold\", \"9153\"], [\"Greenskin Fungus\", \"9148\"], [\"Heffle\", \"5565\"], [\"Jademare\", \"5566\"], [\"Ruby Thistle\", \"9143\"], [\"Toad Corpse\",\"9288\"], [\"Trinettle\", \"5567\"], [\"Viridian Vine\", \"9151\"], [\"Mortar & Pestle\", \"9157\"], [\"Beetle Juice\", \"9158\"]";var quickSearchList="[{\"category\":\"Plants\",\"searchname\":\"Amber\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Blood Bloom\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Jademare\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Dark Shade\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Trinettle\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Heffle Wart\",\"nickname\":\"\"},{\"category\":\"Potions\",\"searchname\":\"Sludge Brew\",\"nickname\":\"DC 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Black Death\",\"nickname\":\"DC 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Aid\",\"nickname\":\"Assist\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Doubling\",\"nickname\":\"DB 450\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Acceleration\",\"nickname\":\"DB 500\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Lesser Death Dealer\",\"nickname\":\"DD\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Runic Potion\",\"nickname\":\"FI 250\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Bookworm\",\"nickname\":\"Lib 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Truth\",\"nickname\":\"EW 1k\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dull Edge\",\"nickname\":\"DE 25\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Notched Blade\",\"nickname\":\"DE 80\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Death\",\"nickname\":\"DW 125\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Decay\",\"nickname\":\"WI 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fatality\",\"nickname\":\"WI 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Annihilation\",\"nickname\":\"DW 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Wise\",\"nickname\":\"Lib 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Shattering\",\"nickname\":\"SA\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dragons Blood Potion\",\"nickname\":\"ZK 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Berserkers Potion\",\"nickname\":\"ZK 300\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fury\",\"nickname\":\"ZK 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Luck\",\"nickname\":\"FI 1k\",\"displayOnAH\":true}]";var arenaMoves="[]";var arenaMatches="[]";var CombatLog="";var hideChampionsGroup=false;var hideElitesGroup=false;var hideSEGroup=false;var hideTitanGroup=false;var hideLegendaryGroup=false;var disableDeactivatePrompts=false;var moveComposingButtons=false;var expandMenuOnKeyPress=false;var disableBreakdownPrompts=false;var collapseNewsArchive=false;var collapseHallPosts=false;var lastmyGuildLogCheck=0;var hideSubLvlCreature=false;var hidePlayerActions=false;var extraProfile="";var textToSearchFor="";var lastLadderReset=0;var disableQuickWearPrompts=false;var enableGuildActivityTracker=false;var enableSeTracker=false;var showTitanInfo=false;var highlightPvpProtection=false;var showBuffInfo=false;var defaults = {lastScavPage:lastScavPage,lastActiveQuestPage:lastActiveQuestPage,lastNormalActiveQuestPage:lastNormalActiveQuestPage,lastNormalCompletedQuestPage:lastNormalCompletedQuestPage,lastNormalNotStartedQuestPage:lastNormalNotStartedQuestPage,lastSeasonalActiveQuestPage:lastSeasonalActiveQuestPage,lastSeasonalCompletedQuestPage:lastSeasonalCompletedQuestPage,lastSeasonalNotStartedQuestPage:lastSeasonalNotStartedQuestPage,enableLogColoring:enableLogColoring,enableChatParsing:enableChatParsing,enableCreatureColoring:enableCreatureColoring,showCombatLog:showCombatLog,showCreatureInfo:showCreatureInfo,keepLogs:keepLogs,showExtraLinks:showExtraLinks,huntingBuffs:huntingBuffs,huntingBuffsName:huntingBuffsName,huntingBuffs2:huntingBuffs2,huntingBuffs2Name:huntingBuffs2Name,huntingBuffs3:huntingBuffs3,huntingBuffs3Name:huntingBuffs3Name,showHuntingBuffs:showHuntingBuffs,moveFSBox:moveFSBox,moveDailyQuest:moveDailyQuest,guildSelf:guildSelf,guildSelfMessage:guildSelfMessage,guildFrnd:guildFrnd,guildFrndMessage:guildFrndMessage,guildPast:guildPast,guildPastMessage:guildPastMessage,guildEnmy:guildEnmy,guildEnmyMessage:guildEnmyMessage,goldRecipient:goldRecipient,goldAmount:goldAmount,sendGoldonWorld:sendGoldonWorld,hideQuests:hideQuests,hideQuestNames:hideQuestNames,hideRecipes:hideRecipes,hideRecipeNames:hideRecipeNames,enableGuildInfoWidgets:enableGuildInfoWidgets,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets,guildOnlineRefreshTime:guildOnlineRefreshTime,hideGuildInfoSecureTrade:hideGuildInfoSecureTrade,hideGuildInfoTrade:hideGuildInfoTrade,hideGuildInfoMessage:hideGuildInfoMessage,hideGuildInfoBuff:hideGuildInfoBuff,buyBuffsGreeting:buyBuffsGreeting,renderSelfBio:renderSelfBio,bioEditLines:bioEditLines,renderOtherBios:renderOtherBios,playNewMessageSound:playNewMessageSound,showSpeakerOnWorld:showSpeakerOnWorld,defaultMessageSound:defaultMessageSound,highlightPlayersNearMyLvl:highlightPlayersNearMyLvl,highlightGvGPlayersNearMyLvl:highlightGvGPlayersNearMyLvl,detailedConflictInfo:detailedConflictInfo,gameHelpLink:gameHelpLink,navigateToLogAfterMsg:navigateToLogAfterMsg,enableAllyOnlineList:enableAllyOnlineList,enableEnemyOnlineList:enableEnemyOnlineList,allyEnemyOnlineRefreshTime:allyEnemyOnlineRefreshTime,moveGuildList:moveGuildList,moveOnlineAlliesList:moveOnlineAlliesList,hideMatchesForCompletedMoves:hideMatchesForCompletedMoves,doNotKillList:doNotKillList,enableBioCompressor:enableBioCompressor,currentGoldSentTotal:currentGoldSentTotal,keepBuffLog:keepBuffLog,buffLog:buffLog,enableActiveBountyList:enableActiveBountyList,bountyListRefreshTime:bountyListRefreshTime,enableWantedList:enableWantedList,wantedNames:wantedNames,wantedGuildMembers:wantedGuildMembers,bwNeedsRefresh:bwNeedsRefresh,fsboxlog:fsboxlog,fsboxcontent:fsboxcontent,itemRecipient:itemRecipient,quickLinks:quickLinks,enableAttackHelper:enableAttackHelper,minGroupLevel:minGroupLevel,combatEvaluatorBias:combatEvaluatorBias,huntingMode:huntingMode,enabledHuntingMode:enabledHuntingMode,hideRelicOffline:hideRelicOffline,enterForSendMessage:enterForSendMessage,trackKillStreak:trackKillStreak,storeLastQuestPage:storeLastQuestPage,addAttackLinkToLog:addAttackLinkToLog,showStatBonusTotal:showStatBonusTotal,newGuildLogHistoryPages:newGuildLogHistoryPages,useNewGuildLog:useNewGuildLog,enhanceChatTextEntry:enhanceChatTextEntry,ajaxifyRankControls:ajaxifyRankControls,enableMaxGroupSizeToJoin:enableMaxGroupSizeToJoin,maxGroupSizeToJoin:maxGroupSizeToJoin,enableTempleAlert:enableTempleAlert,enableUpgradeAlert:enableUpgradeAlert,enableComposingAlert:enableComposingAlert,autoFillMinBidPrice:autoFillMinBidPrice,showPvPSummaryInLog:showPvPSummaryInLog,enableQuickDrink:enableQuickDrink,enhanceOnlineDots:enhanceOnlineDots,hideBuffSelected:hideBuffSelected,hideHelperMenu:hideHelperMenu,keepHelperMenuOnScreen:keepHelperMenuOnScreen,draggableHelperMenu:draggableHelperMenu,quickLinksTopPx:quickLinksTopPx,quickLinksLeftPx:quickLinksLeftPx,draggableQuickLinks:draggableQuickLinks,showNextQuestSteps:showNextQuestSteps,showRecallMessages:showRecallMessages,showRelicMessages:showRelicMessages,showMercenaryMessages:showMercenaryMessages,showGroupCombatMessages:showGroupCombatMessages,showDonationMessages:showDonationMessages,showRankingMessages:showRankingMessages,showGvGMessages:showGvGMessages,showTaggingMessages:showTaggingMessages,showTitanMessages:showTitanMessages,showQuickDropLinks:showQuickDropLinks,onlinePlayerMinLvl:onlinePlayerMinLvl,onlinePlayerMaxLvl:onlinePlayerMaxLvl,arenaMinLvl:arenaMinLvl,arenaMaxLvl:arenaMaxLvl,showMonsterLog:showMonsterLog,lastTempleCheck:lastTempleCheck,needToPray:needToPray,lastChatCheck:lastChatCheck,lastGuildLogCheck:lastGuildLogCheck,lastOutBoxCheck:lastOutBoxCheck,lastPlayerLogCheck:lastPlayerLogCheck,showAdmin:showAdmin,alliestotal:alliestotal,enemiestotal:enemiestotal,footprints:footprints,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages,listOfAllies:listOfAllies,listOfEnemies:listOfEnemies,contactList:contactList,lastUpgradeCheck:lastUpgradeCheck,needToDoUpgrade:needToDoUpgrade,characterVirtualLevel:characterVirtualLevel,guildLogoControl:guildLogoControl,statisticsControl:statisticsControl,guildStructureControl:guildStructureControl,lastMembrListCheck:lastMembrListCheck,disableItemColoring:disableItemColoring,showQuickSendLinks:showQuickSendLinks,needToCompose:needToCompose,lastComposeCheck:lastComposeCheck,lastOnlineCheck:lastOnlineCheck,bountyList:bountyList,wantedList:wantedList,lowestLevelInTop250:lowestLevelInTop250,quickMsg:quickMsg,sendClasses:sendClasses,quickSearchList:quickSearchList,arenaMoves:arenaMoves,arenaMatches:arenaMatches,CombatLog:CombatLog,hideChampionsGroup:hideChampionsGroup,hideElitesGroup:hideElitesGroup,hideSEGroup:hideSEGroup,hideTitanGroup:hideTitanGroup,hideLegendaryGroup:hideLegendaryGroup,disableDeactivatePrompts:disableDeactivatePrompts,moveComposingButtons:moveComposingButtons,expandMenuOnKeyPress:expandMenuOnKeyPress,disableBreakdownPrompts:disableBreakdownPrompts,collapseNewsArchive:collapseNewsArchive,collapseHallPosts:collapseHallPosts,lastmyGuildLogCheck:lastmyGuildLogCheck,hideSubLvlCreature:hideSubLvlCreature,hidePlayerActions:hidePlayerActions,extraProfile:extraProfile,textToSearchFor:textToSearchFor,lastLadderReset:lastLadderReset,disableQuickWearPrompts:disableQuickWearPrompts,enableGuildActivityTracker:enableGuildActivityTracker,enableSeTracker:enableSeTracker,showTitanInfo:showTitanInfo,highlightPvpProtection:highlightPvpProtection,showBuffInfo:showBuffInfo};
 
   var reviver = [
     ['S]', function(value) {return value.substr(2);}],
@@ -674,7 +674,7 @@
     return quickLinks.map(linkHtml).join('');
   }
 
-  function haveLinks(quickLinks) { // Native ?
+  function haveLinks(quickLinks) {
     var draggableQuickLinks = getValue('draggableQuickLinks');
     var html = '<div style="top:' + getValue('quickLinksTopPx') + 'px; left:' +
       getValue('quickLinksLeftPx') + 'px; background-image:url(\'' + imageServer +
@@ -691,7 +691,7 @@
     if (quickLinks.length > 0) {haveLinks(quickLinks);}
   }
 
-  function injectQuickLinks() { // Native ?
+  function injectQuickLinks() {
     var node = getElementById('statbar-container');
     if (node) {haveNode();}
   }
@@ -767,31 +767,49 @@
     }
   }
 
+  var pCL;
   var pCC;
   var pCR;
 
   function initPcc() {
     if (!pCC) {
+      pCL = getElementById('pCL');
       pCC = getElementById('pCC');
       pCR = getElementById('pCR');
     }
   }
 
-  function jQueryPresent() {return isFunction(window.$);}
-
-  function makeSound(soundLocation, i, e) {
-    $(e).after('<audio src="' + soundLocation + '" autoplay=true />');
+  function getElementsByTagName(tagName, element) {
+    if (element) {return element.getElementsByTagName(tagName);}
+    return document.getElementsByTagName(tagName);
   }
 
-  function doMsgSound() { // jQuery
-    var soundLocation = getValue('defaultMessageSound');
-    var boundSound = partial(makeSound, soundLocation);
-    $('a:contains("New log messages"):first').each(boundSound);
-    $('a:contains("New Guild chat message"):first').each(boundSound);
+  function getArrayByTagName(tagName, element) {
+    return Array.from(getElementsByTagName(tagName, element));
+  }
+
+  function getTextTrim(node) {
+    return getText(node).trim();
+  }
+
+  function includesText(text, el) {
+    return getTextTrim(el).includes(text);
+  }
+
+  function includes(text) {
+    return partial(includesText, text);
+  }
+
+  function doMsgSound() {
+    var msg = getArrayByTagName('a', pCL).filter(includes('message'));
+    if (msg.length) {
+      insertHtmlBeforeEnd(document.body,
+        '<audio src="' + getValue('defaultMessageSound') + '" autoplay=true />');
+    }
   }
 
   function isMessageSound() {
-    if (jQueryPresent() && getValue('playNewMessageSound')) {
+    if (getValue('playNewMessageSound')) {
       add(3, doMsgSound);
     }
   }
@@ -1166,6 +1184,8 @@
     calf.sortBy = headerClicked;
   }
 
+  function jQueryPresent() {return isFunction(window.$);}
+
   function getPath(obj, aPath, def) {
     var _obj = obj;
     var _path = aPath.split('.');
@@ -1491,15 +1511,6 @@
     gvgUpperLevel = calcUpperGvgLevel(levelToTest);
   }
 
-  function getElementsByTagName(tagName, element) {
-    if (element) {return element.getElementsByTagName(tagName);}
-    return document.getElementsByTagName(tagName);
-  }
-
-  function getArrayByTagName(tagName, element) {
-    return Array.from(getElementsByTagName(tagName, element));
-  }
-
   var guildId;
 
   function getGuildId(el) {
@@ -1665,15 +1676,19 @@
   }
 
   function buildErrorMsg(opt, jqXhr, textStatus, errorThrown) {
+    var xhrStatus = jqXhr.status + ' ' + jqXhr.statusText + ' - ';
     if (jqXhr.statusText === errorThrown.toString()) {
-      return jqXhr.status + ' ' + jqXhr.statusText + ' - ' + url(opt);
+      return xhrStatus + url(opt);
     }
-    return jqXhr.status + ' ' + jqXhr.statusText + ' - ' +
-      textStatus + ' ' + errorThrown + ' - ' + url(opt);
+    var jqStatus = xhrStatus + textStatus + ' ' + errorThrown + ' - ' + url(opt);
+    if (textStatus === 'parsererror') {
+      return jqStatus + ' - ' + jqXhr.responseText;
+    }
+    return jqStatus;
   }
 
   class AjaxError extends Error {
-    constructor(opt, jqXhr, textStatus, errorThrown, ...params) {
+    constructor([opt, jqXhr, textStatus, errorThrown], ...params) {
       // Pass remaining arguments (including vendor specific ones) to parent constructor
       super(buildErrorMsg(opt, jqXhr, textStatus, errorThrown), ...params);
 
@@ -1710,10 +1725,16 @@
     on(window, 'beforeunload', partial(clearXhr, xhr));
   }
 
-  var ignoreFailureStatus = ['abort'];
+  var ignoreStatus = [0];
+  var ignoreTextStatus = ['abort'];
+
+  function cantIgnore(ajaxErr) {
+    return !ignoreStatus.includes(ajaxErr.jqXhr.status) ||
+      !ignoreTextStatus.includes(ajaxErr.jqTextStatus);
+  }
 
   function handleFailure(reject, ajaxErr) {
-    if (!ignoreFailureStatus.includes(ajaxErr.jqTextStatus)) {
+    if (cantIgnore(ajaxErr)) {
       sendException(ajaxErr.toString(), false);
       reject(ajaxErr);
     }
@@ -1725,7 +1746,7 @@
         setTimeout(fn, 100, opt, retries - 1, resolve, reject);
       } else {
         handleFailure(reject,
-          new AjaxError(opt, jqXhr, textStatus, errorThrown));
+          new AjaxError([opt, jqXhr, textStatus, errorThrown]));
       }
     };
   }
@@ -2698,7 +2719,7 @@
     return isChecked(getValue(pref));
   }
 
-  var moveGuildList$1={helpTitle:"Move Guild Info List",helpText:"This will Move the Guild Info List higher on the bar on the right"};var moveOnlineAlliesList$1={helpTitle:"Move Online Allies List",helpText:"This will Move the Online Allies List higher on the bar on the right"};var enableOnlineAlliesWidgets$1={helpTitle:"Enable Online Allies Widgets",helpText:"Enabling this option will enable the Allies List Widgets (coloring on the Allies List panel)"};var moveFSBox$1={helpTitle:"Move FS box",helpText:"This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)"};var moveDailyQuest$1={helpTitle:"Move Daily Quest",helpText:"This will move the Daily Quest to the left, under the menu, for better visibility (unless it is already hidden.)"};var gameHelpLink$2={helpTitle:"&quot;Game Help&quot; Settings Link",helpText:"This turns the Game Help text in the lower right box into a link to this settings page."};var enableTempleAlert$1={helpTitle:"Enable Temple Alert",helpText:"Puts an alert on the LHS if you have not prayed at the temple today.",network:true};var enableUpgradeAlert$1={helpTitle:"Enable Gold Upgrade Alert",helpText:"Puts an alert on the LHS if you have not upgraded your stamina with gold today.",network:true};var enableComposingAlert$1={helpTitle:"Enable Composing Alert",helpText:"Puts an alert on the LHS if you have composing slots available.",network:true};var enhanceOnlineDots$1={helpTitle:"Enhance Online Dots",helpText:"Enhances the green/grey dots by player names to show online/offline status."};var hideBuffSelected$1={helpTitle:"Hide Buff Selected",helpText:"Hides the buff selected functionality in the online allies and guild info section."};var hideHelperMenu$1={helpTitle:"Hide Helper Menu",helpText:"Hides the helper menu from top left."};var keepHelperMenuOnScreen$1={helpTitle:"Keep Helper Menu On Screen",helpText:"Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links."};var showAdmin$1={helpTitle:"Show rank controls",helpText:"Show ranking controls for guild managemenet in member profile page - this works for guild founders only"};var ajaxifyRankControls$1={helpTitle:"AJAXify rank controls",helpText:"Enables guild founders with ranking rights to change rank positions without a screen refresh."};var detailedConflictInfo$1={helpTitle:"Show Conflict Details",helpText:"Inserts detailed conflict information onto your guild's manage page. Currently displays the target guild as well as the current score.",network:true};var showCombatLog$1={helpTitle:"Show Combat Log",helpText:"This will show the combat log for each automatic battle below the monster list."};var enableCreatureColoring$1={helpTitle:"Color Special Creatures",helpText:"Creatures will be colored according to their rarity. Champions will be colored green, Elites yellow and Super Elites red."};var showCreatureInfo$1={helpTitle:"Show Creature Info",helpText:"This will show the information from the view creature link when you mouseover the link.",network:true};var fsboxlog$1={helpTitle:"Enable FS Box Log",helpText:"This enables the functionality to keep a log of recent seen FS Box message."};var keepBuffLog$1={helpTitle:"Enable Buff Log",helpText:"This enables the functionality to keep a log of recently casted buffs"};var huntingMode$1={helpTitle:"Enable Hunting Mode",helpText:"This disable menu and some visual features to speed up the calf."};var hideNonPlayerGuildLogMessages$1={helpTitle:"Cleanup Guild Log",helpText:"Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)"};var useNewGuildLog$1={helpTitle:"Use New Guild Log",helpText:"This will replace the standard guild log with the helper version of the guild log."};var enableLogColoring$1={helpTitle:"Enable Log Coloring",helpText:"Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown."};var enableChatParsing$1={helpTitle:"Enable Chat Parsing",helpText:"If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message."};var addAttackLinkToLog$1={helpTitle:"Add attack link to log",helpText:"If checked, this will add an Attack link to each message in your log."};var enhanceChatTextEntry$1={helpTitle:"Enhance Chat Text Entry",helpText:"If checked, this will enhance the entry field for entering chat text on the guild chat page."};var showExtraLinks$1={helpTitle:"Show Extra Links",helpText:"If checked, this will add AH and UFSG links to equipment screens."};var disableItemColoring$1={helpTitle:"Disable Item Coloring",helpText:"Disable the code that colors the item text based on the rarity of the item."};var showQuickDropLinks$1={helpTitle:"Show Quick Drop Item",helpText:"This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR"};var storeLastQuestPage$1={helpTitle:"Store Last Quest Page",helpText:"This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, click on the link you wish to reset and then turn this option back on again."};var showNextQuestSteps$1={helpTitle:"Show Next Quest Steps",helpText:"Shows all quest steps in the UFSG."};var renderSelfBio$1={helpTitle:"Render self bio",helpText:"This determines if your own bio will render the FSH special bio tags."};var renderOtherBios$1={helpTitle:"Render other players&#39; bios",helpText:"This determines if other players bios will render the FSH special bio tags."};var showStatBonusTotal$1={helpTitle:"Show Stat Bonus Total",helpText:"This will show a total of the item stats when you mouseover an item on the profile screen."};var enableQuickDrink$1={helpTitle:"Enable Quick Drink/Wear",helpText:"This enables the quick drink/wear functionality on the profile page."};var disableDeactivatePrompts$1={helpTitle:"Disable Deactivate Prompts",helpText:"This disables the prompts for deactivating buffs on the profile page."};var enableAttackHelper$1={helpTitle:"Show Attack Helper",helpText:"This will show extra information on the attack player screen about stats and buffs on you and your target",network:true};var showPvPSummaryInLog$1={helpTitle:"Show PvP Summary in Log",helpText:"This will show a summary of the PvP results in the log.",network:true};var autoFillMinBidPrice$1={helpTitle:"Auto Fill Min Bid Price",helpText:"This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed."};var hideRelicOffline$1={helpTitle:"Hide Relic Offline",helpText:"This hides the relic offline defenders checker."};var enterForSendMessage$1={helpTitle:"Enter Sends Message",helpText:"If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift when you press enter."};var navigateToLogAfterMsg$1={helpTitle:"Navigate After Message Sent",helpText:"If enabled, will navigate to the referring page after a successful message is sent. Example:  if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen."};var moveComposingButtons$1={helpTitle:"Move Composing Buttons",helpText:"If enabled, will move composing buttons to the top of the composing screen."};var draggableHelperMenu$1={helpTitle:"Draggable Helper Menu",helpText:"If enabled, allows the helper menu to be dragged around the screen."};var draggableQuickLinks$1={helpTitle:"Draggable Quick Links",helpText:"If enabled, allows the quick link box to be dragged around the screen."};var expandMenuOnKeyPress$1={helpTitle:"Expand Menu on Key Press",helpText:"If enabled, expands the left hand menu when you use hotkeys."};var disableBreakdownPrompts$1={helpTitle:"Disable Breakdown Prompts",helpText:"If enabled, will disable prompts when you breakdown items.<br>NO REFUNDS OR DO-OVERS! Use at own risk."};var collapseNewsArchive$1={helpTitle:"Collapse News Archive",helpText:"If enabled, will collapse news archives."};var collapseHallPosts$1={helpTitle:"Collapse Hall Posts",helpText:"If enabled, will collapse hall posts."};var hideSubLvlCreature$1={helpTitle:"Hide Sub Level Creatures",helpText:"If enabled, will hide creatures that are lower than the current realm level."};var hidePlayerActions$1={helpTitle:"Hide Player Actions",helpText:"If enabled, will hide player actions."};var disableQuickWearPrompts$1={helpTitle:"Disable Use/Ext Prompts",helpText:"If enabled, will disable prompts when you Use/Ext items.<br>NO REFUNDS OR DO-OVERS! Use at own risk.",title:"Disable Use/Ext<br>Prompts"};var enableGuildActivityTracker$1={helpTitle:"Enable Guild Activity Tracker",helpText:"If enabled, will track guild member activity over time.",network:true,title:"Enable Tracker"};var enableSeTracker$1={helpTitle:"Enable SE Tracker",helpText:"If enabled, will track the last time each SE was killed.<br>This is DIFFERENT from the usual FSH network activity.<br>When this is enabled, if you have ANY game page open in a<br>browser tab it will scan the SE Log every 10 minutes.<br>You do not need auto-refresh for this to work.",network:true};var showMonsterLog$1={helpTitle:"Keep Creature Log",helpText:"This will show the creature log for each creature you see when you travel.",network:true};var showTitanInfo$1={helpTitle:"Show Titan Info",helpText:"This will show titan info in the action list.",network:true};var wantedGuildMembers$1={helpTitle:"Show Guild Members",helpText:"If enabled, will show guild members in the wanted bounty list."};var highlightPvpProtection$1={helpTitle:"Highlight Pvp Protection",helpText:"If enabled, will put a red box around PvP Protection."};var showBuffInfo$1={helpTitle:"Show Buff Info",helpText:"This will show buff info in the action list."};var mySimpleCheckboxes = {moveGuildList:moveGuildList$1,moveOnlineAlliesList:moveOnlineAlliesList$1,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets$1,moveFSBox:moveFSBox$1,moveDailyQuest:moveDailyQuest$1,gameHelpLink:gameHelpLink$2,enableTempleAlert:enableTempleAlert$1,enableUpgradeAlert:enableUpgradeAlert$1,enableComposingAlert:enableComposingAlert$1,enhanceOnlineDots:enhanceOnlineDots$1,hideBuffSelected:hideBuffSelected$1,hideHelperMenu:hideHelperMenu$1,keepHelperMenuOnScreen:keepHelperMenuOnScreen$1,showAdmin:showAdmin$1,ajaxifyRankControls:ajaxifyRankControls$1,detailedConflictInfo:detailedConflictInfo$1,showCombatLog:showCombatLog$1,enableCreatureColoring:enableCreatureColoring$1,showCreatureInfo:showCreatureInfo$1,fsboxlog:fsboxlog$1,keepBuffLog:keepBuffLog$1,huntingMode:huntingMode$1,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages$1,useNewGuildLog:useNewGuildLog$1,enableLogColoring:enableLogColoring$1,enableChatParsing:enableChatParsing$1,addAttackLinkToLog:addAttackLinkToLog$1,enhanceChatTextEntry:enhanceChatTextEntry$1,showExtraLinks:showExtraLinks$1,disableItemColoring:disableItemColoring$1,showQuickDropLinks:showQuickDropLinks$1,storeLastQuestPage:storeLastQuestPage$1,showNextQuestSteps:showNextQuestSteps$1,renderSelfBio:renderSelfBio$1,renderOtherBios:renderOtherBios$1,showStatBonusTotal:showStatBonusTotal$1,enableQuickDrink:enableQuickDrink$1,disableDeactivatePrompts:disableDeactivatePrompts$1,enableAttackHelper:enableAttackHelper$1,showPvPSummaryInLog:showPvPSummaryInLog$1,autoFillMinBidPrice:autoFillMinBidPrice$1,hideRelicOffline:hideRelicOffline$1,enterForSendMessage:enterForSendMessage$1,navigateToLogAfterMsg:navigateToLogAfterMsg$1,moveComposingButtons:moveComposingButtons$1,draggableHelperMenu:draggableHelperMenu$1,draggableQuickLinks:draggableQuickLinks$1,expandMenuOnKeyPress:expandMenuOnKeyPress$1,disableBreakdownPrompts:disableBreakdownPrompts$1,collapseNewsArchive:collapseNewsArchive$1,collapseHallPosts:collapseHallPosts$1,hideSubLvlCreature:hideSubLvlCreature$1,hidePlayerActions:hidePlayerActions$1,disableQuickWearPrompts:disableQuickWearPrompts$1,enableGuildActivityTracker:enableGuildActivityTracker$1,enableSeTracker:enableSeTracker$1,showMonsterLog:showMonsterLog$1,showTitanInfo:showTitanInfo$1,wantedGuildMembers:wantedGuildMembers$1,highlightPvpProtection:highlightPvpProtection$1,showBuffInfo:showBuffInfo$1};
+  var moveGuildList$1={helpTitle:"Move Guild Info List",helpText:"This will Move the Guild Info List higher on the bar on the right"};var moveOnlineAlliesList$1={helpTitle:"Move Online Allies List",helpText:"This will Move the Online Allies List higher on the bar on the right"};var enableOnlineAlliesWidgets$1={helpTitle:"Enable Online Allies Widgets",helpText:"Enabling this option will enable the Allies List Widgets (coloring on the Allies List panel)"};var moveFSBox$1={helpTitle:"Move FS box",helpText:"This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)"};var moveDailyQuest$1={helpTitle:"Move Daily Quest",helpText:"This will move the Daily Quest to the left, under the menu, for better visibility (unless it is already hidden.)"};var gameHelpLink$2={helpTitle:"&quot;Game Help&quot; Settings Link",helpText:"This turns the Game Help text in the lower right box into a link to this settings page."};var enableTempleAlert$1={helpTitle:"Enable Temple Alert",helpText:"Puts an alert on the LHS if you have not prayed at the temple today.",network:true};var enableUpgradeAlert$1={helpTitle:"Enable Gold Upgrade Alert",helpText:"Puts an alert on the LHS if you have not upgraded your stamina with gold today.",network:true};var enableComposingAlert$1={helpTitle:"Enable Composing Alert",helpText:"Puts an alert on the LHS if you have composing slots available.",network:true};var enhanceOnlineDots$1={helpTitle:"Enhance Online Dots",helpText:"Enhances the green/grey dots by player names to show online/offline status."};var hideBuffSelected$1={helpTitle:"Hide Buff Selected",helpText:"Hides the buff selected functionality in the online allies and guild info section."};var hideHelperMenu$1={helpTitle:"Hide Helper Menu",helpText:"Hides the helper menu from top left."};var keepHelperMenuOnScreen$1={helpTitle:"Keep Helper Menu On Screen",helpText:"Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links."};var showAdmin$1={helpTitle:"Show rank controls",helpText:"Show ranking controls for guild managemenet in member profile page - this works for guild founders only"};var ajaxifyRankControls$1={helpTitle:"AJAXify rank controls",helpText:"Enables guild founders with ranking rights to change rank positions without a screen refresh."};var detailedConflictInfo$1={helpTitle:"Show Conflict Details",helpText:"Inserts detailed conflict information onto your guild's manage page. Currently displays the target guild as well as the current score.",network:true};var showCombatLog$1={helpTitle:"Show Combat Log",helpText:"This will show the combat log for each automatic battle below the monster list."};var enableCreatureColoring$1={helpTitle:"Color Special Creatures",helpText:"Creatures will be colored according to their rarity. Champions will be colored green, Elites yellow and Super Elites red."};var showCreatureInfo$1={helpTitle:"Show Creature Info",helpText:"This will show the information from the view creature link when you mouseover the link.",network:true};var fsboxlog$1={helpTitle:"Enable FS Box Log",helpText:"This enables the functionality to keep a log of recent seen FS Box message."};var keepBuffLog$1={helpTitle:"Enable Buff Log",helpText:"This enables the functionality to keep a log of recently casted buffs"};var huntingMode$1={helpTitle:"Enable Hunting Mode",helpText:"This disable menu and some visual features to speed up the calf."};var hideNonPlayerGuildLogMessages$1={helpTitle:"Cleanup Guild Log",helpText:"Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)"};var useNewGuildLog$1={helpTitle:"Use New Guild Log",helpText:"This will replace the standard guild log with the helper version of the guild log."};var enableLogColoring$1={helpTitle:"Enable Log Coloring",helpText:"Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown."};var enableChatParsing$1={helpTitle:"Enable Chat Parsing",helpText:"If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message."};var addAttackLinkToLog$1={helpTitle:"Add attack link to log",helpText:"If checked, this will add an Attack link to each message in your log."};var enhanceChatTextEntry$1={helpTitle:"Enhance Chat Text Entry",helpText:"If checked, this will enhance the entry field for entering chat text on the guild chat page."};var showExtraLinks$1={helpTitle:"Show Extra Links",helpText:"If checked, this will add AH and UFSG links to equipment screens."};var disableItemColoring$1={helpTitle:"Disable Item Coloring",helpText:"Disable the code that colors the item text based on the rarity of the item."};var showQuickDropLinks$1={helpTitle:"Show Quick Drop Item",helpText:"This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR"};var storeLastQuestPage$1={helpTitle:"Store Last Quest Page",helpText:"This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, click on the link you wish to reset and then turn this option back on again."};var showNextQuestSteps$1={helpTitle:"Show Next Quest Steps",helpText:"Shows all quest steps in the UFSG."};var renderSelfBio$1={helpTitle:"Render self bio",helpText:"This determines if your own bio will render the FSH special bio tags."};var renderOtherBios$1={helpTitle:"Render other players&#39; bios",helpText:"This determines if other players bios will render the FSH special bio tags."};var enableBioCompressor$1={helpTitle:"Enable Bio Compressor",helpText:"This will compress long bios and provide a link to expand the compressed section."};var showStatBonusTotal$1={helpTitle:"Show Stat Bonus Total",helpText:"This will show a total of the item stats when you mouseover an item on the profile screen."};var enableQuickDrink$1={helpTitle:"Enable Quick Drink/Wear",helpText:"This enables the quick drink/wear functionality on the profile page."};var disableDeactivatePrompts$1={helpTitle:"Disable Deactivate Prompts",helpText:"This disables the prompts for deactivating buffs on the profile page."};var enableAttackHelper$1={helpTitle:"Show Attack Helper",helpText:"This will show extra information on the attack player screen about stats and buffs on you and your target",network:true};var showPvPSummaryInLog$1={helpTitle:"Show PvP Summary in Log",helpText:"This will show a summary of the PvP results in the log.",network:true};var autoFillMinBidPrice$1={helpTitle:"Auto Fill Min Bid Price",helpText:"This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed."};var hideRelicOffline$1={helpTitle:"Hide Relic Offline",helpText:"This hides the relic offline defenders checker."};var enterForSendMessage$1={helpTitle:"Enter Sends Message",helpText:"If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift when you press enter."};var navigateToLogAfterMsg$1={helpTitle:"Navigate After Message Sent",helpText:"If enabled, will navigate to the referring page after a successful message is sent. Example:  if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen."};var moveComposingButtons$1={helpTitle:"Move Composing Buttons",helpText:"If enabled, will move composing buttons to the top of the composing screen."};var draggableHelperMenu$1={helpTitle:"Draggable Helper Menu",helpText:"If enabled, allows the helper menu to be dragged around the screen."};var draggableQuickLinks$1={helpTitle:"Draggable Quick Links",helpText:"If enabled, allows the quick link box to be dragged around the screen."};var expandMenuOnKeyPress$1={helpTitle:"Expand Menu on Key Press",helpText:"If enabled, expands the left hand menu when you use hotkeys."};var disableBreakdownPrompts$1={helpTitle:"Disable Breakdown Prompts",helpText:"If enabled, will disable prompts when you breakdown items.<br>NO REFUNDS OR DO-OVERS! Use at own risk."};var collapseNewsArchive$1={helpTitle:"Collapse News Archive",helpText:"If enabled, will collapse news archives."};var collapseHallPosts$1={helpTitle:"Collapse Hall Posts",helpText:"If enabled, will collapse hall posts."};var hideSubLvlCreature$1={helpTitle:"Hide Sub Level Creatures",helpText:"If enabled, will hide creatures that are lower than the current realm level."};var hidePlayerActions$1={helpTitle:"Hide Player Actions",helpText:"If enabled, will hide player actions."};var disableQuickWearPrompts$1={helpTitle:"Disable Use/Ext Prompts",helpText:"If enabled, will disable prompts when you Use/Ext items.<br>NO REFUNDS OR DO-OVERS! Use at own risk.",title:"Disable Use/Ext<br>Prompts"};var enableGuildActivityTracker$1={helpTitle:"Enable Guild Activity Tracker",helpText:"If enabled, will track guild member activity over time.",network:true,title:"Enable Tracker"};var enableSeTracker$1={helpTitle:"Enable SE Tracker",helpText:"If enabled, will track the last time each SE was killed.<br>This is DIFFERENT from the usual FSH network activity.<br>When this is enabled, if you have ANY game page open in a<br>browser tab it will scan the SE Log every 10 minutes.<br>You do not need auto-refresh for this to work.",network:true};var showMonsterLog$1={helpTitle:"Keep Creature Log",helpText:"This will show the creature log for each creature you see when you travel.",network:true};var showTitanInfo$1={helpTitle:"Show Titan Info",helpText:"This will show titan info in the action list.",network:true};var wantedGuildMembers$1={helpTitle:"Show Guild Members",helpText:"If enabled, will show guild members in the wanted bounty list."};var highlightPvpProtection$1={helpTitle:"Highlight Pvp Protection",helpText:"If enabled, will put a red box around PvP Protection."};var showBuffInfo$1={helpTitle:"Show Buff Info",helpText:"This will show buff info in the action list."};var mySimpleCheckboxes = {moveGuildList:moveGuildList$1,moveOnlineAlliesList:moveOnlineAlliesList$1,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets$1,moveFSBox:moveFSBox$1,moveDailyQuest:moveDailyQuest$1,gameHelpLink:gameHelpLink$2,enableTempleAlert:enableTempleAlert$1,enableUpgradeAlert:enableUpgradeAlert$1,enableComposingAlert:enableComposingAlert$1,enhanceOnlineDots:enhanceOnlineDots$1,hideBuffSelected:hideBuffSelected$1,hideHelperMenu:hideHelperMenu$1,keepHelperMenuOnScreen:keepHelperMenuOnScreen$1,showAdmin:showAdmin$1,ajaxifyRankControls:ajaxifyRankControls$1,detailedConflictInfo:detailedConflictInfo$1,showCombatLog:showCombatLog$1,enableCreatureColoring:enableCreatureColoring$1,showCreatureInfo:showCreatureInfo$1,fsboxlog:fsboxlog$1,keepBuffLog:keepBuffLog$1,huntingMode:huntingMode$1,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages$1,useNewGuildLog:useNewGuildLog$1,enableLogColoring:enableLogColoring$1,enableChatParsing:enableChatParsing$1,addAttackLinkToLog:addAttackLinkToLog$1,enhanceChatTextEntry:enhanceChatTextEntry$1,showExtraLinks:showExtraLinks$1,disableItemColoring:disableItemColoring$1,showQuickDropLinks:showQuickDropLinks$1,storeLastQuestPage:storeLastQuestPage$1,showNextQuestSteps:showNextQuestSteps$1,renderSelfBio:renderSelfBio$1,renderOtherBios:renderOtherBios$1,enableBioCompressor:enableBioCompressor$1,showStatBonusTotal:showStatBonusTotal$1,enableQuickDrink:enableQuickDrink$1,disableDeactivatePrompts:disableDeactivatePrompts$1,enableAttackHelper:enableAttackHelper$1,showPvPSummaryInLog:showPvPSummaryInLog$1,autoFillMinBidPrice:autoFillMinBidPrice$1,hideRelicOffline:hideRelicOffline$1,enterForSendMessage:enterForSendMessage$1,navigateToLogAfterMsg:navigateToLogAfterMsg$1,moveComposingButtons:moveComposingButtons$1,draggableHelperMenu:draggableHelperMenu$1,draggableQuickLinks:draggableQuickLinks$1,expandMenuOnKeyPress:expandMenuOnKeyPress$1,disableBreakdownPrompts:disableBreakdownPrompts$1,collapseNewsArchive:collapseNewsArchive$1,collapseHallPosts:collapseHallPosts$1,hideSubLvlCreature:hideSubLvlCreature$1,hidePlayerActions:hidePlayerActions$1,disableQuickWearPrompts:disableQuickWearPrompts$1,enableGuildActivityTracker:enableGuildActivityTracker$1,enableSeTracker:enableSeTracker$1,showMonsterLog:showMonsterLog$1,showTitanInfo:showTitanInfo$1,wantedGuildMembers:wantedGuildMembers$1,highlightPvpProtection:highlightPvpProtection$1,showBuffInfo:showBuffInfo$1};
 
   var networkIcon =
     '<img class="networkIcon tip-static" ' +
@@ -2768,8 +2789,6 @@
     'hideRecipeNames',
     'doNotKillList',
     'enableBioCompressor',
-    'maxCompressedCharacters',
-    'maxCompressedLines',
     'sendGoldonWorld',
     'goldRecipient',
     'goldAmount',
@@ -4382,10 +4401,6 @@
     }
   }
 
-  function getTextTrim(node) {
-    return getText(node).trim();
-  }
-
   function findDoc(data) {
     if (notGoldUpgradesPage()) {
       return createDocument(data);
@@ -4443,7 +4458,7 @@
     checkLastUpgrade();
   }
 
-  function injectUpgradeAlert() { // jQuery
+  function injectUpgradeAlert() {
     if (jQueryPresent() && notGoldUpgradesPage()) {
       notUpgradesPage();
     }
@@ -4636,7 +4651,6 @@
 
   function myStats(force) {
     if (force) {return getMyProfile();}
-    // jQuery 1.7 uses pipe instead of then
     return getForage('fsh_selfProfile')
       .then(getProfileFromForage);
   }
@@ -4682,7 +4696,7 @@
     hazAllies(allies, enemies);
   }
 
-  function resetList() { // jQuery.min
+  function resetList() {
     myStats(true).then(injectAllyEnemyList);
   }
 
@@ -4750,7 +4764,7 @@
     }
   }
 
-  function prepareAllyEnemyList() { // jQuery.min
+  function prepareAllyEnemyList() {
     if (jQueryNotPresent()) {return;}
     myStats(false).then(nextTick);
   }
@@ -5585,7 +5599,7 @@
       132,
       null
     ];
-    if (myNav.state !== '-1' && myNav.state !== -1) {
+    if (Number(myNav.state) !== -1) {
       // and now the open one
       theNav.children[myNav.state].children[1].style.height =
         myNav.heights[myNav.state] + 'px';
@@ -5628,13 +5642,21 @@
       'nav-character-notepad');
   }
 
-  function navMenu(myNav) { // jQuery
+  function sectionClosed(id) {
+    return id !== -1 &&
+      querySelector('#nav li.nav-level-0:nth-child(' + (id + 1) + ') ul')
+        .offsetHeight === 0;
+  }
+
+  function validateId(id) {
+    if (sectionClosed(id)) {return -1;}
+    return id;
+  }
+
+  function navMenu(myNav) {
     var oldSave = myNav._saveState;
-    myNav._saveState = function(_id) {
-      var id = _id;
-      var myHeight = $('li.nav-level-0', '#nav').eq(id).find('ul').height();
-      if (myHeight === 0) {id = -1;}
-      oldSave.call(myNav, id);
+    myNav._saveState = function(id) {
+      oldSave.call(myNav, validateId(id));
     };
   }
 
@@ -5652,7 +5674,7 @@
     if (foundNav(myNav) && foundHeights(myNav)) {return true;}
   }
 
-  function preFlight() {
+  function preFlight() { // jQuery.min
     var theNav = getElementById('nav');
     var myNav = $(theNav).data('hcsNav');
     if (myNav && foundWidget(myNav)) {
@@ -5723,7 +5745,7 @@
   }
 
   function injectMenu() {
-    if (!getElementById('pCL') || jQueryNotPresent()) {return;}
+    if (!pCL || jQueryNotPresent()) {return;}
     doAccordion();
   }
 
@@ -6968,26 +6990,44 @@
     node.on('click', selectMoves);
   }
 
-  function getCounts(moves, i, e) { // jQuery
-    var self = $(e);
-    var src = self.attr('src');
-    var moveId = /(\d+)\.gif/.exec(src)[1];
-    moves[moveId] = {};
-    moves[moveId].count = Number(/(\d)$/
-      .exec(self.closest('td').html().trim())[1]);
-    moves[moveId].href = src;
+  function closest(tag, el) {
+    if (el.tagName === tag) {return el;}
+    return closest(tag, el.parentNode);
   }
 
-  function gotMoves(_arena) { // jQuery
+  function closestForm(el) {
+    return closest('FORM', el);
+  }
+
+  function closestTable(el) {
+    return closest('TABLE', el);
+  }
+
+  function closestTd(el) {
+    return closest('TD', el);
+  }
+
+  function getCount(moveImg) {
+    return /(\d)$/.exec(getTextTrim(closestTd(moveImg)))[1];
+  }
+
+  function getCounts(prev, moveImg) {
+    var moveId = /(\d+)\.gif/.exec(moveImg.src)[1];
+    prev[moveId] = {
+      count: Number(getCount(moveImg)),
+      href: moveImg.src
+    };
+    return prev;
+  }
+
+  function gotMoves(_arena) {
     var arena = _arena || {};
-    arena.moves = {};
-    var arenaMoves = $('#pCC img[vspace="4"]').slice(1);
-    arenaMoves.each(partial(getCounts, arena.moves));
+    var arenaMoves = querySelectorArray('#pCC img[vspace="4"]').slice(1);
+    arena.moves = arenaMoves.reduce(getCounts, {});
     setForage(fshArenaKey, arena);
   }
 
   function storeMoves() {
-    if (jQueryNotPresent()) {return;}
     getForage(fshArenaKey).then(gotMoves);
   }
 
@@ -7048,7 +7088,7 @@
     clickThis(getElementById('refresh'));
   }
 
-  function doCancel(cancelButton) {
+  function doCancel(cancelButton) { // jQuery.min
     var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
     cancelButton.outerHTML = '<img src="' + imageServer +
       '/skin/loading.gif" width="14" height="14">';
@@ -7059,7 +7099,7 @@
     });
   }
 
-  function cancelAllAH() { // jQuery
+  function cancelAllAH() {
     var cancelButtons = getArrayByClassName('auctionCancel',
       getElementById('resultRows'));
     if (cancelButtons.length === 0) {return;}
@@ -8351,11 +8391,6 @@
     '-': injectGroups
   };
 
-  function closestTable(el) {
-    if (el.tagName === 'TABLE') {return el;}
-    return closestTable(el.parentNode);
-  }
-
   function translateReturnInfo(data) {
     var info = infoBox(data);
     var _r = {r: 1, m: info};
@@ -8697,7 +8732,7 @@
     var myEntries = Object.entries(buffCost.buffs);
     var totalText = formatCost(myEntries.reduce(totalCost,
       {k: 0, fsp: 0, stam: 0, unknown: 0}));
-    getElementById('buffCost').innerHTML = '<br><span class="tip-static" ' +
+    getElementById('buffCost').innerHTML = '<span class="tip-static" ' +
       'data-tipped="This is an estimated cost based on how the script finds ' +
       'the cost associated with buffs from viewing bio. It can be incorrect, ' +
       'please use with discretion.<br><hr><table border=0>' +
@@ -8710,7 +8745,7 @@
     if (buffCost.count > 0) {
       hazBuffs();
     } else {
-      getElementById('buffCost').innerHTML = '';
+      getElementById('buffCost').innerHTML = '&nbsp;';
       buffCost.buffCostTotalText = '';
     }
   }
@@ -8795,8 +8830,8 @@
     if (bioContents.indexOf('[cmd]') < 0) {bioContents += '[cmd]';}
     bioContents = bioContents.replace('[cmd]',
       '<br><input id="fshSendBuffMsg" ' +
-      'class="custombutton" type="button" value="Ask For Buffs">' +
-      '<span id="buffCost" class="fshRed"></span>');
+      'class="custombutton" type="button" value="Ask For Buffs"><br>' +
+      '<span id="buffCost" class="fshRed">&nbsp;</span>');
     return bioContents;
   }
 
@@ -9008,89 +9043,33 @@
       changeOnlineDot);
   }
 
-  var lineBreak = '';
-
-  function getNumberOfLine(bioContents, maxCharactersToShow) {
-    return bioContents.substr(0, maxCharactersToShow).split('<br>\n').length - 1;
+  function bioToggle() {
+    sendEvent('bio', 'toggle');
   }
 
-  function bioIsTooSmall(bio, maxChar, lines, maxRows) {
-    return bio.length <= maxChar && lines <= maxRows;
+  function doCompression(bioCell) {
+    var fshCompressor = createDiv({className: 'fshCompressor'});
+    var toggle = insertElement(fshCompressor,
+      createInput({id: 'fshCompressToggle', type: 'checkbox'}));
+    on(toggle, 'change', bioToggle);
+    insertElement(fshCompressor,
+      createLabel({className: 'sendLink', htmlFor: 'fshCompressToggle'}));
+    var fshCompress = insertElement(fshCompressor,
+      createDiv({className: 'fshCompress'}));
+    fshCompress.innerHTML = bioCell.innerHTML;
+    bioCell.innerHTML = '';
+    insertElement(bioCell, fshCompressor);
   }
 
-  function findStartPosition(bioContents, maxRowsToShow) {
-    return bioContents.split('<br>\n').slice(0, maxRowsToShow)
-      .join('<br>\n').length;
-  }
-
-  function breakOnSpace(bioContents, maxCharactersToShow) {
-    var breakPoint = bioContents.indexOf(' ', maxCharactersToShow) + 1;
-    if (breakPoint === 0) {breakPoint = maxCharactersToShow;}
-    lineBreak = '<br>';
-    return breakPoint;
-  }
-
-  function getBreakpoint(bioContents, maxCharactersToShow) {
-    var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
-    if (breakPoint === 3 || breakPoint > maxCharactersToShow + 65) {
-      breakPoint = breakOnSpace(bioContents, maxCharactersToShow);
-    }
-    return breakPoint;
-  }
-
-  function foundHangingTag(closeTagIndex, openTagIndex) {
-    return closeTagIndex !== -1 &&
-      (openTagIndex === -1 || openTagIndex > closeTagIndex);
-  }
-
-  var closeTags = ['b', 'i', 'u', 'span'];
-
-  function hangingTags(bioEnd, tag) {
-    return foundHangingTag(bioEnd.indexOf('</' + tag + '>'),
-      bioEnd.indexOf('<' + tag + '>'));
-  }
-
-  function closeTag(tag) {return '</' + tag + '>';}
-
-  function getExtraCloseTags(bioEnd) {
-    return closeTags.filter(partial(hangingTags, bioEnd)).map(closeTag).join('');
-  }
-
-  function expandBio() {
-    var bioExpander = getElementById('fshBioExpander');
-    if (containsText('More ...', bioExpander)) {
-      setText('Less ...', bioExpander);
-    } else {
-      setText('More ...', bioExpander);
-    }
-    getElementById('fshBioHidden').classList.toggle('fshHide');
-  }
-
-  function doCompression(bioCell, bioContents, maxCharactersToShow) {
-    // find the end of next HTML tag after the max characters to show.
-    var breakPoint = getBreakpoint(bioContents, maxCharactersToShow);
-    var bioStart = bioContents.substring(0, breakPoint);
-    var bioEnd = bioContents.substring(breakPoint, bioContents.length);
-    var extraCloseHtml = getExtraCloseTags(bioEnd);
-    var extraOpenHtml = extraCloseHtml.replace('/', '');
-    bioCell.innerHTML = bioStart + extraCloseHtml + lineBreak +
-      '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
-      '<span class="fshHide" id="fshBioHidden">' + extraOpenHtml + bioEnd +
-      '</span>';
-    on(getElementById('fshBioExpander'), 'click', expandBio);
+  function getFontSize(bioCell) {
+    var computedStyle = getComputedStyle(bioCell);
+    return parseInt(computedStyle.getPropertyValue('font-size'), 10);
   }
 
   function compressBio(bioCell) {
-    var bioContents = bioCell.innerHTML;
-    var maxCharactersToShow = Number(getValue('maxCompressedCharacters'));
-    var maxRowsToShow = Number(getValue('maxCompressedLines'));
-    var numberOfLines = getNumberOfLine(bioContents, maxCharactersToShow);
-    if (bioIsTooSmall(bioContents, maxCharactersToShow, numberOfLines,
-      maxRowsToShow)) {return;}
-    if (numberOfLines >= maxRowsToShow) {
-      maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
+    if (bioCell.clientHeight / getFontSize(bioCell) > 10) {
+      doCompression(bioCell);
     }
-    doCompression(bioCell, bioContents, maxCharactersToShow);
   }
 
   function compressHistory() {
@@ -12442,11 +12421,6 @@
     evtHandlers();
   }
 
-  function closestForm(el) {
-    if (el.tagName === 'FORM') {return el;}
-    return closestForm(el.parentNode);
-  }
-
   function updateUrl$2(evt) {
     evt.preventDefault();
     dontPost(closestForm(evt.target));
@@ -13009,8 +12983,6 @@
   }
 
   function saveConfig() { // jQuery
-    checkNumeric('maxCompressedCharacters', 50, 1500);
-    checkNumeric('maxCompressedLines', 1, 25);
     checkNumeric('newGuildLogHistoryPages', 1, 25);
     checkNumeric('maxGroupSizeToJoin', 1, 11);
     saveNumeric('combatEvaluatorBias');
@@ -13618,20 +13590,6 @@
       simpleCheckbox('huntingMode');
   }
 
-  function bioCompressor() {
-    return '<tr><td class="fshRight">Enable Bio Compressor' +
-      helpLink('Enable Bio Compressor',
-        'This will compress long bios according to settings and provide a ' +
-        'link to expand the compressed section.') +
-      ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
-      'value="on"' +
-      isValueChecked('enableBioCompressor') +
-      '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
-      'value="' + getValue('maxCompressedCharacters') + '" />' +
-      ' Max Lines:<input name="maxCompressedLines" size="3" value="' +
-      getValue('maxCompressedLines') + '"></td></tr>';
-  }
-
   function buffGreet() {
     return '<tr><td class="fshRight">Buy Buffs Greeting' +
       helpLink('Buy Buffs Greeting',
@@ -13648,9 +13606,9 @@
     return '<tr><th colspan="2"><b>Profile preferences</b></th></tr>' +
       bunchOfSimple([
         'renderSelfBio',
-        'renderOtherBios'
+        'renderOtherBios',
+        'enableBioCompressor'
       ]) +
-      bioCompressor() +
       buffGreet() +
       bunchOfSimple([
         'showStatBonusTotal',
@@ -19314,12 +19272,12 @@
   var currentFSP;
   var warehouse$1 = {};
 
-  function includesText(text, el) {
+  function includesText$1(text, el) {
     return getText(el).includes(text);
   }
 
   function findText(text) {
-    return upgrades.find(partial(includesText, text));
+    return upgrades.find(partial(includesText$1, text));
   }
 
   function getInputCell(label) {
@@ -21245,7 +21203,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '113';
+  window.FSH.calf = '114';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
