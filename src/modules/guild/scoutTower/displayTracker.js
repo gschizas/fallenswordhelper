@@ -36,9 +36,11 @@ function makeTrackerTable(theTitans) {
 }
 
 export default function displayTracker(parentTable, theTitans) {
-  var trackerTable = makeTrackerTable(theTitans);
-  var newRow = parentTable.insertRow(5);
-  var newCell = newRow.insertCell(-1);
-  newCell.colSpan = 3;
-  insertElement(newCell, trackerTable);
+  if (parentTable.rows.length > 5) {
+    var trackerTable = makeTrackerTable(theTitans);
+    var newRow = parentTable.insertRow(5);
+    var newCell = newRow.insertCell(-1);
+    newCell.colSpan = 3;
+    insertElement(newCell, trackerTable);
+  }
 }
