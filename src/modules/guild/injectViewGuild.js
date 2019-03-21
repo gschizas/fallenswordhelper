@@ -1,6 +1,4 @@
-//#if _DEV  //  compress history
 import compressHistory from './compressHistory';
-//#endif
 import currentGuildId from '../common/currentGuildId';
 import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
@@ -62,7 +60,5 @@ export default function injectViewGuild() {
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   highlightGvGPlayersNearMyLvl = getValue('highlightGvGPlayersNearMyLvl');
   doHighlights();
-  //#if _DEV  //  compress history
-  compressHistory();
-  //#endif
+  if (getValue('enableHistoryCompressor')) {compressHistory();}
 }

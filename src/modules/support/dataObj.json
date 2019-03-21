@@ -182,5 +182,6 @@
   "enableSeTracker":false,
   "showTitanInfo":false,
   "highlightPvpProtection":false,
-  "showBuffInfo":false
+  "showBuffInfo":false,
+  "enableHistoryCompressor":false
 }
