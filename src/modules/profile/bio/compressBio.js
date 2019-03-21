@@ -1,23 +1,28 @@
 import insertElement from '../../common/insertElement';
 import on from '../../common/on';
+import partial from '../../common/partial';
 import {sendEvent} from '../../support/fshGa';
 import {createDiv, createInput, createLabel} from '../../common/cElement';
 
-function bioToggle() {
-  sendEvent('bio', 'toggle');
-}
-
-function doCompression(bioCell) {
-  var fshCompressor = createDiv({className: 'fshCompressor'});
+function injectToggle(fshCompressor) {
   var toggle = insertElement(fshCompressor,
     createInput({id: 'fshCompressToggle', type: 'checkbox'}));
-  on(toggle, 'change', bioToggle);
-  insertElement(fshCompressor,
-    createLabel({className: 'sendLink', htmlFor: 'fshCompressToggle'}));
+  on(toggle, 'change', partial(sendEvent, 'bio', 'toggle'));
+}
+
+function hideBlock(bioCell, fshCompressor) {
   var fshCompress = insertElement(fshCompressor,
     createDiv({className: 'fshCompress'}));
   fshCompress.innerHTML = bioCell.innerHTML;
   bioCell.innerHTML = '';
+}
+
+function doCompression(bioCell) {
+  var fshCompressor = createDiv({className: 'fshCompressor'});
+  injectToggle(fshCompressor);
+  insertElement(fshCompressor,
+    createLabel({className: 'sendLink', htmlFor: 'fshCompressToggle'}));
+  hideBlock(bioCell, fshCompressor);
   insertElement(bioCell, fshCompressor);
 }
 

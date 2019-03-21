@@ -1,4 +1,5 @@
 import querySelector from '../../common/querySelector';
+import {sendEvent} from '../../support/fshGa';
 
 function sectionClosed(id) {
   return id !== -1 &&
@@ -7,7 +8,10 @@ function sectionClosed(id) {
 }
 
 function validateId(id) {
-  if (sectionClosed(id)) {return -1;}
+  if (sectionClosed(id)) {
+    sendEvent('accordion', 'collapse');
+    return -1;
+  }
   return id;
 }
 

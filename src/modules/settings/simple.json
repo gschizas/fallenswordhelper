@@ -259,5 +259,9 @@
   "showBuffInfo":{
     "helpTitle":"Show Buff Info",
     "helpText":"This will show buff info in the action list."
+  },
+  "enableHistoryCompressor":{
+    "helpTitle":"Guild History Compressor",
+    "helpText":"This will compress long guild histories and provide a link to expand the compressed section."
   }
 }

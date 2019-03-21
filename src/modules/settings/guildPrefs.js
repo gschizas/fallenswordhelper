@@ -59,6 +59,7 @@ export default function guildPrefs() {
     bunchOfSimple([
       'showAdmin',
       'ajaxifyRankControls',
-      'detailedConflictInfo'
+      'detailedConflictInfo',
+      'enableHistoryCompressor'
     ]);
 }

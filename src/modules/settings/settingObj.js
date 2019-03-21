@@ -120,5 +120,6 @@ export var saveBoxes = [
   'moveComposingButtons',
   'showExtraLinks',
   'expandMenuOnKeyPress',
-  'highlightPvpProtection'
+  'highlightPvpProtection',
+  'enableHistoryCompressor'
 ];
