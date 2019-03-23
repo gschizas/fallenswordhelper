@@ -55,7 +55,7 @@ function updateDom(avyImg, playername, self) {
   updateNmv();
   updateStatistics();
   highlightPvpProtection();
-  profileRenderBio(self);
+  add(3, profileRenderBio, [self]);
   addStatTotalToMouseover();
   add(3, colouredDots);
 }
