@@ -1,3 +1,6 @@
+//#if _DEV  //  reliclist
+import advisor from '../../notepad/advisor/advisor';
+//#endif
 import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
 import injectFsBoxContent from '../../notepad/injectFsBoxContent';
 import {injectInventoryManagerNew} from '../../notepad/inventory/inventory';
@@ -20,24 +23,25 @@ import {injectFindBuffs, injectFindOther}
   from '../../notepad/findBuffs/findBuffs';
 
 export default {
-  showlogs: {'-': injectNotepadShowLogs}, // done
-  invmanagernew: {'-': injectInventoryManagerNew},
-  guildinvmgr: {'-': injectInventoryManagerNew},
-  recipemanager: {'-': injectRecipeManager}, // done
-  auctionsearch: {'-': injectAuctionSearch}, // done
-  onlineplayers: {'-': injectOnlinePlayers}, // done
-  quicklinkmanager: {'-': injectQuickLinkManager}, // done
-  monsterlog: {'-': injectMonsterLog}, // done
-  quickextract: {'-': insertQuickExtract}, // done
-  quickwear: {'-': insertQuickWear}, // done
-  fsboxcontent: {'-': injectFsBoxContent}, // done
-  bufflogcontent: {'-': injectBuffLog}, // done
-  newguildlog: {'-': injectNewGuildLog},
-  findbuffs: {'-': injectFindBuffs}, // done
-  findother: {'-': injectFindOther}, // done
-  savesettings: {'-': injectSaveSettings},
-  //#if _DEV  //  reliclist
+  showlogs: {'-': injectNotepadShowLogs},
+  invmanagernew: {'-': injectInventoryManagerNew}, // TODO
+  guildinvmgr: {'-': injectInventoryManagerNew}, // TODO
+  recipemanager: {'-': injectRecipeManager},
+  auctionsearch: {'-': injectAuctionSearch},
+  onlineplayers: {'-': injectOnlinePlayers},
+  quicklinkmanager: {'-': injectQuickLinkManager},
+  monsterlog: {'-': injectMonsterLog},
+  quickextract: {'-': insertQuickExtract},
+  quickwear: {'-': insertQuickWear},
+  fsboxcontent: {'-': injectFsBoxContent},
+  bufflogcontent: {'-': injectBuffLog},
+  newguildlog: {'-': injectNewGuildLog}, // TODO
+  findbuffs: {'-': injectFindBuffs},
+  findother: {'-': injectFindOther},
+  savesettings: {'-': injectSaveSettings}, // TODO
+  //#if _DEV  //  reliclist, advisor
   reliclist: {'-': reliclist},
+  advisor: {'-': advisor},
   //#endif
   '-': {'-': injectNotepad}
 };
