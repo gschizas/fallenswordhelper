@@ -1,3 +1,12 @@
+/* Smart Table */
+.st-sort-asc:after {
+  content: '\25b3\0020';
+}
+
+.st-sort-desc:after {
+  content: '\25bd\0020';
+}
+
 /* Bio Compressor */
 .fshCompressor {
   margin-bottom: 0.5em;

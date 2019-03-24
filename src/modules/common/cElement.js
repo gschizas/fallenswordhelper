@@ -19,6 +19,10 @@ export function createTable(props) {
   return cElement(def_table, props);
 }
 
+export function createTHead(props) {
+  return cElement('thead', props);
+}
+
 export function createTBody(props) {
   return cElement('tbody', props);
 }

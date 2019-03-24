@@ -1,5 +1,6 @@
 import jscc from 'rollup-plugin-jscc';
 import json from 'rollup-plugin-json';
+import resolve from 'rollup-plugin-node-resolve';
 
 let version = require('../package.json').version;
 let varAry = version.split('.');
@@ -15,6 +16,7 @@ export default function rollupCalf(file, beta, dev) {
       sourcemapFile: 'src/calfSystem.js.map'
     },
     plugins: [
+      resolve(),
       jscc({
         values: {
           _BETA: beta,

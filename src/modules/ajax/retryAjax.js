@@ -26,13 +26,13 @@ function beforeSend(xhr) {
 var ignoreStatus = [0];
 var ignoreTextStatus = ['abort'];
 
-function cantIgnore(ajaxErr) {
-  return !ignoreStatus.includes(ajaxErr.jqXhr.status) ||
-    !ignoreTextStatus.includes(ajaxErr.jqTextStatus);
+function ignore(ajaxErr) {
+  return ignoreStatus.includes(ajaxErr.jqXhr.status) ||
+    ignoreTextStatus.includes(ajaxErr.jqTextStatus);
 }
 
 function handleFailure(reject, ajaxErr) {
-  if (cantIgnore(ajaxErr)) {
+  if (!ignore(ajaxErr)) {
     sendException(ajaxErr.toString(), false);
     reject(ajaxErr);
   }
