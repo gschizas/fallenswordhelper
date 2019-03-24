@@ -4,5 +4,7 @@ import getArrayByTagName from '../common/getArrayByTagName';
 import {pCC} from '../support/layout';
 
 export default function compressHistory() {
-  compressBio(getArrayByTagName(def_table, pCC).slice(-2, -1)[0]);
+  compressBio(
+    getArrayByTagName(def_table, pCC).slice(-2, -1)[0].rows[0].cells[0]
+  );
 }
