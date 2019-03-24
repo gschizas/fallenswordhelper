@@ -872,6 +872,10 @@
     return cElement(def_table, props);
   }
 
+  function createTHead(props) {
+    return cElement('thead', props);
+  }
+
   function createTBody(props) {
     return cElement('tbody', props);
   }
@@ -1728,13 +1732,13 @@
   var ignoreStatus = [0];
   var ignoreTextStatus = ['abort'];
 
-  function cantIgnore(ajaxErr) {
-    return !ignoreStatus.includes(ajaxErr.jqXhr.status) ||
-      !ignoreTextStatus.includes(ajaxErr.jqTextStatus);
+  function ignore(ajaxErr) {
+    return ignoreStatus.includes(ajaxErr.jqXhr.status) ||
+      ignoreTextStatus.includes(ajaxErr.jqTextStatus);
   }
 
   function handleFailure(reject, ajaxErr) {
-    if (cantIgnore(ajaxErr)) {
+    if (!ignore(ajaxErr)) {
       sendException(ajaxErr.toString(), false);
       reject(ajaxErr);
     }
@@ -8948,7 +8952,9 @@
   }
 
   function compressHistory() {
-    compressBio(getArrayByTagName(def_table, pCC).slice(-2, -1)[0]);
+    compressBio(
+      getArrayByTagName(def_table, pCC).slice(-2, -1)[0].rows[0].cells[0]
+    );
   }
 
   var highlightPlayersNearMyLvl$2;
@@ -17628,6 +17634,1076 @@
     '-': {'-': unknownPage}
   };
 
+  const swap = (f) => (a, b) => f(b, a);
+  const compose = (first, ...fns) => (...args) => fns.reduce((previous, current) => current(previous), first(...args));
+  const curry = (fn, arityLeft) => {
+      const arity = arityLeft || fn.length;
+      return (...args) => {
+          const argLength = args.length || 1;
+          if (arity === argLength) {
+              return fn(...args);
+          }
+          const func = (...moreArgs) => fn(...args, ...moreArgs);
+          return curry(func, arity - args.length);
+      };
+  };
+  const apply = (fn) => (...args) => fn(...args);
+  const tap = (fn) => arg => {
+      fn(arg);
+      return arg;
+  };
+
+  const pointer = (path) => {
+      const parts = path.split('.');
+      const partial = (obj = {}, parts = []) => {
+          const p = parts.shift();
+          const current = obj[p];
+          return (current === undefined || current === null || parts.length === 0) ?
+              current : partial(current, parts);
+      };
+      const set = (target, newTree) => {
+          let current = target;
+          const [leaf, ...intermediate] = parts.reverse();
+          for (const key of intermediate.reverse()) {
+              if (current[key] === undefined) {
+                  current[key] = {};
+                  current = current[key];
+              }
+          }
+          current[leaf] = Object.assign(current[leaf] || {}, newTree);
+          return target;
+      };
+      return {
+          get(target) {
+              return partial(target, [...parts]);
+          },
+          set
+      };
+  };
+
+  const emitter = () => {
+      const listenersLists = {};
+      const instance = {
+          on(event, ...listeners) {
+              listenersLists[event] = (listenersLists[event] || []).concat(listeners);
+              return instance;
+          },
+          dispatch(event, ...args) {
+              const listeners = listenersLists[event] || [];
+              for (const listener of listeners) {
+                  listener(...args);
+              }
+              return instance;
+          },
+          off(event, ...listeners) {
+              if (event === undefined) {
+                  Object.keys(listenersLists).forEach(ev => instance.off(ev));
+              }
+              else {
+                  const list = listenersLists[event] || [];
+                  listenersLists[event] = listeners.length ? list.filter(listener => !listeners.includes(listener)) : [];
+              }
+              return instance;
+          }
+      };
+      return instance;
+  };
+  const proxyListener = (eventMap) => ({ emitter }) => {
+      const eventListeners = {};
+      const proxy = {
+          off(ev) {
+              if (!ev) {
+                  Object.keys(eventListeners).forEach(eventName => proxy.off(eventName));
+              }
+              if (eventListeners[ev]) {
+                  emitter.off(ev, ...eventListeners[ev]);
+              }
+              return proxy;
+          }
+      };
+      for (const ev of Object.keys(eventMap)) {
+          const method = eventMap[ev];
+          eventListeners[ev] = [];
+          proxy[method] = function (...listeners) {
+              eventListeners[ev] = eventListeners[ev].concat(listeners);
+              emitter.on(ev, ...listeners);
+              return proxy;
+          };
+      }
+      return proxy;
+  };
+
+  var Type;
+  (function (Type) {
+      Type["BOOLEAN"] = "boolean";
+      Type["NUMBER"] = "number";
+      Type["DATE"] = "date";
+      Type["STRING"] = "string";
+  })(Type || (Type = {}));
+  const typeExpression = (type) => {
+      switch (type) {
+          case Type.BOOLEAN:
+              return Boolean;
+          case Type.NUMBER:
+              return Number;
+          case Type.DATE:
+              return val => new Date(val);
+          case Type.STRING:
+              return compose(String, val => val.toLowerCase());
+          default:
+              return val => val;
+      }
+  };
+  var FilterOperator;
+  (function (FilterOperator) {
+      FilterOperator["INCLUDES"] = "includes";
+      FilterOperator["IS"] = "is";
+      FilterOperator["IS_NOT"] = "isNot";
+      FilterOperator["LOWER_THAN"] = "lt";
+      FilterOperator["GREATER_THAN"] = "gt";
+      FilterOperator["GREATER_THAN_OR_EQUAL"] = "gte";
+      FilterOperator["LOWER_THAN_OR_EQUAL"] = "lte";
+      FilterOperator["EQUALS"] = "equals";
+      FilterOperator["NOT_EQUALS"] = "notEquals";
+      FilterOperator["ANY_OF"] = "anyOf";
+  })(FilterOperator || (FilterOperator = {}));
+  const not = fn => input => !fn(input);
+  const is = value => input => Object.is(value, input);
+  const lt = value => input => input < value;
+  const gt = value => input => input > value;
+  const equals = value => input => value === input;
+  const includes$1 = value => input => input.includes(value);
+  const anyOf = value => input => value.includes(input);
+  const operators = {
+      ["includes" /* INCLUDES */]: includes$1,
+      ["is" /* IS */]: is,
+      ["isNot" /* IS_NOT */]: compose(is, not),
+      ["lt" /* LOWER_THAN */]: lt,
+      ["gte" /* GREATER_THAN_OR_EQUAL */]: compose(lt, not),
+      ["gt" /* GREATER_THAN */]: gt,
+      ["lte" /* LOWER_THAN_OR_EQUAL */]: compose(gt, not),
+      ["equals" /* EQUALS */]: equals,
+      ["notEquals" /* NOT_EQUALS */]: compose(equals, not),
+      ["anyOf" /* ANY_OF */]: anyOf
+  };
+  const every = fns => (...args) => fns.every(fn => fn(...args));
+  const predicate = ({ value = '', operator = "includes" /* INCLUDES */, type }) => {
+      const typeIt = typeExpression(type);
+      const operateOnTyped = compose(typeIt, operators[operator]);
+      const predicateFunc = operateOnTyped(value);
+      return compose(typeIt, predicateFunc);
+  };
+  // Avoid useless filter lookup (improve perf)
+  const normalizeClauses = (conf) => {
+      const output = {};
+      const validPath = Object.keys(conf).filter(path => Array.isArray(conf[path]));
+      validPath.forEach(path => {
+          const validClauses = conf[path].filter(c => c.value !== '');
+          if (validClauses.length > 0) {
+              output[path] = validClauses;
+          }
+      });
+      return output;
+  };
+  const filter = (filter) => {
+      const normalizedClauses = normalizeClauses(filter);
+      const funcList = Object.keys(normalizedClauses).map(path => {
+          const getter = pointer(path).get;
+          const clauses = normalizedClauses[path].map(predicate);
+          return compose(getter, every(clauses));
+      });
+      const filterPredicate = every(funcList);
+      return array => array.filter(filterPredicate);
+  };
+
+  const defaultComparator = (a, b) => {
+      if (a === b) {
+          return 0;
+      }
+      if (a === undefined) {
+          return 1;
+      }
+      if (b === undefined) {
+          return -1;
+      }
+      return a < b ? -1 : 1;
+  };
+  var SortDirection;
+  (function (SortDirection) {
+      SortDirection["ASC"] = "asc";
+      SortDirection["DESC"] = "desc";
+      SortDirection["NONE"] = "none";
+  })(SortDirection || (SortDirection = {}));
+  const sortByProperty = (prop, comparator) => {
+      const propGetter = pointer(prop).get;
+      return (a, b) => comparator(propGetter(a), propGetter(b));
+  };
+  const defaultSortFactory = (conf) => {
+      const { pointer: pointer$$1, direction = "asc" /* ASC */, comparator = defaultComparator } = conf;
+      if (!pointer$$1 || direction === "none" /* NONE */) {
+          return (array) => [...array];
+      }
+      const orderFunc = sortByProperty(pointer$$1, comparator);
+      const compareFunc = direction === "desc" /* DESC */ ? swap(orderFunc) : orderFunc;
+      return (array) => [...array].sort(compareFunc);
+  };
+
+  const basic = (input) => {
+      const { value, scope = [], isCaseSensitive = false } = input;
+      const searchPointers = scope.map(field => pointer(field).get);
+      if (scope.length === 0 || !value) {
+          return (array) => array;
+      }
+      const test = isCaseSensitive === true ? String(value) : String(value).toLowerCase();
+      return (array) => array.filter(item => searchPointers.some(p => {
+          const v = isCaseSensitive === true ? String(p(item)) : String(p(item)).toLowerCase();
+          return v.includes(test);
+      }));
+  };
+
+  function re(strs, ...substs) {
+      let reStr = transformRaw(strs.raw[0]);
+      for (const [i, subst] of substs.entries()) {
+          if (subst instanceof RegExp) {
+              reStr += subst.source;
+          } else if (typeof subst === 'string') {
+              reStr += quoteText(subst);
+          } else {
+              throw new Error('Illegal substitution: '+subst);
+          }
+          reStr += transformRaw(strs.raw[i+1]);
+      }
+      let flags = '';
+      if (reStr.startsWith('/')) {
+          const lastSlashIndex = reStr.lastIndexOf('/');
+          if (lastSlashIndex === 0) {
+              throw new Error('If the `re` string starts with a slash, it must end with a second slash and zero or more flags: '+reStr);
+          }
+          flags = reStr.slice(lastSlashIndex+1);
+          reStr = reStr.slice(1, lastSlashIndex);
+      }
+      return new RegExp(reStr, flags);
+  }
+
+  function transformRaw(str) {
+      return str.replace(/\\`/g, '`');
+  }
+
+  /**
+   * All special characters are escaped, because you may want to quote several characters inside parentheses or square brackets.
+   */
+  function quoteText(text) {
+      return text.replace(/[\\^$.*+?()[\]{}|=!<>:-]/g, '\\$&');
+  }
+
+  const regexp = (input) => {
+      const { value, scope = [], escape = false, flags = '' } = input;
+      const searchPointers = scope.map(field => pointer(field).get);
+      if (scope.length === 0 || !value) {
+          return (array) => array;
+      }
+      const regex = escape === true ? re `/${value}/${flags}` : new RegExp(value, flags);
+      return (array) => array.filter(item => searchPointers.some(p => regex.test(String(p(item)))));
+  };
+
+  const sliceFactory = ({ page = 1, size } = { page: 1 }) => (array = []) => {
+      const actualSize = size || array.length;
+      const offset = (page - 1) * actualSize;
+      return array.slice(offset, offset + actualSize);
+  };
+
+  var SmartTableEvents;
+  (function (SmartTableEvents) {
+      SmartTableEvents["TOGGLE_SORT"] = "TOGGLE_SORT";
+      SmartTableEvents["DISPLAY_CHANGED"] = "DISPLAY_CHANGED";
+      SmartTableEvents["PAGE_CHANGED"] = "CHANGE_PAGE";
+      SmartTableEvents["EXEC_CHANGED"] = "EXEC_CHANGED";
+      SmartTableEvents["FILTER_CHANGED"] = "FILTER_CHANGED";
+      SmartTableEvents["SUMMARY_CHANGED"] = "SUMMARY_CHANGED";
+      SmartTableEvents["SEARCH_CHANGED"] = "SEARCH_CHANGED";
+      SmartTableEvents["EXEC_ERROR"] = "EXEC_ERROR";
+  })(SmartTableEvents || (SmartTableEvents = {}));
+  const curriedPointer = (path) => {
+      const { get, set } = pointer(path);
+      return { get, set: curry(set) };
+  };
+  const tableDirective = ({ sortFactory, tableState, data, filterFactory, searchFactory }) => {
+      let filteredCount = data.length;
+      let matchingItems = data;
+      const table = emitter();
+      const sortPointer = curriedPointer('sort');
+      const slicePointer = curriedPointer('slice');
+      const filterPointer = curriedPointer('filter');
+      const searchPointer = curriedPointer('search');
+      // We need to register in case the summary comes from outside (like server data)
+      table.on("SUMMARY_CHANGED" /* SUMMARY_CHANGED */, ({ filteredCount: count }) => {
+          filteredCount = count;
+      });
+      const safeAssign = curry((base, extension) => Object.assign({}, base, extension));
+      const dispatch = curry(table.dispatch, 2);
+      const dispatchSummary = (filtered) => {
+          matchingItems = filtered;
+          return dispatch("SUMMARY_CHANGED" /* SUMMARY_CHANGED */, {
+              page: tableState.slice.page,
+              size: tableState.slice.size,
+              filteredCount: filtered.length
+          });
+      };
+      const exec = ({ processingDelay = 20 } = { processingDelay: 20 }) => {
+          table.dispatch("EXEC_CHANGED" /* EXEC_CHANGED */, { working: true });
+          setTimeout(() => {
+              try {
+                  const filterFunc = filterFactory(filterPointer.get(tableState));
+                  const searchFunc = searchFactory(searchPointer.get(tableState));
+                  const sortFunc = sortFactory(sortPointer.get(tableState));
+                  const sliceFunc = sliceFactory(slicePointer.get(tableState));
+                  const execFunc = compose(filterFunc, searchFunc, tap(dispatchSummary), sortFunc, sliceFunc);
+                  const displayed = execFunc(data);
+                  table.dispatch("DISPLAY_CHANGED" /* DISPLAY_CHANGED */, displayed.map(d => ({
+                      index: data.indexOf(d),
+                      value: d
+                  })));
+              }
+              catch (err) {
+                  table.dispatch("EXEC_ERROR" /* EXEC_ERROR */, err);
+              }
+              finally {
+                  table.dispatch("EXEC_CHANGED" /* EXEC_CHANGED */, { working: false });
+              }
+          }, processingDelay);
+      };
+      const updateTableState = curry((pter, ev, newPartialState) => compose(safeAssign(pter.get(tableState)), tap(dispatch(ev)), pter.set(tableState))(newPartialState));
+      const resetToFirstPage = () => updateTableState(slicePointer, "CHANGE_PAGE" /* PAGE_CHANGED */, { page: 1 });
+      const tableOperation = (pter, ev) => compose(updateTableState(pter, ev), resetToFirstPage, () => table.exec() // We wrap within a function so table.exec can be overwritten (when using with a server for example)
+      );
+      const api = {
+          sort: tableOperation(sortPointer, "TOGGLE_SORT" /* TOGGLE_SORT */),
+          filter: tableOperation(filterPointer, "FILTER_CHANGED" /* FILTER_CHANGED */),
+          search: tableOperation(searchPointer, "SEARCH_CHANGED" /* SEARCH_CHANGED */),
+          slice: compose(updateTableState(slicePointer, "CHANGE_PAGE" /* PAGE_CHANGED */), () => table.exec()),
+          exec,
+          async eval(state = tableState) {
+              const sortFunc = sortFactory(sortPointer.get(state));
+              const searchFunc = searchFactory(searchPointer.get(state));
+              const filterFunc = filterFactory(filterPointer.get(state));
+              const sliceFunc = sliceFactory(slicePointer.get(state));
+              const execFunc = compose(filterFunc, searchFunc, sortFunc, sliceFunc);
+              return execFunc(data).map(d => ({ index: data.indexOf(d), value: d }));
+          },
+          onDisplayChange(fn) {
+              table.on("DISPLAY_CHANGED" /* DISPLAY_CHANGED */, fn);
+          },
+          getTableState() {
+              const sort = Object.assign({}, tableState.sort);
+              const search = Object.assign({}, tableState.search);
+              const slice = Object.assign({}, tableState.slice);
+              const filter$$1 = {};
+              for (const prop of Object.getOwnPropertyNames(tableState.filter)) {
+                  filter$$1[prop] = tableState.filter[prop].map(v => Object.assign({}, v));
+              }
+              return { sort, search, slice, filter: filter$$1 };
+          },
+          getMatchingItems() {
+              return [...matchingItems];
+          }
+      };
+      const instance = Object.assign(table, api);
+      Object.defineProperties(instance, {
+          filteredCount: {
+              get() {
+                  return filteredCount;
+              }
+          },
+          length: {
+              get() {
+                  return data.length;
+              }
+          }
+      });
+      return instance;
+  };
+
+  const filterListener = proxyListener({ ["FILTER_CHANGED" /* FILTER_CHANGED */]: 'onFilterChange' });
+  // todo expose and re-export from smart-table-filter
+  var FilterType;
+  (function (FilterType) {
+      FilterType["BOOLEAN"] = "boolean";
+      FilterType["NUMBER"] = "number";
+      FilterType["DATE"] = "date";
+      FilterType["STRING"] = "string";
+  })(FilterType || (FilterType = {}));
+  const filterDirective = ({ table, pointer: pointer$$1, operator = "includes" /* INCLUDES */, type = "string" /* STRING */ }) => {
+      const proxy = filterListener({ emitter: table });
+      return Object.assign({
+          filter(input) {
+              const filterConf = {
+                  [pointer$$1]: [
+                      {
+                          value: input,
+                          operator,
+                          type
+                      }
+                  ]
+              };
+              return table.filter(filterConf);
+          },
+          state() {
+              return table.getTableState().filter;
+          }
+      }, proxy);
+  };
+
+  const searchListener = proxyListener({ ["SEARCH_CHANGED" /* SEARCH_CHANGED */]: 'onSearchChange' });
+  const searchDirective = ({ table, scope = [] }) => {
+      const proxy = searchListener({ emitter: table });
+      return Object.assign(proxy, {
+          search(input, opts = {}) {
+              return table.search(Object.assign({}, { value: input, scope }, opts));
+          },
+          state() {
+              return table.getTableState().search;
+          }
+      }, proxy);
+  };
+
+  const sliceListener = proxyListener({
+      ["CHANGE_PAGE" /* PAGE_CHANGED */]: 'onPageChange',
+      ["SUMMARY_CHANGED" /* SUMMARY_CHANGED */]: 'onSummaryChange'
+  });
+  const paginationDirective = ({ table }) => {
+      let { slice: { page: currentPage, size: currentSize } } = table.getTableState();
+      let itemListLength = table.filteredCount;
+      const proxy = sliceListener({ emitter: table });
+      const api = {
+          selectPage(p) {
+              return table.slice({ page: p, size: currentSize });
+          },
+          selectNextPage() {
+              return api.selectPage(currentPage + 1);
+          },
+          selectPreviousPage() {
+              return api.selectPage(currentPage - 1);
+          },
+          changePageSize(size) {
+              return table.slice({ page: 1, size });
+          },
+          isPreviousPageEnabled() {
+              return currentPage > 1;
+          },
+          isNextPageEnabled() {
+              return Math.ceil(itemListLength / currentSize) > currentPage;
+          },
+          state() {
+              return Object.assign(table.getTableState().slice, { filteredCount: itemListLength });
+          }
+      };
+      const directive = Object.assign(api, proxy);
+      directive.onSummaryChange(({ page: p, size: s, filteredCount }) => {
+          currentPage = p;
+          currentSize = s;
+          itemListLength = filteredCount;
+      });
+      return directive;
+  };
+
+  const debounce = (fn, time) => {
+      let timer = null;
+      return (...args) => {
+          if (timer !== null) {
+              clearTimeout(timer);
+          }
+          timer = setTimeout(() => fn(...args), time);
+      };
+  };
+  const sortListeners = proxyListener({ ["TOGGLE_SORT" /* TOGGLE_SORT */]: 'onSortToggle' });
+  const directions = ["asc" /* ASC */, "desc" /* DESC */];
+  const sortDirective = ({ pointer: pointer$$1, table, cycle = false, debounceTime = 0 }) => {
+      const cycleDirections = cycle === true ? ["none" /* NONE */].concat(directions) : [...directions].reverse();
+      const commit = debounce(table.sort, debounceTime);
+      let hit = 0;
+      const proxy = sortListeners({ emitter: table });
+      const directive = Object.assign({
+          toggle() {
+              hit++;
+              const direction = cycleDirections[hit % cycleDirections.length];
+              return commit({ pointer: pointer$$1, direction });
+          },
+          state() {
+              return table.getTableState().sort;
+          }
+      }, proxy);
+      directive.onSortToggle(({ pointer: p }) => {
+          hit = pointer$$1 !== p ? 0 : hit;
+      });
+      const { pointer: statePointer, direction = "asc" /* ASC */ } = directive.state();
+      hit = statePointer === pointer$$1 ? (direction === "asc" /* ASC */ ? 1 : 2) : 0;
+      return directive;
+  };
+
+  const summaryListener = proxyListener({ ["SUMMARY_CHANGED" /* SUMMARY_CHANGED */]: 'onSummaryChange' });
+  const summaryDirective = ({ table }) => summaryListener({ emitter: table });
+
+  const executionListener = proxyListener({ ["EXEC_CHANGED" /* EXEC_CHANGED */]: 'onExecutionChange' });
+  const workingIndicatorDirective = ({ table }) => executionListener({ emitter: table });
+
+  const defaultTableState = () => ({ sort: {}, slice: { page: 1 }, filter: {}, search: {} });
+  const smartTable = ({ sortFactory = defaultSortFactory, filterFactory = filter, searchFactory = regexp, tableState = defaultTableState(), data = [] } = {
+      sortFactory: defaultSortFactory,
+      filterFactory: filter,
+      searchFactory: regexp,
+      tableState: defaultTableState(),
+      data: []
+  }, ...tableExtensions) => {
+      const coreTable = tableDirective({ sortFactory, filterFactory, tableState, data, searchFactory });
+      return tableExtensions.reduce((accumulator, newdir) => Object.assign(accumulator, newdir({
+          sortFactory,
+          filterFactory,
+          searchFactory,
+          tableState,
+          data,
+          table: coreTable
+      })), coreTable);
+  };
+
+  function pointer$1(path) {
+      const parts = path.split('.');
+      const partial = (obj = {}, parts = []) => {
+          const p = parts.shift();
+          const current = obj[p];
+          return (current === undefined || current === null || parts.length === 0) ?
+              current : partial(current, parts);
+      };
+      const set = (target, newTree) => {
+          let current = target;
+          const [leaf, ...intermediate] = parts.reverse();
+          for (const key of intermediate.reverse()) {
+              if (current[key] === undefined) {
+                  current[key] = {};
+                  current = current[key];
+              }
+          }
+          current[leaf] = Object.assign(current[leaf] || {}, newTree);
+          return target;
+      };
+      return {
+          get(target) {
+              return partial(target, [...parts]);
+          },
+          set
+      };
+  }
+
+  function sortByProperty$1(prop) {
+  	const propGetter = pointer$1(prop).get;
+  	return (a, b) => {
+  		const aVal = propGetter(a);
+  		const bVal = propGetter(b);
+
+  		if (aVal === bVal) {
+  			return 0;
+  		}
+
+  		if (bVal === undefined) {
+  			return -1;
+  		}
+
+  		if (aVal === undefined) {
+  			return 1;
+  		}
+
+  		return aVal < bVal ? -1 : 1;
+  	};
+  }
+
+  function sortFactory({pointer, direction} = {}) {
+  	if (!pointer || direction === 'none') {
+  		return array => [...array];
+  	}
+
+  	const orderFunc = sortByProperty$1(pointer);
+  	const compareFunc = direction === 'desc' ? swap(orderFunc) : orderFunc;
+
+  	return array => [...array].sort(compareFunc);
+  }
+
+  function typeExpression$1(type) {
+  	switch (type) {
+  		case 'boolean':
+  			return Boolean;
+  		case 'number':
+  			return Number;
+  		case 'date':
+  			return val => new Date(val);
+  		default:
+  			return compose(String, val => val.toLowerCase());
+  	}
+  }
+
+  const not$1 = fn => input => !fn(input);
+
+  const is$1 = value => input => Object.is(value, input);
+  const lt$1 = value => input => input < value;
+  const gt$1 = value => input => input > value;
+  const equals$1 = value => input => value === input;
+  const includes$2 = value => input => input.includes(value);
+
+  const operators$1 = {
+  	includes: includes$2,
+  	is: is$1,
+  	isNot: compose(is$1, not$1),
+  	lt: lt$1,
+  	gte: compose(lt$1, not$1),
+  	gt: gt$1,
+  	lte: compose(gt$1, not$1),
+  	equals: equals$1,
+  	notEquals: compose(equals$1, not$1)
+  };
+
+  const every$1 = fns => (...args) => fns.every(fn => fn(...args));
+
+  function predicate$1({value = '', operator = 'includes', type = 'string'}) {
+  	const typeIt = typeExpression$1(type);
+  	const operateOnTyped = compose(typeIt, operators$1[operator]);
+  	const predicateFunc = operateOnTyped(value);
+  	return compose(typeIt, predicateFunc);
+  }
+
+  // Avoid useless filter lookup (improve perf)
+  function normalizeClauses$1(conf) {
+  	const output = {};
+  	const validPath = Object.keys(conf).filter(path => Array.isArray(conf[path]));
+  	validPath.forEach(path => {
+  		const validClauses = conf[path].filter(c => c.value !== '');
+  		if (validClauses.length > 0) {
+  			output[path] = validClauses;
+  		}
+  	});
+  	return output;
+  }
+
+  function filter$1(filter) {
+  	const normalizedClauses = normalizeClauses$1(filter);
+  	const funcList = Object.keys(normalizedClauses).map(path => {
+  		const getter = pointer$1(path).get;
+  		const clauses = normalizedClauses[path].map(predicate$1);
+  		return compose(getter, every$1(clauses));
+  	});
+  	const filterPredicate = every$1(funcList);
+
+  	return array => array.filter(filterPredicate);
+  }
+
+  function search (searchConf = {}) {
+  	const {value, scope = []} = searchConf;
+  	const searchPointers = scope.map(field => pointer$1(field).get);
+  	if (scope.length === 0 || !value) {
+  		return array => array;
+  	}
+  	return array => array.filter(item => searchPointers.some(p => String(p(item)).includes(String(value))));
+  }
+
+  var sliceFactory$1 = ({page = 1, size} = {}) => (array = []) => {
+  	const actualSize = size || array.length;
+  	const offset = (page - 1) * actualSize;
+  	return array.slice(offset, offset + actualSize);
+  };
+
+  const TOGGLE_SORT = 'TOGGLE_SORT';
+  const DISPLAY_CHANGED = 'DISPLAY_CHANGED';
+  const PAGE_CHANGED = 'CHANGE_PAGE';
+  const EXEC_CHANGED = 'EXEC_CHANGED';
+  const FILTER_CHANGED = 'FILTER_CHANGED';
+  const SUMMARY_CHANGED = 'SUMMARY_CHANGED';
+  const SEARCH_CHANGED = 'SEARCH_CHANGED';
+  const EXEC_ERROR = 'EXEC_ERROR';
+
+  function curriedPointer$1(path) {
+  	const {get, set} = pointer$1(path);
+  	return {get, set: curry(set)};
+  }
+
+  function table$1 ({sortFactory, tableState, data, filterFactory, searchFactory}) {
+  	const table = emitter();
+  	const sortPointer = curriedPointer$1('sort');
+  	const slicePointer = curriedPointer$1('slice');
+  	const filterPointer = curriedPointer$1('filter');
+  	const searchPointer = curriedPointer$1('search');
+
+  	const safeAssign = curry((base, extension) => Object.assign({}, base, extension));
+  	const dispatch = curry(table.dispatch, 2);
+
+  	const dispatchSummary = filtered => dispatch(SUMMARY_CHANGED, {
+  		page: tableState.slice.page,
+  		size: tableState.slice.size,
+  		filteredCount: filtered.length
+  	});
+
+  	const exec = ({processingDelay = 20} = {}) => {
+  		table.dispatch(EXEC_CHANGED, {working: true});
+  		setTimeout(() => {
+  			try {
+  				const filterFunc = filterFactory(filterPointer.get(tableState));
+  				const searchFunc = searchFactory(searchPointer.get(tableState));
+  				const sortFunc = sortFactory(sortPointer.get(tableState));
+  				const sliceFunc = sliceFactory$1(slicePointer.get(tableState));
+  				const execFunc = compose(filterFunc, searchFunc, tap(dispatchSummary), sortFunc, sliceFunc);
+  				const displayed = execFunc(data);
+  				table.dispatch(DISPLAY_CHANGED, displayed.map(d => {
+  					return {index: data.indexOf(d), value: d};
+  				}));
+  			} catch (err) {
+  				table.dispatch(EXEC_ERROR, err);
+  			} finally {
+  				table.dispatch(EXEC_CHANGED, {working: false});
+  			}
+  		}, processingDelay);
+  	};
+
+  	const updateTableState = curry((pter, ev, newPartialState) => compose(
+  		safeAssign(pter.get(tableState)),
+  		tap(dispatch(ev)),
+  		pter.set(tableState)
+  	)(newPartialState));
+
+  	const resetToFirstPage = () => updateTableState(slicePointer, PAGE_CHANGED, {page: 1});
+
+  	const tableOperation = (pter, ev) => compose(
+  		updateTableState(pter, ev),
+  		resetToFirstPage,
+  		() => table.exec() // We wrap within a function so table.exec can be overwritten (when using with a server for example)
+  	);
+
+  	const api = {
+  		sort: tableOperation(sortPointer, TOGGLE_SORT),
+  		filter: tableOperation(filterPointer, FILTER_CHANGED),
+  		search: tableOperation(searchPointer, SEARCH_CHANGED),
+  		slice: compose(updateTableState(slicePointer, PAGE_CHANGED), () => table.exec()),
+  		exec,
+  		eval(state = tableState) {
+  			return Promise
+  				.resolve()
+  				.then(() => {
+  					const sortFunc = sortFactory(sortPointer.get(state));
+  					const searchFunc = searchFactory(searchPointer.get(state));
+  					const filterFunc = filterFactory(filterPointer.get(state));
+  					const sliceFunc = sliceFactory$1(slicePointer.get(state));
+  					const execFunc = compose(filterFunc, searchFunc, sortFunc, sliceFunc);
+  					return execFunc(data).map(d => ({index: data.indexOf(d), value: d}));
+  				});
+  		},
+  		onDisplayChange(fn) {
+  			table.on(DISPLAY_CHANGED, fn);
+  		},
+  		getTableState() {
+  			const sort = Object.assign({}, tableState.sort);
+  			const search = Object.assign({}, tableState.search);
+  			const slice = Object.assign({}, tableState.slice);
+  			const filter = {};
+  			for (const prop of Object.getOwnPropertyNames(tableState.filter)) {
+  				filter[prop] = tableState.filter[prop].map(v => Object.assign({}, v));
+  			}
+  			return {sort, search, slice, filter};
+  		}
+  	};
+
+  	const instance = Object.assign(table, api);
+
+  	Object.defineProperty(instance, 'length', {
+  		get() {
+  			return data.length;
+  		}
+  	});
+
+  	return instance;
+  }
+
+  function tableDirective$1 ({
+  													 sortFactory: sortFactory$1 = sortFactory,
+  													 filterFactory = filter$1,
+  													 searchFactory = search,
+  													 tableState = {sort: {}, slice: {page: 1}, filter: {}, search: {}},
+  													 data = []
+  												 }, ...tableDirectives) {
+
+  	const coreTable = table$1({sortFactory: sortFactory$1, filterFactory, tableState, data, searchFactory});
+
+  	return tableDirectives.reduce((accumulator, newdir) => {
+  		return Object.assign(accumulator, newdir({
+  			sortFactory: sortFactory$1,
+  			filterFactory,
+  			searchFactory,
+  			tableState,
+  			data,
+  			table: coreTable
+  		}));
+  	}, coreTable);
+  }
+
+  const filterListener$1 = proxyListener({[FILTER_CHANGED]: 'onFilterChange'});
+
+  var filterDirective$1 = ({table, pointer, operator = 'includes', type = 'string'}) => Object.assign({
+  	filter(input) {
+  		const filterConf = {
+  			[pointer]: [
+  				{
+  					value: input,
+  					operator,
+  					type
+  				}
+  			]
+
+  		};
+  		return table.filter(filterConf);
+  	}
+  }, filterListener$1({emitter: table}));
+
+  const searchListener$1 = proxyListener({[SEARCH_CHANGED]: 'onSearchChange'});
+
+  var searchDirective$1 = ({table, scope = []}) => Object.assign(searchListener$1({emitter: table}), {
+  	search(input) {
+  		return table.search({value: input, scope});
+  	}
+  });
+
+  const sliceListener$1 = proxyListener({[PAGE_CHANGED]: 'onPageChange', [SUMMARY_CHANGED]: 'onSummaryChange'});
+
+  function sliceDirective ({table}) {
+  	let {slice: {page: currentPage, size: currentSize}} = table.getTableState();
+  	let itemListLength = table.length;
+
+  	const api = {
+  		selectPage(p) {
+  			return table.slice({page: p, size: currentSize});
+  		},
+  		selectNextPage() {
+  			return api.selectPage(currentPage + 1);
+  		},
+  		selectPreviousPage() {
+  			return api.selectPage(currentPage - 1);
+  		},
+  		changePageSize(size) {
+  			return table.slice({page: 1, size});
+  		},
+  		isPreviousPageEnabled() {
+  			return currentPage > 1;
+  		},
+  		isNextPageEnabled() {
+  			return Math.ceil(itemListLength / currentSize) > currentPage;
+  		}
+  	};
+  	const directive = Object.assign(api, sliceListener$1({emitter: table}));
+
+  	directive.onSummaryChange(({page: p, size: s, filteredCount}) => {
+  		currentPage = p;
+  		currentSize = s;
+  		itemListLength = filteredCount;
+  	});
+
+  	return directive;
+  }
+
+  const sortListeners$1 = proxyListener({[TOGGLE_SORT]: 'onSortToggle'});
+  const directions$1 = ['asc', 'desc'];
+
+  function sortDirective$1 ({pointer, table, cycle = false}) {
+  	const cycleDirections = cycle === true ? ['none'].concat(directions$1) : [...directions$1].reverse();
+  	let hit = 0;
+
+  	const directive = Object.assign({
+  		toggle() {
+  			hit++;
+  			const direction = cycleDirections[hit % cycleDirections.length];
+  			return table.sort({pointer, direction});
+  		}
+
+  	}, sortListeners$1({emitter: table}));
+
+  	directive.onSortToggle(({pointer: p}) => {
+  		if (pointer !== p) {
+  			hit = 0;
+  		}
+  	});
+
+  	return directive;
+  }
+
+  const summaryListener$1 = proxyListener({[SUMMARY_CHANGED]: 'onSummaryChange'});
+
+  var summaryDirective$1 = ({table}) => summaryListener$1({emitter: table});
+
+  const executionListener$1 = proxyListener({[EXEC_CHANGED]: 'onExecutionChange'});
+
+  var workingIndicatorDirective$1 = ({table}) => executionListener$1({emitter: table});
+
+  const search$1 = searchDirective$1;
+  const slice = sliceDirective;
+  const summary = summaryDirective$1;
+  const sort = sortDirective$1;
+  const filter$2 = filterDirective$1;
+  const workingIndicator = workingIndicatorDirective$1;
+  const table$2 = tableDirective$1;
+
+  function loading ({table, el}) {
+    const component = workingIndicator({table});
+    component.onExecutionChange(function ({working}) {
+      el.classList.remove('st-working');
+      if (working === true) {
+        el.classList.add('st-working');
+      }
+    });
+    return component;
+  };
+
+  function sort$1 ({el, table, conf = {}}) {
+    const pointer = conf.pointer || el.getAttribute('data-st-sort');
+    const cycle = conf.cycle || el.hasAttribute('data-st-sort-cycle');
+    const component = sort({pointer, table, cycle});
+    component.onSortToggle(({pointer:currentPointer, direction}) => {
+      el.classList.remove('st-sort-asc', 'st-sort-desc');
+      if (pointer === currentPointer && direction !== 'none') {
+        const className = direction === 'asc' ? 'st-sort-asc' : 'st-sort-desc';
+        el.classList.add(className);
+      }
+    });
+    const eventListener = ev => component.toggle();
+    el.addEventListener('click', eventListener);
+    return component;
+  }
+
+  function debounce$1 (fn, delay) {
+    let timeoutId;
+    return (ev) => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+      timeoutId = window.setTimeout(function () {
+        fn(ev);
+      }, delay);
+    };
+  };
+
+  function filterInput ({table, el, delay = 400, conf = {}}) {
+    const pointer = conf.pointer || el.getAttribute('data-st-filter');
+    const operator = conf.operator || el.getAttribute('data-st-filter-operator') || 'includes';
+    const elType = el.hasAttribute('type') ? el.getAttribute('type') : 'string';
+    let type = conf.type || el.getAttribute('data-st-filter-type');
+    if (!type) {
+      type = ['date', 'number'].includes(elType) ? elType : 'string';
+    }
+    const component = filter$2({table, pointer, type, operator});
+    const eventListener = debounce$1(ev => component.filter(el.value), delay);
+    el.addEventListener('input', eventListener);
+    if (el.tagName === 'SELECT') {
+      el.addEventListener('change', eventListener);
+    }
+    return component;
+  };
+
+  function searchInput ({el, table, delay = 400, conf = {}}) {
+    const scope = conf.scope || (el.getAttribute('data-st-search') || '').split(',').map(s => s.trim());
+    const component = search$1({table, scope});
+    const eventListener = debounce$1(ev => {
+      component.search(el.value);
+    }, delay);
+    el.addEventListener('input', eventListener);
+  };
+
+  function tableComponentFactory ({el, table}) {
+    // boot
+    [...el.querySelectorAll('[data-st-sort]')].forEach(el => sort$1({el, table}));
+    [...el.querySelectorAll('[data-st-loading-indicator]')].forEach(el => loading({el, table}));
+    [...el.querySelectorAll('[data-st-search]')].forEach(el => searchInput({el, table}));
+    [...el.querySelectorAll('[data-st-filter]')].forEach(el => filterInput({el, table}));
+
+    //extension
+    const tableDisplayChange = table.onDisplayChange;
+    return Object.assign(table, {
+      onDisplayChange: (listener) => {
+        tableDisplayChange(listener);
+        table.exec();
+      }
+    });
+  };
+
+  const reformat$1 = row => {
+    row.player.lower = row.player.name.toLowerCase();
+    return {
+      player: row.player,
+      stats: row.stats
+    };
+  };
+
+  const thisTHead = () => createTHead({
+    innerHTML: '<th data-st-sort="player.lower">Member</th>' +
+      '<th data-st-sort="player.level">Lvl</th>' +
+      '<th data-st-sort="stats.6">Gold From Deposits</th>' +
+      '<th data-st-sort="stats.7">Gold From Tax</th>' +
+      '<th data-st-sort="stats.0">Gold Total</th>' +
+      '<th data-st-sort="stats.1">FSP</th>' +
+      '<th data-st-sort="stats.2">Skill Cast</th>' +
+      '<th data-st-sort="stats.3">Group Create</th>' +
+      '<th data-st-sort="stats.4">Group Join</th>' +
+      '<th data-st-sort="stats.8">Relic</th>' +
+      '<th data-st-sort="stats.5">XP Contrib</th>'
+  });
+
+  const rowFactory = aRow => {
+    const withCommas = aRow.stats.map(addCommas);
+    return createTr({
+      innerHTML: `<td>${aRow.player.name}</td>` +
+        `<td>${aRow.player.level}</td>` +
+        `<td>${withCommas[6]}</td>` +
+        `<td>${withCommas[7]}</td>` +
+        `<td>${withCommas[0]}</td>` +
+        `<td>${withCommas[1]}</td>` +
+        `<td>${withCommas[2]}</td>` +
+        `<td>${withCommas[3]}</td>` +
+        `<td>${withCommas[4]}</td>` +
+        `<td>${withCommas[8]}</td>` +
+        `<td>${withCommas[5]}</td>`
+    });
+  };
+
+  function displayChange(domTBody, displayed) {
+    domTBody.innerHTML = '';
+    for (let r of displayed) {
+      const newChild = rowFactory(r.value);
+      domTBody.appendChild(newChild);
+    }
+  }
+
+  function showMe(data) {
+    // console.log('showMe', data);
+    var smartCollection = smartTable({
+      data: data.r.map(reformat$1),
+      tableState: {
+        sort: {},
+        filter: {},
+        search: {},
+        slice: {page: 1, size: 50}
+      }
+    });
+    pCC.innerHTML = '';
+    const container = insertElement(pCC, createDiv());
+    const domTable = insertElement(container, createTable());
+    // const domTHead = insertElement(domTable, thisTHead());
+    insertElement(domTable, thisTHead());
+    const domTBody = insertElement(domTable, createTBody());
+
+    const tableComponent = tableComponentFactory({
+      el: container,
+      table: smartCollection
+    });
+
+    tableComponent.onDisplayChange(partial(displayChange, domTBody));
+  }
+
+  function advisor$1() {
+    if (jQueryNotPresent()) {return;}
+    pCC.innerHTML = 'Loading...';
+    advisorView(0).then(showMe);
+  }
+
   function fetchinv() {
     return guild({subcmd: 'fetchinv'});
   }
@@ -19126,23 +20202,24 @@
   }
 
   var notepad = {
-    showlogs: {'-': injectNotepadShowLogs}, // done
-    invmanagernew: {'-': injectInventoryManagerNew},
-    guildinvmgr: {'-': injectInventoryManagerNew},
-    recipemanager: {'-': injectRecipeManager}, // done
-    auctionsearch: {'-': injectAuctionSearch}, // done
-    onlineplayers: {'-': injectOnlinePlayers}, // done
-    quicklinkmanager: {'-': injectQuickLinkManager}, // done
-    monsterlog: {'-': injectMonsterLog}, // done
-    quickextract: {'-': insertQuickExtract}, // done
-    quickwear: {'-': insertQuickWear}, // done
-    fsboxcontent: {'-': injectFsBoxContent}, // done
-    bufflogcontent: {'-': injectBuffLog}, // done
-    newguildlog: {'-': injectNewGuildLog},
-    findbuffs: {'-': injectFindBuffs}, // done
-    findother: {'-': injectFindOther}, // done
-    savesettings: {'-': injectSaveSettings},
+    showlogs: {'-': injectNotepadShowLogs},
+    invmanagernew: {'-': injectInventoryManagerNew}, // TODO
+    guildinvmgr: {'-': injectInventoryManagerNew}, // TODO
+    recipemanager: {'-': injectRecipeManager},
+    auctionsearch: {'-': injectAuctionSearch},
+    onlineplayers: {'-': injectOnlinePlayers},
+    quicklinkmanager: {'-': injectQuickLinkManager},
+    monsterlog: {'-': injectMonsterLog},
+    quickextract: {'-': insertQuickExtract},
+    quickwear: {'-': insertQuickWear},
+    fsboxcontent: {'-': injectFsBoxContent},
+    bufflogcontent: {'-': injectBuffLog},
+    newguildlog: {'-': injectNewGuildLog}, // TODO
+    findbuffs: {'-': injectFindBuffs},
+    findother: {'-': injectFindOther},
+    savesettings: {'-': injectSaveSettings}, // TODO
     reliclist: {'-': reliclist},
+    advisor: {'-': advisor$1},
     '-': {'-': injectNotepad}
   };
 
@@ -20001,7 +21078,7 @@
     var bioCell = getElementById('profile-bio');
     if (!bioCell) {return;}
     testForRender(self, bioCell);
-    if (getValue('enableBioCompressor')) {compressBio(bioCell);}
+    if (getValue('enableBioCompressor')) {add(3, compressBio, [bioCell]);}
     on(bioCell, 'click', bioEvtHdl);
   }
 
@@ -20138,7 +21215,7 @@
     updateNmv();
     updateStatistics();
     highlightPvpProtection$2();
-    profileRenderBio(self);
+    add(3, profileRenderBio, [self]);
     addStatTotalToMouseover();
     add(3, colouredDots);
   }
@@ -20324,12 +21401,12 @@
 
   function alphaEntries(a, b) {return alpha(a[0], b[0]);}
 
-  function summary(pair) {return '<br>' + pair[1] + ' ' + pair[0] + '(s), ';}
+  function summary$1(pair) {return '<br>' + pair[1] + ' ' + pair[0] + '(s), ';}
 
   function gotGains(gains) {
     var gainHash = buildGainHash(gains);
     return '<br>' + gains.length + ' item(s):' +
-      Object.entries(gainHash).sort(alphaEntries).map(summary).join('');
+      Object.entries(gainHash).sort(alphaEntries).map(summary$1).join('');
   }
 
   function getGains(report) {
@@ -21081,7 +22158,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '115';
+  window.FSH.calf = '116';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
