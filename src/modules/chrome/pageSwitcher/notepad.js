@@ -16,6 +16,7 @@ import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../../notepad/quickWear/quickWear';
 //#if _DEV  //  reliclist
 import reliclist from '../../notepad/reliclist/reliclist';
+import whosGotWhat from '../../notepad/whosGotWhat/whosGotWhat';
 //#endif
 import {injectAuctionSearch, injectQuickLinkManager} from
   '../../notepad/lists/lists';
@@ -42,6 +43,7 @@ export default {
   //#if _DEV  //  reliclist, advisor
   reliclist: {'-': reliclist},
   advisor: {'-': advisor},
+  whosgotwhat: {'-': whosGotWhat},
   //#endif
   '-': {'-': injectNotepad}
 };
