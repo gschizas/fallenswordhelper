@@ -34,7 +34,8 @@ export default function activeMembers() {
     var dots = querySelectorArray('#pCC a[data-tipped*="Last Activity"]');
     var memberStats = getActive(dots);
     members.classList.add('tip-static');
-    members.dataset.tipped = 'Active: ' + memberStats[ACTIVE] + '<br>' +
+    members.dataset.tipped = 'Active: ' + memberStats[ACTIVE] + '/' +
+      dots.length + '<br>' +
       'Stamina: ' + addCommas(memberStats[STAMINA]);
   }
 }
