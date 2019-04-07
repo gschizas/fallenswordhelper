@@ -3,8 +3,15 @@ import getTextTrim from '../common/getTextTrim';
 import querySelector from '../common/querySelector';
 import {def_statAttack, def_statDefense} from '../support/constants';
 
+function thisText(thisNode) {
+  return Array.from(thisNode.childNodes)
+    .filter(el => el.nodeType === 3)
+    .map(getTextTrim)
+    .join('');
+}
+
 function getDefStat() {
-  return Number(getTextTrim(getElementById(def_statDefense)));
+  return Number(thisText(getElementById(def_statDefense)));
 }
 
 function calcNmvEffect(atkStat, oldTipped) {
@@ -26,7 +33,7 @@ function gotAtk(nmvImg, atkStat) {
 function gotImg(nmvImg) {
   var atkEl = getElementById(def_statAttack);
   if (!atkEl) {return;}
-  var atkStat = Number(getTextTrim(atkEl));
+  var atkStat = Number(thisText(atkEl));
   if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
 }
 
