@@ -30,6 +30,7 @@ function composePots(button, templateId) {
   sendEvent('composing', 'FastComposeButton');
   var openTemplates = querySelectorAll(
     '[id|="composing-template"]:not(#composing-template-multi)');
+  if (openTemplates.length < button.value) {return;}
   for (var i = 0; i < button.value; i += 1) {
     openTemplates[i].value = templateId;
     backgroundCreate(openTemplates[i].nextElementSibling.nextElementSibling,

@@ -2,6 +2,7 @@ import add from '../../support/task';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';
 import {playerIdUrl} from '../../support/constants';
+import replaceChild from '../../common/replaceChild';
 import {createDiv, createTable} from '../../common/cElement';
 
 export var advisorColumns = [
@@ -56,12 +57,8 @@ export function doTable(tbl, data, callback) { // jQuery
   });
 }
 
-function swapOutAdvisorTable(div, targetElement) {
-  targetElement.parentNode.replaceChild(div, targetElement);
-}
-
 function switcheroo(div, targetElement) {
-  add(3, partial(swapOutAdvisorTable, div, targetElement));
+  add(3, partial(replaceChild, div, targetElement));
 }
 
 export function injectTable(targetElement, tfoot, data) {

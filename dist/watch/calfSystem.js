@@ -579,7 +579,7 @@
 
   var GMSTORAGE_PATH = 'GM_';
 
-  var lastScavPage="";var lastActiveQuestPage="";var lastNormalActiveQuestPage="";var lastNormalCompletedQuestPage="";var lastNormalNotStartedQuestPage="";var lastSeasonalActiveQuestPage="";var lastSeasonalCompletedQuestPage="";var lastSeasonalNotStartedQuestPage="";var enableLogColoring=false;var enableChatParsing=false;var enableCreatureColoring=false;var showCombatLog=false;var showCreatureInfo=false;var keepLogs=false;var showExtraLinks=false;var huntingBuffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve";var huntingBuffsName="default";var huntingBuffs2="Deflect";var huntingBuffs2Name="PvP";var huntingBuffs3="Super Elite Slayer";var huntingBuffs3Name="SE";var showHuntingBuffs=false;var moveFSBox=false;var moveDailyQuest=false;var guildSelf="";var guildSelfMessage="Member of your own guild!";var guildFrnd="";var guildFrndMessage="Do not attack - Guild is friendly!";var guildPast="";var guildPastMessage="Do not attack - You've been in that guild once!";var guildEnmy="";var guildEnmyMessage="Enemy guild. Attack at will!";var goldRecipient="";var goldAmount="";var sendGoldonWorld=false;var hideQuests=false;var hideQuestNames="";var hideRecipes=false;var hideRecipeNames="";var enableGuildInfoWidgets=false;var enableOnlineAlliesWidgets=false;var guildOnlineRefreshTime=300;var hideGuildInfoSecureTrade=false;var hideGuildInfoTrade=false;var hideGuildInfoMessage=false;var hideGuildInfoBuff=false;var buyBuffsGreeting="Hello {playername}, can I buy {buffs} for {cost} please?";var renderSelfBio=false;var bioEditLines=10;var renderOtherBios=false;var playNewMessageSound=false;var showSpeakerOnWorld=false;var defaultMessageSound="https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav";var highlightPlayersNearMyLvl=false;var highlightGvGPlayersNearMyLvl=false;var detailedConflictInfo=false;var gameHelpLink=true;var navigateToLogAfterMsg=false;var enableAllyOnlineList=false;var enableEnemyOnlineList=false;var allyEnemyOnlineRefreshTime=300;var moveGuildList=false;var moveOnlineAlliesList=false;var hideMatchesForCompletedMoves=false;var doNotKillList="";var enableBioCompressor=false;var currentGoldSentTotal=0;var keepBuffLog=false;var buffLog="";var enableActiveBountyList=false;var bountyListRefreshTime=300;var enableWantedList=false;var wantedNames="";var wantedGuildMembers=false;var bwNeedsRefresh=true;var fsboxlog=false;var fsboxcontent="";var itemRecipient="";var quickLinks="[]";var enableAttackHelper=false;var minGroupLevel=1;var combatEvaluatorBias=0;var huntingMode=false;var enabledHuntingMode="1";var hideRelicOffline=false;var enterForSendMessage=false;var trackKillStreak=false;var storeLastQuestPage=false;var addAttackLinkToLog=false;var showStatBonusTotal=false;var newGuildLogHistoryPages=3;var useNewGuildLog=false;var enhanceChatTextEntry=false;var ajaxifyRankControls=false;var enableMaxGroupSizeToJoin=false;var maxGroupSizeToJoin=11;var enableTempleAlert=false;var enableUpgradeAlert=false;var enableComposingAlert=false;var autoFillMinBidPrice=false;var showPvPSummaryInLog=false;var enableQuickDrink=false;var enhanceOnlineDots=false;var hideBuffSelected=false;var hideHelperMenu=false;var keepHelperMenuOnScreen=true;var draggableHelperMenu=false;var quickLinksTopPx=22;var quickLinksLeftPx=0;var draggableQuickLinks=false;var showNextQuestSteps=true;var showRecallMessages=true;var showRelicMessages=true;var showMercenaryMessages=true;var showGroupCombatMessages=true;var showDonationMessages=true;var showRankingMessages=true;var showGvGMessages=true;var showTaggingMessages=true;var showTitanMessages=true;var showQuickDropLinks=false;var onlinePlayerMinLvl=1;var onlinePlayerMaxLvl=9999;var arenaMinLvl=1;var arenaMaxLvl=9999;var showMonsterLog=false;var lastTempleCheck=0;var needToPray=false;var lastChatCheck="0";var lastGuildLogCheck="0";var lastOutBoxCheck="0";var lastPlayerLogCheck="0";var showAdmin=false;var alliestotal=0;var enemiestotal=0;var footprints=false;var hideNonPlayerGuildLogMessages=false;var listOfAllies="";var listOfEnemies="";var contactList="";var lastUpgradeCheck=0;var needToDoUpgrade=false;var characterVirtualLevel=0;var guildLogoControl=false;var statisticsControl=false;var guildStructureControl=false;var lastMembrListCheck=0;var disableItemColoring=true;var showQuickSendLinks=false;var needToCompose=false;var lastComposeCheck=0;var lastOnlineCheck=0;var bountyList="";var wantedList="";var lowestLevelInTop250=0;var quickMsg="[\"Thank you very much ^_^\",\"Happy hunting, {playername}\"]";var sendClasses="[\"Composed Pots\", \"13699\"], [\"Amber\", \"5611\"], [\"Amethyst Weed\", \"9145\"], [\"Blood Bloom\", \"5563\"], [\"Cerulean Rose\", \"9156\"], [\"Coleoptera Body\", \"9287\"], [\"Dark Shade\", \"5564\"], [\"Deathbloom\", \"9140\"], [\"Deathly Mold\", \"9153\"], [\"Greenskin Fungus\", \"9148\"], [\"Heffle\", \"5565\"], [\"Jademare\", \"5566\"], [\"Ruby Thistle\", \"9143\"], [\"Toad Corpse\",\"9288\"], [\"Trinettle\", \"5567\"], [\"Viridian Vine\", \"9151\"], [\"Mortar & Pestle\", \"9157\"], [\"Beetle Juice\", \"9158\"]";var quickSearchList="[{\"category\":\"Plants\",\"searchname\":\"Amber\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Blood Bloom\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Jademare\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Dark Shade\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Trinettle\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Heffle Wart\",\"nickname\":\"\"},{\"category\":\"Potions\",\"searchname\":\"Sludge Brew\",\"nickname\":\"DC 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Black Death\",\"nickname\":\"DC 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Aid\",\"nickname\":\"Assist\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Doubling\",\"nickname\":\"DB 450\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Acceleration\",\"nickname\":\"DB 500\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Lesser Death Dealer\",\"nickname\":\"DD\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Runic Potion\",\"nickname\":\"FI 250\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Bookworm\",\"nickname\":\"Lib 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Truth\",\"nickname\":\"EW 1k\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dull Edge\",\"nickname\":\"DE 25\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Notched Blade\",\"nickname\":\"DE 80\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Death\",\"nickname\":\"DW 125\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Decay\",\"nickname\":\"WI 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fatality\",\"nickname\":\"WI 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Annihilation\",\"nickname\":\"DW 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Wise\",\"nickname\":\"Lib 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Shattering\",\"nickname\":\"SA\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dragons Blood Potion\",\"nickname\":\"ZK 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Berserkers Potion\",\"nickname\":\"ZK 300\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fury\",\"nickname\":\"ZK 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Luck\",\"nickname\":\"FI 1k\",\"displayOnAH\":true}]";var arenaMoves="[]";var arenaMatches="[]";var CombatLog="";var hideChampionsGroup=false;var hideElitesGroup=false;var hideSEGroup=false;var hideTitanGroup=false;var hideLegendaryGroup=false;var disableDeactivatePrompts=false;var moveComposingButtons=false;var expandMenuOnKeyPress=false;var disableBreakdownPrompts=false;var collapseNewsArchive=false;var collapseHallPosts=false;var lastmyGuildLogCheck=0;var hideSubLvlCreature=false;var hidePlayerActions=false;var extraProfile="";var textToSearchFor="";var lastLadderReset=0;var disableQuickWearPrompts=false;var enableGuildActivityTracker=false;var enableSeTracker=false;var showTitanInfo=false;var highlightPvpProtection=false;var showBuffInfo=false;var enableHistoryCompressor=false;var defaults = {lastScavPage:lastScavPage,lastActiveQuestPage:lastActiveQuestPage,lastNormalActiveQuestPage:lastNormalActiveQuestPage,lastNormalCompletedQuestPage:lastNormalCompletedQuestPage,lastNormalNotStartedQuestPage:lastNormalNotStartedQuestPage,lastSeasonalActiveQuestPage:lastSeasonalActiveQuestPage,lastSeasonalCompletedQuestPage:lastSeasonalCompletedQuestPage,lastSeasonalNotStartedQuestPage:lastSeasonalNotStartedQuestPage,enableLogColoring:enableLogColoring,enableChatParsing:enableChatParsing,enableCreatureColoring:enableCreatureColoring,showCombatLog:showCombatLog,showCreatureInfo:showCreatureInfo,keepLogs:keepLogs,showExtraLinks:showExtraLinks,huntingBuffs:huntingBuffs,huntingBuffsName:huntingBuffsName,huntingBuffs2:huntingBuffs2,huntingBuffs2Name:huntingBuffs2Name,huntingBuffs3:huntingBuffs3,huntingBuffs3Name:huntingBuffs3Name,showHuntingBuffs:showHuntingBuffs,moveFSBox:moveFSBox,moveDailyQuest:moveDailyQuest,guildSelf:guildSelf,guildSelfMessage:guildSelfMessage,guildFrnd:guildFrnd,guildFrndMessage:guildFrndMessage,guildPast:guildPast,guildPastMessage:guildPastMessage,guildEnmy:guildEnmy,guildEnmyMessage:guildEnmyMessage,goldRecipient:goldRecipient,goldAmount:goldAmount,sendGoldonWorld:sendGoldonWorld,hideQuests:hideQuests,hideQuestNames:hideQuestNames,hideRecipes:hideRecipes,hideRecipeNames:hideRecipeNames,enableGuildInfoWidgets:enableGuildInfoWidgets,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets,guildOnlineRefreshTime:guildOnlineRefreshTime,hideGuildInfoSecureTrade:hideGuildInfoSecureTrade,hideGuildInfoTrade:hideGuildInfoTrade,hideGuildInfoMessage:hideGuildInfoMessage,hideGuildInfoBuff:hideGuildInfoBuff,buyBuffsGreeting:buyBuffsGreeting,renderSelfBio:renderSelfBio,bioEditLines:bioEditLines,renderOtherBios:renderOtherBios,playNewMessageSound:playNewMessageSound,showSpeakerOnWorld:showSpeakerOnWorld,defaultMessageSound:defaultMessageSound,highlightPlayersNearMyLvl:highlightPlayersNearMyLvl,highlightGvGPlayersNearMyLvl:highlightGvGPlayersNearMyLvl,detailedConflictInfo:detailedConflictInfo,gameHelpLink:gameHelpLink,navigateToLogAfterMsg:navigateToLogAfterMsg,enableAllyOnlineList:enableAllyOnlineList,enableEnemyOnlineList:enableEnemyOnlineList,allyEnemyOnlineRefreshTime:allyEnemyOnlineRefreshTime,moveGuildList:moveGuildList,moveOnlineAlliesList:moveOnlineAlliesList,hideMatchesForCompletedMoves:hideMatchesForCompletedMoves,doNotKillList:doNotKillList,enableBioCompressor:enableBioCompressor,currentGoldSentTotal:currentGoldSentTotal,keepBuffLog:keepBuffLog,buffLog:buffLog,enableActiveBountyList:enableActiveBountyList,bountyListRefreshTime:bountyListRefreshTime,enableWantedList:enableWantedList,wantedNames:wantedNames,wantedGuildMembers:wantedGuildMembers,bwNeedsRefresh:bwNeedsRefresh,fsboxlog:fsboxlog,fsboxcontent:fsboxcontent,itemRecipient:itemRecipient,quickLinks:quickLinks,enableAttackHelper:enableAttackHelper,minGroupLevel:minGroupLevel,combatEvaluatorBias:combatEvaluatorBias,huntingMode:huntingMode,enabledHuntingMode:enabledHuntingMode,hideRelicOffline:hideRelicOffline,enterForSendMessage:enterForSendMessage,trackKillStreak:trackKillStreak,storeLastQuestPage:storeLastQuestPage,addAttackLinkToLog:addAttackLinkToLog,showStatBonusTotal:showStatBonusTotal,newGuildLogHistoryPages:newGuildLogHistoryPages,useNewGuildLog:useNewGuildLog,enhanceChatTextEntry:enhanceChatTextEntry,ajaxifyRankControls:ajaxifyRankControls,enableMaxGroupSizeToJoin:enableMaxGroupSizeToJoin,maxGroupSizeToJoin:maxGroupSizeToJoin,enableTempleAlert:enableTempleAlert,enableUpgradeAlert:enableUpgradeAlert,enableComposingAlert:enableComposingAlert,autoFillMinBidPrice:autoFillMinBidPrice,showPvPSummaryInLog:showPvPSummaryInLog,enableQuickDrink:enableQuickDrink,enhanceOnlineDots:enhanceOnlineDots,hideBuffSelected:hideBuffSelected,hideHelperMenu:hideHelperMenu,keepHelperMenuOnScreen:keepHelperMenuOnScreen,draggableHelperMenu:draggableHelperMenu,quickLinksTopPx:quickLinksTopPx,quickLinksLeftPx:quickLinksLeftPx,draggableQuickLinks:draggableQuickLinks,showNextQuestSteps:showNextQuestSteps,showRecallMessages:showRecallMessages,showRelicMessages:showRelicMessages,showMercenaryMessages:showMercenaryMessages,showGroupCombatMessages:showGroupCombatMessages,showDonationMessages:showDonationMessages,showRankingMessages:showRankingMessages,showGvGMessages:showGvGMessages,showTaggingMessages:showTaggingMessages,showTitanMessages:showTitanMessages,showQuickDropLinks:showQuickDropLinks,onlinePlayerMinLvl:onlinePlayerMinLvl,onlinePlayerMaxLvl:onlinePlayerMaxLvl,arenaMinLvl:arenaMinLvl,arenaMaxLvl:arenaMaxLvl,showMonsterLog:showMonsterLog,lastTempleCheck:lastTempleCheck,needToPray:needToPray,lastChatCheck:lastChatCheck,lastGuildLogCheck:lastGuildLogCheck,lastOutBoxCheck:lastOutBoxCheck,lastPlayerLogCheck:lastPlayerLogCheck,showAdmin:showAdmin,alliestotal:alliestotal,enemiestotal:enemiestotal,footprints:footprints,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages,listOfAllies:listOfAllies,listOfEnemies:listOfEnemies,contactList:contactList,lastUpgradeCheck:lastUpgradeCheck,needToDoUpgrade:needToDoUpgrade,characterVirtualLevel:characterVirtualLevel,guildLogoControl:guildLogoControl,statisticsControl:statisticsControl,guildStructureControl:guildStructureControl,lastMembrListCheck:lastMembrListCheck,disableItemColoring:disableItemColoring,showQuickSendLinks:showQuickSendLinks,needToCompose:needToCompose,lastComposeCheck:lastComposeCheck,lastOnlineCheck:lastOnlineCheck,bountyList:bountyList,wantedList:wantedList,lowestLevelInTop250:lowestLevelInTop250,quickMsg:quickMsg,sendClasses:sendClasses,quickSearchList:quickSearchList,arenaMoves:arenaMoves,arenaMatches:arenaMatches,CombatLog:CombatLog,hideChampionsGroup:hideChampionsGroup,hideElitesGroup:hideElitesGroup,hideSEGroup:hideSEGroup,hideTitanGroup:hideTitanGroup,hideLegendaryGroup:hideLegendaryGroup,disableDeactivatePrompts:disableDeactivatePrompts,moveComposingButtons:moveComposingButtons,expandMenuOnKeyPress:expandMenuOnKeyPress,disableBreakdownPrompts:disableBreakdownPrompts,collapseNewsArchive:collapseNewsArchive,collapseHallPosts:collapseHallPosts,lastmyGuildLogCheck:lastmyGuildLogCheck,hideSubLvlCreature:hideSubLvlCreature,hidePlayerActions:hidePlayerActions,extraProfile:extraProfile,textToSearchFor:textToSearchFor,lastLadderReset:lastLadderReset,disableQuickWearPrompts:disableQuickWearPrompts,enableGuildActivityTracker:enableGuildActivityTracker,enableSeTracker:enableSeTracker,showTitanInfo:showTitanInfo,highlightPvpProtection:highlightPvpProtection,showBuffInfo:showBuffInfo,enableHistoryCompressor:enableHistoryCompressor};
+  var lastScavPage="";var lastActiveQuestPage="";var lastNormalActiveQuestPage="";var lastNormalCompletedQuestPage="";var lastNormalNotStartedQuestPage="";var lastSeasonalActiveQuestPage="";var lastSeasonalCompletedQuestPage="";var lastSeasonalNotStartedQuestPage="";var enableLogColoring=false;var enableChatParsing=false;var enableCreatureColoring=false;var showCombatLog=false;var showCreatureInfo=false;var keepLogs=false;var showExtraLinks=false;var huntingBuffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve";var huntingBuffsName="default";var huntingBuffs2="Deflect";var huntingBuffs2Name="PvP";var huntingBuffs3="Super Elite Slayer";var huntingBuffs3Name="SE";var showHuntingBuffs=false;var moveFSBox=false;var moveDailyQuest=false;var guildSelf="";var guildSelfMessage="Member of your own guild!";var guildFrnd="";var guildFrndMessage="Do not attack - Guild is friendly!";var guildPast="";var guildPastMessage="Do not attack - You've been in that guild once!";var guildEnmy="";var guildEnmyMessage="Enemy guild. Attack at will!";var goldRecipient="";var goldAmount="";var sendGoldonWorld=false;var hideQuests=false;var hideQuestNames="";var hideRecipes=false;var hideRecipeNames="";var enableGuildInfoWidgets=false;var enableOnlineAlliesWidgets=false;var guildOnlineRefreshTime=300;var hideGuildInfoSecureTrade=false;var hideGuildInfoTrade=false;var hideGuildInfoMessage=false;var hideGuildInfoBuff=false;var buyBuffsGreeting="Hello {playername}, can I buy {buffs} for {cost} please?";var renderSelfBio=false;var bioEditLines=10;var renderOtherBios=false;var playNewMessageSound=false;var showSpeakerOnWorld=false;var defaultMessageSound="https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav";var highlightPlayersNearMyLvl=false;var highlightGvGPlayersNearMyLvl=false;var detailedConflictInfo=false;var gameHelpLink=true;var navigateToLogAfterMsg=false;var enableAllyOnlineList=false;var enableEnemyOnlineList=false;var allyEnemyOnlineRefreshTime=300;var moveGuildList=false;var moveOnlineAlliesList=false;var hideMatchesForCompletedMoves=false;var doNotKillList="";var enableBioCompressor=false;var currentGoldSentTotal=0;var keepBuffLog=false;var buffLog="";var enableActiveBountyList=false;var bountyListRefreshTime=300;var enableWantedList=false;var wantedNames="";var wantedGuildMembers=false;var bwNeedsRefresh=true;var fsboxlog=false;var fsboxcontent="";var itemRecipient="";var quickLinks="[]";var enableAttackHelper=false;var minGroupLevel=1;var combatEvaluatorBias=0;var huntingMode=false;var enabledHuntingMode="1";var hideRelicOffline=false;var enterForSendMessage=false;var trackKillStreak=false;var storeLastQuestPage=false;var addAttackLinkToLog=false;var showStatBonusTotal=false;var newGuildLogHistoryPages=3;var useNewGuildLog=false;var enhanceChatTextEntry=false;var ajaxifyRankControls=false;var enableMaxGroupSizeToJoin=false;var maxGroupSizeToJoin=11;var enableTempleAlert=false;var enableUpgradeAlert=false;var enableComposingAlert=false;var autoFillMinBidPrice=false;var showPvPSummaryInLog=false;var enableQuickDrink=false;var enhanceOnlineDots=false;var hideBuffSelected=false;var hideHelperMenu=false;var keepHelperMenuOnScreen=true;var draggableHelperMenu=false;var quickLinksTopPx=22;var quickLinksLeftPx=0;var draggableQuickLinks=false;var showNextQuestSteps=true;var showRecallMessages=true;var showRelicMessages=true;var showMercenaryMessages=true;var showGroupCombatMessages=true;var showDonationMessages=true;var showRankingMessages=true;var showGvGMessages=true;var showTaggingMessages=true;var showTitanMessages=true;var showQuickDropLinks=false;var onlinePlayerMinLvl=1;var onlinePlayerMaxLvl=9999;var arenaMinLvl=1;var arenaMaxLvl=9999;var showMonsterLog=false;var lastTempleCheck=0;var needToPray=false;var lastChatCheck="0";var lastGuildLogCheck="0";var lastOutBoxCheck="0";var lastPlayerLogCheck="0";var showAdmin=false;var alliestotal=0;var enemiestotal=0;var footprints=false;var hideNonPlayerGuildLogMessages=false;var listOfAllies="";var listOfEnemies="";var contactList="";var lastUpgradeCheck=0;var needToDoUpgrade=false;var characterVirtualLevel=0;var guildLogoControl=false;var statisticsControl=false;var guildStructureControl=false;var lastMembrListCheck=0;var disableItemColoring=true;var showQuickSendLinks=false;var needToCompose=false;var lastComposeCheck=0;var lastOnlineCheck=0;var bountyList="";var wantedList="";var lowestLevelInTop250=0;var quickMsg="[\"Thank you very much ^_^\",\"Happy hunting, {playername}\"]";var sendClasses="[\"Composed Pots\", \"13699\"], [\"Amber\", \"5611\"], [\"Amethyst Weed\", \"9145\"], [\"Blood Bloom\", \"5563\"], [\"Cerulean Rose\", \"9156\"], [\"Coleoptera Body\", \"9287\"], [\"Dark Shade\", \"5564\"], [\"Deathbloom\", \"9140\"], [\"Deathly Mold\", \"9153\"], [\"Greenskin Fungus\", \"9148\"], [\"Heffle\", \"5565\"], [\"Jademare\", \"5566\"], [\"Ruby Thistle\", \"9143\"], [\"Toad Corpse\",\"9288\"], [\"Trinettle\", \"5567\"], [\"Viridian Vine\", \"9151\"], [\"Mortar & Pestle\", \"9157\"], [\"Beetle Juice\", \"9158\"]";var quickSearchList="[{\"category\":\"Plants\",\"searchname\":\"Amber\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Blood Bloom\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Jademare\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Dark Shade\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Trinettle\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Heffle Wart\",\"nickname\":\"\"},{\"category\":\"Potions\",\"searchname\":\"Sludge Brew\",\"nickname\":\"DC 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Black Death\",\"nickname\":\"DC 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Aid\",\"nickname\":\"Assist\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Doubling\",\"nickname\":\"DB 450\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Acceleration\",\"nickname\":\"DB 500\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Lesser Death Dealer\",\"nickname\":\"DD\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Runic Potion\",\"nickname\":\"FI 250\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Bookworm\",\"nickname\":\"Lib 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Truth\",\"nickname\":\"EW 1k\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dull Edge\",\"nickname\":\"DE 25\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Notched Blade\",\"nickname\":\"DE 80\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Death\",\"nickname\":\"DW 125\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Decay\",\"nickname\":\"WI 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fatality\",\"nickname\":\"WI 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Annihilation\",\"nickname\":\"DW 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Wise\",\"nickname\":\"Lib 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Shattering\",\"nickname\":\"SA\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dragons Blood Potion\",\"nickname\":\"ZK 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Berserkers Potion\",\"nickname\":\"ZK 300\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fury\",\"nickname\":\"ZK 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Luck\",\"nickname\":\"FI 1k\",\"displayOnAH\":true}]";var arenaMoves="[]";var arenaMatches="[]";var CombatLog="";var hideChampionsGroup=false;var hideElitesGroup=false;var hideSEGroup=false;var hideTitanGroup=false;var hideLegendaryGroup=false;var disableDeactivatePrompts=false;var moveComposingButtons=false;var expandMenuOnKeyPress=false;var disableBreakdownPrompts=false;var collapseNewsArchive=false;var collapseHallPosts=false;var lastmyGuildLogCheck=0;var hideSubLvlCreature=false;var hidePlayerActions=false;var extraProfile="";var textToSearchFor="";var lastLadderReset=0;var disableQuickWearPrompts=false;var enableGuildActivityTracker=false;var enableSeTracker=false;var showTitanInfo=false;var highlightPvpProtection=false;var showBuffInfo=false;var enableHistoryCompressor=false;var enableStamBars=false;var defaults = {lastScavPage:lastScavPage,lastActiveQuestPage:lastActiveQuestPage,lastNormalActiveQuestPage:lastNormalActiveQuestPage,lastNormalCompletedQuestPage:lastNormalCompletedQuestPage,lastNormalNotStartedQuestPage:lastNormalNotStartedQuestPage,lastSeasonalActiveQuestPage:lastSeasonalActiveQuestPage,lastSeasonalCompletedQuestPage:lastSeasonalCompletedQuestPage,lastSeasonalNotStartedQuestPage:lastSeasonalNotStartedQuestPage,enableLogColoring:enableLogColoring,enableChatParsing:enableChatParsing,enableCreatureColoring:enableCreatureColoring,showCombatLog:showCombatLog,showCreatureInfo:showCreatureInfo,keepLogs:keepLogs,showExtraLinks:showExtraLinks,huntingBuffs:huntingBuffs,huntingBuffsName:huntingBuffsName,huntingBuffs2:huntingBuffs2,huntingBuffs2Name:huntingBuffs2Name,huntingBuffs3:huntingBuffs3,huntingBuffs3Name:huntingBuffs3Name,showHuntingBuffs:showHuntingBuffs,moveFSBox:moveFSBox,moveDailyQuest:moveDailyQuest,guildSelf:guildSelf,guildSelfMessage:guildSelfMessage,guildFrnd:guildFrnd,guildFrndMessage:guildFrndMessage,guildPast:guildPast,guildPastMessage:guildPastMessage,guildEnmy:guildEnmy,guildEnmyMessage:guildEnmyMessage,goldRecipient:goldRecipient,goldAmount:goldAmount,sendGoldonWorld:sendGoldonWorld,hideQuests:hideQuests,hideQuestNames:hideQuestNames,hideRecipes:hideRecipes,hideRecipeNames:hideRecipeNames,enableGuildInfoWidgets:enableGuildInfoWidgets,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets,guildOnlineRefreshTime:guildOnlineRefreshTime,hideGuildInfoSecureTrade:hideGuildInfoSecureTrade,hideGuildInfoTrade:hideGuildInfoTrade,hideGuildInfoMessage:hideGuildInfoMessage,hideGuildInfoBuff:hideGuildInfoBuff,buyBuffsGreeting:buyBuffsGreeting,renderSelfBio:renderSelfBio,bioEditLines:bioEditLines,renderOtherBios:renderOtherBios,playNewMessageSound:playNewMessageSound,showSpeakerOnWorld:showSpeakerOnWorld,defaultMessageSound:defaultMessageSound,highlightPlayersNearMyLvl:highlightPlayersNearMyLvl,highlightGvGPlayersNearMyLvl:highlightGvGPlayersNearMyLvl,detailedConflictInfo:detailedConflictInfo,gameHelpLink:gameHelpLink,navigateToLogAfterMsg:navigateToLogAfterMsg,enableAllyOnlineList:enableAllyOnlineList,enableEnemyOnlineList:enableEnemyOnlineList,allyEnemyOnlineRefreshTime:allyEnemyOnlineRefreshTime,moveGuildList:moveGuildList,moveOnlineAlliesList:moveOnlineAlliesList,hideMatchesForCompletedMoves:hideMatchesForCompletedMoves,doNotKillList:doNotKillList,enableBioCompressor:enableBioCompressor,currentGoldSentTotal:currentGoldSentTotal,keepBuffLog:keepBuffLog,buffLog:buffLog,enableActiveBountyList:enableActiveBountyList,bountyListRefreshTime:bountyListRefreshTime,enableWantedList:enableWantedList,wantedNames:wantedNames,wantedGuildMembers:wantedGuildMembers,bwNeedsRefresh:bwNeedsRefresh,fsboxlog:fsboxlog,fsboxcontent:fsboxcontent,itemRecipient:itemRecipient,quickLinks:quickLinks,enableAttackHelper:enableAttackHelper,minGroupLevel:minGroupLevel,combatEvaluatorBias:combatEvaluatorBias,huntingMode:huntingMode,enabledHuntingMode:enabledHuntingMode,hideRelicOffline:hideRelicOffline,enterForSendMessage:enterForSendMessage,trackKillStreak:trackKillStreak,storeLastQuestPage:storeLastQuestPage,addAttackLinkToLog:addAttackLinkToLog,showStatBonusTotal:showStatBonusTotal,newGuildLogHistoryPages:newGuildLogHistoryPages,useNewGuildLog:useNewGuildLog,enhanceChatTextEntry:enhanceChatTextEntry,ajaxifyRankControls:ajaxifyRankControls,enableMaxGroupSizeToJoin:enableMaxGroupSizeToJoin,maxGroupSizeToJoin:maxGroupSizeToJoin,enableTempleAlert:enableTempleAlert,enableUpgradeAlert:enableUpgradeAlert,enableComposingAlert:enableComposingAlert,autoFillMinBidPrice:autoFillMinBidPrice,showPvPSummaryInLog:showPvPSummaryInLog,enableQuickDrink:enableQuickDrink,enhanceOnlineDots:enhanceOnlineDots,hideBuffSelected:hideBuffSelected,hideHelperMenu:hideHelperMenu,keepHelperMenuOnScreen:keepHelperMenuOnScreen,draggableHelperMenu:draggableHelperMenu,quickLinksTopPx:quickLinksTopPx,quickLinksLeftPx:quickLinksLeftPx,draggableQuickLinks:draggableQuickLinks,showNextQuestSteps:showNextQuestSteps,showRecallMessages:showRecallMessages,showRelicMessages:showRelicMessages,showMercenaryMessages:showMercenaryMessages,showGroupCombatMessages:showGroupCombatMessages,showDonationMessages:showDonationMessages,showRankingMessages:showRankingMessages,showGvGMessages:showGvGMessages,showTaggingMessages:showTaggingMessages,showTitanMessages:showTitanMessages,showQuickDropLinks:showQuickDropLinks,onlinePlayerMinLvl:onlinePlayerMinLvl,onlinePlayerMaxLvl:onlinePlayerMaxLvl,arenaMinLvl:arenaMinLvl,arenaMaxLvl:arenaMaxLvl,showMonsterLog:showMonsterLog,lastTempleCheck:lastTempleCheck,needToPray:needToPray,lastChatCheck:lastChatCheck,lastGuildLogCheck:lastGuildLogCheck,lastOutBoxCheck:lastOutBoxCheck,lastPlayerLogCheck:lastPlayerLogCheck,showAdmin:showAdmin,alliestotal:alliestotal,enemiestotal:enemiestotal,footprints:footprints,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages,listOfAllies:listOfAllies,listOfEnemies:listOfEnemies,contactList:contactList,lastUpgradeCheck:lastUpgradeCheck,needToDoUpgrade:needToDoUpgrade,characterVirtualLevel:characterVirtualLevel,guildLogoControl:guildLogoControl,statisticsControl:statisticsControl,guildStructureControl:guildStructureControl,lastMembrListCheck:lastMembrListCheck,disableItemColoring:disableItemColoring,showQuickSendLinks:showQuickSendLinks,needToCompose:needToCompose,lastComposeCheck:lastComposeCheck,lastOnlineCheck:lastOnlineCheck,bountyList:bountyList,wantedList:wantedList,lowestLevelInTop250:lowestLevelInTop250,quickMsg:quickMsg,sendClasses:sendClasses,quickSearchList:quickSearchList,arenaMoves:arenaMoves,arenaMatches:arenaMatches,CombatLog:CombatLog,hideChampionsGroup:hideChampionsGroup,hideElitesGroup:hideElitesGroup,hideSEGroup:hideSEGroup,hideTitanGroup:hideTitanGroup,hideLegendaryGroup:hideLegendaryGroup,disableDeactivatePrompts:disableDeactivatePrompts,moveComposingButtons:moveComposingButtons,expandMenuOnKeyPress:expandMenuOnKeyPress,disableBreakdownPrompts:disableBreakdownPrompts,collapseNewsArchive:collapseNewsArchive,collapseHallPosts:collapseHallPosts,lastmyGuildLogCheck:lastmyGuildLogCheck,hideSubLvlCreature:hideSubLvlCreature,hidePlayerActions:hidePlayerActions,extraProfile:extraProfile,textToSearchFor:textToSearchFor,lastLadderReset:lastLadderReset,disableQuickWearPrompts:disableQuickWearPrompts,enableGuildActivityTracker:enableGuildActivityTracker,enableSeTracker:enableSeTracker,showTitanInfo:showTitanInfo,highlightPvpProtection:highlightPvpProtection,showBuffInfo:showBuffInfo,enableHistoryCompressor:enableHistoryCompressor,enableStamBars:enableStamBars};
 
   var reviver = [
     ['S]', function(value) {return value.substr(2);}],
@@ -2723,7 +2723,7 @@
     return isChecked(getValue(pref));
   }
 
-  var moveGuildList$1={helpTitle:"Move Guild Info List",helpText:"This will Move the Guild Info List higher on the bar on the right"};var moveOnlineAlliesList$1={helpTitle:"Move Online Allies List",helpText:"This will Move the Online Allies List higher on the bar on the right"};var enableOnlineAlliesWidgets$1={helpTitle:"Enable Online Allies Widgets",helpText:"Enabling this option will enable the Allies List Widgets (coloring on the Allies List panel)"};var moveFSBox$1={helpTitle:"Move FS box",helpText:"This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)"};var moveDailyQuest$1={helpTitle:"Move Daily Quest",helpText:"This will move the Daily Quest to the left, under the menu, for better visibility (unless it is already hidden.)"};var gameHelpLink$2={helpTitle:"&quot;Game Help&quot; Settings Link",helpText:"This turns the Game Help text in the lower right box into a link to this settings page."};var enableTempleAlert$1={helpTitle:"Enable Temple Alert",helpText:"Puts an alert on the LHS if you have not prayed at the temple today.",network:true};var enableUpgradeAlert$1={helpTitle:"Enable Gold Upgrade Alert",helpText:"Puts an alert on the LHS if you have not upgraded your stamina with gold today.",network:true};var enableComposingAlert$1={helpTitle:"Enable Composing Alert",helpText:"Puts an alert on the LHS if you have composing slots available.",network:true};var enhanceOnlineDots$1={helpTitle:"Enhance Online Dots",helpText:"Enhances the green/grey dots by player names to show online/offline status."};var hideBuffSelected$1={helpTitle:"Hide Buff Selected",helpText:"Hides the buff selected functionality in the online allies and guild info section."};var hideHelperMenu$1={helpTitle:"Hide Helper Menu",helpText:"Hides the helper menu from top left."};var keepHelperMenuOnScreen$1={helpTitle:"Keep Helper Menu On Screen",helpText:"Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links."};var showAdmin$1={helpTitle:"Show rank controls",helpText:"Show ranking controls for guild managemenet in member profile page - this works for guild founders only"};var ajaxifyRankControls$1={helpTitle:"AJAXify rank controls",helpText:"Enables guild founders with ranking rights to change rank positions without a screen refresh."};var detailedConflictInfo$1={helpTitle:"Show Conflict Details",helpText:"Inserts detailed conflict information onto your guild's manage page. Currently displays the target guild as well as the current score.",network:true};var showCombatLog$1={helpTitle:"Show Combat Log",helpText:"This will show the combat log for each automatic battle below the monster list."};var enableCreatureColoring$1={helpTitle:"Color Special Creatures",helpText:"Creatures will be colored according to their rarity. Champions will be colored green, Elites yellow and Super Elites red."};var showCreatureInfo$1={helpTitle:"Show Creature Info",helpText:"This will show the information from the view creature link when you mouseover the link.",network:true};var fsboxlog$1={helpTitle:"Enable FS Box Log",helpText:"This enables the functionality to keep a log of recent seen FS Box message."};var keepBuffLog$1={helpTitle:"Enable Buff Log",helpText:"This enables the functionality to keep a log of recently casted buffs"};var huntingMode$1={helpTitle:"Enable Hunting Mode",helpText:"This disable menu and some visual features to speed up the calf."};var hideNonPlayerGuildLogMessages$1={helpTitle:"Cleanup Guild Log",helpText:"Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)"};var useNewGuildLog$1={helpTitle:"Use New Guild Log",helpText:"This will replace the standard guild log with the helper version of the guild log."};var enableLogColoring$1={helpTitle:"Enable Log Coloring",helpText:"Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown."};var enableChatParsing$1={helpTitle:"Enable Chat Parsing",helpText:"If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message."};var addAttackLinkToLog$1={helpTitle:"Add attack link to log",helpText:"If checked, this will add an Attack link to each message in your log."};var enhanceChatTextEntry$1={helpTitle:"Enhance Chat Text Entry",helpText:"If checked, this will enhance the entry field for entering chat text on the guild chat page."};var showExtraLinks$1={helpTitle:"Show Extra Links",helpText:"If checked, this will add AH and UFSG links to equipment screens."};var disableItemColoring$1={helpTitle:"Disable Item Coloring",helpText:"Disable the code that colors the item text based on the rarity of the item."};var showQuickDropLinks$1={helpTitle:"Show Quick Drop Item",helpText:"This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR"};var storeLastQuestPage$1={helpTitle:"Store Last Quest Page",helpText:"This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, click on the link you wish to reset and then turn this option back on again."};var showNextQuestSteps$1={helpTitle:"Show Next Quest Steps",helpText:"Shows all quest steps in the UFSG."};var renderSelfBio$1={helpTitle:"Render self bio",helpText:"This determines if your own bio will render the FSH special bio tags."};var renderOtherBios$1={helpTitle:"Render other players&#39; bios",helpText:"This determines if other players bios will render the FSH special bio tags."};var enableBioCompressor$1={helpTitle:"Enable Bio Compressor",helpText:"This will compress long bios and provide a link to expand the compressed section."};var showStatBonusTotal$1={helpTitle:"Show Stat Bonus Total",helpText:"This will show a total of the item stats when you mouseover an item on the profile screen."};var enableQuickDrink$1={helpTitle:"Enable Quick Drink/Wear",helpText:"This enables the quick drink/wear functionality on the profile page."};var disableDeactivatePrompts$1={helpTitle:"Disable Deactivate Prompts",helpText:"This disables the prompts for deactivating buffs on the profile page."};var enableAttackHelper$1={helpTitle:"Show Attack Helper",helpText:"This will show extra information on the attack player screen about stats and buffs on you and your target",network:true};var showPvPSummaryInLog$1={helpTitle:"Show PvP Summary in Log",helpText:"This will show a summary of the PvP results in the log.",network:true};var autoFillMinBidPrice$1={helpTitle:"Auto Fill Min Bid Price",helpText:"This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed."};var hideRelicOffline$1={helpTitle:"Hide Relic Offline",helpText:"This hides the relic offline defenders checker."};var enterForSendMessage$1={helpTitle:"Enter Sends Message",helpText:"If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift when you press enter."};var navigateToLogAfterMsg$1={helpTitle:"Navigate After Message Sent",helpText:"If enabled, will navigate to the referring page after a successful message is sent. Example:  if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen."};var moveComposingButtons$1={helpTitle:"Move Composing Buttons",helpText:"If enabled, will move composing buttons to the top of the composing screen."};var draggableHelperMenu$1={helpTitle:"Draggable Helper Menu",helpText:"If enabled, allows the helper menu to be dragged around the screen."};var draggableQuickLinks$1={helpTitle:"Draggable Quick Links",helpText:"If enabled, allows the quick link box to be dragged around the screen."};var expandMenuOnKeyPress$1={helpTitle:"Expand Menu on Key Press",helpText:"If enabled, expands the left hand menu when you use hotkeys."};var disableBreakdownPrompts$1={helpTitle:"Disable Breakdown Prompts",helpText:"If enabled, will disable prompts when you breakdown items.<br>NO REFUNDS OR DO-OVERS! Use at own risk."};var collapseNewsArchive$1={helpTitle:"Collapse News Archive",helpText:"If enabled, will collapse news archives."};var collapseHallPosts$1={helpTitle:"Collapse Hall Posts",helpText:"If enabled, will collapse hall posts."};var hideSubLvlCreature$1={helpTitle:"Hide Sub Level Creatures",helpText:"If enabled, will hide creatures that are lower than the current realm level."};var hidePlayerActions$1={helpTitle:"Hide Player Actions",helpText:"If enabled, will hide player actions."};var disableQuickWearPrompts$1={helpTitle:"Disable Use/Ext Prompts",helpText:"If enabled, will disable prompts when you Use/Ext items.<br>NO REFUNDS OR DO-OVERS! Use at own risk.",title:"Disable Use/Ext<br>Prompts"};var enableGuildActivityTracker$1={helpTitle:"Enable Guild Activity Tracker",helpText:"If enabled, will track guild member activity over time.",network:true,title:"Enable Tracker"};var enableSeTracker$1={helpTitle:"Enable SE Tracker",helpText:"If enabled, will track the last time each SE was killed.<br>This is DIFFERENT from the usual FSH network activity.<br>When this is enabled, if you have ANY game page open in a<br>browser tab it will scan the SE Log every 10 minutes.<br>You do not need auto-refresh for this to work.",network:true};var showMonsterLog$1={helpTitle:"Keep Creature Log",helpText:"This will show the creature log for each creature you see when you travel.",network:true};var showTitanInfo$1={helpTitle:"Show Titan Info",helpText:"This will show titan info in the action list.",network:true};var wantedGuildMembers$1={helpTitle:"Show Guild Members",helpText:"If enabled, will show guild members in the wanted bounty list."};var highlightPvpProtection$1={helpTitle:"Highlight Pvp Protection",helpText:"If enabled, will put a red box around PvP Protection."};var showBuffInfo$1={helpTitle:"Show Buff Info",helpText:"This will show buff info in the action list."};var enableHistoryCompressor$1={helpTitle:"Guild History Compressor",helpText:"This will compress long guild histories and provide a link to expand the compressed section."};var mySimpleCheckboxes = {moveGuildList:moveGuildList$1,moveOnlineAlliesList:moveOnlineAlliesList$1,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets$1,moveFSBox:moveFSBox$1,moveDailyQuest:moveDailyQuest$1,gameHelpLink:gameHelpLink$2,enableTempleAlert:enableTempleAlert$1,enableUpgradeAlert:enableUpgradeAlert$1,enableComposingAlert:enableComposingAlert$1,enhanceOnlineDots:enhanceOnlineDots$1,hideBuffSelected:hideBuffSelected$1,hideHelperMenu:hideHelperMenu$1,keepHelperMenuOnScreen:keepHelperMenuOnScreen$1,showAdmin:showAdmin$1,ajaxifyRankControls:ajaxifyRankControls$1,detailedConflictInfo:detailedConflictInfo$1,showCombatLog:showCombatLog$1,enableCreatureColoring:enableCreatureColoring$1,showCreatureInfo:showCreatureInfo$1,fsboxlog:fsboxlog$1,keepBuffLog:keepBuffLog$1,huntingMode:huntingMode$1,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages$1,useNewGuildLog:useNewGuildLog$1,enableLogColoring:enableLogColoring$1,enableChatParsing:enableChatParsing$1,addAttackLinkToLog:addAttackLinkToLog$1,enhanceChatTextEntry:enhanceChatTextEntry$1,showExtraLinks:showExtraLinks$1,disableItemColoring:disableItemColoring$1,showQuickDropLinks:showQuickDropLinks$1,storeLastQuestPage:storeLastQuestPage$1,showNextQuestSteps:showNextQuestSteps$1,renderSelfBio:renderSelfBio$1,renderOtherBios:renderOtherBios$1,enableBioCompressor:enableBioCompressor$1,showStatBonusTotal:showStatBonusTotal$1,enableQuickDrink:enableQuickDrink$1,disableDeactivatePrompts:disableDeactivatePrompts$1,enableAttackHelper:enableAttackHelper$1,showPvPSummaryInLog:showPvPSummaryInLog$1,autoFillMinBidPrice:autoFillMinBidPrice$1,hideRelicOffline:hideRelicOffline$1,enterForSendMessage:enterForSendMessage$1,navigateToLogAfterMsg:navigateToLogAfterMsg$1,moveComposingButtons:moveComposingButtons$1,draggableHelperMenu:draggableHelperMenu$1,draggableQuickLinks:draggableQuickLinks$1,expandMenuOnKeyPress:expandMenuOnKeyPress$1,disableBreakdownPrompts:disableBreakdownPrompts$1,collapseNewsArchive:collapseNewsArchive$1,collapseHallPosts:collapseHallPosts$1,hideSubLvlCreature:hideSubLvlCreature$1,hidePlayerActions:hidePlayerActions$1,disableQuickWearPrompts:disableQuickWearPrompts$1,enableGuildActivityTracker:enableGuildActivityTracker$1,enableSeTracker:enableSeTracker$1,showMonsterLog:showMonsterLog$1,showTitanInfo:showTitanInfo$1,wantedGuildMembers:wantedGuildMembers$1,highlightPvpProtection:highlightPvpProtection$1,showBuffInfo:showBuffInfo$1,enableHistoryCompressor:enableHistoryCompressor$1};
+  var moveGuildList$1={helpTitle:"Move Guild Info List",helpText:"This will Move the Guild Info List higher on the bar on the right"};var moveOnlineAlliesList$1={helpTitle:"Move Online Allies List",helpText:"This will Move the Online Allies List higher on the bar on the right"};var enableOnlineAlliesWidgets$1={helpTitle:"Enable Online Allies Widgets",helpText:"Enabling this option will enable the Allies List Widgets (coloring on the Allies List panel)"};var moveFSBox$1={helpTitle:"Move FS box",helpText:"This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)"};var moveDailyQuest$1={helpTitle:"Move Daily Quest",helpText:"This will move the Daily Quest to the left, under the menu, for better visibility (unless it is already hidden.)"};var gameHelpLink$2={helpTitle:"&quot;Game Help&quot; Settings Link",helpText:"This turns the Game Help text in the lower right box into a link to this settings page."};var enableTempleAlert$1={helpTitle:"Enable Temple Alert",helpText:"Puts an alert on the LHS if you have not prayed at the temple today.",network:true};var enableUpgradeAlert$1={helpTitle:"Enable Gold Upgrade Alert",helpText:"Puts an alert on the LHS if you have not upgraded your stamina with gold today.",network:true};var enableComposingAlert$1={helpTitle:"Enable Composing Alert",helpText:"Puts an alert on the LHS if you have composing slots available.",network:true};var enhanceOnlineDots$1={helpTitle:"Enhance Online Dots",helpText:"Enhances the green/grey dots by player names to show online/offline status."};var hideBuffSelected$1={helpTitle:"Hide Buff Selected",helpText:"Hides the buff selected functionality in the online allies and guild info section."};var hideHelperMenu$1={helpTitle:"Hide Helper Menu",helpText:"Hides the helper menu from top left."};var keepHelperMenuOnScreen$1={helpTitle:"Keep Helper Menu On Screen",helpText:"Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links."};var showAdmin$1={helpTitle:"Show rank controls",helpText:"Show ranking controls for guild managemenet in member profile page - this works for guild founders only"};var ajaxifyRankControls$1={helpTitle:"AJAXify rank controls",helpText:"Enables guild founders with ranking rights to change rank positions without a screen refresh."};var detailedConflictInfo$1={helpTitle:"Show Conflict Details",helpText:"Inserts detailed conflict information onto your guild's manage page. Currently displays the target guild as well as the current score.",network:true};var showCombatLog$1={helpTitle:"Show Combat Log",helpText:"This will show the combat log for each automatic battle below the monster list."};var enableCreatureColoring$1={helpTitle:"Color Special Creatures",helpText:"Creatures will be colored according to their rarity. Champions will be colored green, Elites yellow and Super Elites red."};var showCreatureInfo$1={helpTitle:"Show Creature Info",helpText:"This will show the information from the view creature link when you mouseover the link.",network:true};var fsboxlog$1={helpTitle:"Enable FS Box Log",helpText:"This enables the functionality to keep a log of recent seen FS Box message."};var keepBuffLog$1={helpTitle:"Enable Buff Log",helpText:"This enables the functionality to keep a log of recently casted buffs"};var huntingMode$1={helpTitle:"Enable Hunting Mode",helpText:"This disable menu and some visual features to speed up the calf."};var hideNonPlayerGuildLogMessages$1={helpTitle:"Cleanup Guild Log",helpText:"Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)"};var useNewGuildLog$1={helpTitle:"Use New Guild Log",helpText:"This will replace the standard guild log with the helper version of the guild log."};var enableLogColoring$1={helpTitle:"Enable Log Coloring",helpText:"Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown."};var enableChatParsing$1={helpTitle:"Enable Chat Parsing",helpText:"If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message."};var addAttackLinkToLog$1={helpTitle:"Add attack link to log",helpText:"If checked, this will add an Attack link to each message in your log."};var enhanceChatTextEntry$1={helpTitle:"Enhance Chat Text Entry",helpText:"If checked, this will enhance the entry field for entering chat text on the guild chat page."};var showExtraLinks$1={helpTitle:"Show Extra Links",helpText:"If checked, this will add AH and UFSG links to equipment screens."};var disableItemColoring$1={helpTitle:"Disable Item Coloring",helpText:"Disable the code that colors the item text based on the rarity of the item."};var showQuickDropLinks$1={helpTitle:"Show Quick Drop Item",helpText:"This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR"};var storeLastQuestPage$1={helpTitle:"Store Last Quest Page",helpText:"This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, click on the link you wish to reset and then turn this option back on again."};var showNextQuestSteps$1={helpTitle:"Show Next Quest Steps",helpText:"Shows all quest steps in the UFSG."};var renderSelfBio$1={helpTitle:"Render self bio",helpText:"This determines if your own bio will render the FSH special bio tags."};var renderOtherBios$1={helpTitle:"Render other players&#39; bios",helpText:"This determines if other players bios will render the FSH special bio tags."};var enableBioCompressor$1={helpTitle:"Enable Bio Compressor",helpText:"This will compress long bios and provide a link to expand the compressed section."};var showStatBonusTotal$1={helpTitle:"Show Stat Bonus Total",helpText:"This will show a total of the item stats when you mouseover an item on the profile screen."};var enableQuickDrink$1={helpTitle:"Enable Quick Drink/Wear",helpText:"This enables the quick drink/wear functionality on the profile page."};var disableDeactivatePrompts$1={helpTitle:"Disable Deactivate Prompts",helpText:"This disables the prompts for deactivating buffs on the profile page."};var enableAttackHelper$1={helpTitle:"Show Attack Helper",helpText:"This will show extra information on the attack player screen about stats and buffs on you and your target",network:true};var showPvPSummaryInLog$1={helpTitle:"Show PvP Summary in Log",helpText:"This will show a summary of the PvP results in the log.",network:true};var autoFillMinBidPrice$1={helpTitle:"Auto Fill Min Bid Price",helpText:"This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed."};var hideRelicOffline$1={helpTitle:"Hide Relic Offline",helpText:"This hides the relic offline defenders checker."};var enterForSendMessage$1={helpTitle:"Enter Sends Message",helpText:"If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift when you press enter."};var navigateToLogAfterMsg$1={helpTitle:"Navigate After Message Sent",helpText:"If enabled, will navigate to the referring page after a successful message is sent. Example:  if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen."};var moveComposingButtons$1={helpTitle:"Move Composing Buttons",helpText:"If enabled, will move composing buttons to the top of the composing screen."};var draggableHelperMenu$1={helpTitle:"Draggable Helper Menu",helpText:"If enabled, allows the helper menu to be dragged around the screen."};var draggableQuickLinks$1={helpTitle:"Draggable Quick Links",helpText:"If enabled, allows the quick link box to be dragged around the screen."};var expandMenuOnKeyPress$1={helpTitle:"Expand Menu on Key Press",helpText:"If enabled, expands the left hand menu when you use hotkeys."};var disableBreakdownPrompts$1={helpTitle:"Disable Breakdown Prompts",helpText:"If enabled, will disable prompts when you breakdown items.<br>NO REFUNDS OR DO-OVERS! Use at own risk."};var collapseNewsArchive$1={helpTitle:"Collapse News Archive",helpText:"If enabled, will collapse news archives."};var collapseHallPosts$1={helpTitle:"Collapse Hall Posts",helpText:"If enabled, will collapse hall posts."};var hideSubLvlCreature$1={helpTitle:"Hide Sub Level Creatures",helpText:"If enabled, will hide creatures that are lower than the current realm level."};var hidePlayerActions$1={helpTitle:"Hide Player Actions",helpText:"If enabled, will hide player actions."};var disableQuickWearPrompts$1={helpTitle:"Disable Use/Ext Prompts",helpText:"If enabled, will disable prompts when you Use/Ext items.<br>NO REFUNDS OR DO-OVERS! Use at own risk.",title:"Disable Use/Ext<br>Prompts"};var enableGuildActivityTracker$1={helpTitle:"Enable Guild Activity Tracker",helpText:"If enabled, will track guild member activity over time.",network:true,title:"Enable Tracker"};var enableSeTracker$1={helpTitle:"Enable SE Tracker",helpText:"If enabled, will track the last time each SE was killed.<br>This is DIFFERENT from the usual FSH network activity.<br>When this is enabled, if you have ANY game page open in a<br>browser tab it will scan the SE Log every 10 minutes.<br>You do not need auto-refresh for this to work.",network:true};var showMonsterLog$1={helpTitle:"Keep Creature Log",helpText:"This will show the creature log for each creature you see when you travel.",network:true};var showTitanInfo$1={helpTitle:"Show Titan Info",helpText:"This will show titan info in the action list.",network:true};var wantedGuildMembers$1={helpTitle:"Show Guild Members",helpText:"If enabled, will show guild members in the wanted bounty list."};var highlightPvpProtection$1={helpTitle:"Highlight Pvp Protection",helpText:"If enabled, will put a red box around PvP Protection."};var showBuffInfo$1={helpTitle:"Show Buff Info",helpText:"This will show buff info in the action list."};var enableHistoryCompressor$1={helpTitle:"Guild History Compressor",helpText:"This will compress long guild histories and provide a link to expand the compressed section."};var enableStamBars$1={helpTitle:"Stamina Bars",helpText:"This shows stamina as a coloured bar."};var mySimpleCheckboxes = {moveGuildList:moveGuildList$1,moveOnlineAlliesList:moveOnlineAlliesList$1,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets$1,moveFSBox:moveFSBox$1,moveDailyQuest:moveDailyQuest$1,gameHelpLink:gameHelpLink$2,enableTempleAlert:enableTempleAlert$1,enableUpgradeAlert:enableUpgradeAlert$1,enableComposingAlert:enableComposingAlert$1,enhanceOnlineDots:enhanceOnlineDots$1,hideBuffSelected:hideBuffSelected$1,hideHelperMenu:hideHelperMenu$1,keepHelperMenuOnScreen:keepHelperMenuOnScreen$1,showAdmin:showAdmin$1,ajaxifyRankControls:ajaxifyRankControls$1,detailedConflictInfo:detailedConflictInfo$1,showCombatLog:showCombatLog$1,enableCreatureColoring:enableCreatureColoring$1,showCreatureInfo:showCreatureInfo$1,fsboxlog:fsboxlog$1,keepBuffLog:keepBuffLog$1,huntingMode:huntingMode$1,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages$1,useNewGuildLog:useNewGuildLog$1,enableLogColoring:enableLogColoring$1,enableChatParsing:enableChatParsing$1,addAttackLinkToLog:addAttackLinkToLog$1,enhanceChatTextEntry:enhanceChatTextEntry$1,showExtraLinks:showExtraLinks$1,disableItemColoring:disableItemColoring$1,showQuickDropLinks:showQuickDropLinks$1,storeLastQuestPage:storeLastQuestPage$1,showNextQuestSteps:showNextQuestSteps$1,renderSelfBio:renderSelfBio$1,renderOtherBios:renderOtherBios$1,enableBioCompressor:enableBioCompressor$1,showStatBonusTotal:showStatBonusTotal$1,enableQuickDrink:enableQuickDrink$1,disableDeactivatePrompts:disableDeactivatePrompts$1,enableAttackHelper:enableAttackHelper$1,showPvPSummaryInLog:showPvPSummaryInLog$1,autoFillMinBidPrice:autoFillMinBidPrice$1,hideRelicOffline:hideRelicOffline$1,enterForSendMessage:enterForSendMessage$1,navigateToLogAfterMsg:navigateToLogAfterMsg$1,moveComposingButtons:moveComposingButtons$1,draggableHelperMenu:draggableHelperMenu$1,draggableQuickLinks:draggableQuickLinks$1,expandMenuOnKeyPress:expandMenuOnKeyPress$1,disableBreakdownPrompts:disableBreakdownPrompts$1,collapseNewsArchive:collapseNewsArchive$1,collapseHallPosts:collapseHallPosts$1,hideSubLvlCreature:hideSubLvlCreature$1,hidePlayerActions:hidePlayerActions$1,disableQuickWearPrompts:disableQuickWearPrompts$1,enableGuildActivityTracker:enableGuildActivityTracker$1,enableSeTracker:enableSeTracker$1,showMonsterLog:showMonsterLog$1,showTitanInfo:showTitanInfo$1,wantedGuildMembers:wantedGuildMembers$1,highlightPvpProtection:highlightPvpProtection$1,showBuffInfo:showBuffInfo$1,enableHistoryCompressor:enableHistoryCompressor$1,enableStamBars:enableStamBars$1};
 
   var networkIcon =
     '<img class="networkIcon tip-static" ' +
@@ -5049,6 +5049,10 @@
     return guild({subcmd: 'manage'});
   }
 
+  function lastActivityToDays(last_activity) {
+    return Math.floor((nowSecs - last_activity) / 86400);
+  }
+
   var act = 0;
   var cur = 1;
   var lvl = 2;
@@ -5062,7 +5066,7 @@
 
   function pushNewRecord(member) {
     oldArchive.members[member.name].push([
-      Math.floor((nowSecs - member.last_activity) / 86400),
+      lastActivityToDays(member.last_activity),
       member.current_stamina,
       member.level,
       member.max_stamina,
@@ -5115,7 +5119,7 @@
     if (hasChanged(archiveRecord, member)) {
       pushNewRecord(member);
     } else {
-      archiveRecord[act] = Math.floor((nowSecs - member.last_activity) / 86400);
+      archiveRecord[act] = lastActivityToDays(member.last_activity);
       archiveRecord[utc] = nowSecs;
     }
   }
@@ -7276,6 +7280,7 @@
     sendEvent('composing', 'FastComposeButton');
     var openTemplates = querySelectorAll(
       '[id|="composing-template"]:not(#composing-template-multi)');
+    if (openTemplates.length < button.value) {return;}
     for (var i = 0; i < button.value; i += 1) {
       openTemplates[i].value = templateId;
       backgroundCreate(openTemplates[i].nextElementSibling.nextElementSibling,
@@ -7670,6 +7675,13 @@
     return guild({subcmd: 'advisor', subcmd2: 'view', period: period});
   }
 
+  function replaceChild(newChild, oldChild) {
+    if (newChild instanceof Node && oldChild instanceof Node) {
+      oldChild.parentNode.replaceChild(newChild, oldChild);
+    }
+    return oldChild;
+  }
+
   var advisorColumns = [
     {title: '<div class="fshBold">Member</div>'},
     {title: '<div class="fshBold">Lvl</div>', 'class': 'dt-center'},
@@ -7722,12 +7734,8 @@
     });
   }
 
-  function swapOutAdvisorTable(div, targetElement) {
-    targetElement.parentNode.replaceChild(div, targetElement);
-  }
-
   function switcheroo(div, targetElement) {
-    add(3, partial(swapOutAdvisorTable, div, targetElement));
+    add(3, partial(replaceChild, div, targetElement));
   }
 
   function injectTable(targetElement, tfoot, data) {
@@ -8875,7 +8883,8 @@
       var dots = querySelectorArray('#pCC a[data-tipped*="Last Activity"]');
       var memberStats = getActive(dots);
       members.classList.add('tip-static');
-      members.dataset.tipped = 'Active: ' + memberStats[ACTIVE] + '<br>' +
+      members.dataset.tipped = 'Active: ' + memberStats[ACTIVE] + '/' +
+        dots.length + '<br>' +
         'Stamina: ' + addCommas(memberStats[STAMINA]);
     }
   }
@@ -9426,7 +9435,7 @@
     on(myDiv, 'change', togglePref$3);
     insertElement(container, gs);
     insertElement(container, myDiv);
-    insertElement(td, container);
+    insertElementAfterBegin(td, container);
   }
 
   function injectTracker() {
@@ -9445,6 +9454,64 @@
   function guildTracker() {
     injectShowTracker();
     injectTracker();
+  }
+
+  const pref_enableStamBars = 'enableStamBars';
+  let enableStamBars$2;
+  let thisStyle;
+
+  function getStamPerc(a) {
+    const mo = a.dataset.tipped.match(/(\d+) \/ (\d+)/);
+    return Math.min(Math.round(Number(mo[1]) / Number(mo[2]) * 100), 100);
+  }
+
+  function stamBarStyle(a) {
+    const perc = getStamPerc(a);
+    return '#fshMemberList ' +
+      `tr:nth-child(${a.parentNode.parentNode.rowIndex + 1}) {` +
+      `background: linear-gradient(to right, rgba(255, 153, 0, 0.5) ${perc}%, ` +
+      `transparent ${perc + 1}%)}`;
+  }
+
+  function injectStyle() {
+    const tables = getElementsByTagName(def_table, pCC);
+    const memberList = tables[tables.length - 1];
+    memberList.id = 'fshMemberList';
+    const memberLinks = querySelectorArray('a[href*="&player_id="]', memberList);
+    const myTest = memberLinks.map(stamBarStyle).join('\n');
+    thisStyle = insertElement(document.body, createStyle(myTest)).sheet;
+  }
+
+  function toggleStyle() {
+    if (!thisStyle) {
+      injectStyle();
+    } else {
+      thisStyle.disabled = !enableStamBars$2;
+    }
+  }
+
+  function changePref() {
+    enableStamBars$2 = !enableStamBars$2;
+    setValue(pref_enableStamBars, enableStamBars$2);
+    toggleStyle();
+    sendEvent('guildManage', 'StamBars');
+  }
+
+  function injectPref() {
+    var gs = querySelector('#pCC img.guild_openGuildStore');
+    var td = gs.parentNode;
+    const prefContainer = insertElement(td,
+      createDiv({
+        className: 'fshCenter',
+        innerHTML: simpleCheckboxHtml(pref_enableStamBars)
+      }));
+    on(prefContainer, 'change', changePref);
+  }
+
+  function progressBar() {
+    injectPref();
+    enableStamBars$2 = getValue(pref_enableStamBars);
+    if (enableStamBars$2) {toggleStyle();}
   }
 
   function toggleVisibilty(evt) {
@@ -9543,6 +9610,7 @@
     lhsAdditions(leftHandSideColumnTable);
     add(3, buffLinks$1);
     ajaxStuff(leftHandSideColumnTable);
+    progressBar();
   }
 
   function getIntFromRegExp(theText, rxSearch) {
@@ -12509,6 +12577,912 @@
     makeQtLabel('qtOff', 'Quick Take', injector);
   }
 
+  var bpc;
+
+  function bp$1() {
+    if (!bpc) {
+      bpc = getElementById('backpackContainer');
+    }
+    return bpc;
+  }
+
+  var elementTests = [
+    function(self) {return self.tagName === 'A';},
+    function(self) {return Boolean(self.href);},
+    function(self) {return self.href.includes('togglesection');}
+  ];
+
+  function condition$7(self, fn) {return fn(self);}
+
+  function isSectionToggle(self) {
+    return elementTests.every(partial(condition$7, self));
+  }
+
+  function oldStyleDiv(target) {
+    if (target.style.display === 'block') {
+      hideElement(target);
+    }
+    target.removeAttribute('style');
+    return 0;
+  }
+
+  function toggleTarget(target) {
+    if (target.hasAttribute('style')) {
+      oldStyleDiv(target);
+    } else {
+      target.classList.toggle('fshHide');
+    }
+  }
+
+  function toggleSection(self) {
+    var sectionId = Number(getCustomUrlParameter(self.href, 'section_id'));
+    if (sectionId === 5) {
+      toggleTarget(bp$1());
+    } else {
+      toggleTarget(self.parentNode.parentNode.nextElementSibling);
+    }
+  }
+
+  function testForSection(evt) {
+    var self = evt.target;
+    if (isSectionToggle(self)) {
+      toggleSection(self);
+      retryAjax(self.href);
+      evt.preventDefault();
+    }
+  }
+
+  function ajaxifyProfileSections() {
+    on(pCC, 'click', testForSection);
+  }
+
+  function loadComponents() {
+    return profile({subcmd: 'loadcomponents'});
+  }
+
+  var componentList;
+
+  function tallyComponent(prev, el) {
+    prev[el.b] = prev[el.b] || {
+      a: el.a,
+      b: el.b,
+      count: 0,
+      del: [],
+      v: el.v
+    };
+    prev[el.b].count += 1;
+    prev[el.b].del.push(el.a);
+    return prev;
+  }
+
+  function prepareComponentList(data) {
+    componentList = data.r.reduce(tallyComponent, {});
+  }
+
+  function tallyTableRow(prev, comp) {
+    return prev + '<tr><td><img src="' + imageServer + '/items/' + comp.b +
+      '.gif" class="fshTblCenter tip-dynamic" data-tipped="fetchitem.php?' +
+      'item_id=' + comp.b + '&inv_id=' + comp.a + '&t=2&p=' + playerId() +
+      '&vcode=' + comp.v + '"></td><td>' + comp.count +
+      '</td><td>[<span class="sendLink compDelType" data-compid="' + comp.b +
+      '">Del</span>]</td></tr>';
+  }
+
+  function makeTallyTbody(data) {
+    var tBody = createTBody();
+    prepareComponentList(data);
+    insertHtmlBeforeEnd(tBody,
+      '<tr><td colspan="3">Component Summary</td></tr>' +
+      Object.values(componentList).reduce(tallyTableRow, ''));
+    return tBody;
+  }
+
+  function makeTotalCell(tbl) {
+    var totRow = tbl.insertRow(-1);
+    insertHtmlBeforeEnd(totRow, '<td>Total:</td>');
+    var totCell = totRow.insertCell(-1);
+    totCell.colSpan = 2;
+    return totCell;
+  }
+
+  function makeUsedCount(data) {
+    var usedCount = data.r.length;
+    var usedCountDom = createSpan();
+    usedCountDom.innerHTML = usedCount.toString();
+    return usedCountDom;
+  }
+
+  function makeTotalRow(tbl, data) {
+    var totCell = makeTotalCell(tbl);
+    insertElement(totCell, makeUsedCount(data));
+    insertTextBeforeEnd(totCell, ' / ' + data.h.cm.toString());
+  }
+
+  function makeTallyTable(data) {
+    var tbl = createTable({className: 'fshTblCenter', id: 'fshTally'});
+    insertElement(tbl, makeTallyTbody(data));
+    makeTotalRow(tbl, data);
+    return tbl;
+  }
+
+  function displayComponentTally(self, data) {
+    if (!Array.isArray(data.r)) {return;}
+    var sumComp = self.parentNode;
+    if (sumComp) {
+      sumComp.innerHTML = '';
+      insertElement(sumComp, makeTallyTable(data));
+    }
+  }
+
+  function countComponent(self) { // jQuery.min
+    sendEvent('components', 'countComponent');
+    loadComponents().then(partial(displayComponentTally, self));
+  }
+
+  function decorateButton(label) {
+    var parentDiv = createDiv();
+    var innerSpan = createSpan({
+      className: 'sendLink ' + toLowerCase(label).replace(/ /g, '-'),
+      textContent: label
+    });
+    setText('[', parentDiv);
+    insertElement(parentDiv, innerSpan);
+    insertHtmlBeforeEnd(parentDiv, ']');
+    return parentDiv;
+  }
+
+  var invTableCache;
+
+  function getInvTable() {
+    if (!invTableCache) {
+      var invTables = getElementsByClassName('inventory-table',
+        getElementById('profileRightColumn'));
+      if (invTables.length === 2) {invTableCache = invTables[1];}
+    }
+    return invTableCache;
+  }
+
+  var visibleCache;
+
+  function getComponents$1(prev, x) {
+    var matches = x.dataset.tipped.match(itemRE);
+    prev[matches[2]] = x.parentNode.parentNode;
+    return prev;
+  }
+
+  function getVisibleComponents() {
+    if (!visibleCache) {
+      var nodeList = getArrayByTagName('img', getInvTable());
+      visibleCache = nodeList.reduce(getComponents$1, {});
+    }
+    return visibleCache;
+  }
+
+  function blatElement(visibleComponents, a) {
+    if (visibleComponents[a]) {visibleComponents[a].innerHTML = '';}
+  }
+
+  function deleteVisible(ary) {
+    ary.forEach(partial(blatElement, getVisibleComponents()));
+  }
+
+  function destroyComponent(componentIdAry) {
+    return profile({subcmd: 'destroycomponent', removeIndex: componentIdAry});
+  }
+
+  function updateUsedCount(del) {
+    var invTableParent = getInvTable().parentNode;
+    if (!invTableParent) {return;}
+    var fshTally = invTableParent.children[2].children[1].children[0];
+    if (fshTally.tagName !== 'TABLE') {return;}
+    var tallyRows = fshTally.rows;
+    var usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
+    var usedCount = Number(getText(usedCountDom));
+    usedCount -= del;
+    setText(usedCount, usedCountDom);
+  }
+
+  function doSpinner(td) {
+    td.innerHTML = '';
+    td.className = 'guildTagSpinner';
+    td.style.backgroundImage = 'url(\'' + imageServer +
+      '/skin/loading.gif\')';
+  }
+
+  function destroyed(data) {
+    if (data.s) {
+      deleteVisible(data.r);
+      updateUsedCount(data.r.length);
+    }
+  }
+
+  function removeSpinner(td) {td.parentNode.remove();}
+
+  function destroy(el) {
+    return destroyComponent(el).then(destroyed);
+  }
+
+  function delCompType(self) { // jQuery.min
+    var toDelete = componentList[self.dataset.compid].del;
+    var td = self.parentNode;
+    doSpinner(td);
+    var prm = chunk(30, toDelete).map(destroy);
+    allthen(prm, partial(removeSpinner, td));
+  }
+
+  function updateComponentCounts(itemId) {
+    var delBtn = querySelector('#fshTally [data-compid="' + itemId + '"]');
+    if (!delBtn) {return;}
+    var countDom = delBtn.parentNode.parentNode.children[1];
+    var count = Number(getText(countDom)) - 1;
+    setText(count, countDom);
+  }
+
+  function compDeleted(self, itemId, data) {
+    if (data.s) {
+      updateComponentCounts(itemId);
+      updateUsedCount(1);
+      if (self.parentNode) {self.parentNode.innerHTML = '';}
+    }
+  }
+
+  function delComponent(self) { // jQuery.min
+    var tipped = self.parentNode.children[0].children[0].dataset.tipped;
+    var matches = tipped.match(itemRE);
+    var itemId = matches[1];
+    var componentId = matches[2];
+    destroyComponent([componentId])
+      .then(errorDialog)
+      .then(partial(compDeleted, self, itemId));
+  }
+
+  var buttonLabels = [
+    'Enable Quick Del',
+    'Count Components',
+    'Quick Extract Components'
+  ];
+
+  function addButtons(prev, el) {
+    insertElement(prev, decorateButton(el));
+    return prev;
+  }
+
+  function componentBtnContainer() {
+    return buttonLabels.reduce(addButtons, createDiv({className: 'fshCenter'}));
+  }
+
+  function quickExtractHandler() {
+    sendEvent('components', 'insertQuickExtract');
+    jQueryDialog(insertQuickExtract);
+  }
+
+  function addDelBtn(el) {
+    insertHtmlBeforeEnd(el.parentNode.parentNode,
+      '<span class="compDelBtn">Del</span>');
+  }
+
+  function enableDelComponent(self) {
+    sendEvent('components', 'enableDelComponent');
+    var quickDelDiv = self.parentNode;
+    hideElement(quickDelDiv);
+    var cmDiv = quickDelDiv.parentNode;
+    insertElement(cmDiv, decorateButton('Delete All Visible'));
+    getArrayByTagName('img', getInvTable()).forEach(addDelBtn);
+  }
+
+  function delAllComponent(self) {
+    sendEvent('components', 'delAllComponent');
+    var thisInvTable = self.parentNode.parentNode.parentNode.children[0];
+    getArrayByClassName('compDelBtn', thisInvTable).forEach(clickThis);
+  }
+
+  var classEvts$1 = [
+    ['quick-extract-components', quickExtractHandler],
+    ['enable-quick-del', enableDelComponent],
+    ['delete-all-visible', delAllComponent],
+    ['compDelBtn', delComponent],
+    ['count-components', countComponent],
+    ['compDelType', delCompType]
+  ];
+
+  function addComposingButtons(thisInvTable) {
+    var compDiv = thisInvTable.parentNode;
+    insertElement(compDiv, componentBtnContainer());
+    on(compDiv, 'click', classHandler(classEvts$1));
+  }
+
+  function components() {
+    var thisInvTable = getInvTable();
+    if (!thisInvTable) {return;}
+    addComposingButtons(thisInvTable);
+  }
+
+  function removeskill(buffId) {
+    return profile({
+      subcmd: 'removeskill',
+      skill_id: buffId
+    });
+  }
+
+  var disableDeactivatePrompts$2;
+
+  function debuffSuccess(aLink, json) {
+    if (json.s) {aLink.parentNode.innerHTML = '';}
+  }
+
+  function doDebuff(aLink) { // jQuery.min
+    sendEvent('profile', 'doDebuff');
+    var buffId = aLink.href.match(/(\d+)$/)[1];
+    removeskill(buffId).then(errorDialog).then(partial(debuffSuccess, aLink));
+  }
+
+  function doPrompt(aLink) {
+    var onclick = aLink.getAttribute('onclick');
+    var warn = onclick
+      .match(/Are you sure you wish to remove the .* skill\?/)[0];
+    jConfirm('Remove Skill', warn, partial(doDebuff, aLink));
+  }
+
+  function checkForPrompt(aLink) {
+    if (!disableDeactivatePrompts$2) {
+      doPrompt(aLink);
+    } else {
+      doDebuff(aLink);
+    }
+  }
+
+  function interceptDebuff(e) {
+    var aLink = e.target;
+    if (aLink.tagName === 'IMG') {
+      hideQTip(e.target);
+      aLink = aLink.parentNode;
+    } else if (aLink.tagName !== 'A') {return;}
+    e.stopPropagation();
+    e.preventDefault();
+    checkForPrompt(aLink);
+  }
+
+  function fastDebuff() {
+    var profileRightColumn = getElementById('profileRightColumn');
+    if (profileRightColumn) {
+      disableDeactivatePrompts$2 = getValue('disableDeactivatePrompts');
+      on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
+    }
+  }
+
+  function highlightPvpProtection$2() {
+    if (!getValue('highlightPvpProtection')) {return;}
+    var pvpp = querySelector('#profileLeftColumn a[href="' + pointsUrl + '"]');
+    if (getTextTrim(pvpp.parentNode.nextSibling) !== 'N/A') { // Text Node
+      pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red'; // TODO
+    }
+  }
+
+  var THEBACKPACK = 0;
+  var RESULT = 1;
+  var SELF = 2;
+  var INVID = 3;
+
+  function restyleBackpack() {
+    var bpBack = getElementById('backpack');
+    bpBack.className = 'fshBackpack';
+    bpBack.removeAttribute('style');
+  }
+
+  function thisInvId(_invId, el) {return el.a === _invId;}
+
+  function backpackRemove$1(theBackpack, invId) { // jQuery.min
+    var _invId = Number(invId);
+    // remove from srcData
+    var i = theBackpack.srcData.findIndex(partial(thisInvId, _invId));
+    if (i !== -1) {theBackpack.srcData.splice(i, 1);}
+  }
+
+  function actionResult$1(ary, data) {
+    if (data.r !== 0) {
+      ary[SELF].remove();
+      return;
+    }
+    backpackRemove$1(ary[THEBACKPACK], ary[INVID]);
+    ary[SELF].classList.remove('fshSpinner');
+    ary[SELF].parentNode.innerHTML = '<span class="fastWorn">' +
+      ary[RESULT] + '</span>';
+  }
+
+  function fastAction(theBackpack, evt, action, result) { // jQuery.min
+    sendEvent('profile', 'fastAction - ' + result);
+    var self = evt.target;
+    var invId = self.parentNode.parentNode.children[0].dataset.inv;
+    setText('', self);
+    self.className = 'fastAction fshSpinner fshSpinner12';
+    action(invId).then(partial(actionResult$1, [theBackpack, result, self, invId]));
+  }
+
+  function evtHdl$2(theBackpack, evt) {
+    if (evt.target.classList.contains('fastWear')) {
+      fastAction(theBackpack, evt, equipItem, 'Worn');
+    }
+    if (evt.target.classList.contains('fastUse')) {
+      fastAction(theBackpack, evt, useItem, 'Used');
+    }
+  }
+
+  function actionClass(usable) {
+    if (usable) {return 'fastUse';}
+    return 'fastWear';
+  }
+
+  function actionText(usable) {
+    if (usable) {return 'Use';}
+    return 'Wear';
+  }
+
+  function drawButtons(self, theSpan) {
+    var toUse = theSpan.classList.contains('backpackContextMenuUsable');
+    var myDiv = createDiv({
+      className: 'fastDiv',
+      innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
+        actionText(toUse) + '</span>'
+    });
+    if (self.options.checkboxesEnabled) {
+      insertElement(myDiv,
+        theSpan.parentNode.nextElementSibling.nextElementSibling);
+    }
+    insertElement(theSpan.parentNode.parentNode, myDiv);
+  }
+
+  function fastWearLinks(self) {
+    var items = querySelectorArray(
+      '#backpackTab_' + self.type.toString() +
+      ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
+    items.forEach(partial(drawButtons, self));
+  }
+
+  function foundBackpack(backpackContainer, theBackpack) {
+    var oldShow = theBackpack._showPage;
+    theBackpack._showPage = function(type, page) {
+      if (!theBackpack.tabData) {return;}
+      oldShow.call(theBackpack, type, page);
+      fastWearLinks(theBackpack);
+    };
+    if (getText(getElementById('backpack_current')).length !== 0) {
+      add(3, fastWearLinks, [theBackpack]);
+    }
+    on(backpackContainer, 'click', partial(evtHdl$2, theBackpack));
+  }
+
+  function initialiseFastWear() {
+    var backpackContainer = getElementById('backpackContainer');
+    var theBackpack = $(backpackContainer).data('hcsBackpack');
+    if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
+  }
+
+  function injectFastWear() { // jQuery
+    if (!getValue('enableQuickDrink')) {return;}
+    restyleBackpack();
+    initialiseFastWear();
+  }
+
+  function unequipitem(item) {
+    return profile({
+      subcmd: 'unequipitem',
+      inventory_id: item
+    });
+  }
+
+  var profileCombatSetDiv;
+
+  function clearBox(link, json) {
+    if (json.s) {
+      link.parentNode.innerHTML = '';
+    }
+  }
+
+  function removeItem(link) {
+    var item = /inventory_id=(\d+)/.exec(link.href)[1];
+    if (item) {
+      unequipitem(item).then(partial(clearBox, link));
+    }
+  }
+
+  function getNekid() {
+    sendEvent('profile', 'nekidBtn');
+    var profileBlock = profileCombatSetDiv.nextElementSibling;
+    getArrayByTagName('a', profileBlock).forEach(removeItem);
+  }
+
+  function makeButton$2() {
+    var nekidDiv = createDiv({className: 'fshCenter'});
+    var theBtn = createButton({
+      className: 'fshBl fshBls',
+      textContent: 'Nekid'
+    });
+    insertTextBeforeEnd(nekidDiv, '[ ');
+    insertElement(nekidDiv, theBtn);
+    insertTextBeforeEnd(nekidDiv, ' ]');
+    on(theBtn, 'click', getNekid);
+    return nekidDiv;
+  }
+
+  function nekidBtn() {
+    var profileRightColumn = getElementById('profileRightColumn');
+    profileCombatSetDiv = getElementById('profileCombatSetDiv');
+    var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
+    var nekidDiv = makeButton$2();
+    profileRightColumn.replaceChild(nekidDiv, targetBr);
+  }
+
+  function replaceDoubleSpace(str) {
+    return str.replace(/\s\s+/g, ' ');
+  }
+
+  var guildId$1;
+  var currentGuildRelationship;
+  var myGuildMsgs = [
+    ['self', 'fshGreen', 'guildSelfMessage'],
+    ['friendly', 'fshOliveDrab', 'guildFrndMessage'],
+    ['old', 'fshDarkCyan', 'guildPastMessage'],
+    ['enemy', 'fshRed', 'guildEnmyMessage']
+  ];
+  var typeMapping = [
+    ['guildFrnd', 'friendly'],
+    ['guildPast', 'old'],
+    ['guildEnmy', 'enemy']
+  ];
+
+  function guildAry(pref) {
+    var val = shouldBeArray(pref);
+    if (val) {
+      return val.map(replaceDoubleSpace).map(toLowerCase);
+    }
+    return [];
+  }
+
+  function expandList(arr) {
+    return [guildAry(arr[0]), arr[1]];
+  }
+
+  function buildScenario() {
+    return typeMapping.map(expandList);
+  }
+
+  function hasRelationship(txt, el) {
+    return el[0].includes(txt);
+  }
+
+  function externalRelationship(_txt) {
+    var scenario = buildScenario();
+    var txt = replaceDoubleSpace(toLowerCase(_txt));
+    var relObj = scenario.find(partial(hasRelationship, txt));
+    if (relObj) {return relObj[1];}
+  }
+
+  function thisGuildId(aLink) {
+    var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
+    if (guildIdResult) {return Number(guildIdResult[1]);}
+  }
+
+  function guildRelationship(aLink) {
+    guildId$1 = thisGuildId(aLink);
+    if (guildId$1 && guildId$1 === currentGuildId()) {
+      setValue('guildSelf', getText(aLink));
+      return 'self';
+    }
+    return externalRelationship(getText(aLink));
+  }
+
+  function whichMsg(arr) {return arr[0] === currentGuildRelationship;}
+
+  function setMsg$1(aLink) {
+    var thisGuildRel = myGuildMsgs.find(whichMsg);
+    aLink.parentNode.classList.add(thisGuildRel[1]);
+    insertHtmlBeforeEnd(aLink.parentNode, '<br>' + getValue(thisGuildRel[2]));
+  }
+
+  function foundGuildLink(aLink) {
+    currentGuildRelationship = guildRelationship(aLink);
+    if (currentGuildRelationship) {
+      setMsg$1(aLink);
+    }
+  }
+
+  function profileInjectGuildRel(self) {
+    var aLink = querySelector(
+      '#pCC a[href^="' + guildViewUrl + '"]');
+    if (aLink) {
+      foundGuildLink(aLink);
+    } else if (self) {
+      setValue('guildSelf', '');
+    }
+  }
+
+  function joinGroups() {
+    if (!getValue('enableMaxGroupSizeToJoin')) {
+      return '<a class="quickButton buttonJoinAll tip-static" ' +
+        'href="' + joinallUrl + '" ' +
+        'data-tipped="Join All Groups" style="background-image: url(\'' +
+        imageServer +
+        '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+    }
+    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+    return '<a class="quickButton buttonJoinUnder tip-static" href="' +
+      joinUnderUrl + '" data-tipped="Join All Groups < ' + maxGroupSizeToJoin +
+      ' Members" style="background-image: url(\'' + imageServer +
+      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+  }
+
+  function showRecallButton(playername) {
+    if (currentGuildRelationship === 'self') {
+      return '<a class="quickButton tip-static" href="' + recallUserUrl +
+        playername + '" data-tipped="Recall items from ' + playername +
+        '" style="background-image: url(\'' + imageServer +
+        '/temple/3.gif\');"></a>&nbsp;&nbsp;';
+    }
+    return '';
+  }
+
+  function showRankButton(playerid, playername) {
+    if (currentGuildRelationship === 'self' && getValue('showAdmin')) {
+      return '<a class="quickButton buttonGuildRank tip-static" href="' +
+        guildSubcmdUrl + 'members&subcmd2=changerank&member_id=' +
+        playerid + '" data-tipped="Rank ' + playername +
+        '" style="background-image: url(\'' + imageServer +
+        '/guilds/' + guildId$1 + '_mini.png\');"></a>&nbsp;&nbsp;';
+    }
+    return '';
+  }
+
+  function profileInjectQuickButton(avyImg, playerid, playername) {
+    var newhtml = '<div align="center">';
+    newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
+      quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
+      '" style="background-image: url(\'' + imageServer +
+      '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
+    newhtml += joinGroups();
+    newhtml += '<a class="quickButton tip-static" ' +
+      'href="' + auctionhouseUrl + '&type=-3&tid=' + playerid +
+      '" data-tipped="Go to ' + playername +
+      '\'s auctions" style="background-image: url(\'' +
+      imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
+    newhtml += '<a class="quickButton tip-static" href="' + secureUrl +
+      playername + '" data-tipped="Create Secure Trade to ' + playername +
+      '" style="background-image: url(\'' + imageServer +
+      '/temple/2.gif\');"></a>&nbsp;&nbsp;';
+    newhtml += showRecallButton(playername);
+    newhtml += showRankButton(playerid, playername);
+    newhtml += '</div>';
+    insertHtmlAfterEnd(avyImg, newhtml);
+  }
+
+  function totalKey(isAllies) {
+    if (isAllies) {return 'alliestotal';}
+    return 'enemiestotal';
+  }
+
+  function contactSlots(numberOfContacts, contactsTotal) {
+    if (contactsTotal && contactsTotal >= numberOfContacts) {
+      return '/' + contactsTotal;
+    }
+    return '';
+  }
+
+  function countContacts(isAllies, el) {
+    var target = el.parentNode;
+    var numberOfContacts = getElementsByTagName(def_table,
+      target.nextElementSibling).length - 1;
+    insertHtmlBeforeEnd(target,
+      '<span class="fshBlue">&nbsp;' + numberOfContacts.toString() +
+      contactSlots(numberOfContacts, getValue(totalKey(isAllies))) +
+      '</span>');
+  }
+
+  function profileParseAllyEnemy() {
+    // Allies/Enemies count/total function
+    var headings = querySelectorArray('#profileLeftColumn strong');
+    headings.filter(contains('Allies')).forEach(partial(countContacts, true));
+    headings.filter(contains('Enemies')).forEach(partial(countContacts, false));
+  }
+
+  function doRender(bioCell) {
+    var bioContents = bioCell.innerHTML;
+    bioContents = renderBio(bioContents);
+    if (bioContents) {
+      bioCell.innerHTML = bioContents;
+    }
+  }
+
+  function selfRender(self) {
+    return self && getValue('renderSelfBio');
+  }
+
+  function otherRender(self) {
+    return !self && getValue('renderOtherBios');
+  }
+
+  function shouldRender(self) {
+    return selfRender(self) || otherRender(self);
+  }
+
+  function testForRender(self, bioCell) {
+    if (shouldRender(self)) {
+      doRender(bioCell);
+    }
+  }
+
+  function profileRenderBio(self) {
+    var bioCell = getElementById('profile-bio');
+    if (!bioCell) {return;}
+    testForRender(self, bioCell);
+    if (getValue('enableBioCompressor')) {add(3, compressBio, [bioCell]);}
+    on(bioCell, 'click', bioEvtHdl);
+  }
+
+  function openQwDialog() {
+    sendEvent('profile', 'insertQuickWear');
+    jQueryDialog(insertQuickWear);
+  }
+
+  function quickWearLink() {
+    // quick wear manager link
+    var node = querySelector('#profileRightColumn a[href="' + cmdUrl +
+      'profile&subcmd=togglesection&section_id=2"]');
+    if (!node) {return;}
+    var wrap = createSpan({innerHTML: '&nbsp;['});
+    var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});
+    insertElement(wrap, qw);
+    insertTextBeforeEnd(wrap, ']');
+    insertElement(node.parentNode, wrap);
+    on(qw, 'click', openQwDialog);
+  }
+
+  function profileSelectAll() {
+    var bpTabs = getElementById('backpack_tabs');
+    var type = getElementsByClassName('tab-selected', bpTabs)[0]
+      .getAttribute('data-type');
+    var items = querySelectorArray('#backpackTab_' + type +
+      ' li:not(.hcsPaginate_hidden) .backpackItem');
+    if (items.length === 0) {return;}
+    var checkboxes = querySelectorArray('#backpackTab_' + type +
+      ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
+    if (checkboxes.length > 0) {items = checkboxes;}
+    items.forEach(clickThis);
+  }
+
+  function selectAllLink() {
+    // select all link
+    var node = querySelector('#profileRightColumn a[href="' +
+      dropItemsUrl + '"]');
+    if (!node) {return;}
+    var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
+    on(allSpan, 'click', profileSelectAll);
+    var wrapper = createSpan({innerHTML: '[&nbsp;'});
+    insertElement(wrapper, allSpan);
+    insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');
+    insertElement(node.parentNode, wrapper);
+  }
+
+  function sameAsLevel(virtualLevel) {
+    return intValue(valueText(
+      getElementsByClassName(def_statLevel))) === virtualLevel;
+  }
+
+  function storeVL() {
+    // store the VL of the player
+    var virtualLevel = parseInt(getText(getElementById(def_statVl)), 10);
+    if (sameAsLevel(virtualLevel)) {
+      setValue(def_characterVirtualLevel, ''); // ?
+    } else {
+      setValue(def_characterVirtualLevel, virtualLevel);
+    }
+  }
+
+  function thisText(thisNode) {
+    return Array.from(thisNode.childNodes)
+      .filter(el => el.nodeType === 3)
+      .map(getTextTrim)
+      .join('');
+  }
+
+  function getDefStat() {
+    return Number(thisText(getElementById(def_statDefense)));
+  }
+
+  function calcNmvEffect(atkStat, oldTipped) {
+    var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
+    var nmvLvl = Number(lvlAry[1]);
+    return Math.floor(atkStat * nmvLvl * 0.0025);
+  }
+
+  function gotAtk(nmvImg, atkStat) {
+    var defStat = getDefStat();
+    var oldTipped = nmvImg.dataset.tipped;
+    var nmvEffect = calcNmvEffect(atkStat, oldTipped);
+    nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
+      '<br>Attack: ' + (atkStat - nmvEffect).toString() +
+      '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
+      '</center></div>';
+  }
+
+  function gotImg(nmvImg) {
+    var atkEl = getElementById(def_statAttack);
+    if (!atkEl) {return;}
+    var atkStat = Number(thisText(atkEl));
+    if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
+  }
+
+  function updateNmv() {
+    var nmvImg = querySelector('#profileRightColumn img[src$="/60_sm.gif"]');
+    if (nmvImg) {gotImg(nmvImg);}
+  }
+
+  function removeStatTable(el) {
+    var tde = getElementsByTagName('td', el);
+    el.parentNode.innerHTML = '<span id="' + tde[0].id + '">' +
+      tde[0].innerHTML.replace(/&nbsp;/g, ' ').trim() +
+      '</span> <div class="profile-stat-bonus">' + getText(tde[1]) + '</div>';
+  }
+
+  function updateStatistics() {
+    var charStats = getElementsByTagName(def_table,
+      getElementById('profileLeftColumn'))[0];
+    getArrayByTagName(def_table, charStats).forEach(removeStatTable);
+  }
+
+  function ifSelf(self) {
+    if (self) {
+      // self inventory
+      fastDebuff();
+      profileParseAllyEnemy();
+      injectFastWear();
+      components();
+      quickWearLink();
+      selectAllLink();
+      storeVL();
+      nekidBtn();
+      ajaxifyProfileSections();
+    }
+  }
+
+  function guildRelationship$1(avyImg, playername, self) {
+    // Must be before profileInjectQuickButton
+    profileInjectGuildRel(self);
+    // It sets up guildId and currentGuildRelationship
+    var playerid = fallback(getUrlParameter('player_id'), playerId());
+    profileInjectQuickButton(avyImg, playerid, playername);
+  }
+
+  function updateDom(avyImg, playername, self) {
+    ifSelf(self);
+    guildRelationship$1(avyImg, playername, self);
+    updateNmv();
+    updateStatistics();
+    highlightPvpProtection$2();
+    add(3, profileRenderBio, [self]);
+    addStatTotalToMouseover();
+    add(3, colouredDots);
+  }
+
+  function updateUrl$3(e) {
+    e.preventDefault();
+    dontPost(closestForm(e.target).parentNode);
+  }
+
+  function allowBack$2(self) {
+    if (!self) {
+      on(querySelector('#profileRightColumn'), 'submit', updateUrl$3);
+    }
+  }
+
+  function injectProfile() { // Legacy
+    if (jQueryNotPresent()) {return;}
+    var avyImg = querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
+    if (!avyImg) {return;}
+    var playername = getText(getElementsByTagName('h1', pCC)[0]);
+    var self = playername === playerName();
+    updateDom(avyImg, playername, self);
+    allowBack$2(self);
+  }
+
   function getActivitySpan(myPlayer) {
     var activity = querySelector('span.fshLastActivity', myPlayer);
     if (!activity) {
@@ -14321,7 +15295,7 @@
     });
   }
 
-  function addButtons() {
+  function addButtons$1() {
     showQuickLinks(buttonContainer);
     showSpeakerOnWorld$1(buttonContainer);
     showHuntMode(buttonContainer);
@@ -14347,7 +15321,7 @@
   function injectButtons() {
     if (!buttonContainer) {
       buttonContainer = makeButtonContainer();
-      addButtons();
+      addButtons$1();
       setupHandlers$1();
       insertElementBefore(buttonContainer, getElementById('worldCoord'));
     }
@@ -14522,10 +15496,10 @@
     }
   ];
 
-  function condition$7(key, fn) {return fn(key);}
+  function condition$8(key, fn) {return fn(key);}
 
   function availableMembers(key) {
-    return available.every(partial(condition$7, key));
+    return available.every(partial(condition$8, key));
   }
 
   function makeLinks(key) {
@@ -14746,7 +15720,7 @@
     setTextCommas(groupStats$1.hp, groupHPElement);
   }
 
-  function calcNmvEffect(buffs) {
+  function calcNmvEffect$1(buffs) {
     return Math.ceil(groupStats$1.attack *
       (fallback(buffs['Nightmare Visage'], 0) * 0.0025));
   }
@@ -14791,7 +15765,7 @@
   }
 
   function doGroupAttributeElements(buffs) {
-    var nightmareVisageEffect = calcNmvEffect(buffs);
+    var nightmareVisageEffect = calcNmvEffect$1(buffs);
     groupStats$1.attack -= nightmareVisageEffect; // <-- important
     doGroupAttackBuffedElement();
     var defenseWithConstitution = calcDefWithConst(buffs);
@@ -15804,10 +16778,10 @@
     ]
   ];
 
-  function condition$8(combat, el) {return el[0](combat);}
+  function condition$9(combat, el) {return el[0](combat);}
 
   function getStatus(combat) {
-    var status = evalFightStatus.find(partial(condition$8, combat));
+    var status = evalFightStatus.find(partial(condition$9, combat));
     if (status) {
       return status[1](combat);
     }
@@ -17180,15 +18154,15 @@
     view: {'-': itemsView}
   };
 
-  function updateUrl$3(e) {
+  function updateUrl$4(e) {
     e.preventDefault();
     dontPost(pCC);
   }
 
-  function allowBack$2() {
+  function allowBack$3() {
     var submitButton = querySelector('input[type="submit"]', pCC);
     if (submitButton) {
-      on(submitButton, 'click', updateUrl$3);
+      on(submitButton, 'click', updateUrl$4);
     }
   }
 
@@ -17235,7 +18209,7 @@
   }
 
   function ladder() {
-    allowBack$2();
+    allowBack$3();
     lastReset();
   }
 
@@ -17393,10 +18367,6 @@
       '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
   }
 
-  function replaceDoubleSpace(str) {
-    return str.replace(/\s\s+/g, ' ');
-  }
-
   function isHideQuests() {
     if (getValue('hideQuests')) {
       return shouldBeArray('hideQuestNames');
@@ -17428,7 +18398,7 @@
       .forEach(partial(decorate$2, questsToHide));
   }
 
-  function updateUrl$4(evt) {
+  function updateUrl$5(evt) {
     if (evt.target.type !== 'submit') {
       return;
     }
@@ -17528,7 +18498,7 @@
   }
 
   function injectQuestBookFull() {
-    on(pCC, 'click', updateUrl$4);
+    on(pCC, 'click', updateUrl$5);
     storeQuestPage();
     var questTable = getElementsByTagName(def_table, pCC)[5];
     if (!questTable) {return;}
@@ -17633,6 +18603,121 @@
     viewarchive: {'-': viewArchive},
     '-': {'-': unknownPage}
   };
+
+  const rowHtml = (aRow, withCommas) => `
+  <td>
+  <a href="${playerIdUrl}${aRow.player.id}">${aRow.player.name}</a>
+  </td>
+  <td>${aRow.player.level}</td>
+  <td>${aRow.player.rank}</td>
+  <td>${withCommas[6]}</td>
+  <td>${withCommas[7]}</td>
+  <td>${withCommas[0]}</td>
+  <td>${withCommas[1]}</td>
+  <td>${withCommas[2]}</td>
+  <td>${withCommas[3]}</td>
+  <td>${withCommas[4]}</td>
+  <td>${withCommas[8]}</td>
+  <td>${withCommas[5]}</td>
+`;
+
+  function rowFactory(aRow) {
+    let dom = aRow.dom;
+    if (!dom) {
+      dom = createTr(
+        {innerHTML: rowHtml(aRow, aRow.stats.map(addCommas))}
+      );
+    }
+    return dom;
+  }
+
+  function displayChange(domTable, displayed) {
+    const domTBody = domTable.tBodies[0];
+    const thisTBody = createTBody();
+    for (let r of displayed) {
+      thisTBody.appendChild(rowFactory(r.value));
+    }
+    domTable.replaceChild(thisTBody, domTBody);
+  }
+
+  /* eslint-disable max-len */
+  const thisStyle$1 = `
+/* Advisor */
+.fshSmartTable {
+  border: 1px solid black;
+  table-layout: fixed;
+  width: 650px;
+}
+
+.fshSmartTable thead tr {
+  height: 22px;
+}
+
+.fshSmartTable thead th {
+  background-color: #cd9e4b;
+  position: relative;
+}
+
+.fshSmartTable thead th span {
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.fshSmartTable tbody tr:hover {
+  background-color: whitesmoke;
+}
+
+.fshSmartTable td:nth-child(1), .fshSmartTable th:nth-child(1) {width: 64px;} /* member */
+.fshSmartTable td:nth-child(2), .fshSmartTable th:nth-child(2) {width: 24px;} /* lvl */
+.fshSmartTable td:nth-child(3), .fshSmartTable th:nth-child(3) {width: 76px;} /* rank */
+.fshSmartTable td:nth-child(4), .fshSmartTable th:nth-child(4) {width: 70px;} /* depo */
+.fshSmartTable td:nth-child(5), .fshSmartTable th:nth-child(5) {width: 70px;} /* tax */
+.fshSmartTable td:nth-child(6), .fshSmartTable th:nth-child(6) {width: 70px;} /* total */
+.fshSmartTable td:nth-child(7), .fshSmartTable th:nth-child(7) {width: 32px;} /* fsp */
+.fshSmartTable td:nth-child(8), .fshSmartTable th:nth-child(8) {width: 38px;} /* skill */
+.fshSmartTable td:nth-child(9), .fshSmartTable th:nth-child(9) {width: 32px;} /* create */
+.fshSmartTable td:nth-child(10), .fshSmartTable th:nth-child(10) {width: 30px;} /* join */
+.fshSmartTable td:nth-child(11), .fshSmartTable th:nth-child(11) {width: 26px;} /* relic */
+.fshSmartTable td:nth-child(12), .fshSmartTable th:nth-child(12) {width: 90px;} /* gxp */
+
+.fshSmartTable td:nth-child(n+4), .fshSmartTable th:nth-child(n+4) {
+  text-align: center;
+}
+
+.fshSmartTable td {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Smart Table */
+.fshSmartTable th[data-st-sort]:after {
+  /* color: #999; */
+  /* content: '\\f0dc'; */
+  position: absolute;
+  right: 8px;
+}
+
+/* .fshSmartTable th[data-st-sort]:hover::after {
+  color: #333;
+} */
+
+.st-sort-asc:after {
+  /* content: '\\25b3\\0020'; */
+  content: '\\25b3';
+}
+
+.st-sort-desc:after {
+  /* content: '\\25bd\\0020'; */
+  content: '\\25bd';
+}
+`;
+  /* eslint-enable max-len */
+
+  function injectStyle$1() {
+    insertElement(document.body, createStyle(thisStyle$1));
+  }
 
   const swap = (f) => (a, b) => f(b, a);
   const compose = (first, ...fns) => (...args) => fns.reduce((previous, current) => current(previous), first(...args));
@@ -18165,6 +19250,28 @@
       })), coreTable);
   };
 
+  const reformat$1 = (membrList, row) => {
+    row.player.lower = row.player.name.toLowerCase();
+    row.player.rank = membrList[row.player.name].rank_name; // TODO
+    return row;
+  };
+
+  function prepareData(data, membrList) {
+    return data.r.map(partial(reformat$1, membrList));
+  }
+
+  function smartTableConfig(data, membrList) {
+    return {
+      data: prepareData(data, membrList),
+      tableState: {
+        sort: {},
+        filter: {},
+        search: {},
+        slice: {page: 1, size: 50}
+      }
+    };
+  }
+
   function pointer$1(path) {
       const parts = path.split('.');
       const partial = (obj = {}, parts = []) => {
@@ -18625,83 +19732,68 @@
     });
   };
 
-  const reformat$1 = row => {
-    row.player.lower = row.player.name.toLowerCase();
-    return {
-      player: row.player,
-      stats: row.stats
-    };
-  };
+  const theadHtml = `
+<th data-st-sort="player.lower"><span>Member</span></th>
+<th data-st-sort="player.level"><span>Lvl</span></th>
+<th data-st-sort="player.rank"><span>Rank</span></th>
+<th data-st-sort="stats.6"><span>Gold From<br>Deposits</span></th>
+<th data-st-sort="stats.7"><span>Gold From<br>Tax</span></th>
+<th data-st-sort="stats.0"><span>Gold Total</span></th>
+<th data-st-sort="stats.1"><span>FSP</span></th>
+<th data-st-sort="stats.2"><span>Skill<br>Cast</span></th>
+<th data-st-sort="stats.3"><span>Group<br>Create</span></th>
+<th data-st-sort="stats.4"><span>Group<br>Join</span></th>
+<th data-st-sort="stats.8"><span>Relic</span></th>
+<th data-st-sort="stats.5"><span>XP Contrib</span></th>
+`;
 
-  const thisTHead = () => createTHead({
-    innerHTML: '<th data-st-sort="player.lower">Member</th>' +
-      '<th data-st-sort="player.level">Lvl</th>' +
-      '<th data-st-sort="stats.6">Gold From Deposits</th>' +
-      '<th data-st-sort="stats.7">Gold From Tax</th>' +
-      '<th data-st-sort="stats.0">Gold Total</th>' +
-      '<th data-st-sort="stats.1">FSP</th>' +
-      '<th data-st-sort="stats.2">Skill Cast</th>' +
-      '<th data-st-sort="stats.3">Group Create</th>' +
-      '<th data-st-sort="stats.4">Group Join</th>' +
-      '<th data-st-sort="stats.8">Relic</th>' +
-      '<th data-st-sort="stats.5">XP Contrib</th>'
-  });
-
-  const rowFactory = aRow => {
-    const withCommas = aRow.stats.map(addCommas);
-    return createTr({
-      innerHTML: `<td>${aRow.player.name}</td>` +
-        `<td>${aRow.player.level}</td>` +
-        `<td>${withCommas[6]}</td>` +
-        `<td>${withCommas[7]}</td>` +
-        `<td>${withCommas[0]}</td>` +
-        `<td>${withCommas[1]}</td>` +
-        `<td>${withCommas[2]}</td>` +
-        `<td>${withCommas[3]}</td>` +
-        `<td>${withCommas[4]}</td>` +
-        `<td>${withCommas[8]}</td>` +
-        `<td>${withCommas[5]}</td>`
-    });
-  };
-
-  function displayChange(domTBody, displayed) {
-    domTBody.innerHTML = '';
-    for (let r of displayed) {
-      const newChild = rowFactory(r.value);
-      domTBody.appendChild(newChild);
-    }
+  function insertDiv(parent) {
+    return insertElement(parent, createDiv());
   }
 
-  function showMe(data) {
-    // console.log('showMe', data);
-    var smartCollection = smartTable({
-      data: data.r.map(reformat$1),
-      tableState: {
-        sort: {},
-        filter: {},
-        search: {},
-        slice: {page: 1, size: 50}
-      }
-    });
+  function prepareContainer() {
     pCC.innerHTML = '';
-    const container = insertElement(pCC, createDiv());
-    const domTable = insertElement(container, createTable());
-    // const domTHead = insertElement(domTable, thisTHead());
-    insertElement(domTable, thisTHead());
-    const domTBody = insertElement(domTable, createTBody());
+    return insertDiv(pCC);
+  }
+
+  // function makeTopControls(container) {
+  //   return insertDiv(container);
+  // }
+
+  function makeTable(container) {
+    const domTable = insertElement(container,
+      createTable({className: 'fshSmartTable fshXSmall'}));
+    insertElement(domTable, createTHead({innerHTML: theadHtml}));
+    insertElement(domTable, createTBody());
+    return domTable;
+  }
+
+  // function makeBottomControls(container) {
+  //   return insertDiv(container);
+  // }
+
+  function showMe([data, membrList]) {
+    // console.log('showMe', data, membrList);
+    var smartCollection = smartTable(smartTableConfig(data, membrList));
+
+    const container = prepareContainer();
+    // const topControls = makeTopControls(container);
+    const domTable = makeTable(container);
+    // const bottomControls = makeBottomControls(container);
+    injectStyle$1();
 
     const tableComponent = tableComponentFactory({
       el: container,
       table: smartCollection
     });
 
-    tableComponent.onDisplayChange(partial(displayChange, domTBody));
+    tableComponent.onDisplayChange(partial(displayChange, domTable));
   }
 
   function advisor$1() {
     if (jQueryNotPresent()) {return;}
     pCC.innerHTML = 'Loading...';
-    advisorView(0).then(showMe);
+    Promise.all([advisorView(0), getMembrList(false)]).then(showMe);
   }
 
   function fetchinv() {
@@ -19627,7 +20719,7 @@
     );
   }
 
-  function doSpinner() { // jQuery
+  function doSpinner$1() { // jQuery
     pCC.innerHTML = '<span id="fshInvMan"><img src = "' +
     imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
       'Getting inventory data...</span>';
@@ -19693,7 +20785,7 @@
 
   function injectInventoryManagerNew() {
     if (jQueryNotPresent()) {return;}
-    doSpinner();
+    doSpinner$1();
     syncInvMan();
   }
 
@@ -20171,7 +21263,7 @@
       '</tr>';
   }
 
-  function makeTable(relicList) {
+  function makeTable$1(relicList) {
     return '<style>' +
       '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}' +
       'table, th, td {border: 1px solid black;}' +
@@ -20193,12 +21285,81 @@
   }
 
   function processRelicList(relicList) {
-    pCC.innerHTML = makeTable(relicList);
+    pCC.innerHTML = makeTable$1(relicList);
   }
 
   function reliclist() {
     pCC.innerHTML = 'Loading...';
     getRelicList().then(processRelicList);
+  }
+
+  function guildView(guildId) {
+    return guild({subcmd: 'view', guild_id: guildId});
+  }
+
+  const thisStyle$2 = `
+#pCC .whosGotWhat {
+  border: 1px solid black;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.whosGotWhat tr:nth-child(odd) {background: wheat;}
+.whosGotWhat tr:nth-child(even) {background: burlywood;}
+.whosGotWhat tr:hover {background: cornsilk;}
+.whosGotWhat th, .whosGotWhat td {padding: 2px;}
+.whosGotWhat th:nth-child(2), .whosGotWhat td:nth-child(2),
+.whosGotWhat th:nth-child(4), .whosGotWhat td:nth-child(4),
+.whosGotWhat th:nth-child(5), .whosGotWhat td:nth-child(5),
+.whosGotWhat th:nth-child(6), .whosGotWhat td:nth-child(6) {text-align: right;}
+`;
+
+  function byType(prev, curr) {
+    if ([10, 15].includes(curr.t)) {
+      prev[curr.player.name] = prev[curr.player.name] || [];
+      prev[curr.player.name].push(curr);
+    }
+    return prev;
+  }
+
+  function addRank(rank_name, thisMember) {
+    thisMember.rank_name = rank_name;
+    return thisMember;
+  }
+
+  function extractMembers(thisRank) {
+    return thisRank.members.map(partial(addRank, thisRank.name));
+  }
+
+  function processGuild(guild) {
+    return [].concat(...guild.r.ranks.map(extractMembers));
+  }
+
+  function rowFactory$1(pots, domTBody, obj) {
+    // var thisPots = (pots[obj.name] || []).length;
+    domTBody.innerHTML += `<tr>
+      <td>
+        ${obj.name}
+      </td>
+      <td>${obj.level}</td>
+      <td>${obj.rank_name}</td>
+      <td>${addCommas(obj.guild_xp)}</td>
+      <td>${lastActivityToDays(obj.last_activity)}</td>
+      <td>${(pots[obj.name] || []).length}</td>
+    </tr>`;
+  }
+
+  function showMe$1([json, guild]) {
+    const members = processGuild(guild);
+    const pots = json.r.reduce(byType, {});
+    pCC.innerHTML = '';
+    insertElement(pCC, createStyle(thisStyle$2));
+    var domTable = insertElement(pCC, createTable({className: 'whosGotWhat'}));
+    var domTBody = insertElement(domTable, createTBody());
+    members.forEach(partial(rowFactory$1, pots, domTBody));
+  }
+
+  function whosGotWhat() {
+    Promise.all([report(), guildView()]).then(showMe$1);
   }
 
   var notepad = {
@@ -20220,6 +21381,7 @@
     savesettings: {'-': injectSaveSettings}, // TODO
     reliclist: {'-': reliclist},
     advisor: {'-': advisor$1},
+    whosgotwhat: {'-': whosGotWhat},
     '-': {'-': injectNotepad}
   };
 
@@ -20344,889 +21506,6 @@
     } else {
       storePlayerUpgrades();
     }
-  }
-
-  var bpc;
-
-  function bp$1() {
-    if (!bpc) {
-      bpc = getElementById('backpackContainer');
-    }
-    return bpc;
-  }
-
-  var elementTests = [
-    function(self) {return self.tagName === 'A';},
-    function(self) {return Boolean(self.href);},
-    function(self) {return self.href.includes('togglesection');}
-  ];
-
-  function condition$9(self, fn) {return fn(self);}
-
-  function isSectionToggle(self) {
-    return elementTests.every(partial(condition$9, self));
-  }
-
-  function oldStyleDiv(target) {
-    if (target.style.display === 'block') {
-      hideElement(target);
-    }
-    target.removeAttribute('style');
-    return 0;
-  }
-
-  function toggleTarget(target) {
-    if (target.hasAttribute('style')) {
-      oldStyleDiv(target);
-    } else {
-      target.classList.toggle('fshHide');
-    }
-  }
-
-  function toggleSection(self) {
-    var sectionId = Number(getCustomUrlParameter(self.href, 'section_id'));
-    if (sectionId === 5) {
-      toggleTarget(bp$1());
-    } else {
-      toggleTarget(self.parentNode.parentNode.nextElementSibling);
-    }
-  }
-
-  function testForSection(evt) {
-    var self = evt.target;
-    if (isSectionToggle(self)) {
-      toggleSection(self);
-      retryAjax(self.href);
-      evt.preventDefault();
-    }
-  }
-
-  function ajaxifyProfileSections() {
-    on(pCC, 'click', testForSection);
-  }
-
-  function loadComponents() {
-    return profile({subcmd: 'loadcomponents'});
-  }
-
-  var componentList;
-
-  function tallyComponent(prev, el) {
-    prev[el.b] = prev[el.b] || {
-      a: el.a,
-      b: el.b,
-      count: 0,
-      del: [],
-      v: el.v
-    };
-    prev[el.b].count += 1;
-    prev[el.b].del.push(el.a);
-    return prev;
-  }
-
-  function prepareComponentList(data) {
-    componentList = data.r.reduce(tallyComponent, {});
-  }
-
-  function tallyTableRow(prev, comp) {
-    return prev + '<tr><td><img src="' + imageServer + '/items/' + comp.b +
-      '.gif" class="fshTblCenter tip-dynamic" data-tipped="fetchitem.php?' +
-      'item_id=' + comp.b + '&inv_id=' + comp.a + '&t=2&p=' + playerId() +
-      '&vcode=' + comp.v + '"></td><td>' + comp.count +
-      '</td><td>[<span class="sendLink compDelType" data-compid="' + comp.b +
-      '">Del</span>]</td></tr>';
-  }
-
-  function makeTallyTbody(data) {
-    var tBody = createTBody();
-    prepareComponentList(data);
-    insertHtmlBeforeEnd(tBody,
-      '<tr><td colspan="3">Component Summary</td></tr>' +
-      Object.values(componentList).reduce(tallyTableRow, ''));
-    return tBody;
-  }
-
-  function makeTotalCell(tbl) {
-    var totRow = tbl.insertRow(-1);
-    insertHtmlBeforeEnd(totRow, '<td>Total:</td>');
-    var totCell = totRow.insertCell(-1);
-    totCell.colSpan = 2;
-    return totCell;
-  }
-
-  function makeUsedCount(data) {
-    var usedCount = data.r.length;
-    var usedCountDom = createSpan();
-    usedCountDom.innerHTML = usedCount.toString();
-    return usedCountDom;
-  }
-
-  function makeTotalRow(tbl, data) {
-    var totCell = makeTotalCell(tbl);
-    insertElement(totCell, makeUsedCount(data));
-    insertTextBeforeEnd(totCell, ' / ' + data.h.cm.toString());
-  }
-
-  function makeTallyTable(data) {
-    var tbl = createTable({className: 'fshTblCenter', id: 'fshTally'});
-    insertElement(tbl, makeTallyTbody(data));
-    makeTotalRow(tbl, data);
-    return tbl;
-  }
-
-  function displayComponentTally(self, data) {
-    if (!Array.isArray(data.r)) {return;}
-    var sumComp = self.parentNode;
-    if (sumComp) {
-      sumComp.innerHTML = '';
-      insertElement(sumComp, makeTallyTable(data));
-    }
-  }
-
-  function countComponent(self) { // jQuery.min
-    sendEvent('components', 'countComponent');
-    loadComponents().then(partial(displayComponentTally, self));
-  }
-
-  function decorateButton(label) {
-    var parentDiv = createDiv();
-    var innerSpan = createSpan({
-      className: 'sendLink ' + toLowerCase(label).replace(/ /g, '-'),
-      textContent: label
-    });
-    setText('[', parentDiv);
-    insertElement(parentDiv, innerSpan);
-    insertHtmlBeforeEnd(parentDiv, ']');
-    return parentDiv;
-  }
-
-  var invTableCache;
-
-  function getInvTable() {
-    if (!invTableCache) {
-      var invTables = getElementsByClassName('inventory-table',
-        getElementById('profileRightColumn'));
-      if (invTables.length === 2) {invTableCache = invTables[1];}
-    }
-    return invTableCache;
-  }
-
-  var visibleCache;
-
-  function getComponents$1(prev, x) {
-    var matches = x.dataset.tipped.match(itemRE);
-    prev[matches[2]] = x.parentNode.parentNode;
-    return prev;
-  }
-
-  function getVisibleComponents() {
-    if (!visibleCache) {
-      var nodeList = getArrayByTagName('img', getInvTable());
-      visibleCache = nodeList.reduce(getComponents$1, {});
-    }
-    return visibleCache;
-  }
-
-  function blatElement(visibleComponents, a) {
-    if (visibleComponents[a]) {visibleComponents[a].innerHTML = '';}
-  }
-
-  function deleteVisible(ary) {
-    ary.forEach(partial(blatElement, getVisibleComponents()));
-  }
-
-  function destroyComponent(componentIdAry) {
-    return profile({subcmd: 'destroycomponent', removeIndex: componentIdAry});
-  }
-
-  function updateUsedCount(del) {
-    var invTableParent = getInvTable().parentNode;
-    if (!invTableParent) {return;}
-    var fshTally = invTableParent.children[2].children[1].children[0];
-    if (fshTally.tagName !== 'TABLE') {return;}
-    var tallyRows = fshTally.rows;
-    var usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
-    var usedCount = Number(getText(usedCountDom));
-    usedCount -= del;
-    setText(usedCount, usedCountDom);
-  }
-
-  function doSpinner$1(td) {
-    td.innerHTML = '';
-    td.className = 'guildTagSpinner';
-    td.style.backgroundImage = 'url(\'' + imageServer +
-      '/skin/loading.gif\')';
-  }
-
-  function destroyed(data) {
-    if (data.s) {
-      deleteVisible(data.r);
-      updateUsedCount(data.r.length);
-    }
-  }
-
-  function removeSpinner(td) {td.parentNode.remove();}
-
-  function destroy(el) {
-    return destroyComponent(el).then(destroyed);
-  }
-
-  function delCompType(self) { // jQuery.min
-    var toDelete = componentList[self.dataset.compid].del;
-    var td = self.parentNode;
-    doSpinner$1(td);
-    var prm = chunk(30, toDelete).map(destroy);
-    allthen(prm, partial(removeSpinner, td));
-  }
-
-  function updateComponentCounts(itemId) {
-    var delBtn = querySelector('#fshTally [data-compid="' + itemId + '"]');
-    if (!delBtn) {return;}
-    var countDom = delBtn.parentNode.parentNode.children[1];
-    var count = Number(getText(countDom)) - 1;
-    setText(count, countDom);
-  }
-
-  function compDeleted(self, itemId, data) {
-    if (data.s) {
-      updateComponentCounts(itemId);
-      updateUsedCount(1);
-      if (self.parentNode) {self.parentNode.innerHTML = '';}
-    }
-  }
-
-  function delComponent(self) { // jQuery.min
-    var tipped = self.parentNode.children[0].children[0].dataset.tipped;
-    var matches = tipped.match(itemRE);
-    var itemId = matches[1];
-    var componentId = matches[2];
-    destroyComponent([componentId])
-      .then(errorDialog)
-      .then(partial(compDeleted, self, itemId));
-  }
-
-  var buttonLabels = [
-    'Enable Quick Del',
-    'Count Components',
-    'Quick Extract Components'
-  ];
-
-  function addButtons$1(prev, el) {
-    insertElement(prev, decorateButton(el));
-    return prev;
-  }
-
-  function componentBtnContainer() {
-    return buttonLabels.reduce(addButtons$1, createDiv({className: 'fshCenter'}));
-  }
-
-  function quickExtractHandler() {
-    sendEvent('components', 'insertQuickExtract');
-    jQueryDialog(insertQuickExtract);
-  }
-
-  function addDelBtn(el) {
-    insertHtmlBeforeEnd(el.parentNode.parentNode,
-      '<span class="compDelBtn">Del</span>');
-  }
-
-  function enableDelComponent(self) {
-    sendEvent('components', 'enableDelComponent');
-    var quickDelDiv = self.parentNode;
-    hideElement(quickDelDiv);
-    var cmDiv = quickDelDiv.parentNode;
-    insertElement(cmDiv, decorateButton('Delete All Visible'));
-    getArrayByTagName('img', getInvTable()).forEach(addDelBtn);
-  }
-
-  function delAllComponent(self) {
-    sendEvent('components', 'delAllComponent');
-    var thisInvTable = self.parentNode.parentNode.parentNode.children[0];
-    getArrayByClassName('compDelBtn', thisInvTable).forEach(clickThis);
-  }
-
-  var classEvts$1 = [
-    ['quick-extract-components', quickExtractHandler],
-    ['enable-quick-del', enableDelComponent],
-    ['delete-all-visible', delAllComponent],
-    ['compDelBtn', delComponent],
-    ['count-components', countComponent],
-    ['compDelType', delCompType]
-  ];
-
-  function addComposingButtons(thisInvTable) {
-    var compDiv = thisInvTable.parentNode;
-    insertElement(compDiv, componentBtnContainer());
-    on(compDiv, 'click', classHandler(classEvts$1));
-  }
-
-  function components() {
-    var thisInvTable = getInvTable();
-    if (!thisInvTable) {return;}
-    addComposingButtons(thisInvTable);
-  }
-
-  function removeskill(buffId) {
-    return profile({
-      subcmd: 'removeskill',
-      skill_id: buffId
-    });
-  }
-
-  var disableDeactivatePrompts$2;
-
-  function debuffSuccess(aLink, json) {
-    if (json.s) {aLink.parentNode.innerHTML = '';}
-  }
-
-  function doDebuff(aLink) { // jQuery.min
-    sendEvent('profile', 'doDebuff');
-    var buffId = aLink.href.match(/(\d+)$/)[1];
-    removeskill(buffId).then(errorDialog).then(partial(debuffSuccess, aLink));
-  }
-
-  function doPrompt(aLink) {
-    var onclick = aLink.getAttribute('onclick');
-    var warn = onclick
-      .match(/Are you sure you wish to remove the .* skill\?/)[0];
-    jConfirm('Remove Skill', warn, partial(doDebuff, aLink));
-  }
-
-  function checkForPrompt(aLink) {
-    if (!disableDeactivatePrompts$2) {
-      doPrompt(aLink);
-    } else {
-      doDebuff(aLink);
-    }
-  }
-
-  function interceptDebuff(e) {
-    var aLink = e.target;
-    if (aLink.tagName === 'IMG') {
-      hideQTip(e.target);
-      aLink = aLink.parentNode;
-    } else if (aLink.tagName !== 'A') {return;}
-    e.stopPropagation();
-    e.preventDefault();
-    checkForPrompt(aLink);
-  }
-
-  function fastDebuff() {
-    var profileRightColumn = getElementById('profileRightColumn');
-    if (profileRightColumn) {
-      disableDeactivatePrompts$2 = getValue('disableDeactivatePrompts');
-      on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
-    }
-  }
-
-  function highlightPvpProtection$2() {
-    if (!getValue('highlightPvpProtection')) {return;}
-    var pvpp = querySelector('#profileLeftColumn a[href="' + pointsUrl + '"]');
-    if (getTextTrim(pvpp.parentNode.nextSibling) !== 'N/A') { // Text Node
-      pvpp.parentNode.parentNode.style.cssText = 'border: 3px solid red'; // TODO
-    }
-  }
-
-  var THEBACKPACK = 0;
-  var RESULT = 1;
-  var SELF = 2;
-  var INVID = 3;
-
-  function restyleBackpack() {
-    var bpBack = getElementById('backpack');
-    bpBack.className = 'fshBackpack';
-    bpBack.removeAttribute('style');
-  }
-
-  function thisInvId(_invId, el) {return el.a === _invId;}
-
-  function backpackRemove$1(theBackpack, invId) { // jQuery.min
-    var _invId = Number(invId);
-    // remove from srcData
-    var i = theBackpack.srcData.findIndex(partial(thisInvId, _invId));
-    if (i !== -1) {theBackpack.srcData.splice(i, 1);}
-  }
-
-  function actionResult$1(ary, data) {
-    if (data.r !== 0) {
-      ary[SELF].remove();
-      return;
-    }
-    backpackRemove$1(ary[THEBACKPACK], ary[INVID]);
-    ary[SELF].classList.remove('fshSpinner');
-    ary[SELF].parentNode.innerHTML = '<span class="fastWorn">' +
-      ary[RESULT] + '</span>';
-  }
-
-  function fastAction(theBackpack, evt, action, result) { // jQuery.min
-    sendEvent('profile', 'fastAction - ' + result);
-    var self = evt.target;
-    var invId = self.parentNode.parentNode.children[0].dataset.inv;
-    setText('', self);
-    self.className = 'fastAction fshSpinner fshSpinner12';
-    action(invId).then(partial(actionResult$1, [theBackpack, result, self, invId]));
-  }
-
-  function evtHdl$2(theBackpack, evt) {
-    if (evt.target.classList.contains('fastWear')) {
-      fastAction(theBackpack, evt, equipItem, 'Worn');
-    }
-    if (evt.target.classList.contains('fastUse')) {
-      fastAction(theBackpack, evt, useItem, 'Used');
-    }
-  }
-
-  function actionClass(usable) {
-    if (usable) {return 'fastUse';}
-    return 'fastWear';
-  }
-
-  function actionText(usable) {
-    if (usable) {return 'Use';}
-    return 'Wear';
-  }
-
-  function drawButtons(self, theSpan) {
-    var toUse = theSpan.classList.contains('backpackContextMenuUsable');
-    var myDiv = createDiv({
-      className: 'fastDiv',
-      innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
-        actionText(toUse) + '</span>'
-    });
-    if (self.options.checkboxesEnabled) {
-      insertElement(myDiv,
-        theSpan.parentNode.nextElementSibling.nextElementSibling);
-    }
-    insertElement(theSpan.parentNode.parentNode, myDiv);
-  }
-
-  function fastWearLinks(self) {
-    var items = querySelectorArray(
-      '#backpackTab_' + self.type.toString() +
-      ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
-    items.forEach(partial(drawButtons, self));
-  }
-
-  function foundBackpack(backpackContainer, theBackpack) {
-    var oldShow = theBackpack._showPage;
-    theBackpack._showPage = function(type, page) {
-      if (!theBackpack.tabData) {return;}
-      oldShow.call(theBackpack, type, page);
-      fastWearLinks(theBackpack);
-    };
-    if (getText(getElementById('backpack_current')).length !== 0) {
-      add(3, fastWearLinks, [theBackpack]);
-    }
-    on(backpackContainer, 'click', partial(evtHdl$2, theBackpack));
-  }
-
-  function initialiseFastWear() {
-    var backpackContainer = getElementById('backpackContainer');
-    var theBackpack = $(backpackContainer).data('hcsBackpack');
-    if (theBackpack) {foundBackpack(backpackContainer, theBackpack);}
-  }
-
-  function injectFastWear() { // jQuery
-    if (!getValue('enableQuickDrink')) {return;}
-    restyleBackpack();
-    initialiseFastWear();
-  }
-
-  function unequipitem(item) {
-    return profile({
-      subcmd: 'unequipitem',
-      inventory_id: item
-    });
-  }
-
-  var profileCombatSetDiv;
-
-  function clearBox(link, json) {
-    if (json.s) {
-      link.parentNode.innerHTML = '';
-    }
-  }
-
-  function removeItem(link) {
-    var item = /inventory_id=(\d+)/.exec(link.href)[1];
-    if (item) {
-      unequipitem(item).then(partial(clearBox, link));
-    }
-  }
-
-  function getNekid() {
-    sendEvent('profile', 'nekidBtn');
-    var profileBlock = profileCombatSetDiv.nextElementSibling;
-    getArrayByTagName('a', profileBlock).forEach(removeItem);
-  }
-
-  function makeButton$2() {
-    var nekidDiv = createDiv({className: 'fshCenter'});
-    var theBtn = createButton({
-      className: 'fshBl fshBls',
-      textContent: 'Nekid'
-    });
-    insertTextBeforeEnd(nekidDiv, '[ ');
-    insertElement(nekidDiv, theBtn);
-    insertTextBeforeEnd(nekidDiv, ' ]');
-    on(theBtn, 'click', getNekid);
-    return nekidDiv;
-  }
-
-  function nekidBtn() {
-    var profileRightColumn = getElementById('profileRightColumn');
-    profileCombatSetDiv = getElementById('profileCombatSetDiv');
-    var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
-    var nekidDiv = makeButton$2();
-    profileRightColumn.replaceChild(nekidDiv, targetBr);
-  }
-
-  var guildId$1;
-  var currentGuildRelationship;
-  var myGuildMsgs = [
-    ['self', 'fshGreen', 'guildSelfMessage'],
-    ['friendly', 'fshOliveDrab', 'guildFrndMessage'],
-    ['old', 'fshDarkCyan', 'guildPastMessage'],
-    ['enemy', 'fshRed', 'guildEnmyMessage']
-  ];
-  var typeMapping = [
-    ['guildFrnd', 'friendly'],
-    ['guildPast', 'old'],
-    ['guildEnmy', 'enemy']
-  ];
-
-  function guildAry(pref) {
-    var val = shouldBeArray(pref);
-    if (val) {
-      return val.map(replaceDoubleSpace).map(toLowerCase);
-    }
-    return [];
-  }
-
-  function expandList(arr) {
-    return [guildAry(arr[0]), arr[1]];
-  }
-
-  function buildScenario() {
-    return typeMapping.map(expandList);
-  }
-
-  function hasRelationship(txt, el) {
-    return el[0].includes(txt);
-  }
-
-  function externalRelationship(_txt) {
-    var scenario = buildScenario();
-    var txt = replaceDoubleSpace(toLowerCase(_txt));
-    var relObj = scenario.find(partial(hasRelationship, txt));
-    if (relObj) {return relObj[1];}
-  }
-
-  function thisGuildId(aLink) {
-    var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-    if (guildIdResult) {return Number(guildIdResult[1]);}
-  }
-
-  function guildRelationship(aLink) {
-    guildId$1 = thisGuildId(aLink);
-    if (guildId$1 && guildId$1 === currentGuildId()) {
-      setValue('guildSelf', getText(aLink));
-      return 'self';
-    }
-    return externalRelationship(getText(aLink));
-  }
-
-  function whichMsg(arr) {return arr[0] === currentGuildRelationship;}
-
-  function setMsg$1(aLink) {
-    var thisGuildRel = myGuildMsgs.find(whichMsg);
-    aLink.parentNode.classList.add(thisGuildRel[1]);
-    insertHtmlBeforeEnd(aLink.parentNode, '<br>' + getValue(thisGuildRel[2]));
-  }
-
-  function foundGuildLink(aLink) {
-    currentGuildRelationship = guildRelationship(aLink);
-    if (currentGuildRelationship) {
-      setMsg$1(aLink);
-    }
-  }
-
-  function profileInjectGuildRel(self) {
-    var aLink = querySelector(
-      '#pCC a[href^="' + guildViewUrl + '"]');
-    if (aLink) {
-      foundGuildLink(aLink);
-    } else if (self) {
-      setValue('guildSelf', '');
-    }
-  }
-
-  function joinGroups() {
-    if (!getValue('enableMaxGroupSizeToJoin')) {
-      return '<a class="quickButton buttonJoinAll tip-static" ' +
-        'href="' + joinallUrl + '" ' +
-        'data-tipped="Join All Groups" style="background-image: url(\'' +
-        imageServer +
-        '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-    }
-    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    return '<a class="quickButton buttonJoinUnder tip-static" href="' +
-      joinUnderUrl + '" data-tipped="Join All Groups < ' + maxGroupSizeToJoin +
-      ' Members" style="background-image: url(\'' + imageServer +
-      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-  }
-
-  function showRecallButton(playername) {
-    if (currentGuildRelationship === 'self') {
-      return '<a class="quickButton tip-static" href="' + recallUserUrl +
-        playername + '" data-tipped="Recall items from ' + playername +
-        '" style="background-image: url(\'' + imageServer +
-        '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-    }
-    return '';
-  }
-
-  function showRankButton(playerid, playername) {
-    if (currentGuildRelationship === 'self' && getValue('showAdmin')) {
-      return '<a class="quickButton buttonGuildRank tip-static" href="' +
-        guildSubcmdUrl + 'members&subcmd2=changerank&member_id=' +
-        playerid + '" data-tipped="Rank ' + playername +
-        '" style="background-image: url(\'' + imageServer +
-        '/guilds/' + guildId$1 + '_mini.png\');"></a>&nbsp;&nbsp;';
-    }
-    return '';
-  }
-
-  function profileInjectQuickButton(avyImg, playerid, playername) {
-    var newhtml = '<div align="center">';
-    newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
-      quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
-    newhtml += joinGroups();
-    newhtml += '<a class="quickButton tip-static" ' +
-      'href="' + auctionhouseUrl + '&type=-3&tid=' + playerid +
-      '" data-tipped="Go to ' + playername +
-      '\'s auctions" style="background-image: url(\'' +
-      imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
-    newhtml += '<a class="quickButton tip-static" href="' + secureUrl +
-      playername + '" data-tipped="Create Secure Trade to ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/temple/2.gif\');"></a>&nbsp;&nbsp;';
-    newhtml += showRecallButton(playername);
-    newhtml += showRankButton(playerid, playername);
-    newhtml += '</div>';
-    insertHtmlAfterEnd(avyImg, newhtml);
-  }
-
-  function totalKey(isAllies) {
-    if (isAllies) {return 'alliestotal';}
-    return 'enemiestotal';
-  }
-
-  function contactSlots(numberOfContacts, contactsTotal) {
-    if (contactsTotal && contactsTotal >= numberOfContacts) {
-      return '/' + contactsTotal;
-    }
-    return '';
-  }
-
-  function countContacts(isAllies, el) {
-    var target = el.parentNode;
-    var numberOfContacts = getElementsByTagName(def_table,
-      target.nextElementSibling).length - 1;
-    insertHtmlBeforeEnd(target,
-      '<span class="fshBlue">&nbsp;' + numberOfContacts.toString() +
-      contactSlots(numberOfContacts, getValue(totalKey(isAllies))) +
-      '</span>');
-  }
-
-  function profileParseAllyEnemy() {
-    // Allies/Enemies count/total function
-    var headings = querySelectorArray('#profileLeftColumn strong');
-    headings.filter(contains('Allies')).forEach(partial(countContacts, true));
-    headings.filter(contains('Enemies')).forEach(partial(countContacts, false));
-  }
-
-  function doRender(bioCell) {
-    var bioContents = bioCell.innerHTML;
-    bioContents = renderBio(bioContents);
-    if (bioContents) {
-      bioCell.innerHTML = bioContents;
-    }
-  }
-
-  function selfRender(self) {
-    return self && getValue('renderSelfBio');
-  }
-
-  function otherRender(self) {
-    return !self && getValue('renderOtherBios');
-  }
-
-  function shouldRender(self) {
-    return selfRender(self) || otherRender(self);
-  }
-
-  function testForRender(self, bioCell) {
-    if (shouldRender(self)) {
-      doRender(bioCell);
-    }
-  }
-
-  function profileRenderBio(self) {
-    var bioCell = getElementById('profile-bio');
-    if (!bioCell) {return;}
-    testForRender(self, bioCell);
-    if (getValue('enableBioCompressor')) {add(3, compressBio, [bioCell]);}
-    on(bioCell, 'click', bioEvtHdl);
-  }
-
-  function openQwDialog() {
-    sendEvent('profile', 'insertQuickWear');
-    jQueryDialog(insertQuickWear);
-  }
-
-  function quickWearLink() {
-    // quick wear manager link
-    var node = querySelector('#profileRightColumn a[href="' + cmdUrl +
-      'profile&subcmd=togglesection&section_id=2"]');
-    if (!node) {return;}
-    var wrap = createSpan({innerHTML: '&nbsp;['});
-    var qw = createSpan({className: 'sendLink', innerHTML: 'Quick&nbsp;Wear'});
-    insertElement(wrap, qw);
-    insertTextBeforeEnd(wrap, ']');
-    insertElement(node.parentNode, wrap);
-    on(qw, 'click', openQwDialog);
-  }
-
-  function profileSelectAll() {
-    var bpTabs = getElementById('backpack_tabs');
-    var type = getElementsByClassName('tab-selected', bpTabs)[0]
-      .getAttribute('data-type');
-    var items = querySelectorArray('#backpackTab_' + type +
-      ' li:not(.hcsPaginate_hidden) .backpackItem');
-    if (items.length === 0) {return;}
-    var checkboxes = querySelectorArray('#backpackTab_' + type +
-      ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
-    if (checkboxes.length > 0) {items = checkboxes;}
-    items.forEach(clickThis);
-  }
-
-  function selectAllLink() {
-    // select all link
-    var node = querySelector('#profileRightColumn a[href="' +
-      dropItemsUrl + '"]');
-    if (!node) {return;}
-    var allSpan = createSpan({className: 'smallLink', textContent: 'All'});
-    on(allSpan, 'click', profileSelectAll);
-    var wrapper = createSpan({innerHTML: '[&nbsp;'});
-    insertElement(wrapper, allSpan);
-    insertHtmlBeforeEnd(wrapper, '&nbsp;]&nbsp;');
-    insertElement(node.parentNode, wrapper);
-  }
-
-  function sameAsLevel(virtualLevel) {
-    return intValue(valueText(
-      getElementsByClassName(def_statLevel))) === virtualLevel;
-  }
-
-  function storeVL() {
-    // store the VL of the player
-    var virtualLevel = parseInt(getText(getElementById(def_statVl)), 10);
-    if (sameAsLevel(virtualLevel)) {
-      setValue(def_characterVirtualLevel, ''); // ?
-    } else {
-      setValue(def_characterVirtualLevel, virtualLevel);
-    }
-  }
-
-  function getDefStat() {
-    return Number(getTextTrim(getElementById(def_statDefense)));
-  }
-
-  function calcNmvEffect$1(atkStat, oldTipped) {
-    var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
-    var nmvLvl = Number(lvlAry[1]);
-    return Math.floor(atkStat * nmvLvl * 0.0025);
-  }
-
-  function gotAtk(nmvImg, atkStat) {
-    var defStat = getDefStat();
-    var oldTipped = nmvImg.dataset.tipped;
-    var nmvEffect = calcNmvEffect$1(atkStat, oldTipped);
-    nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
-      '<br>Attack: ' + (atkStat - nmvEffect).toString() +
-      '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
-      '</center></div>';
-  }
-
-  function gotImg(nmvImg) {
-    var atkEl = getElementById(def_statAttack);
-    if (!atkEl) {return;}
-    var atkStat = Number(getTextTrim(atkEl));
-    if (!isNaN(atkStat)) {gotAtk(nmvImg, atkStat);}
-  }
-
-  function updateNmv() {
-    var nmvImg = querySelector('#profileRightColumn img[src$="/60_sm.gif"]');
-    if (nmvImg) {gotImg(nmvImg);}
-  }
-
-  function removeStatTable(el) {
-    var tde = getElementsByTagName('td', el);
-    el.parentNode.innerHTML = '<span id="' + tde[0].id + '">' +
-      tde[0].innerHTML.replace(/&nbsp;/g, ' ').trim() +
-      '</span> <div class="profile-stat-bonus">' + getText(tde[1]) + '</div>';
-  }
-
-  function updateStatistics() {
-    var charStats = getElementsByTagName(def_table,
-      getElementById('profileLeftColumn'))[0];
-    getArrayByTagName(def_table, charStats).forEach(removeStatTable);
-  }
-
-  function ifSelf(self) {
-    if (self) {
-      // self inventory
-      fastDebuff();
-      profileParseAllyEnemy();
-      injectFastWear();
-      components();
-      quickWearLink();
-      selectAllLink();
-      storeVL();
-      nekidBtn();
-      ajaxifyProfileSections();
-    }
-  }
-
-  function guildRelationship$1(avyImg, playername, self) {
-    // Must be before profileInjectQuickButton
-    profileInjectGuildRel(self);
-    // It sets up guildId and currentGuildRelationship
-    var playerid = fallback(getUrlParameter('player_id'), playerId());
-    profileInjectQuickButton(avyImg, playerid, playername);
-  }
-
-  function updateDom(avyImg, playername, self) {
-    ifSelf(self);
-    guildRelationship$1(avyImg, playername, self);
-    updateNmv();
-    updateStatistics();
-    highlightPvpProtection$2();
-    add(3, profileRenderBio, [self]);
-    addStatTotalToMouseover();
-    add(3, colouredDots);
-  }
-
-  function injectProfile() { // Legacy
-    if (jQueryNotPresent()) {return;}
-    var avyImg = querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
-    if (!avyImg) {return;}
-    var playername = getText(getElementsByTagName('h1', pCC)[0]);
-    var self = playername === playerName();
-    updateDom(avyImg, playername, self);
   }
 
   function otherFolders(el) {
@@ -21550,7 +21829,7 @@
     }
   }
 
-  function allowBack$3(topTable) { // jQuery
+  function allowBack$4(topTable) { // jQuery
     var thisSelect = getElementsByTagName('select', topTable)[0];
     $(thisSelect).off();
     on(thisSelect, 'change', partial(dontPost, pCC));
@@ -21563,7 +21842,7 @@
 
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
-    allowBack$3(topTable);
+    allowBack$4(topTable);
     Array.from(topTable.rows).filter(myRows(4, 1)).forEach(playerLink);
   }
 
@@ -21616,10 +21895,6 @@
   function getPlayersByGuild() {
     return getArrayByTagName(def_table, pCC).slice(4).map(enumeratePlayers)
       .reduce(aggGuilds, []).reduce(rollupSmallGuilds, []);
-  }
-
-  function guildView(guildId) {
-    return guild({subcmd: 'view', guild_id: guildId});
   }
 
   function getMyItem(removeBy, item) {
@@ -22063,7 +22338,8 @@
     crafting: {'-': {'-': craftForge}},
     hellforge: {'-': {'-': craftForge}},
     superelite: {'-': {'-': superelite$1}},
-    '-': noCmd
+    '-': noCmd,
+    combat: {attackplayer: {'-': injectProfile}}
   };
 
   var cmd;
@@ -22158,7 +22434,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '116';
+  window.FSH.calf = '117';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

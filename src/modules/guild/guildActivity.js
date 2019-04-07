@@ -3,6 +3,7 @@ import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
 import guildManage from '../app/guild/manage';
 import jQueryPresent from '../common/jQueryPresent';
+import lastActivityToDays from '../common/lastActivityToDays';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
 import setForage from '../ajax/setForage';
@@ -13,7 +14,7 @@ var guild;
 
 function pushNewRecord(member) {
   oldArchive.members[member.name].push([
-    Math.floor((nowSecs - member.last_activity) / 86400),
+    lastActivityToDays(member.last_activity),
     member.current_stamina,
     member.level,
     member.max_stamina,
@@ -66,7 +67,7 @@ function upsert(archiveRecord, member) {
   if (hasChanged(archiveRecord, member)) {
     pushNewRecord(member);
   } else {
-    archiveRecord[act] = Math.floor((nowSecs - member.last_activity) / 86400);
+    archiveRecord[act] = lastActivityToDays(member.last_activity);
     archiveRecord[utc] = nowSecs;
   }
 }

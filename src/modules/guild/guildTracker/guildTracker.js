@@ -3,6 +3,7 @@ import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
+import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import once from '../../common/once';
@@ -146,7 +147,7 @@ function injectShowTracker() {
   on(myDiv, 'change', togglePref);
   insertElement(container, gs);
   insertElement(container, myDiv);
-  insertElement(td, container);
+  insertElementAfterBegin(td, container);
 }
 
 function injectTracker() {
