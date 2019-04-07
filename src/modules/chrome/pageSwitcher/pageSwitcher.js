@@ -8,6 +8,7 @@ import injectBank from '../../bank/injectBank';
 import injectBazaar from '../../bazaar';
 import injectFindPlayer from '../../injectFindPlayer';
 import injectMailbox from '../../mailbox/mailbox';
+import injectProfile from '../../profile/profile';
 import injectQuickBuff from '../../quickbuff/quickBuff';
 import injectSettings from '../../settings/injectSettings';
 import injectTitan from '../../injectTitan';
@@ -66,5 +67,6 @@ export default {
   crafting: {'-': {'-': craftForge}},
   hellforge: {'-': {'-': craftForge}},
   superelite: {'-': {'-': superelite}},
-  '-': noCmd
+  '-': noCmd,
+  combat: {attackplayer: {'-': injectProfile}}
 };
