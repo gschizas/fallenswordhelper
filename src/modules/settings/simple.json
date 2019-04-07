@@ -263,5 +263,9 @@
   "enableHistoryCompressor":{
     "helpTitle":"Guild History Compressor",
     "helpText":"This will compress long guild histories and provide a link to expand the compressed section."
+  },
+  "enableStamBars":{
+    "helpTitle":"Stamina Bars",
+    "helpText":"This shows stamina as a coloured bar."
   }
 }

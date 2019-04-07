@@ -9,6 +9,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import playerName from '../common/playerName';
+import progressBar from './progressBar';
 import {recallUserUrl} from '../support/constants';
 import {logoToggle, statToggle, structureToggle} from './panelToggle';
 
@@ -52,4 +53,5 @@ export default function manage() {
   lhsAdditions(leftHandSideColumnTable);
   add(3, buffLinks);
   ajaxStuff(leftHandSideColumnTable);
+  progressBar();
 }

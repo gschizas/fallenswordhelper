@@ -183,5 +183,6 @@
   "showTitanInfo":false,
   "highlightPvpProtection":false,
   "showBuffInfo":false,
-  "enableHistoryCompressor":false
+  "enableHistoryCompressor":false,
+  "enableStamBars":false
 }
