@@ -86,6 +86,8 @@ function setHelperMembrList(guildId, membrList) {
 
 export default function getMembrList(force) {
   var guildId = currentGuildId();
-  return guildMembers(force, guildId)
-    .then(partial(setHelperMembrList, guildId));
+  if (guildId) {
+    return guildMembers(force, guildId)
+      .then(partial(setHelperMembrList, guildId));
+  }
 }
