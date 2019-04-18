@@ -79,7 +79,6 @@ function updateDefenderElements() {
 }
 
 function updateGroupValues() {
-  if (!groupStats) {return;}
   setTextCommas(groupStats.attack, groupAttackElement);
   setTextCommas(groupStats.defense, groupDefenseElement);
   setTextCommas(groupStats.armor, groupArmorElement);
@@ -221,7 +220,7 @@ export function doCalculations() {
   setTextCommas(defBuffedHp, hpBuffedElement);
   updateDefenderBuffedDamage(defBuffedHp);
   isLeadDefenderCloaked();
-  if (GameData.player().hasGroup) {
+  if (GameData.player().hasGroup && groupStats) {
     calculateGroup();
   } else {
     setText('Done.', processingStatus);
