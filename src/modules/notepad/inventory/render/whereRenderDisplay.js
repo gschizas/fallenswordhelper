@@ -5,7 +5,7 @@ import playerName from './playerName';
 import {theInv} from '../buildInv';
 
 function whereRenderGuildDisplay(row) {
-  if (row.player_id === -1) {return 'GS';}
+  if (row.player_id === -1) {return 'Guild Store';}
   return '<a class="fshMaroon" href="' + playerIdUrl +
     row.player_id + '">' + playerName(row.player_id) + '</a>';
 }
