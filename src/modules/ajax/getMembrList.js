@@ -90,4 +90,5 @@ export default function getMembrList(force) {
     return guildMembers(force, guildId)
       .then(partial(setHelperMembrList, guildId));
   }
+  return Promise.reject(new Error('no guild id'));
 }
