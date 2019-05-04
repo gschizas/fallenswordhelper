@@ -1,5 +1,6 @@
 import allthen from '../common/allthen';
 import calf from '../support/calf';
+import currentGuildId from '../common/currentGuildId';
 import doBuffLink from './doBuffLink';
 import doChat from './doChat';
 import getCalfPrefs from '../common/getCalfPrefs';
@@ -129,9 +130,10 @@ function addLogWidgetsOld() { // Legacy
 
 export default function addLogWidgets() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  allthen([
-    getMembrList(false).then(getKeys),
+  var prm = [
     myStats(false).then(prepareAlliesEnemies),
     initCache()
-  ], addLogWidgetsOld);
+  ];
+  if (currentGuildId()) {prm.push(getMembrList(false).then(getKeys));}
+  allthen(prm, addLogWidgetsOld);
 }

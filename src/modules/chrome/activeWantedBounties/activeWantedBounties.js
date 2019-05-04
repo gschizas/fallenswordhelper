@@ -1,3 +1,4 @@
+import './activeWantedBounties.postcss';
 import bountyPage from '../../ajax/bountyPage';
 import calf from '../../support/calf';
 import functionPasses from '../../common/functionPasses';

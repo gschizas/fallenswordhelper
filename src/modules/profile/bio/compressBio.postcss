@@ -1,0 +1,27 @@
+.fshCompressor {
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+  position: relative;
+
+  & > label {
+    position: absolute;
+    top: 100%;
+  }
+  & > input {
+    display: none;
+  }
+  & > label:after {
+    content: "More ...";
+  }
+  & > input:checked + label:after {
+    content: "Less ...";
+  }
+  & > input:checked ~ div {
+    height: 100%;
+  }
+
+}
+.fshCompress {
+  height: 10em;
+  overflow: hidden;
+}

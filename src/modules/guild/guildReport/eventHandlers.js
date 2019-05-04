@@ -1,3 +1,4 @@
+import './guildReport.postcss';
 import classHandler from '../../common/classHandler';
 import classPair from '../../common/classPair';
 import equipItem from '../../ajax/equipItem';
@@ -79,6 +80,7 @@ var subClass = [
 
 function doFastRecall(self) {
   var theTd = self.parentNode.parentNode;
+  if (!theTd) {return;}
   var href = theTd.children[0].href;
   if (!href) {return;}
   subClass.find(partial(classPair, self))[1](theTd, href);

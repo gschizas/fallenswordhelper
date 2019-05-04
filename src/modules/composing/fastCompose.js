@@ -1,3 +1,4 @@
+import './fastCompose.postcss';
 import backgroundCreate from './backgroundCreate';
 import contains from '../common/contains';
 import getArrayByClassName from '../common/getArrayByClassName';

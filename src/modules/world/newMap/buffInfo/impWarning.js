@@ -1,3 +1,4 @@
+import './impWarning.postcss';
 import {createSpan} from '../../../common/cElement';
 import {def_fetch_playerBuffs} from '../../../support/constants';
 import getBuff from './getBuff';

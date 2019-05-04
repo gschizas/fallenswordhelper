@@ -5,7 +5,7 @@ import injectHomePageTwoLink from '../../news/injectHomePageTwoLink';
 import injectJoinAllLink from '../notification/injectJoinAllLink';
 import injectLevelupCalculator from '../calcs/injectLevelupCalculator';
 import injectMenu from '../accordion/injectMenu';
-import injectQuickMsgDialogJQ from '../messaging';
+import injectQuickMsgDialogJQ from '../messaging/messaging';
 import injectServerNode from '../injectServerNode';
 import injectStaminaCalculator from '../calcs/injectStaminaCalculator';
 import interceptQuickBuff from '../interceptQuickBuff';

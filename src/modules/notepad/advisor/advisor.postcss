@@ -1,9 +1,3 @@
-import {createStyle} from '../../common/cElement';
-import insertElement from '../../common/insertElement';
-
-/* eslint-disable max-len */
-const thisStyle = `
-/* Advisor */
 .fshSmartTable {
   border: 1px solid black;
   table-layout: fixed;
@@ -29,6 +23,12 @@ const thisStyle = `
   background-color: whitesmoke;
 }
 
+.fshSmartTable td {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .fshSmartTable td:nth-child(1), .fshSmartTable th:nth-child(1) {width: 64px;} /* member */
 .fshSmartTable td:nth-child(2), .fshSmartTable th:nth-child(2) {width: 24px;} /* lvl */
 .fshSmartTable td:nth-child(3), .fshSmartTable th:nth-child(3) {width: 76px;} /* rank */
@@ -46,16 +46,10 @@ const thisStyle = `
   text-align: center;
 }
 
-.fshSmartTable td {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
 /* Smart Table */
 .fshSmartTable th[data-st-sort]:after {
   /* color: #999; */
-  /* content: '\\f0dc'; */
+  /* content: '\f0dc'; */
   position: absolute;
   right: 8px;
 }
@@ -65,17 +59,11 @@ const thisStyle = `
 } */
 
 .st-sort-asc:after {
-  /* content: '\\25b3\\0020'; */
-  content: '\\25b3';
+  /* content: '\25b3\0020'; */
+  /* content: '\25b3'; */
 }
 
 .st-sort-desc:after {
-  /* content: '\\25bd\\0020'; */
-  content: '\\25bd';
-}
-`;
-/* eslint-enable max-len */
-
-export default function injectStyle() {
-  insertElement(document.body, createStyle(thisStyle));
+  /* content: '\25bd\0020'; */
+  /* content: '\25bd'; */
 }

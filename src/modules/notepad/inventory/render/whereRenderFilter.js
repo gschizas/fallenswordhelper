@@ -2,7 +2,7 @@ import playerName from './playerName';
 import {theInv} from '../buildInv';
 
 function whereRenderGuildFilter(row) {
-  if (row.player_id === -1) {return 'GS';}
+  if (row.player_id === -1) {return 'Guild Store';}
   return playerName(row.player_id);
 }
 

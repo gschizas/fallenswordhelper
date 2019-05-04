@@ -2984,14 +2984,18 @@
     return createDiv({
       id: 'invTabs',
       className: 'ui-tabs ui-widget-content ui-corner-all',
-      innerHTML: '<input id="qwtab1" type="radio" name="qwtabs" checked>' +
-        '<input id="qwtab2" type="radio" name="qwtabs">' +
+      innerHTML:
+        '<input id="qwtab1" class="fsh-tab-open" ' +
+          'type="radio" name="qwtabs" checked>' +
+        '<input id="qwtab2" class="fsh-tab-open" type="radio" name="qwtabs">' +
         '<ul class="ui-tabs-nav ui-helper-reset ' +
           'ui-helper-clearfix ui-widget-header ui-corner-all">' +
-        '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
+        // '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
+        '<li class="ui-state-default ui-corner-top">' +
         '<label for="qwtab1">Quick Wear / Use / Extract<br>Manager</label>' +
         '</li>' +
-        '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
+        // '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
+        '<li class="ui-state-default ui-corner-top">' +
         '<label for="qwtab2">Inventory Manager Counter' +
           '<br>filtered by AH Quick Search</label>' +
         '</li><div id="setPrompt" class="fshFloatRight fshCenter">' +
@@ -7667,8 +7671,11 @@
 
   function getMembrList(force) {
     var guildId = currentGuildId();
-    return guildMembers(force, guildId)
-      .then(partial(setHelperMembrList, guildId));
+    if (guildId) {
+      return guildMembers(force, guildId)
+        .then(partial(setHelperMembrList, guildId));
+    }
+    return Promise.reject(new Error('no guild id'));
   }
 
   function advisorView(period) {
@@ -9636,14 +9643,18 @@
     wrapUrl(guildLogo);
   }
 
+  function mightBePositive(actualXP, xpLockXP) {
+    let sign = '';
+    if (actualXP > xpLockXP) {sign = '+';}
+    return sign + addCommas(actualXP - xpLockXP);
+  }
+
   function injectLock(xpLock) {
     var xpLockmouseover = xpLock.dataset.tipped;
     var xpLockXP = getIntFromRegExp(xpLockmouseover, /XP Lock: <b>(\d*)/);
     var actualXP = getIntFromRegExp(xpLockmouseover, /XP: <b>(\d*)/);
-    if (actualXP < xpLockXP) {
-      insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
-        ' (<b>' + addCommas(xpLockXP - actualXP) + '</b>)');
-    }
+    insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
+      ' (<b>' + mightBePositive(actualXP, xpLockXP) + '</b>)');
   }
 
   function guildXPLock() {
@@ -10513,6 +10524,7 @@
 
   function doFastRecall(self) {
     var theTd = self.parentNode.parentNode;
+    if (!theTd) {return;}
     var href = theTd.children[0].href;
     if (!href) {return;}
     subClass.find(partial(classPair, self))[1](theTd, href);
@@ -12204,11 +12216,12 @@
 
   function addLogWidgets() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    allthen([
-      getMembrList(false).then(getKeys),
+    var prm = [
       myStats(false).then(prepareAlliesEnemies),
       initCache()
-    ], addLogWidgetsOld);
+    ];
+    if (currentGuildId()) {prm.push(getMembrList(false).then(getKeys));}
+    allthen(prm, addLogWidgetsOld);
   }
 
   function guildChatStyling() {
@@ -13038,10 +13051,29 @@
     items.forEach(partial(drawButtons, self));
   }
 
+  function updateSrc(img, gif) {
+    const url = imageServer + '/' + gif + '.gif';
+    if (img.src !== url) {img.src = url;}
+  }
+
+  function doFolder(thisFolder, img) {
+    if (img.dataset.folder === thisFolder) {
+      updateSrc(img, 'folder_on');
+    } else {
+      updateSrc(img, 'folder');
+    }
+  }
+
+  function fixFolders(theBackpack) {
+    querySelectorArray('.backpackFolderImage')
+      .forEach(partial(doFolder, String(theBackpack.folderId)));
+  }
+
   function foundBackpack(backpackContainer, theBackpack) {
     var oldShow = theBackpack._showPage;
     theBackpack._showPage = function(type, page) {
       if (!theBackpack.tabData) {return;}
+      fixFolders(theBackpack);
       oldShow.call(theBackpack, type, page);
       fastWearLinks(theBackpack);
     };
@@ -15712,7 +15744,6 @@
   }
 
   function updateGroupValues() {
-    if (!groupStats$1) {return;}
     setTextCommas(groupStats$1.attack, groupAttackElement);
     setTextCommas(groupStats$1.defense, groupDefenseElement);
     setTextCommas(groupStats$1.armor, groupArmorElement);
@@ -15854,7 +15885,7 @@
     setTextCommas(defBuffedHp, hpBuffedElement);
     updateDefenderBuffedDamage(defBuffedHp);
     isLeadDefenderCloaked();
-    if (GameData.player().hasGroup) {
+    if (GameData.player().hasGroup && groupStats$1) {
       calculateGroup();
     } else {
       setText('Done.', processingStatus);
@@ -18604,22 +18635,22 @@
     '-': {'-': unknownPage}
   };
 
-  const rowHtml = (aRow, withCommas) => `
-  <td>
-  <a href="${playerIdUrl}${aRow.player.id}">${aRow.player.name}</a>
-  </td>
-  <td>${aRow.player.level}</td>
-  <td>${aRow.player.rank}</td>
-  <td>${withCommas[6]}</td>
-  <td>${withCommas[7]}</td>
-  <td>${withCommas[0]}</td>
-  <td>${withCommas[1]}</td>
-  <td>${withCommas[2]}</td>
-  <td>${withCommas[3]}</td>
-  <td>${withCommas[4]}</td>
-  <td>${withCommas[8]}</td>
-  <td>${withCommas[5]}</td>
-`;
+  function rowHtml(aRow, withCommas) {
+    return '<td>' +
+      `<a href="${playerIdUrl}${aRow.player.id}">${aRow.player.name}</a>` +
+      '</td>' +
+      `<td>${aRow.player.level}</td>` +
+      `<td>${aRow.player.rank}</td>` +
+      `<td>${withCommas[6]}</td>` +
+      `<td>${withCommas[7]}</td>` +
+      `<td>${withCommas[0]}</td>` +
+      `<td>${withCommas[1]}</td>` +
+      `<td>${withCommas[2]}</td>` +
+      `<td>${withCommas[3]}</td>` +
+      `<td>${withCommas[4]}</td>` +
+      `<td>${withCommas[8]}</td>` +
+      `<td>${withCommas[5]}</td>`;
+  }
 
   function rowFactory(aRow) {
     let dom = aRow.dom;
@@ -18638,85 +18669,6 @@
       thisTBody.appendChild(rowFactory(r.value));
     }
     domTable.replaceChild(thisTBody, domTBody);
-  }
-
-  /* eslint-disable max-len */
-  const thisStyle$1 = `
-/* Advisor */
-.fshSmartTable {
-  border: 1px solid black;
-  table-layout: fixed;
-  width: 650px;
-}
-
-.fshSmartTable thead tr {
-  height: 22px;
-}
-
-.fshSmartTable thead th {
-  background-color: #cd9e4b;
-  position: relative;
-}
-
-.fshSmartTable thead th span {
-  cursor: pointer;
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-.fshSmartTable tbody tr:hover {
-  background-color: whitesmoke;
-}
-
-.fshSmartTable td:nth-child(1), .fshSmartTable th:nth-child(1) {width: 64px;} /* member */
-.fshSmartTable td:nth-child(2), .fshSmartTable th:nth-child(2) {width: 24px;} /* lvl */
-.fshSmartTable td:nth-child(3), .fshSmartTable th:nth-child(3) {width: 76px;} /* rank */
-.fshSmartTable td:nth-child(4), .fshSmartTable th:nth-child(4) {width: 70px;} /* depo */
-.fshSmartTable td:nth-child(5), .fshSmartTable th:nth-child(5) {width: 70px;} /* tax */
-.fshSmartTable td:nth-child(6), .fshSmartTable th:nth-child(6) {width: 70px;} /* total */
-.fshSmartTable td:nth-child(7), .fshSmartTable th:nth-child(7) {width: 32px;} /* fsp */
-.fshSmartTable td:nth-child(8), .fshSmartTable th:nth-child(8) {width: 38px;} /* skill */
-.fshSmartTable td:nth-child(9), .fshSmartTable th:nth-child(9) {width: 32px;} /* create */
-.fshSmartTable td:nth-child(10), .fshSmartTable th:nth-child(10) {width: 30px;} /* join */
-.fshSmartTable td:nth-child(11), .fshSmartTable th:nth-child(11) {width: 26px;} /* relic */
-.fshSmartTable td:nth-child(12), .fshSmartTable th:nth-child(12) {width: 90px;} /* gxp */
-
-.fshSmartTable td:nth-child(n+4), .fshSmartTable th:nth-child(n+4) {
-  text-align: center;
-}
-
-.fshSmartTable td {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* Smart Table */
-.fshSmartTable th[data-st-sort]:after {
-  /* color: #999; */
-  /* content: '\\f0dc'; */
-  position: absolute;
-  right: 8px;
-}
-
-/* .fshSmartTable th[data-st-sort]:hover::after {
-  color: #333;
-} */
-
-.st-sort-asc:after {
-  /* content: '\\25b3\\0020'; */
-  content: '\\25b3';
-}
-
-.st-sort-desc:after {
-  /* content: '\\25bd\\0020'; */
-  content: '\\25bd';
-}
-`;
-  /* eslint-enable max-len */
-
-  function injectStyle$1() {
-    insertElement(document.body, createStyle(thisStyle$1));
   }
 
   const swap = (f) => (a, b) => f(b, a);
@@ -19780,7 +19732,6 @@
     // const topControls = makeTopControls(container);
     const domTable = makeTable(container);
     // const bottomControls = makeBottomControls(container);
-    injectStyle$1();
 
     const tableComponent = tableComponentFactory({
       el: container,
@@ -20268,7 +20219,7 @@
   }
 
   function whereRenderGuildDisplay(row) {
-    if (row.player_id === -1) {return 'GS';}
+    if (row.player_id === -1) {return 'Guild Store';}
     return '<a class="fshMaroon" href="' + playerIdUrl +
       row.player_id + '">' + playerName$4(row.player_id) + '</a>';
   }
@@ -20296,7 +20247,7 @@
   }
 
   function whereRenderGuildFilter(row) {
-    if (row.player_id === -1) {return 'GS';}
+    if (row.player_id === -1) {return 'Guild Store';}
     return playerName$4(row.player_id);
   }
 
@@ -21293,31 +21244,43 @@
     getRelicList().then(processRelicList);
   }
 
+  function rowHtml$1(obj) {
+    return `<td>${obj.slot}</td>` +
+      `<td>${obj.name}</td>` +
+      `<td>${obj.level}</td>` +
+      `<td>${obj.rank_name}</td>` +
+      `<td>${obj.gxp}</td>` +
+      `<td>${obj.activity}</td>` +
+      `<td>${obj.pack}</td>` +
+      `<td>${obj.stam}</td>`;
+  }
+
+  function rowFactory$1(aRow) {
+    let dom = aRow.dom;
+    if (!dom) {
+      dom = createTr(
+        {innerHTML: rowHtml$1(aRow)}
+      );
+    }
+    return dom;
+  }
+
+  function displayChange$1(domTable, displayed) {
+    const domTBody = domTable.tBodies[0];
+    const thisTBody = createTBody();
+    for (let r of displayed) {
+      thisTBody.appendChild(rowFactory$1(r.value));
+    }
+    domTable.replaceChild(thisTBody, domTBody);
+  }
+
   function guildView(guildId) {
     return guild({subcmd: 'view', guild_id: guildId});
   }
 
-  const thisStyle$2 = `
-#pCC .whosGotWhat {
-  border: 1px solid black;
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-.whosGotWhat tr:nth-child(odd) {background: wheat;}
-.whosGotWhat tr:nth-child(even) {background: burlywood;}
-.whosGotWhat tr:hover {background: cornsilk;}
-.whosGotWhat th, .whosGotWhat td {padding: 2px;}
-.whosGotWhat th:nth-child(2), .whosGotWhat td:nth-child(2),
-.whosGotWhat th:nth-child(4), .whosGotWhat td:nth-child(4),
-.whosGotWhat th:nth-child(5), .whosGotWhat td:nth-child(5),
-.whosGotWhat th:nth-child(6), .whosGotWhat td:nth-child(6) {text-align: right;}
-`;
-
-  function byType(prev, curr) {
-    if ([10, 15].includes(curr.t)) {
-      prev[curr.player.name] = prev[curr.player.name] || [];
-      prev[curr.player.name].push(curr);
-    }
+  function byMember(prev, curr) {
+    prev[curr.player.name] = prev[curr.player.name] || [];
+    prev[curr.player.name].push(curr);
     return prev;
   }
 
@@ -21334,31 +21297,60 @@
     return [].concat(...guild.r.ranks.map(extractMembers));
   }
 
-  function rowFactory$1(pots, domTBody, obj) {
-    // var thisPots = (pots[obj.name] || []).length;
-    domTBody.innerHTML += `<tr>
-      <td>
-        ${obj.name}
-      </td>
-      <td>${obj.level}</td>
-      <td>${obj.rank_name}</td>
-      <td>${addCommas(obj.guild_xp)}</td>
-      <td>${lastActivityToDays(obj.last_activity)}</td>
-      <td>${(pots[obj.name] || []).length}</td>
-    </tr>`;
+  function decorateMembers(pots, obj, i) {
+    obj.slot = i + 1;
+    obj.name_lower = obj.name.toLowerCase();
+    obj.lvl_reverse = 0 - obj.level;
+    obj.rank_lower = obj.rank_name.trim().toLowerCase();
+    obj.gxp = addCommas(obj.guild_xp);
+    obj.gxp_reverse = 0 - obj.guild_xp;
+    obj.activity = lastActivityToDays(obj.last_activity);
+    obj.act = obj.last_activity - nowSecs;
+    obj.pack = (pots[obj.name] || []).length;
+    obj.pack_reverse = 0 - (pots[obj.name] || []).length;
+    obj.stam = addCommas(obj.current_stamina);
+    obj.stam_reverse = 0 - obj.current_stamina;
+    return obj;
   }
 
-  function showMe$1([json, guild]) {
+  function prepareData$1([json, guild]) {
+    const pots = json.r.reduce(byMember, {});
     const members = processGuild(guild);
-    const pots = json.r.reduce(byType, {});
+    return members.map(partial(decorateMembers, pots));
+  }
+
+  const theadHtml$1 =
+    '<thead><tr>' +
+    '<th data-st-sort="slot">Slot</th>' +
+    '<th data-st-sort="name_lower">Name</th>' +
+    '<th class="st-sort-reverse" data-st-sort="lvl_reverse">Level</th>' +
+    '<th data-st-sort="rank_lower">Rank</th>' +
+    '<th class="st-sort-reverse" data-st-sort="gxp_reverse">GXP</th>' +
+    '<th class="st-sort-reverse" data-st-sort="act">Activity</th>' +
+    '<th class="st-sort-reverse" data-st-sort="pack_reverse">Pack</th>' +
+    '<th class="st-sort-reverse" data-st-sort="stam_reverse">Stam</th>' +
+    '</tr></thead><tbody></tbody>';
+
+  function makeTable$2(el) {
+    return insertElement(el, createTable({
+      className: 'whosGotWhat',
+      innerHTML: theadHtml$1
+    }));
+  }
+
+  function showMe$1(dataAry) {
+    const data = prepareData$1(dataAry);
+    // console.log(data);
     pCC.innerHTML = '';
-    insertElement(pCC, createStyle(thisStyle$2));
-    var domTable = insertElement(pCC, createTable({className: 'whosGotWhat'}));
-    var domTBody = insertElement(domTable, createTBody());
-    members.forEach(partial(rowFactory$1, pots, domTBody));
+    const el = insertElement(pCC, createDiv());
+    const domTable = makeTable$2(el);
+    const table = smartTable({data});
+    const tableComponent = tableComponentFactory({el, table});
+    tableComponent.onDisplayChange(partial(displayChange$1, domTable));
   }
 
   function whosGotWhat() {
+    pCC.innerHTML = 'Loading...';
     Promise.all([report(), guildView()]).then(showMe$1);
   }
 
@@ -22434,7 +22426,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '117';
+  window.FSH.calf = '118';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

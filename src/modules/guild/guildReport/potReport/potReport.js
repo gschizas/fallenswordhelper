@@ -1,3 +1,4 @@
+import './potReport.postcss';
 import {createDiv} from '../../../common/cElement';
 import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';

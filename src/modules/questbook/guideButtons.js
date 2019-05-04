@@ -1,3 +1,4 @@
+import './guideButtons.postcss';
 import {guideUrl} from '../support/constants';
 import {imageServer} from '../system/system';
 

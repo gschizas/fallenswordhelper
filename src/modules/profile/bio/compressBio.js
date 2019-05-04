@@ -1,3 +1,4 @@
+import './compressBio.postcss';
 import insertElement from '../../common/insertElement';
 import on from '../../common/on';
 import partial from '../../common/partial';

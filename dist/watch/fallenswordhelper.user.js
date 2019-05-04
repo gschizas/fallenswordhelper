@@ -24,7 +24,7 @@ function fshMain(ver) {
   window.FSH = window.FSH || {};
   window.FSH.version = ver;
 
-  var cssFiles = ['https://localhost:9966/src/calfSystem.css'];
+  var cssFiles = ['https://localhost:9966/dist/watch/calfSystem.css'];
   var scriptFiles = [
     'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.6.0/localforage.nopromises.min.js',
     'https://localhost:9966/dist/watch/calfSystem.js'

@@ -8,7 +8,7 @@ const localhttp = 'https://localhost:9966/';
 export default rollupFsh(
   'dev',
   {
-    _CALFCSS: localhttp + 'src/calfSystem.css',
+    _CALFCSS: localhttp + 'dist/dev/calfSystem.css',
     _CALFJS: localhttp + 'dist/dev/calfSystem.min.js',
     _DLURL: localhttp + 'dist/dev/fallenswordhelper.user.js',
     _VER: core + 'a'

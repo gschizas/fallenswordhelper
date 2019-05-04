@@ -5,7 +5,7 @@ const fs = require('fs');
 
 const options = rollupCalf('dist/watch/calfSystem.js', true, true);
 options.treeshake = false;
-options.watch = {include: 'src/**/*.js'};
+options.watch = {include: 'src/**'};
 
 options.plugins.push(serve({
   contentBase: '',

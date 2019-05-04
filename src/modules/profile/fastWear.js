@@ -4,6 +4,7 @@ import equipItem from '../ajax/equipItem';
 import {getElementById} from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
+import {imageServer} from '../system/system';
 import insertElement from '../common/insertElement';
 import on from '../common/on';
 import partial from '../common/partial';
@@ -92,10 +93,29 @@ function fastWearLinks(self) {
   items.forEach(partial(drawButtons, self));
 }
 
+function updateSrc(img, gif) {
+  const url = imageServer + '/' + gif + '.gif';
+  if (img.src !== url) {img.src = url;}
+}
+
+function doFolder(thisFolder, img) {
+  if (img.dataset.folder === thisFolder) {
+    updateSrc(img, 'folder_on');
+  } else {
+    updateSrc(img, 'folder');
+  }
+}
+
+function fixFolders(theBackpack) {
+  querySelectorArray('.backpackFolderImage')
+    .forEach(partial(doFolder, String(theBackpack.folderId)));
+}
+
 function foundBackpack(backpackContainer, theBackpack) {
   var oldShow = theBackpack._showPage;
   theBackpack._showPage = function(type, page) {
     if (!theBackpack.tabData) {return;}
+    fixFolders(theBackpack);
     oldShow.call(theBackpack, type, page);
     fastWearLinks(theBackpack);
   };

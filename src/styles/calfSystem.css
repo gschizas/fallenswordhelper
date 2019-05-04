@@ -1,0 +1,732 @@
+.custombutton[disabled] {
+  background: #B8B8B8;
+  pointer-events: none;
+}
+
+#fshWorldPrefs img {vertical-align: text-bottom;}
+.cR .fshFten {margin: 0.5em 0;}
+
+/* Scout Tower Titan Tracker & Super Elite Log */
+.fshTTracker {
+  width: 500px;
+  margin: auto;
+}
+.fshCooldown {
+  color: #640000;
+}
+
+/* New Map */
+/* #missingBuffs {
+  text-align: center;
+  margin: 0 0 4px 0;
+} */
+#fshWorldButtonContainer {
+  float: left;
+  height: 25.6px;
+  display: flex;
+  align-items: center;
+}
+#fshWorldButtonContainer > div:first-child {
+  margin-right: 0.25em;
+}
+
+.fshToggle {display: flex;}
+.fshToggle input {display: none;}
+.fshToggle input ~ label:nth-child(2) {display: none;}
+.fshToggle input ~ label:nth-child(3) {display: block;}
+.fshToggle input:checked ~ label:nth-child(2) {display: block;}
+.fshToggle input:checked ~ label:nth-child(3) {display: none;}
+
+.fshCurveContainer .fshCurveEle {
+  background-position: center center;
+  border: solid 1px #4f3717;
+  border-radius: 2px;
+  box-shadow: 0 0 4px #4f3717;
+  margin-left: 0.25em;
+}
+
+.fshCurveBtn {
+  height: 17px;
+  padding: 0;
+  width: 17px;
+}
+
+.fshCurveLbl {
+  height: 15px;
+  width: 15px;
+}
+
+.fshFormGroup {background-image: url('https://cdn.fallensword.com/skin/realm/icon_action_formgroup.gif');}
+.fshQuickBuff {background-image: url('https://cdn.fallensword.com/skin/realm/icon_action_quickbuff.gif');}
+.fshRealmMap {background-image: url('https://cdn.fallensword.com/skin/realm/icon_action_map.gif');}
+.fshTempleOne {background-image: url('https://cdn.fallensword.com/temple/1.gif');}
+
+.fshFsty div {font-size: 70%}
+.fshFten div {font-size: 11px;}
+.fshFten select {
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+  font-size: 11px;
+}
+
+
+/* Settings */
+#fshSettingsTable {border-spacing: 10px;}
+.networkIcon {display: inline-block;}
+.fshHelpTitle {
+  font-weight: bold;
+  color: #FFF380;
+}
+
+/* Advisor */
+.fshOldSpinner {
+  background-image: url('https://cdn.fallensword.com/world/actionLoadingSpinner.gif')
+}
+.fshSpinnerMsg {
+  align-self: center;
+}
+
+/* Bazaar */
+.bazaarButton {
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  cursor: pointer;
+}
+.bazaarSelected {
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* New Guild Log */
+.newGuildLog {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+}
+
+/* Guild Add/Remove Tags */
+.guildTagSpinner {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Top Lists */
+#fshFindOnlinePlayers {
+  width: 120px;
+  float: right;
+  margin: 0 100px 0 0;
+  padding: 0;
+}
+.fshTopListWrap {
+  width: 190px;
+  display: block;
+}
+.fshTopListSpinner {
+  float: right;
+  margin: 0 160px 0 0;
+}
+
+/* Helper Menu */
+#content {max-width:600px}
+.column {
+  float: left;
+  width: 180px;
+  margin-right: 5px;
+}
+.column h3 {
+  background: #e0e0e0;
+  font: bold 13px Arial;
+  margin: 0 0 5px 0;
+}
+.helperMenuDiv {
+  cursor: default;
+  text-decoration: none;
+  text-align: center;
+  position: absolute;
+  color: black;
+  font-size: 12px;
+  border-radius: 5px;
+  border:3px solid #ccbb77;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 100ms linear, visibility 0s linear 100ms;
+}
+.showMenuDiv {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 100ms linear, visibility 0s linear;
+}
+.helperMenuDiv .a-reply {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.helperMenu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: yellow;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  z-index: 100100;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Quick Links */
+.fshQuickLinks {
+  position: absolute;
+  z-index: 100050;
+  text-align: left;
+  white-space: nowrap;
+  color: black;
+  font-size: 12px;
+  border-radius: 5px;
+  border: 3px solid #ccbb77;
+  width: 100px;
+}
+
+/* Lists */
+.HelperTextLink {
+  color: blue;
+  font-size: x-small;
+  cursor: pointer;
+}
+.HelperTextLink:hover {text-decoration: underline;}
+
+/* Profile*/
+.quickButton {
+  display: inline-block;
+  height: 17px;
+  width: 17px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.fshBackpack  {height: 490px;}
+.fshBackpack .backpackTabContent > div {height: 110px;}
+.backpackTabContent > div {width: 60px;}
+.fastDiv {
+  display: flex;
+  height: 16px;
+  justify-content: center;
+}
+.fastAction {
+  /* margin-right: 0.2em; */
+  position: relative;
+  top: -16%;
+  width: 3em;
+}
+.fastWorn {
+  color: green;
+  font-weight: bold;
+}
+.compDelBtn {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #A0CFEC;
+}
+
+/* General */
+.custombutton.fshHide {display: none;}
+.no-close .ui-dialog-titlebar-close {display: none;}
+.sendLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+}
+.dropLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: red;
+}
+.fshLink {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.buffLink {cursor: pointer;}
+.fshPoint {cursor: pointer;}
+.smallLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+  font-size: x-small;
+}
+.notLink {
+  color: grey;
+  font-size: x-small;
+}
+.fshMove {cursor: move;}
+
+.pCR a {color: #F7EAC9;}
+
+.fshRed {color: red;}
+.fshBlue {color: blue;}
+.fshGreen {color: green;}
+.fshNavy {color: navy;}
+.fshMaroon {color: maroon;}
+.fshWhite {color: white;}
+.fshGrey {color: grey;}
+.fshLime {color: lime;}
+.fshYellow {color: yellow;}
+.fshPink {color: pink;}
+.fshBrown {color: brown;}
+.fshDarkCyan {color: DarkCyan;}
+.fshOliveDrab {color: OliveDrab;}
+.fshDodgerBlue {color: DodgerBlue;}
+.fshPowderBlue {color: PowderBlue;}
+.fshLightSkyBlue {color: LightSkyBlue;}
+.fshPaleVioletRed {color: PaleVioletRed;}
+.fshRed a {color: red;}
+.fshGreen a {color: green;}
+.fshYellow a {color: yellow;}
+.fshDarkCyan a {color: DarkCyan;}
+.fshOliveDrab a {color: OliveDrab;}
+.fshPaleVioletRed a {color: PaleVioletRed;}
+.fshHeader {background-color: #CD9E4B;}
+.fshBlack {background-color: black;}
+.fshVerySoftOrange {background-color: #e2b960;}
+.fshBtnBox {
+  font-size: x-small;
+  text-align: right;
+}
+.fshBkRed {background-color: red;}
+
+.fshCommon {color: white;}
+.fshRare {color: #3366ff;}
+.fshUnique {color: #cc33ff;}
+.fshLegendary {color: #ffff40;}
+.fshSuper {color: #ff0000;}
+.fshCrystal {color: #6633ff;}
+.fshEpic {color: #009933;}
+
+.fshVMid {vertical-align: middle;}
+.fshCenter {text-align: center;}
+.fshTblCenter {margin: 0 auto;}
+.fshRight {text-align: right;}
+.fshHide {display: none;}
+.fshWearHide {display: none;}
+.fshInline {display: inline;}
+.fshBlock {display: inline-block;}
+.fshNoWrap {white-space: nowrap;}
+.fshBold {font-weight: bold;}
+.quickCreate {
+  display: inline-block;
+  height: 1.2em;
+  margin-left: 0.4em;
+  position: relative;
+  width: 6.5em;
+}
+.fshFixed {position: fixed;}
+.fshRelative {position: relative;}
+.fshXSmall {font-size: x-small;}
+.fshXXSmall {font-size: xx-small;}
+.fshSmall {font-size: small;}
+.fshFloatLeft {float: left;}
+.fshFloatRight {float: right;}
+.fshFlex {display: flex;}
+.fshAdvRank {
+  width: 62px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fshBreakAll {word-break: break-all}
+
+/* Shoutbox Preview Table */
+.sbpTbl {
+  width: 325px;
+  margin: 0 auto;
+}
+/* Shoutbox Preview Header */
+.sbpHdr {
+  text-align: center;
+  color: #7D2252;
+  background-color: #CD9E4B;
+}
+/* Shoutbox Preview Msg */
+.sbpMsg {
+  width: 325px;
+  display: inline-block;
+  overflow-wrap: break-word;
+  font-size: 11px;
+}
+
+#fshAllyEnemy .fshHide {display: none;}
+#fshAllyEnemy .fshWhite {color: white;}
+#fshAllyEnemy .fshRed {color: red;}
+#fshAllyEnemy .fshDodgerBlue {color: DodgerBlue;}
+#fshAllyEnemy .fshPowderBlue {color: PowderBlue;}
+#fshAllyEnemy .fshLightSkyBlue {color: LightSkyBlue;}
+#fshAllyEnemy .fshPaleVioletRed {color: PaleVioletRed;}
+#fshAllyEnemy .fshPink {color: pink;}
+
+#minibox-guild-members-list .fshGreen {color: green;}
+#minibox-guild-members-list .fshWhite {color: white;}
+#minibox-guild-members-list .fshGrey {color: grey;}
+#minibox-guild-members-list .fshHide {display: none;}
+#minibox-allies-list .fshDodgerBlue {color: DodgerBlue;}
+#minibox-allies-list .fshLightSkyBlue {color: LightSkyBlue;}
+#minibox-allies-list .fshPowderBlue {color: PowderBlue;}
+#minibox-allies-list .fshHide {display: none;}
+
+.fastPray {text-align: center;}
+.fastPray table {
+  float: left;
+}
+.fastPray td {padding: 1px;}
+.fastPray span {
+  cursor: pointer;
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  background-repeat: no-repeat;
+}
+
+.quickbuffTable {margin: 0 auto;}
+.quickbuffTableHeader {
+  text-align: center;
+  padding: 0 4px;
+  color: orange;
+}
+.quickbuffTableDetail {
+  text-align: center;
+  padding: 0 4px;
+}
+.quickbuffActivate {
+  cursor: pointer;
+  color: red;
+}
+
+#quickbuff .player h1 {float: left;}
+#quickbuff .player p {clear: both;}
+
+.fshBuffOn {color: white; font-size: x-small;}
+.fshLastActivity {color: #cccccc; font-size: x-small;}
+#quickbuff #buff-outer .fshDim span {
+  color: #999999;
+}
+
+.profile-stat-bonus {font-size: x-small;}
+#minibox-enemy {margin: 0 0 10px; overflow: hidden}
+#fshResetEnemy {
+  font-size: xx-small;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.enemy-send-message {
+  cursor: pointer;
+  background-position: -198px -80px;
+}
+.enemy-quickbuff {
+  cursor: pointer;
+  background-position: -210px -80px;
+}
+.enemy-secure-trade {background-position: -222px -80px;}
+.enemy-trade {background-position: -234px -80px;}
+.player-row {white-space: nowrap}
+#fshAllyEnemy .enemy-quick-buff {
+  clear: both;
+  text-align: center;
+  font-size: 11px;
+  margin: 0;
+  padding-top: 5px;
+  color: #F7EAC9;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.enemy-buff-check-on,
+.enemy-buff-check-off {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 0 1px 2px 0;
+  vertical-align: bottom;
+  background: transparent url('https://cdn.fallensword.com/media/dist/img/ui/ui.png');
+  cursor: pointer;
+}
+.enemy-buff-check-off {
+  background-position: -246px -80px;
+}
+.enemy-buff-check-on {
+  background-position: -270px -80px;
+}
+
+.fshMoveItem {
+  font-size: xx-small;
+  border: none;
+  height: 11px;
+}
+
+#fshBazaar {font-size: x-small;}
+#fshBazaar #fshBazaarWarning {
+  color: red;
+  font-size: small
+}
+
+/* Relic */
+
+#dialog-relic .fshRelicLeftDiv {
+  width: 100px;
+  margin-right: 10px;
+}
+#dialog-relic .fshRelicMidDiv {
+  width: 160px;
+  margin-right: 10px;
+}
+.fshRelicRightDiv {
+  width: 160px;
+}
+#dialog-relic .fshRelicLowDiv {
+  width: 455px;
+  padding-top: 10px;
+}
+.fshRelicLowDiv a {
+  color: red;
+}
+.relicT th {border-top: 2px black solid;}
+.relicT td {font-size: x-small;}
+.relicT td, .relicT th {text-align: right;}
+.relicS td:nth-child(1) {color: brown;}
+.relicS td:nth-child(1), .relicS th:nth-child(1) {width: 112px;}
+.relicS td:nth-child(2), .relicS th:nth-child(2) {width: 46px;}
+
+/* Online Players */
+.fshImgCntr {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lvlHighlight {background-color: #4671C8;}
+.lvlGvGHighlight {background-color: #FF9900;}
+
+.fshInvFilter {
+  width: 100%;
+}
+.fshInvFilter th {
+  background-color: #cd9e4b;
+}
+
+#fshInv_filter input {width: 200px}
+
+.fshNumberInput {width: 3em;}
+
+.text-input-wrapper {
+  border: 1px solid;
+  padding: 1px 6px 1px 1px;
+  display: inline-block;
+  background: white;
+}
+.text-input-wrapper input {
+  border: none;
+}
+.text-input-wrapper span {
+  cursor: pointer;
+  color: blue;
+  font-weight: bold;
+}
+
+/* Recipe Manager */
+
+.rmTh {background-color: #ddd;}
+.rmTh th {text-align: center;}
+.rmTr {
+  vertical-align: middle;
+  text-align: center;
+}
+.rmTd {border-bottom: 1px solid #CD9E4B;}
+.rmTd img {margin: 0 auto;}
+.rmItem {
+  display: inline-block;
+  margin: 0 3px;
+}
+.rmItem p {margin: 0;}
+
+/* New World Shop Multi Buy */
+.fshClear {clear: both;}
+
+/* Button as Link */
+.fshBl {
+  background: transparent;
+  border: none;
+  color: blue;
+  cursor: pointer;
+  font-family : inherit;
+  margin: 0;
+  padding: 0;
+  text-decoration: underline;
+  user-select: text;
+}
+button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+.fshBl.fshBls {font-size: 84%;}
+
+/* Create Auction Craft Buttons */
+.fshAC {
+  margin: 10px auto 10px auto;
+  text-align: center;
+}
+
+/* Composing Potion*/
+.fshPot {
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* Success Msg */
+.fshScs {height: 26px;}
+
+/* Guild Chat */
+.fshGc {
+  table-layout: fixed;
+  overflow-wrap: break-word;
+}
+.fshGc td:nth-child(1) {width: 120px;}
+.fshGc td:nth-child(2) {width: 100px;}
+.fshGc td:nth-child(3) {width: 418px;}
+
+/* New Row */
+.fshNr {
+  background-color: #F5F298;
+}
+/* Old Row */
+.fshOr {
+  background-color: #CD9E4B;
+}
+/* Buff Link */
+.fshBf {
+  color: blue;
+  font-size: 84%;
+}
+
+/* AH Quick Search - Category Header */
+.fshQs {
+  font-weight: bold;
+  font-size: large;
+}
+
+/* Quick Extract */
+.qeHead {
+  background-color: #CD9E4B;
+  width: 100%;
+}
+
+/* Find Buffs & Other */
+
+.fshFind {
+  width: 620px;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.headCell {
+  width: 50%;
+}
+
+.findLabel {
+  text-align: right;
+  color: brown;
+}
+
+.leftLabel {
+  text-align: right;
+  color: brown;
+  width: 30%;
+}
+
+.extraProfile {
+  width: 118px;
+}
+
+.selectOnline {
+  width: 140px;
+}
+
+.disclaim {
+  font-size: xx-small;
+  color: brown;
+  margin-left: 28px;
+  margin-right: 28px;
+}
+
+.buffProg {
+  width: 310px;
+}
+
+.nameCol {
+  width: 120px;
+}
+
+.infoCol {
+  width: 200px;
+}
+
+.fshResult {
+  width: 620px;
+  border-collapse: collapse;
+  margin: 0 auto;
+  border-width: 1px;
+  border-style: solid;
+  border-color: gray black black gray;
+}
+
+.fshResult > tbody > tr > th, .fshResult > tbody > tr > td {
+  padding: 2px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: black gray gray black;
+}
+
+.resAct {
+  color: gray;
+  text-align: right;
+  width: 50%;
+}
+
+.resLbl {
+  color: gray;
+  text-align: right;
+  width: 25%;
+}
+
+.resVal {
+  width: 25%
+}
+
+/* End of Find Buffs & Other */
+
+/* ClearFix */
+.nav-link:after, .nav-level-1:after, .nav-level-2:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+/* Stop resizable textareas */
+textarea {resize: none;}
+
+/* Quick Extract and Inventing results */
+.fshNbrList {list-style: decimal inside;}
+
+/* topbanner-stats */
+#topbanner-stats a {color: #F7EAC9;}
+
+/* Spoils of War */
+#fshScoutTower {
+  height: 21px;
+  width: 21px;
+}
+
