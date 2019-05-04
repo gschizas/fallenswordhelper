@@ -1,3 +1,4 @@
+import './fetchGroupStatsButton.postcss';
 import addButton from './addButton';
 import getGroupStats from '../../ajax/getGroupStats';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';

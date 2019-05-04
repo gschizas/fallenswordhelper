@@ -1,3 +1,4 @@
+import './hasTitan.postcss';
 import {createDiv} from '../../../common/cElement';
 import {getElementById} from '../../../common/getElement';
 import insertElement from '../../../common/insertElement';

@@ -2,7 +2,7 @@ import allowBack from '../../guide/allowBack';
 import arena from './arena';
 import auctionhouse from './auctionhouse';
 import composing from './composing';
-import craftForge from '../../craftForge';
+import craftForge from '../../craftForge/craftForge';
 import guild from './guild/guild';
 import injectBank from '../../bank/injectBank';
 import injectBazaar from '../../bazaar';

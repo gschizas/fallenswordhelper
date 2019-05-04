@@ -1,3 +1,4 @@
+import './guildReport.postcss';
 import classHandler from '../../common/classHandler';
 import classPair from '../../common/classPair';
 import equipItem from '../../ajax/equipItem';

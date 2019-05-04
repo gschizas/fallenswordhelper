@@ -1,15 +1,16 @@
-import classHandler from '../common/classHandler';
-import fallback from '../system/fallback';
-import {getElementById} from '../common/getElement';
-import getElementsByClassName from '../common/getElementsByClassName';
-import getText from '../common/getText';
-import getValue from '../system/getValue';
-import getValueJSON from '../system/getValueJSON';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
-import setText from '../common/setText';
-import setValueJSON from '../system/setValueJSON';
+import './messaging.postcss';
+import classHandler from '../../common/classHandler';
+import fallback from '../../system/fallback';
+import {getElementById} from '../../common/getElement';
+import getElementsByClassName from '../../common/getElementsByClassName';
+import getText from '../../common/getText';
+import getValue from '../../system/getValue';
+import getValueJSON from '../../system/getValueJSON';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
+import on from '../../common/on';
+import setText from '../../common/setText';
+import setValueJSON from '../../system/setValueJSON';
 
 var enterForSendMessage;
 var quickMsgDialog;

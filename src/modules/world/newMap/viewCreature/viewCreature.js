@@ -1,3 +1,4 @@
+import './viewCreature.postcss';
 import calf from '../../../support/calf';
 import {createDiv} from '../../../common/cElement';
 import {def_viewCreature} from '../../../support/constants';

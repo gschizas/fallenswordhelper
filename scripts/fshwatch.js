@@ -8,7 +8,7 @@ const localhttp = 'https://localhost:9966/';
 export default rollupFsh(
   'watch',
   {
-    _CALFCSS: localhttp + 'src/calfSystem.css',
+    _CALFCSS: localhttp + 'dist/watch/calfSystem.css',
     _CALFJS: localhttp + 'dist/watch/calfSystem.js',
     _DLURL: localhttp + 'dist/watch/fallenswordhelper.user.js',
     _VER: core + 'a'

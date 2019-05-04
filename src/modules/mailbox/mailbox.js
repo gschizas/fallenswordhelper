@@ -1,3 +1,4 @@
+import './mailbox.postcss';
 import chunk from '../common/chunk';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';

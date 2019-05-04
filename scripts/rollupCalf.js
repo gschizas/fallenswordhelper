@@ -1,5 +1,8 @@
+import cssnano from 'cssnano';
 import jscc from 'rollup-plugin-jscc';
 import json from 'rollup-plugin-json';
+import postcss from 'rollup-plugin-postcss';
+import postcssNesting from 'postcss-nesting';
 import resolve from 'rollup-plugin-node-resolve';
 
 let version = require('../package.json').version;
@@ -24,7 +27,12 @@ export default function rollupCalf(file, beta, dev) {
           _DEV: dev
         }
       }),
-      json({compact: true})
+      json({compact: true}),
+      postcss({
+        extensions: ['.css', '.postcss'],
+        extract: file.replace('.min', '').replace('.js', '.css'),
+        plugins: [postcssNesting(), cssnano()]
+      })
     ]
   };
 }

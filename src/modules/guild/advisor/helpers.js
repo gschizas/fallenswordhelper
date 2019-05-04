@@ -1,3 +1,4 @@
+import './advisor.postcss';
 import add from '../../support/task';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';

@@ -1,3 +1,4 @@
+import './injectStoreItems.postcss';
 import add from '../../support/task';
 import batch from '../../common/batch';
 import doCheckboxes from './doCheckboxes';

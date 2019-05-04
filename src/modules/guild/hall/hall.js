@@ -1,8 +1,9 @@
-import collapse from '../common/collapse';
-import {createDiv} from '../common/cElement';
-import insertElement from '../common/insertElement';
-import {pCC} from '../support/layout';
-import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
+import './hall.postcss';
+import collapse from '../../common/collapse';
+import {createDiv} from '../../common/cElement';
+import insertElement from '../../common/insertElement';
+import {pCC} from '../../support/layout';
+import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 
 function testArticle(rowType) {return rowType === 1;}
 

@@ -1,3 +1,4 @@
+import './advisor.postcss';
 import advisorView from '../../app/guild/advisorView';
 import getMembrList from '../../ajax/getMembrList';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
