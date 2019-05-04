@@ -1,3 +1,4 @@
+import './quickWear.postcss';
 import {createDiv} from '../../common/cElement';
 import createQuickWear from './createQuickWear';
 import equipItem from '../../ajax/equipItem';
@@ -96,14 +97,16 @@ function createInvTabs() {
   return createDiv({
     id: 'invTabs',
     className: 'ui-tabs ui-widget-content ui-corner-all',
-    innerHTML: '<input id="qwtab1" type="radio" name="qwtabs" checked>' +
-      '<input id="qwtab2" type="radio" name="qwtabs">' +
+    innerHTML:
+      '<input id="qwtab1" class="fsh-tab-open" ' +
+        'type="radio" name="qwtabs" checked>' +
+      '<input id="qwtab2" class="fsh-tab-open" type="radio" name="qwtabs">' +
       '<ul class="ui-tabs-nav ui-helper-reset ' +
         'ui-helper-clearfix ui-widget-header ui-corner-all">' +
-      '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
+      '<li class="ui-state-default ui-corner-top">' +
       '<label for="qwtab1">Quick Wear / Use / Extract<br>Manager</label>' +
       '</li>' +
-      '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
+      '<li class="ui-state-default ui-corner-top">' +
       '<label for="qwtab2">Inventory Manager Counter' +
         '<br>filtered by AH Quick Search</label>' +
       '</li><div id="setPrompt" class="fshFloatRight fshCenter">' +
