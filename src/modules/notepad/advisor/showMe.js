@@ -1,5 +1,4 @@
 import displayChange from './displayChange';
-import injectStyle from './injectStyle';
 import insertElement from '../../common/insertElement';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
@@ -47,7 +46,6 @@ export default function showMe([data, membrList]) {
   // const topControls = makeTopControls(container);
   const domTable = makeTable(container);
   // const bottomControls = makeBottomControls(container);
-  injectStyle();
 
   const tableComponent = tableComponentFactory({
     el: container,
