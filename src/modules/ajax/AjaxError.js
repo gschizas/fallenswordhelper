@@ -1,5 +1,8 @@
 function url(opt) {
-  if (opt.data) {return $.param(opt.data);}
+  if (opt.data) {
+    delete opt.data._rnd;
+    return $.param(opt.data);
+  }
   return opt.url;
 }
 
