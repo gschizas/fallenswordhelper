@@ -1,4 +1,4 @@
-var memberNamesAsStrings;
+var memberNamesAsStrings = [];
 var listOfAllies;
 var listOfEnemies;
 
