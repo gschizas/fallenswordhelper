@@ -25,6 +25,13 @@ export function subscribe(topic, func) {
   return token;
 }
 
+export function subscribeOnce(topic, func) {
+  if (topics[topic]) {
+    return topics[topic][0].token;
+  }
+  return subscribe(topic, func);
+}
+
 function hasSub(token, subs, el, i) {
   if (el.token === token) {
     subs.splice(i, 1);

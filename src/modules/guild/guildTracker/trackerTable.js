@@ -1,3 +1,4 @@
+import './trackerTable.postcss';
 import add from '../../support/task';
 import alpha from '../../common/alpha';
 import formatLocalDateTime from '../../common/formatLocalDateTime';

@@ -1,6 +1,8 @@
 import add from '../support/task';
 import buffLinks from './buffLinks';
 import conflictInfo from './conflictInfo';
+import contains from '../common/contains';
+import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
@@ -10,8 +12,17 @@ import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import playerName from '../common/playerName';
 import progressBar from './progressBar';
-import {recallUserUrl} from '../support/constants';
+import {guildSubcmdUrl, recallUserUrl} from '../support/constants';
 import {logoToggle, statToggle, structureToggle} from './panelToggle';
+
+function relicControl(leftHandSideColumnTable) {
+  const relic = getArrayByTagName('b', leftHandSideColumnTable)
+    .filter(contains('Relics'));
+  if (relic.length !== 1) {return;}
+  const thisFont = relic[0].parentNode.nextElementSibling.children[0];
+  thisFont.innerHTML = '[ <a href="' + guildSubcmdUrl +
+    'reliclist">Control</a> ]&nbsp;';
+}
 
 function selfRecallLink(leftHandSideColumnTable) {
   // self recall
@@ -35,6 +46,7 @@ function lhsAdditions(leftHandSideColumnTable) {
     logoToggle,
     statToggle,
     structureToggle,
+    relicControl,
     selfRecallLink
   ].forEach(partial(lhsAdd, leftHandSideColumnTable));
 }

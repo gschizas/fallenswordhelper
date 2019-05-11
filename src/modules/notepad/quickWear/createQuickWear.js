@@ -1,3 +1,4 @@
+import './createQuickWear.postcss';
 import calf from '../../support/calf';
 import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
@@ -79,10 +80,7 @@ function makeQwTable(appInv) {
 
 export default function createQuickWear(appInv) {
   var tbl = makeQwTable(appInv);
-  var qw = createDiv({
-    id: 'invTabs-qw',
-    className: 'ui-tabs-panel ui-corner-bottom'
-  });
+  var qw = createDiv();
   insertElement(qw, tbl);
   return qw;
 }

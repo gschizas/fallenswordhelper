@@ -336,19 +336,14 @@
     }
   }
 
-  var target = 0;
-  var type = 1;
-  var listener = 2;
-  var addOptions = 3;
-  var removeOptions = 4;
-
   // https://stackoverflow.com/a/34325394
 
   function once(ary) {
-    on(ary[target], ary[type], function fn() { // Closure
-      off(ary[target], ary[type], fn, ary[removeOptions]);
-      ary[listener].apply(this, arguments); // eslint-disable-line no-invalid-this
-    }, ary[addOptions]);
+    const [target, type, listener, addOptions, removeOptions] = ary;
+    on(target, type, function fn() { // Closure
+      off(target, type, fn, removeOptions);
+      listener.apply(this, arguments); // eslint-disable-line no-invalid-this
+    }, addOptions);
   }
 
   function partial(fn /* , rest args */) {
@@ -817,7 +812,7 @@
   function isObject(e) {return isType(e, 'object');}
 
   function containsText(text, el) {
-    return getText(el) === text;
+    return getTextTrim(el) === text;
   }
 
   function contains(text) {
@@ -1675,7 +1670,10 @@
   }
 
   function url(opt) {
-    if (opt.data) {return $.param(opt.data);}
+    if (opt.data) {
+      delete opt.data._rnd;
+      return $.param(opt.data);
+    }
     return opt.url;
   }
 
@@ -2578,10 +2576,7 @@
 
   function createQuickWear(appInv) {
     var tbl = makeQwTable(appInv);
-    var qw = createDiv({
-      id: 'invTabs-qw',
-      className: 'ui-tabs-panel ui-corner-bottom'
-    });
+    var qw = createDiv();
     insertElement(qw, tbl);
     return qw;
   }
@@ -2600,6 +2595,109 @@
       inventory_id: backpackInvId,
       ajax: 1
     }).then(dialog);
+  }
+
+  /*
+  Based on
+  https://github.com/addyosmani/pubsubz
+  */
+
+  var topics = {};
+  var subUid = -1;
+
+  function execute(args, el) {add(3, el.func, [args]);}
+
+  function publish(topic, args) {
+    if (!topics[topic]) {return;}
+    topics[topic].forEach(partial(execute, args));
+    return true; // probably not needed
+  }
+
+  function subscribe(topic, func) {
+    if (!topics[topic]) {topics[topic] = [];}
+    subUid += 1;
+    var token = subUid.toString();
+    topics[topic].push({token: token, func: func});
+    return token;
+  }
+
+  function subscribeOnce(topic, func) {
+    if (topics[topic]) {
+      return topics[topic][0].token;
+    }
+    return subscribe(topic, func);
+  }
+
+  function hasSub(token, subs, el, i) {
+    if (el.token === token) {
+      subs.splice(i, 1);
+      return true;
+    }
+  }
+
+  function hasTopic(token, subs) {
+    return subs.some(partial(hasSub, token, subs));
+  }
+
+  function unsubscribe(token) {
+    if (topics.values().some(partial(hasTopic, token))) {return token;}
+  }
+
+  const toggleId = (groupName, i) => groupName + String(i);
+
+  function makeRadio(groupName, e, i) {
+    return createInput({
+      checked: i === 0,
+      id: toggleId(groupName, i),
+      name: groupName,
+      type: 'radio'
+    });
+  }
+
+  function makeListItem(groupName, thisDivs, e, i) {
+    const thisLi = createLi({className: 'ui-state-default ui-corner-top'});
+    insertElement(thisLi, createLabel({
+      htmlFor: toggleId(groupName, i),
+      innerHTML: e
+    }));
+    if (i !== 0) {
+      once([thisLi, 'click', function() {
+        publish(toggleId(groupName, i), thisDivs[i]);
+      }]);
+    }
+    return thisLi;
+  }
+
+  function makeUl(tabs, groupName, thisDivs) {
+    const thisUl = createUl({
+      className: 'ui-tabs-nav ui-helper-reset ui-helper-clearfix ' +
+        'ui-widget-header ui-corner-all'
+    });
+    const thisItems = tabs.map(partial(makeListItem, groupName, thisDivs));
+    thisItems.forEach(partial(insertElement, thisUl));
+    return thisUl;
+  }
+
+  const makeDiv = () => createDiv({className: 'ui-tabs-panel ui-corner-bottom'});
+
+  function fshTabSet(container, tabs, groupName) {
+    const thisTabSet =
+      createDiv({
+        className: 'fshTabSet ' +
+          'ui-tabs ui-widget-content ui-corner-all'
+      });
+    const appendToTabSet = partial(insertElement, thisTabSet);
+    const thisRadios = tabs.map(partial(makeRadio, groupName));
+    thisRadios.forEach(appendToTabSet);
+    const thisDivs = tabs.map(makeDiv);
+    publish(toggleId(groupName, 0), thisDivs[0]);
+    const thisList = makeUl(tabs, groupName, thisDivs);
+    publish(groupName + '-header', thisList);
+    insertElement(thisTabSet, thisList);
+    thisDivs.forEach(appendToTabSet);
+    container.innerHTML = '';
+    insertElement(container, thisTabSet);
+    return 0;
   }
 
   function hasClass(className, el) {
@@ -2706,10 +2804,7 @@
     var quickSL = getValueJSON('quickSearchList') || [];
     // fill up the Inv Counter
     itemList.r.forEach(partial(folder, invCount, quickSL));
-    var im = createDiv({
-      id: 'invTabs-ah',
-      className: 'ui-tabs-panel ui-corner-bottom'
-    });
+    var im = createDiv();
     insertHtmlBeforeEnd(im, buildHTML(invCount, quickSL));
     return im;
   }
@@ -2910,8 +3005,8 @@
     return useitem(backpackInvId).then(errorDialog).then(ajaxReturnCode);
   }
 
+  const def_disableQuickWearPrompts = 'disableQuickWearPrompts';
   var disableQuickWearPrompts$2;
-  var content$2;
   var itemList;
 
   function actionResult(self, verb, data) {
@@ -2968,7 +3063,7 @@
 
   function togglePref() {
     disableQuickWearPrompts$2 = !disableQuickWearPrompts$2;
-    setValue('disableQuickWearPrompts', disableQuickWearPrompts$2);
+    setValue(def_disableQuickWearPrompts, disableQuickWearPrompts$2);
   }
 
   function evts5() {
@@ -2976,60 +3071,47 @@
       [partial(hasClasses, ['smallLink', 'fshEq']), equipProfileInventoryItem],
       [partial(hasClasses, ['smallLink', 'fshUse']), useProfileInventoryItem],
       [partial(hasClass, 'fshFolder'), hideFolders],
-      [selfIdIs('disableQuickWearPrompts'), togglePref]
+      [selfIdIs(def_disableQuickWearPrompts), togglePref]
     ];
-  }
-
-  function createInvTabs() {
-    return createDiv({
-      id: 'invTabs',
-      className: 'ui-tabs ui-widget-content ui-corner-all',
-      innerHTML:
-        '<input id="qwtab1" class="fsh-tab-open" ' +
-          'type="radio" name="qwtabs" checked>' +
-        '<input id="qwtab2" class="fsh-tab-open" type="radio" name="qwtabs">' +
-        '<ul class="ui-tabs-nav ui-helper-reset ' +
-          'ui-helper-clearfix ui-widget-header ui-corner-all">' +
-        // '<li class="ui-state-default ui-corner-top inv-tabs-qw">' +
-        '<li class="ui-state-default ui-corner-top">' +
-        '<label for="qwtab1">Quick Wear / Use / Extract<br>Manager</label>' +
-        '</li>' +
-        // '<li class="ui-state-default ui-corner-top inv-tabs-ah">' +
-        '<li class="ui-state-default ui-corner-top">' +
-        '<label for="qwtab2">Inventory Manager Counter' +
-          '<br>filtered by AH Quick Search</label>' +
-        '</li><div id="setPrompt" class="fshFloatRight fshCenter">' +
-        simpleCheckboxHtml('disableQuickWearPrompts') + '</div></ul>'
-    });
   }
 
   function goodData(appInv) {
     return appInv && appInv.s && Array.isArray(appInv.r);
   }
 
-  function buildQuickWear(appInv) {
-    var invTabs = createInvTabs();
-    var invTabsQw = createQuickWear(appInv);
-    insertElement(invTabs, invTabsQw);
-    content$2.innerHTML = '';
-    insertElement(content$2, invTabs);
-    on(invTabs, 'click', eventHandler5(evts5()));
-    insertElement(invTabs, showAHInvManager(appInv));
+  function makePref(thisList) {
+    insertElement(thisList, createDiv({
+      className: 'qwPref',
+      innerHTML: simpleCheckboxHtml(def_disableQuickWearPrompts)
+    }));
   }
 
-  function showQuickWear(appInv) {
+  function injectContent(thisFn, appInv, thisDiv) {
+    insertElement(thisDiv, thisFn(appInv));
+  }
+
+  function buildQuickWear(content, appInv) {
+    subscribeOnce('qwtab-header', makePref);
+    subscribeOnce('qwtab0', partial(injectContent, createQuickWear, appInv));
+    subscribeOnce('qwtab1', partial(injectContent, showAHInvManager, appInv));
+    fshTabSet(content, ['Quick Wear / Use / Extract<br>Manager',
+      'Inventory Manager Counter<br>filtered by AH Quick Search'], 'qwtab');
+    on(content, 'click', eventHandler5(evts5()));
+  }
+
+  function showQuickWear(content, appInv) {
     if (goodData(appInv)) {
       itemList = appInv;
-      buildQuickWear(appInv);
+      buildQuickWear(content, appInv);
     }
   }
 
   function hasJquery(injector) { // jQuery.min
-    content$2 = injector || pCC;
-    if (!content$2) {return;}
-    insertHtmlBeforeEnd(content$2, 'Getting item list from backpack...');
-    loadInventory().then(showQuickWear);
-    disableQuickWearPrompts$2 = getValue('disableQuickWearPrompts');
+    const content = injector || pCC;
+    if (!content) {return;}
+    insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
+    loadInventory().then(partial(showQuickWear, content));
+    disableQuickWearPrompts$2 = getValue(def_disableQuickWearPrompts);
   }
 
   function insertQuickWear(injector) {
@@ -4616,7 +4698,7 @@
     classHandler(classEvt)(evt);
   }
 
-  function makeDiv(data) {
+  function makeDiv$1(data) {
     var fshAllyEnemy = createDiv({
       id: 'fshAllyEnemy',
       className: 'minibox'
@@ -4636,7 +4718,7 @@
 
   function nextTick(data) {
     if (data) {
-      add(3, makeDiv, [data]);
+      add(3, makeDiv$1, [data]);
     }
   }
 
@@ -5035,12 +5117,12 @@
     callComposing();
   }
 
-  function execute(fn) {
+  function execute$1(fn) {
     fn();
   }
 
   function executeAll(ary) {
-    ary.forEach(execute);
+    ary.forEach(execute$1);
   }
 
   function getCalfPrefs(pref) {calf[pref] = getValue(pref);}
@@ -6938,16 +7020,16 @@
   }
 
   var inv;
-  var target$1;
+  var target;
 
   function clickOnPerf(el) {
-    var thisItem = el.id.replace(target$1 + '-item-', '');
+    var thisItem = el.id.replace(target + '-item-', '');
     if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {clickThis(el);}
   }
 
   function selectPerf() {
     var items = getArrayByClassName('selectable-item',
-      getElementById(target$1 + '-items'));
+      getElementById(target + '-items'));
     if (items.length === 0) {return;} // ?
     items.forEach(clickOnPerf);
   }
@@ -6963,7 +7045,7 @@
 
   function perfFilter(loc) { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    target$1 = loc;
+    target = loc;
     getInventoryById().then(drawFilters);
   }
 
@@ -7176,45 +7258,6 @@
         _rnd: rnd()
       }
     });
-  }
-
-  /*
-  Based on
-  https://github.com/addyosmani/pubsubz
-  */
-
-  var topics = {};
-  var subUid = -1;
-
-  function execute$1(args, el) {add(3, el.func, [args]);}
-
-  function publish(topic, args) {
-    if (!topics[topic]) {return;}
-    topics[topic].forEach(partial(execute$1, args));
-    return true; // probably not needed
-  }
-
-  function subscribe(topic, func) {
-    if (!topics[topic]) {topics[topic] = [];}
-    subUid += 1;
-    var token = subUid.toString();
-    topics[topic].push({token: token, func: func});
-    return token;
-  }
-
-  function hasSub(token, subs, el, i) {
-    if (el.token === token) {
-      subs.splice(i, 1);
-      return true;
-    }
-  }
-
-  function hasTopic(token, subs) {
-    return subs.some(partial(hasSub, token, subs));
-  }
-
-  function unsubscribe(token) {
-    if (topics.values().some(partial(hasTopic, token))) {return token;}
   }
 
   function randomBackgroundImage() {
@@ -9577,6 +9620,15 @@
       'guildStructureControl');
   }
 
+  function relicControl(leftHandSideColumnTable) {
+    const relic = getArrayByTagName('b', leftHandSideColumnTable)
+      .filter(contains('Relics'));
+    if (relic.length !== 1) {return;}
+    const thisFont = relic[0].parentNode.nextElementSibling.children[0];
+    thisFont.innerHTML = '[ <a href="' + guildSubcmdUrl +
+      'reliclist">Control</a> ]&nbsp;';
+  }
+
   function selfRecallLink(leftHandSideColumnTable) {
     // self recall
     var getLi = getElementsByTagName('li', leftHandSideColumnTable);
@@ -9599,6 +9651,7 @@
       logoToggle,
       statToggle,
       structureToggle,
+      relicControl,
       selfRecallLink
     ].forEach(partial(lhsAdd, leftHandSideColumnTable));
   }
@@ -12064,7 +12117,7 @@
     return getForage('fsh_pvpCombat').then(checkCache);
   }
 
-  var memberNamesAsStrings;
+  var memberNamesAsStrings = [];
   var listOfAllies$1;
   var listOfEnemies$1;
 
@@ -13902,7 +13955,7 @@
     insertElement(inject, tickAll);
   }
 
-  function listener$1(el) {on(getElementById(el[0]), 'click', el[1]);}
+  function listener(el) {on(getElementById(el[0]), 'click', el[1]);}
 
   function clickHandlers() {
     [
@@ -13910,7 +13963,7 @@
       ['Helper:SaveOptions', saveConfig],
       ['Helper:ShowLogs', showLogs],
       ['Helper:ShowMonsterLogs', showMonsterLogs]
-    ].forEach(listener$1);
+    ].forEach(listener);
   }
 
   function toggleListener(id) {on(getElementById(id), 'click', toggleVisibilty);}
@@ -22337,7 +22390,7 @@
   var cmd;
   var subcmd;
   var subcmd2;
-  var type$1 = '';
+  var type = '';
   var coreFunction;
   var functionPath;
 
@@ -22366,7 +22419,7 @@
     cmd = getParam('cmd');
     subcmd = getParam('subcmd');
     subcmd2 = getParam('subcmd2');
-    if (cmd === 'points') {type$1 = '/' + getParam('type');}
+    if (cmd === 'points') {type = '/' + getParam('type');}
   }
 
   function getParamsFromPage() {
@@ -22388,7 +22441,7 @@
       getParamsFromPage();
     }
     setCalfParams();
-    functionPath = cmd + '/' + subcmd + '/' + subcmd2 + type$1;
+    functionPath = cmd + '/' + subcmd + '/' + subcmd2 + type;
     coreFunction = testCoreFunction();
   }
 
@@ -22426,7 +22479,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '118';
+  window.FSH.calf = '119';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
