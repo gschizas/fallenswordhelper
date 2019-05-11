@@ -1,5 +1,5 @@
-import getText from './getText';
+import getTextTrim from './getTextTrim';
 
 export default function containsText(text, el) {
-  return getText(el) === text;
+  return getTextTrim(el) === text;
 }
