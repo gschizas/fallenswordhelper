@@ -3,6 +3,7 @@ import {createDiv} from '../../common/cElement';
 import createQuickWear from './createQuickWear';
 import equipItem from '../../ajax/equipItem';
 import eventHandler5 from '../../common/eventHandler5';
+import fshTabSet from '../../fshTabSet/fshTabSet';
 import getValue from '../../system/getValue';
 import hasClass from '../../common/hasClass';
 import hasClasses from '../../common/hasClasses';
@@ -20,11 +21,12 @@ import setText from '../../common/setText';
 import setValue from '../../system/setValue';
 import showAHInvManager from './showAHInvManager';
 import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
+import {subscribeOnce} from '../../support/pubsub';
 import toggleForce from '../../common/toggleForce';
 import useItem from '../../ajax/useItem';
 
+const def_disableQuickWearPrompts = 'disableQuickWearPrompts';
 var disableQuickWearPrompts;
-var content;
 var itemList;
 
 function actionResult(self, verb, data) {
@@ -81,7 +83,7 @@ function hideFolders(self) {
 
 function togglePref() {
   disableQuickWearPrompts = !disableQuickWearPrompts;
-  setValue('disableQuickWearPrompts', disableQuickWearPrompts);
+  setValue(def_disableQuickWearPrompts, disableQuickWearPrompts);
 }
 
 function evts5() {
@@ -89,58 +91,47 @@ function evts5() {
     [partial(hasClasses, ['smallLink', 'fshEq']), equipProfileInventoryItem],
     [partial(hasClasses, ['smallLink', 'fshUse']), useProfileInventoryItem],
     [partial(hasClass, 'fshFolder'), hideFolders],
-    [selfIdIs('disableQuickWearPrompts'), togglePref]
+    [selfIdIs(def_disableQuickWearPrompts), togglePref]
   ];
-}
-
-function createInvTabs() {
-  return createDiv({
-    id: 'invTabs',
-    className: 'ui-tabs ui-widget-content ui-corner-all',
-    innerHTML:
-      '<input id="qwtab1" class="fsh-tab-open" ' +
-        'type="radio" name="qwtabs" checked>' +
-      '<input id="qwtab2" class="fsh-tab-open" type="radio" name="qwtabs">' +
-      '<ul class="ui-tabs-nav ui-helper-reset ' +
-        'ui-helper-clearfix ui-widget-header ui-corner-all">' +
-      '<li class="ui-state-default ui-corner-top">' +
-      '<label for="qwtab1">Quick Wear / Use / Extract<br>Manager</label>' +
-      '</li>' +
-      '<li class="ui-state-default ui-corner-top">' +
-      '<label for="qwtab2">Inventory Manager Counter' +
-        '<br>filtered by AH Quick Search</label>' +
-      '</li><div id="setPrompt" class="fshFloatRight fshCenter">' +
-      simpleCheckboxHtml('disableQuickWearPrompts') + '</div></ul>'
-  });
 }
 
 function goodData(appInv) {
   return appInv && appInv.s && Array.isArray(appInv.r);
 }
 
-function buildQuickWear(appInv) {
-  var invTabs = createInvTabs();
-  var invTabsQw = createQuickWear(appInv);
-  insertElement(invTabs, invTabsQw);
-  content.innerHTML = '';
-  insertElement(content, invTabs);
-  on(invTabs, 'click', eventHandler5(evts5()));
-  insertElement(invTabs, showAHInvManager(appInv));
+function makePref(thisList) {
+  insertElement(thisList, createDiv({
+    className: 'qwPref',
+    innerHTML: simpleCheckboxHtml(def_disableQuickWearPrompts)
+  }));
 }
 
-function showQuickWear(appInv) {
+function injectContent(thisFn, appInv, thisDiv) {
+  insertElement(thisDiv, thisFn(appInv));
+}
+
+function buildQuickWear(content, appInv) {
+  subscribeOnce('qwtab-header', makePref);
+  subscribeOnce('qwtab0', partial(injectContent, createQuickWear, appInv));
+  subscribeOnce('qwtab1', partial(injectContent, showAHInvManager, appInv));
+  fshTabSet(content, ['Quick Wear / Use / Extract<br>Manager',
+    'Inventory Manager Counter<br>filtered by AH Quick Search'], 'qwtab');
+  on(content, 'click', eventHandler5(evts5()));
+}
+
+function showQuickWear(content, appInv) {
   if (goodData(appInv)) {
     itemList = appInv;
-    buildQuickWear(appInv);
+    buildQuickWear(content, appInv);
   }
 }
 
 function hasJquery(injector) { // jQuery.min
-  content = injector || pCC;
+  const content = injector || pCC;
   if (!content) {return;}
   insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
-  loadInventory().then(showQuickWear);
-  disableQuickWearPrompts = getValue('disableQuickWearPrompts');
+  loadInventory().then(partial(showQuickWear, content));
+  disableQuickWearPrompts = getValue(def_disableQuickWearPrompts);
 }
 
 export default function insertQuickWear(injector) {
