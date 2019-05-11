@@ -10,7 +10,6 @@
   left: 0;
   right: 0;
   background: rgba(0, 0, 0, 0.5);
-  -webkit-transform: translateX(-100vw);
   transform: translateX(-100vw);
 }
 .fsh-dialog-cancel {
@@ -24,7 +23,6 @@
   left: 50%;
   margin-left: -322px;
   right: 0;
-  -webkit-transform: translateX(-100vw);
   transform: translateX(-100vw);
   position: absolute;
 }
@@ -33,11 +31,9 @@
   display: none;
 }
 .fsh-dialog-content > div {
-  -webkit-transform: translateX(-100vw);
   transform: translateX(-100vw);
 }
 .fsh-dialog-open:checked ~ div {
-  -webkit-transform: none;
   transform: none;
 }
 .fsh-tab-label {
@@ -93,56 +89,5 @@
 }
 .fsh-tab-open:nth-child(1):checked ~ .fsh-dialog-content > div:nth-child(1),
 .fsh-tab-open:nth-child(2):checked ~ .fsh-dialog-content > div:nth-child(2) {
-  -webkit-transform: none;
   transform: none;
-}
-
-#tg {
-  border: none;
-  width: 620px;
-  table-layout: fixed;
-}
-#tg th {text-align: center;}
-#tg td, #tg th{
-  overflow-x: hidden;
-  padding: 0.1em 0.1em 0.1em 0.1em;
-}
-#tg td{
-  padding: 0.1em 0.1em 0.1em 0.1em;
-  border-bottom: 1px solid gray;
-}
-#tg td:nth-child(1), #tg th:nth-child(1) {width: 125px;}
-#tg td:nth-child(2), #tg th:nth-child(2) {width: 80px;}
-#tg td:nth-child(3), #tg th:nth-child(3) {width: 40px;}
-#tg td:nth-child(4), #tg th:nth-child(4) {width: 40px;}
-#tg td:nth-child(5), #tg th:nth-child(5) {width: 50px;}
-#tg td:nth-child(6), #tg th:nth-child(6) {width: 50px;}
-#tg td:nth-child(7), #tg th:nth-child(7) {width: 30px;}
-#tg td:nth-child(8), #tg th:nth-child(8) {width: 40px;}
-#tg td:nth-child(9), #tg th:nth-child(9) {width: 115px;}
-#tg thead tr {
-  display: block;
-  position: relative;
-  background-color: #CD9E4B;
-}
-#tg tbody {
-  display: block;
-  height: 60vh;
-  overflow-y: scroll;
-  width: 100%;
-}
-#tg tr:last-child td {border-bottom: none;}
-#tg thead tr select {width: 79px;}
-
-#io {
-  text-align: center;
-  width: 620px;
-}
-#io button {margin: 1em 1em;}
-#io textarea {
-  height: 55vh;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  width: 550px;
-  word-break: break-all;
 }
