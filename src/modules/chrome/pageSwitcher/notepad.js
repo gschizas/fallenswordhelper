@@ -1,4 +1,4 @@
-//#if _DEV  //  reliclist
+//#if _DEV  //  advisor
 import advisor from '../../notepad/advisor/advisor';
 //#endif
 import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
@@ -14,7 +14,7 @@ import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
 import injectSaveSettings from '../../settings/load';
 import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../../notepad/quickWear/quickWear';
-//#if _DEV  //  reliclist
+//#if _DEV  //  reliclist  whosGotWhat
 import reliclist from '../../notepad/reliclist/reliclist';
 import whosGotWhat from '../../notepad/whosGotWhat/whosGotWhat';
 //#endif
@@ -40,7 +40,7 @@ export default {
   findbuffs: {'-': injectFindBuffs},
   findother: {'-': injectFindOther},
   savesettings: {'-': injectSaveSettings}, // TODO
-  //#if _DEV  //  reliclist, advisor
+  //#if _DEV  //  reliclist, advisor, whosGotWhat
   reliclist: {'-': reliclist},
   advisor: {'-': advisor},
   whosgotwhat: {'-': whosGotWhat},

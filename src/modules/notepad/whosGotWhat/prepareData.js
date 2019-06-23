@@ -4,8 +4,10 @@ import {nowSecs} from '../../support/now';
 import partial from '../../common/partial';
 
 function byMember(prev, curr) {
+  // if (curr.b === 11503) {
   prev[curr.player.name] = prev[curr.player.name] || [];
   prev[curr.player.name].push(curr);
+  // }
   return prev;
 }
 
@@ -39,6 +41,7 @@ function decorateMembers(pots, obj, i) {
 }
 
 export default function prepareData([json, guild]) {
+  // console.log(json);
   const pots = json.r.reduce(byMember, {});
   const members = processGuild(guild);
   return members.map(partial(decorateMembers, pots));
