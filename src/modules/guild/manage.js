@@ -6,6 +6,9 @@ import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
+//#if _DEV  //  guildTrackerV2
+import guildTrackerV2 from './guildTrackerV2/guildTracker';
+//#endif
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {pCC} from '../support/layout';
@@ -51,13 +54,24 @@ function lhsAdditions(leftHandSideColumnTable) {
   ].forEach(partial(lhsAdd, leftHandSideColumnTable));
 }
 
+function doGuildTracker() {
+  const test = 0;
+  if (test === 0) {
+    add(4, guildTracker);
+    //#if _DEV  //  guildTrackerV2
+  } else {
+    add(4, guildTrackerV2);
+    //#endif
+  }
+}
+
 function ajaxStuff(leftHandSideColumnTable) {
   if (jQueryNotPresent()) {return;}
   // Detailed conflict information
   if (getValue('detailedConflictInfo')) {
     add(3, conflictInfo, [leftHandSideColumnTable]);
   }
-  add(4, guildTracker);
+  doGuildTracker();
 }
 
 export default function manage() {

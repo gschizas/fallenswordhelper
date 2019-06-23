@@ -2,17 +2,13 @@ import './guildTracker.postcss';
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import getForage from '../../ajax/getForage';
-import getValue from '../../system/getValue';
+import injectShowTracker from './injectShowTracker';
 import insertElement from '../../common/insertElement';
-import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import once from '../../common/once';
 import partial from '../../common/partial';
-import querySelector from '../../common/querySelector';
 import {sendEvent} from '../../support/fshGa';
-import setValue from '../../system/setValue';
-import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
 import {
   createDiv,
   createInput,
@@ -80,7 +76,7 @@ function makeInnerPopup() {
     name: 'acttabs',
     type: 'radio'
   });
-  once([acttab2, 'change', updateRawData]);
+  once(acttab2, 'change', updateRawData);
   insertElement(dialogPopup, acttab2);
   return dialogPopup;
 }
@@ -122,13 +118,6 @@ function gotActivity(data) {
   }
 }
 
-function togglePref(evt) {
-  if (evt.target.id === 'enableGuildActivityTracker') {
-    setValue('enableGuildActivityTracker',
-      !getValue('enableGuildActivityTracker'));
-  }
-}
-
 function openDialog() {
   sendEvent('guildTracker', 'openDialog');
   getForage('fsh_guildActivity').then(gotActivity);
@@ -137,27 +126,13 @@ function openDialog() {
   makePopup();
 }
 
-function injectShowTracker() {
-  var gs = querySelector('#pCC img.guild_openGuildStore');
-  var td = gs.parentNode;
-  var container = createDiv({className: 'fsh-tracker'});
-  var myDiv = createDiv({
-    innerHTML: simpleCheckboxHtml('enableGuildActivityTracker') +
-    '&nbsp;<label class="custombutton" for="tracker">Show</label>'
-  });
-  on(myDiv, 'change', togglePref);
-  insertElement(container, gs);
-  insertElement(container, myDiv);
-  insertElementAfterBegin(td, container);
-}
-
 function injectTracker() {
   tracker = createInput({
     id: 'tracker',
     className: 'fsh-dialog-open',
     type: 'checkbox'
   });
-  once([tracker, 'change', openDialog]);
+  once(tracker, 'change', openDialog);
   trDialog = createDiv({className: 'fsh-dialog'});
   insertElement(trDialog, tracker);
   on(document.body, 'keydown', keydownHandler);
