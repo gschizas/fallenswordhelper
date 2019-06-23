@@ -1,7 +1,7 @@
 import addCommas from '../../system/addCommas';
 import getValue from '../../system/getValue';
 import indexAjaxData from '../../ajax/indexAjaxData';
-import infoBox from '../../common/infoBox';
+import infoBoxFrom from '../../common/InfoBoxFrom';
 import setValue from '../../system/setValue';
 import {def_fetch_playerStats, def_playerGold} from '../../support/constants';
 
@@ -9,7 +9,7 @@ var goldAmount;
 var sendGoldonWorld;
 
 function doneSendGold(data) {
-  var info = infoBox(data);
+  var info = infoBoxFrom(data);
   if (info === 'You successfully sent gold!' || info === '') {
     setValue('currentGoldSentTotal',
       parseInt(getValue('currentGoldSentTotal'), 10) +

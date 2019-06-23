@@ -1,17 +1,12 @@
-import createDocument from '../system/createDocument';
 import {getElementById} from './getElement';
 
-export default function infoBox(documentText) {
-  var doc = createDocument(documentText);
-  var result;
-  var infoMsg = getElementById('info-msg', doc);
+export default function infoBox(scope) {
+  const infoMsg = getElementById('info-msg', scope);
   if (infoMsg) {
-    var infoMatch = infoMsg.innerHTML;
-    result = '';
+    const infoMatch = infoMsg.innerHTML;
     if (infoMatch) {
-      infoMatch = infoMatch.replace(/<br.*/, '');
-      result = infoMatch;
+      return infoMatch.replace(/<br.*/, '');
     }
+    return '';
   }
-  return result;
 }
