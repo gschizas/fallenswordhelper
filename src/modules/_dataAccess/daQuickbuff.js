@@ -1,16 +1,14 @@
-import ajaxQb from '../ajax/quickbuff';
+import ajaxQb from './quickbuff';
 import appQb from '../app/quickbuff';
+import hasFailed from './hasFailed';
 import partial from '../common/partial';
 
 function doFallback(userAry, buffAry) {
   return ajaxQb(userAry, buffAry);
 }
 
-const fail = json => json && 's' in json &&
-  json.e.message === 'Unknown Command';
-
 function fallback(userAry, buffAry, json) {
-  if (fail(json)) {return doFallback(userAry, buffAry);}
+  if (hasFailed(json)) {return doFallback(userAry, buffAry);}
   return json;
 }
 

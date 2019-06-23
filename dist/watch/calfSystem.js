@@ -2585,6 +2585,47 @@
     return qw;
   }
 
+  function formatResponse(json) {
+    // console.log('formatResponse', json);
+    return {r: json, s: false};
+  }
+
+  function fetchinv() {
+    return indexAjaxJson({
+      cmd: 'profile',
+      subcmd: 'fetchinv'
+    }).then(formatResponse);
+  }
+
+  const tests = [
+    json => isObject(json),
+    json => 's' in json,
+    json => !json.s,
+    json => 'e' in json,
+    json => json.e.message === 'Unknown Command'
+  ];
+
+  function hasFailed(json) {
+    return tests.every(f => f(json));
+  }
+
+  function loadInventory() {
+    return profile({subcmd: 'loadinventory'});
+  }
+
+  function doFallback() {
+    return fetchinv();
+  }
+
+  function fallback$1(json) {
+    if (hasFailed(json)) {return doFallback();}
+    return json;
+  }
+
+  function daLoadInventory() {
+    return loadInventory().then(fallback$1).catch(doFallback);
+  }
+
   function dialog(data) {
     if (data.r !== 0) {
       dialogMsg(data.m);
@@ -2713,10 +2754,6 @@
 
   function hasClasses(classAry, el) {
     return classAry.every(partial(exists, el));
-  }
-
-  function loadInventory() {
-    return profile({subcmd: 'loadinventory'});
   }
 
   function foundInvItem(invCount, name) {
@@ -3003,7 +3040,7 @@
     const content = injector || pCC;
     if (!content) {return;}
     insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
-    loadInventory().then(partial(showQuickWear, content));
+    daLoadInventory().then(partial(showQuickWear, content));
     disableQuickWearPrompts$2 = getValue(def_disableQuickWearPrompts);
   }
 
@@ -14140,7 +14177,7 @@
     return {r: buffsByPlayer, s: true};
   }
 
-  function formatResponse(html) {
+  function formatResponse$1(html) {
     const buffsParsed = buffReportParser(createDocument(html));
     return buffFormatter(buffsParsed);
   }
@@ -14151,7 +14188,7 @@
       subcmd: 'activate',
       targetPlayers: userAry.join(),
       skills: buffAry
-    }).then(formatResponse);
+    }).then(formatResponse$1);
   }
 
   function quickbuff$1(userAry, buffAry) {
@@ -14163,22 +14200,19 @@
     });
   }
 
-  function doFallback(userAry, buffAry) {
+  function doFallback$1(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  const fail = json => json && 's' in json &&
-    json.e.message === 'Unknown Command';
-
-  function fallback$1(userAry, buffAry, json) {
-    if (fail(json)) {return doFallback(userAry, buffAry);}
+  function fallback$2(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$1(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$1, userAry, buffAry))
-      .catch(partial(doFallback, userAry, buffAry));
+      .then(partial(fallback$2, userAry, buffAry))
+      .catch(partial(doFallback$1, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -19748,7 +19782,7 @@
     Promise.all([advisorView(0), getMembrList(false)]).then(showMe);
   }
 
-  function fetchinv() {
+  function fetchinv$1() {
     return guild({subcmd: 'fetchinv'});
   }
 
@@ -19785,7 +19819,7 @@
   }
 
   function doGs() {
-    return fetchinv().then(getComposedFromGs);
+    return fetchinv$1().then(getComposedFromGs);
   }
 
   function doReport() {
@@ -22430,7 +22464,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '120';
+  window.FSH.calf = '121';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
