@@ -1,7 +1,7 @@
 import buffReportParser from '../notepad/buffLog/buffReportParser';
 import createDocument from '../system/createDocument';
 import {getBuffId} from '../common/buffUtils';
-import indexAjaxData from './indexAjaxData';
+import indexAjaxData from '../ajax/indexAjaxData';
 
 const playerName = result => result[3] || result[6] || result[7];
 const successObject = result => (

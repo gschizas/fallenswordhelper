@@ -1,6 +1,7 @@
 import './quickWear.postcss';
 import {createDiv} from '../../common/cElement';
 import createQuickWear from './createQuickWear';
+import daLoadInventory from '../../_dataAccess/daLoadInventory';
 import equipItem from '../../ajax/equipItem';
 import eventHandler5 from '../../common/eventHandler5';
 import fshTabSet from '../../dialog/fshTabSet';
@@ -11,7 +12,6 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jConfirm from '../../common/jConfirm';
 import jQueryPresent from '../../common/jQueryPresent';
-import loadInventory from '../../app/profile/loadInventory';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
@@ -130,7 +130,7 @@ function hasJquery(injector) { // jQuery.min
   const content = injector || pCC;
   if (!content) {return;}
   insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
-  loadInventory().then(partial(showQuickWear, content));
+  daLoadInventory().then(partial(showQuickWear, content));
   disableQuickWearPrompts = getValue(def_disableQuickWearPrompts);
 }
 
