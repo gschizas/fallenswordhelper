@@ -12,6 +12,9 @@ var subUid = -1;
 function execute(args, el) {add(3, el.func, [args]);}
 
 export function publish(topic, args) {
+  //#if _DEV  //  pubsubz publish
+  console.log('publish', topic); // eslint-disable-line no-console
+  //#endif
   if (!topics[topic]) {return;}
   topics[topic].forEach(partial(execute, args));
   return true; // probably not needed
