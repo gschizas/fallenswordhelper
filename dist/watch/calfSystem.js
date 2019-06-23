@@ -11421,6 +11421,20 @@
     return ret;
   }
 
+  function moveItem(invIdList, folderId) {
+    return indexAjaxJson({
+      cmd: 'profile',
+      subcmd: 'sendtofolder',
+      inv_list: JSON.stringify(invIdList),
+      folder_id: folderId,
+      ajax: 1
+    }).then(dialog);
+  }
+
+  function moveItems(folderId, itemsAry) {
+    return moveItem(itemsAry, folderId).then(() => ({r: itemsAry}));
+  }
+
   function sendtofolder(folderId, itemsAry) {
     return callApp({
       cmd: 'profile',
@@ -11428,6 +11442,21 @@
       folder_id: folderId,
       folderItem: itemsAry
     });
+  }
+
+  function doFallback$1(folderId, itemsAry) {
+    return moveItems(folderId, itemsAry);
+  }
+
+  function fallback$2(folderId, itemsAry, json) {
+    if (hasFailed(json)) {return doFallback$1(folderId, itemsAry);}
+    return json;
+  }
+
+  function daSendToFolder(folderId, itemsAry) {
+    return sendtofolder(folderId, itemsAry)
+      .then(partial(fallback$2, folderId, itemsAry))
+      .catch(partial(doFallback$1, folderId, itemsAry));
   }
 
   function checked(o) {
@@ -11461,7 +11490,7 @@
   }
 
   function moveList(itemsAry, folderId, list) {
-    sendtofolder(folderId, list).then(partial(removeInvIds, itemsAry));
+    daSendToFolder(folderId, list).then(partial(removeInvIds, itemsAry));
   }
 
   function moveItemsToFolder(itemsAry) { // jQuery.min
@@ -14208,19 +14237,19 @@
     });
   }
 
-  function doFallback$1(userAry, buffAry) {
+  function doFallback$2(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  function fallback$2(userAry, buffAry, json) {
-    if (hasFailed(json)) {return doFallback$1(userAry, buffAry);}
+  function fallback$3(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$2(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$2, userAry, buffAry))
-      .catch(partial(doFallback$1, userAry, buffAry));
+      .then(partial(fallback$3, userAry, buffAry))
+      .catch(partial(doFallback$2, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -19818,7 +19847,7 @@
   }
 
   function doComposedFromBp() {
-    return loadInventory().then(getComposedFromBp);
+    return daLoadInventory().then(getComposedFromBp);
   }
 
   function getComposedFromGs(data) {
@@ -20518,16 +20547,6 @@
       );
     saveOptions(options);
     $(fshInv).DataTable().draw(false);
-  }
-
-  function moveItem(invIdList, folderId) {
-    return indexAjaxJson({
-      cmd: 'profile',
-      subcmd: 'sendtofolder',
-      inv_list: JSON.stringify(invIdList),
-      folder_id: folderId,
-      ajax: 1
-    }).then(dialog);
   }
 
   function resetChecks(fshInv) { // jQuery
@@ -22472,7 +22491,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '122';
+  window.FSH.calf = '123';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
