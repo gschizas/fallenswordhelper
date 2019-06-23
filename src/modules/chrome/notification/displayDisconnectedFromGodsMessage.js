@@ -45,5 +45,5 @@ function prayToGods(e) { // jQuery
 
 export default function displayDisconnectedFromGodsMessage() {
   insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
-  once([getElementById('helperPrayToGods'), 'click', prayToGods]);
+  once(getElementById('helperPrayToGods'), 'click', prayToGods);
 }

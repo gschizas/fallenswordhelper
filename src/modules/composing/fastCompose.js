@@ -108,5 +108,5 @@ export default function fastCompose() {
   insertElementAfter(fcDiv, buttonDiv);
   var fcCheck = createInput({id: 'fast-compose', type: 'checkbox'});
   insertElementAfter(fcCheck, buttonDiv);
-  once([fcCheck, 'change', partial(drawList, fcDiv)]);
+  once(fcCheck, 'change', partial(drawList, fcDiv));
 }

@@ -153,8 +153,8 @@ function makeQtCheckbox(items, injector) {
     type: 'checkbox'
   });
   insertElementBefore(qtCheckbox, injector);
-  once([qtCheckbox, 'change',
-    partial(toggleQuickTake, items, injector)]);
+  once(qtCheckbox, 'change',
+    partial(toggleQuickTake, items, injector));
 }
 
 export default function injectMailbox() {
