@@ -2585,9 +2585,17 @@
     return qw;
   }
 
+  function byFolder(items, folder) {
+    return {
+      id: folder.a,
+      name: folder.n,
+      items: items.filter(i => i.f === folder.a)
+    };
+  }
+
   function formatResponse(json) {
-    // console.log('formatResponse', json);
-    return {r: json, s: false};
+    const itemsByFolder = json.folders.map(partial(byFolder, json.items));
+    return {r: itemsByFolder, s: true};
   }
 
   function fetchinv() {
@@ -22464,7 +22472,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '121';
+  window.FSH.calf = '122';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
