@@ -3,7 +3,7 @@ import {createDiv} from '../../common/cElement';
 import createQuickWear from './createQuickWear';
 import equipItem from '../../ajax/equipItem';
 import eventHandler5 from '../../common/eventHandler5';
-import fshTabSet from '../../fshTabSet/fshTabSet';
+import fshTabSet from '../../dialog/fshTabSet';
 import getValue from '../../system/getValue';
 import hasClass from '../../common/hasClass';
 import hasClasses from '../../common/hasClasses';

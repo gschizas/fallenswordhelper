@@ -29,9 +29,9 @@ function makeListItem(groupName, thisDivs, e, i) {
     innerHTML: e
   }));
   if (i !== 0) {
-    once([thisLi, 'click', function() {
+    once(thisLi, 'click', function() {
       publish(toggleId(groupName, i), thisDivs[i]);
-    }]);
+    });
   }
   return thisLi;
 }

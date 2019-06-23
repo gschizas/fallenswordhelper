@@ -61,7 +61,7 @@ function dragOver(event) {
 
 function dragDrop(event) {
   drawElement(event);
-  off(document.body, 'dragover', dragOver, false);
+  off(document.body, 'dragover', dragOver);
   event.preventDefault();
   return false;
 }
@@ -80,8 +80,8 @@ function dragStart(parent, event) {
   setOffsets();
   timer = 0;
   event.dataTransfer.setData('text/plain', '');
-  on(document.body, 'dragover', dragOver, false);
-  once([document.body, 'drop', dragDrop, false]);
+  on(document.body, 'dragover', dragOver);
+  once(document.body, 'drop', dragDrop);
 }
 
 export default function draggable(element, parent) {

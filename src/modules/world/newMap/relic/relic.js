@@ -102,7 +102,7 @@ function viewRelic(e, data) {
   relicData = data.response.data;
   if (relicData.defenders.length > 0) {
     primaryElementsSetup(relicData);
-    once([fetchStatsBtn, 'click', getStats]);
+    once(fetchStatsBtn, 'click', getStats);
   }
 }
 

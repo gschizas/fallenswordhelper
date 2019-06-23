@@ -112,7 +112,7 @@ function haveNode(node) {
   if (getValue('keepHelperMenuOnScreen')) {
     helperMenu.classList.add('fshFixed');
   }
-  once([helperMenu, 'mouseenter', showHelperMenu]);
+  once(helperMenu, 'mouseenter', showHelperMenu);
   if (getValue('draggableHelperMenu')) {
     helperMenu.classList.add('fshMove');
     draggable(helperMenu);

@@ -1,5 +1,6 @@
 import {bountyList} from './lists';
 import {bountyListDiv} from './createDivs';
+import {bountyUrl} from '../../support/constants';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import setValueJSON from '../../system/setValueJSON';
@@ -16,14 +17,12 @@ function makeMouseOver(el) {
 
 export function injectBountyList() { // Legacy
   setValueJSON('bountyList', bountyList);
-
   bountyListDiv.innerHTML = '';
-
-  var heading = createDiv({textContent: 'Active Bounties '});
+  var heading = createDiv(
+    {innerHTML: '<a href="' + bountyUrl + '">Active Bounties</a> '});
   bountyListReset = createSpan({className: 'xxsLink', textContent: 'Reset'});
   insertElement(heading, bountyListReset);
   insertElement(bountyListDiv, heading);
-
   var output = '';
   if (bountyList.bounty.length === 0) {
     output += '<div class="xsOrange">[No active bounties]</div>';

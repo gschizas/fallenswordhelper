@@ -2,7 +2,7 @@ import clickThis from '../common/clickThis';
 import {closestTable} from '../common/closest';
 import dialog from '../ajax/dialog';
 import getArrayByTagName from '../common/getArrayByTagName';
-import infoBox from '../common/infoBox';
+import infoBoxFrom from '../common/InfoBoxFrom';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
@@ -12,7 +12,7 @@ import querySelector from '../common/querySelector';
 import retryAjax from '../ajax/retryAjax';
 
 function translateReturnInfo(data) {
-  var info = infoBox(data);
+  var info = infoBoxFrom(data);
   var _r = {r: 1, m: info};
   if (info === 'Item was transferred to the guild store!') {
     _r = {r: 0, m: ''};

@@ -11,6 +11,7 @@ function getRelicList(offset, myList) {
     subcmd: 'reliclist',
     offset: fallback(offset, 0)
   }).then(function(json) {
+    console.log(json); // eslint-disable-line no-console
     var someRelics = json.r.relics;
     var newList = fallback(myList, []).concat(someRelics);
     if (json.r.remaining_relics > 0) {
@@ -54,6 +55,7 @@ function allAttribs(attribs) {
 }
 
 function formatTime(time) {
+  if (!time) {return '';}
   var t = splitTime(time);
   return padZ(t[0]) + 'd ' +
     padZ(t[1]) + 'h ' +

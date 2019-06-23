@@ -2,6 +2,7 @@ import containsText from '../common/containsText';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
+import {imageServer} from '../system/system';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
@@ -78,7 +79,7 @@ function titanLink(el) {
 
 function addUfsgLinks() {
   querySelectorArray(
-    '.news_body img[src^="https://cdn.fallensword.com/creatures/"]')
+    '.news_body img[src^="' + imageServer + '/creatures/"]')
     .forEach(makeUfsgLink);
   getArrayByClassName('news_body_tavern', pCC)
     .filter(titanSpotted).forEach(titanLink);

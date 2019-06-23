@@ -1,3 +1,4 @@
+import {bountyUrl} from '../../support/constants';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import setValueJSON from '../../system/setValueJSON';
@@ -26,14 +27,12 @@ function acceptBtn(bounty) {
 
 export function injectWantedList() { // Legacy
   setValueJSON('wantedList', wantedList);
-
   wantedListDiv.innerHTML = '';
-
-  var heading = createDiv({textContent: 'Wanted Bounties '});
+  var heading = createDiv(
+    {innerHTML: '<a href="' + bountyUrl + '">Wanted Bounties</a> '});
   wantedListReset = createSpan({className: 'xxsLink', textContent: 'Reset'});
   insertElement(heading, wantedListReset);
   insertElement(wantedListDiv, heading);
-
   var output = '';
   if (wantedList.bounty.length === 0) {
     output += '<div class="xsOrange">[No wanted bounties]</div>';

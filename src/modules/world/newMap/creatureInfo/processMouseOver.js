@@ -1,5 +1,6 @@
 import badData from '../badData';
 import calf from '../../../support/calf';
+import {imageServer} from '../../../system/system';
 import {
   getMyStats,
   statArmor,
@@ -12,7 +13,7 @@ import {
 
 function tipHeader(creature) {
   return '<table><tr><td>' +
-    '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
+    '<img src="' + imageServer + '/creatures/' + creature.image_id +
     '.jpg" height="200" width="200"></td><td rowspan="2">' +
     '<table width="400"><tr>' +
     '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>';

@@ -1,11 +1,17 @@
+import allthen from '../common/allthen';
 import doLvlFilter from './doLvlFilter';
 import filterHeader from './filterHeader';
 import getForage from '../ajax/getForage';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import orderData from './orderData';
 import partial from '../common/partial';
+//#if _DEV  //  participants
+import participants from './participants';
+//#endif
+import querySelectorArray from '../common/querySelectorArray';
 import redoSort from './redoSort';
 import updateUrl from './updateUrl';
+import view from '../app/arena/view';
 import {fshArenaKey, tableOpts} from './assets';
 import {
   setOpts,
@@ -15,7 +21,11 @@ import {
 import {time, timeEnd} from '../support/debug';
 //#endif
 
-var theTables;
+function removeHiddenRows() {
+  const hiddenRows = querySelectorArray(
+    '#arenaTypeTabs tr[style="display: none;"]');
+  hiddenRows.forEach(n => n.remove());
+}
 
 function redoHead(i, e) { // jQuery
   var firstRow = $('tr', e).first();
@@ -29,23 +39,28 @@ function prepareEnv() {
   doLvlFilter();
 }
 
-function arenaDataTable(tabs, arena) { // jQuery
+function arenaDataTable(tabs, [arena, json]) { // jQuery
+  const theTables = $('table[width="635"]', tabs);
   theTables.each(redoHead);
   setOpts(arena);
   orderData(theTables);
+  //#if _DEV  //  participants
+  participants(json);
+  //#endif
   prepareEnv();
   theTables.DataTable(tableOpts);
   redoSort(tabs);
   tabs.on('click', 'input.custombutton[type="submit"]', updateUrl);
 }
 
-function process(tabs, arena) {
+function process(tabs, values) {
   //#if _BETA  //  Timing output
 
   time('arena.process');
 
   //#endif
-  arenaDataTable(tabs, arena);
+  removeHiddenRows();
+  arenaDataTable(tabs, values);
   //#if _BETA  //  Timing output
 
   timeEnd('arena.process');
@@ -56,7 +71,12 @@ function process(tabs, arena) {
 export function injectArena() { // jQuery
   if (jQueryNotPresent()) {return;}
   var tabs = $('#arenaTypeTabs');
-  if (tabs.length !== 1) {return;} // Join error screen
-  theTables = $('table[width="635"]', tabs);
-  getForage(fshArenaKey).then(partial(process, tabs));
+  if (tabs.length !== 1) { // Join error screen
+    //#if _DEV  //  Join error screen ?
+    console.log('Join error screen ?'); // eslint-disable-line no-console
+    //#endif
+    return;
+  }
+  // all([getForage(fshArenaKey), view()]).then(partial(process, tabs));
+  allthen([getForage(fshArenaKey), view()], partial(process, tabs));
 }

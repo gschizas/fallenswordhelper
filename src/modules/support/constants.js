@@ -71,6 +71,7 @@ export var composingUrl = cmdUrl + 'composing';
 export var attackplayerUrl = cmdUrl + 'attackplayer' + def_targetUsername;
 export var updateArchiveUrl = cmdUrl + def_subcmd + 'viewupdatearchive';
 export var archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
+export var bountyUrl = cmdUrl + 'bounty';
 
 export var guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
 
@@ -111,6 +112,7 @@ export var def_fetch_playerNotifications = 1024;
 export var def_needToCompose = 'needToCompose';
 export var def_lastComposeCheck = 'lastComposeCheck';
 export var def_characterVirtualLevel = 'characterVirtualLevel';
+export var def_enableGuildActivityTracker = 'enableGuildActivityTracker';
 
 export var def_table = 'table';
 

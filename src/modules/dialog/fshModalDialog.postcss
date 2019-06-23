@@ -1,0 +1,35 @@
+.fshDialog {
+
+  height: 0;
+  overflow: hidden;
+
+  & > input {
+    display: none;
+  }
+
+  & > div {
+    transform: translateX(-100vw);
+  }
+
+  & > div:first-of-type > label {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+  }
+
+  & > input:checked ~ div {
+    transform: none;
+    z-index: 500;
+  }
+
+  & > input:checked ~ div:nth-of-type(2) {
+    left: 50%;
+    max-width: 644px;
+    min-height: 100px;
+    min-width: 200px;
+    position: absolute;
+    top: 75px;
+    transform: translateX(-50%);
+  }
+
+}

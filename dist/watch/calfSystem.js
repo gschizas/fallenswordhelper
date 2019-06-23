@@ -336,14 +336,16 @@
     }
   }
 
-  // https://stackoverflow.com/a/34325394
+  function listenerOptions(options) {
+    if (isType(options, 'boolean')) {
+      return {capture: options};
+    }
+    return options;
+  }
 
-  function once(ary) {
-    const [target, type, listener, addOptions, removeOptions] = ary;
-    on(target, type, function fn() { // Closure
-      off(target, type, fn, removeOptions);
-      listener.apply(this, arguments); // eslint-disable-line no-invalid-this
-    }, addOptions);
+  function once(target, type, listener, addOptions) {
+    on(target, type, listener,
+      Object.assign({once: true}, listenerOptions(addOptions)));
   }
 
   function partial(fn /* , rest args */) {
@@ -408,7 +410,7 @@
 
   function dragDrop(event) {
     drawElement(event);
-    off(document.body, 'dragover', dragOver, false);
+    off(document.body, 'dragover', dragOver);
     event.preventDefault();
     return false;
   }
@@ -427,8 +429,8 @@
     setOffsets();
     timer = 0;
     event.dataTransfer.setData('text/plain', '');
-    on(document.body, 'dragover', dragOver, false);
-    once([document.body, 'drop', dragDrop, false]);
+    on(document.body, 'dragover', dragOver);
+    once(document.body, 'drop', dragDrop);
   }
 
   function draggable(element, parent) {
@@ -518,6 +520,7 @@
   var attackplayerUrl = cmdUrl + 'attackplayer' + def_targetUsername;
   var updateArchiveUrl = cmdUrl + def_subcmd + 'viewupdatearchive';
   var archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
+  var bountyUrl = cmdUrl + 'bounty';
 
   var guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
 
@@ -558,6 +561,7 @@
   var def_needToCompose = 'needToCompose';
   var def_lastComposeCheck = 'lastComposeCheck';
   var def_characterVirtualLevel = 'characterVirtualLevel';
+  var def_enableGuildActivityTracker = 'enableGuildActivityTracker';
 
   var def_table = 'table';
 
@@ -2608,6 +2612,7 @@
   function execute(args, el) {add(3, el.func, [args]);}
 
   function publish(topic, args) {
+    console.log('publish', topic); // eslint-disable-line no-console
     if (!topics[topic]) {return;}
     topics[topic].forEach(partial(execute, args));
     return true; // probably not needed
@@ -2661,9 +2666,9 @@
       innerHTML: e
     }));
     if (i !== 0) {
-      once([thisLi, 'click', function() {
+      once(thisLi, 'click', function() {
         publish(toggleId(groupName, i), thisDivs[i]);
-      }]);
+      });
     }
     return thisLi;
   }
@@ -2833,118 +2838,6 @@
     'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
     'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
     'egAAAABJRU5ErkJggg==" width="16" height="16" />';
-
-  var saveBoxes = [
-    'navigateToLogAfterMsg',
-    'gameHelpLink',
-    'guildSelf',
-    'guildSelfMessage',
-    'guildFrnd',
-    'guildFrndMessage',
-    'guildPast',
-    'guildPastMessage',
-    'guildEnmy',
-    'guildEnmyMessage',
-    'showAdmin',
-    'ajaxifyRankControls',
-    'detailedConflictInfo',
-    'disableItemColoring',
-    'enableLogColoring',
-    'enableChatParsing',
-    'enableCreatureColoring',
-    'hideNonPlayerGuildLogMessages',
-    'buyBuffsGreeting',
-    'renderSelfBio',
-    'renderOtherBios',
-    'defaultMessageSound',
-    'showSpeakerOnWorld',
-    'playNewMessageSound',
-    'highlightPlayersNearMyLvl',
-    'highlightGvGPlayersNearMyLvl',
-    'showCombatLog',
-    'showMonsterLog',
-    'showCreatureInfo',
-    'keepLogs',
-    'enableGuildInfoWidgets',
-    'enableOnlineAlliesWidgets',
-    'hideGuildInfoMessage',
-    'hideGuildInfoBuff',
-    'hideGuildInfoSecureTrade',
-    'hideGuildInfoTrade',
-    'huntingBuffs',
-    'huntingBuffsName',
-    'huntingBuffs2',
-    'huntingBuffs2Name',
-    'huntingBuffs3',
-    'huntingBuffs3Name',
-    'showHuntingBuffs',
-    'moveGuildList',
-    'moveOnlineAlliesList',
-    'moveFSBox',
-    'moveDailyQuest',
-    'hideQuests',
-    'hideQuestNames',
-    'hideRecipes',
-    'hideRecipeNames',
-    'doNotKillList',
-    'enableBioCompressor',
-    'sendGoldonWorld',
-    'goldRecipient',
-    'goldAmount',
-    'keepBuffLog',
-    'showQuickSendLinks',
-    'showQuickDropLinks',
-    'sendClasses',
-    'itemRecipient',
-    'currentGoldSentTotal',
-    'enableAllyOnlineList',
-    'enableEnemyOnlineList',
-    'allyEnemyOnlineRefreshTime',
-    'quickLinksTopPx',
-    'quickLinksLeftPx',
-    'draggableQuickLinks',
-    'enableActiveBountyList',
-    'bountyListRefreshTime',
-    'enableWantedList',
-    'wantedNames',
-    'wantedGuildMembers',
-    'fsboxlog',
-    'huntingMode',
-    'enableAttackHelper',
-    'hideRelicOffline',
-    'enterForSendMessage',
-    'storeLastQuestPage',
-    'addAttackLinkToLog',
-    'showStatBonusTotal',
-    'newGuildLogHistoryPages',
-    'useNewGuildLog',
-    'enhanceChatTextEntry',
-    'enableMaxGroupSizeToJoin',
-    'maxGroupSizeToJoin',
-    'enableTempleAlert',
-    'enableUpgradeAlert',
-    'enableComposingAlert',
-    'autoFillMinBidPrice',
-    'showPvPSummaryInLog',
-    'enableQuickDrink',
-    'enhanceOnlineDots',
-    'hideBuffSelected',
-    'hideHelperMenu',
-    'keepHelperMenuOnScreen',
-    'draggableHelperMenu',
-    'showNextQuestSteps',
-    'hideChampionsGroup',
-    'hideElitesGroup',
-    'hideSEGroup',
-    'hideTitanGroup',
-    'hideLegendaryGroup',
-    'disableDeactivatePrompts',
-    'moveComposingButtons',
-    'showExtraLinks',
-    'expandMenuOnKeyPress',
-    'highlightPvpProtection',
-    'enableHistoryCompressor'
-  ];
 
   function helpLink(title, text) {
     return '&nbsp;[&nbsp;<span class="fshLink tip-static" data-tipped="' +
@@ -4057,7 +3950,7 @@
     if (getValue('keepHelperMenuOnScreen')) {
       helperMenu.classList.add('fshFixed');
     }
-    once([helperMenu, 'mouseenter', showHelperMenu]);
+    once(helperMenu, 'mouseenter', showHelperMenu);
     if (getValue('draggableHelperMenu')) {
       helperMenu.classList.add('fshMove');
       draggable(helperMenu);
@@ -4302,7 +4195,7 @@
 
   function displayDisconnectedFromGodsMessage() {
     insertHtmlAfterBegin(getElementById('notifications'), godsNotification);
-    once([getElementById('helperPrayToGods'), 'click', prayToGods]);
+    once(getElementById('helperPrayToGods'), 'click', prayToGods);
   }
 
   function templeAlertEnabled(responseText) {
@@ -4910,14 +4803,12 @@
 
   function injectBountyList() { // Legacy
     setValueJSON('bountyList', bountyList$1);
-
     bountyListDiv.innerHTML = '';
-
-    var heading = createDiv({textContent: 'Active Bounties '});
+    var heading = createDiv(
+      {innerHTML: '<a href="' + bountyUrl + '">Active Bounties</a> '});
     bountyListReset = createSpan({className: 'xxsLink', textContent: 'Reset'});
     insertElement(heading, bountyListReset);
     insertElement(bountyListDiv, heading);
-
     var output = '';
     if (bountyList$1.bounty.length === 0) {
       output += '<div class="xsOrange">[No active bounties]</div>';
@@ -4953,14 +4844,12 @@
 
   function injectWantedList() { // Legacy
     setValueJSON('wantedList', wantedList$1);
-
     wantedListDiv.innerHTML = '';
-
-    var heading = createDiv({textContent: 'Wanted Bounties '});
+    var heading = createDiv(
+      {innerHTML: '<a href="' + bountyUrl + '">Wanted Bounties</a> '});
     wantedListReset = createSpan({className: 'xxsLink', textContent: 'Reset'});
     insertElement(heading, wantedListReset);
     insertElement(wantedListDiv, heading);
-
     var output = '';
     if (wantedList$1.bounty.length === 0) {
       output += '<div class="xsOrange">[No wanted bounties]</div>';
@@ -5409,7 +5298,7 @@
 
   function addUfsgLinks() {
     querySelectorArray(
-      '.news_body img[src^="https://cdn.fallensword.com/creatures/"]')
+      '.news_body img[src^="' + imageServer + '/creatures/"]')
       .forEach(makeUfsgLink);
     getArrayByClassName('news_body_tavern', pCC)
       .filter(titanSpotted).forEach(titanLink);
@@ -5957,7 +5846,7 @@
       insertHtmlBeforeEnd(parent, '&nbsp;<a href="' + scouttowerUrl +
         '" class="tip-static" data-tipped="View Scout Report">' +
         '<img id="fshScoutTower" ' +
-        'src="https://cdn.fallensword.com/structures/27.gif"></a>');
+        'src="' + imageServer + '/structures/27.gif"></a>');
     }
   }
 
@@ -6243,26 +6132,27 @@
     notWorld('doRepair', blacksmithUrl + def_subcmd + 'repairall');
   }
 
-  function infoBox(documentText) {
-    var doc = createDocument(documentText);
-    var result;
-    var infoMsg = getElementById('info-msg', doc);
+  function infoBox(scope) {
+    const infoMsg = getElementById('info-msg', scope);
     if (infoMsg) {
-      var infoMatch = infoMsg.innerHTML;
-      result = '';
+      const infoMatch = infoMsg.innerHTML;
       if (infoMatch) {
-        infoMatch = infoMatch.replace(/<br.*/, '');
-        result = infoMatch;
+        return infoMatch.replace(/<br.*/, '');
       }
+      return '';
     }
-    return result;
+  }
+
+  function infoBoxFrom(documentText) {
+    var doc = createDocument(documentText);
+    return infoBox(doc);
   }
 
   var goldAmount$1;
   var sendGoldonWorld$1;
 
   function doneSendGold(data) {
-    var info = infoBox(data);
+    var info = infoBoxFrom(data);
     if (info === 'You successfully sent gold!' || info === '') {
       setValue('currentGoldSentTotal',
         parseInt(getValue('currentGoldSentTotal'), 10) +
@@ -6487,54 +6377,8 @@
     on(querySelector('input[type="submit"]'), 'click', updateUrl);
   }
 
-  function updateGoUrl(e) {
-    e.preventDefault();
-    dontPost(querySelector('#pCC input[value="completed"]').parentNode);
-  }
-
-  function updateUrl$1(e) {
-    e.preventDefault();
-    dontPost(e.target.parentNode);
-  }
-
-  function gotoPage(pageId) {
-    window.location = arenaUrl + 'completed&page=' + pageId;
-  }
-
-  function lastPage$1() { // jQuery
-    return $('#pCC input[value="Go"]').closest('td').prev().text()
-      .replace(/\D/g, '');
-  }
-
-  function injectStartButton() { // jQuery
-    var prevButton = $('#pCC input[value="<"]');
-    if (prevButton.length === 1) {
-      var startButton = $('<input value="<<" type="button">');
-      prevButton.before(startButton).before('&nbsp;');
-      startButton.on('click', partial(gotoPage, 1));
-    }
-  }
-
-  function gotoLastPage() {gotoPage(lastPage$1());}
-
-  function injectFinishButton() { // jQuery
-    var nextButton = $('#pCC input[value=">"]');
-    if (nextButton.length === 1) {
-      var finishButton = $('<input value=">>" type="button">');
-      nextButton.after(finishButton).after('&nbsp;');
-      finishButton.on('click', gotoLastPage);
-    }
-  }
-
-  function overrideButtons() { // jQuery
-    injectStartButton();
-    injectFinishButton();
-    $('#pCC input[value="View"]').on('click', updateUrl$1);
-    on(querySelector('#pCC input[value="Go"]'), 'click', updateGoUrl);
-  }
-
-  function completedArenas() { // jQuery
-    if (jQueryPresent()) {overrideButtons();}
+  function allthen(prm, callback) {
+    return all(prm).then(callback);
   }
 
   function getIntVal(selector) {
@@ -6717,7 +6561,9 @@
     var cell = theCells.eq(1);
     var matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
     if (matches) {
-      cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
+      cell.attr('data-order',
+        (Number(matches[1]) - Number(matches[2])) * 100 + Number(matches[2])
+      );
     }
   }
 
@@ -6780,6 +6626,54 @@
     myRows.each(_orderData);
   }
 
+  const addId = e => [e, Number(e.previousElementSibling.value)];
+
+  function addMeta(json, e) {
+    if (json.r && json.r.arenas) {
+      return e.concat(json.r.arenas.find(a => a.id === e[1]));
+    }
+    return e;
+  }
+
+  function listPlayers(myGuild, p) {
+    if (p.guild_id === myGuild) {
+      return '<span class="fshRed">' + p.name + '</span>';
+    }
+    return p.name;
+  }
+
+  const joinBtn = (myGuild, button) => myGuild && button.value === 'Join';
+
+  function testGuildies(myGuild, button, arena) {
+    const fromMyGuild = arena.players.filter(p => p.guild_id === myGuild)
+      .length;
+    const maxGuildies = arena.max_players / 4;
+    if (fromMyGuild === maxGuildies) {button.classList.add('fshGray');}
+  }
+
+  function hazPlayers(myGuild, button, arena) {
+    button.dataset.tipped = arena.players.map(partial(listPlayers, myGuild))
+      .join('<br>');
+    button.classList.add('tip-static');
+    if (joinBtn(myGuild, button)) {testGuildies(myGuild, button, arena);}
+  }
+
+  function decorate(myGuild, [button, id, arena]) {
+    if (!arena) {
+      console.log('decorate', [button, id, arena]); // eslint-disable-line no-console
+    } else if (arena.players.length > 0) {hazPlayers(myGuild, button, arena);}
+  }
+
+  function participants(json) {
+    const theButtons = querySelectorArray(
+      '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
+    const withPvpId = theButtons.map(addId);
+    const withMeta = withPvpId.map(partial(addMeta, json));
+    // console.log('withMeta', withMeta); // eslint-disable-line no-console
+    withMeta.forEach(partial(decorate, currentGuildId()));
+    return 0;
+  }
+
   var sortClasses = 'td.sorting, td.sorting_asc, td.sorting_desc';
 
   function calculateSortOrder(self) {
@@ -6809,7 +6703,24 @@
     tabs.on('click', sortClasses, sortHandler);
   }
 
-  var theTables;
+  function updateUrl$1(e) {
+    e.preventDefault();
+    dontPost(e.target.parentNode);
+  }
+
+  function arena(data) {
+    return callApp(extend({cmd: 'arena'}, data));
+  }
+
+  function view$1() {
+    return arena({subcmd: 'view'});
+  }
+
+  function removeHiddenRows() {
+    const hiddenRows = querySelectorArray(
+      '#arenaTypeTabs tr[style="display: none;"]');
+    hiddenRows.forEach(n => n.remove());
+  }
 
   function redoHead(i, e) { // jQuery
     var firstRow = $('tr', e).first();
@@ -6823,21 +6734,24 @@
     doLvlFilter();
   }
 
-  function arenaDataTable(tabs, arena) { // jQuery
+  function arenaDataTable(tabs, [arena, json]) { // jQuery
+    const theTables = $('table[width="635"]', tabs);
     theTables.each(redoHead);
     setOpts$1(arena);
     orderData(theTables);
+    participants(json);
     prepareEnv$1();
     theTables.DataTable(tableOpts$1);
     redoSort(tabs);
     tabs.on('click', 'input.custombutton[type="submit"]', updateUrl$1);
   }
 
-  function process(tabs, arena) {
+  function process(tabs, values) {
 
     time('arena.process');
 
-    arenaDataTable(tabs, arena);
+    removeHiddenRows();
+    arenaDataTable(tabs, values);
 
     timeEnd('arena.process');
 
@@ -6846,13 +6760,201 @@
   function injectArena() { // jQuery
     if (jQueryNotPresent()) {return;}
     var tabs = $('#arenaTypeTabs');
-    if (tabs.length !== 1) {return;} // Join error screen
-    theTables = $('table[width="635"]', tabs);
-    getForage(fshArenaKey).then(partial(process, tabs));
+    if (tabs.length !== 1) { // Join error screen
+      console.log('Join error screen ?'); // eslint-disable-line no-console
+      return;
+    }
+    // all([getForage(fshArenaKey), view()]).then(partial(process, tabs));
+    allthen([getForage(fshArenaKey), view$1()], partial(process, tabs));
   }
 
-  function allthen(prm, callback) {
-    return all(prm).then(callback);
+  function getMsg() {
+    const thisInfo = infoBox();
+    console.log(thisInfo); // eslint-disable-line no-console
+  }
+
+  function getId() {
+    const thisId = querySelector('#pCC input[name="pvp_id"]');
+    console.log(thisId.value); // eslint-disable-line no-console
+  }
+
+  function arenaDoJoin() {
+    // console.log('arena DoJoin');
+    const tabs = getElementById('arenaTypeTabs');
+    if (tabs) {
+      injectArena();
+    } else {
+      getMsg();
+      getId();
+    }
+  }
+
+  function updateUrl$2(e) {
+    e.preventDefault();
+    dontPost(pCC);
+  }
+
+  function allowBack$1() {
+    var submitButton = querySelector('input[type="submit"]', pCC);
+    if (submitButton) {
+      on(submitButton, 'click', updateUrl$2);
+    }
+  }
+
+  function isSelected(val, test) {
+    if (val === test) {return ' selected';}
+    return '';
+  }
+
+  function usesetup(setId) {
+    return arena({subcmd: 'usesetup', set_id: setId});
+  }
+
+  let moveContainer;
+
+  function getContainer(thisCell) {
+    if (!moveContainer) {
+      moveContainer = insertElement(thisCell, createDiv());
+    }
+    return moveContainer;
+  }
+
+  const boolToString = e => String(Number(e));
+
+  const thisTournament = () => Number(getTextTrim(getArrayByTagName('b', pCC)
+    .find(includes('Tournament #'))).match(/\d+/)[0]);
+
+  function injectImg(container, id) {
+    insertHtmlBeforeEnd(container,
+      '<img src="' + imageServer + '/pvp/' + String(id - 1) +
+      '.gif" class="moveImg">');
+  }
+
+  function param$1(label, value) {
+    return '<div>' + label + '<img src="' + imageServer +
+      '/pvp/specials_' + boolToString(value) + '.gif"></div>';
+  }
+
+  function paramBox(thisArena) {
+    return '<div class="flex">' +
+        param$1('Specials', thisArena.specials) +
+        param$1('Hell Forge', thisArena.hellforge) +
+        param$1('Epic', thisArena.epic) +
+      '</div>';
+  }
+
+  function thisOptions(current_set, e) {
+    return '<option value="' + String(e.id) + '"' +
+      isSelected(current_set.slots.join(), e.slots.join()) +
+      '>' + e.name + '</option>';
+  }
+
+  function doMoves(thisSet, thisCell) {
+    const container = getContainer(thisCell);
+    container.innerHTML = '';
+    thisSet.slots.forEach(partial(injectImg, container));
+  }
+
+  function onchange(r, thisCell, evt) {
+    // console.log(evt.target.value);
+    const thisSet = r.sets.find(e => e.id === Number(evt.target.value));
+    if (thisSet) {
+      usesetup(evt.target.value).then(function(json) {
+        // console.log(json);
+        if (json.s) {
+          doMoves(thisSet, thisCell);
+        }
+      });
+    }
+  }
+
+  function doSelect(r, thisCell) {
+    if (r.sets.length > 0) {
+      const thisSelect = createSelect({
+        innerHTML: r.sets.map(partial(thisOptions, r.current_set))
+          .join('')
+      });
+      on(thisSelect, 'change', partial(onchange, r, thisCell));
+      const div = createDiv();
+      insertElement(div, thisSelect);
+      insertElementAfterBegin(thisCell.children[0], div);
+    }
+  }
+
+  function showMoves(r, thisCell) {
+    // console.log('r', r);
+    const tourney = thisTournament();
+    // console.log('tourney', tourney);
+    const thisArena = r.arenas.find(e => e.id === tourney);
+    // console.log('thisArena', thisArena);
+    thisCell.setAttribute('align', 'center');
+    insertHtmlBeforeEnd(thisCell, paramBox(thisArena));
+    if (thisArena.specials) {
+      doSelect(r, thisCell);
+      doMoves(r.current_set, thisCell);
+    }
+  }
+
+  function findCell(json) {
+    // console.log('json', json);
+    const thisCell = querySelector('#pCC > form > table tr:nth-of-type(7) td');
+    if (json.r && thisCell) {showMoves(json.r, thisCell);}
+  }
+
+  function arenaJoin() {
+    console.log('arena Join'); // eslint-disable-line no-console
+    var tabs = getElementById('arenaTypeTabs');
+    if (tabs) {
+      injectArena();
+    } else {
+      allowBack$1();
+      view$1().then(findCell);
+    }
+  }
+
+  function updateGoUrl(e) {
+    e.preventDefault();
+    dontPost(querySelector('#pCC input[value="completed"]').parentNode);
+  }
+
+  function gotoPage(pageId) {
+    window.location = arenaUrl + 'completed&page=' + pageId;
+  }
+
+  function lastPage$1() { // jQuery
+    return $('#pCC input[value="Go"]').closest('td').prev().text()
+      .replace(/\D/g, '');
+  }
+
+  function injectStartButton() { // jQuery
+    var prevButton = $('#pCC input[value="<"]');
+    if (prevButton.length === 1) {
+      var startButton = $('<input value="<<" type="button">');
+      prevButton.before(startButton).before('&nbsp;');
+      startButton.on('click', partial(gotoPage, 1));
+    }
+  }
+
+  function gotoLastPage() {gotoPage(lastPage$1());}
+
+  function injectFinishButton() { // jQuery
+    var nextButton = $('#pCC input[value=">"]');
+    if (nextButton.length === 1) {
+      var finishButton = $('<input value=">>" type="button">');
+      nextButton.after(finishButton).after('&nbsp;');
+      finishButton.on('click', gotoLastPage);
+    }
+  }
+
+  function overrideButtons() { // jQuery
+    injectStartButton();
+    injectFinishButton();
+    $('#pCC input[value="View"]').on('click', updateUrl$1);
+    on(querySelector('#pCC input[value="Go"]'), 'click', updateGoUrl);
+  }
+
+  function completedArenas() { // jQuery
+    if (jQueryPresent()) {overrideButtons();}
   }
 
   var oldMoves = [];
@@ -6996,9 +7098,10 @@
     getForage(fshArenaKey).then(gotMoves);
   }
 
-  var arena = {
+  var arena$1 = {
     '-': {'-': injectArena},
-    join: {'-': injectArena},
+    dojoin: {'-': arenaDoJoin},
+    join: {'-': arenaJoin},
     completed: {'-': completedArenas},
     pickmove: {'-': storeMoves},
     setup: {'-': setupMoves}
@@ -7404,7 +7507,7 @@
     insertElementAfter(fcDiv, buttonDiv);
     var fcCheck = createInput({id: 'fast-compose', type: 'checkbox'});
     insertElementAfter(fcCheck, buttonDiv);
-    once([fcCheck, 'change', partial(drawList, fcDiv)]);
+    once(fcCheck, 'change', partial(drawList, fcDiv));
   }
 
   var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
@@ -8325,7 +8428,7 @@
   };
 
   function translateReturnInfo(data) {
-    var info = infoBox(data);
+    var info = infoBoxFrom(data);
     var _r = {r: 1, m: info};
     if (info === 'Item was transferred to the guild store!') {
       _r = {r: 0, m: ''};
@@ -9158,6 +9261,27 @@
     }
   }
 
+  function togglePref$3(evt) {
+    if (evt.target.id === 'enableGuildActivityTracker') {
+      setValue('enableGuildActivityTracker',
+        !getValue('enableGuildActivityTracker'));
+    }
+  }
+
+  function injectShowTracker() {
+    var gs = querySelector('#pCC img.guild_openGuildStore');
+    var td = gs.parentNode;
+    var container = createDiv({className: 'fsh-tracker'});
+    var myDiv = createDiv({
+      innerHTML: simpleCheckboxHtml('enableGuildActivityTracker') +
+      '&nbsp;<label class="custombutton" for="tracker">Show</label>'
+    });
+    on(myDiv, 'change', togglePref$3);
+    insertElement(container, gs);
+    insertElement(container, myDiv);
+    insertElementAfterBegin(td, container);
+  }
+
   function formatDateTime(dateParts) {
     return dateParts[0] + '-' + dateParts[1] + '-' + dateParts[2] + ' ' +
       dateParts[3] + ':' + dateParts[4] + ':' + dateParts[5];
@@ -9417,7 +9541,7 @@
       name: 'acttabs',
       type: 'radio'
     });
-    once([acttab2, 'change', updateRawData]);
+    once(acttab2, 'change', updateRawData);
     insertElement(dialogPopup, acttab2);
     return dialogPopup;
   }
@@ -9459,13 +9583,6 @@
     }
   }
 
-  function togglePref$3(evt) {
-    if (evt.target.id === 'enableGuildActivityTracker') {
-      setValue('enableGuildActivityTracker',
-        !getValue('enableGuildActivityTracker'));
-    }
-  }
-
   function openDialog$2() {
     sendEvent('guildTracker', 'openDialog');
     getForage('fsh_guildActivity').then(gotActivity$1);
@@ -9474,27 +9591,13 @@
     makePopup();
   }
 
-  function injectShowTracker() {
-    var gs = querySelector('#pCC img.guild_openGuildStore');
-    var td = gs.parentNode;
-    var container = createDiv({className: 'fsh-tracker'});
-    var myDiv = createDiv({
-      innerHTML: simpleCheckboxHtml('enableGuildActivityTracker') +
-      '&nbsp;<label class="custombutton" for="tracker">Show</label>'
-    });
-    on(myDiv, 'change', togglePref$3);
-    insertElement(container, gs);
-    insertElement(container, myDiv);
-    insertElementAfterBegin(td, container);
-  }
-
   function injectTracker() {
     tracker = createInput({
       id: 'tracker',
       className: 'fsh-dialog-open',
       type: 'checkbox'
     });
-    once([tracker, 'change', openDialog$2]);
+    once(tracker, 'change', openDialog$2);
     trDialog = createDiv({className: 'fsh-dialog'});
     insertElement(trDialog, tracker);
     on(document.body, 'keydown', keydownHandler);
@@ -9504,6 +9607,116 @@
   function guildTracker() {
     injectShowTracker();
     injectTracker();
+  }
+
+  function makeDialog(name) {
+    const thisContainer = createDiv({className: 'fshDialog'});
+    const thisInput = createInput({id: name, type: 'checkbox'});
+    insertElement(thisContainer, thisInput);
+    const thisOverlay = createDiv({className: 'ui-widget-overlay'});
+    const thisLabel = createLabel({htmlFor: name});
+    insertElement(thisOverlay, thisLabel);
+    insertElement(thisContainer, thisOverlay);
+    const thisPopup = createDiv(
+      {className: 'ui-dialog ui-tabs ui-widget ui-widget-content ui-corner-all'});
+    publish(name + '-popup', thisPopup);
+    insertElement(thisContainer, thisPopup);
+    insertElement(document.body, thisContainer);
+  }
+
+  function fshModalDialog(name) {
+    const thisInput = getElementById(name);
+    if (thisInput) {thisInput.checked = true;} else {
+      makeDialog(name);
+    }
+  }
+
+  function injectTabSet(name, tabs, thisPopup) {
+    fshTabSet(thisPopup, tabs, name + '-tab');
+  }
+
+  function fshTabbedModal(name, tabs) {
+    subscribeOnce(name + '-popup', partial(injectTabSet, name, tabs));
+    // subscribeOnce('qwtab-header', makePref);
+    fshModalDialog(name);
+  }
+
+  var actBody$1;
+  var tgCont$1;
+  var memberSelect$1;
+
+  function makeMemberHeader$1() {
+    var memberHead = createTh({textContent: 'Member'});
+    memberSelect$1 = createDiv();
+    insertElement(memberHead, memberSelect$1);
+    return memberHead;
+  }
+
+  function headerRow$1(tg) {
+    var hrow = tg.createTHead().insertRow(-1);
+    insertHtmlBeforeEnd(hrow, '<th>Date</th>');
+    var memberHead = makeMemberHeader$1();
+    insertElement(hrow, memberHead);
+    insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
+      '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
+      '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
+  }
+
+  function makeActBody$1(tg) {
+    actBody$1 = createTBody();
+    insertElement(tg, actBody$1);
+  }
+
+  function makeTg$1() {
+    var tg = createTable({id: 'tg'});
+    headerRow$1(tg);
+    makeActBody$1(tg);
+    // on(tg, 'change', myChange);
+    tgCont$1 = createDiv({className: 'tgCont fshSpinner fshSpinner64'});
+    insertElement(tgCont$1, tg);
+    return tgCont$1;
+  }
+
+  function togglePref$4(evt) {
+    if (evt.target.id === def_enableGuildActivityTracker) {
+      setValue(def_enableGuildActivityTracker,
+        !getValue(def_enableGuildActivityTracker));
+    }
+  }
+
+  function injectContent$1(thisFn, thisDiv) {
+    insertElement(thisDiv, thisFn());
+  }
+
+  function showDialog() {
+    subscribeOnce('tracker-tab0', partial(injectContent$1, makeTg$1));
+    // subscribeOnce('tracker-tab1', partial(injectContent, showAHInvManager, appInv));
+    fshTabbedModal('tracker', ['Guild Activity Tracker', 'Import/Export']);
+  }
+
+  function injectShowTracker$1() {
+    var gs = querySelector('#pCC img.guild_openGuildStore');
+    var td = gs.parentNode;
+    var container = createDiv({className: 'fsh-tracker'});
+    var myDiv = createDiv({
+      innerHTML: simpleCheckboxHtml(def_enableGuildActivityTracker) +
+        '&nbsp;'
+    });
+    on(myDiv, 'change', togglePref$4);
+    var showTrackerDialog = createLabel({
+      className: 'custombutton',
+      htmlFor: 'tracker',
+      textContent: 'Show'
+    });
+    once(showTrackerDialog, 'click', showDialog);
+    insertElement(myDiv, showTrackerDialog);
+    insertElement(container, gs);
+    insertElement(container, myDiv);
+    insertElementAfterBegin(td, container);
+  }
+
+  function guildTrackerV2() {
+    injectShowTracker$1();
   }
 
   const pref_enableStamBars = 'enableStamBars';
@@ -9656,13 +9869,22 @@
     ].forEach(partial(lhsAdd, leftHandSideColumnTable));
   }
 
+  function doGuildTracker() {
+    const test = 0;
+    if (test === 0) {
+      add(4, guildTracker);
+    } else {
+      add(4, guildTrackerV2);
+    }
+  }
+
   function ajaxStuff(leftHandSideColumnTable) {
     if (jQueryNotPresent()) {return;}
     // Detailed conflict information
     if (getValue('detailedConflictInfo')) {
       add(3, conflictInfo, [leftHandSideColumnTable]);
     }
-    add(4, guildTracker);
+    doGuildTracker();
   }
 
   function manage() {
@@ -10308,7 +10530,7 @@
       realmName + '" target="_blank">' + realmName + '</a>';
   }
 
-  function decorate(newTitans, aRow) {
+  function decorate$1(newTitans, aRow) {
     killsSummary(aRow);
     cooldownTracker(newTitans, aRow); // Pref
     guideLink(aRow);
@@ -10316,7 +10538,7 @@
 
   function doTooMuch(titanTable, newTitans) {
     Array.from(titanTable.rows).filter(myRows(4, 0))
-      .forEach(partial(decorate, newTitans));
+      .forEach(partial(decorate$1, newTitans));
   }
 
   function gotOldTitans(oldTitans) {
@@ -10711,8 +10933,8 @@
     if (potOpts.pottab1) {
       drawInventory(potOpts, potObj);
     } else {
-      once([panels.parentNode.children[0], 'change',
-        partial(drawInventory, potOpts, potObj)]);
+      once(panels.parentNode.children[0], 'change',
+        partial(drawInventory, potOpts, potObj));
     }
     insertElement(panels, inventory$1);
   }
@@ -10797,8 +11019,8 @@
     if (potOpts.pottab2) {
       drawMapping(potOpts);
     } else {
-      once([panels.parentNode.children[2], 'change',
-        partial(drawMapping, potOpts)]);
+      once(panels.parentNode.children[2], 'change',
+        partial(drawMapping, potOpts));
     }
     insertElement(panels, mapping);
   }
@@ -11890,6 +12112,27 @@
     }
   }
 
+  // import results from '../app/arena/results';
+
+  function getPvpId(aRow) {
+    return aRow.cells[2] && /pvp_id=(\d+)/.exec(aRow.cells[2].innerHTML);
+  }
+
+  // function processResults(json) {
+  //   console.log(json);
+  // }
+
+  function havePvpId(aRow, pvpId) {
+    // results(pvpId).then(processResults);
+    console.log(aRow, pvpId); // eslint-disable-line no-console
+  }
+
+  // TODO Pref
+  function viewCombat(aRow) {
+    const pvpId = getPvpId(aRow);
+    if (pvpId) {havePvpId(aRow, pvpId[1]);}
+  }
+
   function combatView(id) {
     return indexAjaxData({
       cmd: 'combat',
@@ -11931,7 +12174,7 @@
     '38': '@0 had their attack reduced by Fumble.'
   };
 
-  function viewCombat(id) {
+  function viewCombat$1(id) {
     return callApp({
       cmd: 'combat',
       subcmd: 'view',
@@ -12028,7 +12271,7 @@
     if (combatCache[combatID] && combatCache[combatID].logTime) {
       parseCombat(combatSummary, combatCache[combatID]);
     } else {
-      viewCombat(combatID).then(partial(cacheCombat, aRow))
+      viewCombat$1(combatID).then(partial(cacheCombat, aRow))
         .then(partial(parseCombat, combatSummary));
     }
   }
@@ -12242,6 +12485,7 @@
       doLogWidgetRow(aRow, messageType);
       addPvpSummary(aRow, messageType);
       processLadder(aRow, messageType);
+      viewCombat(aRow);
     }
   }
 
@@ -12438,13 +12682,13 @@
     evtHandlers();
   }
 
-  function updateUrl$2(evt) {
+  function updateUrl$3(evt) {
     evt.preventDefault();
     dontPost(closestForm(evt.target));
   }
 
-  function allowBack$1(findPlayerButton) {
-    on(findPlayerButton, 'click', updateUrl$2);
+  function allowBack$2(findPlayerButton) {
+    on(findPlayerButton, 'click', updateUrl$3);
   }
 
   function searchUrl(min, max, guild) {
@@ -12468,7 +12712,7 @@
 
   function doFindPlayer() {
     var findPlayerButton = $('input[value="Find Player"]');
-    allowBack$1(findPlayerButton[0]);
+    allowBack$2(findPlayerButton[0]);
     doShortcuts(findPlayerButton);
   }
 
@@ -12630,8 +12874,8 @@
       type: 'checkbox'
     });
     insertElementBefore(qtCheckbox, injector);
-    once([qtCheckbox, 'change',
-      partial(toggleQuickTake, items, injector)]);
+    once(qtCheckbox, 'change',
+      partial(toggleQuickTake, items, injector));
   }
 
   function injectMailbox() {
@@ -13547,14 +13791,14 @@
     add(3, colouredDots);
   }
 
-  function updateUrl$3(e) {
+  function updateUrl$4(e) {
     e.preventDefault();
     dontPost(closestForm(e.target).parentNode);
   }
 
-  function allowBack$2(self) {
+  function allowBack$3(self) {
     if (!self) {
-      on(querySelector('#profileRightColumn'), 'submit', updateUrl$3);
+      on(querySelector('#profileRightColumn'), 'submit', updateUrl$4);
     }
   }
 
@@ -13565,7 +13809,7 @@
     var playername = getText(getElementsByTagName('h1', pCC)[0]);
     var self = playername === playerName();
     updateDom(avyImg, playername, self);
-    allowBack$2(self);
+    allowBack$3(self);
   }
 
   function getActivitySpan(myPlayer) {
@@ -13700,14 +13944,14 @@
     }
   }
 
-  function decorate$1(el) {
+  function decorate$2(el) {
     var nameSpan = el.children[0];
     addStamCost(el, nameSpan);
     dimPreReqs(el, nameSpan);
   }
 
   function doLabels() {
-    querySelectorArray('#buff-outer label[for^="skill-"]').forEach(decorate$1);
+    querySelectorArray('#buff-outer label[for^="skill-"]').forEach(decorate$2);
   }
 
   function tickBuff(id) {
@@ -13822,13 +14066,119 @@
     populateBuffs(responseText);
   }
 
+  let transform$1;
+
+  function buildTransform() {
+    if (!transform$1) {
+      transform$1 = new RegExp(
+        'Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\'|' +
+        'The skill ([\\w ]*) of (current or higher ' +
+        'level is currently active) on \'(\\w*)\'|' +
+        'Player \'(\\w*)\' (has set their preferences to block ' +
+        'the skill) \'([\\w ]*)\' from being cast on them.'
+      );
+    }
+  }
+
+  function meta(report) {
+    return transform$1.exec(report);
+  }
+
+  function buffReportParser(scope) {
+    buildTransform();
+    const buffsAttempted = querySelectorArray('#quickbuff-report font', scope)
+      .map(getTextTrim).map(meta);
+    return buffsAttempted;
+  }
+
+  // function buff(thisBuff, el) {return el.name === thisBuff;}
+
+  const getBuff$1 = thisBuff => buffList.find(e => e.name === thisBuff);
+
+  function getStamAsString(buffCast) {
+    // var thisBuff = buffList.find(partial(buff, buffCast[1]));
+    var thisBuff = getBuff$1(buffCast);
+    if (thisBuff) {return thisBuff.stam.toString();}
+    return '-';
+  }
+
+  function getBuffId$1(buff) {
+    const thisBuff = getBuff$1(buff);
+    if (thisBuff) {return thisBuff.id;}
+    return -1;
+  }
+
+  const playerName$3 = result => result[3] || result[6] || result[7];
+  const successObject = result => (
+    {id: getBuffId$1(result[1]), level: Number(result[2])}
+  );
+
+  function failObject(result) {
+    if (result[4]) {
+      return {id: getBuffId$1(result[4]), reason: result[5]};
+    }
+    return {id: getBuffId$1(result[9]), reason: result[8]};
+  }
+
+  function byPlayer(prev, curr) {
+    const thisPlayer = playerName$3(curr);
+    let thisObj = prev.find(o => o.player.name === thisPlayer);
+    if (!thisObj) {
+      thisObj = {player: {name: thisPlayer}, casts: [], failed: []};
+      prev.push(thisObj);
+    }
+    if (curr[1]) {
+      thisObj.casts.push(successObject(curr));
+    } else {
+      thisObj.failed.push(failObject(curr));
+    }
+    return prev;
+  }
+
+  function buffFormatter(buffsParsed) {
+    const buffsByPlayer = buffsParsed.reduce(byPlayer, []);
+    return {r: buffsByPlayer, s: true};
+  }
+
+  function formatResponse(html) {
+    const buffsParsed = buffReportParser(createDocument(html));
+    return buffFormatter(buffsParsed);
+  }
+
   function quickbuff(userAry, buffAry) {
+    return indexAjaxData({
+      cmd: 'quickbuff',
+      subcmd: 'activate',
+      targetPlayers: userAry.join(),
+      skills: buffAry
+    }).then(formatResponse);
+  }
+
+  function quickbuff$1(userAry, buffAry) {
     return callApp({
       cmd: 'quickbuff',
       subcmd: 'activate',
       username: userAry,
       skill: buffAry
     });
+  }
+
+  function doFallback(userAry, buffAry) {
+    return quickbuff(userAry, buffAry);
+  }
+
+  const fail = json => json && 's' in json &&
+    json.e.message === 'Unknown Command';
+
+  function fallback$1(userAry, buffAry, json) {
+    if (fail(json)) {return doFallback(userAry, buffAry);}
+    return json;
+  }
+
+  function daQuickbuff(userAry, buffAry) {
+    return quickbuff$1(userAry, buffAry)
+      .then(partial(fallback$1, userAry, buffAry))
+      .catch(partial(doFallback, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -13845,7 +14195,7 @@
   function quickActivate(evt) { // jQuery.min
     var trigger = evt.target;
     if (trigger.className !== 'quickbuffActivate') {return;}
-    quickbuff([window.self], [trigger.dataset.buffid])
+    daQuickbuff([window.self], [trigger.dataset.buffid])
       .then(partial(processResult$1, trigger));
   }
 
@@ -13865,6 +14215,8 @@
     setupEventHandlers();
     firstPlayerStats();
   }
+
+  var saveBoxes = ["navigateToLogAfterMsg","gameHelpLink","guildSelf","guildSelfMessage","guildFrnd","guildFrndMessage","guildPast","guildPastMessage","guildEnmy","guildEnmyMessage","showAdmin","ajaxifyRankControls","detailedConflictInfo","disableItemColoring","enableLogColoring","enableChatParsing","enableCreatureColoring","hideNonPlayerGuildLogMessages","buyBuffsGreeting","renderSelfBio","renderOtherBios","defaultMessageSound","showSpeakerOnWorld","playNewMessageSound","highlightPlayersNearMyLvl","highlightGvGPlayersNearMyLvl","showCombatLog","showMonsterLog","showCreatureInfo","keepLogs","enableGuildInfoWidgets","enableOnlineAlliesWidgets","hideGuildInfoMessage","hideGuildInfoBuff","hideGuildInfoSecureTrade","hideGuildInfoTrade","huntingBuffs","huntingBuffsName","huntingBuffs2","huntingBuffs2Name","huntingBuffs3","huntingBuffs3Name","showHuntingBuffs","moveGuildList","moveOnlineAlliesList","moveFSBox","moveDailyQuest","hideQuests","hideQuestNames","hideRecipes","hideRecipeNames","doNotKillList","enableBioCompressor","sendGoldonWorld","goldRecipient","goldAmount","keepBuffLog","showQuickSendLinks","showQuickDropLinks","sendClasses","itemRecipient","currentGoldSentTotal","enableAllyOnlineList","enableEnemyOnlineList","allyEnemyOnlineRefreshTime","quickLinksTopPx","quickLinksLeftPx","draggableQuickLinks","enableActiveBountyList","bountyListRefreshTime","enableWantedList","wantedNames","wantedGuildMembers","fsboxlog","huntingMode","enableAttackHelper","hideRelicOffline","enterForSendMessage","storeLastQuestPage","addAttackLinkToLog","showStatBonusTotal","newGuildLogHistoryPages","useNewGuildLog","enhanceChatTextEntry","enableMaxGroupSizeToJoin","maxGroupSizeToJoin","enableTempleAlert","enableUpgradeAlert","enableComposingAlert","autoFillMinBidPrice","showPvPSummaryInLog","enableQuickDrink","enhanceOnlineDots","hideBuffSelected","hideHelperMenu","keepHelperMenuOnScreen","draggableHelperMenu","showNextQuestSteps","hideChampionsGroup","hideElitesGroup","hideSEGroup","hideTitanGroup","hideLegendaryGroup","disableDeactivatePrompts","moveComposingButtons","showExtraLinks","expandMenuOnKeyPress","highlightPvpProtection","enableHistoryCompressor"];
 
   function findEl(el, name) {
     return querySelector('#fshSettingsTable ' + el + '[name="' + name + '"]');
@@ -14345,11 +14697,6 @@
       ]) +
       groupJoinSize() +
       simpleCheckbox('moveComposingButtons');
-  }
-
-  function isSelected(val, test) {
-    if (val === test) {return ' selected';}
-    return '';
   }
 
   function worldGroup() {
@@ -14894,7 +15241,7 @@
 
   function thisBuff$2(name, e) {return e.name === name;}
 
-  function getBuff$1(name) {
+  function getBuff$2(name) {
     var buffs = GameData.player().buffs;
     if (buffs) {
       return buffs.find(partial(thisBuff$2, name));
@@ -14930,8 +15277,8 @@
   }
 
   function recastClick() {
-    if (getBuff$1('Summon Shield Imp')) {return;}
-    quickbuff([playerName()], [55]).then(refreshBuffs);
+    if (getBuff$2('Summon Shield Imp')) {return;}
+    quickbuff$1([playerName()], [55]).then(refreshBuffs);
   }
 
   function getImpsRemaining(imp) {
@@ -15051,10 +15398,10 @@
   var ks;
 
   function initVars() {
-    dd = getBuff$1('Death Dealer');
-    dbl = getBuff$1('Doubler');
-    ca = getBuff$1('Counter Attack');
-    imp = getBuff$1('Summon Shield Imp');
+    dd = getBuff$2('Death Dealer');
+    dbl = getBuff$2('Doubler');
+    ca = getBuff$2('Counter Attack');
+    imp = getBuff$2('Summon Shield Imp');
     cd = getCooldown();
     titanActive = titanKs();
     ks = GameData.player().killStreak;
@@ -15494,10 +15841,10 @@
   var fetchStatsBtn;
   var myDefenders;
 
-  function playerName$3(x) {return x.player_name;}
+  function playerName$4(x) {return x.player_name;}
 
   function defendersSetup(relicData) {
-    myDefenders = relicData.defenders.map(playerName$3);
+    myDefenders = relicData.defenders.map(playerName$4);
   }
 
   function containerSetup() {
@@ -16052,7 +16399,7 @@
     relicData = data.response.data;
     if (relicData.defenders.length > 0) {
       primaryElementsSetup(relicData);
-      once([fetchStatsBtn, 'click', getStats]);
+      once(fetchStatsBtn, 'click', getStats);
     }
   }
 
@@ -16128,7 +16475,7 @@
 
   function tipHeader(creature) {
     return '<table><tr><td>' +
-      '<img src="https://cdn.fallensword.com/creatures/' + creature.image_id +
+      '<img src="' + imageServer + '/creatures/' + creature.image_id +
       '.jpg" height="200" width="200"></td><td rowspan="2">' +
       '<table width="400"><tr>' +
       '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>';
@@ -17265,7 +17612,7 @@
     return '';
   }
 
-  function headerRow$1(combat) {
+  function headerRow$2(combat) {
     return '<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
       doesGroupExist(combat) + 'Combat Evaluation</td></tr>';
   }
@@ -17337,7 +17684,7 @@
 
   function evalHTML(combat) {
     return '<table width="100%"><tbody>' +
-      headerRow$1(combat) +
+      headerRow$2(combat) +
       willIHitItRow(combat) +
       numberOfHitsRequiredRow(combat) +
       willIBeHitRow(combat) +
@@ -18157,6 +18504,7 @@
   }
 
   function getItemId(el) {
+    if (!el) {return;}
     var match = el.src.match(/\/items\/(\d+)\.gif/);
     if (match) {return match[1];}
   }
@@ -18238,15 +18586,23 @@
     view: {'-': itemsView}
   };
 
-  function updateUrl$4(e) {
-    e.preventDefault();
-    dontPost(pCC);
+  function isMyRow(thisRow) {
+    return thisRow.cells.length > 1 &&
+      getTextTrim(thisRow.cells[1]) === playerName();
   }
 
-  function allowBack$3() {
-    var submitButton = querySelector('input[type="submit"]', pCC);
-    if (submitButton) {
-      on(submitButton, 'click', updateUrl$4);
+  function prepareRow(thisRow) {
+    const pvpRating = intValue(getTextTrim(thisRow.cells[3]));
+    insertHtmlAfterBegin(thisRow.cells[3],
+      '<span class="fshBlue fshXSmall">(' +
+      addCommas(pvpRating - 250) + ')</span>&nbsp;');
+  }
+
+  function margin() {
+    const vlHeader = getArrayByTagName('td', pCC).filter(contains('VL'));
+    if (vlHeader.length === 1) {
+      const thisRows = vlHeader[0].parentNode.parentNode.rows;
+      Array.from(thisRows).filter(isMyRow).forEach(prepareRow);
     }
   }
 
@@ -18293,8 +18649,9 @@
   }
 
   function ladder() {
-    allowBack$3();
+    allowBack$1();
     lastReset();
+    margin();
   }
 
   var log$1 = {
@@ -18469,7 +18826,7 @@
     }
   }
 
-  function decorate$2(questsToHide, aRow) {
+  function decorate$3(questsToHide, aRow) {
     var questName = replaceDoubleSpace(getTextTrim(aRow.cells[0]));
     doHideQuests(questsToHide, questName, aRow);
     var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
@@ -18479,7 +18836,7 @@
   function injectQuestRow(questTable) {
     var questsToHide = isHideQuests();
     Array.from(questTable.rows).filter(myRows(5, 0))
-      .forEach(partial(decorate$2, questsToHide));
+      .forEach(partial(decorate$3, questsToHide));
   }
 
   function updateUrl$5(evt) {
@@ -18589,53 +18946,23 @@
     injectQuestRow(questTable);
   }
 
-  function buff(thisBuff, el) {return el.name === thisBuff;}
-
-  function getStamUsed(buffCast) {
-    var thisBuff = buffList.find(partial(buff, buffCast[1]));
-    if (thisBuff) {return thisBuff.stam.toString();}
-    return '-';
-  }
-
-  function successfull(timeStamp, buffCast) {
-    return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
-      ' stamina)<br>';
-  }
-
-  function rejected(timeStamp, buffsNotCast) {
-    return timeStamp + ' <span class="fshRed">' + buffsNotCast[0] + '</span><br>';
-  }
-
-  var transform$1;
-
-  function buildTransform() {
-    return [
-      [new RegExp('Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\''),
-        successfull],
-      [new RegExp('The skill ([\\w ]*) of current or higher level is currently ' +
-        'active on \'(\\w*)\''), rejected],
-      [new RegExp('Player \'(\\w*)\' has set their preferences to block the ' +
-        'skill \'([\\w ]*)\' from being cast on them.'), rejected]
-    ];
-  }
-
-  function doRegExp(el, pair) {
-    return [
-      pair[0].exec(el.innerText),
-      pair[1]
-    ];
-  }
-
-  function match(pair) {return pair[0] !== null;}
+  const success = e => ' ' + e[0] + ' (' + getStamAsString(e[1]) +
+    ' stamina)<br>';
+  const reject = e => ' <span class="fshRed">' + e[0] + '</span><br>';
 
   function logFormat(timeStamp, el) {
-    var transformed = transform$1.map(partial(doRegExp, el)).find(match);
-    return transformed[1](timeStamp, transformed[0]);
+    let result;
+    if (el[1]) {
+      result = success(el);
+    } else {
+      result = reject(el);
+    }
+    return timeStamp + result;
   }
 
   function buffResult(buffLog) {
     var timeStamp = formatLocalDateTime(new Date());
-    var buffsAttempted = querySelectorArray('#quickbuff-report p:not(.back)')
+    const buffsAttempted = buffReportParser(document)
       .map(partial(logFormat, timeStamp));
     setForage(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
   }
@@ -18643,7 +18970,6 @@
   function updateBuffLog() {
     if (!getValue('keepBuffLog')) {return;}
     getForage(fshBuffLog).then(buffResult);
-    transform$1 = buildTransform();
   }
 
   var unknown = [
@@ -18771,56 +19097,36 @@
       };
   };
 
-  const emitter = () => {
-      const listenersLists = {};
-      const instance = {
-          on(event, ...listeners) {
-              listenersLists[event] = (listenersLists[event] || []).concat(listeners);
-              return instance;
-          },
-          dispatch(event, ...args) {
-              const listeners = listenersLists[event] || [];
-              for (const listener of listeners) {
-                  listener(...args);
-              }
-              return instance;
-          },
-          off(event, ...listeners) {
-              if (event === undefined) {
-                  Object.keys(listenersLists).forEach(ev => instance.off(ev));
-              }
-              else {
-                  const list = listenersLists[event] || [];
-                  listenersLists[event] = listeners.length ? list.filter(listener => !listeners.includes(listener)) : [];
-              }
-              return instance;
-          }
-      };
-      return instance;
-  };
-  const proxyListener = (eventMap) => ({ emitter }) => {
-      const eventListeners = {};
-      const proxy = {
-          off(ev) {
-              if (!ev) {
-                  Object.keys(eventListeners).forEach(eventName => proxy.off(eventName));
-              }
-              if (eventListeners[ev]) {
-                  emitter.off(ev, ...eventListeners[ev]);
-              }
-              return proxy;
-          }
-      };
-      for (const ev of Object.keys(eventMap)) {
-          const method = eventMap[ev];
-          eventListeners[ev] = [];
-          proxy[method] = function (...listeners) {
-              eventListeners[ev] = eventListeners[ev].concat(listeners);
-              emitter.on(ev, ...listeners);
-              return proxy;
-          };
+  const defaultComparator = (a, b) => {
+      if (a === b) {
+          return 0;
       }
-      return proxy;
+      if (a === undefined) {
+          return 1;
+      }
+      if (b === undefined) {
+          return -1;
+      }
+      return a < b ? -1 : 1;
+  };
+  var SortDirection;
+  (function (SortDirection) {
+      SortDirection["ASC"] = "asc";
+      SortDirection["DESC"] = "desc";
+      SortDirection["NONE"] = "none";
+  })(SortDirection || (SortDirection = {}));
+  const sortByProperty = (prop, comparator) => {
+      const propGetter = pointer(prop).get;
+      return (a, b) => comparator(propGetter(a), propGetter(b));
+  };
+  const defaultSortFactory = (conf) => {
+      const { pointer: pointer$$1, direction = "asc" /* ASC */, comparator = defaultComparator } = conf;
+      if (!pointer$$1 || direction === "none" /* NONE */) {
+          return (array) => [...array];
+      }
+      const orderFunc = sortByProperty(pointer$$1, comparator);
+      const compareFunc = direction === "desc" /* DESC */ ? swap(orderFunc) : orderFunc;
+      return (array) => [...array].sort(compareFunc);
   };
 
   var Type;
@@ -18906,38 +19212,6 @@
       return array => array.filter(filterPredicate);
   };
 
-  const defaultComparator = (a, b) => {
-      if (a === b) {
-          return 0;
-      }
-      if (a === undefined) {
-          return 1;
-      }
-      if (b === undefined) {
-          return -1;
-      }
-      return a < b ? -1 : 1;
-  };
-  var SortDirection;
-  (function (SortDirection) {
-      SortDirection["ASC"] = "asc";
-      SortDirection["DESC"] = "desc";
-      SortDirection["NONE"] = "none";
-  })(SortDirection || (SortDirection = {}));
-  const sortByProperty = (prop, comparator) => {
-      const propGetter = pointer(prop).get;
-      return (a, b) => comparator(propGetter(a), propGetter(b));
-  };
-  const defaultSortFactory = (conf) => {
-      const { pointer: pointer$$1, direction = "asc" /* ASC */, comparator = defaultComparator } = conf;
-      if (!pointer$$1 || direction === "none" /* NONE */) {
-          return (array) => [...array];
-      }
-      const orderFunc = sortByProperty(pointer$$1, comparator);
-      const compareFunc = direction === "desc" /* DESC */ ? swap(orderFunc) : orderFunc;
-      return (array) => [...array].sort(compareFunc);
-  };
-
   const basic = (input) => {
       const { value, scope = [], isCaseSensitive = false } = input;
       const searchPointers = scope.map(field => pointer(field).get);
@@ -18994,6 +19268,58 @@
       }
       const regex = escape === true ? re `/${value}/${flags}` : new RegExp(value, flags);
       return (array) => array.filter(item => searchPointers.some(p => regex.test(String(p(item)))));
+  };
+
+  const emitter = () => {
+      const listenersLists = {};
+      const instance = {
+          on(event, ...listeners) {
+              listenersLists[event] = (listenersLists[event] || []).concat(listeners);
+              return instance;
+          },
+          dispatch(event, ...args) {
+              const listeners = listenersLists[event] || [];
+              for (const listener of listeners) {
+                  listener(...args);
+              }
+              return instance;
+          },
+          off(event, ...listeners) {
+              if (event === undefined) {
+                  Object.keys(listenersLists).forEach(ev => instance.off(ev));
+              }
+              else {
+                  const list = listenersLists[event] || [];
+                  listenersLists[event] = listeners.length ? list.filter(listener => !listeners.includes(listener)) : [];
+              }
+              return instance;
+          }
+      };
+      return instance;
+  };
+  const proxyListener = (eventMap) => ({ emitter }) => {
+      const eventListeners = {};
+      const proxy = {
+          off(ev) {
+              if (!ev) {
+                  Object.keys(eventListeners).forEach(eventName => proxy.off(eventName));
+              }
+              if (eventListeners[ev]) {
+                  emitter.off(ev, ...eventListeners[ev]);
+              }
+              return proxy;
+          }
+      };
+      for (const ev of Object.keys(eventMap)) {
+          const method = eventMap[ev];
+          eventListeners[ev] = [];
+          proxy[method] = function (...listeners) {
+              eventListeners[ev] = eventListeners[ev].concat(listeners);
+              emitter.on(ev, ...listeners);
+              return proxy;
+          };
+      }
+      return proxy;
   };
 
   const sliceFactory = ({ page = 1, size } = { page: 1 }) => (array = []) => {
@@ -19087,11 +19413,11 @@
               const sort = Object.assign({}, tableState.sort);
               const search = Object.assign({}, tableState.search);
               const slice = Object.assign({}, tableState.slice);
-              const filter$$1 = {};
+              const filter = {};
               for (const prop of Object.getOwnPropertyNames(tableState.filter)) {
-                  filter$$1[prop] = tableState.filter[prop].map(v => Object.assign({}, v));
+                  filter[prop] = tableState.filter[prop].map(v => Object.assign({}, v));
               }
-              return { sort, search, slice, filter: filter$$1 };
+              return { sort, search, slice, filter };
           },
           getMatchingItems() {
               return [...matchingItems];
@@ -19122,12 +19448,12 @@
       FilterType["DATE"] = "date";
       FilterType["STRING"] = "string";
   })(FilterType || (FilterType = {}));
-  const filterDirective = ({ table, pointer: pointer$$1, operator = "includes" /* INCLUDES */, type = "string" /* STRING */ }) => {
+  const filterDirective = ({ table, pointer, operator = "includes" /* INCLUDES */, type = "string" /* STRING */ }) => {
       const proxy = filterListener({ emitter: table });
       return Object.assign({
           filter(input) {
               const filterConf = {
-                  [pointer$$1]: [
+                  [pointer]: [
                       {
                           value: input,
                           operator,
@@ -19207,7 +19533,7 @@
   };
   const sortListeners = proxyListener({ ["TOGGLE_SORT" /* TOGGLE_SORT */]: 'onSortToggle' });
   const directions = ["asc" /* ASC */, "desc" /* DESC */];
-  const sortDirective = ({ pointer: pointer$$1, table, cycle = false, debounceTime = 0 }) => {
+  const sortDirective = ({ pointer, table, cycle = false, debounceTime = 0 }) => {
       const cycleDirections = cycle === true ? ["none" /* NONE */].concat(directions) : [...directions].reverse();
       const commit = debounce(table.sort, debounceTime);
       let hit = 0;
@@ -19216,17 +19542,17 @@
           toggle() {
               hit++;
               const direction = cycleDirections[hit % cycleDirections.length];
-              return commit({ pointer: pointer$$1, direction });
+              return commit({ pointer, direction });
           },
           state() {
               return table.getTableState().sort;
           }
       }, proxy);
       directive.onSortToggle(({ pointer: p }) => {
-          hit = pointer$$1 !== p ? 0 : hit;
+          hit = pointer !== p ? 0 : hit;
       });
       const { pointer: statePointer, direction = "asc" /* ASC */ } = directive.state();
-      hit = statePointer === pointer$$1 ? (direction === "asc" /* ASC */ ? 1 : 2) : 0;
+      hit = statePointer === pointer ? (direction === "asc" /* ASC */ ? 1 : 2) : 0;
       return directive;
   };
 
@@ -19277,464 +19603,86 @@
     };
   }
 
-  function pointer$1(path) {
-      const parts = path.split('.');
-      const partial = (obj = {}, parts = []) => {
-          const p = parts.shift();
-          const current = obj[p];
-          return (current === undefined || current === null || parts.length === 0) ?
-              current : partial(current, parts);
-      };
-      const set = (target, newTree) => {
-          let current = target;
-          const [leaf, ...intermediate] = parts.reverse();
-          for (const key of intermediate.reverse()) {
-              if (current[key] === undefined) {
-                  current[key] = {};
-                  current = current[key];
-              }
+  const loadingIndicator = ({table, el}) => {
+      const component = workingIndicatorDirective({table});
+      component.onExecutionChange(function ({working}) {
+          el.classList.remove('st-working');
+          if (working === true) {
+              el.classList.add('st-working');
           }
-          current[leaf] = Object.assign(current[leaf] || {}, newTree);
-          return target;
+      });
+      return component;
+  };
+
+  const sort = ({el, table, conf = {}}) => {
+      const pointer = conf.pointer || el.getAttribute('data-st-sort');
+      const cycle = conf.cycle || el.hasAttribute('data-st-sort-cycle');
+      const component = sortDirective({pointer, table, cycle});
+      component.onSortToggle(({pointer: currentPointer, direction}) => {
+          el.classList.remove('st-sort-asc', 'st-sort-desc');
+          if (pointer === currentPointer && direction !== 'none') {
+              const className = direction === 'asc' ? 'st-sort-asc' : 'st-sort-desc';
+              el.classList.add(className);
+          }
+      });
+      const eventListener = () => component.toggle();
+      el.addEventListener('click', eventListener);
+      return component;
+  };
+
+  function debounce$1(fn, delay) {
+      let timeoutId;
+      return (ev) => {
+          if (timeoutId) {
+              clearTimeout(timeoutId);
+          }
+          timeoutId = setTimeout(function () {
+              fn(ev);
+          }, delay);
       };
-      return {
-          get(target) {
-              return partial(target, [...parts]);
-          },
-          set
-      };
   }
 
-  function sortByProperty$1(prop) {
-  	const propGetter = pointer$1(prop).get;
-  	return (a, b) => {
-  		const aVal = propGetter(a);
-  		const bVal = propGetter(b);
-
-  		if (aVal === bVal) {
-  			return 0;
-  		}
-
-  		if (bVal === undefined) {
-  			return -1;
-  		}
-
-  		if (aVal === undefined) {
-  			return 1;
-  		}
-
-  		return aVal < bVal ? -1 : 1;
-  	};
-  }
-
-  function sortFactory({pointer, direction} = {}) {
-  	if (!pointer || direction === 'none') {
-  		return array => [...array];
-  	}
-
-  	const orderFunc = sortByProperty$1(pointer);
-  	const compareFunc = direction === 'desc' ? swap(orderFunc) : orderFunc;
-
-  	return array => [...array].sort(compareFunc);
-  }
-
-  function typeExpression$1(type) {
-  	switch (type) {
-  		case 'boolean':
-  			return Boolean;
-  		case 'number':
-  			return Number;
-  		case 'date':
-  			return val => new Date(val);
-  		default:
-  			return compose(String, val => val.toLowerCase());
-  	}
-  }
-
-  const not$1 = fn => input => !fn(input);
-
-  const is$1 = value => input => Object.is(value, input);
-  const lt$1 = value => input => input < value;
-  const gt$1 = value => input => input > value;
-  const equals$1 = value => input => value === input;
-  const includes$2 = value => input => input.includes(value);
-
-  const operators$1 = {
-  	includes: includes$2,
-  	is: is$1,
-  	isNot: compose(is$1, not$1),
-  	lt: lt$1,
-  	gte: compose(lt$1, not$1),
-  	gt: gt$1,
-  	lte: compose(gt$1, not$1),
-  	equals: equals$1,
-  	notEquals: compose(equals$1, not$1)
+  const filter$1 = ({table, el, delay = 400, conf = {}}) => {
+      const pointer = conf.pointer || el.getAttribute('data-st-filter');
+      const operator = conf.operator || el.getAttribute('data-st-filter-operator') || 'includes';
+      const elType = el.hasAttribute('type') ? el.getAttribute('type') : 'string';
+      let type = conf.type || el.getAttribute('data-st-filter-type');
+      if (!type) {
+          type = ['date', 'number'].includes(elType) ? elType : 'string';
+      }
+      const component = filterDirective({table, pointer, type, operator});
+      const eventListener = debounce$1(ev => component.filter(el.value), delay);
+      el.addEventListener('input', eventListener);
+      if (el.tagName === 'SELECT') {
+          el.addEventListener('change', eventListener);
+      }
+      return component;
   };
 
-  const every$1 = fns => (...args) => fns.every(fn => fn(...args));
-
-  function predicate$1({value = '', operator = 'includes', type = 'string'}) {
-  	const typeIt = typeExpression$1(type);
-  	const operateOnTyped = compose(typeIt, operators$1[operator]);
-  	const predicateFunc = operateOnTyped(value);
-  	return compose(typeIt, predicateFunc);
-  }
-
-  // Avoid useless filter lookup (improve perf)
-  function normalizeClauses$1(conf) {
-  	const output = {};
-  	const validPath = Object.keys(conf).filter(path => Array.isArray(conf[path]));
-  	validPath.forEach(path => {
-  		const validClauses = conf[path].filter(c => c.value !== '');
-  		if (validClauses.length > 0) {
-  			output[path] = validClauses;
-  		}
-  	});
-  	return output;
-  }
-
-  function filter$1(filter) {
-  	const normalizedClauses = normalizeClauses$1(filter);
-  	const funcList = Object.keys(normalizedClauses).map(path => {
-  		const getter = pointer$1(path).get;
-  		const clauses = normalizedClauses[path].map(predicate$1);
-  		return compose(getter, every$1(clauses));
-  	});
-  	const filterPredicate = every$1(funcList);
-
-  	return array => array.filter(filterPredicate);
-  }
-
-  function search (searchConf = {}) {
-  	const {value, scope = []} = searchConf;
-  	const searchPointers = scope.map(field => pointer$1(field).get);
-  	if (scope.length === 0 || !value) {
-  		return array => array;
-  	}
-  	return array => array.filter(item => searchPointers.some(p => String(p(item)).includes(String(value))));
-  }
-
-  var sliceFactory$1 = ({page = 1, size} = {}) => (array = []) => {
-  	const actualSize = size || array.length;
-  	const offset = (page - 1) * actualSize;
-  	return array.slice(offset, offset + actualSize);
-  };
-
-  const TOGGLE_SORT = 'TOGGLE_SORT';
-  const DISPLAY_CHANGED = 'DISPLAY_CHANGED';
-  const PAGE_CHANGED = 'CHANGE_PAGE';
-  const EXEC_CHANGED = 'EXEC_CHANGED';
-  const FILTER_CHANGED = 'FILTER_CHANGED';
-  const SUMMARY_CHANGED = 'SUMMARY_CHANGED';
-  const SEARCH_CHANGED = 'SEARCH_CHANGED';
-  const EXEC_ERROR = 'EXEC_ERROR';
-
-  function curriedPointer$1(path) {
-  	const {get, set} = pointer$1(path);
-  	return {get, set: curry(set)};
-  }
-
-  function table$1 ({sortFactory, tableState, data, filterFactory, searchFactory}) {
-  	const table = emitter();
-  	const sortPointer = curriedPointer$1('sort');
-  	const slicePointer = curriedPointer$1('slice');
-  	const filterPointer = curriedPointer$1('filter');
-  	const searchPointer = curriedPointer$1('search');
-
-  	const safeAssign = curry((base, extension) => Object.assign({}, base, extension));
-  	const dispatch = curry(table.dispatch, 2);
-
-  	const dispatchSummary = filtered => dispatch(SUMMARY_CHANGED, {
-  		page: tableState.slice.page,
-  		size: tableState.slice.size,
-  		filteredCount: filtered.length
-  	});
-
-  	const exec = ({processingDelay = 20} = {}) => {
-  		table.dispatch(EXEC_CHANGED, {working: true});
-  		setTimeout(() => {
-  			try {
-  				const filterFunc = filterFactory(filterPointer.get(tableState));
-  				const searchFunc = searchFactory(searchPointer.get(tableState));
-  				const sortFunc = sortFactory(sortPointer.get(tableState));
-  				const sliceFunc = sliceFactory$1(slicePointer.get(tableState));
-  				const execFunc = compose(filterFunc, searchFunc, tap(dispatchSummary), sortFunc, sliceFunc);
-  				const displayed = execFunc(data);
-  				table.dispatch(DISPLAY_CHANGED, displayed.map(d => {
-  					return {index: data.indexOf(d), value: d};
-  				}));
-  			} catch (err) {
-  				table.dispatch(EXEC_ERROR, err);
-  			} finally {
-  				table.dispatch(EXEC_CHANGED, {working: false});
-  			}
-  		}, processingDelay);
-  	};
-
-  	const updateTableState = curry((pter, ev, newPartialState) => compose(
-  		safeAssign(pter.get(tableState)),
-  		tap(dispatch(ev)),
-  		pter.set(tableState)
-  	)(newPartialState));
-
-  	const resetToFirstPage = () => updateTableState(slicePointer, PAGE_CHANGED, {page: 1});
-
-  	const tableOperation = (pter, ev) => compose(
-  		updateTableState(pter, ev),
-  		resetToFirstPage,
-  		() => table.exec() // We wrap within a function so table.exec can be overwritten (when using with a server for example)
-  	);
-
-  	const api = {
-  		sort: tableOperation(sortPointer, TOGGLE_SORT),
-  		filter: tableOperation(filterPointer, FILTER_CHANGED),
-  		search: tableOperation(searchPointer, SEARCH_CHANGED),
-  		slice: compose(updateTableState(slicePointer, PAGE_CHANGED), () => table.exec()),
-  		exec,
-  		eval(state = tableState) {
-  			return Promise
-  				.resolve()
-  				.then(() => {
-  					const sortFunc = sortFactory(sortPointer.get(state));
-  					const searchFunc = searchFactory(searchPointer.get(state));
-  					const filterFunc = filterFactory(filterPointer.get(state));
-  					const sliceFunc = sliceFactory$1(slicePointer.get(state));
-  					const execFunc = compose(filterFunc, searchFunc, sortFunc, sliceFunc);
-  					return execFunc(data).map(d => ({index: data.indexOf(d), value: d}));
-  				});
-  		},
-  		onDisplayChange(fn) {
-  			table.on(DISPLAY_CHANGED, fn);
-  		},
-  		getTableState() {
-  			const sort = Object.assign({}, tableState.sort);
-  			const search = Object.assign({}, tableState.search);
-  			const slice = Object.assign({}, tableState.slice);
-  			const filter = {};
-  			for (const prop of Object.getOwnPropertyNames(tableState.filter)) {
-  				filter[prop] = tableState.filter[prop].map(v => Object.assign({}, v));
-  			}
-  			return {sort, search, slice, filter};
-  		}
-  	};
-
-  	const instance = Object.assign(table, api);
-
-  	Object.defineProperty(instance, 'length', {
-  		get() {
-  			return data.length;
-  		}
-  	});
-
-  	return instance;
-  }
-
-  function tableDirective$1 ({
-  													 sortFactory: sortFactory$1 = sortFactory,
-  													 filterFactory = filter$1,
-  													 searchFactory = search,
-  													 tableState = {sort: {}, slice: {page: 1}, filter: {}, search: {}},
-  													 data = []
-  												 }, ...tableDirectives) {
-
-  	const coreTable = table$1({sortFactory: sortFactory$1, filterFactory, tableState, data, searchFactory});
-
-  	return tableDirectives.reduce((accumulator, newdir) => {
-  		return Object.assign(accumulator, newdir({
-  			sortFactory: sortFactory$1,
-  			filterFactory,
-  			searchFactory,
-  			tableState,
-  			data,
-  			table: coreTable
-  		}));
-  	}, coreTable);
-  }
-
-  const filterListener$1 = proxyListener({[FILTER_CHANGED]: 'onFilterChange'});
-
-  var filterDirective$1 = ({table, pointer, operator = 'includes', type = 'string'}) => Object.assign({
-  	filter(input) {
-  		const filterConf = {
-  			[pointer]: [
-  				{
-  					value: input,
-  					operator,
-  					type
-  				}
-  			]
-
-  		};
-  		return table.filter(filterConf);
-  	}
-  }, filterListener$1({emitter: table}));
-
-  const searchListener$1 = proxyListener({[SEARCH_CHANGED]: 'onSearchChange'});
-
-  var searchDirective$1 = ({table, scope = []}) => Object.assign(searchListener$1({emitter: table}), {
-  	search(input) {
-  		return table.search({value: input, scope});
-  	}
-  });
-
-  const sliceListener$1 = proxyListener({[PAGE_CHANGED]: 'onPageChange', [SUMMARY_CHANGED]: 'onSummaryChange'});
-
-  function sliceDirective ({table}) {
-  	let {slice: {page: currentPage, size: currentSize}} = table.getTableState();
-  	let itemListLength = table.length;
-
-  	const api = {
-  		selectPage(p) {
-  			return table.slice({page: p, size: currentSize});
-  		},
-  		selectNextPage() {
-  			return api.selectPage(currentPage + 1);
-  		},
-  		selectPreviousPage() {
-  			return api.selectPage(currentPage - 1);
-  		},
-  		changePageSize(size) {
-  			return table.slice({page: 1, size});
-  		},
-  		isPreviousPageEnabled() {
-  			return currentPage > 1;
-  		},
-  		isNextPageEnabled() {
-  			return Math.ceil(itemListLength / currentSize) > currentPage;
-  		}
-  	};
-  	const directive = Object.assign(api, sliceListener$1({emitter: table}));
-
-  	directive.onSummaryChange(({page: p, size: s, filteredCount}) => {
-  		currentPage = p;
-  		currentSize = s;
-  		itemListLength = filteredCount;
-  	});
-
-  	return directive;
-  }
-
-  const sortListeners$1 = proxyListener({[TOGGLE_SORT]: 'onSortToggle'});
-  const directions$1 = ['asc', 'desc'];
-
-  function sortDirective$1 ({pointer, table, cycle = false}) {
-  	const cycleDirections = cycle === true ? ['none'].concat(directions$1) : [...directions$1].reverse();
-  	let hit = 0;
-
-  	const directive = Object.assign({
-  		toggle() {
-  			hit++;
-  			const direction = cycleDirections[hit % cycleDirections.length];
-  			return table.sort({pointer, direction});
-  		}
-
-  	}, sortListeners$1({emitter: table}));
-
-  	directive.onSortToggle(({pointer: p}) => {
-  		if (pointer !== p) {
-  			hit = 0;
-  		}
-  	});
-
-  	return directive;
-  }
-
-  const summaryListener$1 = proxyListener({[SUMMARY_CHANGED]: 'onSummaryChange'});
-
-  var summaryDirective$1 = ({table}) => summaryListener$1({emitter: table});
-
-  const executionListener$1 = proxyListener({[EXEC_CHANGED]: 'onExecutionChange'});
-
-  var workingIndicatorDirective$1 = ({table}) => executionListener$1({emitter: table});
-
-  const search$1 = searchDirective$1;
-  const slice = sliceDirective;
-  const summary = summaryDirective$1;
-  const sort = sortDirective$1;
-  const filter$2 = filterDirective$1;
-  const workingIndicator = workingIndicatorDirective$1;
-  const table$2 = tableDirective$1;
-
-  function loading ({table, el}) {
-    const component = workingIndicator({table});
-    component.onExecutionChange(function ({working}) {
-      el.classList.remove('st-working');
-      if (working === true) {
-        el.classList.add('st-working');
-      }
-    });
-    return component;
-  };
-
-  function sort$1 ({el, table, conf = {}}) {
-    const pointer = conf.pointer || el.getAttribute('data-st-sort');
-    const cycle = conf.cycle || el.hasAttribute('data-st-sort-cycle');
-    const component = sort({pointer, table, cycle});
-    component.onSortToggle(({pointer:currentPointer, direction}) => {
-      el.classList.remove('st-sort-asc', 'st-sort-desc');
-      if (pointer === currentPointer && direction !== 'none') {
-        const className = direction === 'asc' ? 'st-sort-asc' : 'st-sort-desc';
-        el.classList.add(className);
-      }
-    });
-    const eventListener = ev => component.toggle();
-    el.addEventListener('click', eventListener);
-    return component;
-  }
-
-  function debounce$1 (fn, delay) {
-    let timeoutId;
-    return (ev) => {
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-      timeoutId = window.setTimeout(function () {
-        fn(ev);
+  const search = ({el, table, delay = 400, conf = {}}) => {
+      const scope = conf.scope || (el.getAttribute('data-st-search') || '')
+          .split(',')
+          .map(s => s.trim());
+      const flags = conf.flags || el.getAttribute('data-st-search-flags') || '';
+      const component = searchDirective({table, scope});
+      const eventListener = debounce$1(() => {
+          component.search(el.value, {flags});
       }, delay);
-    };
+      el.addEventListener('input', eventListener);
   };
 
-  function filterInput ({table, el, delay = 400, conf = {}}) {
-    const pointer = conf.pointer || el.getAttribute('data-st-filter');
-    const operator = conf.operator || el.getAttribute('data-st-filter-operator') || 'includes';
-    const elType = el.hasAttribute('type') ? el.getAttribute('type') : 'string';
-    let type = conf.type || el.getAttribute('data-st-filter-type');
-    if (!type) {
-      type = ['date', 'number'].includes(elType) ? elType : 'string';
-    }
-    const component = filter$2({table, pointer, type, operator});
-    const eventListener = debounce$1(ev => component.filter(el.value), delay);
-    el.addEventListener('input', eventListener);
-    if (el.tagName === 'SELECT') {
-      el.addEventListener('change', eventListener);
-    }
-    return component;
-  };
+  const table$1 = ({el, table}) => {
+      const bootDirective = (factory, selector) => Array.from(el.querySelectorAll(selector)).forEach(el => factory({
+          el,
+          table
+      }));
+      // boot
+      bootDirective(sort, '[data-st-sort]');
+      bootDirective(loadingIndicator, '[data-st-loading-indicator]');
+      bootDirective(search, '[data-st-search]');
+      bootDirective(filter$1, '[data-st-filter]');
 
-  function searchInput ({el, table, delay = 400, conf = {}}) {
-    const scope = conf.scope || (el.getAttribute('data-st-search') || '').split(',').map(s => s.trim());
-    const component = search$1({table, scope});
-    const eventListener = debounce$1(ev => {
-      component.search(el.value);
-    }, delay);
-    el.addEventListener('input', eventListener);
-  };
-
-  function tableComponentFactory ({el, table}) {
-    // boot
-    [...el.querySelectorAll('[data-st-sort]')].forEach(el => sort$1({el, table}));
-    [...el.querySelectorAll('[data-st-loading-indicator]')].forEach(el => loading({el, table}));
-    [...el.querySelectorAll('[data-st-search]')].forEach(el => searchInput({el, table}));
-    [...el.querySelectorAll('[data-st-filter]')].forEach(el => filterInput({el, table}));
-
-    //extension
-    const tableDisplayChange = table.onDisplayChange;
-    return Object.assign(table, {
-      onDisplayChange: (listener) => {
-        tableDisplayChange(listener);
-        table.exec();
-      }
-    });
+      return table;
   };
 
   const theadHtml = `
@@ -19786,7 +19734,7 @@
     const domTable = makeTable(container);
     // const bottomControls = makeBottomControls(container);
 
-    const tableComponent = tableComponentFactory({
+    const tableComponent = table$1({
       el: container,
       table: smartCollection
     });
@@ -19819,13 +19767,11 @@
     return getInventory().then(cacheTheInv);
   }
 
-  function itemsFromFolder(el) {return el.items;}
-
-  function composedPot(el) {return el.t === 15;}
+  const composedPot = el => el.t === 15;
 
   function getComposedFromBp(data) {
     if (!Array.isArray(data.r)) {return;}
-    composed = Array.prototype.concat.apply([], data.r.map(itemsFromFolder))
+    composed = Array.prototype.concat.apply([], data.r.map(el => el.items))
       .filter(composedPot);
   }
 
@@ -19851,7 +19797,7 @@
   function addComposedName(item) {
     if (item.type === 15) {
       var cp = composed.find(partial(thisPot, item.inv_id));
-      item.item_name = cp.n;
+      if (cp) {item.item_name = cp.n;}
     }
   }
 
@@ -19885,7 +19831,7 @@
     clear.on('click', partial(clearSearch, fshInv, input));
   }
 
-  function decorate$3() {
+  function decorate$4() {
     if (theInv.folders) {
       theInv.folders['-1'] = 'Main';
     }
@@ -20253,7 +20199,7 @@
     return fallback(row.folder_id, row.player_id);
   }
 
-  function playerName$4(f) {
+  function playerName$5(f) {
     if (!calf.membrList[f]) {return '???';}
     return calf.membrList[f].username;
   }
@@ -20268,13 +20214,13 @@
       return whereRenderUserFolder(row);
     }
     if (row.player_id === -1) {return '~';}
-    return playerName$4(row.player_id);
+    return playerName$5(row.player_id);
   }
 
   function whereRenderGuildDisplay(row) {
     if (row.player_id === -1) {return 'Guild Store';}
     return '<a class="fshMaroon" href="' + playerIdUrl +
-      row.player_id + '">' + playerName$4(row.player_id) + '</a>';
+      row.player_id + '">' + playerName$5(row.player_id) + '</a>';
   }
 
   function numeric(a, b) {return a[0] - b[0];}
@@ -20301,7 +20247,7 @@
 
   function whereRenderGuildFilter(row) {
     if (row.player_id === -1) {return 'Guild Store';}
-    return playerName$4(row.player_id);
+    return playerName$5(row.player_id);
   }
 
   function whereRenderFilter(data, type, row) {
@@ -20742,7 +20688,7 @@
 
   function prepareLayout() {
     executeAll([
-      decorate$3,
+      decorate$4,
       lvlFilter$1,
       typeFilter,
       setFilter,
@@ -20891,7 +20837,7 @@
     '</tbody></table>' +
     '<table id="fshInjectHere">' +
     '</table>';
-  var headerRow$2 = '<tbody><tr>' +
+  var headerRow$3 = '<tbody><tr>' +
     '<td class="header" width="16">&nbsp;</td>' +
     '<td class="header" width="20%">Date</td>' +
     '<td class="header" width="80%">Message</td></tr></tbody>';
@@ -21022,7 +20968,7 @@
 
   function buildTable$1() {
     myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
-    insertHtmlBeforeEnd(myTable, headerRow$2);
+    insertHtmlBeforeEnd(myTable, headerRow$3);
 
     tmpGuildLog.forEach(buildRow$1);
 
@@ -21207,6 +21153,7 @@
       subcmd: 'reliclist',
       offset: fallback(offset, 0)
     }).then(function(json) {
+      console.log(json); // eslint-disable-line no-console
       var someRelics = json.r.relics;
       var newList = fallback(myList, []).concat(someRelics);
       if (json.r.remaining_relics > 0) {
@@ -21250,6 +21197,7 @@
   }
 
   function formatTime$1(time) {
+    if (!time) {return '';}
     var t = splitTime(time);
     return padZ(t[0]) + 'd ' +
       padZ(t[1]) + 'h ' +
@@ -21332,8 +21280,10 @@
   }
 
   function byMember(prev, curr) {
+    // if (curr.b === 11503) {
     prev[curr.player.name] = prev[curr.player.name] || [];
     prev[curr.player.name].push(curr);
+    // }
     return prev;
   }
 
@@ -21367,6 +21317,7 @@
   }
 
   function prepareData$1([json, guild]) {
+    // console.log(json);
     const pots = json.r.reduce(byMember, {});
     const members = processGuild(guild);
     return members.map(partial(decorateMembers, pots));
@@ -21398,7 +21349,7 @@
     const el = insertElement(pCC, createDiv());
     const domTable = makeTable$2(el);
     const table = smartTable({data});
-    const tableComponent = tableComponentFactory({el, table});
+    const tableComponent = table$1({el, table});
     tableComponent.onDisplayChange(partial(displayChange$1, domTable));
   }
 
@@ -21725,12 +21676,12 @@
 
   function alphaEntries(a, b) {return alpha(a[0], b[0]);}
 
-  function summary$1(pair) {return '<br>' + pair[1] + ' ' + pair[0] + '(s), ';}
+  function summary(pair) {return '<br>' + pair[1] + ' ' + pair[0] + '(s), ';}
 
   function gotGains(gains) {
     var gainHash = buildGainHash(gains);
     return '<br>' + gains.length + ' item(s):' +
-      Object.entries(gainHash).sort(alphaEntries).map(summary$1).join('');
+      Object.entries(gainHash).sort(alphaEntries).map(summary).join('');
   }
 
   function getGains(report) {
@@ -21849,7 +21800,7 @@
     }
   }
 
-  function togglePref$4(evt) {
+  function togglePref$5(evt) {
     if (evt.target.id === enableSeTracker$2) {
       calf.enableSeTracker = !calf.enableSeTracker;
       setValue(enableSeTracker$2, calf.enableSeTracker);
@@ -21868,7 +21819,7 @@
     newCell = insertNewRow();
     newCell.className = 'fshCenter';
     newCell.innerHTML = simpleCheckboxHtml(enableSeTracker$2);
-    on(newCell, 'change', togglePref$4);
+    on(newCell, 'change', togglePref$5);
     if (calf.enableSeTracker) {
       getFshSeLog().then(waitForLog);
     }
@@ -22351,7 +22302,7 @@
     settings: {'-': {'-': injectSettings}},
     world: {'-': {'-': injectWorld}},
     news: news,
-    arena: arena,
+    arena: arena$1,
     questbook: questbook,
     profile: profile$2,
     auctionhouse: auctionhouse,
@@ -22479,7 +22430,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '119';
+  window.FSH.calf = '120';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

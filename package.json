@@ -1,6 +1,6 @@
 {
   "name": "fallenswordhelper",
-  "version": "15.23.119",
+  "version": "15.23.120",
   "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
   "scripts": {
     "addsourceroot": "node scripts/addSourceRoot.js",
@@ -52,24 +52,24 @@
   "homepage": "https://fallenswordhelper.github.io/fallenswordhelper",
   "devDependencies": {
     "cssnano": "^4.1.10",
-    "eslint": "^5.16.0",
-    "gzip-size": "^5.1.0",
-    "husky": "^2.2.0",
+    "eslint": "^6.0.0",
+    "gzip-size": "^5.1.1",
+    "husky": "^2.4.1",
     "postcss-nesting": "^7.0.0",
-    "rollup": "^1.11.3",
+    "rollup": "^1.16.2",
     "rollup-plugin-clear": "^2.0.7",
     "rollup-plugin-jscc": "^1.0.0",
     "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-node-resolve": "^4.2.4",
+    "rollup-plugin-node-resolve": "^5.0.4",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-serve": "^1.0.1",
-    "rollup-plugin-terser": "^4.0.4",
+    "rollup-plugin-terser": "^5.0.0",
     "stylelint-config-recommended": "^2.2.0",
     "stylelint-config-standard": "^18.3.0",
     "trucker": "^0.8.3"
   },
   "dependencies": {
-    "smart-table-core": "^3.0.3",
-    "smart-table-vanilla": "^0.1.0"
+    "smart-table-core": "^3.0.4",
+    "smart-table-vanilla": "^0.2.0"
   }
 }
