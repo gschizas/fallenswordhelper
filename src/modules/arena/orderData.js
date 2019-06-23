@@ -22,7 +22,9 @@ function players(theCells) { // jQuery
   var cell = theCells.eq(1);
   var matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
   if (matches) {
-    cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
+    cell.attr('data-order',
+      (Number(matches[1]) - Number(matches[2])) * 100 + Number(matches[2])
+    );
   }
 }
 

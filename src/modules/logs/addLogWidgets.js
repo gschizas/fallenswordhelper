@@ -13,6 +13,9 @@ import myRows from '../common/myRows';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import querySelector from '../common/querySelector';
+//#if _DEV  //  arena Combat
+import viewCombat from './viewCombat';
+//#endif
 import {addPvpSummary, initCache} from './addPvpSummary';
 import {
   attackplayerUrl,
@@ -103,6 +106,9 @@ function processLogWidgetRow(aRow) { // Legacy
     doLogWidgetRow(aRow, messageType);
     addPvpSummary(aRow, messageType);
     processLadder(aRow, messageType);
+    //#if _DEV  //  arena Combat
+    viewCombat(aRow);
+    //#endif
   }
 }
 
