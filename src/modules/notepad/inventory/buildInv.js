@@ -1,8 +1,8 @@
 import allthen from '../../common/allthen';
 import calf from '../../support/calf';
+import daLoadInventory from '../../_dataAccess/daLoadInventory';
 import fetchinv from '../../app/guild/fetchinv';
 import getInventory from '../../ajax/getInventory';
-import loadInventory from '../../app/profile/loadInventory';
 import partial from '../../common/partial';
 import report from '../../app/guild/inventory/report';
 
@@ -26,7 +26,7 @@ function getComposedFromBp(data) {
 }
 
 function doComposedFromBp() {
-  return loadInventory().then(getComposedFromBp);
+  return daLoadInventory().then(getComposedFromBp);
 }
 
 function getComposedFromGs(data) {
