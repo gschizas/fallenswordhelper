@@ -1,59 +1,29 @@
-import buffList from '../../support/buffObj.json';
+import buffReportParser from './buffReportParser.js';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
 import {fshBuffLog} from '../../support/constants';
 import getForage from '../../ajax/getForage';
+import {getStamAsString} from '../../common/buffUtils.js';
 import getValue from '../../system/getValue';
 import partial from '../../common/partial';
-import querySelectorArray from '../../common/querySelectorArray';
 import setForage from '../../ajax/setForage';
 
-function buff(thisBuff, el) {return el.name === thisBuff;}
-
-function getStamUsed(buffCast) {
-  var thisBuff = buffList.find(partial(buff, buffCast[1]));
-  if (thisBuff) {return thisBuff.stam.toString();}
-  return '-';
-}
-
-function successfull(timeStamp, buffCast) {
-  return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
-    ' stamina)<br>';
-}
-
-function rejected(timeStamp, buffsNotCast) {
-  return timeStamp + ' <span class="fshRed">' + buffsNotCast[0] + '</span><br>';
-}
-
-var transform;
-
-function buildTransform() {
-  return [
-    [new RegExp('Skill ([\\w ]*) level (\\d*) was activated on \'(\\w*)\''),
-      successfull],
-    [new RegExp('The skill ([\\w ]*) of current or higher level is currently ' +
-      'active on \'(\\w*)\''), rejected],
-    [new RegExp('Player \'(\\w*)\' has set their preferences to block the ' +
-      'skill \'([\\w ]*)\' from being cast on them.'), rejected]
-  ];
-}
-
-function doRegExp(el, pair) {
-  return [
-    pair[0].exec(el.innerText),
-    pair[1]
-  ];
-}
-
-function match(pair) {return pair[0] !== null;}
+const success = e => ' ' + e[0] + ' (' + getStamAsString(e[1]) +
+  ' stamina)<br>';
+const reject = e => ' <span class="fshRed">' + e[0] + '</span><br>';
 
 function logFormat(timeStamp, el) {
-  var transformed = transform.map(partial(doRegExp, el)).find(match);
-  return transformed[1](timeStamp, transformed[0]);
+  let result;
+  if (el[1]) {
+    result = success(el);
+  } else {
+    result = reject(el);
+  }
+  return timeStamp + result;
 }
 
 function buffResult(buffLog) {
   var timeStamp = formatLocalDateTime(new Date());
-  var buffsAttempted = querySelectorArray('#quickbuff-report p:not(.back)')
+  const buffsAttempted = buffReportParser(document)
     .map(partial(logFormat, timeStamp));
   setForage(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
 }
@@ -61,5 +31,4 @@ function buffResult(buffLog) {
 export default function updateBuffLog() {
   if (!getValue('keepBuffLog')) {return;}
   getForage(fshBuffLog).then(buffResult);
-  transform = buildTransform();
 }

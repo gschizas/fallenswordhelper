@@ -1,5 +1,5 @@
 import partial from '../common/partial';
-import quickbuff from '../app/quickbuff';
+import quickbuff from '../_dataAccess/daQuickbuff';
 import quickbuffSuccess from '../common/quickbuffSuccess';
 
 function processResult(trigger, json) {
