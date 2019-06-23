@@ -1,4 +1,5 @@
 import {getElementById} from '../common/getElement';
+import {imageServer} from '../system/system';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import {scouttowerUrl} from '../support/constants';
 
@@ -9,6 +10,6 @@ export default function scoutTowerLink() {
     insertHtmlBeforeEnd(parent, '&nbsp;<a href="' + scouttowerUrl +
       '" class="tip-static" data-tipped="View Scout Report">' +
       '<img id="fshScoutTower" ' +
-      'src="https://cdn.fallensword.com/structures/27.gif"></a>');
+      'src="' + imageServer + '/structures/27.gif"></a>');
   }
 }
