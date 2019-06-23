@@ -1,7 +1,7 @@
 import chunk from '../../common/chunk';
+import daSendToFolder from '../../_dataAccess/daSendToFolder';
 import {getElementById} from '../../common/getElement';
 import partial from '../../common/partial';
-import sendtofolder from '../../app/profile/sendtofolder';
 
 function checked(o) {
   if (!o.injectHere) {return;}
@@ -34,7 +34,7 @@ function removeInvIds(itemsAry, json) {
 }
 
 function moveList(itemsAry, folderId, list) {
-  sendtofolder(folderId, list).then(partial(removeInvIds, itemsAry));
+  daSendToFolder(folderId, list).then(partial(removeInvIds, itemsAry));
 }
 
 export default function moveItemsToFolder(itemsAry) { // jQuery.min
