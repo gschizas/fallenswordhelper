@@ -7,6 +7,7 @@ import xPath from '../common/xPath';
 import {def_subcmd, guideUrl} from '../support/constants';
 
 function getItemId(el) {
+  if (!el) {return;}
   var match = el.src.match(/\/items\/(\d+)\.gif/);
   if (match) {return match[1];}
 }
