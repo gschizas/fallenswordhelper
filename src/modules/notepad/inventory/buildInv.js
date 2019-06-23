@@ -17,13 +17,11 @@ function doInventory() {
   return getInventory().then(cacheTheInv);
 }
 
-function itemsFromFolder(el) {return el.items;}
-
-function composedPot(el) {return el.t === 15;}
+const composedPot = el => el.t === 15;
 
 function getComposedFromBp(data) {
   if (!Array.isArray(data.r)) {return;}
-  composed = Array.prototype.concat.apply([], data.r.map(itemsFromFolder))
+  composed = Array.prototype.concat.apply([], data.r.map(el => el.items))
     .filter(composedPot);
 }
 
@@ -49,7 +47,7 @@ function thisPot(inv_id, pot) {return pot.a === inv_id;}
 function addComposedName(item) {
   if (item.type === 15) {
     var cp = composed.find(partial(thisPot, item.inv_id));
-    item.item_name = cp.n;
+    if (cp) {item.item_name = cp.n;}
   }
 }
 
