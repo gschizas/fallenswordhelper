@@ -7,7 +7,7 @@ import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
 import on from '../common/on';
 import querySelector from '../common/querySelector';
-import {saveBoxes} from './settingObj';
+import saveBoxes from './saveBoxes.json';
 import {sendEvent} from '../support/fshGa';
 import setValue from '../system/setValue';
 import toggleVisibilty from '../common/toggleVisibilty';
