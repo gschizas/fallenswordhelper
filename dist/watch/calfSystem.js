@@ -2585,6 +2585,13 @@
     return qw;
   }
 
+  function backpack() {
+    return indexAjaxJson({
+      cmd: 'profile',
+      subcmd: 'fetchinv'
+    });
+  }
+
   function byFolder(items, folder) {
     return {
       id: folder.a,
@@ -2599,10 +2606,7 @@
   }
 
   function fetchinv() {
-    return indexAjaxJson({
-      cmd: 'profile',
-      subcmd: 'fetchinv'
-    }).then(formatResponse);
+    return backpack().then(formatResponse);
   }
 
   const tests = [
@@ -6121,7 +6125,7 @@
     sendEvent('keyHandler', func);
   }
 
-  function backpack() {
+  function backpack$1() {
     keyHandlerEvent('backpack');
     expandMenu('2');
     location.href = dropItemsUrl;
@@ -6324,7 +6328,7 @@
     ['>', movePage, '>'], // move to next page [>]
     ['G', createGroup], // create group [G]
     ['L', logPage], // Log Page [L]
-    ['b', backpack], // backpack [b]
+    ['b', backpack$1], // backpack [b]
     ['g', gotoGuild], // go to guild [g]
     ['j', joinAllGroup], // join all group [j]
     ['l', logPage], // Log Page [l]
@@ -10672,17 +10676,33 @@
     }
   }
 
-  function backpack$1() {
-    return indexAjaxJson({
-      cmd: 'profile',
-      subcmd: 'fetchinv'
-    });
+  function itemId(href) {
+    return href.match(/&id=(\d+)/)[1];
   }
 
   function itemStatus(data) {return data;}
 
   function doAction$1(fn, item, data) {
     return fn(item).then(partial(itemStatus, data));
+  }
+
+  function htmlResult(data) {
+    var info = infoBoxFrom(data);
+    if (info.search(/(successfully|gained|components)/) !== -1) {
+      return {s: true};
+    }
+    return {e: {message: info}, s: false};
+  }
+
+  function guildInvRecall(invId, playerId, mode) {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'recall',
+      id: invId,
+      player_id: playerId,
+      mode: mode
+    }).then(htmlResult);
   }
 
   function recall(invId, playerId, mode) {
@@ -10694,8 +10714,23 @@
     });
   }
 
+  function doFallback$1(invId, playerId, mode) {
+    return guildInvRecall(invId, playerId, mode);
+  }
+
+  function fallback$2(invId, playerId, mode, json) {
+    if (hasFailed(json)) {return doFallback$1(invId, playerId, mode);}
+    return json;
+  }
+
+  function daGuildRecall(invId, playerId, mode) {
+    return recall(invId, playerId, mode)
+      .then(partial(fallback$2, invId, playerId, mode))
+      .catch(partial(doFallback$1, invId, playerId, mode));
+  }
+
   function recallItem(invId, playerId, mode) {
-    return recall(invId, playerId, mode).then(ajaxReturnCode);
+    return daGuildRecall(invId, playerId, mode).then(ajaxReturnCode);
   }
 
   function gotBackpack(action, data, bpData) {
@@ -10713,7 +10748,7 @@
 
   function recallItemStatus(action, data) {
     if (data.r === 0 && action !== 'recall') {
-      return backpack$1().then(partial(gotBackpack, action, data));
+      return backpack().then(partial(gotBackpack, action, data));
     }
     return data;
   }
@@ -10789,10 +10824,6 @@
 
   function replyTo(self) {
     window.openQuickMsgDialog(self.getAttribute('target_player'));
-  }
-
-  function itemId(href) {
-    return href.match(/&id=(\d+)/)[1];
   }
 
   function targetPlayerId(href) {
@@ -11444,19 +11475,19 @@
     });
   }
 
-  function doFallback$1(folderId, itemsAry) {
+  function doFallback$2(folderId, itemsAry) {
     return moveItems(folderId, itemsAry);
   }
 
-  function fallback$2(folderId, itemsAry, json) {
-    if (hasFailed(json)) {return doFallback$1(folderId, itemsAry);}
+  function fallback$3(folderId, itemsAry, json) {
+    if (hasFailed(json)) {return doFallback$2(folderId, itemsAry);}
     return json;
   }
 
   function daSendToFolder(folderId, itemsAry) {
     return sendtofolder(folderId, itemsAry)
-      .then(partial(fallback$2, folderId, itemsAry))
-      .catch(partial(doFallback$1, folderId, itemsAry));
+      .then(partial(fallback$3, folderId, itemsAry))
+      .catch(partial(doFallback$2, folderId, itemsAry));
   }
 
   function checked(o) {
@@ -14237,19 +14268,19 @@
     });
   }
 
-  function doFallback$2(userAry, buffAry) {
+  function doFallback$3(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  function fallback$3(userAry, buffAry, json) {
-    if (hasFailed(json)) {return doFallback$2(userAry, buffAry);}
+  function fallback$4(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$3(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$3, userAry, buffAry))
-      .catch(partial(doFallback$2, userAry, buffAry));
+      .then(partial(fallback$4, userAry, buffAry))
+      .catch(partial(doFallback$3, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -19823,8 +19854,86 @@
     return guild({subcmd: 'fetchinv'});
   }
 
+  function updateType(item) {
+    item.a = Number(item.a);
+    item.b = Number(item.b);
+    item.l = Number(item.l);
+    if (item.extra) {
+      item.n = item.extra.name;
+    }
+    item.t = Number(item.t);
+    return item;
+  }
+
+  function formatResponse$2(json) {
+    return {r: json.map(updateType), s: true};
+  }
+
+  function guildFetchInv() {
+    return indexAjaxJson({
+      cmd: 'guild',
+      subcmd: 'fetchinv'
+    }).then(formatResponse$2);
+  }
+
+  function doFallback$4() {
+    return guildFetchInv();
+  }
+
+  function fallback$5(json) {
+    if (hasFailed(json)) {return doFallback$4();}
+    return json;
+  }
+
+  function daGuildFetchInv() {
+    return fetchinv$1().then(fallback$5).catch(doFallback$4);
+  }
+
+  function details(td) {
+    const thisId = Number(itemId(td.children[0].href));
+    const thisName = getTextTrim(td.previousElementSibling);
+    const ret = {a: thisId};
+    if (thisName.endsWith(' (Potion)')) {
+      ret.n = thisName.slice(0, -9);
+      ret.t = 15;
+    } else {
+      ret.n = thisName;
+      ret.t = -1;
+    }
+    return ret;
+  }
+
+  function parseReport(html) {
+    const doc = createDocument(html);
+    const nodeList = querySelectorArray('#pCC table table td:nth-of-type(3n)',
+      doc);
+    return {r: nodeList.map(details), s: true};
+  }
+
+  // Incomplete
+  function guildReport() {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'report'
+    }).then(parseReport);
+  }
+
   function report() {
     return guildInventory$1({subcmd2: 'report'});
+  }
+
+  function doFallback$5() {
+    return guildReport();
+  }
+
+  function fallback$6(json) {
+    if (hasFailed(json)) {return doFallback$5();}
+    return json;
+  }
+
+  function daGuildReport() {
+    return report().then(fallback$6).catch(doFallback$5);
   }
 
   var theInv;
@@ -19856,11 +19965,11 @@
   }
 
   function doGs() {
-    return fetchinv$1().then(getComposedFromGs);
+    return daGuildFetchInv().then(getComposedFromGs);
   }
 
   function doReport() {
-    return report().then(getComposedFromGs);
+    return daGuildReport().then(getComposedFromGs);
   }
 
   function thisPot(inv_id, pot) {return pot.a === inv_id;}
@@ -22491,7 +22600,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '123';
+  window.FSH.calf = '124';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
