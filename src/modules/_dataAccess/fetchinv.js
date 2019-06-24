@@ -1,4 +1,4 @@
-import indexAjaxJson from '../ajax/indexAjaxJson';
+import backpack from '../ajaxQueue/backpack';
 import partial from '../common/partial';
 
 function byFolder(items, folder) {
@@ -15,8 +15,5 @@ function formatResponse(json) {
 }
 
 export default function fetchinv() {
-  return indexAjaxJson({
-    cmd: 'profile',
-    subcmd: 'fetchinv'
-  }).then(formatResponse);
+  return backpack().then(formatResponse);
 }

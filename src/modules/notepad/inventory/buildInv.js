@@ -1,10 +1,10 @@
 import allthen from '../../common/allthen';
 import calf from '../../support/calf';
+import daGuildFetchInv from '../../_dataAccess/daGuildFetchInv';
+import daGuildReport from '../../_dataAccess/daGuildReport';
 import daLoadInventory from '../../_dataAccess/daLoadInventory';
-import fetchinv from '../../app/guild/fetchinv';
 import getInventory from '../../ajax/getInventory';
 import partial from '../../common/partial';
-import report from '../../app/guild/inventory/report';
 
 export var theInv;
 var composed = [];
@@ -35,11 +35,11 @@ function getComposedFromGs(data) {
 }
 
 function doGs() {
-  return fetchinv().then(getComposedFromGs);
+  return daGuildFetchInv().then(getComposedFromGs);
 }
 
 function doReport() {
-  return report().then(getComposedFromGs);
+  return daGuildReport().then(getComposedFromGs);
 }
 
 function thisPot(inv_id, pot) {return pot.a === inv_id;}
