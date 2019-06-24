@@ -4,6 +4,7 @@ import classPair from '../../common/classPair';
 import equipItem from '../../ajax/equipItem';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import {imageServer} from '../../system/system';
+import itemId from './itemId';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
@@ -25,10 +26,6 @@ function wornItem(theTd) {
 
 function replyTo(self) {
   window.openQuickMsgDialog(self.getAttribute('target_player'));
-}
-
-function itemId(href) {
-  return href.match(/&id=(\d+)/)[1];
 }
 
 function targetPlayerId(href) {
