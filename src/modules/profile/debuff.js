@@ -1,17 +1,19 @@
 import errorDialog from '../app/errorDialog';
+import fetchdata from '../ajax/fetchdata';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import hideQTip from '../common/hideQTip';
 import jConfirm from '../common/jConfirm';
 import on from '../common/on';
 import partial from '../common/partial';
-import removeskill from '../app/profile/removeskill';
 import {sendEvent} from '../support/fshGa';
 
-var disableDeactivatePrompts;
+let disableDeactivatePrompts;
+const success = json => json && json.response && json.response.response === 0;
+const removeskill = buffId => fetchdata({a: 22, id: buffId});
 
 function debuffSuccess(aLink, json) {
-  if (json.s) {aLink.parentNode.innerHTML = '';}
+  if (success(json)) {aLink.parentNode.innerHTML = '';}
 }
 
 function doDebuff(aLink) { // jQuery.min
