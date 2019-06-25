@@ -1,7 +1,7 @@
 import ajaxReturnCode from '../app/ajaxReturnCode';
+import daUseItem from '../_dataAccess/daUseItem';
 import errorDialog from '../app/errorDialog';
-import useitem from '../app/profile/useitem';
 
 export default function useItem(backpackInvId) {
-  return useitem(backpackInvId).then(errorDialog).then(ajaxReturnCode);
+  return daUseItem(backpackInvId).then(errorDialog).then(ajaxReturnCode);
 }

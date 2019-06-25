@@ -1,4 +1,6 @@
+import {composingFragmentType} from '../../support/constants';
 import {createTable} from '../../common/cElement';
+import daUseItem from '../../_dataAccess/daUseItem';
 import eventHandler5 from '../../common/eventHandler5';
 import {getElementById} from '../../common/getElement';
 import getInventory from '../../ajax/getInventory';
@@ -12,7 +14,6 @@ import outputResult from '../../common/outputResult';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import selfIdIs from '../../common/selfIdIs';
-import useitem from '../../app/profile/useitem';
 
 var extTbl;
 var playerId;
@@ -30,9 +31,6 @@ function backpackRemove(invId) {
     extractInv.splice(thisIndex, 1);
   }
 }
-
-var composingFragmentType = [
-  'Common', 'Rare', 'Unique', 'Legendary', 'Super Elite', 'Crystalline'];
 
 function expandFrags(frag) {
   return frag.amount + ' x ' + composingFragmentType[frag.type];
@@ -57,7 +55,7 @@ function quickDoneExtracted(invId, json) {
   outputResult(processResult(json.r), buyResult);
 }
 
-function ajaxExtract(el) {useitem(el).then(partial(quickDoneExtracted, el));}
+function ajaxExtract(el) {daUseItem(el).then(partial(quickDoneExtracted, el));}
 
 function doExtract(target) {
   var inventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;

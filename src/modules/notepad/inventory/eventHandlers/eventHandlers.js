@@ -1,6 +1,7 @@
 import allChecks from './allChecks';
 import changeLvls from './changeLvls';
 import clearChecks from './clearChecks';
+import daStoreItems from '../../../_dataAccess/daStoreItems';
 import doAction from './doAction';
 import dropItem from '../../../ajax/dropItem';
 import equipItem from '../../../ajax/equipItem';
@@ -10,7 +11,6 @@ import partial from '../../../common/partial';
 import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
 import senditems from '../../../app/trade/senditems';
-import storeItems from '../../../ajax/storeItems';
 import useItem from '../../../ajax/useItem';
 import {queueRecallItem, queueTakeItem} from '../../../ajaxQueue/queue';
 
@@ -48,7 +48,7 @@ function doMoveItem(e) { // jQuery
 
 function doStoreItem(e) { // jQuery
   var self = $(e.target);
-  doAction(partial(storeItems, [self.attr('invid')]), self);
+  doAction(partial(daStoreItems, [self.attr('invid')]), self);
 }
 
 function doDropItem(e) { // jQuery
