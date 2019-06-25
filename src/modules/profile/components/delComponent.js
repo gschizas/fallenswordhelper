@@ -1,5 +1,5 @@
 import destroyComponent from '../../app/profile/destroycomponent';
-import errorDialog from '../../app/errorDialog';
+import errorDialog from '../../common/errorDialog';
 import getText from '../../common/getText';
 import {itemRE} from '../../support/constants';
 import partial from '../../common/partial';

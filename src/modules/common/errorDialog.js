@@ -1,4 +1,4 @@
-import dialogMsg from '../common/dialogMsg';
+import dialogMsg from './dialogMsg';
 
 function hasErrorMsg(json) {
   return json.e && json.e.message;
