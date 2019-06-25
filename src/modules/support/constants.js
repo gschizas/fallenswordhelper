@@ -128,3 +128,6 @@ export var def_statHp = 'stat-hp';
 export var def_statVl = 'stat-vl';
 
 export var GMSTORAGE_PATH = 'GM_';
+
+export const composingFragmentType = [
+  'Common', 'Rare', 'Unique', 'Legendary', 'Super Elite', 'Crystalline'];
