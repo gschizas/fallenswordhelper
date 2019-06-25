@@ -1,7 +1,8 @@
 import ajaxReturnCode from '../app/ajaxReturnCode';
-import dostoreitems from '../app/guild/inventory/dostoreitems';
+import daStoreItems from '../_dataAccess/daStoreItems';
+// import dostoreitems from '../app/guild/inventory/dostoreitems';
 import errorDialog from '../app/errorDialog';
 
 export default function storeItems(invIdAry) {
-  return dostoreitems(invIdAry).then(errorDialog).then(ajaxReturnCode);
+  return daStoreItems(invIdAry).then(errorDialog).then(ajaxReturnCode);
 }
