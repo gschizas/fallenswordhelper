@@ -1,3 +1,4 @@
+import daUnequipItem from '../_dataAccess/daUnequipItem';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
@@ -5,7 +6,6 @@ import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import on from '../common/on';
 import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
-import unequipitem from '../app/profile/unequipitem';
 import {createButton, createDiv} from '../common/cElement';
 
 var profileCombatSetDiv;
@@ -19,7 +19,7 @@ function clearBox(link, json) {
 function removeItem(link) {
   var item = /inventory_id=(\d+)/.exec(link.href)[1];
   if (item) {
-    unequipitem(item).then(partial(clearBox, link));
+    daUnequipItem(item).then(partial(clearBox, link));
   }
 }
 
