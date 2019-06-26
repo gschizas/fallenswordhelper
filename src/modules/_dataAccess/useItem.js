@@ -2,26 +2,27 @@ import {composingFragmentType} from '../support/constants';
 import indexAjaxData from '../ajax/indexAjaxData';
 import infoBoxFrom from '../common/InfoBoxFrom';
 
-function fragObj(result) {
-  const thisResult = result.match(/(\d+) x (.*)/);
+const extract = info => ({r: {item: {n: info.match(/'(.*)'/)[1]}}, s: true});
+
+function fragObj(pair) {
+  const thisResult = pair.match(/(\d+) x (.*)/);
   return {
     amount: thisResult[1],
     type: composingFragmentType.indexOf(thisResult[2])
   };
 }
 
+function stash(info) {
+  const frags = info.match(/You gained (.*) Fragments/)[1].split(', ')
+    .map(fragObj);
+  return {r: {frags}, s: true};
+}
+
 const outputLookup = [
   ['You successfully used', () => ({s: true})],
-  ['You successfully extracted', info => ({
-    r: {item: {n: info.match(/'(.*)'/)[1]}},
-    s: true
-  })],
+  ['You successfully extracted', extract],
   ['You failed to extract', () => ({r: {}, s: true})],
-  ['You gained', info => {
-    const frags = info.match(/You gained (.*) Fragments/)[1].split(', ')
-      .map(fragObj);
-    return {r: {frags}, s: true};
-  }]
+  ['You gained', stash]
 ];
 
 function formatResults(html) {
