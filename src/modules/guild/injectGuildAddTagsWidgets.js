@@ -1,5 +1,6 @@
 import clickThis from '../common/clickThis';
 import {createInput} from '../common/cElement';
+import daGsTake from '../_dataAccess/daGsTake';
 import {getElementById} from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import {imageServer} from '../system/system';
@@ -11,7 +12,6 @@ import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import setText from '../common/setText';
-import takeitem from '../app/guild/inventory/takeitem';
 
 function doItemTable(checkbox) {
   insertHtmlBeforeEnd(checkbox.parentNode.nextElementSibling
@@ -33,7 +33,7 @@ function takeResult(self, data) {
 function fastBp(el) {
   var itmId = el.parentNode.previousElementSibling.previousElementSibling
     .children[0].value;
-  takeitem(itmId).then(partial(takeResult, el));
+  daGsTake(itmId).then(partial(takeResult, el));
   setText('', el);
   el.className = 'guildTagSpinner';
   el.style.backgroundImage = 'url(\'' + imageServer +
