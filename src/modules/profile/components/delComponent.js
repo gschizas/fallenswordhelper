@@ -1,4 +1,4 @@
-import destroyComponent from '../../app/profile/destroycomponent';
+import daDestroyComponent from '../../_dataAccess/daDestroyComponent';
 import errorDialog from '../../common/errorDialog';
 import getText from '../../common/getText';
 import {itemRE} from '../../support/constants';
@@ -28,7 +28,7 @@ export default function delComponent(self) { // jQuery.min
   var matches = tipped.match(itemRE);
   var itemId = matches[1];
   var componentId = matches[2];
-  destroyComponent([componentId])
+  daDestroyComponent([componentId])
     .then(errorDialog)
     .then(partial(compDeleted, self, itemId));
 }
