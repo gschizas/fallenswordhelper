@@ -1,12 +1,12 @@
 import './impWarning.postcss';
 import {createSpan} from '../../../common/cElement';
+import daQuickbuff from '../../../_dataAccess/daQuickbuff';
 import {def_fetch_playerBuffs} from '../../../support/constants';
 import getBuff from './getBuff';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
 import on from '../../../common/on';
 import playerName from '../../../common/playerName';
-import quickbuff from '../../../app/quickbuff';
 import quickbuffSuccess from '../../../common/quickbuffSuccess';
 import setText from '../../../common/setText';
 import toggleForce from '../../../common/toggleForce';
@@ -22,7 +22,7 @@ function refreshBuffs(json) {
 
 function recastClick() {
   if (getBuff('Summon Shield Imp')) {return;}
-  quickbuff([playerName()], [55]).then(refreshBuffs);
+  daQuickbuff([playerName()], [55]).then(refreshBuffs);
 }
 
 function getImpsRemaining(imp) {
