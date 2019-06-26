@@ -1,8 +1,8 @@
 import allthen from '../../common/allthen';
 import chunk from '../../common/chunk';
 import {componentList} from './prepareComponentList';
+import daDestroyComponent from '../../_dataAccess/daDestroyComponent';
 import deleteVisible from './deleteVisible';
-import destroyComponent from '../../app/profile/destroycomponent';
 import {imageServer} from '../../system/system';
 import partial from '../../common/partial';
 import updateUsedCount from './updateUsedCount';
@@ -24,7 +24,7 @@ function destroyed(data) {
 function removeSpinner(td) {td.parentNode.remove();}
 
 function destroy(el) {
-  return destroyComponent(el).then(destroyed);
+  return daDestroyComponent(el).then(destroyed);
 }
 
 export default function delCompType(self) { // jQuery.min

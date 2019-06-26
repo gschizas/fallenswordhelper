@@ -1,4 +1,4 @@
-import errorDialog from '../app/errorDialog';
+import errorDialog from '../common/errorDialog';
 import fetchdata from '../ajax/fetchdata';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';

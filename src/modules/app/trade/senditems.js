@@ -1,4 +1,4 @@
-import ajaxReturnCode from '../ajaxReturnCode';
+import ajaxReturnCode from '../../common/ajaxReturnCode';
 import callApp from '../callApp';
 import getValue from '../../system/getValue';
 

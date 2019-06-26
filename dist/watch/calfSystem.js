@@ -2300,26 +2300,27 @@
     return infoBox(doc);
   }
 
-  function fragObj(result) {
-    const thisResult = result.match(/(\d+) x (.*)/);
+  const extract = info => ({r: {item: {n: info.match(/'(.*)'/)[1]}}, s: true});
+
+  function fragObj(pair) {
+    const thisResult = pair.match(/(\d+) x (.*)/);
     return {
       amount: thisResult[1],
       type: composingFragmentType.indexOf(thisResult[2])
     };
   }
 
+  function stash(info) {
+    const frags = info.match(/You gained (.*) Fragments/)[1].split(', ')
+      .map(fragObj);
+    return {r: {frags}, s: true};
+  }
+
   const outputLookup = [
     ['You successfully used', () => ({s: true})],
-    ['You successfully extracted', info => ({
-      r: {item: {n: info.match(/'(.*)'/)[1]}},
-      s: true
-    })],
+    ['You successfully extracted', extract],
     ['You failed to extract', () => ({r: {}, s: true})],
-    ['You gained', info => {
-      const frags = info.match(/You gained (.*) Fragments/)[1].split(', ')
-        .map(fragObj);
-      return {r: {frags}, s: true};
-    }]
+    ['You gained', stash]
   ];
 
   function formatResults(html) {
@@ -10658,6 +10659,25 @@
     getForage('fsh_titans').then(gotOldTitans); // Pref
   }
 
+  function takeItem(invId) {
+    return indexAjaxJson({
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'takeitem',
+      guildstore_id: invId,
+      ajax: 1
+    }).then(dialog);
+  }
+
+  function formatResults$1(json) {
+    if (json.r === 0) {return {s: true};}
+    return {e: {message: json.m}, s: false};
+  }
+
+  function gsTake(invId) {
+    return takeItem(invId).then(formatResults$1);
+  }
+
   function guildInventory$1(data) {
     return guild(extend({subcmd: 'inventory'}, data));
   }
@@ -10667,6 +10687,21 @@
       subcmd2: 'takeitem',
       guildstore_id: invId,
     });
+  }
+
+  function doFallback$2(invId) {
+    return gsTake(invId);
+  }
+
+  function fallback$3(invId, json) {
+    if (hasFailed(json)) {return doFallback$2(invId);}
+    return json;
+  }
+
+  function daGsTake(invId) {
+    return takeitem(invId)
+      .then(partial(fallback$3, invId))
+      .catch(partial(doFallback$2, invId));
   }
 
   function doItemTable(checkbox) {
@@ -10689,7 +10724,7 @@
   function fastBp(el) {
     var itmId = el.parentNode.previousElementSibling.previousElementSibling
       .children[0].value;
-    takeitem(itmId).then(partial(takeResult$1, el));
+    daGsTake(itmId).then(partial(takeResult$1, el));
     setText('', el);
     el.className = 'guildTagSpinner';
     el.style.backgroundImage = 'url(\'' + imageServer +
@@ -10766,19 +10801,19 @@
     });
   }
 
-  function doFallback$2(invId, playerId, mode) {
+  function doFallback$3(invId, playerId, mode) {
     return guildInvRecall(invId, playerId, mode);
   }
 
-  function fallback$3(invId, playerId, mode, json) {
-    if (hasFailed(json)) {return doFallback$2(invId, playerId, mode);}
+  function fallback$4(invId, playerId, mode, json) {
+    if (hasFailed(json)) {return doFallback$3(invId, playerId, mode);}
     return json;
   }
 
   function daGuildRecall(invId, playerId, mode) {
     return recall(invId, playerId, mode)
-      .then(partial(fallback$3, invId, playerId, mode))
-      .catch(partial(doFallback$2, invId, playerId, mode));
+      .then(partial(fallback$4, invId, playerId, mode))
+      .catch(partial(doFallback$3, invId, playerId, mode));
   }
 
   function recallItem(invId, playerId, mode) {
@@ -10808,16 +10843,6 @@
   function pipeRecallToQueue(invId, playerId, mode, action) {
     return recallItem(invId, playerId, mode).then(errorDialog)
       .then(partial(recallItemStatus, action));
-  }
-
-  function takeItem(invId) {
-    return indexAjaxJson({
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'takeitem',
-      guildstore_id: invId,
-      ajax: 1
-    }).then(dialog);
   }
 
   function additionalAction(action, data) {
@@ -11374,6 +11399,48 @@
     eventHandlers$1();
   }
 
+  function senditems(invIdAry) {
+    return callApp({
+      cmd: 'trade',
+      subcmd: 'senditems',
+      xc: window.ajaxXC,
+      target_username: getValue('itemRecipient'),
+      items: invIdAry
+    }).then(ajaxReturnCode);
+  }
+
+  function ajaxResult(html) {
+    var info = infoBoxFrom(html);
+    var _r = 1;
+    if (info.includes('successfully')) {_r = 0;}
+    return {r: _r, m: info};
+  }
+
+  function senditems$1(invIdAry) {
+    return indexAjaxData({
+      cmd: 'trade',
+      subcmd: 'senditems',
+      xc: window.ajaxXC,
+      target_username: getValue('itemRecipient'),
+      sendItemList: invIdAry
+    }).then(ajaxResult);
+  }
+
+  function doFallback$4(invIdAry) {
+    return senditems$1(invIdAry);
+  }
+
+  function fallback$5(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$4(invIdAry);}
+    return json;
+  }
+
+  function daSendItems(invIdAry) {
+    return senditems(invIdAry)
+      .then(partial(fallback$5, invIdAry))
+      .catch(partial(doFallback$4, invIdAry));
+  }
+
   var invItems$1;
   var itemId$1;
 
@@ -11527,19 +11594,19 @@
     });
   }
 
-  function doFallback$3(folderId, itemsAry) {
+  function doFallback$5(folderId, itemsAry) {
     return moveItems(folderId, itemsAry);
   }
 
-  function fallback$4(folderId, itemsAry, json) {
-    if (hasFailed(json)) {return doFallback$3(folderId, itemsAry);}
+  function fallback$6(folderId, itemsAry, json) {
+    if (hasFailed(json)) {return doFallback$5(folderId, itemsAry);}
     return json;
   }
 
   function daSendToFolder(folderId, itemsAry) {
     return sendtofolder(folderId, itemsAry)
-      .then(partial(fallback$4, folderId, itemsAry))
-      .catch(partial(doFallback$3, folderId, itemsAry));
+      .then(partial(fallback$6, folderId, itemsAry))
+      .catch(partial(doFallback$5, folderId, itemsAry));
   }
 
   function checked(o) {
@@ -11621,16 +11688,6 @@
     var theTd = self.parentNode;
     disableOtherButton(theTd, otherClass);
     disableCheckbox(theTd);
-  }
-
-  function senditems(invIdAry) {
-    return callApp({
-      cmd: 'trade',
-      subcmd: 'senditems',
-      xc: window.ajaxXC,
-      target_username: getValue('itemRecipient'),
-      items: invIdAry
-    }).then(ajaxReturnCode);
   }
 
   var disableItemColoring$2;
@@ -11898,7 +11955,7 @@
         }
       ],
       [partial(hasClass, 'sendLink'),
-        partial(quickAction, senditems, 'Sent', '.dropLink')],
+        partial(quickAction, daSendItems, 'Sent', '.dropLink')],
       [partial(hasClass, 'dropLink'),
         partial(quickAction, dropItem, 'Dropped', '.sendLink')],
       [partial(hasClass, 'fshFolder'), partial(hideFolders$1, itemsAry$1, invItems$2)]
@@ -12269,7 +12326,7 @@
     }
   }
 
-  // import results from '../app/arena/results';
+  // import results from '../---/arena/results';
 
   function getPvpId(aRow) {
     return aRow.cells[2] && /pvp_id=(\d+)/.exec(aRow.cells[2].innerHTML);
@@ -12737,12 +12794,41 @@
     });
   }
 
+  function formatResults$2(html) {
+    const info = infoBoxFrom(html);
+    if (info === 'You purchased the item!') {return {s: true};}
+    return {e: {message: info}, s: false};
+  }
+
+  function bazaarBuy(item) {
+    return indexAjaxData({
+      cmd: 'potionbazaar',
+      subcmd: 'buyitem',
+      item_id: item
+    }).then(formatResults$2);
+  }
+
   function buyitem(item) {
     return callApp({
       cmd: 'potionbazaar',
       subcmd: 'buyitem',
       item_id: item
     });
+  }
+
+  function doFallback$6(item) {
+    return bazaarBuy(item);
+  }
+
+  function fallback$7(item, json) {
+    if (hasFailed(json)) {return doFallback$6(item);}
+    return json;
+  }
+
+  function daBazaarBuy(item) {
+    return buyitem(item)
+      .then(partial(fallback$7, item))
+      .catch(partial(doFallback$6, item));
   }
 
   var ItemId;
@@ -12809,7 +12895,7 @@
     var buyAmount = getText(getElementById('quantity'));
     setText('Buying ' + buyAmount + ' items', getElementById('buyResultLabel'));
     for (var i = 0; i < buyAmount; i += 1) {
-      buyitem(ItemId).then(done);
+      daBazaarBuy(ItemId).then(done);
     }
   }
 
@@ -12890,12 +12976,52 @@
     doBuffLinks$2();
   }
 
+  function tempinvTake(invId) {
+    return indexAjaxJson({
+      cmd: 'tempinv',
+      subcmd: 'takeitem',
+      temp_id: invId,
+      ajax: 1
+    });
+  }
+
+  function formatResults$3(resultAry) {
+    const good = resultAry.filter(e => e.r === 0);
+    const bad = resultAry.filter(e => e.r !== 0);
+    if (good.length > 0) {
+      return {r: good.map(e => ({id: e.temp_id})), s: true};
+    }
+    if (bad.length > 0) {
+      return {e: {message: bad[0].m}, s: false};
+    }
+    return {e: {message: resultAry[0].m}, s: false};
+  }
+
+  function mailboxTake(invIdAry) {
+    return allthen(invIdAry.map(tempinvTake), formatResults$3);
+  }
+
   function takeitems(invIdAry) {
     return callApp({
       cmd: 'tempinv',
       subcmd: 'takeitems',
       item: invIdAry
     });
+  }
+
+  function doFallback$7(invIdAry) {
+    return mailboxTake(invIdAry);
+  }
+
+  function fallback$8(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$7(invIdAry);}
+    return json;
+  }
+
+  function daMailboxTake(invIdAry) {
+    return takeitems(invIdAry)
+      .then(partial(fallback$8, invIdAry))
+      .catch(partial(doFallback$7, invIdAry));
   }
 
   function makeQtLabel(id, text, injector) {
@@ -12988,7 +13114,7 @@
   }
 
   function doTakeItem(takeResult, el) {
-    takeitems(el).then(partial(doneTake, takeResult));
+    daMailboxTake(el).then(partial(doneTake, takeResult));
   }
 
   function takeSimilar(itemList, takeResult, self) { // jQuery.min
@@ -13198,6 +13324,56 @@
     return parentDiv;
   }
 
+  function destroyComponent(componentIdAry) {
+    return profile({subcmd: 'destroycomponent', removeIndex: componentIdAry});
+  }
+
+  function ajaxResult$1(componentId, html) {
+    var info = infoBoxFrom(html);
+    var _r = 1;
+    if (info === 'Component destroyed.') {_r = 0;}
+    return {r: _r, m: info, c: componentId};
+  }
+
+  function destroyComponent$1(componentId) {
+    return indexAjaxData({
+      cmd: 'profile',
+      subcmd: 'destroycomponent',
+      component_id: componentId
+    }).then(partial(ajaxResult$1, componentId));
+  }
+
+  function formatResults$4(resultAry) {
+    const good = resultAry.filter(e => e.r === 0);
+    const bad = resultAry.filter(e => e.r === 1);
+    if (good.length > 0) {
+      return {r: good.map(e => e.c), s: true};
+    }
+    if (bad.length > 0) {
+      return {e: {message: bad[0].m}, s: false};
+    }
+    return {e: {message: resultAry[0].m}, s: false};
+  }
+
+  function dropComponent(componentIdAry) {
+    return allthen(componentIdAry.map(destroyComponent$1), formatResults$4);
+  }
+
+  function doFallback$8(componentIdAry) {
+    return dropComponent(componentIdAry);
+  }
+
+  function fallback$9(componentIdAry, json) {
+    if (hasFailed(json)) {return doFallback$8(componentIdAry);}
+    return json;
+  }
+
+  function daDestroyComponent(componentIdAry) {
+    return destroyComponent(componentIdAry)
+      .then(partial(fallback$9, componentIdAry))
+      .catch(partial(doFallback$8, componentIdAry));
+  }
+
   var invTableCache;
 
   function getInvTable() {
@@ -13233,10 +13409,6 @@
     ary.forEach(partial(blatElement, getVisibleComponents()));
   }
 
-  function destroyComponent(componentIdAry) {
-    return profile({subcmd: 'destroycomponent', removeIndex: componentIdAry});
-  }
-
   function updateUsedCount(del) {
     var invTableParent = getInvTable().parentNode;
     if (!invTableParent) {return;}
@@ -13266,7 +13438,7 @@
   function removeSpinner(td) {td.parentNode.remove();}
 
   function destroy(el) {
-    return destroyComponent(el).then(destroyed);
+    return daDestroyComponent(el).then(destroyed);
   }
 
   function delCompType(self) { // jQuery.min
@@ -13298,7 +13470,7 @@
     var matches = tipped.match(itemRE);
     var itemId = matches[1];
     var componentId = matches[2];
-    destroyComponent([componentId])
+    daDestroyComponent([componentId])
       .then(errorDialog)
       .then(partial(compDeleted, self, itemId));
   }
@@ -13553,11 +13725,40 @@
     initialiseFastWear();
   }
 
+  function formatResults$5(html) {
+    const info = infoBoxFrom(html);
+    if (!info) {return {s: true};}
+    return {e: {message: info}, s: false};
+  }
+
+  function unequip(item) {
+    return indexAjaxData({
+      cmd: 'profile',
+      subcmd: 'unequipitem',
+      inventory_id: item
+    }).then(formatResults$5);
+  }
+
   function unequipitem(item) {
     return profile({
       subcmd: 'unequipitem',
       inventory_id: item
     });
+  }
+
+  function doFallback$9(item) {
+    return unequip(item);
+  }
+
+  function fallback$a(item, json) {
+    if (hasFailed(json)) {return doFallback$9(item);}
+    return json;
+  }
+
+  function daUnequipItem(item) {
+    return unequipitem(item)
+      .then(partial(fallback$a, item))
+      .catch(partial(doFallback$9, item));
   }
 
   var profileCombatSetDiv;
@@ -13571,7 +13772,7 @@
   function removeItem(link) {
     var item = /inventory_id=(\d+)/.exec(link.href)[1];
     if (item) {
-      unequipitem(item).then(partial(clearBox, link));
+      daUnequipItem(item).then(partial(clearBox, link));
     }
   }
 
@@ -14324,19 +14525,19 @@
     });
   }
 
-  function doFallback$4(userAry, buffAry) {
+  function doFallback$a(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  function fallback$5(userAry, buffAry, json) {
-    if (hasFailed(json)) {return doFallback$4(userAry, buffAry);}
+  function fallback$b(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$a(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$5, userAry, buffAry))
-      .catch(partial(doFallback$4, userAry, buffAry));
+      .then(partial(fallback$b, userAry, buffAry))
+      .catch(partial(doFallback$a, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -15436,7 +15637,7 @@
 
   function recastClick() {
     if (getBuff$2('Summon Shield Imp')) {return;}
-    quickbuff$1([playerName()], [55]).then(refreshBuffs);
+    daQuickbuff([playerName()], [55]).then(refreshBuffs);
   }
 
   function getImpsRemaining(imp) {
@@ -18547,6 +18748,35 @@
     });
   }
 
+  function formatResult(html) {
+    var info = infoBoxFrom(html);
+    if (info.includes('successfully')) {
+      return {r: {item: {}}, s: true};
+    }
+    return {e: {message: info}, s: false};
+  }
+
+  function invent(recipe) {
+    return indexAjaxData({
+      cmd: 'inventing',
+      subcmd: 'doinvent',
+      recipe_id: recipe
+    }).then(formatResult);
+  }
+
+  const doFallback$b = recipe => invent(recipe);
+
+  function fallback$c(recipe, json) {
+    if (hasFailed(json)) {return doFallback$b(recipe);}
+    return json;
+  }
+
+  function daDoInvent(recipe) {
+    return doinvent(recipe)
+      .then(partial(fallback$c, recipe))
+      .catch(partial(doFallback$b, recipe));
+  }
+
   var invAmount;
   var invResultHeader;
   var invResults;
@@ -18578,7 +18808,7 @@
     var recipeID = querySelector('input[name="recipe_id"]').value;
     initResults('Inventing ' + String(amountToInvent) + ' Items');
     for (var i = 0; i < amountToInvent; i += 1) {
-      doinvent(recipeID).then(quickInventDone);
+      daDoInvent(recipeID).then(quickInventDone);
     }
   }
 
@@ -19923,17 +20153,17 @@
     }).then(formatResponse$2);
   }
 
-  function doFallback$5() {
+  function doFallback$c() {
     return guildFetchInv();
   }
 
-  function fallback$6(json) {
-    if (hasFailed(json)) {return doFallback$5();}
+  function fallback$d(json) {
+    if (hasFailed(json)) {return doFallback$c();}
     return json;
   }
 
   function daGuildFetchInv() {
-    return fetchinv$1().then(fallback$6).catch(doFallback$5);
+    return fetchinv$1().then(fallback$d).catch(doFallback$c);
   }
 
   function details(td) {
@@ -19970,17 +20200,17 @@
     return guildInventory$1({subcmd2: 'report'});
   }
 
-  function doFallback$6() {
+  function doFallback$d() {
     return guildReport();
   }
 
-  function fallback$7(json) {
-    if (hasFailed(json)) {return doFallback$6();}
+  function fallback$e(json) {
+    if (hasFailed(json)) {return doFallback$d();}
     return json;
   }
 
   function daGuildReport() {
-    return report().then(fallback$7).catch(doFallback$6);
+    return report().then(fallback$e).catch(doFallback$d);
   }
 
   var theInv;
@@ -20656,37 +20886,6 @@
     $(fshInv).DataTable().draw();
   }
 
-  function dostoreitems(invIdAry) {
-    return guildInventory$1({
-      subcmd2: 'dostoreitems',
-      storeIndex: invIdAry
-    });
-  }
-
-  function storeitems(invIdAry) {
-    return indexAjaxData({
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'dostoreitems',
-      storeIndex: invIdAry
-    }).then(htmlResult);
-  }
-
-  function doFallback$7(invIdAry) {
-    return storeitems(invIdAry);
-  }
-
-  function fallback$8(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$7(invIdAry);}
-    return json;
-  }
-
-  function daStoreItems(invIdAry) {
-    return dostoreitems(invIdAry)
-      .then(partial(fallback$8, invIdAry))
-      .catch(partial(doFallback$7, invIdAry));
-  }
-
   function removeClass(self) {
     self.closest('tr')
       .find('.takeItem, .recallItem, .wearItem, .dropItem, .sendItem, .storeItem')
@@ -20751,6 +20950,41 @@
     $(fshInv).DataTable().draw(false);
   }
 
+  function dostoreitems(invIdAry) {
+    return guildInventory$1({
+      subcmd2: 'dostoreitems',
+      storeIndex: invIdAry
+    });
+  }
+
+  function storeitems(invIdAry) {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'dostoreitems',
+      storeIndex: invIdAry
+    }).then(htmlResult);
+  }
+
+  function doFallback$e(invIdAry) {
+    return storeitems(invIdAry);
+  }
+
+  function fallback$f(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$e(invIdAry);}
+    return json;
+  }
+
+  function daStoreItems(invIdAry) {
+    return dostoreitems(invIdAry)
+      .then(partial(fallback$f, invIdAry))
+      .catch(partial(doFallback$e, invIdAry));
+  }
+
+  function storeItems(invIdAry) {
+    return daStoreItems(invIdAry).then(errorDialog).then(ajaxReturnCode);
+  }
+
   function setName$1(fshInv, e) { // jQuery
     $(fshInv).DataTable().search($(e.target).attr('set')).draw();
     $('#' + fshInv.id + '_filter input').trigger('focus');
@@ -20785,7 +21019,7 @@
 
   function doStoreItem(e) { // jQuery
     var self = $(e.target);
-    doAction$3(partial(daStoreItems, [self.attr('invid')]), self);
+    doAction$3(partial(storeItems, [self.attr('invid')]), self);
   }
 
   function doDropItem(e) { // jQuery
@@ -20795,7 +21029,7 @@
 
   function doSendItem(e) { // jQuery
     var self = $(e.target);
-    doAction$3(partial(senditems, [self.data('inv')]), self);
+    doAction$3(partial(daSendItems, [self.data('inv')]), self);
   }
 
   function elClick(fshInv, el) { // jQuery
@@ -22667,7 +22901,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '125';
+  window.FSH.calf = '126';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

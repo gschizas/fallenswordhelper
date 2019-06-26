@@ -1,5 +1,6 @@
 import './mailbox.postcss';
 import chunk from '../common/chunk';
+import daMailboxTake from '../_dataAccess/daMailboxTake';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
@@ -12,7 +13,6 @@ import once from '../common/once';
 import outputResult from '../common/outputResult';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
-import takeitems from '../app/tempinv/take';
 import {
   createDiv,
   createInput,
@@ -110,7 +110,7 @@ function doneTake(takeResult, json) {
 }
 
 function doTakeItem(takeResult, el) {
-  takeitems(el).then(partial(doneTake, takeResult));
+  daMailboxTake(el).then(partial(doneTake, takeResult));
 }
 
 function takeSimilar(itemList, takeResult, self) { // jQuery.min

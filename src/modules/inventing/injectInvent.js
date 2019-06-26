@@ -1,4 +1,4 @@
-import doinvent from '../app/inventing/doinvent';
+import daDoInvent from '../_dataAccess/daDoInvent';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jsonFail from '../common/jsonFail';
@@ -39,7 +39,7 @@ function quickInvent() {
   var recipeID = querySelector('input[name="recipe_id"]').value;
   initResults('Inventing ' + String(amountToInvent) + ' Items');
   for (var i = 0; i < amountToInvent; i += 1) {
-    doinvent(recipeID).then(quickInventDone);
+    daDoInvent(recipeID).then(quickInventDone);
   }
 }
 
