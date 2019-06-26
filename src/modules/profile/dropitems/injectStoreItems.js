@@ -1,6 +1,7 @@
 import './injectStoreItems.postcss';
 import add from '../../support/task';
 import batch from '../../common/batch';
+import daSendItems from '../../_dataAccess/daSendItems';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
@@ -20,7 +21,6 @@ import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import quickAction from './quickAction';
 import selfIdIs from '../../common/selfIdIs';
-import senditems from '../../app/trade/senditems';
 import toggleForce from '../../common/toggleForce';
 import {
   ahSearchUrl,
@@ -170,7 +170,7 @@ function evts() {
       }
     ],
     [partial(hasClass, 'sendLink'),
-      partial(quickAction, senditems, 'Sent', '.dropLink')],
+      partial(quickAction, daSendItems, 'Sent', '.dropLink')],
     [partial(hasClass, 'dropLink'),
       partial(quickAction, dropItem, 'Dropped', '.sendLink')],
     [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)]

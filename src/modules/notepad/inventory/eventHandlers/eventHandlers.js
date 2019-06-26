@@ -1,6 +1,7 @@
 import allChecks from './allChecks';
 import changeLvls from './changeLvls';
 import clearChecks from './clearChecks';
+import daSendItems from '../../../_dataAccess/daSendItems';
 import doAction from './doAction';
 import dropItem from '../../../ajax/dropItem';
 import equipItem from '../../../ajax/equipItem';
@@ -9,7 +10,6 @@ import moveItem from '../../../ajax/moveItem';
 import partial from '../../../common/partial';
 import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
-import senditems from '../../../app/trade/senditems';
 import storeItems from '../../../ajax/storeItems';
 import useItem from '../../../ajax/useItem';
 import {queueRecallItem, queueTakeItem} from '../../../ajaxQueue/queue';
@@ -58,7 +58,7 @@ function doDropItem(e) { // jQuery
 
 function doSendItem(e) { // jQuery
   var self = $(e.target);
-  doAction(partial(senditems, [self.data('inv')]), self);
+  doAction(partial(daSendItems, [self.data('inv')]), self);
 }
 
 function elClick(fshInv, el) { // jQuery
