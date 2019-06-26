@@ -1,4 +1,4 @@
-import buyitem from './app/potionbazaar/buyitem';
+import daBazaarBuy from './_dataAccess/daBazaarBuy';
 import getArrayByTagName from './common/getArrayByTagName';
 import {getElementById} from './common/getElement';
 import getElementsByTagName from './common/getElementsByTagName';
@@ -77,7 +77,7 @@ function buy() { // jQuery.min
   var buyAmount = getText(getElementById('quantity'));
   setText('Buying ' + buyAmount + ' items', getElementById('buyResultLabel'));
   for (var i = 0; i < buyAmount; i += 1) {
-    buyitem(ItemId).then(done);
+    daBazaarBuy(ItemId).then(done);
   }
 }
 
