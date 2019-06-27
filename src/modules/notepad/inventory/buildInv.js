@@ -4,6 +4,7 @@ import daGuildFetchInv from '../../_dataAccess/daGuildFetchInv';
 import daGuildReport from '../../_dataAccess/daGuildReport';
 import daLoadInventory from '../../_dataAccess/daLoadInventory';
 import getInventory from '../../ajax/getInventory';
+import {isArray} from '../../common/isArray';
 import partial from '../../common/partial';
 
 export var theInv;
@@ -20,7 +21,7 @@ function doInventory() {
 const composedPot = el => el.t === 15;
 
 function getComposedFromBp(data) {
-  if (!Array.isArray(data.r)) {return;}
+  if (!isArray(data.r)) {return;}
   composed = Array.prototype.concat.apply([], data.r.map(el => el.items))
     .filter(composedPot);
 }
@@ -30,7 +31,7 @@ function doComposedFromBp() {
 }
 
 function getComposedFromGs(data) {
-  if (!Array.isArray(data.r)) {return;}
+  if (!isArray(data.r)) {return;}
   composed = composed.concat(data.r.filter(composedPot));
 }
 

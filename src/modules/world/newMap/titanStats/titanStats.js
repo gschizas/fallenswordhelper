@@ -1,4 +1,5 @@
 import calf from '../../../support/calf';
+import {isArray} from '../../../common/isArray';
 import partial from '../../../common/partial';
 import {processTitans} from './processTitans';
 import scouttower from '../../../app/guild/scouttower';
@@ -16,11 +17,11 @@ function clearTheTimeout() {
 }
 
 function goodData(data) {
-  return data.s && Array.isArray(data.r);
+  return data.s && isArray(data.r);
 }
 
 function titanToShow(dynamic) {
-  return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan);
+  return calf.showTitanInfo && isArray(dynamic) && dynamic.some(hasTitan);
 }
 
 function processScoutTower(ast, data) {

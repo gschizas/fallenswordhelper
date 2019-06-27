@@ -2,6 +2,7 @@ import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
+import {isArray} from '../../common/isArray';
 import loadComponents from '../../app/profile/loadcomponents';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
@@ -56,7 +57,7 @@ function makeTallyTable(data) {
 }
 
 function displayComponentTally(self, data) {
-  if (!Array.isArray(data.r)) {return;}
+  if (!isArray(data.r)) {return;}
   var sumComp = self.parentNode;
   if (sumComp) {
     sumComp.innerHTML = '';

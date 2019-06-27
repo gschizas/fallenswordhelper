@@ -10,6 +10,7 @@ import hasClass from '../../common/hasClass';
 import hasClasses from '../../common/hasClasses';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import {isArray} from '../../common/isArray';
 import jConfirm from '../../common/jConfirm';
 import jQueryPresent from '../../common/jQueryPresent';
 import on from '../../common/on';
@@ -96,7 +97,7 @@ function evts5() {
 }
 
 function goodData(appInv) {
-  return appInv && appInv.s && Array.isArray(appInv.r);
+  return appInv && appInv.s && isArray(appInv.r);
 }
 
 function makePref(thisList) {

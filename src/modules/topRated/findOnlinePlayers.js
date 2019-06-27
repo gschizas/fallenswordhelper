@@ -2,6 +2,7 @@ import allthen from '../common/allthen';
 import findplayer from '../app/findplayer';
 import getPlayersByGuild from './getPlayersByGuild';
 import guildView from '../app/guild/view';
+import {isArray} from '../common/isArray';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
 import playerName from '../common/playerName';
@@ -26,7 +27,7 @@ function guildPlayer(guildMembers, player) {
 }
 
 function returnPlayer(player, json) {
-  if (json.s && Array.isArray(json.r)) {parsePlayer(player, json.r[0]);}
+  if (json.s && isArray(json.r)) {parsePlayer(player, json.r[0]);}
 }
 
 function returnSelf(player, json) {
