@@ -1,10 +1,11 @@
+import {arrayFrom} from '../common/arrayFrom';
 import {getElementById} from '../common/getElement';
 import getTextTrim from '../common/getTextTrim';
 import querySelector from '../common/querySelector';
 import {def_statAttack, def_statDefense} from '../support/constants';
 
 function thisText(thisNode) {
-  return Array.from(thisNode.childNodes)
+  return arrayFrom(thisNode.childNodes)
     .filter(el => el.nodeType === 3)
     .map(getTextTrim)
     .join('');

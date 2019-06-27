@@ -1,5 +1,6 @@
+import {arrayFrom} from '../../common/arrayFrom';
 import hideElement from '../../common/hideElement';
 
 export default function hideNodeList(nodeList) {
-  Array.from(nodeList).forEach(hideElement);
+  arrayFrom(nodeList).forEach(hideElement);
 }

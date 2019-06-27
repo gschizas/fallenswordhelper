@@ -1,3 +1,4 @@
+import {arrayFrom} from '../../common/arrayFrom';
 import batch from '../../common/batch';
 import getMembrList from '../../ajax/getMembrList';
 import getText from '../../common/getText';
@@ -12,7 +13,7 @@ import {doButtons, setCharacterRow} from './doButtons';
 function findTheRows() {
   var outerTable = pCC.lastElementChild.previousElementSibling;
   if (outerTable.rows && outerTable.rows.length > 7) {
-    return Array.from(outerTable.rows[7].children[0].children[0].rows);
+    return arrayFrom(outerTable.rows[7].children[0].children[0].rows);
   }
 }
 

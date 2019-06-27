@@ -1,4 +1,5 @@
 import allthen from '../common/allthen';
+import {arrayFrom} from '../common/arrayFrom';
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
 import {dataRows} from '../common/dataRows';
@@ -113,7 +114,7 @@ function processLogWidgetRow(aRow) { // Legacy
 }
 
 function processTableRows(logTable) {
-  Array.from(logTable.rows).filter(dataRows(3, 0)).forEach(processLogWidgetRow);
+  arrayFrom(logTable.rows).filter(dataRows(3, 0)).forEach(processLogWidgetRow);
 }
 
 function openMsgDialog(evt) {

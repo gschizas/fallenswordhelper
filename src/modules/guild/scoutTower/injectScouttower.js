@@ -1,3 +1,4 @@
+import {arrayFrom} from '../../common/arrayFrom';
 import {createAnchor} from '../../common/cElement';
 import {dataRows} from '../../common/dataRows';
 import displayTracker from './displayTracker';
@@ -112,7 +113,7 @@ function decorate(newTitans, aRow) {
 }
 
 function doTooMuch(titanTable, newTitans) {
-  Array.from(titanTable.rows).filter(dataRows(4, 0))
+  arrayFrom(titanTable.rows).filter(dataRows(4, 0))
     .forEach(partial(decorate, newTitans));
 }
 

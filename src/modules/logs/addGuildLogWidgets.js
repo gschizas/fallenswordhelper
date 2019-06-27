@@ -1,3 +1,4 @@
+import {arrayFrom} from '../common/arrayFrom';
 import contains from '../common/contains';
 import {dataRows} from '../common/dataRows';
 import getArrayByTagName from '../common/getArrayByTagName';
@@ -32,7 +33,7 @@ function stripClassName(el) {el.className = '';}
 
 function findPlayers(aRow) { // Legacy
   if (msgDoesNotIncludePlayer(aRow)) {
-    Array.from(aRow.cells).forEach(stripClassName);
+    arrayFrom(aRow.cells).forEach(stripClassName);
     aRow.classList.add('fshGrey');
     aRow.classList.add('fshXSmall');
   }
@@ -77,7 +78,7 @@ function guildLogWidgetsEnabled() { // Legacy
   var logTable = messageNameCell.parentNode.parentNode.parentNode;
   messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
     '(Guild Log messages not involving self are dimmed!)</span>';
-  Array.from(logTable.rows).filter(dataRows(3, 0))
+  arrayFrom(logTable.rows).filter(dataRows(3, 0))
     .forEach(processGuildWidgetRow);
 }
 

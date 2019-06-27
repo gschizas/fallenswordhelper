@@ -1,3 +1,4 @@
+import {arrayFrom} from '../../common/arrayFrom';
 import calf from '../../support/calf';
 import {cmdUrl} from '../../support/constants';
 import {createTFoot} from '../../common/cElement';
@@ -36,14 +37,14 @@ function cellText(cell, i) {
 }
 
 function bodyText(membrList, row) {
-  var foo = Array.from(row.cells, cellText);
+  var foo = arrayFrom(row.cells, cellText);
   foo.splice(0, 1, playerName(foo[0], membrList),
     playerLevel(foo[0], membrList), playerRank(foo[0], membrList));
   return foo;
 }
 
 function getData(list, membrList) {
-  return Array.from(list.rows).slice(1, -1)
+  return arrayFrom(list.rows).slice(1, -1)
     .map(partial(bodyText, membrList));
 }
 
