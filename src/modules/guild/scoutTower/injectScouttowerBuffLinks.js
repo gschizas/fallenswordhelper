@@ -1,7 +1,7 @@
 import containsText from '../../common/containsText';
+import {dataRows} from '../../common/dataRows';
 import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import myRows from '../../common/myRows';
 import on from '../../common/on';
 import openQuickBuffByName from '../../common/openQuickBuffByName';
 
@@ -16,7 +16,7 @@ function memberName(el) {return getText(el.cells[0].children[0].children[0]);}
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;
   var shortList = Array.from(titanTable.rows)
-    .filter(myRows(3, 0)).map(memberName);
+    .filter(dataRows(3, 0)).map(memberName);
   openQuickBuffByName(shortList.join());
 }
 
@@ -40,7 +40,7 @@ function playerBufflink(el) {
 }
 
 function doBuffLinks(titanTable) {
-  Array.from(titanTable.rows).filter(myRows(3, 0)).forEach(playerBufflink);
+  Array.from(titanTable.rows).filter(dataRows(3, 0)).forEach(playerBufflink);
   insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
     ' <button class="fshBl fshXSmall">all</button>');
 }

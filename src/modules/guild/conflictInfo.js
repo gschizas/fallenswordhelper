@@ -1,7 +1,7 @@
 import conflicts from '../ajax/conflicts';
 import createDocument from '../system/createDocument';
+import {dataRows} from '../common/dataRows';
 import {guildSubcmdUrl} from '../support/constants';
-import myRows from '../common/myRows';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
 
@@ -29,7 +29,7 @@ function hazConflict(conflictTable, curPage, insertHere) { // Legacy
   if (curPage === 1) {
     conflictHeader(insertHere);
   }
-  Array.from(conflictTable.rows).filter(myRows(7, 0))
+  Array.from(conflictTable.rows).filter(dataRows(7, 0))
     .forEach(partial(conflictRow, insertHere));
 }
 

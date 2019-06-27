@@ -1,6 +1,7 @@
 import allthen from '../common/allthen';
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
+import {dataRows} from '../common/dataRows';
 import doBuffLink from './doBuffLink';
 import doChat from './doChat';
 import getCalfPrefs from '../common/getCalfPrefs';
@@ -9,7 +10,6 @@ import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import myRows from '../common/myRows';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import querySelector from '../common/querySelector';
@@ -113,7 +113,7 @@ function processLogWidgetRow(aRow) { // Legacy
 }
 
 function processTableRows(logTable) {
-  Array.from(logTable.rows).filter(myRows(3, 0)).forEach(processLogWidgetRow);
+  Array.from(logTable.rows).filter(dataRows(3, 0)).forEach(processLogWidgetRow);
 }
 
 function openMsgDialog(evt) {

@@ -1,4 +1,5 @@
 import {createAnchor} from '../../common/cElement';
+import {dataRows} from '../../common/dataRows';
 import displayTracker from './displayTracker';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getForage from '../../ajax/getForage';
@@ -7,7 +8,6 @@ import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import myRows from '../../common/myRows';
 import {now} from '../../support/now';
 import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
@@ -112,7 +112,7 @@ function decorate(newTitans, aRow) {
 }
 
 function doTooMuch(titanTable, newTitans) {
-  Array.from(titanTable.rows).filter(myRows(4, 0))
+  Array.from(titanTable.rows).filter(dataRows(4, 0))
     .forEach(partial(decorate, newTitans));
 }
 
