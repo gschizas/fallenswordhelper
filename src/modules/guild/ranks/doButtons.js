@@ -1,9 +1,9 @@
+import daRankPosition from '../../_dataAccess/daRankPosition';
 import getValue from '../../system/getValue';
 import insertElementBefore from '../../common/insertElementBefore';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import playerName from '../../common/playerName';
-import rankPosition from '../../app/guild/ranks/position';
 import toLowerCase from '../../common/toLowerCase';
 
 var characterRow;
@@ -26,7 +26,7 @@ function getPxScroll(val) {
 
 function shuffleRows(evt, thisRankRow, targetRowNum) {
   var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
-  rankPosition(toLowerCase(evt.target.value), matchRankId[1]);
+  daRankPosition(toLowerCase(evt.target.value), matchRankId[1]);
   var injectRow = thisRankRow.parentNode.rows[targetRowNum];
   insertElementBefore(thisRankRow, injectRow);
   var pxScroll = getPxScroll(evt.target.value);
