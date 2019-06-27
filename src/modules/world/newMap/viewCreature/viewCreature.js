@@ -1,6 +1,7 @@
 import './viewCreature.postcss';
 import calf from '../../../support/calf';
 import {createDiv} from '../../../common/cElement';
+import daViewGroups from '../../../_dataAccess/daViewGroups';
 import {def_viewCreature} from '../../../support/constants';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
@@ -11,9 +12,9 @@ import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHTML from './evalHtml';
 import {getElementById} from '../../../common/getElement';
-import groupsView from '../../../app/guild/groups/view';
 import groupsViewStats from '../../../app/guild/groups/viewStats';
 import insertElement from '../../../common/insertElement';
+import {isArray} from '../../../common/isArray';
 import makeDoNotKillLink from './makeDoNotKillLink';
 import myStats from '../../../ajax/myStats';
 import partial from '../../../common/partial';
@@ -136,7 +137,9 @@ function myGroup(el) {
 }
 
 function getGroupId(json) {
-  return json.r.find(myGroup).id;
+  if (isArray(json.r)) {
+    return json.r.find(myGroup).id;
+  }
 }
 
 function processGroupStats(data, playerJson, groupJson) {
@@ -153,11 +156,14 @@ function processGroupStats(data, playerJson, groupJson) {
 }
 
 function getGroupStats(data, playerJson, groupId) {
-  groupsViewStats(groupId).then(partial(processGroupStats, data, playerJson));
+  if (groupId) {
+    groupsViewStats(groupId).then(partial(processGroupStats, data, playerJson));
+  }
 }
 
 function processGroup(data, playerJson) {
-  groupsView().then(getGroupId).then(partial(getGroupStats, data, playerJson));
+  daViewGroups().then(getGroupId)
+    .then(partial(getGroupStats, data, playerJson));
 }
 
 function processPlayer(data, playerJson) {
