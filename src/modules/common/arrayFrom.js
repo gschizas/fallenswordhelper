@@ -1,1 +1,1 @@
-export const arrayFrom = e => Array.from(e);
+export const arrayFrom = (e, mapFn) => Array.from(e, mapFn);
