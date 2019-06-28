@@ -1,6 +1,7 @@
 import './viewCreature.postcss';
 import calf from '../../../support/calf';
 import {createDiv} from '../../../common/cElement';
+import daGroupStats from '../../../_dataAccess/daGroupStats';
 import daViewGroups from '../../../_dataAccess/daViewGroups';
 import {def_viewCreature} from '../../../support/constants';
 import evalAnalysis from './evalAnalysis';
@@ -12,7 +13,6 @@ import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHTML from './evalHtml';
 import {getElementById} from '../../../common/getElement';
-import groupsViewStats from '../../../app/guild/groups/viewStats';
 import insertElement from '../../../common/insertElement';
 import {isArray} from '../../../common/isArray';
 import makeDoNotKillLink from './makeDoNotKillLink';
@@ -157,7 +157,7 @@ function processGroupStats(data, playerJson, groupJson) {
 
 function getGroupStats(data, playerJson, groupId) {
   if (groupId) {
-    groupsViewStats(groupId).then(partial(processGroupStats, data, playerJson));
+    daGroupStats(groupId).then(partial(processGroupStats, data, playerJson));
   }
 }
 
