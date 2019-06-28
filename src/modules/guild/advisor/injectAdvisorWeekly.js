@@ -1,11 +1,11 @@
 import addCommas from '../../system/addCommas';
-import advisorView from '../../app/guild/advisorView';
 import allthen from '../../common/allthen';
 import {createTFoot} from '../../common/cElement';
+import daAdvisor from '../../_dataAccess/daAdvisor';
 import getMembrList from '../../ajax/getMembrList';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
-import {injectTable, playerName, playerRank} from './helpers';
+import {injectTable, playerLevel, playerName, playerRank} from './helpers';
 //#if _BETA  //  Timing output
 import {time, timeEnd} from '../../support/debug';
 //#endif
@@ -17,7 +17,7 @@ function returnAdvisorPage(list, e, response) {
 }
 
 function getAdvisorPage(list, e) { // jQuery.min
-  return advisorView(e).then(partial(returnAdvisorPage, list, e));
+  return daAdvisor(e).then(partial(returnAdvisorPage, list, e));
 }
 
 function addElements(ary, v, i) {
@@ -67,7 +67,7 @@ function makeData(membrList, el) {
   var stats = el.stats.map(addCommas);
   return [
     playerName(el.player.name, membrList),
-    el.player.level,
+    playerLevel(el.player.name, membrList),
     playerRank(el.player.name, membrList)
   ].concat(stats);
 }
