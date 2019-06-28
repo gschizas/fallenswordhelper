@@ -1,4 +1,5 @@
 import fallback from '../system/fallback';
+import {isArray} from '../common/isArray';
 import isFunction from '../common/isFunction';
 import isUndefined from '../common/isUndefined';
 import on from '../common/on';
@@ -58,9 +59,9 @@ function initMessageHandler() {
 
 //#if _DEV  //  Not sending args as Array
 function devLog(args) {
-  if (args && !Array.isArray(args)) {
+  if (args && !isArray(args)) {
     // eslint-disable-next-line no-console
-    console.log('addTask Array.isArray(args)', Array.isArray(args));
+    console.log('addTask isArray(args)', isArray(args));
   }
 }
 

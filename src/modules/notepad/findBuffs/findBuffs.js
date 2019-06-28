@@ -1,3 +1,4 @@
+import {arrayFrom} from '../../common/arrayFrom.js';
 import buffList from '../../support/buffObj.json';
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
@@ -204,7 +205,7 @@ function deleteRow(buffTable) {buffTable.deleteRow(-1);}
 
 function findBuffsClearResults() { // Legacy
   var buffTable = getElementById('buffTable');
-  Array.from(buffTable.rows).filter(notHeader)
+  arrayFrom(buffTable.rows).filter(notHeader)
     .forEach(partial(deleteRow, buffTable));
   getElementById('buffNicks').innerHTML = '';
   updateProgress('Idle.', 'black');

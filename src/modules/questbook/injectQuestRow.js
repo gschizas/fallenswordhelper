@@ -1,8 +1,9 @@
+import {arrayFrom} from '../common/arrayFrom';
+import {dataRows} from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import guideButtons from './guideButtons';
 import hideElement from '../common/hideElement';
-import myRows from '../common/myRows';
 import partial from '../common/partial';
 import replaceDoubleSpace from '../common/replaceDoubleSpace';
 import shouldBeArray from '../system/shouldBeArray';
@@ -34,6 +35,6 @@ function decorate(questsToHide, aRow) {
 
 export default function injectQuestRow(questTable) {
   var questsToHide = isHideQuests();
-  Array.from(questTable.rows).filter(myRows(5, 0))
+  arrayFrom(questTable.rows).filter(dataRows(5, 0))
     .forEach(partial(decorate, questsToHide));
 }

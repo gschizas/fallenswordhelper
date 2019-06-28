@@ -1,3 +1,4 @@
+import {arrayFrom} from '../../../common/arrayFrom';
 import calf from '../../../support/calf';
 import getCreatureStats from '../getCreatureStats/getCreatureStats';
 import {getElementById} from '../../../common/getElement';
@@ -30,7 +31,7 @@ function setQTip(monster, qtipText) { // jQuery
 }
 
 function getIndex(element) {
-  return Array.from(element.parentNode.children).indexOf(element);
+  return arrayFrom(element.parentNode.children).indexOf(element);
 }
 
 function displayJson(api, data) {

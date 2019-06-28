@@ -1,6 +1,7 @@
 import chunk from '../../common/chunk';
 import daSendToFolder from '../../_dataAccess/daSendToFolder';
 import {getElementById} from '../../common/getElement';
+import {isArray} from '../../common/isArray';
 import partial from '../../common/partial';
 
 function checked(o) {
@@ -28,7 +29,7 @@ function removeInvId(itemsAry, invId) {
 }
 
 function removeInvIds(itemsAry, json) {
-  if (Array.isArray(json.r)) {
+  if (isArray(json.r)) {
     json.r.forEach(partial(removeInvId, itemsAry));
   }
 }

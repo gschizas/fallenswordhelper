@@ -2,6 +2,7 @@ import defaults from '../../support/dataObj.json';
 import eventHandler5 from '../../common/eventHandler5';
 import {getElementById} from '../../common/getElement';
 import getValueJSON from '../../system/getValueJSON';
+import {isArray} from '../../common/isArray.js';
 import isChecked from '../../system/isChecked';
 import jsonParse from '../../common/jsonParse';
 import makePageHeader from './makePageHeader';
@@ -128,7 +129,7 @@ function addQuickItem() { // Legacy
 
 function saveRawEditor() { // Legacy
   var userInput = jsonParse(getElementById('fshEd').value);
-  if (Array.isArray(userInput)) {
+  if (isArray(userInput)) {
     param.currentItems = userInput;
     generateManageTable();
   }

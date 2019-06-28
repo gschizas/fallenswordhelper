@@ -5,6 +5,7 @@ import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
+import {isArray} from '../common/isArray';
 import {itemRE} from '../support/constants';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonFail from '../common/jsonFail';
@@ -106,7 +107,7 @@ function takeSuccess(takeResult, json) {
 
 function doneTake(takeResult, json) {
   if (jsonFail(json, takeResult)) {return;}
-  if (Array.isArray(json.r)) {takeSuccess(takeResult, json);}
+  if (isArray(json.r)) {takeSuccess(takeResult, json);}
 }
 
 function doTakeItem(takeResult, el) {

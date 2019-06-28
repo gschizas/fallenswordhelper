@@ -1,6 +1,7 @@
+import {arrayFrom} from '../common/arrayFrom';
+import {dataRows} from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
-import myRows from '../common/myRows';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
@@ -52,7 +53,7 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
   var lastCheckScreen = 'last' + logScreen + 'Check';
   lastCheckUtc = getLastCheck(lastCheckScreen);
-  Array.from(chatTable.rows).filter(myRows(3, 0))
+  arrayFrom(chatTable.rows).filter(dataRows(3, 0))
     .forEach(partial(rowColor, logScreen, dateColumn));
   setValue(lastCheckScreen, nowUtc);
 }

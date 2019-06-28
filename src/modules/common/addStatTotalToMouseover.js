@@ -1,3 +1,4 @@
+import {arrayFrom} from './arrayFrom';
 import {closestTable} from './closest';
 import contains from './contains';
 import {createDiv} from './cElement';
@@ -45,7 +46,7 @@ function calcTotalStats(statObj) {
 
 function addStats(el) {
   var statTable = closestTable(el);
-  var statObj = Array.from(statTable.rows).reduce(reduceStatTable, {});
+  var statObj = arrayFrom(statTable.rows).reduce(reduceStatTable, {});
   var totalStats = calcTotalStats(statObj);
   insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
     '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +

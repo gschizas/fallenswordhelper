@@ -1,3 +1,4 @@
+import {arrayFrom} from './arrayFrom';
 import fallback from '../system/fallback';
 import {getElementById} from '../common/getElement';
 import hideElement from './hideElement';
@@ -118,6 +119,6 @@ function setupPref(prefName) {
 export default function collapse(param) {
   headerIndex = param.headInd;
   setupPref(param.prefName);
-  Array.from(param.theTable.rows).forEach(partial(doTagging, param));
+  arrayFrom(param.theTable.rows).forEach(partial(doTagging, param));
   on(param.theTable, 'click', evtHdl);
 }

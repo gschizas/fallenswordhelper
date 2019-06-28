@@ -1,10 +1,10 @@
 import calf from '../support/calf';
+import daSuperElite from '../_dataAccess/daSuperElite';
 import getForage from '../ajax/getForage';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
 import setForage from '../ajax/setForage';
-import superelite from '../app/superelite';
 
 export var oldLog;
 var timeoutId;
@@ -49,7 +49,7 @@ function gotSe(data) {
 }
 
 function getSeLog() { // jQuery.min
-  return superelite().then(gotSe);
+  return daSuperElite().then(gotSe);
 }
 
 export function doBackgroundCheck() {
