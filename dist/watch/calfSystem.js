@@ -5,6 +5,8 @@
     return a || b;
   }
 
+  const isArray = e => Array.isArray(e);
+
   function isType(e, t) {return typeof e === t;}
 
   function isFunction(e) {return isType(e, 'function');}
@@ -311,9 +313,9 @@
   }
 
   function devLog(args) {
-    if (args && !Array.isArray(args)) {
+    if (args && !isArray(args)) {
       // eslint-disable-next-line no-console
-      console.log('addTask Array.isArray(args)', Array.isArray(args));
+      console.log('addTask isArray(args)', isArray(args));
     }
   }
 
@@ -348,8 +350,10 @@
       Object.assign({once: true}, listenerOptions(addOptions)));
   }
 
+  const arrayFrom = e => Array.from(e);
+
   function partial(fn /* , rest args */) {
-    return fn.bind.apply(fn, Array.from(arguments));
+    return fn.bind.apply(fn, arrayFrom(arguments));
   }
 
   var dragTarget;
@@ -787,7 +791,7 @@
   }
 
   function getArrayByTagName(tagName, element) {
-    return Array.from(getElementsByTagName(tagName, element));
+    return arrayFrom(getElementsByTagName(tagName, element));
   }
 
   function getTextTrim(node) {
@@ -832,7 +836,7 @@
   }
 
   function querySelectorArray(selector, scope) {
-    return Array.from(querySelectorAll(selector, scope));
+    return arrayFrom(querySelectorAll(selector, scope));
   }
 
   function toSettings(el) {
@@ -3087,7 +3091,7 @@
   }
 
   function goodData(appInv) {
-    return appInv && appInv.s && Array.isArray(appInv.r);
+    return appInv && appInv.s && isArray(appInv.r);
   }
 
   function makePref(thisList) {
@@ -3294,7 +3298,7 @@
 
   function saveRawEditor() { // Legacy
     var userInput = jsonParse(getElementById('fshEd').value);
-    if (Array.isArray(userInput)) {
+    if (isArray(userInput)) {
       param.currentItems = userInput;
       generateManageTable();
     }
@@ -3909,7 +3913,7 @@
 
   function findBuffsClearResults() { // Legacy
     var buffTable = getElementById('buffTable');
-    Array.from(buffTable.rows).filter(notHeader)
+    arrayFrom(buffTable.rows).filter(notHeader)
       .forEach(partial(deleteRow, buffTable));
     getElementById('buffNicks').innerHTML = '';
     updateProgress('Idle.', 'black');
@@ -4083,7 +4087,7 @@
   }
 
   function getArrayByClassName(names, element) {
-    return Array.from(getElementsByClassName(names, element));
+    return arrayFrom(getElementsByClassName(names, element));
   }
 
   function colouring(parent, colourFn) {
@@ -4108,7 +4112,7 @@
   }
 
   function hideNodeList(nodeList) {
-    Array.from(nodeList).forEach(hideElement);
+    arrayFrom(nodeList).forEach(hideElement);
   }
 
   var hideBtn = [
@@ -6014,6 +6018,48 @@
     return callApp({cmd: 'superelite'});
   }
 
+  const dataRows = (cols, skip) =>
+    (el, i) => el.children.length === cols && i > skip;
+
+  function parseDateAsOffset(textDate) {
+    var dateAry = textDate.replace('<br>', ' ').split(/[: /]/);
+    return Math.floor(
+      (now - Date.UTC(Number(dateAry[2]), months.indexOf(dateAry[1]),
+        Number(dateAry[0]), Number(dateAry[3]), Number(dateAry[4]), 0)) / 1000
+    );
+  }
+
+  function formatRow(row) {
+    return {
+      time: parseDateAsOffset(row.cells[0].innerHTML),
+      creature: {name: getTextTrim(row.cells[1])}
+    };
+  }
+
+  function parseReport(html) {
+    const doc = createDocument(html);
+    const logTable = querySelector('#pCC table table', doc);
+    const rows = arrayFrom(logTable.rows).filter(dataRows(4, 1));
+    const data = rows.map(formatRow);
+    return {r: data, s: true, t: '0 ' + String(nowSecs)};
+  }
+
+  // Incomplete
+  function superelite$1() {
+    return indexAjaxData({cmd: 'superelite'}).then(parseReport);
+  }
+
+  const doFallback$2 = () => superelite$1();
+
+  function fallback$3(json) {
+    if (hasFailed(json)) {return doFallback$2();}
+    return json;
+  }
+
+  function daSuperElite() {
+    return superelite().then(fallback$3).catch(doFallback$2);
+  }
+
   var oldLog;
   var timeoutId;
   var intervalId;
@@ -6057,7 +6103,7 @@
   }
 
   function getSeLog() { // jQuery.min
-    return superelite().then(gotSe);
+    return daSuperElite().then(gotSe);
   }
 
   function doBackgroundCheck() {
@@ -8109,14 +8155,14 @@
   }
 
   function bodyText(membrList, row) {
-    var foo = Array.from(row.cells, cellText);
+    var foo = arrayFrom(row.cells, cellText);
     foo.splice(0, 1, playerName$2(foo[0], membrList),
       playerLevel(foo[0], membrList), playerRank(foo[0], membrList));
     return foo;
   }
 
   function getData(list, membrList) {
-    return Array.from(list.rows).slice(1, -1)
+    return arrayFrom(list.rows).slice(1, -1)
       .map(partial(bodyText, membrList));
   }
 
@@ -8679,7 +8725,7 @@
   function collapse(param) {
     headerIndex = param.headInd;
     setupPref(param.prefName);
-    Array.from(param.theTable.rows).forEach(partial(doTagging, param));
+    arrayFrom(param.theTable.rows).forEach(partial(doTagging, param));
     on(param.theTable, 'click', evtHdl);
   }
 
@@ -9296,10 +9342,6 @@
     });
   }
 
-  function myRows(cols, skip) {
-    return function(el, i) {return el.children.length === cols && i > skip;};
-  }
-
   function makeCell(newRow, html) {
     newRow.insertCell(-1).innerHTML = html;
   }
@@ -9324,7 +9366,7 @@
     if (curPage === 1) {
       conflictHeader(insertHere);
     }
-    Array.from(conflictTable.rows).filter(myRows(7, 0))
+    arrayFrom(conflictTable.rows).filter(dataRows(7, 0))
       .forEach(partial(conflictRow, insertHere));
   }
 
@@ -10289,8 +10331,30 @@
     }
   }
 
+  function moveRank(direction, rankId) {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'ranks',
+      subcmd2: direction,
+      rank_id: rankId
+    }).then(() => ({s: true}));
+  }
+
   function rankPosition(direction, rankId) {
     return ranks({subcmd2: direction, rank_id: rankId});
+  }
+
+  const doFallback$3 = (direction, rankId) => moveRank(direction, rankId);
+
+  function fallback$4(direction, rankId, json) {
+    if (hasFailed(json)) {return doFallback$3(direction, rankId);}
+    return json;
+  }
+
+  function daRankPosition(direction, rankId) {
+    return rankPosition(direction, rankId)
+      .then(partial(fallback$4, direction, rankId))
+      .catch(partial(doFallback$3, direction, rankId));
   }
 
   var characterRow;
@@ -10313,7 +10377,7 @@
 
   function shuffleRows(evt, thisRankRow, targetRowNum) {
     var matchRankId = evt.target.getAttribute('onclick').match(/rank_id=(\d+)/);
-    rankPosition(toLowerCase(evt.target.value), matchRankId[1]);
+    daRankPosition(toLowerCase(evt.target.value), matchRankId[1]);
     var injectRow = thisRankRow.parentNode.rows[targetRowNum];
     insertElementBefore(thisRankRow, injectRow);
     var pxScroll = getPxScroll(evt.target.value);
@@ -10352,7 +10416,7 @@
   function findTheRows() {
     var outerTable = pCC.lastElementChild.previousElementSibling;
     if (outerTable.rows && outerTable.rows.length > 7) {
-      return Array.from(outerTable.rows[7].children[0].children[0].rows);
+      return arrayFrom(outerTable.rows[7].children[0].children[0].rows);
     }
   }
 
@@ -10502,8 +10566,8 @@
 
   function buffAll(self) {
     var titanTable = self.parentNode.parentNode.parentNode.parentNode;
-    var shortList = Array.from(titanTable.rows)
-      .filter(myRows(3, 0)).map(memberName);
+    var shortList = arrayFrom(titanTable.rows)
+      .filter(dataRows(3, 0)).map(memberName);
     openQuickBuffByName(shortList.join());
   }
 
@@ -10527,7 +10591,7 @@
   }
 
   function doBuffLinks$1(titanTable) {
-    Array.from(titanTable.rows).filter(myRows(3, 0)).forEach(playerBufflink);
+    arrayFrom(titanTable.rows).filter(dataRows(3, 0)).forEach(playerBufflink);
     insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
       ' <button class="fshBl fshXSmall">all</button>');
   }
@@ -10535,7 +10599,7 @@
   function myTables(el, i) {return el.rows.length > 1 && i > 1;}
 
   function gotTables(titanTables) {
-    Array.from(titanTables).filter(myTables).forEach(doBuffLinks$1);
+    arrayFrom(titanTables).filter(myTables).forEach(doBuffLinks$1);
     on(titanTables[1], 'click', evtHdl$1);
   }
 
@@ -10639,7 +10703,7 @@
   }
 
   function doTooMuch(titanTable, newTitans) {
-    Array.from(titanTable.rows).filter(myRows(4, 0))
+    arrayFrom(titanTable.rows).filter(dataRows(4, 0))
       .forEach(partial(decorate$1, newTitans));
   }
 
@@ -10689,19 +10753,19 @@
     });
   }
 
-  function doFallback$2(invId) {
+  function doFallback$4(invId) {
     return gsTake(invId);
   }
 
-  function fallback$3(invId, json) {
-    if (hasFailed(json)) {return doFallback$2(invId);}
+  function fallback$5(invId, json) {
+    if (hasFailed(json)) {return doFallback$4(invId);}
     return json;
   }
 
   function daGsTake(invId) {
     return takeitem(invId)
-      .then(partial(fallback$3, invId))
-      .catch(partial(doFallback$2, invId));
+      .then(partial(fallback$5, invId))
+      .catch(partial(doFallback$4, invId));
   }
 
   function doItemTable(checkbox) {
@@ -10801,19 +10865,19 @@
     });
   }
 
-  function doFallback$3(invId, playerId, mode) {
+  function doFallback$5(invId, playerId, mode) {
     return guildInvRecall(invId, playerId, mode);
   }
 
-  function fallback$4(invId, playerId, mode, json) {
-    if (hasFailed(json)) {return doFallback$3(invId, playerId, mode);}
+  function fallback$6(invId, playerId, mode, json) {
+    if (hasFailed(json)) {return doFallback$5(invId, playerId, mode);}
     return json;
   }
 
   function daGuildRecall(invId, playerId, mode) {
     return recall(invId, playerId, mode)
-      .then(partial(fallback$4, invId, playerId, mode))
-      .catch(partial(doFallback$3, invId, playerId, mode));
+      .then(partial(fallback$6, invId, playerId, mode))
+      .catch(partial(doFallback$5, invId, playerId, mode));
   }
 
   function recallItem(invId, playerId, mode) {
@@ -11426,19 +11490,19 @@
     }).then(ajaxResult);
   }
 
-  function doFallback$4(invIdAry) {
+  function doFallback$6(invIdAry) {
     return senditems$1(invIdAry);
   }
 
-  function fallback$5(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$4(invIdAry);}
+  function fallback$7(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$6(invIdAry);}
     return json;
   }
 
   function daSendItems(invIdAry) {
     return senditems(invIdAry)
-      .then(partial(fallback$5, invIdAry))
-      .catch(partial(doFallback$4, invIdAry));
+      .then(partial(fallback$7, invIdAry))
+      .catch(partial(doFallback$6, invIdAry));
   }
 
   var invItems$1;
@@ -11594,19 +11658,19 @@
     });
   }
 
-  function doFallback$5(folderId, itemsAry) {
+  function doFallback$7(folderId, itemsAry) {
     return moveItems(folderId, itemsAry);
   }
 
-  function fallback$6(folderId, itemsAry, json) {
-    if (hasFailed(json)) {return doFallback$5(folderId, itemsAry);}
+  function fallback$8(folderId, itemsAry, json) {
+    if (hasFailed(json)) {return doFallback$7(folderId, itemsAry);}
     return json;
   }
 
   function daSendToFolder(folderId, itemsAry) {
     return sendtofolder(folderId, itemsAry)
-      .then(partial(fallback$6, folderId, itemsAry))
-      .catch(partial(doFallback$5, folderId, itemsAry));
+      .then(partial(fallback$8, folderId, itemsAry))
+      .catch(partial(doFallback$7, folderId, itemsAry));
   }
 
   function checked(o) {
@@ -11634,7 +11698,7 @@
   }
 
   function removeInvIds(itemsAry, json) {
-    if (Array.isArray(json.r)) {
+    if (isArray(json.r)) {
       json.r.forEach(partial(removeInvId, itemsAry));
     }
   }
@@ -11753,7 +11817,7 @@
 
   function addStats(el) {
     var statTable = closestTable(el);
-    var statObj = Array.from(statTable.rows).reduce(reduceStatTable, {});
+    var statObj = arrayFrom(statTable.rows).reduce(reduceStatTable, {});
     var totalStats = calcTotalStats(statObj);
     insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
       '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
@@ -12086,7 +12150,7 @@
 
   function findPlayers(aRow) { // Legacy
     if (msgDoesNotIncludePlayer(aRow)) {
-      Array.from(aRow.cells).forEach(stripClassName);
+      arrayFrom(aRow.cells).forEach(stripClassName);
       aRow.classList.add('fshGrey');
       aRow.classList.add('fshXSmall');
     }
@@ -12131,7 +12195,8 @@
     var logTable = messageNameCell.parentNode.parentNode.parentNode;
     messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
       '(Guild Log messages not involving self are dimmed!)</span>';
-    Array.from(logTable.rows).filter(myRows(3, 0)).forEach(processGuildWidgetRow);
+    arrayFrom(logTable.rows).filter(dataRows(3, 0))
+      .forEach(processGuildWidgetRow);
   }
 
   function addGuildLogWidgets() {
@@ -12192,7 +12257,7 @@
     nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
     var lastCheckScreen = 'last' + logScreen + 'Check';
     lastCheckUtc = getLastCheck(lastCheckScreen);
-    Array.from(chatTable.rows).filter(myRows(3, 0))
+    arrayFrom(chatTable.rows).filter(dataRows(3, 0))
       .forEach(partial(rowColor, logScreen, dateColumn));
     setValue(lastCheckScreen, nowUtc);
   }
@@ -12704,7 +12769,7 @@
   }
 
   function processTableRows(logTable) {
-    Array.from(logTable.rows).filter(myRows(3, 0)).forEach(processLogWidgetRow);
+    arrayFrom(logTable.rows).filter(dataRows(3, 0)).forEach(processLogWidgetRow);
   }
 
   function openMsgDialog(evt) {
@@ -12816,19 +12881,19 @@
     });
   }
 
-  function doFallback$6(item) {
+  function doFallback$8(item) {
     return bazaarBuy(item);
   }
 
-  function fallback$7(item, json) {
-    if (hasFailed(json)) {return doFallback$6(item);}
+  function fallback$9(item, json) {
+    if (hasFailed(json)) {return doFallback$8(item);}
     return json;
   }
 
   function daBazaarBuy(item) {
     return buyitem(item)
-      .then(partial(fallback$7, item))
-      .catch(partial(doFallback$6, item));
+      .then(partial(fallback$9, item))
+      .catch(partial(doFallback$8, item));
   }
 
   var ItemId;
@@ -13009,19 +13074,19 @@
     });
   }
 
-  function doFallback$7(invIdAry) {
+  function doFallback$9(invIdAry) {
     return mailboxTake(invIdAry);
   }
 
-  function fallback$8(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$7(invIdAry);}
+  function fallback$a(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$9(invIdAry);}
     return json;
   }
 
   function daMailboxTake(invIdAry) {
     return takeitems(invIdAry)
-      .then(partial(fallback$8, invIdAry))
-      .catch(partial(doFallback$7, invIdAry));
+      .then(partial(fallback$a, invIdAry))
+      .catch(partial(doFallback$9, invIdAry));
   }
 
   function makeQtLabel(id, text, injector) {
@@ -13110,7 +13175,7 @@
 
   function doneTake(takeResult, json) {
     if (jsonFail(json, takeResult)) {return;}
-    if (Array.isArray(json.r)) {takeSuccess(takeResult, json);}
+    if (isArray(json.r)) {takeSuccess(takeResult, json);}
   }
 
   function doTakeItem(takeResult, el) {
@@ -13299,7 +13364,7 @@
   }
 
   function displayComponentTally(self, data) {
-    if (!Array.isArray(data.r)) {return;}
+    if (!isArray(data.r)) {return;}
     var sumComp = self.parentNode;
     if (sumComp) {
       sumComp.innerHTML = '';
@@ -13359,19 +13424,19 @@
     return allthen(componentIdAry.map(destroyComponent$1), formatResults$4);
   }
 
-  function doFallback$8(componentIdAry) {
+  function doFallback$a(componentIdAry) {
     return dropComponent(componentIdAry);
   }
 
-  function fallback$9(componentIdAry, json) {
-    if (hasFailed(json)) {return doFallback$8(componentIdAry);}
+  function fallback$b(componentIdAry, json) {
+    if (hasFailed(json)) {return doFallback$a(componentIdAry);}
     return json;
   }
 
   function daDestroyComponent(componentIdAry) {
     return destroyComponent(componentIdAry)
-      .then(partial(fallback$9, componentIdAry))
-      .catch(partial(doFallback$8, componentIdAry));
+      .then(partial(fallback$b, componentIdAry))
+      .catch(partial(doFallback$a, componentIdAry));
   }
 
   var invTableCache;
@@ -13746,19 +13811,19 @@
     });
   }
 
-  function doFallback$9(item) {
+  function doFallback$b(item) {
     return unequip(item);
   }
 
-  function fallback$a(item, json) {
-    if (hasFailed(json)) {return doFallback$9(item);}
+  function fallback$c(item, json) {
+    if (hasFailed(json)) {return doFallback$b(item);}
     return json;
   }
 
   function daUnequipItem(item) {
     return unequipitem(item)
-      .then(partial(fallback$a, item))
-      .catch(partial(doFallback$9, item));
+      .then(partial(fallback$c, item))
+      .catch(partial(doFallback$b, item));
   }
 
   var profileCombatSetDiv;
@@ -14068,7 +14133,7 @@
   }
 
   function thisText(thisNode) {
-    return Array.from(thisNode.childNodes)
+    return arrayFrom(thisNode.childNodes)
       .filter(el => el.nodeType === 3)
       .map(getTextTrim)
       .join('');
@@ -14525,19 +14590,19 @@
     });
   }
 
-  function doFallback$a(userAry, buffAry) {
+  function doFallback$c(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  function fallback$b(userAry, buffAry, json) {
-    if (hasFailed(json)) {return doFallback$a(userAry, buffAry);}
+  function fallback$d(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$c(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$b, userAry, buffAry))
-      .catch(partial(doFallback$a, userAry, buffAry));
+      .then(partial(fallback$d, userAry, buffAry))
+      .catch(partial(doFallback$c, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -15697,7 +15762,7 @@
 
   function titanKs() {
     var dynamic = GameData.realm().dynamic;
-    return Array.isArray(dynamic) && dynamic.some(hasTitan);
+    return isArray(dynamic) && dynamic.some(hasTitan);
   }
 
   var cdDiv;
@@ -16932,7 +16997,7 @@
   }
 
   function getIndex(element) {
-    return Array.from(element.parentNode.children).indexOf(element);
+    return arrayFrom(element.parentNode.children).indexOf(element);
   }
 
   function displayJson(api, data) {
@@ -17216,11 +17281,11 @@
   }
 
   function goodData$2(data) {
-    return data.s && Array.isArray(data.r);
+    return data.s && isArray(data.r);
   }
 
   function titanToShow(dynamic) {
-    return calf.showTitanInfo && Array.isArray(dynamic) && dynamic.some(hasTitan$1);
+    return calf.showTitanInfo && isArray(dynamic) && dynamic.some(hasTitan$1);
   }
 
   function processScoutTower(ast, data) {
@@ -17501,6 +17566,38 @@
       '5-success.action-response ' +
       '25-success.action-response', initMonsterLog);
     initMonsterLog();
+  }
+
+  function guildGroups(data) {
+    return guild(extend({subcmd: 'groups'}, data));
+  }
+
+  function groupsView() {
+    return guildGroups({subcmd2: 'view'});
+  }
+
+  function parseReport$1(html) {
+    const doc = createDocument(html);
+    const disband = querySelector('#pCC img[src$="disband.gif"]', doc);
+    if (!disband) {return {};}
+    const id = Number(disband.parentNode.href.match(/\((\d+)\)/)[1]);
+    return {r: [{id: id, members: [{name: playerName()}]}]};
+  }
+
+  // Incomplete
+  function viewGroups() {
+    return indexAjaxData({cmd: 'guild', subcmd: 'groups'}).then(parseReport$1);
+  }
+
+  const doFallback$d = () => viewGroups();
+
+  function fallback$e(json) {
+    if (hasFailed(json)) {return doFallback$d();}
+    return json;
+  }
+
+  function daViewGroups() {
+    return groupsView().then(fallback$e).catch(doFallback$d);
   }
 
   function evalMiss(combat) {
@@ -18045,14 +18142,6 @@
       '</tbody></table>';
   }
 
-  function guildGroups(data) {
-    return guild(extend({subcmd: 'groups'}, data));
-  }
-
-  function groupsView() {
-    return guildGroups({subcmd2: 'view'});
-  }
-
   function groupsViewStats(groupId) {
     return guildGroups({subcmd2: 'viewstats', group_id: groupId});
   }
@@ -18241,7 +18330,9 @@
   }
 
   function getGroupId(json) {
-    return json.r.find(myGroup).id;
+    if (isArray(json.r)) {
+      return json.r.find(myGroup).id;
+    }
   }
 
   function processGroupStats(data, playerJson, groupJson) {
@@ -18258,11 +18349,14 @@
   }
 
   function getGroupStats$1(data, playerJson, groupId) {
-    groupsViewStats(groupId).then(partial(processGroupStats, data, playerJson));
+    if (groupId) {
+      groupsViewStats(groupId).then(partial(processGroupStats, data, playerJson));
+    }
   }
 
   function processGroup(data, playerJson) {
-    groupsView().then(getGroupId).then(partial(getGroupStats$1, data, playerJson));
+    daViewGroups().then(getGroupId)
+      .then(partial(getGroupStats$1, data, playerJson));
   }
 
   function processPlayer(data, playerJson) {
@@ -18298,7 +18392,7 @@
       [calf.buffs2, calf.buffs2Name],
       [calf.buffs3, calf.buffs3Name]
     ][calf.enabledHuntingMode];
-    if (Array.isArray(lookup)) {
+    if (isArray(lookup)) {
       huntingBuffs$2 = lookup[0];
       huntingBuffsName$1 = lookup[1];
     }
@@ -18764,17 +18858,17 @@
     }).then(formatResult);
   }
 
-  const doFallback$b = recipe => invent(recipe);
+  const doFallback$e = recipe => invent(recipe);
 
-  function fallback$c(recipe, json) {
-    if (hasFailed(json)) {return doFallback$b(recipe);}
+  function fallback$f(recipe, json) {
+    if (hasFailed(json)) {return doFallback$e(recipe);}
     return json;
   }
 
   function daDoInvent(recipe) {
     return doinvent(recipe)
-      .then(partial(fallback$c, recipe))
-      .catch(partial(doFallback$b, recipe));
+      .then(partial(fallback$f, recipe))
+      .catch(partial(doFallback$e, recipe));
   }
 
   var invAmount;
@@ -18981,7 +19075,7 @@
     const vlHeader = getArrayByTagName('td', pCC).filter(contains('VL'));
     if (vlHeader.length === 1) {
       const thisRows = vlHeader[0].parentNode.parentNode.rows;
-      Array.from(thisRows).filter(isMyRow).forEach(prepareRow);
+      arrayFrom(thisRows).filter(isMyRow).forEach(prepareRow);
     }
   }
 
@@ -19214,7 +19308,7 @@
 
   function injectQuestRow(questTable) {
     var questsToHide = isHideQuests();
-    Array.from(questTable.rows).filter(myRows(5, 0))
+    arrayFrom(questTable.rows).filter(dataRows(5, 0))
       .forEach(partial(decorate$3, questsToHide));
   }
 
@@ -20153,17 +20247,17 @@
     }).then(formatResponse$2);
   }
 
-  function doFallback$c() {
+  function doFallback$f() {
     return guildFetchInv();
   }
 
-  function fallback$d(json) {
-    if (hasFailed(json)) {return doFallback$c();}
+  function fallback$g(json) {
+    if (hasFailed(json)) {return doFallback$f();}
     return json;
   }
 
   function daGuildFetchInv() {
-    return fetchinv$1().then(fallback$d).catch(doFallback$c);
+    return fetchinv$1().then(fallback$g).catch(doFallback$f);
   }
 
   function details(td) {
@@ -20180,7 +20274,7 @@
     return ret;
   }
 
-  function parseReport(html) {
+  function parseReport$2(html) {
     const doc = createDocument(html);
     const nodeList = querySelectorArray('#pCC table table td:nth-of-type(3n)',
       doc);
@@ -20193,24 +20287,24 @@
       cmd: 'guild',
       subcmd: 'inventory',
       subcmd2: 'report'
-    }).then(parseReport);
+    }).then(parseReport$2);
   }
 
   function report() {
     return guildInventory$1({subcmd2: 'report'});
   }
 
-  function doFallback$d() {
+  function doFallback$g() {
     return guildReport();
   }
 
-  function fallback$e(json) {
-    if (hasFailed(json)) {return doFallback$d();}
+  function fallback$h(json) {
+    if (hasFailed(json)) {return doFallback$g();}
     return json;
   }
 
   function daGuildReport() {
-    return report().then(fallback$e).catch(doFallback$d);
+    return report().then(fallback$h).catch(doFallback$g);
   }
 
   var theInv;
@@ -20227,7 +20321,7 @@
   const composedPot = el => el.t === 15;
 
   function getComposedFromBp(data) {
-    if (!Array.isArray(data.r)) {return;}
+    if (!isArray(data.r)) {return;}
     composed = Array.prototype.concat.apply([], data.r.map(el => el.items))
       .filter(composedPot);
   }
@@ -20237,7 +20331,7 @@
   }
 
   function getComposedFromGs(data) {
-    if (!Array.isArray(data.r)) {return;}
+    if (!isArray(data.r)) {return;}
     composed = composed.concat(data.r.filter(composedPot));
   }
 
@@ -20966,19 +21060,19 @@
     }).then(htmlResult);
   }
 
-  function doFallback$e(invIdAry) {
+  function doFallback$h(invIdAry) {
     return storeitems(invIdAry);
   }
 
-  function fallback$f(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$e(invIdAry);}
+  function fallback$i(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$h(invIdAry);}
     return json;
   }
 
   function daStoreItems(invIdAry) {
     return dostoreitems(invIdAry)
-      .then(partial(fallback$f, invIdAry))
-      .catch(partial(doFallback$e, invIdAry));
+      .then(partial(fallback$i, invIdAry))
+      .catch(partial(doFallback$h, invIdAry));
   }
 
   function storeItems(invIdAry) {
@@ -22283,7 +22377,7 @@
     doBackgroundCheck().finally(gotSeLog);
   }
 
-  function superelite$1() {
+  function superelite$2() {
     if (jQueryNotPresent()) {return;}
     var newCell = insertNewRow();
     newCell.height = 20;
@@ -22310,7 +22404,7 @@
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
     allowBack$4(topTable);
-    Array.from(topTable.rows).filter(myRows(4, 1)).forEach(playerLink);
+    arrayFrom(topTable.rows).filter(dataRows(4, 1)).forEach(playerLink);
   }
 
   function findplayer(username) {
@@ -22446,7 +22540,7 @@
   }
 
   function returnPlayer(player, json) {
-    if (json.s && Array.isArray(json.r)) {parsePlayer(player, json.r[0]);}
+    if (json.s && isArray(json.r)) {parsePlayer(player, json.r[0]);}
   }
 
   function returnSelf(player, json) {
@@ -22804,7 +22898,7 @@
     pvpladder: {'-': {'-': ladder}},
     crafting: {'-': {'-': craftForge}},
     hellforge: {'-': {'-': craftForge}},
-    superelite: {'-': {'-': superelite$1}},
+    superelite: {'-': {'-': superelite$2}},
     '-': noCmd,
     combat: {attackplayer: {'-': injectProfile}}
   };
@@ -22901,7 +22995,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '126';
+  window.FSH.calf = '127';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
