@@ -1,7 +1,7 @@
+import daGuildManage from '../_dataAccess/daGuildManage';
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';
-import guildManage from '../app/guild/manage';
 import jQueryPresent from '../common/jQueryPresent';
 import lastActivityToDays from '../common/lastActivityToDays';
 import {nowSecs} from '../support/now';
@@ -107,7 +107,7 @@ function gotActivity(data) { // jQuery.min
     oldArchive = {lastUpdate: 0, members: {}};
   }
   if (nowSecs > fallback(oldArchive.lastUpdate, 0) + 300) { // 5 mins - probably want to increase
-    guildManage().then(gotGuild);
+    daGuildManage().then(gotGuild);
   }
 }
 
