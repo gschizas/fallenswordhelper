@@ -5146,6 +5146,77 @@
     return guild({subcmd: 'manage'});
   }
 
+  const dataRows = (cols, skip) =>
+    (el, i) => el.children.length === cols && i > skip;
+
+  function lastActivity(tipped) {
+    const activity = tipped.match(lastActivityRE);
+    return nowSecs - (
+      Number(activity[1]) * 24 * 60 * 60 +
+      Number(activity[2]) * 60 * 60 +
+      Number(activity[3]) * 60 +
+      Number(activity[4])
+    );
+  }
+
+  function formatRow(row, i) {
+    const tipped = row.cells[1].children[0].dataset.tipped;
+    const stamina = tipped.match(/Stamina:<\/td><td>(\d+) \/ (\d+)</);
+    return {
+      id: 0,
+      name: getTextTrim(row.cells[1].children[0]),
+      level: Number(getTextTrim(row.cells[2])),
+      current_stamina: Number(stamina[1]),
+      max_stamina: Number(stamina[2]),
+      xp: 0,
+      vl: Number(tipped.match(/VL:<\/td><td>(\d+)</)[1]),
+      last_activity: lastActivity(tipped),
+      guild_xp: intValue(getTextTrim(row.cells[4])),
+      rank_name: getTextTrim(row.cells[3]),
+      rank_index: i
+    };
+  }
+
+  function byRank(prev, member) {
+    const thisRankName = member.rank_name;
+    const thisRankIndex = member.rank_index;
+    const thisRankObj = prev.find(e => e.name === thisRankName);
+    if (thisRankObj) {
+      thisRankObj.members.push(member);
+    } else {
+      prev.push({id: thisRankIndex, name: thisRankName, members: [member]});
+    }
+    return prev;
+  }
+
+  function parseReport(html) {
+    const doc = createDocument(html);
+    const pCC = getElementById('pCC', doc);
+    const tables = getElementsByTagName(def_table, pCC);
+    const memberList = tables[tables.length - 1];
+    if (!memberList) {return {s: false};}
+    const memberRows = arrayFrom(memberList.rows).filter(dataRows(5, 1));
+    const memberData = memberRows.map(formatRow);
+    const ranksData = memberData.reduce(byRank, []);
+    return {r: {ranks: ranksData}, s: true};
+  }
+
+  // Incomplete
+  function guildManage$2() {
+    return indexAjaxData({cmd: 'guild', subcmd: 'manage'}).then(parseReport);
+  }
+
+  const doFallback$2 = () => guildManage$2();
+
+  function fallback$3(json) {
+    if (hasFailed(json)) {return doFallback$2();}
+    return json;
+  }
+
+  function daGuildManage() {
+    return guildManage$1().then(fallback$3).catch(doFallback$2);
+  }
+
   function lastActivityToDays(last_activity) {
     return Math.floor((nowSecs - last_activity) / 86400);
   }
@@ -5256,7 +5327,7 @@
       oldArchive = {lastUpdate: 0, members: {}};
     }
     if (nowSecs > fallback(oldArchive.lastUpdate, 0) + 300) { // 5 mins - probably want to increase
-      guildManage$1().then(gotGuild);
+      daGuildManage().then(gotGuild);
     }
   }
 
@@ -6018,9 +6089,6 @@
     return callApp({cmd: 'superelite'});
   }
 
-  const dataRows = (cols, skip) =>
-    (el, i) => el.children.length === cols && i > skip;
-
   function parseDateAsOffset(textDate) {
     var dateAry = textDate.replace('<br>', ' ').split(/[: /]/);
     return Math.floor(
@@ -6029,35 +6097,36 @@
     );
   }
 
-  function formatRow(row) {
+  function formatRow$1(row) {
     return {
       time: parseDateAsOffset(row.cells[0].innerHTML),
       creature: {name: getTextTrim(row.cells[1])}
     };
   }
 
-  function parseReport(html) {
+  function parseReport$1(html) {
     const doc = createDocument(html);
     const logTable = querySelector('#pCC table table', doc);
+    if (!logTable) {return {s: false};}
     const rows = arrayFrom(logTable.rows).filter(dataRows(4, 1));
-    const data = rows.map(formatRow);
+    const data = rows.map(formatRow$1);
     return {r: data, s: true, t: '0 ' + String(nowSecs)};
   }
 
   // Incomplete
   function superelite$1() {
-    return indexAjaxData({cmd: 'superelite'}).then(parseReport);
+    return indexAjaxData({cmd: 'superelite'}).then(parseReport$1);
   }
 
-  const doFallback$2 = () => superelite$1();
+  const doFallback$3 = () => superelite$1();
 
-  function fallback$3(json) {
-    if (hasFailed(json)) {return doFallback$2();}
+  function fallback$4(json) {
+    if (hasFailed(json)) {return doFallback$3();}
     return json;
   }
 
   function daSuperElite() {
-    return superelite().then(fallback$3).catch(doFallback$2);
+    return superelite().then(fallback$4).catch(doFallback$3);
   }
 
   var oldLog;
@@ -7995,7 +8064,7 @@
     };
   }
 
-  function parseReport$1(html) {
+  function parseReport$2(html) {
     const doc = createDocument(html);
     const advisorTable = querySelector('#pCC table table', doc);
     const advisorRows = arrayFrom(advisorTable.rows).slice(1, -1);
@@ -8010,20 +8079,20 @@
       subcmd: 'advisor',
       subcmd2: 'view',
       period: period
-    }).then(parseReport$1);
+    }).then(parseReport$2);
   }
 
-  const doFallback$3 = period => viewAdvisor(period);
+  const doFallback$4 = period => viewAdvisor(period);
 
-  function fallback$4(period, json) {
-    if (hasFailed(json)) {return doFallback$3(period);}
+  function fallback$5(period, json) {
+    if (hasFailed(json)) {return doFallback$4(period);}
     return json;
   }
 
   function daAdvisor(period) {
     return advisorView(period)
-      .then(partial(fallback$4, period))
-      .catch(partial(doFallback$3, period));
+      .then(partial(fallback$5, period))
+      .catch(partial(doFallback$4, period));
   }
 
   function replaceChild(newChild, oldChild) {
@@ -10394,17 +10463,17 @@
     return ranks({subcmd2: direction, rank_id: rankId});
   }
 
-  const doFallback$4 = (direction, rankId) => moveRank(direction, rankId);
+  const doFallback$5 = (direction, rankId) => moveRank(direction, rankId);
 
-  function fallback$5(direction, rankId, json) {
-    if (hasFailed(json)) {return doFallback$4(direction, rankId);}
+  function fallback$6(direction, rankId, json) {
+    if (hasFailed(json)) {return doFallback$5(direction, rankId);}
     return json;
   }
 
   function daRankPosition(direction, rankId) {
     return rankPosition(direction, rankId)
-      .then(partial(fallback$5, direction, rankId))
-      .catch(partial(doFallback$4, direction, rankId));
+      .then(partial(fallback$6, direction, rankId))
+      .catch(partial(doFallback$5, direction, rankId));
   }
 
   var characterRow;
@@ -10803,19 +10872,19 @@
     });
   }
 
-  function doFallback$5(invId) {
+  function doFallback$6(invId) {
     return gsTake(invId);
   }
 
-  function fallback$6(invId, json) {
-    if (hasFailed(json)) {return doFallback$5(invId);}
+  function fallback$7(invId, json) {
+    if (hasFailed(json)) {return doFallback$6(invId);}
     return json;
   }
 
   function daGsTake(invId) {
     return takeitem(invId)
-      .then(partial(fallback$6, invId))
-      .catch(partial(doFallback$5, invId));
+      .then(partial(fallback$7, invId))
+      .catch(partial(doFallback$6, invId));
   }
 
   function doItemTable(checkbox) {
@@ -10915,19 +10984,19 @@
     });
   }
 
-  function doFallback$6(invId, playerId, mode) {
+  function doFallback$7(invId, playerId, mode) {
     return guildInvRecall(invId, playerId, mode);
   }
 
-  function fallback$7(invId, playerId, mode, json) {
-    if (hasFailed(json)) {return doFallback$6(invId, playerId, mode);}
+  function fallback$8(invId, playerId, mode, json) {
+    if (hasFailed(json)) {return doFallback$7(invId, playerId, mode);}
     return json;
   }
 
   function daGuildRecall(invId, playerId, mode) {
     return recall(invId, playerId, mode)
-      .then(partial(fallback$7, invId, playerId, mode))
-      .catch(partial(doFallback$6, invId, playerId, mode));
+      .then(partial(fallback$8, invId, playerId, mode))
+      .catch(partial(doFallback$7, invId, playerId, mode));
   }
 
   function recallItem(invId, playerId, mode) {
@@ -11540,19 +11609,19 @@
     }).then(ajaxResult);
   }
 
-  function doFallback$7(invIdAry) {
+  function doFallback$8(invIdAry) {
     return senditems$1(invIdAry);
   }
 
-  function fallback$8(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$7(invIdAry);}
+  function fallback$9(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$8(invIdAry);}
     return json;
   }
 
   function daSendItems(invIdAry) {
     return senditems(invIdAry)
-      .then(partial(fallback$8, invIdAry))
-      .catch(partial(doFallback$7, invIdAry));
+      .then(partial(fallback$9, invIdAry))
+      .catch(partial(doFallback$8, invIdAry));
   }
 
   var invItems$1;
@@ -11708,19 +11777,19 @@
     });
   }
 
-  function doFallback$8(folderId, itemsAry) {
+  function doFallback$9(folderId, itemsAry) {
     return moveItems(folderId, itemsAry);
   }
 
-  function fallback$9(folderId, itemsAry, json) {
-    if (hasFailed(json)) {return doFallback$8(folderId, itemsAry);}
+  function fallback$a(folderId, itemsAry, json) {
+    if (hasFailed(json)) {return doFallback$9(folderId, itemsAry);}
     return json;
   }
 
   function daSendToFolder(folderId, itemsAry) {
     return sendtofolder(folderId, itemsAry)
-      .then(partial(fallback$9, folderId, itemsAry))
-      .catch(partial(doFallback$8, folderId, itemsAry));
+      .then(partial(fallback$a, folderId, itemsAry))
+      .catch(partial(doFallback$9, folderId, itemsAry));
   }
 
   function checked(o) {
@@ -12931,19 +13000,19 @@
     });
   }
 
-  function doFallback$9(item) {
+  function doFallback$a(item) {
     return bazaarBuy(item);
   }
 
-  function fallback$a(item, json) {
-    if (hasFailed(json)) {return doFallback$9(item);}
+  function fallback$b(item, json) {
+    if (hasFailed(json)) {return doFallback$a(item);}
     return json;
   }
 
   function daBazaarBuy(item) {
     return buyitem(item)
-      .then(partial(fallback$a, item))
-      .catch(partial(doFallback$9, item));
+      .then(partial(fallback$b, item))
+      .catch(partial(doFallback$a, item));
   }
 
   var ItemId;
@@ -13124,19 +13193,19 @@
     });
   }
 
-  function doFallback$a(invIdAry) {
+  function doFallback$b(invIdAry) {
     return mailboxTake(invIdAry);
   }
 
-  function fallback$b(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$a(invIdAry);}
+  function fallback$c(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$b(invIdAry);}
     return json;
   }
 
   function daMailboxTake(invIdAry) {
     return takeitems(invIdAry)
-      .then(partial(fallback$b, invIdAry))
-      .catch(partial(doFallback$a, invIdAry));
+      .then(partial(fallback$c, invIdAry))
+      .catch(partial(doFallback$b, invIdAry));
   }
 
   function makeQtLabel(id, text, injector) {
@@ -13474,19 +13543,19 @@
     return allthen(componentIdAry.map(destroyComponent$1), formatResults$4);
   }
 
-  function doFallback$b(componentIdAry) {
+  function doFallback$c(componentIdAry) {
     return dropComponent(componentIdAry);
   }
 
-  function fallback$c(componentIdAry, json) {
-    if (hasFailed(json)) {return doFallback$b(componentIdAry);}
+  function fallback$d(componentIdAry, json) {
+    if (hasFailed(json)) {return doFallback$c(componentIdAry);}
     return json;
   }
 
   function daDestroyComponent(componentIdAry) {
     return destroyComponent(componentIdAry)
-      .then(partial(fallback$c, componentIdAry))
-      .catch(partial(doFallback$b, componentIdAry));
+      .then(partial(fallback$d, componentIdAry))
+      .catch(partial(doFallback$c, componentIdAry));
   }
 
   var invTableCache;
@@ -13861,19 +13930,19 @@
     });
   }
 
-  function doFallback$c(item) {
+  function doFallback$d(item) {
     return unequip(item);
   }
 
-  function fallback$d(item, json) {
-    if (hasFailed(json)) {return doFallback$c(item);}
+  function fallback$e(item, json) {
+    if (hasFailed(json)) {return doFallback$d(item);}
     return json;
   }
 
   function daUnequipItem(item) {
     return unequipitem(item)
-      .then(partial(fallback$d, item))
-      .catch(partial(doFallback$c, item));
+      .then(partial(fallback$e, item))
+      .catch(partial(doFallback$d, item));
   }
 
   var profileCombatSetDiv;
@@ -14640,19 +14709,19 @@
     });
   }
 
-  function doFallback$d(userAry, buffAry) {
+  function doFallback$e(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  function fallback$e(userAry, buffAry, json) {
-    if (hasFailed(json)) {return doFallback$d(userAry, buffAry);}
+  function fallback$f(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$e(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$e, userAry, buffAry))
-      .catch(partial(doFallback$d, userAry, buffAry));
+      .then(partial(fallback$f, userAry, buffAry))
+      .catch(partial(doFallback$e, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -17618,7 +17687,7 @@
     initMonsterLog();
   }
 
-  function parseReport$2(html) {
+  function parseReport$3(html) {
     const doc = createDocument(html);
     const stats = groupViewStats(doc);
     // console.log(groupViewStats(doc));
@@ -17642,7 +17711,7 @@
       subcmd: 'groups',
       subcmd2: 'viewstats',
       group_id: groupId
-    }).then(parseReport$2);
+    }).then(parseReport$3);
   }
 
   function guildGroups(data) {
@@ -17653,24 +17722,24 @@
     return guildGroups({subcmd2: 'viewstats', group_id: groupId});
   }
 
-  const doFallback$e = groupId => groupStats$2(groupId);
+  const doFallback$f = groupId => groupStats$2(groupId);
 
-  function fallback$f(groupId, json) {
-    if (hasFailed(json)) {return doFallback$e(groupId);}
+  function fallback$g(groupId, json) {
+    if (hasFailed(json)) {return doFallback$f(groupId);}
     return json;
   }
 
   function daGroupStats(groupId) {
     return groupsViewStats(groupId)
-      .then(partial(fallback$f, groupId))
-      .catch(partial(doFallback$e, groupId));
+      .then(partial(fallback$g, groupId))
+      .catch(partial(doFallback$f, groupId));
   }
 
   function groupsView() {
     return guildGroups({subcmd2: 'view'});
   }
 
-  function parseReport$3(html) {
+  function parseReport$4(html) {
     const doc = createDocument(html);
     const disband = querySelector('#pCC img[src$="disband.gif"]', doc);
     if (!disband) {return {};}
@@ -17680,18 +17749,18 @@
 
   // Incomplete
   function viewGroups() {
-    return indexAjaxData({cmd: 'guild', subcmd: 'groups'}).then(parseReport$3);
+    return indexAjaxData({cmd: 'guild', subcmd: 'groups'}).then(parseReport$4);
   }
 
-  const doFallback$f = () => viewGroups();
+  const doFallback$g = () => viewGroups();
 
-  function fallback$g(json) {
-    if (hasFailed(json)) {return doFallback$f();}
+  function fallback$h(json) {
+    if (hasFailed(json)) {return doFallback$g();}
     return json;
   }
 
   function daViewGroups() {
-    return groupsView().then(fallback$g).catch(doFallback$f);
+    return groupsView().then(fallback$h).catch(doFallback$g);
   }
 
   function evalMiss(combat) {
@@ -18948,17 +19017,17 @@
     }).then(formatResult);
   }
 
-  const doFallback$g = recipe => invent(recipe);
+  const doFallback$h = recipe => invent(recipe);
 
-  function fallback$h(recipe, json) {
-    if (hasFailed(json)) {return doFallback$g(recipe);}
+  function fallback$i(recipe, json) {
+    if (hasFailed(json)) {return doFallback$h(recipe);}
     return json;
   }
 
   function daDoInvent(recipe) {
     return doinvent(recipe)
-      .then(partial(fallback$h, recipe))
-      .catch(partial(doFallback$g, recipe));
+      .then(partial(fallback$i, recipe))
+      .catch(partial(doFallback$h, recipe));
   }
 
   var invAmount;
@@ -20337,17 +20406,17 @@
     }).then(formatResponse$2);
   }
 
-  function doFallback$h() {
+  function doFallback$i() {
     return guildFetchInv();
   }
 
-  function fallback$i(json) {
-    if (hasFailed(json)) {return doFallback$h();}
+  function fallback$j(json) {
+    if (hasFailed(json)) {return doFallback$i();}
     return json;
   }
 
   function daGuildFetchInv() {
-    return fetchinv$1().then(fallback$i).catch(doFallback$h);
+    return fetchinv$1().then(fallback$j).catch(doFallback$i);
   }
 
   function details(td) {
@@ -20364,7 +20433,7 @@
     return ret;
   }
 
-  function parseReport$4(html) {
+  function parseReport$5(html) {
     const doc = createDocument(html);
     const nodeList = querySelectorArray('#pCC table table td:nth-of-type(3n)',
       doc);
@@ -20377,24 +20446,24 @@
       cmd: 'guild',
       subcmd: 'inventory',
       subcmd2: 'report'
-    }).then(parseReport$4);
+    }).then(parseReport$5);
   }
 
   function report() {
     return guildInventory$1({subcmd2: 'report'});
   }
 
-  function doFallback$i() {
+  function doFallback$j() {
     return guildReport();
   }
 
-  function fallback$j(json) {
-    if (hasFailed(json)) {return doFallback$i();}
+  function fallback$k(json) {
+    if (hasFailed(json)) {return doFallback$j();}
     return json;
   }
 
   function daGuildReport() {
-    return report().then(fallback$j).catch(doFallback$i);
+    return report().then(fallback$k).catch(doFallback$j);
   }
 
   var theInv;
@@ -21150,19 +21219,19 @@
     }).then(htmlResult);
   }
 
-  function doFallback$j(invIdAry) {
+  function doFallback$k(invIdAry) {
     return storeitems(invIdAry);
   }
 
-  function fallback$k(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$j(invIdAry);}
+  function fallback$l(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$k(invIdAry);}
     return json;
   }
 
   function daStoreItems(invIdAry) {
     return dostoreitems(invIdAry)
-      .then(partial(fallback$k, invIdAry))
-      .catch(partial(doFallback$j, invIdAry));
+      .then(partial(fallback$l, invIdAry))
+      .catch(partial(doFallback$k, invIdAry));
   }
 
   function storeItems(invIdAry) {
@@ -23085,7 +23154,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '128';
+  window.FSH.calf = '129';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
