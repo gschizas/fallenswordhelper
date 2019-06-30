@@ -1,7 +1,7 @@
+import daViewProfile from '../../_dataAccess/daViewProfile';
 import expandMenu from './expandMenu';
 import keyHandlerEvent from './keyHandlerEvent';
 import partial from '../../common/partial';
-import view from '../../app/profile/view';
 import {def_subcmd, profileUrl} from '../../support/constants';
 
 var jsonTests = [
@@ -29,5 +29,5 @@ function changeCombatSet(itemIndex, json) {
 
 export default function combatSetKey(itemIndex) {
   keyHandlerEvent('changeCombatSet');
-  view().then(partial(changeCombatSet, itemIndex));
+  daViewProfile().then(partial(changeCombatSet, itemIndex));
 }

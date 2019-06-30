@@ -1,14 +1,14 @@
 import allthen from '../common/allthen';
-import findplayer from '../app/findplayer';
+import daFindPlayer from '../_dataAccess/daFindPlayer';
+import daGuildView from '../_dataAccess/daGuildView';
+import daViewProfile from '../_dataAccess/daViewProfile';
 import getPlayersByGuild from './getPlayersByGuild';
-import guildView from '../app/guild/view';
 import {isArray} from '../common/isArray';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
 import playerName from '../common/playerName';
 import {sendEvent} from '../support/fshGa';
 import uniq from '../common/uniq';
-import view from '../app/profile/view';
 import {decoratePlayer, initDecorate} from './decoratePlayer';
 import {displaySpinner, hideSpinner} from './displaySpinner';
 
@@ -51,16 +51,16 @@ function parseGuild(guild, json) {
 function returnGuild(guild, json) {if (json.s) {parseGuild(guild, json);}}
 
 function ajaxGuild(guild) {
-  return guildView(guild[0]).then(partial(returnGuild, guild));
+  return daGuildView(guild[0]).then(partial(returnGuild, guild));
 }
 
 function small(guild) {return guild[0] === -1;}
 
 function ajaxPlayer(player) {
   if (player[1] !== playerName()) {
-    return findplayer(player[1]).then(partial(returnPlayer, player));
+    return daFindPlayer(player[1]).then(partial(returnPlayer, player));
   }
-  return view().then(partial(returnSelf, player));
+  return daViewProfile().then(partial(returnSelf, player));
 }
 
 function prepareAjax() {
