@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import composingView from '../app/composing/view';
+import daComposing from '../_dataAccess/daComposing';
 import displayComposeMsg from './displayComposeMsg';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';
@@ -44,7 +44,7 @@ function checkAppResponse(json) {
 function checkLastCompose() { // jQuery.min
   var lastComposeCheck = getValue(def_lastComposeCheck);
   if (lastComposeCheck && now < lastComposeCheck) {return;}
-  composingView().then(checkAppResponse);
+  daComposing().then(checkAppResponse);
 }
 
 function composeAlert() {
