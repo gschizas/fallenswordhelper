@@ -1,8 +1,8 @@
 import calf from '../../../support/calf';
+import daScoutTower from '../../../_dataAccess/daScoutTower';
 import {isArray} from '../../../common/isArray';
 import partial from '../../../common/partial';
 import {processTitans} from './processTitans';
-import scouttower from '../../../app/guild/scouttower';
 import {setRealm} from './realm';
 import setValue from '../../../system/setValue';
 import {hasTitan, hideTitanDiv, setupTitanDiv} from './hasTitan';
@@ -35,7 +35,7 @@ function processScoutTower(ast, data) {
 }
 
 function ajaxScoutTower() {
-  scouttower().then(partial(processScoutTower, ajaxScoutTower));
+  daScoutTower().then(partial(processScoutTower, ajaxScoutTower));
 }
 
 function testDynamics(dynamic) {
