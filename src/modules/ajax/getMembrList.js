@@ -1,19 +1,11 @@
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
 import getForage from './getForage';
-import indexAjaxJson from './indexAjaxJson';
+import getGuild from '../_dataAccess/export/guildMembers';
 import isObject from '../common/isObject';
 import {now} from '../support/now';
 import partial from '../common/partial';
 import setForage from './setForage';
-
-function getGuild(guildId) {
-  return indexAjaxJson({
-    cmd: 'export',
-    subcmd: 'guild_members',
-    guild_id: guildId
-  });
-}
 
 function saveMembrListInForage(membrList, data) {
   var oldMemList = data || {};

@@ -23,7 +23,7 @@ function formatRow(row, i) {
   const tipped = row.cells[1].children[0].dataset.tipped;
   const stamina = tipped.match(/Stamina:<\/td><td>(\d+) \/ (\d+)</);
   return {
-    id: 0,
+    id: Number(row.cells[1].children[0].href.match(/player_id=(\d+)/)[1]),
     name: getTextTrim(row.cells[1].children[0]),
     level: Number(getTextTrim(row.cells[2])),
     current_stamina: Number(stamina[1]),
