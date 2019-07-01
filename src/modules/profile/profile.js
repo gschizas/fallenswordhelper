@@ -1,10 +1,10 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
-import {closestForm} from '../common/closest';
+// import {closestForm} from '../common/closest';
 import colouredDots from '../common/colouredDots';
 import components from './components/components';
-import dontPost from '../common/dontPost';
+// import dontPost from '../common/dontPost';
 import fallback from '../system/fallback';
 import fastDebuff from './debuff';
 import getElementsByTagName from '../common/getElementsByTagName';
@@ -14,7 +14,7 @@ import highlightPvpProtection from './highlightPvpProtection';
 import injectFastWear from './fastWear';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import nekidBtn from './nekidBtn';
-import on from '../common/on';
+// import on from '../common/on';
 import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
@@ -63,16 +63,16 @@ function updateDom(avyImg, playername, self) {
   add(3, colouredDots);
 }
 
-function updateUrl(e) {
-  e.preventDefault();
-  dontPost(closestForm(e.target).parentNode);
-}
+// function updateUrl(e) {
+//   e.preventDefault();
+//   dontPost(closestForm(e.target).parentNode);
+// }
 
-function allowBack(self) {
-  if (!self) {
-    on(querySelector('#profileRightColumn'), 'submit', updateUrl);
-  }
-}
+// function allowBack(self) {
+//   if (!self) {
+//     on(querySelector('#profileRightColumn'), 'submit', updateUrl);
+//   }
+// }
 
 export default function injectProfile() { // Legacy
   if (jQueryNotPresent()) {return;}
@@ -81,5 +81,5 @@ export default function injectProfile() { // Legacy
   var playername = getText(getElementsByTagName('h1', pCC)[0]);
   var self = playername === playerName();
   updateDom(avyImg, playername, self);
-  allowBack(self);
+  // allowBack(self);
 }

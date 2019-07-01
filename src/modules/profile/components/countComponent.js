@@ -1,9 +1,9 @@
+import daComponents from '../../_dataAccess/daComponents';
 import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
 import {isArray} from '../../common/isArray';
-import loadComponents from '../../app/profile/loadcomponents';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
 import {sendEvent} from '../../support/fshGa';
@@ -67,5 +67,5 @@ function displayComponentTally(self, data) {
 
 export default function countComponent(self) { // jQuery.min
   sendEvent('components', 'countComponent');
-  loadComponents().then(partial(displayComponentTally, self));
+  daComponents().then(partial(displayComponentTally, self));
 }

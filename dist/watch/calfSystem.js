@@ -13489,8 +13489,56 @@
     on(pCC, 'click', testForSection);
   }
 
+  const componentRe = /\?item_id=(\d+)&inv_id=(\d+)&.*&vcode=([0-9a-f]+)/;
+
+  function details(a) {
+    const pattern = a.children[0].dataset.tipped.match(componentRe);
+    return {
+      a: Number(pattern[2]),
+      b: Number(pattern[1]),
+      v: pattern[3]
+    };
+  }
+
+  const getComponents$1 = doc =>
+    querySelectorArray('a[href*="=destroycomponent&"]', doc).map(details);
+
+  const getSlots = doc =>
+    querySelectorArray('td[background*="1x1mini"]', doc).length;
+
+  function processPages(prm) {
+    const asDocs = prm.map(createDocument);
+    const perPage = asDocs.map(getComponents$1);
+    const r = [].concat(...perPage);
+    const cm = asDocs.map(getSlots).reduce((a, b) => a + b, 0);
+    return {h: {cm}, r};
+  }
+
+  function firstPage(html) {
+    const doc = createDocument(html);
+    const pages = querySelectorArray('a[href*="profile&component_page="]', doc);
+    const profiles = pages.map(a => retryAjax(a.href));
+    return allthen(profiles, processPages);
+  }
+
+  // Incomplete
+  function components() {
+    return indexAjaxData({cmd: 'profile'}).then(firstPage);
+  }
+
   function loadComponents() {
     return profile({subcmd: 'loadcomponents'});
+  }
+
+  const doFallback$e = () => components();
+
+  function fallback$f(json) {
+    if (hasFailed(json)) {return doFallback$e();}
+    return json;
+  }
+
+  function daComponents() {
+    return loadComponents().then(fallback$f).catch(doFallback$e);
   }
 
   var componentList;
@@ -13569,7 +13617,7 @@
 
   function countComponent(self) { // jQuery.min
     sendEvent('components', 'countComponent');
-    loadComponents().then(partial(displayComponentTally, self));
+    daComponents().then(partial(displayComponentTally, self));
   }
 
   function decorateButton(label) {
@@ -13619,19 +13667,19 @@
     return allthen(componentIdAry.map(destroyComponent$1), formatResults$4);
   }
 
-  function doFallback$e(componentIdAry) {
+  function doFallback$f(componentIdAry) {
     return dropComponent(componentIdAry);
   }
 
-  function fallback$f(componentIdAry, json) {
-    if (hasFailed(json)) {return doFallback$e(componentIdAry);}
+  function fallback$g(componentIdAry, json) {
+    if (hasFailed(json)) {return doFallback$f(componentIdAry);}
     return json;
   }
 
   function daDestroyComponent(componentIdAry) {
     return destroyComponent(componentIdAry)
-      .then(partial(fallback$f, componentIdAry))
-      .catch(partial(doFallback$e, componentIdAry));
+      .then(partial(fallback$g, componentIdAry))
+      .catch(partial(doFallback$f, componentIdAry));
   }
 
   var invTableCache;
@@ -13647,7 +13695,7 @@
 
   var visibleCache;
 
-  function getComponents$1(prev, x) {
+  function getComponents$2(prev, x) {
     var matches = x.dataset.tipped.match(itemRE);
     prev[matches[2]] = x.parentNode.parentNode;
     return prev;
@@ -13656,7 +13704,7 @@
   function getVisibleComponents() {
     if (!visibleCache) {
       var nodeList = getArrayByTagName('img', getInvTable());
-      visibleCache = nodeList.reduce(getComponents$1, {});
+      visibleCache = nodeList.reduce(getComponents$2, {});
     }
     return visibleCache;
   }
@@ -13790,7 +13838,7 @@
     on(compDiv, 'click', classHandler(classEvts$1));
   }
 
-  function components() {
+  function components$1() {
     var thisInvTable = getInvTable();
     if (!thisInvTable) {return;}
     addComposingButtons(thisInvTable);
@@ -14006,19 +14054,19 @@
     });
   }
 
-  function doFallback$f(item) {
+  function doFallback$g(item) {
     return unequip(item);
   }
 
-  function fallback$g(item, json) {
-    if (hasFailed(json)) {return doFallback$f(item);}
+  function fallback$h(item, json) {
+    if (hasFailed(json)) {return doFallback$g(item);}
     return json;
   }
 
   function daUnequipItem(item) {
     return unequipitem(item)
-      .then(partial(fallback$g, item))
-      .catch(partial(doFallback$f, item));
+      .then(partial(fallback$h, item))
+      .catch(partial(doFallback$g, item));
   }
 
   var profileCombatSetDiv;
@@ -14385,7 +14433,7 @@
       fastDebuff();
       profileParseAllyEnemy();
       injectFastWear();
-      components();
+      components$1();
       quickWearLink();
       selectAllLink();
       storeVL();
@@ -14413,16 +14461,16 @@
     add(3, colouredDots);
   }
 
-  function updateUrl$4(e) {
-    e.preventDefault();
-    dontPost(closestForm(e.target).parentNode);
-  }
+  // function updateUrl(e) {
+  //   e.preventDefault();
+  //   dontPost(closestForm(e.target).parentNode);
+  // }
 
-  function allowBack$3(self) {
-    if (!self) {
-      on(querySelector('#profileRightColumn'), 'submit', updateUrl$4);
-    }
-  }
+  // function allowBack(self) {
+  //   if (!self) {
+  //     on(querySelector('#profileRightColumn'), 'submit', updateUrl);
+  //   }
+  // }
 
   function injectProfile() { // Legacy
     if (jQueryNotPresent()) {return;}
@@ -14431,7 +14479,7 @@
     var playername = getText(getElementsByTagName('h1', pCC)[0]);
     var self = playername === playerName();
     updateDom(avyImg, playername, self);
-    allowBack$3(self);
+    // allowBack(self);
   }
 
   function getActivitySpan(myPlayer) {
@@ -14785,19 +14833,19 @@
     });
   }
 
-  function doFallback$g(userAry, buffAry) {
+  function doFallback$h(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  function fallback$h(userAry, buffAry, json) {
-    if (hasFailed(json)) {return doFallback$g(userAry, buffAry);}
+  function fallback$i(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$h(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$h, userAry, buffAry))
-      .catch(partial(doFallback$g, userAry, buffAry));
+      .then(partial(fallback$i, userAry, buffAry))
+      .catch(partial(doFallback$h, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -17296,15 +17344,15 @@
     return indexAjaxData({cmd: 'guild', subcmd: 'scouttower'}).then(parseReport$5);
   }
 
-  const doFallback$h = () => scouttower$1();
+  const doFallback$i = () => scouttower$1();
 
-  function fallback$i(json) {
-    if (hasFailed(json)) {return doFallback$h();}
+  function fallback$j(json) {
+    if (hasFailed(json)) {return doFallback$i();}
     return json;
   }
 
   function daScoutTower() {
-    return scouttower().then(fallback$i).catch(doFallback$h);
+    return scouttower().then(fallback$j).catch(doFallback$i);
   }
 
   // colSpan = attributes[0]
@@ -17870,17 +17918,17 @@
     return guildGroups({subcmd2: 'viewstats', group_id: groupId});
   }
 
-  const doFallback$i = groupId => groupStats$2(groupId);
+  const doFallback$j = groupId => groupStats$2(groupId);
 
-  function fallback$j(groupId, json) {
-    if (hasFailed(json)) {return doFallback$i(groupId);}
+  function fallback$k(groupId, json) {
+    if (hasFailed(json)) {return doFallback$j(groupId);}
     return json;
   }
 
   function daGroupStats(groupId) {
     return groupsViewStats(groupId)
-      .then(partial(fallback$j, groupId))
-      .catch(partial(doFallback$i, groupId));
+      .then(partial(fallback$k, groupId))
+      .catch(partial(doFallback$j, groupId));
   }
 
   function groupsView() {
@@ -17900,15 +17948,15 @@
     return indexAjaxData({cmd: 'guild', subcmd: 'groups'}).then(parseReport$7);
   }
 
-  const doFallback$j = () => viewGroups();
+  const doFallback$k = () => viewGroups();
 
-  function fallback$k(json) {
-    if (hasFailed(json)) {return doFallback$j();}
+  function fallback$l(json) {
+    if (hasFailed(json)) {return doFallback$k();}
     return json;
   }
 
   function daViewGroups() {
-    return groupsView().then(fallback$k).catch(doFallback$j);
+    return groupsView().then(fallback$l).catch(doFallback$k);
   }
 
   function evalMiss(combat) {
@@ -19165,17 +19213,17 @@
     }).then(formatResult);
   }
 
-  const doFallback$k = recipe => invent(recipe);
+  const doFallback$l = recipe => invent(recipe);
 
-  function fallback$l(recipe, json) {
-    if (hasFailed(json)) {return doFallback$k(recipe);}
+  function fallback$m(recipe, json) {
+    if (hasFailed(json)) {return doFallback$l(recipe);}
     return json;
   }
 
   function daDoInvent(recipe) {
     return doinvent(recipe)
-      .then(partial(fallback$l, recipe))
-      .catch(partial(doFallback$k, recipe));
+      .then(partial(fallback$m, recipe))
+      .catch(partial(doFallback$l, recipe));
   }
 
   var invAmount;
@@ -19619,7 +19667,7 @@
       .forEach(partial(decorate$3, questsToHide));
   }
 
-  function updateUrl$5(evt) {
+  function updateUrl$4(evt) {
     if (evt.target.type !== 'submit') {
       return;
     }
@@ -19719,7 +19767,7 @@
   }
 
   function injectQuestBookFull() {
-    on(pCC, 'click', updateUrl$5);
+    on(pCC, 'click', updateUrl$4);
     storeQuestPage();
     var questTable = getElementsByTagName(def_table, pCC)[5];
     if (!questTable) {return;}
@@ -20554,20 +20602,20 @@
     }).then(formatResponse$2);
   }
 
-  function doFallback$l() {
+  function doFallback$m() {
     return guildFetchInv();
   }
 
-  function fallback$m(json) {
-    if (hasFailed(json)) {return doFallback$l();}
+  function fallback$n(json) {
+    if (hasFailed(json)) {return doFallback$m();}
     return json;
   }
 
   function daGuildFetchInv() {
-    return fetchinv$1().then(fallback$m).catch(doFallback$l);
+    return fetchinv$1().then(fallback$n).catch(doFallback$m);
   }
 
-  function details(td) {
+  function details$1(td) {
     const thisId = Number(itemId(td.children[0].href));
     const thisName = getTextTrim(td.previousElementSibling);
     const ret = {a: thisId};
@@ -20585,7 +20633,7 @@
     const doc = createDocument(html);
     const nodeList = querySelectorArray('#pCC table table td:nth-of-type(3n)',
       doc);
-    return {r: nodeList.map(details), s: true};
+    return {r: nodeList.map(details$1), s: true};
   }
 
   // Incomplete
@@ -20601,17 +20649,17 @@
     return guildInventory$1({subcmd2: 'report'});
   }
 
-  function doFallback$m() {
+  function doFallback$n() {
     return guildReport();
   }
 
-  function fallback$n(json) {
-    if (hasFailed(json)) {return doFallback$m();}
+  function fallback$o(json) {
+    if (hasFailed(json)) {return doFallback$n();}
     return json;
   }
 
   function daGuildReport() {
-    return report().then(fallback$n).catch(doFallback$m);
+    return report().then(fallback$o).catch(doFallback$n);
   }
 
   var theInv;
@@ -21367,19 +21415,19 @@
     }).then(htmlResult);
   }
 
-  function doFallback$n(invIdAry) {
+  function doFallback$o(invIdAry) {
     return storeitems(invIdAry);
   }
 
-  function fallback$o(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$n(invIdAry);}
+  function fallback$p(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$o(invIdAry);}
     return json;
   }
 
   function daStoreItems(invIdAry) {
     return dostoreitems(invIdAry)
-      .then(partial(fallback$o, invIdAry))
-      .catch(partial(doFallback$n, invIdAry));
+      .then(partial(fallback$p, invIdAry))
+      .catch(partial(doFallback$o, invIdAry));
   }
 
   function storeItems(invIdAry) {
@@ -22697,7 +22745,7 @@
     }
   }
 
-  function allowBack$4(topTable) { // jQuery
+  function allowBack$3(topTable) { // jQuery
     var thisSelect = getElementsByTagName('select', topTable)[0];
     $(thisSelect).off();
     on(thisSelect, 'change', partial(dontPost, pCC));
@@ -22710,7 +22758,7 @@
 
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
-    allowBack$4(topTable);
+    allowBack$3(topTable);
     arrayFrom(topTable.rows).filter(dataRows(4, 1)).forEach(playerLink);
   }
 
@@ -22736,30 +22784,30 @@
     return getProfile$1(username).then(parseReport$9);
   }
 
-  const doFallback$o = username => findPlayer(username);
+  const doFallback$p = username => findPlayer(username);
 
-  function fallback$p(username, json) {
-    if (hasFailed(json)) {return doFallback$o(username);}
+  function fallback$q(username, json) {
+    if (hasFailed(json)) {return doFallback$p(username);}
     return json;
   }
 
   function daFindPlayer(username) {
     return findplayer(username)
-      .then(partial(fallback$p, username))
-      .catch(partial(doFallback$o, username));
+      .then(partial(fallback$q, username))
+      .catch(partial(doFallback$p, username));
   }
 
-  const doFallback$p = guildId => guildView(guildId);
+  const doFallback$q = guildId => guildView(guildId);
 
-  function fallback$q(guildId, json) {
-    if (hasFailed(json)) {return doFallback$p(guildId);}
+  function fallback$r(guildId, json) {
+    if (hasFailed(json)) {return doFallback$q(guildId);}
     return json;
   }
 
   function daGuildView(guildId) {
     return guildView$1(guildId)
-      .then(partial(fallback$q, guildId))
-      .catch(partial(doFallback$p, guildId));
+      .then(partial(fallback$r, guildId))
+      .catch(partial(doFallback$q, guildId));
   }
 
   function getGuild$2(tbl) {
@@ -23342,7 +23390,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '131';
+  window.FSH.calf = '132';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
