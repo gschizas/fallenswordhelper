@@ -1,25 +1,9 @@
-import fallback from '../../system/fallback';
-import guild from '../../app/guild/guild';
+import getRelicList from './getRelicList';
 import {pCC} from '../../support/layout';
 import padZ from '../../system/padZ';
 import partial from '../../common/partial';
 import splitTime from '../../common/splitTime';
 import {def_subcmd, guideUrl, guildViewUrl} from '../../support/constants';
-
-function getRelicList(offset, myList) {
-  return guild({
-    subcmd: 'reliclist',
-    offset: fallback(offset, 0)
-  }).then(function(json) {
-    console.log(json); // eslint-disable-line no-console
-    var someRelics = json.r.relics;
-    var newList = fallback(myList, []).concat(someRelics);
-    if (json.r.remaining_relics > 0) {
-      return getRelicList(fallback(offset, 0) + someRelics.length, newList);
-    }
-    return newList;
-  });
-}
 
 function relicName(relic) {
   return '<a href="' + guideUrl + 'relics' + def_subcmd +
@@ -94,8 +78,9 @@ function makeTable(relicList) {
     '</tbody></table>';
 }
 
-function processRelicList(relicList) {
-  pCC.innerHTML = makeTable(relicList);
+function processRelicList(thisRelicList) {
+  thisRelicList.sort((a, b) => a.min_level - b.min_level);
+  pCC.innerHTML = makeTable(thisRelicList);
 }
 
 export default function reliclist() {
