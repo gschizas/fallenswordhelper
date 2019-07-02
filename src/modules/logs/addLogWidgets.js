@@ -17,7 +17,7 @@ import querySelector from '../common/querySelector';
 //#if _DEV  //  arena Combat
 import viewCombat from './viewCombat';
 //#endif
-import {addPvpSummary, initCache} from './addPvpSummary';
+import {addPvpSummary, initCache} from './pvpSummary/addPvpSummary';
 import {
   attackplayerUrl,
   doAddIgnore,

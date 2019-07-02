@@ -1,21 +1,21 @@
-import addCommas from '../system/addCommas';
-import calf from '../support/calf';
-import combatView from '../ajax/combatView';
-import createDocument from '../system/createDocument';
-import getForage from '../ajax/getForage';
-import getText from '../common/getText';
-import getTextTrim from '../common/getTextTrim';
-import insertElement from '../common/insertElement';
-import {nowSecs} from '../support/now';
-import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
-import partial from '../common/partial';
-import playerId from '../common/playerId';
-import querySelectorAll from '../common/querySelectorAll';
-import {sendEvent} from '../support/fshGa';
-import setForage from '../ajax/setForage';
-import {specials} from '../support/specials';
-import viewCombat from '../app/combat/view';
-import {createDiv, createSpan} from '../common/cElement';
+import addCommas from '../../system/addCommas';
+import calf from '../../support/calf';
+import combatView from '../../ajax/combatView';
+import createDocument from '../../system/createDocument';
+import daViewCombat from '../../_dataAccess/daViewCombat';
+import getForage from '../../ajax/getForage';
+import getText from '../../common/getText';
+import getTextTrim from '../../common/getTextTrim';
+import insertElement from '../../common/insertElement';
+import {nowSecs} from '../../support/now';
+import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
+import partial from '../../common/partial';
+import playerId from '../../common/playerId';
+import querySelectorAll from '../../common/querySelectorAll';
+import {sendEvent} from '../../support/fshGa';
+import setForage from '../../ajax/setForage';
+import {specials} from '../../support/specials';
+import {createDiv, createSpan} from '../../common/cElement';
 
 var combatCache = {};
 
@@ -108,7 +108,7 @@ function processCombat(aRow) {
   if (combatCache[combatID] && combatCache[combatID].logTime) {
     parseCombat(combatSummary, combatCache[combatID]);
   } else {
-    viewCombat(combatID).then(partial(cacheCombat, aRow))
+    daViewCombat(combatID).then(partial(cacheCombat, aRow))
       .then(partial(parseCombat, combatSummary));
   }
 }
