@@ -131,3 +131,14 @@ export var GMSTORAGE_PATH = 'GM_';
 
 export const composingFragmentType = [
   'Common', 'Rare', 'Unique', 'Legendary', 'Super Elite', 'Crystalline'];
+
+export const attribType = ['Attack', 'Defense', 'Armor', 'HP', 'Damage',
+  'Stamina', 'Stamina Gain', 'Gold Gain', 'XP Gain'];
+
+export const enhancementType = ['Piercing Strike', 'Reinforced Armor',
+  'Thievery', 'Critical Hit', 'Holy', 'Breaker', 'Nullify', 'Banishment',
+  'Protection', 'Oceanic', 'Master Thief', 'Protect Gold', 'Dodge', 'Disarm',
+  'Master Blacksmith', 'Elite Hunter', 'Sustain', 'Master Crafter',
+  'Fury Caster', 'Greenskin Slayer', 'Beast Slayer', 'Duelist', 'Glory Seeker',
+  'First Strike', 'Hypnotize', 'Master Inventor', 'Soulless', 'Temporal Shift'
+];

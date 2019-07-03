@@ -1,11 +1,10 @@
 import calf from '../support/calf';
-import extend from '../common/extend';
-import indexAjaxJson from './indexAjaxJson';
+import guildStore from '../_dataAccess/export/guildStore';
+import inventory from '../_dataAccess/export/inventory';
 
 export default function getInventory() {
-  var subcmd = {subcmd: 'inventory'};
   if (calf.subcmd === 'guildinvmgr') {
-    subcmd = {subcmd: 'guild_store', inc_tagged: '1'};
+    return guildStore();
   }
-  return indexAjaxJson(extend({cmd: 'export'}, subcmd));
+  return inventory();
 }

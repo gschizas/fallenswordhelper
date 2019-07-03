@@ -1,3 +1,4 @@
+import addPvpSummary from './pvpSummary/addPvpSummary';
 import allthen from '../common/allthen';
 import {arrayFrom} from '../common/arrayFrom';
 import calf from '../support/calf';
@@ -9,6 +10,7 @@ import getCalfPrefs from '../common/getCalfPrefs';
 import getMembrList from '../ajax/getMembrList';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
+import {initCache} from './pvpSummary/combatCache';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
@@ -17,7 +19,6 @@ import querySelector from '../common/querySelector';
 //#if _DEV  //  arena Combat
 import viewCombat from './viewCombat';
 //#endif
-import {addPvpSummary, initCache} from './addPvpSummary';
 import {
   attackplayerUrl,
   doAddIgnore,

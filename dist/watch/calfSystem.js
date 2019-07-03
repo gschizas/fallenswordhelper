@@ -585,6 +585,17 @@
   const composingFragmentType = [
     'Common', 'Rare', 'Unique', 'Legendary', 'Super Elite', 'Crystalline'];
 
+  const attribType = ['Attack', 'Defense', 'Armor', 'HP', 'Damage',
+    'Stamina', 'Stamina Gain', 'Gold Gain', 'XP Gain'];
+
+  const enhancementType = ['Piercing Strike', 'Reinforced Armor',
+    'Thievery', 'Critical Hit', 'Holy', 'Breaker', 'Nullify', 'Banishment',
+    'Protection', 'Oceanic', 'Master Thief', 'Protect Gold', 'Dodge', 'Disarm',
+    'Master Blacksmith', 'Elite Hunter', 'Sustain', 'Master Crafter',
+    'Fury Caster', 'Greenskin Slayer', 'Beast Slayer', 'Duelist', 'Glory Seeker',
+    'First Strike', 'Hypnotize', 'Master Inventor', 'Soulless', 'Temporal Shift'
+  ];
+
   var lastScavPage="";var lastActiveQuestPage="";var lastNormalActiveQuestPage="";var lastNormalCompletedQuestPage="";var lastNormalNotStartedQuestPage="";var lastSeasonalActiveQuestPage="";var lastSeasonalCompletedQuestPage="";var lastSeasonalNotStartedQuestPage="";var enableLogColoring=false;var enableChatParsing=false;var enableCreatureColoring=false;var showCombatLog=false;var showCreatureInfo=false;var keepLogs=false;var showExtraLinks=false;var huntingBuffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve";var huntingBuffsName="default";var huntingBuffs2="Deflect";var huntingBuffs2Name="PvP";var huntingBuffs3="Super Elite Slayer";var huntingBuffs3Name="SE";var showHuntingBuffs=false;var moveFSBox=false;var moveDailyQuest=false;var guildSelf="";var guildSelfMessage="Member of your own guild!";var guildFrnd="";var guildFrndMessage="Do not attack - Guild is friendly!";var guildPast="";var guildPastMessage="Do not attack - You've been in that guild once!";var guildEnmy="";var guildEnmyMessage="Enemy guild. Attack at will!";var goldRecipient="";var goldAmount="";var sendGoldonWorld=false;var hideQuests=false;var hideQuestNames="";var hideRecipes=false;var hideRecipeNames="";var enableGuildInfoWidgets=false;var enableOnlineAlliesWidgets=false;var guildOnlineRefreshTime=300;var hideGuildInfoSecureTrade=false;var hideGuildInfoTrade=false;var hideGuildInfoMessage=false;var hideGuildInfoBuff=false;var buyBuffsGreeting="Hello {playername}, can I buy {buffs} for {cost} please?";var renderSelfBio=false;var bioEditLines=10;var renderOtherBios=false;var playNewMessageSound=false;var showSpeakerOnWorld=false;var defaultMessageSound="https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav";var highlightPlayersNearMyLvl=false;var highlightGvGPlayersNearMyLvl=false;var detailedConflictInfo=false;var gameHelpLink=true;var navigateToLogAfterMsg=false;var enableAllyOnlineList=false;var enableEnemyOnlineList=false;var allyEnemyOnlineRefreshTime=300;var moveGuildList=false;var moveOnlineAlliesList=false;var hideMatchesForCompletedMoves=false;var doNotKillList="";var enableBioCompressor=false;var currentGoldSentTotal=0;var keepBuffLog=false;var buffLog="";var enableActiveBountyList=false;var bountyListRefreshTime=300;var enableWantedList=false;var wantedNames="";var wantedGuildMembers=false;var bwNeedsRefresh=true;var fsboxlog=false;var fsboxcontent="";var itemRecipient="";var quickLinks="[]";var enableAttackHelper=false;var minGroupLevel=1;var combatEvaluatorBias=0;var huntingMode=false;var enabledHuntingMode="1";var hideRelicOffline=false;var enterForSendMessage=false;var trackKillStreak=false;var storeLastQuestPage=false;var addAttackLinkToLog=false;var showStatBonusTotal=false;var newGuildLogHistoryPages=3;var useNewGuildLog=false;var enhanceChatTextEntry=false;var ajaxifyRankControls=false;var enableMaxGroupSizeToJoin=false;var maxGroupSizeToJoin=11;var enableTempleAlert=false;var enableUpgradeAlert=false;var enableComposingAlert=false;var autoFillMinBidPrice=false;var showPvPSummaryInLog=false;var enableQuickDrink=false;var enhanceOnlineDots=false;var hideBuffSelected=false;var hideHelperMenu=false;var keepHelperMenuOnScreen=true;var draggableHelperMenu=false;var quickLinksTopPx=22;var quickLinksLeftPx=0;var draggableQuickLinks=false;var showNextQuestSteps=true;var showRecallMessages=true;var showRelicMessages=true;var showMercenaryMessages=true;var showGroupCombatMessages=true;var showDonationMessages=true;var showRankingMessages=true;var showGvGMessages=true;var showTaggingMessages=true;var showTitanMessages=true;var showQuickDropLinks=false;var onlinePlayerMinLvl=1;var onlinePlayerMaxLvl=9999;var arenaMinLvl=1;var arenaMaxLvl=9999;var showMonsterLog=false;var lastTempleCheck=0;var needToPray=false;var lastChatCheck="0";var lastGuildLogCheck="0";var lastOutBoxCheck="0";var lastPlayerLogCheck="0";var showAdmin=false;var alliestotal=0;var enemiestotal=0;var footprints=false;var hideNonPlayerGuildLogMessages=false;var listOfAllies="";var listOfEnemies="";var contactList="";var lastUpgradeCheck=0;var needToDoUpgrade=false;var characterVirtualLevel=0;var guildLogoControl=false;var statisticsControl=false;var guildStructureControl=false;var lastMembrListCheck=0;var disableItemColoring=true;var showQuickSendLinks=false;var needToCompose=false;var lastComposeCheck=0;var lastOnlineCheck=0;var bountyList="";var wantedList="";var lowestLevelInTop250=0;var quickMsg="[\"Thank you very much ^_^\",\"Happy hunting, {playername}\"]";var sendClasses="[\"Composed Pots\", \"13699\"], [\"Amber\", \"5611\"], [\"Amethyst Weed\", \"9145\"], [\"Blood Bloom\", \"5563\"], [\"Cerulean Rose\", \"9156\"], [\"Coleoptera Body\", \"9287\"], [\"Dark Shade\", \"5564\"], [\"Deathbloom\", \"9140\"], [\"Deathly Mold\", \"9153\"], [\"Greenskin Fungus\", \"9148\"], [\"Heffle\", \"5565\"], [\"Jademare\", \"5566\"], [\"Ruby Thistle\", \"9143\"], [\"Toad Corpse\",\"9288\"], [\"Trinettle\", \"5567\"], [\"Viridian Vine\", \"9151\"], [\"Mortar & Pestle\", \"9157\"], [\"Beetle Juice\", \"9158\"]";var quickSearchList="[{\"category\":\"Plants\",\"searchname\":\"Amber\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Blood Bloom\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Jademare\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Dark Shade\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Trinettle\",\"nickname\":\"\"},{\"category\":\"Plants\",\"searchname\":\"Heffle Wart\",\"nickname\":\"\"},{\"category\":\"Potions\",\"searchname\":\"Sludge Brew\",\"nickname\":\"DC 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Black Death\",\"nickname\":\"DC 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Aid\",\"nickname\":\"Assist\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Doubling\",\"nickname\":\"DB 450\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Acceleration\",\"nickname\":\"DB 500\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Lesser Death Dealer\",\"nickname\":\"DD\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Runic Potion\",\"nickname\":\"FI 250\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Bookworm\",\"nickname\":\"Lib 225\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Truth\",\"nickname\":\"EW 1k\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dull Edge\",\"nickname\":\"DE 25\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Notched Blade\",\"nickname\":\"DE 80\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Death\",\"nickname\":\"DW 125\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Decay\",\"nickname\":\"WI 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fatality\",\"nickname\":\"WI 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Annihilation\",\"nickname\":\"DW 150\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of the Wise\",\"nickname\":\"Lib 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Shattering\",\"nickname\":\"SA\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Dragons Blood Potion\",\"nickname\":\"ZK 200\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Berserkers Potion\",\"nickname\":\"ZK 300\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Fury\",\"nickname\":\"ZK 350\",\"displayOnAH\":true},{\"category\":\"Potions\",\"searchname\":\"Potion of Supreme Luck\",\"nickname\":\"FI 1k\",\"displayOnAH\":true}]";var arenaMoves="[]";var arenaMatches="[]";var CombatLog="";var hideChampionsGroup=false;var hideElitesGroup=false;var hideSEGroup=false;var hideTitanGroup=false;var hideLegendaryGroup=false;var disableDeactivatePrompts=false;var moveComposingButtons=false;var expandMenuOnKeyPress=false;var disableBreakdownPrompts=false;var collapseNewsArchive=false;var collapseHallPosts=false;var lastmyGuildLogCheck=0;var hideSubLvlCreature=false;var hidePlayerActions=false;var extraProfile="";var textToSearchFor="";var lastLadderReset=0;var disableQuickWearPrompts=false;var enableGuildActivityTracker=false;var enableSeTracker=false;var showTitanInfo=false;var highlightPvpProtection=false;var showBuffInfo=false;var enableHistoryCompressor=false;var enableStamBars=false;var defaults = {lastScavPage:lastScavPage,lastActiveQuestPage:lastActiveQuestPage,lastNormalActiveQuestPage:lastNormalActiveQuestPage,lastNormalCompletedQuestPage:lastNormalCompletedQuestPage,lastNormalNotStartedQuestPage:lastNormalNotStartedQuestPage,lastSeasonalActiveQuestPage:lastSeasonalActiveQuestPage,lastSeasonalCompletedQuestPage:lastSeasonalCompletedQuestPage,lastSeasonalNotStartedQuestPage:lastSeasonalNotStartedQuestPage,enableLogColoring:enableLogColoring,enableChatParsing:enableChatParsing,enableCreatureColoring:enableCreatureColoring,showCombatLog:showCombatLog,showCreatureInfo:showCreatureInfo,keepLogs:keepLogs,showExtraLinks:showExtraLinks,huntingBuffs:huntingBuffs,huntingBuffsName:huntingBuffsName,huntingBuffs2:huntingBuffs2,huntingBuffs2Name:huntingBuffs2Name,huntingBuffs3:huntingBuffs3,huntingBuffs3Name:huntingBuffs3Name,showHuntingBuffs:showHuntingBuffs,moveFSBox:moveFSBox,moveDailyQuest:moveDailyQuest,guildSelf:guildSelf,guildSelfMessage:guildSelfMessage,guildFrnd:guildFrnd,guildFrndMessage:guildFrndMessage,guildPast:guildPast,guildPastMessage:guildPastMessage,guildEnmy:guildEnmy,guildEnmyMessage:guildEnmyMessage,goldRecipient:goldRecipient,goldAmount:goldAmount,sendGoldonWorld:sendGoldonWorld,hideQuests:hideQuests,hideQuestNames:hideQuestNames,hideRecipes:hideRecipes,hideRecipeNames:hideRecipeNames,enableGuildInfoWidgets:enableGuildInfoWidgets,enableOnlineAlliesWidgets:enableOnlineAlliesWidgets,guildOnlineRefreshTime:guildOnlineRefreshTime,hideGuildInfoSecureTrade:hideGuildInfoSecureTrade,hideGuildInfoTrade:hideGuildInfoTrade,hideGuildInfoMessage:hideGuildInfoMessage,hideGuildInfoBuff:hideGuildInfoBuff,buyBuffsGreeting:buyBuffsGreeting,renderSelfBio:renderSelfBio,bioEditLines:bioEditLines,renderOtherBios:renderOtherBios,playNewMessageSound:playNewMessageSound,showSpeakerOnWorld:showSpeakerOnWorld,defaultMessageSound:defaultMessageSound,highlightPlayersNearMyLvl:highlightPlayersNearMyLvl,highlightGvGPlayersNearMyLvl:highlightGvGPlayersNearMyLvl,detailedConflictInfo:detailedConflictInfo,gameHelpLink:gameHelpLink,navigateToLogAfterMsg:navigateToLogAfterMsg,enableAllyOnlineList:enableAllyOnlineList,enableEnemyOnlineList:enableEnemyOnlineList,allyEnemyOnlineRefreshTime:allyEnemyOnlineRefreshTime,moveGuildList:moveGuildList,moveOnlineAlliesList:moveOnlineAlliesList,hideMatchesForCompletedMoves:hideMatchesForCompletedMoves,doNotKillList:doNotKillList,enableBioCompressor:enableBioCompressor,currentGoldSentTotal:currentGoldSentTotal,keepBuffLog:keepBuffLog,buffLog:buffLog,enableActiveBountyList:enableActiveBountyList,bountyListRefreshTime:bountyListRefreshTime,enableWantedList:enableWantedList,wantedNames:wantedNames,wantedGuildMembers:wantedGuildMembers,bwNeedsRefresh:bwNeedsRefresh,fsboxlog:fsboxlog,fsboxcontent:fsboxcontent,itemRecipient:itemRecipient,quickLinks:quickLinks,enableAttackHelper:enableAttackHelper,minGroupLevel:minGroupLevel,combatEvaluatorBias:combatEvaluatorBias,huntingMode:huntingMode,enabledHuntingMode:enabledHuntingMode,hideRelicOffline:hideRelicOffline,enterForSendMessage:enterForSendMessage,trackKillStreak:trackKillStreak,storeLastQuestPage:storeLastQuestPage,addAttackLinkToLog:addAttackLinkToLog,showStatBonusTotal:showStatBonusTotal,newGuildLogHistoryPages:newGuildLogHistoryPages,useNewGuildLog:useNewGuildLog,enhanceChatTextEntry:enhanceChatTextEntry,ajaxifyRankControls:ajaxifyRankControls,enableMaxGroupSizeToJoin:enableMaxGroupSizeToJoin,maxGroupSizeToJoin:maxGroupSizeToJoin,enableTempleAlert:enableTempleAlert,enableUpgradeAlert:enableUpgradeAlert,enableComposingAlert:enableComposingAlert,autoFillMinBidPrice:autoFillMinBidPrice,showPvPSummaryInLog:showPvPSummaryInLog,enableQuickDrink:enableQuickDrink,enhanceOnlineDots:enhanceOnlineDots,hideBuffSelected:hideBuffSelected,hideHelperMenu:hideHelperMenu,keepHelperMenuOnScreen:keepHelperMenuOnScreen,draggableHelperMenu:draggableHelperMenu,quickLinksTopPx:quickLinksTopPx,quickLinksLeftPx:quickLinksLeftPx,draggableQuickLinks:draggableQuickLinks,showNextQuestSteps:showNextQuestSteps,showRecallMessages:showRecallMessages,showRelicMessages:showRelicMessages,showMercenaryMessages:showMercenaryMessages,showGroupCombatMessages:showGroupCombatMessages,showDonationMessages:showDonationMessages,showRankingMessages:showRankingMessages,showGvGMessages:showGvGMessages,showTaggingMessages:showTaggingMessages,showTitanMessages:showTitanMessages,showQuickDropLinks:showQuickDropLinks,onlinePlayerMinLvl:onlinePlayerMinLvl,onlinePlayerMaxLvl:onlinePlayerMaxLvl,arenaMinLvl:arenaMinLvl,arenaMaxLvl:arenaMaxLvl,showMonsterLog:showMonsterLog,lastTempleCheck:lastTempleCheck,needToPray:needToPray,lastChatCheck:lastChatCheck,lastGuildLogCheck:lastGuildLogCheck,lastOutBoxCheck:lastOutBoxCheck,lastPlayerLogCheck:lastPlayerLogCheck,showAdmin:showAdmin,alliestotal:alliestotal,enemiestotal:enemiestotal,footprints:footprints,hideNonPlayerGuildLogMessages:hideNonPlayerGuildLogMessages,listOfAllies:listOfAllies,listOfEnemies:listOfEnemies,contactList:contactList,lastUpgradeCheck:lastUpgradeCheck,needToDoUpgrade:needToDoUpgrade,characterVirtualLevel:characterVirtualLevel,guildLogoControl:guildLogoControl,statisticsControl:statisticsControl,guildStructureControl:guildStructureControl,lastMembrListCheck:lastMembrListCheck,disableItemColoring:disableItemColoring,showQuickSendLinks:showQuickSendLinks,needToCompose:needToCompose,lastComposeCheck:lastComposeCheck,lastOnlineCheck:lastOnlineCheck,bountyList:bountyList,wantedList:wantedList,lowestLevelInTop250:lowestLevelInTop250,quickMsg:quickMsg,sendClasses:sendClasses,quickSearchList:quickSearchList,arenaMoves:arenaMoves,arenaMatches:arenaMatches,CombatLog:CombatLog,hideChampionsGroup:hideChampionsGroup,hideElitesGroup:hideElitesGroup,hideSEGroup:hideSEGroup,hideTitanGroup:hideTitanGroup,hideLegendaryGroup:hideLegendaryGroup,disableDeactivatePrompts:disableDeactivatePrompts,moveComposingButtons:moveComposingButtons,expandMenuOnKeyPress:expandMenuOnKeyPress,disableBreakdownPrompts:disableBreakdownPrompts,collapseNewsArchive:collapseNewsArchive,collapseHallPosts:collapseHallPosts,lastmyGuildLogCheck:lastmyGuildLogCheck,hideSubLvlCreature:hideSubLvlCreature,hidePlayerActions:hidePlayerActions,extraProfile:extraProfile,textToSearchFor:textToSearchFor,lastLadderReset:lastLadderReset,disableQuickWearPrompts:disableQuickWearPrompts,enableGuildActivityTracker:enableGuildActivityTracker,enableSeTracker:enableSeTracker,showTitanInfo:showTitanInfo,highlightPvpProtection:highlightPvpProtection,showBuffInfo:showBuffInfo,enableHistoryCompressor:enableHistoryCompressor,enableStamBars:enableStamBars};
 
   var reviver = [
@@ -2392,12 +2403,23 @@
     return indexAjax({data: data, dataType: 'json'});
   }
 
+  function cmdExport(data) {
+    return indexAjaxJson(extend({cmd: 'export'}, data));
+  }
+
+  function guildStore() {
+    return cmdExport({inc_tagged: '1', subcmd: 'guild_store'});
+  }
+
+  function inventory() {
+    return cmdExport({subcmd: 'inventory'});
+  }
+
   function getInventory() {
-    var subcmd = {subcmd: 'inventory'};
     if (calf.subcmd === 'guildinvmgr') {
-      subcmd = {subcmd: 'guild_store', inc_tagged: '1'};
+      return guildStore();
     }
-    return indexAjaxJson(extend({cmd: 'export'}, subcmd));
+    return inventory();
   }
 
   function outputResult(result, handle) {
@@ -4626,12 +4648,12 @@
     }
   }
 
+  function profile$1(username) {
+    return cmdExport({player_username: username, subcmd: 'profile'});
+  }
+
   function getProfile$1(username) {
-    return indexAjaxJson({
-      cmd: 'export',
-      subcmd: 'profile',
-      player_username: username
-    });
+    return profile$1(username);
   }
 
   function sendMyProfileToForage(data) {
@@ -5200,7 +5222,7 @@
     const tipped = row.cells[1].children[0].dataset.tipped;
     const stamina = tipped.match(/Stamina:<\/td><td>(\d+) \/ (\d+)</);
     return {
-      id: 0,
+      id: Number(row.cells[1].children[0].href.match(/player_id=(\d+)/)[1]),
       name: getTextTrim(row.cells[1].children[0]),
       level: Number(getTextTrim(row.cells[2])),
       current_stamina: Number(stamina[1]),
@@ -6544,7 +6566,7 @@
     clickThis(dirButton);
   }
 
-  function profile$1() {
+  function profile$2() {
     keyHandlerEvent('profile');
     expandMenu('2');
     location.href = profileUrl;
@@ -6576,7 +6598,7 @@
     ['g', gotoGuild], // go to guild [g]
     ['j', joinAllGroup], // join all group [j]
     ['l', logPage], // Log Page [l]
-    ['p', profile$1], // profile [p]
+    ['p', profile$2], // profile [p]
     ['r', doRepair], // repair [r]
     ['v', fastWearMgr], // fast wear manager [v]
     ['y', doSendGold] // fast send gold [y]
@@ -8004,7 +8026,7 @@
     insertElement(inject, perfLabel);
   }
 
-  function inventory(data) {
+  function inventory$1(data) {
     if (data.items && itemTable) {
       invItems = data.items;
       add(4, enhanceWarehouse);
@@ -8026,17 +8048,13 @@
 
   function craftForge() {
     if (jQueryPresent()) {
-      getInventoryById().then(inventory);
+      getInventoryById().then(inventory$1);
       add(3, getItems);
     }
   }
 
-  function getGuild(guildId) {
-    return indexAjaxJson({
-      cmd: 'export',
-      subcmd: 'guild_members',
-      guild_id: guildId
-    });
+  function guildMembers(guildId) {
+    return cmdExport({guild_id: guildId, subcmd: 'guild_members'});
   }
 
   function saveMembrListInForage(membrList, data) {
@@ -8063,7 +8081,7 @@
   }
 
   function getGuildMembers(guildId) {
-    return getGuild(guildId).then(partial(membrListToHash, guildId));
+    return guildMembers(guildId).then(partial(membrListToHash, guildId));
   }
 
   function getAndCacheGuildMembers(guildId) {
@@ -8095,7 +8113,7 @@
     return getAndCacheGuildMembers(guildId);
   }
 
-  function guildMembers(force, guildId) {
+  function guildMembers$1(force, guildId) {
     if (force) {
       return getAndCacheGuildMembers(guildId);
     }
@@ -8111,7 +8129,7 @@
   function getMembrList(force) {
     var guildId = currentGuildId();
     if (guildId) {
-      return guildMembers(force, guildId)
+      return guildMembers$1(force, guildId)
         .then(partial(setHelperMembrList, guildId));
     }
     return Promise.reject(new Error('no guild id'));
@@ -10441,6 +10459,60 @@
     return guild(extend({subcmd: 'ranks'}, data));
   }
 
+  const rankPerms = rankId => indexAjaxData({
+    cmd: 'guild',
+    subcmd: 'ranks',
+    subcmd2: 'add',
+    rank_id: rankId
+  });
+
+  const rankFromInput = input =>
+    rankPerms(input.getAttribute('onclick').match(/[=](\d+)/)[1]);
+
+  const permFlags = doc =>
+    querySelectorArray('input[name^="permission"]:checked', doc)
+      .reduce((a, b) => a + 2 ** Number(b.name.match(/\[(\d+)\]/)[1]), 0);
+
+  function parsePerms(doc) {
+    return {
+      id: Number(querySelector('input[name="rank_id"]', doc).value),
+      name: querySelector('input[name="rank_name"]', doc).value,
+      permissions: permFlags(doc),
+      tax: Number(querySelector('input[name="rank_tax"]', doc).value)
+    };
+  }
+
+  function formatPerms(ary) {
+    const docs = ary.map(createDocument);
+    const ranks = docs.map(parsePerms);
+    return {r: {'0': ranks[0], ranks: ranks.slice(1)}, s: true};
+  }
+
+  function processRanks(html) {
+    const doc = createDocument(html);
+    const editButton = querySelectorArray('input[value="Edit"]', doc);
+    return allthen(editButton.map(rankFromInput), formatPerms);
+  }
+
+  // Incomplete
+  function ranksView() {
+    return indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'ranks'
+    }).then(processRanks);
+  }
+
+  const doFallback$7 = () => ranksView();
+
+  function fallback$8(json) {
+    if (hasFailed(json)) {return doFallback$7();}
+    return json;
+  }
+
+  function daRanksView() {
+    return ranks().then(fallback$8).catch(doFallback$7);
+  }
+
   function isNaN$1(value) {
     return Number.isNaN(value);
   }
@@ -10468,25 +10540,20 @@
     [0x400000, 4] //   Can Kick Members
   ];
 
-  function rankObj(rankName, rank) {return rank.name === rankName;}
-
-  function sum$1(prev, curr) {return prev + curr;}
-
-  function thePriv(perms, v) {return bitwiseAnd(perms, v[0]);}
-
-  function addWeight(prev, curr) {return prev + curr[1] - 1;}
-
   function calcPermWeight(perms) {
     return roundToString(
-      privLookup.filter(partial(thePriv, perms)).reduce(addWeight, 0) +
-      perms.toString(2).split('').map(Number).reduce(sum$1, 0), 1);
+      privLookup.filter(([flag]) => bitwiseAnd(perms, flag))
+        .reduce((a, [, weight]) => a + weight - 1, 0) +
+      perms.toString(2).split('').map(Number).reduce((a, b) => a + b, 0)
+      , 1
+    );
   }
 
   function parseRankData(memberRanks, row) {
     // Makes a weighted calculation of available permissions and gets tax rate
     var rankCell = row.children[0];
     var rankName = getText(rankCell.firstChild); // Text Node
-    var thisRank = memberRanks.find(partial(rankObj, rankName));
+    var thisRank = memberRanks.find(r => r.name === rankName);
     if (thisRank) {
       insertHtmlAfterBegin(rankCell, '<span class="fshBlue">(' +
         calcPermWeight(thisRank.permissions) +
@@ -10494,15 +10561,21 @@
     }
   }
 
-  function gotRankData(theRows, json) {
+  function gotRankData(theRows, spinner, json) {
     if (json.s) {
       theRows.forEach(partial(parseRankData, [json.r['0']].concat(json.r.ranks)));
+      spinner.classList.remove('fshSpinner');
     }
   }
 
-  function fetchRankData(theRows, weightButton) { // jQuery.min
-    hideElement(weightButton);
-    ranks().then(partial(gotRankData, theRows));
+  function fetchRankData(theRows, weightButton) {
+    const spinner =
+      createSpan({
+        className: 'fshBlock fshRelative fshSpinner fshSpinner12',
+        style: {height: '15px', width: '136px'}
+      });
+    replaceChild(spinner, weightButton);
+    daRanksView().then(partial(gotRankData, theRows, spinner));
   }
 
   function injectWeightButton(theRows, addNewRank) {
@@ -10539,17 +10612,17 @@
     return ranks({subcmd2: direction, rank_id: rankId});
   }
 
-  const doFallback$7 = (direction, rankId) => moveRank(direction, rankId);
+  const doFallback$8 = (direction, rankId) => moveRank(direction, rankId);
 
-  function fallback$8(direction, rankId, json) {
-    if (hasFailed(json)) {return doFallback$7(direction, rankId);}
+  function fallback$9(direction, rankId, json) {
+    if (hasFailed(json)) {return doFallback$8(direction, rankId);}
     return json;
   }
 
   function daRankPosition(direction, rankId) {
     return rankPosition(direction, rankId)
-      .then(partial(fallback$8, direction, rankId))
-      .catch(partial(doFallback$7, direction, rankId));
+      .then(partial(fallback$9, direction, rankId))
+      .catch(partial(doFallback$8, direction, rankId));
   }
 
   var characterRow;
@@ -10948,19 +11021,19 @@
     });
   }
 
-  function doFallback$8(invId) {
+  function doFallback$9(invId) {
     return gsTake(invId);
   }
 
-  function fallback$9(invId, json) {
-    if (hasFailed(json)) {return doFallback$8(invId);}
+  function fallback$a(invId, json) {
+    if (hasFailed(json)) {return doFallback$9(invId);}
     return json;
   }
 
   function daGsTake(invId) {
     return takeitem(invId)
-      .then(partial(fallback$9, invId))
-      .catch(partial(doFallback$8, invId));
+      .then(partial(fallback$a, invId))
+      .catch(partial(doFallback$9, invId));
   }
 
   function doItemTable(checkbox) {
@@ -11060,19 +11133,19 @@
     });
   }
 
-  function doFallback$9(invId, playerId, mode) {
+  function doFallback$a(invId, playerId, mode) {
     return guildInvRecall(invId, playerId, mode);
   }
 
-  function fallback$a(invId, playerId, mode, json) {
-    if (hasFailed(json)) {return doFallback$9(invId, playerId, mode);}
+  function fallback$b(invId, playerId, mode, json) {
+    if (hasFailed(json)) {return doFallback$a(invId, playerId, mode);}
     return json;
   }
 
   function daGuildRecall(invId, playerId, mode) {
     return recall(invId, playerId, mode)
-      .then(partial(fallback$a, invId, playerId, mode))
-      .catch(partial(doFallback$9, invId, playerId, mode));
+      .then(partial(fallback$b, invId, playerId, mode))
+      .catch(partial(doFallback$a, invId, playerId, mode));
   }
 
   function recallItem(invId, playerId, mode) {
@@ -11294,7 +11367,7 @@
     return Object.keys(obj).sort(alpha).reduce(partial(cloneObj, obj), {});
   }
 
-  var inventory$1;
+  var inventory$2;
 
   function pivotPotObj(potOpts, potObj, prev, pot) {
     if (potOpts.myMap[pot] !== 'Ignore') {
@@ -11335,20 +11408,20 @@
     sendEvent('potReport', 'drawInventory');
     var pivot = sortKeys(Object.keys(potObj)
       .reduce(partial(pivotPotObj, potOpts, potObj), {}));
-    inventory$1.innerHTML = '<table><tbody>' +
+    inventory$2.innerHTML = '<table><tbody>' +
       Object.keys(pivot).reduce(partial(makeRowsFromPivot, potOpts, pivot), '') +
       '</tbody></table>';
   }
 
   function initInventory(potOpts, potObj, panels) {
-    inventory$1 = createDiv({id: 'inventory'});
+    inventory$2 = createDiv({id: 'inventory'});
     if (potOpts.pottab1) {
       drawInventory(potOpts, potObj);
     } else {
       once(panels.parentNode.children[0], 'change',
         partial(drawInventory, potOpts, potObj));
     }
-    insertElement(panels, inventory$1);
+    insertElement(panels, inventory$2);
   }
 
   var mapping;
@@ -11685,19 +11758,19 @@
     }).then(ajaxResult);
   }
 
-  function doFallback$a(invIdAry) {
+  function doFallback$b(invIdAry) {
     return senditems$1(invIdAry);
   }
 
-  function fallback$b(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$a(invIdAry);}
+  function fallback$c(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$b(invIdAry);}
     return json;
   }
 
   function daSendItems(invIdAry) {
     return senditems(invIdAry)
-      .then(partial(fallback$b, invIdAry))
-      .catch(partial(doFallback$a, invIdAry));
+      .then(partial(fallback$c, invIdAry))
+      .catch(partial(doFallback$b, invIdAry));
   }
 
   var invItems$1;
@@ -11853,19 +11926,19 @@
     });
   }
 
-  function doFallback$b(folderId, itemsAry) {
+  function doFallback$c(folderId, itemsAry) {
     return moveItems(folderId, itemsAry);
   }
 
-  function fallback$c(folderId, itemsAry, json) {
-    if (hasFailed(json)) {return doFallback$b(folderId, itemsAry);}
+  function fallback$d(folderId, itemsAry, json) {
+    if (hasFailed(json)) {return doFallback$c(folderId, itemsAry);}
     return json;
   }
 
   function daSendToFolder(folderId, itemsAry) {
     return sendtofolder(folderId, itemsAry)
-      .then(partial(fallback$c, folderId, itemsAry))
-      .catch(partial(doFallback$b, folderId, itemsAry));
+      .then(partial(fallback$d, folderId, itemsAry))
+      .catch(partial(doFallback$c, folderId, itemsAry));
   }
 
   function checked(o) {
@@ -12003,11 +12076,11 @@
     return tbl.rows[tbl.rows.length - 1];
   }
 
-  function sum$2(statObj, prev, curr) {return prev + getVal$1(curr, statObj);}
+  function sum$1(statObj, prev, curr) {return prev + getVal$1(curr, statObj);}
 
   function calcTotalStats(statObj) {
     return ['Attack', 'Defense', 'Armor', 'Damage', 'HP']
-      .reduce(partial(sum$2, statObj), 0);
+      .reduce(partial(sum$1, statObj), 0);
   }
 
   function addStats(el) {
@@ -12225,7 +12298,7 @@
     return !data || !data.items || !data.folders;
   }
 
-  function inventory$2(data) {
+  function inventory$3(data) {
     if (badData(data) || !itemsAry$1) {return;}
     extraLinks = false;
     checkAll = false;
@@ -12240,11 +12313,11 @@
 
   function injectStoreItems() {
     if (jQueryNotPresent()) {return;}
-    getInventoryById().then(inventory$2);
+    getInventoryById().then(inventory$3);
     add(3, getItems$1);
   }
 
-  var inventory$3 = {
+  var inventory$4 = {
     report: injectReportPaint,
     addtags: injectGuildAddTagsWidgets,
     removetags: injectGuildAddTagsWidgets,
@@ -12463,6 +12536,278 @@
     if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
   }
 
+  function viewCombat(id) {
+    return callApp({
+      cmd: 'combat',
+      subcmd: 'view',
+      combat_id: id
+    });
+  }
+
+  function combatView(id) {
+    return indexAjaxData({
+      cmd: 'combat',
+      subcmd: 'view',
+      combat_id: id
+    });
+  }
+
+  function getId$1(e) {
+    return Number(e.getAttribute('background').match(/\/(\d+)/)[1]);
+  }
+
+  function getResult(script, e) {
+    const thisRe = new RegExp(e + ' = (\\d+)');
+    return Number(script.match(thisRe)[1]);
+  }
+
+  const specialMask = [
+    [18, /(\w+)+ leeched the buff '([A-Za-z ]+)'./],
+    [21,
+      /(\w+)+ was mesmerized by Spell Breaker, losing the '([A-Za-z ]+)' buff./]
+  ];
+
+  function gettokens(spec) {
+    const [specId, specMatch] = specialMask
+      .map(([id, mask]) => [id, spec.match(mask)])
+      .find(([, match]) => match);
+    return {id: specId, params: [specMatch[1], specMatch[2]]};
+  }
+
+  function formatSpecial(pCC) {
+    const spec = querySelectorArray('#specialsDiv', pCC)
+      .map(getTextTrim)
+      .filter(t => ['leeched', 'Spell'].some(s => t.includes(s)))
+      .map(gettokens);
+    return spec;
+  }
+
+  function parseReport$5(id, html) {
+    const doc = createDocument(html);
+    const pCC = getElementById('pCC', doc);
+    const script = getText(pCC.children[1]);
+    const header = pCC.children[0].rows[5].cells[0].children[0];
+    return {
+      r: {
+        attacker: {
+          id: getId$1(header.rows[1].cells[0]),
+          name: getTextTrim(header.rows[0].cells[0])
+        },
+        defender: {
+          id: getId$1(header.rows[1].cells[2]),
+          name: getTextTrim(header.rows[0].cells[2])
+        },
+        gold_gain: getResult(script, 'goldGain'),
+        gold_stolen: getResult(script, 'goldStolen'),
+        id: Number(id),
+        pvp_prestige_gain: getResult(script, 'prestigeGain'),
+        pvp_rating_change: getResult(script, 'pvpRatingChange'),
+        specials: formatSpecial(pCC),
+        winner: getResult(script, 'winner'),
+        xp_gain: getResult(script, 'xpGain')
+      },
+      s: true
+    };
+  }
+
+  // Incomplete
+  function viewCombat$1(id) {
+    return combatView(id).then(partial(parseReport$5, id));
+  }
+
+  const doFallback$d = id => viewCombat$1(id);
+
+  function fallback$e(id, json) {
+    if (hasFailed(json)) {return doFallback$d(id);}
+    return json;
+  }
+
+  function daViewCombat(id) {
+    return viewCombat(id)
+      .then(partial(fallback$e, id))
+      .catch(partial(doFallback$d, id));
+  }
+
+  var specials = {"0": "Dull Edge was activated.","1": "@0 was afflicted by Super Elite Slayer.","2": "@0 was withered.","3": "@0\"s armor was shattered.","4": "@0 was infused with extra defense (Constitution).","5": "@0 was infused with extra armor (Sanctuary).","7": "@0 activated Spectral Knight reducing targets armor to zero.","8": "@0 activated Savagery.","9": "@0 activated Shield Strike.","13": "@0 activated Conserve.","17": "@0 activated Four Leaf.","18": "@0 leeched the buff \"@1\".","19": "@0\"s demoralize skill reduced the effectiveness of @1\"s enhancements.","20": "@0\"s reckoning has improved their skill \"@1\"","21": "@0 was mesmerized by Spell Breaker, losing the \"@1\" buff.","22": "@0 was turned Undead by Necrosis.","23": "@0 activated High Guard.","24": "@0 was smote.","25": "@0 activated Barricade.","26": "@0 activated Ageless.","27": "@0 activated Severe Condition.","28": "@0 activated Golden Shield.","29": "@0 activated Anti Deflect.","30": "@0 activated Sealed. (Negated @1)","31": "@0 activated Fist Fight.","33": "@0 activated Dispel Curse.","35": "@0 activated Heavy Weight.","37": "@0 had their armor and defence Inverted.","38": "@0 had their attack reduced by Fumble."};
+
+  let combatCache = {};
+
+  function currentCombatRecord(data, combatId, sevenDays) {
+    return combatId === 'lastCheck' || data[combatId].logTime &&
+      data[combatId].logTime > sevenDays;
+  }
+
+  function keepRecent(data, sevenDays, prev, combatId) {
+    if (currentCombatRecord(data, combatId, sevenDays)) {
+      prev[combatId] = data[combatId];
+    }
+    return prev;
+  }
+
+  function cleanCache(data) {
+    var sevenDays = nowSecs - 7 * 24 * 60 * 60;
+    combatCache = Object.keys(data)
+      .reduce(partial(keepRecent, data, sevenDays), {});
+    combatCache.lastCheck = nowSecs;
+    setForage('fsh_pvpCombat', combatCache);
+  }
+
+  function prepareCache(data) {
+    var oneDay = nowSecs - 24 * 60 * 60;
+    if (!data.lastCheck || data.lastCheck < oneDay) {
+      cleanCache(data);
+    } else {
+      combatCache = data;
+    }
+  }
+
+  function checkCache(data) {
+    if (data) {prepareCache(data);}
+  }
+
+  function initCache() {
+    return getForage('fsh_pvpCombat').then(checkCache);
+  }
+
+  function inSpecialsList(el) {
+    return el.id in specials;
+  }
+
+  function check(specialHtml, el, i) {
+    if (!inSpecialsList(el)) {
+      var label = JSON.stringify(el) + ' ' + getText(specialHtml[i]);
+      console.log(label); // eslint-disable-line no-console
+      sendEvent('Logs', 'Missing PvP Special', label);
+    }
+  }
+
+  function whatsMissing(json, html) {
+    var specialHtml = querySelectorAll('#specialsDiv', createDocument(html));
+    json.r.specials.forEach(partial(check, specialHtml));
+  }
+
+  function unknownSpecials(json) {
+    if (!json.r.specials.every(inSpecialsList)) {
+      combatView(json.r.id).then(partial(whatsMissing, json));
+    }
+  }
+
+  function cacheCombat(aRow, json) {
+    if (json.s) {
+      json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
+      combatCache[json.r.id] = json;
+      setForage('fsh_pvpCombat', combatCache);
+      unknownSpecials(json);
+    }
+    return json;
+  }
+
+  function result(stat, desc, color) {
+    if (stat !== 0) {
+      return desc + ':<span class="' + color + '">' +
+        addCommas(stat) + ' </span>';
+    }
+    return '';
+  }
+
+  function iDefended(json) {
+    return json.r.defender.id === playerId() && json.r.winner === 1;
+  }
+
+  function iAttacked(json) {
+    return json.r.attacker.id === playerId() && json.r.winner === 0;
+  }
+
+  function iWon(json) {
+    if (iDefended(json) || iAttacked(json)) {
+      return 'fshGreen';
+    }
+    return 'fshRed';
+  }
+
+  function highlightSpecials(prev, el) {
+    if (el.id === 18) {
+      return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
+        ' leeched the buff \'' + el.params[1] + '\'.</span>';
+    }
+    if (el.id === 21) {
+      return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
+        ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
+        '\' buff.</span>';
+    }
+    return prev;
+  }
+
+  function parseCombat(combatSummary, json) {
+    if (!json.s) {return;}
+    var color = iWon(json);
+    combatSummary.innerHTML = result(json.r.xp_gain, 'XP stolen', color) +
+      result(json.r.gold_gain, 'Gold lost', color) +
+      result(json.r.gold_stolen, 'Gold stolen', color) +
+      result(json.r.pvp_prestige_gain, 'Prestige gain', color) +
+      result(json.r.pvp_rating_change, 'PvP change', color) +
+      json.r.specials.reduce(highlightSpecials, '');
+  }
+
+  function processCombat(aRow) {
+    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+    var combatSummary = createDiv({style: {color: 'gray'}});
+    insertElement(aRow.cells[2], combatSummary);
+    if (combatCache[combatID] && combatCache[combatID].logTime) {
+      parseCombat(combatSummary, combatCache[combatID]);
+    } else {
+      daViewCombat(combatID).then(partial(cacheCombat, aRow))
+        .then(partial(parseCombat, combatSummary));
+    }
+  }
+
+  function replaceLeadingText(msgCell, newHtml) {
+    var replaceText = createSpan({innerHTML: newHtml});
+    msgCell.replaceChild(replaceText, msgCell.firstChild); // Text Node
+  }
+
+  function parseCombatWinner(msgCell) {
+    var victory = /You were victorious over/.test(msgCell.innerHTML);
+    if (victory) {
+      replaceLeadingText(msgCell,
+        'You were <span class="fshGreen">victorious</span> over ');
+      return 1;
+    }
+    var defeat = /You were defeated by/.test(msgCell.innerHTML);
+    if (defeat) {
+      replaceLeadingText(msgCell,
+        'You were <span class="fshRed">defeated</span> by ');
+      return 0;
+    }
+  }
+
+  function processCombatRow(aRow) {
+    var winner = parseCombatWinner(aRow.cells[2]);
+    if ([0, 1].includes(winner)) {processCombat(aRow);}
+  }
+
+  var combatRowTests = [
+    function(aRow, messageType) {return messageType === 'Combat';},
+    function() {return calf.showPvPSummaryInLog;},
+    function(aRow) {
+      return aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML);
+    },
+    function(aRow) {
+      return !/\(Guild Conflict\)/.test(getText(aRow.cells[2]));
+    }
+  ];
+
+  function condition$6(aRow, messageType, e) {return e(aRow, messageType);}
+
+  function isCombatRow(aRow, messageType) {
+    return combatRowTests.every(partial(condition$6, aRow, messageType));
+  }
+
+  function addPvpSummary(aRow, messageType) {
+    // add PvP combat log summary
+    if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
+  }
+
   function thisNick(nick, buffObj) {
     return csvSplit(buffObj.nicks).includes(toLowerCase(nick));
   }
@@ -12602,236 +12947,9 @@
   }
 
   // TODO Pref
-  function viewCombat(aRow) {
+  function viewCombat$2(aRow) {
     const pvpId = getPvpId(aRow);
     if (pvpId) {havePvpId(aRow, pvpId[1]);}
-  }
-
-  function combatView(id) {
-    return indexAjaxData({
-      cmd: 'combat',
-      subcmd: 'view',
-      combat_id: id
-    });
-  }
-
-  /* eslint-disable max-len */
-  var specials = {
-    '0': 'Dull Edge was activated.',
-    '1': '@0 was afflicted by Super Elite Slayer.',
-    '2': '@0 was withered.',
-    '3': '@0\'s armor was shattered.',
-    '4': '@0 was infused with extra defense (Constitution).',
-    '5': '@0 was infused with extra armor (Sanctuary).',
-    '7': '@0 activated Spectral Knight reducing targets armor to zero.',
-    '8': '@0 activated Savagery.',
-    '9': '@0 activated Shield Strike.',
-    '13': '@0 activated Conserve.',
-    '18': '@0 leeched the buff \'@1\'.',
-    '17': '@0 activated Four Leaf.',
-    '19': '@0\'s demoralize skill reduced the effectiveness of @1\'s enhancements.',
-    '20': '@0\'s reckoning has improved their skill \'@1\'',
-    '21': '@0 was mesmerized by Spell Breaker, losing the \'@1\' buff.',
-    '22': '@0 was turned Undead by Necrosis.',
-    '23': '@0 activated High Guard.',
-    '24': '@0 was smote.',
-    '25': '@0 activated Barricade.',
-    '26': '@0 activated Ageless.',
-    '27': '@0 activated Severe Condition.',
-    '28': '@0 activated Golden Shield.',
-    '29': '@0 activated Anti Deflect.',
-    '30': '@0 activated Sealed. (Negated @1)',
-    '31': '@0 activated Fist Fight.',
-    '33': '@0 activated Dispel Curse.',
-    '35': '@0 activated Heavy Weight.',
-    '37': '@0 had their armor and defence Inverted.',
-    '38': '@0 had their attack reduced by Fumble.'
-  };
-
-  function viewCombat$1(id) {
-    return callApp({
-      cmd: 'combat',
-      subcmd: 'view',
-      combat_id: id
-    });
-  }
-
-  var combatCache = {};
-
-  function result(stat, desc, color) {
-    if (stat !== 0) {
-      return desc + ':<span class="' + color + '">' +
-        addCommas(stat) + ' </span>';
-    }
-    return '';
-  }
-
-  function iDefended(json) {
-    return json.r.defender.id === playerId() && json.r.winner === 1;
-  }
-
-  function iAttacked(json) {
-    return json.r.attacker.id === playerId() && json.r.winner === 0;
-  }
-
-  function iWon(json) {
-    if (iDefended(json) || iAttacked(json)) {
-      return 'fshGreen';
-    }
-    return 'fshRed';
-  }
-
-  function highlightSpecials(prev, el) {
-    if (el.id === 18) {
-      return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
-        ' leeched the buff \'' + el.params[1] + '\'.</span>';
-    }
-    if (el.id === 21) {
-      return prev + '<br><span class="fshRed fshBold">' + el.params[0] +
-        ' was mesmerized by Spell Breaker, losing the \'' + el.params[1] +
-        '\' buff.</span>';
-    }
-    return prev;
-  }
-
-  function parseCombat(combatSummary, json) {
-    if (!json.s) {return;}
-    var color = iWon(json);
-    combatSummary.innerHTML = result(json.r.xp_gain, 'XP stolen', color) +
-      result(json.r.gold_gain, 'Gold lost', color) +
-      result(json.r.gold_stolen, 'Gold stolen', color) +
-      result(json.r.pvp_prestige_gain, 'Prestige gain', color) +
-      result(json.r.pvp_rating_change, 'PvP change', color) +
-      json.r.specials.reduce(highlightSpecials, '');
-  }
-
-  function inSpecialsList(el) {
-    return el.id in specials;
-  }
-
-  function check(specialHtml, el, i) {
-    if (!inSpecialsList(el)) {
-      var label = JSON.stringify(el) + ' ' + getText(specialHtml[i]);
-      console.log(label); // eslint-disable-line no-console
-      sendEvent('Logs', 'Missing PvP Special', label);
-    }
-  }
-
-  function whatsMissing(json, html) {
-    var specialHtml = querySelectorAll('#specialsDiv', createDocument(html));
-    json.r.specials.forEach(partial(check, specialHtml));
-  }
-
-  function unknownSpecials(json) {
-    if (!json.r.specials.every(inSpecialsList)) {
-      combatView(json.r.id).then(partial(whatsMissing, json));
-    }
-  }
-
-  function cacheCombat(aRow, json) {
-    if (json.s) {
-      json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
-      combatCache[json.r.id] = json;
-      setForage('fsh_pvpCombat', combatCache);
-      unknownSpecials(json);
-    }
-    return json;
-  }
-
-  function processCombat(aRow) {
-    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-    var combatSummary = createDiv({style: {color: 'gray'}});
-    insertElement(aRow.cells[2], combatSummary);
-    if (combatCache[combatID] && combatCache[combatID].logTime) {
-      parseCombat(combatSummary, combatCache[combatID]);
-    } else {
-      viewCombat$1(combatID).then(partial(cacheCombat, aRow))
-        .then(partial(parseCombat, combatSummary));
-    }
-  }
-
-  function replaceLeadingText(msgCell, newHtml) {
-    var replaceText = createSpan({innerHTML: newHtml});
-    msgCell.replaceChild(replaceText, msgCell.firstChild); // Text Node
-  }
-
-  function parseCombatWinner(msgCell) {
-    var victory = /You were victorious over/.test(msgCell.innerHTML);
-    if (victory) {
-      replaceLeadingText(msgCell,
-        'You were <span class="fshGreen">victorious</span> over ');
-      return 1;
-    }
-    var defeat = /You were defeated by/.test(msgCell.innerHTML);
-    if (defeat) {
-      replaceLeadingText(msgCell,
-        'You were <span class="fshRed">defeated</span> by ');
-      return 0;
-    }
-  }
-
-  function processCombatRow(aRow) {
-    var winner = parseCombatWinner(aRow.cells[2]);
-    if ([0, 1].includes(winner)) {processCombat(aRow);}
-  }
-
-  var combatRowTests = [
-    function(aRow, messageType) {return messageType === 'Combat';},
-    function() {return calf.showPvPSummaryInLog;},
-    function(aRow) {
-      return aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML);
-    },
-    function(aRow) {
-      return !/\(Guild Conflict\)/.test(getText(aRow.cells[2]));
-    }
-  ];
-
-  function condition$6(aRow, messageType, e) {return e(aRow, messageType);}
-
-  function isCombatRow(aRow, messageType) {
-    return combatRowTests.every(partial(condition$6, aRow, messageType));
-  }
-
-  function addPvpSummary(aRow, messageType) {
-    // add PvP combat log summary
-    if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
-  }
-
-  function currentCombatRecord(data, combatId, sevenDays) {
-    return combatId === 'lastCheck' || data[combatId].logTime &&
-      data[combatId].logTime > sevenDays;
-  }
-
-  function keepRecent(data, sevenDays, prev, combatId) {
-    if (currentCombatRecord(data, combatId, sevenDays)) {
-      prev[combatId] = data[combatId];
-    }
-    return prev;
-  }
-
-  function cleanCache(data) {
-    var sevenDays = nowSecs - 7 * 24 * 60 * 60;
-    combatCache = Object.keys(data)
-      .reduce(partial(keepRecent, data, sevenDays), {});
-    combatCache.lastCheck = nowSecs;
-    setForage('fsh_pvpCombat', combatCache);
-  }
-
-  function prepareCache(data) {
-    var oneDay = nowSecs - 24 * 60 * 60;
-    if (!data.lastCheck || data.lastCheck < oneDay) {
-      cleanCache(data);
-    } else {
-      combatCache = data;
-    }
-  }
-
-  function checkCache(data) {
-    if (data) {prepareCache(data);}
-  }
-
-  function initCache() {
-    return getForage('fsh_pvpCombat').then(checkCache);
   }
 
   var memberNamesAsStrings = [];
@@ -12959,7 +13077,7 @@
       doLogWidgetRow(aRow, messageType);
       addPvpSummary(aRow, messageType);
       processLadder(aRow, messageType);
-      viewCombat(aRow);
+      viewCombat$2(aRow);
     }
   }
 
@@ -13022,7 +13140,7 @@
   }
 
   var guild$2 = {
-    inventory: inventory$3,
+    inventory: inventory$4,
     chat: {'-': guildChat},
     dochat: {'-': guildChat},
     log: {'-': guildLog},
@@ -13076,19 +13194,19 @@
     });
   }
 
-  function doFallback$c(item) {
+  function doFallback$e(item) {
     return bazaarBuy(item);
   }
 
-  function fallback$d(item, json) {
-    if (hasFailed(json)) {return doFallback$c(item);}
+  function fallback$f(item, json) {
+    if (hasFailed(json)) {return doFallback$e(item);}
     return json;
   }
 
   function daBazaarBuy(item) {
     return buyitem(item)
-      .then(partial(fallback$d, item))
-      .catch(partial(doFallback$c, item));
+      .then(partial(fallback$f, item))
+      .catch(partial(doFallback$e, item));
   }
 
   var ItemId;
@@ -13269,19 +13387,19 @@
     });
   }
 
-  function doFallback$d(invIdAry) {
+  function doFallback$f(invIdAry) {
     return mailboxTake(invIdAry);
   }
 
-  function fallback$e(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$d(invIdAry);}
+  function fallback$g(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$f(invIdAry);}
     return json;
   }
 
   function daMailboxTake(invIdAry) {
     return takeitems(invIdAry)
-      .then(partial(fallback$e, invIdAry))
-      .catch(partial(doFallback$d, invIdAry));
+      .then(partial(fallback$g, invIdAry))
+      .catch(partial(doFallback$f, invIdAry));
   }
 
   function makeQtLabel(id, text, injector) {
@@ -13530,15 +13648,15 @@
     return profile({subcmd: 'loadcomponents'});
   }
 
-  const doFallback$e = () => components();
+  const doFallback$g = () => components();
 
-  function fallback$f(json) {
-    if (hasFailed(json)) {return doFallback$e();}
+  function fallback$h(json) {
+    if (hasFailed(json)) {return doFallback$g();}
     return json;
   }
 
   function daComponents() {
-    return loadComponents().then(fallback$f).catch(doFallback$e);
+    return loadComponents().then(fallback$h).catch(doFallback$g);
   }
 
   var componentList;
@@ -13667,19 +13785,19 @@
     return allthen(componentIdAry.map(destroyComponent$1), formatResults$4);
   }
 
-  function doFallback$f(componentIdAry) {
+  function doFallback$h(componentIdAry) {
     return dropComponent(componentIdAry);
   }
 
-  function fallback$g(componentIdAry, json) {
-    if (hasFailed(json)) {return doFallback$f(componentIdAry);}
+  function fallback$i(componentIdAry, json) {
+    if (hasFailed(json)) {return doFallback$h(componentIdAry);}
     return json;
   }
 
   function daDestroyComponent(componentIdAry) {
     return destroyComponent(componentIdAry)
-      .then(partial(fallback$g, componentIdAry))
-      .catch(partial(doFallback$f, componentIdAry));
+      .then(partial(fallback$i, componentIdAry))
+      .catch(partial(doFallback$h, componentIdAry));
   }
 
   var invTableCache;
@@ -14054,19 +14172,19 @@
     });
   }
 
-  function doFallback$g(item) {
+  function doFallback$i(item) {
     return unequip(item);
   }
 
-  function fallback$h(item, json) {
-    if (hasFailed(json)) {return doFallback$g(item);}
+  function fallback$j(item, json) {
+    if (hasFailed(json)) {return doFallback$i(item);}
     return json;
   }
 
   function daUnequipItem(item) {
     return unequipitem(item)
-      .then(partial(fallback$h, item))
-      .catch(partial(doFallback$g, item));
+      .then(partial(fallback$j, item))
+      .catch(partial(doFallback$i, item));
   }
 
   var profileCombatSetDiv;
@@ -14461,16 +14579,19 @@
     add(3, colouredDots);
   }
 
-  // function updateUrl(e) {
-  //   e.preventDefault();
-  //   dontPost(closestForm(e.target).parentNode);
-  // }
+  function updateUrl$4(e) {
+    e.preventDefault();
+    var validInputs = arrayFrom(e.target.closest('form').elements)
+      .filter(i => i.type !== 'submit')
+      .map(i => i.name + '=' + i.value).join('&');
+    window.location = indexPhp + '?' + validInputs;
+  }
 
-  // function allowBack(self) {
-  //   if (!self) {
-  //     on(querySelector('#profileRightColumn'), 'submit', updateUrl);
-  //   }
-  // }
+  function allowBack$3(self) {
+    if (!self) {
+      on(querySelector('#profileRightColumn'), 'submit', updateUrl$4);
+    }
+  }
 
   function injectProfile() { // Legacy
     if (jQueryNotPresent()) {return;}
@@ -14479,7 +14600,7 @@
     var playername = getText(getElementsByTagName('h1', pCC)[0]);
     var self = playername === playerName();
     updateDom(avyImg, playername, self);
-    // allowBack(self);
+    allowBack$3(self);
   }
 
   function getActivitySpan(myPlayer) {
@@ -14833,19 +14954,19 @@
     });
   }
 
-  function doFallback$h(userAry, buffAry) {
+  function doFallback$j(userAry, buffAry) {
     return quickbuff(userAry, buffAry);
   }
 
-  function fallback$i(userAry, buffAry, json) {
-    if (hasFailed(json)) {return doFallback$h(userAry, buffAry);}
+  function fallback$k(userAry, buffAry, json) {
+    if (hasFailed(json)) {return doFallback$j(userAry, buffAry);}
     return json;
   }
 
   function daQuickbuff(userAry, buffAry) {
     return quickbuff$1(userAry, buffAry)
-      .then(partial(fallback$i, userAry, buffAry))
-      .catch(partial(doFallback$h, userAry, buffAry));
+      .then(partial(fallback$k, userAry, buffAry))
+      .catch(partial(doFallback$j, userAry, buffAry));
   }
 
   function quickbuffSuccess(result) {
@@ -17028,7 +17149,7 @@
     }).then(parseGroups);
   }
 
-  function getGuild$1() {
+  function getGuild() {
     return indexAjaxData({
       cmd: 'guild',
       subcmd: 'view',
@@ -17046,7 +17167,7 @@
   }
 
   function buildStatPrm() {
-    var prm = [getGuild$1()];
+    var prm = [getGuild()];
     if (GameData.player().hasGroup) {
       prm.push(getGroups());
     }
@@ -17329,7 +17450,7 @@
     return ret;
   }
 
-  function parseReport$5(html) {
+  function parseReport$6(html) {
     const doc = createDocument(html);
     const titanTable = querySelector('table[width="500"]', doc);
     if (!titanTable) {return {s: false};}
@@ -17341,18 +17462,18 @@
 
   // Incomplete
   function scouttower$1() {
-    return indexAjaxData({cmd: 'guild', subcmd: 'scouttower'}).then(parseReport$5);
+    return indexAjaxData({cmd: 'guild', subcmd: 'scouttower'}).then(parseReport$6);
   }
 
-  const doFallback$i = () => scouttower$1();
+  const doFallback$k = () => scouttower$1();
 
-  function fallback$j(json) {
-    if (hasFailed(json)) {return doFallback$i();}
+  function fallback$l(json) {
+    if (hasFailed(json)) {return doFallback$k();}
     return json;
   }
 
   function daScoutTower() {
-    return scouttower().then(fallback$j).catch(doFallback$i);
+    return scouttower().then(fallback$l).catch(doFallback$k);
   }
 
   // colSpan = attributes[0]
@@ -17883,7 +18004,7 @@
     initMonsterLog();
   }
 
-  function parseReport$6(html) {
+  function parseReport$7(html) {
     const doc = createDocument(html);
     const stats = groupViewStats(doc);
     // console.log(groupViewStats(doc));
@@ -17907,7 +18028,7 @@
       subcmd: 'groups',
       subcmd2: 'viewstats',
       group_id: groupId
-    }).then(parseReport$6);
+    }).then(parseReport$7);
   }
 
   function guildGroups(data) {
@@ -17918,24 +18039,24 @@
     return guildGroups({subcmd2: 'viewstats', group_id: groupId});
   }
 
-  const doFallback$j = groupId => groupStats$2(groupId);
+  const doFallback$l = groupId => groupStats$2(groupId);
 
-  function fallback$k(groupId, json) {
-    if (hasFailed(json)) {return doFallback$j(groupId);}
+  function fallback$m(groupId, json) {
+    if (hasFailed(json)) {return doFallback$l(groupId);}
     return json;
   }
 
   function daGroupStats(groupId) {
     return groupsViewStats(groupId)
-      .then(partial(fallback$k, groupId))
-      .catch(partial(doFallback$j, groupId));
+      .then(partial(fallback$m, groupId))
+      .catch(partial(doFallback$l, groupId));
   }
 
   function groupsView() {
     return guildGroups({subcmd2: 'view'});
   }
 
-  function parseReport$7(html) {
+  function parseReport$8(html) {
     const doc = createDocument(html);
     const disband = querySelector('#pCC img[src$="disband.gif"]', doc);
     if (!disband) {return {};}
@@ -17945,18 +18066,18 @@
 
   // Incomplete
   function viewGroups() {
-    return indexAjaxData({cmd: 'guild', subcmd: 'groups'}).then(parseReport$7);
+    return indexAjaxData({cmd: 'guild', subcmd: 'groups'}).then(parseReport$8);
   }
 
-  const doFallback$k = () => viewGroups();
+  const doFallback$m = () => viewGroups();
 
-  function fallback$l(json) {
-    if (hasFailed(json)) {return doFallback$k();}
+  function fallback$n(json) {
+    if (hasFailed(json)) {return doFallback$m();}
     return json;
   }
 
   function daViewGroups() {
-    return groupsView().then(fallback$l).catch(doFallback$k);
+    return groupsView().then(fallback$n).catch(doFallback$m);
   }
 
   function evalMiss(combat) {
@@ -19213,17 +19334,17 @@
     }).then(formatResult);
   }
 
-  const doFallback$l = recipe => invent(recipe);
+  const doFallback$n = recipe => invent(recipe);
 
-  function fallback$m(recipe, json) {
-    if (hasFailed(json)) {return doFallback$l(recipe);}
+  function fallback$o(recipe, json) {
+    if (hasFailed(json)) {return doFallback$n(recipe);}
     return json;
   }
 
   function daDoInvent(recipe) {
     return doinvent(recipe)
-      .then(partial(fallback$m, recipe))
-      .catch(partial(doFallback$l, recipe));
+      .then(partial(fallback$o, recipe))
+      .catch(partial(doFallback$n, recipe));
   }
 
   var invAmount;
@@ -19667,7 +19788,7 @@
       .forEach(partial(decorate$3, questsToHide));
   }
 
-  function updateUrl$4(evt) {
+  function updateUrl$5(evt) {
     if (evt.target.type !== 'submit') {
       return;
     }
@@ -19767,7 +19888,7 @@
   }
 
   function injectQuestBookFull() {
-    on(pCC, 'click', updateUrl$4);
+    on(pCC, 'click', updateUrl$5);
     storeQuestPage();
     var questTable = getElementsByTagName(def_table, pCC)[5];
     if (!questTable) {return;}
@@ -20412,6 +20533,7 @@
   const reformat$1 = (membrList, row) => {
     row.player.lower = row.player.name.toLowerCase();
     row.player.rank = membrList[row.player.name].rank_name; // TODO
+    row.player.level = membrList[row.player.name].level; // TODO
     return row;
   };
 
@@ -20573,7 +20695,7 @@
   function advisor$1() {
     if (jQueryNotPresent()) {return;}
     pCC.innerHTML = 'Loading...';
-    Promise.all([advisorView(0), getMembrList(false)]).then(showMe);
+    Promise.all([daAdvisor(0), getMembrList(false)]).then(showMe);
   }
 
   function fetchinv$1() {
@@ -20602,17 +20724,17 @@
     }).then(formatResponse$2);
   }
 
-  function doFallback$m() {
+  function doFallback$o() {
     return guildFetchInv();
   }
 
-  function fallback$n(json) {
-    if (hasFailed(json)) {return doFallback$m();}
+  function fallback$p(json) {
+    if (hasFailed(json)) {return doFallback$o();}
     return json;
   }
 
   function daGuildFetchInv() {
-    return fetchinv$1().then(fallback$n).catch(doFallback$m);
+    return fetchinv$1().then(fallback$p).catch(doFallback$o);
   }
 
   function details$1(td) {
@@ -20629,7 +20751,7 @@
     return ret;
   }
 
-  function parseReport$8(html) {
+  function parseReport$9(html) {
     const doc = createDocument(html);
     const nodeList = querySelectorArray('#pCC table table td:nth-of-type(3n)',
       doc);
@@ -20642,24 +20764,24 @@
       cmd: 'guild',
       subcmd: 'inventory',
       subcmd2: 'report'
-    }).then(parseReport$8);
+    }).then(parseReport$9);
   }
 
   function report() {
     return guildInventory$1({subcmd2: 'report'});
   }
 
-  function doFallback$n() {
+  function doFallback$p() {
     return guildReport();
   }
 
-  function fallback$o(json) {
-    if (hasFailed(json)) {return doFallback$n();}
+  function fallback$q(json) {
+    if (hasFailed(json)) {return doFallback$p();}
     return json;
   }
 
   function daGuildReport() {
-    return report().then(fallback$o).catch(doFallback$n);
+    return report().then(fallback$q).catch(doFallback$p);
   }
 
   var theInv;
@@ -21415,19 +21537,19 @@
     }).then(htmlResult);
   }
 
-  function doFallback$o(invIdAry) {
+  function doFallback$q(invIdAry) {
     return storeitems(invIdAry);
   }
 
-  function fallback$p(invIdAry, json) {
-    if (hasFailed(json)) {return doFallback$o(invIdAry);}
+  function fallback$r(invIdAry, json) {
+    if (hasFailed(json)) {return doFallback$q(invIdAry);}
     return json;
   }
 
   function daStoreItems(invIdAry) {
     return dostoreitems(invIdAry)
-      .then(partial(fallback$p, invIdAry))
-      .catch(partial(doFallback$o, invIdAry));
+      .then(partial(fallback$r, invIdAry))
+      .catch(partial(doFallback$q, invIdAry));
   }
 
   function storeItems(invIdAry) {
@@ -22068,19 +22190,118 @@
     $('#HelperLoadSettings').on('click', clickHandler$1);
   }
 
-  function getRelicList(offset, myList) {
-    return guild({
+  function guildReliclist(page) {
+    return indexAjaxData({
+      cmd: 'guild',
       subcmd: 'reliclist',
-      offset: fallback(offset, 0)
-    }).then(function(json) {
-      console.log(json); // eslint-disable-line no-console
-      var someRelics = json.r.relics;
-      var newList = fallback(myList, []).concat(someRelics);
-      if (json.r.remaining_relics > 0) {
-        return getRelicList(fallback(offset, 0) + someRelics.length, newList);
-      }
-      return newList;
+      page
     });
+  }
+
+  function parseTime(string) {
+    const parts = string.match(/(\d+) days, (\d+) hours, (\d+) mins, (\d+) secs/);
+    if (parts) {
+      return Number(parts[1]) * 24 * 60 * 60 +
+        Number(parts[2]) * 60 * 60 +
+        Number(parts[3]) * 60 +
+        Number(parts[4]);
+    }
+  }
+
+  function parseGuild$1(cell) {
+    const a = cell.children[0].rows[0].cells[1].children[0];
+    const id = a.href.match(/&guild_id=(\d+)/)[1];
+    const name = getTextTrim(a);
+    return {id, name};
+  }
+
+  function parseLocation(div) {
+    const parts = getTextTrim(div).match(/(.*) \((\d+), (\d+)\)/);
+    return {
+      name: parts[1],
+      x: Number(parts[2]),
+      y: Number(parts[3])
+    };
+  }
+
+  function getTextNodes(div) {
+    return arrayFrom(div.childNodes)
+      .filter(n => n.nodeType === Node.TEXT_NODE)
+      .map(getTextTrim)
+      .map(e => e.split('\u00A0'));
+  }
+
+  function getAttribs(childNodes) {
+    return childNodes.filter(e => attribType.includes(e[1])).map(e => ({
+      id: attribType.indexOf(e[1]),
+      is_percent: e[0].endsWith('%'),
+      value: parseInt(e[0], 10)
+    }));
+  }
+
+  function getEnhancements(childNodes) {
+    return childNodes.filter(e => enhancementType.includes(e[1])).map(e => ({
+      id: enhancementType.indexOf(e[1]),
+      value: Number(e[0])
+    }));
+  }
+
+  function parseTip(tipped) {
+    const div = createDiv({innerHTML: tipped});
+    const location = parseLocation(div.children[1]);
+    const min_level = Number(getTextTrim(div.children[2]).match(/(\d+)/)[1]);
+    const childNodes = getTextNodes(div);
+    const attributes = getAttribs(childNodes);
+    const enhancements = getEnhancements(childNodes);
+    return {attributes, enhancements, location, min_level};
+  }
+
+  function getBaseRelic(row) {
+    const img = row.cells[0].children[0];
+    const tipped = parseTip(img.dataset.tipped);
+    return {
+      attributes: tipped.attributes,
+      enhancements: tipped.enhancements,
+      id: Number(img.src.match(/\/(\d+)\.gif/)[1]),
+      location: tipped.location,
+      min_level: tipped.min_level,
+      name: getTextTrim(row.cells[1].children[0])
+    };
+  }
+
+  function parseRelic(row) {
+    const baseRelic = getBaseRelic(row);
+    const time = parseTime(getTextTrim(row.cells[3]));
+    if (!isUndefined(time)) {
+      baseRelic.time = time;
+      baseRelic.guild = parseGuild$1(row.cells[2]);
+    }
+    return baseRelic;
+  }
+
+  function parsePage$1(doc) {
+    const firstHeader = querySelector('.header', doc);
+    const thisTable = closestTable(firstHeader);
+    const thisRows = arrayFrom(thisTable.rows).filter(dataRows(4, 0));
+    return thisRows.map(parseRelic);
+  }
+
+  function processPages$1(ary) {
+    const relics = ary.map(createDocument).map(parsePage$1);
+    return [].concat(...relics);
+  }
+
+  function processPageOne(html) {
+    const doc = createDocument(html);
+    const select = querySelector('#pCC select[name="page"]', doc);
+    const otherPages = arrayFrom(select.children)
+      .map(o => Number(o.value)).filter(v => v !== 0);
+    return allthen([html].concat(otherPages.map(guildReliclist)),
+      processPages$1);
+  }
+
+  function getRelicList() {
+    return guildReliclist(0).then(processPageOne);
   }
 
   function relicName(relic) {
@@ -22156,8 +22377,9 @@
       '</tbody></table>';
   }
 
-  function processRelicList(relicList) {
-    pCC.innerHTML = makeTable$1(relicList);
+  function processRelicList(thisRelicList) {
+    thisRelicList.sort((a, b) => a.min_level - b.min_level);
+    pCC.innerHTML = makeTable$1(thisRelicList);
   }
 
   function reliclist() {
@@ -22195,14 +22417,10 @@
     domTable.replaceChild(thisTBody, domTBody);
   }
 
-  function guildView$1(guildId) {
-    return guild({subcmd: 'view', guild_id: guildId});
-  }
-
   function byMember(prev, curr) {
-    // if (curr.b === 11503) {
-    prev[curr.player.name] = prev[curr.player.name] || [];
-    prev[curr.player.name].push(curr);
+    // if (curr.b === 11503) { // Zombie Brew
+    prev[curr.player_id] = prev[curr.player_id] || [];
+    prev[curr.player_id].push(curr);
     // }
     return prev;
   }
@@ -22229,8 +22447,8 @@
     obj.gxp_reverse = 0 - obj.guild_xp;
     obj.activity = lastActivityToDays(obj.last_activity);
     obj.act = obj.last_activity - nowSecs;
-    obj.pack = (pots[obj.name] || []).length;
-    obj.pack_reverse = 0 - (pots[obj.name] || []).length;
+    obj.pack = (pots[obj.id] || []).length;
+    obj.pack_reverse = 0 - (pots[obj.id] || []).length;
     obj.stam = addCommas(obj.current_stamina);
     obj.stam_reverse = 0 - obj.current_stamina;
     return obj;
@@ -22238,8 +22456,10 @@
 
   function prepareData$1([json, guild]) {
     // console.log(json);
-    const pots = json.r.reduce(byMember, {});
+    const pots = json.items.reduce(byMember, {});
+    // console.log('pots', pots);
     const members = processGuild(guild);
+    // console.log('members', members);
     return members.map(partial(decorateMembers, pots));
   }
 
@@ -22263,19 +22483,22 @@
   }
 
   function showMe$1(dataAry) {
+    // console.log(dataAry);
     const data = prepareData$1(dataAry);
-    // console.log(data);
+    // console.log('data', data);
     pCC.innerHTML = '';
     const el = insertElement(pCC, createDiv());
     const domTable = makeTable$2(el);
     const table = smartTable({data});
     const tableComponent = table$1({el, table});
     tableComponent.onDisplayChange(partial(displayChange$1, domTable));
+    tableComponent.exec();
   }
 
   function whosGotWhat() {
     pCC.innerHTML = 'Loading...';
-    Promise.all([report(), guildView$1()]).then(showMe$1);
+    // Promise.all([report(), guildView()]).then(showMe);
+    allthen([guildStore(), guildManage$2()], showMe$1);
   }
 
   var notepad = {
@@ -22453,7 +22676,7 @@
     injectMoveItems();
   }
 
-  var profile$2 = {
+  var profile$3 = {
     '-': {'-': injectProfile},
     managecombatset: {'-': injectProfile},
     report: {'-': injectProfile},
@@ -22745,7 +22968,7 @@
     }
   }
 
-  function allowBack$3(topTable) { // jQuery
+  function allowBack$4(topTable) { // jQuery
     var thisSelect = getElementsByTagName('select', topTable)[0];
     $(thisSelect).off();
     on(thisSelect, 'change', partial(dontPost, pCC));
@@ -22758,7 +22981,7 @@
 
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
-    allowBack$3(topTable);
+    allowBack$4(topTable);
     arrayFrom(topTable.rows).filter(dataRows(4, 1)).forEach(playerLink);
   }
 
@@ -22770,7 +22993,7 @@
     });
   }
 
-  function parseReport$9(json) {
+  function parseReport$a(json) {
     let last = json.last_login;
     if (!last) {last = 0;}
     return {
@@ -22781,36 +23004,40 @@
 
   // Incomplete
   function findPlayer(username) {
-    return getProfile$1(username).then(parseReport$9);
+    return getProfile$1(username).then(parseReport$a);
   }
 
-  const doFallback$p = username => findPlayer(username);
+  const doFallback$r = username => findPlayer(username);
 
-  function fallback$q(username, json) {
-    if (hasFailed(json)) {return doFallback$p(username);}
+  function fallback$s(username, json) {
+    if (hasFailed(json)) {return doFallback$r(username);}
     return json;
   }
 
   function daFindPlayer(username) {
     return findplayer(username)
-      .then(partial(fallback$q, username))
-      .catch(partial(doFallback$p, username));
+      .then(partial(fallback$s, username))
+      .catch(partial(doFallback$r, username));
   }
 
-  const doFallback$q = guildId => guildView(guildId);
+  function guildView$1(guildId) {
+    return guild({subcmd: 'view', guild_id: guildId});
+  }
 
-  function fallback$r(guildId, json) {
-    if (hasFailed(json)) {return doFallback$q(guildId);}
+  const doFallback$s = guildId => guildView(guildId);
+
+  function fallback$t(guildId, json) {
+    if (hasFailed(json)) {return doFallback$s(guildId);}
     return json;
   }
 
   function daGuildView(guildId) {
     return guildView$1(guildId)
-      .then(partial(fallback$r, guildId))
-      .catch(partial(doFallback$q, guildId));
+      .then(partial(fallback$t, guildId))
+      .catch(partial(doFallback$s, guildId));
   }
 
-  function getGuild$2(tbl) {
+  function getGuild$1(tbl) {
     if (tbl.rows[0].cells[0].children[0]) {
       return Number(
         /guild_id=(\d+)/.exec(tbl.rows[0].cells[0].children[0].href)[1]);
@@ -22819,7 +23046,7 @@
   }
 
   function enumeratePlayers(playerTable) {
-    return [playerTable, getTextTrim(playerTable), getGuild$2(playerTable)];
+    return [playerTable, getTextTrim(playerTable), getGuild$1(playerTable)];
   }
 
   function aGuild(player, ary) {return ary[0] === player[2];}
@@ -22951,12 +23178,12 @@
 
   function getMembers(prev, curr) {return prev.concat(curr.members);}
 
-  function parseGuild$1(guild, json) {
+  function parseGuild$2(guild, json) {
     var guildMembers = uniq(json.r.ranks, 'id').reduce(getMembers, []);
     guild[1].forEach(partial(guildPlayer, guildMembers));
   }
 
-  function returnGuild(guild, json) {if (json.s) {parseGuild$1(guild, json);}}
+  function returnGuild(guild, json) {if (json.s) {parseGuild$2(guild, json);}}
 
   function ajaxGuild(guild) {
     return daGuildView(guild[0]).then(partial(returnGuild, guild));
@@ -23264,7 +23491,7 @@
     news: news,
     arena: arena$1,
     questbook: questbook,
-    profile: profile$2,
+    profile: profile$3,
     auctionhouse: auctionhouse,
     guild: guild$2,
     bank: {'-': {'-': injectBank}},
@@ -23390,7 +23617,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '132';
+  window.FSH.calf = '133';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

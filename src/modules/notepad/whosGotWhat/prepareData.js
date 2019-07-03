@@ -4,9 +4,9 @@ import {nowSecs} from '../../support/now';
 import partial from '../../common/partial';
 
 function byMember(prev, curr) {
-  // if (curr.b === 11503) {
-  prev[curr.player.name] = prev[curr.player.name] || [];
-  prev[curr.player.name].push(curr);
+  // if (curr.b === 11503) { // Zombie Brew
+  prev[curr.player_id] = prev[curr.player_id] || [];
+  prev[curr.player_id].push(curr);
   // }
   return prev;
 }
@@ -33,8 +33,8 @@ function decorateMembers(pots, obj, i) {
   obj.gxp_reverse = 0 - obj.guild_xp;
   obj.activity = lastActivityToDays(obj.last_activity);
   obj.act = obj.last_activity - nowSecs;
-  obj.pack = (pots[obj.name] || []).length;
-  obj.pack_reverse = 0 - (pots[obj.name] || []).length;
+  obj.pack = (pots[obj.id] || []).length;
+  obj.pack_reverse = 0 - (pots[obj.id] || []).length;
   obj.stam = addCommas(obj.current_stamina);
   obj.stam_reverse = 0 - obj.current_stamina;
   return obj;
@@ -42,7 +42,9 @@ function decorateMembers(pots, obj, i) {
 
 export default function prepareData([json, guild]) {
   // console.log(json);
-  const pots = json.r.reduce(byMember, {});
+  const pots = json.items.reduce(byMember, {});
+  // console.log('pots', pots);
   const members = processGuild(guild);
+  // console.log('members', members);
   return members.map(partial(decorateMembers, pots));
 }
