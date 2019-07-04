@@ -53,4 +53,5 @@ export default function showMe([data, membrList]) {
   });
 
   tableComponent.onDisplayChange(partial(displayChange, domTable));
+  tableComponent.exec();
 }
