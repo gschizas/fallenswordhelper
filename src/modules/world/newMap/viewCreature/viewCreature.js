@@ -1,8 +1,6 @@
 import './viewCreature.postcss';
 import calf from '../../../support/calf';
 import {createDiv} from '../../../common/cElement';
-import daGroupStats from '../../../_dataAccess/daGroupStats';
-import daViewGroups from '../../../_dataAccess/daViewGroups';
 import {def_viewCreature} from '../../../support/constants';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
@@ -20,6 +18,7 @@ import myStats from '../../../ajax/myStats';
 import partial from '../../../common/partial';
 import playerDataObject from '../../../common/playerDataObject';
 import playerName from '../../../common/playerName';
+import {daGroupStats, daViewGroups} from '../../../_dataAccess/_dataAccess';
 
 var dialogViewCreature;
 var combatEvalContainer;

@@ -1,5 +1,5 @@
 import bitwiseAnd from '../../common/bitwiseAnd';
-import daRanksView from '../../_dataAccess/daRanksView';
+import {daRanksView} from '../../_dataAccess/_dataAccess';
 import getText from '../../common/getText';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';

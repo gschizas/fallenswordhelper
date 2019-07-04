@@ -1,7 +1,7 @@
 import './injectStoreItems.postcss';
 import add from '../../support/task';
 import batch from '../../common/batch';
-import daSendItems from '../../_dataAccess/daSendItems';
+import {daSendItems} from '../../_dataAccess/_dataAccess';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';

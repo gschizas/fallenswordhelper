@@ -1,5 +1,5 @@
 import calf from '../../../support/calf';
-import daScoutTower from '../../../_dataAccess/daScoutTower';
+import {daScoutTower} from '../../../_dataAccess/_dataAccess';
 import {isArray} from '../../../common/isArray';
 import partial from '../../../common/partial';
 import {processTitans} from './processTitans';

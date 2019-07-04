@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import daComposing from '../_dataAccess/daComposing';
+import {daComposing} from '../_dataAccess/_dataAccess';
 import displayComposeMsg from './displayComposeMsg';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';

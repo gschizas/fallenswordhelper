@@ -1,5 +1,5 @@
 import ajaxReturnCode from '../common/ajaxReturnCode';
-import daStoreItems from '../_dataAccess/daStoreItems';
+import {daStoreItems} from '../_dataAccess/_dataAccess';
 import errorDialog from '../common/errorDialog';
 
 export default function storeItems(invIdAry) {
