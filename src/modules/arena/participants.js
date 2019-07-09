@@ -44,6 +44,7 @@ function decorate(myGuild, [button, id, arena]) {
 }
 
 export default function participants(json) {
+  if (!json.s) {return;}
   const theButtons = querySelectorArray(
     '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
   const withPvpId = theButtons.map(addId);
