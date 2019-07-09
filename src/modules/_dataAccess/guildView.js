@@ -9,6 +9,8 @@ import intValue from '../system/intValue';
 import {nowSecs} from '../support/now';
 import {def_table, lastActivityRE} from '../support/constants';
 
+let cache = {};
+
 function lastActivity(tipped) {
   const activity = tipped.match(lastActivityRE);
   return nowSecs - (
@@ -63,6 +65,15 @@ function parseReport(html) {
 
 // Incomplete
 export default function guildView(guildId) {
-  return indexAjaxData({cmd: 'guild', subcmd: 'view', guild_id: guildId})
-    .then(parseReport);
+  // console.log('guildView...');
+  // return indexAjaxData({cmd: 'guild', subcmd: 'view', guild_id: guildId})
+  //   .then(parseReport);
+  if (!cache[guildId]) {
+    cache[guildId] = indexAjaxData({
+      cmd: 'guild',
+      subcmd: 'view',
+      guild_id: guildId
+    }).then(parseReport);
+  }
+  return cache[guildId];
 }
