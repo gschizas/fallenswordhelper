@@ -184,5 +184,6 @@
   "highlightPvpProtection":false,
   "showBuffInfo":false,
   "enableHistoryCompressor":false,
-  "enableStamBars":false
+  "enableStamBars":false,
+  "appBad": [0, false]
 }

@@ -21,6 +21,7 @@ import dostoreitems from '../app/guild/inventory/dostoreitems';
 import dropComponent from './dropComponent';
 import fetchinv from './fetchinv';
 import findPlayer from './findPlayer';
+import getValueJSON from '../system/getValueJSON';
 import groupStats from './groupStats';
 import groupsView from '../app/guild/groups/view';
 import groupsViewStats from '../app/guild/groups/viewStats';
@@ -37,6 +38,7 @@ import loadInventory from '../app/profile/loadInventory';
 import mailboxTake from './mailboxTake';
 import moveItems from './moveItems';
 import moveRank from './moveRank';
+import {nowSecs} from '../support/now';
 import rankPosition from '../app/guild/ranks/position';
 import ranks from '../app/guild/ranks/ranks';
 import ranksView from './ranksView';
@@ -45,6 +47,7 @@ import report from '../app/guild/inventory/report';
 import scouttower from './scouttower';
 import senditems from './sendItems';
 import sendtofolder from '../app/profile/sendtofolder';
+import setValueJSON from '../system/setValueJSON';
 import storeitems from './storeitems';
 import superelite from './superelite';
 import takeitem from '../app/guild/inventory/takeitem';
@@ -58,10 +61,29 @@ import viewCombat from './viewCombat';
 import viewGroups from './viewGroups';
 import viewProfile from './viewProfile';
 
+let appBad;
+
+function resetAppBad() {
+  if (appBad[0] < nowSecs - 24 * 60 * 60) {appBad = [nowSecs, false];}
+}
+
+function initAppBad() {
+  if (!appBad) {
+    appBad = getValueJSON('appBad') || [nowSecs, false];
+    resetAppBad();
+  }
+}
+
 export function _dataAccess(appFn, fallbackFn, ...args) {
+  initAppBad();
+  if (appBad[1]) {return fallbackFn(...args);}
   return appFn(...args)
     .then(function(json) {
-      if (hasFailed(json)) {return fallbackFn(...args);}
+      if (hasFailed(json)) {
+        appBad = [nowSecs, true];
+        setValueJSON('appBad', appBad);
+        return fallbackFn(...args);
+      }
       return json;
     })
     .catch(() => fallbackFn(...args));
