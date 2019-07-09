@@ -1,7 +1,10 @@
 import allthen from '../common/allthen';
+//#if _DEV  //  arenaFull
+import arenaFull from './arenaFull';
+//#endif
 import doLvlFilter from './doLvlFilter';
 import filterHeader from './filterHeader';
-import getForage from '../ajax/getForage';
+import {get} from 'idb-keyval';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import orderData from './orderData';
 import partial from '../common/partial';
@@ -10,6 +13,7 @@ import participants from './participants';
 //#endif
 import querySelectorArray from '../common/querySelectorArray';
 import redoSort from './redoSort';
+import {sendEvent} from '../support/fshGa';
 import updateUrl from './updateUrl';
 import view from '../app/arena/view';
 import {fshArenaKey, tableOpts} from './assets';
@@ -39,12 +43,13 @@ function prepareEnv() {
   doLvlFilter();
 }
 
-function arenaDataTable(tabs, [arena, json]) { // jQuery
+function arenaDataTable(tabs, [arena, obj, json]) { // jQuery
   const theTables = $('table[width="635"]', tabs);
   theTables.each(redoHead);
   setOpts(arena);
   orderData(theTables);
   //#if _DEV  //  participants
+  arenaFull(obj);
   participants(json);
   //#endif
   prepareEnv();
@@ -72,11 +77,8 @@ export function injectArena() { // jQuery
   if (jQueryNotPresent()) {return;}
   var tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) { // Join error screen
-    //#if _DEV  //  Join error screen ?
-    console.log('Join error screen ?'); // eslint-disable-line no-console
-    //#endif
+    sendEvent('arena', 'Join error screen ?');
     return;
   }
-  // all([getForage(fshArenaKey), view()]).then(partial(process, tabs));
-  allthen([getForage(fshArenaKey), view()], partial(process, tabs));
+  allthen([get(fshArenaKey), get('arenaFull'), view()], partial(process, tabs));
 }

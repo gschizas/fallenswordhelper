@@ -1,13 +1,13 @@
 import changeMinMax from '../common/changeMinMax';
 import defaults from '../support/dataObj.json';
 import {fshArenaKey} from './assets';
-import setForage from '../ajax/setForage';
+import {set} from 'idb-keyval';
 
 export var opts;
 export var oldIds;
 
 export function storeOpts() {
-  setForage(fshArenaKey, opts);
+  set(fshArenaKey, opts);
 }
 
 function newOpts(newMin, newMax) {
