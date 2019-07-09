@@ -1,4 +1,4 @@
-import daComponents from '../../_dataAccess/daComponents';
+import {daComponents} from '../../_dataAccess/_dataAccess';
 import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';

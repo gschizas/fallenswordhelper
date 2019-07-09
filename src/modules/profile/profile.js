@@ -1,9 +1,7 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
-//#if _DEV  //  allow back
 import {arrayFrom} from '../common/arrayFrom';
-//#endif
 import colouredDots from '../common/colouredDots';
 import components from './components/components';
 import fallback from '../system/fallback';
@@ -12,15 +10,11 @@ import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
 import highlightPvpProtection from './highlightPvpProtection';
-//#if _DEV  //  allow back
 import {indexPhp} from '../support/constants';
-//#endif
 import injectFastWear from './fastWear';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import nekidBtn from './nekidBtn';
-//#if _DEV  //  allow back
 import on from '../common/on';
-//#endif
 import {pCC} from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
@@ -68,7 +62,6 @@ function updateDom(avyImg, playername, self) {
   addStatTotalToMouseover();
   add(3, colouredDots);
 }
-//#if _DEV  //  allow back
 
 function updateUrl(e) {
   e.preventDefault();
@@ -83,7 +76,6 @@ function allowBack(self) {
     on(querySelector('#profileRightColumn'), 'submit', updateUrl);
   }
 }
-//#endif
 
 export default function injectProfile() { // Legacy
   if (jQueryNotPresent()) {return;}
@@ -92,7 +84,5 @@ export default function injectProfile() { // Legacy
   var playername = getText(getElementsByTagName('h1', pCC)[0]);
   var self = playername === playerName();
   updateDom(avyImg, playername, self);
-  //#if _DEV  //  allow back
   allowBack(self);
-  //#endif
 }

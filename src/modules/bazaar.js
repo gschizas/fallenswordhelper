@@ -1,4 +1,4 @@
-import daBazaarBuy from './_dataAccess/daBazaarBuy';
+import {daBazaarBuy} from './_dataAccess/_dataAccess';
 import getArrayByTagName from './common/getArrayByTagName';
 import {getElementById} from './common/getElement';
 import getElementsByTagName from './common/getElementsByTagName';

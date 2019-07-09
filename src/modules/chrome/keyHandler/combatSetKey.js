@@ -1,4 +1,4 @@
-import daViewProfile from '../../_dataAccess/daViewProfile';
+import {daViewProfile} from '../../_dataAccess/_dataAccess';
 import expandMenu from './expandMenu';
 import keyHandlerEvent from './keyHandlerEvent';
 import partial from '../../common/partial';

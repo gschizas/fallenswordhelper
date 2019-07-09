@@ -1,5 +1,5 @@
 import './advisor.postcss';
-import daAdvisor from '../../_dataAccess/daAdvisor';
+import {daAdvisor} from '../../_dataAccess/_dataAccess';
 import getMembrList from '../../ajax/getMembrList';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import {pCC} from '../../support/layout';

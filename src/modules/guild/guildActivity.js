@@ -1,4 +1,4 @@
-import daGuildManage from '../_dataAccess/daGuildManage';
+import {daGuildManage} from '../_dataAccess/_dataAccess';
 import fallback from '../system/fallback';
 import getForage from '../ajax/getForage';
 import getValue from '../system/getValue';

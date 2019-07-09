@@ -1,6 +1,6 @@
 import addCommas from '../../system/addCommas';
 import calf from '../../support/calf';
-import daViewCombat from '../../_dataAccess/daViewCombat';
+import {daViewCombat} from '../../_dataAccess/_dataAccess';
 import getText from '../../common/getText';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';

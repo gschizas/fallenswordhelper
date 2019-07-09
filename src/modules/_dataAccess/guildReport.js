@@ -5,6 +5,7 @@ import itemId from '../guild/guildReport/itemId';
 import querySelectorArray from '../common/querySelectorArray';
 
 function details(td) {
+  if (!td.children[0].href) {return {a: -1, n: '-1', t: -1};}
   const thisId = Number(itemId(td.children[0].href));
   const thisName = getTextTrim(td.previousElementSibling);
   const ret = {a: thisId};

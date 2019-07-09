@@ -1,4 +1,4 @@
-import daDoInvent from '../_dataAccess/daDoInvent';
+import {daDoInvent} from '../_dataAccess/_dataAccess';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jsonFail from '../common/jsonFail';

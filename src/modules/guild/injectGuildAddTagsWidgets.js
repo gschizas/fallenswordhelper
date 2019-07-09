@@ -1,6 +1,6 @@
 import clickThis from '../common/clickThis';
 import {createInput} from '../common/cElement';
-import daGsTake from '../_dataAccess/daGsTake';
+import {daGsTake} from '../_dataAccess/_dataAccess';
 import {getElementById} from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import {imageServer} from '../system/system';

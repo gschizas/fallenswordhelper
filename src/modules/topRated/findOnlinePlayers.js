@@ -1,7 +1,4 @@
 import allthen from '../common/allthen';
-import daFindPlayer from '../_dataAccess/daFindPlayer';
-import daGuildView from '../_dataAccess/daGuildView';
-import daViewProfile from '../_dataAccess/daViewProfile';
 import getPlayersByGuild from './getPlayersByGuild';
 import {isArray} from '../common/isArray';
 import {nowSecs} from '../support/now';
@@ -9,6 +6,11 @@ import partial from '../common/partial';
 import playerName from '../common/playerName';
 import {sendEvent} from '../support/fshGa';
 import uniq from '../common/uniq';
+import {
+  daFindPlayer,
+  daGuildView,
+  daViewProfile
+} from '../_dataAccess/_dataAccess';
 import {decoratePlayer, initDecorate} from './decoratePlayer';
 import {displaySpinner, hideSpinner} from './displaySpinner';
 

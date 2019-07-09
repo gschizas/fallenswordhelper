@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import daSuperElite from '../_dataAccess/daSuperElite';
+import {daSuperElite} from '../_dataAccess/_dataAccess';
 import getForage from '../ajax/getForage';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/now';

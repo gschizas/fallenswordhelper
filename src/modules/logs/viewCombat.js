@@ -8,9 +8,9 @@ function getPvpId(aRow) {
 //   console.log(json);
 // }
 
-function havePvpId(aRow, pvpId) {
+function havePvpId(aRow, pvpId) { // eslint-disable-line
   // results(pvpId).then(processResults);
-  console.log(aRow, pvpId); // eslint-disable-line no-console
+  // console.log(aRow, pvpId); // eslint-disable-line no-console
 }
 
 // TODO Pref
