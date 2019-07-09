@@ -5,6 +5,7 @@ import getText from '../common/getText';
 import getTextTrim from '../common/getTextTrim';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
+import {sendEvent} from '../support/fshGa';
 
 function getId(e) {
   return Number(e.getAttribute('background').match(/\/(\d+)/)[1]);
@@ -22,10 +23,18 @@ const specialMask = [
 ];
 
 function gettokens(spec) {
-  const [specId, specMatch] = specialMask
+  // const [specId, specMatch] = specialMask
+  //   .map(([id, mask]) => [id, spec.match(mask)])
+  //   .find(([, match]) => match);
+  // return {id: specId, params: [specMatch[1], specMatch[2]]};
+  const thisTests = specialMask
     .map(([id, mask]) => [id, spec.match(mask)])
     .find(([, match]) => match);
-  return {id: specId, params: [specMatch[1], specMatch[2]]};
+  if (!thisTests) {
+    sendEvent('Logs', 'Missing PvP Special', spec);
+    return {id: -1, params: ['-1', '-1']};
+  }
+  return {id: thisTests[0], params: [thisTests[1][1], thisTests[1][2]]};
 }
 
 function formatSpecial(pCC) {
