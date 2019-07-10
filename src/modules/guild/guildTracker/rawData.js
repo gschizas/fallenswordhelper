@@ -6,7 +6,7 @@ import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
 import on from '../../common/on';
 import partial from '../../common/partial';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 import {
   createBr,
   createButton,
@@ -42,7 +42,7 @@ function successMsg(newData) {
 
 function doSave() {
   var newData = jsonParse(ioText.value);
-  setForage('fsh_guildActivity', newData)
+  set('fsh_guildActivity', newData)
     .then(partial(successMsg, newData))
     .catch(dialogMsg);
 }

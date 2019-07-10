@@ -1,18 +1,18 @@
 import {fshBuffLog} from '../../support/constants';
 import {getElementById} from '../../common/getElement';
-import getForage from '../../ajax/getForage';
+import getMigrate from '../../common/getMigrate';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import makePageTemplate from '../lists/makePageTemplate';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 
 function displayBuffLog(buffLog) {
   getElementById('bufflog').innerHTML = buffLog;
 }
 
 function clearBuffLog() {
-  setForage(fshBuffLog, '').then(displayBuffLog);
+  set(fshBuffLog, '').then(displayBuffLog);
 }
 
 export default function injectBuffLog(injector) { // jQuery.min
@@ -26,5 +26,5 @@ export default function injectBuffLog(injector) { // jQuery.min
     divId: 'bufflog'
   });
   on(getElementById('clearBuffs'), 'click', clearBuffLog);
-  getForage(fshBuffLog).then(displayBuffLog);
+  getMigrate(fshBuffLog).then(displayBuffLog);
 }

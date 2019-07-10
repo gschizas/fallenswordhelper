@@ -2,13 +2,13 @@ import buildHtml from './buildHtml';
 import calf from '../../support/calf';
 import doSortParams from '../../common/doSortParams';
 import {getElementById} from '../../common/getElement';
-import getForage from '../../ajax/getForage';
+import getMigrate from '../../common/getMigrate';
 import jQueryPresent from '../../common/jQueryPresent';
 import numberSort from '../../system/numberSort';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 import stringSort from '../../system/stringSort';
 
 var content;
@@ -70,7 +70,7 @@ function isSortHeader(target) {
 function doHandlers(evt) {
   var target = evt.target;
   if (target.id === 'clearEntityLog') {
-    setForage('fsh_monsterLog', '');
+    set('fsh_monsterLog', '');
     noMobs();
     return;
   }
@@ -121,7 +121,7 @@ function prepAry(data) {
 function haveJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
-  getForage('fsh_monsterLog').then(prepAry);
+  getMigrate('fsh_monsterLog').then(prepAry);
 }
 
 export default function injectMonsterLog(injector) {

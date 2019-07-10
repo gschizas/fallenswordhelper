@@ -1,6 +1,6 @@
 import getValue from '../../system/getValue';
 import playerId from '../../common/playerId';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 import shouldBeArray from '../../system/shouldBeArray';
 
 var currentPlayerId;
@@ -83,7 +83,7 @@ function drawRecipeTable(output, recipebook) { // Legacy
   result += '</table>';
   output.innerHTML = result;
   recipebook.lastUpdate = new Date();
-  setForage('fsh_recipeBook', recipebook);
+  set('fsh_recipeBook', recipebook);
 }
 
 export default function generateRecipeTable(output, recipebook) { // Legacy

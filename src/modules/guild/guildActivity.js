@@ -1,12 +1,12 @@
 import {daGuildManage} from '../_dataAccess/_dataAccess';
 import fallback from '../system/fallback';
-import getForage from '../ajax/getForage';
+import getMigrate from '../common/getMigrate';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';
 import lastActivityToDays from '../common/lastActivityToDays';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
-import setForage from '../ajax/setForage';
+import {set} from 'idb-keyval';
 import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';
 
 var oldArchive;
@@ -90,7 +90,7 @@ function processRank(newArchive, rank) {
 function doMerge() { // jQuery.min
   var newArchive = {lastUpdate: nowSecs, members: {}};
   guild.r.ranks.forEach(partial(processRank, newArchive));
-  setForage('fsh_guildActivity', newArchive);
+  set('fsh_guildActivity', newArchive);
 }
 
 function gotGuild(data) {
@@ -113,6 +113,6 @@ function gotActivity(data) { // jQuery.min
 
 export default function guildActivity() { // jQuery.min
   if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
-    getForage('fsh_guildActivity').then(gotActivity);
+    getMigrate('fsh_guildActivity').then(gotActivity);
   }
 }

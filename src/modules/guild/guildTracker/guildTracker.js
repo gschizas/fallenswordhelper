@@ -1,7 +1,7 @@
 import './guildTracker.postcss';
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
-import getForage from '../../ajax/getForage';
+import getMigrate from '../../common/getMigrate';
 import injectShowTracker from './injectShowTracker';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -120,7 +120,7 @@ function gotActivity(data) {
 
 function openDialog() {
   sendEvent('guildTracker', 'openDialog');
-  getForage('fsh_guildActivity').then(gotActivity);
+  getMigrate('fsh_guildActivity').then(gotActivity);
   calf.dialogIsClosed = isClosed;
   addOverlay();
   makePopup();

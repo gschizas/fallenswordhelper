@@ -3,7 +3,7 @@ import {createAnchor} from '../../common/cElement';
 import {dataRows} from '../../common/dataRows';
 import displayTracker from './displayTracker';
 import getElementsByTagName from '../../common/getElementsByTagName';
-import getForage from '../../ajax/getForage';
+import getMigrate from '../../common/getMigrate';
 import getText from '../../common/getText';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../../common/insertElement';
@@ -14,7 +14,7 @@ import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import roundToString from '../../common/roundToString';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 import {def_table, guideUrl} from '../../support/constants';
 
 function getTitanName(aRow) {
@@ -125,10 +125,10 @@ function gotOldTitans(oldTitans) {
   doTooMuch(titanTable, newTitans);
   addMissingTitansFromOld(oldTitans, newTitans); // Pref
   displayTracker(titanTables[0], newTitans); // Pref
-  setForage('fsh_titans', newTitans); // Pref
+  set('fsh_titans', newTitans); // Pref
 }
 
 export default function injectScouttower() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getForage('fsh_titans').then(gotOldTitans); // Pref
+  getMigrate('fsh_titans').then(gotOldTitans); // Pref
 }

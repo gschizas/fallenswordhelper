@@ -1,6 +1,6 @@
 import calf from '../../support/calf';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 
 export default function saveOptions(options) {
-  setForage('fsh_' + calf.subcmd, options);
+  set('fsh_' + calf.subcmd, options);
 }

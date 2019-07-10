@@ -1,17 +1,17 @@
 import {getElementById} from '../common/getElement';
-import getForage from '../ajax/getForage';
+import getMigrate from '../common/getMigrate';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
 import on from '../common/on';
 import {pCC} from '../support/layout';
-import setForage from '../ajax/setForage';
+import {set} from 'idb-keyval';
 
 function inject(fsboxcontent) {
   getElementById('fsboxdetail').innerHTML = fsboxcontent;
 }
 
 function clearFsBox() {
-  setForage('fsh_fsboxcontent', '');
+  set('fsh_fsboxcontent', '');
   location.reload();
 }
 
@@ -25,6 +25,6 @@ export default function injectFsBoxContent(injector) { // jQuery.min
     button: 'Clear',
     divId: 'fsboxdetail'
   });
-  getForage('fsh_fsboxcontent').then(inject);
+  getMigrate('fsh_fsboxcontent').then(inject);
   on(getElementById('fsboxclear'), 'click', clearFsBox, true);
 }

@@ -1,7 +1,7 @@
 import calf from '../../../support/calf';
-import getForage from '../../../ajax/getForage';
+import getMigrate from '../../../common/getMigrate';
 import partial from '../../../common/partial';
-import setForage from '../../../ajax/setForage';
+import {set} from 'idb-keyval';
 
 var monsterLog;
 
@@ -73,7 +73,7 @@ function doMonsterLog(creature) {
   setupMob(creature);
   storeStats(creature, monsterLog[creature.name]);
   storeEnhancements(creature, monsterLog[creature.name]);
-  setForage('fsh_monsterLog', monsterLog);
+  set('fsh_monsterLog', monsterLog);
 }
 
 export function processMonsterLog(creature) {
@@ -85,5 +85,5 @@ function initLog(data) {
 }
 
 export function getMonsterPrefs() {
-  getForage('fsh_monsterLog').then(initLog);
+  getMigrate('fsh_monsterLog').then(initLog);
 }

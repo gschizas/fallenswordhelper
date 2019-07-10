@@ -1,10 +1,10 @@
 import calf from '../support/calf';
 import {daSuperElite} from '../_dataAccess/_dataAccess';
-import getForage from '../ajax/getForage';
+import getMigrate from '../common/getMigrate';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
-import setForage from '../ajax/setForage';
+import {set} from 'idb-keyval';
 
 export var oldLog;
 var timeoutId;
@@ -40,7 +40,7 @@ function processSeData(data) {
   var resultAry = data.r;
   if (resultAry) {
     resultAry.forEach(partial(updateSeLog, serverTime));
-    setForage('fsh_seLog', oldLog);
+    set('fsh_seLog', oldLog);
   }
 }
 
@@ -77,7 +77,7 @@ function gotLog(data) {
 }
 
 export function getFshSeLog() { // jQuery.min
-  return getForage('fsh_seLog').then(gotLog);
+  return getMigrate('fsh_seLog').then(gotLog);
 }
 
 function shouldLog() {

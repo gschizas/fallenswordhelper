@@ -3,14 +3,14 @@ import {createDiv} from '../../../common/cElement';
 import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';
 import fallback from '../../../system/fallback';
-import getForage from '../../../ajax/getForage';
+import getMigrate from '../../../common/getMigrate';
 import insertElement from '../../../common/insertElement';
 import isChecked from '../../../system/isChecked';
 import on from '../../../common/on';
 import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
 import selfIdIs from '../../../common/selfIdIs';
-import setForage from '../../../ajax/setForage';
+import {set} from 'idb-keyval';
 import sortKeys from './sortKeys';
 import testRange from '../../../system/testRange';
 import {drawInventory, initInventory} from './drawInventory';
@@ -66,7 +66,7 @@ function createThresholds(potOpts, panels) {
 function onChange(potOpts, potObj, e) {
   if (e.target.tagName === 'SELECT') {
     potOpts.myMap[e.target.name] = e.target.value;
-    setForage(storeMap, potOpts);
+    set(storeMap, potOpts);
     drawInventory(potOpts, potObj);
   }
 }
@@ -86,7 +86,7 @@ function resetMap(potOpts, potObj, ignore) {
 
 function doReset(potOpts, potObj, ignore) {
   resetMap(potOpts, potObj, ignore);
-  setForage(storeMap, potOpts);
+  set(storeMap, potOpts);
   drawMapping(potOpts);
   drawInventory(potOpts, potObj);
 }
@@ -96,7 +96,7 @@ function toggleTab(self) {return /^pottab\d$/.test(self.id);}
 function saveState(potOpts, self) {
   var option = self.id;
   potOpts[option] = self.checked;
-  setForage(storeMap, potOpts);
+  set(storeMap, potOpts);
 }
 
 function clickEvents(potOpts, potObj) {
@@ -112,7 +112,7 @@ function onInput(potOpts, potObj, e) {
   var maybeValue = testRange(e.target.value, 0, 999);
   if (maybeValue) {
     potOpts[self] = maybeValue;
-    setForage(storeMap, potOpts);
+    set(storeMap, potOpts);
     drawInventory(potOpts, potObj);
   }
 }
@@ -143,10 +143,10 @@ function gotMap(potObj, data) {
   var potOpts = extend({}, defaultOpts); // deep clone
   extend(potOpts, fallback(data, {}));
   potOpts.myMap = buildMap(potOpts, potObj);
-  setForage(storeMap, potOpts);
+  set(storeMap, potOpts);
   buildPanels(potOpts, potObj);
 }
 
 export default function potReport(potObj) {
-  getForage(storeMap).then(partial(gotMap, potObj));
+  getMigrate(storeMap).then(partial(gotMap, potObj));
 }
