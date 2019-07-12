@@ -19,6 +19,6 @@ export default function arenaFull(obj) {
     '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
   const withPvpId = theButtons.map(e => [e, e.previousElementSibling.value]);
   const newObj = entries(obj).reduce(partial(func, withPvpId), {});
-  set('arenaFull', newObj);
+  set('fsh_arenaFull', newObj);
   return 0;
 }

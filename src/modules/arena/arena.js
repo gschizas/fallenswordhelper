@@ -80,5 +80,6 @@ export function injectArena() { // jQuery
     sendEvent('arena', 'Join error screen ?');
     return;
   }
-  allthen([get(fshArenaKey), get('arenaFull'), view()], partial(process, tabs));
+  allthen([get(fshArenaKey), get('fsh_arenaFull'), view()],
+    partial(process, tabs));
 }

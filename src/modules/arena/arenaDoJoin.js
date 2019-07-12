@@ -13,14 +13,14 @@ import {get, set} from 'idb-keyval';
 function addId(id, obj) {
   const newObj = obj || {};
   newObj[id] = nowSecs;
-  set('arenaFull', newObj);
+  set('fsh_arenaFull', newObj);
 }
 
 function evalMsg() {
   const thisInfo = infoBox();
   if (thisInfo.includes('your guild')) {
     const thisId = querySelector('#pCC input[name="pvp_id"]').value;
-    get('arenaFull').then(partial(addId, thisId));
+    get('fsh_arenaFull').then(partial(addId, thisId));
   } else {
     sendEvent('arena', 'doJoin', thisInfo);
   }
