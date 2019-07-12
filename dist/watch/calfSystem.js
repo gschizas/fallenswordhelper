@@ -965,6 +965,69 @@
     return cElement('option', props);
   }
 
+  class Store {
+      constructor(dbName = 'keyval-store', storeName = 'keyval') {
+          this.storeName = storeName;
+          this._dbp = new Promise((resolve, reject) => {
+              const openreq = indexedDB.open(dbName, 1);
+              openreq.onerror = () => reject(openreq.error);
+              openreq.onsuccess = () => resolve(openreq.result);
+              // First time setup: create an empty object store
+              openreq.onupgradeneeded = () => {
+                  openreq.result.createObjectStore(storeName);
+              };
+          });
+      }
+      _withIDBStore(type, callback) {
+          return this._dbp.then(db => new Promise((resolve, reject) => {
+              const transaction = db.transaction(this.storeName, type);
+              transaction.oncomplete = () => resolve();
+              transaction.onabort = transaction.onerror = () => reject(transaction.error);
+              callback(transaction.objectStore(this.storeName));
+          }));
+      }
+  }
+  let store;
+  function getDefaultStore() {
+      if (!store)
+          store = new Store();
+      return store;
+  }
+  function get(key, store = getDefaultStore()) {
+      let req;
+      return store._withIDBStore('readonly', store => {
+          req = store.get(key);
+      }).then(() => req.result);
+  }
+  function set(key, value, store = getDefaultStore()) {
+      return store._withIDBStore('readwrite', store => {
+          store.put(value, key);
+      });
+  }
+  function del(key, store = getDefaultStore()) {
+      return store._withIDBStore('readwrite', store => {
+          store.delete(key);
+      });
+  }
+  function clear(store = getDefaultStore()) {
+      return store._withIDBStore('readwrite', store => {
+          store.clear();
+      });
+  }
+  function keys(store = getDefaultStore()) {
+      const keys = [];
+      return store._withIDBStore('readonly', store => {
+          // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
+          // And openKeyCursor isn't supported by Safari.
+          (store.openKeyCursor || store.openCursor).call(store).onsuccess = function () {
+              if (!this.result)
+                  return;
+              keys.push(this.result.key);
+              this.result.continue();
+          };
+      }).then(() => keys);
+  }
+
   function dialogMsg(msg) {
     $('#dialog_msg').html(msg).dialog('open');
   }
@@ -991,6 +1054,16 @@
     return localforage.getItem(forage).catch(partial(getForageError, forage));
   }
 
+  function migrateStorage(key, data) {
+    if (data) {return data;}
+    sendEvent('Migrate Storage', key);
+    return getForage(key);
+  }
+
+  function getMigrate(key) {
+    return get(key).then(partial(migrateStorage, key));
+  }
+
   function jQueryNotPresent() {return !isFunction(window.$);}
 
   function makePageHeader(title, comment, spanId, button) {
@@ -1012,85 +1085,12 @@
       '<div class="fshSmall" id="' + o.divId + '"></div>';
   }
 
-  function insertElement(parent, child) {
-    if (parent instanceof Node && child instanceof Node) {
-      parent.appendChild(child);
-    }
-    return child;
-  }
-
-  function setText(text, node) {
-    if (node instanceof Node) {
-      node.textContent = String(text);
-    }
-  }
-
-  function makeFshMsg() {
-    var fshMsg = getElementById('fshmsg');
-    if (!fshMsg) {
-      fshMsg = createDiv({id: 'fshmsg'});
-      insertElement(document.body, fshMsg);
-      $(fshMsg).dialog({
-        autoOpen: false,
-        dialogClass: 'no-close',
-        draggable: false,
-        modal: true,
-        resizable: false,
-      });
-    }
-    return fshMsg;
-  }
-
-  function openFshMsg(title, fn, fshMsg) {
-    $(fshMsg).dialog('option', {
-      buttons: {
-        Yes: function() {
-          fn();
-          $(this).dialog('close');
-        },
-        No: function() {$(this).dialog('close');}
-      },
-      title: title
-    }).dialog('open');
-  }
-
-  function jConfirm(title, msgText, fn) { // jQuery
-    var fshMsg = makeFshMsg();
-    setText(msgText, fshMsg);
-    openFshMsg(title, fn, fshMsg);
-  }
-
-  function clearError(err) {
-    sendException('localforage.clear error ' + stringifyError(err), false);
-  }
-
-  function clearForage() {
-    localforage.clear().catch(clearError);
-  }
-
-  function setForageError(forage, err) {
-    if (err.name === 'QuotaExceededError') {
-      jConfirm('IndexedDB Quota Exceeded Error',
-        'Not enough disk space. Would you like to clear IndexedDB?',
-        clearForage
-      );
-    } else {
-      sendException(forage + ' localforage.setItem error ' +
-        stringifyError(err), false);
-    }
-  }
-
-  function setForage(forage, data) {
-    return localforage.setItem(forage, data)
-      .catch(partial(setForageError, forage));
-  }
-
   function displayBuffLog(buffLog) {
     getElementById('bufflog').innerHTML = buffLog;
   }
 
   function clearBuffLog() {
-    setForage(fshBuffLog, '').then(displayBuffLog);
+    set(fshBuffLog, '').then(displayBuffLog);
   }
 
   function injectBuffLog(injector) { // jQuery.min
@@ -1104,7 +1104,7 @@
       divId: 'bufflog'
     });
     on(getElementById('clearBuffs'), 'click', clearBuffLog);
-    getForage(fshBuffLog).then(displayBuffLog);
+    getMigrate(fshBuffLog).then(displayBuffLog);
   }
 
   function inject(fsboxcontent) {
@@ -1112,7 +1112,7 @@
   }
 
   function clearFsBox() {
-    setForage('fsh_fsboxcontent', '');
+    set('fsh_fsboxcontent', '');
     location.reload();
   }
 
@@ -1126,7 +1126,7 @@
       button: 'Clear',
       divId: 'fsboxdetail'
     });
-    getForage('fsh_fsboxcontent').then(inject);
+    getMigrate('fsh_fsboxcontent').then(inject);
     on(getElementById('fsboxclear'), 'click', clearFsBox, true);
   }
 
@@ -1331,7 +1331,7 @@
   function doHandlers(evt) {
     var target = evt.target;
     if (target.id === 'clearEntityLog') {
-      setForage('fsh_monsterLog', '');
+      set('fsh_monsterLog', '');
       noMobs();
       return;
     }
@@ -1382,11 +1382,59 @@
   function haveJquery(injector) { // jQuery.min
     content = injector || pCC;
     if (!content) {return;}
-    getForage('fsh_monsterLog').then(prepAry);
+    getMigrate('fsh_monsterLog').then(prepAry);
   }
 
   function injectMonsterLog(injector) {
     if (jQueryPresent()) {haveJquery(injector);}
+  }
+
+  function insertElement(parent, child) {
+    if (parent instanceof Node && child instanceof Node) {
+      parent.appendChild(child);
+    }
+    return child;
+  }
+
+  function setText(text, node) {
+    if (node instanceof Node) {
+      node.textContent = String(text);
+    }
+  }
+
+  function makeFshMsg() {
+    var fshMsg = getElementById('fshmsg');
+    if (!fshMsg) {
+      fshMsg = createDiv({id: 'fshmsg'});
+      insertElement(document.body, fshMsg);
+      $(fshMsg).dialog({
+        autoOpen: false,
+        dialogClass: 'no-close',
+        draggable: false,
+        modal: true,
+        resizable: false,
+      });
+    }
+    return fshMsg;
+  }
+
+  function openFshMsg(title, fn, fshMsg) {
+    $(fshMsg).dialog('option', {
+      buttons: {
+        Yes: function() {
+          fn();
+          $(this).dialog('close');
+        },
+        No: function() {$(this).dialog('close');}
+      },
+      title: title
+    }).dialog('open');
+  }
+
+  function jConfirm(title, msgText, fn) { // jQuery
+    var fshMsg = makeFshMsg();
+    setText(msgText, fshMsg);
+    openFshMsg(title, fn, fshMsg);
   }
 
   var content$1;
@@ -1409,7 +1457,7 @@
   function clearCombatLog() {
     combatLog = [];
     textArea.value = '[]';
-    setForage('fsh_combatLog', combatLog);
+    set('fsh_combatLog', combatLog);
   }
 
   function notepadClearLog() { // jQuery
@@ -1443,7 +1491,7 @@
   function injectNotepadShowLogs(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     content$1 = injector || pCC;
-    getForage('fsh_combatLog').then(gotCombatLog);
+    getMigrate('fsh_combatLog').then(gotCombatLog);
   }
 
   function onlinePlayer(onlinePlayers, player) {
@@ -1858,7 +1906,7 @@
 
   function checkLastPage() {
     if (onlinePages === lastPage) {
-      setForage('fsh_onlinePlayers', onlinePlayers);
+      set('fsh_onlinePlayers', onlinePlayers);
       gotOnlinePlayers(onlinePlayers);
     }
   }
@@ -1936,7 +1984,7 @@
     context.html(
       '<span><b>Online Players</b></span>' + doRefreshButton() +
       '<div id="fshOutput"></div>');
-    getForage('fsh_onlinePlayers').then(gotOnlinePlayers);
+    get('fsh_onlinePlayers').then(gotOnlinePlayers);
     on(context[0], 'click', clickHandler);
     on(context[0], 'keyup', changeLvl);
   }
@@ -2041,7 +2089,7 @@
     result += '</table>';
     output.innerHTML = result;
     recipebook.lastUpdate = new Date();
-    setForage('fsh_recipeBook', recipebook);
+    set('fsh_recipeBook', recipebook);
   }
 
   function generateRecipeTable(output, recipebook) { // Legacy
@@ -2224,7 +2272,7 @@
 
   function displayStuff() {
     insertHtmlBeforeEnd(output, 'Finished parsing ... formatting ...');
-    setForage('fsh_recipeBook', recipebook);
+    set('fsh_recipeBook', recipebook);
     generateRecipeTable(output, recipebook);
   }
 
@@ -2272,7 +2320,7 @@
   function injectRecipeManager(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     var content = injector || pCC;
-    getForage('fsh_recipeBook').then(partial(gotRecipeBook, content));
+    get('fsh_recipeBook').then(partial(gotRecipeBook, content));
     on(content, 'click', rmEvtHdl);
   }
 
@@ -2290,7 +2338,7 @@
   function callApp(data) {
     return retryAjax({
       url: 'app.php',
-      data: extend(data, {app: 1}),
+      data: extend(data, {browser: 1}),
       dataType: 'json'
     });
   }
@@ -5681,7 +5729,7 @@
   }
 
   function sendMyProfileToForage(data) {
-    setForage('fsh_selfProfile', data);
+    set('fsh_selfProfile', data);
     return data;
   }
 
@@ -5707,7 +5755,7 @@
 
   function myStats(force) {
     if (force) {return getMyProfile();}
-    return getForage('fsh_selfProfile')
+    return get('fsh_selfProfile')
       .then(getProfileFromForage);
   }
 
@@ -6314,7 +6362,7 @@
   function doMerge() { // jQuery.min
     var newArchive = {lastUpdate: nowSecs, members: {}};
     guild$1.r.ranks.forEach(partial(processRank, newArchive));
-    setForage('fsh_guildActivity', newArchive);
+    set('fsh_guildActivity', newArchive);
   }
 
   function gotGuild(data) {
@@ -6337,7 +6385,7 @@
 
   function guildActivity() { // jQuery.min
     if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
-      getForage('fsh_guildActivity').then(gotActivity);
+      getMigrate('fsh_guildActivity').then(gotActivity);
     }
   }
 
@@ -6380,13 +6428,13 @@
       getElementById('minibox-fsbox'))[0].innerHTML;
     if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
     if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
-    setForage('fsh_fsboxcontent', boxList);
+    set('fsh_fsboxcontent', boxList);
   }
 
   function storeMsg(nodediv) {
     var playerName = getElementsByTagName('a', nodediv);
     if (playerName.length === 0) {return;}
-    getForage('fsh_fsboxcontent').then(storeFSBox);
+    getMigrate('fsh_fsboxcontent').then(storeFSBox);
     playerName = getText(playerName[0]);
     insertHtmlBeforeEnd(nodediv,
       '<span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
@@ -7123,7 +7171,7 @@
     var resultAry = data.r;
     if (resultAry) {
       resultAry.forEach(partial(updateSeLog, serverTime));
-      setForage('fsh_seLog', oldLog);
+      set('fsh_seLog', oldLog);
     }
   }
 
@@ -7160,7 +7208,7 @@
   }
 
   function getFshSeLog() { // jQuery.min
-    return getForage('fsh_seLog').then(gotLog);
+    return getMigrate('fsh_seLog').then(gotLog);
   }
 
   function shouldLog() {
@@ -7550,6 +7598,27 @@
     on(querySelector('input[type="submit"]'), 'click', updateUrl);
   }
 
+  const entries = obj => Object.entries(obj);
+
+  function func(withPvpId, prev, [key, value]) {
+    const thisBtn = withPvpId.find(([, id]) => id === key);
+    if (thisBtn) {
+      thisBtn[0].closest('tr').style.backgroundColor = '#ff0000';
+      prev[key] = value;
+    }
+    return prev;
+  }
+
+  function arenaFull(obj) {
+    if (!isObject(obj)) {return;}
+    const theButtons = querySelectorArray(
+      '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
+    const withPvpId = theButtons.map(e => [e, e.previousElementSibling.value]);
+    const newObj = entries(obj).reduce(partial(func, withPvpId), {});
+    set('fsh_arenaFull', newObj);
+    return 0;
+  }
+
   function getIntVal(selector) {
     return parseInt($(selector).val(), 10);
   }
@@ -7608,7 +7677,7 @@
   var oldIds;
 
   function storeOpts() {
-    setForage(fshArenaKey, opts);
+    set(fshArenaKey, opts);
   }
 
   function newOpts(newMin, newMax) {
@@ -7904,11 +7973,12 @@
     doLvlFilter();
   }
 
-  function arenaDataTable(tabs, [arena, json]) { // jQuery
+  function arenaDataTable(tabs, [arena, obj, json]) { // jQuery
     const theTables = $('table[width="635"]', tabs);
     theTables.each(redoHead);
     setOpts$1(arena);
     orderData(theTables);
+    arenaFull(obj);
     participants(json);
     prepareEnv$1();
     theTables.DataTable(tableOpts$1);
@@ -7931,21 +8001,27 @@
     if (jQueryNotPresent()) {return;}
     var tabs = $('#arenaTypeTabs');
     if (tabs.length !== 1) { // Join error screen
-      console.log('Join error screen ?'); // eslint-disable-line no-console
+      sendEvent('arena', 'Join error screen ?');
       return;
     }
-    // all([getForage(fshArenaKey), view()]).then(partial(process, tabs));
-    allthen([getForage(fshArenaKey), view$1()], partial(process, tabs));
+    allthen([get(fshArenaKey), get('fsh_arenaFull'), view$1()],
+      partial(process, tabs));
   }
 
-  function getMsg() {
+  function addId$1(id, obj) {
+    const newObj = obj || {};
+    newObj[id] = nowSecs;
+    set('fsh_arenaFull', newObj);
+  }
+
+  function evalMsg() {
     const thisInfo = infoBox();
-    console.log(thisInfo); // eslint-disable-line no-console
-  }
-
-  function getId$1() {
-    const thisId = querySelector('#pCC input[name="pvp_id"]');
-    console.log(thisId.value); // eslint-disable-line no-console
+    if (thisInfo.includes('your guild')) {
+      const thisId = querySelector('#pCC input[name="pvp_id"]').value;
+      get('fsh_arenaFull').then(partial(addId$1, thisId));
+    } else {
+      sendEvent('arena', 'doJoin', thisInfo);
+    }
   }
 
   function arenaDoJoin() {
@@ -7954,8 +8030,7 @@
     if (tabs) {
       injectArena();
     } else {
-      getMsg();
-      getId$1();
+      evalMsg();
     }
   }
 
@@ -8082,49 +8157,150 @@
     }
   }
 
+  const keys$1 = obj => Object.keys(obj);
+
+  let container;
+
+  function completed(page) {
+    return indexAjaxData({
+      cmd: 'arena',
+      subcmd: 'completed',
+      page: page || 1
+    }).then(createDocument).finally(() => {
+      insertHtmlBeforeEnd(container, 'Got Page ' + page + ', ');
+    });
+  }
+
+  function results(id) {
+    return indexAjaxData({
+      cmd: 'arena',
+      subcmd: 'results',
+      pvp_id: id
+    }).then(createDocument).finally(() => {
+      insertHtmlBeforeEnd(container, 'Got Arena ' + id + ', ');
+    });
+  }
+
+  function getIds(prev, doc) {
+    querySelectorArray('#pCC input[name="pvp_id"]', doc)
+      .map(e => e.value).forEach(v => {
+        prev[v] = true;
+      });
+    return prev;
+  }
+
+  function getWinner(prev, doc) {
+    const moveImg = querySelector('#pCC img[src*="/pvp/"]', doc);
+    const thisWinner = getTextTrim(
+      querySelector(
+        '#pCC > table > tbody > tr:last-of-type > td > table > tbody > ' +
+          'tr:last-of-type > td:nth-child(2)',
+        doc
+      )
+    );
+    if (!prev[thisWinner]) {prev[thisWinner] = [0, 0];}
+    if (moveImg === null) {
+      prev[thisWinner][1] += 1;
+    } else {
+      prev[thisWinner][0] += 1;
+    }
+    return prev;
+  }
+
+  function desc([aname, awins], [bname, bwins]) {
+    return bwins[1] - awins[1] || bwins[0] - awins[0] || alpha(aname, bname);
+  }
+
+  function processResults(ary) {
+    // console.log('ary', ary);
+    const winners = entries(ary.reduce(getWinner, {})).sort(desc)
+      .map(e => [e[0], ...e[1]]);
+    console.log('winners', winners); // eslint-disable-line
+
+  }
+
+  function processPages$1(ary) {
+    // console.log('ary', ary);
+    const pvpids = keys$1(ary.reduce(getIds, {}));
+    // console.log('pvpids', pvpids);
+    allthen(pvpids.map(results), processResults);
+  }
+
+  function processFirstPage$1(doc) {
+    const maxPage = Number(getText(querySelector('#pCC input[value="Go"]', doc)
+      .parentNode.previousElementSibling).replace(/\D/g, ''));
+    const otherPages = Array.from(Array(maxPage - 1), (e, i) => i + 2);
+    // const otherPages = Array.from(Array(4), (e, i) => i + 2);
+    // console.log(otherPages);
+    allthen([doc].concat(otherPages.map(completed)), processPages$1);
+  }
+
+  function startCrawl(start) {
+    hideQTip(start);
+    start.remove();
+    completed(1).then(processFirstPage$1);
+  }
+
+  function crawler() {
+    container = createDiv();
+    const start = createButton({
+      className: 'fshBl tip-static',
+      dataset: {tipped: 'DANGER!'},
+      textContent: 'Start crawl'
+    });
+    insertElement(container, start);
+    insertElement(pCC, container);
+    on(start, 'click', partial(startCrawl, start));
+  }
+
+  function insertHtmlBeforeBegin(parent, html) {
+    insertHtml(parent, 'beforebegin', html);
+  }
+
   function updateGoUrl(e) {
     e.preventDefault();
     dontPost(querySelector('#pCC input[value="completed"]').parentNode);
+  }
+
+  function intercept(val, fn) {
+    on(querySelector('#pCC input[value="' + val + '"]'), 'click', fn);
   }
 
   function gotoPage(pageId) {
     window.location = arenaUrl + 'completed&page=' + pageId;
   }
 
-  function lastPage$1() { // jQuery
-    return $('#pCC input[value="Go"]').closest('td').prev().text()
-      .replace(/\D/g, '');
-  }
+  const lastPage$1 = () => getText(querySelector('#pCC input[value="Go"]')
+    .parentNode.previousElementSibling).replace(/\D/g, '');
 
-  function injectStartButton() { // jQuery
-    var prevButton = $('#pCC input[value="<"]');
-    if (prevButton.length === 1) {
-      var startButton = $('<input value="<<" type="button">');
-      prevButton.before(startButton).before('&nbsp;');
-      startButton.on('click', partial(gotoPage, 1));
+  function injectStartButton() {
+    const prevButton = querySelector('#pCC input[value="<"]');
+    if (prevButton) {
+      const startButton = createInput({type: 'button', value: '<<'});
+      insertElementBefore(startButton, prevButton);
+      insertHtmlAfterEnd(startButton, '&nbsp;');
+      on(startButton, 'click', partial(gotoPage, 1));
     }
   }
 
   function gotoLastPage() {gotoPage(lastPage$1());}
 
-  function injectFinishButton() { // jQuery
-    var nextButton = $('#pCC input[value=">"]');
-    if (nextButton.length === 1) {
-      var finishButton = $('<input value=">>" type="button">');
-      nextButton.after(finishButton).after('&nbsp;');
-      finishButton.on('click', gotoLastPage);
+  function injectFinishButton() {
+    const nextButton = querySelector('#pCC input[value=">"]');
+    if (nextButton) {
+      const finishButton = createInput({type: 'button', value: '>>'});
+      insertElementAfter(finishButton, nextButton);
+      insertHtmlBeforeBegin(finishButton, '&nbsp;');
+      on(finishButton, 'click', gotoLastPage);
     }
   }
 
-  function overrideButtons() { // jQuery
+  function completedArenas() {
     injectStartButton();
     injectFinishButton();
-    $('#pCC input[value="View"]').on('click', updateUrl$1);
-    on(querySelector('#pCC input[value="Go"]'), 'click', updateGoUrl);
-  }
-
-  function completedArenas() { // jQuery
-    if (jQueryPresent()) {overrideButtons();}
+    intercept('View', updateUrl$1);
+    intercept('Go', updateGoUrl);
+    crawler();
   }
 
   var oldMoves = [];
@@ -8261,11 +8437,11 @@
     var arena = _arena || {};
     var arenaMoves = querySelectorArray('#pCC img[vspace="4"]').slice(1);
     arena.moves = arenaMoves.reduce(getCounts, {});
-    setForage(fshArenaKey, arena);
+    set(fshArenaKey, arena);
   }
 
   function storeMoves() {
-    getForage(fshArenaKey).then(gotMoves);
+    get(fshArenaKey).then(gotMoves);
   }
 
   var arena$1 = {
@@ -8914,11 +9090,11 @@
 
   function saveMembrListInForage(membrList, data) {
     var oldMemList = data || {};
-    setForage('fsh_membrList', $.extend(oldMemList, membrList));
+    set('fsh_membrList', $.extend(oldMemList, membrList));
   }
 
   function addMembrListToForage(membrList) {
-    getForage('fsh_membrList')
+    get('fsh_membrList')
       .then(partial(saveMembrListInForage, membrList));
     return membrList;
   }
@@ -8972,7 +9148,7 @@
     if (force) {
       return getAndCacheGuildMembers(guildId);
     }
-    return getForage('fsh_membrList')
+    return get('fsh_membrList')
       .then(partial(getMembrListFromForage, guildId));
   }
 
@@ -10569,7 +10745,7 @@
 
   function doSave() {
     var newData = jsonParse(ioText.value);
-    setForage('fsh_guildActivity', newData)
+    set('fsh_guildActivity', newData)
       .then(partial(successMsg, newData))
       .catch(dialogMsg);
   }
@@ -10706,7 +10882,7 @@
 
   function openDialog$2() {
     sendEvent('guildTracker', 'openDialog');
-    getForage('fsh_guildActivity').then(gotActivity$1);
+    getMigrate('fsh_guildActivity').then(gotActivity$1);
     calf.dialogIsClosed = isClosed;
     addOverlay();
     makePopup();
@@ -11663,12 +11839,12 @@
     doTooMuch(titanTable, newTitans);
     addMissingTitansFromOld(oldTitans, newTitans); // Pref
     displayTracker(titanTables[0], newTitans); // Pref
-    setForage('fsh_titans', newTitans); // Pref
+    set('fsh_titans', newTitans); // Pref
   }
 
   function injectScouttower() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getForage('fsh_titans').then(gotOldTitans); // Pref
+    getMigrate('fsh_titans').then(gotOldTitans); // Pref
   }
 
   function doItemTable(checkbox) {
@@ -12148,7 +12324,7 @@
   function onChange(potOpts, potObj, e) {
     if (e.target.tagName === 'SELECT') {
       potOpts.myMap[e.target.name] = e.target.value;
-      setForage(storeMap, potOpts);
+      set(storeMap, potOpts);
       drawInventory(potOpts, potObj);
     }
   }
@@ -12168,7 +12344,7 @@
 
   function doReset$1(potOpts, potObj, ignore) {
     resetMap(potOpts, potObj, ignore);
-    setForage(storeMap, potOpts);
+    set(storeMap, potOpts);
     drawMapping(potOpts);
     drawInventory(potOpts, potObj);
   }
@@ -12178,7 +12354,7 @@
   function saveState(potOpts, self) {
     var option = self.id;
     potOpts[option] = self.checked;
-    setForage(storeMap, potOpts);
+    set(storeMap, potOpts);
   }
 
   function clickEvents(potOpts, potObj) {
@@ -12194,7 +12370,7 @@
     var maybeValue = testRange(e.target.value, 0, 999);
     if (maybeValue) {
       potOpts[self] = maybeValue;
-      setForage(storeMap, potOpts);
+      set(storeMap, potOpts);
       drawInventory(potOpts, potObj);
     }
   }
@@ -12225,12 +12401,12 @@
     var potOpts = extend({}, defaultOpts); // deep clone
     extend(potOpts, fallback(data, {}));
     potOpts.myMap = buildMap(potOpts, potObj);
-    setForage(storeMap, potOpts);
+    set(storeMap, potOpts);
     buildPanels(potOpts, potObj);
   }
 
   function potReport(potObj) {
-    getForage(storeMap).then(partial(gotMap, potObj));
+    getMigrate(storeMap).then(partial(gotMap, potObj));
   }
 
   var nodeArray;
@@ -12544,10 +12720,6 @@
     showQuickSendLinks$1 = getValue('showQuickSendLinks');
   }
 
-  function insertHtmlBeforeBegin(parent, html) {
-    insertHtml(parent, 'beforebegin', html);
-  }
-
   function cellOneHazText(curr) {
     return curr.cells[1] && getText(curr.cells[1]);
   }
@@ -12621,7 +12793,7 @@
 
   function hasTip(el) {return el.dataset.tipped;}
 
-  function getIds(el) {
+  function getIds$1(el) {
     var matches = el.dataset.tipped.match(itemRE);
     return [
       el,
@@ -12648,7 +12820,7 @@
     getPrefs();
     doToggleButtons(showExtraLinks$2, showQuickDropLinks$2);
     var imgList = getItemImg();
-    var fromTips = imgList.filter(hasTip).map(getIds);
+    var fromTips = imgList.filter(hasTip).map(getIds$1);
     itemsAry$1 = fromTips.map(getInjector);
     itemsHash = fromTips.reduce(tally, {});
     // Exclude composed pots
@@ -13057,7 +13229,7 @@
     combatCache = Object.keys(data)
       .reduce(partial(keepRecent, data, sevenDays), {});
     combatCache.lastCheck = nowSecs;
-    setForage('fsh_pvpCombat', combatCache);
+    set('fsh_pvpCombat', combatCache);
   }
 
   function prepareCache(data) {
@@ -13074,7 +13246,7 @@
   }
 
   function initCache() {
-    return getForage('fsh_pvpCombat').then(checkCache);
+    return get('fsh_pvpCombat').then(checkCache);
   }
 
   function inSpecialsList(el) {
@@ -13104,7 +13276,7 @@
     if (json.s) {
       json.logTime = parseDateAsTimestamp$1(getTextTrim(aRow.cells[1])) / 1000;
       combatCache[json.r.id] = json;
-      setForage('fsh_pvpCombat', combatCache);
+      set('fsh_pvpCombat', combatCache);
       unknownSpecials(json);
     }
     return json;
@@ -16343,7 +16515,7 @@
     hazEnhancements$1(data);
     combatData.time = data.time;
     combatLog$1.push(combatData);
-    setForage('fsh_combatLog', combatLog$1);
+    set('fsh_combatLog', combatLog$1);
   }
 
   function combatResponse(e, data) {
@@ -16358,7 +16530,7 @@
 
   function combatLogger() { // jQuery.min
     if (getValue('keepLogs')) {
-      getForage('fsh_combatLog').then(gotCombatLog$1);
+      getMigrate('fsh_combatLog').then(gotCombatLog$1);
     }
   }
 
@@ -17951,7 +18123,7 @@
     setupMob(creature);
     storeStats(creature, monsterLog[creature.name]);
     storeEnhancements$1(creature, monsterLog[creature.name]);
-    setForage('fsh_monsterLog', monsterLog);
+    set('fsh_monsterLog', monsterLog);
   }
 
   function processMonsterLog(creature) {
@@ -17963,7 +18135,7 @@
   }
 
   function getMonsterPrefs() {
-    getForage('fsh_monsterLog').then(initLog);
+    getMigrate('fsh_monsterLog').then(initLog);
   }
 
   var processedMonsters = [];
@@ -19797,12 +19969,12 @@
     var timeStamp = formatLocalDateTime(new Date());
     const buffsAttempted = buffReportParser(document)
       .map(partial(logFormat, timeStamp));
-    setForage(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
+    set(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
   }
 
   function updateBuffLog() {
     if (!getValue('keepBuffLog')) {return;}
-    getForage(fshBuffLog).then(buffResult);
+    getMigrate(fshBuffLog).then(buffResult);
   }
 
   var unknown = [
@@ -21208,7 +21380,7 @@
   }
 
   function saveOptions(options) {
-    setForage('fsh_' + calf.subcmd, options);
+    set('fsh_' + calf.subcmd, options);
   }
 
   function setChecks() {
@@ -21262,7 +21434,7 @@
       .removeClass();
   }
 
-  function clear(td, i) {td.eq(i).empty();} // jQuery
+  function clear$1(td, i) {td.eq(i).empty();} // jQuery
 
   function clearButtons(td) {
     [
@@ -21272,7 +21444,7 @@
       14, // W/U - Tag
       15, // Tag - Drop
       16 // ? - Send
-    ].forEach(partial(clear, td));
+    ].forEach(partial(clear$1, td));
   }
 
   function killRow(self, data) { // jQuery
@@ -21538,7 +21710,7 @@
     if (calf.subcmd === 'guildinvmgr') {
       prm.push(getMembrList(false).then(rekeyMembrList));
     }
-    prm.push(getForage('fsh_' + calf.subcmd).then(extendOptions)
+    prm.push(get('fsh_' + calf.subcmd).then(extendOptions)
     );
     allthen(prm, asyncCall);
   }
@@ -21731,7 +21903,7 @@
     return all(prm);
   }
 
-  function storeOptions() {setForage('fsh_guildLog', options$1);}
+  function storeOptions() {set('fsh_guildLog', options$1);}
 
   function notThisMinute(nowUtc, ary) {return ary[1] !== nowUtc;}
 
@@ -21806,7 +21978,7 @@
     buildTable$1();
   }
 
-  function processFirstPage$1(data) {
+  function processFirstPage$2(data) {
     processPage(data);
     getOtherPages$1().then(gotOtherPages);
   }
@@ -21857,7 +22029,7 @@
     tmpGuildLog = [];
     completeReload = true;
     getElementById('fshInjectHere').innerHTML = '';
-    getGuildLogPage(1).then(processFirstPage$1);
+    getGuildLogPage(1).then(processFirstPage$2);
   }
 
   function guildLogEvents() {
@@ -21891,12 +22063,12 @@
     on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
     setChecks$1();
     setMaxPage();
-    getGuildLogPage(1).then(processFirstPage$1);
+    getGuildLogPage(1).then(processFirstPage$2);
   }
 
   function injectNewGuildLog() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    getForage('fsh_guildLog').then(gotOptions);
+    get('fsh_guildLog').then(gotOptions);
   }
 
   function injectNotepad() { // jQuery
@@ -22054,7 +22226,7 @@
     return thisRows.map(parseRelic);
   }
 
-  function processPages$1(ary) {
+  function processPages$2(ary) {
     const relics = ary.map(createDocument).map(parsePage$1);
     return [].concat(...relics);
   }
@@ -22065,7 +22237,7 @@
     const otherPages = arrayFrom(select.children)
       .map(o => Number(o.value)).filter(v => v !== 0);
     return allthen([html].concat(otherPages.map(guildReliclist)),
-      processPages$1);
+      processPages$2);
   }
 
   function getRelicList() {
@@ -23333,7 +23505,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '134';
+  window.FSH.calf = '135';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
