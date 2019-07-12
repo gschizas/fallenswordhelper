@@ -5,14 +5,14 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 import processFirstPage from './processFirstPage';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 
 export var recipebook;
 export var output;
 
 function displayStuff() {
   insertHtmlBeforeEnd(output, 'Finished parsing ... formatting ...');
-  setForage('fsh_recipeBook', recipebook);
+  set('fsh_recipeBook', recipebook);
   generateRecipeTable(output, recipebook);
 }
 

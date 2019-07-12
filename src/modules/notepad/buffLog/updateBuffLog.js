@@ -1,11 +1,11 @@
 import buffReportParser from './buffReportParser.js';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
 import {fshBuffLog} from '../../support/constants';
-import getForage from '../../ajax/getForage';
+import getMigrate from '../../common/getMigrate.js';
 import {getStamAsString} from '../../common/buffUtils.js';
 import getValue from '../../system/getValue';
 import partial from '../../common/partial';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 
 const success = e => ' ' + e[0] + ' (' + getStamAsString(e[1]) +
   ' stamina)<br>';
@@ -25,10 +25,10 @@ function buffResult(buffLog) {
   var timeStamp = formatLocalDateTime(new Date());
   const buffsAttempted = buffReportParser(document)
     .map(partial(logFormat, timeStamp));
-  setForage(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
+  set(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
 }
 
 export default function updateBuffLog() {
   if (!getValue('keepBuffLog')) {return;}
-  getForage(fshBuffLog).then(buffResult);
+  getMigrate(fshBuffLog).then(buffResult);
 }

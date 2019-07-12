@@ -1,6 +1,5 @@
 import combatView from '../../ajax/combatView';
 import createDocument from '../../system/createDocument';
-import getForage from '../../ajax/getForage';
 import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
 import {nowSecs} from '../../support/now';
@@ -8,8 +7,8 @@ import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import querySelectorAll from '../../common/querySelectorAll';
 import {sendEvent} from '../../support/fshGa';
-import setForage from '../../ajax/setForage';
 import specials from '../../support/specials.json';
+import {get, set} from 'idb-keyval';
 
 export let combatCache = {};
 
@@ -30,7 +29,7 @@ function cleanCache(data) {
   combatCache = Object.keys(data)
     .reduce(partial(keepRecent, data, sevenDays), {});
   combatCache.lastCheck = nowSecs;
-  setForage('fsh_pvpCombat', combatCache);
+  set('fsh_pvpCombat', combatCache);
 }
 
 function prepareCache(data) {
@@ -47,7 +46,7 @@ function checkCache(data) {
 }
 
 export function initCache() {
-  return getForage('fsh_pvpCombat').then(checkCache);
+  return get('fsh_pvpCombat').then(checkCache);
 }
 
 function inSpecialsList(el) {
@@ -79,7 +78,7 @@ export function cacheCombat(aRow, json) {
   if (json.s) {
     json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
     combatCache[json.r.id] = json;
-    setForage('fsh_pvpCombat', combatCache);
+    set('fsh_pvpCombat', combatCache);
     unknownSpecials(json);
   }
   return json;

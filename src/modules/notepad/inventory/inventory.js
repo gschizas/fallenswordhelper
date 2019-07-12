@@ -8,7 +8,7 @@ import doTable from './table';
 import eventHandlers from './eventHandlers/eventHandlers';
 import executeAll from '../../common/executeAll';
 import {extendOptions} from './options';
-import getForage from '../../ajax/getForage';
+import {get} from 'idb-keyval';
 import getMembrList from '../../ajax/getMembrList';
 import headers from './headers';
 import {imageServer} from '../../system/system';
@@ -85,7 +85,7 @@ function syncInvMan() { // jQuery
   if (calf.subcmd === 'guildinvmgr') {
     prm.push(getMembrList(false).then(rekeyMembrList));
   }
-  prm.push(getForage('fsh_' + calf.subcmd).then(extendOptions)
+  prm.push(get('fsh_' + calf.subcmd).then(extendOptions)
   );
   allthen(prm, asyncCall);
 }

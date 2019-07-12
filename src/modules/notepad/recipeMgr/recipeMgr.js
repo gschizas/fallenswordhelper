@@ -1,6 +1,6 @@
 import doSortParams from '../../common/doSortParams';
 import generateRecipeTable from './generateRecipeTable';
-import getForage from '../../ajax/getForage';
+import {get} from 'idb-keyval';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
@@ -31,6 +31,6 @@ function rmEvtHdl(evt) {
 export default function injectRecipeManager(injector) { // jQuery.min
   if (jQueryNotPresent()) {return;}
   var content = injector || pCC;
-  getForage('fsh_recipeBook').then(partial(gotRecipeBook, content));
+  get('fsh_recipeBook').then(partial(gotRecipeBook, content));
   on(content, 'click', rmEvtHdl);
 }

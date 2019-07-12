@@ -1,10 +1,10 @@
 import {getElementById} from '../common/getElement';
-import getForage from '../ajax/getForage';
+import getMigrate from '../common/getMigrate';
 import jConfirm from '../common/jConfirm';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
 import {pCC} from '../support/layout';
-import setForage from '../ajax/setForage';
+import {set} from 'idb-keyval';
 
 var content;
 var combatLog = [];
@@ -26,7 +26,7 @@ function notepadCopyLog() {
 function clearCombatLog() {
   combatLog = [];
   textArea.value = '[]';
-  setForage('fsh_combatLog', combatLog);
+  set('fsh_combatLog', combatLog);
 }
 
 function notepadClearLog() { // jQuery
@@ -60,5 +60,5 @@ function gotCombatLog(data) {
 export default function injectNotepadShowLogs(injector) { // jQuery.min
   if (jQueryNotPresent()) {return;}
   content = injector || pCC;
-  getForage('fsh_combatLog').then(gotCombatLog);
+  getMigrate('fsh_combatLog').then(gotCombatLog);
 }

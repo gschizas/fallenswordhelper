@@ -8,7 +8,6 @@ import functionPasses from '../../common/functionPasses';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import {getElementById} from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
-import getForage from '../../ajax/getForage';
 import getGuildLogPage from './getGuildLogPage';
 import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
@@ -24,10 +23,10 @@ import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import {rowProfile} from './profiler';
 import selfIdIs from '../../common/selfIdIs';
-import setForage from '../../ajax/setForage';
 import setText from '../../common/setText';
 import toggleForce from '../../common/toggleForce';
 import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
+import {get, set} from 'idb-keyval';
 
 var options = {};
 var fshNewGuildLog;
@@ -104,7 +103,7 @@ function getOtherPages() {
   return all(prm);
 }
 
-function storeOptions() {setForage('fsh_guildLog', options);}
+function storeOptions() {set('fsh_guildLog', options);}
 
 function notThisMinute(nowUtc, ary) {return ary[1] !== nowUtc;}
 
@@ -269,5 +268,5 @@ function gotOptions(guildLog) {
 
 export default function injectNewGuildLog() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getForage('fsh_guildLog').then(gotOptions);
+  get('fsh_guildLog').then(gotOptions);
 }

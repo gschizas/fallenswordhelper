@@ -5,15 +5,14 @@ import createDocument from '../../system/createDocument';
 import doRefreshButton from './doRefreshButton';
 import {doTable} from './doTable';
 import filterHeaderOnlinePlayers from './filterHeaderOnlinePlayers';
-import getForage from '../../ajax/getForage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import {now} from '../../support/now';
 import on from '../../common/on';
 import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import partial from '../../common/partial';
 import resetEvt from './resetEvt';
-import setForage from '../../ajax/setForage';
 import setValue from '../../system/setValue';
+import {get, set} from 'idb-keyval';
 
 var context;
 var onlinePlayers;
@@ -29,7 +28,7 @@ function gotOnlinePlayers(value) { // jQuery
 
 function checkLastPage() {
   if (onlinePages === lastPage) {
-    setForage('fsh_onlinePlayers', onlinePlayers);
+    set('fsh_onlinePlayers', onlinePlayers);
     gotOnlinePlayers(onlinePlayers);
   }
 }
@@ -107,7 +106,7 @@ function injectOnlinePlayersNew() { // jQuery
   context.html(
     '<span><b>Online Players</b></span>' + doRefreshButton() +
     '<div id="fshOutput"></div>');
-  getForage('fsh_onlinePlayers').then(gotOnlinePlayers);
+  get('fsh_onlinePlayers').then(gotOnlinePlayers);
   on(context[0], 'click', clickHandler);
   on(context[0], 'keyup', changeLvl);
 }

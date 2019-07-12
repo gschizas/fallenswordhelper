@@ -1,19 +1,18 @@
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
-import getForage from './getForage';
 import getGuild from '../_dataAccess/export/guildMembers';
 import isObject from '../common/isObject';
 import {now} from '../support/now';
 import partial from '../common/partial';
-import setForage from './setForage';
+import {get, set} from 'idb-keyval';
 
 function saveMembrListInForage(membrList, data) {
   var oldMemList = data || {};
-  setForage('fsh_membrList', $.extend(oldMemList, membrList));
+  set('fsh_membrList', $.extend(oldMemList, membrList));
 }
 
 function addMembrListToForage(membrList) {
-  getForage('fsh_membrList')
+  get('fsh_membrList')
     .then(partial(saveMembrListInForage, membrList));
   return membrList;
 }
@@ -67,7 +66,7 @@ function guildMembers(force, guildId) {
   if (force) {
     return getAndCacheGuildMembers(guildId);
   }
-  return getForage('fsh_membrList')
+  return get('fsh_membrList')
     .then(partial(getMembrListFromForage, guildId));
 }
 

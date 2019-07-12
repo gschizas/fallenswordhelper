@@ -1,7 +1,7 @@
 import {def_PvE} from '../../support/constants';
-import getForage from '../../ajax/getForage';
+import getMigrate from '../../common/getMigrate';
 import getValue from '../../system/getValue';
-import setForage from '../../ajax/setForage';
+import {set} from 'idb-keyval';
 
 // Taking the Not Save in case they add new enhancements.
 var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
@@ -48,7 +48,7 @@ function processCombatResponse(e, data) {
   hazEnhancements(data);
   combatData.time = data.time;
   combatLog.push(combatData);
-  setForage('fsh_combatLog', combatLog);
+  set('fsh_combatLog', combatLog);
 }
 
 function combatResponse(e, data) {
@@ -63,6 +63,6 @@ function gotCombatLog(data) { // jQuery.min
 
 export default function combatLogger() { // jQuery.min
   if (getValue('keepLogs')) {
-    getForage('fsh_combatLog').then(gotCombatLog);
+    getMigrate('fsh_combatLog').then(gotCombatLog);
   }
 }
