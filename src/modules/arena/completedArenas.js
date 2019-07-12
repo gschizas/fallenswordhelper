@@ -1,4 +1,7 @@
 import {arenaUrl} from '../support/constants';
+//#if _DEV  //  arena crawler
+import crawler from './crawler/crawler';
+//#endif
 import {createInput} from '../common/cElement';
 import getText from '../common/getText';
 import insertElementAfter from '../common/insertElementAfter';
@@ -49,4 +52,7 @@ export default function completedArenas() {
   injectFinishButton();
   intercept('View', updateUrl);
   intercept('Go', updateGoUrl);
+  //#if _DEV  //  crawler
+  crawler();
+  //#endif
 }
