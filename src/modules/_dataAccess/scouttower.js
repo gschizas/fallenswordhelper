@@ -29,29 +29,41 @@ function creature(e) {
   };
 }
 
-function testTitan(e) {
-  const ret = {
+function common(e) {
+  return {
     cooldown: calcCd(e),
     creature: creature(e),
     kills: Number(getTextTrim(e[0].cells[3]))
   };
+}
+
+function location(e) {
   const loc = getTextTrim(e[0].cells[1]);
   if (loc !== 'n/a') {
-    ret.realm = loc;
     const kills = getTextTrim(e[0].cells[2]).match(/(\d+)\/(\d+)/);
-    ret.current_hp = Number(kills[1]);
-    ret.max_hp = Number(kills[2]);
+    return {
+      realm: loc,
+      current_hp: Number(kills[1]),
+      max_hp: Number(kills[2])
+    };
   }
-  ret.three = getTextTrim(e[2]);
+}
+
+function contributors(e) {
   const contribs = e[2].cells[0].children;
   if (contribs.length === 1) {
-    const thisRows = arrayFrom(contribs[0].rows).filter(dataRows(3, 0));
-    ret.contributors = thisRows.map(r => ({
-      kills: Number(getTextTrim(r.cells[1])),
-      player: {name: getTextTrim(r.cells[0])}
-    }));
+    const thisRows = dataRows(contribs[0].rows, 3, 0);
+    return {
+      contributors: thisRows.map(r => ({
+        kills: Number(getTextTrim(r.cells[1])),
+        player: {name: getTextTrim(r.cells[0])}
+      }))
+    };
   }
-  return ret;
+}
+
+function testTitan(e) {
+  return Object.assign(common(e), location(e), contributors(e));
 }
 
 function parseReport(html) {

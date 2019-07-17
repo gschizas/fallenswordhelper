@@ -40,7 +40,6 @@ function playerBufflink(el) {
 }
 
 function doBuffLinks(titanTable) {
-  // arrayFrom(titanTable.rows).filter(dataRows(3, 0)).forEach(playerBufflink);
   dataRows(titanTable.rows, 3, 0).forEach(playerBufflink);
   insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
     ' <button class="fshBl fshXSmall">all</button>');
