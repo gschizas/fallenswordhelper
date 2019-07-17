@@ -1054,10 +1054,14 @@
     return localforage.getItem(forage).catch(partial(getForageError, forage));
   }
 
+  function fallbackStorage(key, data) {
+    if (data) {sendEvent('Migrate Storage', key);}
+    return data;
+  }
+
   function migrateStorage(key, data) {
     if (data) {return data;}
-    sendEvent('Migrate Storage', key);
-    return getForage(key);
+    return getForage(key).then(partial(fallbackStorage, key));
   }
 
   function getMigrate(key) {
@@ -2604,7 +2608,7 @@
   function parseReport(html) {
     const doc = createDocument(html);
     const slots = getArrayByClassName('composing-potion', doc);
-    if (!slots) {return {s: false};}
+    if (slots.length === 0) {return {s: false};}
     const max_potions = slots.length;
     const potions = getArrayByClassName('composing-potion-time', doc)
       .map(getTextTrim)
@@ -3336,9 +3340,13 @@
   }
 
   function stash(info) {
-    const frags = info.match(/You gained (.*) Fragments/)[1].split(', ')
-      .map(fragObj);
-    return {r: {frags}, s: true};
+    const reAry = info.match(/You gained (.*) Fragments/);
+    if (reAry) {
+      const frags = reAry[1].split(', ').map(fragObj);
+      return {r: {frags}, s: true};
+    }
+    sendEvent('da/useItem', 'Bad Msg', info);
+    console.log('da/useItem', 'Bad Msg', info); // eslint-disable-line no-console
   }
 
   const outputLookup = [
@@ -3350,8 +3358,14 @@
 
   function formatResults$5(html) {
     const info = infoBoxFrom(html);
-    const thisResult = outputLookup.find(e => info.startsWith(e[0]));
-    if (thisResult) {return thisResult[1](info);}
+    if (info) {
+      const thisResult = outputLookup.find(e => info.startsWith(e[0]));
+      if (thisResult) {return thisResult[1](info);}
+    } else {
+      sendEvent('da/useItem', 'No Info');
+      console.log('da/useItem', 'No Info'); // eslint-disable-line no-console
+      return {s: false};
+    }
     return {e: {message: info}, s: false};
   }
 
@@ -7896,10 +7910,13 @@
     if (joinBtn(myGuild, button)) {testGuildies(myGuild, button, arena);}
   }
 
-  function decorate(myGuild, [button, id, arena]) {
-    if (!arena) {
-      console.log('decorate', [button, id, arena]); // eslint-disable-line no-console
-    } else if (arena.players.length > 0) {hazPlayers(myGuild, button, arena);}
+  const arenaChecks = [isObject, e => isArray(e.players),
+    e => e.players.length > 0];
+
+  function decorate(myGuild, [button, , arena]) {
+    if (arenaChecks.every(f => f(arena))) {
+      hazPlayers(myGuild, button, arena);
+    }
   }
 
   function participants(json) {
@@ -7908,7 +7925,6 @@
       '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
     const withPvpId = theButtons.map(addId);
     const withMeta = withPvpId.map(partial(addMeta, json));
-    // console.log('withMeta', withMeta); // eslint-disable-line no-console
     withMeta.forEach(partial(decorate, currentGuildId()));
     return 0;
   }
@@ -8025,7 +8041,6 @@
   }
 
   function arenaDoJoin() {
-    // console.log('arena DoJoin');
     const tabs = getElementById('arenaTypeTabs');
     if (tabs) {
       injectArena();
@@ -8157,88 +8172,151 @@
     }
   }
 
-  const keys$1 = obj => Object.keys(obj);
-
-  let container;
-
-  function completed(page) {
-    return indexAjaxData({
-      cmd: 'arena',
+  function completed() {
+    return arena({
       subcmd: 'completed',
-      page: page || 1
-    }).then(createDocument).finally(() => {
-      insertHtmlBeforeEnd(container, 'Got Page ' + page + ', ');
+      arena_id: -1,
+      latest: false,
+      limit: 9999
     });
   }
 
-  function results(id) {
-    return indexAjaxData({
-      cmd: 'arena',
-      subcmd: 'results',
-      pvp_id: id
-    }).then(createDocument).finally(() => {
-      insertHtmlBeforeEnd(container, 'Got Arena ' + id + ', ');
-    });
+  let resultsPromise;
+  let resultsCache;
+
+  function currentCombatRecord(combatId, obj, sevenDays) {
+    return combatId === 'lastCheck' || obj.logTime && obj.logTime > sevenDays;
   }
 
-  function getIds(prev, doc) {
-    querySelectorArray('#pCC input[name="pvp_id"]', doc)
-      .map(e => e.value).forEach(v => {
-        prev[v] = true;
-      });
-    return prev;
-  }
-
-  function getWinner(prev, doc) {
-    const moveImg = querySelector('#pCC img[src*="/pvp/"]', doc);
-    const thisWinner = getTextTrim(
-      querySelector(
-        '#pCC > table > tbody > tr:last-of-type > td > table > tbody > ' +
-          'tr:last-of-type > td:nth-child(2)',
-        doc
-      )
-    );
-    if (!prev[thisWinner]) {prev[thisWinner] = [0, 0];}
-    if (moveImg === null) {
-      prev[thisWinner][1] += 1;
-    } else {
-      prev[thisWinner][0] += 1;
+  function keepRecent(sevenDays, prev, [combatId, obj]) {
+    if (currentCombatRecord(combatId, obj, sevenDays)) {
+      prev[combatId] = obj;
     }
     return prev;
   }
 
-  function desc([aname, awins], [bname, bwins]) {
-    return bwins[1] - awins[1] || bwins[0] - awins[0] || alpha(aname, bname);
+  function cleanCache(data) {
+    const sevenDays = nowSecs - 7 * 24 * 60 * 60;
+    return entries(data)
+      .reduce(partial(keepRecent, sevenDays), {lastCheck: nowSecs});
   }
 
-  function processResults(ary) {
-    // console.log('ary', ary);
-    const winners = entries(ary.reduce(getWinner, {})).sort(desc)
-      .map(e => [e[0], ...e[1]]);
-    console.log('winners', winners); // eslint-disable-line
-
+  function prepareCache(data) {
+    const oneDay = nowSecs - 24 * 60 * 60;
+    if (!data.lastCheck || data.lastCheck < oneDay) {
+      return cleanCache(data);
+    }
+    return data;
   }
 
-  function processPages$1(ary) {
-    // console.log('ary', ary);
-    const pvpids = keys$1(ary.reduce(getIds, {}));
-    // console.log('pvpids', pvpids);
-    allthen(pvpids.map(results), processResults);
+  async function initCache() {
+    const cache = await get('fsh_arenaResults');
+    if (cache) {
+      resultsCache = prepareCache(cache);
+      set('fsh_arenaResults', resultsCache);
+    } else {
+      resultsCache = {lastCheck: nowSecs};
+    }
   }
 
-  function processFirstPage$1(doc) {
-    const maxPage = Number(getText(querySelector('#pCC input[value="Go"]', doc)
-      .parentNode.previousElementSibling).replace(/\D/g, ''));
-    const otherPages = Array.from(Array(maxPage - 1), (e, i) => i + 2);
-    // const otherPages = Array.from(Array(4), (e, i) => i + 2);
-    // console.log(otherPages);
-    allthen([doc].concat(otherPages.map(completed)), processPages$1);
+  async function useApi(pvpId) {
+    const json = await arena({subcmd: 'results', pvp_id: pvpId});
+    if (json.s) {
+      json.logTime = nowSecs;
+      resultsCache[pvpId] = json;
+      set('fsh_arenaResults', resultsCache);
+    }
+    return json;
   }
 
-  function startCrawl(start) {
+  function returnResults(pvpId) {
+    if (resultsCache[pvpId]) {return resultsCache[pvpId];}
+    return useApi(pvpId);
+  }
+
+  function results(pvpId) {
+    if (!resultsPromise) {resultsPromise = initCache();}
+    return resultsPromise.then(partial(returnResults, pvpId));
+  }
+
+  function isNaN$1(value) {
+    return Number.isNaN(value);
+  }
+
+  function round(number, precision) {
+    var factor = Math.pow(10, precision);
+    if (isNaN$1(factor)) {factor = 1;}
+    return Math.round(number * factor) / factor;
+  }
+
+  let container;
+
+  function setWinner(arena, thisResult) {
+    const lastBattle = thisResult.r[thisResult.r.length - 1];
+    if (lastBattle.attacker_win) {
+      arena.winner = lastBattle.attacker;
+    } else {
+      arena.winner = lastBattle.defender;
+    }
+  }
+
+  async function getCombats(arena) {
+    const thisResult = await results(arena.id);
+    if (thisResult.s) {
+      setWinner(arena, thisResult);
+    }
+    return arena;
+  }
+
+  function doRollup(obj, result) {
+    result.players.forEach(function(player) {
+      if (!obj[player.name]) {
+        obj[player.name] = {
+          novice_entered: 0,
+          novice_won: 0,
+          standard_entered: 0,
+          standard_won: 0
+        };
+      }
+      if (result.type === 0) {
+        obj[player.name].novice_entered += 1;
+      } else {
+        obj[player.name].standard_entered += 1;
+      }
+    });
+    if (result.type === 0) {
+      obj[result.winner.name].novice_won += 1;
+    } else {
+      obj[result.winner.name].standard_won += 1;
+    }
+    return obj;
+  }
+
+  async function startCrawl(start) {
     hideQTip(start);
     start.remove();
-    completed(1).then(processFirstPage$1);
+    const thisComplete = await completed();
+    if (!thisComplete.s) {return;}
+    const prm = thisComplete.r.arenas.map(getCombats);
+    const ary = await all(prm);
+    // console.log(ary);
+    const rollup = ary.reduce(doRollup, {});
+    console.log( // eslint-disable-line no-console
+      entries(rollup).map(([name, obj]) => {
+        let standard_ratio = 0;
+        if (obj.standard_entered !== 0) {
+          standard_ratio = round(obj.standard_won / obj.standard_entered, 3);
+        }
+        return [
+          name,
+          obj.novice_entered,
+          obj.novice_won,
+          obj.standard_entered,
+          obj.standard_won,
+          standard_ratio
+        ];
+      }).sort((a, b) => b[4] - a[4] || b[3] - a[3] || b[2] - a[2])
+    );
   }
 
   function crawler() {
@@ -11395,16 +11473,6 @@
     return a & b; // eslint-disable-line no-bitwise
   }
 
-  function isNaN$1(value) {
-    return Number.isNaN(value);
-  }
-
-  function round(number, precision) {
-    var factor = Math.pow(10, precision);
-    if (isNaN$1(factor)) {factor = 1;}
-    return Math.round(number * factor) / factor;
-  }
-
   function roundToString(number, precision) {
     return round(number, precision).toString();
   }
@@ -12793,7 +12861,7 @@
 
   function hasTip(el) {return el.dataset.tipped;}
 
-  function getIds$1(el) {
+  function getIds(el) {
     var matches = el.dataset.tipped.match(itemRE);
     return [
       el,
@@ -12820,7 +12888,7 @@
     getPrefs();
     doToggleButtons(showExtraLinks$2, showQuickDropLinks$2);
     var imgList = getItemImg();
-    var fromTips = imgList.filter(hasTip).map(getIds$1);
+    var fromTips = imgList.filter(hasTip).map(getIds);
     itemsAry$1 = fromTips.map(getInjector);
     itemsHash = fromTips.reduce(tally, {});
     // Exclude composed pots
@@ -13212,40 +13280,40 @@
 
   let combatCache = {};
 
-  function currentCombatRecord(data, combatId, sevenDays) {
+  function currentCombatRecord$1(data, combatId, sevenDays) {
     return combatId === 'lastCheck' || data[combatId].logTime &&
       data[combatId].logTime > sevenDays;
   }
 
-  function keepRecent(data, sevenDays, prev, combatId) {
-    if (currentCombatRecord(data, combatId, sevenDays)) {
+  function keepRecent$1(data, sevenDays, prev, combatId) {
+    if (currentCombatRecord$1(data, combatId, sevenDays)) {
       prev[combatId] = data[combatId];
     }
     return prev;
   }
 
-  function cleanCache(data) {
+  function cleanCache$1(data) {
     var sevenDays = nowSecs - 7 * 24 * 60 * 60;
     combatCache = Object.keys(data)
-      .reduce(partial(keepRecent, data, sevenDays), {});
+      .reduce(partial(keepRecent$1, data, sevenDays), {});
     combatCache.lastCheck = nowSecs;
     set('fsh_pvpCombat', combatCache);
   }
 
-  function prepareCache(data) {
+  function prepareCache$1(data) {
     var oneDay = nowSecs - 24 * 60 * 60;
     if (!data.lastCheck || data.lastCheck < oneDay) {
-      cleanCache(data);
+      cleanCache$1(data);
     } else {
       combatCache = data;
     }
   }
 
   function checkCache(data) {
-    if (data) {prepareCache(data);}
+    if (data) {prepareCache$1(data);}
   }
 
-  function initCache() {
+  function initCache$1() {
     return get('fsh_pvpCombat').then(checkCache);
   }
 
@@ -13687,7 +13755,7 @@
     if (jQueryNotPresent()) {return;}
     var prm = [
       myStats(false).then(prepareAlliesEnemies),
-      initCache()
+      initCache$1()
     ];
     if (currentGuildId()) {prm.push(getMembrList(false).then(getKeys));}
     allthen(prm, addLogWidgetsOld);
@@ -20494,6 +20562,7 @@
   const paginationDirective = ({ table }) => {
       let { slice: { page: currentPage, size: currentSize } } = table.getTableState();
       let itemListLength = table.filteredCount;
+      let pageCount = currentSize ? Math.ceil(itemListLength / currentSize) : 1;
       const proxy = sliceListener({ emitter: table });
       const api = {
           selectPage(p) {
@@ -20512,10 +20581,10 @@
               return currentPage > 1;
           },
           isNextPageEnabled() {
-              return Math.ceil(itemListLength / currentSize) > currentPage;
+              return pageCount > currentPage;
           },
           state() {
-              return Object.assign(table.getTableState().slice, { filteredCount: itemListLength });
+              return Object.assign(table.getTableState().slice, { filteredCount: itemListLength, pageCount });
           }
       };
       const directive = Object.assign(api, proxy);
@@ -20523,6 +20592,7 @@
           currentPage = p;
           currentSize = s;
           itemListLength = filteredCount;
+          pageCount = currentSize ? Math.ceil(itemListLength / currentSize) : 1;
       });
       return directive;
   };
@@ -21978,7 +22048,7 @@
     buildTable$1();
   }
 
-  function processFirstPage$2(data) {
+  function processFirstPage$1(data) {
     processPage(data);
     getOtherPages$1().then(gotOtherPages);
   }
@@ -22029,7 +22099,7 @@
     tmpGuildLog = [];
     completeReload = true;
     getElementById('fshInjectHere').innerHTML = '';
-    getGuildLogPage(1).then(processFirstPage$2);
+    getGuildLogPage(1).then(processFirstPage$1);
   }
 
   function guildLogEvents() {
@@ -22063,7 +22133,7 @@
     on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
     setChecks$1();
     setMaxPage();
-    getGuildLogPage(1).then(processFirstPage$2);
+    getGuildLogPage(1).then(processFirstPage$1);
   }
 
   function injectNewGuildLog() { // jQuery.min
@@ -22226,7 +22296,7 @@
     return thisRows.map(parseRelic);
   }
 
-  function processPages$2(ary) {
+  function processPages$1(ary) {
     const relics = ary.map(createDocument).map(parsePage$1);
     return [].concat(...relics);
   }
@@ -22237,7 +22307,7 @@
     const otherPages = arrayFrom(select.children)
       .map(o => Number(o.value)).filter(v => v !== 0);
     return allthen([html].concat(otherPages.map(guildReliclist)),
-      processPages$2);
+      processPages$1);
   }
 
   function getRelicList() {
@@ -23505,7 +23575,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '135';
+  window.FSH.calf = '136';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
