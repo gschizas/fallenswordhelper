@@ -16,8 +16,7 @@ function memberName(el) {return getText(el.cells[0].children[0].children[0]);}
 
 function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;
-  var shortList = arrayFrom(titanTable.rows)
-    .filter(dataRows(3, 0)).map(memberName);
+  var shortList = dataRows(titanTable.rows, 3, 0).map(memberName);
   openQuickBuffByName(shortList.join());
 }
 
@@ -41,7 +40,8 @@ function playerBufflink(el) {
 }
 
 function doBuffLinks(titanTable) {
-  arrayFrom(titanTable.rows).filter(dataRows(3, 0)).forEach(playerBufflink);
+  // arrayFrom(titanTable.rows).filter(dataRows(3, 0)).forEach(playerBufflink);
+  dataRows(titanTable.rows, 3, 0).forEach(playerBufflink);
   insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
     ' <button class="fshBl fshXSmall">all</button>');
 }

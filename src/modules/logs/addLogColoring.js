@@ -1,4 +1,3 @@
-import {arrayFrom} from '../common/arrayFrom';
 import {dataRows} from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
@@ -53,7 +52,7 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
   var lastCheckScreen = 'last' + logScreen + 'Check';
   lastCheckUtc = getLastCheck(lastCheckScreen);
-  arrayFrom(chatTable.rows).filter(dataRows(3, 0))
+  dataRows(chatTable.rows, 3, 0)
     .forEach(partial(rowColor, logScreen, dateColumn));
   setValue(lastCheckScreen, nowUtc);
 }

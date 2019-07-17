@@ -102,8 +102,7 @@ function parseRelic(row) {
 function parsePage(doc) {
   const firstHeader = querySelector('.header', doc);
   const thisTable = closestTable(firstHeader);
-  const thisRows = arrayFrom(thisTable.rows).filter(dataRows(4, 0));
-  return thisRows.map(parseRelic);
+  return dataRows(thisTable.rows, 4, 0).map(parseRelic);
 }
 
 function processPages(ary) {
