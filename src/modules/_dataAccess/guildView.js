@@ -1,4 +1,3 @@
-import {arrayFrom} from '../common/arrayFrom';
 import createDocument from '../system/createDocument';
 import {dataRows} from '../common/dataRows';
 import {getElementById} from '../common/getElement';
@@ -51,23 +50,23 @@ function byRank(prev, member) {
   return prev;
 }
 
+function rankData(memberList) {
+  const memberRows = dataRows(memberList.rows, 5, 1);
+  const memberData = memberRows.map(formatRow);
+  return memberData.reduce(byRank, []);
+}
+
 function parseReport(html) {
   const doc = createDocument(html);
   const pCC = getElementById('pCC', doc);
   const tables = getElementsByTagName(def_table, pCC);
   const memberList = tables[tables.length - 1];
-  if (!memberList) {return {s: false};}
-  const memberRows = arrayFrom(memberList.rows).filter(dataRows(5, 1));
-  const memberData = memberRows.map(formatRow);
-  const ranksData = memberData.reduce(byRank, []);
-  return {r: {ranks: ranksData}, s: true};
+  if (memberList) {return {r: {ranks: rankData(memberList)}, s: true};}
+  return {s: false};
 }
 
 // Incomplete
 export default function guildView(guildId) {
-  // console.log('guildView...');
-  // return indexAjaxData({cmd: 'guild', subcmd: 'view', guild_id: guildId})
-  //   .then(parseReport);
   if (!cache[guildId]) {
     cache[guildId] = indexAjaxData({
       cmd: 'guild',
