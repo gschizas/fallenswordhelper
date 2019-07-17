@@ -20,22 +20,30 @@ function lastActivity(tipped) {
   );
 }
 
-function formatRow(row, i) {
+function fromTip(row) {
   const tipped = row.cells[1].children[0].dataset.tipped;
   const stamina = tipped.match(/Stamina:<\/td><td>(\d+) \/ (\d+)</);
+  return {
+    current_stamina: Number(stamina[1]),
+    max_stamina: Number(stamina[2]),
+    vl: Number(tipped.match(/VL:<\/td><td>(\d+)</)[1]),
+    last_activity: lastActivity(tipped)
+  };
+}
+
+function fromRow(row) {
   return {
     id: Number(row.cells[1].children[0].href.match(/player_id=(\d+)/)[1]),
     name: getTextTrim(row.cells[1].children[0]),
     level: Number(getTextTrim(row.cells[2])),
-    current_stamina: Number(stamina[1]),
-    max_stamina: Number(stamina[2]),
     xp: 0,
-    vl: Number(tipped.match(/VL:<\/td><td>(\d+)</)[1]),
-    last_activity: lastActivity(tipped),
     guild_xp: intValue(getTextTrim(row.cells[4])),
-    rank_name: getTextTrim(row.cells[3]),
-    rank_index: i
+    rank_name: getTextTrim(row.cells[3])
   };
+}
+
+function formatRow(row, i) {
+  return Object.assign({rank_index: i}, fromTip(row), fromRow(row));
 }
 
 function byRank(prev, member) {
