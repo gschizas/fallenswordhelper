@@ -63,17 +63,19 @@ function doMoves(thisSet, thisCell) {
   thisSet.slots.forEach(partial(injectImg, container));
 }
 
+function doChange(thisCell, evt, thisSet) {
+  usesetup(evt.target.value).then(function(json) {
+    // console.log(json);
+    if (json.s) {
+      doMoves(thisSet, thisCell);
+    }
+  });
+}
+
 function onchange(r, thisCell, evt) {
   // console.log(evt.target.value);
   const thisSet = r.sets.find(e => e.id === Number(evt.target.value));
-  if (thisSet) {
-    usesetup(evt.target.value).then(function(json) {
-      // console.log(json);
-      if (json.s) {
-        doMoves(thisSet, thisCell);
-      }
-    });
-  }
+  if (thisSet) {doChange(thisCell, evt, thisSet);}
 }
 
 function doSelect(r, thisCell) {
