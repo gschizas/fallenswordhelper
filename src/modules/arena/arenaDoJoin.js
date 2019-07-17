@@ -1,9 +1,6 @@
 import {getElementById} from '../common/getElement';
-//#if _DEV  //  arena DoJoin
 import infoBox from '../common/infoBox';
-//#endif
 import {injectArena} from './arena';
-//#if _DEV  //  arena DoJoin
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
@@ -25,16 +22,12 @@ function evalMsg() {
     sendEvent('arena', 'doJoin', thisInfo);
   }
 }
-//#endif
 
 export default function arenaDoJoin() {
-  // console.log('arena DoJoin');
   const tabs = getElementById('arenaTypeTabs');
   if (tabs) {
     injectArena();
-  //#if _DEV  //  arena DoJoin
   } else {
     evalMsg();
-  //#endif
   }
 }
