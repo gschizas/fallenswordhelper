@@ -1,16 +1,12 @@
 import allthen from '../common/allthen';
-//#if _DEV  //  arenaFull
 import arenaFull from './arenaFull';
-//#endif
 import doLvlFilter from './doLvlFilter';
 import filterHeader from './filterHeader';
 import {get} from 'idb-keyval';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import orderData from './orderData';
 import partial from '../common/partial';
-//#if _DEV  //  participants
 import participants from './participants';
-//#endif
 import querySelectorArray from '../common/querySelectorArray';
 import redoSort from './redoSort';
 import {sendEvent} from '../support/fshGa';
@@ -48,10 +44,8 @@ function arenaDataTable(tabs, [arena, obj, json]) { // jQuery
   theTables.each(redoHead);
   setOpts(arena);
   orderData(theTables);
-  //#if _DEV  //  participants
   arenaFull(obj);
   participants(json);
-  //#endif
   prepareEnv();
   theTables.DataTable(tableOpts);
   redoSort(tabs);

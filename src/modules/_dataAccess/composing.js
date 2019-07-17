@@ -15,7 +15,7 @@ function formatTime(e) {
 function parseReport(html) {
   const doc = createDocument(html);
   const slots = getArrayByClassName('composing-potion', doc);
-  if (!slots) {return {s: false};}
+  if (slots.length === 0) {return {s: false};}
   const max_potions = slots.length;
   const potions = getArrayByClassName('composing-potion-time', doc)
     .map(getTextTrim)

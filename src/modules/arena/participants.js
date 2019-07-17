@@ -1,5 +1,7 @@
 import './participants.postcss';
 import currentGuildId from '../common/currentGuildId';
+import {isArray} from '../common/isArray';
+import isObject from '../common/isObject';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 
@@ -35,12 +37,13 @@ function hazPlayers(myGuild, button, arena) {
   if (joinBtn(myGuild, button)) {testGuildies(myGuild, button, arena);}
 }
 
-function decorate(myGuild, [button, id, arena]) {
-  if (!arena) {
-    //#if _DEV  //  arena
-    console.log('decorate', [button, id, arena]); // eslint-disable-line no-console
-    //#endif
-  } else if (arena.players.length > 0) {hazPlayers(myGuild, button, arena);}
+const arenaChecks = [isObject, e => isArray(e.players),
+  e => e.players.length > 0];
+
+function decorate(myGuild, [button, , arena]) {
+  if (arenaChecks.every(f => f(arena))) {
+    hazPlayers(myGuild, button, arena);
+  }
 }
 
 export default function participants(json) {
@@ -49,9 +52,6 @@ export default function participants(json) {
     '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
   const withPvpId = theButtons.map(addId);
   const withMeta = withPvpId.map(partial(addMeta, json));
-  //#if _DEV  //  withMeta
-  // console.log('withMeta', withMeta); // eslint-disable-line no-console
-  //#endif
   withMeta.forEach(partial(decorate, currentGuildId()));
   return 0;
 }
