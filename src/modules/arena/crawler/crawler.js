@@ -1,101 +1,83 @@
-import allthen from '../../common/allthen';
-import alpha from '../../common/alpha';
-import createDocument from '../../system/createDocument';
+import all from '../../common/all';
+import completed from '../../app/arena/completed';
 import {entries} from '../../common/entries';
-import getText from '../../common/getText';
-import getTextTrim from '../../common/getTextTrim';
 import hideQTip from '../../common/hideQTip';
-import indexAjaxData from '../../ajax/indexAjaxData';
 import insertElement from '../../common/insertElement';
-import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import {keys} from '../../common/keys';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
-import querySelector from '../../common/querySelector';
-import querySelectorArray from '../../common/querySelectorArray';
+import results from '../../app/arena/results';
+import round from '../../common/round';
 import {createButton, createDiv} from '../../common/cElement';
 
 let container;
 
-function completed(page) {
-  return indexAjaxData({
-    cmd: 'arena',
-    subcmd: 'completed',
-    page: page || 1
-  }).then(createDocument).finally(() => {
-    insertHtmlBeforeEnd(container, 'Got Page ' + page + ', ');
-  });
-}
-
-function results(id) {
-  return indexAjaxData({
-    cmd: 'arena',
-    subcmd: 'results',
-    pvp_id: id
-  }).then(createDocument).finally(() => {
-    insertHtmlBeforeEnd(container, 'Got Arena ' + id + ', ');
-  });
-}
-
-function getIds(prev, doc) {
-  querySelectorArray('#pCC input[name="pvp_id"]', doc)
-    .map(e => e.value).forEach(v => {
-      prev[v] = true;
-    });
-  return prev;
-}
-
-function getWinner(prev, doc) {
-  const moveImg = querySelector('#pCC img[src*="/pvp/"]', doc);
-  const thisWinner = getTextTrim(
-    querySelector(
-      '#pCC > table > tbody > tr:last-of-type > td > table > tbody > ' +
-        'tr:last-of-type > td:nth-child(2)',
-      doc
-    )
-  );
-  if (!prev[thisWinner]) {prev[thisWinner] = [0, 0];}
-  if (moveImg === null) {
-    prev[thisWinner][1] += 1;
+function setWinner(arena, thisResult) {
+  const lastBattle = thisResult.r[thisResult.r.length - 1];
+  if (lastBattle.attacker_win) {
+    arena.winner = lastBattle.attacker;
   } else {
-    prev[thisWinner][0] += 1;
+    arena.winner = lastBattle.defender;
   }
-  return prev;
 }
 
-function desc([aname, awins], [bname, bwins]) {
-  return bwins[1] - awins[1] || bwins[0] - awins[0] || alpha(aname, bname);
+async function getCombats(arena) {
+  const thisResult = await results(arena.id);
+  if (thisResult.s) {
+    setWinner(arena, thisResult);
+  }
+  return arena;
 }
 
-function processResults(ary) {
-  // console.log('ary', ary);
-  const winners = entries(ary.reduce(getWinner, {})).sort(desc)
-    .map(e => [e[0], ...e[1]]);
-  console.log('winners', winners); // eslint-disable-line
-
+function doRollup(obj, result) {
+  result.players.forEach(function(player) {
+    if (!obj[player.name]) {
+      obj[player.name] = {
+        novice_entered: 0,
+        novice_won: 0,
+        standard_entered: 0,
+        standard_won: 0
+      };
+    }
+    if (result.type === 0) {
+      obj[player.name].novice_entered += 1;
+    } else {
+      obj[player.name].standard_entered += 1;
+    }
+  });
+  if (result.type === 0) {
+    obj[result.winner.name].novice_won += 1;
+  } else {
+    obj[result.winner.name].standard_won += 1;
+  }
+  return obj;
 }
 
-function processPages(ary) {
-  // console.log('ary', ary);
-  const pvpids = keys(ary.reduce(getIds, {}));
-  // console.log('pvpids', pvpids);
-  allthen(pvpids.map(results), processResults);
-}
-
-function processFirstPage(doc) {
-  const maxPage = Number(getText(querySelector('#pCC input[value="Go"]', doc)
-    .parentNode.previousElementSibling).replace(/\D/g, ''));
-  const otherPages = Array.from(Array(maxPage - 1), (e, i) => i + 2);
-  // const otherPages = Array.from(Array(4), (e, i) => i + 2);
-  // console.log(otherPages);
-  allthen([doc].concat(otherPages.map(completed)), processPages);
-}
-
-function startCrawl(start) {
+async function startCrawl(start) {
   hideQTip(start);
   start.remove();
-  completed(1).then(processFirstPage);
+  const thisComplete = await completed();
+  if (!thisComplete.s) {return;}
+  const prm = thisComplete.r.arenas.map(getCombats);
+  const ary = await all(prm);
+  // console.log(ary);
+  const rollup = ary.reduce(doRollup, {});
+  console.log( // eslint-disable-line no-console
+    entries(rollup).map(([name, obj]) => {
+      let standard_ratio = 0;
+      if (obj.standard_entered !== 0) {
+        standard_ratio = round(obj.standard_won / obj.standard_entered, 3);
+      }
+      return [
+        name,
+        obj.novice_entered,
+        obj.novice_won,
+        obj.standard_entered,
+        obj.standard_won,
+        standard_ratio
+      ];
+    }).sort((a, b) => b[4] - a[4] || b[3] - a[3] || b[2] - a[2])
+  );
 }
 
 export default function crawler() {
