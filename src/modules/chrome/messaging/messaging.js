@@ -151,13 +151,15 @@ function getFshTemplate() { // jQuery
 
 function openQuickMsgDialog(name, msg, tip) { // jQuery
   getQuickMessageDialog();
-  getFshTemplate();
-  showMsgTemplate();
-  setName(name);
-  setMsg(msg);
-  captureEnter();
-  doValidateTip(fallback(tip, ''));
-  $quickMessageDialog.dialog('open');
+  if (quickMsgDialog.classList.contains('ui-dialog-content')) {
+    getFshTemplate();
+    showMsgTemplate();
+    setName(name);
+    setMsg(msg);
+    captureEnter();
+    doValidateTip(fallback(tip, ''));
+    $quickMessageDialog.dialog('open');
+  }
 }
 
 export default function injectQuickMsgDialogJQ() {

@@ -15,7 +15,7 @@ function addId(id, obj) {
 
 function evalMsg() {
   const thisInfo = infoBox();
-  if (thisInfo.includes('your guild')) {
+  if (thisInfo && thisInfo.includes('your guild')) {
     const thisId = querySelector('#pCC input[name="pvp_id"]').value;
     get('fsh_arenaFull').then(partial(addId, thisId));
   } else {
