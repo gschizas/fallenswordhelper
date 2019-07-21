@@ -12,13 +12,12 @@ function rowHtml(obj) {
 }
 
 function rowFactory(aRow) {
-  let dom = aRow.dom;
-  if (!dom) {
-    dom = createTr(
+  if (!aRow.dom) {
+    aRow.dom = createTr(
       {innerHTML: rowHtml(aRow)}
     );
   }
-  return dom;
+  return aRow.dom;
 }
 
 export default function displayChange(domTable, displayed) {

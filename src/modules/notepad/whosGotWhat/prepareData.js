@@ -4,7 +4,7 @@ import {nowSecs} from '../../support/now';
 import partial from '../../common/partial';
 
 function byMember(prev, curr) {
-  // if (curr.b === 11503) { // Zombie Brew
+  // if (curr.item_id === 11503) { // Zombie Brew
   prev[curr.player_id] = prev[curr.player_id] || [];
   prev[curr.player_id].push(curr);
   // }
@@ -41,7 +41,7 @@ function decorateMembers(pots, obj, i) {
 }
 
 export default function prepareData([json, guild]) {
-  // console.log(json);
+  // console.log('json', json);
   const pots = json.items.reduce(byMember, {});
   // console.log('pots', pots);
   const members = processGuild(guild);
