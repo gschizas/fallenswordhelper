@@ -1,5 +1,10 @@
 import guild from './guild';
 
+let cache;
+
 export default function guildManage() {
-  return guild({subcmd: 'manage'});
+  if (!cache) {
+    cache = guild({subcmd: 'manage'});
+  }
+  return cache;
 }
