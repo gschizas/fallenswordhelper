@@ -1,4 +1,3 @@
-import {arrayFrom} from '../../common/arrayFrom';
 import {createAnchor} from '../../common/cElement';
 import {dataRows} from '../../common/dataRows';
 import displayTracker from './displayTracker';
@@ -113,8 +112,7 @@ function decorate(newTitans, aRow) {
 }
 
 function doTooMuch(titanTable, newTitans) {
-  arrayFrom(titanTable.rows).filter(dataRows(4, 0))
-    .forEach(partial(decorate, newTitans));
+  dataRows(titanTable.rows, 4, 0).forEach(partial(decorate, newTitans));
 }
 
 function gotOldTitans(oldTitans) {

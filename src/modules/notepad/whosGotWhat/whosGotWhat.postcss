@@ -1,7 +1,8 @@
 .whosGotWhat {
   border: 1px solid black;
+  margin: auto;
   table-layout: fixed;
-  width: 588px;
+  /* width: 588px; */
 
   & tr:nth-child(odd) {background: wheat;}
   & tr:nth-child(even) {background: burlywood;}
@@ -49,4 +50,47 @@
 #pCC .whosGotWhat {
   border-collapse: collapse;
   border-spacing: 0;
+}
+
+.st-top-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto 5px;
+  /* padding: 0 5px; */
+  width: 618px;
+}
+
+.st-bottom-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px auto 0;
+  /* padding: 0 5px; */
+  width: 618px;
+}
+
+.fsh-search-wrapper {
+
+  border-style: solid;
+  border-width: 1px;
+  border-color: #a9772c #f3d99d #f3d99d #a9772c;
+  background-color: #f7ebd3;
+  padding: 1px 6px 1px 1px;
+
+  & input {
+    background-color: transparent;
+    border: none;
+    outline: 0;
+  }
+
+  & button {
+    background-color: transparent;
+    border: none;
+    color: blue;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0;
+  }
+
+  & input:not(:valid) ~ button {visibility: hidden;}
+
 }

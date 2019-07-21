@@ -57,7 +57,7 @@ function makeRow(relic) {
     '</tr>';
 }
 
-function makeTable(relicList) {
+function makeTable(thisRelicList) {
   return '<style>' +
     '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}' +
     'table, th, td {border: 1px solid black;}' +
@@ -74,7 +74,7 @@ function makeTable(relicList) {
     '<th>XP<br>Gain</th>' +
     '<th>Time</th>' +
     '</tr></thead><tbody>' +
-    relicList.filter(stamGain).map(makeRow).join('') +
+    thisRelicList.filter(stamGain).map(makeRow).join('') +
     '</tbody></table>';
 }
 

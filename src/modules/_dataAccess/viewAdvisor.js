@@ -10,17 +10,7 @@ const getInt = cell => intValue(getTextTrim(cell));
 function formatData(row) {
   return {
     player: {level: 0, name: getTextTrim(row.cells[0])},
-    stats: [
-      getInt(row.cells[3]),
-      getInt(row.cells[4]),
-      getInt(row.cells[5]),
-      getInt(row.cells[6]),
-      getInt(row.cells[7]),
-      getInt(row.cells[9]),
-      getInt(row.cells[1]),
-      getInt(row.cells[2]),
-      getInt(row.cells[8])
-    ]
+    stats: [3, 4, 5, 6, 7, 9, 1, 2, 8].map(i => getInt(row.cells[i]))
   };
 }
 

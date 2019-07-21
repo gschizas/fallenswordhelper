@@ -1,4 +1,3 @@
-import {arrayFrom} from '../common/arrayFrom';
 import conflicts from '../ajax/conflicts';
 import createDocument from '../system/createDocument';
 import {dataRows} from '../common/dataRows';
@@ -30,8 +29,7 @@ function hazConflict(conflictTable, curPage, insertHere) { // Legacy
   if (curPage === 1) {
     conflictHeader(insertHere);
   }
-  arrayFrom(conflictTable.rows).filter(dataRows(7, 0))
-    .forEach(partial(conflictRow, insertHere));
+  dataRows(conflictTable.rows, 7, 0).forEach(partial(conflictRow, insertHere));
 }
 
 function activeConflicts(doc, curPage, insertHere) { // Legacy

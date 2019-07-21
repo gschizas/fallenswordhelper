@@ -45,30 +45,51 @@ function formatSpecial(pCC) {
   return spec;
 }
 
+function attacker(header) {
+  return {
+    id: getId(header.rows[1].cells[0]),
+    name: getTextTrim(header.rows[0].cells[0])
+  };
+}
+
+function defender(header) {
+  return {
+    id: getId(header.rows[1].cells[2]),
+    name: getTextTrim(header.rows[0].cells[2])
+  };
+}
+
+function doBase(id, pCC) {
+  const header = pCC.children[0].rows[5].cells[0].children[0];
+  return {
+    attacker: attacker(header),
+    defender: defender(header),
+    id: Number(id),
+    specials: formatSpecial(pCC)
+  };
+}
+
+function doscript(pCC) {
+  const script = getText(pCC.children[1]);
+  return {
+    gold_gain: getResult(script, 'goldGain'),
+    gold_stolen: getResult(script, 'goldStolen'),
+    pvp_prestige_gain: getResult(script, 'prestigeGain'),
+    pvp_rating_change: getResult(script, 'pvpRatingChange'),
+    winner: getResult(script, 'winner'),
+    xp_gain: getResult(script, 'xpGain')
+  };
+}
+
+function reportObject(id, pCC) {
+  return Object.assign(doBase(id, pCC), doscript(pCC));
+}
+
 function parseReport(id, html) {
   const doc = createDocument(html);
   const pCC = getElementById('pCC', doc);
-  const script = getText(pCC.children[1]);
-  const header = pCC.children[0].rows[5].cells[0].children[0];
   return {
-    r: {
-      attacker: {
-        id: getId(header.rows[1].cells[0]),
-        name: getTextTrim(header.rows[0].cells[0])
-      },
-      defender: {
-        id: getId(header.rows[1].cells[2]),
-        name: getTextTrim(header.rows[0].cells[2])
-      },
-      gold_gain: getResult(script, 'goldGain'),
-      gold_stolen: getResult(script, 'goldStolen'),
-      id: Number(id),
-      pvp_prestige_gain: getResult(script, 'prestigeGain'),
-      pvp_rating_change: getResult(script, 'pvpRatingChange'),
-      specials: formatSpecial(pCC),
-      winner: getResult(script, 'winner'),
-      xp_gain: getResult(script, 'xpGain')
-    },
+    r: reportObject(id, pCC),
     s: true
   };
 }

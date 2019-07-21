@@ -1,6 +1,6 @@
 export const theadHtml =
   '<thead><tr>' +
-  '<th data-st-sort="slot">Slot</th>' +
+  '<th data-st-sort="slot" class="st-sort-asc">Slot</th>' +
   '<th data-st-sort="name_lower">Name</th>' +
   '<th class="st-sort-reverse" data-st-sort="lvl_reverse">Level</th>' +
   '<th data-st-sort="rank_lower">Rank</th>' +

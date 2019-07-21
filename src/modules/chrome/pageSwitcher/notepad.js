@@ -14,8 +14,10 @@ import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
 import injectSaveSettings from '../../settings/load';
 import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../../notepad/quickWear/quickWear';
-//#if _DEV  //  reliclist  whosGotWhat
+//#if _BETA  //  reliclist
 import reliclist from '../../notepad/reliclist/reliclist';
+//#endif
+//#if _DEV  //  whosGotWhat
 import whosGotWhat from '../../notepad/whosGotWhat/whosGotWhat';
 //#endif
 import {injectAuctionSearch, injectQuickLinkManager} from
@@ -40,8 +42,10 @@ export default {
   findbuffs: {'-': injectFindBuffs},
   findother: {'-': injectFindOther},
   savesettings: {'-': injectSaveSettings}, // TODO
-  //#if _DEV  //  reliclist, advisor, whosGotWhat
+  //#if _BETA  //  reliclist
   reliclist: {'-': reliclist},
+  //#endif
+  //#if _DEV  //  advisor, whosGotWhat
   advisor: {'-': advisor},
   whosgotwhat: {'-': whosGotWhat},
   //#endif

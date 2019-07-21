@@ -13,9 +13,18 @@ function addId(id, obj) {
   set('fsh_arenaFull', newObj);
 }
 
+function maxMoves(thisInfo) {
+  return thisInfo && thisInfo.includes('combat move');
+}
+
+function yourGuild(thisInfo) {
+  return thisInfo && thisInfo.includes('your guild');
+}
+
 function evalMsg() {
   const thisInfo = infoBox();
-  if (thisInfo.includes('your guild')) {
+  if (maxMoves(thisInfo)) {return;}
+  if (yourGuild(thisInfo)) {
     const thisId = querySelector('#pCC input[name="pvp_id"]').value;
     get('fsh_arenaFull').then(partial(addId, thisId));
   } else {

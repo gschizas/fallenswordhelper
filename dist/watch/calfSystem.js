@@ -2457,8 +2457,13 @@
     });
   }
 
+  let cache;
+
   function guildManage() {
-    return guild({subcmd: 'manage'});
+    if (!cache) {
+      cache = guild({subcmd: 'manage'});
+    }
+    return cache;
   }
 
   function guildView(guildId) {
@@ -2716,14 +2721,14 @@
     return indexAjaxJson(extend({cmd: 'export'}, data));
   }
 
-  let cache = {};
+  let cache$1 = {};
 
   function profile$1(username) {
     // return cmdExport({player_username: username, subcmd: 'profile'});
-    if (!cache[username]) {
-      cache[username] = cmdExport({player_username: username, subcmd: 'profile'});
+    if (!cache$1[username]) {
+      cache$1[username] = cmdExport({player_username: username, subcmd: 'profile'});
     }
-    return cache[username];
+    return cache$1[username];
   }
 
   function getProfile(username) {
@@ -2887,10 +2892,10 @@
     }).then(htmlResult);
   }
 
-  const dataRows = (cols, skip) =>
-    (el, i) => el.children.length === cols && i > skip;
+  const dataRows = (rows, cols, skip) => arrayFrom(rows)
+    .filter((el, i) => el.children.length === cols && i > skip);
 
-  let cache$1 = {};
+  let cache$2 = {};
 
   function lastActivity(tipped) {
     const activity = tipped.match(lastActivityRE);
@@ -2902,22 +2907,30 @@
     );
   }
 
-  function formatRow(row, i) {
+  function fromTip(row) {
     const tipped = row.cells[1].children[0].dataset.tipped;
     const stamina = tipped.match(/Stamina:<\/td><td>(\d+) \/ (\d+)</);
+    return {
+      current_stamina: Number(stamina[1]),
+      max_stamina: Number(stamina[2]),
+      vl: Number(tipped.match(/VL:<\/td><td>(\d+)</)[1]),
+      last_activity: lastActivity(tipped)
+    };
+  }
+
+  function fromRow(row) {
     return {
       id: Number(row.cells[1].children[0].href.match(/player_id=(\d+)/)[1]),
       name: getTextTrim(row.cells[1].children[0]),
       level: Number(getTextTrim(row.cells[2])),
-      current_stamina: Number(stamina[1]),
-      max_stamina: Number(stamina[2]),
       xp: 0,
-      vl: Number(tipped.match(/VL:<\/td><td>(\d+)</)[1]),
-      last_activity: lastActivity(tipped),
       guild_xp: intValue(getTextTrim(row.cells[4])),
-      rank_name: getTextTrim(row.cells[3]),
-      rank_index: i
+      rank_name: getTextTrim(row.cells[3])
     };
+  }
+
+  function formatRow(row, i) {
+    return Object.assign({rank_index: i}, fromTip(row), fromRow(row));
   }
 
   function byRank(prev, member) {
@@ -2932,31 +2945,31 @@
     return prev;
   }
 
+  function rankData(memberList) {
+    const memberRows = dataRows(memberList.rows, 5, 1);
+    const memberData = memberRows.map(formatRow);
+    return memberData.reduce(byRank, []);
+  }
+
   function parseReport$3(html) {
     const doc = createDocument(html);
     const pCC = getElementById('pCC', doc);
     const tables = getElementsByTagName(def_table, pCC);
     const memberList = tables[tables.length - 1];
-    if (!memberList) {return {s: false};}
-    const memberRows = arrayFrom(memberList.rows).filter(dataRows(5, 1));
-    const memberData = memberRows.map(formatRow);
-    const ranksData = memberData.reduce(byRank, []);
-    return {r: {ranks: ranksData}, s: true};
+    if (memberList) {return {r: {ranks: rankData(memberList)}, s: true};}
+    return {s: false};
   }
 
   // Incomplete
   function guildView$1(guildId) {
-    // console.log('guildView...');
-    // return indexAjaxData({cmd: 'guild', subcmd: 'view', guild_id: guildId})
-    //   .then(parseReport);
-    if (!cache$1[guildId]) {
-      cache$1[guildId] = indexAjaxData({
+    if (!cache$2[guildId]) {
+      cache$2[guildId] = indexAjaxData({
         cmd: 'guild',
         subcmd: 'view',
         guild_id: guildId
       }).then(parseReport$3);
     }
-    return cache$1[guildId];
+    return cache$2[guildId];
   }
 
   // Incomplete
@@ -3185,29 +3198,41 @@
     };
   }
 
-  function testTitan(e) {
-    const ret = {
+  function common(e) {
+    return {
       cooldown: calcCd(e),
       creature: creature(e),
       kills: Number(getTextTrim(e[0].cells[3]))
     };
+  }
+
+  function location$1(e) {
     const loc = getTextTrim(e[0].cells[1]);
     if (loc !== 'n/a') {
-      ret.realm = loc;
       const kills = getTextTrim(e[0].cells[2]).match(/(\d+)\/(\d+)/);
-      ret.current_hp = Number(kills[1]);
-      ret.max_hp = Number(kills[2]);
+      return {
+        realm: loc,
+        current_hp: Number(kills[1]),
+        max_hp: Number(kills[2])
+      };
     }
-    ret.three = getTextTrim(e[2]);
+  }
+
+  function contributors(e) {
     const contribs = e[2].cells[0].children;
     if (contribs.length === 1) {
-      const thisRows = arrayFrom(contribs[0].rows).filter(dataRows(3, 0));
-      ret.contributors = thisRows.map(r => ({
-        kills: Number(getTextTrim(r.cells[1])),
-        player: {name: getTextTrim(r.cells[0])}
-      }));
+      const thisRows = dataRows(contribs[0].rows, 3, 0);
+      return {
+        contributors: thisRows.map(r => ({
+          kills: Number(getTextTrim(r.cells[1])),
+          player: {name: getTextTrim(r.cells[0])}
+        }))
+      };
     }
-    return ret;
+  }
+
+  function testTitan(e) {
+    return Object.assign(common(e), location$1(e), contributors(e));
   }
 
   function parseReport$5(html) {
@@ -3283,7 +3308,7 @@
     const doc = createDocument(html);
     const logTable = querySelector('#pCC table table', doc);
     if (!logTable) {return {s: false};}
-    const rows = arrayFrom(logTable.rows).filter(dataRows(4, 1));
+    const rows = dataRows(logTable.rows, 4, 1);
     const data = rows.map(formatRow$1);
     return {r: data, s: true, t: '0 ' + String(nowSecs)};
   }
@@ -3389,17 +3414,7 @@
   function formatData(row) {
     return {
       player: {level: 0, name: getTextTrim(row.cells[0])},
-      stats: [
-        getInt(row.cells[3]),
-        getInt(row.cells[4]),
-        getInt(row.cells[5]),
-        getInt(row.cells[6]),
-        getInt(row.cells[7]),
-        getInt(row.cells[9]),
-        getInt(row.cells[1]),
-        getInt(row.cells[2]),
-        getInt(row.cells[8])
-      ]
+      stats: [3, 4, 5, 6, 7, 9, 1, 2, 8].map(i => getInt(row.cells[i]))
     };
   }
 
@@ -3467,30 +3482,51 @@
     return spec;
   }
 
+  function attacker(header) {
+    return {
+      id: getId(header.rows[1].cells[0]),
+      name: getTextTrim(header.rows[0].cells[0])
+    };
+  }
+
+  function defender(header) {
+    return {
+      id: getId(header.rows[1].cells[2]),
+      name: getTextTrim(header.rows[0].cells[2])
+    };
+  }
+
+  function doBase(id, pCC) {
+    const header = pCC.children[0].rows[5].cells[0].children[0];
+    return {
+      attacker: attacker(header),
+      defender: defender(header),
+      id: Number(id),
+      specials: formatSpecial(pCC)
+    };
+  }
+
+  function doscript(pCC) {
+    const script = getText(pCC.children[1]);
+    return {
+      gold_gain: getResult(script, 'goldGain'),
+      gold_stolen: getResult(script, 'goldStolen'),
+      pvp_prestige_gain: getResult(script, 'prestigeGain'),
+      pvp_rating_change: getResult(script, 'pvpRatingChange'),
+      winner: getResult(script, 'winner'),
+      xp_gain: getResult(script, 'xpGain')
+    };
+  }
+
+  function reportObject(id, pCC) {
+    return Object.assign(doBase(id, pCC), doscript(pCC));
+  }
+
   function parseReport$8(id, html) {
     const doc = createDocument(html);
     const pCC = getElementById('pCC', doc);
-    const script = getText(pCC.children[1]);
-    const header = pCC.children[0].rows[5].cells[0].children[0];
     return {
-      r: {
-        attacker: {
-          id: getId(header.rows[1].cells[0]),
-          name: getTextTrim(header.rows[0].cells[0])
-        },
-        defender: {
-          id: getId(header.rows[1].cells[2]),
-          name: getTextTrim(header.rows[0].cells[2])
-        },
-        gold_gain: getResult(script, 'goldGain'),
-        gold_stolen: getResult(script, 'goldStolen'),
-        id: Number(id),
-        pvp_prestige_gain: getResult(script, 'prestigeGain'),
-        pvp_rating_change: getResult(script, 'pvpRatingChange'),
-        specials: formatSpecial(pCC),
-        winner: getResult(script, 'winner'),
-        xp_gain: getResult(script, 'xpGain')
-      },
+      r: reportObject(id, pCC),
       s: true
     };
   }
@@ -6284,7 +6320,7 @@
   function getCalfPrefs(pref) {calf[pref] = getValue(pref);}
 
   function lastActivityToDays(last_activity) {
-    return Math.floor((nowSecs - last_activity) / 86400);
+    return Math.floor(Math.max(0, nowSecs - last_activity) / 86400);
   }
 
   var act = 0;
@@ -7001,13 +7037,15 @@
 
   function openQuickMsgDialog(name, msg, tip) { // jQuery
     getQuickMessageDialog();
-    getFshTemplate();
-    showMsgTemplate();
-    setName(name);
-    setMsg(msg);
-    captureEnter();
-    doValidateTip(fallback(tip, ''));
-    $quickMessageDialog.dialog('open');
+    if (quickMsgDialog.classList.contains('ui-dialog-content')) {
+      getFshTemplate();
+      showMsgTemplate();
+      setName(name);
+      setMsg(msg);
+      captureEnter();
+      doValidateTip(fallback(tip, ''));
+      $quickMessageDialog.dialog('open');
+    }
   }
 
   function injectQuickMsgDialogJQ() {
@@ -7881,7 +7919,7 @@
   const addId = e => [e, Number(e.previousElementSibling.value)];
 
   function addMeta(json, e) {
-    if (json.r && json.r.arenas) {
+    if (json.r.arenas) {
       return e.concat(json.r.arenas.find(a => a.id === e[1]));
     }
     return e;
@@ -7894,38 +7932,59 @@
     return p.name;
   }
 
-  const joinBtn = (myGuild, button) => myGuild && button.value === 'Join';
+  function grey(el) {
+    if (el && el.classList) {el.classList.add('fshGray');}
+  }
+
+  const validMoves = (json, arena) => arena.reward_type === 1 && json.r.moves;
+
+  const findMove = (json, arena) => json.r.moves.find(a => a.id === arena.reward);
+
+  const isMax = thisMove => thisMove && thisMove.max === 3;
+
+  const hasMax = (json, arena) =>
+    validMoves(json, arena) && isMax(findMove(json, arena));
+
+  function testMoves(json, [button, , arena]) {
+    if (hasMax(json, arena)) {grey(button);}
+  }
 
   function testGuildies(myGuild, button, arena) {
     const fromMyGuild = arena.players.filter(p => p.guild_id === myGuild)
       .length;
     const maxGuildies = arena.max_players / 4;
-    if (fromMyGuild === maxGuildies) {button.classList.add('fshGray');}
+    if (fromMyGuild === maxGuildies) {grey(button);}
   }
 
   function hazPlayers(myGuild, button, arena) {
     button.dataset.tipped = arena.players.map(partial(listPlayers, myGuild))
       .join('<br>');
     button.classList.add('tip-static');
-    if (joinBtn(myGuild, button)) {testGuildies(myGuild, button, arena);}
+    if (myGuild && button.value === 'Join') {
+      testGuildies(myGuild, button, arena);
+    }
   }
 
-  const arenaChecks = [isObject, e => isArray(e.players),
-    e => e.players.length > 0];
+  const arenaPlayerListChecks = [
+    isObject,
+    e => isArray(e.players),
+    e => e.players.length > 0
+  ];
 
   function decorate(myGuild, [button, , arena]) {
-    if (arenaChecks.every(f => f(arena))) {
+    if (arenaPlayerListChecks.every(f => f(arena))) {
       hazPlayers(myGuild, button, arena);
     }
   }
 
   function participants(json) {
-    if (!json.s) {return;}
+    if (!json.s || !isObject(json.r)) {return;}
     const theButtons = querySelectorArray(
       '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
     const withPvpId = theButtons.map(addId);
     const withMeta = withPvpId.map(partial(addMeta, json));
     withMeta.forEach(partial(decorate, currentGuildId()));
+    withMeta.forEach(partial(testMoves, json));
     return 0;
   }
 
@@ -8030,9 +8089,18 @@
     set('fsh_arenaFull', newObj);
   }
 
+  function maxMoves$1(thisInfo) {
+    return thisInfo && thisInfo.includes('combat move');
+  }
+
+  function yourGuild(thisInfo) {
+    return thisInfo && thisInfo.includes('your guild');
+  }
+
   function evalMsg() {
     const thisInfo = infoBox();
-    if (thisInfo.includes('your guild')) {
+    if (maxMoves$1(thisInfo)) {return;}
+    if (yourGuild(thisInfo)) {
       const thisId = querySelector('#pCC input[name="pvp_id"]').value;
       get('fsh_arenaFull').then(partial(addId$1, thisId));
     } else {
@@ -8115,17 +8183,19 @@
     thisSet.slots.forEach(partial(injectImg, container));
   }
 
+  function doChange(thisCell, evt, thisSet) {
+    usesetup(evt.target.value).then(function(json) {
+      // console.log(json);
+      if (json.s) {
+        doMoves(thisSet, thisCell);
+      }
+    });
+  }
+
   function onchange(r, thisCell, evt) {
     // console.log(evt.target.value);
     const thisSet = r.sets.find(e => e.id === Number(evt.target.value));
-    if (thisSet) {
-      usesetup(evt.target.value).then(function(json) {
-        // console.log(json);
-        if (json.s) {
-          doMoves(thisSet, thisCell);
-        }
-      });
-    }
+    if (thisSet) {doChange(thisCell, evt, thisSet);}
   }
 
   function doSelect(r, thisCell) {
@@ -10597,8 +10667,7 @@
     if (curPage === 1) {
       conflictHeader(insertHere);
     }
-    arrayFrom(conflictTable.rows).filter(dataRows(7, 0))
-      .forEach(partial(conflictRow, insertHere));
+    dataRows(conflictTable.rows, 7, 0).forEach(partial(conflictRow, insertHere));
   }
 
   function activeConflicts(doc, curPage, insertHere) { // Legacy
@@ -11758,8 +11827,7 @@
 
   function buffAll(self) {
     var titanTable = self.parentNode.parentNode.parentNode.parentNode;
-    var shortList = arrayFrom(titanTable.rows)
-      .filter(dataRows(3, 0)).map(memberName);
+    var shortList = dataRows(titanTable.rows, 3, 0).map(memberName);
     openQuickBuffByName(shortList.join());
   }
 
@@ -11783,7 +11851,7 @@
   }
 
   function doBuffLinks$1(titanTable) {
-    arrayFrom(titanTable.rows).filter(dataRows(3, 0)).forEach(playerBufflink);
+    dataRows(titanTable.rows, 3, 0).forEach(playerBufflink);
     insertHtmlBeforeEnd(titanTable.rows[0].cells[0],
       ' <button class="fshBl fshXSmall">all</button>');
   }
@@ -11895,8 +11963,7 @@
   }
 
   function doTooMuch(titanTable, newTitans) {
-    arrayFrom(titanTable.rows).filter(dataRows(4, 0))
-      .forEach(partial(decorate$1, newTitans));
+    dataRows(titanTable.rows, 4, 0).forEach(partial(decorate$1, newTitans));
   }
 
   function gotOldTitans(oldTitans) {
@@ -13203,8 +13270,7 @@
     var logTable = messageNameCell.parentNode.parentNode.parentNode;
     messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
       '(Guild Log messages not involving self are dimmed!)</span>';
-    arrayFrom(logTable.rows).filter(dataRows(3, 0))
-      .forEach(processGuildWidgetRow);
+    dataRows(logTable.rows, 3, 0).forEach(processGuildWidgetRow);
   }
 
   function addGuildLogWidgets() {
@@ -13265,7 +13331,7 @@
     nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
     var lastCheckScreen = 'last' + logScreen + 'Check';
     lastCheckUtc = getLastCheck(lastCheckScreen);
-    arrayFrom(chatTable.rows).filter(dataRows(3, 0))
+    dataRows(chatTable.rows, 3, 0)
       .forEach(partial(rowColor, logScreen, dateColumn));
     setValue(lastCheckScreen, nowUtc);
   }
@@ -13730,7 +13796,7 @@
   }
 
   function processTableRows(logTable) {
-    arrayFrom(logTable.rows).filter(dataRows(3, 0)).forEach(processLogWidgetRow);
+    dataRows(logTable.rows, 3, 0).forEach(processLogWidgetRow);
   }
 
   function openMsgDialog(evt) {
@@ -17757,7 +17823,7 @@
   var status;
   var titanHp;
   var total;
-  var yourGuild;
+  var yourGuild$1;
 
   function partOne() {
     current = textSpan('Current');
@@ -17770,7 +17836,7 @@
     status = textSpan('Status');
     titanHp = textSpan('Titan HP');
     total = textSpan('Total');
-    yourGuild = textSpan('Your Guild');
+    yourGuild$1 = textSpan('Your Guild');
   }
 
   function buildAssets() {
@@ -17833,7 +17899,7 @@
     titanTbl = createTable({className: 'fshCenter'});
     buildAssets();
     addRows$1(titanTbl, [
-      [[[2, titanHp, true], [4, yourGuild, true]]],
+      [[[2, titanHp, true], [4, yourGuild$1, true]]],
       [[[2, makeTitanHpWrapper()], [4, guildKills]]],
       [[[2, current, true], [4, makePctWrapper(currentPct)]], true],
       [[[2, total, true], [4, makePctWrapper(totalPct)]], true],
@@ -19908,8 +19974,7 @@
 
   function injectQuestRow(questTable) {
     var questsToHide = isHideQuests();
-    arrayFrom(questTable.rows).filter(dataRows(5, 0))
-      .forEach(partial(decorate$3, questsToHide));
+    dataRows(questTable.rows, 5, 0).forEach(partial(decorate$3, questsToHide));
   }
 
   function updateUrl$5(evt) {
@@ -22292,8 +22357,7 @@
   function parsePage$1(doc) {
     const firstHeader = querySelector('.header', doc);
     const thisTable = closestTable(firstHeader);
-    const thisRows = arrayFrom(thisTable.rows).filter(dataRows(4, 0));
-    return thisRows.map(parseRelic);
+    return dataRows(thisTable.rows, 4, 0).map(parseRelic);
   }
 
   function processPages$1(ary) {
@@ -22366,7 +22430,7 @@
       '</tr>';
   }
 
-  function makeTable$1(relicList) {
+  function makeTable$1(thisRelicList) {
     return '<style>' +
       '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}' +
       'table, th, td {border: 1px solid black;}' +
@@ -22383,7 +22447,7 @@
       '<th>XP<br>Gain</th>' +
       '<th>Time</th>' +
       '</tr></thead><tbody>' +
-      relicList.filter(stamGain).map(makeRow$3).join('') +
+      thisRelicList.filter(stamGain).map(makeRow$3).join('') +
       '</tbody></table>';
   }
 
@@ -22409,13 +22473,12 @@
   }
 
   function rowFactory$1(aRow) {
-    let dom = aRow.dom;
-    if (!dom) {
-      dom = createTr(
+    if (!aRow.dom) {
+      aRow.dom = createTr(
         {innerHTML: rowHtml$1(aRow)}
       );
     }
-    return dom;
+    return aRow.dom;
   }
 
   function displayChange$1(domTable, displayed) {
@@ -22428,7 +22491,7 @@
   }
 
   function byMember(prev, curr) {
-    // if (curr.b === 11503) { // Zombie Brew
+    // if (curr.item_id === 11503) { // Zombie Brew
     prev[curr.player_id] = prev[curr.player_id] || [];
     prev[curr.player_id].push(curr);
     // }
@@ -22465,7 +22528,7 @@
   }
 
   function prepareData$1([json, guild]) {
-    // console.log(json);
+    // console.log('json', json);
     const pots = json.items.reduce(byMember, {});
     // console.log('pots', pots);
     const members = processGuild(guild);
@@ -22475,7 +22538,7 @@
 
   const theadHtml$1 =
     '<thead><tr>' +
-    '<th data-st-sort="slot">Slot</th>' +
+    '<th data-st-sort="slot" class="st-sort-asc">Slot</th>' +
     '<th data-st-sort="name_lower">Name</th>' +
     '<th class="st-sort-reverse" data-st-sort="lvl_reverse">Level</th>' +
     '<th data-st-sort="rank_lower">Rank</th>' +
@@ -22492,23 +22555,88 @@
     }));
   }
 
+  function makeSizer(el, table) {
+    const thisSizer = createSelect({
+      innerHTML: '<option value="25" selected>25</option>' +
+        '<option value="50">50</option>' +
+        '<option value="0">All</option>'
+    });
+    const box = createDiv();
+    insertElement(box, thisSizer);
+    insertElement(el, box);
+    const slice = paginationDirective({table});
+    on(thisSizer, 'change', e => {
+      slice.changePageSize(Number(e.target.value));
+    });
+  }
+
+  function makeSearch(top, table) {
+    const wrapper = createDiv({className: 'fsh-search-wrapper'});
+    const input = createInput({
+      dataset: {
+        stSearch: 'name, rank_name',
+        stSearchFlags: 'i'
+      },
+      placeholder: 'Enter search term',
+      required: true,
+      type: 'text'
+    });
+    const button = createButton({
+      innerHTML: '&times;',
+      type: 'button'
+    });
+    const directive = searchDirective({table});
+    on(button, 'click', () => {
+      input.value = '';
+      input.focus();
+      directive.search('');
+    });
+    insertElement(wrapper, input);
+    insertElement(wrapper, button);
+    insertElement(top, wrapper);
+  }
+
+  function makeSummary(bottom, table) {
+    const summaryDiv = createDiv();
+    insertElement(bottom, summaryDiv);
+    const slice = paginationDirective({table});
+    slice.onSummaryChange(({page, size, filteredCount}) => {
+      let filterModifier = 0;
+      if (filteredCount) {filterModifier = 1;}
+      summaryDiv.innerHTML = `showing ${(page - 1) * size + filterModifier} - ${
+      Math.min(filteredCount, page * size)} of ${filteredCount}`;
+    });
+  }
+
   function showMe$1(dataAry) {
     // console.log(dataAry);
     const data = prepareData$1(dataAry);
     // console.log('data', data);
     pCC.innerHTML = '';
     const el = insertElement(pCC, createDiv());
+    const top = insertElement(el, createDiv({className: 'st-top-container'}));
     const domTable = makeTable$2(el);
-    const table = smartTable({data});
+    const bottom = insertElement(el,
+      createDiv({className: 'st-bottom-container'}));
+    const tableState = {
+      sort: {pointer: 'slot', direction: 'asc'},
+      slice: {page: 1, size: 25},
+      filter: {},
+      search: {}
+    };
+    const table = smartTable({data, tableState});
+    makeSizer(top, table);
+    makeSearch(top, table);
+    makeSummary(bottom, table);
     const tableComponent = table$1({el, table});
     tableComponent.onDisplayChange(partial(displayChange$1, domTable));
     tableComponent.exec();
+    // slice.selectNextPage();
   }
 
   function whosGotWhat() {
     pCC.innerHTML = 'Loading...';
-    // Promise.all([report(), guildView()]).then(showMe);
-    allthen([guildStore(), guildManage$1()], showMe$1);
+    allthen([guildStore(), daGuildManage()], showMe$1);
   }
 
   var notepad = {
@@ -22992,7 +23120,7 @@
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
     allowBack$4(topTable);
-    arrayFrom(topTable.rows).filter(dataRows(4, 1)).forEach(playerLink);
+    dataRows(topTable.rows, 4, 1).forEach(playerLink);
   }
 
   function getGuild$1(tbl) {
@@ -23575,7 +23703,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '136';
+  window.FSH.calf = '137';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

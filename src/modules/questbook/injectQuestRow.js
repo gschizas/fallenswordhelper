@@ -1,4 +1,3 @@
-import {arrayFrom} from '../common/arrayFrom';
 import {dataRows} from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
@@ -35,6 +34,5 @@ function decorate(questsToHide, aRow) {
 
 export default function injectQuestRow(questTable) {
   var questsToHide = isHideQuests();
-  arrayFrom(questTable.rows).filter(dataRows(5, 0))
-    .forEach(partial(decorate, questsToHide));
+  dataRows(questTable.rows, 5, 0).forEach(partial(decorate, questsToHide));
 }
