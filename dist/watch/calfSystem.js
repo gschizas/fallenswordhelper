@@ -8117,18 +8117,6 @@
     }
   }
 
-  function updateUrl$2(e) {
-    e.preventDefault();
-    dontPost(pCC);
-  }
-
-  function allowBack$1() {
-    var submitButton = querySelector('input[type="submit"]', pCC);
-    if (submitButton) {
-      on(submitButton, 'click', updateUrl$2);
-    }
-  }
-
   function isSelected(val, test) {
     if (val === test) {return ' selected';}
     return '';
@@ -8140,35 +8128,17 @@
 
   let moveContainer;
 
-  function getContainer(thisCell) {
+  function getContainer(movesController) {
     if (!moveContainer) {
-      moveContainer = insertElement(thisCell, createDiv());
+      moveContainer = insertElement(movesController, createDiv());
     }
     return moveContainer;
   }
-
-  const boolToString = e => String(Number(e));
-
-  const thisTournament = () => Number(getTextTrim(getArrayByTagName('b', pCC)
-    .find(includes('Tournament #'))).match(/\d+/)[0]);
 
   function injectImg(container, id) {
     insertHtmlBeforeEnd(container,
       '<img src="' + imageServer + '/pvp/' + String(id - 1) +
       '.gif" class="moveImg">');
-  }
-
-  function param$1(label, value) {
-    return '<div>' + label + '<img src="' + imageServer +
-      '/pvp/specials_' + boolToString(value) + '.gif"></div>';
-  }
-
-  function paramBox(thisArena) {
-    return '<div class="flex">' +
-        param$1('Specials', thisArena.specials) +
-        param$1('Hell Forge', thisArena.hellforge) +
-        param$1('Epic', thisArena.epic) +
-      '</div>';
   }
 
   function thisOptions(current_set, e) {
@@ -8177,68 +8147,130 @@
       '>' + e.name + '</option>';
   }
 
-  function doMoves(thisSet, thisCell) {
-    const container = getContainer(thisCell);
+  function doMoves(thisSet, movesController) {
+    const container = getContainer(movesController);
     container.innerHTML = '';
     thisSet.slots.forEach(partial(injectImg, container));
   }
 
-  function doChange(thisCell, evt, thisSet) {
-    usesetup(evt.target.value).then(function(json) {
-      // console.log(json);
+  function doChange(movesController, evt, thisSet) {
+    usesetup(evt.target.value).then(json => {
       if (json.s) {
-        doMoves(thisSet, thisCell);
+        doMoves(thisSet, movesController);
       }
     });
   }
 
-  function onchange(r, thisCell, evt) {
-    // console.log(evt.target.value);
+  function onchange(r, movesController, evt) {
     const thisSet = r.sets.find(e => e.id === Number(evt.target.value));
-    if (thisSet) {doChange(thisCell, evt, thisSet);}
+    if (thisSet) {doChange(movesController, evt, thisSet);}
   }
 
-  function doSelect(r, thisCell) {
+  function doSelect(r, movesController) {
     if (r.sets.length > 0) {
       const thisSelect = createSelect({
         innerHTML: r.sets.map(partial(thisOptions, r.current_set))
           .join('')
       });
-      on(thisSelect, 'change', partial(onchange, r, thisCell));
-      const div = createDiv();
+      on(thisSelect, 'change', partial(onchange, r, movesController));
+      const div = createDiv({className: 'flex'});
       insertElement(div, thisSelect);
-      insertElementAfterBegin(thisCell.children[0], div);
+      insertElementAfterBegin(movesController, div);
     }
   }
 
-  function showMoves(r, thisCell) {
-    // console.log('r', r);
-    const tourney = thisTournament();
-    // console.log('tourney', tourney);
-    const thisArena = r.arenas.find(e => e.id === tourney);
-    // console.log('thisArena', thisArena);
-    thisCell.setAttribute('align', 'center');
-    insertHtmlBeforeEnd(thisCell, paramBox(thisArena));
+  function showMoves(r, thisCell, thisArena) {
     if (thisArena.specials) {
-      doSelect(r, thisCell);
-      doMoves(r.current_set, thisCell);
+      const movesController = createDiv({className: 'flex'});
+      doSelect(r, movesController);
+      doMoves(r.current_set, movesController);
+      insertElement(thisCell, movesController);
     }
   }
 
-  function findCell(json) {
-    // console.log('json', json);
+  function loadEquipped() {
+    return profile({subcmd: 'loadequipped'});
+  }
+
+  function updateUrl$2(e) {
+    e.preventDefault();
+    const validInputs = arrayFrom(e.target.closest('form').elements)
+      .filter(i => i.type !== 'submit')
+      .map(i => i.name + '=' + i.value)
+      .join('&');
+    window.location = `${indexPhp}?${validInputs}`;
+  }
+
+  async function buttonPress(r, thisArena, e) {
+    e.preventDefault();
+    const equipped = await loadEquipped();
+    console.log(r); // eslint-disable-line no-console
+    console.log(thisArena); // eslint-disable-line no-console
+    console.log(equipped); // eslint-disable-line no-console
+    // updateUrl(e);
+    console.log('updateUrl(e)'); // eslint-disable-line no-console
+  }
+
+  function takeSnapshot(r, thisArena) {
+    const submitButton = querySelector('input[type="submit"]', pCC);
+    if (submitButton) {
+      off(submitButton, 'click', updateUrl$2);
+      once(submitButton, 'click', partial(buttonPress, r, thisArena));
+    }
+  }
+
+  const boolToString = e => String(Number(e));
+
+  const thisTournament = () => Number(getTextTrim(getArrayByTagName('b', pCC)
+    .find(includes('Tournament #'))).match(/\d+/)[0]);
+
+  function findArena(r) {
+    const tourney = thisTournament();
+    return r.arenas.find(e => e.id === tourney);
+  }
+
+  function param$1(label, value) {
+    return '<div><div>' + label + '</div><div><img src="' + imageServer +
+      '/pvp/specials_' + boolToString(value) + '.gif"></div></div>';
+  }
+
+  function paramBox(thisArena) {
+    return '<div class="flex">' +
+        `<div><div>Players</div><div>${thisArena.players.length} / ${
+        thisArena.max_players}</div></div>` +
+        param$1('Specials', thisArena.specials) +
+        param$1('Hell Forge', thisArena.hellforge) +
+        param$1('Epic', thisArena.epic) +
+        `<div><div>Max Equip Level</div><div>${
+        addCommas(thisArena.equip_level)}</div></div>` +
+      '</div>';
+  }
+
+  function showAttribs(json) {
     const thisCell = querySelector('#pCC > form > table tr:nth-of-type(7) td');
-    if (json.r && thisCell) {showMoves(json.r, thisCell);}
+    if (json.r && thisCell) {
+      thisCell.setAttribute('align', 'center');
+      const thisArena = findArena(json.r);
+      insertHtmlBeforeEnd(thisCell, paramBox(thisArena));
+      showMoves(json.r, thisCell, thisArena);
+      takeSnapshot(json.r, thisArena);
+    }
+  }
+
+  function allowBack$1() {
+    const submitButton = querySelector('input[type="submit"]', pCC);
+    if (submitButton) {
+      once(submitButton, 'click', updateUrl$2);
+    }
   }
 
   function arenaJoin() {
-    console.log('arena Join'); // eslint-disable-line no-console
-    var tabs = getElementById('arenaTypeTabs');
+    const tabs = getElementById('arenaTypeTabs');
     if (tabs) {
       injectArena();
     } else {
       allowBack$1();
-      view$1().then(findCell);
+      view$1().then(showAttribs);
     }
   }
 
@@ -19725,6 +19757,18 @@
     view: {'-': itemsView}
   };
 
+  function updateUrl$5(e) {
+    e.preventDefault();
+    dontPost(pCC);
+  }
+
+  function allowBack$4() {
+    var submitButton = querySelector('input[type="submit"]', pCC);
+    if (submitButton) {
+      on(submitButton, 'click', updateUrl$5);
+    }
+  }
+
   function isMyRow(thisRow) {
     return thisRow.cells.length > 1 &&
       getTextTrim(thisRow.cells[1]) === playerName$1();
@@ -19788,7 +19832,7 @@
   }
 
   function ladder() {
-    allowBack$1();
+    allowBack$4();
     lastReset();
     margin();
   }
@@ -19977,7 +20021,7 @@
     dataRows(questTable.rows, 5, 0).forEach(partial(decorate$3, questsToHide));
   }
 
-  function updateUrl$5(evt) {
+  function updateUrl$6(evt) {
     if (evt.target.type !== 'submit') {
       return;
     }
@@ -20077,7 +20121,7 @@
   }
 
   function injectQuestBookFull() {
-    on(pCC, 'click', updateUrl$5);
+    on(pCC, 'click', updateUrl$6);
     storeQuestPage();
     var questTable = getElementsByTagName(def_table, pCC)[5];
     if (!questTable) {return;}
@@ -23106,7 +23150,7 @@
     }
   }
 
-  function allowBack$4(topTable) { // jQuery
+  function allowBack$5(topTable) { // jQuery
     var thisSelect = getElementsByTagName('select', topTable)[0];
     $(thisSelect).off();
     on(thisSelect, 'change', partial(dontPost, pCC));
@@ -23119,7 +23163,7 @@
 
   function globalQuest() {
     var topTable = getElementsByTagName(def_table, pCC)[3];
-    allowBack$4(topTable);
+    allowBack$5(topTable);
     dataRows(topTable.rows, 4, 1).forEach(playerLink);
   }
 
@@ -23703,7 +23747,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '137';
+  window.FSH.calf = '138';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
