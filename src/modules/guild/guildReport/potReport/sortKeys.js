@@ -1,4 +1,5 @@
 import alpha from '../../../common/alpha';
+import {keys} from '../../../common/keys';
 import partial from '../../../common/partial';
 
 function cloneObj(obj, result, key) {
@@ -7,5 +8,5 @@ function cloneObj(obj, result, key) {
 }
 
 export default function sortKeys(obj) {
-  return Object.keys(obj).sort(alpha).reduce(partial(cloneObj, obj), {});
+  return keys(obj).sort(alpha).reduce(partial(cloneObj, obj), {});
 }

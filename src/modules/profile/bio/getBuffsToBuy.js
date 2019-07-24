@@ -2,6 +2,7 @@ import calf from '../../support/calf';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
+import {keys} from '../../common/keys';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import playerName from '../../common/playerName';
@@ -46,7 +47,7 @@ function formatToUse(greetingText, el) {return el[0](greetingText);}
 
 function formatGreetingText(greetingText, buffCost) {
   return buyFormatter.find(partial(formatToUse, greetingText))[1](
-    greetingText, Object.keys(buffCost.buffs).join(', '), buffCost);
+    greetingText, keys(buffCost.buffs).join(', '), buffCost);
 }
 
 function formatBuffsToBuy(buffCost) { // Legacy

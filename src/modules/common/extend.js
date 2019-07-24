@@ -1,4 +1,5 @@
 import isObject from './isObject';
+import {keys} from './keys';
 import partial from './partial';
 
 function overwriteKey(obj, mixins, fn, key) {
@@ -11,7 +12,7 @@ function overwriteKey(obj, mixins, fn, key) {
 
 export default function extend(obj, mixins) {
   if (isObject(mixins)) {
-    Object.keys(mixins).forEach(partial(overwriteKey, obj, mixins, extend));
+    keys(mixins).forEach(partial(overwriteKey, obj, mixins, extend));
   }
   return obj;
 }

@@ -1,3 +1,4 @@
+import {entries} from '../../common/entries';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import {now} from '../../support/now';
@@ -19,7 +20,7 @@ function makeRow(el) {
 }
 
 function makeHtml(theTitans) {
-  return Object.entries(theTitans).map(reformat).filter(onCd).sort(int)
+  return entries(theTitans).map(reformat).filter(onCd).sort(int)
     .map(makeRow).join('');
 }
 

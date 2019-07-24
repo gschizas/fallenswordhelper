@@ -1,6 +1,7 @@
 import './mailbox.postcss';
 import chunk from '../common/chunk';
 import {daMailboxTake} from '../_dataAccess/_dataAccess';
+import {entries} from '../common/entries';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
@@ -86,7 +87,7 @@ function makeItemBox(itemTbl, pair) {
 }
 
 function makeItemBoxes(itemTbl, itemList) {
-  Object.entries(itemList).forEach(partial(makeItemBox, itemTbl));
+  entries(itemList).forEach(partial(makeItemBox, itemTbl));
 }
 
 function killQTip(itemId) { // jQuery

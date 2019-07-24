@@ -1,5 +1,6 @@
 import alpha from '../common/alpha';
 import {createDiv} from '../common/cElement';
+import {entries} from '../common/entries';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import isFunction from '../common/isFunction';
@@ -52,7 +53,7 @@ function summary(pair) {return '<br>' + pair[1] + ' ' + pair[0] + '(s), ';}
 function gotGains(gains) {
   var gainHash = buildGainHash(gains);
   return '<br>' + gains.length + ' item(s):' +
-    Object.entries(gainHash).sort(alphaEntries).map(summary).join('');
+    entries(gainHash).sort(alphaEntries).map(summary).join('');
 }
 
 function getGains(report) {

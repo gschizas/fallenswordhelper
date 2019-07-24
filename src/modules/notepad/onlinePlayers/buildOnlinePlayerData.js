@@ -1,3 +1,4 @@
+import {keys} from '../../common/keys';
 import partial from '../../common/partial';
 
 function onlinePlayer(onlinePlayers, player) {
@@ -13,5 +14,5 @@ function onlinePlayer(onlinePlayers, player) {
 }
 
 export default function buildOnlinePlayerData(onlinePlayers) { // jQuery
-  return Object.keys(onlinePlayers).map(partial(onlinePlayer, onlinePlayers));
+  return keys(onlinePlayers).map(partial(onlinePlayer, onlinePlayers));
 }

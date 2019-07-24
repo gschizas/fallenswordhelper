@@ -1,5 +1,6 @@
 import add from '../../../support/task';
 import batch from '../../../common/batch';
+import {entries} from '../../../common/entries';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
 import once from '../../../common/once';
@@ -86,7 +87,7 @@ export function drawMapping(potOpts) {
   sendEvent('potReport', 'drawMapping');
   var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
   mapping.replaceChild(mapTbl, mapping.children[0]);
-  add(3, batch, [3, Object.entries(potOpts.myMap), 0,
+  add(3, batch, [3, entries(potOpts.myMap), 0,
     partial(insertRows, mapTbl), partial(insertFinal, mapTbl)]);
 }
 

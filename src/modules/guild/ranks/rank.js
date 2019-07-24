@@ -1,5 +1,6 @@
 import {arrayFrom} from '../../common/arrayFrom';
 import batch from '../../common/batch';
+import {entries} from '../../common/entries';
 import getMembrList from '../../ajax/getMembrList';
 import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -57,7 +58,7 @@ function rankArray(prev, ary) {
 }
 
 function makeRanks(json) {
-  return Object.entries(json).filter(notLastUpdate).reduce(rankArray, []);
+  return entries(json).filter(notLastUpdate).reduce(rankArray, []);
 }
 
 export default function injectGuildRanks() { // jQuery.min

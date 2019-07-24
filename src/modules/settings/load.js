@@ -4,6 +4,7 @@ import getValue from '../system/getValue';
 import isObject from '../common/isObject';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonParse from '../common/jsonParse';
+import {keys} from '../common/keys';
 import {listValues} from '../system/listValues';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
@@ -31,7 +32,7 @@ function clickHandler() {
   var userInput = jsonParse(getElementById('HelperfshSettings').value);
   if (isObject(userInput)) {
     var settings = userInput;
-    Object.keys(settings).forEach(partial(saveSetting, settings));
+    keys(settings).forEach(partial(saveSetting, settings));
     dialogMsg('Settings loaded successfully!');
   }
 }

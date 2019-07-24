@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import {entries} from '../common/entries';
 import formatUtcDateTime from '../common/formatUtcDateTime';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -54,7 +55,7 @@ function valueNumeric(a, b) {return a[1] - b[1];}
 
 function gotSeLog() {
   if (oldLog && oldLog.se) {
-    displayTracker(Object.entries(oldLog.se).sort(valueNumeric));
+    displayTracker(entries(oldLog.se).sort(valueNumeric));
   }
 }
 

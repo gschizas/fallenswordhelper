@@ -9,6 +9,7 @@ import insertElement from '../../common/insertElement';
 import jConfirm from '../../common/jConfirm';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import jsonFail from '../../common/jsonFail';
+import {keys} from '../../common/keys';
 import on from '../../common/on';
 import outputResult from '../../common/outputResult';
 import {pCC} from '../../support/layout';
@@ -115,7 +116,7 @@ function showQuickExtract() {
   var output =
     '<tr><th width="20%">Actions</th><th colspan="2">Items</th></tr>' +
     '<tr><td colspan="3"><ol id="qeresult"></ol></td></tr>';
-  output += Object.keys(resourceList).reduce(tableRows, '');
+  output += keys(resourceList).reduce(tableRows, '');
   extTbl.innerHTML = output;
   buyResult = getElementById('qeresult');
 }

@@ -1,3 +1,4 @@
+import {entries} from './entries';
 import isObject from './isObject';
 import partial from './partial';
 
@@ -10,5 +11,5 @@ function mutate(fn, obj, arr) {
 }
 
 export default function mixin(obj, mixins) {
-  Object.entries(mixins).forEach(partial(mutate, mixin, obj));
+  entries(mixins).forEach(partial(mutate, mixin, obj));
 }

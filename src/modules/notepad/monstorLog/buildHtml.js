@@ -1,6 +1,8 @@
 import addCommas from '../../system/addCommas';
+import {entries} from '../../common/entries';
 import extend from '../../common/extend';
 import {imageServer} from '../../system/system';
+import {keys} from '../../common/keys';
 
 function imgHtml(image_id) {
   return '<img class="tip-static" src="' + imageServer +
@@ -10,7 +12,7 @@ function imgHtml(image_id) {
 }
 
 function hazEnhancements(enhancements) {
-  return enhancements && Object.keys(enhancements).length > 0;
+  return enhancements && keys(enhancements).length > 0;
 }
 
 function statMinMax(stat) {
@@ -25,7 +27,7 @@ function buildEnhancements(pair) {
 function formatEnhancements(enhancements) {
   if (hazEnhancements(enhancements)) {
     var tmp = '<span class="fshXXSmall">';
-    tmp += Object.entries(enhancements).map(buildEnhancements).join('<br>');
+    tmp += entries(enhancements).map(buildEnhancements).join('<br>');
     return tmp + '</span>';
   }
   return '<span class="fshGrey">**Missing**</span>';
