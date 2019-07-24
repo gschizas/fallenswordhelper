@@ -772,8 +772,8 @@
     }
   }
 
-  var now;
-  var nowSecs;
+  let now;
+  let nowSecs;
 
   function initNow() {
     if (!now) {
@@ -7946,7 +7946,7 @@
     validMoves(json, arena) && isMax(findMove(json, arena));
 
   function testMoves(json, [button, , arena]) {
-    if (hasMax(json, arena)) {grey(button);}
+    if (arena && hasMax(json, arena)) {grey(button);}
   }
 
   function testGuildies(myGuild, button, arena) {
@@ -8117,6 +8117,14 @@
     }
   }
 
+  const thisTournament = () => Number(getTextTrim(getArrayByTagName('b', pCC)
+    .find(includes('Tournament #'))).match(/\d+/)[0]);
+
+  function findArena(r) {
+    const tourney = thisTournament();
+    return r.arenas.find(e => e.id === tourney);
+  }
+
   function isSelected(val, test) {
     if (val === test) {return ' selected';}
     return '';
@@ -8188,9 +8196,14 @@
     }
   }
 
+  const fromEntries = entries => Object.fromEntries(entries);
+
   function loadEquipped() {
     return profile({subcmd: 'loadequipped'});
   }
+
+  const removeKeys = (keys, obj) =>
+    fromEntries(entries(obj).filter(([k]) => !keys.includes(k)));
 
   function updateUrl$2(e) {
     e.preventDefault();
@@ -8201,33 +8214,41 @@
     window.location = `${indexPhp}?${validInputs}`;
   }
 
-  async function buttonPress(r, thisArena, e) {
-    e.preventDefault();
-    const equipped = await loadEquipped();
-    console.log(r); // eslint-disable-line no-console
-    console.log(thisArena); // eslint-disable-line no-console
-    console.log(equipped); // eslint-disable-line no-console
-    // updateUrl(e);
-    console.log('updateUrl(e)'); // eslint-disable-line no-console
+  function getStats() {
+    const statLabels = getArrayByTagName('b', pCC).slice(2);
+    return fromEntries(statLabels.map(b => [
+      getTextTrim(b).replace(':', '').toLowerCase(),
+      Number(getTextTrim(b.parentNode.nextElementSibling))
+    ]));
   }
 
-  function takeSnapshot(r, thisArena) {
+  async function buttonPress(e) {
+    e.preventDefault();
+    const [json, equipped, joinedArenas] = await all([view$1(), loadEquipped(),
+      get('fsh_joinedArenas')]);
+    const thisArena = removeKeys(['players'], findArena(json.r));
+    if (thisArena.specials) {
+      thisArena.slots = json.r.current_set.slots;
+    }
+    thisArena.equipped = equipped.r.map(o => removeKeys(['sp', 'v'], o));
+    thisArena.joined = nowSecs;
+    thisArena.seen = nowSecs;
+    thisArena.stats = getStats();
+    const newJoined = joinedArenas || [];
+    newJoined.push(thisArena);
+    await set('fsh_joinedArenas', newJoined);
+    updateUrl$2(e);
+  }
+
+  function takeSnapshot() {
     const submitButton = querySelector('input[type="submit"]', pCC);
     if (submitButton) {
       off(submitButton, 'click', updateUrl$2);
-      once(submitButton, 'click', partial(buttonPress, r, thisArena));
+      once(submitButton, 'click', buttonPress);
     }
   }
 
   const boolToString = e => String(Number(e));
-
-  const thisTournament = () => Number(getTextTrim(getArrayByTagName('b', pCC)
-    .find(includes('Tournament #'))).match(/\d+/)[0]);
-
-  function findArena(r) {
-    const tourney = thisTournament();
-    return r.arenas.find(e => e.id === tourney);
-  }
 
   function param$1(label, value) {
     return '<div><div>' + label + '</div><div><img src="' + imageServer +
@@ -8253,7 +8274,7 @@
       const thisArena = findArena(json.r);
       insertHtmlBeforeEnd(thisCell, paramBox(thisArena));
       showMoves(json.r, thisCell, thisArena);
-      takeSnapshot(json.r, thisArena);
+      takeSnapshot();
     }
   }
 
@@ -8272,165 +8293,6 @@
       allowBack$1();
       view$1().then(showAttribs);
     }
-  }
-
-  function completed() {
-    return arena({
-      subcmd: 'completed',
-      arena_id: -1,
-      latest: false,
-      limit: 9999
-    });
-  }
-
-  let resultsPromise;
-  let resultsCache;
-
-  function currentCombatRecord(combatId, obj, sevenDays) {
-    return combatId === 'lastCheck' || obj.logTime && obj.logTime > sevenDays;
-  }
-
-  function keepRecent(sevenDays, prev, [combatId, obj]) {
-    if (currentCombatRecord(combatId, obj, sevenDays)) {
-      prev[combatId] = obj;
-    }
-    return prev;
-  }
-
-  function cleanCache(data) {
-    const sevenDays = nowSecs - 7 * 24 * 60 * 60;
-    return entries(data)
-      .reduce(partial(keepRecent, sevenDays), {lastCheck: nowSecs});
-  }
-
-  function prepareCache(data) {
-    const oneDay = nowSecs - 24 * 60 * 60;
-    if (!data.lastCheck || data.lastCheck < oneDay) {
-      return cleanCache(data);
-    }
-    return data;
-  }
-
-  async function initCache() {
-    const cache = await get('fsh_arenaResults');
-    if (cache) {
-      resultsCache = prepareCache(cache);
-      set('fsh_arenaResults', resultsCache);
-    } else {
-      resultsCache = {lastCheck: nowSecs};
-    }
-  }
-
-  async function useApi(pvpId) {
-    const json = await arena({subcmd: 'results', pvp_id: pvpId});
-    if (json.s) {
-      json.logTime = nowSecs;
-      resultsCache[pvpId] = json;
-      set('fsh_arenaResults', resultsCache);
-    }
-    return json;
-  }
-
-  function returnResults(pvpId) {
-    if (resultsCache[pvpId]) {return resultsCache[pvpId];}
-    return useApi(pvpId);
-  }
-
-  function results(pvpId) {
-    if (!resultsPromise) {resultsPromise = initCache();}
-    return resultsPromise.then(partial(returnResults, pvpId));
-  }
-
-  function isNaN$1(value) {
-    return Number.isNaN(value);
-  }
-
-  function round(number, precision) {
-    var factor = Math.pow(10, precision);
-    if (isNaN$1(factor)) {factor = 1;}
-    return Math.round(number * factor) / factor;
-  }
-
-  let container;
-
-  function setWinner(arena, thisResult) {
-    const lastBattle = thisResult.r[thisResult.r.length - 1];
-    if (lastBattle.attacker_win) {
-      arena.winner = lastBattle.attacker;
-    } else {
-      arena.winner = lastBattle.defender;
-    }
-  }
-
-  async function getCombats(arena) {
-    const thisResult = await results(arena.id);
-    if (thisResult.s) {
-      setWinner(arena, thisResult);
-    }
-    return arena;
-  }
-
-  function doRollup(obj, result) {
-    result.players.forEach(function(player) {
-      if (!obj[player.name]) {
-        obj[player.name] = {
-          novice_entered: 0,
-          novice_won: 0,
-          standard_entered: 0,
-          standard_won: 0
-        };
-      }
-      if (result.type === 0) {
-        obj[player.name].novice_entered += 1;
-      } else {
-        obj[player.name].standard_entered += 1;
-      }
-    });
-    if (result.type === 0) {
-      obj[result.winner.name].novice_won += 1;
-    } else {
-      obj[result.winner.name].standard_won += 1;
-    }
-    return obj;
-  }
-
-  async function startCrawl(start) {
-    hideQTip(start);
-    start.remove();
-    const thisComplete = await completed();
-    if (!thisComplete.s) {return;}
-    const prm = thisComplete.r.arenas.map(getCombats);
-    const ary = await all(prm);
-    // console.log(ary);
-    const rollup = ary.reduce(doRollup, {});
-    console.log( // eslint-disable-line no-console
-      entries(rollup).map(([name, obj]) => {
-        let standard_ratio = 0;
-        if (obj.standard_entered !== 0) {
-          standard_ratio = round(obj.standard_won / obj.standard_entered, 3);
-        }
-        return [
-          name,
-          obj.novice_entered,
-          obj.novice_won,
-          obj.standard_entered,
-          obj.standard_won,
-          standard_ratio
-        ];
-      }).sort((a, b) => b[4] - a[4] || b[3] - a[3] || b[2] - a[2])
-    );
-  }
-
-  function crawler() {
-    container = createDiv();
-    const start = createButton({
-      className: 'fshBl tip-static',
-      dataset: {tipped: 'DANGER!'},
-      textContent: 'Start crawl'
-    });
-    insertElement(container, start);
-    insertElement(pCC, container);
-    on(start, 'click', partial(startCrawl, start));
   }
 
   function insertHtmlBeforeBegin(parent, html) {
@@ -8480,7 +8342,6 @@
     injectFinishButton();
     intercept('View', updateUrl$1);
     intercept('Go', updateGoUrl);
-    crawler();
   }
 
   var oldMoves = [];
@@ -11574,6 +11435,16 @@
     return a & b; // eslint-disable-line no-bitwise
   }
 
+  function isNaN$1(value) {
+    return Number.isNaN(value);
+  }
+
+  function round(number, precision) {
+    var factor = Math.pow(10, precision);
+    if (isNaN$1(factor)) {factor = 1;}
+    return Math.round(number * factor) / factor;
+  }
+
   function roundToString(number, precision) {
     return round(number, precision).toString();
   }
@@ -13378,40 +13249,40 @@
 
   let combatCache = {};
 
-  function currentCombatRecord$1(data, combatId, sevenDays) {
+  function currentCombatRecord(data, combatId, sevenDays) {
     return combatId === 'lastCheck' || data[combatId].logTime &&
       data[combatId].logTime > sevenDays;
   }
 
-  function keepRecent$1(data, sevenDays, prev, combatId) {
-    if (currentCombatRecord$1(data, combatId, sevenDays)) {
+  function keepRecent(data, sevenDays, prev, combatId) {
+    if (currentCombatRecord(data, combatId, sevenDays)) {
       prev[combatId] = data[combatId];
     }
     return prev;
   }
 
-  function cleanCache$1(data) {
+  function cleanCache(data) {
     var sevenDays = nowSecs - 7 * 24 * 60 * 60;
     combatCache = Object.keys(data)
-      .reduce(partial(keepRecent$1, data, sevenDays), {});
+      .reduce(partial(keepRecent, data, sevenDays), {});
     combatCache.lastCheck = nowSecs;
     set('fsh_pvpCombat', combatCache);
   }
 
-  function prepareCache$1(data) {
+  function prepareCache(data) {
     var oneDay = nowSecs - 24 * 60 * 60;
     if (!data.lastCheck || data.lastCheck < oneDay) {
-      cleanCache$1(data);
+      cleanCache(data);
     } else {
       combatCache = data;
     }
   }
 
   function checkCache(data) {
-    if (data) {prepareCache$1(data);}
+    if (data) {prepareCache(data);}
   }
 
-  function initCache$1() {
+  function initCache() {
     return get('fsh_pvpCombat').then(checkCache);
   }
 
@@ -13853,7 +13724,7 @@
     if (jQueryNotPresent()) {return;}
     var prm = [
       myStats(false).then(prepareAlliesEnemies),
-      initCache$1()
+      initCache()
     ];
     if (currentGuildId()) {prm.push(getMembrList(false).then(getKeys));}
     allthen(prm, addLogWidgetsOld);
@@ -17586,7 +17457,7 @@
     return prm;
   }
 
-  function getStats() {
+  function getStats$1() {
     prepareSecondaryDivs(relicData);
     resetCounters();
     var prm = buildStatPrm();
@@ -17598,7 +17469,7 @@
     relicData = data.response.data;
     if (relicData.defenders.length > 0) {
       primaryElementsSetup(relicData);
-      once(fetchStatsBtn, 'click', getStats);
+      once(fetchStatsBtn, 'click', getStats$1);
     }
   }
 
@@ -20934,6 +20805,157 @@
     Promise.all([daAdvisor(0), getMembrList(false)]).then(showMe);
   }
 
+  function completed() {
+    return arena({
+      subcmd: 'completed',
+      arena_id: -1,
+      latest: false,
+      limit: 9999
+    });
+  }
+
+  let resultsPromise;
+  let resultsCache;
+
+  function currentCombatRecord$1(combatId, obj, sevenDays) {
+    return combatId === 'lastCheck' || obj.logTime && obj.logTime > sevenDays;
+  }
+
+  function keepRecent$1(sevenDays, prev, [combatId, obj]) {
+    if (currentCombatRecord$1(combatId, obj, sevenDays)) {
+      prev[combatId] = obj;
+    }
+    return prev;
+  }
+
+  function cleanCache$1(data) {
+    const thirtyDays = nowSecs - 30 * 24 * 60 * 60;
+    return entries(data)
+      .reduce(partial(keepRecent$1, thirtyDays), {lastCheck: nowSecs});
+  }
+
+  function prepareCache$1(data) {
+    const oneDay = nowSecs - 24 * 60 * 60;
+    if (!data.lastCheck || data.lastCheck < oneDay) {
+      return cleanCache$1(data);
+    }
+    return data;
+  }
+
+  async function initCache$1() {
+    const cache = await get('fsh_arenaResults');
+    if (cache) {
+      resultsCache = prepareCache$1(cache);
+      set('fsh_arenaResults', resultsCache);
+    } else {
+      resultsCache = {lastCheck: nowSecs};
+    }
+  }
+
+  async function useApi(pvpId) {
+    const json = await arena({subcmd: 'results', pvp_id: pvpId});
+    if (json.s) {
+      json.logTime = nowSecs;
+      resultsCache[pvpId] = json;
+      set('fsh_arenaResults', resultsCache);
+    }
+    return json;
+  }
+
+  function returnResults(pvpId) {
+    if (resultsCache[pvpId]) {return resultsCache[pvpId];}
+    return useApi(pvpId);
+  }
+
+  function results(pvpId) {
+    if (!resultsPromise) {resultsPromise = initCache$1();}
+    return resultsPromise.then(partial(returnResults, pvpId));
+  }
+
+  function addArenaInfoToPlayers(o) {
+    const tmpObj = removeKeys(['id', 'players'], o);
+    tmpObj.arena_id = o.id;
+    return o.players.map(p => Object.assign(
+      {player_id: p.id, name: p.name, win: p.win}, tmpObj));
+  }
+
+  function getJoinsByPlayer(o, p) {
+    o[p.name] = o[p.name] || [p.name, []];
+    o[p.name][1].push(p);
+    return o;
+  }
+
+  function calcRatio(dividend, divisor) {
+    let ratio = 0;
+    if (divisor !== 0) {ratio = round(dividend / divisor, 3);}
+    return ratio;
+  }
+
+  // const thisSort = (a, b) => b[4] - a[4] || b[3] - a[3] || b[2] - a[2];
+
+  function setWinner(arena, thisResult) {
+    const lastBattle = thisResult.r[thisResult.r.length - 1];
+    let thisWinner = 0;
+    if (lastBattle.attacker_win) {
+      thisWinner = lastBattle.attacker.id;
+    } else {
+      thisWinner = lastBattle.defender.id;
+    }
+    arena.players.forEach(p => {
+      if (p.id === thisWinner) {
+        p.win = 1;
+      } else {
+        p.win = 0;
+      }
+    });
+  }
+
+  async function getCombats(arena) {
+    const thisResult = await results(arena.id);
+    if (thisResult.s) {
+      setWinner(arena, thisResult);
+    }
+    return arena;
+  }
+
+  function breakdown(ary) {
+    const joins = ary.length;
+    const wins = ary.filter(o => o.win === 1).length;
+    return [joins, wins, calcRatio(wins, joins)];
+  }
+
+  async function crawler() {
+    const thisComplete = await completed();
+    if (!thisComplete.s) {return;}
+    const prm = thisComplete.r.arenas.map(getCombats);
+    const ary = await all(prm);
+    // console.log(ary);
+    const playerJoins = [].concat(...ary.map(addArenaInfoToPlayers));
+    // console.log(playerJoins);
+    const joinsByPlayer = Object.values(playerJoins.reduce(getJoinsByPlayer, {}));
+    // console.log(joinsByPlayer);
+    const overallTotals = joinsByPlayer.map(a => [
+      a[0],
+      a[1].length,
+      a[1].filter(o => o.win === 1).length,
+      a[1].filter(o => o.type === 0),
+      a[1].filter(o => o.type === 1)
+    ]);
+    // console.log(overallTotals);
+    const byType = overallTotals.map(a => a.slice(0, -2).concat(
+      breakdown(a[3]),
+      breakdown(a[4]),
+      [
+        a[4].filter(o => !o.specials),
+        a[4].filter(o => o.specials)
+      ]));
+    // console.log(byType);
+    const typeWins = byType.map(a => a.slice(0, -2).concat(
+      breakdown(a[9]), breakdown(a[10])
+    ));
+    console.log(typeWins.sort((a, b) => b[7] - a[7])); // eslint-disable-line no-console
+  }
+
   var theInv;
   var composed = [];
 
@@ -22702,6 +22724,7 @@
     savesettings: {'-': injectSaveSettings}, // TODO
     reliclist: {'-': reliclist},
     advisor: {'-': advisor$1},
+    crawler: {'-': crawler},
     whosgotwhat: {'-': whosGotWhat},
     '-': {'-': injectNotepad}
   };
@@ -23747,7 +23770,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '138';
+  window.FSH.calf = '139';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

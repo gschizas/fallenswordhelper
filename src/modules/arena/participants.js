@@ -35,7 +35,7 @@ const hasMax = (json, arena) =>
   validMoves(json, arena) && isMax(findMove(json, arena));
 
 function testMoves(json, [button, , arena]) {
-  if (hasMax(json, arena)) {grey(button);}
+  if (arena && hasMax(json, arena)) {grey(button);}
 }
 
 function testGuildies(myGuild, button, arena) {

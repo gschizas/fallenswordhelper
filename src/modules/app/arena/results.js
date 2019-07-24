@@ -19,9 +19,9 @@ function keepRecent(sevenDays, prev, [combatId, obj]) {
 }
 
 function cleanCache(data) {
-  const sevenDays = nowSecs - 7 * 24 * 60 * 60;
+  const thirtyDays = nowSecs - 30 * 24 * 60 * 60;
   return entries(data)
-    .reduce(partial(keepRecent, sevenDays), {lastCheck: nowSecs});
+    .reduce(partial(keepRecent, thirtyDays), {lastCheck: nowSecs});
 }
 
 function prepareCache(data) {
