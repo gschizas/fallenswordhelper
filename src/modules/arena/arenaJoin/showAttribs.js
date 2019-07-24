@@ -1,23 +1,12 @@
 import addCommas from '../../system/addCommas';
-import getArrayByTagName from '../../common/getArrayByTagName';
-import getTextTrim from '../../common/getTextTrim';
+import findArena from './findArena';
 import {imageServer} from '../../system/system';
-import includes from '../../common/includes';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import {pCC} from '../../support/layout';
 import querySelector from '../../common/querySelector';
 import showMoves from './showMoves';
 import takeSnapshot from './takeSnapshot';
 
 const boolToString = e => String(Number(e));
-
-const thisTournament = () => Number(getTextTrim(getArrayByTagName('b', pCC)
-  .find(includes('Tournament #'))).match(/\d+/)[0]);
-
-function findArena(r) {
-  const tourney = thisTournament();
-  return r.arenas.find(e => e.id === tourney);
-}
 
 function param(label, value) {
   return '<div><div>' + label + '</div><div><img src="' + imageServer +
@@ -44,7 +33,7 @@ export default function showAttribs(json) {
     insertHtmlBeforeEnd(thisCell, paramBox(thisArena));
     showMoves(json.r, thisCell, thisArena);
     //#if _DEV  //  arena snapshot
-    takeSnapshot(json.r, thisArena);
+    takeSnapshot();
     //#endif
   }
 }

@@ -1,5 +1,6 @@
-//#if _DEV  //  advisor
+//#if _DEV  //  advisor, crawler
 import advisor from '../../notepad/advisor/advisor';
+import crawler from '../../notepad/arenaCrawler/crawler';
 //#endif
 import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
 import injectFsBoxContent from '../../notepad/injectFsBoxContent';
@@ -47,6 +48,7 @@ export default {
   //#endif
   //#if _DEV  //  advisor, whosGotWhat
   advisor: {'-': advisor},
+  crawler: {'-': crawler},
   whosgotwhat: {'-': whosGotWhat},
   //#endif
   '-': {'-': injectNotepad}

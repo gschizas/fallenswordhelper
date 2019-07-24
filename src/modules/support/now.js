@@ -1,5 +1,5 @@
-export var now;
-export var nowSecs;
+export let now;
+export let nowSecs;
 
 export function initNow() {
   if (!now) {
