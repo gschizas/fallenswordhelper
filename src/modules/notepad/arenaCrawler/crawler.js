@@ -85,5 +85,5 @@ export default async function crawler() {
   const typeWins = byType.map(a => a.slice(0, -2).concat(
     breakdown(a[9]), breakdown(a[10])
   ));
-  console.log(typeWins.sort((a, b) => b[7] - a[7]));
+  console.log(typeWins.sort((a, b) => b[7] - a[7])); // eslint-disable-line no-console
 }
