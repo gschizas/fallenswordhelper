@@ -7,6 +7,7 @@ module.exports = {
   env: {},
   globals: {
 
+    clearTimeout: false,
     DOMParser: false,
     Element: false,
     EventTarget: false,
@@ -22,6 +23,7 @@ module.exports = {
     localStorage: false,
     location: false,
     performance: false,
+    requestAnimationFrame: false,
     setTimeout: false,
     window: false,
 
