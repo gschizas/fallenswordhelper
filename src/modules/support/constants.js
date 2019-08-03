@@ -1,4 +1,4 @@
-export var rarity = [
+export const rarity = [
   {colour: '#ffffff', clas: 'fshCommon'},
   {colour: '#0099ff', clas: 'fshRare'},
   {colour: '#cc00ff', clas: 'fshUnique'},
@@ -8,14 +8,14 @@ export var rarity = [
   {colour: '#009900', clas: 'fshEpic'}
 ];
 
-export var places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
+export const places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
   'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
   'fourteenth'];
 
-export var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+export const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
   'Sep', 'Oct', 'Nov', 'Dec'];
 
-export var mercRE = [
+export const mercRE = [
   /<td>Attack:<\/td><td>(\d+)<\/td>/,
   /<td>Defense:<\/td><td>(\d+)<\/td>/,
   /<td>Armor:<\/td><td>(\d+)<\/td>/,
@@ -23,111 +23,111 @@ export var mercRE = [
   /<td>HP:<\/td><td>(\d+)<\/td>/
 ];
 
-export var lastActivityRE =
+export const lastActivityRE =
   /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
+export const playerIDRE = /player_id=(\d+)/;
+export const itemRE = /item_id=(\d+)&inv_id=(\d+)/;
+export const defenderMultiplier = 0.2;
 
-export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
-export var defenderMultiplier = 0.2;
+export const def_joinallgroupsundersize = 'joinallgroupsundersize';
 
-export var def_joinallgroupsundersize = 'joinallgroupsundersize';
-
-export var indexPhp = 'index.php';
-export var def_cmd = '?cmd=';
-export var cmdUrl = indexPhp + def_cmd;
-export var def_subcmd = '&subcmd=';
-var def_targetUsername = '&target_username=';
-var notepadBlank = def_cmd + 'notepad&blank=1' + def_subcmd;
-export var newGuildLogLoc = notepadBlank + 'newguildlog';
-export var newGuildLogUrl = indexPhp + newGuildLogLoc;
-export var auctionhouseUrl = cmdUrl + 'auctionhouse';
-export var ahSearchUrl = auctionhouseUrl + '&search=';
-export var logUrl = cmdUrl + 'log';
-export var doAddIgnore = logUrl + def_subcmd + 'doaddignore&ignore_username=';
-export var profileUrl = cmdUrl + 'profile';
-export var playerIdUrl = profileUrl + '&player_id=';
-export var dropItemsUrl = profileUrl + def_subcmd + 'dropitems';
-export var tradeUrl = cmdUrl + 'trade&target_player=';
-export var secureUrl = cmdUrl + 'trade' + def_subcmd + 'createsecure' +
+export const indexPhp = 'index.php';
+export const def_cmd = '?cmd=';
+export const cmdUrl = indexPhp + def_cmd;
+export const def_subcmd = '&subcmd=';
+const def_targetUsername = '&target_username=';
+const notepadBlank = def_cmd + 'notepad&blank=1' + def_subcmd;
+export const newGuildLogLoc = notepadBlank + 'newguildlog';
+export const newGuildLogUrl = indexPhp + newGuildLogLoc;
+export const auctionhouseUrl = cmdUrl + 'auctionhouse';
+export const ahSearchUrl = auctionhouseUrl + '&search=';
+export const logUrl = cmdUrl + 'log';
+export const doAddIgnore = logUrl + def_subcmd + 'doaddignore&ignore_username=';
+export const profileUrl = cmdUrl + 'profile';
+export const playerIdUrl = profileUrl + '&player_id=';
+export const dropItemsUrl = profileUrl + def_subcmd + 'dropitems';
+export const tradeUrl = cmdUrl + 'trade&target_player=';
+export const secureUrl = cmdUrl + 'trade' + def_subcmd + 'createsecure' +
   def_targetUsername;
-export var arenaUrl = cmdUrl + 'arena' + def_subcmd;
-export var notepadBlankUrl = indexPhp + notepadBlank;
-export var auctionSearchUrl = notepadBlankUrl + 'auctionsearch';
-export var pointsUrl = cmdUrl + 'points';
-export var guildSubcmdUrl = cmdUrl + 'guild' + def_subcmd;
-export var guildLogUrl = guildSubcmdUrl + 'log';
-export var scouttowerUrl = guildSubcmdUrl + 'scouttower';
-export var groupsSubcmdUrl = guildSubcmdUrl + 'groups&subcmd2=';
-export var recallUserUrl = guildSubcmdUrl + 'inventory&subcmd2=report&user=';
-export var guildViewUrl = guildSubcmdUrl + 'view&guild_id=';
-export var joinallUrl = groupsSubcmdUrl + 'joinall';
-export var joinUnderUrl = groupsSubcmdUrl + def_joinallgroupsundersize;
-export var worldUrl = cmdUrl + 'world';
-export var searchPlayerUrl = cmdUrl + 'findplayer';
-export var showPlayerUrl = searchPlayerUrl +
+export const arenaUrl = cmdUrl + 'arena' + def_subcmd;
+export const notepadBlankUrl = indexPhp + notepadBlank;
+export const auctionSearchUrl = notepadBlankUrl + 'auctionsearch';
+export const pointsUrl = cmdUrl + 'points';
+export const guildSubcmdUrl = cmdUrl + 'guild' + def_subcmd;
+export const guildLogUrl = guildSubcmdUrl + 'log';
+export const scouttowerUrl = guildSubcmdUrl + 'scouttower';
+export const groupsSubcmdUrl = guildSubcmdUrl + 'groups&subcmd2=';
+export const recallUserUrl = guildSubcmdUrl + 'inventory&subcmd2=report&user=';
+export const guildViewUrl = guildSubcmdUrl + 'view&guild_id=';
+export const joinallUrl = groupsSubcmdUrl + 'joinall';
+export const joinUnderUrl = groupsSubcmdUrl + def_joinallgroupsundersize;
+export const worldUrl = cmdUrl + 'world';
+export const searchPlayerUrl = cmdUrl + 'findplayer';
+export const showPlayerUrl = searchPlayerUrl +
   '&search_show_first=1&search_username=';
-export var blacksmithUrl = cmdUrl + 'blacksmith';
-export var quickbuffUrl = cmdUrl + 'quickbuff';
-export var composingUrl = cmdUrl + 'composing';
-export var attackplayerUrl = cmdUrl + 'attackplayer' + def_targetUsername;
-export var updateArchiveUrl = cmdUrl + def_subcmd + 'viewupdatearchive';
-export var archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
-export var bountyUrl = cmdUrl + 'bounty';
+export const blacksmithUrl = cmdUrl + 'blacksmith';
+export const quickbuffUrl = cmdUrl + 'quickbuff';
+export const composingUrl = cmdUrl + 'composing';
+export const attackplayerUrl = cmdUrl + 'attackplayer' + def_targetUsername;
+export const updateArchiveUrl = cmdUrl + def_subcmd + 'viewupdatearchive';
+export const archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
+export const bountyUrl = cmdUrl + 'bounty';
 
-export var guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
+export const guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
 
-export var def_afterUpdateActionlist = 'after-update.actionlist';
-export var def_playerBuffs = 'buffs.player';
-export var def_playerUpdate = 'update.player';
-export var def_playerLevel = 'level.stats-player';
-export var def_playerGold = 'gold.stats-player';
-export var def_shopPrompt = 'prompt.worldDialogShop';
-export var def_controlsKeydown = 'keydown.controls';
-export var def_realmUpdate = 'update.realm';
+export const def_afterUpdateActionlist = 'after-update.actionlist';
+export const def_playerBuffs = 'buffs.player';
+export const def_playerUpdate = 'update.player';
+export const def_playerLevel = 'level.stats-player';
+export const def_playerGold = 'gold.stats-player';
+export const def_shopPrompt = 'prompt.worldDialogShop';
+export const def_controlsKeydown = 'keydown.controls';
+export const def_realmUpdate = 'update.realm';
 
-export var def_suffixSuccessActionResponse = '-success.action-response';
-export var def_refreshActionList = '-1' + def_suffixSuccessActionResponse;
-export var def_viewCreature = '1' + def_suffixSuccessActionResponse;
-export var def_PvE = '2' + def_suffixSuccessActionResponse;
-export var def_relicView = '9' + def_suffixSuccessActionResponse;
-export var def_stairway = '5' + def_suffixSuccessActionResponse;
-export var def_teleport = '25' + def_suffixSuccessActionResponse;
+export const def_suffixSuccessActionResponse = '-success.action-response';
+export const def_refreshActionList = '-1' + def_suffixSuccessActionResponse;
+export const def_viewCreature = '1' + def_suffixSuccessActionResponse;
+export const def_PvE = '2' + def_suffixSuccessActionResponse;
+export const def_relicView = '9' + def_suffixSuccessActionResponse;
+export const def_stairway = '5' + def_suffixSuccessActionResponse;
+export const def_teleport = '25' + def_suffixSuccessActionResponse;
 
-export var def_creatureCombat = 2;
-export var def_repairAll = 15;
+export const def_creatureCombat = 2;
+export const def_repairAll = 15;
 
-export var def_fetch_playerStats = 1;
-export var def_fetch_playerBackpackCount = 2;
-export var def_fetch_playerBackpackItems = 4;
-export var def_fetch_playerPrefs = 8;
+export const def_fetch_playerStats = 1;
+export const def_fetch_playerBackpackCount = 2;
+export const def_fetch_playerBackpackItems = 4;
+export const def_fetch_playerPrefs = 8;
 
-export var def_fetch_playerBuffs = 16;
-export var def_fetch_worldDefines = 32;
-export var def_fetch_worldRealmStatic = 64;
-export var def_fetch_worldRealmDynamic = 128;
+export const def_fetch_playerBuffs = 16;
+export const def_fetch_worldDefines = 32;
+export const def_fetch_worldRealmStatic = 64;
+export const def_fetch_worldRealmDynamic = 128;
 
-export var def_fetch_worldRealmActions = 256;
-export var def_fetch_playerEquipment = 512;
-export var def_fetch_playerNotifications = 1024;
+export const def_fetch_worldRealmActions = 256;
+export const def_fetch_playerEquipment = 512;
+export const def_fetch_playerNotifications = 1024;
 
-export var def_needToCompose = 'needToCompose';
-export var def_lastComposeCheck = 'lastComposeCheck';
-export var def_characterVirtualLevel = 'characterVirtualLevel';
-export var def_enableGuildActivityTracker = 'enableGuildActivityTracker';
+export const def_needToCompose = 'needToCompose';
+export const def_lastComposeCheck = 'lastComposeCheck';
+export const def_characterVirtualLevel = 'characterVirtualLevel';
+export const def_enableGuildActivityTracker = 'enableGuildActivityTracker';
 
-export var def_table = 'table';
+export const def_table = 'table';
 
-export var fshBuffLog = 'fsh_buffLog';
+export const fshBuffLog = 'fsh_buffLog';
 
-export var def_statbarLevel = 'statbar-level-tooltip-general';
-export var def_statLevel = 'stat-level';
-export var def_statDefense = 'stat-defense';
-export var def_statAttack = 'stat-attack';
-export var def_statDamage = 'stat-damage';
-export var def_statArmor = 'stat-armor';
-export var def_statHp = 'stat-hp';
-export var def_statVl = 'stat-vl';
+export const def_statbarLevel = 'statbar-level-tooltip-general';
+export const def_statLevel = 'stat-level';
+export const def_statDefense = 'stat-defense';
+export const def_statAttack = 'stat-attack';
+export const def_statDamage = 'stat-damage';
+export const def_statArmor = 'stat-armor';
+export const def_statHp = 'stat-hp';
+export const def_statVl = 'stat-vl';
 
-export var GMSTORAGE_PATH = 'GM_';
+export const GMSTORAGE_PATH = 'GM_';
 
 export const composingFragmentType = [
   'Common', 'Rare', 'Unique', 'Legendary', 'Super Elite', 'Crystalline'];

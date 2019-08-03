@@ -3,6 +3,7 @@ import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
+import {playerIDRE} from '../support/constants';
 import querySelector from '../common/querySelector';
 import quickBuffHref from '../common/quickBuffHref';
 import setValue from '../system/setValue';
@@ -22,12 +23,18 @@ function isOldRow(postAgeMins, postDateUtc) {
   return postAgeMins > 20 && postDateUtc <= lastCheckUtc;
 }
 
-function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
-  if (logScreen === 'Chat' && addBuffTag) {
-    var playerIDRE = /player_id=(\d+)/;
-    var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
+function doBuffLink(aRow) {
+  const playerAnchor = playerIDRE.exec(aRow.cells[1].innerHTML);
+  if (playerAnchor) {
+    var playerID = playerAnchor[1];
     aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
       quickBuffHref(playerID) + '>[b]</a>';
+  }
+}
+
+function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
+  if (logScreen === 'Chat' && addBuffTag) {
+    doBuffLink(aRow);
   }
 }
 
