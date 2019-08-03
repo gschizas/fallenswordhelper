@@ -2,6 +2,7 @@ import addCommas from '../../system/addCommas';
 import lastActivityToDays from '../../common/lastActivityToDays';
 import {nowSecs} from '../../support/now';
 import partial from '../../common/partial';
+import toLowerCase from '../../common/toLowerCase';
 
 function byMember(prev, curr) {
   // if (curr.item_id === 11503) { // Zombie Brew
@@ -26,9 +27,9 @@ function processGuild(guild) {
 
 function decorateMembers(pots, obj, i) {
   obj.slot = i + 1;
-  obj.name_lower = obj.name.toLowerCase();
+  obj.name_lower = toLowerCase(obj.name);
   obj.lvl_reverse = 0 - obj.level;
-  obj.rank_lower = obj.rank_name.trim().toLowerCase();
+  obj.rank_lower = toLowerCase(obj.rank_name.trim());
   obj.gxp = addCommas(obj.guild_xp);
   obj.gxp_reverse = 0 - obj.guild_xp;
   obj.activity = lastActivityToDays(obj.last_activity);

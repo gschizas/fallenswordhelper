@@ -142,3 +142,8 @@ export const enhancementType = ['Piercing Strike', 'Reinforced Armor',
   'Fury Caster', 'Greenskin Slayer', 'Beast Slayer', 'Duelist', 'Glory Seeker',
   'First Strike', 'Hypnotize', 'Master Inventor', 'Soulless', 'Temporal Shift'
 ];
+
+export const itemType = ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon',
+  'Shield', 'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
+  'Resource', 'Recipe', 'Container', 'Composed', 'Frag Stash'];
+

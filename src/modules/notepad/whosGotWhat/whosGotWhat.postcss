@@ -82,6 +82,10 @@
     outline: 0;
   }
 
+  & input:invalid {
+    box-shadow: none; /* Firefox */
+  }
+
   & button {
     background-color: transparent;
     border: none;
@@ -89,6 +93,10 @@
     cursor: pointer;
     font-weight: bold;
     padding: 0;
+  }
+
+  & button:focus {
+    outline: none; /* Chrome */
   }
 
   & input:not(:valid) ~ button {visibility: hidden;}

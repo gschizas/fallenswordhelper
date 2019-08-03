@@ -20,7 +20,8 @@ function rowFactory(aRow) {
   return aRow.dom;
 }
 
-export default function displayChange(domTable, displayed) {
+export default function displayChange(domTable, table, displayed) {
+  // console.log(table.getTableState());
   const domTBody = domTable.tBodies[0];
   const thisTBody = createTBody();
   for (let r of displayed) {
