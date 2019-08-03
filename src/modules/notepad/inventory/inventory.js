@@ -5,6 +5,7 @@ import calf from '../../support/calf';
 import clearButton from './clearButton';
 import decorate from './decorate';
 import doTable from './table';
+import {entries} from '../../common/entries';
 import eventHandlers from './eventHandlers/eventHandlers';
 import executeAll from '../../common/executeAll';
 import {extendOptions} from './options';
@@ -35,7 +36,7 @@ function hydrate(prev, pair) {
 
 function rekeyMembrList() {
   // Rekey membrList from names to id's
-  calf.membrList = Object.entries(calf.membrList).filter(notLastUpdate)
+  calf.membrList = entries(calf.membrList).filter(notLastUpdate)
     .reduce(hydrate, {});
 }
 

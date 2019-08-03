@@ -1,3 +1,4 @@
+import {entries} from '../../../common/entries';
 import {options} from '../options';
 import setChecks from '../setChecks';
 
@@ -9,7 +10,7 @@ function hydrate(prev, curr) {
 }
 
 function clearGearOnly(checkedElements) {
-  return Object.entries(checkedElements).filter(gearOnly).reduce(hydrate, {});
+  return entries(checkedElements).filter(gearOnly).reduce(hydrate, {});
 }
 
 export default function clearChecks(fshInv) { // jQuery

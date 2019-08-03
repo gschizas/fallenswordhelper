@@ -4,6 +4,7 @@ import doSortParams from '../../common/doSortParams';
 import {getElementById} from '../../common/getElement';
 import getMigrate from '../../common/getMigrate';
 import jQueryPresent from '../../common/jQueryPresent';
+import {keys} from '../../common/keys';
 import numberSort from '../../system/numberSort';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
@@ -102,7 +103,7 @@ function drawTable() {
 }
 
 function prepMonster(data) {
-  monsterAry = Object.keys(data).map(partial(buildHtml, data));
+  monsterAry = keys(data).map(partial(buildHtml, data));
 }
 
 function prepAry(data) {

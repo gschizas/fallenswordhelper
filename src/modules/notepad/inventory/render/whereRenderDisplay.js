@@ -1,3 +1,4 @@
+import {entries} from '../../../common/entries';
 import isSelected from '../../../system/isSelected';
 import partial from '../../../common/partial';
 import {playerIdUrl} from '../../../support/constants';
@@ -19,7 +20,7 @@ function makeOption(folder_id, pair) {
 }
 
 function makeFolderOptions(folder_id, folders) {
-  return Object.entries(folders).sort(numeric)
+  return entries(folders).sort(numeric)
     .map(partial(makeOption, folder_id)).join('');
 }
 

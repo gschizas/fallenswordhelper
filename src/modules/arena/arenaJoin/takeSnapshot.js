@@ -1,42 +1,37 @@
 import all from '../../common/all';
-import findArena from './findArena';
+import {assign} from '../../common/assign';
 import {fromEntries} from '../../common/fromEntries';
-import getArrayByTagName from '../../common/getArrayByTagName';
-import getTextTrim from '../../common/getTextTrim';
+import join from '../../app/arena/join';
 import loadEquipped from '../../app/profile/loadequipped';
 import {nowSecs} from '../../support/now';
 import off from '../../common/off';
 import once from '../../common/once';
 import {pCC} from '../../support/layout';
 import querySelector from '../../common/querySelector';
-import {removeKeys} from '../../common/removeKeys';
+import {thisTournament} from './thisTournament';
+import toLowerCase from '../../common/toLowerCase';
 import updateUrl from './updateUrl';
-import view from '../../app/arena/view';
+import {attribType, itemType} from '../../support/constants';
 import {get, set} from 'idb-keyval';
 
-function getStats() {
-  const statLabels = getArrayByTagName('b', pCC).slice(2);
-  return fromEntries(statLabels.map(b => [
-    getTextTrim(b).replace(':', '').toLowerCase(),
-    Number(getTextTrim(b.parentNode.nextElementSibling))
-  ]));
-}
+const mapAttribs = joinData => fromEntries(joinData.r.attributes.map(o =>
+  ['stat_' + toLowerCase(attribType[o.id]), o.value]));
+const mapEquipment = equipped =>
+  fromEntries(equipped.r.map(o => [toLowerCase(itemType[o.t]), o.n]));
 
 async function buttonPress(e) {
   e.preventDefault();
-  const [json, equipped, joinedArenas] = await all([view(), loadEquipped(),
-    get('fsh_joinedArenas')]);
-  const thisArena = removeKeys(['players'], findArena(json.r));
-  if (thisArena.specials) {
-    thisArena.slots = json.r.current_set.slots;
-  }
-  thisArena.equipped = equipped.r.map(o => removeKeys(['sp', 'v'], o));
-  thisArena.joined = nowSecs;
-  thisArena.seen = nowSecs;
-  thisArena.stats = getStats();
-  const newJoined = joinedArenas || [];
-  newJoined.push(thisArena);
-  await set('fsh_joinedArenas', newJoined);
+  const pvpId = thisTournament();
+  const [equipped, joinData, fsh_arenaJoined] = await all([
+    loadEquipped(), join(pvpId), get('fsh_arenaJoined')]);
+  const thisData = assign(
+    {pvpId, joined: nowSecs},
+    mapEquipment(equipped),
+    mapAttribs(joinData)
+  );
+  const newJoined = fsh_arenaJoined || [];
+  newJoined.push(thisData);
+  set('fsh_arenaJoined', newJoined);
   updateUrl(e);
 }
 

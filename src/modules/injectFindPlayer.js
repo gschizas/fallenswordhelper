@@ -3,7 +3,6 @@ import dontPost from './common/dontPost';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import on from './common/on';
 import quickBuffHref from './common/quickBuffHref';
-import {searchPlayerUrl} from './support/constants';
 import {
   calculateBoundaries,
   gvgLowerLevel,
@@ -11,6 +10,7 @@ import {
   pvpLowerLevel,
   pvpUpperLevel
 } from './common/levelHighlight';
+import {playerIDRE, searchPlayerUrl} from './support/constants';
 
 function updateUrl(evt) {
   evt.preventDefault();
@@ -47,7 +47,7 @@ function doFindPlayer() {
 }
 
 function addBuffLinks(i, e) {
-  var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
+  var id = playerIDRE.exec($(e).attr('href'));
   $(e).after(' <a class="fshBf" ' + quickBuffHref(id[1]) + '>[b]</a>');
 }
 

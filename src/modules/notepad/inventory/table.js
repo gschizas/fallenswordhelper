@@ -1,4 +1,5 @@
 import bpRender from './render/bpRender';
+import {craftHash} from './assets';
 import craftRender from './render/craftRender';
 import {createTable} from '../../common/cElement';
 import createdRow from './render/createdRow';
@@ -7,6 +8,7 @@ import durabilityRender from './render/durabilityRender';
 import forgeRender from './render/forgeRender';
 import gsRender from './render/gsRender';
 import insertElement from '../../common/insertElement';
+import {itemType} from '../../support/constants';
 import nameRender from './render/nameRender';
 import {pCC} from '../../support/layout';
 import sendRender from './render/sendRender';
@@ -16,7 +18,6 @@ import whereData from './render/whereData';
 import whereRender from './render/whereRender';
 import whereRenderDisplay from './render/whereRenderDisplay';
 import whereRenderFilter from './render/whereRenderFilter';
-import {craftHash, itemType} from './assets';
 import {showQuickDropLinks, showQuickSendLinks} from './options';
 
 var tblCols = [

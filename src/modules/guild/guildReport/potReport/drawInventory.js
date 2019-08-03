@@ -1,5 +1,6 @@
 import {createDiv} from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
+import {keys} from '../../../common/keys';
 import once from '../../../common/once';
 import partial from '../../../common/partial';
 import {sendEvent} from '../../../support/fshGa';
@@ -44,10 +45,10 @@ function makeRowsFromPivot(potOpts, pivot, prev, pot) {
 
 export function drawInventory(potOpts, potObj) {
   sendEvent('potReport', 'drawInventory');
-  var pivot = sortKeys(Object.keys(potObj)
+  var pivot = sortKeys(keys(potObj)
     .reduce(partial(pivotPotObj, potOpts, potObj), {}));
   inventory.innerHTML = '<table><tbody>' +
-    Object.keys(pivot).reduce(partial(makeRowsFromPivot, potOpts, pivot), '') +
+    keys(pivot).reduce(partial(makeRowsFromPivot, potOpts, pivot), '') +
     '</tbody></table>';
 }
 

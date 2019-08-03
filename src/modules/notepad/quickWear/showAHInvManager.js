@@ -1,4 +1,5 @@
 import {createDiv} from '../../common/cElement';
+import {entries} from '../../common/entries';
 import getValueJSON from '../../system/getValueJSON';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
@@ -25,7 +26,7 @@ function foundHtml(pair) {
 }
 
 function displayFoundCount(invCount) {
-  return Object.entries(invCount).filter(found).map(foundHtml).join('');
+  return entries(invCount).filter(found).map(foundHtml).join('');
 }
 
 function notFound(item) {return item.displayOnAH && !item.found;}
@@ -44,7 +45,7 @@ function otherHtml(pair) {
 }
 
 function displayOtherCount(invCount) {
-  return Object.entries(invCount).filter(others).map(otherHtml).join('');
+  return entries(invCount).filter(others).map(otherHtml).join('');
 }
 
 function buildHTML(invCount, quickSL) {

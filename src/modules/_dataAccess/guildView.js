@@ -6,7 +6,7 @@ import getTextTrim from '../common/getTextTrim';
 import indexAjaxData from '../ajax/indexAjaxData';
 import intValue from '../system/intValue';
 import {nowSecs} from '../support/now';
-import {def_table, lastActivityRE} from '../support/constants';
+import {def_table, lastActivityRE, playerIDRE} from '../support/constants';
 
 let cache = {};
 
@@ -33,7 +33,7 @@ function fromTip(row) {
 
 function fromRow(row) {
   return {
-    id: Number(row.cells[1].children[0].href.match(/player_id=(\d+)/)[1]),
+    id: Number(row.cells[1].children[0].href.match(playerIDRE)[1]),
     name: getTextTrim(row.cells[1].children[0]),
     level: Number(getTextTrim(row.cells[2])),
     xp: 0,

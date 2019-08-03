@@ -1,3 +1,4 @@
+import {entries} from '../../common/entries';
 import formatCost from './formatCost';
 import getBuffsToBuy from './getBuffsToBuy';
 import {getElementById} from '../../common/getElement';
@@ -17,7 +18,7 @@ function totalCost(prev, pair) {
 }
 
 function hazBuffs() {
-  var myEntries = Object.entries(buffCost.buffs);
+  var myEntries = entries(buffCost.buffs);
   var totalText = formatCost(myEntries.reduce(totalCost,
     {k: 0, fsp: 0, stam: 0, unknown: 0}));
   getElementById('buffCost').innerHTML = '<span class="tip-static" ' +

@@ -2,6 +2,7 @@ import combatView from '../../ajax/combatView';
 import createDocument from '../../system/createDocument';
 import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
+import {keys} from '../../common/keys';
 import {nowSecs} from '../../support/now';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
@@ -26,7 +27,7 @@ function keepRecent(data, sevenDays, prev, combatId) {
 
 function cleanCache(data) {
   var sevenDays = nowSecs - 7 * 24 * 60 * 60;
-  combatCache = Object.keys(data)
+  combatCache = keys(data)
     .reduce(partial(keepRecent, data, sevenDays), {});
   combatCache.lastCheck = nowSecs;
   set('fsh_pvpCombat', combatCache);

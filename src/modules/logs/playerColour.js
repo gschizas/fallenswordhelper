@@ -1,3 +1,5 @@
+import {keys} from '../common/keys';
+
 var memberNamesAsStrings = [];
 var listOfAllies;
 var listOfEnemies;
@@ -30,7 +32,7 @@ export function playerColor(colorPlayerName, playerName, playerElement) {
 }
 
 export function getKeys(data) {
-  memberNamesAsStrings = Object.keys(data);
+  memberNamesAsStrings = keys(data);
 }
 
 function justUsername(obj) {

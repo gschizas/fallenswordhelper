@@ -1,6 +1,7 @@
 import {createAnchor} from '../../common/cElement';
 import {dataRows} from '../../common/dataRows';
 import displayTracker from './displayTracker';
+import {entries} from '../../common/entries';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getMigrate from '../../common/getMigrate';
 import getText from '../../common/getText';
@@ -49,7 +50,7 @@ function anyMissing(newTitans, pair) {
 
 function addMissingTitansFromOld(oldTitans, newTitans) {
   if (!oldTitans) {return;}
-  Object.entries(oldTitans).forEach(partial(anyMissing, newTitans));
+  entries(oldTitans).forEach(partial(anyMissing, newTitans));
 }
 
 export function getTitanString(guildKills, totalHP, currentHP) {

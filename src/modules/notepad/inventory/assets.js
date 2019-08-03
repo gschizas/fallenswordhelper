@@ -122,9 +122,6 @@ export var inventoryCheckAll = {
   '105': 1,
   '106': 1
 };
-export var itemType = ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon', 'Shield',
-  'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
-  'Resource', 'Recipe', 'Container', 'Composed', 'Frag Stash'];
 export var craftHash = {
   Perfect: {abbr: 'Perf', colour: '#00b600', index: 8},
   Excellent: {abbr: 'Exc', colour: '#f6ed00', index: 7},

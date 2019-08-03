@@ -6,6 +6,7 @@ import fallback from '../../../system/fallback';
 import getMigrate from '../../../common/getMigrate';
 import insertElement from '../../../common/insertElement';
 import isChecked from '../../../system/isChecked';
+import {keys} from '../../../common/keys';
 import on from '../../../common/on';
 import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
@@ -31,7 +32,7 @@ function update(potOpts, pot) {
 }
 
 function buildMap(potOpts, potObj) {
-  Object.keys(potObj).forEach(partial(update, potOpts));
+  keys(potObj).forEach(partial(update, potOpts));
   return sortKeys(potOpts.myMap);
 }
 
@@ -81,7 +82,7 @@ function reMap(ignore, prev, pot) {
 }
 
 function resetMap(potOpts, potObj, ignore) {
-  potOpts.myMap = Object.keys(potObj).reduce(partial(reMap, ignore), {});
+  potOpts.myMap = keys(potObj).reduce(partial(reMap, ignore), {});
 }
 
 function doReset(potOpts, potObj, ignore) {

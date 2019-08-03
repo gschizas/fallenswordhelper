@@ -1,6 +1,7 @@
 import './doFolders.postcss';
 import add from '../support/task';
 import {def_table} from '../support/constants';
+import {entries} from '../common/entries';
 import fallback from '../system/fallback';
 import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
@@ -80,7 +81,7 @@ function doFolderHeaders(folders) {
     innerHTML: '<td colspan=6>' +
       '<span id="folderid0" class="fshLink" fid=0>All</span>' +
       ' &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>' +
-      Object.entries(folders).map(folderSpan).join('')
+      entries(folders).map(folderSpan).join('')
   });
   on(foldersRow, 'click', hideFolder);
   var el = getElementById('item-list').parentNode.parentNode;

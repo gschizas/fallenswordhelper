@@ -5,6 +5,7 @@ import formatLocalDateTime from '../../common/formatLocalDateTime';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isUndefined from '../../common/isUndefined';
+import {keys} from '../../common/keys';
 import on from '../../common/on';
 import partial from '../../common/partial';
 import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
@@ -28,7 +29,7 @@ function addOption(prev, member) {
 function buildOptions(ourMembers) {
   return '<select name="member">' +
     '<option value="- All -" selected>- All -</option>' +
-    Object.keys(ourMembers).sort(alpha).reduce(addOption, '') + '</select>';
+    keys(ourMembers).sort(alpha).reduce(addOption, '') + '</select>';
 }
 
 function toText(val) {
@@ -65,7 +66,7 @@ function selectedMember(outside, memberKey) {
 }
 
 function memberRows() {
-  return Object.keys(myMembers).reduce(selectedMember, '');
+  return keys(myMembers).reduce(selectedMember, '');
 }
 
 function drawRows() {

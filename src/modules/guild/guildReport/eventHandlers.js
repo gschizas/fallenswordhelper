@@ -8,6 +8,7 @@ import itemId from './itemId';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
+import {playerIDRE} from '../../support/constants';
 import playerId from '../../common/playerId';
 import {queueRecallItem} from '../../ajaxQueue/queue';
 import {sendEvent} from '../../support/fshGa';
@@ -29,7 +30,7 @@ function replyTo(self) {
 }
 
 function targetPlayerId(href) {
-  return href.match(/&player_id=(\d+)/)[1];
+  return href.match(playerIDRE)[1];
 }
 
 function recallResult(action, theTd, data) {

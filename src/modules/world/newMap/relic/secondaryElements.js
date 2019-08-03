@@ -5,6 +5,7 @@ import getValue from '../../../system/getValue';
 import hideElement from '../../../common/hideElement';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
+import {keys} from '../../../common/keys';
 import {nowSecs} from '../../../support/now';
 import partial from '../../../common/partial';
 import {playerIdUrl} from '../../../support/constants';
@@ -83,7 +84,7 @@ function missingMembers(membrList) {
   guildMemberList = membrList;
   twoMinutesAgo = nowSecs - 120;
   sevenDaysAgo = nowSecs - 604800;
-  var filtered = Object.keys(guildMemberList)
+  var filtered = keys(guildMemberList)
     .filter(availableMembers).map(makeLinks);
   insertHtmlBeforeEnd(containerDiv,
     '<div class="fshFloatLeft fshRelicLowDiv">' +

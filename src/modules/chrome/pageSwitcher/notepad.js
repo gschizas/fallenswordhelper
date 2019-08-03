@@ -15,6 +15,9 @@ import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
 import injectSaveSettings from '../../settings/load';
 import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../../notepad/quickWear/quickWear';
+//#if _DEV  //  newGuildLog5
+import newGuildLog5 from '../../notepad/newGuildLog5/newGuildLog5';
+//#endif
 //#if _BETA  //  reliclist
 import reliclist from '../../notepad/reliclist/reliclist';
 //#endif
@@ -46,7 +49,8 @@ export default {
   //#if _BETA  //  reliclist
   reliclist: {'-': reliclist},
   //#endif
-  //#if _DEV  //  advisor, whosGotWhat
+  //#if _DEV  //  newGuildLog5, advisor, whosGotWhat
+  newGuildLog5: {'-': newGuildLog5},
   advisor: {'-': advisor},
   crawler: {'-': crawler},
   whosgotwhat: {'-': whosGotWhat},

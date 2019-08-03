@@ -21,6 +21,7 @@ import viewCombat from './viewCombat';
 import {
   attackplayerUrl,
   doAddIgnore,
+  playerIDRE,
   secureUrl,
   tradeUrl
 } from '../support/constants';
@@ -55,8 +56,7 @@ function canIgnore(aRow, playerName, isGuildMate) {
 
 function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   canIgnore(aRow, playerName, isGuildMate);
-  var buffingPlayerIDRE = /player_id=(\d+)/;
-  var buffingPlayerID = buffingPlayerIDRE
+  var buffingPlayerID = playerIDRE
     .exec(aRow.cells[2].innerHTML)[1];
   var buffingPlayerName = getTextTrim(aRow.cells[2].children[0]);
   var extraText = ' <span style="font-size:x-small;"><nobr>' +
