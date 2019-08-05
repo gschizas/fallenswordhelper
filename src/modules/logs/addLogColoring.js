@@ -1,11 +1,12 @@
 import {dataRows} from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
+import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
+import on from '../common/on';
+import openQuickBuffByName from '../common/openQuickBuffByName';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
-import {playerIDRE} from '../support/constants';
 import querySelector from '../common/querySelector';
-import quickBuffHref from '../common/quickBuffHref';
 import setValue from '../system/setValue';
 
 var nowUtc;
@@ -24,12 +25,8 @@ function isOldRow(postAgeMins, postDateUtc) {
 }
 
 function doBuffLink(aRow) {
-  const playerAnchor = playerIDRE.exec(aRow.cells[1].innerHTML);
-  if (playerAnchor) {
-    var playerID = playerAnchor[1];
-    aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
-      quickBuffHref(playerID) + '>[b]</a>';
-  }
+  insertHtmlBeforeEnd(aRow.cells[1],
+    ' <button class="fshBl fshBls">[b]</button>');
 }
 
 function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
@@ -55,12 +52,22 @@ function getLastCheck(lastCheckScreen) {
   return getValue(lastCheckScreen) || nowUtc;
 }
 
+const isBuffLink = target =>
+  target.classList.contains('fshBl') && target.previousElementSibling;
+
+function handleClick(e) {
+  if (isBuffLink(e.target)) {
+    openQuickBuffByName(getTextTrim(e.target.previousElementSibling));
+  }
+}
+
 function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
   var lastCheckScreen = 'last' + logScreen + 'Check';
   lastCheckUtc = getLastCheck(lastCheckScreen);
   dataRows(chatTable.rows, 3, 0)
     .forEach(partial(rowColor, logScreen, dateColumn));
+  on(chatTable, 'click', handleClick);
   setValue(lastCheckScreen, nowUtc);
 }
 

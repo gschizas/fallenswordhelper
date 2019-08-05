@@ -5817,8 +5817,21 @@
       .then(getProfileFromForage);
   }
 
+  function getPos(available, desired, offset) {
+    return Math.floor(Math.max(available - desired, 0) / 2 + offset);
+  }
+
+  function fshOpen(url, title, w, _h, features) {
+    var h = _h;
+    if (_h === 500) {h = 1000;}
+    var top = getPos(window.screen.availHeight, h, window.screenY);
+    var left = getPos(document.documentElement.clientWidth, w, window.screenX);
+    window.open(url, title, 'width=' + w + ', height=' + h + ', left=' + left +
+      ', top=' + top + features);
+  }
+
   function openQuickBuffByName(aPlayerName) {
-    window.openWindow(quickbuffUrl + '&t=' + aPlayerName,
+    fshOpen(quickbuffUrl + '&t=' + aPlayerName,
       'fsQuickBuff', 618, 1000, ',scrollbars');
   }
 
@@ -7125,19 +7138,6 @@
     var staminaMouseover = getElementById('statbar-stamina-tooltip-stamina');
     var stamVals = getStamVals(staminaMouseover);
     insertHtmlBeforeEnd(staminaMouseover, maxStamAt(nextGain, stamVals));
-  }
-
-  function getPos(available, desired, offset) {
-    return Math.floor(Math.max(available - desired, 0) / 2 + offset);
-  }
-
-  function fshOpen(url, title, w, _h, features) {
-    var h = _h;
-    if (_h === 500) {h = 1000;}
-    var top = getPos(window.screen.availHeight, h, window.screenY);
-    var left = getPos(document.documentElement.clientWidth, w, window.screenX);
-    window.open(url, title, 'width=' + w + ', height=' + h + ', left=' + left +
-      ', top=' + top + features);
   }
 
   function interceptQuickBuff() {
@@ -13207,13 +13207,6 @@
     }
   }
 
-  function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
-    var passthru = '';
-    if (buffList) {passthru = '&blist=' + buffList;}
-    return 'href=\'javascript:window.openWindow("' + quickbuffUrl + '&tid=' +
-      aPlayerId + passthru + '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
-  }
-
   var nowUtc;
   var lastCheckUtc;
 
@@ -13230,12 +13223,8 @@
   }
 
   function doBuffLink(aRow) {
-    const playerAnchor = playerIDRE.exec(aRow.cells[1].innerHTML);
-    if (playerAnchor) {
-      var playerID = playerAnchor[1];
-      aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
-        quickBuffHref(playerID) + '>[b]</a>';
-    }
+    insertHtmlBeforeEnd(aRow.cells[1],
+      ' <button class="fshBl fshBls">[b]</button>');
   }
 
   function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
@@ -13261,12 +13250,22 @@
     return getValue(lastCheckScreen) || nowUtc;
   }
 
+  const isBuffLink$1 = target =>
+    target.classList.contains('fshBl') && target.previousElementSibling;
+
+  function handleClick$1(e) {
+    if (isBuffLink$1(e.target)) {
+      openQuickBuffByName(getTextTrim(e.target.previousElementSibling));
+    }
+  }
+
   function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
     nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
     var lastCheckScreen = 'last' + logScreen + 'Check';
     lastCheckUtc = getLastCheck(lastCheckScreen);
     dataRows(chatTable.rows, 3, 0)
       .forEach(partial(rowColor, logScreen, dateColumn));
+    on(chatTable, 'click', handleClick$1);
     setValue(lastCheckScreen, nowUtc);
   }
 
@@ -13454,6 +13453,13 @@
   function addPvpSummary(aRow, messageType) {
     // add PvP combat log summary
     if (isCombatRow(aRow, messageType)) {processCombatRow(aRow);}
+  }
+
+  function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
+    var passthru = '';
+    if (buffList) {passthru = '&blist=' + buffList;}
+    return 'href=\'javascript:window.openWindow("' + quickbuffUrl + '&tid=' +
+      aPlayerId + passthru + '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
   }
 
   function thisNick(nick, buffObj) {
@@ -24116,7 +24122,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '140';
+  window.FSH.calf = '141';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
