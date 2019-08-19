@@ -10,6 +10,7 @@ import partial from '../../common/partial';
 import results from '../../app/arena/results';
 import round from '../../common/round';
 import {createAnchor, createBr} from '../../common/cElement';
+import {cyrb32, cyrb53, makeHash} from './makeHash';
 import {get, set} from 'idb-keyval';
 
 const tabDelimited = (s, a) => s.concat(a.join('\t'), '\n');
@@ -64,12 +65,19 @@ function makeDownloadAnchor(output, type, filename, text) {
 
 const joinedFields = ['pvpId', 'helmet', 'armor', 'gloves', 'boots', 'weapon',
   'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
-  'stat_armor', 'stat_damage', 'stat_hp'];
+  'stat_armor', 'stat_damage', 'stat_hp', 'cyrb32', 'cyrb53'];
 
 async function makeArenaJoined() {
   const fsh_arenaJoined = await get('fsh_arenaJoined');
   if (!fsh_arenaJoined) {return;}
-  const output = fsh_arenaJoined.map(o => joinedFields.map(j => o[j]))
+  const output = fsh_arenaJoined
+    .map(o =>
+      fromEntries(entries(o)
+        .concat([['cyrb32', makeHash(cyrb32, o)]])
+        .concat([['cyrb53', makeHash(cyrb53, o)]])
+      )
+    )
+    .map(o => joinedFields.map(j => o[j]))
     .reduce(tabDelimited, joinedFields.join('\t') + '\n');
   makeDownloadAnchor(output,
     'text/plain', 'fsh_arenaJoined.txt', 'fsh_arenaJoined');

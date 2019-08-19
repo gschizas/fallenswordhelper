@@ -14,6 +14,17 @@ function lvlFilter(_settings, data) {
   return true;
 }
 
+//#if _DEV  //  specFilter
+function specFilter(settings, searchData, index, rowData) {
+  const test = rowData[4].match(/_(\d)\./);
+  if (test) {return Number(test[1]) === 0;}
+  return true;
+}
+
+//#endif
 export default function doLvlFilter() {
   $.fn.dataTable.ext.search.push(lvlFilter);
+  //#if _DEV  //  specFilter
+  $.fn.dataTable.ext.search.push(specFilter);
+  //#endif
 }
