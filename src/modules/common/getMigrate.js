@@ -1,10 +1,13 @@
-import {get} from 'idb-keyval';
 import getForage from '../ajax/getForage';
 import partial from './partial';
 import {sendEvent} from '../support/fshGa';
+import {get, set} from 'idb-keyval';
 
 function fallbackStorage(key, data) {
-  if (data) {sendEvent('Migrate Storage', key);}
+  if (data) {
+    sendEvent('Migrate Storage', key);
+    set(key, data);
+  }
   return data;
 }
 
