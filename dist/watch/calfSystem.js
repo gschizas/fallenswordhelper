@@ -655,11 +655,12 @@
     return result;
   }
 
-  var server = document.location.protocol + '//' +
+  const server = document.location.protocol + '//' +
     document.location.host + '/';
-  var imageServer = window.HCS && window.HCS.defines &&
+  const imageServer = window.HCS && window.HCS.defines &&
     window.HCS.defines.fileserver &&
     window.HCS.defines.fileserver.slice(0, -1);
+  const cdn = window.HCS && window.HCS.defines && window.HCS.defines.cdn;
 
   function retBool(bool, ifTrue, ifFalse) {
     if (bool) {
@@ -971,6 +972,32 @@
     return cElement('option', props);
   }
 
+  function dialogMsg(msg) {
+    $('#dialog_msg').html(msg).dialog('open');
+  }
+
+  function stringifyError(err) {
+    return JSON.stringify(err,
+      Object.getOwnPropertyNames(Object.getPrototypeOf(err)), 1)
+      .replace(/\n/g, '');
+  }
+
+  function getForageError(forage, err) {
+    if (err.name === 'UnknownError') {
+      dialogMsg('Firefox IndexedDB - UnknownError<br>' +
+        err.message + '<br>' +
+        '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
+        'More Info</a>');
+    } else {
+      sendException(forage + ' localforage.getItem error ' +
+        stringifyError(err), false);
+    }
+  }
+
+  function getForage(forage) {
+    return localforage.getItem(forage).catch(partial(getForageError, forage));
+  }
+
   class Store {
       constructor(dbName = 'keyval-store', storeName = 'keyval') {
           this.storeName = storeName;
@@ -1034,34 +1061,11 @@
       }).then(() => keys);
   }
 
-  function dialogMsg(msg) {
-    $('#dialog_msg').html(msg).dialog('open');
-  }
-
-  function stringifyError(err) {
-    return JSON.stringify(err,
-      Object.getOwnPropertyNames(Object.getPrototypeOf(err)), 1)
-      .replace(/\n/g, '');
-  }
-
-  function getForageError(forage, err) {
-    if (err.name === 'UnknownError') {
-      dialogMsg('Firefox IndexedDB - UnknownError<br>' +
-        err.message + '<br>' +
-        '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=944918">' +
-        'More Info</a>');
-    } else {
-      sendException(forage + ' localforage.getItem error ' +
-        stringifyError(err), false);
-    }
-  }
-
-  function getForage(forage) {
-    return localforage.getItem(forage).catch(partial(getForageError, forage));
-  }
-
   function fallbackStorage(key, data) {
-    if (data) {sendEvent('Migrate Storage', key);}
+    if (data) {
+      sendEvent('Migrate Storage', key);
+      set(key, data);
+    }
     return data;
   }
 
@@ -6614,7 +6618,7 @@
 
   function addUfsgLinks() {
     querySelectorArray(
-      '.news_body img[src^="' + imageServer + '/creatures/"]')
+      '.news_body img[src^="' + cdn + 'creatures/"]')
       .forEach(makeUfsgLink);
     getArrayByClassName('news_body_tavern', pCC)
       .filter(titanSpotted).forEach(titanLink);
@@ -7785,8 +7789,15 @@
     return true;
   }
 
+  function specFilter(settings, searchData, index, rowData) {
+    const test = rowData[4].match(/_(\d)\./);
+    if (test) {return Number(test[1]) === 0;}
+    return true;
+  }
+
   function doLvlFilter() {
     $.fn.dataTable.ext.search.push(lvlFilter);
+    $.fn.dataTable.ext.search.push(specFilter);
   }
 
   function makeTheRow() {
@@ -8347,13 +8358,52 @@
     intercept('Go', updateGoUrl);
   }
 
+  /* eslint-disable no-bitwise */
+
+  /* https://stackoverflow.com/a/52171480/1274806 */
+
+  function cyrb32(s) {
+    let h = 6;
+    for (let i = 0; i < s.length; i += 1) {
+      h = Math.imul(h ^ s.charCodeAt(i), 9 ** 9);
+    }
+    return (h ^ h >>> 9) >>> 0;
+  }
+
+  function cyrb53(str, seed = 0) {
+    let h1 = 0xdeadbeef ^ seed;
+    let h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ h1 >>> 16, 2246822507) ^
+      Math.imul(h2 ^ h2 >>> 13, 3266489909);
+    h2 = Math.imul(h2 ^ h2 >>> 16, 2246822507) ^
+      Math.imul(h1 ^ h1 >>> 13, 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  }
+
+  function makeHash(hashFn, equip) {
+    return hashFn(
+      itemType
+        .map(toLowerCase)
+        .map(t => equip[t])
+        .filter(s => s)
+        .join()
+    );
+  }
+
   function makeRows$1(equip) {
-    return entries(equip).map(([key, value]) =>
-      `<tr><td>${key}</td><td>${value}</td></tr>`).join('');
+    return entries(equip)
+      .concat([['cyrb32', makeHash(cyrb32, equip)]])
+      .concat([['cyrb53', makeHash(cyrb53, equip)]])
+      .map(([key, value]) =>
+        `<tr><td>${key}</td><td>${value}</td></tr>`).join('');
   }
 
   function displayObj(equip) {
-    // console.log(equip);
     const aTbl = createTable({innerHTML: `<tbody>${makeRows$1(equip)}</tbody>`});
     insertElement(pCC, createDiv({innerHTML: '&nbsp;'}));
     insertElement(pCC, aTbl);
@@ -8362,7 +8412,6 @@
   async function results() {
     const fsh_arenaJoined = await get('fsh_arenaJoined');
     if (!fsh_arenaJoined) {return;}
-    // console.log(fsh_arenaJoined);
     const thisArena = thisTournament();
     const equip = fsh_arenaJoined.find(o => o.pvpId === thisArena);
     if (equip) {displayObj(equip);}
@@ -14958,7 +15007,7 @@
   }
 
   function updateNmv() {
-    var nmvImg = querySelector('#profileRightColumn img[src$="/60_sm.gif"]');
+    var nmvImg = querySelector('#profileRightColumn img[src$="/60.png"]');
     if (nmvImg) {gotImg(nmvImg);}
   }
 
@@ -17572,8 +17621,8 @@
 
   function tipHeader(creature) {
     return '<table><tr><td>' +
-      '<img src="' + imageServer + '/creatures/' + creature.image_id +
-      '.jpg" height="200" width="200"></td><td rowspan="2">' +
+      `<img src="${cdn}creatures/${creature.image_id}.png" ` +
+      'height="200" width="200"></td><td rowspan="2">' +
       '<table width="400"><tr>' +
       '<td class="header" colspan="4" class="fshCenter">Statistics</td></tr>';
   }
@@ -20960,12 +21009,19 @@
 
   const joinedFields = ['pvpId', 'helmet', 'armor', 'gloves', 'boots', 'weapon',
     'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
-    'stat_armor', 'stat_damage', 'stat_hp'];
+    'stat_armor', 'stat_damage', 'stat_hp', 'cyrb32', 'cyrb53'];
 
   async function makeArenaJoined() {
     const fsh_arenaJoined = await get('fsh_arenaJoined');
     if (!fsh_arenaJoined) {return;}
-    const output = fsh_arenaJoined.map(o => joinedFields.map(j => o[j]))
+    const output = fsh_arenaJoined
+      .map(o =>
+        fromEntries(entries(o)
+          .concat([['cyrb32', makeHash(cyrb32, o)]])
+          .concat([['cyrb53', makeHash(cyrb53, o)]])
+        )
+      )
+      .map(o => joinedFields.map(j => o[j]))
       .reduce(tabDelimited, joinedFields.join('\t') + '\n');
     makeDownloadAnchor(output,
       'text/plain', 'fsh_arenaJoined.txt', 'fsh_arenaJoined');
@@ -23364,14 +23420,14 @@
     return '';
   }
 
-  function makeHash(prev, curr) {
+  function makeHash$1(prev, curr) {
     var itemName = curr.match(/>([^<]+)</)[1];
     prev[itemName] = (prev[itemName] || 0) + 1;
     return prev;
   }
 
   function buildGainHash(gains) {
-    return gains.reduce(makeHash, {});
+    return gains.reduce(makeHash$1, {});
   }
 
   function alphaEntries(a, b) {return alpha(a[0], b[0]);}
@@ -24122,7 +24178,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '141';
+  window.FSH.calf = '142';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
