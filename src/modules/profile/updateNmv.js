@@ -39,6 +39,6 @@ function gotImg(nmvImg) {
 }
 
 export default function updateNmv() {
-  var nmvImg = querySelector('#profileRightColumn img[src$="/60_sm.gif"]');
+  var nmvImg = querySelector('#profileRightColumn img[src$="/60.png"]');
   if (nmvImg) {gotImg(nmvImg);}
 }
