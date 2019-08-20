@@ -15,9 +15,11 @@ function lvlFilter(_settings, data) {
 }
 
 //#if _DEV  //  specFilter
-function specFilter(settings, searchData, index, rowData) {
-  const test = rowData[4].match(/_(\d)\./);
-  if (test) {return Number(test[1]) === 0;}
+function specFilter(_settings, _searchData, _index, rowData) {
+  const test = 0;
+  if (test) {
+    return rowData[4]['@data-order'] === '0';
+  }
   return true;
 }
 
