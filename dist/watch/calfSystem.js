@@ -7789,9 +7789,11 @@
     return true;
   }
 
-  function specFilter(settings, searchData, index, rowData) {
-    const test = rowData[4].match(/_(\d)\./);
-    if (test) {return Number(test[1]) === 0;}
+  function specFilter(_settings, _searchData, _index, rowData) {
+    const test = 0;
+    if (test) {
+      return rowData[4]['@data-order'] === '0';
+    }
     return true;
   }
 
@@ -7879,14 +7881,13 @@
     cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
   }
 
-  function boolData(theCells, i) { // jQuery
-    var cell = theCells.eq(i);
-    var matches = /(\d)\.gif/.exec($('img', cell).attr('src'));
-    if (matches) {cell.attr('data-order', matches[1]);}
+  function boolData(i, el) { // jQuery
+    var matches = /(\d)\.png/.exec($('img', el).attr('src'));
+    if (matches) {$(el).attr('data-order', matches[1]);}
   }
 
   function theBools(theCells) {
-    [4, 5, 6].forEach(partial(boolData, theCells));
+    theCells.slice(4, 7).each(boolData);
   }
 
   function hazMaxMoves(matches, row) { // jQuery
@@ -7897,7 +7898,7 @@
   }
 
   function optsHazMoves(cell, row) { // jQuery
-    var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+    var matches = /\/arena\/(\d+)\.png/.exec($('img', cell).attr('src'));
     if (matches) {
       hazMaxMoves(matches, row);
       cell.attr('data-order', matches[1]);
@@ -24178,7 +24179,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '142';
+  window.FSH.calf = '143';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

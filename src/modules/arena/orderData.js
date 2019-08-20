@@ -1,6 +1,5 @@
 import {def_table} from '../support/constants';
 import isObject from '../common/isObject';
-import partial from '../common/partial';
 import {oldIds, opts} from './setOpts';
 
 function colourNewRow(row, id) { // jQuery
@@ -33,14 +32,13 @@ function joinCost(theCells) {
   cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
 }
 
-function boolData(theCells, i) { // jQuery
-  var cell = theCells.eq(i);
-  var matches = /(\d)\.gif/.exec($('img', cell).attr('src'));
-  if (matches) {cell.attr('data-order', matches[1]);}
+function boolData(i, el) { // jQuery
+  var matches = /(\d)\.png/.exec($('img', el).attr('src'));
+  if (matches) {$(el).attr('data-order', matches[1]);}
 }
 
 function theBools(theCells) {
-  [4, 5, 6].forEach(partial(boolData, theCells));
+  theCells.slice(4, 7).each(boolData);
 }
 
 function hazMaxMoves(matches, row) { // jQuery
@@ -51,7 +49,7 @@ function hazMaxMoves(matches, row) { // jQuery
 }
 
 function optsHazMoves(cell, row) { // jQuery
-  var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+  var matches = /\/arena\/(\d+)\.png/.exec($('img', cell).attr('src'));
   if (matches) {
     hazMaxMoves(matches, row);
     cell.attr('data-order', matches[1]);
