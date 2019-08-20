@@ -1,11 +1,10 @@
 import allthen from '../common/allthen';
 import getArrayByTagName from '../common/getArrayByTagName';
-import {imageServer} from '../system/system';
 import indexAjaxData from '../ajax/indexAjaxData';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import {moveOptions} from './assets';
 import partial from '../common/partial';
-import {arenaUrl, def_table} from '../support/constants';
+import {arenaUrl, def_table, oldActionSpinner} from '../support/constants';
 
 var oldMoves = [];
 var imgNodes;
@@ -29,7 +28,7 @@ function getAllMoves() {
 function resetMove(val, ind) {
   if (val === oldMoves[ind]) {return;}
   imgNodes.eq(ind).attr({
-    src: imageServer + '/world/actionLoadingSpinner.gif',
+    src: oldActionSpinner,
     width: '25',
     height: '25'
   });

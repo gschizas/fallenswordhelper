@@ -1,3 +1,5 @@
+import {cdn} from '../system/system';
+
 export const rarity = [
   {colour: '#ffffff', clas: 'fshCommon'},
   {colour: '#0099ff', clas: 'fshRare'},
@@ -147,3 +149,4 @@ export const itemType = ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon',
   'Shield', 'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
   'Resource', 'Recipe', 'Container', 'Composed', 'Frag Stash'];
 
+export const oldActionSpinner = cdn + 'ui/world/action_spinner.gif';
