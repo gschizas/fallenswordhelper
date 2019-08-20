@@ -12,9 +12,9 @@ import {extendOptions} from './options';
 import {get} from 'idb-keyval';
 import getMembrList from '../../ajax/getMembrList';
 import headers from './headers';
-import {imageServer} from '../../system/system';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import notLastUpdate from '../../common/notLastUpdate';
+import {oldActionSpinner} from '../../support/constants';
 import {pCC} from '../../support/layout';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
@@ -24,8 +24,8 @@ import {time, timeEnd} from '../../support/debug';
 //#endif
 
 function doSpinner() { // jQuery
-  pCC.innerHTML = '<span id="fshInvMan"><img src = "' +
-  imageServer + '/world/actionLoadingSpinner.gif">&nbsp;' +
+  pCC.innerHTML = '<span id="fshInvMan">' +
+    '<img src = "' + oldActionSpinner + '">&nbsp;' +
     'Getting inventory data...</span>';
 }
 
