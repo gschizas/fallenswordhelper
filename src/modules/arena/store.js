@@ -9,11 +9,8 @@ function getCount(moveImg) {
 }
 
 function getCounts(prev, moveImg) {
-  var moveId = /(\d+)\.gif/.exec(moveImg.src)[1];
-  prev[moveId] = {
-    count: Number(getCount(moveImg)),
-    href: moveImg.src
-  };
+  var moveId = /(\d+)\.png/.exec(moveImg.src)[1];
+  prev[moveId] = Number(getCount(moveImg));
   return prev;
 }
 
