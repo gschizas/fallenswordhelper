@@ -1,5 +1,6 @@
 import {def_table} from '../support/constants';
 import isObject from '../common/isObject';
+import {moveRe} from './assets';
 import {oldIds, opts} from './setOpts';
 
 function colourNewRow(row, id) { // jQuery
@@ -42,14 +43,13 @@ function theBools(theCells) {
 }
 
 function hazMaxMoves(matches, row) { // jQuery
-  if (opts.moves[matches[1]] &&
-    opts.moves[matches[1]].count === 3) {
+  if (opts.moves[matches[1]] && opts.moves[matches[1]] === 3) {
     row.addClass('moveMax');
   }
 }
 
 function optsHazMoves(cell, row) { // jQuery
-  var matches = /\/arena\/(\d+)\.png/.exec($('img', cell).attr('src'));
+  var matches = moveRe.exec($('img', cell).attr('src'));
   if (matches) {
     hazMaxMoves(matches, row);
     cell.attr('data-order', matches[1]);

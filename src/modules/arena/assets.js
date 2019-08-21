@@ -39,3 +39,4 @@ export var arenaFilter =
   '<input id="fshReset" class="custombutton" type="button" ' +
   'value="Reset"></span></td></tr></tbody></table>';
 export var fshArenaKey = 'fsh_arena';
+export const moveRe = /\/arena\/(\d+)\.png/;

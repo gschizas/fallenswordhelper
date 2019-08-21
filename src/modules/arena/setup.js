@@ -2,9 +2,9 @@ import allthen from '../common/allthen';
 import getArrayByTagName from '../common/getArrayByTagName';
 import indexAjaxData from '../ajax/indexAjaxData';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import {moveOptions} from './assets';
 import partial from '../common/partial';
 import {arenaUrl, def_table, oldActionSpinner} from '../support/constants';
+import {moveOptions, moveRe} from './assets';
 
 var oldMoves = [];
 var imgNodes;
@@ -69,7 +69,7 @@ function makeDropDown(row, i, e) { // jQuery
   if (move.indexOf('bar_icon_holder.jpg') > 0) {
     move = 'x';
   } else {
-    move = move.match(/pvp\/(\d+).gif$/)[1];
+    move = move.match(moveRe)[1];
   }
   oldMoves.push(move);
   var html = $(moveOptions);
@@ -94,7 +94,7 @@ function selectMoves(evt) { // jQuery
   imgNodes = $('#pCC a[href*="=pickmove&"] img');
   var table = getTable();
   pickerRow(table);
-  $('img[src$="pvp/bar_spacer.jpg"]', table).attr({width: '15', height: '50'});
+  $('img[src*="arena/bar_spacer."]', table).attr({width: '15', height: '50'});
   updateButton(table);
 }
 

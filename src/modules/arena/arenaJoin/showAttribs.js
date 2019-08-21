@@ -1,6 +1,6 @@
 import addCommas from '../../system/addCommas';
+import {cdn} from '../../system/system';
 import findArena from './findArena';
-import {imageServer} from '../../system/system';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import querySelector from '../../common/querySelector';
 import showMoves from './showMoves';
@@ -9,8 +9,8 @@ import takeSnapshot from './takeSnapshot';
 const boolToString = e => String(Number(e));
 
 function param(label, value) {
-  return '<div><div>' + label + '</div><div><img src="' + imageServer +
-    '/pvp/specials_' + boolToString(value) + '.gif"></div></div>';
+  return '<div><div>' + label + '</div><div><img src="' + cdn +
+    'ui/arena/specials_' + boolToString(value) + '.png"></div></div>';
 }
 
 function paramBox(thisArena) {

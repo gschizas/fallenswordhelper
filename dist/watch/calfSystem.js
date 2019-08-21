@@ -7157,7 +7157,7 @@
       insertHtmlBeforeEnd(parent, '&nbsp;<a href="' + scouttowerUrl +
         '" class="tip-static" data-tipped="View Scout Report">' +
         '<img id="fshScoutTower" ' +
-        'src="' + imageServer + '/structures/27.gif"></a>');
+        'src="' + cdn + '/structures/27.png"></a>');
     }
   }
 
@@ -7736,6 +7736,7 @@
     '<input id="fshReset" class="custombutton" type="button" ' +
     'value="Reset"></span></td></tr></tbody></table>';
   var fshArenaKey = 'fsh_arena';
+  const moveRe = /\/arena\/(\d+)\.png/;
 
   var opts;
   var oldIds;
@@ -7893,14 +7894,13 @@
   }
 
   function hazMaxMoves(matches, row) { // jQuery
-    if (opts.moves[matches[1]] &&
-      opts.moves[matches[1]].count === 3) {
+    if (opts.moves[matches[1]] && opts.moves[matches[1]] === 3) {
       row.addClass('moveMax');
     }
   }
 
   function optsHazMoves(cell, row) { // jQuery
-    var matches = /\/arena\/(\d+)\.png/.exec($('img', cell).attr('src'));
+    var matches = moveRe.exec($('img', cell).attr('src'));
     if (matches) {
       hazMaxMoves(matches, row);
       cell.attr('data-order', matches[1]);
@@ -8268,8 +8268,8 @@
   const boolToString = e => String(Number(e));
 
   function param$1(label, value) {
-    return '<div><div>' + label + '</div><div><img src="' + imageServer +
-      '/pvp/specials_' + boolToString(value) + '.gif"></div></div>';
+    return '<div><div>' + label + '</div><div><img src="' + cdn +
+      'ui/arena/specials_' + boolToString(value) + '.png"></div></div>';
   }
 
   function paramBox(thisArena) {
@@ -8483,7 +8483,7 @@
     if (move.indexOf('bar_icon_holder.jpg') > 0) {
       move = 'x';
     } else {
-      move = move.match(/pvp\/(\d+).gif$/)[1];
+      move = move.match(moveRe)[1];
     }
     oldMoves.push(move);
     var html = $(moveOptions);
@@ -8508,7 +8508,7 @@
     imgNodes = $('#pCC a[href*="=pickmove&"] img');
     var table = getTable$1();
     pickerRow(table);
-    $('img[src$="pvp/bar_spacer.jpg"]', table).attr({width: '15', height: '50'});
+    $('img[src*="arena/bar_spacer."]', table).attr({width: '15', height: '50'});
     updateButton(table);
   }
 
@@ -8542,11 +8542,8 @@
   }
 
   function getCounts(prev, moveImg) {
-    var moveId = /(\d+)\.gif/.exec(moveImg.src)[1];
-    prev[moveId] = {
-      count: Number(getCount(moveImg)),
-      href: moveImg.src
-    };
+    var moveId = /(\d+)\.png/.exec(moveImg.src)[1];
+    prev[moveId] = Number(getCount(moveImg));
     return prev;
   }
 
@@ -24181,7 +24178,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '144';
+  window.FSH.calf = '145';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
