@@ -1,4 +1,4 @@
-import {imageServer} from '../../system/system';
+import {cdn} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -19,8 +19,8 @@ function getContainer(movesController) {
 
 function injectImg(container, id) {
   insertHtmlBeforeEnd(container,
-    '<img src="' + imageServer + '/pvp/' + String(id - 1) +
-    '.gif" class="moveImg">');
+    '<img src="' + cdn + 'arena/' + String(id - 1) +
+    '.png" class="moveImg">');
 }
 
 function thisOptions(current_set, e) {

@@ -1,5 +1,5 @@
+import {cdn} from '../../system/system';
 import {daComponents} from '../../_dataAccess/_dataAccess';
-import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
@@ -11,7 +11,7 @@ import {componentList, prepareComponentList} from './prepareComponentList';
 import {createSpan, createTBody, createTable} from '../../common/cElement';
 
 function tallyTableRow(prev, comp) {
-  return prev + '<tr><td><img src="' + imageServer + '/items/' + comp.b +
+  return prev + '<tr><td><img src="' + cdn + 'items/' + comp.b +
     '.gif" class="fshTblCenter tip-dynamic" data-tipped="fetchitem.php?' +
     'item_id=' + comp.b + '&inv_id=' + comp.a + '&t=2&p=' + playerId() +
     '&vcode=' + comp.v + '"></td><td>' + comp.count +

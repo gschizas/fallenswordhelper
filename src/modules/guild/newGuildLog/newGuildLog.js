@@ -1,3 +1,4 @@
+import './newGuildLog.postcss';
 import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
 import addLogColoring from '../../logs/addLogColoring';
 import all from '../../common/all';
@@ -13,7 +14,6 @@ import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
-import {imageServer} from '../../system/system';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
@@ -128,8 +128,7 @@ function dataRow(r) {
   r.push(myRow);
   if (!options.checks[r[4]]) {myRow.className = 'fshHide';}
   makeCell(myRow,
-    '<span class="newGuildLog" style="background-image: url(\'' +
-    imageServer + '/skin/log_1.gif\');"></span>');
+    '<span class="newGuildLog"></span>');
   makeCell(myRow, '<nobr>' + r[2] + '</nobr>');
   makeCell(myRow, r[3]);
 }

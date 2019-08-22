@@ -26,7 +26,7 @@ function paramBox(thisArena) {
 }
 
 export default function showAttribs(json) {
-  const thisCell = querySelector('#pCC > form > table tr:nth-of-type(7) td');
+  const thisCell = querySelector('#pCC > form > table tr:nth-of-type(4) td');
   if (json.r && thisCell) {
     thisCell.setAttribute('align', 'center');
     const thisArena = findArena(json.r);

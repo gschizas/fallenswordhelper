@@ -1,14 +1,14 @@
 import addCommas from '../../system/addCommas';
+import {cdn} from '../../system/system';
 import {entries} from '../../common/entries';
 import extend from '../../common/extend';
-import {imageServer} from '../../system/system';
 import {keys} from '../../common/keys';
 
 function imgHtml(image_id) {
-  return '<img class="tip-static" src="' + imageServer +
-    '/creatures/' + image_id + '.jpg" data-tipped="<img src=\'' +
-    imageServer + '/creatures/' + image_id +
-    '.jpg\' width=200 height=200>" width=40 height=40>';
+  return '<img class="tip-static" src="' + cdn +
+    'creatures/' + image_id + '.png" data-tipped="<img src=\'' +
+    cdn + 'creatures/' + image_id +
+    '.png\' width=200 height=200>" width=40 height=40>';
 }
 
 function hazEnhancements(enhancements) {

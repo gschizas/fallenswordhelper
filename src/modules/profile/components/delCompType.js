@@ -1,17 +1,17 @@
 import allthen from '../../common/allthen';
+import {cdn} from '../../system/system';
 import chunk from '../../common/chunk';
 import {componentList} from './prepareComponentList';
 import {daDestroyComponent} from '../../_dataAccess/_dataAccess';
 import deleteVisible from './deleteVisible';
-import {imageServer} from '../../system/system';
 import partial from '../../common/partial';
 import updateUsedCount from './updateUsedCount';
 
 function doSpinner(td) {
   td.innerHTML = '';
   td.className = 'guildTagSpinner';
-  td.style.backgroundImage = 'url(\'' + imageServer +
-    '/skin/loading.gif\')';
+  td.style.backgroundImage = 'url(\'' + cdn +
+    'ui/misc/spinner.gif\')';
 }
 
 function destroyed(data) {
