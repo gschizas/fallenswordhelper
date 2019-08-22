@@ -1,14 +1,14 @@
+import {cdn} from '../system/system';
 import createPotionFromTemplate from '../ajax/createPotionFromTemplate';
 import {def_needToCompose} from '../support/constants';
 import getRandomInt from '../system/getRandomInt';
-import {imageServer} from '../system/system';
 import partial from '../common/partial';
 import {publish} from '../support/pubsub';
 import querySelectorAll from '../common/querySelectorAll';
 import setValue from '../system/setValue';
 
 function randomBackgroundImage() {
-  return 'url(' + imageServer + '/composing/potions/' +
+  return 'url(' + cdn + 'composing/' +
     getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.gif)';
 }
 

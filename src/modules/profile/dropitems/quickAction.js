@@ -1,12 +1,12 @@
+import {cdn} from '../../system/system';
 import hideQTip from '../../common/hideQTip';
-import {imageServer} from '../../system/system';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 
 function anotherSpinner(self) {
   self.innerHTML = '<img class="quickActionSpinner" src="' +
-    imageServer +
-    '/skin/loading.gif" width="15" height="15">';
+    cdn +
+    'ui/misc/spinner.gif" width="15" height="15">';
 }
 
 function actionReturn(self, success, data) {

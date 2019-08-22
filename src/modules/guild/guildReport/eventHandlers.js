@@ -1,9 +1,9 @@
 import './guildReport.postcss';
+import {cdn} from '../../system/system';
 import classHandler from '../../common/classHandler';
 import classPair from '../../common/classPair';
 import equipItem from '../../ajax/equipItem';
 import getElementsByTagName from '../../common/getElementsByTagName';
-import {imageServer} from '../../system/system';
 import itemId from './itemId';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
@@ -14,7 +14,7 @@ import {queueRecallItem} from '../../ajaxQueue/queue';
 import {sendEvent} from '../../support/fshGa';
 
 var spinner = '<span class="guildReportSpinner" style="background-image: ' +
-  'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
+  'url(\'' + cdn + 'ui/misc/spinner.gif\');"></span>';
 
 function recalled(theTd) {
   theTd.innerHTML = '<span class="fastWorn">' +

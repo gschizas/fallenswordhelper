@@ -1,5 +1,5 @@
+import {cdn} from '../../../system/system';
 import hideQTip from '../../../common/hideQTip';
-import {imageServer} from '../../../system/system';
 import partial from '../../../common/partial';
 
 function removeClass(self) {
@@ -30,8 +30,8 @@ function killRow(self, data) { // jQuery
 }
 
 function anotherSpinner(self) { // jQuery
-  self.empty().append('<img src="' + imageServer +
-    '/skin/loading.gif" width="11" height="11">');
+  self.empty().append('<img src="' + cdn +
+    'ui/misc/spinner.gif" width="11" height="11">');
 }
 
 export default function doAction(fn, self) { // jQuery

@@ -451,9 +451,6 @@
 
   const server = document.location.protocol + '//' +
     document.location.host + '/';
-  const imageServer = window.HCS && window.HCS.defines &&
-    window.HCS.defines.fileserver &&
-    window.HCS.defines.fileserver.slice(0, -1);
   const cdn = window.HCS && window.HCS.defines && window.HCS.defines.cdn;
 
   const rarity = [
@@ -699,8 +696,8 @@
   function haveLinks(quickLinks) {
     var draggableQuickLinks = getValue('draggableQuickLinks');
     var html = '<div style="top:' + getValue('quickLinksTopPx') + 'px; left:' +
-      getValue('quickLinksLeftPx') + 'px; background-image:url(\'' + imageServer +
-      '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
+      getValue('quickLinksLeftPx') + 'px;" id="fshQuickLinks" ' +
+      'class="fshQuickLinks fshInnerBg' +
       retOption('keepHelperMenuOnScreen', ' fshFixed', '') +
       retBool(draggableQuickLinks, ' fshMove', '') + '">' +
       makeQuickLinks(quickLinks) + '</div>';
@@ -1168,10 +1165,10 @@
   }
 
   function imgHtml(image_id) {
-    return '<img class="tip-static" src="' + imageServer +
-      '/creatures/' + image_id + '.jpg" data-tipped="<img src=\'' +
-      imageServer + '/creatures/' + image_id +
-      '.jpg\' width=200 height=200>" width=40 height=40>';
+    return '<img class="tip-static" src="' + cdn +
+      'creatures/' + image_id + '.png" data-tipped="<img src=\'' +
+      cdn + 'creatures/' + image_id +
+      '.png\' width=200 height=200>" width=40 height=40>';
   }
 
   function hazEnhancements(enhancements) {
@@ -3805,7 +3802,7 @@
     return prev + '<tr><td class="fshCenter"><span class="smallLink"' +
       ' id="fshExtr' + item_id +
       '">Extract all ' + res.invIDs.length + '</span></td>' +
-      '<td><img src="' + imageServer + '/items/' +
+      '<td><img src="' + cdn + 'items/' +
       item_id + '.gif" class="tip-dynamic" data-tipped="' +
       'fetchitem.php?item_id=' + item_id + '&inv_id=' +
       res.inv_id + '&t=1&p=' + playerId$1 +
@@ -3898,10 +3895,10 @@
   }
 
   function itemImage(item) {
-    var ret = imageServer + '/';
+    var ret = cdn;
     if (item.b === 13699) {
-      ret += 'composing/potions/' + item.extra.design + '_' +
-        item.extra.color + '.gif';
+      ret += 'composing/' + item.extra.design + '_' +
+        item.extra.color + '.png';
     } else {
       ret += 'items/' + item.b + '.gif';
     }
@@ -5266,11 +5263,7 @@
     var helperMenu = evt.target;
     var helperMenuDiv = createDiv({
       id: 'helperMenuDiv',
-      className: 'helperMenuDiv',
-      style: {
-        backgroundImage: 'url(' + imageServer +
-          '/skin/inner_bg.jpg)'
-      }
+      className: 'helperMenuDiv fshInnerBg'
     });
     insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
     insertElement(helperMenu, helperMenuDiv);
@@ -5489,18 +5482,14 @@
     '<li class="notification">' +
     '<span id="helperPrayToGods" class="fastPray">' +
     '<table><tbody><tr><td>' +
-    '<span class="tip-static" data-tipped="Pray to Sahria" ' +
-    'style="background-image: url(\'' + imageServer +
-    '/temple/0.gif\');" praytype="0"></span></td><td>' +
-    '<span class="tip-static" data-tipped="Pray to Osverin" ' +
-    'style="background-image: url(\'' + imageServer +
-    '/temple/1.gif\');" praytype="1"></span></td></tr><tr><td>' +
-    '<span class="tip-static" data-tipped="Pray to Gurgriss" ' +
-    'style="background-image: url(\'' + imageServer +
-    '/temple/2.gif\');" praytype="2"></span></td><td>' +
-    '<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
-    'style="background-image: url(\'' + imageServer +
-    '/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
+    '<span class="tip-static fshTempleZero" data-tipped="Pray to Sahria" ' +
+    'praytype="0"></span></td><td>' +
+    '<span class="tip-static fshTempleOne" data-tipped="Pray to Osverin" ' +
+    'praytype="1"></span></td></tr><tr><td>' +
+    '<span class="tip-static fshTempleTwo" data-tipped="Pray to Gurgriss" ' +
+    'praytype="2"></span></td><td>' +
+    '<span class="tip-static fshTempleThree" data-tipped="Pray to Lindarsil" ' +
+    'praytype="3"></span></td></tr></tbody></table>' +
     '<a href="' + cmdUrl + 'temple">' +
     '<p class="notification-content">Bow down to the gods</p>' +
     '</a></span></li>';
@@ -7793,7 +7782,7 @@
   }
 
   function specFilter(_settings, _searchData, _index, rowData) {
-    const test = 1;
+    const test = 0;
     if (test) {
       return rowData[4]['@data-order'] === '0';
     }
@@ -7806,7 +7795,7 @@
   }
 
   function makeTheRow() {
-    var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
+    var theRow = $('#pCC > table > tbody > tr:nth-child(4)');
     theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
     theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
     return theRow;
@@ -8164,8 +8153,8 @@
 
   function injectImg(container, id) {
     insertHtmlBeforeEnd(container,
-      '<img src="' + imageServer + '/pvp/' + String(id - 1) +
-      '.gif" class="moveImg">');
+      '<img src="' + cdn + 'arena/' + String(id - 1) +
+      '.png" class="moveImg">');
   }
 
   function thisOptions(current_set, e) {
@@ -8285,7 +8274,7 @@
   }
 
   function showAttribs(json) {
-    const thisCell = querySelector('#pCC > form > table tr:nth-of-type(7) td');
+    const thisCell = querySelector('#pCC > form > table tr:nth-of-type(4) td');
     if (json.r && thisCell) {
       thisCell.setAttribute('align', 'center');
       const thisArena = findArena(json.r);
@@ -8619,8 +8608,8 @@
 
   function doCancel(cancelButton) { // jQuery.min
     var itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
-    cancelButton.outerHTML = '<img src="' + imageServer +
-      '/skin/loading.gif" width="14" height="14">';
+    cancelButton.outerHTML = '<img src="' + cdn +
+      'ui/misc/spinner.gif" width="14" height="14">';
     return indexAjaxData({
       cmd: 'auctionhouse',
       subcmd: 'cancel',
@@ -8825,7 +8814,7 @@
   }
 
   function randomBackgroundImage() {
-    return 'url(' + imageServer + '/composing/potions/' +
+    return 'url(' + cdn + 'composing/' +
       getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.gif)';
   }
 
@@ -11982,8 +11971,8 @@
     daGsTake(itmId).then(partial(takeResult$1, el));
     setText('', el);
     el.className = 'guildTagSpinner';
-    el.style.backgroundImage = 'url(\'' + imageServer +
-      '/skin/loading.gif\')';
+    el.style.backgroundImage = 'url(\'' + cdn +
+      'ui/misc/spinner.gif\')';
   }
 
   function evtHdlr(e) {
@@ -12096,7 +12085,7 @@
   }
 
   var spinner = '<span class="guildReportSpinner" style="background-image: ' +
-    'url(\'' + imageServer + '/skin/loading.gif\');"></span>';
+    'url(\'' + cdn + 'ui/misc/spinner.gif\');"></span>';
 
   function recalled(theTd) {
     theTd.innerHTML = '<span class="fastWorn">' +
@@ -12771,8 +12760,8 @@
 
   function anotherSpinner(self) {
     self.innerHTML = '<img class="quickActionSpinner" src="' +
-      imageServer +
-      '/skin/loading.gif" width="15" height="15">';
+      cdn +
+      'ui/misc/spinner.gif" width="15" height="15">';
   }
 
   function actionReturn(self, success, data) {
@@ -14244,7 +14233,7 @@
   }
 
   function tallyTableRow(prev, comp) {
-    return prev + '<tr><td><img src="' + imageServer + '/items/' + comp.b +
+    return prev + '<tr><td><img src="' + cdn + 'items/' + comp.b +
       '.gif" class="fshTblCenter tip-dynamic" data-tipped="fetchitem.php?' +
       'item_id=' + comp.b + '&inv_id=' + comp.a + '&t=2&p=' + playerId() +
       '&vcode=' + comp.v + '"></td><td>' + comp.count +
@@ -14365,8 +14354,8 @@
   function doSpinner(td) {
     td.innerHTML = '';
     td.className = 'guildTagSpinner';
-    td.style.backgroundImage = 'url(\'' + imageServer +
-      '/skin/loading.gif\')';
+    td.style.backgroundImage = 'url(\'' + cdn +
+      'ui/misc/spinner.gif\')';
   }
 
   function destroyed(data) {
@@ -14623,7 +14612,7 @@
   }
 
   function updateSrc(img, gif) {
-    const url = imageServer + '/' + gif + '.gif';
+    const url = cdn + 'ui/misc/' + gif + '.png';
     if (img.src !== url) {img.src = url;}
   }
 
@@ -14794,25 +14783,21 @@
 
   function joinGroups() {
     if (!getValue('enableMaxGroupSizeToJoin')) {
-      return '<a class="quickButton buttonJoinAll tip-static" ' +
+      return '<a class="quickButton buttonJoinAll tip-static fshJoin" ' +
         'href="' + joinallUrl + '" ' +
-        'data-tipped="Join All Groups" style="background-image: url(\'' +
-        imageServer +
-        '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+        'data-tipped="Join All Groups"></a>&nbsp;&nbsp;';
     }
     var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    return '<a class="quickButton buttonJoinUnder tip-static" href="' +
+    return '<a class="quickButton buttonJoinUnder tip-static fshJoin" href="' +
       joinUnderUrl + '" data-tipped="Join All Groups < ' + maxGroupSizeToJoin +
-      ' Members" style="background-image: url(\'' + imageServer +
-      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+      ' Members"></a>&nbsp;&nbsp;';
   }
 
   function showRecallButton(playername) {
     if (currentGuildRelationship === 'self') {
-      return '<a class="quickButton tip-static" href="' + recallUserUrl +
-        playername + '" data-tipped="Recall items from ' + playername +
-        '" style="background-image: url(\'' + imageServer +
-        '/temple/3.gif\');"></a>&nbsp;&nbsp;';
+      return '<a class="quickButton tip-static fshTempleThree" href="' +
+        recallUserUrl + playername + '" data-tipped="Recall items from ' +
+        playername + '"></a>&nbsp;&nbsp;';
     }
     return '';
   }
@@ -14822,28 +14807,25 @@
       return '<a class="quickButton buttonGuildRank tip-static" href="' +
         guildSubcmdUrl + 'members&subcmd2=changerank&member_id=' +
         playerid + '" data-tipped="Rank ' + playername +
-        '" style="background-image: url(\'' + imageServer +
-        '/guilds/' + guildId$1 + '_mini.png\');"></a>&nbsp;&nbsp;';
+        '" style="background-image: url(\'' + cdn +
+        'guilds/' + guildId$1 + '_mini.png\');"></a>&nbsp;&nbsp;';
     }
     return '';
   }
 
   function profileInjectQuickButton(avyImg, playerid, playername) {
     var newhtml = '<div align="center">';
-    newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
+    newhtml += '<a class="quickButton buttonQuickBuff tip-static fshQuickBuff" ' +
       quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
+      '"></a>&nbsp;&nbsp;';
     newhtml += joinGroups();
-    newhtml += '<a class="quickButton tip-static" ' +
+    newhtml += '<a class="quickButton tip-static fshGold" ' +
       'href="' + auctionhouseUrl + '&type=-3&tid=' + playerid +
       '" data-tipped="Go to ' + playername +
-      '\'s auctions" style="background-image: url(\'' +
-      imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
-    newhtml += '<a class="quickButton tip-static" href="' + secureUrl +
-      playername + '" data-tipped="Create Secure Trade to ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/temple/2.gif\');"></a>&nbsp;&nbsp;';
+      '\'s auctions"></a>&nbsp;&nbsp;';
+    newhtml += '<a class="quickButton tip-static fshTempleTwo" href="' +
+      secureUrl + playername + '" data-tipped="Create Secure Trade to ' +
+      playername + '"></a>&nbsp;&nbsp;';
     newhtml += showRecallButton(playername);
     newhtml += showRankButton(playerid, playername);
     newhtml += '</div>';
@@ -19936,15 +19918,13 @@
   function guideButtons(questID, questName) {
     return '<div class="parent">' +
       '<a href="' + guideUrl + 'quests&' +
-      'subcmd=view&quest_id=' + questID + '" class="tip-static" ' +
+      'subcmd=view&quest_id=' + questID + '" class="tip-static fshTempleOne" ' +
       'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
-      'style="background-image: url(\'' + imageServer +
-      '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
+      'target="_blank"></a>&nbsp;' +
       '<a href="https://wiki.fallensword.com/index.php?title=' +
-      questName.replace(/ /g, '_') + '" class="tip-static" ' +
+      questName.replace(/ /g, '_') + '" class="tip-static fshWiki" ' +
       'data-tipped="Search for this quest on the Wiki" ' +
-      'style="background-image: url(\'' + imageServer +
-      '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
+      'target="_blank"></a></div>';
   }
 
   function isHideQuests() {
@@ -21790,8 +21770,8 @@
   }
 
   function anotherSpinner$1(self) { // jQuery
-    self.empty().append('<img src="' + imageServer +
-      '/skin/loading.gif" width="11" height="11">');
+    self.empty().append('<img src="' + cdn +
+      'ui/misc/spinner.gif" width="11" height="11">');
   }
 
   function doAction$3(fn, self) { // jQuery
@@ -22262,8 +22242,7 @@
     r.push(myRow);
     if (!options$1.checks[r[4]]) {myRow.className = 'fshHide';}
     makeCell$2(myRow,
-      '<span class="newGuildLog" style="background-image: url(\'' +
-      imageServer + '/skin/log_1.gif\');"></span>');
+      '<span class="newGuildLog"></span>');
     makeCell$2(myRow, '<nobr>' + r[2] + '</nobr>');
     makeCell$2(myRow, r[3]);
   }
@@ -22645,8 +22624,7 @@
 
   function toTr(nowUtc, lastCheckUtc, el) {
     return '<tr' + trClass(nowUtc, lastCheckUtc, el) +
-      '><td><span class="newGuildLog" style="background-image: url(\'' +
-      imageServer + '/skin/log_1.gif\');"></span></td><td>' +
+      '><td><span class="newGuildLog"></span></td><td>' +
       formatShortDate$1(el.time) + '</td><td>' +
       el.msg.text + '</td></tr>';
   }
@@ -24178,7 +24156,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '145';
+  window.FSH.calf = '146';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

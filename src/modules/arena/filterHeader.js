@@ -3,7 +3,7 @@ import defaults from '../support/dataObj.json';
 import {changeLvls, hideMoves, opts, resetLvls} from './setOpts';
 
 function makeTheRow() {
-  var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
+  var theRow = $('#pCC > table > tbody > tr:nth-child(4)');
   theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
   theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
   return theRow;

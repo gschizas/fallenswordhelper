@@ -1,9 +1,9 @@
+import {cdn} from '../system/system';
 import clickThis from '../common/clickThis';
 import {createInput} from '../common/cElement';
 import {daGsTake} from '../_dataAccess/_dataAccess';
 import {getElementById} from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
-import {imageServer} from '../system/system';
 import injectGuild from './guild';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -36,8 +36,8 @@ function fastBp(el) {
   daGsTake(itmId).then(partial(takeResult, el));
   setText('', el);
   el.className = 'guildTagSpinner';
-  el.style.backgroundImage = 'url(\'' + imageServer +
-    '/skin/loading.gif\')';
+  el.style.backgroundImage = 'url(\'' + cdn +
+    'ui/misc/spinner.gif\')';
 }
 
 function evtHdlr(e) {

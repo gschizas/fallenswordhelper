@@ -5,7 +5,6 @@ import escapeHtml from '../system/escapeHtml';
 import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
-import {imageServer} from '../system/system';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 
 function retBool(bool, ifTrue, ifFalse) {
@@ -43,8 +42,8 @@ function makeQuickLinks(quickLinks) {
 function haveLinks(quickLinks) {
   var draggableQuickLinks = getValue('draggableQuickLinks');
   var html = '<div style="top:' + getValue('quickLinksTopPx') + 'px; left:' +
-    getValue('quickLinksLeftPx') + 'px; background-image:url(\'' + imageServer +
-    '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
+    getValue('quickLinksLeftPx') + 'px;" id="fshQuickLinks" ' +
+    'class="fshQuickLinks fshInnerBg' +
     retOption('keepHelperMenuOnScreen', ' fshFixed', '') +
     retBool(draggableQuickLinks, ' fshMove', '') + '">' +
     makeQuickLinks(quickLinks) + '</div>';

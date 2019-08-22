@@ -4,7 +4,6 @@ import {createTable} from '../../common/cElement';
 import {get} from 'idb-keyval';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
-import {imageServer} from '../../system/system';
 import initTable from './outputTable';
 import insertElement from '../../common/insertElement';
 // import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -47,8 +46,7 @@ function trClass(nowUtc, lastCheckUtc, el) {
 
 function toTr(nowUtc, lastCheckUtc, el) {
   return '<tr' + trClass(nowUtc, lastCheckUtc, el) +
-    '><td><span class="newGuildLog" style="background-image: url(\'' +
-    imageServer + '/skin/log_1.gif\');"></span></td><td>' +
+    '><td><span class="newGuildLog"></span></td><td>' +
     formatShortDate(el.time) + '</td><td>' +
     el.msg.text + '</td></tr>';
 }

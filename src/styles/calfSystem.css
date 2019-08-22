@@ -56,11 +56,6 @@
   width: 15px;
 }
 
-.fshFormGroup {background-image: url('https://cdn.fallensword.com/skin/realm/icon_action_formgroup.gif');}
-.fshQuickBuff {background-image: url('https://cdn.fallensword.com/skin/realm/icon_action_quickbuff.gif');}
-.fshRealmMap {background-image: url('https://cdn.fallensword.com/skin/realm/icon_action_map.gif');}
-.fshTempleOne {background-image: url('https://cdn.fallensword.com/temple/1.gif');}
-
 .fshFsty div {font-size: 70%}
 .fshFten div {font-size: 11px;}
 .fshFten select {
@@ -78,9 +73,6 @@
 }
 
 /* Advisor */
-.fshOldSpinner {
-  background-image: url('https://cdn2.fallensword.com/ui/world/action_spinner.gif')
-}
 .fshSpinnerMsg {
   align-self: center;
 }
@@ -102,13 +94,6 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-}
-
-/* New Guild Log */
-.newGuildLog {
-  display: inline-block;
-  height: 16px;
-  width: 16px;
 }
 
 /* Guild Add/Remove Tags */
@@ -453,7 +438,7 @@
   height: 12px;
   margin: 0 1px 2px 0;
   vertical-align: bottom;
-  background: transparent url('https://cdn.fallensword.com/media/dist/img/ui/ui.png');
+  background: transparent url('https://cdn2.fallensword.com/ui/misc/icons.png');
   cursor: pointer;
 }
 .enemy-buff-check-off {

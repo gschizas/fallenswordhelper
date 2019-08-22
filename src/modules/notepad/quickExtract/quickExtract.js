@@ -1,10 +1,10 @@
+import {cdn} from '../../system/system';
 import {composingFragmentType} from '../../support/constants';
 import {createTable} from '../../common/cElement';
 import {daUseItem} from '../../_dataAccess/_dataAccess';
 import eventHandler5 from '../../common/eventHandler5';
 import {getElementById} from '../../common/getElement';
 import getInventory from '../../ajax/getInventory';
-import {imageServer} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import jConfirm from '../../common/jConfirm';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
@@ -103,7 +103,7 @@ function tableRows(prev, item_id) {
   return prev + '<tr><td class="fshCenter"><span class="smallLink"' +
     ' id="fshExtr' + item_id +
     '">Extract all ' + res.invIDs.length + '</span></td>' +
-    '<td><img src="' + imageServer + '/items/' +
+    '<td><img src="' + cdn + 'items/' +
     item_id + '.gif" class="tip-dynamic" data-tipped="' +
     'fetchitem.php?item_id=' + item_id + '&inv_id=' +
     res.inv_id + '&t=1&p=' + playerId +

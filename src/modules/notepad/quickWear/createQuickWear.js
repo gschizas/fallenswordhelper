@@ -1,6 +1,6 @@
 import './createQuickWear.postcss';
 import calf from '../../support/calf';
-import {imageServer} from '../../system/system';
+import {cdn} from '../../system/system';
 import insertElement from '../../common/insertElement';
 import makeFolderSpan from '../../common/makeFolderSpan';
 import partial from '../../common/partial';
@@ -22,10 +22,10 @@ function isUseable(item) {
 }
 
 function itemImage(item) {
-  var ret = imageServer + '/';
+  var ret = cdn;
   if (item.b === 13699) {
-    ret += 'composing/potions/' + item.extra.design + '_' +
-      item.extra.color + '.gif';
+    ret += 'composing/' + item.extra.design + '_' +
+      item.extra.color + '.png';
   } else {
     ret += 'items/' + item.b + '.gif';
   }

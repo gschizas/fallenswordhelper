@@ -1,4 +1,5 @@
 import './styles/calfSystem.css';
+import './styles/cdn_bg.css';
 import './styles/grids.postcss';
 import './styles/spinners.postcss';
 import './styles/dataTables.css';

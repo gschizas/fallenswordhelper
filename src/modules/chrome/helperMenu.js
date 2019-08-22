@@ -3,7 +3,6 @@ import draggable from '../common/dragStart';
 import {getElementById} from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import {imageServer} from '../system/system';
 import injectBuffLog from '../notepad/buffLog/injectBuffLog';
 import injectFsBoxContent from '../notepad/injectFsBoxContent';
 import injectMonsterLog from '../notepad/monstorLog/monstorLog';
@@ -91,11 +90,7 @@ function showHelperMenu(evt) {
   var helperMenu = evt.target;
   var helperMenuDiv = createDiv({
     id: 'helperMenuDiv',
-    className: 'helperMenuDiv',
-    style: {
-      backgroundImage: 'url(' + imageServer +
-        '/skin/inner_bg.jpg)'
-    }
+    className: 'helperMenuDiv fshInnerBg'
   });
   insertHtmlBeforeEnd(helperMenuDiv, helperMenuBlob);
   insertElement(helperMenu, helperMenuDiv);

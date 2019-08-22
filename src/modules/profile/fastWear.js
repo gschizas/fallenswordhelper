@@ -1,10 +1,10 @@
 import add from '../support/task';
+import {cdn} from '../system/system';
 import {createDiv} from '../common/cElement';
 import equipItem from '../ajax/equipItem';
 import {getElementById} from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import {imageServer} from '../system/system';
 import insertElement from '../common/insertElement';
 import on from '../common/on';
 import partial from '../common/partial';
@@ -94,7 +94,7 @@ function fastWearLinks(self) {
 }
 
 function updateSrc(img, gif) {
-  const url = imageServer + '/' + gif + '.gif';
+  const url = cdn + 'ui/misc/' + gif + '.png';
   if (img.src !== url) {img.src = url;}
 }
 
