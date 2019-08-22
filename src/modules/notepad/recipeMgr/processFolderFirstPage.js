@@ -9,7 +9,7 @@ import processFolderAnyPage from './processFolderAnyPage';
 import retryAjax from '../../ajax/retryAjax';
 
 function thisInventFolder(el) {
-  return /\/folder_on\.gif/.test(el.getAttribute('src'));
+  return /\/folder_on\./.test(el.getAttribute('src'));
 }
 
 function thisFolderHref(doc) {
