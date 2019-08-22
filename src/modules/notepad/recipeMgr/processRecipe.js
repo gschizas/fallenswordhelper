@@ -57,8 +57,8 @@ export default function processRecipe(output, recipebook, recipe, html) {
   insertHtmlBeforeEnd(output,
     'Parsing blueprint ' + recipe.name + '...<br>');
   var tblCells = getTblCells(doc);
-  recipe.items = parseRecipe(tblCells, '/inventory/2x3.gif');
-  recipe.components = parseRecipe(tblCells, '/inventory/1x1mini.gif');
-  recipe.target = parseRecipe(tblCells, '/hellforge/2x3.gif')[0];
+  recipe.items = parseRecipe(tblCells, '/inventory/2x3.');
+  recipe.components = parseRecipe(tblCells, '/inventory/1x1mini.');
+  recipe.target = parseRecipe(tblCells, '/hellforge/2x3.')[0];
   recipebook.recipe.push(recipe);
 }
