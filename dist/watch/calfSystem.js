@@ -8815,7 +8815,7 @@
 
   function randomBackgroundImage() {
     return 'url(' + cdn + 'composing/' +
-      getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.gif)';
+      getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.png)';
   }
 
   function updateInfoDiv(infoDiv, potName) {
@@ -16638,8 +16638,12 @@
     }
   }
 
+  function isOnList(creatureName) {
+    return calf.doNotKillList.includes(creatureName.trim());
+  }
+
   function doNotKillBlue(el) {
-    el.classList.toggle('fshBlue', calf.doNotKillList.includes(getText(el)));
+    el.classList.toggle('fshBlue', isOnList(getText(el)));
   }
 
   function afterUpdateActionList() {
@@ -16649,7 +16653,7 @@
   }
 
   function creatureOnList(creatureName, passback) {
-    if (calf.doNotKillList.includes(creatureName)) {
+    if (isOnList(creatureName)) {
       getElementById('actionList').children[passback].children[0].children[1]
         .classList.remove('loading');
       return true;
@@ -18833,7 +18837,7 @@
   }
 
   function doNotKillText() {
-    if (calf.doNotKillList.includes(dnkName)) {
+    if (isOnList(dnkName)) {
       return 'Remove from do not kill list';
     }
     return 'Add to the do not kill list';
@@ -18882,7 +18886,7 @@
   function makeDoNotKillLink(thisName, dialogViewCreature) {
     getCreatureBody(dialogViewCreature);
     if (creatureBody) {
-      dnkName = thisName;
+      dnkName = thisName.trim();
       doNotKillLink();
     }
   }
@@ -24156,7 +24160,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '147';
+  window.FSH.calf = '148';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
