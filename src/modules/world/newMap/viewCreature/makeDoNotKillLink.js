@@ -2,6 +2,7 @@ import afterUpdateActionList from '../doNotKill/afterUpdateActionList';
 import calf from '../../../support/calf';
 import getElementsByClassName from '../../../common/getElementsByClassName';
 import insertElement from '../../../common/insertElement';
+import isOnList from '../doNotKill/isOnList';
 import on from '../../../common/on';
 import setText from '../../../common/setText';
 import setValue from '../../../system/setValue';
@@ -21,7 +22,7 @@ function getCreatureBody(dialogViewCreature) {
 }
 
 function doNotKillText() {
-  if (calf.doNotKillList.includes(dnkName)) {
+  if (isOnList(dnkName)) {
     return 'Remove from do not kill list';
   }
   return 'Add to the do not kill list';
@@ -70,7 +71,7 @@ function doNotKillLink() {
 export default function makeDoNotKillLink(thisName, dialogViewCreature) {
   getCreatureBody(dialogViewCreature);
   if (creatureBody) {
-    dnkName = thisName;
+    dnkName = thisName.trim();
     doNotKillLink();
   }
 }
