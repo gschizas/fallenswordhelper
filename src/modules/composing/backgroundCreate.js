@@ -9,7 +9,7 @@ import setValue from '../system/setValue';
 
 function randomBackgroundImage() {
   return 'url(' + cdn + 'composing/' +
-    getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.gif)';
+    getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.png)';
 }
 
 function updateInfoDiv(infoDiv, potName) {

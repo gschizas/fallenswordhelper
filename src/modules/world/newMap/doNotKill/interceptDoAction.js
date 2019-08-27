@@ -1,10 +1,10 @@
-import calf from '../../../support/calf';
 import {getElementById} from '../../../common/getElement';
 import isFunction from '../../../common/isFunction';
+import isOnList from './isOnList';
 import isUndefined from '../../../common/isUndefined';
 
 function creatureOnList(creatureName, passback) {
-  if (calf.doNotKillList.includes(creatureName)) {
+  if (isOnList(creatureName)) {
     getElementById('actionList').children[passback].children[0].children[1]
       .classList.remove('loading');
     return true;
