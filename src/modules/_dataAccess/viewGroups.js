@@ -5,7 +5,7 @@ import querySelector from '../common/querySelector';
 
 function parseReport(html) {
   const doc = createDocument(html);
-  const disband = querySelector('#pCC img[src$="disband.gif"]', doc);
+  const disband = querySelector('#pCC img[src$="disband.png"]', doc);
   if (!disband) {return {};}
   const id = Number(disband.parentNode.href.match(/\((\d+)\)/)[1]);
   return {r: [{id: id, members: [{name: playerName()}]}]};
