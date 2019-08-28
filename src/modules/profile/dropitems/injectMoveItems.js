@@ -4,9 +4,7 @@ import getText from '../../common/getText';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import {pCC} from '../../support/layout';
 
-function otherFolders(el) {
-  return el.src.includes('/folder.gif');
-}
+const otherFolders = el => el.src.includes('/folder.png');
 
 function makeOption(e) {
   return '<option value=' +
