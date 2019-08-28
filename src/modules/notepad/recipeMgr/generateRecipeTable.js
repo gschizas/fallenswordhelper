@@ -82,7 +82,6 @@ function drawRecipeTable(output, recipebook) { // Legacy
   result += recipebook.recipe.filter(hidden).map(makeRow).join('');
   result += '</table>';
   output.innerHTML = result;
-  recipebook.lastUpdate = new Date();
   set('fsh_recipeBook', recipebook);
 }
 
