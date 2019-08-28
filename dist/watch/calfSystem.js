@@ -1949,7 +1949,7 @@
 
   function processTheRows(doc, input) {
     var thePage = input.attr('value');
-    var theRows = $('#pCC img[src$="/skin/icon_action_view.gif',
+    var theRows = $('#pCC img[src$="/world/icon_action_view.png',
       doc).parent().parent().parent();
     theRows.each(partial(buildElements, thePage));
   }
@@ -2103,7 +2103,6 @@
     result += recipebook.recipe.filter(hidden).map(makeRow$1).join('');
     result += '</table>';
     output.innerHTML = result;
-    recipebook.lastUpdate = new Date();
     set('fsh_recipeBook', recipebook);
   }
 
@@ -3561,7 +3560,7 @@
 
   function parseReport$9(html) {
     const doc = createDocument(html);
-    const disband = querySelector('#pCC img[src$="disband.gif"]', doc);
+    const disband = querySelector('#pCC img[src$="disband.png"]', doc);
     if (!disband) {return {};}
     const id = Number(disband.parentNode.href.match(/\((\d+)\)/)[1]);
     return {r: [{id: id, members: [{name: playerName$1()}]}]};
@@ -20993,14 +20992,15 @@
 
   const joinedFields = ['pvpId', 'helmet', 'armor', 'gloves', 'boots', 'weapon',
     'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
-    'stat_armor', 'stat_damage', 'stat_hp', 'cyrb32', 'cyrb53'];
+    'stat_armor', 'stat_damage', 'stat_hp', 'winner', 'cyrb32', 'cyrb53'];
 
-  async function makeArenaJoined() {
+  async function makeArenaJoined(listOfWinners) {
     const fsh_arenaJoined = await get('fsh_arenaJoined');
     if (!fsh_arenaJoined) {return;}
     const output = fsh_arenaJoined
       .map(o =>
         fromEntries(entries(o)
+          .concat([['winner', listOfWinners[o.pvpId]]])
           .concat([['cyrb32', makeHash(cyrb32, o)]])
           .concat([['cyrb53', makeHash(cyrb53, o)]])
         )
@@ -21068,7 +21068,7 @@
     console.log('arenaSpecialStats', arenaSpecialStats); // eslint-disable-line no-console
 
     // makeArenaWins(typeWins);
-    await makeArenaJoined();
+    await makeArenaJoined(listOfWinners);
   }
 
   async function crawler() {
@@ -23242,9 +23242,7 @@
     }
   }
 
-  function otherFolders(el) {
-    return el.src.includes('/folder.gif');
-  }
+  const otherFolders = el => el.src.includes('/folder.png');
 
   function makeOption$1(e) {
     return '<option value=' +
@@ -24160,7 +24158,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '148';
+  window.FSH.calf = '149';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {

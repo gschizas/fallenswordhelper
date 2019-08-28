@@ -65,14 +65,15 @@ function makeDownloadAnchor(output, type, filename, text) {
 
 const joinedFields = ['pvpId', 'helmet', 'armor', 'gloves', 'boots', 'weapon',
   'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
-  'stat_armor', 'stat_damage', 'stat_hp', 'cyrb32', 'cyrb53'];
+  'stat_armor', 'stat_damage', 'stat_hp', 'winner', 'cyrb32', 'cyrb53'];
 
-async function makeArenaJoined() {
+async function makeArenaJoined(listOfWinners) {
   const fsh_arenaJoined = await get('fsh_arenaJoined');
   if (!fsh_arenaJoined) {return;}
   const output = fsh_arenaJoined
     .map(o =>
       fromEntries(entries(o)
+        .concat([['winner', listOfWinners[o.pvpId]]])
         .concat([['cyrb32', makeHash(cyrb32, o)]])
         .concat([['cyrb53', makeHash(cyrb53, o)]])
       )
@@ -140,7 +141,7 @@ async function processCompleted(thisComplete) {
   console.log('arenaSpecialStats', arenaSpecialStats); // eslint-disable-line no-console
 
   // makeArenaWins(typeWins);
-  await makeArenaJoined();
+  await makeArenaJoined(listOfWinners);
 }
 
 export default async function crawler() {
