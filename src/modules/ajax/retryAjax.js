@@ -23,12 +23,19 @@ function beforeSend(xhr) {
   on(window, 'beforeunload', partial(clearXhr, xhr));
 }
 
-var ignoreStatus = [0];
+var ignoreStatus = [0, 503, 504];
 var ignoreTextStatus = ['abort'];
+const ignoreResponse = [
+  'We have encountered an issue with a server connection',
+  'We\'re performing maintenance on the game'
+];
 
 function ignore(ajaxErr) {
   return ignoreStatus.includes(ajaxErr.jqXhr.status) ||
-    ignoreTextStatus.includes(ajaxErr.jqTextStatus);
+    ignoreTextStatus.includes(ajaxErr.jqTextStatus) ||
+    ignoreResponse.some(
+      substring => ajaxErr.jqXhr.responseText.includes(substring)
+    );
 }
 
 function handleFailure(reject, ajaxErr) {
