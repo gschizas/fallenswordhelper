@@ -42,7 +42,10 @@ module.exports = {
     localforage: false,
     ga: false,
     GameController: false,
-    GameData: false
+    GameData: false,
+
+    Modernizr:false,
+
   },
   'extends': 'eslint:recommended',
   rules: {
