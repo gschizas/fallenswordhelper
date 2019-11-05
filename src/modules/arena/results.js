@@ -1,5 +1,5 @@
 import {entries} from '../common/entries';
-import {get} from 'idb-keyval';
+import {get} from '../system/idb';
 import insertElement from '../common/insertElement';
 import {pCC} from '../support/layout';
 import {thisTournament} from './arenaJoin/thisTournament';

@@ -6,7 +6,7 @@ import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
 import on from '../../common/on';
 import partial from '../../common/partial';
-import {set} from 'idb-keyval';
+import {set} from '../../system/idb';
 import {
   createBr,
   createButton,

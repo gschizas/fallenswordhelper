@@ -12,7 +12,7 @@ import {thisTournament} from './thisTournament';
 import toLowerCase from '../../common/toLowerCase';
 import updateUrl from './updateUrl';
 import {attribType, itemType} from '../../support/constants';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../../system/idb';
 
 const mapAttribs = joinData => fromEntries(joinData.r.attributes.map(o =>
   ['stat_' + toLowerCase(attribType[o.id]), o.value]));

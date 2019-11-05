@@ -9,7 +9,7 @@ import {entries} from '../../common/entries';
 import eventHandlers from './eventHandlers/eventHandlers';
 import executeAll from '../../common/executeAll';
 import {extendOptions} from './options';
-import {get} from 'idb-keyval';
+import {get} from '../../system/idb';
 import getMembrList from '../../ajax/getMembrList';
 import headers from './headers';
 import jQueryNotPresent from '../../common/jQueryNotPresent';

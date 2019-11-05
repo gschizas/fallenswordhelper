@@ -2,7 +2,7 @@ import allthen from '../common/allthen';
 import arenaFull from './arenaFull';
 import doLvlFilter from './doLvlFilter';
 import filterHeader from './filterHeader';
-import {get} from 'idb-keyval';
+import {get} from '../system/idb';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import orderData from './orderData';
 import partial from '../common/partial';

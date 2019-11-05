@@ -11,7 +11,7 @@ import results from '../../app/arena/results';
 import round from '../../common/round';
 import {createAnchor, createBr} from '../../common/cElement';
 import {cyrb32, cyrb53, makeHash} from './makeHash';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../../system/idb';
 
 const tabDelimited = (s, a) => s.concat(a.join('\t'), '\n');
 const byWins = (a, b) => b[2] - a[2] || b[1] - a[1];

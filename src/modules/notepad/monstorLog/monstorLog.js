@@ -9,7 +9,7 @@ import numberSort from '../../system/numberSort';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
-import {set} from 'idb-keyval';
+import {set} from '../../system/idb';
 import stringSort from '../../system/stringSort';
 
 var content;

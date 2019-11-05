@@ -1,7 +1,7 @@
 import getForage from '../ajax/getForage';
 import partial from './partial';
 import {sendEvent} from '../support/fshGa';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../system/idb';
 
 function fallbackStorage(key, data) {
   if (data) {

@@ -2,7 +2,7 @@ import calf from '../support/calf';
 import getProfile from './getProfile';
 import {now} from '../support/now';
 import playerName from '../common/playerName';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../system/idb';
 
 function sendMyProfileToForage(data) {
   set('fsh_selfProfile', data);

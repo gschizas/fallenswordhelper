@@ -13,7 +13,7 @@ import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
 import on from '../common/on';
 import {sendEvent} from '../support/fshGa';
-import {set} from 'idb-keyval';
+import {set} from '../system/idb';
 
 function getBoxList(boxList) {
   if (boxList) {return boxList;}

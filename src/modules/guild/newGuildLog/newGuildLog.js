@@ -26,7 +26,7 @@ import selfIdIs from '../../common/selfIdIs';
 import setText from '../../common/setText';
 import toggleForce from '../../common/toggleForce';
 import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../../system/idb';
 
 var options = {};
 var fshNewGuildLog;

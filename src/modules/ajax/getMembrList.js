@@ -4,7 +4,7 @@ import getGuild from '../_dataAccess/export/guildMembers';
 import isObject from '../common/isObject';
 import {now} from '../support/now';
 import partial from '../common/partial';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../system/idb';
 
 function saveMembrListInForage(membrList, data) {
   var oldMemList = data || {};

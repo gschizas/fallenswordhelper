@@ -2,7 +2,7 @@ import {closestTd} from '../common/closest';
 import {fshArenaKey} from './assets';
 import getTextTrim from '../common/getTextTrim';
 import querySelectorArray from '../common/querySelectorArray';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../system/idb';
 
 function getCount(moveImg) {
   return /(\d)$/.exec(getTextTrim(closestTd(moveImg)))[1];

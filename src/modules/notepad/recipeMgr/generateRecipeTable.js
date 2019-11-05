@@ -1,6 +1,6 @@
 import getValue from '../../system/getValue';
 import playerId from '../../common/playerId';
-import {set} from 'idb-keyval';
+import {set} from '../../system/idb';
 import shouldBeArray from '../../system/shouldBeArray';
 
 var currentPlayerId;
