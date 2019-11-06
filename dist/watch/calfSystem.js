@@ -1060,10 +1060,26 @@
       }).then(() => keys);
   }
 
+  async function get$1(key, store) {
+    try {
+      return await get(key, store);
+    } catch (e) {
+      sendException(parseError(e), false);
+    }
+  }
+
+  async function set$1(key, value, store) {
+    try {
+      return await set(key, value, store);
+    } catch (e) {
+      sendException(parseError(e), false);
+    }
+  }
+
   function fallbackStorage(key, data) {
     if (data) {
       sendEvent('Migrate Storage', key);
-      set(key, data);
+      set$1(key, data);
     }
     return data;
   }
@@ -1074,7 +1090,7 @@
   }
 
   function getMigrate(key) {
-    return get(key).then(partial(migrateStorage, key));
+    return get$1(key).then(partial(migrateStorage, key));
   }
 
   function jQueryNotPresent() {return !isFunction(window.$);}
@@ -1103,7 +1119,7 @@
   }
 
   function clearBuffLog() {
-    set(fshBuffLog, '').then(displayBuffLog);
+    set$1(fshBuffLog, '').then(displayBuffLog);
   }
 
   function injectBuffLog(injector) { // jQuery.min
@@ -1125,7 +1141,7 @@
   }
 
   function clearFsBox() {
-    set('fsh_fsboxcontent', '');
+    set$1('fsh_fsboxcontent', '');
     location.reload();
   }
 
@@ -1346,7 +1362,7 @@
   function doHandlers(evt) {
     var target = evt.target;
     if (target.id === 'clearEntityLog') {
-      set('fsh_monsterLog', '');
+      set$1('fsh_monsterLog', '');
       noMobs();
       return;
     }
@@ -1472,7 +1488,7 @@
   function clearCombatLog() {
     combatLog = [];
     textArea.value = '[]';
-    set('fsh_combatLog', combatLog);
+    set$1('fsh_combatLog', combatLog);
   }
 
   function notepadClearLog() { // jQuery
@@ -1689,7 +1705,9 @@
   }
 
   function storItem(name, type, value) {
-    window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
+    if (Modernizr.localstorage) {
+      window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
+    }
   }
 
   var cold = [
@@ -1812,12 +1830,19 @@
     on(window, 'beforeunload', partial(clearXhr, xhr));
   }
 
-  var ignoreStatus = [0];
+  var ignoreStatus = [0, 503, 504];
   var ignoreTextStatus = ['abort'];
+  const ignoreResponse = [
+    'We have encountered an issue with a server connection',
+    'We\'re performing maintenance on the game'
+  ];
 
   function ignore(ajaxErr) {
     return ignoreStatus.includes(ajaxErr.jqXhr.status) ||
-      ignoreTextStatus.includes(ajaxErr.jqTextStatus);
+      ignoreTextStatus.includes(ajaxErr.jqTextStatus) ||
+      ignoreResponse.some(
+        substring => ajaxErr.jqXhr.responseText.includes(substring)
+      );
   }
 
   function handleFailure(reject, ajaxErr) {
@@ -1921,7 +1946,7 @@
 
   function checkLastPage() {
     if (onlinePages === lastPage) {
-      set('fsh_onlinePlayers', onlinePlayers);
+      set$1('fsh_onlinePlayers', onlinePlayers);
       gotOnlinePlayers(onlinePlayers);
     }
   }
@@ -1999,7 +2024,7 @@
     context.html(
       '<span><b>Online Players</b></span>' + doRefreshButton() +
       '<div id="fshOutput"></div>');
-    get('fsh_onlinePlayers').then(gotOnlinePlayers);
+    get$1('fsh_onlinePlayers').then(gotOnlinePlayers);
     on(context[0], 'click', clickHandler);
     on(context[0], 'keyup', changeLvl);
   }
@@ -2103,7 +2128,7 @@
     result += recipebook.recipe.filter(hidden).map(makeRow$1).join('');
     result += '</table>';
     output.innerHTML = result;
-    set('fsh_recipeBook', recipebook);
+    set$1('fsh_recipeBook', recipebook);
   }
 
   function generateRecipeTable(output, recipebook) { // Legacy
@@ -2286,7 +2311,7 @@
 
   function displayStuff() {
     insertHtmlBeforeEnd(output, 'Finished parsing ... formatting ...');
-    set('fsh_recipeBook', recipebook);
+    set$1('fsh_recipeBook', recipebook);
     generateRecipeTable(output, recipebook);
   }
 
@@ -2334,7 +2359,7 @@
   function injectRecipeManager(injector) { // jQuery.min
     if (jQueryNotPresent()) {return;}
     var content = injector || pCC;
-    get('fsh_recipeBook').then(partial(gotRecipeBook, content));
+    get$1('fsh_recipeBook').then(partial(gotRecipeBook, content));
     on(content, 'click', rmEvtHdl);
   }
 
@@ -5781,7 +5806,7 @@
   }
 
   function sendMyProfileToForage(data) {
-    set('fsh_selfProfile', data);
+    set$1('fsh_selfProfile', data);
     return data;
   }
 
@@ -5807,7 +5832,7 @@
 
   function myStats(force) {
     if (force) {return getMyProfile();}
-    return get('fsh_selfProfile')
+    return get$1('fsh_selfProfile')
       .then(getProfileFromForage);
   }
 
@@ -6427,7 +6452,7 @@
   function doMerge() { // jQuery.min
     var newArchive = {lastUpdate: nowSecs, members: {}};
     guild$1.r.ranks.forEach(partial(processRank, newArchive));
-    set('fsh_guildActivity', newArchive);
+    set$1('fsh_guildActivity', newArchive);
   }
 
   function gotGuild(data) {
@@ -6493,7 +6518,7 @@
       getElementById('minibox-fsbox'))[0].innerHTML;
     if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
     if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
-    set('fsh_fsboxcontent', boxList);
+    set$1('fsh_fsboxcontent', boxList);
   }
 
   function storeMsg(nodediv) {
@@ -7225,7 +7250,7 @@
     var resultAry = data.r;
     if (resultAry) {
       resultAry.forEach(partial(updateSeLog, serverTime));
-      set('fsh_seLog', oldLog);
+      set$1('fsh_seLog', oldLog);
     }
   }
 
@@ -7667,7 +7692,7 @@
       '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]');
     const withPvpId = theButtons.map(e => [e, e.previousElementSibling.value]);
     const newObj = entries(obj).reduce(partial(func, withPvpId), {});
-    set('fsh_arenaFull', newObj);
+    set$1('fsh_arenaFull', newObj);
     return 0;
   }
 
@@ -7730,7 +7755,7 @@
   var oldIds;
 
   function storeOpts() {
-    set(fshArenaKey, opts);
+    set$1(fshArenaKey, opts);
   }
 
   function newOpts(newMin, newMax) {
@@ -8087,14 +8112,14 @@
       sendEvent('arena', 'Join error screen ?');
       return;
     }
-    allthen([get(fshArenaKey), get('fsh_arenaFull'), view$1()],
+    allthen([get$1(fshArenaKey), get$1('fsh_arenaFull'), view$1()],
       partial(process, tabs));
   }
 
   function addId$1(id, obj) {
     const newObj = obj || {};
     newObj[id] = nowSecs;
-    set('fsh_arenaFull', newObj);
+    set$1('fsh_arenaFull', newObj);
   }
 
   function maxMoves$1(thisInfo) {
@@ -8110,7 +8135,7 @@
     if (maxMoves$1(thisInfo)) {return;}
     if (yourGuild(thisInfo)) {
       const thisId = querySelector('#pCC input[name="pvp_id"]').value;
-      get('fsh_arenaFull').then(partial(addId$1, thisId));
+      get$1('fsh_arenaFull').then(partial(addId$1, thisId));
     } else {
       sendEvent('arena', 'doJoin', thisInfo);
     }
@@ -8233,7 +8258,7 @@
     e.preventDefault();
     const pvpId = thisTournament();
     const [equipped, joinData, fsh_arenaJoined] = await all([
-      loadEquipped(), join(pvpId), get('fsh_arenaJoined')]);
+      loadEquipped(), join(pvpId), get$1('fsh_arenaJoined')]);
     const thisData = assign(
       {pvpId, joined: nowSecs},
       mapEquipment(equipped),
@@ -8241,7 +8266,7 @@
     );
     const newJoined = fsh_arenaJoined || [];
     newJoined.push(thisData);
-    set('fsh_arenaJoined', newJoined);
+    set$1('fsh_arenaJoined', newJoined);
     updateUrl$2(e);
   }
 
@@ -8401,7 +8426,7 @@
   }
 
   async function results() {
-    const fsh_arenaJoined = await get('fsh_arenaJoined');
+    const fsh_arenaJoined = await get$1('fsh_arenaJoined');
     if (!fsh_arenaJoined) {return;}
     const thisArena = thisTournament();
     const equip = fsh_arenaJoined.find(o => o.pvpId === thisArena);
@@ -8539,11 +8564,11 @@
     var arena = _arena || {};
     var arenaMoves = querySelectorArray('#pCC img[vspace="4"]').slice(1);
     arena.moves = arenaMoves.reduce(getCounts, {});
-    set(fshArenaKey, arena);
+    set$1(fshArenaKey, arena);
   }
 
   function storeMoves() {
-    get(fshArenaKey).then(gotMoves);
+    get$1(fshArenaKey).then(gotMoves);
   }
 
   var arena$1 = {
@@ -9193,11 +9218,11 @@
 
   function saveMembrListInForage(membrList, data) {
     var oldMemList = data || {};
-    set('fsh_membrList', $.extend(oldMemList, membrList));
+    set$1('fsh_membrList', $.extend(oldMemList, membrList));
   }
 
   function addMembrListToForage(membrList) {
-    get('fsh_membrList')
+    get$1('fsh_membrList')
       .then(partial(saveMembrListInForage, membrList));
     return membrList;
   }
@@ -9251,7 +9276,7 @@
     if (force) {
       return getAndCacheGuildMembers(guildId);
     }
-    return get('fsh_membrList')
+    return get$1('fsh_membrList')
       .then(partial(getMembrListFromForage, guildId));
   }
 
@@ -10847,7 +10872,7 @@
 
   function doSave() {
     var newData = jsonParse(ioText.value);
-    set('fsh_guildActivity', newData)
+    set$1('fsh_guildActivity', newData)
       .then(partial(successMsg, newData))
       .catch(dialogMsg);
   }
@@ -11939,7 +11964,7 @@
     doTooMuch(titanTable, newTitans);
     addMissingTitansFromOld(oldTitans, newTitans); // Pref
     displayTracker(titanTables[0], newTitans); // Pref
-    set('fsh_titans', newTitans); // Pref
+    set$1('fsh_titans', newTitans); // Pref
   }
 
   function injectScouttower() { // jQuery.min
@@ -12424,7 +12449,7 @@
   function onChange(potOpts, potObj, e) {
     if (e.target.tagName === 'SELECT') {
       potOpts.myMap[e.target.name] = e.target.value;
-      set(storeMap, potOpts);
+      set$1(storeMap, potOpts);
       drawInventory(potOpts, potObj);
     }
   }
@@ -12444,7 +12469,7 @@
 
   function doReset$1(potOpts, potObj, ignore) {
     resetMap(potOpts, potObj, ignore);
-    set(storeMap, potOpts);
+    set$1(storeMap, potOpts);
     drawMapping(potOpts);
     drawInventory(potOpts, potObj);
   }
@@ -12454,7 +12479,7 @@
   function saveState(potOpts, self) {
     var option = self.id;
     potOpts[option] = self.checked;
-    set(storeMap, potOpts);
+    set$1(storeMap, potOpts);
   }
 
   function clickEvents(potOpts, potObj) {
@@ -12470,7 +12495,7 @@
     var maybeValue = testRange(e.target.value, 0, 999);
     if (maybeValue) {
       potOpts[self] = maybeValue;
-      set(storeMap, potOpts);
+      set$1(storeMap, potOpts);
       drawInventory(potOpts, potObj);
     }
   }
@@ -12501,7 +12526,7 @@
     var potOpts = extend({}, defaultOpts); // deep clone
     extend(potOpts, fallback(data, {}));
     potOpts.myMap = buildMap(potOpts, potObj);
-    set(storeMap, potOpts);
+    set$1(storeMap, potOpts);
     buildPanels(potOpts, potObj);
   }
 
@@ -13297,7 +13322,7 @@
   }
 
   function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
-    nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
+    nowUtc = new Date().setUTCSeconds(0, 0) - 1;
     var lastCheckScreen = 'last' + logScreen + 'Check';
     lastCheckUtc = getLastCheck(lastCheckScreen);
     dataRows(chatTable.rows, 3, 0)
@@ -13333,7 +13358,7 @@
     combatCache = keys$1(data)
       .reduce(partial(keepRecent, data, sevenDays), {});
     combatCache.lastCheck = nowSecs;
-    set('fsh_pvpCombat', combatCache);
+    set$1('fsh_pvpCombat', combatCache);
   }
 
   function prepareCache(data) {
@@ -13350,7 +13375,7 @@
   }
 
   function initCache() {
-    return get('fsh_pvpCombat').then(checkCache);
+    return get$1('fsh_pvpCombat').then(checkCache);
   }
 
   function inSpecialsList(el) {
@@ -13380,7 +13405,7 @@
     if (json.s) {
       json.logTime = parseDateAsTimestamp$1(getTextTrim(aRow.cells[1])) / 1000;
       combatCache[json.r.id] = json;
-      set('fsh_pvpCombat', combatCache);
+      set$1('fsh_pvpCombat', combatCache);
       unknownSpecials(json);
     }
     return json;
@@ -16618,7 +16643,7 @@
     hazEnhancements$1(data);
     combatData.time = data.time;
     combatLog$1.push(combatData);
-    set('fsh_combatLog', combatLog$1);
+    set$1('fsh_combatLog', combatLog$1);
   }
 
   function combatResponse(e, data) {
@@ -18230,7 +18255,7 @@
     setupMob(creature);
     storeStats(creature, monsterLog[creature.name]);
     storeEnhancements$1(creature, monsterLog[creature.name]);
-    set('fsh_monsterLog', monsterLog);
+    set$1('fsh_monsterLog', monsterLog);
   }
 
   function processMonsterLog(creature) {
@@ -20085,7 +20110,7 @@
     var timeStamp = formatLocalDateTime(new Date());
     const buffsAttempted = buffReportParser(document)
       .map(partial(logFormat, timeStamp));
-    set(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
+    set$1(fshBuffLog, buffsAttempted.reverse().join('') + buffLog);
   }
 
   function updateBuffLog() {
@@ -20202,12 +20227,12 @@
           let current = target;
           const [leaf, ...intermediate] = parts.reverse();
           for (const key of intermediate.reverse()) {
-              if (current[key] === undefined) {
+              if (current[key] === void 0) {
                   current[key] = {};
                   current = current[key];
               }
           }
-          current[leaf] = Object.assign(current[leaf] || {}, newTree);
+          current[leaf] = newTree;
           return target;
       };
       return {
@@ -20241,11 +20266,11 @@
       return (a, b) => comparator(propGetter(a), propGetter(b));
   };
   const defaultSortFactory = (conf) => {
-      const { pointer: pointer$$1, direction = "asc" /* ASC */, comparator = defaultComparator } = conf;
-      if (!pointer$$1 || direction === "none" /* NONE */) {
+      const { pointer, direction = "asc" /* ASC */, comparator = defaultComparator } = conf;
+      if (!pointer || direction === "none" /* NONE */) {
           return (array) => [...array];
       }
-      const orderFunc = sortByProperty(pointer$$1, comparator);
+      const orderFunc = sortByProperty(pointer, comparator);
       const compareFunc = direction === "desc" /* DESC */ ? swap(orderFunc) : orderFunc;
       return (array) => [...array].sort(compareFunc);
   };
@@ -20476,7 +20501,7 @@
       table.on("SUMMARY_CHANGED" /* SUMMARY_CHANGED */, ({ filteredCount: count }) => {
           filteredCount = count;
       });
-      const safeAssign = curry((base, extension) => Object.assign({}, base, extension));
+      const safeAssign = newState => Object.assign({}, newState);
       const dispatch = curry(table.dispatch, 2);
       const dispatchSummary = (filtered) => {
           matchingItems = filtered;
@@ -20509,10 +20534,13 @@
               }
           }, processingDelay);
       };
-      const updateTableState = curry((pter, ev, newPartialState) => compose(safeAssign(pter.get(tableState)), tap(dispatch(ev)), pter.set(tableState))(newPartialState));
-      const resetToFirstPage = () => updateTableState(slicePointer, "CHANGE_PAGE" /* PAGE_CHANGED */, { page: 1 });
-      const tableOperation = (pter, ev) => compose(updateTableState(pter, ev), resetToFirstPage, () => table.exec() // We wrap within a function so table.exec can be overwritten (when using with a server for example)
-      );
+      const updateTableState = curry((pter, ev, newPartialState) => compose(safeAssign, tap(dispatch(ev)), pter.set(tableState))(newPartialState));
+      const resetToFirstPage = () => updateTableState(slicePointer, "CHANGE_PAGE" /* PAGE_CHANGED */, Object.assign({}, slicePointer.get(tableState), { page: 1 }));
+      const tableOperation = (pter, ev) => {
+          const fn = compose(updateTableState(pter, ev), resetToFirstPage, () => table.exec() // We wrap within a function so table.exec can be overwritten (when using with a server for example)
+          );
+          return (arg = {}) => fn(arg);
+      };
       const api = {
           sort: tableOperation(sortPointer, "TOGGLE_SORT" /* TOGGLE_SORT */),
           filter: tableOperation(filterPointer, "FILTER_CHANGED" /* FILTER_CHANGED */),
@@ -20531,14 +20559,7 @@
               table.on("DISPLAY_CHANGED" /* DISPLAY_CHANGED */, fn);
           },
           getTableState() {
-              const sort = Object.assign({}, tableState.sort);
-              const search = Object.assign({}, tableState.search);
-              const slice = Object.assign({}, tableState.slice);
-              const filter = {};
-              for (const prop of Object.getOwnPropertyNames(tableState.filter)) {
-                  filter[prop] = tableState.filter[prop].map(v => Object.assign({}, v));
-              }
-              return { sort, search, slice, filter };
+              return JSON.parse(JSON.stringify(tableState));
           },
           getMatchingItems() {
               return [...matchingItems];
@@ -20573,19 +20594,23 @@
       const proxy = filterListener({ emitter: table });
       return Object.assign({
           filter(input) {
-              const filterConf = {
-                  [pointer]: [
-                      {
-                          value: input,
-                          operator,
-                          type
-                      }
-                  ]
-              };
-              return table.filter(filterConf);
+              const newState = this.state();
+              if (input === void 0) {
+                  delete newState[pointer];
+              }
+              else {
+                  Object.assign(newState, {
+                      [pointer]: [{
+                              value: input,
+                              operator,
+                              type
+                          }]
+                  });
+              }
+              return table.filter(newState);
           },
           state() {
-              return table.getTableState().filter;
+              return table.getTableState().filter || {};
           }
       }, proxy);
   };
@@ -20882,6 +20907,26 @@
     });
   }
 
+  function utcDatePartsPadded(aDate) {
+    return [
+      aDate.getUTCMonth() + 1,
+      aDate.getUTCDate(),
+      aDate.getUTCHours(),
+      aDate.getUTCMinutes(),
+      aDate.getUTCSeconds()
+    ].map(padZ);
+  }
+
+  function utcDateParts(aDate) {
+    return [aDate.getUTCFullYear().toString()].concat(utcDatePartsPadded(aDate));
+  }
+
+  function formatUtcDateTime(aDate) {
+    if (isDate(aDate)) {
+      return formatDateTime(utcDateParts(aDate));
+    }
+  }
+
   let resultsPromise;
   let resultsCache;
 
@@ -20911,10 +20956,10 @@
   }
 
   async function initCache$1() {
-    const cache = await get('fsh_arenaResults');
+    const cache = await get$1('fsh_arenaResults');
     if (cache) {
       resultsCache = prepareCache$1(cache);
-      set('fsh_arenaResults', resultsCache);
+      set$1('fsh_arenaResults', resultsCache);
     } else {
       resultsCache = {lastCheck: nowSecs};
     }
@@ -20925,7 +20970,7 @@
     if (json.s) {
       json.logTime = nowSecs;
       resultsCache[pvpId] = json;
-      set('fsh_arenaResults', resultsCache);
+      set$1('fsh_arenaResults', resultsCache);
     }
     return json;
   }
@@ -20990,16 +21035,17 @@
   //     'text/plain', 'arena_wins.txt', 'arena_wins');
   // }
 
-  const joinedFields = ['pvpId', 'helmet', 'armor', 'gloves', 'boots', 'weapon',
-    'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
+  const joinedFields = ['pvpId', 'joinDate', 'helmet', 'armor', 'gloves', 'boots',
+    'weapon', 'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
     'stat_armor', 'stat_damage', 'stat_hp', 'winner', 'cyrb32', 'cyrb53'];
 
   async function makeArenaJoined(listOfWinners) {
-    const fsh_arenaJoined = await get('fsh_arenaJoined');
+    const fsh_arenaJoined = await get$1('fsh_arenaJoined');
     if (!fsh_arenaJoined) {return;}
     const output = fsh_arenaJoined
       .map(o =>
         fromEntries(entries(o)
+          .concat([['joinDate', formatUtcDateTime(new Date(o.joined * 1000))]])
           .concat([['winner', listOfWinners[o.pvpId]]])
           .concat([['cyrb32', makeHash(cyrb32, o)]])
           .concat([['cyrb53', makeHash(cyrb53, o)]])
@@ -21022,13 +21068,13 @@
   }
 
   async function getListOfWinners(thisArenas) {
-    const fsh_arenaWinners = await get('fsh_arenaWinners') || {};
+    const fsh_arenaWinners = await get$1('fsh_arenaWinners') || {};
     const winnersToGet = thisArenas.filter(a => !fsh_arenaWinners[a.id])
       .map(o => o.id);
     const prm = winnersToGet.map(getWinner);
     const newWinners = fromEntries(await all(prm));
     const combinedWinners = assign(fsh_arenaWinners, newWinners);
-    set('fsh_arenaWinners', combinedWinners);
+    set$1('fsh_arenaWinners', combinedWinners);
     return combinedWinners;
   }
 
@@ -21698,7 +21744,7 @@
   }
 
   function saveOptions(options) {
-    set('fsh_' + calf.subcmd, options);
+    set$1('fsh_' + calf.subcmd, options);
   }
 
   function setChecks() {
@@ -22028,7 +22074,7 @@
     if (calf.subcmd === 'guildinvmgr') {
       prm.push(getMembrList(false).then(rekeyMembrList));
     }
-    prm.push(get('fsh_' + calf.subcmd).then(extendOptions)
+    prm.push(get$1('fsh_' + calf.subcmd).then(extendOptions)
     );
     allthen(prm, asyncCall);
   }
@@ -22221,7 +22267,7 @@
     return all(prm);
   }
 
-  function storeOptions() {set('fsh_guildLog', options$1);}
+  function storeOptions() {set$1('fsh_guildLog', options$1);}
 
   function notThisMinute(nowUtc, ary) {return ary[1] !== nowUtc;}
 
@@ -22230,7 +22276,7 @@
   function updateOptionsLog() {
     // Don't cache current minute as it may be incomplete
     options$1.log = tmpGuildLog
-      .filter(partial(notThisMinute, (new Date()).setSeconds(0, 0)))
+      .filter(partial(notThisMinute, new Date().setSeconds(0, 0)))
       .map(cacheValues);
     storeOptions();
   }
@@ -22385,7 +22431,7 @@
 
   function injectNewGuildLog() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    get('fsh_guildLog').then(gotOptions);
+    get$1('fsh_guildLog').then(gotOptions);
   }
 
   function injectNotepad() { // jQuery
@@ -22646,7 +22692,7 @@
   }
 
   function processRawLog(theLog) {
-    var nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
+    var nowUtc = new Date().setUTCSeconds(0, 0) - 1;
     var lastCheckUtc = getValue('lastmyGuildLogCheck') || nowUtc;
     var foo = theLog.map(partial(toTr, nowUtc, lastCheckUtc)).reverse();
     getElementById('fshOutput').textContent = 'Building table.';
@@ -22680,7 +22726,7 @@
 
   function newGuildLog5() { // jQuery.min
     if (jQueryNotPresent()) {return;}
-    get('fsh_guildLog').then(gotOptions$1);
+    get$1('fsh_guildLog').then(gotOptions$1);
   }
 
   function guildReliclist(page) {
@@ -23462,26 +23508,6 @@
     process: {'-': injectScavenging}
   };
 
-  function utcDatePartsPadded(aDate) {
-    return [
-      aDate.getUTCMonth() + 1,
-      aDate.getUTCDate(),
-      aDate.getUTCHours(),
-      aDate.getUTCMinutes(),
-      aDate.getUTCSeconds()
-    ].map(padZ);
-  }
-
-  function utcDateParts(aDate) {
-    return [aDate.getUTCFullYear().toString()].concat(utcDatePartsPadded(aDate));
-  }
-
-  function formatUtcDateTime(aDate) {
-    if (isDate(aDate)) {
-      return formatDateTime(utcDateParts(aDate));
-    }
-  }
-
   var enableSeTracker$2 = 'enableSeTracker';
   var trackerCell;
 
@@ -24158,7 +24184,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '149';
+  window.FSH.calf = '150';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
