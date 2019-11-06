@@ -64,7 +64,7 @@ function getGuildLog(tofetch, myId, myLog, latest) {
 }
 
 function processRawLog(theLog) {
-  var nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
+  var nowUtc = new Date().setUTCSeconds(0, 0) - 1;
   var lastCheckUtc = getValue('lastmyGuildLogCheck') || nowUtc;
   var foo = theLog.map(partial(toTr, nowUtc, lastCheckUtc)).reverse();
   getElementById('fshOutput').textContent = 'Building table.';

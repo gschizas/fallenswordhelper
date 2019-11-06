@@ -112,7 +112,7 @@ function cacheValues(ary) {return ary.slice(1, 5);}
 function updateOptionsLog() {
   // Don't cache current minute as it may be incomplete
   options.log = tmpGuildLog
-    .filter(partial(notThisMinute, (new Date()).setSeconds(0, 0)))
+    .filter(partial(notThisMinute, new Date().setSeconds(0, 0)))
     .map(cacheValues);
   storeOptions();
 }
