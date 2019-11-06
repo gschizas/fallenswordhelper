@@ -1,7 +1,7 @@
 import {def_PvE} from '../../support/constants';
 import getMigrate from '../../common/getMigrate';
 import getValue from '../../system/getValue';
-import {set} from 'idb-keyval';
+import {set} from '../../system/idb';
 
 // Taking the Not Save in case they add new enhancements.
 var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',

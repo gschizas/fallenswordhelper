@@ -2,6 +2,7 @@ import all from '../../common/all';
 import {assign} from '../../common/assign';
 import completed from '../../app/arena/completed';
 import {entries} from '../../common/entries';
+import formatUtcDateTime from '../../common/formatUtcDateTime';
 import {fromEntries} from '../../common/fromEntries';
 import insertElement from '../../common/insertElement';
 import {pCC} from '../../support/layout';
@@ -11,7 +12,7 @@ import results from '../../app/arena/results';
 import round from '../../common/round';
 import {createAnchor, createBr} from '../../common/cElement';
 import {cyrb32, cyrb53, makeHash} from './makeHash';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../../system/idb';
 
 const tabDelimited = (s, a) => s.concat(a.join('\t'), '\n');
 const byWins = (a, b) => b[2] - a[2] || b[1] - a[1];
@@ -63,8 +64,8 @@ function makeDownloadAnchor(output, type, filename, text) {
 //     'text/plain', 'arena_wins.txt', 'arena_wins');
 // }
 
-const joinedFields = ['pvpId', 'helmet', 'armor', 'gloves', 'boots', 'weapon',
-  'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
+const joinedFields = ['pvpId', 'joinDate', 'helmet', 'armor', 'gloves', 'boots',
+  'weapon', 'shield', 'ring', 'amulet', 'rune', 'stat_attack', 'stat_defense',
   'stat_armor', 'stat_damage', 'stat_hp', 'winner', 'cyrb32', 'cyrb53'];
 
 async function makeArenaJoined(listOfWinners) {
@@ -73,6 +74,7 @@ async function makeArenaJoined(listOfWinners) {
   const output = fsh_arenaJoined
     .map(o =>
       fromEntries(entries(o)
+        .concat([['joinDate', formatUtcDateTime(new Date(o.joined * 1000))]])
         .concat([['winner', listOfWinners[o.pvpId]]])
         .concat([['cyrb32', makeHash(cyrb32, o)]])
         .concat([['cyrb53', makeHash(cyrb53, o)]])

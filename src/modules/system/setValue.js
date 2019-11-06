@@ -2,7 +2,9 @@ import {GMSTORAGE_PATH} from '../support/constants';
 import partial from '../common/partial';
 
 function storItem(name, type, value) {
-  window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
+  if (Modernizr.localstorage) {
+    window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
+  }
 }
 
 var cold = [

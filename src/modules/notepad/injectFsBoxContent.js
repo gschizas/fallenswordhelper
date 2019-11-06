@@ -4,7 +4,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
 import on from '../common/on';
 import {pCC} from '../support/layout';
-import {set} from 'idb-keyval';
+import {set} from '../system/idb';
 
 function inject(fsboxcontent) {
   getElementById('fsboxdetail').innerHTML = fsboxcontent;

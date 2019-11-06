@@ -5,7 +5,7 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
 import processFirstPage from './processFirstPage';
-import {set} from 'idb-keyval';
+import {set} from '../../system/idb';
 
 export var recipebook;
 export var output;

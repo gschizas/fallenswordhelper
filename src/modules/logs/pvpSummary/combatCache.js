@@ -9,7 +9,7 @@ import partial from '../../common/partial';
 import querySelectorAll from '../../common/querySelectorAll';
 import {sendEvent} from '../../support/fshGa';
 import specials from '../../support/specials.json';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../../system/idb';
 
 export let combatCache = {};
 

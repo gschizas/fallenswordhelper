@@ -6,7 +6,7 @@ import jQueryPresent from '../common/jQueryPresent';
 import lastActivityToDays from '../common/lastActivityToDays';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
-import {set} from 'idb-keyval';
+import {set} from '../system/idb';
 import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';
 
 var oldArchive;

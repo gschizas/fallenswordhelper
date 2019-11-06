@@ -11,7 +11,7 @@ import on from '../../../common/on';
 import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
 import selfIdIs from '../../../common/selfIdIs';
-import {set} from 'idb-keyval';
+import {set} from '../../../system/idb';
 import sortKeys from './sortKeys';
 import testRange from '../../../system/testRange';
 import {drawInventory, initInventory} from './drawInventory';

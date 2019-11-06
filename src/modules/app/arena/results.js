@@ -2,7 +2,7 @@ import arena from './arena';
 import {entries} from '../../common/entries';
 import {nowSecs} from '../../support/now';
 import partial from '../../common/partial';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../../system/idb';
 
 let resultsPromise;
 let resultsCache;

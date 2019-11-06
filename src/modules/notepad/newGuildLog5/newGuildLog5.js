@@ -1,7 +1,7 @@
 import './newGuildLog5.postcss';
 import add from '../../support/task';
 import {createTable} from '../../common/cElement';
-import {get} from 'idb-keyval';
+import {get} from '../../system/idb';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import initTable from './outputTable';
@@ -64,7 +64,7 @@ function getGuildLog(tofetch, myId, myLog, latest) {
 }
 
 function processRawLog(theLog) {
-  var nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
+  var nowUtc = new Date().setUTCSeconds(0, 0) - 1;
   var lastCheckUtc = getValue('lastmyGuildLogCheck') || nowUtc;
   var foo = theLog.map(partial(toTr, nowUtc, lastCheckUtc)).reverse();
   getElementById('fshOutput').textContent = 'Building table.';

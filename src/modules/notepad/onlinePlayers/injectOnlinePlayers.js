@@ -12,7 +12,7 @@ import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import partial from '../../common/partial';
 import resetEvt from './resetEvt';
 import setValue from '../../system/setValue';
-import {get, set} from 'idb-keyval';
+import {get, set} from '../../system/idb';
 
 var context;
 var onlinePlayers;

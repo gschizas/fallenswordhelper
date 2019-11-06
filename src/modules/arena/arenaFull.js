@@ -2,7 +2,7 @@ import {entries} from '../common/entries';
 import isObject from '../common/isObject';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
-import {set} from 'idb-keyval';
+import {set} from '../system/idb';
 
 function func(withPvpId, prev, [key, value]) {
   const thisBtn = withPvpId.find(([, id]) => id === key);

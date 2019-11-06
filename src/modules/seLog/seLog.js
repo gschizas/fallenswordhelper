@@ -4,7 +4,7 @@ import getMigrate from '../common/getMigrate';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
-import {set} from 'idb-keyval';
+import {set} from '../system/idb';
 
 export var oldLog;
 var timeoutId;

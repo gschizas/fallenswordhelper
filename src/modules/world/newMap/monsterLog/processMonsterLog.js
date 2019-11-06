@@ -1,7 +1,7 @@
 import calf from '../../../support/calf';
 import getMigrate from '../../../common/getMigrate';
 import partial from '../../../common/partial';
-import {set} from 'idb-keyval';
+import {set} from '../../../system/idb';
 
 var monsterLog;
 

@@ -14,7 +14,7 @@ import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import roundToString from '../../common/roundToString';
-import {set} from 'idb-keyval';
+import {set} from '../../system/idb';
 import {def_table, guideUrl} from '../../support/constants';
 
 function getTitanName(aRow) {

@@ -1,6 +1,6 @@
 import doSortParams from '../../common/doSortParams';
 import generateRecipeTable from './generateRecipeTable';
-import {get} from 'idb-keyval';
+import {get} from '../../system/idb';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';

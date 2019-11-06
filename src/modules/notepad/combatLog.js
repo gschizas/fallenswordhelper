@@ -4,7 +4,7 @@ import jConfirm from '../common/jConfirm';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
 import {pCC} from '../support/layout';
-import {set} from 'idb-keyval';
+import {set} from '../system/idb';
 
 var content;
 var combatLog = [];
