@@ -8112,7 +8112,7 @@
       sendEvent('arena', 'Join error screen ?');
       return;
     }
-    allthen([get$1(fshArenaKey), get$1('fsh_arenaFull'), view$1()],
+    allthen([get$1(fshArenaKey), get$1('fsh_arenaFull'), view$1().catch(() => ({}))],
       partial(process, tabs));
   }
 
@@ -24184,7 +24184,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '150';
+  window.FSH.calf = '151';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
