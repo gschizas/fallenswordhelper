@@ -8,9 +8,9 @@ import getValue from '../../system/getValue';
 import guildActivity from '../../guild/guildActivity';
 import insertElement from '../../common/insertElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
-import {pCR} from '../../support/layout';
 import priorityThree from './priorityThree';
 import {seLog} from '../../seLog/seLog';
+import {pCL, pCR} from '../../support/layout';
 
 function getEnvVars() {
   [
@@ -46,7 +46,7 @@ function moveRHSBoxToLHS(title) {
   var boxDiv = getElementById(title);
   if (boxDiv) {
     boxDiv.classList.add('pCR');
-    insertElement(getElementById('pCL'), boxDiv);
+    insertElement(pCL, boxDiv);
   }
 }
 
@@ -74,6 +74,14 @@ function doMoveDailyQuest() {
   }
 }
 
+//#if _DEV  //  doMoveXmas
+function doMoveXmas() {
+  // if (getValue('moveFSBox')) {
+  add(3, moveRHSBoxToLHS, ['minibox-xmas']);
+  // }
+}
+//#endif
+
 function asyncPFour(fn) {add(4, fn);}
 
 function priorityFour() {
@@ -87,6 +95,9 @@ export default function notHuntMode() {
   if (calf.huntingMode) {return;}
   // move boxes in opposite order that you want them to appear.
   executeAll([
+    //#if _DEV  //  doMoveXmas
+    doMoveXmas,
+    //#endif
     doMoveGuildList,
     doMoveAllyList,
     doMoveDailyQuest,
