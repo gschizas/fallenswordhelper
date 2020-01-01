@@ -1,6 +1,6 @@
 import cssnano from 'cssnano';
 import jscc from 'rollup-plugin-jscc';
-import json from 'rollup-plugin-json';
+import json from '@rollup/plugin-json';
 import postcss from 'rollup-plugin-postcss';
 import postcssNesting from 'postcss-nesting';
 import resolve from 'rollup-plugin-node-resolve';

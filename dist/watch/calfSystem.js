@@ -1834,7 +1834,9 @@
   var ignoreTextStatus = ['abort'];
   const ignoreResponse = [
     'We have encountered an issue with a server connection',
-    'We\'re performing maintenance on the game'
+    'We\'re performing maintenance on the game',
+    'the team have been notified and will get it fixed soon',
+    'Create a Free Account Now!'
   ];
 
   function ignore(ajaxErr) {
@@ -7334,7 +7336,7 @@
     var boxDiv = getElementById(title);
     if (boxDiv) {
       boxDiv.classList.add('pCR');
-      insertElement(getElementById('pCL'), boxDiv);
+      insertElement(pCL, boxDiv);
     }
   }
 
@@ -7362,6 +7364,12 @@
     }
   }
 
+  function doMoveXmas() {
+    // if (getValue('moveFSBox')) {
+    add(3, moveRHSBoxToLHS, ['minibox-xmas']);
+    // }
+  }
+
   function asyncPFour(fn) {add(4, fn);}
 
   function priorityFour() {
@@ -7375,6 +7383,7 @@
     if (calf.huntingMode) {return;}
     // move boxes in opposite order that you want them to appear.
     executeAll([
+      doMoveXmas,
       doMoveGuildList,
       doMoveAllyList,
       doMoveDailyQuest,
@@ -7708,27 +7717,6 @@
     redraw();
   }
 
-  var moveOptions =
-    '<td colspan=3 ' +
-    'style="padding-top: 2px;padding-bottom: 2px;">' +
-    '<select style="max-width: 50px;">' +
-    '<option value="x">Basic Attack</option>' +
-    '<option value="0">Block</option>' +
-    '<option value="1">Counter Attack</option>' +
-    '<option value="2">Critical Hit</option>' +
-    '<option value="3">Defend</option>' +
-    '<option value="4">Deflect</option>' +
-    '<option value="5">Dodge</option>' +
-    '<option value="6">Lunge</option>' +
-    '<option value="7">Power Attack</option>' +
-    '<option value="8">Spin Attack</option>' +
-    '<option value="9">Piercing Strike</option>' +
-    '<option value="10">Crush</option>' +
-    '<option value="11">Weaken</option>' +
-    '<option value="12">Ice Shard</option>' +
-    '<option value="13">Fire Blast</option>' +
-    '<option value="14">Poison</option>' +
-    '</select></td>';
   var tableOpts$1 = {
     columnDefs: [
       {orderable: false, targets: [9]}
@@ -8433,6 +8421,27 @@
     if (equip) {displayObj(equip);}
   }
 
+  const moveOptions =
+    '<td colspan=3 style="padding-top: 2px;padding-bottom: 2px;">' +
+    '<select style="max-width: 50px;">' +
+    '<option value="x">Basic Attack</option>' +
+    '<option value="0">Block</option>' +
+    '<option value="1">Counter Attack</option>' +
+    '<option value="2">Critical Hit</option>' +
+    '<option value="3">Defend</option>' +
+    '<option value="4">Deflect</option>' +
+    '<option value="5">Dodge</option>' +
+    '<option value="6">Lunge</option>' +
+    '<option value="7">Power Attack</option>' +
+    '<option value="8">Spin Attack</option>' +
+    '<option value="9">Piercing Strike</option>' +
+    '<option value="10">Crush</option>' +
+    '<option value="11">Weaken</option>' +
+    '<option value="12">Ice Shard</option>' +
+    '<option value="13">Fire Blast</option>' +
+    '<option value="14">Poison</option>' +
+    '</select></td>';
+
   var oldMoves = [];
   var imgNodes;
   var selectRow;
@@ -8496,7 +8505,7 @@
     if (move.indexOf('bar_icon_holder.jpg') > 0) {
       move = 'x';
     } else {
-      move = move.match(moveRe)[1];
+      move = move.match(moveRe)[1]; // TODO this fails sometimes
     }
     oldMoves.push(move);
     var html = $(moveOptions);
@@ -24184,7 +24193,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '151';
+  window.FSH.calf = '152';
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
