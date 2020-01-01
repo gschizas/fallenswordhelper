@@ -5,7 +5,7 @@ import {injectArena} from '../../arena/arena';
 //#if _DEV  //  arena results
 import results from '../../arena/results';
 //#endif
-import setupMoves from '../../arena/setup';
+import setupMoves from '../../arena/arenaSetup/setup';
 import storeMoves from '../../arena/store';
 
 export default {

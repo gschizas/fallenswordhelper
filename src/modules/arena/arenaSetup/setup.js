@@ -1,10 +1,11 @@
-import allthen from '../common/allthen';
-import getArrayByTagName from '../common/getArrayByTagName';
-import indexAjaxData from '../ajax/indexAjaxData';
-import jQueryNotPresent from '../common/jQueryNotPresent';
-import partial from '../common/partial';
-import {arenaUrl, def_table, oldActionSpinner} from '../support/constants';
-import {moveOptions, moveRe} from './assets';
+import allthen from '../../common/allthen';
+import getArrayByTagName from '../../common/getArrayByTagName';
+import indexAjaxData from '../../ajax/indexAjaxData';
+import jQueryNotPresent from '../../common/jQueryNotPresent';
+import {moveOptions} from './moveOptions';
+import {moveRe} from '../assets';
+import partial from '../../common/partial';
+import {arenaUrl, def_table, oldActionSpinner} from '../../support/constants';
 
 var oldMoves = [];
 var imgNodes;
@@ -69,7 +70,7 @@ function makeDropDown(row, i, e) { // jQuery
   if (move.indexOf('bar_icon_holder.jpg') > 0) {
     move = 'x';
   } else {
-    move = move.match(moveRe)[1];
+    move = move.match(moveRe)[1]; // TODO this fails sometimes
   }
   oldMoves.push(move);
   var html = $(moveOptions);
