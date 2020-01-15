@@ -39,7 +39,7 @@ export default function viewArchive() {
     collapse({
       prefName: prefName,
       theTable: theTables[2],
-      headInd: 6,
+      headInd: 7,
       articleTest: testArticle,
       extraFn: checkForPvPLadder
     });
