@@ -27,9 +27,14 @@
     return e.message + '|' + concatStack;
   }
 
-  function parseError(e) {
+  function isError(e) {
     if (e.stack) {return parseStack(e);}
     if (e.message) {return e.message;}
+    return String(e);
+  }
+
+  function parseError(e) {
+    if (e instanceof Error) {return isError(e);}
     return String(e);
   }
 
@@ -1836,7 +1841,7 @@
     'We have encountered an issue with a server connection',
     'We\'re performing maintenance on the game',
     'the team have been notified and will get it fixed soon',
-    'Create a Free Account Now!'
+    'uUDRezBqFM4'
   ];
 
   function ignore(ajaxErr) {
@@ -3053,16 +3058,20 @@
     }).then(parseReport$4);
   }
 
-  const tests = [
-    json => isObject(json),
-    json => 's' in json,
-    json => !json.s,
-    json => 'e' in json,
-    json => json.e.message === 'Unknown Command'
-  ];
+  // import isObject from '../common/isObject';
 
-  function hasFailed(json) {
-    return tests.every(f => f(json));
+  // const tests = [
+  //   json => isObject(json),
+  //   json => 's' in json,
+  //   json => !json.s,
+  //   json => 'e' in json,
+  //   json => json.e.message === 'Unknown Command'
+  // ];
+
+  // export default function hasFailed(json) {
+  function hasFailed() {
+    // return tests.every(f => f(json));
+    return false;
   }
 
   function formatResult(html) {
@@ -3482,7 +3491,7 @@
   }
 
   function getId(e) {
-    return Number(e.getAttribute('background').match(/\/(\d+)/)[1]);
+    return Number(e.getAttribute('background').match(/\/(\d+)/)[1]); // FIXME
   }
 
   function getResult(script, e) {
@@ -3626,6 +3635,7 @@
     if (!appBad$1) {
       appBad$1 = getValueJSON('appBad') || [nowSecs, false];
       resetAppBad();
+      // setValueJSON('appBad', appBad);
     }
   }
 
@@ -19901,7 +19911,7 @@
       collapse({
         prefName: prefName,
         theTable: theTables[2],
-        headInd: 6,
+        headInd: 7,
         articleTest: testArticle$1,
         extraFn: checkForPvPLadder
       });
@@ -24193,11 +24203,15 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '152';
+  window.FSH.calf = '153';
+
+  function badEnv() {
+    return !isFunction(Object.fromEntries) || !navigator.cookieEnabled;
+  }
 
   // main event dispatcher
   window.FSH.dispatch = function dispatch() {
-    if (!isFunction(Object.fromEntries)) {return;}
+    if (badEnv()) {return;}
     globalErrorHandler();
     setup();
     start('JS Perf', 'FSH.dispatch');

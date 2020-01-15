@@ -8,7 +8,7 @@ import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
 
 function getId(e) {
-  return Number(e.getAttribute('background').match(/\/(\d+)/)[1]);
+  return Number(e.getAttribute('background').match(/\/(\d+)/)[1]); // FIXME
 }
 
 function getResult(script, e) {

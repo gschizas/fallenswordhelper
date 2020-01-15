@@ -29,7 +29,7 @@ const ignoreResponse = [
   'We have encountered an issue with a server connection',
   'We\'re performing maintenance on the game',
   'the team have been notified and will get it fixed soon',
-  'Create a Free Account Now!'
+  'uUDRezBqFM4'
 ];
 
 function ignore(ajaxErr) {

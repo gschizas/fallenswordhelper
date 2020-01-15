@@ -6,8 +6,13 @@ function parseStack(e) {
   return e.message + '|' + concatStack;
 }
 
-export default function parseError(e) {
+function isError(e) {
   if (e.stack) {return parseStack(e);}
   if (e.message) {return e.message;}
+  return String(e);
+}
+
+export default function parseError(e) {
+  if (e instanceof Error) {return isError(e);}
   return String(e);
 }
