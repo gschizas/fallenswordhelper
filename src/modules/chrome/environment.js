@@ -111,9 +111,13 @@ function runCore() {
 window.FSH = window.FSH || {};
 window.FSH.calf = '$_CALFVER';
 
+function badEnv() {
+  return !isFunction(Object.fromEntries) || !navigator.cookieEnabled;
+}
+
 // main event dispatcher
 window.FSH.dispatch = function dispatch() {
-  if (!isFunction(Object.fromEntries)) {return;}
+  if (badEnv()) {return;}
   globalErrorHandler();
   setup();
   start('JS Perf', 'FSH.dispatch');
