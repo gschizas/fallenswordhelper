@@ -71,6 +71,7 @@ function initAppBad() {
   if (!appBad) {
     appBad = getValueJSON('appBad') || [nowSecs, false];
     resetAppBad();
+    // setValueJSON('appBad', appBad);
   }
 }
 
