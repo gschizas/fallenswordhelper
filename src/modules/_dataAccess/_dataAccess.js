@@ -80,7 +80,8 @@ export function _dataAccess(appFn, fallbackFn, ...args) {
   if (appBad[1]) {return fallbackFn(...args);}
   return appFn(...args)
     .then(function(json) {
-      if (hasFailed(json)) {
+      // if (hasFailed(json)) {
+      if (hasFailed()) {
         appBad = [nowSecs, true];
         setValueJSON('appBad', appBad);
         return fallbackFn(...args);
