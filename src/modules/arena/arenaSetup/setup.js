@@ -65,13 +65,16 @@ function updateButton(table) { // jQuery
   table.append(row);
 }
 
-function makeDropDown(row, i, e) { // jQuery
-  var move = $(e).attr('src');
-  if (move.indexOf('bar_icon_holder.jpg') > 0) {
-    move = 'x';
-  } else {
-    move = move.match(moveRe)[1]; // TODO this fails sometimes
+function getMoveCode(e) {
+  const moveMatches = $(e).attr('src').match(moveRe);
+  if (moveMatches) {
+    return moveMatches[1];
   }
+  return 'x';
+}
+
+function makeDropDown(row, i, e) { // jQuery
+  const move = getMoveCode(e);
   oldMoves.push(move);
   var html = $(moveOptions);
   $('option[value=' + move + ']', html).prop('selected', true);
