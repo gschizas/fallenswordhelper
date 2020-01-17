@@ -3644,7 +3644,8 @@
     if (appBad$1[1]) {return fallbackFn(...args);}
     return appFn(...args)
       .then(function(json) {
-        if (hasFailed(json)) {
+        // if (hasFailed(json)) {
+        if (hasFailed()) {
           appBad$1 = [nowSecs, true];
           setValueJSON('appBad', appBad$1);
           return fallbackFn(...args);
@@ -8510,13 +8511,16 @@
     table.append(row);
   }
 
-  function makeDropDown(row, i, e) { // jQuery
-    var move = $(e).attr('src');
-    if (move.indexOf('bar_icon_holder.jpg') > 0) {
-      move = 'x';
-    } else {
-      move = move.match(moveRe)[1]; // TODO this fails sometimes
+  function getMoveCode(e) {
+    const moveMatches = $(e).attr('src').match(moveRe);
+    if (moveMatches) {
+      return moveMatches[1];
     }
+    return 'x';
+  }
+
+  function makeDropDown(row, i, e) { // jQuery
+    const move = getMoveCode(e);
     oldMoves.push(move);
     var html = $(moveOptions);
     $('option[value=' + move + ']', html).prop('selected', true);
@@ -24203,7 +24207,7 @@
   }
 
   window.FSH = window.FSH || {};
-  window.FSH.calf = '153';
+  window.FSH.calf = '154';
 
   function badEnv() {
     return !isFunction(Object.fromEntries) || !navigator.cookieEnabled;
