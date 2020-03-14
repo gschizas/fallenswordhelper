@@ -24211,8 +24211,8 @@ function dispatch(fshVer, gmInfo) {
   start('JS Perf', 'FSH.dispatch');
   if (badEnv()) {return;}
   globalErrorHandler();
-  setup();
   setVer(fshVer, gmInfo);
+  setup();
   loadCss('https://localhost:9966/dist/watch/calfSystem.css').then(runCore);
   end('JS Perf', 'FSH.dispatch');
 }
