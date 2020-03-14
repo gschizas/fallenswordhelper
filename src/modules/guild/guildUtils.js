@@ -9,7 +9,7 @@ function wrapUrl(guildLogo) {
 }
 
 export function removeGuildAvyImgBorder() {
-  var guildLogo = querySelector('#pCC img[oldtitle$="\'s Logo"]');
+  var guildLogo = querySelector('#pCC img[src*="/guilds/"][width="200"]');
   if (!guildLogo) {return;}
   guildLogo.removeAttribute('style');
   wrapUrl(guildLogo);

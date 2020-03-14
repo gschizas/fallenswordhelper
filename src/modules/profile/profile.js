@@ -79,7 +79,8 @@ function allowBack(self) {
 
 export default function injectProfile() { // Legacy
   if (jQueryNotPresent()) {return;}
-  var avyImg = querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
+  var avyImg = querySelector(
+    '#profileLeftColumn img[src*="/avatars/"][width="200"]');
   if (!avyImg) {return;}
   var playername = getText(getElementsByTagName('h1', pCC)[0]);
   var self = playername === playerName();

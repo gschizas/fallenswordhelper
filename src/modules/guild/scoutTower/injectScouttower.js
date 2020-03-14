@@ -4,6 +4,7 @@ import displayTracker from './displayTracker';
 import {entries} from '../../common/entries';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getText from '../../common/getText';
+import getTitle from '../../common/getTitle';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -17,7 +18,7 @@ import {def_table, guideUrl} from '../../support/constants';
 import {get, set} from '../../system/idb';
 
 function getTitanName(aRow) {
-  return aRow.cells[0].children[0].getAttribute('oldtitle');
+  return getTitle(aRow.cells[0].children[0]);
 }
 
 function cooldownTracker(theTitans, aRow) {

@@ -8,6 +8,7 @@ import doChat from './doChat';
 import getCalfPrefs from '../common/getCalfPrefs';
 import getMembrList from '../ajax/getMembrList';
 import getTextTrim from '../common/getTextTrim';
+import getTitle from '../common/getTitle';
 import getValue from '../system/getValue';
 import {initCache} from './pvpSummary/combatCache';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -102,7 +103,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
 }
 
 function processLogWidgetRow(aRow) { // Legacy
-  var messageType = aRow.cells[0].children[0].getAttribute('oldtitle');
+  var messageType = getTitle(aRow.cells[0].children[0]);
   if (messageType) {
     doLogWidgetRow(aRow, messageType);
     addPvpSummary(aRow, messageType);
