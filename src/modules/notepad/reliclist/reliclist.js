@@ -6,14 +6,13 @@ import splitTime from '../../common/splitTime';
 import {def_subcmd, guideUrl, guildViewUrl} from '../../support/constants';
 
 function relicName(relic) {
-  return '<a href="' + guideUrl + 'relics' + def_subcmd +
-    'view&relic_id=' + relic.id + '">' + relic.name + '</a>';
+  return `<a href="${guideUrl}relics${def_subcmd}view&relic_id=${relic.id}">` +
+    `${relic.name}</a>`;
 }
 
 function guildName(relicGuild) {
   if (relicGuild) {
-    return '<a href="' + guildViewUrl + relicGuild.id + '">' +
-      relicGuild.name + '</a>';
+    return `<a href="${guildViewUrl}${relicGuild.id}">${relicGuild.name}</a>`;
   }
   return '';
 }
@@ -41,27 +40,22 @@ function allAttribs(attribs) {
 function formatTime(time) {
   if (!time) {return '';}
   var t = splitTime(time);
-  return padZ(t[0]) + 'd ' +
-    padZ(t[1]) + 'h ' +
-    padZ(t[2]) + 'm ' +
-    padZ(t[3]) + 's';
+  return `${padZ(t[0])}d ${padZ(t[1])}h ${padZ(t[2])}m ${padZ(t[3])}s`;
 }
 
 function makeRow(relic) {
-  return '<tr>' +
-    '<td>' + relic.min_level + '</td>' +
-    '<td>' + relicName(relic) + '</td>' +
-    '<td>' + guildName(relic.guild) + '</td>' +
-    '<td>' + allAttribs(relic.attributes) + '</td>' +
-    '<td>' + formatTime(relic.time) + '</td>' +
-    '</tr>';
+  return `<tr><td>${relic.min_level}</td>` +
+    `<td>${relicName(relic)}</td>` +
+    `<td>${guildName(relic.guild)}</td>` +
+    `<td>${allAttribs(relic.attributes)}</td>` +
+    `<td>${formatTime(relic.time)}</td></tr>`;
 }
 
 function makeTable(thisRelicList) {
   return '<style>' +
     '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}' +
-    'table, th, td {border: 1px solid black;}' +
-    'th, td {padding: 5px;}' +
+    '.reliclist, .reliclist th, .reliclist td {border: 1px solid black;}' +
+    '.reliclist th, .reliclist td {padding: 5px;}' +
     '</style><table class="reliclist"><thead><tr>' +
     '<th>Level</th>' +
     '<th>Name</th>' +
