@@ -18,15 +18,16 @@ function getContainer(movesController) {
 }
 
 function injectImg(container, id) {
+  let move = String(id - 1);
+  if (id === 0) {move = 'x';}
   insertHtmlBeforeEnd(container,
-    '<img src="' + cdn + 'arena/' + String(id - 1) +
-    '.png" class="moveImg">');
+    `<img src="${cdn}arena/${move}.png" class="moveImg">`);
 }
 
 function thisOptions(current_set, e) {
-  return '<option value="' + String(e.id) + '"' +
-    isSelected(current_set.slots.join(), e.slots.join()) +
-    '>' + e.name + '</option>';
+  return `<option value="${String(e.id)}"` +
+    `${isSelected(current_set.slots.join(), e.slots.join())}>` +
+    `${e.name}</option>`;
 }
 
 function doMoves(thisSet, movesController) {
