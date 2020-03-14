@@ -1,16 +1,13 @@
+import {core} from './getVersion.js';
 import rollupFsh from './rollupFsh.js';
 
-const version = require('../package.json').version;
-const varAry = version.split('.');
-const core = varAry[0] + varAry[1];
-const localhttp = 'https://localhost:9966/';
+const localhttp = require('./config.json').localhttp;
 
 export default rollupFsh(
   'dev',
   {
-    _CALFCSS: localhttp + 'dist/dev/calfSystem.css',
-    _CALFJS: localhttp + 'dist/dev/calfSystem.min.js',
-    _DLURL: localhttp + 'dist/dev/fallenswordhelper.user.js',
-    _VER: core + 'a'
+    _CALFJS: `${localhttp}dist/dev/calfSystem.min.js`,
+    _DLURL: `${localhttp}dist/dev/fallenswordhelper.user.js`,
+    _VER: `${core}a`
   }
 );

@@ -1,3 +1,4 @@
+import calf from './calf';
 import isUndefined from '../common/isUndefined';
 //#if _BETA  //  Timing output
 import {log} from './debug';
@@ -84,7 +85,7 @@ export function setup() {
     siteSpeedSampleRate: 10
   });
   ga('fshApp.set', 'appName', 'fshApp');
-  ga('fshApp.set', 'appVersion', FSH.version + '(' + FSH.calf + ')');
+  ga('fshApp.set', 'appVersion', calf.fshVer + '(' + calf.calfVer + ')');
   ga('create', 'UA-76488113-2', 'auto', 'fsh', {
     userId: playerId(),
     siteSpeedSampleRate: 10

@@ -4,6 +4,7 @@ import doLvlFilter from './doLvlFilter';
 import filterHeader from './filterHeader';
 import {get} from '../system/idb';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import loadDataTables from '../common/loadDatatables';
 import orderData from './orderData';
 import partial from '../common/partial';
 import participants from './participants';
@@ -74,6 +75,11 @@ export function injectArena() { // jQuery
     sendEvent('arena', 'Join error screen ?');
     return;
   }
-  allthen([get(fshArenaKey), get('fsh_arenaFull'), view().catch(() => ({}))],
-    partial(process, tabs));
+  allthen([
+    get(fshArenaKey),
+    get('fsh_arenaFull'),
+    view().catch(() => ({})),
+    loadDataTables()
+  ],
+  partial(process, tabs));
 }
