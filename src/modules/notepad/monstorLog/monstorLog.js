@@ -2,15 +2,14 @@ import buildHtml from './buildHtml';
 import calf from '../../support/calf';
 import doSortParams from '../../common/doSortParams';
 import {getElementById} from '../../common/getElement';
-import getMigrate from '../../common/getMigrate';
 import jQueryPresent from '../../common/jQueryPresent';
 import {keys} from '../../common/keys';
 import numberSort from '../../system/numberSort';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
-import {set} from '../../system/idb';
 import stringSort from '../../system/stringSort';
+import {get, set} from '../../system/idb';
 
 var content;
 var monsterAry;
@@ -122,7 +121,7 @@ function prepAry(data) {
 function haveJquery(injector) { // jQuery.min
   content = injector || pCC;
   if (!content) {return;}
-  getMigrate('fsh_monsterLog').then(prepAry);
+  get('fsh_monsterLog').then(prepAry);
 }
 
 export default function injectMonsterLog(injector) {

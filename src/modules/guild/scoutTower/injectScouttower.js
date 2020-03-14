@@ -3,7 +3,6 @@ import {dataRows} from '../../common/dataRows';
 import displayTracker from './displayTracker';
 import {entries} from '../../common/entries';
 import getElementsByTagName from '../../common/getElementsByTagName';
-import getMigrate from '../../common/getMigrate';
 import getText from '../../common/getText';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../../common/insertElement';
@@ -14,8 +13,8 @@ import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import roundToString from '../../common/roundToString';
-import {set} from '../../system/idb';
 import {def_table, guideUrl} from '../../support/constants';
+import {get, set} from '../../system/idb';
 
 function getTitanName(aRow) {
   return aRow.cells[0].children[0].getAttribute('oldtitle');
@@ -129,5 +128,5 @@ function gotOldTitans(oldTitans) {
 
 export default function injectScouttower() { // jQuery.min
   if (jQueryNotPresent()) {return;}
-  getMigrate('fsh_titans').then(gotOldTitans); // Pref
+  get('fsh_titans').then(gotOldTitans); // Pref
 }

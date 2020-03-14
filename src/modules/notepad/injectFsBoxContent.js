@@ -1,10 +1,9 @@
 import {getElementById} from '../common/getElement';
-import getMigrate from '../common/getMigrate';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
 import on from '../common/on';
 import {pCC} from '../support/layout';
-import {set} from '../system/idb';
+import {get, set} from '../system/idb';
 
 function inject(fsboxcontent) {
   getElementById('fsboxdetail').innerHTML = fsboxcontent;
@@ -25,6 +24,6 @@ export default function injectFsBoxContent(injector) { // jQuery.min
     button: 'Clear',
     divId: 'fsboxdetail'
   });
-  getMigrate('fsh_fsboxcontent').then(inject);
+  get('fsh_fsboxcontent').then(inject);
   on(getElementById('fsboxclear'), 'click', clearFsBox, true);
 }

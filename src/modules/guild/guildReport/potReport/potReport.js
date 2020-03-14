@@ -3,7 +3,6 @@ import {createDiv} from '../../../common/cElement';
 import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';
 import fallback from '../../../system/fallback';
-import getMigrate from '../../../common/getMigrate';
 import insertElement from '../../../common/insertElement';
 import isChecked from '../../../system/isChecked';
 import {keys} from '../../../common/keys';
@@ -11,11 +10,11 @@ import on from '../../../common/on';
 import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
 import selfIdIs from '../../../common/selfIdIs';
-import {set} from '../../../system/idb';
 import sortKeys from './sortKeys';
 import testRange from '../../../system/testRange';
 import {drawInventory, initInventory} from './drawInventory';
 import {drawMapping, initMapping} from './drawMapping';
+import {get, set} from '../../../system/idb';
 
 var storeMap = 'fsh_potMap';
 var defaultOpts = {
@@ -149,5 +148,5 @@ function gotMap(potObj, data) {
 }
 
 export default function potReport(potObj) {
-  getMigrate(storeMap).then(partial(gotMap, potObj));
+  get(storeMap).then(partial(gotMap, potObj));
 }

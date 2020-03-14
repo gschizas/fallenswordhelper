@@ -1,7 +1,6 @@
 import calf from '../../../support/calf';
-import getMigrate from '../../../common/getMigrate';
 import partial from '../../../common/partial';
-import {set} from '../../../system/idb';
+import {get, set} from '../../../system/idb';
 
 var monsterLog;
 
@@ -85,5 +84,5 @@ function initLog(data) {
 }
 
 export function getMonsterPrefs() {
-  getMigrate('fsh_monsterLog').then(initLog);
+  get('fsh_monsterLog').then(initLog);
 }
