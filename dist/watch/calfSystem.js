@@ -24203,7 +24203,7 @@ function setVer(fshVer, gmInfo) {
   } else {
     calf.fshVer = `${fshVer}_native`;
   }
-  calf.calfVer = '0';
+  calf.calfVer = '2';
 }
 
 // main event dispatcher
