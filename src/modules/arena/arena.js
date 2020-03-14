@@ -4,7 +4,7 @@ import doLvlFilter from './doLvlFilter';
 import filterHeader from './filterHeader';
 import {get} from '../system/idb';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import loadDataTables from '../common/loadDatatables';
+import loadDataTables from '../common/loadDataTables';
 import orderData from './orderData';
 import partial from '../common/partial';
 import participants from './participants';
