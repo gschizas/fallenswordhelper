@@ -40,7 +40,7 @@ export function playerRank(f, membrList) {
     membrList[f].rank_name.trim() + '</div>';
 }
 
-export function doTable(tbl, data, callback) { // jQuery
+function doTable(tbl, data, callback) { // jQuery
   $(tbl).DataTable({
     autoWidth: false,
     columnDefs: [{
