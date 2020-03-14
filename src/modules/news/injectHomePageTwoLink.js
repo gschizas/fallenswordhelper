@@ -2,6 +2,7 @@ import {cdn} from '../system/system';
 import containsText from '../common/containsText';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getText from '../common/getText';
+import getTitle from '../common/getTitle';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
@@ -52,7 +53,7 @@ function realmSearchHref(name) {
 }
 
 function makeUfsgLink(img) {
-  var myName = encodeURIComponent(img.getAttribute('oldtitle'));
+  var myName = encodeURIComponent(getTitle(img));
   var myLink = createAnchor({
     href: creatureSearchHref(myName),
     target: '_blank'

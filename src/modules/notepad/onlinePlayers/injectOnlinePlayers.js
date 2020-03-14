@@ -6,6 +6,7 @@ import doRefreshButton from './doRefreshButton';
 import {doTable} from './doTable';
 import filterHeaderOnlinePlayers from './filterHeaderOnlinePlayers';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
+import loadDataTables from '../../common/loadDatatables';
 import {now} from '../../support/now';
 import on from '../../common/on';
 import onlinePlayersPage from '../../ajax/onlinePlayersPage';
@@ -118,5 +119,5 @@ export default function injectOnlinePlayers(content) { // jQuery
   } else {
     context = $('#pCC');
   }
-  injectOnlinePlayersNew();
+  loadDataTables().then(injectOnlinePlayersNew);
 }

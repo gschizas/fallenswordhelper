@@ -4,6 +4,7 @@ import chunk from '../../common/chunk';
 import {componentList} from './prepareComponentList';
 import {daDestroyComponent} from '../../_dataAccess/_dataAccess';
 import deleteVisible from './deleteVisible';
+import {isArray} from '../../common/isArray';
 import partial from '../../common/partial';
 import updateUsedCount from './updateUsedCount';
 
@@ -15,7 +16,7 @@ function doSpinner(td) {
 }
 
 function destroyed(data) {
-  if (data.s) {
+  if (data.s && isArray(data.r)) {
     deleteVisible(data.r);
     updateUsedCount(data.r.length);
   }

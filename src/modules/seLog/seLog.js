@@ -1,10 +1,9 @@
 import calf from '../support/calf';
 import {daSuperElite} from '../_dataAccess/_dataAccess';
-import getMigrate from '../common/getMigrate';
 import jQueryPresent from '../common/jQueryPresent';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
-import {set} from '../system/idb';
+import {get, set} from '../system/idb';
 
 export var oldLog;
 var timeoutId;
@@ -77,7 +76,7 @@ function gotLog(data) {
 }
 
 export function getFshSeLog() { // jQuery.min
-  return getMigrate('fsh_seLog').then(gotLog);
+  return get('fsh_seLog').then(gotLog);
 }
 
 function shouldLog() {

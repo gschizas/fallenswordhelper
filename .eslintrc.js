@@ -1,6 +1,6 @@
 module.exports = {
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2020,
     sourceType: 'module',
     ecmaFeatures: {impliedStrict: true}
   },
@@ -39,8 +39,6 @@ module.exports = {
 
     GM_info: false,
 
-    FSH: true,
-    localforage: false,
     ga: false,
     GameController: false,
     GameData: false,

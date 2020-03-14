@@ -1,3 +1,10 @@
 import uglyCalf from './uglyCalf';
 
-export default uglyCalf('dev', true, true);
+const localhttp = require('./config.json').localhttp;
+
+export default uglyCalf(
+  'dev',
+  `${localhttp}dist/dev/calfSystem.css`,
+  true,
+  true
+);

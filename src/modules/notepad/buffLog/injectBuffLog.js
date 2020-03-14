@@ -1,11 +1,10 @@
 import {fshBuffLog} from '../../support/constants';
 import {getElementById} from '../../common/getElement';
-import getMigrate from '../../common/getMigrate';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import makePageTemplate from '../lists/makePageTemplate';
 import on from '../../common/on';
 import {pCC} from '../../support/layout';
-import {set} from '../../system/idb';
+import {get, set} from '../../system/idb';
 
 function displayBuffLog(buffLog) {
   getElementById('bufflog').innerHTML = buffLog;
@@ -26,5 +25,5 @@ export default function injectBuffLog(injector) { // jQuery.min
     divId: 'bufflog'
   });
   on(getElementById('clearBuffs'), 'click', clearBuffLog);
-  getMigrate(fshBuffLog).then(displayBuffLog);
+  get(fshBuffLog).then(displayBuffLog);
 }

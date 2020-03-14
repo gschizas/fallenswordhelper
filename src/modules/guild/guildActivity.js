@@ -1,13 +1,12 @@
 import {daGuildManage} from '../_dataAccess/_dataAccess';
 import fallback from '../system/fallback';
-import getMigrate from '../common/getMigrate';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';
 import lastActivityToDays from '../common/lastActivityToDays';
 import {nowSecs} from '../support/now';
 import partial from '../common/partial';
-import {set} from '../system/idb';
 import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';
+import {get, set} from '../system/idb';
 
 var oldArchive;
 var guild;
@@ -113,6 +112,6 @@ function gotActivity(data) { // jQuery.min
 
 export default function guildActivity() { // jQuery.min
   if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
-    getMigrate('fsh_guildActivity').then(gotActivity);
+    get('fsh_guildActivity').then(gotActivity);
   }
 }

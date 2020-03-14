@@ -10,7 +10,6 @@ import injectNotepadShowLogs from '../notepad/combatLog';
 import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
 import injectRecipeManager from '../notepad/recipeMgr/recipeMgr';
 import insertElement from '../common/insertElement';
-import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../notepad/quickExtract/quickExtract';
 import insertQuickWear from '../notepad/quickWear/quickWear';
@@ -98,7 +97,7 @@ function showHelperMenu(evt) {
   on(helperMenuDiv, 'click', eventHandler);
 }
 
-function haveNode(node) {
+function haveNode() {
   var helperMenu = createDiv({
     id: 'helperMenu',
     className: 'helperMenu',
@@ -112,11 +111,11 @@ function haveNode(node) {
     helperMenu.classList.add('fshMove');
     draggable(helperMenu);
   }
-  insertElementBefore(helperMenu, node);
+  insertElement(document.body, helperMenu);
 }
 
 export default function injectHelperMenu() {
   // don't put all the menu code here (but call if clicked) to minimize lag
   var node = getElementById('statbar-container');
-  if (node) {haveNode(node);}
+  if (node) {haveNode();}
 }

@@ -1,3 +1,11 @@
+import {core} from './getVersion.js';
 import uglyCalf from './uglyCalf';
 
-export default uglyCalf('beta', true, false);
+const github = require('./config.json').github;
+
+export default uglyCalf(
+  'beta',
+  `${github}resources/beta/${core}/calfSystem.css`,
+  true,
+  false
+);

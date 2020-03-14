@@ -2,8 +2,13 @@ import rollupCalf from './rollupCalf';
 import serve from 'rollup-plugin-serve';
 
 const fs = require('fs');
+const localhttp = require('./config.json').localhttp;
 
-const options = rollupCalf('dist/watch/calfSystem.js', true, true);
+const options = rollupCalf(
+  'dist/watch/calfSystem.js',
+  `${localhttp}dist/watch/calfSystem.css`,
+  true,
+  true);
 options.treeshake = false;
 options.watch = {include: 'src/**'};
 

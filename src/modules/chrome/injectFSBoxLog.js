@@ -3,7 +3,6 @@ import {doAddIgnore} from '../support/constants';
 import {getElementById} from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
-import getMigrate from '../common/getMigrate';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
 import injectFsBoxContent from '../notepad/injectFsBoxContent';
@@ -13,7 +12,7 @@ import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
 import on from '../common/on';
 import {sendEvent} from '../support/fshGa';
-import {set} from '../system/idb';
+import {get, set} from '../system/idb';
 
 function getBoxList(boxList) {
   if (boxList) {return boxList;}
@@ -32,7 +31,7 @@ function storeFSBox(_boxList) {
 function storeMsg(nodediv) {
   var playerName = getElementsByTagName('a', nodediv);
   if (playerName.length === 0) {return;}
-  getMigrate('fsh_fsboxcontent').then(storeFSBox);
+  get('fsh_fsboxcontent').then(storeFSBox);
   playerName = getText(playerName[0]);
   insertHtmlBeforeEnd(nodediv,
     '<span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +

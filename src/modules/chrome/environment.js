@@ -8,6 +8,8 @@ import {initPcc} from '../support/layout';
 import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
 import isObject from '../common/isObject';
+import jsonParse from '../common/jsonParse';
+import loadCss from '../common/loadCss';
 import lookForHcsData from './lookForHcsData/lookForHcsData';
 import pageSwitcher from './pageSwitcher/pageSwitcher';
 import querySelector from '../common/querySelector';
@@ -45,7 +47,7 @@ function getParamsFromUrl() {
   cmd = getParam('cmd');
   subcmd = getParam('subcmd');
   subcmd2 = getParam('subcmd2');
-  if (cmd === 'points') {type = '/' + getParam('type');}
+  if (cmd === 'points') {type = `/${getParam('type')}`;}
 }
 
 function getParamsFromPage() {
@@ -67,7 +69,7 @@ function getCoreFunction() {
     getParamsFromPage();
   }
   setCalfParams();
-  functionPath = cmd + '/' + subcmd + '/' + subcmd2 + type;
+  functionPath = `${cmd}/${subcmd}/${subcmd2}${type}`;
   coreFunction = testCoreFunction();
 }
 
@@ -97,6 +99,7 @@ function asyncDispatcher() {
 }
 
 function runCore() {
+  start('JS Perf', 'FSH.runCore');
   initNow();
   initPcc();
   getCoreFunction();
@@ -106,21 +109,30 @@ function runCore() {
   /* This must be at the end in order not to
   screw up other findNode calls (Issue 351) */
   doQuickLinks();
+  end('JS Perf', 'FSH.runCore');
 }
-
-window.FSH = window.FSH || {};
-window.FSH.calf = '$_CALFVER';
 
 function badEnv() {
   return !isFunction(Object.fromEntries) || !navigator.cookieEnabled;
 }
 
+function setVer(fshVer, gmInfo) {
+  calf.gmInfo = jsonParse(decodeURIComponent(gmInfo));
+  if (calf.gmInfo) {
+    calf.fshVer = fshVer;
+  } else {
+    calf.fshVer = `${fshVer}_native`;
+  }
+  calf.calfVer = '$_CALFVER';
+}
+
 // main event dispatcher
-window.FSH.dispatch = function dispatch() {
+export default function dispatch(fshVer, gmInfo) {
+  start('JS Perf', 'FSH.dispatch');
   if (badEnv()) {return;}
   globalErrorHandler();
   setup();
-  start('JS Perf', 'FSH.dispatch');
-  runCore();
+  setVer(fshVer, gmInfo);
+  loadCss('$_CALFCSS').then(runCore);
   end('JS Perf', 'FSH.dispatch');
-};
+}

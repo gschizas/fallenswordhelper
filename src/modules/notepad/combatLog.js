@@ -1,10 +1,9 @@
 import {getElementById} from '../common/getElement';
-import getMigrate from '../common/getMigrate';
 import jConfirm from '../common/jConfirm';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
 import {pCC} from '../support/layout';
-import {set} from '../system/idb';
+import {get, set} from '../system/idb';
 
 var content;
 var combatLog = [];
@@ -60,5 +59,5 @@ function gotCombatLog(data) {
 export default function injectNotepadShowLogs(injector) { // jQuery.min
   if (jQueryNotPresent()) {return;}
   content = injector || pCC;
-  getMigrate('fsh_combatLog').then(gotCombatLog);
+  get('fsh_combatLog').then(gotCombatLog);
 }

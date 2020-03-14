@@ -13,6 +13,7 @@ import {get} from '../../system/idb';
 import getMembrList from '../../ajax/getMembrList';
 import headers from './headers';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
+import loadDataTables from '../../common/loadDatatables';
 import notLastUpdate from '../../common/notLastUpdate';
 import {oldActionSpinner} from '../../support/constants';
 import {pCC} from '../../support/layout';
@@ -81,8 +82,7 @@ function asyncCall() {
 }
 
 function syncInvMan() { // jQuery
-  var prm = [];
-  prm.push(buildInv());
+  var prm = [loadDataTables(), buildInv()];
   if (calf.subcmd === 'guildinvmgr') {
     prm.push(getMembrList(false).then(rekeyMembrList));
   }

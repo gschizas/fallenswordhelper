@@ -4,4 +4,6 @@ import './styles/grids.postcss';
 import './styles/spinners.postcss';
 import './styles/dataTables.css';
 import './styles/base64.css';
-import './modules/chrome/environment';
+import dispatch from './modules/chrome/environment';
+
+export default dispatch;

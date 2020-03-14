@@ -3,7 +3,7 @@
 const fs = require('fs');
 const gzipSize = require('gzip-size');
 
-const file = 'dist/' + process.argv[2] + '/calfSystem.min.js';
+const file = `dist/${process.argv[2]}/calfSystem.min.js`;
 
 const stats = fs.statSync(file);
 const fileSizeInKilobytes = Math.round(stats.size / 10.24) / 100;

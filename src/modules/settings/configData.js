@@ -20,7 +20,7 @@ function storageDetails() {
     'defaults<br>Use it if your storage has overflowed or become ' +
     'corrupt"></td><td align=center>' +
     '<span style="font-size:x-small">(Current version: ' +
-    FSH.version + '(' + FSH.calf + ')) (Storage Used: ' +
+    calf.fshVer + '(' + calf.calfVer + ')) (Storage Used: ' +
     calf.storage + '% Remaining: ' +
     (100 - calf.storage).toFixed(2) + '%)</span></td></tr>';
 }

@@ -8,7 +8,7 @@ import setupConfigData from './configData';
 
 function addTab(tabs) { // jQuery
   tabs.find('.ui-tabs-nav')
-    .append('<li><a href="#fshSettings">FSH Settings</a></li>');
+    .append('<li><a href="#fshSettings">FSH</a></li>');
   tabs.append('<div id="fshSettings"><p>' + calf.configData + '</p></div>');
   tabs.tabs('refresh');
 }

@@ -1,11 +1,10 @@
 import buffReportParser from './buffReportParser.js';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
 import {fshBuffLog} from '../../support/constants';
-import getMigrate from '../../common/getMigrate.js';
 import {getStamAsString} from '../../common/buffUtils.js';
 import getValue from '../../system/getValue';
 import partial from '../../common/partial';
-import {set} from '../../system/idb.js';
+import {get, set} from '../../system/idb.js';
 
 const success = e => ' ' + e[0] + ' (' + getStamAsString(e[1]) +
   ' stamina)<br>';
@@ -30,5 +29,5 @@ function buffResult(buffLog) {
 
 export default function updateBuffLog() {
   if (!getValue('keepBuffLog')) {return;}
-  getMigrate(fshBuffLog).then(buffResult);
+  get(fshBuffLog).then(buffResult);
 }
