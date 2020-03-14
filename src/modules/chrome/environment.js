@@ -131,8 +131,8 @@ export default function dispatch(fshVer, gmInfo) {
   start('JS Perf', 'FSH.dispatch');
   if (badEnv()) {return;}
   globalErrorHandler();
-  setup();
   setVer(fshVer, gmInfo);
+  setup();
   loadCss('$_CALFCSS').then(runCore);
   end('JS Perf', 'FSH.dispatch');
 }
