@@ -11,7 +11,7 @@ import injectAdvisorWeekly from './injectAdvisorWeekly';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import loadDataTables from '../../common/loadDatatables';
+import loadDataTables from '../../common/loadDataTables';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import {injectTable, playerLevel, playerName, playerRank} from './helpers';

@@ -13,7 +13,7 @@ import {get} from '../../system/idb';
 import getMembrList from '../../ajax/getMembrList';
 import headers from './headers';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import loadDataTables from '../../common/loadDatatables';
+import loadDataTables from '../../common/loadDataTables';
 import notLastUpdate from '../../common/notLastUpdate';
 import {oldActionSpinner} from '../../support/constants';
 import {pCC} from '../../support/layout';
