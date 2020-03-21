@@ -1,4 +1,4 @@
-import './newMap.postcss';
+import './newMap.css';
 import {buffInfo} from './buffInfo/buffInfo';
 import combatLogger from './combatLogger';
 import {createStyle} from '../../common/cElement';

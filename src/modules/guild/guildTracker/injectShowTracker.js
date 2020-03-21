@@ -1,4 +1,4 @@
-import './injectShowTracker.postcss';
+import './injectShowTracker.css';
 import {createDiv} from '../../common/cElement';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';

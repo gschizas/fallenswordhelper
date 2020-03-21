@@ -1,4 +1,4 @@
-import './guildReport.postcss';
+import './guildReport.css';
 import {cdn} from '../../system/system';
 import classHandler from '../../common/classHandler';
 import classPair from '../../common/classPair';

@@ -1,4 +1,4 @@
-import './guildTracker.postcss';
+import './guildTracker.css';
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
 import {get} from '../../system/idb';

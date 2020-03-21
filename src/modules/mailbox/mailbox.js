@@ -1,4 +1,4 @@
-import './mailbox.postcss';
+import './mailbox.css';
 import chunk from '../common/chunk';
 import {daMailboxTake} from '../_dataAccess/_dataAccess';
 import {entries} from '../common/entries';

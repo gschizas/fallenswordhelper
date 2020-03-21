@@ -1,4 +1,4 @@
-import './doFolders.postcss';
+import './doFolders.css';
 import add from '../support/task';
 import {def_table} from '../support/constants';
 import {entries} from '../common/entries';

@@ -1,4 +1,4 @@
-import './advisor.postcss';
+import './advisor.css';
 import {daAdvisor} from '../../_dataAccess/_dataAccess';
 import getMembrList from '../../ajax/getMembrList';
 import jQueryNotPresent from '../../common/jQueryNotPresent';

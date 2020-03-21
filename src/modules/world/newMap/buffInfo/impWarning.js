@@ -1,4 +1,4 @@
-import './impWarning.postcss';
+import './impWarning.css';
 import {createSpan} from '../../../common/cElement';
 import {daQuickbuff} from '../../../_dataAccess/_dataAccess';
 import {def_fetch_playerBuffs} from '../../../support/constants';

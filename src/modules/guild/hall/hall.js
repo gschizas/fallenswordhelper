@@ -1,4 +1,4 @@
-import './hall.postcss';
+import './hall.css';
 import collapse from '../../common/collapse';
 import {createDiv} from '../../common/cElement';
 import insertElement from '../../common/insertElement';

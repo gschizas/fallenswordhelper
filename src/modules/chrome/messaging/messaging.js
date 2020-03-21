@@ -1,4 +1,4 @@
-import './messaging.postcss';
+import './messaging.css';
 import classHandler from '../../common/classHandler';
 import fallback from '../../system/fallback';
 import {getElementById} from '../../common/getElement';

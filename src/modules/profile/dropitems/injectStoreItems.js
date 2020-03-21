@@ -1,4 +1,4 @@
-import './injectStoreItems.postcss';
+import './injectStoreItems.css';
 import add from '../../support/task';
 import batch from '../../common/batch';
 import {daSendItems} from '../../_dataAccess/_dataAccess';

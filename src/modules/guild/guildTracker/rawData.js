@@ -1,4 +1,4 @@
-import './rawData.postcss';
+import './rawData.css';
 import add from '../../support/task';
 import dialogMsg from '../../common/dialogMsg';
 import {initTable} from './trackerTable';

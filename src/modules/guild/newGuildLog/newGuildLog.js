@@ -1,4 +1,4 @@
-import './newGuildLog.postcss';
+import './newGuildLog.css';
 import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
 import addLogColoring from '../../logs/addLogColoring';
 import all from '../../common/all';

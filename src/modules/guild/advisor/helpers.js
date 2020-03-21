@@ -1,4 +1,4 @@
-import './advisor.postcss';
+import './advisor.css';
 import add from '../../support/task';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';

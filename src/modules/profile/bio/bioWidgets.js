@@ -1,4 +1,4 @@
-import './bioWidgets.postcss';
+import './bioWidgets.css';
 import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';

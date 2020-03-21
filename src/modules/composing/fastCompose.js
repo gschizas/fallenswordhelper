@@ -1,4 +1,4 @@
-import './fastCompose.postcss';
+import './fastCompose.css';
 import backgroundCreate from './backgroundCreate';
 import contains from '../common/contains';
 import getArrayByClassName from '../common/getArrayByClassName';

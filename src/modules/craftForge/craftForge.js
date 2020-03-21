@@ -1,4 +1,4 @@
-import './craftForge.postcss';
+import './craftForge.css';
 import add from '../support/task';
 import calf from '../support/calf';
 import getArrayByTagName from '../common/getArrayByTagName';
