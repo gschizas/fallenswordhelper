@@ -1,12 +1,10 @@
 import rollupCalf from './rollupCalf';
 import {terser} from 'rollup-plugin-terser';
 
-export default function uglyCalf(outdir, css, beta, dev) {
+export default function uglyCalf(outdir, jsccValues) {
   const options = rollupCalf(
     `dist/${outdir}/calfSystem.min.js`,
-    css,
-    beta,
-    dev
+    jsccValues
   );
 
   options.output.sourcemapFile = 'src/calfSystem.min.js.map';

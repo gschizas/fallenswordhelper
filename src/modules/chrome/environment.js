@@ -133,6 +133,7 @@ export default function dispatch(fshVer, gmInfo) {
   globalErrorHandler();
   setVer(fshVer, gmInfo);
   setup();
+  //#set _CALFCSS = _CSSPATH + 'calfSystem.css'
   loadCss('$_CALFCSS').then(runCore);
   end('JS Perf', 'FSH.dispatch');
 }

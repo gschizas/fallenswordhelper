@@ -2,13 +2,16 @@ import rollupCalf from './rollupCalf';
 import serve from 'rollup-plugin-serve';
 
 const fs = require('fs');
-const localhttp = require('./config.json').localhttp;
+const port = require('./config.json').port;
+const outPath = 'dist/watch/';
 
 const options = rollupCalf(
-  'dist/watch/calfSystem.js',
-  `${localhttp}dist/watch/calfSystem.css`,
-  true,
-  true);
+  `${outPath}calfSystem.js`,
+  {
+    _BETA: true,
+    _CSSPATH: `https://localhost:${port}/${outPath}`,
+    _DEV: true
+  });
 options.treeshake = false;
 options.watch = {include: 'src/**'};
 
@@ -19,7 +22,7 @@ options.plugins.push(serve({
     key: fs.readFileSync('key.pem'),
     cert: fs.readFileSync('cert.crt')
   },
-  port: 9966
+  port
 }));
 
 export default options;

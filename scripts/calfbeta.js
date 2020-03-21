@@ -5,7 +5,9 @@ const github = require('./config.json').github;
 
 export default uglyCalf(
   'beta',
-  `${github}resources/beta/${core}/calfSystem.css`,
-  true,
-  false
+  {
+    _BETA: true,
+    _CSSPATH: `${github}resources/beta/${core}/`,
+    _DEV: false
+  }
 );

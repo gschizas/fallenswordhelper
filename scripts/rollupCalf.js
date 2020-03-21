@@ -1,12 +1,13 @@
 import {calfVer} from './getVersion';
+import copy from 'rollup-plugin-copy';
 import cssnano from 'cssnano';
 import jscc from 'rollup-plugin-jscc';
 import json from '@rollup/plugin-json';
 import postcss from 'rollup-plugin-postcss';
 import postcssNesting from 'postcss-nesting';
-import resolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 
-export default function rollupCalf(file, css, beta, dev) {
+export default function rollupCalf(file, jsccValues) {
   return {
     input: 'src/calfSystem.js',
     output: {
@@ -17,15 +18,15 @@ export default function rollupCalf(file, css, beta, dev) {
       sourcemapFile: 'src/calfSystem.js.map'
     },
     plugins: [
-      resolve(),
-      jscc({
-        values: {
-          _BETA: beta,
-          _CALFCSS: css,
-          _CALFVER: calfVer,
-          _DEV: dev
-        }
+      copy({
+        targets: [{
+          src: 'src/styles/dataTables.css',
+          dest: file.replace('.min', '').replace('/calfSystem.js', '')
+        }],
+        copyOnce: true
       }),
+      resolve(),
+      jscc({values: {...jsccValues, _CALFVER: calfVer}}),
       json({compact: true}),
       postcss({
         extensions: ['.css', '.postcss'],
