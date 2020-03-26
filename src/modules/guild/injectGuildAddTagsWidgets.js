@@ -22,11 +22,11 @@ function doCheckAll() {
   querySelectorArray('#pCC input[name="tagIndex[]"]').forEach(clickThis);
 }
 
-function takeResult(self, data) {
+function takeResult(target, data) {
   if (data.s) {
-    self.removeAttribute('style');
-    self.className = 'fshGreen';
-    setText('Taken', self);
+    target.removeAttribute('style');
+    target.className = 'fshGreen';
+    setText('Taken', target);
   }
 }
 
@@ -41,9 +41,9 @@ function fastBp(el) {
 }
 
 function evtHdlr(e) {
-  var self = e.target;
-  if (self.value === 'Check All') {doCheckAll();}
-  if (self.className === 'sendLink') {fastBp(self);}
+  var target = e.target;
+  if (target.value === 'Check All') {doCheckAll();}
+  if (target.className === 'sendLink') {fastBp(target);}
 }
 
 function paintTable() {

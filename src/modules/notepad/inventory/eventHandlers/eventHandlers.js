@@ -20,45 +20,46 @@ function setName(fshInv, e) { // jQuery
 }
 
 function takeItem(e) { // jQuery
-  var self = $(e.target);
-  doAction(partial(queueTakeItem, self.attr('invid'), self.attr('action')),
-    self);
+  var target = $(e.target);
+  doAction(partial(queueTakeItem, target.attr('invid'), target.attr('action')),
+    target);
 }
 
 function recallItem(e) { // jQuery
-  var self = $(e.target);
-  doAction(partial(queueRecallItem, self.attr('invid'), self.attr('playerid'),
-    self.attr('mode'), self.attr('action')), self);
+  var target = $(e.target);
+  doAction(partial(queueRecallItem, target.attr('invid'),
+    target.attr('playerid'), target.attr('mode'), target.attr('action')),
+  target);
 }
 
 function wearItem(e) { // jQuery
-  var self = $(e.target);
-  doAction(partial(equipItem, self.attr('invid')), self);
+  var target = $(e.target);
+  doAction(partial(equipItem, target.attr('invid')), target);
 }
 
 function doUseItem(e) { // jQuery
-  var self = $(e.target);
-  doAction(partial(useItem, self.attr('invid')), self);
+  var target = $(e.target);
+  doAction(partial(useItem, target.attr('invid')), target);
 }
 
 function doMoveItem(e) { // jQuery
-  var self = $(e.target);
-  moveItem([self.data('inv')], self.val());
+  var target = $(e.target);
+  moveItem([target.data('inv')], target.val());
 }
 
 function doStoreItem(e) { // jQuery
-  var self = $(e.target);
-  doAction(partial(storeItems, [self.attr('invid')]), self);
+  var target = $(e.target);
+  doAction(partial(storeItems, [target.attr('invid')]), target);
 }
 
 function doDropItem(e) { // jQuery
-  var self = $(e.target);
-  doAction(partial(dropItem, [self.data('inv')]), self);
+  var target = $(e.target);
+  doAction(partial(dropItem, [target.data('inv')]), target);
 }
 
 function doSendItem(e) { // jQuery
-  var self = $(e.target);
-  doAction(partial(daSendItems, [self.data('inv')]), self);
+  var target = $(e.target);
+  doAction(partial(daSendItems, [target.data('inv')]), target);
 }
 
 function elClick(fshInv, el) { // jQuery

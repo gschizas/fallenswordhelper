@@ -6,10 +6,10 @@ import getValue from '../../system/getValue';
 import on from '../../common/on';
 import testForRender from './testForRender';
 
-export default function profileRenderBio(self) {
+export default function profileRenderBio(isSelf) {
   var bioCell = getElementById('profile-bio');
   if (!bioCell) {return;}
-  testForRender(self, bioCell);
+  testForRender(isSelf, bioCell);
   if (getValue('enableBioCompressor')) {add(3, compressBio, [bioCell]);}
   on(bioCell, 'click', bioEvtHdl);
 }

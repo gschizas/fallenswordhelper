@@ -80,12 +80,12 @@ function foundGuildLink(aLink) {
   }
 }
 
-export function profileInjectGuildRel(self) {
+export function profileInjectGuildRel(isSelf) {
   var aLink = querySelector(
     '#pCC a[href^="' + guildViewUrl + '"]');
   if (aLink) {
     foundGuildLink(aLink);
-  } else if (self) {
+  } else if (isSelf) {
     setValue('guildSelf', '');
   }
 }

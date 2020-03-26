@@ -54,9 +54,9 @@ function createPotion(temp) { // jQuery.min
   // setTimeout(partial(potionDone, temp, {}, 'faked'), 200);
 }
 
-export default function backgroundCreate(self, temp) {
-  self.innerHTML = '';
-  self.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
+export default function backgroundCreate(target, temp) {
+  target.innerHTML = '';
+  target.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
   createPotion(temp);
   publish('quickcreate');
 }

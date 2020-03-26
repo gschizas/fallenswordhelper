@@ -86,8 +86,8 @@ function doStamCount(type, upgrade, quantity, cell) {
 }
 
 function updateStamCount(type, upgrade, evt) {
-  var self = evt.target;
-  var quantity = Number(self.value);
+  var target = evt.target;
+  var quantity = Number(target.value);
   var cell = getCell(type, upgrade);
   if (isNaN(quantity) || quantity === 0) {
     cell.className = 'fshHide';

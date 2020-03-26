@@ -28,9 +28,9 @@ function destroy(el) {
   return daDestroyComponent(el).then(destroyed);
 }
 
-export default function delCompType(self) { // jQuery.min
-  var toDelete = componentList[self.dataset.compid].del;
-  var td = self.parentNode;
+export default function delCompType(target) { // jQuery.min
+  var toDelete = componentList[target.dataset.compid].del;
+  var td = target.parentNode;
   doSpinner(td);
   var prm = chunk(30, toDelete).map(destroy);
   allthen(prm, partial(removeSpinner, td));

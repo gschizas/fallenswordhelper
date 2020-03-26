@@ -32,18 +32,18 @@ function isOurTarget(target) {
   return target.tagName === 'SPAN' && target.className === 'quickCreate';
 }
 
-function doQuickCreate(self) {
-  var temp = self.previousElementSibling.previousElementSibling;
+function doQuickCreate(target) {
+  var temp = target.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
-    backgroundCreate(self, temp);
+    backgroundCreate(target, temp);
     sendEvent('composing', 'QuickCreate');
   }
 }
 
 function quickCreate(evt) {
-  var self = evt.target.parentNode;
-  if (isOurTarget(self)) {
-    doQuickCreate(self);
+  var target = evt.target.parentNode;
+  if (isOurTarget(target)) {
+    doQuickCreate(target);
   }
 }
 

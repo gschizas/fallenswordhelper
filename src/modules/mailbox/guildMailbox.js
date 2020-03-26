@@ -24,21 +24,21 @@ function guildMailboxTake(href) {
   return retryAjax(href).then(translateReturnInfo).then(dialog);
 }
 
-function takeResult(self, data) {
+function takeResult(target, data) {
   if (data.r === 0) {
-    closestTable(self).nextElementSibling.rows[0].cells[0].innerHTML =
+    closestTable(target).nextElementSibling.rows[0].cells[0].innerHTML =
       '<span class="fshGreen">Taken</span>';
   }
 }
 
 function guildMailboxEvent(e) { // jQuery.min
-  var self = e.target;
-  if (self.tagName === 'IMG') {
+  var target = e.target;
+  if (target.tagName === 'IMG') {
     e.preventDefault();
-    var anchor = self.parentNode.href;
-    guildMailboxTake(anchor).then(partial(takeResult, self));
+    var anchor = target.parentNode.href;
+    guildMailboxTake(anchor).then(partial(takeResult, target));
   }
-  if (self.className === 'sendLink') {
+  if (target.className === 'sendLink') {
     getArrayByTagName('img', pCC).forEach(clickThis);
   }
 }

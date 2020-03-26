@@ -115,10 +115,10 @@ function doTakeItem(takeResult, el) {
   daMailboxTake(el).then(partial(doneTake, takeResult));
 }
 
-function takeSimilar(itemList, takeResult, self) { // jQuery.min
-  var type = self.dataset.id;
+function takeSimilar(itemList, takeResult, target) { // jQuery.min
+  var type = target.dataset.id;
   var invIds = itemList[type].invIds;
-  self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
+  target.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
   chunk(40, invIds).forEach(partial(doTakeItem, takeResult));
 }
 

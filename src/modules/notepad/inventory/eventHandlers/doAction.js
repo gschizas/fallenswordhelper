@@ -2,8 +2,8 @@ import {cdn} from '../../../system/system';
 import hideQTip from '../../../common/hideQTip';
 import partial from '../../../common/partial';
 
-function removeClass(self) {
-  self.closest('tr')
+function removeClass(target) {
+  target.closest('tr')
     .find('.takeItem, .recallItem, .wearItem, .dropItem, .sendItem, .storeItem')
     .removeClass();
 }
@@ -21,22 +21,22 @@ function clearButtons(td) {
   ].forEach(partial(clear, td));
 }
 
-function killRow(self, data) { // jQuery
+function killRow(target, data) { // jQuery
   if (data.r === 1) {return;}
-  var tr = self.closest('tr');
+  var tr = target.closest('tr');
   var td = $('td', tr);
   clearButtons(td);
   tr.css('text-decoration', 'line-through');
 }
 
-function anotherSpinner(self) { // jQuery
-  self.empty().append('<img src="' + cdn +
+function anotherSpinner(target) { // jQuery
+  target.empty().append('<img src="' + cdn +
     'ui/misc/spinner.gif" width="11" height="11">');
 }
 
-export default function doAction(fn, self) { // jQuery
-  hideQTip(self);
-  removeClass(self);
-  fn().then(partial(killRow, self));
-  anotherSpinner(self);
+export default function doAction(fn, target) { // jQuery
+  hideQTip(target);
+  removeClass(target);
+  fn().then(partial(killRow, target));
+  anotherSpinner(target);
 }

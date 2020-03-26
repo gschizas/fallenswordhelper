@@ -30,36 +30,36 @@ const def_disableQuickWearPrompts = 'disableQuickWearPrompts';
 var disableQuickWearPrompts;
 var itemList;
 
-function actionResult(self, verb, data) {
+function actionResult(target, verb, data) {
   if (data.r !== 0) {return;}
-  self.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
+  target.parentNode.innerHTML = '<span class="fastWorn">' + verb + '</span>';
 }
 
-function doAction(self, fn, verb) { // jQuery.min
+function doAction(target, fn, verb) { // jQuery.min
   sendEvent('QuickWear', 'doAction - ' + verb);
-  setText('', self);
-  self.classList.remove('smallLink');
-  self.classList.add('fshSpinner', 'fshSpin12');
-  fn(self.dataset.itemid).then(partial(actionResult, self, verb));
+  setText('', target);
+  target.classList.remove('smallLink');
+  target.classList.add('fshSpinner', 'fshSpin12');
+  fn(target.dataset.itemid).then(partial(actionResult, target, verb));
 }
 
-function doUseItem(self) {
-  doAction(self, useItem, 'Used');
+function doUseItem(target) {
+  doAction(target, useItem, 'Used');
 }
 
-function useProfileInventoryItem(self) {
+function useProfileInventoryItem(target) {
   if (disableQuickWearPrompts) {
-    doUseItem(self);
+    doUseItem(target);
   } else {
     jConfirm('Use/Extract Item',
       'Are you sure you want to use/extract the item?',
-      partial(doUseItem, self)
+      partial(doUseItem, target)
     );
   }
 }
 
-function equipProfileInventoryItem(self) {
-  doAction(self, equipItem, 'Worn');
+function equipProfileInventoryItem(target) {
+  doAction(target, equipItem, 'Worn');
 }
 
 function processItems(folderId, thisFolder, o) {
@@ -77,8 +77,8 @@ function processFolder(folderId, aFolder) {
   aFolder.items.forEach(partial(processItems, folderId, thisFolder));
 }
 
-function hideFolders(self) {
-  var folderId = self.dataset.folder;
+function hideFolders(target) {
+  var folderId = target.dataset.folder;
   itemList.r.forEach(partial(processFolder, folderId));
 }
 

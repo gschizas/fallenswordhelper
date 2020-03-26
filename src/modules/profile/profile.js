@@ -29,8 +29,8 @@ import storeVL from './storeVL';
 import updateNmv from './updateNmv';
 import updateStatistics from './updateStatistics';
 
-function ifSelf(self) {
-  if (self) {
+function ifSelf(isSelf) {
+  if (isSelf) {
     // self inventory
     fastDebuff();
     profileParseAllyEnemy();
@@ -44,21 +44,21 @@ function ifSelf(self) {
   }
 }
 
-function guildRelationship(avyImg, playername, self) {
+function guildRelationship(avyImg, playername, isSelf) {
   // Must be before profileInjectQuickButton
-  profileInjectGuildRel(self);
+  profileInjectGuildRel(isSelf);
   // It sets up guildId and currentGuildRelationship
   var playerid = fallback(getUrlParameter('player_id'), playerId());
   profileInjectQuickButton(avyImg, playerid, playername);
 }
 
-function updateDom(avyImg, playername, self) {
-  ifSelf(self);
-  guildRelationship(avyImg, playername, self);
+function updateDom(avyImg, playername, isSelf) {
+  ifSelf(isSelf);
+  guildRelationship(avyImg, playername, isSelf);
   updateNmv();
   updateStatistics();
   highlightPvpProtection();
-  add(3, profileRenderBio, [self]);
+  add(3, profileRenderBio, [isSelf]);
   addStatTotalToMouseover();
   add(3, colouredDots);
 }
@@ -71,8 +71,8 @@ function updateUrl(e) {
   window.location = indexPhp + '?' + validInputs;
 }
 
-function allowBack(self) {
-  if (!self) {
+function allowBack(isSelf) {
+  if (!isSelf) {
     on(querySelector('#profileRightColumn'), 'submit', updateUrl);
   }
 }
@@ -83,7 +83,7 @@ export default function injectProfile() { // Legacy
     '#profileLeftColumn img[src*="/avatars/"][width="200"]');
   if (!avyImg) {return;}
   var playername = getText(getElementsByTagName('h1', pCC)[0]);
-  var self = playername === playerName();
-  updateDom(avyImg, playername, self);
-  allowBack(self);
+  var isSelf = playername === playerName();
+  updateDom(avyImg, playername, isSelf);
+  allowBack(isSelf);
 }

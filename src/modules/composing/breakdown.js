@@ -15,14 +15,16 @@ var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
 var disableBreakdownPrompts;
 var selectedList = [];
 
-function disappearance(self) {self.hide();}
+function disappearance(target) {target.hide();}
 
-function goDown(self, disappear) {self.animate({height: 0}, 500, disappear);}
+function goDown(target, disappear) {
+  target.animate({height: 0}, 500, disappear);
+}
 
 function fadeAway() {
-  var self = $('#composingMessageContainer');
-  self.animate({opacity: 0}, 500,
-    partial(goDown, self, partial(disappearance, self)));
+  var target = $('#composingMessageContainer');
+  target.animate({opacity: 0}, 500,
+    partial(goDown, target, partial(disappearance, target)));
 }
 
 function msgText(message, bgcolor) {

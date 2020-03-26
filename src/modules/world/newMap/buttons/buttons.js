@@ -35,8 +35,8 @@ var ufsgMap;
 var soundCheck;
 var huntCheck;
 
-function doFormGroup(self) {
-  hideQTip(self);
+function doFormGroup(target) {
+  hideQTip(target);
   GameData.doAction(12, 401, {}, 0);
 }
 
@@ -151,15 +151,15 @@ function addButtons() {
 }
 
 var changeHdl = [
-  [function(self) {return self === soundCheck;}, toggleSound],
-  [function(self) {return self === huntCheck;}, toggleHuntMode]
+  [function(target) {return target === soundCheck;}, toggleSound],
+  [function(target) {return target === huntCheck;}, toggleHuntMode]
 ];
 
 var clickHdl = [
-  [function(self) {return self === formGroup;}, doFormGroup],
-  [function(self) {return self === quickBuff;}, openQuickBuff],
-  [function(self) {return self === realmMap;}, openRealmMap],
-  [function(self) {return self === ufsgMap;}, openUfsgMap]
+  [function(target) {return target === formGroup;}, doFormGroup],
+  [function(target) {return target === quickBuff;}, openQuickBuff],
+  [function(target) {return target === realmMap;}, openRealmMap],
+  [function(target) {return target === ufsgMap;}, openUfsgMap]
 ];
 
 function setupHandlers() {

@@ -97,18 +97,18 @@ function addTemplateRow(index, text) {
     text + '</span>');
 }
 
-function deleteTemplate(self) {
-  var myRow = self.parentNode.parentNode.rowIndex;
+function deleteTemplate(target) {
+  var myRow = target.parentNode.parentNode.rowIndex;
   msgTbl.deleteRow(myRow);
   fshTemplate.splice(myRow - 2, 1);
   setValueJSON('quickMsg', fshTemplate);
 }
 
-function addNewTemplate(self) {
-  var templateInput = self.parentNode.nextElementSibling.children[0];
+function addNewTemplate(target) {
+  var templateInput = target.parentNode.nextElementSibling.children[0];
   var templateValue = templateInput.value;
   if (templateValue !== '') {
-    var myRow = self.parentNode.parentNode.rowIndex;
+    var myRow = target.parentNode.parentNode.rowIndex;
     addTemplateRow(myRow, templateValue);
     templateInput.value = '';
     fshTemplate.push(templateValue);
@@ -116,8 +116,8 @@ function addNewTemplate(self) {
   }
 }
 
-function insertTemplate(self) {
-  dialogMsg.value += getText(self)
+function insertTemplate(target) {
+  dialogMsg.value += getText(target)
     .replace(/\{playername\}/g, targetPlayer) + '\n';
 }
 

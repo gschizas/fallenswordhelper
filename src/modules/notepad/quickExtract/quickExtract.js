@@ -65,10 +65,10 @@ function doExtract(target) {
   inventoryIDs.forEach(ajaxExtract);
 }
 
-function extractAllSimilar(self) {
+function extractAllSimilar(target) {
   jConfirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
-    partial(doExtract, self)
+    partial(doExtract, target)
   );
 }
 
@@ -143,7 +143,7 @@ function toggleSelectMain() {
   showQuickExtract();
 }
 
-function extractable(self) {return self.id.startsWith('fshExtr');}
+function extractable(target) {return target.id.startsWith('fshExtr');}
 
 function extractEvents() {
   return [

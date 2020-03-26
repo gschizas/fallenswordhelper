@@ -18,6 +18,7 @@ function updateList(invItems, folderId, o) {
   displayFolderItems(invItems, folderId, o);
 }
 
-export default function hideFolders(itemsAry, invItems, self) {
-  itemsAry.forEach(partial(updateList, invItems, Number(self.dataset.folder)));
+export default function hideFolders(itemsAry, invItems, target) {
+  itemsAry.forEach(
+    partial(updateList, invItems, Number(target.dataset.folder)));
 }

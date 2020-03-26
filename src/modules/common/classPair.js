@@ -1,3 +1,3 @@
 import hasClass from './hasClass';
 
-export default function classPair(self, el) {return hasClass(el[0], self);}
+export default function classPair(target, el) {return hasClass(el[0], target);}

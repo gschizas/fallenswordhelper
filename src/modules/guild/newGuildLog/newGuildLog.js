@@ -188,8 +188,8 @@ function toggle(item, hide, r) {
   toggleForce(r[6], hide);
 }
 
-function toggleItem(self) {
-  var item = Number(self.getAttribute('item'));
+function toggleItem(target) {
+  var item = Number(target.getAttribute('item'));
   options.checks[item] = !options.checks[item];
   storeOptions();
   tmpGuildLog.forEach(partial(toggle, item, !options.checks[item]));
@@ -233,7 +233,7 @@ function refresh() {
 
 function guildLogEvents() {
   return [
-    [function(self) {return self.tagName === 'INPUT';}, toggleItem],
+    [function(target) {return target.tagName === 'INPUT';}, toggleItem],
     [selfIdIs('fshAll'), selectAll],
     [selfIdIs('fshNone'), selectNone],
     [selfIdIs('rfsh'), refresh]

@@ -164,9 +164,9 @@ function selfIds() {
 function evts() {
   return selfIds().concat([
     [
-      function(self) {return self.hasAttribute('linkto');},
-      function(self) {
-        doCheckboxesByType('item', self.getAttribute('linkto'));
+      function(target) {return target.hasAttribute('linkto');},
+      function(target) {
+        doCheckboxesByType('item', target.getAttribute('linkto'));
       }
     ],
     [partial(hasClass, 'sendLink'),

@@ -63,18 +63,18 @@ function resetList() {
   myStats(true).then(injectAllyEnemyList);
 }
 
-function toggleBuffSelected(self) {
-  self.classList.toggle(enemyBuffCheckOn);
-  self.classList.toggle(enemyBuffCheckOff);
+function toggleBuffSelected(target) {
+  target.classList.toggle(enemyBuffCheckOn);
+  target.classList.toggle(enemyBuffCheckOff);
 }
 
-function msgPlayer(self) {
-  window.openQuickMsgDialog(getText(self.parentNode.previousElementSibling
+function msgPlayer(target) {
+  window.openQuickMsgDialog(getText(target.parentNode.previousElementSibling
     .lastElementChild));
 }
 
-function buffPlayer(self) {
-  openQuickBuffByName(getText(self.parentNode
+function buffPlayer(target) {
+  openQuickBuffByName(getText(target.parentNode
     .previousElementSibling.lastElementChild));
 }
 
@@ -95,8 +95,8 @@ var classEvt = [
 ];
 
 function eventHandler(evt) {
-  var self = evt.target;
-  if (self.id === 'fshResetEnemy') {
+  var target = evt.target;
+  if (target.id === 'fshResetEnemy') {
     resetList();
     return;
   }

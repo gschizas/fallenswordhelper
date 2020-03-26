@@ -91,11 +91,11 @@ function doReset(potOpts, potObj, ignore) {
   drawInventory(potOpts, potObj);
 }
 
-function toggleTab(self) {return /^pottab\d$/.test(self.id);}
+function toggleTab(target) {return /^pottab\d$/.test(target.id);}
 
-function saveState(potOpts, self) {
-  var option = self.id;
-  potOpts[option] = self.checked;
+function saveState(potOpts, target) {
+  var option = target.id;
+  potOpts[option] = target.checked;
   set(storeMap, potOpts);
 }
 
@@ -108,10 +108,10 @@ function clickEvents(potOpts, potObj) {
 }
 
 function onInput(potOpts, potObj, e) {
-  var self = e.target.id;
+  var target = e.target.id;
   var maybeValue = testRange(e.target.value, 0, 999);
   if (maybeValue) {
-    potOpts[self] = maybeValue;
+    potOpts[target] = maybeValue;
     set(storeMap, potOpts);
     drawInventory(potOpts, potObj);
   }

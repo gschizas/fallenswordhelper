@@ -95,8 +95,8 @@ function generateManageTable() { // Legacy
   }
 }
 
-function deleteQuickItem(self) { // Legacy
-  var itemId = self.getAttribute('data-itemId');
+function deleteQuickItem(target) { // Legacy
+  var itemId = target.getAttribute('data-itemId');
   param.currentItems.splice(itemId, 1);
   generateManageTable();
 }
@@ -148,7 +148,7 @@ function listEvents() {
     [selfIdIs('fshReset'), resetRawEditor],
     [selfIdIs('fshSave'), saveRawEditor],
     [selfIdIs('fshAdd'), addQuickItem],
-    [function(self) {return self.id.startsWith('fshDel');}, deleteQuickItem]
+    [function(target) {return target.id.startsWith('fshDel');}, deleteQuickItem]
   ];
 }
 

@@ -9,20 +9,20 @@ function doRender(bioCell) {
   }
 }
 
-function selfRender(self) {
-  return self && getValue('renderSelfBio');
+function selfRender(isSelf) {
+  return isSelf && getValue('renderSelfBio');
 }
 
-function otherRender(self) {
-  return !self && getValue('renderOtherBios');
+function otherRender(isSelf) {
+  return !isSelf && getValue('renderOtherBios');
 }
 
-function shouldRender(self) {
-  return selfRender(self) || otherRender(self);
+function shouldRender(isSelf) {
+  return selfRender(isSelf) || otherRender(isSelf);
 }
 
-export default function testForRender(self, bioCell) {
-  if (shouldRender(self)) {
+export default function testForRender(isSelf, bioCell) {
+  if (shouldRender(isSelf)) {
     doRender(bioCell);
   }
 }
