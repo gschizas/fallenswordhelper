@@ -1,7 +1,7 @@
+import ajaxSendItems from '../../../ajax/ajaxSendItems';
 import allChecks from './allChecks';
 import changeLvls from './changeLvls';
 import clearChecks from './clearChecks';
-import {daSendItems} from '../../../_dataAccess/_dataAccess';
 import doAction from './doAction';
 import dropItem from '../../../ajax/dropItem';
 import equipItem from '../../../ajax/equipItem';
@@ -59,7 +59,7 @@ function doDropItem(e) { // jQuery
 
 function doSendItem(e) { // jQuery
   var target = $(e.target);
-  doAction(partial(daSendItems, [target.data('inv')]), target);
+  doAction(partial(ajaxSendItems, [target.data('inv')]), target);
 }
 
 function elClick(fshInv, el) { // jQuery

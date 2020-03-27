@@ -7,7 +7,7 @@ import appGuildView from '../app/guild/view';
 import appQb from '../app/quickbuff';
 import appScouttower from '../app/guild/scouttower';
 import appSe from '../app/superelite';
-import appSend from '../app/trade/senditems';
+import appSendItemsToRecipient from '../app/trade/sendItemsToRecipient';
 import appViewCombat from '../app/combat/view';
 import appViewProfile from '../app/profile/view';
 import bazaarBuy from './bazaarBuy';
@@ -45,7 +45,7 @@ import ranksView from './ranksView';
 import recall from '../app/guild/inventory/recall';
 import report from '../app/guild/inventory/report';
 import scouttower from './scouttower';
-import senditems from './sendItems';
+import sendItemsToRecipient from './sendItemsToRecipient';
 import sendtofolder from '../app/profile/sendtofolder';
 import setValueJSON from '../system/setValueJSON';
 import storeitems from './storeitems';
@@ -121,8 +121,8 @@ export const daRankPosition = (direction, rankId) =>
   _dataAccess(rankPosition, moveRank, direction, rankId);
 export const daRanksView = () => _dataAccess(ranks, ranksView);
 export const daScoutTower = () => _dataAccess(appScouttower, scouttower);
-export const daSendItems = invIdAry =>
-  _dataAccess(appSend, senditems, invIdAry);
+export const daAjaxSendItemsToRecipient = invIdAry =>
+  _dataAccess(appSendItemsToRecipient, sendItemsToRecipient, invIdAry);
 export const daSendToFolder = (folderId, itemsAry) =>
   _dataAccess(sendtofolder, moveItems, folderId, itemsAry);
 export const daStoreItems = invIdAry =>

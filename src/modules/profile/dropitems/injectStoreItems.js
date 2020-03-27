@@ -1,7 +1,7 @@
 import './injectStoreItems.css';
 import add from '../../support/task';
+import ajaxSendItems from '../../ajax/ajaxSendItems';
 import batch from '../../common/batch';
-import {daSendItems} from '../../_dataAccess/_dataAccess';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
@@ -170,7 +170,7 @@ function evts() {
       }
     ],
     [partial(hasClass, 'sendLink'),
-      partial(quickAction, daSendItems, 'Sent', '.dropLink')],
+      partial(quickAction, ajaxSendItems, 'Sent', '.dropLink')],
     [partial(hasClass, 'dropLink'),
       partial(quickAction, dropItem, 'Dropped', '.sendLink')],
     [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)]
