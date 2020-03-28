@@ -10,8 +10,8 @@ import {isArray} from '../common/isArray';
 import {itemRE} from '../support/constants';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonFail from '../common/jsonFail';
-import on from '../common/on';
 import once from '../common/once';
+import onclick from '../common/onclick';
 import outputResult from '../common/outputResult';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
@@ -132,7 +132,7 @@ function makeItemTable(itemList, qt, takeResult) {
   var itemTbl = createDiv({className: 'fshTakeGrid'});
   makeItemBoxes(itemTbl, itemList);
   insertElement(qt, itemTbl);
-  on(itemTbl, 'click', partial(clickEvt, itemList, takeResult));
+  onclick(itemTbl, partial(clickEvt, itemList, takeResult));
 }
 
 function makeQtDiv(itemList) {

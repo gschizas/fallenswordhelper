@@ -6,8 +6,8 @@ import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import on from '../common/on';
 import once from '../common/once';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
@@ -83,7 +83,7 @@ function setupFastCompose(fcDiv, compSlots, openSlots) {
     .map(keyValuePairs);
   var myTable = buildTable(templates, compSlots, openSlots);
   insertElement(fcDiv, myTable);
-  on(pCC, 'click', handleClick);
+  onclick(pCC, handleClick);
   subscribe('quickcreate', partial(quickcreate, myTable));
 }
 

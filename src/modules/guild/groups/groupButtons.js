@@ -8,7 +8,7 @@ import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import indexAjaxData from '../../ajax/indexAjaxData';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import querySelectorArray from '../../common/querySelectorArray';
@@ -57,7 +57,7 @@ function joinAllGroupsUnderSize() {
 function joinUnderButton(buttonRow) {
   var joinUnder = addButton(buttonRow,
     'Join All Groups < ' + maxGroupSizeToJoin + ' Members');
-  on(joinUnder, 'click', joinAllGroupsUnderSize);
+  onclick(joinUnder, joinAllGroupsUnderSize);
 }
 
 export default function groupButtons() {

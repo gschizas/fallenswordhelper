@@ -13,7 +13,7 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import {isArray} from '../../common/isArray';
 import jConfirm from '../../common/jConfirm';
 import jQueryPresent from '../../common/jQueryPresent';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import selfIdIs from '../../common/selfIdIs';
@@ -117,7 +117,7 @@ function buildQuickWear(content, appInv) {
   subscribeOnce('qwtab1', partial(injectContent, showAHInvManager, appInv));
   fshTabSet(content, ['Quick Wear / Use / Extract<br>Manager',
     'Inventory Manager Counter<br>filtered by AH Quick Search'], 'qwtab');
-  on(content, 'click', eventHandler5(evts5()));
+  onclick(content, eventHandler5(evts5()));
 }
 
 function showQuickWear(content, appInv) {

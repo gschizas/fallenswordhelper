@@ -5,7 +5,7 @@ import classPair from '../../common/classPair';
 import equipItem from '../../ajax/equipItem';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import itemId from './itemId';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import {playerIDRE} from '../../support/constants';
@@ -91,5 +91,5 @@ var classEvts = [
 ];
 
 export default function eventHandlers() {
-  on(getElementsByTagName('table', pCC)[1], 'click', classHandler(classEvts));
+  onclick(getElementsByTagName('table', pCC)[1], classHandler(classEvts));
 }

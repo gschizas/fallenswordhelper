@@ -1,6 +1,6 @@
 import fallback from '../system/fallback';
 import insertElement from './insertElement';
-import on from './on';
+import onclick from './onclick';
 import openQuickBuffByName from './openQuickBuffByName';
 import partial from './partial';
 import {places} from '../support/constants';
@@ -22,7 +22,7 @@ function makeButtons(prev, curr, i) {
     dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
     textContent: 'Buff ' + modifierWord + ' 16'
   });
-  on(btn, 'click', partial(openQuickBuffByName, theNames));
+  onclick(btn, partial(openQuickBuffByName, theNames));
   insertElement(li, btn);
   insertElement(prev, li);
   return prev;

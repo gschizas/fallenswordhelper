@@ -9,7 +9,7 @@ import indexAjaxData from './ajax/indexAjaxData';
 import insertElementAfterBegin from './common/insertElementAfterBegin';
 import insertHtmlAfterBegin from './common/insertHtmlAfterBegin';
 import jQueryNotPresent from './common/jQueryNotPresent';
-import on from './common/on';
+import onclick from './common/onclick';
 import {pCC} from './support/layout';
 import perfFilter from './common/perfFilter';
 
@@ -47,7 +47,7 @@ function makeCancelAll() {
   insertHtmlAfterBegin(fill, ']');
   insertElementAfterBegin(fill, cancelAll);
   insertHtmlAfterBegin(fill, '[');
-  on(cancelAll, 'click', cancelAllAH);
+  onclick(cancelAll, cancelAllAH);
 }
 
 function autoFill() {

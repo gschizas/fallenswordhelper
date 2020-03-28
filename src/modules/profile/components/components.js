@@ -13,7 +13,7 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import jQueryDialog from '../../chrome/jQueryDialog';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {sendEvent} from '../../support/fshGa';
 
 var buttonLabels = [
@@ -68,7 +68,7 @@ var classEvts = [
 function addComposingButtons(thisInvTable) {
   var compDiv = thisInvTable.parentNode;
   insertElement(compDiv, componentBtnContainer());
-  on(compDiv, 'click', classHandler(classEvts));
+  onclick(compDiv, classHandler(classEvts));
 }
 
 export default function components() {

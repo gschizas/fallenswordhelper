@@ -12,7 +12,7 @@ import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import partial from '../common/partial';
 import {createDiv, createTr} from '../common/cElement';
 //#if _BETA  //  Timing output
@@ -83,7 +83,7 @@ function doFolderHeaders(folders) {
       ' &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>' +
       entries(folders).map(folderSpan).join('')
   });
-  on(foldersRow, 'click', hideFolder);
+  onclick(foldersRow, hideFolder);
   var el = getElementById('item-list').parentNode.parentNode;
   insertHtmlBeforeBegin(el, '<tr id="fshShowSTs">' +
     '<td align="center" colspan=6>' +

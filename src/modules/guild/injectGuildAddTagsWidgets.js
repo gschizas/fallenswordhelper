@@ -7,7 +7,7 @@ import getElementsByTagName from '../common/getElementsByTagName';
 import injectGuild from './guild';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
@@ -59,7 +59,7 @@ function checkAllBtn() {
 }
 
 function doItemTagging() {
-  on(pCC, 'click', evtHdlr);
+  onclick(pCC, evtHdlr);
   paintTable();
   checkAllBtn();
 }

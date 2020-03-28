@@ -6,7 +6,7 @@ import {getElementById} from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
@@ -123,7 +123,7 @@ function foundBackpack(backpackContainer, theBackpack) {
   if (getText(getElementById('backpack_current')).length !== 0) {
     add(3, fastWearLinks, [theBackpack]);
   }
-  on(backpackContainer, 'click', partial(evtHdl, theBackpack));
+  onclick(backpackContainer, partial(evtHdl, theBackpack));
 }
 
 function initialiseFastWear() {

@@ -16,7 +16,7 @@ import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
@@ -259,7 +259,7 @@ function gotOptions(guildLog) {
   setOpts(guildLog);
   pCC.innerHTML = guildLogFilter;
   getElements();
-  on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
+  onclick(fshNewGuildLog, eventHandler5(guildLogEvents()));
   setChecks();
   setMaxPage();
   getGuildLogPage(1).then(processFirstPage);

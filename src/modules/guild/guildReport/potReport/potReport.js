@@ -7,6 +7,7 @@ import insertElement from '../../../common/insertElement';
 import isChecked from '../../../system/isChecked';
 import {keys} from '../../../common/keys';
 import on from '../../../common/on';
+import onclick from '../../../common/onclick';
 import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
 import selfIdIs from '../../../common/selfIdIs';
@@ -119,7 +120,7 @@ function onInput(potOpts, potObj, e) {
 
 function cellEventHandlers(potOpts, potObj, myCell) {
   on(myCell, 'change', partial(onChange, potOpts, potObj));
-  on(myCell, 'click', eventHandler5(clickEvents(potOpts, potObj)));
+  onclick(myCell, eventHandler5(clickEvents(potOpts, potObj)));
   on(myCell, 'input', partial(onInput, potOpts, potObj));
 }
 

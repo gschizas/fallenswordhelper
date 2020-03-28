@@ -2,7 +2,7 @@ import './fetchGroupStatsButton.css';
 import addButton from './addButton';
 import getGroupStats from '../../ajax/getGroupStats';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import querySelectorArray from '../../common/querySelectorArray';
 
@@ -39,5 +39,5 @@ function fetchGroupData(evt) {
 
 export default function fetchGroupStatsButton(buttonRow) {
   var fetchStats = addButton(buttonRow, 'Fetch Group Stats');
-  on(fetchStats, 'click', fetchGroupData);
+  onclick(fetchStats, fetchGroupData);
 }

@@ -7,7 +7,7 @@ import isChecked from '../../system/isChecked';
 import jsonParse from '../../common/jsonParse';
 import makePageHeader from './makePageHeader';
 import makePageTemplate from './makePageTemplate';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import selfIdIs from '../../common/selfIdIs';
 import setValueJSON from '../../system/setValueJSON';
@@ -153,7 +153,7 @@ function listEvents() {
 }
 
 function setupEventHandler(content) {
-  on(content, 'click', eventHandler5(listEvents()));
+  onclick(content, eventHandler5(listEvents()));
 }
 
 export function injectAuctionSearch(injector) { // Legacy

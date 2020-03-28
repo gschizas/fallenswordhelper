@@ -10,7 +10,7 @@ import jConfirm from '../../common/jConfirm';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import jsonFail from '../../common/jsonFail';
 import {keys} from '../../common/keys';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import outputResult from '../../common/outputResult';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
@@ -167,6 +167,6 @@ export default function insertQuickExtract(injector) { // jQuery.min
   insertElement(content, extTbl);
   selectST = true;
   selectMain = true;
-  on(content, 'click', eventHandler5(extractEvents()));
+  onclick(content, eventHandler5(extractEvents()));
   getInventory().then(prepInv);
 }

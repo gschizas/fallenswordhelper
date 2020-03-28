@@ -1,7 +1,7 @@
 import {closestForm} from './common/closest';
 import dontPost from './common/dontPost';
 import jQueryNotPresent from './common/jQueryNotPresent';
-import on from './common/on';
+import onclick from './common/onclick';
 import quickBuffHref from './common/quickBuffHref';
 import {
   calculateBoundaries,
@@ -18,7 +18,7 @@ function updateUrl(evt) {
 }
 
 function allowBack(findPlayerButton) {
-  on(findPlayerButton, 'click', updateUrl);
+  onclick(findPlayerButton, updateUrl);
 }
 
 function searchUrl(min, max, guild) {

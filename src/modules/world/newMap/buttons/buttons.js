@@ -8,6 +8,7 @@ import insertElement from '../../../common/insertElement';
 import insertElementBefore from '../../../common/insertElementBefore';
 import makeToggleBtn from './makeToggleBtn';
 import on from '../../../common/on';
+import onclick from '../../../common/onclick';
 import openQuickBuffByName from '../../../common/openQuickBuffByName';
 import playerName from '../../../common/playerName';
 import setText from '../../../common/setText';
@@ -163,7 +164,7 @@ var clickHdl = [
 ];
 
 function setupHandlers() {
-  on(buttonContainer, 'click', eventHandler5(clickHdl));
+  onclick(buttonContainer, eventHandler5(clickHdl));
   on(buttonContainer, 'change', eventHandler5(changeHdl));
 }
 

@@ -9,6 +9,7 @@ import getValueJSON from '../../system/getValueJSON';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
+import onclick from '../../common/onclick';
 import setText from '../../common/setText';
 import setValueJSON from '../../system/setValueJSON';
 
@@ -137,7 +138,7 @@ function showMsgTemplate() {
       fshButton('add', 'Add'),
       '<input id="newTmpl" class="ui-widget-content fshTmpl">');
     showingTemplates = true;
-    on(msgTbl, 'click', classHandler(classEvents));
+    onclick(msgTbl, classHandler(classEvents));
   }
 }
 

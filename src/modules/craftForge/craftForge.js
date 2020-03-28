@@ -11,6 +11,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryPresent from '../common/jQueryPresent';
 import makeFolderSpans from '../common/makeFolderSpans';
 import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import toggleForce from '../common/toggleForce';
 import {createDiv, createInput, createLabel} from '../common/cElement';
@@ -94,7 +95,7 @@ function doFolderButtons(folders) {
   var inject = itemTable.parentNode.parentNode
     .previousElementSibling.children[0];
   inject.classList.add('fshCenter');
-  on(inject, 'click', doHideFolders);
+  onclick(inject, doHideFolders);
   insertHtmlBeforeEnd(inject, makeFolderSpans(folders, true));
   return inject;
 }

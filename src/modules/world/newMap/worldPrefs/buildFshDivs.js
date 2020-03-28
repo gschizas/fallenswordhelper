@@ -5,6 +5,7 @@ import insertElement from '../../../common/insertElement';
 import insertElementBefore from '../../../common/insertElementBefore';
 import isFunction from '../../../common/isFunction';
 import on from '../../../common/on';
+import onclick from '../../../common/onclick';
 import {simpleCheckboxHtml} from '../../../settings/simpleCheckbox';
 import {toggleBuffInfo} from '../buffInfo/buffInfo';
 import toggleEnabledHuntingMode from './toggleEnabledHuntingMode';
@@ -50,7 +51,7 @@ function prefsClickEvent(e) {
 export default function buildFshDivs() {
   var fshDiv = createDiv({className: 'fshCenter fshFten'});
   var prefsDiv = buildPrefsDiv();
-  on(prefsDiv, 'click', prefsClickEvent);
+  onclick(prefsDiv, prefsClickEvent);
   on(prefsDiv, 'change', toggleEnabledHuntingMode);
   insertElement(fshDiv, prefsDiv);
   var missingBuffsDiv = createDiv();

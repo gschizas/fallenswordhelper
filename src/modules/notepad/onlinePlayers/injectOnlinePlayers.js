@@ -9,6 +9,7 @@ import jQueryNotPresent from '../../common/jQueryNotPresent';
 import loadDataTables from '../../common/loadDataTables';
 import {now} from '../../support/now';
 import on from '../../common/on';
+import onclick from '../../common/onclick';
 import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import partial from '../../common/partial';
 import resetEvt from './resetEvt';
@@ -108,7 +109,7 @@ function injectOnlinePlayersNew() { // jQuery
     '<span><b>Online Players</b></span>' + doRefreshButton() +
     '<div id="fshOutput"></div>');
   get('fsh_onlinePlayers').then(gotOnlinePlayers);
-  on(context[0], 'click', clickHandler);
+  onclick(context[0], clickHandler);
   on(context[0], 'keyup', changeLvl);
 }
 

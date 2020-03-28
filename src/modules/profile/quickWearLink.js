@@ -4,7 +4,7 @@ import insertElement from '../common/insertElement';
 import insertQuickWear from '../notepad/quickWear/quickWear';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import querySelector from '../common/querySelector';
 import {sendEvent} from '../support/fshGa';
 
@@ -23,5 +23,5 @@ export default function quickWearLink() {
   insertElement(wrap, qw);
   insertTextBeforeEnd(wrap, ']');
   insertElement(node.parentNode, wrap);
-  on(qw, 'click', openQwDialog);
+  onclick(qw, openQwDialog);
 }

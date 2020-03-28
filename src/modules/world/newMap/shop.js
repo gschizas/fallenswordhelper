@@ -5,7 +5,7 @@ import fetchdata from '../../ajax/fetchdata';
 import {getElementById} from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import setText from '../../common/setText';
 import testQuant from '../../system/testQuant';
 import {createButton, createDiv, createInput} from '../../common/cElement';
@@ -78,7 +78,7 @@ function injectQuickBuy() {
   });
   insertElement(fshDiv, numInput);
   qbBtn = createButton({textContent: 'Quick-buy'});
-  on(qbBtn, 'click', qBuy);
+  onclick(qbBtn, qBuy);
   insertElement(fshDiv, qbBtn);
   resultDiv = createDiv();
   insertElement(fshDiv, resultDiv);

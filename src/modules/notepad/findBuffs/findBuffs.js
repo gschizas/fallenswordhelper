@@ -8,7 +8,7 @@ import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import guildManage from '../../ajax/guildManage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import on from '../../common/on';
+import onclick from '../../common/onclick.js';
 import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import {pCC} from '../../support/layout';
 import pageLayout from './pageLayout';
@@ -249,12 +249,11 @@ function getExtraProfile() {
 }
 
 function setupFindEvent(fn) {
-  on(getElementById('findbuffsbutton'), 'click', fn, true);
+  onclick(getElementById('findbuffsbutton'), fn, true);
 }
 
 function setupClearEvent() {
-  on(getElementById('clearresultsbutton'),
-    'click', findBuffsClearResults, true);
+  onclick(getElementById('clearresultsbutton'), findBuffsClearResults, true);
 }
 
 export function injectFindBuffs(injector) { // Legacy

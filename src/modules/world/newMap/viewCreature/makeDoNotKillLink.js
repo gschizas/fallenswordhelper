@@ -3,7 +3,7 @@ import calf from '../../../support/calf';
 import getElementsByClassName from '../../../common/getElementsByClassName';
 import insertElement from '../../../common/insertElement';
 import isOnList from '../doNotKill/isOnList';
-import on from '../../../common/on';
+import onclick from '../../../common/onclick';
 import setText from '../../../common/setText';
 import setValue from '../../../system/setValue';
 import {createButton, createDiv} from '../../../common/cElement';
@@ -57,7 +57,7 @@ function makeDnkBtn() {
   });
   insertElement(btnContainer, doNotKillBtn);
   insertElement(creatureBody, btnContainer);
-  on(doNotKillBtn, 'click', addRemoveCreature);
+  onclick(doNotKillBtn, addRemoveCreature);
 }
 
 function doNotKillLink() {

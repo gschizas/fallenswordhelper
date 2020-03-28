@@ -2,7 +2,7 @@ import {daDoInvent} from '../_dataAccess/_dataAccess';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jsonFail from '../common/jsonFail';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import outputResult from '../common/outputResult';
 import {pCC} from '../support/layout';
 import querySelector from '../common/querySelector';
@@ -68,7 +68,7 @@ function makeQuickInv(myCell) {
     value: 'Quick invent items'
   });
   insertElement(myCell, quickInv);
-  on(quickInv, 'click', quickInvent);
+  onclick(quickInv, quickInvent);
 }
 
 function makeInvResultHeader(myCell) {

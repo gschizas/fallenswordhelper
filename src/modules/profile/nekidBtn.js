@@ -3,7 +3,7 @@ import getArrayByTagName from '../common/getArrayByTagName';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
 import {createButton, createDiv} from '../common/cElement';
@@ -38,7 +38,7 @@ function makeButton() {
   insertTextBeforeEnd(nekidDiv, '[ ');
   insertElement(nekidDiv, theBtn);
   insertTextBeforeEnd(nekidDiv, ' ]');
-  on(theBtn, 'click', getNekid);
+  onclick(theBtn, getNekid);
   return nekidDiv;
 }
 

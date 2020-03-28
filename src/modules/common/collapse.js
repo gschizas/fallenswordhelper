@@ -4,6 +4,7 @@ import {getElementById} from '../common/getElement';
 import hideElement from './hideElement';
 import isFunction from './isFunction';
 import on from './on';
+import onclick from './onclick';
 import partial from './partial';
 import setValue from '../system/setValue';
 import toggleForce from './toggleForce';
@@ -120,5 +121,5 @@ export default function collapse(param) {
   headerIndex = param.headInd;
   setupPref(param.prefName);
   arrayFrom(param.theTable.rows).forEach(partial(doTagging, param));
-  on(param.theTable, 'click', evtHdl);
+  onclick(param.theTable, evtHdl);
 }

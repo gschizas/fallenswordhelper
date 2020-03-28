@@ -3,7 +3,7 @@ import containsText from '../../common/containsText';
 import {dataRows} from '../../common/dataRows';
 import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import openQuickBuffByName from '../../common/openQuickBuffByName';
 
 function buffIndividual(target) {
@@ -49,7 +49,7 @@ function myTables(el, i) {return el.rows.length > 1 && i > 1;}
 
 function gotTables(titanTables) {
   arrayFrom(titanTables).filter(myTables).forEach(doBuffLinks);
-  on(titanTables[1], 'click', evtHdl);
+  onclick(titanTables[1], evtHdl);
 }
 
 export default function injectScouttowerBuffLinks(titanTables) {

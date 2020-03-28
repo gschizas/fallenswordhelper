@@ -2,7 +2,7 @@ import {def_table} from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import injectQuestRow from './injectQuestRow';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import setValue from '../system/setValue';
@@ -100,7 +100,7 @@ function storeQuestPage() {
 }
 
 export default function injectQuestBookFull() {
-  on(pCC, 'click', updateUrl);
+  onclick(pCC, updateUrl);
   storeQuestPage();
   var questTable = getElementsByTagName(def_table, pCC)[5];
   if (!questTable) {return;}

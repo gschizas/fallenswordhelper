@@ -5,6 +5,7 @@ import displayChange from './displayChange';
 import guildStore from '../../_dataAccess/export/guildStore';
 import insertElement from '../../common/insertElement';
 import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import prepareData from './prepareData';
@@ -61,7 +62,7 @@ function makeSearch(top, table) {
     type: 'button'
   });
   const directive = searchDirective({table});
-  on(button, 'click', () => {
+  onclick(button, () => {
     input.value = '';
     input.focus();
     directive.search('');
@@ -104,10 +105,10 @@ function makePager(bottom, table) {
     lastPage = Math.ceil(filteredCount / size);
   });
 
-  on(firstBtn, 'click', () => pager.selectPage(1));
-  on(prevBtn, 'click', () => pager.selectPreviousPage());
-  on(nextBtn, 'click', () => pager.selectNextPage());
-  on(lastBtn, 'click', () => pager.selectPage(lastPage));
+  onclick(firstBtn, () => pager.selectPage(1));
+  onclick(prevBtn, () => pager.selectPreviousPage());
+  onclick(nextBtn, () => pager.selectNextPage());
+  onclick(lastBtn, () => pager.selectPage(lastPage));
 
   insertElement(pagerDiv, firstBtn);
   insertElement(pagerDiv, prevBtn);

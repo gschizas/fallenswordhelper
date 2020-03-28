@@ -8,6 +8,7 @@ import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import jsonFail from './common/jsonFail';
 import on from './common/on';
+import onclick from './common/onclick';
 import outputResult from './common/outputResult';
 import {pCC} from './support/layout';
 import setText from './common/setText';
@@ -92,9 +93,9 @@ function doMiniatures(el, i) {
 }
 
 function evtHandlers() {
-  on(getElementById('fshBazaar'), 'click', select);
+  onclick(getElementById('fshBazaar'), select);
   on(getElementById('buy_amount'), 'input', quantity);
-  on(getElementById('fshBuy'), 'click', buy);
+  onclick(getElementById('fshBuy'), buy);
 }
 
 export default function injectBazaar() { // TODO stop using getElementById

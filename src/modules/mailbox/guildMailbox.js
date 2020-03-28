@@ -5,7 +5,7 @@ import getArrayByTagName from '../common/getArrayByTagName';
 import infoBoxFrom from '../common/InfoBoxFrom';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
@@ -45,7 +45,7 @@ function guildMailboxEvent(e) { // jQuery.min
 
 export default function guildMailbox() {
   if (jQueryNotPresent()) {return;}
-  on(pCC, 'click', guildMailboxEvent);
+  onclick(pCC, guildMailboxEvent);
   insertHtmlBeforeEnd(querySelector('#pCC td[height="25"]'),
     '<span class="sendLink">Take All</span>');
 }

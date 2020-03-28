@@ -1,7 +1,7 @@
 import {daRankPosition} from '../../_dataAccess/_dataAccess';
 import getValue from '../../system/getValue';
 import insertElementBefore from '../../common/insertElementBefore';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import playerName from '../../common/playerName';
 import toLowerCase from '../../common/toLowerCase';
@@ -52,7 +52,7 @@ function ajaxifyRankControls(evt) {
 
 export function doButtons() {
   if (characterRow && getValue('ajaxifyRankControls')) {
-    on(pCC, 'click', ajaxifyRankControls, true);
+    onclick(pCC, ajaxifyRankControls, true);
   }
 }
 

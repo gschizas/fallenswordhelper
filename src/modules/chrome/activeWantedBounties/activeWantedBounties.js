@@ -3,7 +3,7 @@ import bountyPage from '../../ajax/bountyPage';
 import calf from '../../support/calf';
 import functionPasses from '../../common/functionPasses';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {parseBountyPageForWorld} from './parseBountyPageForWorld';
 import setValueJSON from '../../system/setValueJSON';
 import {
@@ -60,8 +60,8 @@ function resetList(e) {
 }
 
 function doHandlers() {
-  if (bountyListDiv) {on(bountyListDiv, 'click', resetList);}
-  if (wantedListDiv) {on(wantedListDiv, 'click', resetList);}
+  if (bountyListDiv) {onclick(bountyListDiv, resetList);}
+  if (wantedListDiv) {onclick(wantedListDiv, resetList);}
 }
 
 export function prepareBountyData() {

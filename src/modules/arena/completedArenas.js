@@ -5,14 +5,14 @@ import insertElementAfter from '../common/insertElementAfter';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
 import updateGoUrl from './updateGoUrl';
 import updateUrl from './updateUrl';
 
 function intercept(val, fn) {
-  on(querySelector('#pCC input[value="' + val + '"]'), 'click', fn);
+  onclick(querySelector('#pCC input[value="' + val + '"]'), fn);
 }
 
 function gotoPage(pageId) {
@@ -28,7 +28,7 @@ function injectStartButton() {
     const startButton = createInput({type: 'button', value: '<<'});
     insertElementBefore(startButton, prevButton);
     insertHtmlAfterEnd(startButton, '&nbsp;');
-    on(startButton, 'click', partial(gotoPage, 1));
+    onclick(startButton, partial(gotoPage, 1));
   }
 }
 
@@ -40,7 +40,7 @@ function injectFinishButton() {
     const finishButton = createInput({type: 'button', value: '>>'});
     insertElementAfter(finishButton, nextButton);
     insertHtmlBeforeBegin(finishButton, '&nbsp;');
-    on(finishButton, 'click', gotoLastPage);
+    onclick(finishButton, gotoLastPage);
   }
 }
 

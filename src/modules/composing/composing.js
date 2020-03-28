@@ -6,7 +6,7 @@ import getValue from '../system/getValue';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryPresent from '../common/jQueryPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import parseComposing from './parseComposing';
 import querySelectorArray from '../common/querySelectorArray';
@@ -51,7 +51,7 @@ function hasJQuery() {
   parseComposing();
   querySelectorArray('input[id^=create-]:not(#create-multi)', pCC)
     .forEach(injectButton);
-  on(pCC, 'click', quickCreate);
+  onclick(pCC, quickCreate);
   moveButtons();
   fastCompose();
 }

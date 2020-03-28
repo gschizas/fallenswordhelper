@@ -15,7 +15,7 @@ import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import moveItemsToFolder from './moveItemsToFolder';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
@@ -191,7 +191,7 @@ function inventory(data) {
   sendLinks = false;
   batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
   doFolderButtons(data.folders);
-  on(pCC, 'click', eventHandler5(evts()));
+  onclick(pCC, eventHandler5(evts()));
 }
 
 export default function injectStoreItems() {
