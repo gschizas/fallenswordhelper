@@ -82,7 +82,7 @@ function doscript(pCC) {
 }
 
 function reportObject(id, pCC) {
-  return Object.assign(doBase(id, pCC), doscript(pCC));
+  return {...doBase(id, pCC), ...doscript(pCC)};
 }
 
 function parseReport(id, html) {

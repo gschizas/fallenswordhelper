@@ -1,5 +1,4 @@
 import all from '../../common/all';
-import {assign} from '../../common/assign';
 import completed from '../../app/arena/completed';
 import {entries} from '../../common/entries';
 import formatUtcDateTime from '../../common/formatUtcDateTime';
@@ -102,7 +101,7 @@ async function getListOfWinners(thisArenas) {
     .map(o => o.id);
   const prm = winnersToGet.map(getWinner);
   const newWinners = fromEntries(await all(prm));
-  const combinedWinners = assign(fsh_arenaWinners, newWinners);
+  const combinedWinners = {...fsh_arenaWinners, ...newWinners};
   set('fsh_arenaWinners', combinedWinners);
   return combinedWinners;
 }
