@@ -1,7 +1,17 @@
 import addCommas from '../system/addCommas';
-import getIntFromRegExp from '../system/getIntFromRegExp';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import querySelector from '../common/querySelector';
+
+function getIntFromRegExp(theText, rxSearch) {
+  var result;
+  var matches = theText.replace(/,/g, '').match(rxSearch);
+  if (matches) {
+    result = parseInt(matches[1], 10);
+  } else {
+    result = 0;
+  }
+  return result;
+}
 
 function mightBePositive(actualXP, xpLockXP) {
   let sign = '';
