@@ -3,18 +3,6 @@ import getIntFromRegExp from '../system/getIntFromRegExp';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import querySelector from '../common/querySelector';
 
-function wrapUrl(guildLogo) {
-  var url = guildLogo.nextElementSibling.nextElementSibling;
-  if (url) {url.classList.add('fshBreakAll');}
-}
-
-export function removeGuildAvyImgBorder() {
-  var guildLogo = querySelector('#pCC img[src*="/guilds/"][width="200"]');
-  if (!guildLogo) {return;}
-  guildLogo.removeAttribute('style');
-  wrapUrl(guildLogo);
-}
-
 function mightBePositive(actualXP, xpLockXP) {
   let sign = '';
   if (actualXP > xpLockXP) {sign = '+';}
@@ -29,7 +17,7 @@ function injectLock(xpLock) {
     ' (<b>' + mightBePositive(actualXP, xpLockXP) + '</b>)');
 }
 
-export function guildXPLock() {
+export default function guildXPLock() {
   var xpLock = querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   if (xpLock) {injectLock(xpLock);}
 }
