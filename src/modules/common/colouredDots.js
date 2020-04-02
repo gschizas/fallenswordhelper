@@ -16,6 +16,11 @@ function changeOnlineDot(contactLink) {
 
 export default function colouredDots() {
   if (!getValue('enhanceOnlineDots')) {return;}
-  batch(3, querySelectorAll('#pCC a[data-tipped*="Last Activity"]'), 0,
-    changeOnlineDot);
+  batch([
+    5,
+    3,
+    querySelectorAll('#pCC a[data-tipped*="Last Activity"]'),
+    0,
+    changeOnlineDot
+  ]);
 }

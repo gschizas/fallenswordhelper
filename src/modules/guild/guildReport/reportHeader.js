@@ -22,5 +22,5 @@ function updateMemberHeader(el) {
 export default function reportHeader() {
   var headers = querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
-  batch(3, headers, 0, updateMemberHeader);
+  batch([5, 3, headers, 0, updateMemberHeader]);
 }

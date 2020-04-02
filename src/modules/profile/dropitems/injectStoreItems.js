@@ -126,7 +126,7 @@ function toggleShowExtraLinks() {
   setShowExtraLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
-    batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
+    batch([5, 3, itemsAry, 0, itemWidgets, doneInvPaint]);
   } else {
     itemsAry.forEach(toggleExtraLinks);
   }
@@ -140,7 +140,7 @@ function toggleShowQuickDropLinks() {
   setShowQuickDropLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
-    batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
+    batch([5, 3, itemsAry, 0, itemWidgets, doneInvPaint]);
   } else {
     itemsAry.forEach(toggleDropLinks);
   }
@@ -189,7 +189,7 @@ function inventory(data) {
   colouring = false;
   dropLinks = false;
   sendLinks = false;
-  batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
+  batch([5, 3, itemsAry, 0, itemWidgets, doneInvPaint]);
   doFolderButtons(data.folders);
   onclick(pCC, eventHandler5(evts()));
 }
