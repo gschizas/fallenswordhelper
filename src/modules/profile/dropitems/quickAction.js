@@ -3,21 +3,21 @@ import hideQTip from '../../common/hideQTip';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 
-function anotherSpinner(self) {
-  self.innerHTML = '<img class="quickActionSpinner" src="' +
+function anotherSpinner(target) {
+  target.innerHTML = '<img class="quickActionSpinner" src="' +
     cdn +
     'ui/misc/spinner.gif" width="15" height="15">';
 }
 
-function actionReturn(self, success, data) {
+function actionReturn(target, success, data) {
   if (data.r === 1) {return;}
-  self.style.color = 'green';
-  self.innerHTML = success;
+  target.style.color = 'green';
+  target.innerHTML = success;
 }
 
-function doAction(self, fn, success) {
-  var itemInvId = self.getAttribute('itemInvId');
-  fn([itemInvId]).then(partial(actionReturn, self, success));
+function doAction(target, fn, success) {
+  var itemInvId = target.getAttribute('itemInvId');
+  fn([itemInvId]).then(partial(actionReturn, target, success));
 }
 
 function disableOtherButton(theTd, otherClass) {
@@ -34,12 +34,12 @@ function disableCheckbox(theTd) {
   checkbox.disabled = true;
 }
 
-export default function quickAction(fn, success, otherClass, self) {
-  self.className = 'quickAction';
-  doAction(self, fn, success);
-  hideQTip(self);
-  anotherSpinner(self);
-  var theTd = self.parentNode;
+export default function quickAction(fn, success, otherClass, target) {
+  target.className = 'quickAction';
+  doAction(target, fn, success);
+  hideQTip(target);
+  anotherSpinner(target);
+  var theTd = target.parentNode;
   disableOtherButton(theTd, otherClass);
   disableCheckbox(theTd);
 }

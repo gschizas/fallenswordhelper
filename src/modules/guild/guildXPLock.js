@@ -1,18 +1,16 @@
 import addCommas from '../system/addCommas';
-import getIntFromRegExp from '../system/getIntFromRegExp';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import querySelector from '../common/querySelector';
 
-function wrapUrl(guildLogo) {
-  var url = guildLogo.nextElementSibling.nextElementSibling;
-  if (url) {url.classList.add('fshBreakAll');}
-}
-
-export function removeGuildAvyImgBorder() {
-  var guildLogo = querySelector('#pCC img[src*="/guilds/"][width="200"]');
-  if (!guildLogo) {return;}
-  guildLogo.removeAttribute('style');
-  wrapUrl(guildLogo);
+function getIntFromRegExp(theText, rxSearch) {
+  var result;
+  var matches = theText.replace(/,/g, '').match(rxSearch);
+  if (matches) {
+    result = parseInt(matches[1], 10);
+  } else {
+    result = 0;
+  }
+  return result;
 }
 
 function mightBePositive(actualXP, xpLockXP) {
@@ -29,7 +27,7 @@ function injectLock(xpLock) {
     ' (<b>' + mightBePositive(actualXP, xpLockXP) + '</b>)');
 }
 
-export function guildXPLock() {
+export default function guildXPLock() {
   var xpLock = querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   if (xpLock) {injectLock(xpLock);}
 }

@@ -1,4 +1,4 @@
-import './messaging.postcss';
+import './messaging.css';
 import classHandler from '../../common/classHandler';
 import fallback from '../../system/fallback';
 import {getElementById} from '../../common/getElement';
@@ -9,6 +9,7 @@ import getValueJSON from '../../system/getValueJSON';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
+import onclick from '../../common/onclick';
 import setText from '../../common/setText';
 import setValueJSON from '../../system/setValueJSON';
 
@@ -97,18 +98,18 @@ function addTemplateRow(index, text) {
     text + '</span>');
 }
 
-function deleteTemplate(self) {
-  var myRow = self.parentNode.parentNode.rowIndex;
+function deleteTemplate(target) {
+  var myRow = target.parentNode.parentNode.rowIndex;
   msgTbl.deleteRow(myRow);
   fshTemplate.splice(myRow - 2, 1);
   setValueJSON('quickMsg', fshTemplate);
 }
 
-function addNewTemplate(self) {
-  var templateInput = self.parentNode.nextElementSibling.children[0];
+function addNewTemplate(target) {
+  var templateInput = target.parentNode.nextElementSibling.children[0];
   var templateValue = templateInput.value;
   if (templateValue !== '') {
-    var myRow = self.parentNode.parentNode.rowIndex;
+    var myRow = target.parentNode.parentNode.rowIndex;
     addTemplateRow(myRow, templateValue);
     templateInput.value = '';
     fshTemplate.push(templateValue);
@@ -116,8 +117,8 @@ function addNewTemplate(self) {
   }
 }
 
-function insertTemplate(self) {
-  dialogMsg.value += getText(self)
+function insertTemplate(target) {
+  dialogMsg.value += getText(target)
     .replace(/\{playername\}/g, targetPlayer) + '\n';
 }
 
@@ -137,7 +138,7 @@ function showMsgTemplate() {
       fshButton('add', 'Add'),
       '<input id="newTmpl" class="ui-widget-content fshTmpl">');
     showingTemplates = true;
-    on(msgTbl, 'click', classHandler(classEvents));
+    onclick(msgTbl, classHandler(classEvents));
   }
 }
 

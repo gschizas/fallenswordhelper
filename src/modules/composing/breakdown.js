@@ -3,7 +3,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import perfFilter from '../common/perfFilter';
@@ -15,14 +15,16 @@ var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
 var disableBreakdownPrompts;
 var selectedList = [];
 
-function disappearance(self) {self.hide();}
+function disappearance(target) {target.hide();}
 
-function goDown(self, disappear) {self.animate({height: 0}, 500, disappear);}
+function goDown(target, disappear) {
+  target.animate({height: 0}, 500, disappear);
+}
 
 function fadeAway() {
-  var self = $('#composingMessageContainer');
-  self.animate({opacity: 0}, 500,
-    partial(goDown, self, partial(disappearance, self)));
+  var target = $('#composingMessageContainer');
+  target.animate({opacity: 0}, 500,
+    partial(goDown, target, partial(disappearance, target)));
 }
 
 function msgText(message, bgcolor) {
@@ -104,10 +106,10 @@ function prefBox() {
 }
 
 function setupHandlers() {
-  on(getElementById('breakdown-selected-items').parentNode, 'click', breakEvt,
+  onclick(getElementById('breakdown-selected-items').parentNode, breakEvt,
     true);
-  on(getElementById('composing-items'), 'click', itemClick);
-  on(getElementById(prefDisableBreakdownPrompts), 'click', togglePref);
+  onclick(getElementById('composing-items'), itemClick);
+  onclick(getElementById(prefDisableBreakdownPrompts), togglePref);
 }
 
 export default function composingBreakdown() {

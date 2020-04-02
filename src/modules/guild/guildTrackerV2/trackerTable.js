@@ -1,4 +1,4 @@
-import './trackerTable.postcss';
+import './trackerTable.css';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 // import on from '../../common/on';

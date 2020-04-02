@@ -1,7 +1,7 @@
-import './injectStoreItems.postcss';
+import './injectStoreItems.css';
 import add from '../../support/task';
+import ajaxSendItems from '../../ajax/ajaxSendItems';
 import batch from '../../common/batch';
-import {daSendItems} from '../../_dataAccess/_dataAccess';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
@@ -15,7 +15,7 @@ import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import moveItemsToFolder from './moveItemsToFolder';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
@@ -126,7 +126,7 @@ function toggleShowExtraLinks() {
   setShowExtraLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
-    batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
+    batch([5, 3, itemsAry, 0, itemWidgets, doneInvPaint]);
   } else {
     itemsAry.forEach(toggleExtraLinks);
   }
@@ -140,7 +140,7 @@ function toggleShowQuickDropLinks() {
   setShowQuickDropLinks();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
-    batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
+    batch([5, 3, itemsAry, 0, itemWidgets, doneInvPaint]);
   } else {
     itemsAry.forEach(toggleDropLinks);
   }
@@ -164,13 +164,13 @@ function selfIds() {
 function evts() {
   return selfIds().concat([
     [
-      function(self) {return self.hasAttribute('linkto');},
-      function(self) {
-        doCheckboxesByType('item', self.getAttribute('linkto'));
+      function(target) {return target.hasAttribute('linkto');},
+      function(target) {
+        doCheckboxesByType('item', target.getAttribute('linkto'));
       }
     ],
     [partial(hasClass, 'sendLink'),
-      partial(quickAction, daSendItems, 'Sent', '.dropLink')],
+      partial(quickAction, ajaxSendItems, 'Sent', '.dropLink')],
     [partial(hasClass, 'dropLink'),
       partial(quickAction, dropItem, 'Dropped', '.sendLink')],
     [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)]
@@ -189,9 +189,9 @@ function inventory(data) {
   colouring = false;
   dropLinks = false;
   sendLinks = false;
-  batch(3, itemsAry, 0, itemWidgets, doneInvPaint);
+  batch([5, 3, itemsAry, 0, itemWidgets, doneInvPaint]);
   doFolderButtons(data.folders);
-  on(pCC, 'click', eventHandler5(evts()));
+  onclick(pCC, eventHandler5(evts()));
 }
 
 export default function injectStoreItems() {

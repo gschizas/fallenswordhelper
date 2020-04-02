@@ -1,11 +1,11 @@
-import './impWarning.postcss';
+import './impWarning.css';
 import {createSpan} from '../../../common/cElement';
 import {daQuickbuff} from '../../../_dataAccess/_dataAccess';
 import {def_fetch_playerBuffs} from '../../../support/constants';
 import getBuff from './getBuff';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
-import on from '../../../common/on';
+import onclick from '../../../common/onclick';
 import playerName from '../../../common/playerName';
 import quickbuffSuccess from '../../../common/quickbuffSuccess';
 import setText from '../../../common/setText';
@@ -50,7 +50,7 @@ function initImpDiv(containerDiv) {
   insertHtmlBeforeEnd(impDiv, '&nbsp;');
   var recast = createSpan({className: 'xSmallLink', textContent: 'Recast'});
   insertElement(impDiv, recast);
-  on(recast, 'click', recastClick);
+  onclick(recast, recastClick);
 }
 
 function hasImp(containerDiv, imp) {

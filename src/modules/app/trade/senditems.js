@@ -1,13 +1,11 @@
-import ajaxReturnCode from '../../common/ajaxReturnCode';
 import callApp from '../callApp';
-import getValue from '../../system/getValue';
 
-export default function senditems(invIdAry) {
+export default function senditems(user, invIdAry) {
   return callApp({
     cmd: 'trade',
     subcmd: 'senditems',
     xc: window.ajaxXC,
-    target_username: getValue('itemRecipient'),
+    target_username: user,
     items: invIdAry
-  }).then(ajaxReturnCode);
+  });
 }

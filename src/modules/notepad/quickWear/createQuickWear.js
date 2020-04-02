@@ -1,4 +1,4 @@
-import './createQuickWear.postcss';
+import './createQuickWear.css';
 import calf from '../../support/calf';
 import {cdn} from '../../system/system';
 import insertElement from '../../common/insertElement';

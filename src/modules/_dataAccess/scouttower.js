@@ -63,7 +63,7 @@ function contributors(e) {
 }
 
 function testTitan(e) {
-  return Object.assign(common(e), location(e), contributors(e));
+  return {...common(e), ...location(e), ...contributors(e)};
 }
 
 function parseReport(html) {

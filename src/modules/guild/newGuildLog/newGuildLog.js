@@ -1,4 +1,4 @@
-import './newGuildLog.postcss';
+import './newGuildLog.css';
 import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
 import addLogColoring from '../../logs/addLogColoring';
 import all from '../../common/all';
@@ -16,7 +16,7 @@ import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
@@ -188,8 +188,8 @@ function toggle(item, hide, r) {
   toggleForce(r[6], hide);
 }
 
-function toggleItem(self) {
-  var item = Number(self.getAttribute('item'));
+function toggleItem(target) {
+  var item = Number(target.getAttribute('item'));
   options.checks[item] = !options.checks[item];
   storeOptions();
   tmpGuildLog.forEach(partial(toggle, item, !options.checks[item]));
@@ -233,7 +233,7 @@ function refresh() {
 
 function guildLogEvents() {
   return [
-    [function(self) {return self.tagName === 'INPUT';}, toggleItem],
+    [function(target) {return target.tagName === 'INPUT';}, toggleItem],
     [selfIdIs('fshAll'), selectAll],
     [selfIdIs('fshNone'), selectNone],
     [selfIdIs('rfsh'), refresh]
@@ -259,7 +259,7 @@ function gotOptions(guildLog) {
   setOpts(guildLog);
   pCC.innerHTML = guildLogFilter;
   getElements();
-  on(fshNewGuildLog, 'click', eventHandler5(guildLogEvents()));
+  onclick(fshNewGuildLog, eventHandler5(guildLogEvents()));
   setChecks();
   setMaxPage();
   getGuildLogPage(1).then(processFirstPage);

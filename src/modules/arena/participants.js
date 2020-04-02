@@ -1,4 +1,4 @@
-import './participants.postcss';
+import './participants.css';
 import currentGuildId from '../common/currentGuildId';
 import {isArray} from '../common/isArray';
 import isObject from '../common/isObject';

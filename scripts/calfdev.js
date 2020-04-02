@@ -1,10 +1,12 @@
 import uglyCalf from './uglyCalf';
 
-const localhttp = require('./config.json').localhttp;
+const port = require('./config.json').port;
 
 export default uglyCalf(
   'dev',
-  `${localhttp}dist/dev/calfSystem.css`,
-  true,
-  true
+  {
+    _BETA: true,
+    _CSSPATH: `https://localhost:${port}/dist/dev/`,
+    _DEV: true
+  }
 );

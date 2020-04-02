@@ -1,4 +1,4 @@
-import './guildTracker.postcss';
+import './guildTracker.css';
 import {def_enableGuildActivityTracker} from '../../support/constants';
 import fshTabbedModal from '../../dialog/fshTabbedModal';
 import getValue from '../../system/getValue';

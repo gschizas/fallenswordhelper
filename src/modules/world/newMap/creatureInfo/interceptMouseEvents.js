@@ -45,24 +45,24 @@ function getJson(passback, event, api) { // jQuery.min
   return 'Loading...';
 }
 
-function makeMouseOver(self, listItem) {
+function makeMouseOver(target, listItem) {
   sendEvent('NewMap', 'CreatureInfo');
   var passback = getIndex(listItem);
-  self.classList.add('fshTip');
-  setQTip(self, partial(getJson, passback));
+  target.classList.add('fshTip');
+  setQTip(target, partial(getJson, passback));
 }
 
-function isViewCreature(self, listItem) {
-  return hasClasses(creatureViewTests, self) && !hasClass('fshTip', self) &&
+function isViewCreature(target, listItem) {
+  return hasClasses(creatureViewTests, target) && !hasClass('fshTip', target) &&
     hasClass('creature', listItem);
 }
 
 function moEvt(evt) {
   if (!calf.showCreatureInfo) {return;}
-  var self = evt.target;
-  var listItem = self.parentNode.parentNode.parentNode;
-  if (isViewCreature(self, listItem)) {
-    makeMouseOver(self, listItem);
+  var target = evt.target;
+  var listItem = target.parentNode.parentNode.parentNode;
+  if (isViewCreature(target, listItem)) {
+    makeMouseOver(target, listItem);
   }
 }
 

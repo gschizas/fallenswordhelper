@@ -1,4 +1,4 @@
-import './newMap.postcss';
+import './newMap.css';
 import {buffInfo} from './buffInfo/buffInfo';
 import combatLogger from './combatLogger';
 import {createStyle} from '../../common/cElement';
@@ -12,8 +12,8 @@ import injectRelic from './relic/relic';
 import {injectSendGoldOnWorld} from './sendGold';
 import insertElement from '../../common/insertElement';
 import {interceptMouseEvents} from './creatureInfo/interceptMouseEvents';
-import on from '../../common/on';
 import onWorld from './onWorld';
+import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import prepareShop from './shop';
 //#if _DEV  //  hide titan combat results
@@ -129,7 +129,7 @@ function fixDebuffQTip(e) {
 }
 
 function fixDebuff() {
-  on(getElementById('buffList'), 'click', fixDebuffQTip);
+  onclick(getElementById('buffList'), fixDebuffQTip);
 }
 
 export default function subscribes() {

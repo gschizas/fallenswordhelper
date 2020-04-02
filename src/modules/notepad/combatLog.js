@@ -1,7 +1,7 @@
 import {getElementById} from '../common/getElement';
 import jConfirm from '../common/jConfirm';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import {get, set} from '../system/idb';
 
@@ -52,8 +52,8 @@ function gotCombatLog(data) {
     '</tr>' + yuuzParser + '</table></div>' +
     '</form>';
   textArea = getElementById('combatLog');
-  on(getElementById('copyLog'), 'click', notepadCopyLog);
-  on(getElementById('clearLog'), 'click', notepadClearLog);
+  onclick(getElementById('copyLog'), notepadCopyLog);
+  onclick(getElementById('clearLog'), notepadClearLog);
 }
 
 export default function injectNotepadShowLogs(injector) { // jQuery.min

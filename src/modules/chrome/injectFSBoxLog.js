@@ -10,7 +10,7 @@ import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {sendEvent} from '../support/fshGa';
 import {get, set} from '../system/idb';
 
@@ -51,7 +51,7 @@ function fSBoxExists(node) {
     className: 'fshYellow',
     innerHTML: '[ <span class="fshLink">Log</span> ]'
   });
-  on(log, 'click', openDialog);
+  onclick(log, openDialog);
   insertElement(nodediv, log);
 }
 

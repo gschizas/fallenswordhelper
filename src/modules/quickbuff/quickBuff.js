@@ -7,13 +7,13 @@ import getProfile from '../ajax/getProfile';
 import getSustain from './getSustain';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import quickActivate from './quickActivate';
 import {quickBuffHeader} from './assets';
 
 function setupEventHandlers() {
-  on(getElementById('helperQBheader'), 'click', quickActivate);
-  on(getElementById('players'), 'click', addBuffLevels);
+  onclick(getElementById('helperQBheader'), quickActivate);
+  onclick(getElementById('players'), addBuffLevels);
 }
 
 export default function injectQuickBuff() { // jQuery.min

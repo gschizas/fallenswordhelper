@@ -1,4 +1,4 @@
-import './guideButtons.postcss';
+import './guideButtons.css';
 import {guideUrl} from '../support/constants';
 
 export default function guideButtons(questID, questName) {

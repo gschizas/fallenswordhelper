@@ -1,5 +1,5 @@
 import dontPost from '../common/dontPost';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import querySelector from '../common/querySelector';
 
 function updateUrl(evt) {
@@ -8,5 +8,5 @@ function updateUrl(evt) {
 }
 
 export default function allowBack() {
-  on(querySelector('input[type="submit"]'), 'click', updateUrl);
+  onclick(querySelector('input[type="submit"]'), updateUrl);
 }

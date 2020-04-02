@@ -1,4 +1,4 @@
-import './bioWidgets.postcss';
+import './bioWidgets.css';
 import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
 import {getElementById} from '../../common/getElement';
@@ -7,6 +7,7 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
 import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import renderBio from './render';
 import setValue from '../../system/setValue';
@@ -103,7 +104,7 @@ function bioHeight() {
     value: 'Update Rows To Show',
     type: 'button'
   });
-  on(saveLines, 'click', changeHeight);
+  onclick(saveLines, changeHeight);
   insertElement(bioEditLinesDiv, saveLines);
   insertElement(pCC, bioEditLinesDiv);
 }
@@ -123,7 +124,7 @@ export default function injectBioWidgets() {
   bioHeight();
   textArea.rows = bioEditLines;
   if (calf.cmd === 'profile') {
-    on(textArea.parentNode, 'click', bioEvtHdl);
+    onclick(textArea.parentNode, bioEvtHdl);
   }
   on(textArea, 'keyup', updateBioCharacters);
   // Force the preview area to render

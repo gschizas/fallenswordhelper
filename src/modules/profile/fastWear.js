@@ -6,7 +6,7 @@ import {getElementById} from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import {sendEvent} from '../support/fshGa';
@@ -46,11 +46,12 @@ function actionResult(ary, data) {
 
 function fastAction(theBackpack, evt, action, result) { // jQuery.min
   sendEvent('profile', 'fastAction - ' + result);
-  var self = evt.target;
-  var invId = self.parentNode.parentNode.children[0].dataset.inv;
-  setText('', self);
-  self.className = 'fastAction fshSpinner fshSpinner12';
-  action(invId).then(partial(actionResult, [theBackpack, result, self, invId]));
+  var target = evt.target;
+  var invId = target.parentNode.parentNode.children[0].dataset.inv;
+  setText('', target);
+  target.className = 'fastAction fshSpinner fshSpinner12';
+  action(invId).then(
+    partial(actionResult, [theBackpack, result, target, invId]));
 }
 
 function evtHdl(theBackpack, evt) {
@@ -72,25 +73,25 @@ function actionText(usable) {
   return 'Wear';
 }
 
-function drawButtons(self, theSpan) {
+function drawButtons(bp, theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = createDiv({
     className: 'fastDiv',
     innerHTML: '<span class="sendLink fastAction ' + actionClass(toUse) + '">' +
       actionText(toUse) + '</span>'
   });
-  if (self.options.checkboxesEnabled) {
+  if (bp.options.checkboxesEnabled) {
     insertElement(myDiv,
       theSpan.parentNode.nextElementSibling.nextElementSibling);
   }
   insertElement(theSpan.parentNode.parentNode, myDiv);
 }
 
-function fastWearLinks(self) {
+function fastWearLinks(bp) {
   var items = querySelectorArray(
-    '#backpackTab_' + self.type.toString() +
+    '#backpackTab_' + bp.type.toString() +
     ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
-  items.forEach(partial(drawButtons, self));
+  items.forEach(partial(drawButtons, bp));
 }
 
 function updateSrc(img, gif) {
@@ -122,7 +123,7 @@ function foundBackpack(backpackContainer, theBackpack) {
   if (getText(getElementById('backpack_current')).length !== 0) {
     add(3, fastWearLinks, [theBackpack]);
   }
-  on(backpackContainer, 'click', partial(evtHdl, theBackpack));
+  onclick(backpackContainer, partial(evtHdl, theBackpack));
 }
 
 function initialiseFastWear() {

@@ -1,11 +1,11 @@
-import './guildReport.postcss';
+import './guildReport.css';
 import {cdn} from '../../system/system';
 import classHandler from '../../common/classHandler';
 import classPair from '../../common/classPair';
 import equipItem from '../../ajax/equipItem';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import itemId from './itemId';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import {playerIDRE} from '../../support/constants';
@@ -25,8 +25,8 @@ function wornItem(theTd) {
   theTd.innerHTML = '<span class="fastWorn">Worn</span>';
 }
 
-function replyTo(self) {
-  window.openQuickMsgDialog(self.getAttribute('target_player'));
+function replyTo(target) {
+  window.openQuickMsgDialog(target.getAttribute('target_player'));
 }
 
 function targetPlayerId(href) {
@@ -76,12 +76,12 @@ var subClass = [
   ['fast-wear', doFastWear]
 ];
 
-function doFastRecall(self) {
-  var theTd = self.parentNode.parentNode;
+function doFastRecall(target) {
+  var theTd = target.parentNode.parentNode;
   if (!theTd) {return;}
   var href = theTd.children[0].href;
   if (!href) {return;}
-  subClass.find(partial(classPair, self))[1](theTd, href);
+  subClass.find(partial(classPair, target))[1](theTd, href);
   theTd.innerHTML = spinner;
 }
 
@@ -91,5 +91,5 @@ var classEvts = [
 ];
 
 export default function eventHandlers() {
-  on(getElementsByTagName('table', pCC)[1], 'click', classHandler(classEvts));
+  onclick(getElementsByTagName('table', pCC)[1], classHandler(classEvts));
 }

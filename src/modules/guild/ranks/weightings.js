@@ -4,7 +4,7 @@ import getText from '../../common/getText';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import replaceChild from '../../common/replaceChild';
@@ -68,7 +68,7 @@ function injectWeightButton(theRows, addNewRank) {
     type: 'button',
     value: 'Get Rank Weightings'
   });
-  on(weightButton, 'click',
+  onclick(weightButton,
     partial(fetchRankData, theRows, weightButton));
   var theTd = addNewRank.parentNode.parentNode;
   insertHtmlBeforeEnd(theTd, '&nbsp;');

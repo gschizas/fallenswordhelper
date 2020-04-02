@@ -13,7 +13,7 @@ import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import jQueryDialog from '../../chrome/jQueryDialog';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {sendEvent} from '../../support/fshGa';
 
 var buttonLabels = [
@@ -41,18 +41,18 @@ function addDelBtn(el) {
     '<span class="compDelBtn">Del</span>');
 }
 
-function enableDelComponent(self) {
+function enableDelComponent(target) {
   sendEvent('components', 'enableDelComponent');
-  var quickDelDiv = self.parentNode;
+  var quickDelDiv = target.parentNode;
   hideElement(quickDelDiv);
   var cmDiv = quickDelDiv.parentNode;
   insertElement(cmDiv, decorateButton('Delete All Visible'));
   getArrayByTagName('img', getInvTable()).forEach(addDelBtn);
 }
 
-function delAllComponent(self) {
+function delAllComponent(target) {
   sendEvent('components', 'delAllComponent');
-  var thisInvTable = self.parentNode.parentNode.parentNode.children[0];
+  var thisInvTable = target.parentNode.parentNode.parentNode.children[0];
   getArrayByClassName('compDelBtn', thisInvTable).forEach(clickThis);
 }
 
@@ -68,7 +68,7 @@ var classEvts = [
 function addComposingButtons(thisInvTable) {
   var compDiv = thisInvTable.parentNode;
   insertElement(compDiv, componentBtnContainer());
-  on(compDiv, 'click', classHandler(classEvts));
+  onclick(compDiv, classHandler(classEvts));
 }
 
 export default function components() {

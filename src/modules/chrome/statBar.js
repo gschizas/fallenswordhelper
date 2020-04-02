@@ -2,7 +2,7 @@ import {createAnchor} from '../common/cElement';
 import {getElementById} from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {
   blacksmithUrl,
   cmdUrl,
@@ -23,7 +23,7 @@ function statbarWrapper(href, id) {
   var statWrapper = character.parentNode;
   insertElement(myWrapper, character);
   insertElementAfterBegin(statWrapper, myWrapper);
-  on(myWrapper, 'click', preventHcs, true);
+  onclick(myWrapper, preventHcs, true);
 }
 
 export default function statbar() {

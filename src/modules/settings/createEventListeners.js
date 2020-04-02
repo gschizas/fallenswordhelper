@@ -5,7 +5,7 @@ import injectNotepadShowLogs from '../notepad/combatLog';
 import insertElement from '../common/insertElement';
 import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import querySelector from '../common/querySelector';
 import saveBoxes from './saveBoxes.json';
 import {sendEvent} from '../support/fshGa';
@@ -96,13 +96,13 @@ function doTickAll() {
     className: 'fshLink',
     textContent: 'Tick all buffs'
   });
-  on(tickAll, 'click', toggleTickAllBuffs);
+  onclick(tickAll, toggleTickAllBuffs);
   var inject = getElementById('settingsTabs-4').children[0].rows[0].cells[0];
   insertElement(inject, createBr());
   insertElement(inject, tickAll);
 }
 
-function listener(el) {on(getElementById(el[0]), 'click', el[1]);}
+function listener(el) {onclick(getElementById(el[0]), el[1]);}
 
 function clickHandlers() {
   [
@@ -113,7 +113,7 @@ function clickHandlers() {
   ].forEach(listener);
 }
 
-function toggleListener(id) {on(getElementById(id), 'click', toggleVisibilty);}
+function toggleListener(id) {onclick(getElementById(id), toggleVisibilty);}
 
 function onVisibilityToggle() {
   [

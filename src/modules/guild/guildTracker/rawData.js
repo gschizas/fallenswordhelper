@@ -1,10 +1,10 @@
-import './rawData.postcss';
+import './rawData.css';
 import add from '../../support/task';
 import dialogMsg from '../../common/dialogMsg';
 import {initTable} from './trackerTable';
 import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import {set} from '../../system/idb';
 import {
@@ -52,7 +52,7 @@ function customButton(text, fn) {
     className: 'custombutton',
     textContent: text
   });
-  on(btn, 'click', fn);
+  onclick(btn, fn);
   return btn;
 }
 

@@ -2,7 +2,7 @@ import {dataRows} from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import openQuickBuffByName from '../common/openQuickBuffByName';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
@@ -67,7 +67,7 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   lastCheckUtc = getLastCheck(lastCheckScreen);
   dataRows(chatTable.rows, 3, 0)
     .forEach(partial(rowColor, logScreen, dateColumn));
-  on(chatTable, 'click', handleClick);
+  onclick(chatTable, handleClick);
   setValue(lastCheckScreen, nowUtc);
 }
 

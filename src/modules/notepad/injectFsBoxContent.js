@@ -1,7 +1,7 @@
 import {getElementById} from '../common/getElement';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import {get, set} from '../system/idb';
 
@@ -25,5 +25,5 @@ export default function injectFsBoxContent(injector) { // jQuery.min
     divId: 'fsboxdetail'
   });
   get('fsh_fsboxcontent').then(inject);
-  on(getElementById('fsboxclear'), 'click', clearFsBox, true);
+  onclick(getElementById('fsboxclear'), clearFsBox, true);
 }

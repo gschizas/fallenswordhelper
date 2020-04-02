@@ -5,7 +5,7 @@ import {getElementById} from '../../common/getElement';
 import jQueryPresent from '../../common/jQueryPresent';
 import {keys} from '../../common/keys';
 import numberSort from '../../system/numberSort';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import {pCC} from '../../support/layout';
 import partial from '../../common/partial';
 import stringSort from '../../system/stringSort';
@@ -98,7 +98,7 @@ function drawTable() {
     '<th class="fshCenter">HP</th>' +
     '<th class="fshCenter">Enhancements</th>' +
     '</tr></thead><tbody id="entityTableOutput"></tbody></table>';
-  on(content, 'click', doHandlers);
+  onclick(content, doHandlers);
 }
 
 function prepMonster(data) {

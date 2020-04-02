@@ -1,4 +1,4 @@
-import './newGuildLog5.postcss';
+import './newGuildLog5.css';
 import add from '../../support/task';
 import {createTable} from '../../common/cElement';
 import {get} from '../../system/idb';

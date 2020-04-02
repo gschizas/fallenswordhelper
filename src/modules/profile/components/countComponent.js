@@ -56,16 +56,16 @@ function makeTallyTable(data) {
   return tbl;
 }
 
-function displayComponentTally(self, data) {
+function displayComponentTally(target, data) {
   if (!isArray(data.r)) {return;}
-  var sumComp = self.parentNode;
+  var sumComp = target.parentNode;
   if (sumComp) {
     sumComp.innerHTML = '';
     insertElement(sumComp, makeTallyTable(data));
   }
 }
 
-export default function countComponent(self) { // jQuery.min
+export default function countComponent(target) { // jQuery.min
   sendEvent('components', 'countComponent');
-  daComponents().then(partial(displayComponentTally, self));
+  daComponents().then(partial(displayComponentTally, target));
 }

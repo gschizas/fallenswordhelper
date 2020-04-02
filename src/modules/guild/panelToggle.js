@@ -3,7 +3,7 @@ import getValue from '../system/getValue';
 import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import toggleVisibilty from '../common/toggleVisibilty';
 
 function makeButton(linkto) {
@@ -26,7 +26,7 @@ function thisToggle(inject, panel, linkto) {
   insertElement(inject, wrapper(thisButton));
   panel.id = linkto;
   if (getValue(linkto)) {hideElement(panel);}
-  on(thisButton, 'click', toggleVisibilty);
+  onclick(thisButton, toggleVisibilty);
 }
 
 export function logoToggle(leftHandSideColumnTable) {

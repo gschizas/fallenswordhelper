@@ -1,4 +1,4 @@
-import './mailbox.postcss';
+import './mailbox.css';
 import chunk from '../common/chunk';
 import {daMailboxTake} from '../_dataAccess/_dataAccess';
 import {entries} from '../common/entries';
@@ -10,8 +10,8 @@ import {isArray} from '../common/isArray';
 import {itemRE} from '../support/constants';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonFail from '../common/jsonFail';
-import on from '../common/on';
 import once from '../common/once';
+import onclick from '../common/onclick';
 import outputResult from '../common/outputResult';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
@@ -115,10 +115,10 @@ function doTakeItem(takeResult, el) {
   daMailboxTake(el).then(partial(doneTake, takeResult));
 }
 
-function takeSimilar(itemList, takeResult, self) { // jQuery.min
-  var type = self.dataset.id;
+function takeSimilar(itemList, takeResult, target) { // jQuery.min
+  var type = target.dataset.id;
   var invIds = itemList[type].invIds;
-  self.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
+  target.parentNode.innerHTML = 'taking all ' + invIds.length + ' items';
   chunk(40, invIds).forEach(partial(doTakeItem, takeResult));
 }
 
@@ -132,7 +132,7 @@ function makeItemTable(itemList, qt, takeResult) {
   var itemTbl = createDiv({className: 'fshTakeGrid'});
   makeItemBoxes(itemTbl, itemList);
   insertElement(qt, itemTbl);
-  on(itemTbl, 'click', partial(clickEvt, itemList, takeResult));
+  onclick(itemTbl, partial(clickEvt, itemList, takeResult));
 }
 
 function makeQtDiv(itemList) {

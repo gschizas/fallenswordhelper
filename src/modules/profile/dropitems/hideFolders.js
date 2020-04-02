@@ -1,3 +1,4 @@
+import batch from '../../common/batch';
 import partial from '../../common/partial';
 import toggleForce from '../../common/toggleForce';
 
@@ -18,6 +19,12 @@ function updateList(invItems, folderId, o) {
   displayFolderItems(invItems, folderId, o);
 }
 
-export default function hideFolders(itemsAry, invItems, self) {
-  itemsAry.forEach(partial(updateList, invItems, Number(self.dataset.folder)));
+export default function hideFolders(itemsAry, invItems, target) {
+  batch([
+    2,
+    3,
+    itemsAry,
+    0,
+    partial(updateList, invItems, Number(target.dataset.folder))
+  ]);
 }

@@ -1,7 +1,7 @@
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
 import {getElementById} from '../common/getElement';
 import hideElement from '../common/hideElement';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
@@ -16,15 +16,15 @@ function bp() {
 }
 
 var elementTests = [
-  function(self) {return self.tagName === 'A';},
-  function(self) {return Boolean(self.href);},
-  function(self) {return self.href.includes('togglesection');}
+  function(target) {return target.tagName === 'A';},
+  function(target) {return Boolean(target.href);},
+  function(target) {return target.href.includes('togglesection');}
 ];
 
-function condition(self, fn) {return fn(self);}
+function condition(target, fn) {return fn(target);}
 
-function isSectionToggle(self) {
-  return elementTests.every(partial(condition, self));
+function isSectionToggle(target) {
+  return elementTests.every(partial(condition, target));
 }
 
 function oldStyleDiv(target) {
@@ -43,24 +43,24 @@ function toggleTarget(target) {
   }
 }
 
-function toggleSection(self) {
-  var sectionId = Number(getCustomUrlParameter(self.href, 'section_id'));
+function toggleSection(target) {
+  var sectionId = Number(getCustomUrlParameter(target.href, 'section_id'));
   if (sectionId === 5) {
     toggleTarget(bp());
   } else {
-    toggleTarget(self.parentNode.parentNode.nextElementSibling);
+    toggleTarget(target.parentNode.parentNode.nextElementSibling);
   }
 }
 
 function testForSection(evt) {
-  var self = evt.target;
-  if (isSectionToggle(self)) {
-    toggleSection(self);
-    retryAjax(self.href);
+  var target = evt.target;
+  if (isSectionToggle(target)) {
+    toggleSection(target);
+    retryAjax(target.href);
     evt.preventDefault();
   }
 }
 
 export default function ajaxifyProfileSections() {
-  on(pCC, 'click', testForSection);
+  onclick(pCC, testForSection);
 }

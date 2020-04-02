@@ -1,5 +1,4 @@
 import all from '../../common/all';
-import {assign} from '../../common/assign';
 import {fromEntries} from '../../common/fromEntries';
 import join from '../../app/arena/join';
 import loadEquipped from '../../app/profile/loadequipped';
@@ -24,11 +23,12 @@ async function buttonPress(e) {
   const pvpId = thisTournament();
   const [equipped, joinData, fsh_arenaJoined] = await all([
     loadEquipped(), join(pvpId), get('fsh_arenaJoined')]);
-  const thisData = assign(
-    {pvpId, joined: nowSecs},
-    mapEquipment(equipped),
-    mapAttribs(joinData)
-  );
+  const thisData = {
+    pvpId,
+    joined: nowSecs,
+    ...mapEquipment(equipped),
+    ...mapAttribs(joinData)
+  };
   const newJoined = fsh_arenaJoined || [];
   newJoined.push(thisData);
   set('fsh_arenaJoined', newJoined);

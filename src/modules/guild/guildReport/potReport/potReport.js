@@ -1,4 +1,4 @@
-import './potReport.postcss';
+import './potReport.css';
 import {createDiv} from '../../../common/cElement';
 import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';
@@ -7,6 +7,7 @@ import insertElement from '../../../common/insertElement';
 import isChecked from '../../../system/isChecked';
 import {keys} from '../../../common/keys';
 import on from '../../../common/on';
+import onclick from '../../../common/onclick';
 import {pCC} from '../../../support/layout';
 import partial from '../../../common/partial';
 import selfIdIs from '../../../common/selfIdIs';
@@ -91,11 +92,11 @@ function doReset(potOpts, potObj, ignore) {
   drawInventory(potOpts, potObj);
 }
 
-function toggleTab(self) {return /^pottab\d$/.test(self.id);}
+function toggleTab(target) {return /^pottab\d$/.test(target.id);}
 
-function saveState(potOpts, self) {
-  var option = self.id;
-  potOpts[option] = self.checked;
+function saveState(potOpts, target) {
+  var option = target.id;
+  potOpts[option] = target.checked;
   set(storeMap, potOpts);
 }
 
@@ -108,10 +109,10 @@ function clickEvents(potOpts, potObj) {
 }
 
 function onInput(potOpts, potObj, e) {
-  var self = e.target.id;
+  var target = e.target.id;
   var maybeValue = testRange(e.target.value, 0, 999);
   if (maybeValue) {
-    potOpts[self] = maybeValue;
+    potOpts[target] = maybeValue;
     set(storeMap, potOpts);
     drawInventory(potOpts, potObj);
   }
@@ -119,7 +120,7 @@ function onInput(potOpts, potObj, e) {
 
 function cellEventHandlers(potOpts, potObj, myCell) {
   on(myCell, 'change', partial(onChange, potOpts, potObj));
-  on(myCell, 'click', eventHandler5(clickEvents(potOpts, potObj)));
+  onclick(myCell, eventHandler5(clickEvents(potOpts, potObj)));
   on(myCell, 'input', partial(onInput, potOpts, potObj));
 }
 

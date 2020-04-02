@@ -1,5 +1,9 @@
 const fs = require('fs');
-const localhttp = require('./config.json').localhttp;
+const port = require('./config.json').port;
+
+const betaProdSourceRoot =
+  'https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/' +
+    `${process.env.npm_package_version}/src`;
 
 function addSourceRoot(file, sourceRoot) {
   const data = fs.readFileSync(file);
@@ -8,10 +12,13 @@ function addSourceRoot(file, sourceRoot) {
   fs.writeFileSync(file, JSON.stringify(json));
 }
 
-const betaProdSourceRoot =
-  'https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/' +
-    `${process.env.npm_package_version}/src`;
+function fixMaps(dir, sourceRoot) {
+  fs.readdir(`dist/${dir}`, (err, items) => {
+    const maps = items.filter(fn => fn.endsWith('.map'));
+    maps.forEach(map => {addSourceRoot(`dist/${dir}/${map}`, sourceRoot);});
+  });
+}
 
-addSourceRoot('dist/dev/calfSystem.min.js.map', `${localhttp}src`);
-addSourceRoot('dist/beta/calfSystem.min.js.map', betaProdSourceRoot);
-addSourceRoot('dist/prod/calfSystem.min.js.map', betaProdSourceRoot);
+fixMaps('dev', `https://localhost:${port}/src`);
+fixMaps('beta', betaProdSourceRoot);
+fixMaps('prod', betaProdSourceRoot);

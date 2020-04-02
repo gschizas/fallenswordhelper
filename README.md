@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/fallenswordhelper/fallenswordhelper.svg?branch=master)](https://travis-ci.org/fallenswordhelper/fallenswordhelper)
 [![Build status](https://ci.appveyor.com/api/projects/status/715kmqrhqvuna3aa/branch/master?svg=true)](https://ci.appveyor.com/project/atompkins/fallenswordhelper/branch/master)
+[![Dependencies Status](https://david-dm.org/fallenswordhelper/fallenswordhelper/status.svg)](https://david-dm.org/fallenswordhelper/fallenswordhelper)
 [![devDependencies Status](https://david-dm.org/fallenswordhelper/fallenswordhelper/dev-status.svg)](https://david-dm.org/fallenswordhelper/fallenswordhelper?type=dev)
 [![codebeat badge](https://codebeat.co/badges/63cac31b-413a-4f54-b445-025c94033b49)](https://codebeat.co/projects/github-com-fallenswordhelper-fallenswordhelper-master)
 [![Code Climate](https://codeclimate.com/github/fallenswordhelper/fallenswordhelper/badges/gpa.svg)](https://codeclimate.com/github/fallenswordhelper/fallenswordhelper)

@@ -8,7 +8,10 @@ import getValue from '../system/getValue';
 import hasClass from '../common/hasClass';
 import insertElementBefore from '../common/insertElementBefore';
 import jsonParse from '../common/jsonParse';
-import on from '../common/on';
+import onclick from '../common/onclick';
+//#if _DEV  //  oneByOne
+import oneByOne from './oneByOne';
+//#endif
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 
@@ -103,7 +106,7 @@ function injectTradeOld() {
       ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
       'class="custominput" value="all" size=3></td>'
   });
-  on(multiple, 'click', toggleAllPlants);
+  onclick(multiple, toggleAllPlants);
   var el = getElementById('item-list').parentNode.parentNode;
   insertElementBefore(multiple, el);
 }
@@ -111,4 +114,7 @@ function injectTradeOld() {
 export default function injectTrade() {
   add(3, doFolders);
   add(3, injectTradeOld);
+  //#if _DEV  //  oneByOne
+  add(3, oneByOne);
+  //#endif
 }

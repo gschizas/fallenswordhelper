@@ -7,7 +7,7 @@ import getElementsByTagName from '../common/getElementsByTagName';
 import injectGuild from './guild';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
@@ -22,11 +22,11 @@ function doCheckAll() {
   querySelectorArray('#pCC input[name="tagIndex[]"]').forEach(clickThis);
 }
 
-function takeResult(self, data) {
+function takeResult(target, data) {
   if (data.s) {
-    self.removeAttribute('style');
-    self.className = 'fshGreen';
-    setText('Taken', self);
+    target.removeAttribute('style');
+    target.className = 'fshGreen';
+    setText('Taken', target);
   }
 }
 
@@ -41,9 +41,9 @@ function fastBp(el) {
 }
 
 function evtHdlr(e) {
-  var self = e.target;
-  if (self.value === 'Check All') {doCheckAll();}
-  if (self.className === 'sendLink') {fastBp(self);}
+  var target = e.target;
+  if (target.value === 'Check All') {doCheckAll();}
+  if (target.className === 'sendLink') {fastBp(target);}
 }
 
 function paintTable() {
@@ -59,7 +59,7 @@ function checkAllBtn() {
 }
 
 function doItemTagging() {
-  on(pCC, 'click', evtHdlr);
+  onclick(pCC, evtHdlr);
   paintTable();
   checkAllBtn();
 }

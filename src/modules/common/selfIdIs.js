@@ -1,7 +1,7 @@
 import partial from './partial';
 
-function idTest(id, self) {
-  return self.id === id;
+function idTest(id, target) {
+  return target.id === id;
 }
 
 export default function selfIdIs(id) {

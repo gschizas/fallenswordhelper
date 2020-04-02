@@ -6,7 +6,7 @@ import getTextTrim from '../common/getTextTrim';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import isObject from '../common/isObject';
 import jQueryPresent from '../common/jQueryPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 
 function looksLikeTopRated() {
@@ -23,7 +23,7 @@ function looksLikeTopRated() {
     }
   });
   insertElementAfterBegin(theCell, findBtn);
-  on(findBtn, 'click', findOnlinePlayers);
+  onclick(findBtn, findOnlinePlayers);
 }
 
 var topRatedTests = [

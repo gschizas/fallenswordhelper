@@ -43,7 +43,7 @@ function fromRow(row) {
 }
 
 function formatRow(row, i) {
-  return Object.assign({rank_index: i}, fromTip(row), fromRow(row));
+  return {rank_index: i, ...fromTip(row), ...fromRow(row)};
 }
 
 function byRank(prev, member) {

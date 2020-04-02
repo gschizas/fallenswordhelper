@@ -6,7 +6,7 @@ import getValue from '../system/getValue';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryPresent from '../common/jQueryPresent';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import {pCC} from '../support/layout';
 import parseComposing from './parseComposing';
 import querySelectorArray from '../common/querySelectorArray';
@@ -32,18 +32,18 @@ function isOurTarget(target) {
   return target.tagName === 'SPAN' && target.className === 'quickCreate';
 }
 
-function doQuickCreate(self) {
-  var temp = self.previousElementSibling.previousElementSibling;
+function doQuickCreate(target) {
+  var temp = target.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
-    backgroundCreate(self, temp);
+    backgroundCreate(target, temp);
     sendEvent('composing', 'QuickCreate');
   }
 }
 
 function quickCreate(evt) {
-  var self = evt.target.parentNode;
-  if (isOurTarget(self)) {
-    doQuickCreate(self);
+  var target = evt.target.parentNode;
+  if (isOurTarget(target)) {
+    doQuickCreate(target);
   }
 }
 
@@ -51,7 +51,7 @@ function hasJQuery() {
   parseComposing();
   querySelectorArray('input[id^=create-]:not(#create-multi)', pCC)
     .forEach(injectButton);
-  on(pCC, 'click', quickCreate);
+  onclick(pCC, quickCreate);
   moveButtons();
   fastCompose();
 }

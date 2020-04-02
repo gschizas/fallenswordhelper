@@ -2,7 +2,7 @@ import insertAfterParent from './insertAfterParent';
 import insertElement from '../../common/insertElement';
 import insertElementAfter from '../../common/insertElementAfter';
 import jQueryDialog from '../jQueryDialog';
-import on from '../../common/on';
+import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import {sendEvent} from '../../support/fshGa';
 import {createAnchor, createLi} from '../../common/cElement';
@@ -22,7 +22,7 @@ export default function anchorButton(navLvl, text, fn, target) {
     className: 'nav-link fshPoint',
     textContent: text
   });
-  on(al, 'click', partial(openDialog, text, fn));
+  onclick(al, partial(openDialog, text, fn));
   insertElement(li, al);
   insertAfterParent(target, insertAdjElement, li);
 }

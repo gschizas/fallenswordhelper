@@ -4,7 +4,7 @@ import {getElementById} from '../common/getElement';
 import getValue from '../system/getValue';
 import hideQTip from '../common/hideQTip';
 import jConfirm from '../common/jConfirm';
-import on from '../common/on';
+import onclick from '../common/onclick';
 import partial from '../common/partial';
 import {sendEvent} from '../support/fshGa';
 
@@ -23,8 +23,8 @@ function doDebuff(aLink) { // jQuery.min
 }
 
 function doPrompt(aLink) {
-  var onclick = aLink.getAttribute('onclick');
-  var warn = onclick
+  var hcsOnclick = aLink.getAttribute('onclick');
+  var warn = hcsOnclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
   jConfirm('Remove Skill', warn, partial(doDebuff, aLink));
 }
@@ -52,6 +52,6 @@ export default function fastDebuff() {
   var profileRightColumn = getElementById('profileRightColumn');
   if (profileRightColumn) {
     disableDeactivatePrompts = getValue('disableDeactivatePrompts');
-    on(profileRightColumn.lastElementChild, 'click', interceptDebuff, true);
+    onclick(profileRightColumn.lastElementChild, interceptDebuff, true);
   }
 }

@@ -15,20 +15,20 @@ function updateComponentCounts(itemId) {
   setText(count, countDom);
 }
 
-function compDeleted(self, itemId, data) {
+function compDeleted(target, itemId, data) {
   if (data.s) {
     updateComponentCounts(itemId);
     updateUsedCount(1);
-    if (self.parentNode) {self.parentNode.innerHTML = '';}
+    if (target.parentNode) {target.parentNode.innerHTML = '';}
   }
 }
 
-export default function delComponent(self) { // jQuery.min
-  var tipped = self.parentNode.children[0].children[0].dataset.tipped;
+export default function delComponent(target) { // jQuery.min
+  var tipped = target.parentNode.children[0].children[0].dataset.tipped;
   var matches = tipped.match(itemRE);
   var itemId = matches[1];
   var componentId = matches[2];
   daDestroyComponent([componentId])
     .then(errorDialog)
-    .then(partial(compDeleted, self, itemId));
+    .then(partial(compDeleted, target, itemId));
 }
