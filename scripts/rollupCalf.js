@@ -7,21 +7,21 @@ import postcss from 'rollup-plugin-postcss';
 import postcssNesting from 'postcss-nesting';
 import resolve from '@rollup/plugin-node-resolve';
 
-export default function rollupCalf(file, jsccValues) {
+export default function rollupCalf(dir, entryFileNames, jsccValues) {
   return {
     input: 'src/calfSystem.js',
     output: {
-      file: file,
+      dir,
+      entryFileNames,
       format: 'es',
       sourcemap: true,
-      sourcemapExcludeSources: true,
-      sourcemapFile: 'src/calfSystem.js.map'
+      sourcemapExcludeSources: true
     },
     plugins: [
       copy({
         targets: [{
           src: 'src/styles/dataTables.css',
-          dest: file.replace('.min', '').replace('/calfSystem.js', '')
+          dest: dir
         }],
         copyOnce: true
       }),
@@ -30,7 +30,7 @@ export default function rollupCalf(file, jsccValues) {
       json({compact: true}),
       postcss({
         extensions: ['.css', '.postcss'],
-        extract: file.replace('.min', '').replace('.js', '.css'),
+        extract: `${dir}calfSystem.css`,
         plugins: [postcssNesting(), cssnano()]
       })
     ]

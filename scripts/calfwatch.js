@@ -1,3 +1,4 @@
+import del from 'rollup-plugin-delete';
 import rollupCalf from './rollupCalf';
 import serve from 'rollup-plugin-serve';
 
@@ -6,7 +7,8 @@ const port = require('./config.json').port;
 const outPath = 'dist/watch/';
 
 const options = rollupCalf(
-  `${outPath}calfSystem.js`,
+  outPath,
+  '[name].js',
   {
     _BETA: true,
     _CSSPATH: `https://localhost:${port}/${outPath}`,
@@ -23,6 +25,13 @@ options.plugins.push(serve({
     cert: fs.readFileSync('cert.crt')
   },
   port
+}));
+
+options.plugins.push(del({
+  targets: [
+    `${outPath}*`,
+    `!${outPath}fallenswordhelper.user.js`
+  ]
 }));
 
 export default options;

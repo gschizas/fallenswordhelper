@@ -3,9 +3,9 @@
 const fs = require('fs');
 const gzipSize = require('gzip-size');
 
-function getCalfSize(outdir) {
-  const file = `dist/${outdir}/calfSystem.min.js`;
+const calfFiles = fn => fn.startsWith('calfSystem-') && fn.endsWith('.js');
 
+function getFileSize(file) {
   const stats = fs.statSync(file);
   const fileSizeInKilobytes = Math.round(stats.size / 10.24) / 100;
   console.log(`${file}: ${fileSizeInKilobytes}KB (no compression)`);
@@ -13,6 +13,13 @@ function getCalfSize(outdir) {
   const gsize = gzipSize.fileSync(file, {level: 5});
   const gSizeInKilobytes = Math.round(gsize / 10.24) / 100;
   console.log(`${file}: ${gSizeInKilobytes}KB (gzip)\n`);
+}
+
+function getCalfSize(dir) {
+  fs.readdir(`dist/${dir}`, (err, items) => {
+    const files = items.filter(calfFiles);
+    files.forEach(fn => {getFileSize(`dist/${dir}/${fn}`);});
+  });
 }
 
 getCalfSize('dev');
