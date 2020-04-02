@@ -30,6 +30,7 @@ options.plugins.push(serve({
 options.plugins.push(del({
   targets: [
     `${outPath}*`,
+    `!${outPath}dataTables.css`,
     `!${outPath}fallenswordhelper.user.js`
   ]
 }));

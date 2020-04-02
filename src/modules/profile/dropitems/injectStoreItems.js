@@ -104,7 +104,7 @@ function beforeend(o, item) {
 
 function itemWidgets(o) {
   var item = invItems[o.invid];
-  if (item) {
+  if (item) { // Why does this happen?
     afterbegin(o, item);
     beforeend(o, item);
   }
@@ -196,6 +196,6 @@ function inventory(data) {
 
 export default function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
-  getInventoryById().then(inventory);
+  getInventoryById().then(inventory); // change this?
   add(3, getItems);
 }
