@@ -8609,8 +8609,16 @@ function toObject(prev, curr) {
 }
 
 function rekeyInventory(data) {
-  data.items = data.items.reduce(toObject, {});
-  return data;
+  // console.log(JSON.parse(JSON.stringify(data)));
+  // data.items = data.items.reduce(toObject, {});
+  const thisItems = data.items.reduce(toObject, {});
+  if ([563116, 1963510].includes(playerId())) {
+    console.log(data.items.length, entries(thisItems).length); // eslint-disable-line no-console
+  }
+  return {
+    items: thisItems,
+    folders: data.folders
+  };
 }
 
 function getInventoryById() {
@@ -12002,7 +12010,7 @@ function injectScouttower() { // jQuery.min
 }
 
 function dropItemLoader() {
-  import('./injectProfileDropItems-75a8c8f0.js').then(m => m.default());
+  import('./injectProfileDropItems-c50a3886.js').then(m => m.default());
 }
 
 function doItemTable(checkbox) {
@@ -23812,7 +23820,7 @@ function setVer(fshVer, gmInfo) {
   } else {
     calf.fshVer = `${fshVer}_native`;
   }
-  calf.calfVer = '3';
+  calf.calfVer = '4';
 }
 
 // main event dispatcher
@@ -23826,5 +23834,5 @@ function dispatch(fshVer, gmInfo) {
   end('JS Perf', 'FSH.dispatch');
 }
 
-export { itemRE as A, addStatTotalToMouseover as B, jQueryNotPresent as C, getInventoryById as D, add as E, fallback as F, ahSearchUrl as G, guideUrl as H, def_subcmd as I, rarity as J, insertHtmlBeforeEnd as K, selfIdIs as L, hasClass as M, ajaxSendItems as N, dropItem as O, onclick as P, eventHandler5 as Q, getArrayByTagName as a, getText as b, partial as c, dispatch as d, def_table as e, insertHtmlAfterBegin as f, getElementsByTagName as g, calf as h, insertHtmlAfterEnd as i, createTr as j, createTd as k, insertElement as l, insertElementBefore as m, makeFolderSpans$1 as n, batch as o, pCC as p, isArray as q, daSendToFolder as r, getElementById as s, toggleForce as t, chunk as u, cdn as v, querySelector as w, hideQTip as x, setValue as y, getValue as z };
-//# sourceMappingURL=calfSystem-34274e5c.js.map
+export { setValue as A, getValue as B, itemRE as C, addStatTotalToMouseover as D, jQueryNotPresent as E, getInventoryById as F, add as G, fallback as H, ahSearchUrl as I, guideUrl as J, def_subcmd as K, rarity as L, insertHtmlBeforeEnd as M, selfIdIs as N, hasClass as O, ajaxSendItems as P, dropItem as Q, onclick as R, eventHandler5 as S, getArrayByTagName as a, getText as b, partial as c, dispatch as d, def_table as e, insertHtmlAfterBegin as f, getElementsByTagName as g, calf as h, insertHtmlAfterEnd as i, createTr as j, createTd as k, insertElement as l, insertElementBefore as m, makeFolderSpans$1 as n, playerId as o, pCC as p, entries as q, batch as r, isArray as s, toggleForce as t, daSendToFolder as u, getElementById as v, chunk as w, cdn as x, querySelector as y, hideQTip as z };
+//# sourceMappingURL=calfSystem-aa4abd33.js.map
