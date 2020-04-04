@@ -1,4 +1,4 @@
-import { g as getElementsByTagName, p as pCC, a as getArrayByTagName, i as insertHtmlAfterEnd, b as getText, c as partial, e as def_table, f as insertHtmlAfterBegin, h as calf, j as createTr, k as createTd, l as insertElement, m as insertElementBefore, n as makeFolderSpans, o as playerId, t as toggleForce, q as entries, r as batch, s as isArray, u as daSendToFolder, v as getElementById, w as chunk, x as cdn, y as querySelector, z as hideQTip, A as setValue, B as getValue, C as itemRE, D as addStatTotalToMouseover, E as jQueryNotPresent, F as getInventoryById, G as add, H as fallback, I as ahSearchUrl, J as guideUrl, K as def_subcmd, L as rarity, M as insertHtmlBeforeEnd, N as selfIdIs, O as hasClass, P as ajaxSendItems, Q as dropItem, R as onclick, S as eventHandler5 } from './calfSystem-aa4abd33.js';
+import { g as getElementsByTagName, p as pCC, a as getArrayByTagName, i as insertHtmlAfterEnd, b as getText, c as partial, e as def_table, f as insertHtmlAfterBegin, h as calf, j as createTr, k as createTd, l as insertElement, m as insertElementBefore, n as makeFolderSpans, t as toggleForce, o as batch, q as isArray, r as daSendToFolder, s as getElementById, u as chunk, v as cdn, w as querySelector, x as hideQTip, y as setValue, z as getValue, A as itemRE, B as addStatTotalToMouseover, C as jQueryNotPresent, D as getInventoryById, E as add, F as fallback, G as ahSearchUrl, H as guideUrl, I as def_subcmd, J as rarity, K as insertHtmlBeforeEnd, L as sendException, M as selfIdIs, N as hasClass, O as ajaxSendItems, P as dropItem, Q as onclick, R as eventHandler5 } from './calfSystem-d8d0244e.js';
 
 const otherFolders = el => el.src.includes('/folder.png');
 
@@ -122,9 +122,6 @@ function displayFolderItems(invItems, folderId, o) {
   var tr = o.injectHere.parentNode;
   var folder = invItems[o.invid].folder_id;
   var force = folderId !== 0 && folderId !== folder;
-  if ([563116, 1963510].includes(playerId())) {
-    console.log(folderId, folder, folderId !== folder); // eslint-disable-line no-console
-  }
   toggleForce(tr, force);
   toggleForce(tr.nextElementSibling, force);
 }
@@ -135,16 +132,6 @@ function updateList(invItems, folderId, o) {
 }
 
 function hideFolders(itemsAry, invItems, target) {
-  if ([563116, 1963510].includes(playerId())) {
-    console.log( // eslint-disable-line no-console
-      'itemsAry.length',
-      itemsAry.length,
-      'entries(invItems).length',
-      entries(invItems).length,
-      itemsAry,
-      invItems
-    );
-  }
   batch([
     2,
     3,
@@ -368,9 +355,11 @@ function beforeend(o, item) {
 
 function itemWidgets(o) {
   var item = invItems$1[o.invid];
-  if (item) { // Why does this happen?
+  if (item) {
     afterbegin(o, item);
     beforeend(o, item);
+  } else {
+    sendException('injectStoreItems: Item not found', false);
   }
 }
 
@@ -460,7 +449,7 @@ function inventory(data) {
 
 function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
-  getInventoryById().then(inventory); // change this?
+  getInventoryById().then(inventory);
   add(3, getItems);
 }
 
@@ -470,4 +459,4 @@ function injectProfileDropItems() {
 }
 
 export default injectProfileDropItems;
-//# sourceMappingURL=injectProfileDropItems-c50a3886.js.map
+//# sourceMappingURL=injectProfileDropItems-6b8280bc.js.map
