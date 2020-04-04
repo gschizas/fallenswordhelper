@@ -1,6 +1,6 @@
 import addCommas from '../system/addCommas';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import querySelector from '../common/querySelector';
+// import querySelector from '../common/querySelector';
 
 function getIntFromRegExp(theText, rxSearch) {
   var result;
@@ -28,6 +28,7 @@ function injectLock(xpLock) {
 }
 
 export default function guildXPLock() {
-  var xpLock = querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
+  let xpLock;
+  // var xpLock = querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   if (xpLock) {injectLock(xpLock);}
 }
