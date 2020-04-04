@@ -1,6 +1,4 @@
-import {entries} from '../common/entries';
 import getInventory from './getInventory';
-import playerId from '../common/playerId';
 
 function toObject(prev, curr) {
   if (curr.is_in_st) {prev.fshHasST = true;}
@@ -9,14 +7,8 @@ function toObject(prev, curr) {
 }
 
 function rekeyInventory(data) {
-  // console.log(JSON.parse(JSON.stringify(data)));
-  // data.items = data.items.reduce(toObject, {});
-  const thisItems = data.items.reduce(toObject, {});
-  if ([563116, 1963510].includes(playerId())) {
-    console.log(data.items.length, entries(thisItems).length); // eslint-disable-line no-console
-  }
   return {
-    items: thisItems,
+    items: data.items.reduce(toObject, {}),
     folders: data.folders
   };
 }

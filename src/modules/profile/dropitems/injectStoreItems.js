@@ -21,6 +21,7 @@ import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import quickAction from './quickAction';
 import selfIdIs from '../../common/selfIdIs';
+import {sendException} from '../../support/fshGa';
 import toggleForce from '../../common/toggleForce';
 import {
   ahSearchUrl,
@@ -104,9 +105,11 @@ function beforeend(o, item) {
 
 function itemWidgets(o) {
   var item = invItems[o.invid];
-  if (item) { // Why does this happen?
+  if (item) {
     afterbegin(o, item);
     beforeend(o, item);
+  } else {
+    sendException('injectStoreItems: Item not found', false);
   }
 }
 
@@ -196,6 +199,6 @@ function inventory(data) {
 
 export default function injectStoreItems() {
   if (jQueryNotPresent()) {return;}
-  getInventoryById().then(inventory); // change this?
+  getInventoryById().then(inventory);
   add(3, getItems);
 }
