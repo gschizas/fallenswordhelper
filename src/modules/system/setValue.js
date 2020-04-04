@@ -2,7 +2,7 @@ import {GMSTORAGE_PATH} from '../support/constants';
 import partial from '../common/partial';
 
 function storItem(name, type, value) {
-  if (Modernizr.localstorage) {
+  if (Modernizr && Modernizr.localstorage) {
     window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
   }
 }
