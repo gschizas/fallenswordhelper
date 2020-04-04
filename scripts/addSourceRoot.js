@@ -3,7 +3,7 @@ const port = require('./config.json').port;
 
 const betaProdSourceRoot =
   'https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/' +
-    `${process.env.npm_package_version}/src`;
+    `${process.env.npm_package_version}`;
 
 function addSourceRoot(file, sourceRoot) {
   const data = fs.readFileSync(file);
@@ -19,6 +19,6 @@ function fixMaps(dir, sourceRoot) {
   });
 }
 
-fixMaps('dev', `https://localhost:${port}/src`);
+fixMaps('dev', `https://localhost:${port}`);
 fixMaps('beta', betaProdSourceRoot);
 fixMaps('prod', betaProdSourceRoot);

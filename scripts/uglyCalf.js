@@ -8,6 +8,11 @@ export default function uglyCalf(outdir, jsccValues) {
     jsccValues
   );
 
+  if (['beta', 'prod'].includes(outdir)) {
+    options.output.sourcemapPathTransform = relativePath =>
+      relativePath.replace('..\\..\\', '');
+  }
+
   options.plugins.push(terser({
     output: {
       beautify: false,
