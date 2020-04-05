@@ -11,8 +11,8 @@
 // @exclude        https://wiki.fallensword.com/*
 // @exclude        https://www.fallensword.com/app.php*
 // @exclude        https://www.fallensword.com/fetchdata.php*
-// @version        $_VER
-// @downloadURL    $_DLURL
+// @version        _VER
+// @downloadURL    _DLURL
 // @grant          none
 // @run-at         document-body
 // ==/UserScript==
@@ -21,8 +21,8 @@
 
 // EVERYTHING MUST BE IN main()
 function fshMain(gmInfo) {
-  import('$_CALFJS')
-    .then(m => m.default('$_VER', gmInfo));
+  import('_CALFJS')
+    .then(m => m.default('_VER', gmInfo));
 } // end of var main
 
 var script = document.createElement('script');

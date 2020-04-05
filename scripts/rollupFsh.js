@@ -1,5 +1,5 @@
 import clear from 'rollup-plugin-clear';
-import jscc from 'rollup-plugin-jscc';
+import replace from '@rollup/plugin-replace';
 
 export default function rollupFsh(outdir, jsccValues) {
   return {
@@ -10,7 +10,7 @@ export default function rollupFsh(outdir, jsccValues) {
     },
     plugins: [
       clear({targets: [`dist/${outdir}`]}),
-      jscc({values: jsccValues}),
+      replace({values: jsccValues}),
     ],
     external: [jsccValues._CALFJS]
   };
