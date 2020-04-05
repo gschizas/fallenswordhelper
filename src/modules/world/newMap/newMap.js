@@ -7,6 +7,9 @@ import executeAll from '../../common/executeAll';
 import {getElementById} from '../../common/getElement';
 import getValue from '../../system/getValue';
 import hideQTip from '../../common/hideQTip';
+//#if _DEV  //  hide titan combat results
+import hideTitanCombatResults from './hideTitanCombatResults';
+//#endif
 import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
 import {injectSendGoldOnWorld} from './sendGold';
@@ -16,16 +19,10 @@ import onWorld from './onWorld';
 import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import prepareShop from './shop';
-//#if _DEV  //  hide titan combat results
-import querySelectorArray from '../../common/querySelectorArray';
-//#endif
 import startMonsterLog from './monsterLog/monsterLog';
 import viewCreature from './viewCreature/viewCreature';
 import worldPrefs from './worldPrefs/worldPrefs';
 import {
-  //#if _DEV  //  hide titan combat results
-  def_PvE,
-  //#endif
   def_afterUpdateActionlist,
   def_controlsKeydown,
   def_fetch_playerBackpackCount,
@@ -34,34 +31,6 @@ import {
   def_fetch_worldRealmDynamic
 } from '../../support/constants';
 
-//#if _DEV  //  hide titan combat results
-function didNotExist(data) {
-  return data.response && data.response.msg &&
-    data.response.msg.startsWith('Creature did not exist at that location');
-}
-
-function removeAction(data) {
-  if (didNotExist(data)) {
-    GameData.fetch(
-      def_fetch_worldRealmDynamic +
-      def_fetch_worldRealmActions
-    );
-  }
-}
-
-function removeElement(el) {el.remove();}
-
-function hideTitanViewCombat(e, data) {
-  removeAction(data);
-  querySelectorArray('.creature-4 > .quickCombat > .verbs')
-    .forEach(removeElement);
-}
-
-function hideTitanCombatResults() {
-  $.subscribe(def_PvE, hideTitanViewCombat); // TODO Pref
-}
-
-//#endif
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
 }
