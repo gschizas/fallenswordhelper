@@ -1,15 +1,15 @@
 import fallback from '../system/fallback';
-import {isArray} from '../common/isArray';
+import { isArray } from '../common/isArray';
 import isFunction from '../common/isFunction';
 import isUndefined from '../common/isUndefined';
 import on from '../common/on';
 import parseError from './parseError';
-import {sendException} from './fshGa';
-import {getLength, pop, push} from './sch';
+import { sendException } from './fshGa';
+import { getLength, pop, push } from './sch';
 
-var paused = true;
-var message = 'fshMessage';
-var messageHandler;
+let paused = true;
+const message = 'fshMessage';
+let messageHandler;
 
 function taskRunner() {
   if (getLength() === 0) {
@@ -22,15 +22,15 @@ function taskRunner() {
 
 function popError(fn) {
   if (!isUndefined(fn)) {
-    sendException('pop() was not a function (' + typeof fn + ')', false);
+    sendException(`pop() was not a function (${typeof fn})`, false);
   }
 }
 
 function testPop() {
-  var testFn = pop();
+  const testFn = pop();
   if (isFunction(testFn)) {
     testFn();
-  } else {popError(testFn);}
+  } else { popError(testFn); }
 }
 
 function asyncTask() {
@@ -44,7 +44,7 @@ function asyncTask() {
 }
 
 function callback(event) {
-  var key = event.data;
+  const key = event.data;
   if (typeof key === 'string' && key.indexOf(message) === 0) {
     asyncTask();
   }
@@ -57,7 +57,7 @@ function initMessageHandler() {
   }
 }
 
-//#if _DEV  //  Not sending args as Array
+// #if _DEV  //  Not sending args as Array
 function devLog(args) {
   if (args && !isArray(args)) {
     // eslint-disable-next-line no-console
@@ -65,16 +65,16 @@ function devLog(args) {
   }
 }
 
-//#endif
+// #endif
 export default function add(priority, fn, args, scope) {
-  //#if _DEV  //  Not sending args as Array
+  // #if _DEV  //  Not sending args as Array
   devLog(args);
-  //#endif
+  // #endif
   if (isFunction(fn)) {
     initMessageHandler();
-    var _scope = fallback(scope, window);
-    var _args = fallback(args, []);
+    const _scope = fallback(scope, window);
+    const _args = fallback(args, []);
     push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
-    if (paused) {taskRunner();}
+    if (paused) { taskRunner(); }
   }
 }

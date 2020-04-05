@@ -1,26 +1,26 @@
 import './guildTracker.css';
 import calf from '../../support/calf';
 import draggable from '../../common/dragStart';
-import {get} from '../../system/idb';
+import { get } from '../../system/idb';
 import injectShowTracker from './injectShowTracker';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import once from '../../common/once';
 import partial from '../../common/partial';
-import {sendEvent} from '../../support/fshGa';
+import { sendEvent } from '../../support/fshGa';
 import {
   createDiv,
   createInput,
-  createUl
+  createUl,
 } from '../../common/cElement';
-import {initTable, makeTg} from './trackerTable';
-import {makeInOut, queueRawData} from './rawData';
+import { initTable, makeTg } from './trackerTable';
+import { makeInOut, queueRawData } from './rawData';
 
-var trackerData;
-var tracker;
-var trDialog;
-var acttab2;
+let trackerData;
+let tracker;
+let trDialog;
+let acttab2;
 
 function isClosed() {
   return !tracker.checked;
@@ -41,40 +41,40 @@ function keydownHandler(evt) {
 }
 
 function maybeClose(ret) {
-  if (isClosed()) {ret.style.transform = null;}
+  if (isClosed()) { ret.style.transform = null; }
 }
 
 function makeDragHandle() {
   return createUl({
-    className: 'fshMove ui-tabs-nav ui-widget-header ui-corner-all ' +
-      'ui-helper-reset ui-helper-clearfix',
-    innerHTML: '<li class="ui-state-default ui-corner-top">' +
-      '<label class="fsh-tab-label" for="acttab1">' +
-      'Guild Activity Tracker</label></li>' +
-      '<li class="ui-state-default ui-corner-top">' +
-      '<label class="fsh-tab-label" for="acttab2">Import/Export</label></li>' +
-      '<label for="tracker" class="fsh-dialog-close ' +
-      'ui-dialog-titlebar-close">&times;</label>'
+    className: 'fshMove ui-tabs-nav ui-widget-header ui-corner-all '
+      + 'ui-helper-reset ui-helper-clearfix',
+    innerHTML: '<li class="ui-state-default ui-corner-top">'
+      + '<label class="fsh-tab-label" for="acttab1">'
+      + 'Guild Activity Tracker</label></li>'
+      + '<li class="ui-state-default ui-corner-top">'
+      + '<label class="fsh-tab-label" for="acttab2">Import/Export</label></li>'
+      + '<label for="tracker" class="fsh-dialog-close '
+      + 'ui-dialog-titlebar-close">&times;</label>',
   });
 }
 
 function updateRawData() {
   sendEvent('guildTracker', 'updateRawData');
-  if (trackerData) {queueRawData(trackerData);}
+  if (trackerData) { queueRawData(trackerData); }
 }
 
 function makeInnerPopup() {
-  var dialogPopup = createDiv({
-    className: 'fsh-dialog-popup ' +
-      'ui-dialog ui-tabs ui-widget ui-widget-content ui-corner-all',
-    innerHTML: '<input id="acttab1" class="fsh-tab-open" ' +
-      'name="acttabs" checked type="radio">'
+  const dialogPopup = createDiv({
+    className: 'fsh-dialog-popup '
+      + 'ui-dialog ui-tabs ui-widget ui-widget-content ui-corner-all',
+    innerHTML: '<input id="acttab1" class="fsh-tab-open" '
+      + 'name="acttabs" checked type="radio">',
   });
   acttab2 = createInput({
     className: 'fsh-tab-open',
     id: 'acttab2',
     name: 'acttabs',
-    type: 'radio'
+    type: 'radio',
   });
   once(acttab2, 'change', updateRawData);
   insertElement(dialogPopup, acttab2);
@@ -82,23 +82,23 @@ function makeInnerPopup() {
 }
 
 function makeRet() {
-  var ret = makeInnerPopup();
-  var hdl = makeDragHandle();
+  const ret = makeInnerPopup();
+  const hdl = makeDragHandle();
   insertElement(ret, hdl);
   draggable(hdl, ret);
   return ret;
 }
 
 function makeContainer() {
-  var container = createDiv({className: 'fsh-dialog-content'});
+  const container = createDiv({ className: 'fsh-dialog-content' });
   insertElement(container, makeTg());
   insertElement(container, makeInOut());
   return container;
 }
 
 function makePopup() {
-  var ret = makeRet();
-  var container = makeContainer();
+  const ret = makeRet();
+  const container = makeContainer();
   insertElement(ret, container);
   on(tracker, 'change', partial(maybeClose, ret));
   insertElement(trDialog, ret);
@@ -106,9 +106,9 @@ function makePopup() {
 
 function addOverlay() {
   insertHtmlBeforeEnd(trDialog,
-    '<div class="fsh-dialog-overlay">' +
-    '<label class="fsh-dialog-cancel" for="tracker"></label>' +
-    '</div>');
+    '<div class="fsh-dialog-overlay">'
+    + '<label class="fsh-dialog-cancel" for="tracker"></label>'
+    + '</div>');
 }
 
 function gotActivity(data) {
@@ -130,10 +130,10 @@ function injectTracker() {
   tracker = createInput({
     id: 'tracker',
     className: 'fsh-dialog-open',
-    type: 'checkbox'
+    type: 'checkbox',
   });
   once(tracker, 'change', openDialog);
-  trDialog = createDiv({className: 'fsh-dialog'});
+  trDialog = createDiv({ className: 'fsh-dialog' });
   insertElement(trDialog, tracker);
   on(document.body, 'keydown', keydownHandler);
   insertElement(document.body, trDialog);

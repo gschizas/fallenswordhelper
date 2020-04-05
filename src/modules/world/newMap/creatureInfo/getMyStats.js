@@ -1,4 +1,4 @@
-import {getElementById} from '../../../common/getElement';
+import { getElementById } from '../../../common/getElement';
 import getElementsByClassName from '../../../common/getElementsByClassName';
 import valueText from '../../../common/valueText';
 import {
@@ -6,7 +6,7 @@ import {
   def_statAttack,
   def_statDamage,
   def_statDefense,
-  def_statHp
+  def_statHp,
 } from '../../../support/constants';
 
 export var statLevel;

@@ -1,4 +1,4 @@
-import {textSpan} from '../../../common/cElement';
+import { textSpan } from '../../../common/cElement';
 
 export var current;
 export var kills;

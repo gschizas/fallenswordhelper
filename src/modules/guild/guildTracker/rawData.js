@@ -1,12 +1,12 @@
 import './rawData.css';
 import add from '../../support/task';
 import dialogMsg from '../../common/dialogMsg';
-import {initTable} from './trackerTable';
+import { initTable } from './trackerTable';
 import insertElement from '../../common/insertElement';
 import jsonParse from '../../common/jsonParse';
 import onclick from '../../common/onclick';
 import partial from '../../common/partial';
-import {set} from '../../system/idb';
+import { set } from '../../system/idb';
 import {
   createBr,
   createButton,
@@ -14,10 +14,10 @@ import {
   createTextArea,
 } from '../../common/cElement';
 
-var ioText;
-var saveBtn;
-var resetBtn;
-var io;
+let ioText;
+let saveBtn;
+let resetBtn;
+let io;
 
 function drawRawData(trackerData) {
   ioText.value = trackerData;
@@ -41,16 +41,16 @@ function successMsg(newData) {
 }
 
 function doSave() {
-  var newData = jsonParse(ioText.value);
+  const newData = jsonParse(ioText.value);
   set('fsh_guildActivity', newData)
     .then(partial(successMsg, newData))
     .catch(dialogMsg);
 }
 
 function customButton(text, fn) {
-  var btn = createButton({
+  const btn = createButton({
     className: 'custombutton',
-    textContent: text
+    textContent: text,
   });
   onclick(btn, fn);
   return btn;
@@ -65,7 +65,7 @@ function makeIoText() {
 }
 
 export function makeInOut() {
-  io = createDiv({id: 'io', className: 'fshSpinner64'});
+  io = createDiv({ id: 'io', className: 'fshSpinner64' });
   makeIoText();
   saveBtn = customButton('Save', doSave);
   resetBtn = customButton('Reset', doReset);

@@ -6,15 +6,15 @@ import querySelector from '../../common/querySelector';
 import saveTempleSettings from './saveTempleSettings';
 
 function templeAlertEnabled(responseText) {
-  var checkNeedToPray;
-  var doc;
+  let checkNeedToPray;
+  let doc;
   if (calf.cmd !== 'temple') {
     doc = createDocument(responseText);
   } else {
     doc = document;
   }
   checkNeedToPray = querySelector('input[value="Pray to Osverin"]', doc);
-  var needToPray = false;
+  let needToPray = false;
   if (checkNeedToPray) {
     displayDisconnectedFromGodsMessage();
     needToPray = true;
@@ -23,5 +23,5 @@ function templeAlertEnabled(responseText) {
 }
 
 export function parseTemplePage(responseText) {
-  if (calf.enableTempleAlert) {templeAlertEnabled(responseText);}
+  if (calf.enableTempleAlert) { templeAlertEnabled(responseText); }
 }

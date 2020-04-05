@@ -1,11 +1,11 @@
-import {createSpan} from '../../../common/cElement';
+import { createSpan } from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
 import setText from '../../../common/setText';
 import setTextCommas from '../../../common/setTextCommas';
 import toggleForce from '../../../common/toggleForce';
 
-var ksDiv;
-var killStreakSpan;
+let ksDiv;
+let killStreakSpan;
 
 function initKsDiv(containerDiv) {
   ksDiv = containerDiv.children[1];

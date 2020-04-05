@@ -4,24 +4,24 @@ import doHuntingBuffs from './doHuntingBuffs';
 import getCombatBias from './getCombatBias';
 import getValue from '../../../system/getValue';
 import interceptXHR from './interceptXHR';
-import {prepareHidePlayerActions} from '../prepareHidePlayerActions';
+import { prepareHidePlayerActions } from '../prepareHidePlayerActions';
 import shouldBeArray from '../../../system/shouldBeArray';
 
-function mappedArray(a) {calf[a[0]] = shouldBeArray(a[1]);}
+function mappedArray(a) { calf[a[0]] = shouldBeArray(a[1]); }
 
 function mappedArrays() {
   [
     ['buffs', 'huntingBuffs'],
     ['buffs2', 'huntingBuffs2'],
-    ['buffs3', 'huntingBuffs3']
+    ['buffs3', 'huntingBuffs3'],
   ].forEach(mappedArray);
 }
 
-function straightArray(a) {calf[a] = shouldBeArray(a);}
+function straightArray(a) { calf[a] = shouldBeArray(a); }
 
 function straightArrays() {
   [
-    'doNotKillList'
+    'doNotKillList',
   ].forEach(straightArray);
 }
 
@@ -30,18 +30,18 @@ function arrayType() {
   straightArrays();
 }
 
-function mappedValue(a) {calf[a[0]] = getValue(a[1]);}
+function mappedValue(a) { calf[a[0]] = getValue(a[1]); }
 
 function mappedValues() {
   [
     ['buffsName', 'huntingBuffsName'],
     ['buffs2Name', 'huntingBuffs2Name'],
     ['buffs3Name', 'huntingBuffs3Name'],
-    ['showBuffs', 'showHuntingBuffs']
+    ['showBuffs', 'showHuntingBuffs'],
   ].forEach(mappedValue);
 }
 
-function straightValue(a) {calf[a] = getValue(a);}
+function straightValue(a) { calf[a] = getValue(a); }
 
 function straightValues() {
   [
@@ -50,7 +50,7 @@ function straightValues() {
     'showTitanInfo',
     'showBuffInfo',
     'showMonsterLog',
-    'showCreatureInfo'
+    'showCreatureInfo',
   ].forEach(straightValue);
 }
 
@@ -67,7 +67,7 @@ function getPrefs() {
 export default function worldPrefs() {
   getCombatBias();
   getPrefs();
-  var missingBuffsDiv = buildFshDivs();
+  const missingBuffsDiv = buildFshDivs();
   interceptXHR();
   doHuntingBuffs(missingBuffsDiv);
   prepareHidePlayerActions();

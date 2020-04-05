@@ -5,5 +5,5 @@ export default {
   viewstats: injectGroupStats,
   joinallgroupsundersize: injectGroups,
   joinall: injectGroups,
-  '-': injectGroups
+  '-': injectGroups,
 };

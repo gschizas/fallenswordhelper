@@ -1,4 +1,4 @@
-import {options} from './options';
+import { options } from './options';
 
 export default function setLvls() { // jQuery
   $('#fshMinLvl').val(options.fshMinLvl);

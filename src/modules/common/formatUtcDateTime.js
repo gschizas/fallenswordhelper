@@ -8,7 +8,7 @@ function utcDatePartsPadded(aDate) {
     aDate.getUTCDate(),
     aDate.getUTCHours(),
     aDate.getUTCMinutes(),
-    aDate.getUTCSeconds()
+    aDate.getUTCSeconds(),
   ].map(padZ);
 }
 

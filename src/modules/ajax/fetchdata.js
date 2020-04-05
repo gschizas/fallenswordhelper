@@ -6,7 +6,7 @@ export default function fetchdata(data) {
   return retryAjax({
     cache: false,
     url: 'fetchdata.php',
-    data: extend(data, {_rnd: rnd()}),
-    dataType: 'json'
+    data: extend(data, { _rnd: rnd() }),
+    dataType: 'json',
   });
 }

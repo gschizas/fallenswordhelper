@@ -1,11 +1,11 @@
-import {createSpan} from '../../../common/cElement';
+import { createSpan } from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import setText from '../../../common/setText';
 import toggleForce from '../../../common/toggleForce';
 
-var dblDiv;
-var dblSpan;
+let dblDiv;
+let dblSpan;
 
 function initDblDiv(containerDiv) {
   dblDiv = containerDiv.children[4];

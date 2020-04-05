@@ -1,61 +1,61 @@
 import allowBack from './allowBack';
-import {createTr} from '../common/cElement';
+import { createTr } from '../common/cElement';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
-//#if _DEV  //  Ladder Margin
+// #if _DEV  //  Ladder Margin
 import margin from './margin';
-//#endif
-import {now} from '../support/now';
+// #endif
+import { now } from '../support/now';
 import outputFormat from '../system/outputFormat';
 import querySelector from '../common/querySelector';
 import setText from '../common/setText';
 
 function formatLastReset(lastLadderReset) {
-  var m = Math.floor((now - lastLadderReset) / 60000);
-  var h = Math.floor(m / 60);
+  let m = Math.floor((now - lastLadderReset) / 60000);
+  const h = Math.floor(m / 60);
   m %= 60;
-  return outputFormat(h, ' hours, ') + m + ' mins';
+  return `${outputFormat(h, ' hours, ') + m} mins`;
 }
 
 function formatTime() {
-  var lastLadderReset = getValue('lastLadderReset');
+  const lastLadderReset = getValue('lastLadderReset');
   if (lastLadderReset < now - 48 * 60 * 60 * 1000) {
-    return '<span class="fshLink tip-static" data-tipped="FSH has not seen ' +
-      'the last ladder reset.<br>You can find it in your log if you ' +
-      'qualified<br>or Tavern Rumours.">???</span>';
+    return '<span class="fshLink tip-static" data-tipped="FSH has not seen '
+      + 'the last ladder reset.<br>You can find it in your log if you '
+      + 'qualified<br>or Tavern Rumours.">???</span>';
   }
   return formatLastReset(lastLadderReset);
 }
 
 function makeLeftCell(newRow) {
-  var leftCell = newRow.insertCell(-1);
+  const leftCell = newRow.insertCell(-1);
   leftCell.height = 25;
   setText('Last Reset:', leftCell);
 }
 
 function makeRightCell(newRow) {
-  var rightCell = newRow.insertCell(-1);
+  const rightCell = newRow.insertCell(-1);
   rightCell.align = 'right';
   rightCell.innerHTML = formatTime();
 }
 
 function makeNewRow() {
-  var newRow = createTr();
+  const newRow = createTr();
   makeLeftCell(newRow);
   makeRightCell(newRow);
   return newRow;
 }
 
 function lastReset() {
-  var topTable = querySelector('#pCC table');
-  var newRow = makeNewRow();
+  const topTable = querySelector('#pCC table');
+  const newRow = makeNewRow();
   insertElement(topTable, newRow);
 }
 
 export default function ladder() {
   allowBack();
   lastReset();
-  //#if _DEV  //  Ladder Margin
+  // #if _DEV  //  Ladder Margin
   margin();
-  //#endif
+  // #endif
 }

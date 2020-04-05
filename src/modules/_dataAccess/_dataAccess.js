@@ -39,7 +39,7 @@ import loadInventory from '../app/profile/loadInventory';
 import mailboxTake from './mailboxTake';
 import moveItems from './moveItems';
 import moveRank from './moveRank';
-import {nowSecs} from '../support/now';
+import { nowSecs } from '../support/now';
 import rankPosition from '../app/guild/ranks/position';
 import ranks from '../app/guild/ranks/ranks';
 import ranksView from './ranksView';
@@ -66,7 +66,7 @@ import viewProfile from './viewProfile';
 let appBad;
 
 function resetAppBad() {
-  if (appBad[0] < nowSecs - 24 * 60 * 60) {appBad = [nowSecs, false];}
+  if (appBad[0] < nowSecs - 24 * 60 * 60) { appBad = [nowSecs, false]; }
 }
 
 function initAppBad() {
@@ -79,9 +79,9 @@ function initAppBad() {
 
 export function _dataAccess(appFn, fallbackFn, ...args) {
   initAppBad();
-  if (appBad[1]) {return fallbackFn(...args);}
+  if (appBad[1]) { return fallbackFn(...args); }
   return appFn(...args)
-    .then(function(json) {
+    .then((json) => {
       // if (hasFailed(json)) {
       if (hasFailed()) {
         appBad = [nowSecs, true];
@@ -93,47 +93,33 @@ export function _dataAccess(appFn, fallbackFn, ...args) {
     .catch(() => fallbackFn(...args));
 }
 
-export const daAdvisor = period =>
-  _dataAccess(advisorView, viewAdvisor, period);
-export const daBazaarBuy = item => _dataAccess(buyitem, bazaarBuy, item);
+export const daAdvisor = (period) => _dataAccess(advisorView, viewAdvisor, period);
+export const daBazaarBuy = (item) => _dataAccess(buyitem, bazaarBuy, item);
 export const daComponents = () => _dataAccess(loadComponents, components);
 export const daComposing = () => _dataAccess(composingView, composing);
-export const daDestroyComponent = componentIdAry =>
-  _dataAccess(destroyComponent, dropComponent, componentIdAry);
-export const daDoInvent = recipe => _dataAccess(doinvent, invent, recipe);
-export const daFindPlayer = username =>
-  _dataAccess(appFindPlayer, findPlayer, username);
-export const daGroupStats = groupId =>
-  _dataAccess(groupsViewStats, groupStats, groupId);
-export const daGsTake = invId =>
-  _dataAccess(takeitem, gsTake, invId);
+export const daDestroyComponent = (componentIdAry) => _dataAccess(destroyComponent, dropComponent, componentIdAry);
+export const daDoInvent = (recipe) => _dataAccess(doinvent, invent, recipe);
+export const daFindPlayer = (username) => _dataAccess(appFindPlayer, findPlayer, username);
+export const daGroupStats = (groupId) => _dataAccess(groupsViewStats, groupStats, groupId);
+export const daGsTake = (invId) => _dataAccess(takeitem, gsTake, invId);
 export const daGuildFetchInv = () => _dataAccess(appFetchinv, guildFetchInv);
 export const daGuildManage = () => _dataAccess(appGuildManage, guildManage);
-export const daGuildRecall = (invId, playerId, mode) =>
-  _dataAccess(recall, guildInvRecall, invId, playerId, mode);
+export const daGuildRecall = (invId, playerId, mode) => _dataAccess(recall, guildInvRecall, invId, playerId, mode);
 export const daGuildReport = () => _dataAccess(report, guildReport);
-export const daGuildView = guildId =>
-  _dataAccess(appGuildView, guildView, guildId);
+export const daGuildView = (guildId) => _dataAccess(appGuildView, guildView, guildId);
 export const daLoadInventory = () => _dataAccess(loadInventory, fetchinv);
-export const daMailboxTake = invIdAry =>
-  _dataAccess(takeitems, mailboxTake, invIdAry);
-export const daQuickbuff = (userAry, buffAry) =>
-  _dataAccess(appQb, ajaxQb, userAry, buffAry);
-export const daRankPosition = (direction, rankId) =>
-  _dataAccess(rankPosition, moveRank, direction, rankId);
+export const daMailboxTake = (invIdAry) => _dataAccess(takeitems, mailboxTake, invIdAry);
+export const daQuickbuff = (userAry, buffAry) => _dataAccess(appQb, ajaxQb, userAry, buffAry);
+export const daRankPosition = (direction, rankId) => _dataAccess(rankPosition, moveRank, direction, rankId);
 export const daRanksView = () => _dataAccess(ranks, ranksView);
 export const daScoutTower = () => _dataAccess(appScouttower, scouttower);
-export const daSendItems = (user, invIdAry) =>
-  _dataAccess(appSendItems, senditems, user, invIdAry);
-export const daAjaxSendItemsToRecipient = invIdAry =>
-  _dataAccess(appSendItemsToRecipient, sendItemsToRecipient, invIdAry);
-export const daSendToFolder = (folderId, itemsAry) =>
-  _dataAccess(sendtofolder, moveItems, folderId, itemsAry);
-export const daStoreItems = invIdAry =>
-  _dataAccess(dostoreitems, storeitems, invIdAry);
+export const daSendItems = (user, invIdAry) => _dataAccess(appSendItems, senditems, user, invIdAry);
+export const daAjaxSendItemsToRecipient = (invIdAry) => _dataAccess(appSendItemsToRecipient, sendItemsToRecipient, invIdAry);
+export const daSendToFolder = (folderId, itemsAry) => _dataAccess(sendtofolder, moveItems, folderId, itemsAry);
+export const daStoreItems = (invIdAry) => _dataAccess(dostoreitems, storeitems, invIdAry);
 export const daSuperElite = () => _dataAccess(appSe, superelite);
-export const daUnequipItem = item => _dataAccess(unequipitem, unequip, item);
-export const daUseItem = item => _dataAccess(useitem, useItem, item);
-export const daViewCombat = id => _dataAccess(appViewCombat, viewCombat, id);
+export const daUnequipItem = (item) => _dataAccess(unequipitem, unequip, item);
+export const daUseItem = (item) => _dataAccess(useitem, useItem, item);
+export const daViewCombat = (id) => _dataAccess(appViewCombat, viewCombat, id);
 export const daViewGroups = () => _dataAccess(groupsView, viewGroups);
 export const daViewProfile = () => _dataAccess(appViewProfile, viewProfile);

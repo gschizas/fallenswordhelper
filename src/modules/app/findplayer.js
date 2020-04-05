@@ -4,6 +4,6 @@ export default function findplayer(username) {
   return callApp({
     cmd: 'findplayer',
     subcmd: 'view',
-    search_username: username
+    search_username: username,
   });
 }

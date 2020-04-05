@@ -6,12 +6,12 @@ import querySelector from '../common/querySelector';
 function parseReport(html) {
   const doc = createDocument(html);
   const disband = querySelector('#pCC img[src$="disband.png"]', doc);
-  if (!disband) {return {};}
+  if (!disband) { return {}; }
   const id = Number(disband.parentNode.href.match(/\((\d+)\)/)[1]);
-  return {r: [{id: id, members: [{name: playerName()}]}]};
+  return { r: [{ id, members: [{ name: playerName() }] }] };
 }
 
 // Incomplete
 export default function viewGroups() {
-  return indexAjaxData({cmd: 'guild', subcmd: 'groups'}).then(parseReport);
+  return indexAjaxData({ cmd: 'guild', subcmd: 'groups' }).then(parseReport);
 }

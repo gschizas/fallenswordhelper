@@ -1,15 +1,17 @@
-import {daGuildManage} from '../_dataAccess/_dataAccess';
+import { daGuildManage } from '../_dataAccess/_dataAccess';
 import fallback from '../system/fallback';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';
 import lastActivityToDays from '../common/lastActivityToDays';
-import {nowSecs} from '../support/now';
+import { nowSecs } from '../support/now';
 import partial from '../common/partial';
-import {act, cur, gxp, lvl, max, utc, vl} from './guildTracker/indexConstants';
-import {get, set} from '../system/idb';
+import {
+  act, cur, gxp, lvl, max, utc, vl,
+} from './guildTracker/indexConstants';
+import { get, set } from '../system/idb';
 
-var oldArchive;
-var guild;
+let oldArchive;
+let guild;
 
 function pushNewRecord(member) {
   oldArchive.members[member.name].push([
@@ -30,28 +32,28 @@ function initMember(member) {
   }
 }
 
-var type2tests = [
-  function(archive, current) {
+const type2tests = [
+  function (archive, current) {
     // Has current stam changed ?
     return current.current_stamina !== archive[cur]; // probably want a weighted percentage here
     // Might only care if it has dropped significantly ?
   },
-  function(archive, current) {
+  function (archive, current) {
     // Has Max Stam increased ?
     return current.max_stamina > archive[max]; // probably want a weighted percentage here
   },
-  function(archive, current) {
+  function (archive, current) {
     // Has level changed ?
     return current.level !== archive[lvl];
   },
-  function(archive, current) {
+  function (archive, current) {
     // Has VL changed ?
     return current.vl !== archive[vl];
   },
-  function(archive, current) {
+  function (archive, current) {
     // Has GXP changed ?
     return current.guild_xp !== archive[gxp]; // probably want a weighted percentage here
-  }
+  },
 ];
 
 function change(archiveRecord, member, test) {
@@ -73,9 +75,9 @@ function upsert(archiveRecord, member) {
 
 function processMemberRecord(newArchive, member) {
   initMember(member);
-  var archiveMember = oldArchive.members[member.name];
-  var archiveRecord = archiveMember[archiveMember.length - 1];
-  var archiveAge = nowSecs - archiveRecord[utc];
+  const archiveMember = oldArchive.members[member.name];
+  const archiveRecord = archiveMember[archiveMember.length - 1];
+  const archiveAge = nowSecs - archiveRecord[utc];
   if (archiveAge >= 86100) {
     upsert(archiveRecord, member);
   }
@@ -87,7 +89,7 @@ function processRank(newArchive, rank) {
 }
 
 function doMerge() { // jQuery.min
-  var newArchive = {lastUpdate: nowSecs, members: {}};
+  const newArchive = { lastUpdate: nowSecs, members: {} };
   guild.r.ranks.forEach(partial(processRank, newArchive));
   set('fsh_guildActivity', newArchive);
 }
@@ -103,7 +105,7 @@ function gotActivity(data) { // jQuery.min
   if (data) {
     oldArchive = data;
   } else {
-    oldArchive = {lastUpdate: 0, members: {}};
+    oldArchive = { lastUpdate: 0, members: {} };
   }
   if (nowSecs > fallback(oldArchive.lastUpdate, 0) + 300) { // 5 mins - probably want to increase
     daGuildManage().then(gotGuild);

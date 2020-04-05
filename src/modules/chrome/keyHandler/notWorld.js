@@ -1,4 +1,4 @@
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 import keyHandlerEvent from './keyHandlerEvent';
 
 export default function notWorld(type, href) {

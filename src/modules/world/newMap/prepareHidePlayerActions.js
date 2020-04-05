@@ -1,15 +1,15 @@
 import getArrayByClassName from '../../common/getArrayByClassName';
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import setValue from '../../system/setValue';
 import {
   def_afterUpdateActionlist,
-  def_fetch_worldRealmActions
+  def_fetch_worldRealmActions,
 } from '../../support/constants';
 
-var hidePlayerActions;
+let hidePlayerActions;
 
 export function toggleHidePlayerActions() {
   hidePlayerActions = !hidePlayerActions;
@@ -18,15 +18,15 @@ export function toggleHidePlayerActions() {
 }
 
 function hideActions(el) {
-  var verbs = getElementsByClassName('verbs', el);
+  const verbs = getElementsByClassName('verbs', el);
   if (verbs.length === 1) {
     hideElement(verbs[0]);
   }
 }
 
 function doHidePlayerActions() {
-  if (!hidePlayerActions) {return;}
-  var act = getElementById('actionList');
+  if (!hidePlayerActions) { return; }
+  const act = getElementById('actionList');
   getArrayByClassName('player', act).forEach(hideActions);
 }
 

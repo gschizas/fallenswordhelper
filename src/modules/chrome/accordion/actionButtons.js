@@ -1,8 +1,8 @@
 import anchorButton from './anchorButton';
-import {injectAuctionSearch} from '../../notepad/lists/lists';
+import { injectAuctionSearch } from '../../notepad/lists/lists';
 import injectOnlinePlayers from
   '../../notepad/onlinePlayers/injectOnlinePlayers';
-import {injectFindBuffs, injectFindOther} from
+import { injectFindBuffs, injectFindOther } from
   '../../notepad/findBuffs/findBuffs';
 
 export default function actionButtons() {

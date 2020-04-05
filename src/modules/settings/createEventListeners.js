@@ -1,5 +1,5 @@
 import dialogMsg from '../common/dialogMsg';
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import injectMonsterLog from '../notepad/monstorLog/monstorLog';
 import injectNotepadShowLogs from '../notepad/combatLog';
 import insertElement from '../common/insertElement';
@@ -8,13 +8,13 @@ import jQueryDialog from '../chrome/jQueryDialog';
 import onclick from '../common/onclick';
 import querySelector from '../common/querySelector';
 import saveBoxes from './saveBoxes.json';
-import {sendEvent} from '../support/fshGa';
+import { sendEvent } from '../support/fshGa';
 import setValue from '../system/setValue';
 import toggleVisibilty from '../common/toggleVisibilty';
-import {createBr, createSpan} from '../common/cElement';
+import { createBr, createSpan } from '../common/cElement';
 
 function findEl(el, name) {
-  return querySelector('#fshSettingsTable ' + el + '[name="' + name + '"]');
+  return querySelector(`#fshSettingsTable ${el}[name="${name}"]`);
 }
 
 function findInput(name) {
@@ -26,9 +26,9 @@ function findSelect(name) {
 }
 
 function toggleTickAllBuffs(e) { // jQuery
-  var allItems = $('input[name^="blockedSkillList"]:visible',
+  const allItems = $('input[name^="blockedSkillList"]:visible',
     '#settingsTabs-4');
-  var tckTxt = $(e.target);
+  const tckTxt = $(e.target);
   allItems.prop('checked', tckTxt.text() === 'Tick all buffs');
   if (tckTxt.text() === 'Tick all buffs') {
     tckTxt.text('Untick all buffs');
@@ -40,12 +40,11 @@ function toggleTickAllBuffs(e) { // jQuery
 function clearStorage() {
   jConfirm('Clear localStorage',
     'Are you sure you want to clear you localStorage?',
-    function() {localStorage.clear();}
-  );
+    () => { localStorage.clear(); });
 }
 
 function saveValueForm(name) {
-  var formElement = findInput(name);
+  const formElement = findInput(name);
   if (formElement.type === 'checkbox') {
     setValue(name, formElement.checked);
   } else {
@@ -54,18 +53,18 @@ function saveValueForm(name) {
 }
 
 function saveNumeric(name) {
-  var formElement = findSelect(name);
+  const formElement = findSelect(name);
   setValue(name, Number(formElement.value));
 }
 
 function saveOther(name) {
-  var formElement = findSelect(name);
+  const formElement = findSelect(name);
   setValue(name, formElement.value);
 }
 
 function checkNumeric(name, min, def) {
-  var myInput = findInput(name);
-  var inputValue = Number(myInput.value);
+  const myInput = findInput(name);
+  const inputValue = Number(myInput.value);
   if (isNaN(inputValue) || inputValue <= min) {
     myInput.value = def;
   }
@@ -91,36 +90,36 @@ function showMonsterLogs() {
 }
 
 function doTickAll() {
-  var tickAll = createSpan({
+  const tickAll = createSpan({
     id: 'fshAllBuffs',
     className: 'fshLink',
-    textContent: 'Tick all buffs'
+    textContent: 'Tick all buffs',
   });
   onclick(tickAll, toggleTickAllBuffs);
-  var inject = getElementById('settingsTabs-4').children[0].rows[0].cells[0];
+  const inject = getElementById('settingsTabs-4').children[0].rows[0].cells[0];
   insertElement(inject, createBr());
   insertElement(inject, tickAll);
 }
 
-function listener(el) {onclick(getElementById(el[0]), el[1]);}
+function listener(el) { onclick(getElementById(el[0]), el[1]); }
 
 function clickHandlers() {
   [
     ['fshClearStorage', clearStorage],
     ['Helper:SaveOptions', saveConfig],
     ['Helper:ShowLogs', showLogs],
-    ['Helper:ShowMonsterLogs', showMonsterLogs]
+    ['Helper:ShowMonsterLogs', showMonsterLogs],
   ].forEach(listener);
 }
 
-function toggleListener(id) {onclick(getElementById(id), toggleVisibilty);}
+function toggleListener(id) { onclick(getElementById(id), toggleVisibilty); }
 
 function onVisibilityToggle() {
   [
     'toggleShowGuildSelfMessage',
     'toggleShowGuildFrndMessage',
     'toggleShowGuildPastMessage',
-    'toggleShowGuildEnmyMessage'
+    'toggleShowGuildEnmyMessage',
   ].forEach(toggleListener);
 }
 

@@ -1,6 +1,6 @@
 import bitwiseAnd from '../../../common/bitwiseAnd';
 import calf from '../../../support/calf';
-import {def_fetch_worldRealmActions} from '../../../support/constants';
+import { def_fetch_worldRealmActions } from '../../../support/constants';
 import jsonParse from '../../../common/jsonParse';
 import partial from '../../../common/partial';
 
@@ -20,18 +20,18 @@ function getLvlToTest(myData) {
 }
 
 function xhrDataFilter(data) {
-  var myData = jsonParse(data);
-  if (noAction(myData)) {return data;}
+  const myData = jsonParse(data);
+  if (noAction(myData)) { return data; }
   myData.actions = myData.actions.filter(
-    partial(subLvlMobs, getLvlToTest(myData))
+    partial(subLvlMobs, getLvlToTest(myData)),
   );
   return JSON.stringify(myData);
 }
 
 function isActionList(originalOptions) {
-  return originalOptions.data &&
-    originalOptions.data.d &&
-    bitwiseAnd(originalOptions.data.d, def_fetch_worldRealmActions);
+  return originalOptions.data
+    && originalOptions.data.d
+    && bitwiseAnd(originalOptions.data.d, def_fetch_worldRealmActions);
 }
 
 function xhrPreFilter(options, originalOptions) {

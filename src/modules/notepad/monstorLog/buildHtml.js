@@ -1,14 +1,14 @@
 import addCommas from '../../system/addCommas';
-import {cdn} from '../../system/system';
-import {entries} from '../../common/entries';
+import { cdn } from '../../system/system';
+import { entries } from '../../common/entries';
 import extend from '../../common/extend';
-import {keys} from '../../common/keys';
+import { keys } from '../../common/keys';
 
 function imgHtml(image_id) {
-  return '<img class="tip-static" src="' + cdn +
-    'creatures/' + image_id + '.png" data-tipped="<img src=\'' +
-    cdn + 'creatures/' + image_id +
-    '.png\' width=200 height=200>" width=40 height=40>';
+  return `<img class="tip-static" src="${cdn
+  }creatures/${image_id}.png" data-tipped="<img src='${
+    cdn}creatures/${image_id
+  }.png' width=200 height=200>" width=40 height=40>`;
 }
 
 function hazEnhancements(enhancements) {
@@ -16,19 +16,19 @@ function hazEnhancements(enhancements) {
 }
 
 function statMinMax(stat) {
-  return stat.min.toString() + ' - ' + stat.max.toString();
+  return `${stat.min.toString()} - ${stat.max.toString()}`;
 }
 
 function buildEnhancements(pair) {
-  return '<span class="fshNoWrap">' + pair[0] + ': ' +
-    statMinMax(pair[1]) + '</span>';
+  return `<span class="fshNoWrap">${pair[0]}: ${
+    statMinMax(pair[1])}</span>`;
 }
 
 function formatEnhancements(enhancements) {
   if (hazEnhancements(enhancements)) {
-    var tmp = '<span class="fshXXSmall">';
+    let tmp = '<span class="fshXXSmall">';
     tmp += entries(enhancements).map(buildEnhancements).join('<br>');
-    return tmp + '</span>';
+    return `${tmp}</span>`;
   }
   return '<span class="fshGrey">**Missing**</span>';
 }
@@ -43,6 +43,6 @@ export default function buildHtml(data, key) {
     armor: statMinMax(data[key].armor),
     damage: statMinMax(data[key].damage),
     hp: statMinMax(data[key].hp),
-    enhancements: formatEnhancements(data[key].enhancements)
+    enhancements: formatEnhancements(data[key].enhancements),
   });
 }

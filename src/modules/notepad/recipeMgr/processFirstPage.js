@@ -13,12 +13,13 @@ function notUnassigned(el) {
 }
 
 function noQuests(output, el) {
-  var folderName = getText(
-    el.parentNode.nextElementSibling.nextElementSibling.firstChild); // Text Node
-  var hasQuest = /quest/i.test(folderName);
+  const folderName = getText(
+    el.parentNode.nextElementSibling.nextElementSibling.firstChild,
+  ); // Text Node
+  const hasQuest = /quest/i.test(folderName);
   if (hasQuest) {
-    insertHtmlBeforeEnd(output, 'Skipping folder "' +
-      folderName + '"  as it has the word "quest" in folder name.<br>');
+    insertHtmlBeforeEnd(output, `Skipping folder "${
+      folderName}"  as it has the word "quest" in folder name.<br>`);
   }
   return !hasQuest;
 }
@@ -28,8 +29,8 @@ function doAjax(bindFolderFirstPage, el) {
 }
 
 function buildPrm(output, html, bindFolderFirstPage) {
-  var doc = createDocument(html);
-  var folderImgs = getFolderImgs(doc);
+  const doc = createDocument(html);
+  const folderImgs = getFolderImgs(doc);
   return folderImgs
     .filter(notUnassigned)
     .filter(partial(noQuests, output))
@@ -37,8 +38,8 @@ function buildPrm(output, html, bindFolderFirstPage) {
 }
 
 export default function processFirstPage(output, recipebook, html) { // jQuery.min
-  var bindFolderFirstPage = partial(processFolderFirstPage, output, recipebook);
-  var prm = buildPrm(output, html, bindFolderFirstPage);
+  const bindFolderFirstPage = partial(processFolderFirstPage, output, recipebook);
+  const prm = buildPrm(output, html, bindFolderFirstPage);
   prm.push(bindFolderFirstPage(html));
   return all(prm);
 }

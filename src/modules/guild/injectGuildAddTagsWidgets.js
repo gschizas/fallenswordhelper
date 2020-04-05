@@ -1,14 +1,14 @@
-import {cdn} from '../system/system';
+import { cdn } from '../system/system';
 import clickThis from '../common/clickThis';
-import {createInput} from '../common/cElement';
-import {daGsTake} from '../_dataAccess/_dataAccess';
-import {getElementById} from '../common/getElement';
+import { createInput } from '../common/cElement';
+import { daGsTake } from '../_dataAccess/_dataAccess';
+import { getElementById } from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import injectGuild from './guild';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import setText from '../common/setText';
@@ -31,19 +31,19 @@ function takeResult(target, data) {
 }
 
 function fastBp(el) {
-  var itmId = el.parentNode.previousElementSibling.previousElementSibling
+  const itmId = el.parentNode.previousElementSibling.previousElementSibling
     .children[0].value;
   daGsTake(itmId).then(partial(takeResult, el));
   setText('', el);
   el.className = 'guildTagSpinner';
-  el.style.backgroundImage = 'url(\'' + cdn +
-    'ui/misc/spinner.gif\')';
+  el.style.backgroundImage = `url('${cdn
+  }ui/misc/spinner.gif')`;
 }
 
 function evtHdlr(e) {
-  var target = e.target;
-  if (target.value === 'Check All') {doCheckAll();}
-  if (target.className === 'sendLink') {fastBp(target);}
+  const { target } = e;
+  if (target.value === 'Check All') { doCheckAll(); }
+  if (target.className === 'sendLink') { fastBp(target); }
 }
 
 function paintTable() {
@@ -51,8 +51,8 @@ function paintTable() {
 }
 
 function checkAllBtn() {
-  var checkAll = createInput({type: 'button', value: 'Check All'});
-  var formTags = getElementsByTagName('form', pCC);
+  const checkAll = createInput({ type: 'button', value: 'Check All' });
+  const formTags = getElementsByTagName('form', pCC);
   if (formTags.length === 1) {
     insertElement(formTags[0].previousElementSibling.cells[0], checkAll);
   }

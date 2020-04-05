@@ -1,4 +1,4 @@
-import {htmlResult} from './htmlResult';
+import { htmlResult } from './htmlResult';
 import indexAjaxData from '../ajax/indexAjaxData';
 
 export default function guildInvRecall(invId, playerId, mode) {
@@ -8,6 +8,6 @@ export default function guildInvRecall(invId, playerId, mode) {
     subcmd2: 'recall',
     id: invId,
     player_id: playerId,
-    mode: mode
+    mode,
   }).then(htmlResult);
 }

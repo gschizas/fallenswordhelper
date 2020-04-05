@@ -7,5 +7,5 @@ export default {
   report: injectReportPaint,
   addtags: injectGuildAddTagsWidgets,
   removetags: injectGuildAddTagsWidgets,
-  storeitems: dropItemLoader
+  storeitems: dropItemLoader,
 };

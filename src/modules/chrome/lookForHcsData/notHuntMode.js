@@ -3,14 +3,14 @@ import calf from '../../support/calf';
 import conditional from './conditional';
 import executeAll from '../../common/executeAll';
 import getCalfPrefs from '../../common/getCalfPrefs';
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 import getValue from '../../system/getValue';
 import guildActivity from '../../guild/guildActivity';
 import insertElement from '../../common/insertElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import priorityThree from './priorityThree';
-import {seLog} from '../../seLog/seLog';
-import {pCL, pCR} from '../../support/layout';
+import { seLog } from '../../seLog/seLog';
+import { pCL, pCR } from '../../support/layout';
 
 function getEnvVars() {
   [
@@ -29,21 +29,20 @@ function getEnvVars() {
     'enableComposingAlert',
     'enableActiveBountyList',
     'enableWantedList',
-    'wantedGuildMembers'
+    'wantedGuildMembers',
   ].forEach(getCalfPrefs);
-  calf.allyEnemyOnlineRefreshTime =
-    getValue('allyEnemyOnlineRefreshTime') * 1000;
+  calf.allyEnemyOnlineRefreshTime = getValue('allyEnemyOnlineRefreshTime') * 1000;
 }
 
 function moveRHSBoxUpOnRHS(title) {
-  var box = getElementById(title);
+  const box = getElementById(title);
   if (box) {
     insertElementAfterBegin(pCR, box);
   }
 }
 
 function moveRHSBoxToLHS(title) {
-  var boxDiv = getElementById(title);
+  const boxDiv = getElementById(title);
   if (boxDiv) {
     boxDiv.classList.add('pCR');
     insertElement(pCL, boxDiv);
@@ -74,30 +73,30 @@ function doMoveDailyQuest() {
   }
 }
 
-//#if _DEV  //  doMoveXmas
+// #if _DEV  //  doMoveXmas
 function doMoveXmas() {
   // if (getValue('moveFSBox')) {
   add(3, moveRHSBoxToLHS, ['minibox-xmas']);
   // }
 }
-//#endif
+// #endif
 
-function asyncPFour(fn) {add(4, fn);}
+function asyncPFour(fn) { add(4, fn); }
 
 function priorityFour() {
   [
     guildActivity,
-    seLog
+    seLog,
   ].forEach(asyncPFour);
 }
 
 export default function notHuntMode() {
-  if (calf.huntingMode) {return;}
+  if (calf.huntingMode) { return; }
   // move boxes in opposite order that you want them to appear.
   executeAll([
-    //#if _DEV  //  doMoveXmas
+    // #if _DEV  //  doMoveXmas
     doMoveXmas,
-    //#endif
+    // #endif
     doMoveGuildList,
     doMoveAllyList,
     doMoveDailyQuest,
@@ -105,6 +104,6 @@ export default function notHuntMode() {
     getEnvVars,
     conditional,
     priorityThree,
-    priorityFour
+    priorityFour,
   ]);
 }

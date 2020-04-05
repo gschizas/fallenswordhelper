@@ -8,7 +8,7 @@ import useItem from '../ajax/useItem';
 
 function gotBackpack(action, data, bpData) {
   // TODO assuming backpack is successful...
-  var lastBackpackItem = bpData.items[bpData.items.length - 1].a;
+  const lastBackpackItem = bpData.items[bpData.items.length - 1].a;
   if (action === 'wear') {
     return doAction(equipItem, lastBackpackItem, data);
     // Return recall status irrespective of the status of the equipitem

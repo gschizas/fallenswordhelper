@@ -5,6 +5,6 @@ export default function quickbuff(userAry, buffAry) {
     cmd: 'quickbuff',
     subcmd: 'activate',
     username: userAry,
-    skill: buffAry
+    skill: buffAry,
   });
 }

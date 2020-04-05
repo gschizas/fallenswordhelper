@@ -3,8 +3,8 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 // import querySelector from '../common/querySelector';
 
 function getIntFromRegExp(theText, rxSearch) {
-  var result;
-  var matches = theText.replace(/,/g, '').match(rxSearch);
+  let result;
+  const matches = theText.replace(/,/g, '').match(rxSearch);
   if (matches) {
     result = parseInt(matches[1], 10);
   } else {
@@ -15,20 +15,20 @@ function getIntFromRegExp(theText, rxSearch) {
 
 function mightBePositive(actualXP, xpLockXP) {
   let sign = '';
-  if (actualXP > xpLockXP) {sign = '+';}
+  if (actualXP > xpLockXP) { sign = '+'; }
   return sign + addCommas(actualXP - xpLockXP);
 }
 
 function injectLock(xpLock) {
-  var xpLockmouseover = xpLock.dataset.tipped;
-  var xpLockXP = getIntFromRegExp(xpLockmouseover, /XP Lock: <b>(\d*)/);
-  var actualXP = getIntFromRegExp(xpLockmouseover, /XP: <b>(\d*)/);
+  const xpLockmouseover = xpLock.dataset.tipped;
+  const xpLockXP = getIntFromRegExp(xpLockmouseover, /XP Lock: <b>(\d*)/);
+  const actualXP = getIntFromRegExp(xpLockmouseover, /XP: <b>(\d*)/);
   insertHtmlBeforeEnd(xpLock.parentNode.nextElementSibling,
-    ' (<b>' + mightBePositive(actualXP, xpLockXP) + '</b>)');
+    ` (<b>${mightBePositive(actualXP, xpLockXP)}</b>)`);
 }
 
 export default function guildXPLock() {
   let xpLock;
   // var xpLock = querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
-  if (xpLock) {injectLock(xpLock);}
+  if (xpLock) { injectLock(xpLock); }
 }

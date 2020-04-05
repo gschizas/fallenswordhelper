@@ -1,9 +1,10 @@
 import del from 'rollup-plugin-delete';
-import rollupCalf from './rollupCalf';
 import serve from 'rollup-plugin-serve';
+import rollupCalf from './rollupCalf';
 
 const fs = require('fs');
 const port = require('./config.json').port;
+
 const outPath = 'dist/watch/';
 
 const options = rollupCalf(
@@ -12,27 +13,28 @@ const options = rollupCalf(
   {
     _BETA: true,
     _CSSPATH: `https://localhost:${port}/${outPath}`,
-    _DEV: true
-  });
+    _DEV: true,
+  },
+);
 options.treeshake = false;
-options.watch = {include: 'src/**'};
+options.watch = { include: 'src/**' };
 
 options.plugins.push(serve({
   contentBase: '',
-  headers: {'Access-Control-Allow-Origin': '*'},
+  headers: { 'Access-Control-Allow-Origin': '*' },
   https: {
     key: fs.readFileSync('key.pem'),
-    cert: fs.readFileSync('cert.crt')
+    cert: fs.readFileSync('cert.crt'),
   },
-  port
+  port,
 }));
 
 options.plugins.push(del({
   targets: [
     `${outPath}*`,
     `!${outPath}dataTables.css`,
-    `!${outPath}fallenswordhelper.user.js`
-  ]
+    `!${outPath}fallenswordhelper.user.js`,
+  ],
 }));
 
 export default options;

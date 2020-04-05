@@ -1,13 +1,13 @@
-import {def_PvE} from '../../support/constants';
+import { def_PvE } from '../../support/constants';
 import getValue from '../../system/getValue';
-import {get, set} from '../../system/idb';
+import { get, set } from '../../system/idb';
 
 // Taking the Not Save in case they add new enhancements.
-var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
+const notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
   'Disarm', 'Duelist', 'Thievery', 'Master Blacksmith', 'Master Crafter',
   'Fury Caster', 'Master Inventor', 'Sustain'];
-var combatLog = [];
-var combatData;
+let combatLog = [];
+let combatData;
 
 function storeBuffs(buff) {
   if (buff.id === 54 || buff.id === 26) {
@@ -52,11 +52,11 @@ function processCombatResponse(e, data) {
 
 function combatResponse(e, data) {
   // If bad response do nothing.
-  if (data.response.response === 0) {processCombatResponse(e, data);}
+  if (data.response.response === 0) { processCombatResponse(e, data); }
 }
 
 function gotCombatLog(data) { // jQuery.min
-  if (data) {combatLog = data;}
+  if (data) { combatLog = data; }
   $.subscribe(def_PvE, combatResponse);
 }
 

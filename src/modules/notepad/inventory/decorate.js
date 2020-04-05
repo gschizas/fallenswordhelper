@@ -1,4 +1,4 @@
-import {theInv} from './buildInv';
+import { theInv } from './buildInv';
 
 export default function decorate() {
   if (theInv.folders) {

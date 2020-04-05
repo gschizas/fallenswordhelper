@@ -9,8 +9,8 @@ export default function injectBank() {
     balPos: 0,
     data: {
       cmd: 'bank',
-      subcmd: 'transaction'
+      subcmd: 'transaction',
     },
-    initWithdraw: ''
+    initWithdraw: '',
   });
 }

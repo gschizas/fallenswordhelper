@@ -1,4 +1,4 @@
-import {simpleCheckbox} from './simpleCheckbox';
+import { simpleCheckbox } from './simpleCheckbox';
 
 function concatSimple(prev, curr) {
   return prev + simpleCheckbox(curr);

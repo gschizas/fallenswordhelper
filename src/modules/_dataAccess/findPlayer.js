@@ -2,10 +2,10 @@ import getProfile from '../ajax/getProfile';
 
 function parseReport(json) {
   let last = json.last_login;
-  if (!last) {last = 0;}
+  if (!last) { last = 0; }
   return {
-    r: [{last_activity: Number(last), vl: json.virtual_level}],
-    s: true
+    r: [{ last_activity: Number(last), vl: json.virtual_level }],
+    s: true,
   };
 }
 

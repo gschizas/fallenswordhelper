@@ -1,15 +1,15 @@
-import {def_table} from '../support/constants';
+import { def_table } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import on from '../common/on';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import querySelector from '../common/querySelector';
 import querySelectorArray from '../common/querySelectorArray';
-import {sendEvent} from '../support/fshGa';
+import { sendEvent } from '../support/fshGa';
 import setValue from '../system/setValue';
-import {simpleCheckboxHtml} from '../settings/simpleCheckbox';
-import {createDiv, createStyle} from '../common/cElement';
+import { simpleCheckboxHtml } from '../settings/simpleCheckbox';
+import { createDiv, createStyle } from '../common/cElement';
 
 const pref_enableStamBars = 'enableStamBars';
 let enableStamBars;
@@ -22,10 +22,10 @@ function getStamPerc(a) {
 
 function stamBarStyle(a) {
   const perc = getStamPerc(a);
-  return '#fshMemberList ' +
-    `tr:nth-child(${a.parentNode.parentNode.rowIndex + 1}) {` +
-    `background: linear-gradient(to right, rgba(255, 153, 0, 0.5) ${perc}%, ` +
-    `transparent ${perc + 1}%)}`;
+  return '#fshMemberList '
+    + `tr:nth-child(${a.parentNode.parentNode.rowIndex + 1}) {`
+    + `background: linear-gradient(to right, rgba(255, 153, 0, 0.5) ${perc}%, `
+    + `transparent ${perc + 1}%)}`;
 }
 
 function injectStyle() {
@@ -53,12 +53,12 @@ function changePref() {
 }
 
 function injectPref() {
-  var gs = querySelector('#pCC img.guild_openGuildStore');
-  var td = gs.parentNode;
+  const gs = querySelector('#pCC img.guild_openGuildStore');
+  const td = gs.parentNode;
   const prefContainer = insertElement(td,
     createDiv({
       className: 'fshCenter',
-      innerHTML: simpleCheckboxHtml(pref_enableStamBars)
+      innerHTML: simpleCheckboxHtml(pref_enableStamBars),
     }));
   on(prefContainer, 'change', changePref);
 }
@@ -66,5 +66,5 @@ function injectPref() {
 export default function progressBar() {
   injectPref();
   enableStamBars = getValue(pref_enableStamBars);
-  if (enableStamBars) {toggleStyle();}
+  if (enableStamBars) { toggleStyle(); }
 }

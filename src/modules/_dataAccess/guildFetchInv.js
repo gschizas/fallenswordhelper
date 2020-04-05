@@ -12,12 +12,12 @@ function updateType(item) {
 }
 
 function formatResponse(json) {
-  return {r: json.map(updateType), s: true};
+  return { r: json.map(updateType), s: true };
 }
 
 export default function guildFetchInv() {
   return indexAjaxJson({
     cmd: 'guild',
-    subcmd: 'fetchinv'
+    subcmd: 'fetchinv',
   }).then(formatResponse);
 }

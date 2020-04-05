@@ -1,5 +1,5 @@
 import profile from './profile';
 
 export default function loadComponents() {
-  return profile({subcmd: 'loadcomponents'});
+  return profile({ subcmd: 'loadcomponents' });
 }

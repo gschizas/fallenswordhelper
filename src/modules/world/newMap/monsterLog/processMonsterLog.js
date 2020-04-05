@@ -1,8 +1,8 @@
 import calf from '../../../support/calf';
 import partial from '../../../common/partial';
-import {get, set} from '../../../system/idb';
+import { get, set } from '../../../system/idb';
 
-var monsterLog;
+let monsterLog;
 
 function storeDescription(creature, logCreature) {
   logCreature.creature_class = creature.creature_class;
@@ -13,7 +13,7 @@ function storeDescription(creature, logCreature) {
 
 function setupMob(creature) {
   if (!monsterLog[creature.name]) {
-    monsterLog[creature.name] = {seen: 1};
+    monsterLog[creature.name] = { seen: 1 };
     storeDescription(creature, monsterLog[creature.name]);
   } else if (monsterLog[creature.name].seen) {
     monsterLog[creature.name].seen += 1;
@@ -28,20 +28,20 @@ function getStat(fn, stat, creatureStat) {
 }
 
 function updateMinMax(_logStat, creatureStat) {
-  var logStat = _logStat || {};
+  const logStat = _logStat || {};
   logStat.min = getStat(Math.min, logStat.min, creatureStat);
   logStat.max = getStat(Math.max, logStat.max, creatureStat);
   return logStat;
 }
 
-var stats = ['attack', 'armor', 'damage', 'defense', 'hp'];
+const stats = ['attack', 'armor', 'damage', 'defense', 'hp'];
 
 function statChanged(logStat, newStat) {
   return !logStat || logStat.min !== newStat.min || logStat.max !== newStat.max;
 }
 
 function updateStat(creature, logCreature, stat) {
-  var newStat = updateMinMax(logCreature[stat], Number(creature[stat]));
+  const newStat = updateMinMax(logCreature[stat], Number(creature[stat]));
   if (statChanged(logCreature[stat], newStat)) {
     logCreature[stat] = newStat;
   }
@@ -63,12 +63,13 @@ function storeEnhancements(creature, logCreature) {
   if (creatureHazEnhancements(creature)) {
     logCreature.enhancements = logCreature.enhancements || {};
     creature.enhancements.forEach(
-      partial(updateEnhancements, logCreature.enhancements));
+      partial(updateEnhancements, logCreature.enhancements),
+    );
   }
 }
 
 function doMonsterLog(creature) {
-  if (!monsterLog) {monsterLog = {};}
+  if (!monsterLog) { monsterLog = {}; }
   setupMob(creature);
   storeStats(creature, monsterLog[creature.name]);
   storeEnhancements(creature, monsterLog[creature.name]);
@@ -76,7 +77,7 @@ function doMonsterLog(creature) {
 }
 
 export function processMonsterLog(creature) {
-  if (calf.showMonsterLog) {doMonsterLog(creature);}
+  if (calf.showMonsterLog) { doMonsterLog(creature); }
 }
 
 function initLog(data) {

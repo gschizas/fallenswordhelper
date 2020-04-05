@@ -3,5 +3,5 @@ import injectBioWidgets from '../../../profile/bio/bioWidgets';
 
 export default {
   '-': guildHall,
-  post: injectBioWidgets
+  post: injectBioWidgets,
 };

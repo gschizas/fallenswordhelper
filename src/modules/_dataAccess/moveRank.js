@@ -5,6 +5,6 @@ export default function moveRank(direction, rankId) {
     cmd: 'guild',
     subcmd: 'ranks',
     subcmd2: direction,
-    rank_id: rankId
-  }).then(() => ({s: true}));
+    rank_id: rankId,
+  }).then(() => ({ s: true }));
 }

@@ -1,7 +1,7 @@
 import './impWarning.css';
-import {createSpan} from '../../../common/cElement';
-import {daQuickbuff} from '../../../_dataAccess/_dataAccess';
-import {def_fetch_playerBuffs} from '../../../support/constants';
+import { createSpan } from '../../../common/cElement';
+import { daQuickbuff } from '../../../_dataAccess/_dataAccess';
+import { def_fetch_playerBuffs } from '../../../support/constants';
 import getBuff from './getBuff';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
@@ -11,8 +11,8 @@ import quickbuffSuccess from '../../../common/quickbuffSuccess';
 import setText from '../../../common/setText';
 import toggleForce from '../../../common/toggleForce';
 
-var impDiv;
-var impRemainingSpan;
+let impDiv;
+let impRemainingSpan;
 
 function refreshBuffs(json) {
   if (quickbuffSuccess(json)) {
@@ -21,7 +21,7 @@ function refreshBuffs(json) {
 }
 
 function recastClick() {
-  if (getBuff('Summon Shield Imp')) {return;}
+  if (getBuff('Summon Shield Imp')) { return; }
   daQuickbuff([playerName()], [55]).then(refreshBuffs);
 }
 
@@ -32,10 +32,10 @@ function getImpsRemaining(imp) {
   return 0;
 }
 
-var impStyles = [
+const impStyles = [
   'imp-0',
   'imp-1',
-  'imp-1'
+  'imp-1',
 ];
 
 function getImpWarningStyle(impsRem) {
@@ -48,7 +48,7 @@ function initImpDiv(containerDiv) {
   impRemainingSpan = createSpan();
   insertElement(impDiv, impRemainingSpan);
   insertHtmlBeforeEnd(impDiv, '&nbsp;');
-  var recast = createSpan({className: 'xSmallLink', textContent: 'Recast'});
+  const recast = createSpan({ className: 'xSmallLink', textContent: 'Recast' });
   insertElement(impDiv, recast);
   onclick(recast, recastClick);
 }
@@ -59,7 +59,7 @@ function hasImp(containerDiv, imp) {
   } else {
     initImpDiv(containerDiv);
   }
-  var impsRem = getImpsRemaining(imp);
+  const impsRem = getImpsRemaining(imp);
   impDiv.className = getImpWarningStyle(impsRem);
   setText(impsRem, impRemainingSpan);
 }

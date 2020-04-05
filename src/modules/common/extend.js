@@ -1,5 +1,5 @@
 import isObject from './isObject';
-import {keys} from './keys';
+import { keys } from './keys';
 import partial from './partial';
 
 function overwriteKey(obj, mixins, fn, key) {

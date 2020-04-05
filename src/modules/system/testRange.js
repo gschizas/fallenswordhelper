@@ -3,7 +3,7 @@ function theValueIsValid(theValue, min, max) {
 }
 
 export default function testRange(aValue, min, max) {
-  var theValue = parseInt(aValue, 10);
+  const theValue = parseInt(aValue, 10);
   if (theValueIsValid(theValue, min, max)) {
     return theValue;
   }

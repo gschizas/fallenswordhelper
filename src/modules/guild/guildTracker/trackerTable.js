@@ -5,10 +5,12 @@ import formatLocalDateTime from '../../common/formatLocalDateTime';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isUndefined from '../../common/isUndefined';
-import {keys} from '../../common/keys';
+import { keys } from '../../common/keys';
 import on from '../../common/on';
 import partial from '../../common/partial';
-import {act, cur, gxp, lvl, max, utc, vl} from './indexConstants';
+import {
+  act, cur, gxp, lvl, max, utc, vl,
+} from './indexConstants';
 import {
   createDiv,
   createTBody,
@@ -16,24 +18,24 @@ import {
   createTh,
 } from '../../common/cElement';
 
-var actBody;
-var selMember;
-var tgCont;
-var memberSelect;
-var myMembers;
+let actBody;
+let selMember;
+let tgCont;
+let memberSelect;
+let myMembers;
 
 function addOption(prev, member) {
-  return prev + '<option value="' + member + '">' + member + '</option>';
+  return `${prev}<option value="${member}">${member}</option>`;
 }
 
 function buildOptions(ourMembers) {
-  return '<select name="member">' +
-    '<option value="- All -" selected>- All -</option>' +
-    keys(ourMembers).sort(alpha).reduce(addOption, '') + '</select>';
+  return `${'<select name="member">'
+    + '<option value="- All -" selected>- All -</option>'}${
+    keys(ourMembers).sort(alpha).reduce(addOption, '')}</select>`;
 }
 
 function toText(val) {
-  if (isUndefined(val)) {return '#DEF';}
+  if (isUndefined(val)) { return '#DEF'; }
   return val.toLocaleString();
 }
 
@@ -42,27 +44,27 @@ function memberFilter(memberKey) {
 }
 
 function aMembersActivityRows(memberKey, inside, activity) {
-  return inside + '<tr>' +
-    '<td>' +
-    formatLocalDateTime(new Date(activity[utc] * 1000)) +
-    '</td>' +
-    '<td>' + memberKey + '</td>' +
-    '<td class="fshRight">' + toText(activity[lvl]) + '</td>' +
-    '<td class="fshRight">' + toText(activity[vl]) + '</td>' +
-    '<td class="fshRight">' + toText(activity[cur]) + '</td>' +
-    '<td class="fshRight">' + toText(activity[max]) + '</td>' +
-    '<td class="fshRight">' +
-      Math.floor(activity[cur] / activity[max] * 100) +
-    '</td>' +
-    '<td class="fshRight">' + activity[act] + '</td>' +
-    '<td class="fshRight">' + toText(activity[gxp]) + '</td>' +
-    '</tr>';
+  return `${inside}<tr>`
+    + `<td>${
+      formatLocalDateTime(new Date(activity[utc] * 1000))
+    }</td>`
+    + `<td>${memberKey}</td>`
+    + `<td class="fshRight">${toText(activity[lvl])}</td>`
+    + `<td class="fshRight">${toText(activity[vl])}</td>`
+    + `<td class="fshRight">${toText(activity[cur])}</td>`
+    + `<td class="fshRight">${toText(activity[max])}</td>`
+    + `<td class="fshRight">${
+      Math.floor(activity[cur] / activity[max] * 100)
+    }</td>`
+    + `<td class="fshRight">${activity[act]}</td>`
+    + `<td class="fshRight">${toText(activity[gxp])}</td>`
+    + '</tr>';
 }
 
 function selectedMember(outside, memberKey) {
-  if (memberFilter(memberKey)) {return outside;}
-  return outside +
-    myMembers[memberKey].reduce(partial(aMembersActivityRows, memberKey), '');
+  if (memberFilter(memberKey)) { return outside; }
+  return outside
+    + myMembers[memberKey].reduce(partial(aMembersActivityRows, memberKey), '');
 }
 
 function memberRows() {
@@ -70,7 +72,7 @@ function memberRows() {
 }
 
 function drawRows() {
-  if (myMembers) {actBody.innerHTML = memberRows();}
+  if (myMembers) { actBody.innerHTML = memberRows(); }
   tgCont.classList.remove('fshSpinner');
 }
 
@@ -93,20 +95,20 @@ export function initTable(theMembers) {
 }
 
 function makeMemberHeader() {
-  var memberHead = createTh({textContent: 'Member'});
+  const memberHead = createTh({ textContent: 'Member' });
   memberSelect = createDiv();
   insertElement(memberHead, memberSelect);
   return memberHead;
 }
 
 function headerRow(tg) {
-  var hrow = tg.createTHead().insertRow(-1);
+  const hrow = tg.createTHead().insertRow(-1);
   insertHtmlBeforeEnd(hrow, '<th>Date</th>');
-  var memberHead = makeMemberHeader();
+  const memberHead = makeMemberHeader();
   insertElement(hrow, memberHead);
-  insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
-    '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
-    '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
+  insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>'
+    + '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>'
+    + '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
 }
 
 function makeActBody(tg) {
@@ -115,11 +117,11 @@ function makeActBody(tg) {
 }
 
 export function makeTg() {
-  var tg = createTable({id: 'tg'});
+  const tg = createTable({ id: 'tg' });
   headerRow(tg);
   makeActBody(tg);
   on(tg, 'change', myChange);
-  tgCont = createDiv({className: 'tgCont fshSpinner64'});
+  tgCont = createDiv({ className: 'tgCont fshSpinner64' });
   insertElement(tgCont, tg);
   return tgCont;
 }

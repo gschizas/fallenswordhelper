@@ -1,4 +1,4 @@
-import {dropItemsUrl} from '../../support/constants';
+import { dropItemsUrl } from '../../support/constants';
 import expandMenu from './expandMenu';
 import keyHandlerEvent from './keyHandlerEvent';
 

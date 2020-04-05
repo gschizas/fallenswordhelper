@@ -1,25 +1,25 @@
 import combatView from '../ajax/combatView';
 import createDocument from '../system/createDocument';
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import getText from '../common/getText';
 import getTextTrim from '../common/getTextTrim';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
-import {sendEvent} from '../support/fshGa';
+import { sendEvent } from '../support/fshGa';
 
 function getId(e) {
   return Number(e.getAttribute('background').match(/\/(\d+)/)[1]); // FIXME
 }
 
 function getResult(script, e) {
-  const thisRe = new RegExp(e + ' = (\\d+)');
+  const thisRe = new RegExp(`${e} = (\\d+)`);
   return Number(script.match(thisRe)[1]);
 }
 
 const specialMask = [
   [18, /(\w+)+ leeched the buff '([A-Za-z ]+)'./],
   [21,
-    /(\w+)+ was mesmerized by Spell Breaker, losing the '([A-Za-z ]+)' buff./]
+    /(\w+)+ was mesmerized by Spell Breaker, losing the '([A-Za-z ]+)' buff./],
 ];
 
 function gettokens(spec) {
@@ -32,15 +32,15 @@ function gettokens(spec) {
     .find(([, match]) => match);
   if (!thisTests) {
     sendEvent('Logs', 'Missing PvP Special', spec);
-    return {id: -1, params: ['-1', '-1']};
+    return { id: -1, params: ['-1', '-1'] };
   }
-  return {id: thisTests[0], params: [thisTests[1][1], thisTests[1][2]]};
+  return { id: thisTests[0], params: [thisTests[1][1], thisTests[1][2]] };
 }
 
 function formatSpecial(pCC) {
   const spec = querySelectorArray('#specialsDiv', pCC)
     .map(getTextTrim)
-    .filter(t => ['leeched', 'Spell'].some(s => t.includes(s)))
+    .filter((t) => ['leeched', 'Spell'].some((s) => t.includes(s)))
     .map(gettokens);
   return spec;
 }
@@ -48,14 +48,14 @@ function formatSpecial(pCC) {
 function attacker(header) {
   return {
     id: getId(header.rows[1].cells[0]),
-    name: getTextTrim(header.rows[0].cells[0])
+    name: getTextTrim(header.rows[0].cells[0]),
   };
 }
 
 function defender(header) {
   return {
     id: getId(header.rows[1].cells[2]),
-    name: getTextTrim(header.rows[0].cells[2])
+    name: getTextTrim(header.rows[0].cells[2]),
   };
 }
 
@@ -65,7 +65,7 @@ function doBase(id, pCC) {
     attacker: attacker(header),
     defender: defender(header),
     id: Number(id),
-    specials: formatSpecial(pCC)
+    specials: formatSpecial(pCC),
   };
 }
 
@@ -77,12 +77,12 @@ function doscript(pCC) {
     pvp_prestige_gain: getResult(script, 'prestigeGain'),
     pvp_rating_change: getResult(script, 'pvpRatingChange'),
     winner: getResult(script, 'winner'),
-    xp_gain: getResult(script, 'xpGain')
+    xp_gain: getResult(script, 'xpGain'),
   };
 }
 
 function reportObject(id, pCC) {
-  return {...doBase(id, pCC), ...doscript(pCC)};
+  return { ...doBase(id, pCC), ...doscript(pCC) };
 }
 
 function parseReport(id, html) {
@@ -90,7 +90,7 @@ function parseReport(id, html) {
   const pCC = getElementById('pCC', doc);
   return {
     r: reportObject(id, pCC),
-    s: true
+    s: true,
   };
 }
 

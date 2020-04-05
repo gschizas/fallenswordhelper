@@ -9,13 +9,13 @@ function parseReport(html) {
   return {
     r: {
       attributes: [
-        {value: stats.attack},
-        {value: stats.defense},
-        {value: stats.armor},
-        {value: stats.damage},
-        {value: stats.hp}
-      ]
-    }
+        { value: stats.attack },
+        { value: stats.defense },
+        { value: stats.armor },
+        { value: stats.damage },
+        { value: stats.hp },
+      ],
+    },
   };
 }
 
@@ -25,6 +25,6 @@ export default function groupStats(groupId) {
     cmd: 'guild',
     subcmd: 'groups',
     subcmd2: 'viewstats',
-    group_id: groupId
+    group_id: groupId,
   }).then(parseReport);
 }

@@ -2,7 +2,7 @@ import getValue from '../../system/getValue';
 import renderBio from './render';
 
 function doRender(bioCell) {
-  var bioContents = bioCell.innerHTML;
+  let bioContents = bioCell.innerHTML;
   bioContents = renderBio(bioContents);
   if (bioContents) {
     bioCell.innerHTML = bioContents;

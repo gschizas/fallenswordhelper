@@ -1,11 +1,11 @@
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import infoBox from '../common/infoBox';
-import {injectArena} from './arena';
-import {nowSecs} from '../support/now';
+import { injectArena } from './arena';
+import { nowSecs } from '../support/now';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
-import {sendEvent} from '../support/fshGa';
-import {get, set} from '../system/idb';
+import { sendEvent } from '../support/fshGa';
+import { get, set } from '../system/idb';
 
 function addId(id, obj) {
   const newObj = obj || {};
@@ -23,7 +23,7 @@ function yourGuild(thisInfo) {
 
 function evalMsg() {
   const thisInfo = infoBox();
-  if (maxMoves(thisInfo)) {return;}
+  if (maxMoves(thisInfo)) { return; }
   if (yourGuild(thisInfo)) {
     const thisId = querySelector('#pCC input[name="pvp_id"]').value;
     get('fsh_arenaFull').then(partial(addId, thisId));

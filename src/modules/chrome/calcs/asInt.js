@@ -4,6 +4,6 @@ import valueText from '../../common/valueText';
 
 export default function asInt(className) {
   return intValue(
-    valueText(getElementsByClassName(className))
+    valueText(getElementsByClassName(className)),
   );
 }

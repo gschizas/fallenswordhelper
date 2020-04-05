@@ -1,5 +1,5 @@
 import calf from '../../../support/calf';
-import {def_fetch_playerBuffs} from '../../../support/constants';
+import { def_fetch_playerBuffs } from '../../../support/constants';
 import setValue from '../../../system/setValue';
 
 export default function toggleShowHuntingBuffs() {

@@ -1,20 +1,20 @@
 import getValue from '../../system/getValue';
 import playerId from '../../common/playerId';
-import {set} from '../../system/idb';
+import { set } from '../../system/idb';
 import shouldBeArray from '../../system/shouldBeArray';
 
-var currentPlayerId;
-var hideRecipes = [];
+let currentPlayerId;
+let hideRecipes = [];
 
 function itemImg(itm) {
-  return '<div class="rmItem"><img class="tip-dynamic" ' +
-    'data-tipped="fetchitem.php?item_id=' +
-    itm.id + '&inv_id=-1&t=2&p=' +
-    currentPlayerId + '&vcode=' +
-    itm.verify + '" src="' +
-    itm.img + '" height="20px" width="20px"><p>' +
-    itm.amountPresent + '/' +
-    itm.amountNeeded + '</p></div>';
+  return `${'<div class="rmItem"><img class="tip-dynamic" '
+    + 'data-tipped="fetchitem.php?item_id='}${
+    itm.id}&inv_id=-1&t=2&p=${
+    currentPlayerId}&vcode=${
+    itm.verify}" src="${
+    itm.img}" height="20px" width="20px"><p>${
+    itm.amountPresent}/${
+    itm.amountNeeded}</p></div>`;
 }
 
 function getRecipeItems(recipe) {
@@ -25,14 +25,14 @@ function getRecipeItems(recipe) {
 }
 
 function componentImg(comp) {
-  return '<div class="rmItem"><img class="tip-dynamic" ' +
-    'data-tipped="fetchitem.php?item_id=' +
-    comp.id + '&inv_id=-1&t=2&p=' +
-    currentPlayerId + '&vcode=' +
-    comp.verify + '" src="' +
-    comp.img + '" height="20px" width="20px"><p>' +
-    comp.amountPresent + '/' +
-    comp.amountNeeded + '</p></div>';
+  return `${'<div class="rmItem"><img class="tip-dynamic" '
+    + 'data-tipped="fetchitem.php?item_id='}${
+    comp.id}&inv_id=-1&t=2&p=${
+    currentPlayerId}&vcode=${
+    comp.verify}" src="${
+    comp.img}" height="20px" width="20px"><p>${
+    comp.amountPresent}/${
+    comp.amountNeeded}</p></div>`;
 }
 
 function getComponents(recipe) {
@@ -44,12 +44,12 @@ function getComponents(recipe) {
 
 function getImg(recipe) {
   if (recipe.target) {
-    return ' <img class="tip-dynamic" ' +
-      'data-tipped="fetchitem.php?item_id=' +
-      recipe.target.id + '&inv_id=-1&t=2&p=' + currentPlayerId +
-      '&vcode=' + recipe.target.verify + '" ' +
-      'src="' + recipe.target.img +
-      '" height="30px" width="30px"><br/>';
+    return `${' <img class="tip-dynamic" '
+      + 'data-tipped="fetchitem.php?item_id='}${
+      recipe.target.id}&inv_id=-1&t=2&p=${currentPlayerId
+    }&vcode=${recipe.target.verify}" `
+      + `src="${recipe.target.img
+      }" height="30px" width="30px"><br/>`;
   }
   return '';
 }
@@ -59,26 +59,26 @@ function hidden(recipe) {
 }
 
 function makeRow(recipe) {
-  return '<tr class="rmTr">' +
-      '<td class="rmTd">' +
-        '<a href="' + recipe.link + '">' +
-          '<img src="' + recipe.img + '" height="30px" width="30px">' +
-        '</a>' +
-      '</td>' +
-      '<td class="rmTd">' +
-        '<a href="' + recipe.link + '">' + recipe.name + '</a>' +
-      '</td>' +
-      '<td class="rmTd">' + getRecipeItems(recipe) + '</td>' +
-      '<td class="rmTd">' + getComponents(recipe) + '</td>' +
-      '<td class="rmTd">' + getImg(recipe) + '</td>' +
-    '</tr>';
+  return `${'<tr class="rmTr">'
+      + '<td class="rmTd">'
+        + '<a href="'}${recipe.link}">`
+          + `<img src="${recipe.img}" height="30px" width="30px">`
+        + '</a>'
+      + '</td>'
+      + '<td class="rmTd">'
+        + `<a href="${recipe.link}">${recipe.name}</a>`
+      + '</td>'
+      + `<td class="rmTd">${getRecipeItems(recipe)}</td>`
+      + `<td class="rmTd">${getComponents(recipe)}</td>`
+      + `<td class="rmTd">${getImg(recipe)}</td>`
+    + '</tr>';
 }
 
 function drawRecipeTable(output, recipebook) { // Legacy
   currentPlayerId = playerId();
-  var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
-    '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
-    '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
+  let result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>'
+    + '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>'
+    + '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
   result += recipebook.recipe.filter(hidden).map(makeRow).join('');
   result += '</table>';
   output.innerHTML = result;

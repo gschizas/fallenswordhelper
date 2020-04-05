@@ -21,7 +21,7 @@ import marketplace from '../../marketplace';
 import news from './news';
 import noCmd from './noCmd';
 import notepad from './notepad';
-import {parseTemplePage} from '../notification/parseTemplePage';
+import { parseTemplePage } from '../notification/parseTemplePage';
 import points from './points';
 import profile from './profile';
 import questbook from './questbook';
@@ -32,41 +32,41 @@ import toprated from './toprated';
 import trade from './trade';
 
 export default {
-  settings: {'-': {'-': injectSettings}},
-  world: {'-': {'-': injectWorld}},
-  news: news,
-  arena: arena,
-  questbook: questbook,
-  profile: profile,
-  auctionhouse: auctionhouse,
-  guild: guild,
-  bank: {'-': {'-': injectBank}},
-  log: log,
-  potionbazaar: {'-': {'-': injectBazaar}},
-  marketplace: {createreq: {'-': marketplace}},
-  quickbuff: {'-': {'-': injectQuickBuff}}, // No ga
-  notepad: notepad,
-  points: {'-': {'-': points}},
-  trade: trade,
-  titan: {'-': {'-': injectTitan}},
-  toprated: toprated,
-  inventing: {viewrecipe: {'-': inventing}},
-  tempinv: {'-': {'-': injectMailbox}},
-  findplayer: {'-': {'-': injectFindPlayer}},
-  quests: quests, // UFSG
-  items: items, // UFSG
-  creatures: {'-': {'-': allowBack}}, // UFSG
-  masterrealms: {'-': {'-': allowBack}}, // UFSG
-  realms: {'-': {'-': allowBack}}, // UFSG
-  relics: {'-': {'-': allowBack}}, // UFSG
-  shops: {'-': {'-': allowBack}}, // UFSG
-  scavenging: scavenging,
-  temple: {'-': {'-': parseTemplePage}},
-  composing: composing,
-  pvpladder: {'-': {'-': ladder}},
-  crafting: {'-': {'-': craftForge}},
-  hellforge: {'-': {'-': craftForge}},
-  superelite: {'-': {'-': superelite}},
+  settings: { '-': { '-': injectSettings } },
+  world: { '-': { '-': injectWorld } },
+  news,
+  arena,
+  questbook,
+  profile,
+  auctionhouse,
+  guild,
+  bank: { '-': { '-': injectBank } },
+  log,
+  potionbazaar: { '-': { '-': injectBazaar } },
+  marketplace: { createreq: { '-': marketplace } },
+  quickbuff: { '-': { '-': injectQuickBuff } }, // No ga
+  notepad,
+  points: { '-': { '-': points } },
+  trade,
+  titan: { '-': { '-': injectTitan } },
+  toprated,
+  inventing: { viewrecipe: { '-': inventing } },
+  tempinv: { '-': { '-': injectMailbox } },
+  findplayer: { '-': { '-': injectFindPlayer } },
+  quests, // UFSG
+  items, // UFSG
+  creatures: { '-': { '-': allowBack } }, // UFSG
+  masterrealms: { '-': { '-': allowBack } }, // UFSG
+  realms: { '-': { '-': allowBack } }, // UFSG
+  relics: { '-': { '-': allowBack } }, // UFSG
+  shops: { '-': { '-': allowBack } }, // UFSG
+  scavenging,
+  temple: { '-': { '-': parseTemplePage } },
+  composing,
+  pvpladder: { '-': { '-': ladder } },
+  crafting: { '-': { '-': craftForge } },
+  hellforge: { '-': { '-': craftForge } },
+  superelite: { '-': { '-': superelite } },
   '-': noCmd,
-  combat: {attackplayer: {'-': injectProfile}}
+  combat: { attackplayer: { '-': injectProfile } },
 };

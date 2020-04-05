@@ -9,7 +9,7 @@ export default function createPotionFromTemplate(tempId) {
       cmd: 'composing',
       subcmd: 'createajax',
       template_id: tempId,
-      _rnd: rnd()
-    }
+      _rnd: rnd(),
+    },
   });
 }

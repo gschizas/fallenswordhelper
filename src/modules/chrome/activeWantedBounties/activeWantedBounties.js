@@ -4,18 +4,18 @@ import calf from '../../support/calf';
 import functionPasses from '../../common/functionPasses';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import onclick from '../../common/onclick';
-import {parseBountyPageForWorld} from './parseBountyPageForWorld';
+import { parseBountyPageForWorld } from './parseBountyPageForWorld';
 import setValueJSON from '../../system/setValueJSON';
 import {
   bountyList,
   bwNeedsRefresh,
   doRefresh,
   invalidateCache,
-  wantedList
+  wantedList,
 } from './lists';
-import {bountyListDiv, createDivs, wantedListDiv} from './createDivs';
-import {bountyListReset, injectBountyList} from './injectBountyList';
-import {injectWantedList, wantedListReset} from './injectWantedList';
+import { bountyListDiv, createDivs, wantedListDiv } from './createDivs';
+import { bountyListReset, injectBountyList } from './injectBountyList';
+import { injectWantedList, wantedListReset } from './injectWantedList';
 
 function notRefreshed(enableActiveBountyList, enableWantedList) {
   if (enableWantedList) {
@@ -28,10 +28,10 @@ function notRefreshed(enableActiveBountyList, enableWantedList) {
   }
 }
 
-var refreshConditions = [
-  function() {return !bountyList;},
-  function() {return !wantedList;},
-  function() {return bwNeedsRefresh;}
+const refreshConditions = [
+  function () { return !bountyList; },
+  function () { return !wantedList; },
+  function () { return bwNeedsRefresh; },
 ];
 
 function needsRefresh() {
@@ -60,12 +60,12 @@ function resetList(e) {
 }
 
 function doHandlers() {
-  if (bountyListDiv) {onclick(bountyListDiv, resetList);}
-  if (wantedListDiv) {onclick(wantedListDiv, resetList);}
+  if (bountyListDiv) { onclick(bountyListDiv, resetList); }
+  if (wantedListDiv) { onclick(wantedListDiv, resetList); }
 }
 
 export function prepareBountyData() {
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   createDivs();
   doHandlers();
   retrieveBountyInfo(calf.enableActiveBountyList, calf.enableWantedList);

@@ -1,5 +1,5 @@
 export default function failStub() {
-  var dfd = $.Deferred();
+  const dfd = $.Deferred();
   dfd.reject('sorry', 'sorry', 'sorry');
   return dfd;
 }

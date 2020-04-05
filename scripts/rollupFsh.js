@@ -6,12 +6,12 @@ export default function rollupFsh(outdir, jsccValues) {
     input: 'src/fallenswordhelper.user.js',
     output: {
       file: `dist/${outdir}/fallenswordhelper.user.js`,
-      format: 'es'
+      format: 'es',
     },
     plugins: [
-      clear({targets: [`dist/${outdir}`]}),
-      replace({values: jsccValues}),
+      clear({ targets: [`dist/${outdir}`] }),
+      replace({ values: jsccValues }),
     ],
-    external: [jsccValues._CALFJS]
+    external: [jsccValues._CALFJS],
   };
 }

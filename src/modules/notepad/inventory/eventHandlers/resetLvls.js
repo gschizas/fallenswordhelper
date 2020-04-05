@@ -1,5 +1,5 @@
-import {defaultOptions} from '../assets';
-import {options} from '../options';
+import { defaultOptions } from '../assets';
+import { options } from '../options';
 import saveOptions from '../saveOptions';
 
 export default function resetLvls(fshInv) { // jQuery

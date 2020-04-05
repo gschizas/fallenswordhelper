@@ -13,12 +13,12 @@ function getBuffId(nick) {
 }
 
 export default function doBuffLink(targetPlayerID, buffsSent) {
-  var href = '';
+  let href = '';
   if (buffsSent) {
     href = quickBuffHref(targetPlayerID,
       csvSplit(buffsSent[0].replace(/`~|~`/g, '')).map(getBuffId).join(';'));
   } else {
     href = quickBuffHref(targetPlayerID);
   }
-  return ' | <a ' + href + '>Buff</a></span>';
+  return ` | <a ${href}>Buff</a></span>`;
 }

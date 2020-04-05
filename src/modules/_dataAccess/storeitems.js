@@ -1,4 +1,4 @@
-import {htmlResult} from './htmlResult';
+import { htmlResult } from './htmlResult';
 import indexAjaxData from '../ajax/indexAjaxData';
 
 export default function storeitems(invIdAry) {
@@ -6,6 +6,6 @@ export default function storeitems(invIdAry) {
     cmd: 'guild',
     subcmd: 'inventory',
     subcmd2: 'dostoreitems',
-    storeIndex: invIdAry
+    storeIndex: invIdAry,
   }).then(htmlResult);
 }

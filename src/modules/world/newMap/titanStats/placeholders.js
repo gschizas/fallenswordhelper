@@ -1,4 +1,4 @@
-import {createSpan} from '../../../common/cElement';
+import { createSpan } from '../../../common/cElement';
 import setText from '../../../common/setText';
 
 export var currentHp;

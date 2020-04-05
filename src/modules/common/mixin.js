@@ -1,4 +1,4 @@
-import {entries} from './entries';
+import { entries } from './entries';
 import isObject from './isObject';
 import partial from './partial';
 

@@ -7,7 +7,7 @@ export default function smartTableConfig(data, membrList) {
       sort: {},
       filter: {},
       search: {},
-      slice: {page: 1, size: 50}
-    }
+      slice: { page: 1, size: 50 },
+    },
   };
 }

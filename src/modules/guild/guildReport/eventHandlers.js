@@ -1,24 +1,24 @@
 import './guildReport.css';
-import {cdn} from '../../system/system';
+import { cdn } from '../../system/system';
 import classHandler from '../../common/classHandler';
 import classPair from '../../common/classPair';
 import equipItem from '../../ajax/equipItem';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import itemId from './itemId';
 import onclick from '../../common/onclick';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
-import {playerIDRE} from '../../support/constants';
+import { playerIDRE } from '../../support/constants';
 import playerId from '../../common/playerId';
-import {queueRecallItem} from '../../ajaxQueue/queue';
-import {sendEvent} from '../../support/fshGa';
+import { queueRecallItem } from '../../ajaxQueue/queue';
+import { sendEvent } from '../../support/fshGa';
 
-var spinner = '<span class="guildReportSpinner" style="background-image: ' +
-  'url(\'' + cdn + 'ui/misc/spinner.gif\');"></span>';
+const spinner = `${'<span class="guildReportSpinner" style="background-image: '
+  + 'url(\''}${cdn}ui/misc/spinner.gif');"></span>`;
 
 function recalled(theTd) {
-  theTd.innerHTML = '<span class="fastWorn">' +
-    'You successfully recalled the item</span>';
+  theTd.innerHTML = '<span class="fastWorn">'
+    + 'You successfully recalled the item</span>';
 }
 
 function wornItem(theTd) {
@@ -34,7 +34,7 @@ function targetPlayerId(href) {
 }
 
 function recallResult(action, theTd, data) {
-  if (data.r === 1) {return;}
+  if (data.r === 1) { return; }
   if (action === 'recall') {
     recalled(theTd);
   } else {
@@ -70,24 +70,24 @@ function doFastWear(theTd, href) {
   }
 }
 
-var subClass = [
+const subClass = [
   ['fast-bp', doFastBp],
   ['fast-gs', doFastGs],
-  ['fast-wear', doFastWear]
+  ['fast-wear', doFastWear],
 ];
 
 function doFastRecall(target) {
-  var theTd = target.parentNode.parentNode;
-  if (!theTd) {return;}
-  var href = theTd.children[0].href;
-  if (!href) {return;}
+  const theTd = target.parentNode.parentNode;
+  if (!theTd) { return; }
+  const { href } = theTd.children[0];
+  if (!href) { return; }
   subClass.find(partial(classPair, target))[1](theTd, href);
   theTd.innerHTML = spinner;
 }
 
-var classEvts = [
+const classEvts = [
   ['sendLink', doFastRecall],
-  ['a-reply', replyTo]
+  ['a-reply', replyTo],
 ];
 
 export default function eventHandlers() {

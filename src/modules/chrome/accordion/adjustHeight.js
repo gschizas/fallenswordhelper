@@ -1,4 +1,4 @@
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 import querySelectorAll from '../../common/querySelectorAll';
 
 export default function adjustHeight(theNav, myNav) {
@@ -15,11 +15,10 @@ export default function adjustHeight(theNav, myNav) {
     374,
     132,
     132,
-    null
+    null,
   ];
   if (Number(myNav.state) !== -1) {
     // and now the open one
-    theNav.children[myNav.state].children[1].style.height =
-      myNav.heights[myNav.state] + 'px';
+    theNav.children[myNav.state].children[1].style.height = `${myNav.heights[myNav.state]}px`;
   }
 }

@@ -2,7 +2,7 @@ import add from '../support/task';
 import calf from '../support/calf';
 import draggable from '../common/dragStart';
 import escapeHtml from '../system/escapeHtml';
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import getValue from '../system/getValue';
 import getValueJSON from '../system/getValueJSON';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -29,10 +29,10 @@ function invalid(link) {
 }
 
 function linkHtml(link) {
-  if (invalid(link)) {return '';}
-  var newWindow = retBool(link.newWindow, ' target="new"', '');
-  return '<li><a href="' + escapeHtml(link.url) + '"' +
-    newWindow + '>' + link.name + '</a></li>';
+  if (invalid(link)) { return ''; }
+  const newWindow = retBool(link.newWindow, ' target="new"', '');
+  return `<li><a href="${escapeHtml(link.url)}"${
+    newWindow}>${link.name}</a></li>`;
 }
 
 function makeQuickLinks(quickLinks) {
@@ -40,25 +40,25 @@ function makeQuickLinks(quickLinks) {
 }
 
 function haveLinks(quickLinks) {
-  var draggableQuickLinks = getValue('draggableQuickLinks');
-  var html = '<div style="top:' + getValue('quickLinksTopPx') + 'px; left:' +
-    getValue('quickLinksLeftPx') + 'px;" id="fshQuickLinks" ' +
-    'class="fshQuickLinks fshInnerBg' +
-    retOption('keepHelperMenuOnScreen', ' fshFixed', '') +
-    retBool(draggableQuickLinks, ' fshMove', '') + '">' +
-    makeQuickLinks(quickLinks) + '</div>';
+  const draggableQuickLinks = getValue('draggableQuickLinks');
+  const html = `<div style="top:${getValue('quickLinksTopPx')}px; left:${
+    getValue('quickLinksLeftPx')}px;" id="fshQuickLinks" `
+    + `class="fshQuickLinks fshInnerBg${
+      retOption('keepHelperMenuOnScreen', ' fshFixed', '')
+    }${retBool(draggableQuickLinks, ' fshMove', '')}">${
+      makeQuickLinks(quickLinks)}</div>`;
   insertHtmlBeforeEnd(document.body, html);
   isDraggable(draggableQuickLinks);
 }
 
 function haveNode() {
-  var quickLinks = getValueJSON('quickLinks') || [];
-  if (quickLinks.length > 0) {haveLinks(quickLinks);}
+  const quickLinks = getValueJSON('quickLinks') || [];
+  if (quickLinks.length > 0) { haveLinks(quickLinks); }
 }
 
 function injectQuickLinks() {
-  var node = getElementById('statbar-container');
-  if (node) {haveNode();}
+  const node = getElementById('statbar-container');
+  if (node) { haveNode(); }
 }
 
 export default function doQuickLinks() {

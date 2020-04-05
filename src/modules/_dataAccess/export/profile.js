@@ -1,11 +1,11 @@
 import cmdExport from './export';
 
-let cache = {};
+const cache = {};
 
 export default function profile(username) {
   // return cmdExport({player_username: username, subcmd: 'profile'});
   if (!cache[username]) {
-    cache[username] = cmdExport({player_username: username, subcmd: 'profile'});
+    cache[username] = cmdExport({ player_username: username, subcmd: 'profile' });
   }
   return cache[username];
 }

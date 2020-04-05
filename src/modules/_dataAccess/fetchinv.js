@@ -5,13 +5,13 @@ function byFolder(items, folder) {
   return {
     id: folder.a,
     name: folder.n,
-    items: items.filter(i => i.f === folder.a)
+    items: items.filter((i) => i.f === folder.a),
   };
 }
 
 function formatResponse(json) {
   const itemsByFolder = json.folders.map(partial(byFolder, json.items));
-  return {r: itemsByFolder, s: true};
+  return { r: itemsByFolder, s: true };
 }
 
 export default function fetchinv() {

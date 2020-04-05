@@ -14,8 +14,8 @@ function addSourceRoot(file, sourceRoot) {
 
 function fixMaps(dir, sourceRoot) {
   fs.readdir(`dist/${dir}`, (err, items) => {
-    const maps = items.filter(fn => fn.endsWith('.map'));
-    maps.forEach(map => {addSourceRoot(`dist/${dir}/${map}`, sourceRoot);});
+    const maps = items.filter((fn) => fn.endsWith('.map'));
+    maps.forEach((map) => { addSourceRoot(`dist/${dir}/${map}`, sourceRoot); });
   });
 }
 

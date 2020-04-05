@@ -3,13 +3,13 @@ import getText from '../../common/getText';
 import setText from '../../common/setText';
 
 export default function updateUsedCount(del) {
-  var invTableParent = getInvTable().parentNode;
-  if (!invTableParent) {return;}
-  var fshTally = invTableParent.children[2].children[1].children[0];
-  if (fshTally.tagName !== 'TABLE') {return;}
-  var tallyRows = fshTally.rows;
-  var usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
-  var usedCount = Number(getText(usedCountDom));
+  const invTableParent = getInvTable().parentNode;
+  if (!invTableParent) { return; }
+  const fshTally = invTableParent.children[2].children[1].children[0];
+  if (fshTally.tagName !== 'TABLE') { return; }
+  const tallyRows = fshTally.rows;
+  const usedCountDom = tallyRows[tallyRows.length - 1].cells[1].children[0];
+  let usedCount = Number(getText(usedCountDom));
   usedCount -= del;
   setText(usedCount, usedCountDom);
 }

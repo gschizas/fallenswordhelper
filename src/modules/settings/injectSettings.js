@@ -9,7 +9,7 @@ import setupConfigData from './configData';
 function addTab(tabs) { // jQuery
   tabs.find('.ui-tabs-nav')
     .append('<li><a href="#fshSettings">FSH</a></li>');
-  tabs.append('<div id="fshSettings"><p>' + calf.configData + '</p></div>');
+  tabs.append(`<div id="fshSettings"><p>${calf.configData}</p></div>`);
   tabs.tabs('refresh');
 }
 
@@ -23,8 +23,8 @@ function doFshSettings(settingsTabs) {
 }
 
 export default function injectSettings() { // jQuery
-  if (jQueryNotPresent()) {return;}
-  var settingsTabs = $('#settingsTabs');
-  var tabsInstance = settingsTabs.tabs('instance');
-  if (tabsInstance) {doFshSettings(settingsTabs);}
+  if (jQueryNotPresent()) { return; }
+  const settingsTabs = $('#settingsTabs');
+  const tabsInstance = settingsTabs.tabs('instance');
+  if (tabsInstance) { doFshSettings(settingsTabs); }
 }

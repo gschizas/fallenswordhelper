@@ -6,6 +6,6 @@ export default function senditems(user, invIdAry) {
     subcmd: 'senditems',
     xc: window.ajaxXC,
     target_username: user,
-    items: invIdAry
+    items: invIdAry,
   });
 }

@@ -7,9 +7,9 @@ function clearCheck(el) {
 }
 
 function displayFolderItems(invItems, folderId, o) {
-  var tr = o.injectHere.parentNode;
-  var folder = invItems[o.invid].folder_id;
-  var force = folderId !== 0 && folderId !== folder;
+  const tr = o.injectHere.parentNode;
+  const folder = invItems[o.invid].folder_id;
+  const force = folderId !== 0 && folderId !== folder;
   toggleForce(tr, force);
   toggleForce(tr.nextElementSibling, force);
 }
@@ -25,6 +25,6 @@ export default function hideFolders(itemsAry, invItems, target) {
     3,
     itemsAry,
     0,
-    partial(updateList, invItems, Number(target.dataset.folder))
+    partial(updateList, invItems, Number(target.dataset.folder)),
   ]);
 }

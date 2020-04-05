@@ -1,4 +1,4 @@
-import {htmlResult} from './htmlResult';
+import { htmlResult } from './htmlResult';
 import indexAjaxData from '../ajax/indexAjaxData';
 
 export default function senditems(user, invIdAry) {
@@ -7,6 +7,6 @@ export default function senditems(user, invIdAry) {
     subcmd: 'senditems',
     xc: window.ajaxXC,
     target_username: user,
-    sendItemList: invIdAry
+    sendItemList: invIdAry,
   }).then(htmlResult);
 }

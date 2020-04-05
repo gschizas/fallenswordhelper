@@ -1,13 +1,13 @@
 import calf from '../support/calf';
-import {daSuperElite} from '../_dataAccess/_dataAccess';
+import { daSuperElite } from '../_dataAccess/_dataAccess';
 import jQueryPresent from '../common/jQueryPresent';
-import {nowSecs} from '../support/now';
+import { nowSecs } from '../support/now';
 import partial from '../common/partial';
-import {get, set} from '../system/idb';
+import { get, set } from '../system/idb';
 
 export var oldLog;
-var timeoutId;
-var intervalId;
+let timeoutId;
+let intervalId;
 
 export function disableBackgroundChecks() {
   if (timeoutId) {
@@ -25,18 +25,18 @@ function dataLooksOk(data) {
 }
 
 function updateSeLog(serverTime, element) {
-  var myTime = serverTime - element.time;
-  var mobName = element.creature.name.replace(' (Super Elite)', '');
+  const myTime = serverTime - element.time;
+  const mobName = element.creature.name.replace(' (Super Elite)', '');
   if (!oldLog.se[mobName] || oldLog.se[mobName] < myTime) {
     oldLog.se[mobName] = myTime;
   }
 }
 
 function processSeData(data) {
-  var serverTime = Number(data.t.split(' ')[1]);
-  if (!oldLog) {oldLog = {lastUpdate: 0, se: {}};}
+  const serverTime = Number(data.t.split(' ')[1]);
+  if (!oldLog) { oldLog = { lastUpdate: 0, se: {} }; }
   oldLog.lastUpdate = serverTime;
-  var resultAry = data.r;
+  const resultAry = data.r;
   if (resultAry) {
     resultAry.forEach(partial(updateSeLog, serverTime));
     set('fsh_seLog', oldLog);
@@ -44,7 +44,7 @@ function processSeData(data) {
 }
 
 function gotSe(data) {
-  if (dataLooksOk(data)) {processSeData(data);}
+  if (dataLooksOk(data)) { processSeData(data); }
 }
 
 function getSeLog() { // jQuery.min
@@ -62,7 +62,7 @@ function whenWasLastCheck() {
 }
 
 function setupBackgroundCheck() {
-  var lastCheckSecs = whenWasLastCheck();
+  const lastCheckSecs = whenWasLastCheck();
   if (lastCheckSecs >= 600) {
     doBackgroundCheck();
   } else {
@@ -72,7 +72,7 @@ function setupBackgroundCheck() {
 }
 
 function gotLog(data) {
-  if (data) {oldLog = data;}
+  if (data) { oldLog = data; }
 }
 
 export function getFshSeLog() { // jQuery.min

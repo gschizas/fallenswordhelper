@@ -16,5 +16,5 @@ function havePvpId(aRow, pvpId) { // eslint-disable-line
 // TODO Pref
 export default function viewCombat(aRow) {
   const pvpId = getPvpId(aRow);
-  if (pvpId) {havePvpId(aRow, pvpId[1]);}
+  if (pvpId) { havePvpId(aRow, pvpId[1]); }
 }

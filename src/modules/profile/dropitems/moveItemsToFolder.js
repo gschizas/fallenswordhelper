@@ -1,11 +1,11 @@
 import chunk from '../../common/chunk';
-import {daSendToFolder} from '../../_dataAccess/_dataAccess';
-import {getElementById} from '../../common/getElement';
-import {isArray} from '../../common/isArray';
+import { daSendToFolder } from '../../_dataAccess/_dataAccess';
+import { getElementById } from '../../common/getElement';
+import { isArray } from '../../common/isArray';
 import partial from '../../common/partial';
 
 function checked(o) {
-  if (!o.injectHere) {return;}
+  if (!o.injectHere) { return; }
   return o.injectHere.previousElementSibling.previousElementSibling
     .children[0].checked;
 }
@@ -17,9 +17,9 @@ function itemByInvId(invId, item) {
 }
 
 function removeInvId(itemsAry, invId) {
-  var o = itemsAry.find(partial(itemByInvId, invId));
+  const o = itemsAry.find(partial(itemByInvId, invId));
   if (o) {
-    var tr = o.injectHere.parentNode;
+    const tr = o.injectHere.parentNode;
     tr.nextElementSibling.remove();
     tr.remove();
     o.el = null;
@@ -39,7 +39,7 @@ function moveList(itemsAry, folderId, list) {
 }
 
 export default function moveItemsToFolder(itemsAry) { // jQuery.min
-  var folderId = getElementById('selectFolderId').value;
+  const folderId = getElementById('selectFolderId').value;
   chunk(30, itemsAry.filter(checked).map(invid))
     .forEach(partial(moveList, itemsAry, folderId));
 }

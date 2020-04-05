@@ -1,0 +1,64 @@
+---
+parserOptions:
+  ecmaVersion: 2020
+extends:
+  - "airbnb-base"
+globals:
+  Blob: readonly
+  clearTimeout: readonly
+  console: readonly
+  document: readonly
+  DOMParser: readonly
+  Element: readonly
+  EventTarget: readonly
+  getComputedStyle: readonly
+  HTMLDocument: readonly
+  HTMLTableElement: readonly
+  Image: readonly
+  localStorage: readonly
+  location: readonly
+  navigator: readonly
+  Node: readonly
+  performance: readonly
+  Promise: readonly
+  requestAnimationFrame: readonly
+  setTimeout: readonly
+  URL: readonly
+  window: readonly
+  XPathResult: readonly
+  module: readonly
+  process: readonly
+  require: readonly
+  "$": readonly
+  jQuery: readonly
+  GM_info: readonly
+  ga: readonly
+  GameController: readonly
+  GameData: readonly
+  Modernizr: readonly
+rules:
+  prefer-const: off # 1
+  no-restricted-properties: off # 1
+  no-continue: off # 1
+  prefer-spread: off # 2
+  valid-typeof: off # 2
+  no-cond-assign: off # 2
+  no-restricted-syntax: off # 2
+  no-plusplus: off # 2
+  import/no-unresolved: off # 2
+  operator-linebreak: off # 3
+  vars-on-top: off # 3
+  max-len: off # 8
+  import/no-extraneous-dependencies: off # 13
+  import/extensions: off # 26
+  no-restricted-globals: off # 26
+  import/prefer-default-export: off # 28
+  no-underscore-dangle: off # 29
+  prefer-destructuring: off # 38
+  no-mixed-operators: off # 40
+  consistent-return: off # 74
+  no-var: off # 140
+  import/no-mutable-exports: off # 142
+  func-names: off # 151
+  camelcase: off # 212
+  no-param-reassign: off # 264

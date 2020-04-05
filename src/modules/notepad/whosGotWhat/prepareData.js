@@ -1,6 +1,6 @@
 import addCommas from '../../system/addCommas';
 import lastActivityToDays from '../../common/lastActivityToDays';
-import {nowSecs} from '../../support/now';
+import { nowSecs } from '../../support/now';
 import partial from '../../common/partial';
 import toLowerCase from '../../common/toLowerCase';
 

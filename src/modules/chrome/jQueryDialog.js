@@ -1,21 +1,23 @@
-import {createDiv} from '../common/cElement';
-import {getElementById} from '../common/getElement';
+import { createDiv } from '../common/cElement';
+import { getElementById } from '../common/getElement';
 import insertElement from '../common/insertElement';
 
 export default function jQueryDialog(fn) { // jQuery
-  var content = getElementById('content');
-  if (content) {content.innerHTML = '';} else {
+  let content = getElementById('content');
+  if (content) { content.innerHTML = ''; } else {
     content = createDiv({
       id: 'content',
-      style: {display: 'none'}
+      style: { display: 'none' },
     });
     insertElement(document.body, content);
   }
   $(content).dialog({
     width: 640,
     modal: true,
-    position: {my: 'top', at: 'top', offset: '0 60', collision: 'none'},
-    resizable: false
+    position: {
+      my: 'top', at: 'top', offset: '0 60', collision: 'none',
+    },
+    resizable: false,
   });
   fn(content);
 }

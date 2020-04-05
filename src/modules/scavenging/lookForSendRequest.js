@@ -1,15 +1,15 @@
 import alpha from '../common/alpha';
-import {createDiv} from '../common/cElement';
-import {entries} from '../common/entries';
-import {getElementById} from '../common/getElement';
+import { createDiv } from '../common/cElement';
+import { entries } from '../common/entries';
+import { getElementById } from '../common/getElement';
 import insertElement from '../common/insertElement';
 import isFunction from '../common/isFunction';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import setLastScav from './setLastScav';
 
 /* global sendRequest:true */
 
-var fshSummary;
+let fshSummary;
 
 function getSummary() {
   if (!fshSummary) {
@@ -21,23 +21,23 @@ function getSummary() {
 }
 
 function getVictories(report) {
-  var victories = report.match(/victorious/g);
+  const victories = report.match(/victorious/g);
   if (victories) {
-    return 'Victories: ' + victories.length;
+    return `Victories: ${victories.length}`;
   }
   return '';
 }
 
 function getDefeats(report) {
-  var defeats = report.match(/defeated/g);
+  const defeats = report.match(/defeated/g);
   if (defeats) {
-    return ', Defeated: ' + defeats.length;
+    return `, Defeated: ${defeats.length}`;
   }
   return '';
 }
 
 function makeHash(prev, curr) {
-  var itemName = curr.match(/>([^<]+)</)[1];
+  const itemName = curr.match(/>([^<]+)</)[1];
   prev[itemName] = (prev[itemName] || 0) + 1;
   return prev;
 }
@@ -46,26 +46,26 @@ function buildGainHash(gains) {
   return gains.reduce(makeHash, {});
 }
 
-function alphaEntries(a, b) {return alpha(a[0], b[0]);}
+function alphaEntries(a, b) { return alpha(a[0], b[0]); }
 
-function summary(pair) {return '<br>' + pair[1] + ' ' + pair[0] + '(s), ';}
+function summary(pair) { return `<br>${pair[1]} ${pair[0]}(s), `; }
 
 function gotGains(gains) {
-  var gainHash = buildGainHash(gains);
-  return '<br>' + gains.length + ' item(s):' +
-    entries(gainHash).sort(alphaEntries).map(summary).join('');
+  const gainHash = buildGainHash(gains);
+  return `<br>${gains.length} item(s):${
+    entries(gainHash).sort(alphaEntries).map(summary).join('')}`;
 }
 
 function getGains(report) {
-  var gains = report.match(/Item Gained: <b>[^<]+<\/b>/g);
-  if (gains) {return gotGains(gains);}
+  const gains = report.match(/Item Gained: <b>[^<]+<\/b>/g);
+  if (gains) { return gotGains(gains); }
 }
 
 function multiScav() {
-  var ret = '';
-  var scavRes = getElementById('scavenge_results');
+  let ret = '';
+  const scavRes = getElementById('scavenge_results');
   if (scavRes) {
-    var report = scavRes.innerHTML;
+    const report = scavRes.innerHTML;
     ret += getVictories(report);
     ret += getDefeats(report);
     ret += getGains(report);
@@ -74,7 +74,7 @@ function multiScav() {
 }
 
 function interceptSendRequest(oldSendRequest) {
-  return function(amount, goldValue, caveValue) {
+  return function (amount, goldValue, caveValue) {
     oldSendRequest(amount, goldValue, caveValue);
     setLastScav(caveValue, goldValue);
     getSummary().innerHTML = multiScav();
@@ -82,7 +82,7 @@ function interceptSendRequest(oldSendRequest) {
 }
 
 export default function lookForSendRequest() {
-  var oldSendRequest = sendRequest;
+  const oldSendRequest = sendRequest;
   if (isFunction(oldSendRequest)) {
     sendRequest = interceptSendRequest(oldSendRequest);
   }

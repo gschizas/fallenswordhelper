@@ -19,12 +19,12 @@ function bIsNotEquipment(a, b) {
 }
 
 export default function numberSort(a, b) {
-  if (aIsNotEquipment(a)) {return 1;} // non equipment items
-  if (bIsNotEquipment(a, b)) {return -1;}
-  var valueA = path(a, calf.sortBy, 1);
-  var valueB = path(b, calf.sortBy, 1);
+  if (aIsNotEquipment(a)) { return 1; } // non equipment items
+  if (bIsNotEquipment(a, b)) { return -1; }
+  let valueA = path(a, calf.sortBy, 1);
+  let valueB = path(b, calf.sortBy, 1);
   valueA = intFromString(valueA);
   valueB = intFromString(valueB);
-  var result = valueA - valueB;
+  const result = valueA - valueB;
   return sortDesc(result);
 }

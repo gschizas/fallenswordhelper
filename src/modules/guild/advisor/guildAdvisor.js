@@ -1,7 +1,7 @@
-import {arrayFrom} from '../../common/arrayFrom';
+import { arrayFrom } from '../../common/arrayFrom';
 import calf from '../../support/calf';
-import {cmdUrl} from '../../support/constants';
-import {createTFoot} from '../../common/cElement';
+import { cmdUrl } from '../../support/constants';
+import { createTFoot } from '../../common/cElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getMembrList from '../../ajax/getMembrList';
@@ -12,19 +12,21 @@ import insertElement from '../../common/insertElement';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import loadDataTables from '../../common/loadDataTables';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
-import {injectTable, playerLevel, playerName, playerRank} from './helpers';
-//#if _BETA  //  Timing output
-import {time, timeEnd} from '../../support/debug';
-//#endif
+import {
+  injectTable, playerLevel, playerName, playerRank,
+} from './helpers';
+// #if _BETA  //  Timing output
+import { time, timeEnd } from '../../support/debug';
+// #endif
 
 function getTfoot(list) {
-  var totalRow = list.rows[list.rows.length - 1];
-  var totalClone = totalRow.cloneNode(true);
-  var tfoot = createTFoot();
+  const totalRow = list.rows[list.rows.length - 1];
+  const totalClone = totalRow.cloneNode(true);
+  const tfoot = createTFoot();
   insertElement(tfoot, totalClone);
-  var totalCell = totalClone.cells[0];
+  const totalCell = totalClone.cells[0];
   totalCell.className = 'fshRight';
   totalCell.setAttribute('colspan', '3');
   return tfoot;
@@ -38,7 +40,7 @@ function cellText(cell, i) {
 }
 
 function bodyText(membrList, row) {
-  var foo = arrayFrom(row.cells, cellText);
+  const foo = arrayFrom(row.cells, cellText);
   foo.splice(0, 1, playerName(foo[0], membrList),
     playerLevel(foo[0], membrList), playerRank(foo[0], membrList));
   return foo;
@@ -50,27 +52,27 @@ function getData(list, membrList) {
 }
 
 function summaryLink() {
-  var updateInput = getElementsByClassName('custombutton', pCC);
-  if (updateInput.length === 0) {return;}
-  insertHtmlAfterEnd(updateInput[0], '<span> <a href="' + cmdUrl +
-    'guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
+  const updateInput = getElementsByClassName('custombutton', pCC);
+  if (updateInput.length === 0) { return; }
+  insertHtmlAfterEnd(updateInput[0], `<span> <a href="${cmdUrl
+  }guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>`);
 }
 
 function injectAdvisorDaily(list, membrList) {
-  //#if _BETA  //  Timing output
+  // #if _BETA  //  Timing output
 
   time('guildAdvisor.injectAdvisorDaily');
 
-  //#endif
-  var data = getData(list, membrList);
-  var tfoot = getTfoot(list);
+  // #endif
+  const data = getData(list, membrList);
+  const tfoot = getTfoot(list);
   injectTable(list, tfoot, data);
   summaryLink();
-  //#if _BETA  //  Timing output
+  // #if _BETA  //  Timing output
 
   timeEnd('guildAdvisor.injectAdvisorDaily');
 
-  //#endif
+  // #endif
 }
 
 function switcher(list) {
@@ -82,8 +84,8 @@ function switcher(list) {
 }
 
 export default function injectAdvisor() {
-  if (jQueryNotPresent()) {return;}
-  var list = getElementsByTagName('table', pCC)[1];
-  if (!list) {return;}
+  if (jQueryNotPresent()) { return; }
+  const list = getElementsByTagName('table', pCC)[1];
+  if (!list) { return; }
   loadDataTables().then(() => switcher(list));
 }

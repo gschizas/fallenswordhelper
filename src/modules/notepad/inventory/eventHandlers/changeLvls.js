@@ -1,5 +1,5 @@
 import changeMinMax from '../../../common/changeMinMax';
-import {options} from '../options';
+import { options } from '../options';
 import partial from '../../../common/partial';
 import saveOptions from '../saveOptions';
 

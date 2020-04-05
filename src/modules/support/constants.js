@@ -1,13 +1,13 @@
-import {cdn} from '../system/system';
+import { cdn } from '../system/system';
 
 export const rarity = [
-  {colour: '#ffffff', clas: 'fshCommon'},
-  {colour: '#0099ff', clas: 'fshRare'},
-  {colour: '#cc00ff', clas: 'fshUnique'},
-  {colour: '#ffff33', clas: 'fshLegendary'},
-  {colour: '#cc0033', clas: 'fshSuper'},
-  {colour: '#6633ff', clas: 'fshCrystal'},
-  {colour: '#009900', clas: 'fshEpic'}
+  { colour: '#ffffff', clas: 'fshCommon' },
+  { colour: '#0099ff', clas: 'fshRare' },
+  { colour: '#cc00ff', clas: 'fshUnique' },
+  { colour: '#ffff33', clas: 'fshLegendary' },
+  { colour: '#cc0033', clas: 'fshSuper' },
+  { colour: '#6633ff', clas: 'fshCrystal' },
+  { colour: '#009900', clas: 'fshEpic' },
 ];
 
 export const places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
@@ -22,11 +22,10 @@ export const mercRE = [
   /<td>Defense:<\/td><td>(\d+)<\/td>/,
   /<td>Armor:<\/td><td>(\d+)<\/td>/,
   /<td>Damage:<\/td><td>(\d+)<\/td>/,
-  /<td>HP:<\/td><td>(\d+)<\/td>/
+  /<td>HP:<\/td><td>(\d+)<\/td>/,
 ];
 
-export const lastActivityRE =
-  /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
+export const lastActivityRE = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 export const playerIDRE = /player_id=(\d+)/;
 export const itemRE = /item_id=(\d+)&inv_id=(\d+)/;
 export const defenderMultiplier = 0.2;
@@ -38,44 +37,44 @@ export const def_cmd = '?cmd=';
 export const cmdUrl = indexPhp + def_cmd;
 export const def_subcmd = '&subcmd=';
 const def_targetUsername = '&target_username=';
-const notepadBlank = def_cmd + 'notepad&blank=1' + def_subcmd;
-export const newGuildLogLoc = notepadBlank + 'newguildlog';
+const notepadBlank = `${def_cmd}notepad&blank=1${def_subcmd}`;
+export const newGuildLogLoc = `${notepadBlank}newguildlog`;
 export const newGuildLogUrl = indexPhp + newGuildLogLoc;
-export const auctionhouseUrl = cmdUrl + 'auctionhouse';
-export const ahSearchUrl = auctionhouseUrl + '&search=';
-export const logUrl = cmdUrl + 'log';
-export const doAddIgnore = logUrl + def_subcmd + 'doaddignore&ignore_username=';
-export const profileUrl = cmdUrl + 'profile';
-export const playerIdUrl = profileUrl + '&player_id=';
-export const dropItemsUrl = profileUrl + def_subcmd + 'dropitems';
-export const tradeUrl = cmdUrl + 'trade&target_player=';
-export const secureUrl = cmdUrl + 'trade' + def_subcmd + 'createsecure' +
-  def_targetUsername;
-export const arenaUrl = cmdUrl + 'arena' + def_subcmd;
+export const auctionhouseUrl = `${cmdUrl}auctionhouse`;
+export const ahSearchUrl = `${auctionhouseUrl}&search=`;
+export const logUrl = `${cmdUrl}log`;
+export const doAddIgnore = `${logUrl + def_subcmd}doaddignore&ignore_username=`;
+export const profileUrl = `${cmdUrl}profile`;
+export const playerIdUrl = `${profileUrl}&player_id=`;
+export const dropItemsUrl = `${profileUrl + def_subcmd}dropitems`;
+export const tradeUrl = `${cmdUrl}trade&target_player=`;
+export const secureUrl = `${cmdUrl}trade${def_subcmd}createsecure${
+  def_targetUsername}`;
+export const arenaUrl = `${cmdUrl}arena${def_subcmd}`;
 export const notepadBlankUrl = indexPhp + notepadBlank;
-export const auctionSearchUrl = notepadBlankUrl + 'auctionsearch';
-export const pointsUrl = cmdUrl + 'points';
-export const guildSubcmdUrl = cmdUrl + 'guild' + def_subcmd;
-export const guildLogUrl = guildSubcmdUrl + 'log';
-export const scouttowerUrl = guildSubcmdUrl + 'scouttower';
-export const groupsSubcmdUrl = guildSubcmdUrl + 'groups&subcmd2=';
-export const recallUserUrl = guildSubcmdUrl + 'inventory&subcmd2=report&user=';
-export const guildViewUrl = guildSubcmdUrl + 'view&guild_id=';
-export const joinallUrl = groupsSubcmdUrl + 'joinall';
+export const auctionSearchUrl = `${notepadBlankUrl}auctionsearch`;
+export const pointsUrl = `${cmdUrl}points`;
+export const guildSubcmdUrl = `${cmdUrl}guild${def_subcmd}`;
+export const guildLogUrl = `${guildSubcmdUrl}log`;
+export const scouttowerUrl = `${guildSubcmdUrl}scouttower`;
+export const groupsSubcmdUrl = `${guildSubcmdUrl}groups&subcmd2=`;
+export const recallUserUrl = `${guildSubcmdUrl}inventory&subcmd2=report&user=`;
+export const guildViewUrl = `${guildSubcmdUrl}view&guild_id=`;
+export const joinallUrl = `${groupsSubcmdUrl}joinall`;
 export const joinUnderUrl = groupsSubcmdUrl + def_joinallgroupsundersize;
-export const worldUrl = cmdUrl + 'world';
-export const searchPlayerUrl = cmdUrl + 'findplayer';
-export const showPlayerUrl = searchPlayerUrl +
-  '&search_show_first=1&search_username=';
-export const blacksmithUrl = cmdUrl + 'blacksmith';
-export const quickbuffUrl = cmdUrl + 'quickbuff';
-export const composingUrl = cmdUrl + 'composing';
-export const attackplayerUrl = cmdUrl + 'attackplayer' + def_targetUsername;
-export const updateArchiveUrl = cmdUrl + def_subcmd + 'viewupdatearchive';
-export const archiveUrl = cmdUrl + def_subcmd + 'viewarchive';
-export const bountyUrl = cmdUrl + 'bounty';
+export const worldUrl = `${cmdUrl}world`;
+export const searchPlayerUrl = `${cmdUrl}findplayer`;
+export const showPlayerUrl = `${searchPlayerUrl
+}&search_show_first=1&search_username=`;
+export const blacksmithUrl = `${cmdUrl}blacksmith`;
+export const quickbuffUrl = `${cmdUrl}quickbuff`;
+export const composingUrl = `${cmdUrl}composing`;
+export const attackplayerUrl = `${cmdUrl}attackplayer${def_targetUsername}`;
+export const updateArchiveUrl = `${cmdUrl + def_subcmd}viewupdatearchive`;
+export const archiveUrl = `${cmdUrl + def_subcmd}viewarchive`;
+export const bountyUrl = `${cmdUrl}bounty`;
 
-export const guideUrl = 'https://guide.fallensword.com/' + cmdUrl;
+export const guideUrl = `https://guide.fallensword.com/${cmdUrl}`;
 
 export const def_afterUpdateActionlist = 'after-update.actionlist';
 export const def_playerBuffs = 'buffs.player';
@@ -87,12 +86,12 @@ export const def_controlsKeydown = 'keydown.controls';
 export const def_realmUpdate = 'update.realm';
 
 export const def_suffixSuccessActionResponse = '-success.action-response';
-export const def_refreshActionList = '-1' + def_suffixSuccessActionResponse;
-export const def_viewCreature = '1' + def_suffixSuccessActionResponse;
-export const def_PvE = '2' + def_suffixSuccessActionResponse;
-export const def_relicView = '9' + def_suffixSuccessActionResponse;
-export const def_stairway = '5' + def_suffixSuccessActionResponse;
-export const def_teleport = '25' + def_suffixSuccessActionResponse;
+export const def_refreshActionList = `-1${def_suffixSuccessActionResponse}`;
+export const def_viewCreature = `1${def_suffixSuccessActionResponse}`;
+export const def_PvE = `2${def_suffixSuccessActionResponse}`;
+export const def_relicView = `9${def_suffixSuccessActionResponse}`;
+export const def_stairway = `5${def_suffixSuccessActionResponse}`;
+export const def_teleport = `25${def_suffixSuccessActionResponse}`;
 
 export const def_creatureCombat = 2;
 export const def_repairAll = 15;
@@ -142,11 +141,11 @@ export const enhancementType = ['Piercing Strike', 'Reinforced Armor',
   'Protection', 'Oceanic', 'Master Thief', 'Protect Gold', 'Dodge', 'Disarm',
   'Master Blacksmith', 'Elite Hunter', 'Sustain', 'Master Crafter',
   'Fury Caster', 'Greenskin Slayer', 'Beast Slayer', 'Duelist', 'Glory Seeker',
-  'First Strike', 'Hypnotize', 'Master Inventor', 'Soulless', 'Temporal Shift'
+  'First Strike', 'Hypnotize', 'Master Inventor', 'Soulless', 'Temporal Shift',
 ];
 
 export const itemType = ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon',
   'Shield', 'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
   'Resource', 'Recipe', 'Container', 'Composed', 'Frag Stash'];
 
-export const oldActionSpinner = cdn + 'ui/world/action_spinner.gif';
+export const oldActionSpinner = `${cdn}ui/world/action_spinner.gif`;

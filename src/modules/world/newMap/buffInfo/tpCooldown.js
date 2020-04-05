@@ -1,11 +1,11 @@
 import insertElement from '../../../common/insertElement';
 import setText from '../../../common/setText';
-import {textSpan} from '../../../common/cElement';
+import { textSpan } from '../../../common/cElement';
 import toggleForce from '../../../common/toggleForce';
 
-var cdDiv;
-var cooldownSpan;
-var lastTp;
+let cdDiv;
+let cooldownSpan;
+let lastTp;
 
 function initCdDiv(containerDiv, cd) {
   cdDiv = containerDiv.children[5];
@@ -29,7 +29,7 @@ function hideCd() {
 }
 
 function updateCooldown() {
-  var secs = Math.max(Math.ceil((lastTp - Date.now()) / 1000), 0);
+  const secs = Math.max(Math.ceil((lastTp - Date.now()) / 1000), 0);
   setText(secs, cooldownSpan);
   if (secs > 0) {
     setTimeout(updateCooldown, 500);

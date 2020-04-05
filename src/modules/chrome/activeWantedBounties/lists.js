@@ -1,17 +1,17 @@
 import basicBounty from './basicBounty';
 import extend from '../../common/extend';
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import getValueJSON from '../../system/getValueJSON';
-import {nowSecs} from '../../support/now';
+import { nowSecs } from '../../support/now';
 import setValue from '../../system/setValue';
 import shouldBeArray from '../../system/shouldBeArray';
 
 export var bountyList;
 export var wantedList;
 export var activeBountyListPosted;
-var bountyListRefreshTime;
+let bountyListRefreshTime;
 export var bwNeedsRefresh;
 export var wantedArray;
 
@@ -20,13 +20,13 @@ function hasActiveBounties(activeTable) {
 }
 
 function bountyData(theCells) {
-  return extend(basicBounty(theCells), {progress: getText(theCells[5])});
+  return extend(basicBounty(theCells), { progress: getText(theCells[5]) });
 }
 
 function getAllBounties(activeTable) {
-  for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
-    var theCells = activeTable.rows[i].cells;
-    var thisBounty = bountyData(theCells);
+  for (let i = 1; i < activeTable.rows.length - 2; i += 2) {
+    const theCells = activeTable.rows[i].cells;
+    const thisBounty = bountyData(theCells);
     bountyList.bounty.push(thisBounty);
   }
 }
@@ -38,26 +38,26 @@ function parseActiveBounty(activeTable) { // Legacy
 }
 
 export function getActiveBountyList(doc) { // Legacy
-  var bountyInfo = getElementById('bounty-info', doc);
-  if (!bountyInfo) {return;}
-  var activeTable = bountyInfo.parentNode.parentNode
+  const bountyInfo = getElementById('bounty-info', doc);
+  if (!bountyInfo) { return; }
+  const activeTable = bountyInfo.parentNode.parentNode
     .previousElementSibling.children[0].children[0];
   bountyList = {};
   bountyList.bounty = [];
   bountyList.isRefreshed = true;
   bountyList.lastUpdate = nowSecs;
-  if (activeTable) {parseActiveBounty(activeTable);}
+  if (activeTable) { parseActiveBounty(activeTable); }
   activeBountyListPosted = true;
 }
 
 function testBountyList() {
-  return bountyList &&
-    nowSecs - bountyList.lastUpdate > bountyListRefreshTime;
+  return bountyList
+    && nowSecs - bountyList.lastUpdate > bountyListRefreshTime;
 }
 
 function testWantedList() {
-  return wantedList &&
-    nowSecs - wantedList.lastUpdate > bountyListRefreshTime;
+  return wantedList
+    && nowSecs - wantedList.lastUpdate > bountyListRefreshTime;
 }
 
 function testCacheInvalid() {
@@ -69,7 +69,7 @@ export function invalidateCache() {
   wantedList = getValueJSON('wantedList');
   bountyListRefreshTime = getValue('bountyListRefreshTime');
   bwNeedsRefresh = getValue('bwNeedsRefresh');
-  if (bwNeedsRefresh) {return;}
+  if (bwNeedsRefresh) { return; }
   if (testCacheInvalid()) {
     bwNeedsRefresh = true; // invalidate cache
   }

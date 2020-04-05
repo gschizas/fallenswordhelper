@@ -2,12 +2,12 @@ import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
 import getGuild from '../_dataAccess/export/guildMembers';
 import isObject from '../common/isObject';
-import {now} from '../support/now';
+import { now } from '../support/now';
 import partial from '../common/partial';
-import {get, set} from '../system/idb';
+import { get, set } from '../system/idb';
 
 function saveMembrListInForage(membrList, data) {
-  var oldMemList = data || {};
+  const oldMemList = data || {};
   set('fsh_membrList', $.extend(oldMemList, membrList));
 }
 
@@ -22,7 +22,7 @@ function memberToObject(membrList, guildId, ele) {
 }
 
 function membrListToHash(guildId, data) {
-  var membrList = {};
+  const membrList = {};
   membrList[guildId] = {};
   membrList[guildId].lastUpdate = now;
   data.forEach(partial(memberToObject, membrList, guildId));
@@ -37,19 +37,19 @@ function getAndCacheGuildMembers(guildId) {
   return getGuildMembers(guildId).then(addMembrListToForage);
 }
 
-var testList = [
-  function(guildId, membrList) {return membrList;},
-  function(guildId, membrList) {return isObject(membrList);},
-  function(guildId, membrList) {return isObject(membrList[guildId]);},
-  function(guildId, membrList) {
+const testList = [
+  function (guildId, membrList) { return membrList; },
+  function (guildId, membrList) { return isObject(membrList); },
+  function (guildId, membrList) { return isObject(membrList[guildId]); },
+  function (guildId, membrList) {
     return typeof membrList[guildId].lastUpdate === 'number';
   },
-  function(guildId, membrList) {
+  function (guildId, membrList) {
     return membrList[guildId].lastUpdate > now - 300000;
-  }
+  },
 ];
 
-function condition(guildId, membrList, e) {return e(guildId, membrList);}
+function condition(guildId, membrList, e) { return e(guildId, membrList); }
 
 function isValid(guildId, membrList) {
   return testList.every(partial(condition, guildId, membrList));
@@ -76,7 +76,7 @@ function setHelperMembrList(guildId, membrList) {
 }
 
 export default function getMembrList(force) {
-  var guildId = currentGuildId();
+  const guildId = currentGuildId();
   if (guildId) {
     return guildMembers(force, guildId)
       .then(partial(setHelperMembrList, guildId));

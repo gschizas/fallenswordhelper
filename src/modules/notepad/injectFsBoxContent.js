@@ -1,9 +1,9 @@
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import makePageTemplate from './lists/makePageTemplate';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
-import {get, set} from '../system/idb';
+import { pCC } from '../support/layout';
+import { get, set } from '../system/idb';
 
 function inject(fsboxcontent) {
   getElementById('fsboxdetail').innerHTML = fsboxcontent;
@@ -15,14 +15,14 @@ function clearFsBox() {
 }
 
 export default function injectFsBoxContent(injector) { // jQuery.min
-  if (jQueryNotPresent()) {return;}
-  var content = injector || pCC;
+  if (jQueryNotPresent()) { return; }
+  const content = injector || pCC;
   content.innerHTML = makePageTemplate({
     title: 'FS Box Log',
     comment: '',
     spanId: 'fsboxclear',
     button: 'Clear',
-    divId: 'fsboxdetail'
+    divId: 'fsboxdetail',
   });
   get('fsh_fsboxcontent').then(inject);
   onclick(getElementById('fsboxclear'), clearFsBox, true);

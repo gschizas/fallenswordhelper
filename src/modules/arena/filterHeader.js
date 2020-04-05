@@ -1,16 +1,18 @@
-import {arenaFilter} from './assets';
+import { arenaFilter } from './assets';
 import defaults from '../support/dataObj.json';
-import {changeLvls, hideMoves, opts, resetLvls} from './setOpts';
+import {
+  changeLvls, hideMoves, opts, resetLvls,
+} from './setOpts';
 
 function makeTheRow() {
-  var theRow = $('#pCC > table > tbody > tr:nth-child(4)');
+  const theRow = $('#pCC > table > tbody > tr:nth-child(4)');
   theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
   theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
   return theRow;
 }
 
 function hideMovesCheckbox(aTable) { // jQuery
-  var fshHideMoves = $('#fshHideMoves', aTable);
+  const fshHideMoves = $('#fshHideMoves', aTable);
   if (opts && 'hideMoves' in opts) {
     fshHideMoves.prop('checked', opts.hideMoves);
     $('.moveMax').toggle(!opts.hideMoves);
@@ -19,7 +21,7 @@ function hideMovesCheckbox(aTable) { // jQuery
 }
 
 function minLvlValue(aTable) { // jQuery
-  var fshMinLvl = $('#fshMinLvl', aTable);
+  const fshMinLvl = $('#fshMinLvl', aTable);
   if (opts && 'minLvl' in opts) {
     fshMinLvl.val(opts.minLvl);
   } else {
@@ -28,7 +30,7 @@ function minLvlValue(aTable) { // jQuery
 }
 
 function maxLvlValue(aTable) { // jQuery
-  var fshMaxLvl = $('#fshMaxLvl', aTable);
+  const fshMaxLvl = $('#fshMaxLvl', aTable);
   if (opts && 'maxLvl' in opts) {
     fshMaxLvl.val(opts.maxLvl);
   } else {
@@ -42,8 +44,8 @@ function eventHandlers(aTable) {
 }
 
 export default function filterHeader() { // jQuery
-  var theRow = makeTheRow();
-  var aTable = $(arenaFilter);
+  const theRow = makeTheRow();
+  const aTable = $(arenaFilter);
   hideMovesCheckbox(aTable);
   minLvlValue(aTable);
   maxLvlValue(aTable);

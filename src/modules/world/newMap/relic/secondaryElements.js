@@ -1,25 +1,25 @@
-import {createDiv} from '../../../common/cElement';
-import {getElementById} from '../../../common/getElement';
+import { createDiv } from '../../../common/cElement';
+import { getElementById } from '../../../common/getElement';
 import getMembrList from '../../../ajax/getMembrList';
 import getValue from '../../../system/getValue';
 import hideElement from '../../../common/hideElement';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
-import {keys} from '../../../common/keys';
-import {nowSecs} from '../../../support/now';
+import { keys } from '../../../common/keys';
+import { nowSecs } from '../../../support/now';
 import partial from '../../../common/partial';
-import {playerIdUrl} from '../../../support/constants';
-import {atkStats, defStats, proc} from './assets';
+import { playerIdUrl } from '../../../support/constants';
+import { atkStats, defStats, proc } from './assets';
 import {
   containerDiv,
   fetchStatsBtn,
   leftDiv,
-  myDefenders
+  myDefenders,
 } from './primaryElements';
 
-var guildMemberList;
-var twoMinutesAgo;
-var sevenDaysAgo;
+let guildMemberList;
+let twoMinutesAgo;
+let sevenDaysAgo;
 export var relicCountElement;
 export var lDPercentageElement;
 export var lDCloakedElement;
@@ -49,49 +49,49 @@ export var groupHPElement;
 export var groupHPBuffedElement;
 export var processingStatus;
 
-var available = [
-  function(key) {return key !== 'lastUpdate';},
-  function(key) {return !myDefenders.includes(key);},
-  function(key) {return guildMemberList[key].last_login;},
-  function(key) {
+const available = [
+  function (key) { return key !== 'lastUpdate'; },
+  function (key) { return !myDefenders.includes(key); },
+  function (key) { return guildMemberList[key].last_login; },
+  function (key) {
     return Number(guildMemberList[key].last_login) < twoMinutesAgo;
   },
-  function(key) {
+  function (key) {
     return Number(guildMemberList[key].last_login) > sevenDaysAgo;
   },
-  function(key) {
-    return guildMemberList[key].level < 400 ||
-      guildMemberList[key].level > 421;
+  function (key) {
+    return guildMemberList[key].level < 400
+      || guildMemberList[key].level > 421;
   },
-  function(key) {
-    return guildMemberList[key].level < 441 ||
-      guildMemberList[key].level > 450;
-  }
+  function (key) {
+    return guildMemberList[key].level < 441
+      || guildMemberList[key].level > 450;
+  },
 ];
 
-function condition(key, fn) {return fn(key);}
+function condition(key, fn) { return fn(key); }
 
 function availableMembers(key) {
   return available.every(partial(condition, key));
 }
 
 function makeLinks(key) {
-  return '<a href="' + playerIdUrl + guildMemberList[key].id + '">' + key +
-    '</a>';
+  return `<a href="${playerIdUrl}${guildMemberList[key].id}">${key
+  }</a>`;
 }
 
 function missingMembers(membrList) {
   guildMemberList = membrList;
   twoMinutesAgo = nowSecs - 120;
   sevenDaysAgo = nowSecs - 604800;
-  var filtered = keys(guildMemberList)
+  const filtered = keys(guildMemberList)
     .filter(availableMembers).map(makeLinks);
   insertHtmlBeforeEnd(containerDiv,
-    '<div class="fshFloatLeft fshRelicLowDiv">' +
-    '<table class="relicT"><thead><tr><th>' + filtered.length.toString() +
-    ' Offline guild members not at relic:</th></tr></thead>' +
-    '<tbody><tr><td>' + filtered.join(' ') + '</td></tr></tbody>' +
-    '</table></div>');
+    `${'<div class="fshFloatLeft fshRelicLowDiv">'
+    + '<table class="relicT"><thead><tr><th>'}${filtered.length.toString()
+    } Offline guild members not at relic:</th></tr></thead>`
+    + `<tbody><tr><td>${filtered.join(' ')}</td></tr></tbody>`
+    + '</table></div>');
 }
 
 function setDefVars() {
@@ -129,21 +129,21 @@ function setAtkVars() {
 
 export function prepareSecondaryDivs(relicData) {
   hideElement(fetchStatsBtn);
-  var hideRelicOffline = getValue('hideRelicOffline');
+  const hideRelicOffline = getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
     getMembrList(true).then(missingMembers);
   }
   insertHtmlBeforeEnd(leftDiv, proc);
   processingStatus = getElementById('ProcessingStatus');
-  var midDiv = createDiv({
+  const midDiv = createDiv({
     className: 'fshFloatLeft fshRelicMidDiv',
-    innerHTML: defStats
+    innerHTML: defStats,
   });
   insertElement(containerDiv, midDiv);
   setDefVars();
-  var rightDiv = createDiv({
+  const rightDiv = createDiv({
     className: 'fshFloatLeft fshRelicRightDiv',
-    innerHTML: atkStats
+    innerHTML: atkStats,
   });
   insertElement(containerDiv, rightDiv);
   setAtkVars();

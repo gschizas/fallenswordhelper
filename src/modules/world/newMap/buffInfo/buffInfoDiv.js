@@ -1,12 +1,12 @@
 import calf from '../../../support/calf';
-import {createDiv} from '../../../common/cElement';
-import {getElementById} from '../../../common/getElement';
+import { createDiv } from '../../../common/cElement';
+import { getElementById } from '../../../common/getElement';
 import insertElementAfter from '../../../common/insertElementAfter';
 import toggleForce from '../../../common/toggleForce';
 
-var containerDiv;
+let containerDiv;
 
-function value(e) {return e;}
+function value(e) { return e; }
 
 function wantsBuffInfo(ary) {
   return calf.showBuffInfo && ary.some(value);
@@ -18,10 +18,10 @@ function drawBuffInfo() {
   } else {
     containerDiv = createDiv({
       className: 'fshActionBox',
-      innerHTML: '<div></div><div></div><div></div>' +
-        '<div></div><div></div><div></div>'
+      innerHTML: '<div></div><div></div><div></div>'
+        + '<div></div><div></div><div></div>',
     });
-    var actCont = getElementById('actionContainer');
+    const actCont = getElementById('actionContainer');
     insertElementAfter(containerDiv, actCont.children[2]);
   }
   return containerDiv;

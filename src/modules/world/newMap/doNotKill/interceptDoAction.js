@@ -1,4 +1,4 @@
-import {getElementById} from '../../../common/getElement';
+import { getElementById } from '../../../common/getElement';
 import isFunction from '../../../common/isFunction';
 import isOnList from './isOnList';
 import isUndefined from '../../../common/isUndefined';
@@ -13,23 +13,23 @@ function creatureOnList(creatureName, passback) {
 
 function weShouldBlock(passback) {
   // Do custom stuff e.g. do not kill list
-  var creature = GameData.actions()[passback];
+  const creature = GameData.actions()[passback];
   if (creature) {
     return creatureOnList(creature.data.name, passback);
   }
 }
 
 function interceptCreatureCombat(oldDoAction) {
-  return function(action, fetch, data, attempts) {
-    if (weShouldBlock(data.passback)) {return;}
+  return function (action, fetch, data, attempts) {
+    if (weShouldBlock(data.passback)) { return; }
     // Call standard action
     oldDoAction(action, fetch, data, attempts);
   };
 }
 
-var actionsToIntercept = {
+const actionsToIntercept = {
   // def_creatureCombat
-  '2': interceptCreatureCombat
+  2: interceptCreatureCombat,
 };
 
 function firstAttempt(attempts) {
@@ -41,8 +41,8 @@ function goodInterceptFunction(interceptFunction) {
 }
 
 function maybeIntercept(oldDoAction) {
-  return function(action, fetch, data, attempts) {
-    var interceptFunction = actionsToIntercept[action];
+  return function (action, fetch, data, attempts) {
+    const interceptFunction = actionsToIntercept[action];
     if (goodInterceptFunction(interceptFunction) && firstAttempt(attempts)) {
       interceptFunction(oldDoAction)(action, fetch, data, attempts);
     } else {
@@ -52,6 +52,6 @@ function maybeIntercept(oldDoAction) {
 }
 
 export default function interceptDoAction() {
-  var oldDoAction = GameData.doAction;
+  const oldDoAction = GameData.doAction;
   GameData.doAction = maybeIntercept(oldDoAction);
 }

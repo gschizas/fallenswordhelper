@@ -1,7 +1,7 @@
-import {arrayFrom} from './arrayFrom';
-import {closestTable} from './closest';
+import { arrayFrom } from './arrayFrom';
+import { closestTable } from './closest';
 import contains from './contains';
-import {createDiv} from './cElement';
+import { createDiv } from './cElement';
 import getArrayByTagName from './getArrayByTagName';
 import getText from './getText';
 import getTextTrim from './getTextTrim';
@@ -14,9 +14,9 @@ function cellOneHazText(curr) {
 }
 
 function reduceStatTable(prev, curr, index) {
-  var key = getTextTrim(curr.cells[0]).replace(':', '');
-  if (!key) {return prev;}
-  prev[key] = {ind: index};
+  const key = getTextTrim(curr.cells[0]).replace(':', '');
+  if (!key) { return prev; }
+  prev[key] = { ind: index };
   if (cellOneHazText(curr)) {
     prev[key].value = Number(getTextTrim(curr.cells[1]).replace('+', ''));
   }
@@ -37,7 +37,7 @@ function getLastIndex(obj, tbl) {
   return tbl.rows[tbl.rows.length - 1];
 }
 
-function sum(statObj, prev, curr) {return prev + getVal(curr, statObj);}
+function sum(statObj, prev, curr) { return prev + getVal(curr, statObj); }
 
 function calcTotalStats(statObj) {
   return ['Attack', 'Defense', 'Armor', 'Damage', 'HP']
@@ -45,16 +45,16 @@ function calcTotalStats(statObj) {
 }
 
 function addStats(el) {
-  var statTable = closestTable(el);
-  var statObj = arrayFrom(statTable.rows).reduce(reduceStatTable, {});
-  var totalStats = calcTotalStats(statObj);
+  const statTable = closestTable(el);
+  const statObj = arrayFrom(statTable.rows).reduce(reduceStatTable, {});
+  const totalStats = calcTotalStats(statObj);
   insertHtmlBeforeBegin(getLastIndex(statObj, statTable),
-    '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
-    totalStats + '&nbsp;</td></tr>');
+    `<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">${
+      totalStats}&nbsp;</td></tr>`);
 }
 
 function fshDataFilter(data) {
-  var container = createDiv();
+  const container = createDiv();
   insertHtmlBeforeEnd(container, data);
   getArrayByTagName('font', container).filter(contains('Bonuses'))
     .forEach(addStats);

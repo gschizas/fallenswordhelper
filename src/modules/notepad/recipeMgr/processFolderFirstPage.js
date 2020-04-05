@@ -1,7 +1,7 @@
 import all from '../../common/all';
 import createDocument from '../../system/createDocument';
 import getArrayByTagName from '../../common/getArrayByTagName';
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getFolderImgs from './getFolderImgs';
 import partial from '../../common/partial';
@@ -16,9 +16,9 @@ function thisFolderHref(doc) {
   return getFolderImgs(doc).find(thisInventFolder).parentNode.href;
 }
 
-function notThisPage(el, i) {return i !== 0;}
+function notThisPage(el, i) { return i !== 0; }
 
-function pageNumber(el) {return el.value;}
+function pageNumber(el) { return el.value; }
 
 function otherPages(doc) {
   return getArrayByTagName('option',
@@ -27,7 +27,7 @@ function otherPages(doc) {
 }
 
 function getPage(thisFolder, bindFolderAnyPage, i) {
-  return retryAjax(thisFolder + '&page=' + i)
+  return retryAjax(`${thisFolder}&page=${i}`)
     .then(bindFolderAnyPage);
 }
 
@@ -36,10 +36,10 @@ function ajaxOtherPages(doc, thisFolder, bindFolderAnyPage) {
 }
 
 export default function processFolderFirstPage(output, recipebook, html) { // jQuery.min
-  var doc = createDocument(html);
-  var thisFolder = thisFolderHref(doc);
-  var bindFolderAnyPage = partial(processFolderAnyPage, output, recipebook);
-  var prm = ajaxOtherPages(doc, thisFolder, bindFolderAnyPage);
+  const doc = createDocument(html);
+  const thisFolder = thisFolderHref(doc);
+  const bindFolderAnyPage = partial(processFolderAnyPage, output, recipebook);
+  const prm = ajaxOtherPages(doc, thisFolder, bindFolderAnyPage);
   prm.push(bindFolderAnyPage(html));
   return all(prm);
 }

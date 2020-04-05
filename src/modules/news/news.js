@@ -1,13 +1,13 @@
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import on from '../common/on';
 
-var maxcharacters;
-var textArea;
-var shoutboxPreview;
+let maxcharacters;
+let textArea;
+let shoutboxPreview;
 
 function updateShoutboxPreview() {
-  var textContent = textArea.value;
-  var chars = textContent.length;
+  let textContent = textArea.value;
+  let chars = textContent.length;
   if (chars > maxcharacters) {
     textContent = textContent.substring(0, maxcharacters);
     textArea.value = textContent;
@@ -17,10 +17,10 @@ function updateShoutboxPreview() {
     shoutboxPreview = textArea.parentNode.parentNode.parentNode.parentNode
       .insertRow().insertCell();
   }
-  shoutboxPreview.innerHTML = '<table class="sbpTbl"><tbody><tr>' +
-    '<td class="sbpHdr">Preview (' + chars + '/' + maxcharacters +
-    ' characters)</td></tr><tr><td class="sbpMsg"><span>' + textContent +
-    '</span></td></tr></tbody></table>';
+  shoutboxPreview.innerHTML = `${'<table class="sbpTbl"><tbody><tr>'
+    + '<td class="sbpHdr">Preview ('}${chars}/${maxcharacters
+  } characters)</td></tr><tr><td class="sbpMsg"><span>${textContent
+  }</span></td></tr></tbody></table>`;
 }
 
 function injectShoutboxWidgets() {

@@ -11,32 +11,30 @@ function details(a) {
   return {
     a: Number(pattern[2]),
     b: Number(pattern[1]),
-    v: pattern[3]
+    v: pattern[3],
   };
 }
 
-const getComponents = doc =>
-  querySelectorArray('a[href*="=destroycomponent&"]', doc).map(details);
+const getComponents = (doc) => querySelectorArray('a[href*="=destroycomponent&"]', doc).map(details);
 
-const getSlots = doc =>
-  querySelectorArray('td[background*="1x1mini"]', doc).length;
+const getSlots = (doc) => querySelectorArray('td[background*="1x1mini"]', doc).length;
 
 function processPages(prm) {
   const asDocs = prm.map(createDocument);
   const perPage = asDocs.map(getComponents);
   const r = [].concat(...perPage);
   const cm = asDocs.map(getSlots).reduce((a, b) => a + b, 0);
-  return {h: {cm}, r};
+  return { h: { cm }, r };
 }
 
 function firstPage(html) {
   const doc = createDocument(html);
   const pages = querySelectorArray('a[href*="profile&component_page="]', doc);
-  const profiles = pages.map(a => retryAjax(a.href));
+  const profiles = pages.map((a) => retryAjax(a.href));
   return allthen(profiles, processPages);
 }
 
 // Incomplete
 export default function components() {
-  return indexAjaxData({cmd: 'profile'}).then(firstPage);
+  return indexAjaxData({ cmd: 'profile' }).then(firstPage);
 }

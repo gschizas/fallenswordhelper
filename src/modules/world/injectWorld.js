@@ -1,4 +1,4 @@
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import jQueryPresent from '../common/jQueryPresent';
 import subscribes from './newMap/newMap';
 
@@ -7,5 +7,5 @@ function isNewMap() {
 }
 
 export default function injectWorld() {
-  if (isNewMap()) {subscribes();}
+  if (isNewMap()) { subscribes(); }
 }

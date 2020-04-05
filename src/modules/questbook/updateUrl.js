@@ -1,4 +1,4 @@
-import {closestTable} from '../common/closest';
+import { closestTable } from '../common/closest';
 import dontPost from '../common/dontPost';
 
 export default function updateUrl(evt) {

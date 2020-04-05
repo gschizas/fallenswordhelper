@@ -1,13 +1,13 @@
 import calf from '../../../support/calf';
-import {daScoutTower} from '../../../_dataAccess/_dataAccess';
-import {isArray} from '../../../common/isArray';
+import { daScoutTower } from '../../../_dataAccess/_dataAccess';
+import { isArray } from '../../../common/isArray';
 import partial from '../../../common/partial';
-import {processTitans} from './processTitans';
-import {setRealm} from './realm';
+import { processTitans } from './processTitans';
+import { setRealm } from './realm';
 import setValue from '../../../system/setValue';
-import {hasTitan, hideTitanDiv, setupTitanDiv} from './hasTitan';
+import { hasTitan, hideTitanDiv, setupTitanDiv } from './hasTitan';
 
-var timeoutId;
+let timeoutId;
 
 function clearTheTimeout() {
   if (timeoutId) {
@@ -25,7 +25,7 @@ function titanToShow(dynamic) {
 }
 
 function processScoutTower(ast, data) {
-  if (!goodData(data)) {return;}
+  if (!goodData(data)) { return; }
   processTitans(data.r);
   if (titanToShow(GameData.realm().dynamic)) {
     timeoutId = window.setTimeout(ast, 30000);

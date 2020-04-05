@@ -22,11 +22,11 @@
 // EVERYTHING MUST BE IN main()
 function fshMain(gmInfo) {
   import('_CALFJS')
-    .then(m => m.default('_VER', gmInfo));
+    .then((m) => m.default('_VER', gmInfo));
 } // end of var main
 
 var script = document.createElement('script');
-script.textContent = `(${fshMain.toString()})` +
-  `("${encodeURIComponent(JSON.stringify(GM_info))}");`;
+script.textContent = `(${fshMain.toString()})`
+  + `("${encodeURIComponent(JSON.stringify(GM_info))}");`;
 document.body.appendChild(script);
 document.body.removeChild(script);

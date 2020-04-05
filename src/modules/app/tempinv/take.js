@@ -4,6 +4,6 @@ export default function takeitems(invIdAry) {
   return callApp({
     cmd: 'tempinv',
     subcmd: 'takeitems',
-    item: invIdAry
+    item: invIdAry,
   });
 }

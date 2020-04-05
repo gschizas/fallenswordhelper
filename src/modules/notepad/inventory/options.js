@@ -1,4 +1,4 @@
-import {defaultOptions} from './assets';
+import { defaultOptions } from './assets';
 import extend from '../../common/extend';
 import fallback from '../../system/fallback';
 import getValue from '../../system/getValue';

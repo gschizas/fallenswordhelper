@@ -1,1 +1,1 @@
-export const entries = obj => Object.entries(obj);
+export const entries = (obj) => Object.entries(obj);

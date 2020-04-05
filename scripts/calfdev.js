@@ -7,6 +7,6 @@ export default uglyCalf(
   {
     _BETA: true,
     _CSSPATH: `https://localhost:${port}/dist/dev/`,
-    _DEV: true
-  }
+    _DEV: true,
+  },
 );

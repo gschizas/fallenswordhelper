@@ -1,6 +1,6 @@
-import {arrayFrom} from './arrayFrom';
+import { arrayFrom } from './arrayFrom';
 import fallback from '../system/fallback';
-import {getElementById} from '../common/getElement';
+import { getElementById } from './getElement';
 import hideElement from './hideElement';
 import isFunction from './isFunction';
 import on from './on';
@@ -9,47 +9,47 @@ import partial from './partial';
 import setValue from '../system/setValue';
 import toggleForce from './toggleForce';
 
-var warehouse = [];
-var prefValue;
-var headerIndex;
+const warehouse = [];
+let prefValue;
+let headerIndex;
 
-function hideRow(el) {hideElement(el.row);}
+function hideRow(el) { hideElement(el.row); }
 
 function collapseArt(article) {
   article.rows.forEach(hideRow);
   article.open = false;
 }
 
-function needsCollapse(article) {if (article.open) {collapseArt(article);}}
+function needsCollapse(article) { if (article.open) { collapseArt(article); } }
 
-function collapseAll() {warehouse.forEach(needsCollapse);}
+function collapseAll() { warehouse.forEach(needsCollapse); }
 
-function show(el) {toggleForce(el.row, false);}
+function show(el) { toggleForce(el.row, false); }
 
 function expandArt(article) {
   article.rows.forEach(show);
   article.open = true;
 }
 
-function needsExpand(article) {if (!article.open) {expandArt(article);}}
+function needsExpand(article) { if (!article.open) { expandArt(article); } }
 
-function expandAll() {warehouse.forEach(needsExpand);}
+function expandAll() { warehouse.forEach(needsExpand); }
 
-function isHeader(el) {if (el.rowIndex % headerIndex === 0) {return el;}}
+function isHeader(el) { if (el.rowIndex % headerIndex === 0) { return el; } }
 
 function closestTr(el) {
   if (el.tagName === 'TR') {
     return isHeader(el);
   }
-  if (el.tagName === 'TABLE') {return;}
+  if (el.tagName === 'TABLE') { return; }
   return closestTr(el.parentNode);
 }
 
 function evtEnabled(evt) {
-  var myRow = closestTr(evt.target);
-  if (!myRow) {return;}
-  var articleNo = myRow.rowIndex / headerIndex;
-  var article = warehouse[articleNo];
+  const myRow = closestTr(evt.target);
+  if (!myRow) { return; }
+  const articleNo = myRow.rowIndex / headerIndex;
+  const article = warehouse[articleNo];
   if (article.open === false) {
     collapseAll();
     expandArt(article);
@@ -58,10 +58,10 @@ function evtEnabled(evt) {
   }
 }
 
-function evtHdl(evt) {if (prefValue) {evtEnabled(evt);}}
+function evtHdl(evt) { if (prefValue) { evtEnabled(evt); } }
 
 function makeHeaderClickable(row) {
-  if (prefValue) {row.classList.add('fshPoint');}
+  if (prefValue) { row.classList.add('fshPoint'); }
 }
 
 function collapseDuringAnalysis(row, thisArticle) {
@@ -73,7 +73,7 @@ function collapseDuringAnalysis(row, thisArticle) {
   }
 }
 
-function hasExtraFn(extraFn, row) {if (isFunction(extraFn)) {extraFn(row);}}
+function hasExtraFn(extraFn, row) { if (isFunction(extraFn)) { extraFn(row); } }
 
 function testRowType(row, rowType, thisArticle, param) {
   if (rowType === 0) {
@@ -82,23 +82,22 @@ function testRowType(row, rowType, thisArticle, param) {
     hasExtraFn(param.extraFn, row);
   }
   if (param.articleTest(rowType)) {
-    thisArticle.rows[rowType] =
-      fallback(thisArticle[rowType], {});
+    thisArticle.rows[rowType] = fallback(thisArticle[rowType], {});
     thisArticle.rows[rowType].row = row;
     collapseDuringAnalysis(row, thisArticle);
   }
 }
 
 function doTagging(param, row) {
-  var rowType = row.rowIndex % headerIndex;
-  var articleNo = (row.rowIndex - rowType) / headerIndex;
+  const rowType = row.rowIndex % headerIndex;
+  const articleNo = (row.rowIndex - rowType) / headerIndex;
   warehouse[articleNo] = fallback(warehouse[articleNo], {});
-  var thisArticle = warehouse[articleNo];
+  const thisArticle = warehouse[articleNo];
   thisArticle.rows = thisArticle.rows || [];
   testRowType(row, rowType, thisArticle, param);
 }
 
-function togglePointer(article) {article.header.classList.toggle('fshPoint');}
+function togglePointer(article) { article.header.classList.toggle('fshPoint'); }
 
 function toggleHeaderClass() {
   warehouse.forEach(togglePointer);
@@ -107,12 +106,12 @@ function toggleHeaderClass() {
 function togglePref(prefName) {
   prefValue = !prefValue;
   setValue(prefName, prefValue);
-  if (prefValue) {collapseAll();} else {expandAll();}
+  if (prefValue) { collapseAll(); } else { expandAll(); }
   toggleHeaderClass();
 }
 
 function setupPref(prefName) {
-  var prefEl = getElementById(prefName);
+  const prefEl = getElementById(prefName);
   prefValue = prefEl.checked;
   on(getElementById(prefName), 'change', partial(togglePref, prefName));
 }

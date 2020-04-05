@@ -1,11 +1,11 @@
-import {createSpan} from '../../../common/cElement';
+import { createSpan } from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import setText from '../../../common/setText';
 import toggleForce from '../../../common/toggleForce';
 
-var caDiv;
-var caSpan;
+let caDiv;
+let caSpan;
 
 function initCaDiv(containerDiv) {
   caDiv = containerDiv.children[3];

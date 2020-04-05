@@ -1,16 +1,16 @@
 import doSortParams from '../../common/doSortParams';
 import generateRecipeTable from './generateRecipeTable';
-import {get} from '../../system/idb';
+import { get } from '../../system/idb';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import onclick from '../../common/onclick';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 import stringSort from '../../system/stringSort';
 import {
   gotRecipeBook,
   output,
   parseInventingStart,
-  recipebook
+  recipebook,
 } from './parseInventing';
 
 function sortRecipeTable(evt) { // Legacy
@@ -29,8 +29,8 @@ function rmEvtHdl(evt) {
 }
 
 export default function injectRecipeManager(injector) { // jQuery.min
-  if (jQueryNotPresent()) {return;}
-  var content = injector || pCC;
+  if (jQueryNotPresent()) { return; }
+  const content = injector || pCC;
   get('fsh_recipeBook').then(partial(gotRecipeBook, content));
   onclick(content, rmEvtHdl);
 }

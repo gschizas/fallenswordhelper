@@ -6,6 +6,6 @@ export default function equipItem(backpackInvId) {
     cmd: 'profile',
     subcmd: 'equipitem',
     inventory_id: backpackInvId,
-    ajax: 1
+    ajax: 1,
   }).then(dialog);
 }

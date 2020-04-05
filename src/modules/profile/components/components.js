@@ -1,7 +1,7 @@
 import classHandler from '../../common/classHandler';
 import clickThis from '../../common/clickThis';
 import countComponent from './countComponent';
-import {createDiv} from '../../common/cElement';
+import { createDiv } from '../../common/cElement';
 import decorateButton from './decorateButton';
 import delCompType from './delCompType';
 import delComponent from './delComponent';
@@ -14,12 +14,12 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
 import jQueryDialog from '../../chrome/jQueryDialog';
 import onclick from '../../common/onclick';
-import {sendEvent} from '../../support/fshGa';
+import { sendEvent } from '../../support/fshGa';
 
-var buttonLabels = [
+const buttonLabels = [
   'Enable Quick Del',
   'Count Components',
-  'Quick Extract Components'
+  'Quick Extract Components',
 ];
 
 function addButtons(prev, el) {
@@ -28,7 +28,7 @@ function addButtons(prev, el) {
 }
 
 function componentBtnContainer() {
-  return buttonLabels.reduce(addButtons, createDiv({className: 'fshCenter'}));
+  return buttonLabels.reduce(addButtons, createDiv({ className: 'fshCenter' }));
 }
 
 function quickExtractHandler() {
@@ -43,36 +43,36 @@ function addDelBtn(el) {
 
 function enableDelComponent(target) {
   sendEvent('components', 'enableDelComponent');
-  var quickDelDiv = target.parentNode;
+  const quickDelDiv = target.parentNode;
   hideElement(quickDelDiv);
-  var cmDiv = quickDelDiv.parentNode;
+  const cmDiv = quickDelDiv.parentNode;
   insertElement(cmDiv, decorateButton('Delete All Visible'));
   getArrayByTagName('img', getInvTable()).forEach(addDelBtn);
 }
 
 function delAllComponent(target) {
   sendEvent('components', 'delAllComponent');
-  var thisInvTable = target.parentNode.parentNode.parentNode.children[0];
+  const thisInvTable = target.parentNode.parentNode.parentNode.children[0];
   getArrayByClassName('compDelBtn', thisInvTable).forEach(clickThis);
 }
 
-var classEvts = [
+const classEvts = [
   ['quick-extract-components', quickExtractHandler],
   ['enable-quick-del', enableDelComponent],
   ['delete-all-visible', delAllComponent],
   ['compDelBtn', delComponent],
   ['count-components', countComponent],
-  ['compDelType', delCompType]
+  ['compDelType', delCompType],
 ];
 
 function addComposingButtons(thisInvTable) {
-  var compDiv = thisInvTable.parentNode;
+  const compDiv = thisInvTable.parentNode;
   insertElement(compDiv, componentBtnContainer());
   onclick(compDiv, classHandler(classEvts));
 }
 
 export default function components() {
-  var thisInvTable = getInvTable();
-  if (!thisInvTable) {return;}
+  const thisInvTable = getInvTable();
+  if (!thisInvTable) { return; }
   addComposingButtons(thisInvTable);
 }

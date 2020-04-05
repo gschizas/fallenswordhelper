@@ -1,11 +1,11 @@
-import {createSpan} from '../../../common/cElement';
+import { createSpan } from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import setText from '../../../common/setText';
 import toggleForce from '../../../common/toggleForce';
 
-var ddDiv;
-var ddSpan;
+let ddDiv;
+let ddSpan;
 
 function initDdDiv(containerDiv) {
   ddDiv = containerDiv.children[2];
@@ -17,12 +17,12 @@ function initDdDiv(containerDiv) {
 
 function getDdBonus(dd, killStreak) {
   if (dd) {
-    var ddPerc = Math.min(
+    const ddPerc = Math.min(
       Math.round(
-        Math.floor(killStreak / 5) * Number(dd.level)
-      ) * 0.01, 20
+        Math.floor(killStreak / 5) * Number(dd.level),
+      ) * 0.01, 20,
     );
-    var ddBonus = Math.round(ddPerc * 100) / 100;
+    const ddBonus = Math.round(ddPerc * 100) / 100;
     return ddBonus.toString();
   }
   return '0';

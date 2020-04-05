@@ -1,5 +1,5 @@
 import alpha from '../../../common/alpha';
-import {keys} from '../../../common/keys';
+import { keys } from '../../../common/keys';
 import partial from '../../../common/partial';
 
 function cloneObj(obj, result, key) {

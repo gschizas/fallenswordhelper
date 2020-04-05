@@ -1,8 +1,8 @@
 import calf from '../support/calf';
 import getProfile from './getProfile';
-import {now} from '../support/now';
+import { now } from '../support/now';
 import playerName from '../common/playerName';
-import {get, set} from '../system/idb';
+import { get, set } from '../system/idb';
 
 function sendMyProfileToForage(data) {
   set('fsh_selfProfile', data);
@@ -30,7 +30,7 @@ function getProfileFromForage(data) {
 }
 
 export default function myStats(force) {
-  if (force) {return getMyProfile();}
+  if (force) { return getMyProfile(); }
   return get('fsh_selfProfile')
     .then(getProfileFromForage);
 }

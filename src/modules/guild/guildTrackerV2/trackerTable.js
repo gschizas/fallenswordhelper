@@ -10,25 +10,25 @@ import {
   createTh,
 } from '../../common/cElement';
 
-var actBody;
-var tgCont;
-var memberSelect;
+let actBody;
+let tgCont;
+let memberSelect;
 
 function makeMemberHeader() {
-  var memberHead = createTh({textContent: 'Member'});
+  const memberHead = createTh({ textContent: 'Member' });
   memberSelect = createDiv();
   insertElement(memberHead, memberSelect);
   return memberHead;
 }
 
 function headerRow(tg) {
-  var hrow = tg.createTHead().insertRow(-1);
+  const hrow = tg.createTHead().insertRow(-1);
   insertHtmlBeforeEnd(hrow, '<th>Date</th>');
-  var memberHead = makeMemberHeader();
+  const memberHead = makeMemberHeader();
   insertElement(hrow, memberHead);
-  insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>' +
-    '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>' +
-    '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
+  insertHtmlBeforeEnd(hrow, '<th>Level</th><th>VL</th>'
+    + '<th>Stam</th><th>Max<br>Stam</th><th>Stam<br>%</th>'
+    + '<th>Last<br>Activity<br>(Days)</th><th>GXP</th>');
 }
 
 function makeActBody(tg) {
@@ -37,11 +37,11 @@ function makeActBody(tg) {
 }
 
 export function makeTg() {
-  var tg = createTable({id: 'tg'});
+  const tg = createTable({ id: 'tg' });
   headerRow(tg);
   makeActBody(tg);
   // on(tg, 'change', myChange);
-  tgCont = createDiv({className: 'tgCont fshSpinner fshSpinner64'});
+  tgCont = createDiv({ className: 'tgCont fshSpinner fshSpinner64' });
   insertElement(tgCont, tg);
   return tgCont;
 }

@@ -1,11 +1,11 @@
 import calf from '../../../support/calf';
 import getValue from '../../../system/getValue';
 
-var bias = [
-  {generalVariable: 1.1053, hpVariable: 1.1},
-  {generalVariable: 1.1, hpVariable: 1.053},
-  {generalVariable: 1.053, hpVariable: 1},
-  {generalVariable: 1.1053, hpVariable: 1}
+const bias = [
+  { generalVariable: 1.1053, hpVariable: 1.1 },
+  { generalVariable: 1.1, hpVariable: 1.053 },
+  { generalVariable: 1.053, hpVariable: 1 },
+  { generalVariable: 1.1053, hpVariable: 1 },
 ];
 
 function getBiasGeneral(combatEvaluatorBias) {

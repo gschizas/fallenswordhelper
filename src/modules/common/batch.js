@@ -6,12 +6,12 @@ function moreToDo(limit, ctr, list) {
 }
 
 function maybeEndFn(priority, endFn) {
-  if (isFunction(endFn)) {add(priority, endFn);}
+  if (isFunction(endFn)) { add(priority, endFn); }
 }
 
 export default function batch([dur, priority, itemsAry, ctr, doFn, endFn]) {
-  var limit = performance.now() + dur;
-  var localCounter = ctr;
+  const limit = performance.now() + dur;
+  let localCounter = ctr;
   while (moreToDo(limit, localCounter, itemsAry)) {
     doFn(itemsAry[localCounter], localCounter, itemsAry);
     localCounter += 1;

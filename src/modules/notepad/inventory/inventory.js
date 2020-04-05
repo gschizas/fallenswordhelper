@@ -1,33 +1,35 @@
 import add from '../../support/task';
 import allthen from '../../common/allthen';
-import {buildInv} from './buildInv';
+import { buildInv } from './buildInv';
 import calf from '../../support/calf';
 import clearButton from './clearButton';
 import decorate from './decorate';
 import doTable from './table';
-import {entries} from '../../common/entries';
+import { entries } from '../../common/entries';
 import eventHandlers from './eventHandlers/eventHandlers';
 import executeAll from '../../common/executeAll';
-import {extendOptions} from './options';
-import {get} from '../../system/idb';
+import { extendOptions } from './options';
+import { get } from '../../system/idb';
 import getMembrList from '../../ajax/getMembrList';
 import headers from './headers';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import loadDataTables from '../../common/loadDataTables';
 import notLastUpdate from '../../common/notLastUpdate';
-import {oldActionSpinner} from '../../support/constants';
-import {pCC} from '../../support/layout';
+import { oldActionSpinner } from '../../support/constants';
+import { pCC } from '../../support/layout';
 import setChecks from './setChecks';
 import setLvls from './setLvls';
-import {lvlFilter, rarityFilter, setFilter, typeFilter} from './filters';
-//#if _BETA  //  Timing output
-import {time, timeEnd} from '../../support/debug';
-//#endif
+import {
+  lvlFilter, rarityFilter, setFilter, typeFilter,
+} from './filters';
+// #if _BETA  //  Timing output
+import { time, timeEnd } from '../../support/debug';
+// #endif
 
 function doSpinner() { // jQuery
-  pCC.innerHTML = '<span id="fshInvMan">' +
-    '<img src = "' + oldActionSpinner + '">&nbsp;' +
-    'Getting inventory data...</span>';
+  pCC.innerHTML = `${'<span id="fshInvMan">'
+    + '<img src = "'}${oldActionSpinner}">&nbsp;`
+    + 'Getting inventory data...</span>';
 }
 
 function hydrate(prev, pair) {
@@ -50,13 +52,13 @@ function prepareLayout() {
     rarityFilter,
     headers,
     setChecks,
-    setLvls
+    setLvls,
   ]);
 }
 
 function doInventory() {
   prepareLayout();
-  var fshInv = doTable();
+  const fshInv = doTable();
   eventHandlers(fshInv);
   // eslint-disable-next-line no-use-before-define
   $('#fshRefresh').on('click', injectInventoryManagerNew);
@@ -64,17 +66,17 @@ function doInventory() {
 }
 
 function getInvMan() {
-  //#if _BETA  //  Timing output
+  // #if _BETA  //  Timing output
 
   time('inventory.getInvMan');
 
-  //#endif
+  // #endif
   doInventory();
-  //#if _BETA  //  Timing output
+  // #if _BETA  //  Timing output
 
   timeEnd('inventory.getInvMan');
 
-  //#endif
+  // #endif
 }
 
 function asyncCall() {
@@ -82,17 +84,16 @@ function asyncCall() {
 }
 
 function syncInvMan() { // jQuery
-  var prm = [loadDataTables(), buildInv()];
+  const prm = [loadDataTables(), buildInv()];
   if (calf.subcmd === 'guildinvmgr') {
     prm.push(getMembrList(false).then(rekeyMembrList));
   }
-  prm.push(get('fsh_' + calf.subcmd).then(extendOptions)
-  );
+  prm.push(get(`fsh_${calf.subcmd}`).then(extendOptions));
   allthen(prm, asyncCall);
 }
 
 export function injectInventoryManagerNew() {
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   doSpinner();
   syncInvMan();
 }

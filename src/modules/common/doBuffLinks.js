@@ -3,24 +3,24 @@ import insertElement from './insertElement';
 import onclick from './onclick';
 import openQuickBuffByName from './openQuickBuffByName';
 import partial from './partial';
-import {places} from '../support/constants';
-import {createButton, createLi, createUl} from './cElement';
+import { places } from '../support/constants';
+import { createButton, createLi, createUl } from './cElement';
 
 function batchUp(prev, curr, i) {
-  var slot = Math.floor(i / 16);
+  const slot = Math.floor(i / 16);
   prev[slot] = fallback(prev[slot], []);
   prev[slot].push(curr);
   return prev;
 }
 
 function makeButtons(prev, curr, i) {
-  var theNames = curr.join(',');
-  var modifierWord = places[i];
-  var li = createLi();
-  var btn = createButton({
+  const theNames = curr.join(',');
+  const modifierWord = places[i];
+  const li = createLi();
+  const btn = createButton({
     className: 'fshBl fshBls tip-static',
-    dataset: {tipped: 'Quick buff functionality from HCS only does 16'},
-    textContent: 'Buff ' + modifierWord + ' 16'
+    dataset: { tipped: 'Quick buff functionality from HCS only does 16' },
+    textContent: `Buff ${modifierWord} 16`,
   });
   onclick(btn, partial(openQuickBuffByName, theNames));
   insertElement(li, btn);
@@ -30,6 +30,6 @@ function makeButtons(prev, curr, i) {
 
 export default function doBuffLinks(members) {
   // quick buff only supports 16
-  var shortList = members.reduce(batchUp, []).reduce(makeButtons, createUl());
+  const shortList = members.reduce(batchUp, []).reduce(makeButtons, createUl());
   return shortList;
 }

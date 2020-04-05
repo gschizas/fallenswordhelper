@@ -1,8 +1,8 @@
-import {entries} from '../../../common/entries';
-import {options} from '../options';
+import { entries } from '../../../common/entries';
+import { options } from '../options';
 import setChecks from '../setChecks';
 
-function gearOnly(pair) {return Number(pair[0]) >= 100;}
+function gearOnly(pair) { return Number(pair[0]) >= 100; }
 
 function hydrate(prev, curr) {
   prev[curr[0]] = curr[1];

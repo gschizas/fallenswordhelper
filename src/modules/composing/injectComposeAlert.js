@@ -1,13 +1,13 @@
 import calf from '../support/calf';
-import {daComposing} from '../_dataAccess/_dataAccess';
+import { daComposing } from '../_dataAccess/_dataAccess';
 import displayComposeMsg from './displayComposeMsg';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';
-import {now} from '../support/now';
+import { now } from '../support/now';
 import setValue from '../system/setValue';
 import {
   def_lastComposeCheck,
-  def_needToCompose
+  def_needToCompose,
 } from '../support/constants';
 
 function getTime(pot) {
@@ -20,7 +20,7 @@ function displayAlert() {
 }
 
 function potsBrewing(potions) {
-  var minTimeInSecs = Math.min.apply(null, potions.map(getTime));
+  const minTimeInSecs = Math.min.apply(null, potions.map(getTime));
   if (minTimeInSecs > 0) {
     setValue(def_needToCompose, false);
     setValue(def_lastComposeCheck, now + minTimeInSecs * 1000);
@@ -38,12 +38,12 @@ function parseComposingApp(result) {
 }
 
 function checkAppResponse(json) {
-  if (json.s) {parseComposingApp(json.r);}
+  if (json.s) { parseComposingApp(json.r); }
 }
 
 function checkLastCompose() { // jQuery.min
-  var lastComposeCheck = getValue(def_lastComposeCheck);
-  if (lastComposeCheck && now < lastComposeCheck) {return;}
+  const lastComposeCheck = getValue(def_lastComposeCheck);
+  if (lastComposeCheck && now < lastComposeCheck) { return; }
   daComposing().then(checkAppResponse);
 }
 
@@ -56,5 +56,5 @@ function composeAlert() {
 }
 
 export default function injectComposeAlert() {
-  if (calf.cmd !== 'composing' && jQueryPresent()) {composeAlert();}
+  if (calf.cmd !== 'composing' && jQueryPresent()) { composeAlert(); }
 }

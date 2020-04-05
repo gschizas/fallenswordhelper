@@ -1,12 +1,12 @@
-import {createDiv} from './cElement';
-import {getElementById} from './getElement';
+import { createDiv } from './cElement';
+import { getElementById } from './getElement';
 import insertElement from './insertElement';
 import setText from './setText';
 
 function makeFshMsg() {
-  var fshMsg = getElementById('fshmsg');
+  let fshMsg = getElementById('fshmsg');
   if (!fshMsg) {
-    fshMsg = createDiv({id: 'fshmsg'});
+    fshMsg = createDiv({ id: 'fshmsg' });
     insertElement(document.body, fshMsg);
     $(fshMsg).dialog({
       autoOpen: false,
@@ -22,18 +22,18 @@ function makeFshMsg() {
 function openFshMsg(title, fn, fshMsg) {
   $(fshMsg).dialog('option', {
     buttons: {
-      Yes: function() {
+      Yes() {
         fn();
         $(this).dialog('close');
       },
-      No: function() {$(this).dialog('close');}
+      No() { $(this).dialog('close'); },
     },
-    title: title
+    title,
   }).dialog('open');
 }
 
 export default function jConfirm(title, msgText, fn) { // jQuery
-  var fshMsg = makeFshMsg();
+  const fshMsg = makeFshMsg();
   setText(msgText, fshMsg);
   openFshMsg(title, fn, fshMsg);
 }

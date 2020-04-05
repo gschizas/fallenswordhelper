@@ -11,5 +11,5 @@ export default [
   fshProd,
   calfDev,
   calfBeta,
-  calfProd
+  calfProd,
 ];

@@ -3,11 +3,11 @@ import getMercStats from '../../ajax/getMercStats';
 import groupViewStats from '../../ajax/groupViewStats';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 
-var groupStats;
+let groupStats;
 
 function displayStat(el, groupStat, mercStat) {
-  el.innerHTML = '<span class="fshBlue">' + addCommas(groupStat) + '</span>' +
-    ' ( ' + addCommas(groupStat - mercStat) + ' )';
+  el.innerHTML = `<span class="fshBlue">${addCommas(groupStat)}</span>`
+    + ` ( ${addCommas(groupStat - mercStat)} )`;
 }
 
 function parseMercStats(mercStats) {
@@ -19,7 +19,7 @@ function parseMercStats(mercStats) {
 }
 
 export default function injectGroupStats() { // jQuery
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   groupStats = groupViewStats(document);
   if (groupStats.attackElement) {
     getMercStats().then(parseMercStats);

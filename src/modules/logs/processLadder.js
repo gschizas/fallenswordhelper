@@ -5,13 +5,13 @@ import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import setValue from '../system/setValue';
 
 function isLadderReset(aRow) {
-  return aRow.cells[2] &&
-    /You ranked \w{3} in your PvP Band! You have gained \d x PvP Ladder Token/
+  return aRow.cells[2]
+    && /You ranked \w{3} in your PvP Band! You have gained \d x PvP Ladder Token/
       .test(getText(aRow.cells[2]));
 }
 
 function saveLastResetTime(aRow) {
-  var logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1]));
+  const logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1]));
   if (logTime > calf.lastLadderReset) {
     setValue('lastLadderReset', logTime);
     calf.lastLadderReset = logTime;

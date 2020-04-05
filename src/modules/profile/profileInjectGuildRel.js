@@ -1,7 +1,7 @@
 import currentGuildId from '../common/currentGuildId';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import {guildViewUrl} from '../support/constants';
+import { guildViewUrl } from '../support/constants';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
@@ -12,20 +12,20 @@ import toLowerCase from '../common/toLowerCase';
 
 export var guildId;
 export var currentGuildRelationship;
-var myGuildMsgs = [
+const myGuildMsgs = [
   ['self', 'fshGreen', 'guildSelfMessage'],
   ['friendly', 'fshOliveDrab', 'guildFrndMessage'],
   ['old', 'fshDarkCyan', 'guildPastMessage'],
-  ['enemy', 'fshRed', 'guildEnmyMessage']
+  ['enemy', 'fshRed', 'guildEnmyMessage'],
 ];
-var typeMapping = [
+const typeMapping = [
   ['guildFrnd', 'friendly'],
   ['guildPast', 'old'],
-  ['guildEnmy', 'enemy']
+  ['guildEnmy', 'enemy'],
 ];
 
 function guildAry(pref) {
-  var val = shouldBeArray(pref);
+  const val = shouldBeArray(pref);
   if (val) {
     return val.map(replaceDoubleSpace).map(toLowerCase);
   }
@@ -45,15 +45,15 @@ function hasRelationship(txt, el) {
 }
 
 function externalRelationship(_txt) {
-  var scenario = buildScenario();
-  var txt = replaceDoubleSpace(toLowerCase(_txt));
-  var relObj = scenario.find(partial(hasRelationship, txt));
-  if (relObj) {return relObj[1];}
+  const scenario = buildScenario();
+  const txt = replaceDoubleSpace(toLowerCase(_txt));
+  const relObj = scenario.find(partial(hasRelationship, txt));
+  if (relObj) { return relObj[1]; }
 }
 
 function thisGuildId(aLink) {
-  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-  if (guildIdResult) {return Number(guildIdResult[1]);}
+  const guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
+  if (guildIdResult) { return Number(guildIdResult[1]); }
 }
 
 function guildRelationship(aLink) {
@@ -65,12 +65,12 @@ function guildRelationship(aLink) {
   return externalRelationship(getText(aLink));
 }
 
-function whichMsg(arr) {return arr[0] === currentGuildRelationship;}
+function whichMsg(arr) { return arr[0] === currentGuildRelationship; }
 
 function setMsg(aLink) {
-  var thisGuildRel = myGuildMsgs.find(whichMsg);
+  const thisGuildRel = myGuildMsgs.find(whichMsg);
   aLink.parentNode.classList.add(thisGuildRel[1]);
-  insertHtmlBeforeEnd(aLink.parentNode, '<br>' + getValue(thisGuildRel[2]));
+  insertHtmlBeforeEnd(aLink.parentNode, `<br>${getValue(thisGuildRel[2])}`);
 }
 
 function foundGuildLink(aLink) {
@@ -81,8 +81,9 @@ function foundGuildLink(aLink) {
 }
 
 export function profileInjectGuildRel(isSelf) {
-  var aLink = querySelector(
-    '#pCC a[href^="' + guildViewUrl + '"]');
+  const aLink = querySelector(
+    `#pCC a[href^="${guildViewUrl}"]`,
+  );
   if (aLink) {
     foundGuildLink(aLink);
   } else if (isSelf) {

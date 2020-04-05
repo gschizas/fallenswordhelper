@@ -6,25 +6,25 @@ https://github.com/addyosmani/pubsubz
 import add from './task';
 import partial from '../common/partial';
 
-var topics = {};
-var subUid = -1;
+const topics = {};
+let subUid = -1;
 
-function execute(args, el) {add(3, el.func, [args]);}
+function execute(args, el) { add(3, el.func, [args]); }
 
 export function publish(topic, args) {
-  //#if _DEV  //  pubsubz publish
+  // #if _DEV  //  pubsubz publish
   console.log('publish', topic); // eslint-disable-line no-console
-  //#endif
-  if (!topics[topic]) {return;}
+  // #endif
+  if (!topics[topic]) { return; }
   topics[topic].forEach(partial(execute, args));
   return true; // probably not needed
 }
 
 export function subscribe(topic, func) {
-  if (!topics[topic]) {topics[topic] = [];}
+  if (!topics[topic]) { topics[topic] = []; }
   subUid += 1;
-  var token = subUid.toString();
-  topics[topic].push({token: token, func: func});
+  const token = subUid.toString();
+  topics[topic].push({ token, func });
   return token;
 }
 
@@ -47,5 +47,5 @@ function hasTopic(token, subs) {
 }
 
 export function unsubscribe(token) {
-  if (topics.values().some(partial(hasTopic, token))) {return token;}
+  if (topics.values().some(partial(hasTopic, token))) { return token; }
 }

@@ -1,9 +1,9 @@
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 
-var findBuffsLevel175Only;
+let findBuffsLevel175Only;
 
 export function calcMinLvl() { // Legacy
-  if (findBuffsLevel175Only) {return 500;}
+  if (findBuffsLevel175Only) { return 500; }
   return 1;
 }
 

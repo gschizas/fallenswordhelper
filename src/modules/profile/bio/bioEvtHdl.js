@@ -1,15 +1,15 @@
-import {entries} from '../../common/entries';
+import { entries } from '../../common/entries';
 import formatCost from './formatCost';
 import getBuffsToBuy from './getBuffsToBuy';
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 import getPrice from './getPrice';
 import getText from '../../common/getText';
 
-var buffCost = {count: 0, buffs: {}};
+const buffCost = { count: 0, buffs: {} };
 
 function buffRows(pair) {
-  return '<tr><td>' + pair[0] + '</td><td>: ' + pair[1][0] +
-    pair[1][1] + '</td></tr>';
+  return `<tr><td>${pair[0]}</td><td>: ${pair[1][0]
+  }${pair[1][1]}</td></tr>`;
 }
 
 function totalCost(prev, pair) {
@@ -18,15 +18,17 @@ function totalCost(prev, pair) {
 }
 
 function hazBuffs() {
-  var myEntries = entries(buffCost.buffs);
-  var totalText = formatCost(myEntries.reduce(totalCost,
-    {k: 0, fsp: 0, stam: 0, unknown: 0}));
-  getElementById('buffCost').innerHTML = '<span class="tip-static" ' +
-    'data-tipped="This is an estimated cost based on how the script finds ' +
-    'the cost associated with buffs from viewing bio. It can be incorrect, ' +
-    'please use with discretion.<br><hr><table border=0>' +
-    myEntries.map(buffRows).join('') + '</table><b>Total: ' + totalText +
-    '</b>">Estimated Cost: <b>' + totalText + '</b></span>';
+  const myEntries = entries(buffCost.buffs);
+  const totalText = formatCost(myEntries.reduce(totalCost,
+    {
+      k: 0, fsp: 0, stam: 0, unknown: 0,
+    }));
+  getElementById('buffCost').innerHTML = `${'<span class="tip-static" '
+    + 'data-tipped="This is an estimated cost based on how the script finds '
+    + 'the cost associated with buffs from viewing bio. It can be incorrect, '
+    + 'please use with discretion.<br><hr><table border=0>'}${
+    myEntries.map(buffRows).join('')}</table><b>Total: ${totalText
+  }</b>">Estimated Cost: <b>${totalText}</b></span>`;
   buffCost.buffCostTotalText = totalText;
 }
 
@@ -50,9 +52,9 @@ function priceUnit(price) {
 }
 
 function getBuffCost(buffNameNode) {
-  var price = getPrice(buffNameNode);
-  var type;
-  var cost;
+  const price = getPrice(buffNameNode);
+  let type;
+  let cost;
   if (price) {
     type = priceUnit(price);
     cost = price[0].match(/([+-]?[.\d]+)/)[0];
@@ -65,10 +67,10 @@ function getBuffCost(buffNameNode) {
 }
 
 function toggleBuffsToBuy(buffNameNode) { // Legacy
-  var selected = buffNameNode.classList.contains('fshBlue');
+  const selected = buffNameNode.classList.contains('fshBlue');
   buffNameNode.classList.toggle('fshBlue');
   buffNameNode.classList.toggle('fshYellow');
-  var buffName = getText(buffNameNode);
+  const buffName = getText(buffNameNode);
   if (selected) {
     getBuffCost(buffNameNode);
   } else {
@@ -79,13 +81,13 @@ function toggleBuffsToBuy(buffNameNode) { // Legacy
 }
 
 function closestSpan(el) {
-  if (!el.tagName || el.tagName === 'SPAN') {return el;}
+  if (!el.tagName || el.tagName === 'SPAN') { return el; }
   return closestSpan(el.parentNode);
 }
 
 function isBuffLink(buffNameNode) {
-  return buffNameNode.classList &&
-    buffNameNode.classList.contains('buffLink');
+  return buffNameNode.classList
+    && buffNameNode.classList.contains('buffLink');
 }
 
 export default function bioEvtHdl(e) {
@@ -94,7 +96,7 @@ export default function bioEvtHdl(e) {
     getBuffsToBuy(buffCost);
     return;
   }
-  var buffNameNode = closestSpan(e.target);
+  const buffNameNode = closestSpan(e.target);
   if (isBuffLink(buffNameNode)) {
     toggleBuffsToBuy(buffNameNode);
   }

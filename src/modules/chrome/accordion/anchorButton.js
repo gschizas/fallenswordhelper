@@ -4,8 +4,8 @@ import insertElementAfter from '../../common/insertElementAfter';
 import jQueryDialog from '../jQueryDialog';
 import onclick from '../../common/onclick';
 import partial from '../../common/partial';
-import {sendEvent} from '../../support/fshGa';
-import {createAnchor, createLi} from '../../common/cElement';
+import { sendEvent } from '../../support/fshGa';
+import { createAnchor, createLi } from '../../common/cElement';
 
 function openDialog(text, fn) {
   sendEvent('accordion', text);
@@ -17,10 +17,10 @@ function insertAdjElement(parent, listItem) {
 }
 
 export default function anchorButton(navLvl, text, fn, target) {
-  var li = createLi({className: 'nav-level-' + navLvl});
-  var al = createAnchor({
+  const li = createLi({ className: `nav-level-${navLvl}` });
+  const al = createAnchor({
     className: 'nav-link fshPoint',
-    textContent: text
+    textContent: text,
   });
   onclick(al, partial(openDialog, text, fn));
   insertElement(li, al);

@@ -10,8 +10,8 @@ export default function injectGuildBank() {
     data: {
       cmd: 'guild',
       subcmd: 'bank',
-      subcmd2: 'transaction'
+      subcmd2: 'transaction',
     },
-    initWithdraw: '1'
+    initWithdraw: '1',
   });
 }

@@ -1,13 +1,13 @@
 import getRelicList from './getRelicList';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import padZ from '../../system/padZ';
 import partial from '../../common/partial';
 import splitTime from '../../common/splitTime';
-import {def_subcmd, guideUrl, guildViewUrl} from '../../support/constants';
+import { def_subcmd, guideUrl, guildViewUrl } from '../../support/constants';
 
 function relicName(relic) {
-  return `<a href="${guideUrl}relics${def_subcmd}view&relic_id=${relic.id}">` +
-    `${relic.name}</a>`;
+  return `<a href="${guideUrl}relics${def_subcmd}view&relic_id=${relic.id}">`
+    + `${relic.name}</a>`;
 }
 
 function guildName(relicGuild) {
@@ -17,7 +17,7 @@ function guildName(relicGuild) {
   return '';
 }
 
-function attrib(id, att) {return att.id === id;}
+function attrib(id, att) { return att.id === id; }
 
 function stamGain(relic) {
   return relic.attributes && relic.attributes.find(partial(attrib, 6));
@@ -25,7 +25,7 @@ function stamGain(relic) {
 
 function makeAttrib(attribs, id) {
   if (attribs) {
-    var thisAttrib = attribs.find(partial(attrib, id));
+    const thisAttrib = attribs.find(partial(attrib, id));
     if (thisAttrib) {
       return thisAttrib.value;
     }
@@ -38,38 +38,38 @@ function allAttribs(attribs) {
 }
 
 function formatTime(time) {
-  if (!time) {return '';}
-  var t = splitTime(time);
+  if (!time) { return ''; }
+  const t = splitTime(time);
   return `${padZ(t[0])}d ${padZ(t[1])}h ${padZ(t[2])}m ${padZ(t[3])}s`;
 }
 
 function makeRow(relic) {
-  return `<tr><td>${relic.min_level}</td>` +
-    `<td>${relicName(relic)}</td>` +
-    `<td>${guildName(relic.guild)}</td>` +
-    `<td>${allAttribs(relic.attributes)}</td>` +
-    `<td>${formatTime(relic.time)}</td></tr>`;
+  return `<tr><td>${relic.min_level}</td>`
+    + `<td>${relicName(relic)}</td>`
+    + `<td>${guildName(relic.guild)}</td>`
+    + `<td>${allAttribs(relic.attributes)}</td>`
+    + `<td>${formatTime(relic.time)}</td></tr>`;
 }
 
 function makeTable(thisRelicList) {
-  return '<style>' +
-    '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}' +
-    '.reliclist, .reliclist th, .reliclist td {border: 1px solid black;}' +
-    '.reliclist th, .reliclist td {padding: 5px;}' +
-    '</style><table class="reliclist"><thead><tr>' +
-    '<th>Level</th>' +
-    '<th>Name</th>' +
-    '<th>Guild</th>' +
-    '<th>Stam<br>Gain</th>' +
-    '<th>Atk</th>' +
-    '<th>Dmg</th>' +
-    '<th>Stam</th>' +
-    '<th>Gold<br>Gain</th>' +
-    '<th>XP<br>Gain</th>' +
-    '<th>Time</th>' +
-    '</tr></thead><tbody>' +
-    thisRelicList.filter(stamGain).map(makeRow).join('') +
-    '</tbody></table>';
+  return `${'<style>'
+    + '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}'
+    + '.reliclist, .reliclist th, .reliclist td {border: 1px solid black;}'
+    + '.reliclist th, .reliclist td {padding: 5px;}'
+    + '</style><table class="reliclist"><thead><tr>'
+    + '<th>Level</th>'
+    + '<th>Name</th>'
+    + '<th>Guild</th>'
+    + '<th>Stam<br>Gain</th>'
+    + '<th>Atk</th>'
+    + '<th>Dmg</th>'
+    + '<th>Stam</th>'
+    + '<th>Gold<br>Gain</th>'
+    + '<th>XP<br>Gain</th>'
+    + '<th>Time</th>'
+    + '</tr></thead><tbody>'}${
+    thisRelicList.filter(stamGain).map(makeRow).join('')
+  }</tbody></table>`;
 }
 
 function processRelicList(thisRelicList) {

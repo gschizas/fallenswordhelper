@@ -8,7 +8,7 @@ function localDatePartsPadded(aDate) {
     aDate.getDate(),
     aDate.getHours(),
     aDate.getMinutes(),
-    aDate.getSeconds()
+    aDate.getSeconds(),
   ].map(padZ);
 }
 

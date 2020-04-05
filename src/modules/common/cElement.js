@@ -1,9 +1,9 @@
-import {def_table} from '../support/constants';
+import { def_table } from '../support/constants';
 import mixin from './mixin';
 
 function cElement(type, props) {
-  var el = document.createElement(type);
-  if (props) {mixin(el, props);}
+  const el = document.createElement(type);
+  if (props) { mixin(el, props); }
   return el;
 }
 
@@ -80,11 +80,11 @@ export function createLabel(props) {
 }
 
 export function textSpan(text) {
-  return createSpan({textContent: text});
+  return createSpan({ textContent: text });
 }
 
 export function createStyle(style) {
-  return cElement('style', {innerHTML: style});
+  return cElement('style', { innerHTML: style });
 }
 
 export function createSelect(props) {

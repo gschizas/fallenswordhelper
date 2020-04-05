@@ -1,6 +1,6 @@
-import {getElementById} from '../../common/getElement';
+import { getElementById } from '../../common/getElement';
 
-var bufferProgress;
+let bufferProgress;
 
 export function getBufferProgress() {
   bufferProgress = getElementById('bufferProgress');

@@ -5,6 +5,6 @@ export default function completed() {
     subcmd: 'completed',
     arena_id: -1,
     latest: false,
-    limit: 9999
+    limit: 9999,
   });
 }

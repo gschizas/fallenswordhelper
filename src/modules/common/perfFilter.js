@@ -1,32 +1,32 @@
 import clickThis from './clickThis';
-import {createDiv} from './cElement';
+import { createDiv } from './cElement';
 import getArrayByClassName from './getArrayByClassName';
-import {getElementById} from '../common/getElement';
+import { getElementById } from './getElement';
 import getInventoryById from '../ajax/getInventoryById';
 import insertElement from './insertElement';
 import insertHtmlBeforeEnd from './insertHtmlBeforeEnd';
 import jQueryNotPresent from './jQueryNotPresent';
 import onclick from './onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 
-var inv;
-var target;
+let inv;
+let target;
 
 function clickOnPerf(el) {
-  var thisItem = el.id.replace(target + '-item-', '');
-  if (inv[thisItem] && inv[thisItem].craft === 'Perfect') {clickThis(el);}
+  const thisItem = el.id.replace(`${target}-item-`, '');
+  if (inv[thisItem] && inv[thisItem].craft === 'Perfect') { clickThis(el); }
 }
 
 function selectPerf() {
-  var items = getArrayByClassName('selectable-item',
-    getElementById(target + '-items'));
-  if (items.length === 0) {return;} // ?
+  const items = getArrayByClassName('selectable-item',
+    getElementById(`${target}-items`));
+  if (items.length === 0) { return; } // ?
   items.forEach(clickOnPerf);
 }
 
 function drawFilters(data) {
   inv = data.items;
-  var buttonDiv = createDiv({className: 'fshAC'});
+  const buttonDiv = createDiv({ className: 'fshAC' });
   insertHtmlBeforeEnd(buttonDiv,
     '<button class="fshBl">Perfect</button>');
   insertElement(pCC, buttonDiv);
@@ -34,7 +34,7 @@ function drawFilters(data) {
 }
 
 export default function perfFilter(loc) { // jQuery.min
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   target = loc;
   getInventoryById().then(drawFilters);
 }

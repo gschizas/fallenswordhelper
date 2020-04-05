@@ -1,8 +1,8 @@
-import {defenderMultiplier} from '../../../support/constants';
+import { defenderMultiplier } from '../../../support/constants';
 import fallback from '../../../system/fallback';
 import playerDataObject from '../../../common/playerDataObject';
 import reduceBuffArray from '../../../common/reduceBuffArray';
-import {relicMultiplier} from './parseGuild';
+import { relicMultiplier } from './parseGuild';
 import setText from '../../../common/setText';
 import setTextCommas from '../../../common/setTextCommas';
 import {
@@ -31,21 +31,21 @@ import {
   hpBuffedElement,
   hpElement,
   lDCloakedElement,
-  processingStatus
+  processingStatus,
 } from './secondaryElements';
 
-var defRawAttack;
-var defBuffedAttack;
-var defRawDefense;
-var defRawArmor;
-var defRawDamage;
-var defBuffedDamage;
-var defRawHp;
-var defCloaked;
-var defProcessed;
-var leadDefender;
-var groupStats;
-var mercStats;
+let defRawAttack;
+let defBuffedAttack;
+let defRawDefense;
+let defRawArmor;
+let defRawDamage;
+let defBuffedDamage;
+let defRawHp;
+let defCloaked;
+let defProcessed;
+let leadDefender;
+let groupStats;
+let mercStats;
 
 function deductMercStats() {
   groupStats.attack -= mercStats.attack;
@@ -87,20 +87,20 @@ function updateGroupValues() {
 }
 
 function calcNmvEffect(buffs) {
-  return Math.ceil(groupStats.attack *
-    (fallback(buffs['Nightmare Visage'], 0) * 0.0025));
+  return Math.ceil(groupStats.attack
+    * (fallback(buffs['Nightmare Visage'], 0) * 0.0025));
 }
 
 function doGroupAttackBuffedElement() {
-  var storedFlinchEffectValue = Math.ceil(groupStats.attack *
-    leadDefender.flinchLevel * 0.001);
+  const storedFlinchEffectValue = Math.ceil(groupStats.attack
+    * leadDefender.flinchLevel * 0.001);
   setTextCommas(groupStats.attack - storedFlinchEffectValue,
     groupAttackBuffedElement);
 }
 
 function calcDefWithConst(buffs) {
-  return Math.ceil(groupStats.defense *
-    (1 + fallback(buffs.Constitution, 0) * 0.001));
+  return Math.ceil(groupStats.defense
+    * (1 + fallback(buffs.Constitution, 0) * 0.001));
 }
 
 function doGroupDefenseBuffedElement(nmv, defConst) {
@@ -108,13 +108,13 @@ function doGroupDefenseBuffedElement(nmv, defConst) {
 }
 
 function doGroupArmorBuffedElement(buffs) {
-  setTextCommas(groupStats.armor + Math.floor(groupStats.armor *
-    fallback(buffs.Sanctuary, 0) * 0.001), groupArmorBuffedElement);
+  setTextCommas(groupStats.armor + Math.floor(groupStats.armor
+    * fallback(buffs.Sanctuary, 0) * 0.001), groupArmorBuffedElement);
 }
 
 function calcFortitudeBonusHP(buffs, defenseWithConstitution) {
-  return Math.ceil(defenseWithConstitution *
-    fallback(buffs.Fortitude, 0) * 0.001);
+  return Math.ceil(defenseWithConstitution
+    * fallback(buffs.Fortitude, 0) * 0.001);
 }
 
 function doGroupHPBuffedElement(fortitudeBonusHP) {
@@ -122,43 +122,44 @@ function doGroupHPBuffedElement(fortitudeBonusHP) {
 }
 
 function doGroupDamageBuffedElement(buffs, fortitudeBonusHP) {
-  var chiStrikeBonusDamage = Math.ceil((groupStats.hp + fortitudeBonusHP) *
-    fallback(buffs['Chi Strike'], 0) * 0.001);
-  var storedTerrorizeEffectValue = Math.ceil(
-    groupStats.damage * leadDefender.terrorizeLevel * 0.001);
-  setTextCommas(groupStats.damage + chiStrikeBonusDamage -
-    storedTerrorizeEffectValue, groupDamageBuffedElement);
+  const chiStrikeBonusDamage = Math.ceil((groupStats.hp + fortitudeBonusHP)
+    * fallback(buffs['Chi Strike'], 0) * 0.001);
+  const storedTerrorizeEffectValue = Math.ceil(
+    groupStats.damage * leadDefender.terrorizeLevel * 0.001,
+  );
+  setTextCommas(groupStats.damage + chiStrikeBonusDamage
+    - storedTerrorizeEffectValue, groupDamageBuffedElement);
 }
 
 function doGroupAttributeElements(buffs) {
-  var nightmareVisageEffect = calcNmvEffect(buffs);
+  const nightmareVisageEffect = calcNmvEffect(buffs);
   groupStats.attack -= nightmareVisageEffect; // <-- important
   doGroupAttackBuffedElement();
-  var defenseWithConstitution = calcDefWithConst(buffs);
+  const defenseWithConstitution = calcDefWithConst(buffs);
   doGroupDefenseBuffedElement(nightmareVisageEffect, defenseWithConstitution);
   doGroupArmorBuffedElement(buffs);
-  var fortitudeBonusHP = calcFortitudeBonusHP(buffs, defenseWithConstitution);
+  const fortitudeBonusHP = calcFortitudeBonusHP(buffs, defenseWithConstitution);
   doGroupHPBuffedElement(fortitudeBonusHP);
   doGroupDamageBuffedElement(buffs, fortitudeBonusHP);
 }
 
 function flinchEffectOnDefenders(buffs) {
-  var flinchEffectValue = Math.ceil(defBuffedAttack *
-    fallback(buffs.Flinch, 0) * 0.001);
+  const flinchEffectValue = Math.ceil(defBuffedAttack
+    * fallback(buffs.Flinch, 0) * 0.001);
   setTextCommas(defBuffedAttack - flinchEffectValue, attackBuffedElement);
 }
 
 function terrorizeEffectOnDefenders(buffs) {
-  var terrorizeEffectValue = Math.ceil(defBuffedDamage *
-    fallback(buffs.Terrorize, 0) * 0.001);
+  const terrorizeEffectValue = Math.ceil(defBuffedDamage
+    * fallback(buffs.Terrorize, 0) * 0.001);
   setTextCommas(defBuffedDamage - terrorizeEffectValue, damageBuffedElement);
 }
 
 function calculateGroup() {
   setText('Processing attacking group stats ... ', processingStatus);
-  if (mercStats) {deductMercStats();}
+  if (mercStats) { deductMercStats(); }
   updateGroupValues();
-  var buffs = reduceBuffArray(GameData.player().buffs);
+  const buffs = reduceBuffArray(GameData.player().buffs);
   doGroupAttributeElements(buffs);
   flinchEffectOnDefenders(buffs); // Effect on defending group from Flinch on attacking group.
   terrorizeEffectOnDefenders(buffs);
@@ -170,8 +171,8 @@ function calcDefenderNmvEffect() {
 }
 
 function calcDefenderDefenseWithConst() {
-  return Math.ceil(defRawDefense *
-    (1 + leadDefender.constitutionLevel * 0.001));
+  return Math.ceil(defRawDefense
+    * (1 + leadDefender.constitutionLevel * 0.001));
 }
 
 function updateDefenderBuffedAttack(nmvEffect) {
@@ -180,7 +181,7 @@ function updateDefenderBuffedAttack(nmvEffect) {
 }
 
 function updateDefenderBuffedDefense(nmv, defWithConst) {
-  var defBuffedDefense = defWithConst + nmv;
+  const defBuffedDefense = defWithConst + nmv;
   setTextCommas(defBuffedDefense, defenseBuffedElement);
   setTextCommas(Math.ceil(defBuffedDefense * 0.55), dc225Element);
   setTextCommas(Math.ceil(defBuffedDefense * 0.65), dc175Element);
@@ -188,7 +189,8 @@ function updateDefenderBuffedDefense(nmv, defWithConst) {
 
 function updateDefenderBuffedArmor() {
   setTextCommas(defRawArmor + Math.floor(
-    defRawArmor * leadDefender.sanctuaryLevel * 0.001), armorBuffedElement);
+    defRawArmor * leadDefender.sanctuaryLevel * 0.001,
+  ), armorBuffedElement);
 }
 
 function calcDefenderFortitudeBonusHp(defWithConst) {
@@ -196,8 +198,8 @@ function calcDefenderFortitudeBonusHp(defWithConst) {
 }
 
 function updateDefenderBuffedDamage(defBuffedHp) {
-  defBuffedDamage = defRawDamage +
-    Math.ceil(defBuffedHp * leadDefender.chiStrikeLevel * 0.001);
+  defBuffedDamage = defRawDamage
+    + Math.ceil(defBuffedHp * leadDefender.chiStrikeLevel * 0.001);
   setTextCommas(defBuffedDamage);
 }
 
@@ -211,12 +213,12 @@ export function doCalculations() {
   setText('Processing defending guild stats ... ', processingStatus);
   updateDefenderValues();
   updateDefenderElements();
-  var nmvEffect = calcDefenderNmvEffect();
+  const nmvEffect = calcDefenderNmvEffect();
   updateDefenderBuffedAttack(nmvEffect);
-  var defWithConst = calcDefenderDefenseWithConst();
+  const defWithConst = calcDefenderDefenseWithConst();
   updateDefenderBuffedDefense(nmvEffect, defWithConst);
   updateDefenderBuffedArmor();
-  var defBuffedHp = defRawHp + calcDefenderFortitudeBonusHp(defWithConst);
+  const defBuffedHp = defRawHp + calcDefenderFortitudeBonusHp(defWithConst);
   setTextCommas(defBuffedHp, hpBuffedElement);
   updateDefenderBuffedDamage(defBuffedHp);
   isLeadDefenderCloaked();
@@ -228,14 +230,14 @@ export function doCalculations() {
 }
 
 export function parseDefender(json) {
-  var defender = playerDataObject(json);
+  const defender = playerDataObject(json);
   defRawAttack += Math.round(defender.attackValue * defenderMultiplier);
-  defRawDefense += Math.round(defender.defenseValue *
-    defenderMultiplier);
+  defRawDefense += Math.round(defender.defenseValue
+    * defenderMultiplier);
   defRawArmor += Math.round(defender.armorValue * defenderMultiplier);
   defRawDamage += Math.round(defender.damageValue * defenderMultiplier);
   defRawHp += Math.round(defender.hpValue * defenderMultiplier);
-  if (defender.cloakLevel !== 0) {defCloaked += 1;}
+  if (defender.cloakLevel !== 0) { defCloaked += 1; }
   updateDefenderElements();
 }
 

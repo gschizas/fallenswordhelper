@@ -7,6 +7,6 @@ export default function takeItem(invId) {
     subcmd: 'inventory',
     subcmd2: 'takeitem',
     guildstore_id: invId,
-    ajax: 1
+    ajax: 1,
   }).then(dialog);
 }

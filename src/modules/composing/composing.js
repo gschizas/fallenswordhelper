@@ -1,31 +1,31 @@
 import backgroundCreate from './backgroundCreate';
 import fastCompose from './fastCompose';
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getValue from '../system/getValue';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import jQueryPresent from '../common/jQueryPresent';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import parseComposing from './parseComposing';
 import querySelectorArray from '../common/querySelectorArray';
-import {sendEvent} from '../support/fshGa';
+import { sendEvent } from '../support/fshGa';
 
 function moveButtons() {
   if (getValue('moveComposingButtons')) {
-    var buttonDiv = getElementById('composing-error-dialog')
+    const buttonDiv = getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-    var top = getElementsByClassName('composing-level', pCC)[0]
+    const top = getElementsByClassName('composing-level', pCC)[0]
       .parentNode;
     insertElementBefore(buttonDiv, top);
   }
 }
 
 function injectButton(el) {
-  insertHtmlAfterEnd(el, '<span class="quickCreate">' +
-    '[<span class="sendLink">Quick Create</span>]</span>');
+  insertHtmlAfterEnd(el, '<span class="quickCreate">'
+    + '[<span class="sendLink">Quick Create</span>]</span>');
 }
 
 function isOurTarget(target) {
@@ -33,7 +33,7 @@ function isOurTarget(target) {
 }
 
 function doQuickCreate(target) {
-  var temp = target.previousElementSibling.previousElementSibling;
+  const temp = target.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
     backgroundCreate(target, temp);
     sendEvent('composing', 'QuickCreate');
@@ -41,7 +41,7 @@ function doQuickCreate(target) {
 }
 
 function quickCreate(evt) {
-  var target = evt.target.parentNode;
+  const target = evt.target.parentNode;
   if (isOurTarget(target)) {
     doQuickCreate(target);
   }
@@ -57,5 +57,5 @@ function hasJQuery() {
 }
 
 export default function injectComposing() {
-  if (jQueryPresent() && pCC) {hasJQuery();}
+  if (jQueryPresent() && pCC) { hasJQuery(); }
 }

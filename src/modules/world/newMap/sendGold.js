@@ -3,29 +3,29 @@ import getValue from '../../system/getValue';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import infoBoxFrom from '../../common/InfoBoxFrom';
 import setValue from '../../system/setValue';
-import {def_fetch_playerStats, def_playerGold} from '../../support/constants';
+import { def_fetch_playerStats, def_playerGold } from '../../support/constants';
 
-var goldAmount;
-var sendGoldonWorld;
+let goldAmount;
+let sendGoldonWorld;
 
 function doneSendGold(data) {
-  var info = infoBoxFrom(data);
+  const info = infoBoxFrom(data);
   if (info === 'You successfully sent gold!' || info === '') {
     setValue('currentGoldSentTotal',
-      parseInt(getValue('currentGoldSentTotal'), 10) +
-      parseInt(getValue('goldAmount'), 10));
+      parseInt(getValue('currentGoldSentTotal'), 10)
+      + parseInt(getValue('goldAmount'), 10));
     GameData.fetch(def_fetch_playerStats);
   }
 }
 
 export function doSendGold() { // jQuery
-  if (!sendGoldonWorld) {return;}
+  if (!sendGoldonWorld) { return; }
   indexAjaxData({
     cmd: 'trade',
     subcmd: 'sendgold',
     xc: window.ajaxXC,
     target_username: $('#HelperSendTo').html(),
-    gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, '')
+    gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, ''),
   }).then(doneSendGold);
 }
 
@@ -43,16 +43,16 @@ function updateSendGoldOnWorld() { // jQuery
 }
 
 function extraHtml() {
-  return '<dt class="stat-gold-sendTo">Send To:</dt>' +
-    '<dd id="HelperSendTo">' + getValue('goldRecipient') + '</dd>' +
-    '<dt class="stat-gold-sendAmt">Amount:</dt>' +
-    '<dd id="HelperSendAmt">' + addCommas(goldAmount) + '</dd>' +
-    '<dt class="stat-gold-sendTo">Send?</dt>' +
-    '<dd><input id="HelperSendGold" value="Send!" class="custombutton" ' +
-    'type="submit"><input type="hidden" id="xc" value=""</dd>' +
-    '<dt class="stat-gold-sendTotal">Total Sent:</dt>' +
-    '<dd id="HelperSendTotal">' +
-      addCommas(getValue('currentGoldSentTotal')) + '</dd>';
+  return `${'<dt class="stat-gold-sendTo">Send To:</dt>'
+    + '<dd id="HelperSendTo">'}${getValue('goldRecipient')}</dd>`
+    + '<dt class="stat-gold-sendAmt">Amount:</dt>'
+    + `<dd id="HelperSendAmt">${addCommas(goldAmount)}</dd>`
+    + '<dt class="stat-gold-sendTo">Send?</dt>'
+    + '<dd><input id="HelperSendGold" value="Send!" class="custombutton" '
+    + 'type="submit"><input type="hidden" id="xc" value=""</dd>'
+    + '<dt class="stat-gold-sendTotal">Total Sent:</dt>'
+    + `<dd id="HelperSendTotal">${
+      addCommas(getValue('currentGoldSentTotal'))}</dd>`;
 }
 
 function prepareSendGoldOnWorld() {
@@ -65,5 +65,5 @@ function prepareSendGoldOnWorld() {
 
 export function injectSendGoldOnWorld() { // jQuery
   sendGoldonWorld = getValue('sendGoldonWorld');
-  if (sendGoldonWorld) {prepareSendGoldOnWorld();}
+  if (sendGoldonWorld) { prepareSendGoldOnWorld(); }
 }

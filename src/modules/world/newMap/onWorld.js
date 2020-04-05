@@ -1,7 +1,7 @@
-import {titanStats} from './titanStats/titanStats';
+import { titanStats } from './titanStats/titanStats';
 import {
   def_refreshActionList,
-  def_stairway
+  def_stairway,
 } from '../../support/constants';
 
 function hazRealm(data) {
@@ -15,11 +15,11 @@ function injectWorldNewMap(e, data) {
 }
 
 export default function onWorld() {
-  if (window.initialGameData) {// HCS initial data
+  if (window.initialGameData) { // HCS initial data
     injectWorldNewMap(null, window.initialGameData);
   }
   $.subscribe(
-    def_refreshActionList + ' ' + def_stairway,
-    injectWorldNewMap // change of information
+    `${def_refreshActionList} ${def_stairway}`,
+    injectWorldNewMap, // change of information
   );
 }

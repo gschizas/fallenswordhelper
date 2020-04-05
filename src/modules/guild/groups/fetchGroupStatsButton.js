@@ -7,23 +7,23 @@ import partial from '../../common/partial';
 import querySelectorArray from '../../common/querySelectorArray';
 
 function parseGroupData(linkElement, obj) {
-  var extraText = '<table class="fshgrpstat">' +
-    '<tr>' +
-    '<td class="fshBrown">Attack</td>' +
-    '<td class="fshRight">' + obj.attack + '</td>' +
-    '<td class="fshBrown">Defense</td>' +
-    '<td class="fshRight">' + obj.defense + '</td>' +
-    '</tr><tr>' +
-    '<td class="fshBrown">Armor</td>' +
-    '<td class="fshRight">' + obj.armor + '</td>' +
-    '<td class="fshBrown">Damage</td>' +
-    '<td class="fshRight">' + obj.damage + '</td>' +
-    '</tr><tr>' +
-    '<td class="fshBrown">HP</td>' +
-    '<td class="fshRight">' + obj.hp + '</td>' +
-    '<td colspan="2"></td>' +
-    '</tr></table>';
-  var expiresLocation = linkElement.parentNode.parentNode
+  const extraText = `${'<table class="fshgrpstat">'
+    + '<tr>'
+    + '<td class="fshBrown">Attack</td>'
+    + '<td class="fshRight">'}${obj.attack}</td>`
+    + '<td class="fshBrown">Defense</td>'
+    + `<td class="fshRight">${obj.defense}</td>`
+    + '</tr><tr>'
+    + '<td class="fshBrown">Armor</td>'
+    + `<td class="fshRight">${obj.armor}</td>`
+    + '<td class="fshBrown">Damage</td>'
+    + `<td class="fshRight">${obj.damage}</td>`
+    + '</tr><tr>'
+    + '<td class="fshBrown">HP</td>'
+    + `<td class="fshRight">${obj.hp}</td>`
+    + '<td colspan="2"></td>'
+    + '</tr></table>';
+  const expiresLocation = linkElement.parentNode.parentNode
     .previousElementSibling;
   insertHtmlBeforeEnd(expiresLocation, extraText);
 }
@@ -38,6 +38,6 @@ function fetchGroupData(evt) {
 }
 
 export default function fetchGroupStatsButton(buttonRow) {
-  var fetchStats = addButton(buttonRow, 'Fetch Group Stats');
+  const fetchStats = addButton(buttonRow, 'Fetch Group Stats');
   onclick(fetchStats, fetchGroupData);
 }

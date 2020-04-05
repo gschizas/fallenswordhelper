@@ -5,6 +5,6 @@ export default function sendtofolder(folderId, itemsAry) {
     cmd: 'profile',
     subcmd: 'sendtofolder',
     folder_id: folderId,
-    folderItem: itemsAry
+    folderItem: itemsAry,
   });
 }

@@ -6,8 +6,8 @@ export default function doBreakdown(selectedList) {
     data: {
       cmd: 'composing',
       subcmd: 'dobreakdown',
-      item_list: selectedList
+      item_list: selectedList,
     },
-    dataType: 'json'
+    dataType: 'json',
   });
 }

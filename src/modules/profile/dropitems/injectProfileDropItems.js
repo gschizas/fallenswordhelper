@@ -4,5 +4,5 @@ import injectStoreItems from './injectStoreItems';
 
 export default function injectProfileDropItems() {
   injectStoreItems();
-  if (calf.subcmd === 'dropitems') {injectMoveItems();}
+  if (calf.subcmd === 'dropitems') { injectMoveItems(); }
 }

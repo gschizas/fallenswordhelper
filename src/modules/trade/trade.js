@@ -1,24 +1,24 @@
 import add from '../support/task';
 import calf from '../support/calf';
-import {createTr} from '../common/cElement';
+import { createTr } from '../common/cElement';
 import defaults from '../support/dataObj.json';
 import doFolders from './doFolders';
-import {getElementById} from '../common/getElement';
+import { getElementById } from '../common/getElement';
 import getValue from '../system/getValue';
 import hasClass from '../common/hasClass';
 import insertElementBefore from '../common/insertElementBefore';
 import jsonParse from '../common/jsonParse';
 import onclick from '../common/onclick';
-//#if _DEV  //  oneByOne
+// #if _DEV  //  oneByOne
 import oneByOne from './oneByOne';
-//#endif
+// #endif
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 
 function getHowMany(itemTables) {
-  var howMany = parseInt(getElementById('fshSendHowMany').value, 10);
-  if (isNaN(howMany)) {return itemTables.length;}
-  if (calf.subcmd !== '-') {return Math.min(100, howMany);}
+  const howMany = parseInt(getElementById('fshSendHowMany').value, 10);
+  if (isNaN(howMany)) { return itemTables.length; }
+  if (calf.subcmd !== '-') { return Math.min(100, howMany); }
   return howMany;
 }
 
@@ -27,14 +27,14 @@ function itemType(itemid, checkbox) {
 }
 
 function thisType(itemid, checkbox) {
-  return itemid === 'itemid-1' ||
-    itemType(itemid, checkbox) ||
-    hasClass(itemid, checkbox);
+  return itemid === 'itemid-1'
+    || itemType(itemid, checkbox)
+    || hasClass(itemid, checkbox);
 }
 
 function findStCheck() {
-  var cbox = getElementById('itemsInSt');
-  if (cbox) {return cbox.checked;}
+  const cbox = getElementById('itemsInSt');
+  if (cbox) { return cbox.checked; }
 }
 
 function notInSt(itemsInSt, el) {
@@ -67,9 +67,9 @@ function doTheChecks(itemid, itemTables) {
 }
 
 function doCheckAll(evt) {
-  var itemList = getElementById('item-div') ||
-    getElementById('item-list');
-  var itemTables = querySelectorArray('table:not(.fshHide)', itemList);
+  const itemList = getElementById('item-div')
+    || getElementById('item-list');
+  const itemTables = querySelectorArray('table:not(.fshHide)', itemList);
   itemTables
     .map(getCheckbox)
     .forEach(unCheckAll);
@@ -77,44 +77,44 @@ function doCheckAll(evt) {
 }
 
 function toggleAllPlants(evt) {
-  if (hasClass('fshCheckAll', evt.target)) {doCheckAll(evt);}
+  if (hasClass('fshCheckAll', evt.target)) { doCheckAll(evt); }
 }
 
 function arrayfromList(classes) {
-  return jsonParse('[' + classes + ']');
+  return jsonParse(`[${classes}]`);
 }
 
 function getItemList() {
-  var sendClasses = getValue('sendClasses');
-  var itemList = arrayfromList(sendClasses);
-  if (itemList) {return itemList;}
+  const sendClasses = getValue('sendClasses');
+  const itemList = arrayfromList(sendClasses);
+  if (itemList) { return itemList; }
   return arrayfromList(defaults.sendClasses);
 }
 
 function makeSpan(el) {
-  return ' &ensp;<span id="itemid' + el[1] +
-    '" class="fshCheckAll fshLink fshNoWrap">' + el[0] + '</span>';
+  return ` &ensp;<span id="itemid${el[1]
+  }" class="fshCheckAll fshLink fshNoWrap">${el[0]}</span>`;
 }
 
 function injectTradeOld() {
-  var multiple = createTr({
+  const multiple = createTr({
     id: 'fshSelectMultiple',
-    innerHTML: '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
-      'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;' +
-      '<span id="itemid-2" class="fshCheckAll fshLink fshNoWrap">' +
-      'All Resources</span>' + getItemList().map(makeSpan).join('') +
-      ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
-      'class="custominput" value="all" size=3></td>'
+    innerHTML: `${'<td colspan=6>Select:&ensp;<span id="itemid-1" '
+      + 'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;'
+      + '<span id="itemid-2" class="fshCheckAll fshLink fshNoWrap">'
+      + 'All Resources</span>'}${getItemList().map(makeSpan).join('')
+    } &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" `
+      + 'class="custominput" value="all" size=3></td>',
   });
   onclick(multiple, toggleAllPlants);
-  var el = getElementById('item-list').parentNode.parentNode;
+  const el = getElementById('item-list').parentNode.parentNode;
   insertElementBefore(multiple, el);
 }
 
 export default function injectTrade() {
   add(3, doFolders);
   add(3, injectTradeOld);
-  //#if _DEV  //  oneByOne
+  // #if _DEV  //  oneByOne
   add(3, oneByOne);
-  //#endif
+  // #endif
 }

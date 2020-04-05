@@ -1,4 +1,4 @@
-import {ahSearchUrl} from '../support/constants';
+import { ahSearchUrl } from '../support/constants';
 import containsText from '../common/containsText';
 import getText from '../common/getText';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -15,13 +15,13 @@ function isNotComponent() {
 }
 
 function ahItemHref(name) {
-  return 'https://www.fallensword.com/' + ahSearchUrl + name;
+  return `https://www.fallensword.com/${ahSearchUrl}${name}`;
 }
 
 function insertAhLink(target) {
-  insertHtmlBeforeEnd(target.parentNode, ' [<a href="' +
-    ahItemHref(getText(target)) +
-    '" target="_blank"><b class="fshBlue">AH</b></a>]');
+  insertHtmlBeforeEnd(target.parentNode, ` [<a href="${
+    ahItemHref(getText(target))
+  }" target="_blank"><b class="fshBlue">AH</b></a>]`);
 }
 
 export default function itemsView() {

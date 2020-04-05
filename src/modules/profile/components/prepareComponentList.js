@@ -6,7 +6,7 @@ function tallyComponent(prev, el) {
     b: el.b,
     count: 0,
     del: [],
-    v: el.v
+    v: el.v,
   };
   prev[el.b].count += 1;
   prev[el.b].del.push(el.a);

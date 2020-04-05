@@ -12,20 +12,20 @@ import jQueryPresent from '../common/jQueryPresent';
 import makeFolderSpans from '../common/makeFolderSpans';
 import on from '../common/on';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import toggleForce from '../common/toggleForce';
-import {createDiv, createInput, createLabel} from '../common/cElement';
-import {def_table, itemRE} from '../support/constants';
+import { createDiv, createInput, createLabel } from '../common/cElement';
+import { def_table, itemRE } from '../support/constants';
 
-var itemTable;
-var itemsAry;
-var invItems;
-var folderId = 0;
-var perfBox;
-var itemGrid;
+let itemTable;
+let itemsAry;
+let invItems;
+let folderId = 0;
+let perfBox;
+let itemGrid;
 
 function whichTableHasItems() {
-  var allTables = getElementsByTagName(def_table, pCC.lastElementChild);
+  const allTables = getElementsByTagName(def_table, pCC.lastElementChild);
   if (calf.cmd === 'crafting') {
     return allTables[1];
   }
@@ -33,15 +33,15 @@ function whichTableHasItems() {
 }
 
 function insertItem(item) {
-  var itemDiv = createDiv();
-  var aLink = item[0].parentNode;
+  const itemDiv = createDiv();
+  const aLink = item[0].parentNode;
   insertElement(itemDiv, aLink);
   insertElement(itemGrid, itemDiv);
 }
 
 function drawingNewItemTable() {
   if (!itemGrid) {
-    itemGrid = createDiv({className: 'fshItemGrid'});
+    itemGrid = createDiv({ className: 'fshItemGrid' });
     itemsAry.forEach(insertItem);
     insertElementAfterBegin(itemTable.parentNode, itemGrid);
     hideElement(itemTable);
@@ -57,7 +57,7 @@ function testCraft(item) {
 }
 
 function afn(item) {
-  var myDiv = item[0].parentNode.parentNode;
+  const myDiv = item[0].parentNode.parentNode;
   toggleForce(myDiv, testFolder(item) || testCraft(item));
 }
 
@@ -67,8 +67,8 @@ function reDrawGrid() {
 }
 
 function doHideFolders(evt) {
-  if (!evt.target.classList.contains('fshFolder')) {return;}
-  var evtFid = Number(evt.target.dataset.folder);
+  if (!evt.target.classList.contains('fshFolder')) { return; }
+  const evtFid = Number(evt.target.dataset.folder);
   if (evtFid !== folderId) {
     folderId = evtFid;
     reDrawGrid();
@@ -76,12 +76,12 @@ function doHideFolders(evt) {
 }
 
 function getFolderId(item) {
-  if (item.equipped) {return -2;}
+  if (item.equipped) { return -2; }
   return item.folder_id;
 }
 
 function addProps(item) {
-  var invItem = invItems[item[1]];
+  const invItem = invItems[item[1]];
   if (invItem) {
     item.push(getFolderId(invItem), invItem.craft);
   }
@@ -92,7 +92,7 @@ function enhanceWarehouse() {
 }
 
 function doFolderButtons(folders) {
-  var inject = itemTable.parentNode.parentNode
+  const inject = itemTable.parentNode.parentNode
     .previousElementSibling.children[0];
   inject.classList.add('fshCenter');
   onclick(inject, doHideFolders);
@@ -102,16 +102,16 @@ function doFolderButtons(folders) {
 
 function doPerfSwitch(inject) {
   if (calf.cmd === 'crafting') {
-    perfBox = {checked: false};
+    perfBox = { checked: false };
     return;
   }
-  var perfLabel = createLabel({
+  const perfLabel = createLabel({
     className: 'fshVMid',
-    innerHTML: '<span class="fshLink">Perfect</span> '
+    innerHTML: '<span class="fshLink">Perfect</span> ',
   });
   perfBox = createInput({
     className: 'fshVMid',
-    type: 'checkbox'
+    type: 'checkbox',
   });
   on(perfBox, 'change', reDrawGrid);
   insertElement(perfLabel, perfBox);
@@ -123,14 +123,14 @@ function inventory(data) {
   if (data.items && itemTable) {
     invItems = data.items;
     add(4, enhanceWarehouse);
-    var inject = doFolderButtons(data.folders);
+    const inject = doFolderButtons(data.folders);
     doPerfSwitch(inject);
   }
 }
 
 function imgItemId(img) {
-  var tipped = img.dataset.tipped;
-  var matches = tipped.match(itemRE);
+  const { tipped } = img.dataset;
+  const matches = tipped.match(itemRE);
   return [img, matches[2]];
 }
 

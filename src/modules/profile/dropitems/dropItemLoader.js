@@ -1,3 +1,3 @@
 export default function dropItemLoader() {
-  import('./injectProfileDropItems').then(m => m.default());
+  import('./injectProfileDropItems').then((m) => m.default());
 }

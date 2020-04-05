@@ -2,29 +2,29 @@ import badData from '../badData';
 import calf from '../../../support/calf';
 import getCreatureStats from '../getCreatureStats/getCreatureStats';
 import partial from '../../../common/partial';
-import {sendEvent} from '../../../support/fshGa';
+import { sendEvent } from '../../../support/fshGa';
 import {
   getMonsterPrefs,
-  processMonsterLog
+  processMonsterLog,
 } from './processMonsterLog';
 
-var processedMonsters = [];
+const processedMonsters = [];
 
 function processMonster(data) {
-  if (badData(data)) {return;}
+  if (badData(data)) { return; }
   sendEvent('NewMap', 'MonsterLog');
   processMonsterLog(data.response.data);
 }
 
-function thisMob(e, el) {return e.id === el.id;}
+function thisMob(e, el) { return e.id === el.id; }
 
 function seenBefore(e) {
-  if (processedMonsters.find(partial(thisMob, e.data))) {return true;}
+  if (processedMonsters.find(partial(thisMob, e.data))) { return true; }
   processedMonsters.push(e.data);
 }
 
 function loopActions(e, i) { // jQuery.min
-  if (e.type !== 6 || seenBefore(e)) {return;}
+  if (e.type !== 6 || seenBefore(e)) { return; }
   getCreatureStats(e.data.id, i).then(processMonster);
 }
 
@@ -36,9 +36,9 @@ function initMonsterLog() {
 
 export default function startMonsterLog() { // jQuery.min
   getMonsterPrefs();
-  $.subscribe('-1-success.action-response ' +
-    '4-success.action-response ' +
-    '5-success.action-response ' +
-    '25-success.action-response', initMonsterLog);
+  $.subscribe('-1-success.action-response '
+    + '4-success.action-response '
+    + '5-success.action-response '
+    + '25-success.action-response', initMonsterLog);
   initMonsterLog();
 }

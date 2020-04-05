@@ -3,7 +3,7 @@ import guildView from './guildView';
 
 // Incomplete
 export default function guildManage() {
-  var guildId = currentGuildId();
+  const guildId = currentGuildId();
   if (guildId) {
     return guildView(currentGuildId());
   }
