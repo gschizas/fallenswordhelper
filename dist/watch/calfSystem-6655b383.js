@@ -12007,7 +12007,7 @@ function injectScouttower() { // jQuery.min
 }
 
 function dropItemLoader() {
-  import('./injectProfileDropItems-6b8280bc.js').then(m => m.default());
+  import('./injectProfileDropItems-dab27678.js').then(m => m.default());
 }
 
 function doItemTable(checkbox) {
@@ -12422,8 +12422,15 @@ function drawMapping(potOpts) {
   sendEvent('potReport', 'drawMapping');
   var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
   mapping.replaceChild(mapTbl, mapping.children[0]);
-  add(3, batch, [3, entries(potOpts.myMap), 0,
-    partial(insertRows, mapTbl), partial(insertFinal, mapTbl)]);
+  add(3, batch, [
+    [
+      5,
+      3,
+      entries(potOpts.myMap),
+      0,
+      partial(insertRows, mapTbl), partial(insertFinal, mapTbl)
+    ]
+  ]);
 }
 
 function initMapping(potOpts, panels) {
@@ -16344,6 +16351,32 @@ function doNotKill() {
   interceptDoAction();
 }
 
+function didNotExist(data) {
+  return data.response && data.response.msg &&
+    data.response.msg.startsWith('Creature did not exist at that location');
+}
+
+function removeAction(data) {
+  if (didNotExist(data)) {
+    GameData.fetch(
+      def_fetch_worldRealmDynamic +
+      def_fetch_worldRealmActions
+    );
+  }
+}
+
+function removeElement(el) {el.remove();}
+
+function hideTitanViewCombat(e, data) {
+  removeAction(data);
+  querySelectorArray('.creature-4 > .quickCombat > .verbs')
+    .forEach(removeElement);
+}
+
+function hideTitanCombatResults() {
+  $.subscribe(def_PvE, hideTitanViewCombat); // TODO Pref
+}
+
 // BUGFIX - in case of teleporting in new realm with footprints turned on
 
 function invalidFootprints() {
@@ -18994,32 +19027,6 @@ function worldPrefs() {
   interceptXHR();
   doHuntingBuffs(missingBuffsDiv);
   prepareHidePlayerActions();
-}
-
-function didNotExist(data) {
-  return data.response && data.response.msg &&
-    data.response.msg.startsWith('Creature did not exist at that location');
-}
-
-function removeAction(data) {
-  if (didNotExist(data)) {
-    GameData.fetch(
-      def_fetch_worldRealmDynamic +
-      def_fetch_worldRealmActions
-    );
-  }
-}
-
-function removeElement(el) {el.remove();}
-
-function hideTitanViewCombat(e, data) {
-  removeAction(data);
-  querySelectorArray('.creature-4 > .quickCombat > .verbs')
-    .forEach(removeElement);
-}
-
-function hideTitanCombatResults() {
-  $.subscribe(def_PvE, hideTitanViewCombat); // TODO Pref
 }
 
 function hideGroupByType(type) { // jQuery
@@ -23817,7 +23824,7 @@ function setVer(fshVer, gmInfo) {
   } else {
     calf.fshVer = `${fshVer}_native`;
   }
-  calf.calfVer = '5';
+  calf.calfVer = '6';
 }
 
 // main event dispatcher
@@ -23832,4 +23839,4 @@ function dispatch(fshVer, gmInfo) {
 }
 
 export { itemRE as A, addStatTotalToMouseover as B, jQueryNotPresent as C, getInventoryById as D, add as E, fallback as F, ahSearchUrl as G, guideUrl as H, def_subcmd as I, rarity as J, insertHtmlBeforeEnd as K, sendException as L, selfIdIs as M, hasClass as N, ajaxSendItems as O, dropItem as P, onclick as Q, eventHandler5 as R, getArrayByTagName as a, getText as b, partial as c, dispatch as d, def_table as e, insertHtmlAfterBegin as f, getElementsByTagName as g, calf as h, insertHtmlAfterEnd as i, createTr as j, createTd as k, insertElement as l, insertElementBefore as m, makeFolderSpans$1 as n, batch as o, pCC as p, isArray as q, daSendToFolder as r, getElementById as s, toggleForce as t, chunk as u, cdn as v, querySelector as w, hideQTip as x, setValue as y, getValue as z };
-//# sourceMappingURL=calfSystem-d8d0244e.js.map
+//# sourceMappingURL=calfSystem-6655b383.js.map

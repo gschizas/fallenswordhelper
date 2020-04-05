@@ -87,8 +87,15 @@ export function drawMapping(potOpts) {
   sendEvent('potReport', 'drawMapping');
   var mapTbl = createTable({innerHTML: '<tbody></tbody>'});
   mapping.replaceChild(mapTbl, mapping.children[0]);
-  add(3, batch, [3, entries(potOpts.myMap), 0,
-    partial(insertRows, mapTbl), partial(insertFinal, mapTbl)]);
+  add(3, batch, [
+    [
+      5,
+      3,
+      entries(potOpts.myMap),
+      0,
+      partial(insertRows, mapTbl), partial(insertFinal, mapTbl)
+    ]
+  ]);
 }
 
 export function initMapping(potOpts, panels) {
