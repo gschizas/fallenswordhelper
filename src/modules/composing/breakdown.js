@@ -1,5 +1,5 @@
 import doBreakdown from '../ajax/doBreakdown';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -9,7 +9,7 @@ import partial from '../common/partial';
 import perfFilter from '../common/perfFilter';
 import setValue from '../system/setValue';
 import { simpleCheckbox } from '../settings/simpleCheckbox';
-import { composingUrl, def_subcmd } from '../support/constants';
+import { composingUrl, defSubcmd } from '../support/constants';
 
 const prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
 let disableBreakdownPrompts;
@@ -58,7 +58,7 @@ function handleResponse(response) {
   if (response.error !== 0) {
     showComposingMessage(`Error: ${response.msg}`, 'rgb(164, 28, 28)');
   } else {
-    window.location = `${composingUrl + def_subcmd}breakdown&m=1`;
+    window.location = `${composingUrl + defSubcmd}breakdown&m=1`;
   }
 }
 

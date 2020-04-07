@@ -1,4 +1,4 @@
-import { addRows } from './addRows';
+import addRows from './addRows';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import {
@@ -23,7 +23,7 @@ import {
 } from './placeholders';
 import { createSpan, createTable } from '../../../common/cElement';
 
-export var titanTbl;
+export let titanTbl;
 
 export function clearMemberRows() {
   while (titanTbl.rows.length > 7) {

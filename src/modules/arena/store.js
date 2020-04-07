@@ -8,10 +8,10 @@ function getCount(moveImg) {
   return /(\d)$/.exec(getTextTrim(closestTd(moveImg)))[1];
 }
 
-function getCounts(prev, moveImg) {
+function getCounts(acc, moveImg) {
   const moveId = /(\d+)\.png/.exec(moveImg.src)[1];
-  prev[moveId] = Number(getCount(moveImg));
-  return prev;
+  acc[moveId] = Number(getCount(moveImg));
+  return acc;
 }
 
 function gotMoves(_arena) {

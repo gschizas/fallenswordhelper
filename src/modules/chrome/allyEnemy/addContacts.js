@@ -13,22 +13,10 @@ import {
   tradeUrl,
 } from '../../support/constants';
 
-export var contactClass = [
-  [
-    function (n) { return n < 120; },
-    'fshDodgerBlue',
-    'fshRed',
-  ],
-  [
-    function (n) { return n < 300; },
-    'fshDodgerBlue',
-    'fshRed',
-  ],
-  [
-    function () { return true; },
-    'fshPowderBlue',
-    'fshPink',
-  ],
+export const contactClass = [
+  [(n) => n < 120, 'fshDodgerBlue', 'fshRed'],
+  [(n) => n < 300, 'fshDodgerBlue', 'fshRed'],
+  [() => true, 'fshPowderBlue', 'fshPink'],
 ];
 
 function allyOrEnemy(type, test) {
@@ -36,12 +24,12 @@ function allyOrEnemy(type, test) {
   return test[2];
 }
 
-function band(last_login, ary) {
-  return ary[0](nowSecs - last_login);
+function band(lastLogin, ary) {
+  return ary[0](nowSecs - lastLogin);
 }
 
-function contactColor(last_login, type) {
-  const test = contactClass.find(partial(band, last_login));
+function contactColor(lastLogin, type) {
+  const test = contactClass.find(partial(band, lastLogin));
   if (test) { return allyOrEnemy(type, test); }
   return 'fshWhite';
 }
@@ -80,18 +68,18 @@ function doBuffButton() {
 
 function doSecureButton(val) {
   if (!calf.hideGuildInfoSecureTrade) {
-    return `${'<a class="enemy-secure-trade guild-icon left '
-      + 'guild-minibox-action tip-static" href="'}${secureUrl
-    }${val.username}" data-tipped="Secure Trade"></a>`;
+    return '<a class="enemy-secure-trade guild-icon left guild-minibox-action'
+      + ` tip-static" href="${secureUrl}${
+        val.username}" data-tipped="Secure Trade"></a>`;
   }
   return '';
 }
 
 function doTradeButton(val) {
   if (!calf.hideGuildInfoTrade) {
-    return `${'<a class="enemy-trade guild-icon left '
-      + 'guild-minibox-action tip-static" href="'}${tradeUrl
-    }${val.username}" data-tipped="Send Gold/Items/FSP"></a>`;
+    return '<a class="enemy-trade guild-icon left guild-minibox-action '
+      + `tip-static" href="${tradeUrl}${
+        val.username}" data-tipped="Send Gold/Items/FSP"></a>`;
   }
   return '';
 }

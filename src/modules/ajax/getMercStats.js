@@ -9,8 +9,8 @@ function addMercStat(mouseover, stat, i) {
     + Math.round(Number(mercRE[i].exec(mouseover)[1]) * defenderMultiplier);
 }
 
-function addMercStats(prev, merc) {
-  return prev.map(partial(addMercStat, merc.dataset.tipped));
+function addMercStats(acc, merc) {
+  return acc.map(partial(addMercStat, merc.dataset.tipped));
 }
 
 function addAllMercStats(mercElements) {

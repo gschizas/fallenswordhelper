@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import doBuffLink from './doBuffLink';
+import setInnerHtml from '../dom/setInnerHtml';
 import {
   attackplayerUrl,
   doAddIgnore,
@@ -22,8 +23,8 @@ function reportIgnore(aRow, isGuildMate, playerName) { // Legacy
     extraPart = ` | <a title="Add to Ignore List" href="${doAddIgnore
     }${playerName}">Ignore</a>`;
   }
-  aRow.cells[1].innerHTML = `${dateFirstPart}</a>${extraPart
-  }${dateLastPart}`;
+  setInnerHtml(`${dateFirstPart}</a>${extraPart}${dateLastPart}`,
+    aRow.cells[1]);
 }
 
 function makeFirstPart(messageHTML) {
@@ -35,14 +36,14 @@ function makeMsgReplyTo(playerName, firstPart) {
   if (calf.enableChatParsing) {
     replyTo = removeHTML(firstPart.replace(/&nbsp;/g, ' ')).substr(0, 140);
   }
-  return `${'[ <span style="cursor:pointer;text-'
-  + 'decoration:underline"class="a-reply" target_player="'}${playerName
-  }" replyTo="${replyTo}...">Reply</span>`;
+  return '[ <span style="cursor:pointer;text-decoration:underline" '
+    + `class="a-reply" target_player="${playerName}" replyTo="${
+      replyTo}...">Reply</span>`;
 }
 
 function makeExtraPart(playerName) {
-  return ` | <a href="${tradeUrl}${playerName
-  }">Trade</a> | <a title="Secure Trade" href="${
+  return ` | <a href="${tradeUrl}${
+    playerName}">Trade</a> | <a title="Secure Trade" href="${
     secureUrl}${playerName}">ST</a>`;
 }
 
@@ -76,10 +77,10 @@ function makeLastPart(messageHTML) {
 function messageExtras(aRow, playerName) {
   const messageHTML = aRow.cells[2].innerHTML;
   const firstPart = makeFirstPart(messageHTML);
-  aRow.cells[2].innerHTML = `${firstPart}<nobr>${
-    makeMsgReplyTo(playerName, firstPart)}${makeExtraPart(playerName)
-  }${getThirdPart(messageHTML)}${getAttackPart(playerName)
-  }${makeFourthPart(messageHTML)}</nobr>${makeLastPart(messageHTML)}`;
+  setInnerHtml(`${firstPart}<nobr>${makeMsgReplyTo(playerName, firstPart)}${
+    makeExtraPart(playerName)}${getThirdPart(messageHTML)}${
+    getAttackPart(playerName)}${makeFourthPart(messageHTML)}</nobr>${
+    makeLastPart(messageHTML)}`, aRow.cells[2]);
 }
 
 function isChat(aRow, isGuildMate, playerName) { // Legacy

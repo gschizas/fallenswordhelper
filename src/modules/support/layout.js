@@ -1,8 +1,8 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 
-export var pCL;
-export var pCC;
-export var pCR;
+export let pCL;
+export let pCC;
+export let pCR;
 
 export function initPcc() {
   if (!pCC) {

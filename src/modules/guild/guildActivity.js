@@ -33,27 +33,20 @@ function initMember(member) {
 }
 
 const type2tests = [
-  function (archive, current) {
-    // Has current stam changed ?
-    return current.current_stamina !== archive[cur]; // probably want a weighted percentage here
-    // Might only care if it has dropped significantly ?
-  },
-  function (archive, current) {
-    // Has Max Stam increased ?
-    return current.max_stamina > archive[max]; // probably want a weighted percentage here
-  },
-  function (archive, current) {
-    // Has level changed ?
-    return current.level !== archive[lvl];
-  },
-  function (archive, current) {
-    // Has VL changed ?
-    return current.vl !== archive[vl];
-  },
-  function (archive, current) {
-    // Has GXP changed ?
-    return current.guild_xp !== archive[gxp]; // probably want a weighted percentage here
-  },
+  // Has current stam changed ?
+  // probably want a weighted percentage here
+  // Might only care if it has dropped significantly ?
+  (archive, current) => current.current_stamina !== archive[cur],
+  // Has Max Stam increased ?
+  // probably want a weighted percentage here
+  (archive, current) => current.max_stamina > archive[max],
+  // Has level changed ?
+  (archive, current) => current.level !== archive[lvl],
+  // Has VL changed ?
+  (archive, current) => current.vl !== archive[vl],
+  // Has GXP changed ?
+  // probably want a weighted percentage here
+  (archive, current) => current.guild_xp !== archive[gxp],
 ];
 
 function change(archiveRecord, member, test) {
@@ -68,7 +61,9 @@ function upsert(archiveRecord, member) {
   if (hasChanged(archiveRecord, member)) {
     pushNewRecord(member);
   } else {
+    // eslint-disable-next-line no-param-reassign
     archiveRecord[act] = lastActivityToDays(member.last_activity);
+    // eslint-disable-next-line no-param-reassign
     archiveRecord[utc] = nowSecs;
   }
 }
@@ -81,6 +76,7 @@ function processMemberRecord(newArchive, member) {
   if (archiveAge >= 86100) {
     upsert(archiveRecord, member);
   }
+  // eslint-disable-next-line no-param-reassign
   newArchive.members[member.name] = oldArchive.members[member.name];
 }
 

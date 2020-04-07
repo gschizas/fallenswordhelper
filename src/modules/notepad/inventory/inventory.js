@@ -5,7 +5,7 @@ import calf from '../../support/calf';
 import clearButton from './clearButton';
 import decorate from './decorate';
 import doTable from './table';
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import eventHandlers from './eventHandlers/eventHandlers';
 import executeAll from '../../common/executeAll';
 import { extendOptions } from './options';
@@ -18,6 +18,7 @@ import notLastUpdate from '../../common/notLastUpdate';
 import { oldActionSpinner } from '../../support/constants';
 import { pCC } from '../../support/layout';
 import setChecks from './setChecks';
+import setInnerHtml from '../../dom/setInnerHtml';
 import setLvls from './setLvls';
 import {
   lvlFilter, rarityFilter, setFilter, typeFilter,
@@ -27,14 +28,14 @@ import { time, timeEnd } from '../../support/debug';
 // #endif
 
 function doSpinner() { // jQuery
-  pCC.innerHTML = `${'<span id="fshInvMan">'
-    + '<img src = "'}${oldActionSpinner}">&nbsp;`
-    + 'Getting inventory data...</span>';
+  setInnerHtml(`<span id="fshInvMan"><img src = "${
+    oldActionSpinner}">&nbsp;Getting inventory data...</span>`, pCC);
 }
 
-function hydrate(prev, pair) {
-  prev[pair[1].id] = pair[1];
-  return prev;
+function hydrate(acc, pair) {
+  // eslint-disable-next-line prefer-destructuring
+  acc[pair[1].id] = pair[1];
+  return acc;
 }
 
 function rekeyMembrList() {
@@ -92,7 +93,7 @@ function syncInvMan() { // jQuery
   allthen(prm, asyncCall);
 }
 
-export function injectInventoryManagerNew() {
+export default function injectInventoryManagerNew() {
   if (jQueryNotPresent()) { return; }
   doSpinner();
   syncInvMan();

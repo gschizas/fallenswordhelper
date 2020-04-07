@@ -83,6 +83,7 @@ function dragStart(parent, event) {
 }
 
 export default function draggable(element, parent) {
+  // eslint-disable-next-line no-param-reassign
   element.draggable = true;
   on(element, 'dragstart', partial(dragStart, parent));
 }

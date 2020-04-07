@@ -1,5 +1,5 @@
 import './fshModalDialog.postcss';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import { publish } from '../support/pubsub';
 import { createDiv, createInput, createLabel } from '../common/cElement';

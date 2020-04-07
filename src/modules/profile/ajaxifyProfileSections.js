@@ -1,5 +1,5 @@
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import hideElement from '../common/hideElement';
 import onclick from '../common/onclick';
 import { pCC } from '../support/layout';
@@ -16,9 +16,9 @@ function bp() {
 }
 
 const elementTests = [
-  function (target) { return target.tagName === 'A'; },
-  function (target) { return Boolean(target.href); },
-  function (target) { return target.href.includes('togglesection'); },
+  (target) => target.tagName === 'A',
+  (target) => Boolean(target.href),
+  (target) => target.href.includes('togglesection'),
 ];
 
 function condition(target, fn) { return fn(target); }

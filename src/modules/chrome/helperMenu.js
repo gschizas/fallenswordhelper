@@ -1,6 +1,6 @@
 import { createDiv } from '../common/cElement';
 import draggable from '../common/dragStart';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
 import injectBuffLog from '../notepad/buffLog/injectBuffLog';
@@ -24,7 +24,7 @@ import { injectAuctionSearch, injectQuickLinkManager } from
   '../notepad/lists/lists';
 import { injectFindBuffs, injectFindOther } from '../notepad/findBuffs/findBuffs';
 
-const helperMenuBlob = `${'<div class="column"><h3>Character</h3><ul>'
+const helperMenuBlob = '<div class="column"><h3>Character</h3><ul>'
   + '<li><span class="fshLink">Buff Log</span></li>'
   + '<li><span class="fshLink">Combat Log</span></li>'
   + '<li><span class="fshLink">Creature Log</span></li>'
@@ -41,7 +41,7 @@ const helperMenuBlob = `${'<div class="column"><h3>Character</h3><ul>'
   + '<li><span class="fshLink">FS Box Log</span></li>'
   + '</ul><h3>FSH developer quick links</h3><ul>'
   + '<li><span class="a-reply" target_player="PointyHair">PM</span> '
-  + '<a href="'}${playerIdUrl}1963510">PointyHair</a></li>`
+  + `<a href="${playerIdUrl}1963510">PointyHair</a></li>`
   + '</ul></div>';
 
 function toggleMenu(evt) {

@@ -1,5 +1,5 @@
-import calfWatch from './calfwatch.js';
-import fshWatch from './fshwatch.js';
+import calfWatch from './calfwatch';
+import fshWatch from './fshwatch';
 
 export default function watchConfig() {
   return [

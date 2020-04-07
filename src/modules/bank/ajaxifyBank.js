@@ -2,7 +2,7 @@ import createDocument from '../system/createDocument';
 import indexAjaxData from '../ajax/indexAjaxData';
 import jQueryPresent from '../common/jQueryPresent';
 import partial from '../common/partial';
-import { def_table, guildSubcmdUrl } from '../support/constants';
+import { defTable, guildSubcmdUrl } from '../support/constants';
 
 const statbarGold = '#pH #statbar-gold';
 const statbarGoldTooltip = '#pH #statbar-gold-tooltip-general dd';
@@ -16,9 +16,9 @@ const inputDepo = '#pCC input[value="Deposit"]';
 function doInfoBox(infoBox) { // jQuery
   const target = $(infoMsg);
   if (target.length === 0) {
-    $('#pCC').prepend(infoBox.closest(def_table));
+    $('#pCC').prepend(infoBox.closest(defTable));
   } else {
-    target.closest(def_table).replaceWith(infoBox.closest(def_table));
+    target.closest(defTable).replaceWith(infoBox.closest(defTable));
   }
 }
 
@@ -82,7 +82,9 @@ function bankDeposit(bankSettings, e) { // jQuery
   e.preventDefault();
   const amount = $(depositAmount).val();
   if (invalidAmount(bankSettings, amount)) { return; }
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.mode = 'deposit';
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.amount = amount;
   doAjax(bankSettings);
 }
@@ -91,16 +93,17 @@ function bankWithdrawal(bankSettings, e) { // jQuery
   e.preventDefault();
   const amount = $(withdrawAmount).val();
   if (!$.isNumeric(amount) || amount < 1) { return; }
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.mode = 'withdraw';
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.amount = amount;
   doAjax(bankSettings);
 }
 
 function linkToGuildBank(bankSettings, bank) { // jQuery
   if (bankSettings.appLink) {
-    bank.after(`${'<div class="fshCenter">'
-      + '<a href="'}${guildSubcmdUrl}bank">Go to Guild Bank</a>`
-      + '</div>');
+    bank.after(`<div class="fshCenter"><a href="${
+      guildSubcmdUrl}bank">Go to Guild Bank</a></div>`);
   }
 }
 

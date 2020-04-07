@@ -1,13 +1,14 @@
 import buildHtml from './buildHtml';
 import calf from '../../support/calf';
 import doSortParams from '../../common/doSortParams';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import jQueryPresent from '../../common/jQueryPresent';
-import { keys } from '../../common/keys';
+import keys from '../../common/keys';
 import numberSort from '../../system/numberSort';
 import onclick from '../../common/onclick';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import stringSort from '../../system/stringSort';
 import { get, set } from '../../system/idb';
 
@@ -15,13 +16,13 @@ let content;
 let monsterAry;
 
 function noMobs() {
-  content.innerHTML = '<span>No monster information! '
-    + 'Please enable entity log and travel a bit to see the world</span>';
+  setInnerHtml('<span>No monster information! Please enable entity log '
+    + 'and travel a bit to see the world</span>', content);
 }
 
 function makeRow(el) {
-  return `${'<tr>'
-    + '<td class="fshCenter">'}${el.image}</td>`
+  return '<tr>'
+    + `<td class="fshCenter">${el.image}</td>`
     + `<td>${el.name}</td>`
     + `<td class="fshCenter">${el.creature_class}</td>`
     + `<td class="fshCenter">${el.level}</td>`
@@ -40,7 +41,7 @@ function mobRows() {
 function drawMobs() {
   const inject = getElementById('entityTableOutput');
   if (!monsterAry || !inject) { return; }
-  inject.innerHTML = mobRows();
+  setInnerHtml(mobRows(), inject);
 }
 
 function findSortType(target) {
@@ -81,7 +82,7 @@ function doHandlers(evt) {
 
 function drawTable() {
   if (!monsterAry) { return; }
-  content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" '
+  setInnerHtml('<table cellspacing="0" cellpadding="0" border="0" '
     + 'width="100%"><tr class="fshBlack fshWhite">'
     + '<td width="90%" class="fshCenter"><b>Entity Information</b></td>'
     + '<td width="10%">[<span id="clearEntityLog" class="fshPoint">Clear'
@@ -97,7 +98,7 @@ function drawTable() {
     + '<th class="fshCenter">Damage</th>'
     + '<th class="fshCenter">HP</th>'
     + '<th class="fshCenter">Enhancements</th>'
-    + '</tr></thead><tbody id="entityTableOutput"></tbody></table>';
+    + '</tr></thead><tbody id="entityTableOutput"></tbody></table>', content);
   onclick(content, doHandlers);
 }
 

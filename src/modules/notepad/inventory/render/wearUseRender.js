@@ -1,4 +1,3 @@
-import partial from '../../../common/partial';
 import { theInv } from '../buildInv';
 
 function userInvNotEquipped(row) {
@@ -12,28 +11,22 @@ function guidInvNotEquipped(row) {
 
 const locations = [
   [
-    function (row) { return row.player_id && row.player_id === -1; },
-    function (row, act) { return `takeItem" action="${act.a}`; },
+    (row) => row.player_id && row.player_id === -1,
+    (row, act) => `takeItem" action="${act.a}`,
   ],
   [
-    function (row) {
-      return row.player_id && row.player_id !== theInv.current_player_id;
-    },
-    function (row, act) {
-      return `recallItem" playerid="${row.player_id
-      }" mode="0" action="${act.a}`;
-    },
+    (row) => row.player_id && row.player_id !== theInv.current_player_id,
+    (row, act) => `recallItem" playerid="${
+      row.player_id}" mode="0" action="${act.a}`,
   ],
   [
-    function (row) { return userInvNotEquipped(row) || guidInvNotEquipped(row); },
-    function (row, act) { return act.c; },
+    (row) => userInvNotEquipped(row) || guidInvNotEquipped(row),
+    (row, act) => act.c,
   ],
 ];
 
-function thisType(row, el) { return el[0](row); }
-
 function wuRender(row, act) {
-  const location = locations.find(partial(thisType, row));
+  const location = locations.find((el) => el[0](row));
   if (location) {
     return `<span class="fshLink ${location[1](row, act)
     }" invid="${row.inv_id}">${act.b}</span>`;

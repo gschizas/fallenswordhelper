@@ -1,6 +1,6 @@
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import setText from '../../common/setText';
+import setText from '../../dom/setText';
 import toLowerCase from '../../common/toLowerCase';
 import { createDiv, createSpan } from '../../common/cElement';
 

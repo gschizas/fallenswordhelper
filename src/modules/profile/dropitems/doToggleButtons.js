@@ -1,6 +1,7 @@
 import calf from '../../support/calf';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import { pCC } from '../../support/layout';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 let insertHere;
 
@@ -8,6 +9,7 @@ function setInsertHere() {
   if (!insertHere) {
     const cltn = getElementsByTagName('form', pCC);
     if (cltn.length > 0) {
+      // eslint-disable-next-line prefer-destructuring
       insertHere = cltn[0].previousElementSibling.children[0];
     }
   }
@@ -30,6 +32,6 @@ export default function doToggleButtons(showExtraLinks, showQuickDropLinks) {
       inject += '[<span id="fshSelectAllGuildLocked" class="sendLink">'
         + ' Select All Guild Locked</span>]&nbsp;';
     }
-    insertHere.innerHTML = inject;
+    setInnerHtml(inject, insertHere);
   }
 }

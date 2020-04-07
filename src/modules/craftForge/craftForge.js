@@ -15,7 +15,7 @@ import onclick from '../common/onclick';
 import { pCC } from '../support/layout';
 import toggleForce from '../common/toggleForce';
 import { createDiv, createInput, createLabel } from '../common/cElement';
-import { def_table, itemRE } from '../support/constants';
+import { defTable, itemRE } from '../support/constants';
 
 let itemTable;
 let itemsAry;
@@ -25,7 +25,7 @@ let perfBox;
 let itemGrid;
 
 function whichTableHasItems() {
-  const allTables = getElementsByTagName(def_table, pCC.lastElementChild);
+  const allTables = getElementsByTagName(defTable, pCC.lastElementChild);
   if (calf.cmd === 'crafting') {
     return allTables[1];
   }

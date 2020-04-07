@@ -1,7 +1,7 @@
-import { arrayFrom } from '../common/arrayFrom';
+import arrayFrom from '../common/arrayFrom';
 import chunk from '../common/chunk';
 import createDocument from '../system/createDocument';
-import { dataRows } from '../common/dataRows';
+import dataRows from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import indexAjaxData from '../ajax/indexAjaxData';
 import { months } from '../support/constants';

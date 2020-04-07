@@ -1,4 +1,4 @@
-import { def_table } from '../support/constants';
+import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
@@ -11,13 +11,13 @@ import setValue from '../system/setValue';
 import { simpleCheckboxHtml } from '../settings/simpleCheckbox';
 import { createDiv, createStyle } from '../common/cElement';
 
-const pref_enableStamBars = 'enableStamBars';
+const prefEnableStamBars = 'enableStamBars';
 let enableStamBars;
 let thisStyle;
 
 function getStamPerc(a) {
   const mo = a.dataset.tipped.match(/(\d+) \/ (\d+)/);
-  return Math.min(Math.round(Number(mo[1]) / Number(mo[2]) * 100), 100);
+  return Math.min(Math.round((Number(mo[1]) / Number(mo[2])) * 100), 100);
 }
 
 function stamBarStyle(a) {
@@ -29,7 +29,7 @@ function stamBarStyle(a) {
 }
 
 function injectStyle() {
-  const tables = getElementsByTagName(def_table, pCC);
+  const tables = getElementsByTagName(defTable, pCC);
   const memberList = tables[tables.length - 1];
   memberList.id = 'fshMemberList';
   const memberLinks = querySelectorArray('a[href*="&player_id="]', memberList);
@@ -47,7 +47,7 @@ function toggleStyle() {
 
 function changePref() {
   enableStamBars = !enableStamBars;
-  setValue(pref_enableStamBars, enableStamBars);
+  setValue(prefEnableStamBars, enableStamBars);
   toggleStyle();
   sendEvent('guildManage', 'StamBars');
 }
@@ -58,13 +58,13 @@ function injectPref() {
   const prefContainer = insertElement(td,
     createDiv({
       className: 'fshCenter',
-      innerHTML: simpleCheckboxHtml(pref_enableStamBars),
+      innerHTML: simpleCheckboxHtml(prefEnableStamBars),
     }));
   on(prefContainer, 'change', changePref);
 }
 
 export default function progressBar() {
   injectPref();
-  enableStamBars = getValue(pref_enableStamBars);
+  enableStamBars = getValue(prefEnableStamBars);
   if (enableStamBars) { toggleStyle(); }
 }

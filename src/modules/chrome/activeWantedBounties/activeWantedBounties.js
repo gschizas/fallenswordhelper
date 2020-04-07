@@ -4,7 +4,7 @@ import calf from '../../support/calf';
 import functionPasses from '../../common/functionPasses';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import onclick from '../../common/onclick';
-import { parseBountyPageForWorld } from './parseBountyPageForWorld';
+import parseBountyPageForWorld from './parseBountyPageForWorld';
 import setValueJSON from '../../system/setValueJSON';
 import {
   bountyList,
@@ -29,9 +29,9 @@ function notRefreshed(enableActiveBountyList, enableWantedList) {
 }
 
 const refreshConditions = [
-  function () { return !bountyList; },
-  function () { return !wantedList; },
-  function () { return bwNeedsRefresh; },
+  () => !bountyList,
+  () => !wantedList,
+  () => bwNeedsRefresh,
 ];
 
 function needsRefresh() {
@@ -64,7 +64,7 @@ function doHandlers() {
   if (wantedListDiv) { onclick(wantedListDiv, resetList); }
 }
 
-export function prepareBountyData() {
+export default function prepareBountyData() {
   if (jQueryNotPresent()) { return; }
   createDivs();
   doHandlers();

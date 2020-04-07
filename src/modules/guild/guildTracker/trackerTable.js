@@ -5,9 +5,10 @@ import formatLocalDateTime from '../../common/formatLocalDateTime';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isUndefined from '../../common/isUndefined';
-import { keys } from '../../common/keys';
+import keys from '../../common/keys';
 import on from '../../common/on';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import {
   act, cur, gxp, lvl, max, utc, vl,
 } from './indexConstants';
@@ -24,14 +25,14 @@ let tgCont;
 let memberSelect;
 let myMembers;
 
-function addOption(prev, member) {
-  return `${prev}<option value="${member}">${member}</option>`;
+function addOption(acc, member) {
+  return `${acc}<option value="${member}">${member}</option>`;
 }
 
 function buildOptions(ourMembers) {
-  return `${'<select name="member">'
-    + '<option value="- All -" selected>- All -</option>'}${
-    keys(ourMembers).sort(alpha).reduce(addOption, '')}</select>`;
+  return '<select name="member">'
+    + `<option value="- All -" selected>- All -</option>${
+      keys(ourMembers).sort(alpha).reduce(addOption, '')}</select>`;
 }
 
 function toText(val) {
@@ -54,7 +55,7 @@ function aMembersActivityRows(memberKey, inside, activity) {
     + `<td class="fshRight">${toText(activity[cur])}</td>`
     + `<td class="fshRight">${toText(activity[max])}</td>`
     + `<td class="fshRight">${
-      Math.floor(activity[cur] / activity[max] * 100)
+      Math.floor((activity[cur] / activity[max]) * 100)
     }</td>`
     + `<td class="fshRight">${activity[act]}</td>`
     + `<td class="fshRight">${toText(activity[gxp])}</td>`
@@ -72,7 +73,7 @@ function memberRows() {
 }
 
 function drawRows() {
-  if (myMembers) { actBody.innerHTML = memberRows(); }
+  if (myMembers) { setInnerHtml(memberRows(), actBody); }
   tgCont.classList.remove('fshSpinner');
 }
 
@@ -89,7 +90,7 @@ function myChange(e) {
 export function initTable(theMembers) {
   if (theMembers) {
     myMembers = theMembers;
-    memberSelect.innerHTML = buildOptions(theMembers);
+    setInnerHtml(buildOptions(theMembers), memberSelect);
     queueDrawRows();
   }
 }

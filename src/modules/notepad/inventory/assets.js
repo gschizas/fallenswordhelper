@@ -1,4 +1,4 @@
-export var defaultOptions = {
+export const defaultOptions = {
   checkedElements: {
     0: 1,
     1: 1,
@@ -20,7 +20,7 @@ export var defaultOptions = {
   fshMinLvl: 1,
   fshMaxLvl: 9999,
 };
-export var invManFilter = '<table class="fshInvFilter">'
+export const invManFilter = '<table class="fshInvFilter">'
   + '<tr><th colspan="14">@@reportTitle@@</th>'
   + '<th><span id="fshRefresh" class="fshLink">[Refresh]</span></th></tr>'
   + '<tr><td colspan="2" rowspan="3"><b>&nbsp;Show Items:</b></td>'
@@ -95,7 +95,7 @@ export var invManFilter = '<table class="fshInvFilter">'
   + '</td>'
   + '</tr>'
   + '</table>';
-export var inventoryCheckAll = {
+export const inventoryCheckAll = {
   0: 1,
   1: 1,
   2: 1,
@@ -121,7 +121,7 @@ export var inventoryCheckAll = {
   105: 1,
   106: 1,
 };
-export var craftHash = {
+export const craftHash = {
   Perfect: { abbr: 'Perf', colour: '#00b600', index: 8 },
   Excellent: { abbr: 'Exc', colour: '#f6ed00', index: 7 },
   'Very Good': { abbr: 'VG', colour: '#f67a00', index: 6 },

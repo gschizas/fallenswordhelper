@@ -1,10 +1,10 @@
 import alpha from '../../../common/alpha';
-import { keys } from '../../../common/keys';
+import keys from '../../../common/keys';
 import partial from '../../../common/partial';
 
-function cloneObj(obj, result, key) {
-  result[key] = obj[key];
-  return result;
+function cloneObj(obj, acc, key) {
+  acc[key] = obj[key];
+  return acc;
 }
 
 export default function sortKeys(obj) {

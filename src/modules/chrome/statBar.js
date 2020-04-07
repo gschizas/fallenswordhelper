@@ -1,12 +1,12 @@
 import { createAnchor } from '../common/cElement';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
 import onclick from '../common/onclick';
 import {
   blacksmithUrl,
   cmdUrl,
-  def_subcmd,
+  defSubcmd,
   dropItemsUrl,
   pointsUrl,
   profileUrl,
@@ -28,7 +28,7 @@ function statbarWrapper(href, id) {
 
 export default function statbar() {
   statbarWrapper(profileUrl, 'statbar-character');
-  statbarWrapper(`${pointsUrl + def_subcmd}reserve`, 'statbar-stamina');
+  statbarWrapper(`${pointsUrl + defSubcmd}reserve`, 'statbar-stamina');
   statbarWrapper(blacksmithUrl, 'statbar-equipment');
   statbarWrapper(dropItemsUrl, 'statbar-inventory');
   statbarWrapper(pointsUrl, 'statbar-fsp');

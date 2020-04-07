@@ -3,7 +3,7 @@ import { cdn } from './system/system';
 import clickThis from './common/clickThis';
 import { createSpan } from './common/cElement';
 import getArrayByClassName from './common/getArrayByClassName';
-import { getElementById } from './common/getElement';
+import getElementById from './common/getElement';
 import getValue from './system/getValue';
 import indexAjaxData from './ajax/indexAjaxData';
 import insertElementAfterBegin from './common/insertElementAfterBegin';
@@ -19,8 +19,9 @@ function doRefresh() {
 
 function doCancel(cancelButton) { // jQuery.min
   const itemImage = cancelButton.parentNode.parentNode.children[0].children[0];
-  cancelButton.outerHTML = `<img src="${cdn
-  }ui/misc/spinner.gif" width="14" height="14">`;
+  // eslint-disable-next-line no-param-reassign
+  cancelButton.outerHTML = `<img src="${
+    cdn}ui/misc/spinner.gif" width="14" height="14">`;
   return indexAjaxData({
     cmd: 'auctionhouse',
     subcmd: 'cancel',

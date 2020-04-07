@@ -3,18 +3,18 @@ import doToggleButtons from './doToggleButtons';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import { pCC } from '../../support/layout';
-import { def_table, itemRE } from '../../support/constants';
+import { defTable, itemRE } from '../../support/constants';
 import {
   getPrefs,
   showExtraLinks,
   showQuickDropLinks,
 } from './getPrefs';
 
-export var itemsAry;
-export var itemsHash;
+export let itemsAry;
+export let itemsHash;
 
 function getItemImg() {
-  const allTables = getElementsByTagName(def_table, pCC);
+  const allTables = getElementsByTagName(defTable, pCC);
   const lastTable = allTables[allTables.length - 1];
   return getArrayByTagName('img', lastTable);
 }
@@ -30,9 +30,9 @@ function getIds(el) {
   ];
 }
 
-function tally(prev, curr) {
-  prev[curr[1]] = (prev[curr[1]] || 0) + 1;
-  return prev;
+function tally(acc, curr) {
+  acc[curr[1]] = (acc[curr[1]] || 0) + 1;
+  return acc;
 }
 
 function getInjector(ary) {

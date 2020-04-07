@@ -1,14 +1,15 @@
 import contains from '../../common/contains';
 import createDocument from '../../system/createDocument';
-import { def_statVl } from '../../support/constants';
+import { defStatVl } from '../../support/constants';
 import getArrayByTagName from '../../common/getArrayByTagName';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getText from '../../common/getText';
 import intValue from '../../system/intValue';
 import onlineDot from '../../common/onlineDot';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
+import setInnerHtml from '../../dom/setInnerHtml';
 import { updateProgress } from './bufferProgress';
 
 const sustainLevelRE = /Level<br>(\d+)%/;
@@ -16,12 +17,7 @@ const sustainLevelRE = /Level<br>(\d+)%/;
 function getBioLines(bioCellHtml, findBuffNicks) {
   const myRe = new RegExp(`^.*\\b(?:(?:${
     findBuffNicks.replace(/,/g, ')|(?:')}))\\b.*$`, 'gim');
-  let myArray;
-  const res = [];
-  while ((myArray = myRe.exec(bioCellHtml)) !== null) {
-    res.push(myArray[0]);
-  }
-  return res;
+  return [...bioCellHtml.matchAll(myRe)].map((el) => el[0]);
 }
 
 function getSustain(doc) {
@@ -45,7 +41,7 @@ function getInnerLevelValue(doc) {
 }
 
 function getInnerVirtualLevel(doc) {
-  return parseInt(getText(getElementById(def_statVl, doc)), 10);
+  return parseInt(getText(getElementById(defStatVl, doc)), 10);
 }
 
 function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
@@ -56,8 +52,7 @@ function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy
   const lastActivityIMG = onlineDot({ min: lastActivityMinutes });
   const playerHREF = callback.href;
   const bioTip = bioCellHtml.replace(/'|"|\n/g, '');
-  return `<nobr>${lastActivityIMG}&nbsp;<a href="${
-    playerHREF}" target="new" `
+  return `<nobr>${lastActivityIMG}&nbsp;<a href="${playerHREF}" target="new" `
     // FIXME - It kind works now, but not guaranteed?
     + 'class="tip-static" '
     + `data-tipped="${bioTip}">${innerPlayerName}</a>`
@@ -74,8 +69,8 @@ function openMsg(evt) {
 function doNameCell(o) {
   const newCell = o.newRow.insertCell(0);
   newCell.style.verticalAlign = 'top';
-  newCell.innerHTML = nameCell(o.doc, o.callback, o.lastActivity,
-    o.bioCellHtml);
+  setInnerHtml(nameCell(o.doc, o.callback, o.lastActivity, o.bioCellHtml),
+    newCell);
   $('.a-reply').on('click', openMsg);
 }
 
@@ -84,9 +79,9 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
   if (sustainLevel >= 100) { sustain = 'fshGreen'; }
   let extend = '<span class="fshRed">No</span>';
   if (hasExtendBuff) { extend = '<span class="fshGreen">Yes</span>'; }
-  return `${'<table><tbody><tr>'
+  return '<table><tbody><tr>'
     + '<td colspan="2" class="resAct">Last Activity:</td>'
-    + '<td colspan="2"><nobr>'}${lastActivity[0]}</nobr></td></tr>`
+    + `<td colspan="2"><nobr>${lastActivity[0]}</nobr></td></tr>`
     + '<tr><td class="resLbl">Sustain:'
     + `</td><td class="resVal ${sustain}">${sustainLevel}%</td>`
     + '<td class="resLbl">Extend:</td>'
@@ -95,11 +90,12 @@ function playerInfo(lastActivity, sustainLevel, hasExtendBuff) { // Legacy
 
 function playerInfoCell(newRow, lastActivity, sustainLevel, hasExtendBuff) {
   const newCell = newRow.insertCell(1);
-  newCell.innerHTML = playerInfo(lastActivity, sustainLevel, hasExtendBuff);
+  setInnerHtml(playerInfo(lastActivity, sustainLevel, hasExtendBuff), newCell);
   newCell.style.verticalAlign = 'top';
 }
 
 function injectTextLine(newCell, el) {
+  // eslint-disable-next-line no-param-reassign
   newCell.innerHTML += `${el}<br>`;
 }
 
@@ -110,9 +106,10 @@ function buffCell(newRow, textLineArray) {
 
 function updateProcessed() {
   const processedBuffers = getElementById('buffersProcessed');
-  const potentialBuffers = parseInt(getText(getElementById('potentialBuffers')), 10);
+  const potentialBuffers = parseInt(getText(getElementById('potentialBuffers')),
+    10);
   const processedBuffersCount = parseInt(getText(processedBuffers), 10);
-  processedBuffers.innerHTML = processedBuffersCount + 1;
+  setInnerHtml(processedBuffersCount + 1, processedBuffers);
   if (potentialBuffers === processedBuffersCount + 1) {
     updateProgress('Done.', 'blue');
   }

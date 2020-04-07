@@ -1,6 +1,6 @@
 import combatView from '../ajax/combatView';
 import createDocument from '../system/createDocument';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import getTextTrim from '../common/getTextTrim';
 import partial from '../common/partial';

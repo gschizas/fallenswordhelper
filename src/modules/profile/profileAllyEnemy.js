@@ -1,5 +1,5 @@
 import contains from '../common/contains';
-import { def_table } from '../support/constants';
+import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -20,7 +20,7 @@ function contactSlots(numberOfContacts, contactsTotal) {
 
 function countContacts(isAllies, el) {
   const target = el.parentNode;
-  const numberOfContacts = getElementsByTagName(def_table,
+  const numberOfContacts = getElementsByTagName(defTable,
     target.nextElementSibling).length - 1;
   insertHtmlBeforeEnd(target,
     `<span class="fshBlue">&nbsp;${numberOfContacts.toString()

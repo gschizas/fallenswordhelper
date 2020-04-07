@@ -10,6 +10,7 @@ function getMyItem(removeBy, item) {
 function genericFilter(removeBy, seen, item) {
   const myItem = getMyItem(removeBy, item);
   if (!seen[myItem]) {
+    // eslint-disable-next-line no-param-reassign
     seen[myItem] = true;
     return true;
   }

@@ -1,7 +1,7 @@
 import { createDiv } from './cElement';
-import { getElementById } from './getElement';
+import getElementById from './getElement';
 import insertElement from './insertElement';
-import setText from './setText';
+import setText from '../dom/setText';
 
 function makeFshMsg() {
   let fshMsg = getElementById('fshmsg');

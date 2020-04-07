@@ -1,4 +1,4 @@
-import { isArray } from '../../../common/isArray';
+import isArray from '../../../common/isArray';
 
 function hasTitan(el) { return el.type === 0; }
 

@@ -1,4 +1,4 @@
-import { def_PvE } from '../../support/constants';
+import { defPvE } from '../../support/constants';
 import getValue from '../../system/getValue';
 import { get, set } from '../../system/idb';
 
@@ -23,7 +23,8 @@ function storeEnhancements(enh) {
 
 function hazBuffs(data) {
   if (data.player.buffs) {
-    data.player.buffs.forEach(storeBuffs); // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler
+    data.player.buffs.forEach(storeBuffs); // loop through buffs,
+    // only need to keep CA and Doubler 54 = ca, 26 = doubler
   }
 }
 
@@ -57,7 +58,7 @@ function combatResponse(e, data) {
 
 function gotCombatLog(data) { // jQuery.min
   if (data) { combatLog = data; }
-  $.subscribe(def_PvE, combatResponse);
+  $.subscribe(defPvE, combatResponse);
 }
 
 export default function combatLogger() { // jQuery.min

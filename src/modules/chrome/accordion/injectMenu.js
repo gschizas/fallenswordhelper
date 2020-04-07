@@ -3,7 +3,7 @@ import adjustHeight from './adjustHeight';
 import characterButtons from './characterButtons';
 import currentGuildId from '../../common/currentGuildId';
 import executeAll from '../../common/executeAll';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import insertAfterParent from './insertAfterParent';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
@@ -13,7 +13,7 @@ import { pCL } from '../../support/layout';
 import preFlight from './preFlight';
 import {
   cmdUrl,
-  def_subcmd,
+  defSubcmd,
   newGuildLogUrl,
   notepadBlankUrl,
 } from '../../support/constants';
@@ -35,9 +35,9 @@ function updateScavLink() {
 function guildInventory() {
   if (currentGuildId()) {
     insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
-      `${'<li class="nav-level-2"><a class="nav-link" id="nav-'
-      + 'guild-guildinvmanager" href="'}${notepadBlankUrl
-      }guildinvmgr">Guild Inventory</a></li>`);
+      '<li class="nav-level-2"><a class="nav-link" '
+      + `id="nav-guild-guildinvmanager" href="${
+        notepadBlankUrl}guildinvmgr">Guild Inventory</a></li>`);
   }
 }
 
@@ -45,17 +45,15 @@ function newGuildLogLink() {
   if (currentGuildId() && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
     insertAfterParent('nav-guild-ledger-advisor', insertHtmlAfterEnd,
-      `${'<li class="nav-level-2"><a class="nav-link" '
-      + 'href="'}${newGuildLogUrl}"`
-      + '>New Guild Log</a></li>');
+      `<li class="nav-level-2"><a class="nav-link" href="${
+        newGuildLogUrl}">New Guild Log</a></li>`);
   }
 }
 
 function topRatedLink() {
   insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
-    `${'<li class="nav-level-2"><a class="nav-link" id="nav-'
-    + 'toprated-top250" href="'}${cmdUrl}toprated${def_subcmd
-    }xp">Top 250 Players</a></li>`);
+    '<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" '
+    + `href="${cmdUrl}toprated${defSubcmd}xp">Top 250 Players</a></li>`);
 }
 
 function injectItems() {

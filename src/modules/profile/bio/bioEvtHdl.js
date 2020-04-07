@@ -1,9 +1,10 @@
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import formatCost from './formatCost';
 import getBuffsToBuy from './getBuffsToBuy';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getPrice from './getPrice';
 import getText from '../../common/getText';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 const buffCost = { count: 0, buffs: {} };
 
@@ -12,9 +13,9 @@ function buffRows(pair) {
   }${pair[1][1]}</td></tr>`;
 }
 
-function totalCost(prev, pair) {
-  prev[pair[1][1]] += pair[1][0];
-  return prev;
+function totalCost(acc, pair) {
+  acc[pair[1][1]] += pair[1][0];
+  return acc;
 }
 
 function hazBuffs() {
@@ -23,12 +24,13 @@ function hazBuffs() {
     {
       k: 0, fsp: 0, stam: 0, unknown: 0,
     }));
-  getElementById('buffCost').innerHTML = `${'<span class="tip-static" '
+  setInnerHtml('<span class="tip-static" '
     + 'data-tipped="This is an estimated cost based on how the script finds '
     + 'the cost associated with buffs from viewing bio. It can be incorrect, '
-    + 'please use with discretion.<br><hr><table border=0>'}${
-    myEntries.map(buffRows).join('')}</table><b>Total: ${totalText
-  }</b>">Estimated Cost: <b>${totalText}</b></span>`;
+    + `please use with discretion.<br><hr><table border=0>${
+      myEntries.map(buffRows).join('')}</table><b>Total: ${
+      totalText}</b>">Estimated Cost: <b>${totalText}</b></span>`,
+  getElementById('buffCost'));
   buffCost.buffCostTotalText = totalText;
 }
 
@@ -36,7 +38,7 @@ function updateBuffCost() { // Legacy
   if (buffCost.count > 0) {
     hazBuffs();
   } else {
-    getElementById('buffCost').innerHTML = '&nbsp;';
+    setInnerHtml('&nbsp;', getElementById('buffCost'));
     buffCost.buffCostTotalText = '';
   }
 }
@@ -57,7 +59,7 @@ function getBuffCost(buffNameNode) {
   let cost;
   if (price) {
     type = priceUnit(price);
-    cost = price[0].match(/([+-]?[.\d]+)/)[0];
+    [cost] = price[0].match(/([+-]?[.\d]+)/);
   } else {
     type = 'unknown';
     cost = '1';

@@ -8,7 +8,8 @@ import querySelectorArray from '../common/querySelectorArray';
 
 function sendThem(prm, options) {
   return prm.then((data) => {
-    console.log('promise data', data); // eslint-disable-line no-console
+    // eslint-disable-next-line no-console
+    console.log('promise data', data);
     if (data === null || data.s) {
       return daSendItems(options[0], options[1]);
     }
@@ -23,7 +24,8 @@ function onBtnClick() {
   const items = querySelectorArray('[name="sendItemList[]"]:checked');
   items.map((el) => [user.value, [el.value]])
     .reduce(sendThem, Promise.resolve(null))
-    .then((finalResult) => { console.log('finalResult', finalResult); }); // eslint-disable-line no-console
+    // eslint-disable-next-line no-console
+    .then((finalResult) => { console.log('finalResult', finalResult); });
 }
 
 export default function oneByOne() {

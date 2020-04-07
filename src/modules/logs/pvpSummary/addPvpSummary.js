@@ -5,6 +5,7 @@ import getText from '../../common/getText';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
+import setInnerHtml from '../../dom/setInnerHtml';
 import { cacheCombat, combatCache } from './combatCache';
 import { createDiv, createSpan } from '../../common/cElement';
 
@@ -31,28 +32,28 @@ function iWon(json) {
   return 'fshRed';
 }
 
-function highlightSpecials(prev, el) {
+function highlightSpecials(acc, el) {
   if (el.id === 18) {
-    return `${prev}<br><span class="fshRed fshBold">${el.params[0]
-    } leeched the buff '${el.params[1]}'.</span>`;
+    return `${acc}<br><span class="fshRed fshBold">${
+      el.params[0]} leeched the buff '${el.params[1]}'.</span>`;
   }
   if (el.id === 21) {
-    return `${prev}<br><span class="fshRed fshBold">${el.params[0]
-    } was mesmerized by Spell Breaker, losing the '${el.params[1]
-    }' buff.</span>`;
+    return `${acc}<br><span class="fshRed fshBold">${
+      el.params[0]} was mesmerized by Spell Breaker, losing the '${
+      el.params[1]}' buff.</span>`;
   }
-  return prev;
+  return acc;
 }
 
 function parseCombat(combatSummary, json) {
   if (!json.s) { return; }
   const color = iWon(json);
-  combatSummary.innerHTML = result(json.r.xp_gain, 'XP stolen', color)
+  setInnerHtml(result(json.r.xp_gain, 'XP stolen', color)
     + result(json.r.gold_gain, 'Gold lost', color)
     + result(json.r.gold_stolen, 'Gold stolen', color)
     + result(json.r.pvp_prestige_gain, 'Prestige gain', color)
     + result(json.r.pvp_rating_change, 'PvP change', color)
-    + json.r.specials.reduce(highlightSpecials, '');
+    + json.r.specials.reduce(highlightSpecials, ''), combatSummary);
 }
 
 function processCombat(aRow) {
@@ -93,20 +94,14 @@ function processCombatRow(aRow) {
 }
 
 const combatRowTests = [
-  function (aRow, messageType) { return messageType === 'Combat'; },
-  function () { return calf.showPvPSummaryInLog; },
-  function (aRow) {
-    return aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML);
-  },
-  function (aRow) {
-    return !/\(Guild Conflict\)/.test(getText(aRow.cells[2]));
-  },
+  (aRow, messageType) => messageType === 'Combat',
+  () => calf.showPvPSummaryInLog,
+  (aRow) => aRow.cells[2] && /combat_id=/.test(aRow.cells[2].innerHTML),
+  (aRow) => !/\(Guild Conflict\)/.test(getText(aRow.cells[2])),
 ];
 
-function condition(aRow, messageType, e) { return e(aRow, messageType); }
-
 function isCombatRow(aRow, messageType) {
-  return combatRowTests.every(partial(condition, aRow, messageType));
+  return combatRowTests.every((e) => e(aRow, messageType));
 }
 
 export default function addPvpSummary(aRow, messageType) {

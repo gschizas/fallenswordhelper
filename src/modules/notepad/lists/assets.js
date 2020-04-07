@@ -1,7 +1,7 @@
 import { ahSearchUrl } from '../../support/constants';
 import getValueJSON from '../../system/getValueJSON';
 
-export var auctionSearchBlurb = '<div>This screen allows you to set up some quick '
+export const auctionSearchBlurb = '<div>This screen allows you to set up some quick '
   + 'search templates for the Auction House. The Display on AH column '
   + 'indicates if the quick search will show on the short list on the '
   + 'Auction House main screen. A maximum of 36 items can show on this '

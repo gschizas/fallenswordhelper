@@ -1,11 +1,12 @@
-import { smartTable } from 'smart-table-core';
-import { table as tableComponentFactory } from 'smart-table-vanilla';
 import displayChange from './displayChange';
 import insertElement from '../../common/insertElement';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
+import { smartTable } from 'smart-table-core';
 import smartTableConfig from './smartTableConfig';
-import { theadHtml } from './assets';
+import { table as tableComponentFactory } from 'smart-table-vanilla';
+import theadHtml from './assets';
 import {
   createDiv,
   createTBody,
@@ -18,7 +19,7 @@ function insertDiv(parent) {
 }
 
 function prepareContainer() {
-  pCC.innerHTML = '';
+  setInnerHtml('', pCC);
   return insertDiv(pCC);
 }
 

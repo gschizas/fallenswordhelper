@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import partial from '../../../common/partial';
 
 function evalMiss(combat) {
@@ -37,22 +38,17 @@ function evalCreatureHits(combat) {
 
 const evalFightStatus = [
   [
-    function (combat) {
-      return combat.playerHits === '-' && combat.creatureHits === '-';
-    },
-    function () { return 'Unresolved'; },
+    (combat) => combat.playerHits === '-' && combat.creatureHits === '-',
+    () => 'Unresolved',
+  ],
+  [(combat) => combat.playerHits === '-', () => 'Player dies'],
+  [
+    (combat) => combat.playerHits === 1,
+    (combat) => `Player 1 hits${evalMiss(combat)}`,
   ],
   [
-    function (combat) { return combat.playerHits === '-'; },
-    function () { return 'Player dies'; },
-  ],
-  [
-    function (combat) { return combat.playerHits === 1; },
-    function (combat) { return `Player 1 hits${evalMiss(combat)}`; },
-  ],
-  [
-    function (combat) { return combat.playerHits > 1; },
-    function (combat) { return `Player > 1 hits${evalMiss(combat)}`; },
+    (combat) => combat.playerHits > 1,
+    (combat) => `Player > 1 hits${evalMiss(combat)}`,
   ],
 ];
 

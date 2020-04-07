@@ -113,23 +113,22 @@ function huntBuff() {
 }
 
 function huntBuffCheck() {
-  return `${'<input name="showHuntingBuffs" '
-    + 'class="fshVMid" type="checkbox" value="on"'}${
-    isChecked(calf.showBuffs)}>`;
+  return '<input name="showHuntingBuffs" '
+    + `class="fshVMid" type="checkbox" value="on"${
+      isChecked(calf.showBuffs)}>`;
 }
 
 export function huntMode() {
   return `Enabled Hunting Mode${
     helpLink('Enabled Hunting Mode',
       'This will determine which list of buffs gets checked '
-      + 'on the world screen.')
-  }:<select name="enabledHuntingMode">`
-    + `<option value="1"${isSelected(calf.enabledHuntingMode, '1')
-    }>${calf.buffsName}</option>`
-    + `<option value="2"${isSelected(calf.enabledHuntingMode, '2')
-    }>${calf.buffs2Name}</option>`
-    + `<option value="3"${isSelected(calf.enabledHuntingMode, '3')
-    }>${calf.buffs3Name}</option>`
+      + 'on the world screen.')}:<select name="enabledHuntingMode">`
+    + `<option value="1"${
+      isSelected(calf.enabledHuntingMode, '1')}>${calf.buffsName}</option>`
+    + `<option value="2"${
+      isSelected(calf.enabledHuntingMode, '2')}>${calf.buffs2Name}</option>`
+    + `<option value="3"${
+      isSelected(calf.enabledHuntingMode, '3')}>${calf.buffs3Name}</option>`
     + '</select>';
 }
 
@@ -175,19 +174,15 @@ function joinFuncs() {
 
 export function prefs() {
   // World Screen
-  return `${'<tr><th colspan="2"><b>'
-    + 'World screen/Hunting preferences</b></th></tr>'}${
-
-    worldGroup()
-  }${keepCombatLogs()
-
-  }${bunchOfSimple([
-    'showCombatLog',
-    'enableCreatureColoring',
-    'showCreatureInfo',
-  ])
-
-  }${joinFuncs()
-
-  }${simpleCheckbox('huntingMode')}`;
+  return '<tr><th colspan="2"><b>'
+    + `World screen/Hunting preferences</b></th></tr>${
+      worldGroup()}${
+      keepCombatLogs()}${
+      bunchOfSimple([
+        'showCombatLog',
+        'enableCreatureColoring',
+        'showCreatureInfo',
+      ])}${
+      joinFuncs()}${
+      simpleCheckbox('huntingMode')}`;
 }

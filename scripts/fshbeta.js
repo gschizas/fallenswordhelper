@@ -1,7 +1,7 @@
-import { core } from './getVersion.js';
-import rollupFsh from './rollupFsh.js';
+import { core } from './getVersion';
+import rollupFsh from './rollupFsh';
 
-const github = require('./config.json').github;
+const { github } = require('./config.json');
 
 export default rollupFsh(
   'beta',

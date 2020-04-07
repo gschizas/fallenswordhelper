@@ -10,8 +10,8 @@ import setValue from '../system/setValue';
 import shouldBeArray from '../system/shouldBeArray';
 import toLowerCase from '../common/toLowerCase';
 
-export var guildId;
-export var currentGuildRelationship;
+export let guildId;
+export let currentGuildRelationship;
 const myGuildMsgs = [
   ['self', 'fshGreen', 'guildSelfMessage'],
   ['friendly', 'fshOliveDrab', 'guildFrndMessage'],

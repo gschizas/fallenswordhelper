@@ -6,7 +6,7 @@ import injectComposeAlert from '../../composing/injectComposeAlert';
 import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
 import prepareAllyEnemyList from '../allyEnemy/allyEnemy';
-import { prepareBountyData } from '../activeWantedBounties/activeWantedBounties';
+import prepareBountyData from '../activeWantedBounties/activeWantedBounties';
 
 function callAllyEnemy() {
   if (calf.enableAllyOnlineList

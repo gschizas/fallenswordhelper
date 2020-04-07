@@ -1,11 +1,13 @@
 import { daQuickbuff } from '../_dataAccess/_dataAccess';
 import partial from '../common/partial';
 import quickbuffSuccess from '../common/quickbuffSuccess';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function processResult(trigger, json) {
   if (quickbuffSuccess(json)) {
+    // eslint-disable-next-line no-param-reassign
     trigger.className = 'fshLime';
-    trigger.innerHTML = 'On';
+    setInnerHtml('On', trigger);
   }
 }
 

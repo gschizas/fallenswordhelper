@@ -1,5 +1,6 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import on from '../common/on';
+import setInnerHtml from '../dom/setInnerHtml';
 
 let maxcharacters;
 let textArea;
@@ -17,10 +18,10 @@ function updateShoutboxPreview() {
     shoutboxPreview = textArea.parentNode.parentNode.parentNode.parentNode
       .insertRow().insertCell();
   }
-  shoutboxPreview.innerHTML = `${'<table class="sbpTbl"><tbody><tr>'
-    + '<td class="sbpHdr">Preview ('}${chars}/${maxcharacters
-  } characters)</td></tr><tr><td class="sbpMsg"><span>${textContent
-  }</span></td></tr></tbody></table>`;
+  setInnerHtml('<table class="sbpTbl"><tbody><tr>'
+    + `<td class="sbpHdr">Preview (${chars}/${
+      maxcharacters} characters)</td></tr><tr><td class="sbpMsg"><span>${
+      textContent}</span></td></tr></tbody></table>`, shoutboxPreview);
 }
 
 function injectShoutboxWidgets() {

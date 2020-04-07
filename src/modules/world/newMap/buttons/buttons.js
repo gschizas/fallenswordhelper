@@ -1,7 +1,7 @@
 import calf from '../../../support/calf';
 import eventHandler5 from '../../../common/eventHandler5';
 import fixTeleport from './fixTeleport';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import getValue from '../../../system/getValue';
 import hideQTip from '../../../common/hideQTip';
 import insertElement from '../../../common/insertElement';
@@ -11,7 +11,7 @@ import on from '../../../common/on';
 import onclick from '../../../common/onclick';
 import openQuickBuffByName from '../../../common/openQuickBuffByName';
 import playerName from '../../../common/playerName';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import setValue from '../../../system/setValue';
 import {
   createButton,
@@ -19,9 +19,9 @@ import {
   textSpan,
 } from '../../../common/cElement';
 import {
-  def_playerLevel,
-  def_realmUpdate,
-  def_subcmd,
+  defPlayerLevel,
+  defRealmUpdate,
+  defSubcmd,
   guideUrl,
   worldUrl,
 } from '../../../support/constants';
@@ -46,13 +46,13 @@ function openQuickBuff() {
 }
 
 function openRealmMap() {
-  window.open(`${worldUrl + def_subcmd}map`, 'fsMap');
+  window.open(`${worldUrl + defSubcmd}map`, 'fsMap');
 }
 
 function openUfsgMap() {
   const gameRealm = GameData.realm();
   window.open(
-    `${guideUrl}realms${def_subcmd}view&realm_id=${gameRealm.id}`,
+    `${guideUrl}realms${defSubcmd}view&realm_id=${gameRealm.id}`,
     'mapUfsg',
   );
 }
@@ -152,15 +152,15 @@ function addButtons() {
 }
 
 const changeHdl = [
-  [function (target) { return target === soundCheck; }, toggleSound],
-  [function (target) { return target === huntCheck; }, toggleHuntMode],
+  [(target) => target === soundCheck, toggleSound],
+  [(target) => target === huntCheck, toggleHuntMode],
 ];
 
 const clickHdl = [
-  [function (target) { return target === formGroup; }, doFormGroup],
-  [function (target) { return target === quickBuff; }, openQuickBuff],
-  [function (target) { return target === realmMap; }, openRealmMap],
-  [function (target) { return target === ufsgMap; }, openUfsgMap],
+  [(target) => target === formGroup, doFormGroup],
+  [(target) => target === quickBuff, openQuickBuff],
+  [(target) => target === realmMap, openRealmMap],
+  [(target) => target === ufsgMap, openUfsgMap],
 ];
 
 function setupHandlers() {
@@ -192,6 +192,6 @@ function levelStats(e, data) {
 
 export default function initButtons() {
   injectButtons();
-  $.subscribe(def_realmUpdate, realmUpdate);
-  $.subscribe(def_playerLevel, levelStats);
+  $.subscribe(defRealmUpdate, realmUpdate);
+  $.subscribe(defPlayerLevel, levelStats);
 }

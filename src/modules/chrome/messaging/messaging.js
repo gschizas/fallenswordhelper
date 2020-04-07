@@ -1,7 +1,7 @@
 import './messaging.css';
 import classHandler from '../../common/classHandler';
 import fallback from '../../system/fallback';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
@@ -10,7 +10,7 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import onclick from '../../common/onclick';
-import setText from '../../common/setText';
+import setText from '../../dom/setText';
 import setValueJSON from '../../system/setValueJSON';
 
 let enterForSendMessage;
@@ -67,7 +67,7 @@ function getValidateTips() {
   if (!validateTips) {
     const nodes = getElementsByClassName('validateTips', quickMsgDialog);
     if (nodes.length === 1) {
-      validateTips = nodes[0];
+      [validateTips] = nodes;
     }
   }
 }

@@ -1,4 +1,4 @@
-export var quickBuffHeader = '<div id="helperQBheader"><table class="quickbuffTable"><thead><tr>'
+export const quickBuffHeader = '<div id="helperQBheader"><table class="quickbuffTable"><thead><tr>'
   + '<th class="quickbuffTableHeader">Sustain</th>'
   + '<th class="quickbuffTableHeader">Fury Caster</th>'
   + '<th class="quickbuffTableHeader">Guild Buffer</th>'
@@ -13,7 +13,7 @@ export var quickBuffHeader = '<div id="helperQBheader"><table class="quickbuffTa
   + '<td id="fshExt" class="quickbuffTableDetail">&nbsp;</td>'
   + '<td id="fshRI"  class="quickbuffTableDetail">&nbsp;</td>'
   + '</tr></tbody></table></div>';
-export var excludeBuff = [
+export const excludeBuff = [
   50, // Death Dealer
   54, // Counter Attack
   55, // Summon Shield Imp

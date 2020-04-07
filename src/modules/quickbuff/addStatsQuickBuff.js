@@ -3,6 +3,7 @@ import formatLastActivity from '../system/formatLastActivity';
 import getElementsByTagName from '../common/getElementsByTagName';
 import insertElementAfter from '../common/insertElementAfter';
 import querySelector from '../common/querySelector';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function getActivitySpan(myPlayer) {
   let activity = querySelector('span.fshLastActivity', myPlayer);
@@ -18,9 +19,8 @@ export default function addStatsQuickBuff(data) {
   const myPlayer = querySelector(`div.player[data-username="${
     data.username}"]`);
   const activity = getActivitySpan(myPlayer);
-  activity.innerHTML = `Last Activity: ${
-    formatLastActivity(data.last_login)
-  }<br>Stamina: ${data.current_stamina} / ${
-    data.stamina} ( ${Math.floor(data.current_stamina
-    / data.stamina * 100)}% )`;
+  setInnerHtml(`Last Activity: ${
+    formatLastActivity(data.last_login)}<br>Stamina: ${
+    data.current_stamina} / ${data.stamina} ( ${
+    Math.floor((data.current_stamina / data.stamina) * 100)}% )`, activity);
 }

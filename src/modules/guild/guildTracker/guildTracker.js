@@ -41,6 +41,7 @@ function keydownHandler(evt) {
 }
 
 function maybeClose(ret) {
+  // eslint-disable-next-line no-param-reassign
   if (isClosed()) { ret.style.transform = null; }
 }
 

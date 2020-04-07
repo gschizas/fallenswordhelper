@@ -1,6 +1,6 @@
 import getInvTable from './getInvTable';
 import getText from '../../common/getText';
-import setText from '../../common/setText';
+import setText from '../../dom/setText';
 
 export default function updateUsedCount(del) {
   const invTableParent = getInvTable().parentNode;

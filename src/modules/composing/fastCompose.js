@@ -14,7 +14,7 @@ import querySelector from '../common/querySelector';
 import querySelectorAll from '../common/querySelectorAll';
 import querySelectorArray from '../common/querySelectorArray';
 import { sendEvent } from '../support/fshGa';
-import setText from '../common/setText';
+import setText from '../dom/setText';
 import { subscribe } from '../support/pubsub';
 import { createDiv, createInput, createTable } from '../common/cElement';
 

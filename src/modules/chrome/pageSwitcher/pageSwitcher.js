@@ -21,7 +21,7 @@ import marketplace from '../../marketplace';
 import news from './news';
 import noCmd from './noCmd';
 import notepad from './notepad';
-import { parseTemplePage } from '../notification/parseTemplePage';
+import parseTemplePage from '../notification/parseTemplePage';
 import points from './points';
 import profile from './profile';
 import questbook from './questbook';

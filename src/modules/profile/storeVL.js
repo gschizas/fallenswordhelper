@@ -1,27 +1,27 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getText from '../common/getText';
 import intValue from '../system/intValue';
 import setValue from '../system/setValue';
 import valueText from '../common/valueText';
 import {
-  def_characterVirtualLevel,
-  def_statLevel,
-  def_statVl,
+  defCharacterVirtualLevel,
+  defStatLevel,
+  defStatVl,
 } from '../support/constants';
 
 function sameAsLevel(virtualLevel) {
   return intValue(valueText(
-    getElementsByClassName(def_statLevel),
+    getElementsByClassName(defStatLevel),
   )) === virtualLevel;
 }
 
 export default function storeVL() {
   // store the VL of the player
-  const virtualLevel = parseInt(getText(getElementById(def_statVl)), 10);
+  const virtualLevel = parseInt(getText(getElementById(defStatVl)), 10);
   if (sameAsLevel(virtualLevel)) {
-    setValue(def_characterVirtualLevel, ''); // ?
+    setValue(defCharacterVirtualLevel, ''); // ?
   } else {
-    setValue(def_characterVirtualLevel, virtualLevel);
+    setValue(defCharacterVirtualLevel, virtualLevel);
   }
 }

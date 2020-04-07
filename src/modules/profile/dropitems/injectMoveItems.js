@@ -18,9 +18,9 @@ export default function injectMoveItems() {
   const folders = getArrayByTagName('img', flrRow).filter(otherFolders);
   if (folders.length === 0) { return; }
   insertHtmlAfterEnd(flrRow,
-    `${'<tr><td class="fshCenter">Move selected items to: '
-    + '<select name="folder" id="selectFolderId" class="customselect">'}${
-      folders.map(makeOption).join('')
-    }</select>&nbsp;<input type="button" class="custombutton" `
-    + 'id="fshMove" value="Move"></td></tr>');
+    '<tr><td class="fshCenter">Move selected items to: '
+      + `<select name="folder" id="selectFolderId" class="customselect">${
+        folders.map(makeOption).join('')
+      }</select>&nbsp;<input type="button" class="custombutton" `
+      + 'id="fshMove" value="Move"></td></tr>');
 }

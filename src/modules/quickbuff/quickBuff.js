@@ -2,7 +2,7 @@ import addBuffLevels from './addBuffLevels';
 import doLabels from './doLabels';
 import doPassThru from './doPassThru';
 import firstPlayerStats from './firstPlayerStats';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getProfile from '../ajax/getProfile';
 import getSustain from './getSustain';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';

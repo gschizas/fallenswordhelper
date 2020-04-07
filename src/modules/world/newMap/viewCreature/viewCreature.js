@@ -1,7 +1,8 @@
+/* eslint-disable no-param-reassign */
 import './viewCreature.css';
 import calf from '../../../support/calf';
 import { createDiv } from '../../../common/cElement';
-import { def_viewCreature } from '../../../support/constants';
+import { defViewCreature } from '../../../support/constants';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
 import evalAttack from './evalAttack';
@@ -10,14 +11,15 @@ import evalDamage from './evalDamage';
 import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHTML from './evalHtml';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import insertElement from '../../../common/insertElement';
-import { isArray } from '../../../common/isArray';
+import isArray from '../../../common/isArray';
 import makeDoNotKillLink from './makeDoNotKillLink';
 import myStats from '../../../ajax/myStats';
 import partial from '../../../common/partial';
 import playerDataObject from '../../../common/playerDataObject';
 import playerName from '../../../common/playerName';
+import setInnerHtml from '../../../dom/setInnerHtml';
 import { daGroupStats, daViewGroups } from '../../../_dataAccess/_dataAccess';
 
 let dialogViewCreature;
@@ -64,12 +66,12 @@ function getGroupEvaluator() {
 
 function setCombatEvaluator(html) {
   getCombatEvaluator();
-  combatEvaluator.innerHTML = html;
+  setInnerHtml(html, combatEvaluator);
 }
 
 function setGroupEvalalutor(html) {
   getGroupEvaluator();
-  groupEvaluator.innerHTML = html;
+  setInnerHtml(html, groupEvaluator);
 }
 
 function superElite(ses, obj, type) {
@@ -186,5 +188,5 @@ function processCreature(e, data) {
 }
 
 export default function viewCreature() {
-  $.subscribe(def_viewCreature, processCreature);
+  $.subscribe(defViewCreature, processCreature);
 }

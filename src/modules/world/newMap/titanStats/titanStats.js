@@ -1,8 +1,8 @@
 import calf from '../../../support/calf';
 import { daScoutTower } from '../../../_dataAccess/_dataAccess';
-import { isArray } from '../../../common/isArray';
+import isArray from '../../../common/isArray';
 import partial from '../../../common/partial';
-import { processTitans } from './processTitans';
+import processTitans from './processTitans';
 import { setRealm } from './realm';
 import setValue from '../../../system/setValue';
 import { hasTitan, hideTitanDiv, setupTitanDiv } from './hasTitan';

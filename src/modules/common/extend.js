@@ -1,11 +1,13 @@
 import isObject from './isObject';
-import { keys } from './keys';
+import keys from './keys';
 import partial from './partial';
 
 function overwriteKey(obj, mixins, fn, key) {
   if (isObject(mixins[key]) && mixins[key] !== null) {
+    // eslint-disable-next-line no-param-reassign
     obj[key] = fn(mixins[key].constructor(), mixins[key]);
   } else {
+    // eslint-disable-next-line no-param-reassign
     obj[key] = mixins[key];
   }
 }

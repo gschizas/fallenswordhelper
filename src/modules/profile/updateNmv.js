@@ -1,8 +1,9 @@
-import { arrayFrom } from '../common/arrayFrom';
-import { getElementById } from '../common/getElement';
+import arrayFrom from '../common/arrayFrom';
+import getElementById from '../common/getElement';
 import getTextTrim from '../common/getTextTrim';
+import numberIsNaN from '../common/numberIsNaN';
 import querySelector from '../common/querySelector';
-import { def_statAttack, def_statDefense } from '../support/constants';
+import { defStatAttack, defStatDefense } from '../support/constants';
 
 function thisText(thisNode) {
   return arrayFrom(thisNode.childNodes)
@@ -12,7 +13,7 @@ function thisText(thisNode) {
 }
 
 function getDefStat() {
-  return Number(thisText(getElementById(def_statDefense)));
+  return Number(thisText(getElementById(defStatDefense)));
 }
 
 function calcNmvEffect(atkStat, oldTipped) {
@@ -25,6 +26,7 @@ function gotAtk(nmvImg, atkStat) {
   const defStat = getDefStat();
   const oldTipped = nmvImg.dataset.tipped;
   const nmvEffect = calcNmvEffect(atkStat, oldTipped);
+  // eslint-disable-next-line no-param-reassign
   nmvImg.dataset.tipped = `${oldTipped.slice(0, -15)
   }<br>Attack: ${(atkStat - nmvEffect).toString()
   }&nbsp;&nbsp;Defense: ${(defStat + nmvEffect).toString()
@@ -32,10 +34,10 @@ function gotAtk(nmvImg, atkStat) {
 }
 
 function gotImg(nmvImg) {
-  const atkEl = getElementById(def_statAttack);
+  const atkEl = getElementById(defStatAttack);
   if (!atkEl) { return; }
   const atkStat = Number(thisText(atkEl));
-  if (!isNaN(atkStat)) { gotAtk(nmvImg, atkStat); }
+  if (!numberIsNaN(atkStat)) { gotAtk(nmvImg, atkStat); }
 }
 
 export default function updateNmv() {

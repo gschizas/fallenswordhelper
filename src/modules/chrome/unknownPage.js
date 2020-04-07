@@ -1,4 +1,4 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import injectQuestBookFull from '../questbook/injectQuestBookFull';
 import inventing from '../inventing/inventing';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -8,40 +8,40 @@ import xPath from '../common/xPath';
 
 const unknown = [
   [
-    function () { return getElementById('quickbuff-report'); },
-    function () {
+    () => getElementById('quickbuff-report'),
+    () => {
       screenview('unknown.buffLog.updateBuffLog');
       updateBuffLog();
     },
   ],
   [
-    function () { return xPath('//td[.="Quest Name"]'); },
-    function () {
+    () => xPath('//td[.="Quest Name"]'),
+    () => {
       screenview('unknown.questBook.injectQuestBookFull');
       injectQuestBookFull();
     },
   ],
   [
-    function () { return $('#pCC img[title="Inventing"]').length > 0; },
-    function () {
+    () => $('#pCC img[title="Inventing"]').length > 0,
+    () => {
       screenview('unknown.recipes.inventing');
       inventing();
     },
   // #if _DEV  //  Fell through!
   ],
   [
-    function () { return true; },
-    function () { console.log('Fell through!'); }, // eslint-disable-line no-console
+    () => true,
+    // eslint-disable-next-line no-console
+    () => { console.log('Fell through!'); },
   // #endif
   ],
 ];
 
-function aMatch(el) { return el[0]; }
-
 export default function unknownPage() { // Legacy
   if (jQueryNotPresent()) { return; }
   // #if _DEV  //  unknownPage
-  console.log('unknownPage'); // eslint-disable-line no-console
+  // eslint-disable-next-line no-console
+  console.log('unknownPage');
   // #endif
-  unknown.find(aMatch)[1]();
+  unknown.find((el) => el[0]())[1]();
 }

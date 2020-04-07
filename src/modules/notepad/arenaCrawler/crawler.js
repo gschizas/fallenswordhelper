@@ -1,8 +1,8 @@
 import all from '../../common/all';
 import completed from '../../app/arena/completed';
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import formatUtcDateTime from '../../common/formatUtcDateTime';
-import { fromEntries } from '../../common/fromEntries';
+import fromEntries from '../../common/fromEntries';
 import insertElement from '../../common/insertElement';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
@@ -66,9 +66,9 @@ const joinedFields = ['pvpId', 'joinDate', 'helmet', 'armor', 'gloves', 'boots',
   'stat_armor', 'stat_damage', 'stat_hp', 'winner', 'cyrb32', 'cyrb53'];
 
 async function makeArenaJoined(listOfWinners) {
-  const fsh_arenaJoined = await get('fsh_arenaJoined');
-  if (!fsh_arenaJoined) { return; }
-  const output = fsh_arenaJoined
+  const fshArenaJoined = await get('fsh_arenaJoined');
+  if (!fshArenaJoined) { return; }
+  const output = fshArenaJoined
     .map((o) => fromEntries(entries(o)
       .concat([['joinDate', formatUtcDateTime(new Date(o.joined * 1000))]])
       .concat([['winner', listOfWinners[o.pvpId]]])
@@ -80,10 +80,10 @@ async function makeArenaJoined(listOfWinners) {
     'text/plain', 'fsh_arenaJoined.txt', 'fsh_arenaJoined');
 }
 
-function occurences(obj, player) {
-  if (!obj[player]) { obj[player] = 0; }
-  obj[player] += 1;
-  return obj;
+function occurences(acc, player) {
+  if (!acc[player]) { acc[player] = 0; }
+  acc[player] += 1;
+  return acc;
 }
 
 function countEntries(ary) {
@@ -91,12 +91,12 @@ function countEntries(ary) {
 }
 
 async function getListOfWinners(thisArenas) {
-  const fsh_arenaWinners = await get('fsh_arenaWinners') || {};
-  const winnersToGet = thisArenas.filter((a) => !fsh_arenaWinners[a.id])
+  const fshArenaWinners = await get('fsh_arenaWinners') || {};
+  const winnersToGet = thisArenas.filter((a) => !fshArenaWinners[a.id])
     .map((o) => o.id);
   const prm = winnersToGet.map(getWinner);
   const newWinners = fromEntries(await all(prm));
-  const combinedWinners = { ...fsh_arenaWinners, ...newWinners };
+  const combinedWinners = { ...fshArenaWinners, ...newWinners };
   set('fsh_arenaWinners', combinedWinners);
   return combinedWinners;
 }
@@ -130,10 +130,12 @@ async function processCompleted(thisComplete) {
   }));
 
   const arenaBasicStats = processArenas(arenaStandard.filter((o) => !o.specials));
-  console.log('arenaBasicStats', arenaBasicStats); // eslint-disable-line no-console
+  // eslint-disable-next-line no-console
+  console.log('arenaBasicStats', arenaBasicStats);
 
   const arenaSpecialStats = processArenas(arenaStandard.filter((o) => o.specials));
-  console.log('arenaSpecialStats', arenaSpecialStats); // eslint-disable-line no-console
+  // eslint-disable-next-line no-console
+  console.log('arenaSpecialStats', arenaSpecialStats);
 
   // makeArenaWins(typeWins);
   await makeArenaJoined(listOfWinners);

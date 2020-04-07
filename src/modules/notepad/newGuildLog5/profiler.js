@@ -1,5 +1,5 @@
-import isType from '../common/isType';
-import partial from '../common/partial';
+import isString from '../../common/isString';
+import partial from '../../common/partial';
 
 const lookup = [
   [],
@@ -32,7 +32,7 @@ const lookup = [
 ];
 
 function isMatch(data, el) {
-  if (isType(el, 'string')) {
+  if (isString(el)) {
     return data.includes(el);
   }
   return el.test(data);
@@ -40,7 +40,7 @@ function isMatch(data, el) {
 
 function ofMatch(data, ary) { return ary.some(partial(isMatch, data)); }
 
-export function rowProfile(data) {
+export default function rowProfile(data) {
   const myIndex = lookup.findIndex(partial(ofMatch, data));
   if (myIndex === -1) { return 0; }
   return myIndex;

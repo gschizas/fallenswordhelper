@@ -2,7 +2,6 @@ import basicBounty from './basicBounty';
 import calf from '../../support/calf';
 import extend from '../../common/extend';
 import getTextTrim from '../../common/getTextTrim';
-import partial from '../../common/partial';
 import { wantedArray, wantedList } from './lists';
 
 function acceptBtn(theCells) {
@@ -22,18 +21,15 @@ function getTarget(theCells) {
 }
 
 const isWanted = [
-  function () { return wantedArray.includes('*'); },
-  function (target) { return wantedArray.includes(target); },
-  function (target, theRow) {
-    return calf.wantedGuildMembers && getTextTrim(theRow.cells[6]) === '[n/a]';
-  },
+  () => wantedArray.includes('*'),
+  (target) => wantedArray.includes(target),
+  (target, theRow) => calf.wantedGuildMembers
+    && getTextTrim(theRow.cells[6]) === '[n/a]',
 ];
-
-function condition(target, theRow, el) { return el(target, theRow); }
 
 function wanted(target, theRow) {
   return getTextTrim(theRow.cells[6]) !== '[active]'
-    && isWanted.some(partial(condition, target, theRow));
+    && isWanted.some((el) => el(target, theRow));
 }
 
 function wantedTarget(target, theRow) {

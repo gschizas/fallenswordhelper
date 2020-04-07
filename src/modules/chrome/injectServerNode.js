@@ -1,10 +1,11 @@
 import contains from '../common/contains';
 import { createDiv } from '../common/cElement';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import hasClass from '../common/hasClass';
 import insertElement from '../common/insertElement';
 import querySelectorArray from '../common/querySelectorArray';
+import setInnerHtml from '../dom/setInnerHtml';
 import toggleForce from '../common/toggleForce';
 
 function doServerNode(topbannerStats, miniboxList) {
@@ -20,7 +21,7 @@ function doServerNode(topbannerStats, miniboxList) {
 function doOnlinePlayers(topbannerStats, miniboxList) {
   const playersOnline = miniboxList.children[3].innerHTML;
   const bannerPlayers = topbannerStats.children[0];
-  bannerPlayers.innerHTML = `Online: ${playersOnline}`;
+  setInnerHtml(`Online: ${playersOnline}`, bannerPlayers);
 }
 
 function statBoxesExist(topbannerStats, gameStats) {

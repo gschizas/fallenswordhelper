@@ -25,7 +25,7 @@ function fshMain(gmInfo) {
     .then((m) => m.default('_VER', gmInfo));
 } // end of var main
 
-var script = document.createElement('script');
+const script = document.createElement('script');
 script.textContent = `(${fshMain.toString()})`
   + `("${encodeURIComponent(JSON.stringify(GM_info))}");`;
 document.body.appendChild(script);

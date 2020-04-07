@@ -4,7 +4,7 @@ import insertElementBefore from '../common/insertElementBefore';
 import querySelector from '../common/querySelector';
 import querySelectorArray from '../common/querySelectorArray';
 import xPath from '../common/xPath';
-import { def_subcmd, guideUrl } from '../support/constants';
+import { defSubcmd, guideUrl } from '../support/constants';
 
 function getItemId(el) {
   if (!el) { return; }
@@ -13,7 +13,7 @@ function getItemId(el) {
 }
 
 function guideItemHref(itemId) {
-  return `${guideUrl}items${def_subcmd}view&item_id=${itemId}`;
+  return `${guideUrl}items${defSubcmd}view&item_id=${itemId}`;
 }
 
 function makeGuideItemAnchor(itemId) {

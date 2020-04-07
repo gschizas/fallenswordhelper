@@ -1,4 +1,4 @@
-import { arrayFrom } from '../../common/arrayFrom';
+import arrayFrom from '../../common/arrayFrom';
 import calf from '../../support/calf';
 import { cmdUrl } from '../../support/constants';
 import { createTFoot } from '../../common/cElement';

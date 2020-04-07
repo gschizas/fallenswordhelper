@@ -1,10 +1,11 @@
 import alpha from '../common/alpha';
 import { createDiv } from '../common/cElement';
-import { entries } from '../common/entries';
-import { getElementById } from '../common/getElement';
+import entries from '../common/entries';
+import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import isFunction from '../common/isFunction';
 import { pCC } from '../support/layout';
+import setInnerHtml from '../dom/setInnerHtml';
 import setLastScav from './setLastScav';
 
 /* global sendRequest:true */
@@ -16,7 +17,7 @@ function getSummary() {
     fshSummary = createDiv();
     insertElement(pCC, fshSummary);
   }
-  fshSummary.innerHTML = '';
+  setInnerHtml('', fshSummary);
   return fshSummary;
 }
 
@@ -36,10 +37,10 @@ function getDefeats(report) {
   return '';
 }
 
-function makeHash(prev, curr) {
+function makeHash(acc, curr) {
   const itemName = curr.match(/>([^<]+)</)[1];
-  prev[itemName] = (prev[itemName] || 0) + 1;
-  return prev;
+  acc[itemName] = (acc[itemName] || 0) + 1;
+  return acc;
 }
 
 function buildGainHash(gains) {
@@ -74,10 +75,10 @@ function multiScav() {
 }
 
 function interceptSendRequest(oldSendRequest) {
-  return function (amount, goldValue, caveValue) {
+  return function b(amount, goldValue, caveValue) {
     oldSendRequest(amount, goldValue, caveValue);
     setLastScav(caveValue, goldValue);
-    getSummary().innerHTML = multiScav();
+    setInnerHtml(multiScav(), getSummary());
   };
 }
 

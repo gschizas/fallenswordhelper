@@ -1,10 +1,10 @@
 import './guildTracker.css';
-import { def_enableGuildActivityTracker } from '../../support/constants';
+import { defEnableGuildActivityTracker } from '../../support/constants';
 import fshTabbedModal from '../../dialog/fshTabbedModal';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
-import { makeTg } from './trackerTable';
+import makeTg from './trackerTable';
 import on from '../../common/on';
 import once from '../../common/once';
 import partial from '../../common/partial';
@@ -15,9 +15,9 @@ import { subscribeOnce } from '../../support/pubsub';
 import { createDiv, createLabel } from '../../common/cElement';
 
 function togglePref(evt) {
-  if (evt.target.id === def_enableGuildActivityTracker) {
-    setValue(def_enableGuildActivityTracker,
-      !getValue(def_enableGuildActivityTracker));
+  if (evt.target.id === defEnableGuildActivityTracker) {
+    setValue(defEnableGuildActivityTracker,
+      !getValue(defEnableGuildActivityTracker));
   }
 }
 
@@ -36,7 +36,7 @@ function injectShowTracker() {
   const td = gs.parentNode;
   const container = createDiv({ className: 'fsh-tracker' });
   const myDiv = createDiv({
-    innerHTML: `${simpleCheckboxHtml(def_enableGuildActivityTracker)
+    innerHTML: `${simpleCheckboxHtml(defEnableGuildActivityTracker)
     }&nbsp;`,
   });
   on(myDiv, 'change', togglePref);

@@ -1,10 +1,10 @@
 import './doFolders.css';
 import add from '../support/task';
-import { def_table } from '../support/constants';
-import { entries } from '../common/entries';
+import { defTable } from '../support/constants';
+import entries from '../common/entries';
 import fallback from '../system/fallback';
 import getArrayByTagName from '../common/getArrayByTagName';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
 import hideElement from '../common/hideElement';
@@ -26,7 +26,7 @@ function getItemDiv() {
   if (!itemDiv) {
     itemDiv = createDiv({ id: 'item-div', className: 'itemDiv' });
     const itemList = getElementById('item-list');
-    const oldItems = getElementsByTagName(def_table, itemList);
+    const oldItems = getElementsByTagName(defTable, itemList);
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
       insertElement(itemDiv, oldItems[0]);
@@ -45,6 +45,7 @@ function shouldHide(hidden, all, hasFolder) {
 }
 
 function hideFolderItem(folderid, el) {
+  // eslint-disable-next-line no-param-reassign
   el.children[0].lastElementChild.children[0].children[0].checked = false;
   const hidden = el.classList.contains('fshHide');
   const all = folderid === 'folderid0';
@@ -60,7 +61,7 @@ function hideFolderItem(folderid, el) {
 }
 
 function doHideFolder(evt) {
-  const items = getArrayByTagName(def_table, getItemDiv());
+  const items = getArrayByTagName(defTable, getItemDiv());
   items.forEach(partial(hideFolderItem, evt.target.id));
 }
 
@@ -78,10 +79,10 @@ function folderSpan(pair) {
 function doFolderHeaders(folders) {
   const foldersRow = createTr({
     id: 'fshFolderSelect',
-    innerHTML: `${'<td colspan=6>'
+    innerHTML: '<td colspan=6>'
       + '<span id="folderid0" class="fshLink" fid=0>All</span>'
-      + ' &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>'}${
-      entries(folders).map(folderSpan).join('')}`,
+      + ` &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>${
+        entries(folders).map(folderSpan).join('')}`,
   });
   onclick(foldersRow, hideFolder);
   const el = getElementById('item-list').parentNode.parentNode;
@@ -117,7 +118,7 @@ function processTrade(data) {
   // #endif
   invItems = data.items;
   // Highlight items in ST
-  const nodeList = getArrayByTagName(def_table, getElementById('item-list'));
+  const nodeList = getArrayByTagName(defTable, getElementById('item-list'));
   nodeList.forEach(forEachInvItem); // TODO unnecessary DOM manipulation
   doFolderHeaders(data.folders);
   // #if _BETA  //  Timing output

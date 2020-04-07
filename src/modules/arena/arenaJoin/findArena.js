@@ -1,4 +1,4 @@
-import { thisTournament } from './thisTournament';
+import thisTournament from './thisTournament';
 
 export default function findArena(r) {
   const tourney = thisTournament();

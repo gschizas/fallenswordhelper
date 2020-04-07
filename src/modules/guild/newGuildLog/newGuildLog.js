@@ -7,7 +7,7 @@ import { createTable } from '../../common/cElement';
 import eventHandler5 from '../../common/eventHandler5';
 import functionPasses from '../../common/functionPasses';
 import getArrayByTagName from '../../common/getArrayByTagName';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getGuildLogPage from './getGuildLogPage';
 import getText from '../../common/getText';
@@ -21,9 +21,10 @@ import { pCC } from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
-import { rowProfile } from './profiler';
+import rowProfile from './profiler';
 import selfIdIs from '../../common/selfIdIs';
-import setText from '../../common/setText';
+import setInnerHtml from '../../dom/setInnerHtml';
+import setText from '../../dom/setText';
 import toggleForce from '../../common/toggleForce';
 import {
   defChecks, guildLogFilter, headerRow, noChecks,
@@ -55,12 +56,12 @@ function parsePage(data) {
 
 function seenRowBefore(timestamp, myMsg) {
   return [
-    function () { return currPage === 1; },
-    function () { return options.log; },
-    function () { return options.log[0]; },
-    function () { return options.log[0][0]; },
-    function () { return timestamp === options.log[0][0]; },
-    function () { return myMsg === options.log[0][2]; },
+    () => currPage === 1,
+    () => options.log,
+    () => options.log[0],
+    () => options.log[0][0],
+    () => timestamp === options.log[0][0],
+    () => myMsg === options.log[0][2],
   ].every(functionPasses);
 }
 
@@ -121,7 +122,7 @@ function updateOptionsLog() {
 
 function makeCell(row, html) {
   const thisCell = row.insertCell(-1);
-  thisCell.innerHTML = html;
+  setInnerHtml(html, thisCell);
   thisCell.className = 'row';
 }
 
@@ -162,6 +163,7 @@ function buildTable() {
 }
 
 function doChecked(el) {
+  // eslint-disable-next-line no-param-reassign
   el.checked = options.checks[el.getAttribute('item')];
 }
 
@@ -229,13 +231,13 @@ function refresh() {
   setText('Loading Page 1 ...', fshOutput);
   tmpGuildLog = [];
   completeReload = true;
-  getElementById('fshInjectHere').innerHTML = '';
+  setInnerHtml('', getElementById('fshInjectHere'));
   getGuildLogPage(1).then(processFirstPage);
 }
 
 function guildLogEvents() {
   return [
-    [function (target) { return target.tagName === 'INPUT'; }, toggleItem],
+    [(target) => target.tagName === 'INPUT', toggleItem],
     [selfIdIs('fshAll'), selectAll],
     [selfIdIs('fshNone'), selectNone],
     [selfIdIs('rfsh'), refresh],
@@ -259,7 +261,7 @@ function setMaxPage() {
 
 function gotOptions(guildLog) {
   setOpts(guildLog);
-  pCC.innerHTML = guildLogFilter;
+  setInnerHtml(guildLogFilter, pCC);
   getElements();
   onclick(fshNewGuildLog, eventHandler5(guildLogEvents()));
   setChecks();

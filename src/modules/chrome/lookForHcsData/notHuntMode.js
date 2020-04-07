@@ -3,7 +3,7 @@ import calf from '../../support/calf';
 import conditional from './conditional';
 import executeAll from '../../common/executeAll';
 import getCalfPrefs from '../../common/getCalfPrefs';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import guildActivity from '../../guild/guildActivity';
 import insertElement from '../../common/insertElement';

@@ -1,4 +1,4 @@
-import { dataRows } from '../common/dataRows';
+import dataRows from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';

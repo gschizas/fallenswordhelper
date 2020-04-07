@@ -1,5 +1,5 @@
 import fallback from '../system/fallback';
-import { isArray } from '../common/isArray';
+import isArray from '../common/isArray';
 import isFunction from '../common/isFunction';
 import isUndefined from '../common/isUndefined';
 import on from '../common/on';
@@ -72,9 +72,9 @@ export default function add(priority, fn, args, scope) {
   // #endif
   if (isFunction(fn)) {
     initMessageHandler();
-    const _scope = fallback(scope, window);
-    const _args = fallback(args, []);
-    push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
+    const scopeGuard = fallback(scope, window);
+    const argsGuard = fallback(args, []);
+    push(fn.bind(scopeGuard, ...argsGuard), priority);
     if (paused) { taskRunner(); }
   }
 }

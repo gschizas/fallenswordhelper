@@ -5,7 +5,7 @@ import getValue from '../../system/getValue';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import { now } from '../../support/now';
-import { parseTemplePage } from './parseTemplePage';
+import parseTemplePage from './parseTemplePage';
 
 function checkLastUpdate(templeAlertLastUpdate) {
   return !templeAlertLastUpdate || now > templeAlertLastUpdate;

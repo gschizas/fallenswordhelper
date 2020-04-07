@@ -8,7 +8,8 @@ import margin from './margin';
 import { now } from '../support/now';
 import outputFormat from '../system/outputFormat';
 import querySelector from '../common/querySelector';
-import setText from '../common/setText';
+import setInnerHtml from '../dom/setInnerHtml';
+import setText from '../dom/setText';
 
 function formatLastReset(lastLadderReset) {
   let m = Math.floor((now - lastLadderReset) / 60000);
@@ -36,7 +37,7 @@ function makeLeftCell(newRow) {
 function makeRightCell(newRow) {
   const rightCell = newRow.insertCell(-1);
   rightCell.align = 'right';
-  rightCell.innerHTML = formatTime();
+  setInnerHtml(formatTime(), rightCell);
 }
 
 function makeNewRow() {

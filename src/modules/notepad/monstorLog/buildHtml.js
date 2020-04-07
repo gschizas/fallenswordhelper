@@ -1,13 +1,13 @@
 import addCommas from '../../system/addCommas';
 import { cdn } from '../../system/system';
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import extend from '../../common/extend';
-import { keys } from '../../common/keys';
+import keys from '../../common/keys';
 
-function imgHtml(image_id) {
+function imgHtml(imageId) {
   return `<img class="tip-static" src="${cdn
-  }creatures/${image_id}.png" data-tipped="<img src='${
-    cdn}creatures/${image_id
+  }creatures/${imageId}.png" data-tipped="<img src='${
+    cdn}creatures/${imageId
   }.png' width=200 height=200>" width=40 height=40>`;
 }
 

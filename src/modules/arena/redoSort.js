@@ -1,4 +1,4 @@
-import { def_table } from '../support/constants';
+import { defTable } from '../support/constants';
 
 const sortClasses = 'td.sorting, td.sorting_asc, td.sorting_desc';
 
@@ -10,7 +10,7 @@ function calculateSortOrder(target) {
 }
 
 function sortDataTable(target, myCol, sortOrder) {
-  const table = target.closest(def_table).DataTable();
+  const table = target.closest(defTable).DataTable();
   if (myCol !== 3) {
     table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {

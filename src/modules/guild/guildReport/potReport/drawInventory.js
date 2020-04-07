@@ -1,22 +1,23 @@
 import { createDiv } from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
-import { keys } from '../../../common/keys';
+import keys from '../../../common/keys';
 import once from '../../../common/once';
 import partial from '../../../common/partial';
 import { sendEvent } from '../../../support/fshGa';
+import setInnerHtml from '../../../dom/setInnerHtml';
 import sortKeys from './sortKeys';
 
 let inventory;
 
-function pivotPotObj(potOpts, potObj, prev, pot) {
+function pivotPotObj(potOpts, potObj, acc, pot) {
   if (potOpts.myMap[pot] !== 'Ignore') {
-    if (prev[potOpts.myMap[pot]]) {
-      prev[potOpts.myMap[pot]] += potObj[pot];
+    if (acc[potOpts.myMap[pot]]) {
+      acc[potOpts.myMap[pot]] += potObj[pot];
     } else {
-      prev[potOpts.myMap[pot]] = potObj[pot];
+      acc[potOpts.myMap[pot]] = potObj[pot];
     }
   }
-  return prev;
+  return acc;
 }
 
 function perc2color(percent) {
@@ -35,11 +36,11 @@ function perc2color(percent) {
   return `#${(`000000${h.toString(16)}`).slice(-6)}`;
 }
 
-function makeRowsFromPivot(potOpts, pivot, prev, pot) {
-  return `${prev}<tr><td>${pot
+function makeRowsFromPivot(potOpts, pivot, acc, pot) {
+  return `${acc}<tr><td>${pot
   }</td><td style="background-color: ${
-    perc2color((pivot[pot] - potOpts.minpoint)
-    / (potOpts.maxpoint - potOpts.minpoint) * 100)};">${
+    perc2color(((pivot[pot] - potOpts.minpoint)
+    / (potOpts.maxpoint - potOpts.minpoint)) * 100)};">${
     pivot[pot].toString()}</td></tr>`;
 }
 
@@ -47,9 +48,9 @@ export function drawInventory(potOpts, potObj) {
   sendEvent('potReport', 'drawInventory');
   const pivot = sortKeys(keys(potObj)
     .reduce(partial(pivotPotObj, potOpts, potObj), {}));
-  inventory.innerHTML = `<table><tbody>${
+  setInnerHtml(`<table><tbody>${
     keys(pivot).reduce(partial(makeRowsFromPivot, potOpts, pivot), '')
-  }</tbody></table>`;
+  }</tbody></table>`, inventory);
 }
 
 export function initInventory(potOpts, potObj, panels) {

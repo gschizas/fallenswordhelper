@@ -4,7 +4,7 @@ import getElementsByClassName from '../../../common/getElementsByClassName';
 import insertElement from '../../../common/insertElement';
 import isOnList from '../doNotKill/isOnList';
 import onclick from '../../../common/onclick';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import setValue from '../../../system/setValue';
 import { createButton, createDiv } from '../../../common/cElement';
 
@@ -16,7 +16,7 @@ function getCreatureBody(dialogViewCreature) {
   if (!creatureBody) {
     const bodyCollection = getElementsByClassName('body', dialogViewCreature);
     if (bodyCollection.length === 1) {
-      creatureBody = bodyCollection[0];
+      [creatureBody] = bodyCollection;
     }
   }
 }

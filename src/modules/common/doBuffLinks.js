@@ -6,14 +6,14 @@ import partial from './partial';
 import { places } from '../support/constants';
 import { createButton, createLi, createUl } from './cElement';
 
-function batchUp(prev, curr, i) {
+function batchUp(acc, curr, i) {
   const slot = Math.floor(i / 16);
-  prev[slot] = fallback(prev[slot], []);
-  prev[slot].push(curr);
-  return prev;
+  acc[slot] = fallback(acc[slot], []);
+  acc[slot].push(curr);
+  return acc;
 }
 
-function makeButtons(prev, curr, i) {
+function makeButtons(acc, curr, i) {
   const theNames = curr.join(',');
   const modifierWord = places[i];
   const li = createLi();
@@ -24,8 +24,8 @@ function makeButtons(prev, curr, i) {
   });
   onclick(btn, partial(openQuickBuffByName, theNames));
   insertElement(li, btn);
-  insertElement(prev, li);
-  return prev;
+  insertElement(acc, li);
+  return acc;
 }
 
 export default function doBuffLinks(members) {

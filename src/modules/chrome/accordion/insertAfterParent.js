@@ -1,4 +1,4 @@
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import { sendException } from '../../support/fshGa';
 
 export default function insertAfterParent(target, fn, listItem) {

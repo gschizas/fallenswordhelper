@@ -2,7 +2,7 @@ import add from '../support/task';
 import { cdn } from '../system/system';
 import { createDiv } from '../common/cElement';
 import equipItem from '../ajax/equipItem';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
@@ -10,7 +10,8 @@ import onclick from '../common/onclick';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import { sendEvent } from '../support/fshGa';
-import setText from '../common/setText';
+import setInnerHtml from '../dom/setInnerHtml';
+import setText from '../dom/setText';
 import useItem from '../ajax/useItem';
 
 const THEBACKPACK = 0;
@@ -24,12 +25,11 @@ function restyleBackpack() {
   bpBack.removeAttribute('style');
 }
 
-function thisInvId(_invId, el) { return el.a === _invId; }
+function thisInvId(invId, el) { return el.a === invId; }
 
 function backpackRemove(theBackpack, invId) { // jQuery.min
-  const _invId = Number(invId);
   // remove from srcData
-  const i = theBackpack.srcData.findIndex(partial(thisInvId, _invId));
+  const i = theBackpack.srcData.findIndex(partial(thisInvId, Number(invId)));
   if (i !== -1) { theBackpack.srcData.splice(i, 1); }
 }
 
@@ -40,8 +40,8 @@ function actionResult(ary, data) {
   }
   backpackRemove(ary[THEBACKPACK], ary[INVID]);
   ary[SELF].classList.remove('fshSpinner');
-  ary[SELF].parentNode.innerHTML = `<span class="fastWorn">${
-    ary[RESULT]}</span>`;
+  setInnerHtml(`<span class="fastWorn">${ary[RESULT]}</span>`,
+    ary[SELF].parentNode);
 }
 
 function fastAction(theBackpack, evt, action, result) { // jQuery.min
@@ -98,6 +98,7 @@ function fastWearLinks(bp) {
 
 function updateSrc(img, gif) {
   const url = `${cdn}ui/misc/${gif}.png`;
+  // eslint-disable-next-line no-param-reassign
   if (img.src !== url) { img.src = url; }
 }
 
@@ -116,7 +117,8 @@ function fixFolders(theBackpack) {
 
 function foundBackpack(backpackContainer, theBackpack) {
   const oldShow = theBackpack._showPage;
-  theBackpack._showPage = function (type, page) {
+  // eslint-disable-next-line no-param-reassign
+  theBackpack._showPage = function _showPage(type, page) {
     if (!theBackpack.tabData) { return; }
     fixFolders(theBackpack);
     oldShow.call(theBackpack, type, page);

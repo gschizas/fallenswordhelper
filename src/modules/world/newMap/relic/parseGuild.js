@@ -1,13 +1,14 @@
 import createDocument from '../../../system/createDocument';
 import querySelectorAll from '../../../common/querySelectorAll';
-import setText from '../../../common/setText';
+import round from '../../../common/round';
+import setText from '../../../dom/setText';
 import { lDPercentageElement, relicCountElement } from './secondaryElements';
 
-export var relicMultiplier;
+export let relicMultiplier;
 
 function calcRelicMultiplier(rels) {
   if (rels === 1) { return 1.5; }
-  return Math.round((1 - rels / 10) * 100) / 100;
+  return round(1 - rels / 10, 2);
 }
 
 export function parseGuild(html) {

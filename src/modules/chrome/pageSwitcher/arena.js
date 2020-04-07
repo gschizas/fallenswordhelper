@@ -1,7 +1,7 @@
 import arenaDoJoin from '../../arena/arenaDoJoin';
 import arenaJoin from '../../arena/arenaJoin/arenaJoin';
 import completedArenas from '../../arena/completedArenas';
-import { injectArena } from '../../arena/arena';
+import injectArena from '../../arena/arena';
 // #if _DEV  //  arena results
 import results from '../../arena/results';
 // #endif

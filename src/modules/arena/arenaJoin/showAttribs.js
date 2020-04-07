@@ -14,15 +14,12 @@ function param(label, value) {
 }
 
 function paramBox(thisArena) {
-  return `${'<div class="flex">'
-      + `<div><div>Players</div><div>${thisArena.players.length} / ${
-        thisArena.max_players}</div></div>`}${
-    param('Specials', thisArena.specials)
-  }${param('Hell Forge', thisArena.hellforge)
-  }${param('Epic', thisArena.epic)
-  }<div><div>Max Equip Level</div><div>${
-    addCommas(thisArena.equip_level)}</div></div>`
-    + '</div>';
+  return `<div class="flex"><div><div>Players</div><div>${
+    thisArena.players.length} / ${thisArena.max_players}</div></div>${
+    param('Specials', thisArena.specials)}${
+    param('Hell Forge', thisArena.hellforge)}${
+    param('Epic', thisArena.epic)}<div><div>Max Equip Level</div><div>${
+    addCommas(thisArena.equip_level)}</div></div></div>`;
 }
 
 export default function showAttribs(json) {

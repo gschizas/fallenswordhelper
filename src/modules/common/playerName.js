@@ -1,4 +1,4 @@
-import { getElementById } from './getElement';
+import getElementById from './getElement';
 import getText from './getText';
 
 let thisPlayerName;

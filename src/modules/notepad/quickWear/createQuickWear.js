@@ -5,6 +5,7 @@ import insertElement from '../../common/insertElement';
 import makeFolderSpan from '../../common/makeFolderSpan';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
+import setInnerHtml from '../../dom/setInnerHtml';
 import stringSort from '../../system/stringSort';
 import { createDiv, createTBody, createTable } from '../../common/cElement';
 
@@ -34,20 +35,20 @@ function itemImage(item) {
 
 function tableRows(tbl, currentPlayerId, item) {
   const newRow = tbl.insertRow(-1);
+  // eslint-disable-next-line no-param-reassign
   item.dom = newRow;
   let equipClass = 'fshEq ';
   let useClass = 'fshUse ';
   if (item.t < 9) { equipClass += 'smallLink'; } else { equipClass += 'notLink'; }
   useClass += isUseable(item);
-  newRow.innerHTML = `<td class="fshCenter"><span class="${equipClass
-  }" data-itemid="${item.a}">Wear</span>&nbsp;|&nbsp;<span class="${
-    useClass}" data-itemid="${item.a
-  }">Use/Ext</span></td><td><img src="${itemImage(item)
-  }" class="tip-dynamic" data-tipped="fetchitem.php?item_id=${item.b
-  }&amp;inv_id=${item.a}&amp;t=1&amp;p=${currentPlayerId
-  }&amp;currentPlayerId=${currentPlayerId
-  }" width="30" height="30" border="0"></td><td width="90%">&nbsp;${
-    item.n}</td>`;
+  setInnerHtml(`<td class="fshCenter"><span class="${
+    equipClass}" data-itemid="${item.a}">Wear</span>&nbsp;|&nbsp;<span class="${
+    useClass}" data-itemid="${item.a}">Use/Ext</span></td><td><img src="${
+    itemImage(item)}" class="tip-dynamic" data-tipped="fetchitem.php?item_id=${
+    item.b}&amp;inv_id=${item.a}&amp;t=1&amp;p=${
+    currentPlayerId}&amp;currentPlayerId=${
+    currentPlayerId}" width="30" height="30" border="0"></td>`
+    + `<td width="90%">&nbsp;${item.n}</td>`, newRow);
 }
 
 function folderHtml(folderObj) {

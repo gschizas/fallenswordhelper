@@ -1,4 +1,4 @@
-import { keys } from '../../common/keys';
+import keys from '../../common/keys';
 import partial from '../../common/partial';
 
 function onlinePlayer(onlinePlayers, player) {

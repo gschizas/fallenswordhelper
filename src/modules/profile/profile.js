@@ -1,7 +1,7 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
-import { arrayFrom } from '../common/arrayFrom';
+import arrayFrom from '../common/arrayFrom';
 import colouredDots from '../common/colouredDots';
 import components from './components/components';
 import fallback from '../system/fallback';

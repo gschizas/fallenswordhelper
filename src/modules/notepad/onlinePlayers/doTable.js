@@ -1,7 +1,6 @@
 import currentGuildId from '../../common/currentGuildId';
 import getValue from '../../system/getValue';
 import intValue from '../../system/intValue';
-import partial from '../../common/partial';
 import {
   pvpLowerLevel,
   pvpUpperLevel,
@@ -16,16 +15,14 @@ function guildNumber(html) {
 }
 
 const highlightTests = [
-  function () { return highlightPlayersNearMyLvl; },
-  function (data) { return guildNumber(data[0]) !== currentGuildId(); },
-  function (data) { return intValue(data[2]) >= pvpLowerLevel; },
-  function (data) { return intValue(data[2]) <= pvpUpperLevel; },
+  () => highlightPlayersNearMyLvl,
+  (data) => guildNumber(data[0]) !== currentGuildId(),
+  (data) => intValue(data[2]) >= pvpLowerLevel,
+  (data) => intValue(data[2]) <= pvpUpperLevel,
 ];
 
-function condition(data, el) { return el(data); }
-
 function pvpHighlight(data) {
-  return highlightTests.every(partial(condition, data));
+  return highlightTests.every((el) => el(data));
 }
 
 function createdRow(row, data) {

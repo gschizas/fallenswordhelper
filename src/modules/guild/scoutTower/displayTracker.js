@@ -1,4 +1,4 @@
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import { now } from '../../support/now';

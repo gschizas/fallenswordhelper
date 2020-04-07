@@ -4,6 +4,7 @@ import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import onclick from '../common/onclick';
+import setInnerHtml from '../dom/setInnerHtml';
 import toggleVisibilty from '../common/toggleVisibilty';
 
 function makeButton(linkto) {
@@ -24,6 +25,7 @@ function wrapper(btn) {
 function thisToggle(inject, panel, linkto) {
   const thisButton = makeButton(linkto);
   insertElement(inject, wrapper(thisButton));
+  // eslint-disable-next-line no-param-reassign
   panel.id = linkto;
   if (getValue(linkto)) { hideElement(panel); }
   onclick(thisButton, toggleVisibilty);
@@ -39,7 +41,7 @@ export function logoToggle(leftHandSideColumnTable) {
 
 export function statToggle(leftHandSideColumnTable) {
   const leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].children[0];
-  leaveGuildCell.innerHTML = leaveGuildCell.innerHTML.trim();
+  setInnerHtml(leaveGuildCell.innerHTML.trim(), leaveGuildCell);
   thisToggle(leaveGuildCell,
     leftHandSideColumnTable.rows[6].cells[0].children[0],
     'statisticsControl');

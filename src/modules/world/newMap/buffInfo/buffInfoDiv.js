@@ -1,6 +1,6 @@
 import calf from '../../../support/calf';
 import { createDiv } from '../../../common/cElement';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import insertElementAfter from '../../../common/insertElementAfter';
 import toggleForce from '../../../common/toggleForce';
 

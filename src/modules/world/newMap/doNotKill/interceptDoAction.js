@@ -1,4 +1,4 @@
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import isFunction from '../../../common/isFunction';
 import isOnList from './isOnList';
 import isUndefined from '../../../common/isUndefined';
@@ -20,7 +20,7 @@ function weShouldBlock(passback) {
 }
 
 function interceptCreatureCombat(oldDoAction) {
-  return function (action, fetch, data, attempts) {
+  return function c(action, fetch, data, attempts) {
     if (weShouldBlock(data.passback)) { return; }
     // Call standard action
     oldDoAction(action, fetch, data, attempts);
@@ -28,7 +28,7 @@ function interceptCreatureCombat(oldDoAction) {
 }
 
 const actionsToIntercept = {
-  // def_creatureCombat
+  // defCreatureCombat
   2: interceptCreatureCombat,
 };
 
@@ -41,7 +41,7 @@ function goodInterceptFunction(interceptFunction) {
 }
 
 function maybeIntercept(oldDoAction) {
-  return function (action, fetch, data, attempts) {
+  return function d(action, fetch, data, attempts) {
     const interceptFunction = actionsToIntercept[action];
     if (goodInterceptFunction(interceptFunction) && firstAttempt(attempts)) {
       interceptFunction(oldDoAction)(action, fetch, data, attempts);

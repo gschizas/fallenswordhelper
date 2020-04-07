@@ -12,30 +12,30 @@ import questPrefs from './questPrefs';
 import { notepadBlankUrl, playerIdUrl } from '../support/constants';
 
 function storageDetails() {
-  return `${'<tr><td align=center><input id="fshClearStorage" type="button" '
+  return '<tr><td align=center><input id="fshClearStorage" type="button" '
     + 'class="awesome magenta tip-static" value="Clear Storage" '
     + 'data-tipped="<span class=\'fshHelpTitle\'>Clear Storage'
     + '</span><br><br>This will clear all localStorage related to '
     + 'fallensword.com<br>It will reset all your Helper settings to '
     + 'defaults<br>Use it if your storage has overflowed or become '
     + 'corrupt"></td><td align=center>'
-    + '<span style="font-size:x-small">(Current version: '}${
-    calf.fshVer}(${calf.calfVer})) (Storage Used: ${
-    calf.storage}% Remaining: ${
-    (100 - calf.storage).toFixed(2)}%)</span></td></tr>`;
+    + `<span style="font-size:x-small">(Current version: ${
+      calf.fshVer}(${calf.calfVer})) (Storage Used: ${
+      calf.storage}% Remaining: ${
+      (100 - calf.storage).toFixed(2)}%)</span></td></tr>`;
 }
 
 function linkToWebsite() {
   return '<tr><td colspan="2" align=center>'
-  + '<span style="font-weight:bold;">Visit the '
-  + '<a href="https://github.com/fallenswordhelper/fallenswordhelper">'
-  + 'Fallen Sword Helper web site</a> '
-  + 'for any suggestions, requests or bug reports</span></td></tr>';
+    + '<span style="font-weight:bold;">Visit the '
+    + '<a href="https://github.com/fallenswordhelper/fallenswordhelper">'
+    + 'Fallen Sword Helper web site</a> '
+    + 'for any suggestions, requests or bug reports</span></td></tr>';
 }
 
-function coderLink(prev, curr, ind, ary) {
-  let ret = `${prev}<a href="${playerIdUrl}${curr[0]
-  }">${curr[1]}</a>`;
+function coderLink(acc, curr, ind, ary) {
+  let ret = `${acc}<a href="${playerIdUrl}${
+    curr[0]}">${curr[1]}</a>`;
   if (ind === ary.length - 2) {
     ret += ' and ';
   } else if (ind !== ary.length - 1) { ret += ', '; }
@@ -47,15 +47,15 @@ function listOfCoders(ary) {
 }
 
 function codedBy() {
-  return `${'<tr><td colspan="2" align=center>'
-    + '<span class="fshXXSmall">Fallen Sword Helper was coded by '}${
-    listOfCoders([['1393340', 'Coccinella'], ['1599987', 'yuuzhan'],
-      ['1963510', 'PointyHair'], ['1346893', 'Tangtop'],
-      ['2536682', 'dkwizard'], ['1570854', 'jesiegel'],
-      ['2156859', 'ByteBoy'], ['2169401', 'McBush']])
-  }, with valuable contributions by ${
-    listOfCoders([['524660', 'Nabalac'], ['37905', 'Ananasii']])
-  }</span></td></tr>`;
+  return '<tr><td colspan="2" align=center>'
+    + `<span class="fshXXSmall">Fallen Sword Helper was coded by ${
+      listOfCoders([['1393340', 'Coccinella'], ['1599987', 'yuuzhan'],
+        ['1963510', 'PointyHair'], ['1346893', 'Tangtop'],
+        ['2536682', 'dkwizard'], ['1570854', 'jesiegel'],
+        ['2156859', 'ByteBoy'], ['2169401', 'McBush']])
+    }, with valuable contributions by ${
+      listOfCoders([['524660', 'Nabalac'], ['37905', 'Ananasii']])
+    }</span></td></tr>`;
 }
 
 function corePrefs() {
@@ -82,14 +82,12 @@ function corePrefs() {
 }
 
 export default function setupConfigData() {
-  calf.configData = `${'<form><table id="fshSettingsTable">'
+  calf.configData = '<form><table id="fshSettingsTable">'
     + '<thead><th colspan="2"><b>Fallen Sword Helper configuration '
-      + 'Settings</b></th></thead>'}${
-    storageDetails()
-  }${linkToWebsite()
-  }${corePrefs()
-    // save button
-  }<tr><td colspan="2" align=center><input type="button" class=`
+      + `Settings</b></th></thead>${
+        storageDetails()}${linkToWebsite()}${corePrefs()
+        // save button
+      }<tr><td colspan="2" align=center><input type="button" class=`
       + '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>'
     // Export or Load Settings
     + '<tr><td colspan="2" align=center>'

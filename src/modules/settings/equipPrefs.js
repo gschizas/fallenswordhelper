@@ -30,17 +30,7 @@ function makeSendClasses() {
 
 export default function equipPrefs() {
   // Equipment screen prefs
-  return `${'<tr><th colspan="2"><b>Equipment screen preferences'
-      + '</b></th></tr>'}${
-
-    bunchOfSimple([
-      'showExtraLinks',
-      'disableItemColoring',
-    ])
-
-  }${quickSend()
-
-  }${simpleCheckbox('showQuickDropLinks')
-
-  }${makeSendClasses()}`;
+  return '<tr><th colspan="2"><b>Equipment screen preferences</b></th></tr>'
+    + `${bunchOfSimple(['showExtraLinks', 'disableItemColoring'])}${
+      quickSend()}${simpleCheckbox('showQuickDropLinks')}${makeSendClasses()}`;
 }

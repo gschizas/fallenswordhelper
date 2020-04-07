@@ -1,6 +1,6 @@
 import { GMSTORAGE_PATH } from '../support/constants';
 
-export function listValues() {
+export default function listValues() {
   const list = [];
   const reKey = new RegExp(`^${GMSTORAGE_PATH}`);
   for (let i = 0, il = window.localStorage.length; i < il; i += 1) {

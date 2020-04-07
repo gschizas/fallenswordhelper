@@ -1,8 +1,8 @@
-import { entries } from '../common/entries';
+import entries from '../common/entries';
 import { get } from '../system/idb';
 import insertElement from '../common/insertElement';
 import { pCC } from '../support/layout';
-import { thisTournament } from './arenaJoin/thisTournament';
+import thisTournament from './arenaJoin/thisTournament';
 import { createDiv, createTable } from '../common/cElement';
 import { cyrb32, cyrb53, makeHash } from '../notepad/arenaCrawler/makeHash';
 
@@ -21,9 +21,9 @@ function displayObj(equip) {
 }
 
 export default async function results() {
-  const fsh_arenaJoined = await get('fsh_arenaJoined');
-  if (!fsh_arenaJoined) { return; }
+  const fshArenaJoined = await get('fsh_arenaJoined');
+  if (!fshArenaJoined) { return; }
   const thisArena = thisTournament();
-  const equip = fsh_arenaJoined.find((o) => o.pvpId === thisArena);
+  const equip = fshArenaJoined.find((o) => o.pvpId === thisArena);
   if (equip) { displayObj(equip); }
 }

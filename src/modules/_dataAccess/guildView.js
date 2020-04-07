@@ -1,12 +1,12 @@
 import createDocument from '../system/createDocument';
-import { dataRows } from '../common/dataRows';
-import { getElementById } from '../common/getElement';
+import dataRows from '../common/dataRows';
+import getElementById from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getTextTrim from '../common/getTextTrim';
 import indexAjaxData from '../ajax/indexAjaxData';
 import intValue from '../system/intValue';
 import { nowSecs } from '../support/now';
-import { def_table, lastActivityRE, playerIDRE } from '../support/constants';
+import { defTable, lastActivityRE, playerIDRE } from '../support/constants';
 
 const cache = {};
 
@@ -46,28 +46,28 @@ function formatRow(row, i) {
   return { rank_index: i, ...fromTip(row), ...fromRow(row) };
 }
 
-function byRank(prev, member) {
+function byRank(acc, member) {
   const thisRankName = member.rank_name;
   const thisRankIndex = member.rank_index;
-  const thisRankObj = prev.find((e) => e.name === thisRankName);
+  const thisRankObj = acc.find((e) => e.name === thisRankName);
   if (thisRankObj) {
     thisRankObj.members.push(member);
   } else {
-    prev.push({ id: thisRankIndex, name: thisRankName, members: [member] });
+    acc.push({ id: thisRankIndex, name: thisRankName, members: [member] });
   }
-  return prev;
+  return acc;
 }
 
 function rankData(memberList) {
   const memberRows = dataRows(memberList.rows, 5, 1);
   const memberData = memberRows.map(formatRow);
-  return memberData.reduce(byRank, []);
+  return memberData.reduce(byRank, []); // FIXME
 }
 
 function parseReport(html) {
   const doc = createDocument(html);
   const pCC = getElementById('pCC', doc);
-  const tables = getElementsByTagName(def_table, pCC);
+  const tables = getElementsByTagName(defTable, pCC);
   const memberList = tables[tables.length - 1];
   if (memberList) { return { r: { ranks: rankData(memberList) }, s: true }; }
   return { s: false };

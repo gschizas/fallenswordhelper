@@ -1,5 +1,5 @@
 import insertElement from '../../../common/insertElement';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import { textSpan } from '../../../common/cElement';
 import toggleForce from '../../../common/toggleForce';
 
@@ -8,6 +8,7 @@ let cooldownSpan;
 let lastTp;
 
 function initCdDiv(containerDiv, cd) {
+  // eslint-disable-next-line prefer-destructuring
   cdDiv = containerDiv.children[5];
   setText('Teleport Cooldown: ', cdDiv);
   cooldownSpan = textSpan(cd.toString());

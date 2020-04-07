@@ -1,7 +1,7 @@
 import chunk from '../../common/chunk';
 import { daSendToFolder } from '../../_dataAccess/_dataAccess';
-import { getElementById } from '../../common/getElement';
-import { isArray } from '../../common/isArray';
+import getElementById from '../../common/getElement';
+import isArray from '../../common/isArray';
 import partial from '../../common/partial';
 
 function checked(o) {

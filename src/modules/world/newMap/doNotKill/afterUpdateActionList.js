@@ -1,5 +1,5 @@
 import getArrayByClassName from '../../../common/getArrayByClassName';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import getText from '../../../common/getText';
 import isOnList from './isOnList';
 

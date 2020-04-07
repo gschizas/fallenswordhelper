@@ -1,10 +1,10 @@
-import buffReportParser from './buffReportParser.js';
+import buffReportParser from './buffReportParser';
 import formatLocalDateTime from '../../common/formatLocalDateTime';
 import { fshBuffLog } from '../../support/constants';
-import { getStamAsString } from '../../common/buffUtils.js';
+import { getStamAsString } from '../../common/buffUtils';
 import getValue from '../../system/getValue';
 import partial from '../../common/partial';
-import { get, set } from '../../system/idb.js';
+import { get, set } from '../../system/idb';
 
 const success = (e) => ` ${e[0]} (${getStamAsString(e[1])
 } stamina)<br>`;

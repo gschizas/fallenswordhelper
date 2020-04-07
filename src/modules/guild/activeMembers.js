@@ -9,7 +9,7 @@ import querySelectorArray from '../common/querySelectorArray';
 const ACTIVE = 0;
 const STAMINA = 1;
 
-function countActive(prev, curr) {
+function countActive(acc, curr) {
   const lastActivity = lastActivityRE.exec(curr.dataset.tipped);
   const mins = lastActivityMins({
     min: lastActivity[3],
@@ -17,11 +17,11 @@ function countActive(prev, curr) {
     day: lastActivity[1],
   });
   if (mins < 44640) {
-    prev[ACTIVE] += 1;
-    prev[STAMINA]
+    acc[ACTIVE] += 1;
+    acc[STAMINA]
       += Number(/Stamina:<\/td><td>(\d+)/.exec(curr.dataset.tipped)[1]);
   }
-  return prev;
+  return acc;
 }
 
 function getActive(dots) {

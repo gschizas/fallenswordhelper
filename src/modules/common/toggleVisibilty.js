@@ -1,4 +1,4 @@
-import { getElementById } from './getElement';
+import getElementById from './getElement';
 import setValue from '../system/setValue';
 
 export default function toggleVisibilty(evt) {

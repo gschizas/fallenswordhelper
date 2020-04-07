@@ -1,5 +1,7 @@
+import numberIsNaN from '../common/numberIsNaN';
+
 function theValueIsValid(theValue, min, max) {
-  return !isNaN(theValue) && theValue > min && theValue < max;
+  return !numberIsNaN(theValue) && theValue > min && theValue < max;
 }
 
 export default function testRange(aValue, min, max) {

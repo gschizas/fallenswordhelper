@@ -2,11 +2,12 @@ import getRelicList from './getRelicList';
 import { pCC } from '../../support/layout';
 import padZ from '../../system/padZ';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import splitTime from '../../common/splitTime';
-import { def_subcmd, guideUrl, guildViewUrl } from '../../support/constants';
+import { defSubcmd, guideUrl, guildViewUrl } from '../../support/constants';
 
 function relicName(relic) {
-  return `<a href="${guideUrl}relics${def_subcmd}view&relic_id=${relic.id}">`
+  return `<a href="${guideUrl}relics${defSubcmd}view&relic_id=${relic.id}">`
     + `${relic.name}</a>`;
 }
 
@@ -52,7 +53,7 @@ function makeRow(relic) {
 }
 
 function makeTable(thisRelicList) {
-  return `${'<style>'
+  return '<style>'
     + '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}'
     + '.reliclist, .reliclist th, .reliclist td {border: 1px solid black;}'
     + '.reliclist th, .reliclist td {padding: 5px;}'
@@ -67,17 +68,17 @@ function makeTable(thisRelicList) {
     + '<th>Gold<br>Gain</th>'
     + '<th>XP<br>Gain</th>'
     + '<th>Time</th>'
-    + '</tr></thead><tbody>'}${
-    thisRelicList.filter(stamGain).map(makeRow).join('')
-  }</tbody></table>`;
+    + `</tr></thead><tbody>${
+      thisRelicList.filter(stamGain).map(makeRow).join('')
+    }</tbody></table>`;
 }
 
 function processRelicList(thisRelicList) {
   thisRelicList.sort((a, b) => a.min_level - b.min_level);
-  pCC.innerHTML = makeTable(thisRelicList);
+  setInnerHtml(makeTable(thisRelicList), pCC);
 }
 
 export default function reliclist() {
-  pCC.innerHTML = 'Loading...';
+  setInnerHtml('Loading...', pCC);
   getRelicList().then(processRelicList);
 }

@@ -1,6 +1,6 @@
-function buffToggles(prev, buff, i) {
-  return prev.replace(buff, `<span id="fshBuff${i
-  }" class="buffLink fshBlue">${
+function buffToggles(acc, buff, i) {
+  return acc.replace(buff, `<span id="fshBuff${
+    i}" class="buffLink fshBlue">${
     buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '')}</span>`);
 }
 

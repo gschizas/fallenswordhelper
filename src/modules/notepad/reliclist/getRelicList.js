@@ -1,9 +1,9 @@
 import allthen from '../../common/allthen';
-import { arrayFrom } from '../../common/arrayFrom';
+import arrayFrom from '../../common/arrayFrom';
 import { closestTable } from '../../common/closest';
 import { createDiv } from '../../common/cElement';
 import createDocument from '../../system/createDocument';
-import { dataRows } from '../../common/dataRows';
+import dataRows from '../../common/dataRows';
 import getTextTrim from '../../common/getTextTrim';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import isUndefined from '../../common/isUndefined';
@@ -69,12 +69,12 @@ function getEnhancements(childNodes) {
 function parseTip(tipped) {
   const div = createDiv({ innerHTML: tipped });
   const location = parseLocation(div.children[1]);
-  const min_level = Number(getTextTrim(div.children[2]).match(/(\d+)/)[1]);
+  const minLevel = Number(getTextTrim(div.children[2]).match(/(\d+)/)[1]);
   const childNodes = getTextNodes(div);
   const attributes = getAttribs(childNodes);
   const enhancements = getEnhancements(childNodes);
   return {
-    attributes, enhancements, location, min_level,
+    attributes, enhancements, location, min_level: minLevel,
   };
 }
 

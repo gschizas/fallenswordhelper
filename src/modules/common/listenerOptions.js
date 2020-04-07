@@ -1,7 +1,7 @@
-import isType from './isType';
+import isBoolean from './isBoolean';
 
 export default function listenerOptions(options) {
-  if (isType(options, 'boolean')) {
+  if (isBoolean(options)) {
     return { capture: options };
   }
   return options;

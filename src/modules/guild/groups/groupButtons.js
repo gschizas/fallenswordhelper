@@ -2,7 +2,7 @@ import addButton from './addButton';
 import calf from '../../support/calf';
 import { createDiv } from '../../common/cElement';
 import csvSplit from '../../common/csvSplit';
-import { def_joinallgroupsundersize } from '../../support/constants';
+import { defJoinallgroupsundersize } from '../../support/constants';
 import fetchGroupStatsButton from './fetchGroupStatsButton';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
@@ -13,14 +13,15 @@ import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import querySelectorArray from '../../common/querySelectorArray';
 import { sendEvent } from '../../support/fshGa';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 let maxGroupSizeToJoin;
 
 function filterMercs(e) { return !e.includes('#000099'); }
 
 function joined(container) {
-  container.innerHTML = '<span class="fshXSmall fshBlue" '
-    + 'style="line-height: 19px;">Joined</span>';
+  setInnerHtml('<span class="fshXSmall fshBlue" '
+    + 'style="line-height: 19px;">Joined</span>', container);
 }
 
 function joinGroup(groupID, container) { // jQuery.min
@@ -72,7 +73,7 @@ export default function groupButtons() {
 
   fetchGroupStatsButton(buttonRow);
 
-  if (calf.subcmd2 === def_joinallgroupsundersize) {
+  if (calf.subcmd2 === defJoinallgroupsundersize) {
     joinAllGroupsUnderSize();
   }
 }

@@ -1,13 +1,14 @@
 import { createSpan } from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import toggleForce from '../../../common/toggleForce';
 
 let dblDiv;
 let dblSpan;
 
 function initDblDiv(containerDiv) {
+  // eslint-disable-next-line prefer-destructuring
   dblDiv = containerDiv.children[4];
   dblDiv.className = 'fshRed';
   setText('Doubler ', dblDiv);

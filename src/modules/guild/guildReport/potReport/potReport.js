@@ -5,7 +5,7 @@ import extend from '../../../common/extend';
 import fallback from '../../../system/fallback';
 import insertElement from '../../../common/insertElement';
 import isChecked from '../../../system/isChecked';
-import { keys } from '../../../common/keys';
+import keys from '../../../common/keys';
 import on from '../../../common/on';
 import onclick from '../../../common/onclick';
 import { pCC } from '../../../support/layout';
@@ -28,6 +28,7 @@ const defaultOpts = {
 };
 
 function update(potOpts, pot) {
+  // eslint-disable-next-line no-param-reassign
   if (!potOpts.myMap[pot]) { potOpts.myMap[pot] = pot; }
 }
 
@@ -54,11 +55,9 @@ function createContainer(potOpts) {
 function createThresholds(potOpts, panels) {
   const thresholds = createDiv({
     id: 'thresholds',
-    innerHTML: `${'Min:'
-      + '<input id="minpoint" type="number" value="'}${
+    innerHTML: `Min:<input id="minpoint" type="number" value="${
       potOpts.minpoint}" min="0" max="999">`
-      + 'Max:'
-      + `<input id="maxpoint" type="number" value="${
+      + `Max:<input id="maxpoint" type="number" value="${
         potOpts.maxpoint}" min="0" max="999">`,
   });
   insertElement(panels, thresholds);
@@ -66,22 +65,24 @@ function createThresholds(potOpts, panels) {
 
 function onChange(potOpts, potObj, e) {
   if (e.target.tagName === 'SELECT') {
+    // eslint-disable-next-line no-param-reassign
     potOpts.myMap[e.target.name] = e.target.value;
     set(storeMap, potOpts);
     drawInventory(potOpts, potObj);
   }
 }
 
-function reMap(ignore, prev, pot) {
+function reMap(ignore, acc, pot) {
   if (ignore) {
-    prev[pot] = 'Ignore';
+    acc[pot] = 'Ignore';
   } else {
-    prev[pot] = pot;
+    acc[pot] = pot;
   }
-  return prev;
+  return acc;
 }
 
 function resetMap(potOpts, potObj, ignore) {
+  // eslint-disable-next-line no-param-reassign
   potOpts.myMap = keys(potObj).reduce(partial(reMap, ignore), {});
 }
 
@@ -96,6 +97,7 @@ function toggleTab(target) { return /^pottab\d$/.test(target.id); }
 
 function saveState(potOpts, target) {
   const option = target.id;
+  // eslint-disable-next-line no-param-reassign
   potOpts[option] = target.checked;
   set(storeMap, potOpts);
 }
@@ -112,6 +114,7 @@ function onInput(potOpts, potObj, e) {
   const target = e.target.id;
   const maybeValue = testRange(e.target.value, 0, 999);
   if (maybeValue) {
+    // eslint-disable-next-line no-param-reassign
     potOpts[target] = maybeValue;
     set(storeMap, potOpts);
     drawInventory(potOpts, potObj);

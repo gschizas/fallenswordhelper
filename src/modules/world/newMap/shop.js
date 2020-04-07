@@ -1,12 +1,12 @@
 import addCommas from '../../system/addCommas';
 import allthen from '../../common/allthen';
-import { def_shopPrompt } from '../../support/constants';
+import { defShopPrompt } from '../../support/constants';
 import fetchdata from '../../ajax/fetchdata';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import onclick from '../../common/onclick';
-import setText from '../../common/setText';
+import setText from '../../dom/setText';
 import testQuant from '../../system/testQuant';
 import { createButton, createDiv, createInput } from '../../common/cElement';
 
@@ -110,5 +110,5 @@ function worldDialogShop(e, data) {
 }
 
 export default function prepareShop() {
-  $.subscribe(def_shopPrompt, worldDialogShop);
+  $.subscribe(defShopPrompt, worldDialogShop);
 }

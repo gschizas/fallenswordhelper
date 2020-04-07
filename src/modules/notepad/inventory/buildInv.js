@@ -1,7 +1,7 @@
 import allthen from '../../common/allthen';
 import calf from '../../support/calf';
 import getInventory from '../../ajax/getInventory';
-import { isArray } from '../../common/isArray';
+import isArray from '../../common/isArray';
 import partial from '../../common/partial';
 import {
   daGuildFetchInv,
@@ -9,7 +9,7 @@ import {
   daLoadInventory,
 } from '../../_dataAccess/_dataAccess';
 
-export var theInv;
+export let theInv;
 let composed = [];
 
 function cacheTheInv(data) {
@@ -45,11 +45,12 @@ function doReport() {
   return daGuildReport().then(getComposedFromGs);
 }
 
-function thisPot(inv_id, pot) { return pot.a === inv_id; }
+function thisPot(invId, pot) { return pot.a === invId; }
 
 function addComposedName(item) {
   if (item.type === 15) {
     const cp = composed.find(partial(thisPot, item.inv_id));
+    // eslint-disable-next-line no-param-reassign
     if (cp) { item.item_name = cp.n; }
   }
 }

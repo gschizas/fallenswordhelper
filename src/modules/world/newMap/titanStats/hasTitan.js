@@ -1,6 +1,6 @@
 import './hasTitan.css';
 import { createDiv } from '../../../common/cElement';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import insertElement from '../../../common/insertElement';
 import toggleForce from '../../../common/toggleForce';
 import {
@@ -10,8 +10,8 @@ import {
 } from './buildTitanInfoTable';
 import { clearTitanDiv, initVars } from './placeholders';
 
-export var titanDiv;
-export var titanId;
+export let titanDiv;
+export let titanId;
 
 export function hideTitanDiv() {
   titanId = null;

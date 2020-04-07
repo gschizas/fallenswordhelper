@@ -1,6 +1,6 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import infoBox from '../common/infoBox';
-import { injectArena } from './arena';
+import injectArena from './arena';
 import { nowSecs } from '../support/now';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';

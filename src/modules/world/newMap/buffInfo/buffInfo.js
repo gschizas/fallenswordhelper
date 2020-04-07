@@ -11,9 +11,9 @@ import impWarning from './impWarning';
 import setValue from '../../../system/setValue';
 import titanKs from './titanKs';
 import {
-  def_playerBuffs,
-  def_playerUpdate,
-  def_teleport,
+  defPlayerBuffs,
+  defPlayerUpdate,
+  defTeleport,
 } from '../../../support/constants';
 import { doCountdown, tpCooldown } from './tpCooldown';
 
@@ -55,8 +55,8 @@ function teleportEvent(e, data) {
 
 export function buffInfo() {
   updateBuffInfo();
-  $.subscribe(`${def_playerBuffs} ${def_playerUpdate}`, updateBuffInfo);
-  $.subscribe(def_teleport, teleportEvent);
+  $.subscribe(`${defPlayerBuffs} ${defPlayerUpdate}`, updateBuffInfo);
+  $.subscribe(defTeleport, teleportEvent);
 }
 
 export function toggleBuffInfo() {

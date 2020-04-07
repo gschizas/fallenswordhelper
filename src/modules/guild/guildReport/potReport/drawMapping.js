@@ -1,12 +1,12 @@
 import add from '../../../support/task';
 import batch from '../../../common/batch';
-import { entries } from '../../../common/entries';
+import entries from '../../../common/entries';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
 import once from '../../../common/once';
 import partial from '../../../common/partial';
 import { sendEvent } from '../../../support/fshGa';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import {
   createDiv,
   createInput,
@@ -60,8 +60,7 @@ function insertRows(mapTbl, el, i, ary) {
   const selectRow = getSelectRow(ary);
   setText(el[0], selectRow.cells[0]);
   const select = selectRow.cells[1].children[0];
-  select.name = el[0];
-  select.value = el[1];
+  [select.name, select.value] = el;
   insertElement(mapTbl.tBodies[0], selectRow);
 }
 

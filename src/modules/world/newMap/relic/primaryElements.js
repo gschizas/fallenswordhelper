@@ -1,12 +1,13 @@
 import doBuffLinks from '../../../common/doBuffLinks';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import insertElement from '../../../common/insertElement';
+import setInnerHtml from '../../../dom/setInnerHtml';
 import { createButton, createDiv } from '../../../common/cElement';
 
-export var containerDiv;
-export var leftDiv;
-export var fetchStatsBtn;
-export var myDefenders;
+export let containerDiv;
+export let leftDiv;
+export let fetchStatsBtn;
+export let myDefenders;
 
 function playerName(x) { return x.player_name; }
 
@@ -16,7 +17,7 @@ function defendersSetup(relicData) {
 
 function containerSetup() {
   if (containerDiv) {
-    containerDiv.innerHTML = '';
+    setInnerHtml('', containerDiv);
   } else {
     containerDiv = createDiv({ className: 'body' });
   }

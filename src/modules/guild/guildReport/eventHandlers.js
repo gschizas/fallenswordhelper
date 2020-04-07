@@ -12,17 +12,18 @@ import { playerIDRE } from '../../support/constants';
 import playerId from '../../common/playerId';
 import { queueRecallItem } from '../../ajaxQueue/queue';
 import { sendEvent } from '../../support/fshGa';
+import setInnerHtml from '../../dom/setInnerHtml';
 
-const spinner = `${'<span class="guildReportSpinner" style="background-image: '
-  + 'url(\''}${cdn}ui/misc/spinner.gif');"></span>`;
+const spinner = '<span class="guildReportSpinner" '
+  + `style="background-image: url('${cdn}ui/misc/spinner.gif');"></span>`;
 
 function recalled(theTd) {
-  theTd.innerHTML = '<span class="fastWorn">'
-    + 'You successfully recalled the item</span>';
+  setInnerHtml('<span class="fastWorn">You successfully recalled the item'
+    + '</span>', theTd);
 }
 
 function wornItem(theTd) {
-  theTd.innerHTML = '<span class="fastWorn">Worn</span>';
+  setInnerHtml('<span class="fastWorn">Worn</span>', theTd);
 }
 
 function replyTo(target) {
@@ -82,7 +83,7 @@ function doFastRecall(target) {
   const { href } = theTd.children[0];
   if (!href) { return; }
   subClass.find(partial(classPair, target))[1](theTd, href);
-  theTd.innerHTML = spinner;
+  setInnerHtml(spinner, theTd);
 }
 
 const classEvts = [

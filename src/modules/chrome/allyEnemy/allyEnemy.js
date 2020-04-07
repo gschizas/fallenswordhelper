@@ -5,7 +5,7 @@ import classHandler from '../../common/classHandler';
 import { createDiv } from '../../common/cElement';
 import fallback from '../../system/fallback';
 import getArrayByClassName from '../../common/getArrayByClassName';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getText from '../../common/getText';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -15,6 +15,7 @@ import onclick from '../../common/onclick';
 import openQuickBuffByName from '../../common/openQuickBuffByName';
 import { pCR } from '../../support/layout';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import {
   enemyBuffCheckOff,
   enemyBuffCheckOn,
@@ -24,11 +25,11 @@ import {
 } from './constants';
 
 const noAlliesTests = [
-  function (allies, enemies) { return allies.length + enemies.length; },
-  function (allies, enemies) {
+  (allies, enemies) => allies.length + enemies.length,
+  (allies, enemies) => {
     if (!calf.enableAllyOnlineList) { return enemies.length; }
   },
-  function (allies) {
+  (allies) => {
     if (!calf.enableEnemyOnlineList) { return allies.length; }
   },
 ];
@@ -48,7 +49,7 @@ function hazAllies(allies, enemies) {
     output += addContacts(enemies, false);
   }
   const fshContactList = getElementById('fshContactList');
-  fshContactList.innerHTML = '';
+  setInnerHtml('', fshContactList);
   insertHtmlBeforeEnd(fshContactList, output);
 }
 

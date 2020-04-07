@@ -15,23 +15,23 @@ function failObject(result) {
   return { id: getBuffId(result[9]), reason: result[8] };
 }
 
-function byPlayer(prev, curr) {
+function byPlayer(acc, curr) {
   const thisPlayer = playerName(curr);
-  let thisObj = prev.find((o) => o.player.name === thisPlayer);
+  let thisObj = acc.find((o) => o.player.name === thisPlayer);
   if (!thisObj) {
     thisObj = { player: { name: thisPlayer }, casts: [], failed: [] };
-    prev.push(thisObj);
+    acc.push(thisObj);
   }
   if (curr[1]) {
     thisObj.casts.push(successObject(curr));
   } else {
     thisObj.failed.push(failObject(curr));
   }
-  return prev;
+  return acc;
 }
 
 function buffFormatter(buffsParsed) {
-  const buffsByPlayer = buffsParsed.reduce(byPlayer, []);
+  const buffsByPlayer = buffsParsed.reduce(byPlayer, []); // FIXME
   return { r: buffsByPlayer, s: true };
 }
 

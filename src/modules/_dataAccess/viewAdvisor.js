@@ -1,4 +1,4 @@
-import { arrayFrom } from '../common/arrayFrom';
+import arrayFrom from '../common/arrayFrom';
 import createDocument from '../system/createDocument';
 import getTextTrim from '../common/getTextTrim';
 import indexAjaxData from '../ajax/indexAjaxData';

@@ -5,6 +5,7 @@ import { daAdvisor } from '../../_dataAccess/_dataAccess';
 import getMembrList from '../../ajax/getMembrList';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import {
   injectTable, playerLevel, playerName, playerRank,
 } from './helpers';
@@ -27,12 +28,14 @@ function addElements(ary, v, i) {
 }
 
 function addAll(curr, el, i) {
-  el.stats = el.stats.map(partial(addElements, curr[i].stats));
-  return el;
+  return {
+    ...el,
+    stats: el.stats.map(partial(addElements, curr[i].stats)),
+  };
 }
 
-function addStuff(prev, curr) {
-  return prev.map(partial(addAll, curr));
+function addStuff(acc, curr) {
+  return acc.map(partial(addAll, curr));
 }
 
 function reorgStats(el) {
@@ -47,21 +50,19 @@ function addUpStats(args) {
   return args.slice(1).reduce(addStuff, args[0]).map(reorgStats);
 }
 
-function makeTotal(prev, curr) {
-  return curr.stats.map(partial(addElements, prev));
+function makeTotal(acc, curr) {
+  return curr.stats.map(partial(addElements, acc));
 }
 
-function footerStats(prev, curr) {
-  return `${prev}<td><u>${curr}</u></td>`;
+function footerStats(acc, curr) {
+  return `${acc}<td><u>${curr}</u></td>`;
 }
 
 function makeTfoot(added) {
   const stats = added.slice(1).reduce(makeTotal, added[0].stats).map(addCommas);
   return createTFoot({
-    innerHTML: `${'<tr><td class="fshRight" '
-    + 'colspan="3">Total: </td>'}${
-      stats.reduce(footerStats, '')
-    }</tr>`,
+    innerHTML: `<tr><td class="fshRight" colspan="3">Total: </td>${
+      stats.reduce(footerStats, '')}</tr>`,
   });
 }
 
@@ -87,10 +88,10 @@ export default function injectAdvisorWeekly(list) { // jQuery
   time('guildAdvisor.injectAdvisorWeekly');
 
   // #endif
-  list.innerHTML = '<span class="fshCurveContainer fshFlex">'
+  setInnerHtml('<span class="fshCurveContainer fshFlex">'
     + '<span class="fshCurveEle fshCurveLbl fshOldSpinner"></span>'
     + '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>'
-    + '</span>';
+    + '</span>', list);
 
   const prm = [getMembrList(false)]
     .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));

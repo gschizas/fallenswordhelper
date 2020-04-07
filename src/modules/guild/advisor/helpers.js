@@ -6,7 +6,7 @@ import { playerIdUrl } from '../../support/constants';
 import replaceChild from '../../common/replaceChild';
 import { createDiv, createTable } from '../../common/cElement';
 
-export var advisorColumns = [
+export const advisorColumns = [
   { title: '<div class="fshBold">Member</div>' },
   { title: '<div class="fshBold">Lvl</div>', class: 'dt-center' },
   { title: '<div class="fshBold">Rank</div>', class: 'dt-center dt-nowrap' },

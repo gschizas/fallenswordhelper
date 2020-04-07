@@ -1,5 +1,5 @@
 import clickThis from '../common/clickThis';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 
 let retries = 0;

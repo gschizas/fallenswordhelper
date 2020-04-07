@@ -3,15 +3,16 @@ import { daComponents } from '../../_dataAccess/_dataAccess';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
-import { isArray } from '../../common/isArray';
+import isArray from '../../common/isArray';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
 import { sendEvent } from '../../support/fshGa';
+import setInnerHtml from '../../dom/setInnerHtml';
 import { componentList, prepareComponentList } from './prepareComponentList';
 import { createSpan, createTBody, createTable } from '../../common/cElement';
 
-function tallyTableRow(prev, comp) {
-  return `${prev}<tr><td><img src="${cdn}items/${comp.b
+function tallyTableRow(acc, comp) {
+  return `${acc}<tr><td><img src="${cdn}items/${comp.b
   }.gif" class="fshTblCenter tip-dynamic" data-tipped="fetchitem.php?`
     + `item_id=${comp.b}&inv_id=${comp.a}&t=2&p=${playerId()
     }&vcode=${comp.v}"></td><td>${comp.count
@@ -39,7 +40,7 @@ function makeTotalCell(tbl) {
 function makeUsedCount(data) {
   const usedCount = data.r.length;
   const usedCountDom = createSpan();
-  usedCountDom.innerHTML = usedCount.toString();
+  setInnerHtml(usedCount, usedCountDom);
   return usedCountDom;
 }
 
@@ -60,7 +61,7 @@ function displayComponentTally(target, data) {
   if (!isArray(data.r)) { return; }
   const sumComp = target.parentNode;
   if (sumComp) {
-    sumComp.innerHTML = '';
+    setInnerHtml('', sumComp);
     insertElement(sumComp, makeTallyTable(data));
   }
 }

@@ -1,10 +1,10 @@
 import getValue from '../../system/getValue';
 import setValue from '../../system/setValue';
 
-export var disableItemColoring;
-export var showExtraLinks;
-export var showQuickDropLinks;
-export var showQuickSendLinks;
+export let disableItemColoring;
+export let showExtraLinks;
+export let showQuickDropLinks;
+export let showQuickSendLinks;
 
 export function setShowExtraLinks() {
   showExtraLinks = !showExtraLinks;

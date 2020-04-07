@@ -1,8 +1,8 @@
 import querySelectorArray from '../../common/querySelectorArray';
 import {
-  def_PvE,
-  def_fetch_worldRealmActions,
-  def_fetch_worldRealmDynamic,
+  defFetchWorldRealmActions,
+  defFetchWorldRealmDynamic,
+  defPvE,
 } from '../../support/constants';
 
 function didNotExist(data) {
@@ -13,8 +13,8 @@ function didNotExist(data) {
 function removeAction(data) {
   if (didNotExist(data)) {
     GameData.fetch(
-      def_fetch_worldRealmDynamic
-      + def_fetch_worldRealmActions,
+      defFetchWorldRealmDynamic
+      + defFetchWorldRealmActions,
     );
   }
 }
@@ -28,5 +28,5 @@ function hideTitanViewCombat(e, data) {
 }
 
 export default function hideTitanCombatResults() {
-  $.subscribe(def_PvE, hideTitanViewCombat); // TODO Pref
+  $.subscribe(defPvE, hideTitanViewCombat); // TODO Pref
 }

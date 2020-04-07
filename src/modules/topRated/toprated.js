@@ -27,14 +27,12 @@ function looksLikeTopRated() {
 }
 
 const topRatedTests = [
-  function () { return jQueryPresent(); },
-  function () { return isObject(pCC); },
-  function () { return isObject(pCC.children[0]); },
-  function () { return isObject(pCC.children[0].rows); },
-  function () { return pCC.children[0].rows.length > 2; },
-  function () {
-    return getTextTrim(pCC.children[0].rows[1]).startsWith('Last Updated');
-  },
+  () => jQueryPresent(),
+  () => isObject(pCC),
+  () => isObject(pCC.children[0]),
+  () => isObject(pCC.children[0].rows),
+  () => pCC.children[0].rows.length > 2,
+  () => getTextTrim(pCC.children[0].rows[1]).startsWith('Last Updated'),
 ];
 
 function testforTopRated() {

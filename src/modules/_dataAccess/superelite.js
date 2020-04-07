@@ -1,5 +1,5 @@
 import createDocument from '../system/createDocument';
-import { dataRows } from '../common/dataRows';
+import dataRows from '../common/dataRows';
 import getTextTrim from '../common/getTextTrim';
 import indexAjaxData from '../ajax/indexAjaxData';
 import { months } from '../support/constants';

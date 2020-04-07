@@ -21,7 +21,8 @@ function stash(info) {
   }
   sendEvent('da/useItem', 'Bad Msg', info);
   // #if _DEV  //  da/useItem Bad Msg
-  console.log('da/useItem', 'Bad Msg', info); // eslint-disable-line no-console
+  // eslint-disable-next-line no-console
+  console.log('da/useItem', 'Bad Msg', info);
   // #endif
 }
 
@@ -40,7 +41,8 @@ function formatResults(html) {
   } else {
     sendEvent('da/useItem', 'No Info');
     // #if _DEV  //  da/useItem No Info
-    console.log('da/useItem', 'No Info'); // eslint-disable-line no-console
+    // eslint-disable-next-line no-console
+    console.log('da/useItem', 'No Info');
     // #endif
     return { s: false };
   }

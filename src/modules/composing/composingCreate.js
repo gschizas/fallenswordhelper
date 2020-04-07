@@ -1,4 +1,4 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import on from '../common/on';
 import onclick from '../common/onclick';

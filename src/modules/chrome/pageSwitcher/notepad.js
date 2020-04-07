@@ -4,7 +4,7 @@ import crawler from '../../notepad/arenaCrawler/crawler';
 // #endif
 import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
 import injectFsBoxContent from '../../notepad/injectFsBoxContent';
-import { injectInventoryManagerNew } from '../../notepad/inventory/inventory';
+import injectInventoryManagerNew from '../../notepad/inventory/inventory';
 import injectMonsterLog from '../../notepad/monstorLog/monstorLog';
 import injectNewGuildLog from '../../guild/newGuildLog/newGuildLog';
 import injectNotepad from '../../notepad/injectNotepad';

@@ -2,10 +2,10 @@ import allthen from '../../common/allthen';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import { moveOptions } from './moveOptions';
+import moveOptions from './moveOptions';
 import { moveRe } from '../assets';
 import partial from '../../common/partial';
-import { arenaUrl, def_table, oldActionSpinner } from '../../support/constants';
+import { arenaUrl, defTable, oldActionSpinner } from '../../support/constants';
 
 const oldMoves = [];
 let imgNodes;
@@ -90,7 +90,7 @@ function pickerRow(table) { // jQuery
 }
 
 function getTable() {
-  return imgNodes.eq(0).closest(def_table).parent().closest(def_table);
+  return imgNodes.eq(0).closest(defTable).parent().closest(defTable);
 }
 
 function selectMoves(evt) { // jQuery

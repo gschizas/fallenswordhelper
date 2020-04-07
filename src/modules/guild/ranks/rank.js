@@ -1,6 +1,6 @@
-import { arrayFrom } from '../../common/arrayFrom';
+import arrayFrom from '../../common/arrayFrom';
 import batch from '../../common/batch';
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import getMembrList from '../../ajax/getMembrList';
 import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -18,7 +18,7 @@ function findTheRows() {
   }
 }
 
-function aRank(rank_name, memberRanks) { return memberRanks[0] === rank_name; }
+function aRank(rankName, memberRanks) { return memberRanks[0] === rankName; }
 
 function hasMembers(thisRank) { return thisRank && thisRank[1].length > 0; }
 
@@ -47,18 +47,18 @@ function gotMembers(memberRanks) {
   }
 }
 
-function rankArray(prev, ary) {
-  const thisRank = prev.find(partial(aRank, ary[1].rank_name));
+function rankArray(acc, ary) {
+  const thisRank = acc.find(partial(aRank, ary[1].rank_name));
   if (thisRank) {
     thisRank[1].push(ary[0]);
   } else {
-    prev.push([ary[1].rank_name, [ary[0]]]);
+    acc.push([ary[1].rank_name, [ary[0]]]);
   }
-  return prev;
+  return acc;
 }
 
 function makeRanks(json) {
-  return entries(json).filter(notLastUpdate).reduce(rankArray, []);
+  return entries(json).filter(notLastUpdate).reduce(rankArray, []); // FIXME
 }
 
 export default function injectGuildRanks() { // jQuery.min

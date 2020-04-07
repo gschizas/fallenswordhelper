@@ -8,9 +8,10 @@ function getPvpId(aRow) {
 //   console.log(json);
 // }
 
-function havePvpId(aRow, pvpId) { // eslint-disable-line
+// eslint-disable-next-line
+function havePvpId(aRow, pvpId) {
   // results(pvpId).then(processResults);
-  // console.log(aRow, pvpId); // eslint-disable-line no-console
+  // console.log(aRow, pvpId);
 }
 
 // TODO Pref

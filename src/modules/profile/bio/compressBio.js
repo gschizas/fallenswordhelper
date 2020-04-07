@@ -3,6 +3,7 @@ import insertElement from '../../common/insertElement';
 import on from '../../common/on';
 import partial from '../../common/partial';
 import { sendEvent } from '../../support/fshGa';
+import setInnerHtml from '../../dom/setInnerHtml';
 import { createDiv, createInput, createLabel } from '../../common/cElement';
 
 function injectToggle(fshCompressor) {
@@ -14,8 +15,8 @@ function injectToggle(fshCompressor) {
 function hideBlock(bioCell, fshCompressor) {
   const fshCompress = insertElement(fshCompressor,
     createDiv({ className: 'fshCompress' }));
-  fshCompress.innerHTML = bioCell.innerHTML;
-  bioCell.innerHTML = '';
+  setInnerHtml(bioCell.innerHTML, fshCompress);
+  setInnerHtml('', bioCell);
 }
 
 function doCompression(bioCell) {

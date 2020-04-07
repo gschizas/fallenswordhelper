@@ -7,7 +7,7 @@ import partial from '../../../common/partial';
 
 function addNextCell(row, attributes) {
   const aCell = row.insertCell(-1);
-  aCell.colSpan = attributes[0];
+  [aCell.colSpan] = attributes;
   if (attributes[2]) { aCell.className = 'header'; }
   insertElement(aCell, attributes[1]);
   return aCell;
@@ -28,6 +28,6 @@ function addRow(tbl, row) {
   addNextRow(tbl, row[0], row[1]);
 }
 
-export function addRows(tbl, rows) {
+export default function addRows(tbl, rows) {
   rows.forEach(partial(addRow, tbl));
 }

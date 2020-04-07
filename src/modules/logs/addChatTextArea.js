@@ -10,6 +10,7 @@ import partial from '../common/partial';
 import querySelector from '../common/querySelector';
 
 function removeCrlf(fshTxt) {
+  // eslint-disable-next-line no-param-reassign
   fshTxt.value = fshTxt.value.replace(/\r\n|\n|\r/g, ' ');
 }
 

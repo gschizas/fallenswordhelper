@@ -1,12 +1,12 @@
 import './mailbox.css';
 import chunk from '../common/chunk';
 import { daMailboxTake } from '../_dataAccess/_dataAccess';
-import { entries } from '../common/entries';
+import entries from '../common/entries';
 import getArrayByTagName from '../common/getArrayByTagName';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
-import { isArray } from '../common/isArray';
+import isArray from '../common/isArray';
 import { itemRE } from '../support/constants';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonFail from '../common/jsonFail';
@@ -15,6 +15,7 @@ import onclick from '../common/onclick';
 import outputResult from '../common/outputResult';
 import { pCC } from '../support/layout';
 import partial from '../common/partial';
+import setInnerHtml from '../dom/setInnerHtml';
 import {
   createDiv,
   createInput,
@@ -33,23 +34,23 @@ function makeQtLabel(id, text, injector) {
   return lbl;
 }
 
-function reduceItems(prev, curr) {
+function reduceItems(acc, curr) {
   const img = curr.children[0];
   const { tipped } = img.dataset;
   const itemIDs = itemRE.exec(tipped);
-  if (!itemIDs) { return prev; }
+  if (!itemIDs) { return acc; }
   const itemId = itemIDs[1];
   const invId = itemIDs[2];
-  if (prev[itemId]) {
-    prev[itemId].invIds.push(invId);
+  if (acc[itemId]) {
+    acc[itemId].invIds.push(invId);
   } else {
-    prev[itemId] = {
+    acc[itemId] = {
       invIds: [invId],
       tipped: tipped.replace(/&extra=\d/, ''),
       src: img.src,
     };
   }
-  return prev;
+  return acc;
 }
 
 function basicQt() {
@@ -98,7 +99,7 @@ function killQTip(itemId) { // jQuery
 function removeImg(item) {
   killQTip(item.id);
   const thisCell = getElementById(`temp-inv-${item.id}`);
-  if (thisCell) { thisCell.innerHTML = ''; }
+  if (thisCell) { setInnerHtml('', thisCell); }
 }
 
 function takeSuccess(takeResult, json) {
@@ -118,7 +119,7 @@ function doTakeItem(takeResult, el) {
 function takeSimilar(itemList, takeResult, target) { // jQuery.min
   const type = target.dataset.id;
   const { invIds } = itemList[type];
-  target.parentNode.innerHTML = `taking all ${invIds.length} items`;
+  setInnerHtml(`taking all ${invIds.length} items`, target.parentNode);
   chunk(40, invIds).forEach(partial(doTakeItem, takeResult));
 }
 

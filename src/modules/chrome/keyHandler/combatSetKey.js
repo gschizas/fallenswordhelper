@@ -2,14 +2,14 @@ import { daViewProfile } from '../../_dataAccess/_dataAccess';
 import expandMenu from './expandMenu';
 import keyHandlerEvent from './keyHandlerEvent';
 import partial from '../../common/partial';
-import { def_subcmd, profileUrl } from '../../support/constants';
+import { defSubcmd, profileUrl } from '../../support/constants';
 
 const jsonTests = [
-  function (itemIndex, json) { return json; },
-  function (itemIndex, json) { return json.s; },
-  function (itemIndex, json) { return json.r; },
-  function (itemIndex, json) { return json.r.equip_sets; },
-  function (itemIndex, json) { return json.r.equip_sets.length > itemIndex; },
+  (itemIndex, json) => json,
+  (itemIndex, json) => json.s,
+  (itemIndex, json) => json.r,
+  (itemIndex, json) => json.r.equip_sets,
+  (itemIndex, json) => json.r.equip_sets.length > itemIndex,
 ];
 
 function funcPasses(itemIndex, json, fn) { return fn(itemIndex, json); }
@@ -22,7 +22,7 @@ function changeCombatSet(itemIndex, json) {
   if (goodData(itemIndex, json)) {
     const cbsIndex = json.r.equip_sets[itemIndex].id;
     expandMenu('2');
-    location.href = `${profileUrl + def_subcmd
+    window.location.href = `${profileUrl + defSubcmd
     }managecombatset&submit=Use&combatSetId=${cbsIndex}`;
   }
 }

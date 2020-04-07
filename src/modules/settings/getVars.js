@@ -29,6 +29,6 @@ function simpleVars() {
 export default function getVars() {
   mappedVars();
   simpleVars();
-  calf.storage = (JSON.stringify(localStorage).length
-    / (5 * 1024 * 1024) * 100).toFixed(2);
+  calf.storage = ((JSON.stringify(localStorage).length / (5 * 1024 * 1024))
+    * 100).toFixed(2);
 }

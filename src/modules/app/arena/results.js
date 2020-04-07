@@ -1,5 +1,5 @@
 import arena from './arena';
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import { nowSecs } from '../../support/now';
 import partial from '../../common/partial';
 import { get, set } from '../../system/idb';
@@ -8,20 +8,20 @@ let resultsPromise;
 let resultsCache;
 
 function currentCombatRecord(combatId, obj, sevenDays) {
-  return combatId === 'lastCheck' || obj.logTime && obj.logTime > sevenDays;
+  return combatId === 'lastCheck' || (obj.logTime && obj.logTime > sevenDays);
 }
 
-function keepRecent(sevenDays, prev, [combatId, obj]) {
+function keepRecent(sevenDays, acc, [combatId, obj]) {
   if (currentCombatRecord(combatId, obj, sevenDays)) {
-    prev[combatId] = obj;
+    acc[combatId] = obj;
   }
-  return prev;
+  return acc;
 }
 
 function cleanCache(data) {
   const thirtyDays = nowSecs - 30 * 24 * 60 * 60;
   return entries(data)
-    .reduce(partial(keepRecent, thirtyDays), { lastCheck: nowSecs });
+    .reduce(partial(keepRecent, thirtyDays), { lastCheck: nowSecs }); // FIXME
 }
 
 function prepareCache(data) {

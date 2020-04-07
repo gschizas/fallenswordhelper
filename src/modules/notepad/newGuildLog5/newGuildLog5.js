@@ -2,7 +2,7 @@ import './newGuildLog5.css';
 import add from '../../support/task';
 import { createTable } from '../../common/cElement';
 import { get } from '../../system/idb';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import initTable from './outputTable';
 import insertElement from '../../common/insertElement';
@@ -14,6 +14,7 @@ import { months } from '../../support/constants';
 import { pCC } from '../../support/layout';
 import padZ from '../../system/padZ';
 import partial from '../../common/partial';
+import setText from '../../dom/setText';
 import {
   guildLogFilter5,
   headerRow,
@@ -67,17 +68,18 @@ function processRawLog(theLog) {
   const nowUtc = new Date().setUTCSeconds(0, 0) - 1;
   const lastCheckUtc = getValue('lastmyGuildLogCheck') || nowUtc;
   const foo = theLog.map(partial(toTr, nowUtc, lastCheckUtc)).reverse();
-  getElementById('fshOutput').textContent = 'Building table.';
+  setText('Building table.', getElementById('fshOutput'));
   add(3, initTable, [foo]);
 }
 
 function receiveLog(theLog) {
   // console.log('theLog', theLog);
-  getElementById('fshOutput').textContent = 'Processing.';
+  setText('Processing.', getElementById('fshOutput'));
   add(3, processRawLog, [theLog]);
 }
 
-function gotOptions(guildLog) { // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+function gotOptions(guildLog) {
   // console.log('guildLog', guildLog);
   const maxPagesToFetch = 100; // Number(getValue('newGuildLogHistoryPages'));
   getGuildLog(maxPagesToFetch * 50, -1, []).then(receiveLog);

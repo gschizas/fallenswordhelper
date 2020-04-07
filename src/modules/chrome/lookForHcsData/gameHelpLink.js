@@ -1,9 +1,10 @@
 import { cmdUrl } from '../../support/constants';
 import contains from '../../common/contains';
 import querySelectorArray from '../../common/querySelectorArray';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 function toSettings(el) {
-  el.innerHTML = `<a href="${cmdUrl}settings">Game Help</a>`;
+  setInnerHtml(`<a href="${cmdUrl}settings">Game Help</a>`, el);
 }
 
 export default function gameHelpLink() {

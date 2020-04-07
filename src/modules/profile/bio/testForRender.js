@@ -1,11 +1,12 @@
 import getValue from '../../system/getValue';
 import renderBio from './render';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 function doRender(bioCell) {
   let bioContents = bioCell.innerHTML;
   bioContents = renderBio(bioContents);
   if (bioContents) {
-    bioCell.innerHTML = bioContents;
+    setInnerHtml(bioContents, bioCell);
   }
 }
 

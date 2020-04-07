@@ -6,6 +6,7 @@ import onclick from '../common/onclick';
 import outputResult from '../common/outputResult';
 import { pCC } from '../support/layout';
 import querySelector from '../common/querySelector';
+import setInnerHtml from '../dom/setInnerHtml';
 import { createInput, createOl, createSpan } from '../common/cElement';
 
 let invAmount;
@@ -26,8 +27,8 @@ function quickInventDone(json) {
 }
 
 function initResults(str) {
-  invResultHeader.innerHTML = str;
-  invResults.innerHTML = '';
+  setInnerHtml(str, invResultHeader);
+  setInnerHtml('', invResults);
 }
 
 function quickInvent() {

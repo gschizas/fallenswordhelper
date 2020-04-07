@@ -1,4 +1,5 @@
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 let bufferProgress;
 
@@ -7,7 +8,7 @@ export function getBufferProgress() {
 }
 
 export function updateProgress(html, colour) {
-  bufferProgress.innerHTML = html;
+  setInnerHtml(html, bufferProgress);
   if (colour) {
     bufferProgress.style.color = colour;
   }

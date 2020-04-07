@@ -2,7 +2,7 @@ import addPvpSummary from './pvpSummary/addPvpSummary';
 import allthen from '../common/allthen';
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
-import { dataRows } from '../common/dataRows';
+import dataRows from '../common/dataRows';
 import doBuffLink from './doBuffLink';
 import doChat from './doChat';
 import getCalfPrefs from '../common/getCalfPrefs';
@@ -16,6 +16,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import querySelector from '../common/querySelector';
+import setInnerHtml from '../dom/setInnerHtml';
 // #if _DEV  //  arena Combat
 import viewCombat from './viewCombat';
 // #endif
@@ -47,11 +48,11 @@ function doMsgHeader(logTable) {
 
 function canIgnore(aRow, playerName, isGuildMate) {
   if (!isGuildMate) {
-    const dateExtraText = `${'<nobr><span style="font-size:x-small;">'
-      + '[ <a title="Add to Ignore List" href="'}${doAddIgnore}${playerName
-    }">Ignore</a> ]</span></nobr>`;
-    aRow.cells[1].innerHTML = `${aRow.cells[1].innerHTML}<br>${
-      dateExtraText}`;
+    const dateExtraText = '<nobr><span style="font-size:x-small;">[ '
+      + `<a title="Add to Ignore List" href="'${doAddIgnore}${
+        playerName}">Ignore</a> ]</span></nobr>`;
+    setInnerHtml(`${aRow.cells[1].innerHTML}<br>${dateExtraText}`,
+      aRow.cells[1]);
   }
 }
 
@@ -60,12 +61,12 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   const buffingPlayerID = playerIDRE
     .exec(aRow.cells[2].innerHTML)[1];
   const buffingPlayerName = getTextTrim(aRow.cells[2].children[0]);
-  let extraText = `${' <span style="font-size:x-small;"><nobr>'
-    + '[ <span style="cursor:pointer;text-decoration:underline" '
-    + 'class="a-reply" target_player="'}${buffingPlayerName
-  }">Reply</span> | <a href="${tradeUrl}${buffingPlayerName
-  }">Trade</a> | <a title="Secure Trade" href="${secureUrl
-  }${buffingPlayerName}">ST</a>`;
+  let extraText = ' <span style="font-size:x-small;"><nobr>[ '
+    + '<span style="cursor:pointer;text-decoration:underline" '
+    + `class="a-reply" target_player="${
+      buffingPlayerName}">Reply</span> | <a href="${tradeUrl}${
+      buffingPlayerName}">Trade</a> | <a title="Secure Trade" href="${
+      secureUrl}${buffingPlayerName}">ST</a>`;
   extraText += doBuffLink(buffingPlayerID);
   if (calf.addAttackLinkToLog) {
     extraText += ` | <a href="${attackplayerUrl}${buffingPlayerName
@@ -73,6 +74,7 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   }
   extraText += ' ]</nobr></span>';
 
+  // eslint-disable-next-line no-param-reassign
   aRow.cells[2].innerHTML += extraText;
 }
 
@@ -93,6 +95,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
   let playerName;
   let colorPlayerName = false;
   if (hasPlayerLink(aRow)) {
+    // eslint-disable-next-line prefer-destructuring
     playerElement = aRow.cells[2].children[0];
     playerName = getTextTrim(playerElement);
     colorPlayerName = true;

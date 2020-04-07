@@ -1,6 +1,6 @@
 import allthen from '../common/allthen';
 import getPlayersByGuild from './getPlayersByGuild';
-import { isArray } from '../common/isArray';
+import isArray from '../common/isArray';
 import { nowSecs } from '../support/now';
 import partial from '../common/partial';
 import playerName from '../common/playerName';
@@ -43,7 +43,7 @@ function returnSelf(player, json) {
 
 function big(guild) { return guild[0] !== -1; }
 
-function getMembers(prev, curr) { return prev.concat(curr.members); }
+function getMembers(acc, curr) { return acc.concat(curr.members); }
 
 function parseGuild(guild, json) {
   const guildMembers = uniq(json.r.ranks, 'id').reduce(getMembers, []);

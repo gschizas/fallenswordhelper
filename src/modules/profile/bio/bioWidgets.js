@@ -1,7 +1,7 @@
 import './bioWidgets.css';
 import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -10,6 +10,7 @@ import on from '../../common/on';
 import onclick from '../../common/onclick';
 import { pCC } from '../../support/layout';
 import renderBio from './render';
+import setInnerHtml from '../../dom/setInnerHtml';
 import setValue from '../../system/setValue';
 import testQuant from '../../system/testQuant';
 import { createDiv, createInput } from '../../common/cElement';
@@ -35,7 +36,7 @@ const guildTagReplacements = [
   [/\[\*\](.*?)<br>/g, '<li>$1</li>'],
 ];
 
-function replaceTag(prev, re) { return prev.replace(re[0], re[1]); }
+function replaceTag(acc, re) { return acc.replace(re[0], re[1]); }
 
 function replaceTags(inputText, ary) { return ary.reduce(replaceTag, inputText); }
 
@@ -114,7 +115,7 @@ function bioHeight() {
 function updateBioCharacters() {
   let bioContents = convertTextToHtml(textArea.value);
   bioContents = renderBio(bioContents);
-  previewArea.innerHTML = bioContents;
+  setInnerHtml(bioContents, previewArea);
 }
 
 export default function injectBioWidgets() {

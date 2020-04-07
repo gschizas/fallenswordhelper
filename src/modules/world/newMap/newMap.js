@@ -4,7 +4,7 @@ import combatLogger from './combatLogger';
 import { createStyle } from '../../common/cElement';
 import doNotKill from './doNotKill/doNotKill';
 import executeAll from '../../common/executeAll';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import hideQTip from '../../common/hideQTip';
 // #if _DEV  //  hide titan combat results
@@ -14,7 +14,7 @@ import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
 import { injectSendGoldOnWorld } from './sendGold';
 import insertElement from '../../common/insertElement';
-import { interceptMouseEvents } from './creatureInfo/interceptMouseEvents';
+import interceptMouseEvents from './creatureInfo/interceptMouseEvents';
 import onWorld from './onWorld';
 import onclick from '../../common/onclick';
 import partial from '../../common/partial';
@@ -23,12 +23,12 @@ import startMonsterLog from './monsterLog/monsterLog';
 import viewCreature from './viewCreature/viewCreature';
 import worldPrefs from './worldPrefs/worldPrefs';
 import {
-  def_afterUpdateActionlist,
-  def_controlsKeydown,
-  def_fetch_playerBackpackCount,
-  def_fetch_playerBuffs,
-  def_fetch_worldRealmActions,
-  def_fetch_worldRealmDynamic,
+  defAfterUpdateActionlist,
+  defControlsKeydown,
+  defFetchPlayerBackpackCount,
+  defFetchPlayerBuffs,
+  defFetchWorldRealmActions,
+  defFetchWorldRealmDynamic,
 } from '../../support/constants';
 
 function hideGroupByType(type) { // jQuery
@@ -36,7 +36,7 @@ function hideGroupByType(type) { // jQuery
 }
 
 function hideGroupSubscribe(type) { // jQuery.min
-  $.subscribe(def_afterUpdateActionlist, partial(hideGroupByType, type));
+  $.subscribe(defAfterUpdateActionlist, partial(hideGroupByType, type));
 }
 
 const hideGroupTypes = [
@@ -73,16 +73,16 @@ function doMonsterColors() {
 function doRepair(e, key) {
   if (key === 'ACT_REPAIR') {
     GameData.fetch(
-      def_fetch_playerBackpackCount
-      + def_fetch_playerBuffs
-      + def_fetch_worldRealmDynamic
-      + def_fetch_worldRealmActions,
+      defFetchPlayerBackpackCount
+      + defFetchPlayerBuffs
+      + defFetchWorldRealmDynamic
+      + defFetchWorldRealmActions,
     );
   }
 }
 
 function repairButton() {
-  $.subscribe(def_controlsKeydown, doRepair);
+  $.subscribe(defControlsKeydown, doRepair);
 }
 
 function msgCenterOffset() {

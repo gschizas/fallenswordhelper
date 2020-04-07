@@ -29,8 +29,8 @@ function getParam(param) {
 }
 
 function newSelector(selector) {
-  const test_cmd = querySelector(selector);
-  return test_cmd && test_cmd.value || '-';
+  const testCmd = querySelector(selector);
+  return (testCmd && testCmd.value) || '-';
 }
 
 function isValid() {

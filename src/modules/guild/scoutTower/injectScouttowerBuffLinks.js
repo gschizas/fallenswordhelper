@@ -1,6 +1,6 @@
-import { arrayFrom } from '../../common/arrayFrom';
+import arrayFrom from '../../common/arrayFrom';
 import containsText from '../../common/containsText';
-import { dataRows } from '../../common/dataRows';
+import dataRows from '../../common/dataRows';
 import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import onclick from '../../common/onclick';

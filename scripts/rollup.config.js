@@ -1,9 +1,9 @@
-import calfBeta from './calfbeta.js';
-import calfDev from './calfdev.js';
-import calfProd from './calfprod.js';
-import fshBeta from './fshbeta.js';
-import fshDev from './fshdev.js';
-import fshProd from './fshprod.js';
+import calfBeta from './calfbeta';
+import calfDev from './calfdev';
+import calfProd from './calfprod';
+import fshBeta from './fshbeta';
+import fshDev from './fshdev';
+import fshProd from './fshprod';
 
 export default [
   fshDev,

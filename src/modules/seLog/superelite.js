@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import { entries } from '../common/entries';
+import entries from '../common/entries';
 import formatUtcDateTime from '../common/formatUtcDateTime';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -7,6 +7,7 @@ import jQueryNotPresent from '../common/jQueryNotPresent';
 import on from '../common/on';
 import { pCC } from '../support/layout';
 import partial from '../common/partial';
+import setInnerHtml from '../dom/setInnerHtml';
 import setValue from '../system/setValue';
 import { simpleCheckboxHtml } from '../settings/simpleCheckbox';
 import { createTBody, createTable } from '../common/cElement';
@@ -89,7 +90,7 @@ export default function superelite() {
   newCell.height = 20;
   newCell = insertNewRow();
   newCell.className = 'fshCenter';
-  newCell.innerHTML = simpleCheckboxHtml(enableSeTracker);
+  setInnerHtml(simpleCheckboxHtml(enableSeTracker), newCell);
   on(newCell, 'change', togglePref);
   if (calf.enableSeTracker) {
     getFshSeLog().then(waitForLog);

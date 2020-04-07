@@ -36,7 +36,7 @@ const urlPatch = [
 function isAuto() {
   let docRef = document.referrer
     .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
-  if (docRef) { docRef = docRef[1]; }
+  if (docRef) { [, docRef] = docRef; }
   return refAry.includes(docRef);
 }
 
@@ -66,8 +66,8 @@ export function end(category, variable, label) {
   sendTiming(category, variable, label);
 }
 
-function stripExtra(prev, curr) {
-  return prev.replace(curr[0], curr[1] || '');
+function stripExtra(acc, curr) {
+  return acc.replace(curr[0], curr[1] || '');
 }
 
 function fixupUrl() {
@@ -105,7 +105,8 @@ export function sendEvent(eventCategory, eventAction, eventLabel) {
 
 export function sendException(desc, fatal) {
   // #if _BETA  //  sendException
-  console.log('sendException', desc); // eslint-disable-line no-console
+  // eslint-disable-next-line no-console
+  console.log('sendException', desc);
   // #endif
   if (noGa()) { return; }
   ga('fshApp.send', 'exception', {

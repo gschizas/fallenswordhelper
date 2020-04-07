@@ -1,7 +1,7 @@
 import { createAnchor } from '../../common/cElement';
-import { dataRows } from '../../common/dataRows';
+import dataRows from '../../common/dataRows';
 import displayTracker from './displayTracker';
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getText from '../../common/getText';
 import getTitle from '../../common/getTitle';
@@ -14,7 +14,8 @@ import { pCC } from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import roundToString from '../../common/roundToString';
-import { def_table, guideUrl } from '../../support/constants';
+import setInnerHtml from '../../dom/setInnerHtml';
+import { defTable, guideUrl } from '../../support/constants';
 import { get, set } from '../../system/idb';
 
 function getTitanName(aRow) {
@@ -31,6 +32,7 @@ function cooldownTracker(theTitans, aRow) {
         cooldown.replace('Cooldown until: ', ''),
       );
     }
+    // eslint-disable-next-line no-param-reassign
     theTitans[myName] = {
       cooldownText: cooldown,
       coolTime,
@@ -42,6 +44,7 @@ function cooldownTracker(theTitans, aRow) {
 function anyMissing(newTitans, pair) {
   if (newTitans[pair[0]]) { return; }
   if (pair[1].coolTime <= now) { return; }
+  // eslint-disable-next-line no-param-reassign
   newTitans[pair[0]] = {
     cooldownText: pair[1].cooldownText,
     coolTime: pair[1].coolTime,
@@ -68,13 +71,13 @@ export function getTitanString(guildKills, totalHP, currentHP) {
 
 export function getKillsPct(currentNumberOfKills, guildKills) {
   if (currentNumberOfKills === 0) { return 0; }
-  return guildKills * 100 / currentNumberOfKills;
+  return (guildKills * 100) / currentNumberOfKills;
 }
 
 function summaryHtml(guildKills, currentHP, totalHP) {
   return `<br><span class="fshBlue"> (${
     roundToString(getKillsPct(totalHP - currentHP, guildKills), 2)
-  }% Current <br>${roundToString(guildKills * 100 / totalHP, 2)
+  }% Current <br>${roundToString((guildKills * 100) / totalHP, 2)
   }% Total<br>${getTitanString(guildKills, totalHP, currentHP)})`;
 }
 
@@ -103,8 +106,8 @@ function guideLink(aRow) {
 
   const realmCell = aRow.cells[1];
   const realmName = getText(realmCell);
-  realmCell.innerHTML = `<a href="${guideUrl}realms&search_name=${
-    realmName}" target="_blank">${realmName}</a>`;
+  setInnerHtml(`<a href="${guideUrl}realms&search_name=${
+    realmName}" target="_blank">${realmName}</a>`, realmCell);
 }
 
 function decorate(newTitans, aRow) {
@@ -118,7 +121,7 @@ function doTooMuch(titanTable, newTitans) {
 }
 
 function gotOldTitans(oldTitans) {
-  const titanTables = getElementsByTagName(def_table, pCC);
+  const titanTables = getElementsByTagName(defTable, pCC);
   injectScouttowerBuffLinks(titanTables);
   const titanTable = titanTables[1];
   const newTitans = {};

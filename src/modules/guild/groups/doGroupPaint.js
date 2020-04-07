@@ -23,8 +23,8 @@ function groupLocalTime(row) { // jQuery
   const theDateCell = $('td', row).eq(2);
   const x = xRE.exec(theDateCell.text());
   const curYear = new Date().getFullYear(); // TODO Boundary condition
-  theDateCell.append(`${'<br><span class="fshBlue fshXSmall">'
-    + 'Local: '}${dateFromUTC(x, curYear).toString().substr(0, 21)}</span>`);
+  theDateCell.append(`<br><span class="fshBlue fshXSmall">Local: ${
+    dateFromUTC(x, curYear).toString().substr(0, 21)}</span>`);
 }
 
 function creatorDotAndLink(membrlist, row) {

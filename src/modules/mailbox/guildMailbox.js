@@ -10,14 +10,15 @@ import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
 import retryAjax from '../ajax/retryAjax';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function translateReturnInfo(data) {
   const info = infoBoxFrom(data);
-  let _r = { r: 1, m: info };
+  let returnInfo = { r: 1, m: info };
   if (info === 'Item was transferred to the guild store!') {
-    _r = { r: 0, m: '' };
+    returnInfo = { r: 0, m: '' };
   }
-  return _r;
+  return returnInfo;
 }
 
 function guildMailboxTake(href) {
@@ -26,7 +27,8 @@ function guildMailboxTake(href) {
 
 function takeResult(target, data) {
   if (data.r === 0) {
-    closestTable(target).nextElementSibling.rows[0].cells[0].innerHTML = '<span class="fshGreen">Taken</span>';
+    setInnerHtml('<span class="fshGreen">Taken</span>',
+      closestTable(target).nextElementSibling.rows[0].cells[0]);
   }
 }
 

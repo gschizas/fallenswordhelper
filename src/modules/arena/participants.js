@@ -1,6 +1,6 @@
 import './participants.css';
 import currentGuildId from '../common/currentGuildId';
-import { isArray } from '../common/isArray';
+import isArray from '../common/isArray';
 import isObject from '../common/isObject';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
@@ -45,6 +45,7 @@ function testGuildies(myGuild, button, arena) {
 }
 
 function hazPlayers(myGuild, button, arena) {
+  // eslint-disable-next-line no-param-reassign
   button.dataset.tipped = arena.players.map(partial(listPlayers, myGuild))
     .join('<br>');
   button.classList.add('tip-static');

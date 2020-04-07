@@ -2,7 +2,7 @@ import { cdn } from '../system/system';
 import clickThis from '../common/clickThis';
 import { createInput } from '../common/cElement';
 import { daGsTake } from '../_dataAccess/_dataAccess';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import injectGuild from './guild';
 import insertElement from '../common/insertElement';
@@ -11,7 +11,7 @@ import onclick from '../common/onclick';
 import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
-import setText from '../common/setText';
+import setText from '../dom/setText';
 
 function doItemTable(checkbox) {
   insertHtmlBeforeEnd(checkbox.parentNode.nextElementSibling
@@ -25,6 +25,7 @@ function doCheckAll() {
 function takeResult(target, data) {
   if (data.s) {
     target.removeAttribute('style');
+    // eslint-disable-next-line no-param-reassign
     target.className = 'fshGreen';
     setText('Taken', target);
   }
@@ -35,7 +36,9 @@ function fastBp(el) {
     .children[0].value;
   daGsTake(itmId).then(partial(takeResult, el));
   setText('', el);
+  // eslint-disable-next-line no-param-reassign
   el.className = 'guildTagSpinner';
+  // eslint-disable-next-line no-param-reassign
   el.style.backgroundImage = `url('${cdn
   }ui/misc/spinner.gif')`;
 }

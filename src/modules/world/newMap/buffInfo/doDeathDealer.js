@@ -1,13 +1,15 @@
 import { createSpan } from '../../../common/cElement';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
-import setText from '../../../common/setText';
+import round from '../../../common/round';
+import setText from '../../../dom/setText';
 import toggleForce from '../../../common/toggleForce';
 
 let ddDiv;
 let ddSpan;
 
 function initDdDiv(containerDiv) {
+  // eslint-disable-next-line prefer-destructuring
   ddDiv = containerDiv.children[2];
   setText('Damage bonus: ', ddDiv);
   ddSpan = createSpan();
@@ -22,7 +24,7 @@ function getDdBonus(dd, killStreak) {
         Math.floor(killStreak / 5) * Number(dd.level),
       ) * 0.01, 20,
     );
-    const ddBonus = Math.round(ddPerc * 100) / 100;
+    const ddBonus = round(ddPerc, 2);
     return ddBonus.toString();
   }
   return '0';

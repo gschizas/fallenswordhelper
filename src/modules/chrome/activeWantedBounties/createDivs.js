@@ -3,8 +3,8 @@ import { createDiv } from '../../common/cElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import { pCR } from '../../support/layout';
 
-export var bountyListDiv;
-export var wantedListDiv;
+export let bountyListDiv;
+export let wantedListDiv;
 
 function createMiniBox() {
   return createDiv({ className: 'minibox' });

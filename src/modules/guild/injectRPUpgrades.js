@@ -8,15 +8,15 @@ import reduceBuffArray from '../common/reduceBuffArray';
 
 const packRE = />\s*([ a-zA-Z]+) Level (\d+)/g;
 
+const makeSpan = (bf) => `<br><span class="fshRed fshNoWrap">${bf[1]} ${
+  bf[2]} active</span>`;
+
 function checkForBuffs(myBuffs, el) {
   const { tipped } = el.dataset;
-  let packBuffs;
-  while ((packBuffs = packRE.exec(tipped)) !== null) {
-    if (myBuffs[packBuffs[1]] === Number(packBuffs[2])) {
-      insertHtmlBeforeEnd(el.parentNode,
-        `<br><span class="fshRed fshNoWrap">${packBuffs[1]} ${
-          packBuffs[2]} active</span>`);
-    }
+  const dupeBuffs = [...tipped.matchAll(packRE)]
+    .filter((bf) => myBuffs[bf[1]] === Number(bf[2]));
+  if (dupeBuffs.length > 0) {
+    insertHtmlBeforeEnd(el.parentNode, dupeBuffs.map(makeSpan).join(''));
   }
 }
 
@@ -36,5 +36,5 @@ function parseProfile(data) {
 
 export default function injectRPUpgrades() { // jQuery.min
   if (jQueryNotPresent()) { return; }
-  myStats().then(parseProfile);
+  myStats(true).then(parseProfile);
 }

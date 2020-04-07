@@ -4,13 +4,16 @@ import chunk from '../../common/chunk';
 import { componentList } from './prepareComponentList';
 import { daDestroyComponent } from '../../_dataAccess/_dataAccess';
 import deleteVisible from './deleteVisible';
-import { isArray } from '../../common/isArray';
+import isArray from '../../common/isArray';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import updateUsedCount from './updateUsedCount';
 
 function doSpinner(td) {
-  td.innerHTML = '';
+  setInnerHtml('', td);
+  // eslint-disable-next-line no-param-reassign
   td.className = 'guildTagSpinner';
+  // eslint-disable-next-line no-param-reassign
   td.style.backgroundImage = `url('${cdn
   }ui/misc/spinner.gif')`;
 }

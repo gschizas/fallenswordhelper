@@ -7,6 +7,7 @@ import insertElementAfter from '../common/insertElementAfter';
 import parseBuffLevel from './parseBuffLevel';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
@@ -24,15 +25,15 @@ function getBuffColor(myLvl, playerBuffLevel) {
 
 function buffRunning(el, playerBuffLevel, playerSpan) {
   if (!playerBuffLevel) {
-    playerSpan.innerHTML = '';
+    setInnerHtml('', playerSpan);
     return;
   }
   const lvlSpan = el.nextElementSibling.children[0].children[0];
   const myLvl = parseBuffLevel(lvlSpan);
   const fshPlayerSpan = newPlayerSpan(el, playerSpan);
   const buffColor = getBuffColor(myLvl, playerBuffLevel);
-  fshPlayerSpan.innerHTML = ` <span class="${buffColor
-  }">[${playerBuffLevel}]</span>`;
+  setInnerHtml(` <span class="${buffColor}">[${playerBuffLevel}]</span>`,
+    fshPlayerSpan);
 }
 
 function thisBuff(myBuffName, arr) {

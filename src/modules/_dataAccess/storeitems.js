@@ -1,4 +1,4 @@
-import { htmlResult } from './htmlResult';
+import htmlResult from './htmlResult';
 import indexAjaxData from '../ajax/indexAjaxData';
 
 export default function storeitems(invIdAry) {

@@ -1,14 +1,14 @@
-import { arrayFrom } from '../../common/arrayFrom.js';
+import arrayFrom from '../../common/arrayFrom';
 import buffList from '../../support/buffObj.json';
 import calf from '../../support/calf';
 import createDocument from '../../system/createDocument';
 import csvSplit from '../../common/csvSplit';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import guildManage from '../../ajax/guildManage';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
-import onclick from '../../common/onclick.js';
+import onclick from '../../common/onclick';
 import onlinePlayersPage from '../../ajax/onlinePlayersPage';
 import { pCC } from '../../support/layout';
 import pageLayout from './pageLayout';
@@ -17,6 +17,7 @@ import partial from '../../common/partial';
 import playerName from '../../common/playerName';
 import querySelectorArray from '../../common/querySelectorArray';
 import retryAjax from '../../ajax/retryAjax';
+import setInnerHtml from '../../dom/setInnerHtml';
 import setValue from '../../system/setValue';
 import stringSort from '../../system/stringSort';
 import { buffCustom, otherCustom } from './assets';
@@ -32,7 +33,7 @@ let findBuffNicks;
 let findBuffMinCastLevel;
 let onlinePlayers;
 let onlinePlayersSetting;
-export var extraProfile;
+export let extraProfile;
 let profilePagesToSearch;
 let profilePagesToSearchProcessed;
 
@@ -50,7 +51,7 @@ function getProfile(j) {
 function findBuffsParsePlayersForBuffs() { // Legacy
   // remove duplicates TODO
   // now need to parse player pages for buff ...
-  getElementById('potentialBuffers').innerHTML = onlinePlayers.length;
+  setInnerHtml(onlinePlayers.length, getElementById('potentialBuffers'));
   if (onlinePlayers.length <= 0) {
     updateProgress('Done.', 'blue');
     return;
@@ -60,7 +61,9 @@ function findBuffsParsePlayersForBuffs() { // Legacy
 }
 
 function calcNextPage(curPage, maxPage) { // Legacy
-  if (curPage === 1) { return Math.round(onlinePlayersSetting * maxPage / 50); }
+  if (curPage === 1) {
+    return Math.round((onlinePlayersSetting * maxPage) / 50);
+  }
   return curPage + 1;
 }
 
@@ -205,18 +208,18 @@ function findBuffsClearResults() { // Legacy
   const buffTable = getElementById('buffTable');
   arrayFrom(buffTable.rows).filter(notHeader)
     .forEach(partial(deleteRow, buffTable));
-  getElementById('buffNicks').innerHTML = '';
+  setInnerHtml('', getElementById('buffNicks'));
   updateProgress('Idle.', 'black');
-  getElementById('potentialBuffers').innerHTML = '';
-  getElementById('buffersProcessed').innerHTML = 0;
+  setInnerHtml('', getElementById('potentialBuffers'));
+  setInnerHtml('0', getElementById('buffersProcessed'));
 }
 
 function findAnyStart(progMsg) { // jQuery
   if (jQueryNotPresent()) { return; }
-  getElementById('buffNicks').innerHTML = findBuffNicks;
+  setInnerHtml(findBuffNicks, getElementById('buffNicks'));
   updateProgress(`Gathering list of ${progMsg} ...`, 'green');
   setMinLvl();
-  getElementById('buffersProcessed').innerHTML = 0;
+  setInnerHtml('0', getElementById('buffersProcessed'));
   onlinePlayers = [];
   extraProfile = getElementById('extraProfile').value;
   setValue('extraProfile', extraProfile);
@@ -260,7 +263,7 @@ export function injectFindBuffs(injector) { // Legacy
   calf.sortAsc = true;
   buffList.sort(stringSort);
   getExtraProfile();
-  content.innerHTML = pageLayout(buffCustom, extraProfile);
+  setInnerHtml(pageLayout(buffCustom, extraProfile), content);
   getBufferProgress();
   setupFindEvent(findBuffsStart);
   setupClearEvent();
@@ -269,7 +272,7 @@ export function injectFindBuffs(injector) { // Legacy
 export function injectFindOther(injector) { // Native - Bad
   const content = injector || pCC;
   getExtraProfile();
-  content.innerHTML = pageLayout(otherCustom, extraProfile);
+  setInnerHtml(pageLayout(otherCustom, extraProfile), content);
   getBufferProgress();
   setupFindEvent(findOtherStart);
   setupClearEvent();

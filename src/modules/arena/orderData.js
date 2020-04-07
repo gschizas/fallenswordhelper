@@ -1,4 +1,4 @@
-import { def_table } from '../support/constants';
+import { defTable } from '../support/constants';
 import isObject from '../common/isObject';
 import { moveRe } from './assets';
 import { oldIds, opts } from './setOpts';
@@ -13,6 +13,7 @@ function colourNewRow(row, id) { // jQuery
 function checkTournamentId(row, theCells) { // jQuery
   const matches = /#\s(\d+)/.exec(theCells.eq(0).text());
   if ([matches, opts, opts.id].every(isObject)) {
+    // eslint-disable-next-line prefer-destructuring
     opts.id[matches[1]] = matches[1];
     colourNewRow(row, matches[1]);
   }
@@ -64,11 +65,11 @@ function maxMoves(theCells, row) { // jQuery
 
 function reward(theCells) { // jQuery
   const cell = theCells.eq(8);
-  if (cell.children(def_table).length !== 1) { return; }
+  if (cell.children(defTable).length !== 1) { return; }
   cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
 }
 
-function _orderData(i, e) { // jQuery
+function prepareData(i, e) { // jQuery
   const row = $(e);
   const theCells = row.children();
   checkTournamentId(row, theCells);
@@ -81,5 +82,5 @@ function _orderData(i, e) { // jQuery
 
 export default function orderData(theTables) {
   const myRows = theTables.children('tbody').children('tr');
-  myRows.each(_orderData);
+  myRows.each(prepareData);
 }

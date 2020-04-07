@@ -1,9 +1,8 @@
 const fs = require('fs');
-const port = require('./config.json').port;
+const { port } = require('./config.json');
 
-const betaProdSourceRoot =
-  'https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/' +
-    `${process.env.npm_package_version}`;
+const betaProdSourceRoot = 'https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/'
+    + `${process.env.npm_package_version}`;
 
 function addSourceRoot(file, sourceRoot) {
   const data = fs.readFileSync(file);

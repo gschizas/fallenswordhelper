@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 function calcArm(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupArmorValue;

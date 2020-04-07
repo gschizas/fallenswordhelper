@@ -1,12 +1,12 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import intValue from '../system/intValue';
 import {
-  def_statArmor,
-  def_statAttack,
-  def_statDamage,
-  def_statDefense,
-  def_statHp,
+  defStatArmor,
+  defStatAttack,
+  defStatDamage,
+  defStatDefense,
+  defStatHp,
 } from '../support/constants';
 
 let attackElement;
@@ -16,11 +16,11 @@ let damageElement;
 let hpElement;
 
 function getElements(doc) {
-  attackElement = getElementById(def_statAttack, doc);
-  defenseElement = getElementById(def_statDefense, doc);
-  armorElement = getElementById(def_statArmor, doc);
-  damageElement = getElementById(def_statDamage, doc);
-  hpElement = getElementById(def_statHp, doc);
+  attackElement = getElementById(defStatAttack, doc);
+  defenseElement = getElementById(defStatDefense, doc);
+  armorElement = getElementById(defStatArmor, doc);
+  damageElement = getElementById(defStatDamage, doc);
+  hpElement = getElementById(defStatHp, doc);
 }
 
 function statAsNumber(el) {

@@ -4,6 +4,7 @@ import getText from '../../common/getText';
 import onlineDot from '../../common/onlineDot';
 import { playerIdUrl } from '../../support/constants';
 import querySelectorAll from '../../common/querySelectorAll';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 function memberHeader(oldhtml) {
   return `${onlineDot({ last_login: calf.membrList[oldhtml].last_login })
@@ -15,7 +16,7 @@ function memberHeader(oldhtml) {
 function updateMemberHeader(el) {
   const oldhtml = getText(el);
   if (calf.membrList[oldhtml]) {
-    el.innerHTML = memberHeader(oldhtml);
+    setInnerHtml(memberHeader(oldhtml), el);
   }
 }
 

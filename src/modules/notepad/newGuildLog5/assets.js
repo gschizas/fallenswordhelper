@@ -1,6 +1,5 @@
-export var guildLogFilter5 =
+export const guildLogFilter5 = '<thead><tr>'
   // '<table id="fshNewGuildLog" class="fshInvFilter">'
-  '<thead><tr>'
   + '<th colspan="11"><b>Guild Log Version 5</b></th>'
   + '<th colspan="3"><span id="rfsh" class="sendLink">Reset</span> '
   + '<a href="index.php?cmd=guild&subcmd=log" class="sendLink">'
@@ -44,12 +43,12 @@ export var guildLogFilter5 =
   // '</table>' +
   // '<table id="fshInjectHere5">' +
   // '</table>';
-export var headerRow = '<tbody><tr>'
+export const headerRow = '<tbody><tr>'
   + '<td class="header">&nbsp;</td>'
   + '<td class="header">Date</td>'
   + '<td class="header">Message</td>'
   + '</tr></tbody>';
-export var msgType = [
+export const msgType = [
   'Unknown', // 0
   'Potion', // 1
   'showRecallMessages', // 2
@@ -62,7 +61,7 @@ export var msgType = [
   'showGvGMessages', // 9
   'showTitanMessages', // 10
 ];
-export var defChecks = [true, true, true, true, true, true,
+export const defChecks = [true, true, true, true, true, true,
   true, true, true, true, true];
-export var noChecks = [false, false, false, false, false, false,
+export const noChecks = [false, false, false, false, false, false,
   false, false, false, false, false];

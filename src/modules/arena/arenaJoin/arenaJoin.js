@@ -1,6 +1,6 @@
 import './arenaJoin.postcss';
-import { getElementById } from '../../common/getElement';
-import { injectArena } from '../arena';
+import getElementById from '../../common/getElement';
+import injectArena from '../arena';
 import once from '../../common/once';
 import { pCC } from '../../support/layout';
 import querySelector from '../../common/querySelector';

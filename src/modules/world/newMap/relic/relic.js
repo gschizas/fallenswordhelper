@@ -2,7 +2,7 @@ import all from '../../../common/all';
 import allthen from '../../../common/allthen';
 import badData from '../badData';
 import createDocument from '../../../system/createDocument';
-import { def_relicView } from '../../../support/constants';
+import { defRelicView } from '../../../support/constants';
 import getGroupStats from '../../../ajax/getGroupStats';
 import getMercStats from '../../../ajax/getMercStats';
 import getProfile from '../../../ajax/getProfile';
@@ -10,7 +10,7 @@ import indexAjaxData from '../../../ajax/indexAjaxData';
 import once from '../../../common/once';
 import { parseGuild } from './parseGuild';
 import querySelector from '../../../common/querySelector';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import {
   doCalculations,
   parseDefender,
@@ -107,5 +107,5 @@ function viewRelic(e, data) {
 }
 
 export default function injectRelic() {
-  $.subscribe(def_relicView, viewRelic);
+  $.subscribe(defRelicView, viewRelic);
 }

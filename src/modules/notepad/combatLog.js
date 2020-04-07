@@ -1,8 +1,9 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import jConfirm from '../common/jConfirm';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import onclick from '../common/onclick';
 import { pCC } from '../support/layout';
+import setInnerHtml from '../dom/setInnerHtml';
 import { get, set } from '../system/idb';
 
 let content;
@@ -35,12 +36,12 @@ function notepadClearLog() { // jQuery
 
 function gotCombatLog(data) {
   if (data) { combatLog = data; }
-  content.innerHTML = `${'<h1>Combat Logs</h1><br /><form action="http://'
+  setInnerHtml('<h1>Combat Logs</h1><br /><form action="http://'
     + 'evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">'
     + '<div align="center"><textarea align="center" cols="80" rows="25" '
     + 'readonly style="background-color:white;font-family:Consolas,\''
     + 'Lucida Console\',\'Courier New\',monospace;" id="combatLog" '
-    + 'name="logs">'}${JSON.stringify(combatLog)}</textarea></div>`
+    + `name="logs">${JSON.stringify(combatLog)}</textarea></div>`
     + '<br /><br /><table width="100%"><tr>'
     + '<td colspan="2" align=center>'
     + '<input type="button" class="custombutton" value="Select All" '
@@ -49,7 +50,7 @@ function gotCombatLog(data) {
     + '<input type="button" class="custombutton" value="Clear" '
     + 'id="clearLog"></td>'
     + `</tr>${yuuzParser}</table></div>`
-    + '</form>';
+    + '</form>', content);
   textArea = getElementById('combatLog');
   onclick(getElementById('copyLog'), notepadCopyLog);
   onclick(getElementById('clearLog'), notepadClearLog);

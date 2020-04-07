@@ -1,14 +1,14 @@
 import './impWarning.css';
 import { createSpan } from '../../../common/cElement';
 import { daQuickbuff } from '../../../_dataAccess/_dataAccess';
-import { def_fetch_playerBuffs } from '../../../support/constants';
+import { defFetchPlayerBuffs } from '../../../support/constants';
 import getBuff from './getBuff';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
 import onclick from '../../../common/onclick';
 import playerName from '../../../common/playerName';
 import quickbuffSuccess from '../../../common/quickbuffSuccess';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import toggleForce from '../../../common/toggleForce';
 
 let impDiv;
@@ -16,7 +16,7 @@ let impRemainingSpan;
 
 function refreshBuffs(json) {
   if (quickbuffSuccess(json)) {
-    GameData.fetch(def_fetch_playerBuffs);
+    GameData.fetch(defFetchPlayerBuffs);
   }
 }
 
@@ -43,6 +43,7 @@ function getImpWarningStyle(impsRem) {
 }
 
 function initImpDiv(containerDiv) {
+  // eslint-disable-next-line prefer-destructuring
   impDiv = containerDiv.children[0];
   setText('Shield Imps Remaining: ', impDiv);
   impRemainingSpan = createSpan();

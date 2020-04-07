@@ -1,5 +1,5 @@
 import addCommas from '../system/addCommas';
-import { arrayFrom } from '../common/arrayFrom';
+import arrayFrom from '../common/arrayFrom';
 import contains from '../common/contains';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getTextTrim from '../common/getTextTrim';

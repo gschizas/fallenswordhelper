@@ -5,7 +5,7 @@ import { nowSecs } from '../support/now';
 import partial from '../common/partial';
 import { get, set } from '../system/idb';
 
-export var oldLog;
+export let oldLog;
 let timeoutId;
 let intervalId;
 
@@ -58,7 +58,7 @@ export function doBackgroundCheck() {
 }
 
 function whenWasLastCheck() {
-  return nowSecs - (oldLog && oldLog.lastUpdate || 0);
+  return nowSecs - ((oldLog && oldLog.lastUpdate) || 0);
 }
 
 function setupBackgroundCheck() {

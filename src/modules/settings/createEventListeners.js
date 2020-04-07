@@ -1,10 +1,11 @@
 import dialogMsg from '../common/dialogMsg';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import injectMonsterLog from '../notepad/monstorLog/monstorLog';
 import injectNotepadShowLogs from '../notepad/combatLog';
 import insertElement from '../common/insertElement';
 import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
+import numberIsNaN from '../common/numberIsNaN';
 import onclick from '../common/onclick';
 import querySelector from '../common/querySelector';
 import saveBoxes from './saveBoxes.json';
@@ -65,7 +66,7 @@ function saveOther(name) {
 function checkNumeric(name, min, def) {
   const myInput = findInput(name);
   const inputValue = Number(myInput.value);
-  if (isNaN(inputValue) || inputValue <= min) {
+  if (numberIsNaN(inputValue) || inputValue <= min) {
     myInput.value = def;
   }
 }

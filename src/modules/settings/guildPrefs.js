@@ -24,10 +24,10 @@ function injectSettingsGuildData(guildType) {
 }
 
 function guildNames() {
-  return `${'<tr><td colspan="2">'
+  return '<tr><td colspan="2">'
       + 'Enter guild names, separated by commas</td></tr>'
-    + '<tr><td class="fshRight">Own Guild</td><td>'}${
-    injectSettingsGuildData('Self')}</td></tr>`
+    + `<tr><td class="fshRight">Own Guild</td><td>${
+      injectSettingsGuildData('Self')}</td></tr>`
     + `<tr><td class="fshRight">Friendly Guilds</td><td>${
       injectSettingsGuildData('Frnd')}</td></tr>`
     + `<tr><td class="fshRight">Old Guilds</td><td>${
@@ -52,14 +52,14 @@ function pvpTargets() {
 
 export default function guildPrefs() {
   // Guild Manage
-  return `${'<tr><th colspan="2"><b>Guild>Manage preferences'
-      + '</b></th></tr>'}${
-    guildNames()
-  }${pvpTargets()
-  }${bunchOfSimple([
-    'showAdmin',
-    'ajaxifyRankControls',
-    'detailedConflictInfo',
-    'enableHistoryCompressor',
-  ])}`;
+  return '<tr><th colspan="2"><b>Guild>Manage preferences'
+    + `</b></th></tr>${
+      guildNames()}${
+      pvpTargets()}${
+      bunchOfSimple([
+        'showAdmin',
+        'ajaxifyRankControls',
+        'detailedConflictInfo',
+        'enableHistoryCompressor',
+      ])}`;
 }

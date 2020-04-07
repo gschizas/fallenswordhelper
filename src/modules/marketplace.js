@@ -1,8 +1,9 @@
 import addCommas from './system/addCommas';
 import { closestTable } from './common/closest';
-import { getElementById } from './common/getElement';
+import getElementById from './common/getElement';
 import on from './common/on';
 import { pCC } from './support/layout';
+import setInnerHtml from './dom/setInnerHtml';
 
 let amt;
 let prc;
@@ -36,13 +37,13 @@ function totalPrice(amount, sellPrice) {
 
 function marketplaceWarning(sellPrice) {
   const amount = getAmount().value;
-  getWarning().innerHTML = `${'<span class="fshBlue">You are offering to buy '
-    + '<b>'}${amount}</b> FSP for >> <b>${addCommas(sellPrice)
-  }</b> (Total: ${addCommas(totalPrice(amount, sellPrice))})</span>`;
+  setInnerHtml(`<span class="fshBlue">You are offering to buy <b>${
+    amount}</b> FSP for >> <b>${addCommas(sellPrice)}</b> (Total: ${
+    addCommas(totalPrice(amount, sellPrice))})</span>`, getWarning());
 }
 
 function clearWarning() {
-  if (warn && warn.innerHTML !== '') { warn.innerHTML = ''; }
+  if (warn && warn.innerHTML !== '') { setInnerHtml('', warn); }
 }
 
 function addMarketplaceWarning() {

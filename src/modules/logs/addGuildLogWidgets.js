@@ -1,6 +1,6 @@
-import { arrayFrom } from '../common/arrayFrom';
+import arrayFrom from '../common/arrayFrom';
 import contains from '../common/contains';
-import { dataRows } from '../common/dataRows';
+import dataRows from '../common/dataRows';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
@@ -8,6 +8,7 @@ import { pCC } from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
 import searchPlayerHref from '../common/searchPlayerHref';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function getPlayer(playerAry) { // Legacy
   if (playerAry) { return Number(playerAry[1]); }
@@ -27,6 +28,7 @@ function msgDoesNotIncludePlayer(aRow) {
     && secondPlayerID !== playerId();
 }
 
+// eslint-disable-next-line no-param-reassign
 function stripClassName(el) { el.className = ''; }
 
 function findPlayers(aRow) { // Legacy
@@ -40,6 +42,7 @@ function findPlayers(aRow) { // Legacy
 function dimIfNotMe(aRow, hasInvited, targetPlayerName) {
   if (!hasInvited && targetPlayerName !== playerName()) {
     $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
+    // eslint-disable-next-line no-param-reassign
     aRow.style.color = 'gray';
   }
 }
@@ -49,7 +52,7 @@ function likeInvite(aRow, hasInvited) {
   const parts = message.split('\'');
   const targetPlayerName = parts[1];
   parts[1] = searchPlayerHref(targetPlayerName);
-  aRow.cells[2].innerHTML = parts.join('\'');
+  setInnerHtml(parts.join('\''), aRow.cells[2]);
   dimIfNotMe(aRow, hasInvited, targetPlayerName);
 }
 

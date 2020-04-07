@@ -36,7 +36,7 @@ function makeActBody(tg) {
   insertElement(tg, actBody);
 }
 
-export function makeTg() {
+export default function makeTg() {
   const tg = createTable({ id: 'tg' });
   headerRow(tg);
   makeActBody(tg);

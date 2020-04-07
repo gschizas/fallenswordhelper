@@ -22,9 +22,9 @@ const buttonLabels = [
   'Quick Extract Components',
 ];
 
-function addButtons(prev, el) {
-  insertElement(prev, decorateButton(el));
-  return prev;
+function addButtons(acc, el) {
+  insertElement(acc, decorateButton(el));
+  return acc;
 }
 
 function componentBtnContainer() {

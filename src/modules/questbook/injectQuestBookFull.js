@@ -1,4 +1,4 @@
-import { def_table } from '../support/constants';
+import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import injectQuestRow from './injectQuestRow';
@@ -26,25 +26,21 @@ const savePrefKey = [
   'lastSeasonalNotStartedQuestPage',
 ];
 
-function pageCombo(aLinks, prev, curr, i) {
+function pageCombo(aLinks, acc, curr, i) {
   if (aLinks[i].children[0].getAttribute('color') === '#FF0000') {
-    return prev + curr;
+    return acc + curr;
   }
-  return prev;
+  return acc;
 }
 
 function whereAmI() {
   const aLinks = getElementsByTagName('a', pCC);
-  normalLink = aLinks[0];
-  seasonLink = aLinks[1];
-  activeLink = aLinks[2];
-  completeLink = aLinks[3];
-  notStartedLink = aLinks[4];
+  [normalLink, seasonLink, activeLink, completeLink, notStartedLink] = aLinks;
   currentPageValue = currentLocationValue.reduce(partial(pageCombo, aLinks), 0);
 }
 
 function storeLoc() {
-  const lastQBPage = location.search;
+  const lastQBPage = window.location.search;
   setValue('lastActiveQuestPage', lastQBPage);
   setValue(savePrefKey[currentPageValue], lastQBPage);
 }
@@ -102,7 +98,7 @@ function storeQuestPage() {
 export default function injectQuestBookFull() {
   onclick(pCC, updateUrl);
   storeQuestPage();
-  const questTable = getElementsByTagName(def_table, pCC)[5];
+  const questTable = getElementsByTagName(defTable, pCC)[5];
   if (!questTable) { return; }
   injectQuestRow(questTable);
 }

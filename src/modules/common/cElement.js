@@ -1,4 +1,4 @@
-import { def_table } from '../support/constants';
+import { defTable } from '../support/constants';
 import mixin from './mixin';
 
 function cElement(type, props) {
@@ -16,7 +16,7 @@ export function createSpan(props) {
 }
 
 export function createTable(props) {
-  return cElement(def_table, props);
+  return cElement(defTable, props);
 }
 
 export function createTHead(props) {

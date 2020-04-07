@@ -5,9 +5,9 @@ import partial from '../common/partial';
 
 function ajaxResult(componentId, html) {
   const info = infoBoxFrom(html);
-  let _r = 1;
-  if (info === 'Component destroyed.') { _r = 0; }
-  return { r: _r, m: info, c: componentId };
+  let r = 1;
+  if (info === 'Component destroyed.') { r = 0; }
+  return { r, m: info, c: componentId };
 }
 
 function destroyComponent(componentId) {

@@ -1,4 +1,4 @@
-import { arrayFrom } from './arrayFrom';
+import arrayFrom from './arrayFrom';
 import { closestTable } from './closest';
 import contains from './contains';
 import { createDiv } from './cElement';
@@ -13,14 +13,14 @@ function cellOneHazText(curr) {
   return curr.cells[1] && getText(curr.cells[1]);
 }
 
-function reduceStatTable(prev, curr, index) {
+function reduceStatTable(acc, curr, index) {
   const key = getTextTrim(curr.cells[0]).replace(':', '');
-  if (!key) { return prev; }
-  prev[key] = { ind: index };
+  if (!key) { return acc; }
+  acc[key] = { ind: index };
   if (cellOneHazText(curr)) {
-    prev[key].value = Number(getTextTrim(curr.cells[1]).replace('+', ''));
+    acc[key].value = Number(getTextTrim(curr.cells[1]).replace('+', ''));
   }
-  return prev;
+  return acc;
 }
 
 function getVal(prop, obj) {
@@ -37,7 +37,7 @@ function getLastIndex(obj, tbl) {
   return tbl.rows[tbl.rows.length - 1];
 }
 
-function sum(statObj, prev, curr) { return prev + getVal(curr, statObj); }
+function sum(statObj, acc, curr) { return acc + getVal(curr, statObj); }
 
 function calcTotalStats(statObj) {
   return ['Attack', 'Defense', 'Armor', 'Damage', 'HP']
@@ -63,6 +63,7 @@ function fshDataFilter(data) {
 
 function fshPreFilter(options) {
   if (options.url.startsWith('fetchitem')) {
+    // eslint-disable-next-line no-param-reassign
     options.dataFilter = fshDataFilter;
   }
 }

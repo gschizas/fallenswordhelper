@@ -69,7 +69,7 @@ function process(tabs, values) {
   // #endif
 }
 
-export function injectArena() { // jQuery
+export default function injectArena() { // jQuery
   if (jQueryNotPresent()) { return; }
   const tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) { // Join error screen

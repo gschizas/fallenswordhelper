@@ -1,4 +1,4 @@
-export const theadHtml = `
+const theadHtml = `
 <th data-st-sort="player.lower"><span>Member</span></th>
 <th data-st-sort="player.level"><span>Lvl</span></th>
 <th data-st-sort="player.rank"><span>Rank</span></th>
@@ -12,3 +12,5 @@ export const theadHtml = `
 <th data-st-sort="stats.8"><span>Relic</span></th>
 <th data-st-sort="stats.5"><span>XP Contrib</span></th>
 `;
+
+export default theadHtml;

@@ -1,10 +1,11 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import outputFormat from '../system/outputFormat';
 import querySelector from '../common/querySelector';
+import setInnerHtml from '../dom/setInnerHtml';
 
-function buffTimeLeft(_s) {
-  const m = Math.floor(_s / 60);
-  const s = _s % 60;
+function buffTimeLeft(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
   let buffTimeToExpire = outputFormat(m, 'm');
   if (m > 0 && s > 0) { buffTimeToExpire += ' '; }
   buffTimeToExpire += outputFormat(s, 's');
@@ -33,12 +34,12 @@ function buffRunning(dict, buff) {
 }
 
 function getBuff(dict, buff, inject) {
-  inject.innerHTML = buffRunning(dict, buff);
+  setInnerHtml(buffRunning(dict, buff), inject);
 }
 
-function makeDictionary(prev, curr) {
-  prev[curr.name] = curr.duration;
-  return prev;
+function makeDictionary(acc, curr) {
+  acc[curr.name] = curr.duration;
+  return acc;
 }
 
 export default function populateBuffs(responseText) {

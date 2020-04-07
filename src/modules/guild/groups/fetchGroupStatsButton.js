@@ -7,10 +7,10 @@ import partial from '../../common/partial';
 import querySelectorArray from '../../common/querySelectorArray';
 
 function parseGroupData(linkElement, obj) {
-  const extraText = `${'<table class="fshgrpstat">'
+  const extraText = '<table class="fshgrpstat">'
     + '<tr>'
     + '<td class="fshBrown">Attack</td>'
-    + '<td class="fshRight">'}${obj.attack}</td>`
+    + `<td class="fshRight">${obj.attack}</td>`
     + '<td class="fshBrown">Defense</td>'
     + `<td class="fshRight">${obj.defense}</td>`
     + '</tr><tr>'
@@ -33,6 +33,7 @@ function thisLink(aLink) {
 }
 
 function fetchGroupData(evt) {
+  // eslint-disable-next-line no-param-reassign
   evt.target.disabled = true;
   querySelectorArray('#pCC a[href*="=viewstats&"]').forEach(thisLink);
 }

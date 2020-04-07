@@ -9,7 +9,6 @@ import joinAllGroup from './joinAllGroup';
 import logPage from './logPage';
 import movePage from './movePage';
 import on from '../../common/on';
-import partial from '../../common/partial';
 import profile from './profile';
 import toWorld from './toWorld';
 
@@ -40,30 +39,22 @@ const keyLookup = [
   ['y', doSendGold], // fast send gold [y]
 ];
 
-function thisKey(key, arr) { return key === arr[0]; }
-
 function handleKey(key) {
-  const mapping = keyLookup.find(partial(thisKey, key));
+  const mapping = keyLookup.find((arr) => key === arr[0]);
   if (mapping) { mapping[1](mapping[2]); }
 }
 
-function notTagName(evt, tag) { return evt.target.tagName !== tag; }
-
 const bailOut = [
-  function (evt) {
-    return ['HTML', 'BODY'].every(partial(notTagName, evt));
-  },
+  (evt) => ['HTML', 'BODY'].every((tag) => evt.target.tagName !== tag),
   /* ignore control, alt and meta keys
   (I think meta is the command key in Macintoshes) */
-  function (evt) { return evt.ctrlKey; },
-  function (evt) { return evt.metaKey; },
-  function (evt) { return evt.altKey; },
+  (evt) => evt.ctrlKey,
+  (evt) => evt.metaKey,
+  (evt) => evt.altKey,
 ];
 
-function reason(evt, fn) { return fn(evt); }
-
 function doNotHandle(evt) {
-  return bailOut.some(partial(reason, evt));
+  return bailOut.some((fn) => fn(evt));
 }
 
 function handleKeyUp(e) {

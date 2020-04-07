@@ -1,5 +1,5 @@
 import { createDiv } from '../../common/cElement';
-import { entries } from '../../common/entries';
+import entries from '../../common/entries';
 import getValueJSON from '../../system/getValueJSON';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
@@ -7,8 +7,10 @@ import { ahSearchUrl, auctionSearchUrl } from '../../support/constants';
 
 function foundInvItem(invCount, name) {
   if (invCount[name]) {
+    // eslint-disable-next-line no-param-reassign
     invCount[name].count += 1;
   } else {
+    // eslint-disable-next-line no-param-reassign
     invCount[name] = { count: 1, nicknameList: [] };
   }
 }
@@ -21,8 +23,8 @@ function found(pair) { return pair[1].nicknameList.length > 0; }
 
 function foundHtml(pair) {
   return `<tr><td>${pair[0]}</td><td>${
-    pair[1].nicknameList.map(partial(ahLink, pair[0])).join(' ')
-  }</td><td>${pair[1].count}</td><td></td><td></td></tr>`;
+    pair[1].nicknameList.map(partial(ahLink, pair[0])).join(' ')}</td><td>${
+    pair[1].count}</td><td></td><td></td></tr>`;
 }
 
 function displayFoundCount(invCount) {
@@ -40,8 +42,8 @@ function displayNotFound(quickSL) {
 function others(pair) { return pair[1].nicknameList.length === 0; }
 
 function otherHtml(pair) {
-  return `<tr><td>${pair[0]}</td><td></td><td>${pair[1].count
-  }</td><td></td><td></td></tr>`;
+  return `<tr><td>${pair[0]}</td><td></td><td>${
+    pair[1].count}</td><td></td><td></td></tr>`;
 }
 
 function displayOtherCount(invCount) {
@@ -50,9 +52,9 @@ function displayOtherCount(invCount) {
 
 function buildHTML(invCount, quickSL) {
   // TODO this is going to need significant rebuild
-  return `${'<table width="100%" cellspacing="2" cellpadding="2"><thead>'
+  return '<table width="100%" cellspacing="2" cellpadding="2"><thead>'
     + '<tr><th colspan="5" class="fshCenter">Items from '
-    + '<a href="'}${auctionSearchUrl}">`
+    + `<a href="${auctionSearchUrl}">`
     + 'AH Quick Search</a> found in your inventory</th></tr>'
     + '<tr><th>Name</th><th>Nick Name</th><th>Inv Count</th>'
     + `<th>AH Min Price</th><th>AH BuyNow Price</th></tr></thead><tbody>${
@@ -73,6 +75,7 @@ function buildHTML(invCount, quickSL) {
 
 function inQuickSearchList(invCount, name, listItem) {
   if (name === listItem.searchname) {
+    // eslint-disable-next-line no-param-reassign
     listItem.found = true;
     if (invCount[name].nicknameList.indexOf(listItem.nickname) < 0) {
       invCount[name].nicknameList.push(listItem.nickname);

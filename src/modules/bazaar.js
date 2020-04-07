@@ -1,6 +1,6 @@
 import { daBazaarBuy } from './_dataAccess/_dataAccess';
 import getArrayByTagName from './common/getArrayByTagName';
-import { getElementById } from './common/getElement';
+import getElementById from './common/getElement';
 import getElementsByTagName from './common/getElementsByTagName';
 import getText from './common/getText';
 import insertElement from './common/insertElement';
@@ -11,7 +11,8 @@ import on from './common/on';
 import onclick from './common/onclick';
 import outputResult from './common/outputResult';
 import { pCC } from './support/layout';
-import setText from './common/setText';
+import setInnerHtml from './dom/setInnerHtml';
+import setText from './dom/setText';
 import testQuant from './system/testQuant';
 
 let ItemId;
@@ -44,7 +45,7 @@ function buyTarget(target, theValue) {
   const dupNode = target.cloneNode(false);
   dupNode.className = 'bazaarSelected tip-dynamic';
   const selected = getElementById('selectedItem');
-  selected.innerHTML = '';
+  setInnerHtml('', selected);
   insertElement(selected, dupNode);
 }
 

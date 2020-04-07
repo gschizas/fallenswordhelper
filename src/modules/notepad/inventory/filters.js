@@ -10,7 +10,7 @@ function doLvlFilter(_settings, data) {
 }
 
 export function lvlFilter() { // jQuery
-  itemLvlTest = [function (level) { return level === 0; }].concat(playerLvlTest);
+  itemLvlTest = [(level) => level === 0].concat(playerLvlTest);
   /* Custom filtering function which will search
   data in column 2 between two values */
   $.fn.dataTable.ext.search.push(doLvlFilter);

@@ -1,6 +1,6 @@
 import { createSpan } from '../common/cElement';
 import { doAddIgnore } from '../support/constants';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';

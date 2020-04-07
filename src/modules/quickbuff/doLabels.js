@@ -5,6 +5,7 @@ import querySelectorArray from '../common/querySelectorArray';
 function addStamCost(el, nameSpan) {
   const dataTipped = nameSpan.dataset.tipped;
   const { cost } = el.previousElementSibling.dataset;
+  // eslint-disable-next-line no-param-reassign
   nameSpan.dataset.tipped = dataTipped
     .replace('</center>', `<br>Stamina Cost: ${cost}$&`);
 }

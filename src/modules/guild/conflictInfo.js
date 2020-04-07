@@ -1,12 +1,13 @@
 import conflicts from '../ajax/conflicts';
 import createDocument from '../system/createDocument';
-import { dataRows } from '../common/dataRows';
+import dataRows from '../common/dataRows';
 import { guildSubcmdUrl } from '../support/constants';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function makeCell(newRow, html) {
-  newRow.insertCell(-1).innerHTML = html;
+  setInnerHtml(html, newRow.insertCell(-1));
 }
 
 function buildRow(insertHere, html1, html2) {

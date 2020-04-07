@@ -1,16 +1,16 @@
-import { entries } from '../common/entries';
+import entries from '../common/entries';
 import isObject from '../common/isObject';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 import { set } from '../system/idb';
 
-function func(withPvpId, prev, [key, value]) {
+function func(withPvpId, acc, [key, value]) {
   const thisBtn = withPvpId.find(([, id]) => id === key);
   if (thisBtn) {
     thisBtn[0].closest('tr').style.backgroundColor = '#ff0000';
-    prev[key] = value;
+    acc[key] = value;
   }
-  return prev;
+  return acc;
 }
 
 export default function arenaFull(obj) {

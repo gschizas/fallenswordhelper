@@ -1,17 +1,17 @@
 import calf from '../../../support/calf';
-import { isArray } from '../../../common/isArray';
+import isArray from '../../../common/isArray';
 
-export var huntingBuffs;
-export var huntingBuffsName;
+export let huntingBuffs;
+export let huntingBuffsName;
 
 export function setCurrentBuffList() {
-  const lookup = [, // eslint-disable-line no-sparse-arrays
+  // eslint-disable-next-line no-sparse-arrays
+  const lookup = [,
     [calf.buffs, calf.buffsName],
     [calf.buffs2, calf.buffs2Name],
     [calf.buffs3, calf.buffs3Name],
   ][calf.enabledHuntingMode];
   if (isArray(lookup)) {
-    huntingBuffs = lookup[0];
-    huntingBuffsName = lookup[1];
+    [huntingBuffs, huntingBuffsName] = lookup;
   }
 }

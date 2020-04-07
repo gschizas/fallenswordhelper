@@ -1,4 +1,4 @@
-import { entries } from './entries';
+import entries from './entries';
 import makeFolderSpan from './makeFolderSpan';
 
 function wornSelector(needsWorn) {

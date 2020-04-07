@@ -2,7 +2,7 @@ import combatView from '../../ajax/combatView';
 import createDocument from '../../system/createDocument';
 import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
-import { keys } from '../../common/keys';
+import keys from '../../common/keys';
 import { nowSecs } from '../../support/now';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
@@ -14,15 +14,15 @@ import { get, set } from '../../system/idb';
 export let combatCache = {};
 
 function currentCombatRecord(data, combatId, sevenDays) {
-  return combatId === 'lastCheck' || data[combatId].logTime
-    && data[combatId].logTime > sevenDays;
+  return combatId === 'lastCheck'
+    || (data[combatId].logTime && data[combatId].logTime > sevenDays);
 }
 
-function keepRecent(data, sevenDays, prev, combatId) {
+function keepRecent(data, sevenDays, acc, combatId) {
   if (currentCombatRecord(data, combatId, sevenDays)) {
-    prev[combatId] = data[combatId];
+    acc[combatId] = data[combatId];
   }
-  return prev;
+  return acc;
 }
 
 function cleanCache(data) {
@@ -58,7 +58,8 @@ function check(specialHtml, el, i) {
   if (!inSpecialsList(el)) {
     const label = `${JSON.stringify(el)} ${getText(specialHtml[i])}`;
     // #if _DEV  //  PvP missing Special
-    console.log(label); // eslint-disable-line no-console
+    // eslint-disable-next-line no-console
+    console.log(label);
     // #endif
     sendEvent('Logs', 'Missing PvP Special', label);
   }
@@ -77,8 +78,10 @@ function unknownSpecials(json) {
 
 export function cacheCombat(aRow, json) {
   if (json.s) {
-    json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
-    combatCache[json.r.id] = json;
+    combatCache[json.r.id] = {
+      ...json,
+      logTime: parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000,
+    };
     set('fsh_pvpCombat', combatCache);
     unknownSpecials(json);
   }

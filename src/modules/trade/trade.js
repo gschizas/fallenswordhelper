@@ -3,11 +3,12 @@ import calf from '../support/calf';
 import { createTr } from '../common/cElement';
 import defaults from '../support/dataObj.json';
 import doFolders from './doFolders';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getValue from '../system/getValue';
 import hasClass from '../common/hasClass';
 import insertElementBefore from '../common/insertElementBefore';
 import jsonParse from '../common/jsonParse';
+import numberIsNaN from '../common/numberIsNaN';
 import onclick from '../common/onclick';
 // #if _DEV  //  oneByOne
 import oneByOne from './oneByOne';
@@ -17,7 +18,7 @@ import querySelectorArray from '../common/querySelectorArray';
 
 function getHowMany(itemTables) {
   const howMany = parseInt(getElementById('fshSendHowMany').value, 10);
-  if (isNaN(howMany)) { return itemTables.length; }
+  if (numberIsNaN(howMany)) { return itemTables.length; }
   if (calf.subcmd !== '-') { return Math.min(100, howMany); }
   return howMany;
 }
@@ -46,6 +47,7 @@ function getCheckbox(el) {
 }
 
 function doCheck(bool, checkbox) {
+  // eslint-disable-next-line no-param-reassign
   checkbox.checked = bool;
 }
 
@@ -99,11 +101,11 @@ function makeSpan(el) {
 function injectTradeOld() {
   const multiple = createTr({
     id: 'fshSelectMultiple',
-    innerHTML: `${'<td colspan=6>Select:&ensp;<span id="itemid-1" '
+    innerHTML: '<td colspan=6>Select:&ensp;<span id="itemid-1" '
       + 'class="fshCheckAll fshLink fshNoWrap">All Items</span> &ensp;'
       + '<span id="itemid-2" class="fshCheckAll fshLink fshNoWrap">'
-      + 'All Resources</span>'}${getItemList().map(makeSpan).join('')
-    } &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" `
+      + `All Resources</span>${getItemList().map(makeSpan).join('')}`
+      + ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" '
       + 'class="custominput" value="all" size=3></td>',
   });
   onclick(multiple, toggleAllPlants);

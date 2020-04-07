@@ -1,9 +1,9 @@
 import del from 'rollup-plugin-delete';
-import serve from 'rollup-plugin-serve';
 import rollupCalf from './rollupCalf';
+import serve from 'rollup-plugin-serve';
 
 const fs = require('fs');
-const port = require('./config.json').port;
+const { port } = require('./config.json');
 
 const outPath = 'dist/watch/';
 

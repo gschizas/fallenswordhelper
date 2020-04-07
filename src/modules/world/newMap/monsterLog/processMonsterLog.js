@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import calf from '../../../support/calf';
 import partial from '../../../common/partial';
 import { get, set } from '../../../system/idb';

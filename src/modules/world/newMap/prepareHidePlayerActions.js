@@ -1,12 +1,12 @@
 import getArrayByClassName from '../../common/getArrayByClassName';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import setValue from '../../system/setValue';
 import {
-  def_afterUpdateActionlist,
-  def_fetch_worldRealmActions,
+  defAfterUpdateActionlist,
+  defFetchWorldRealmActions,
 } from '../../support/constants';
 
 let hidePlayerActions;
@@ -14,7 +14,7 @@ let hidePlayerActions;
 export function toggleHidePlayerActions() {
   hidePlayerActions = !hidePlayerActions;
   setValue('hidePlayerActions', hidePlayerActions);
-  GameData.fetch(def_fetch_worldRealmActions);
+  GameData.fetch(defFetchWorldRealmActions);
 }
 
 function hideActions(el) {
@@ -32,6 +32,6 @@ function doHidePlayerActions() {
 
 export function prepareHidePlayerActions() {
   hidePlayerActions = getValue('hidePlayerActions');
-  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
+  $.subscribe(defAfterUpdateActionlist, doHidePlayerActions);
   doHidePlayerActions();
 }

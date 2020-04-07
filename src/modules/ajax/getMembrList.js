@@ -18,6 +18,7 @@ function addMembrListToForage(membrList) {
 }
 
 function memberToObject(membrList, guildId, ele) {
+  // eslint-disable-next-line no-param-reassign
   membrList[guildId][ele.username] = ele;
 }
 
@@ -38,15 +39,11 @@ function getAndCacheGuildMembers(guildId) {
 }
 
 const testList = [
-  function (guildId, membrList) { return membrList; },
-  function (guildId, membrList) { return isObject(membrList); },
-  function (guildId, membrList) { return isObject(membrList[guildId]); },
-  function (guildId, membrList) {
-    return typeof membrList[guildId].lastUpdate === 'number';
-  },
-  function (guildId, membrList) {
-    return membrList[guildId].lastUpdate > now - 300000;
-  },
+  (guildId, membrList) => membrList,
+  (guildId, membrList) => isObject(membrList),
+  (guildId, membrList) => isObject(membrList[guildId]),
+  (guildId, membrList) => typeof membrList[guildId].lastUpdate === 'number',
+  (guildId, membrList) => membrList[guildId].lastUpdate > now - 300000,
 ];
 
 function condition(guildId, membrList, e) { return e(guildId, membrList); }

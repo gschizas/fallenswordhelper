@@ -1,11 +1,12 @@
-import { addRows } from './addRows';
+import addRows from './addRows';
 import { months } from '../../../support/constants';
 import { now } from '../../../support/now';
 import padZ from '../../../system/padZ';
 import partial from '../../../common/partial';
 import { realmName } from './realm';
 import roundToString from '../../../common/roundToString';
-import setText from '../../../common/setText';
+import setInnerHtml from '../../../dom/setInnerHtml';
+import setText from '../../../dom/setText';
 import { textSpan } from '../../../common/cElement';
 import { titanId } from './hasTitan';
 import { clearMemberRows, titanTbl } from './buildTitanInfoTable';
@@ -46,7 +47,7 @@ function currentPctText(ourTitan) {
 }
 
 function totalPctText(ourTitan) {
-  return roundToString(ourTitan.kills * 100 / ourTitan.max_hp, 2);
+  return roundToString((ourTitan.kills * 100) / ourTitan.max_hp, 2);
 }
 
 function statusTextHtml(ourTitan) {
@@ -59,15 +60,15 @@ function doTopLabels(ourTitan) {
   setText(ourTitan.kills, guildKills);
   setText(currentPctText(ourTitan), currentPct);
   setText(totalPctText(ourTitan), totalPct);
-  statusText.innerHTML = statusTextHtml(ourTitan);
-  cooldownText.innerHTML = getCooldownHtml(ourTitan.cooldown);
+  setInnerHtml(statusTextHtml(ourTitan), statusText);
+  setInnerHtml(getCooldownHtml(ourTitan.cooldown), cooldownText);
 }
 
 function memberRow(ourTitan, member) {
   return [[
     [2, textSpan(member.player.name)],
     [2, textSpan(member.kills.toString())],
-    [2, textSpan(`${roundToString(member.kills * 100 / ourTitan.kills, 2)}%`)],
+    [2, textSpan(`${roundToString((member.kills * 100) / ourTitan.kills, 2)}%`)],
   ]];
 }
 
@@ -82,7 +83,7 @@ function currentTitan(el) {
   return el.realm && el.creature.base_id === titanId && el.realm === realmName;
 }
 
-export function processTitans(r) {
+export default function processTitans(r) {
   const ourTitan = r.find(currentTitan);
   if (ourTitan) {
     doTopLabels(ourTitan);

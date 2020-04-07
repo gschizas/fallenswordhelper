@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 function calcHp(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupHPValue;
@@ -53,8 +54,8 @@ export default function evalDamage(combat) {
       dmgLessArmor = combat.overallDamageValue - combat.generalVariable
         * combat.creature.armor;
     }
-    combat.numberOfHitsRequired = Math.ceil(combat.hpVariable
-      * combat.creature.hp / dmgLessArmor);
+    combat.numberOfHitsRequired = Math.ceil((combat.hpVariable
+      * combat.creature.hp) / dmgLessArmor);
   } else {
     combat.numberOfHitsRequired = '-';
   }

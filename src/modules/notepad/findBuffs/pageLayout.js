@@ -2,18 +2,18 @@ import { helpLink } from '../../settings/simpleCheckbox';
 
 function header(o) {
   return `<tr><td rowspan="2" colspan="2" class="headCell"><h1>Find ${
-    o.header}</h1></td><td class="findLabel">Select ${o.what
-  } to search for:</td><td>${o.control()}</td></tr>`;
+    o.header}</h1></td><td class="findLabel">Select ${
+    o.what} to search for:</td><td>${o.control()}</td></tr>`;
 }
 
 function cutoff(o) {
-  return `<tr><td class="findLabel">Level ${o.cutoff
-  }ers only:</td><td><input id="level175" type="checkbox"></td></tr>`;
+  return `<tr><td class="findLabel">Level ${
+    o.cutoff}ers only:</td><td><input id="level175" type="checkbox"></td></tr>`;
 }
 
 function searchGuildMembers(o) {
-  return `<tr><td class="leftLabel">${o.searched
-  }:&nbsp;</td><td id="buffNicks">&nbsp;</td>`
+  return `<tr><td class="leftLabel">${
+    o.searched}:&nbsp;</td><td id="buffNicks">&nbsp;</td>`
     + '<td class="findLabel">Search guild members:</td>'
     + '<td><input id="guildMembers" type="checkbox" checked></td></tr>';
 }
@@ -27,11 +27,10 @@ function allyHelpLink() {
 }
 
 function searchAlly(o, extraProfile) {
-  return `${'<tr><td class="findLabel">'
-    + '# potential '}${o.potential}ers to search:&nbsp;</td>`
+  return '<tr><td class="findLabel">'
+    + `# potential ${o.potential}ers to search:&nbsp;</td>`
     + '<td id="potentialBuffers"></td>'
-    + `<td class="findLabel">Search allies/enemies:${
-      allyHelpLink()}</td>`
+    + `<td class="findLabel">Search allies/enemies:${allyHelpLink()}</td>`
     + '<td><input id="alliesEnemies" type="checkbox" checked>'
     + '<input class="extraProfile" class="custominput" id="extraProfile" '
     + `type="text" title="Extra profiles to search" value="${
@@ -80,14 +79,7 @@ function disclaimer() {
 }
 
 export default function pageLayout(o, extraProfile) { // Legacy
-  return `<table class="fshFind"><tbody>${
-    header(o)
-  }${cutoff(o)
-  }${searchGuildMembers(o)
-  }${searchAlly(o, extraProfile)
-  }${onlineList(o)
-  }${progress(o)
-  }</tbody></table>${
-    outputTable(o)
-  }${disclaimer()}`;
+  return `<table class="fshFind"><tbody>${header(o)}${cutoff(o)}${
+    searchGuildMembers(o)}${searchAlly(o, extraProfile)}${onlineList(o)}${
+    progress(o)}</tbody></table>${outputTable(o)}${disclaimer()}`;
 }

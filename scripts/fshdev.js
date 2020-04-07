@@ -1,7 +1,7 @@
-import { core } from './getVersion.js';
-import rollupFsh from './rollupFsh.js';
+import { core } from './getVersion';
+import rollupFsh from './rollupFsh';
 
-const port = require('./config.json').port;
+const { port } = require('./config.json');
 
 const devUrl = `https://localhost:${port}/dist/dev/`;
 

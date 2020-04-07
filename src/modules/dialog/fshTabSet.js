@@ -3,6 +3,7 @@ import insertElement from '../common/insertElement';
 import once from '../common/once';
 import partial from '../common/partial';
 import { publish } from '../support/pubsub';
+import setInnerHtml from '../dom/setInnerHtml';
 import {
   createDiv,
   createInput,
@@ -62,7 +63,7 @@ export default function fshTabSet(container, tabs, groupName) {
   publish(`${groupName}-header`, thisList);
   insertElement(thisTabSet, thisList);
   thisDivs.forEach(appendToTabSet);
-  container.innerHTML = '';
+  setInnerHtml('', container);
   insertElement(container, thisTabSet);
   return 0;
 }

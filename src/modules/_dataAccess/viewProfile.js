@@ -1,6 +1,6 @@
-import { arrayFrom } from '../common/arrayFrom';
+import arrayFrom from '../common/arrayFrom';
 import createDocument from '../system/createDocument';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getTextTrim from '../common/getTextTrim';
 import indexAjaxData from '../ajax/indexAjaxData';
 import querySelector from '../common/querySelector';

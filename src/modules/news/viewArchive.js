@@ -1,6 +1,6 @@
 import collapse from '../common/collapse';
 import containsText from '../common/containsText';
-import { def_table } from '../support/constants';
+import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
@@ -34,7 +34,7 @@ function setupPref(prefName, rowInjector) {
 export default function viewArchive() {
   lastLadderReset = getValue(ladderResetPref);
   const prefName = 'collapseNewsArchive';
-  const theTables = getElementsByTagName(def_table, pCC);
+  const theTables = getElementsByTagName(defTable, pCC);
   if (theTables.length > 2) {
     setupPref(prefName, theTables[0].rows[2]);
     collapse({

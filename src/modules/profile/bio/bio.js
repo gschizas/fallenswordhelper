@@ -1,7 +1,7 @@
 import add from '../../support/task';
 import bioEvtHdl from './bioEvtHdl';
 import compressBio from './compressBio';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import onclick from '../../common/onclick';
 import testForRender from './testForRender';

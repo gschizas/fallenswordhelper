@@ -1,4 +1,4 @@
-import { arrayFrom } from './arrayFrom';
+import arrayFrom from './arrayFrom';
 import querySelectorAll from './querySelectorAll';
 
 export default function querySelectorArray(selector, scope) {

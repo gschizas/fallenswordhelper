@@ -1,6 +1,7 @@
 import fallback from '../../system/fallback';
 import getValue from '../../system/getValue';
 import intValue from '../../system/intValue';
+import numberIsNaN from '../../common/numberIsNaN';
 import partial from '../../common/partial';
 import setValue from '../../system/setValue';
 import { lvlTest, playerLvlTest } from '../../common/lvlTests';
@@ -10,7 +11,7 @@ function getVal(el, context) {
 }
 
 function saveVal(key, val) {
-  if (!isNaN(val)) { setValue(key, val); }
+  if (!numberIsNaN(val)) { setValue(key, val); }
 }
 
 function dataTableSearch(context, _settings, data) { // jQuery
@@ -25,11 +26,10 @@ function dataTableSearch(context, _settings, data) { // jQuery
 export default function filterHeaderOnlinePlayers(context) { // jQuery
   $.fn.dataTable.ext.search.push(partial(dataTableSearch, context));
   $('#fshOutput', context).html(
-    `${'<div align=right>'
-    + 'Min lvl:<input value="'}${getValue('onlinePlayerMinLvl')
-    }" size=5 id="fshMinLvl" /> `
-    + `Max lvl:<input value="${getValue('onlinePlayerMaxLvl')
-    }" size=5 id="fshMaxLvl" /> `
+    `<div align=right>Min lvl:<input value="${
+      getValue('onlinePlayerMinLvl')}" size=5 id="fshMinLvl" /> `
+    + `Max lvl:<input value="${
+      getValue('onlinePlayerMaxLvl')}" size=5 id="fshMaxLvl" /> `
     + '<input id="fshReset" type="button" value="Reset"/>'
     + '</div><table id="fshInv" class="allow stripe hover"></table>',
   );

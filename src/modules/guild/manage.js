@@ -15,6 +15,7 @@ import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import playerName from '../common/playerName';
 import progressBar from './progressBar';
+import setInnerHtml from '../dom/setInnerHtml';
 import { guildSubcmdUrl, recallUserUrl } from '../support/constants';
 import { logoToggle, statToggle, structureToggle } from './panelToggle';
 
@@ -23,8 +24,8 @@ function relicControl(leftHandSideColumnTable) {
     .filter(contains('Relics'));
   if (relic.length !== 1) { return; }
   const thisFont = relic[0].parentNode.nextElementSibling.children[0];
-  thisFont.innerHTML = `[ <a href="${guildSubcmdUrl
-  }reliclist">Control</a> ]&nbsp;`;
+  setInnerHtml(`[ <a href="${guildSubcmdUrl}reliclist">Control</a> ]&nbsp;`,
+    thisFont);
 }
 
 function selfRecallLink(leftHandSideColumnTable) {

@@ -1,11 +1,13 @@
 import { closestTable } from '../common/closest';
 import { createSpan } from '../common/cElement';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import insertElement from '../common/insertElement';
 import intValue from '../system/intValue';
+import numberIsNaN from '../common/numberIsNaN';
 import on from '../common/on';
 import partial from '../common/partial';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function clearWidth(multCnt) {
   const parentTable = closestTable(multCnt);
@@ -21,13 +23,13 @@ function makeMaxTimes(multCnt) {
 function updateMaxTimes(maxTimes, statbarGold, scoutGold) {
   const myGold = intValue(getText(statbarGold));
   const times = Math.floor(myGold / scoutGold).toString();
-  maxTimes.innerHTML = `&nbsp;&nbsp;Max: ${times} times`;
+  setInnerHtml(`&nbsp;&nbsp;Max: ${times} times`, maxTimes);
 }
 
 function redrawMaxTimes(maxTimes, statbarGold, gold) {
-  maxTimes.innerHTML = '';
+  setInnerHtml('', maxTimes);
   const scoutGold = Number(gold.value);
-  if (!isNaN(scoutGold) && scoutGold !== 0) {
+  if (!numberIsNaN(scoutGold) && scoutGold !== 0) {
     updateMaxTimes(maxTimes, statbarGold, scoutGold);
   }
 }

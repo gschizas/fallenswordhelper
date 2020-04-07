@@ -2,7 +2,7 @@ import calf from '../../support/calf';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
-import { keys } from '../../common/keys';
+import keys from '../../common/keys';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 import playerName from '../../common/playerName';
@@ -24,22 +24,19 @@ function getTargetPlayer() {
 
 const buyFormatter = [
   [
-    function (greetingText) { return !greetingText.includes('{buffs}'); },
-    function (greetingText, buffsToBuy) { return `${greetingText} ${buffsToBuy}`; },
+    (greetingText) => !greetingText.includes('{buffs}'),
+    (greetingText, buffsToBuy) => `${greetingText} ${buffsToBuy}`,
   ],
   [
-    function (greetingText) { return !greetingText.includes('{cost}'); },
-    function (greetingText, buffsToBuy) {
-      return greetingText.replace(/{buffs}/g, `\`~${buffsToBuy}~\``);
-    },
+    (greetingText) => !greetingText.includes('{cost}'),
+    (greetingText, buffsToBuy) => greetingText
+      .replace(/{buffs}/g, `\`~${buffsToBuy}~\``),
   ],
   [
-    function () { return true; },
-    function (greetingText, buffsToBuy, buffCost) {
-      return greetingText
-        .replace(/{buffs}/g, `\`~${buffsToBuy}~\``)
-        .replace(/{cost}/g, buffCost.buffCostTotalText);
-    },
+    () => true,
+    (greetingText, buffsToBuy, buffCost) => greetingText
+      .replace(/{buffs}/g, `\`~${buffsToBuy}~\``)
+      .replace(/{cost}/g, buffCost.buffCostTotalText),
   ],
 ];
 

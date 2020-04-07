@@ -1,12 +1,13 @@
 import { bountyUrl } from '../../support/constants';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import setInnerHtml from '../../dom/setInnerHtml';
 import setValueJSON from '../../system/setValueJSON';
 import { wantedList } from './lists';
 import { wantedListDiv } from './createDivs';
 import { createDiv, createSpan } from '../../common/cElement';
 
-export var wantedListReset;
+export let wantedListReset;
 
 function makeMouseOver(el) {
   return `Target Level:  ${el.lvl
@@ -27,7 +28,7 @@ function acceptBtn(bounty) {
 
 export function injectWantedList() { // Legacy
   setValueJSON('wantedList', wantedList);
-  wantedListDiv.innerHTML = '';
+  setInnerHtml('', wantedListDiv);
   const heading = createDiv(
     { innerHTML: `<a href="${bountyUrl}">Wanted Bounties</a> ` },
   );

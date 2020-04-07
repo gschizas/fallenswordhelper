@@ -1,8 +1,8 @@
 import defaults from '../../support/dataObj.json';
 import eventHandler5 from '../../common/eventHandler5';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValueJSON from '../../system/getValueJSON';
-import { isArray } from '../../common/isArray.js';
+import isArray from '../../common/isArray';
 import isChecked from '../../system/isChecked';
 import jsonParse from '../../common/jsonParse';
 import makePageHeader from './makePageHeader';
@@ -10,6 +10,7 @@ import makePageTemplate from './makePageTemplate';
 import onclick from '../../common/onclick';
 import { pCC } from '../../support/layout';
 import selfIdIs from '../../common/selfIdIs';
+import setInnerHtml from '../../dom/setInnerHtml';
 import setValueJSON from '../../system/setValueJSON';
 import { auctionSearchBlurb, auctionSearchParams } from './assets';
 
@@ -34,15 +35,16 @@ function itemRow(item) { // Legacy
   let result = '';
   for (let j = 0; j < param.fields.length; j += 1) {
     result += '<td class="fshCenter">';
-    const itemField = item[param.fields[j]];
-    if (param.fields[j] === param.categoryField) { continue; }
-    result += `${detailRow(j, itemField)}</td>`;
+    if (param.fields[j] !== param.categoryField) {
+      result += `${detailRow(j, item[param.fields[j]])}`;
+    }
+    result += '</td>';
   }
   return result;
 }
 
-function headersToHtml(prev, curr) {
-  return `${prev}<th>${curr}</th>`;
+function headersToHtml(acc, curr) {
+  return `${acc}<th>${curr}</th>`;
 }
 
 function needsCat(item, i, currentItems) {
@@ -50,7 +52,7 @@ function needsCat(item, i, currentItems) {
     || currentItems[i - 1][param.categoryField] !== item[param.categoryField]);
 }
 
-function itemRows(prev, item, i, currentItems) {
+function itemRows(acc, item, i, currentItems) {
   let result = '<tr>';
   if (needsCat(item, i, currentItems)) {
     result += `<td><span class="fshQs">${item[param.categoryField]
@@ -59,7 +61,7 @@ function itemRows(prev, item, i, currentItems) {
   result += itemRow(item);
   result += `<td><span class="HelperTextLink" data-itemId="${i
   }" id="fshDel${i}">[Del]</span></td></tr>`;
-  return prev + result;
+  return acc + result;
 }
 
 function doInputs() { // Legacy
@@ -78,11 +80,11 @@ function generateManageTable() { // Legacy
   result += '<th>Action</th></tr>';
   result += param.currentItems.reduce(itemRows, '');
   result += doInputs();
-  result += `${'<td><span class="HelperTextLink" id="fshAdd">'
+  result += '<td><span class="HelperTextLink" id="fshAdd">'
     + '[Add]</span></td></tr></table>'
     + '<table width="100%"><tr><td class="fshCenter">'
-    + '<textarea cols=70 rows=20 id="fshEd">'}${
-    JSON.stringify(param.currentItems)}</textarea></td></tr>`
+    + `<textarea cols=70 rows=20 id="fshEd">${
+      JSON.stringify(param.currentItems)}</textarea></td></tr>`
     + '<tr><td class="fshCenter"><input id="fshSave" '
     + 'type="button" value="Save" class="custombutton">'
     + '&nbsp;<input id="fshReset" type="button" value="Reset" '
@@ -90,7 +92,7 @@ function generateManageTable() { // Legacy
     + '</tbody></table>';
   const target = getElementById(param.id);
   if (target) {
-    getElementById(param.id).innerHTML = result;
+    setInnerHtml(result, getElementById(param.id));
     setValueJSON(param.gmname, param.currentItems);
   }
 }
@@ -145,7 +147,7 @@ function listEvents() {
     [selfIdIs('fshReset'), resetRawEditor],
     [selfIdIs('fshSave'), saveRawEditor],
     [selfIdIs('fshAdd'), addQuickItem],
-    [function (target) { return target.id.startsWith('fshDel'); }, deleteQuickItem],
+    [(target) => target.id.startsWith('fshDel'), deleteQuickItem],
   ];
 }
 
@@ -155,8 +157,8 @@ function setupEventHandler(content) {
 
 export function injectAuctionSearch(injector) { // Legacy
   const content = injector || pCC;
-  content.innerHTML = makePageHeader('Trade Hub Quick Search', '', '', '')
-    + auctionSearchBlurb;
+  setInnerHtml(makePageHeader('Trade Hub Quick Search', '', '', '')
+    + auctionSearchBlurb, content);
   // global parameters for the meta function generateManageTable
   param = auctionSearchParams();
   generateManageTable();
@@ -165,13 +167,13 @@ export function injectAuctionSearch(injector) { // Legacy
 
 export function injectQuickLinkManager(injector) { // Legacy
   const content = injector || pCC;
-  content.innerHTML = makePageTemplate({
+  setInnerHtml(makePageTemplate({
     title: 'Quick Links',
     comment: '',
     spanId: '',
     button: '',
     divId: 'qla',
-  });
+  }), content);
 
   // global parameters for the meta function generateManageTable
   param = {

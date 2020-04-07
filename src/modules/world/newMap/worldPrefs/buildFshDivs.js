@@ -1,5 +1,5 @@
 import { createDiv } from '../../../common/cElement';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import { huntingBuffsHtml } from '../../../settings/worldPrefs';
 import insertElement from '../../../common/insertElement';
 import insertElementBefore from '../../../common/insertElementBefore';

@@ -1,10 +1,13 @@
 import { createDiv } from '../common/cElement';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
+import setInnerHtml from '../dom/setInnerHtml';
 
 export default function jQueryDialog(fn) { // jQuery
   let content = getElementById('content');
-  if (content) { content.innerHTML = ''; } else {
+  if (content) {
+    setInnerHtml('', content);
+  } else {
     content = createDiv({
       id: 'content',
       style: { display: 'none' },

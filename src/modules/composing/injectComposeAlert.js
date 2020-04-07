@@ -6,8 +6,8 @@ import jQueryPresent from '../common/jQueryPresent';
 import { now } from '../support/now';
 import setValue from '../system/setValue';
 import {
-  def_lastComposeCheck,
-  def_needToCompose,
+  defLastComposeCheck,
+  defNeedToCompose,
 } from '../support/constants';
 
 function getTime(pot) {
@@ -16,14 +16,14 @@ function getTime(pot) {
 
 function displayAlert() {
   displayComposeMsg();
-  setValue(def_needToCompose, true);
+  setValue(defNeedToCompose, true);
 }
 
 function potsBrewing(potions) {
   const minTimeInSecs = Math.min.apply(null, potions.map(getTime));
   if (minTimeInSecs > 0) {
-    setValue(def_needToCompose, false);
-    setValue(def_lastComposeCheck, now + minTimeInSecs * 1000);
+    setValue(defNeedToCompose, false);
+    setValue(defLastComposeCheck, now + minTimeInSecs * 1000);
   } else {
     displayAlert();
   }
@@ -42,13 +42,13 @@ function checkAppResponse(json) {
 }
 
 function checkLastCompose() { // jQuery.min
-  const lastComposeCheck = getValue(def_lastComposeCheck);
+  const lastComposeCheck = getValue(defLastComposeCheck);
   if (lastComposeCheck && now < lastComposeCheck) { return; }
   daComposing().then(checkAppResponse);
 }
 
 function composeAlert() {
-  if (getValue(def_needToCompose)) {
+  if (getValue(defNeedToCompose)) {
     displayComposeMsg();
   } else {
     checkLastCompose();

@@ -1,16 +1,17 @@
 import { cmdUrl } from './support/constants';
 import { createSpan } from './common/cElement';
-import { getElementById } from './common/getElement';
+import getElementById from './common/getElement';
 import getText from './common/getText';
 import insertElement from './common/insertElement';
 import insertTextBeforeEnd from './common/insertTextBeforeEnd';
 import intValue from './system/intValue';
-import isNaN from './common/isNaN';
+import numberIsNaN from './common/numberIsNaN';
 import on from './common/on';
 import partial from './common/partial';
 import querySelectorArray from './common/querySelectorArray';
 import { server } from './system/system';
-import setText from './common/setText';
+import setInnerHtml from './dom/setInnerHtml';
+import setText from './dom/setText';
 import setValue from './system/setValue';
 
 let upgrades;
@@ -77,9 +78,11 @@ function doStamCount(type, upgrade, quantity, cell) {
   let extraStam;
   if (quantity * cost <= currentFSP) {
     extraStam = quantity * amount;
+    // eslint-disable-next-line no-param-reassign
     cell.className = 'fshBlue';
   } else {
     extraStam = Math.floor(currentFSP / cost) * amount;
+    // eslint-disable-next-line no-param-reassign
     cell.className = 'fshRed';
   }
   setText(`(+${extraStam} stamina)`, cell);
@@ -89,7 +92,7 @@ function updateStamCount(type, upgrade, evt) {
   const { target } = evt;
   const quantity = Number(target.value);
   const cell = getCell(type, upgrade);
-  if (isNaN(quantity) || quantity === 0) {
+  if (numberIsNaN(quantity) || quantity === 0) {
     cell.className = 'fshHide';
     return;
   }
@@ -106,8 +109,8 @@ function injectPoints() {
   currentFSP = intValue(getText(getElementById('statbar-fsp')));
   injectUpgradeHelper('Current');
   injectUpgradeHelper('Maximum');
-  getInputCell('Gold').innerHTML = `<a href="${server}${cmdUrl
-  }marketplace">Sell at Marketplace</a>`;
+  setInnerHtml(`<a href="${server}${
+    cmdUrl}marketplace">Sell at Marketplace</a>`, getInputCell('Gold'));
 }
 
 function saveUpgradeValue(upgrade, key) {

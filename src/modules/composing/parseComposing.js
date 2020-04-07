@@ -4,8 +4,8 @@ import getText from '../common/getText';
 import { now } from '../support/now';
 import setValue from '../system/setValue';
 import {
-  def_lastComposeCheck,
-  def_needToCompose,
+  defLastComposeCheck,
+  defNeedToCompose,
 } from '../support/constants';
 
 const timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
@@ -21,7 +21,7 @@ function timeRemaining(times, el) {
 }
 
 function setNeed(bool) {
-  setValue(def_needToCompose, bool);
+  setValue(defNeedToCompose, bool);
 }
 
 export default function parseComposing() {
@@ -33,6 +33,6 @@ export default function parseComposing() {
     setNeed(true);
   } else {
     setNeed(false);
-    setValue(def_lastComposeCheck, eta);
+    setValue(defLastComposeCheck, eta);
   }
 }

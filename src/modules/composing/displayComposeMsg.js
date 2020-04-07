@@ -1,5 +1,5 @@
 import { composingUrl } from '../support/constants';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import insertHtmlAfterBegin from '../common/insertHtmlAfterBegin';
 
 const composeMsg = `<li class="notification"><a href="${composingUrl}"><span`

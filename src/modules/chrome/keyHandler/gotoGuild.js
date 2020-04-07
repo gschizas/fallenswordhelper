@@ -5,5 +5,5 @@ import keyHandlerEvent from './keyHandlerEvent';
 export default function gotoGuild() {
   keyHandlerEvent('gotoGuild');
   expandMenu('4');
-  location.href = `${guildSubcmdUrl}manage`;
+  window.location.href = `${guildSubcmdUrl}manage`;
 }

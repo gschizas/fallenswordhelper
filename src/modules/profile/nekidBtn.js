@@ -1,18 +1,19 @@
 import { daUnequipItem } from '../_dataAccess/_dataAccess';
 import getArrayByTagName from '../common/getArrayByTagName';
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import onclick from '../common/onclick';
 import partial from '../common/partial';
 import { sendEvent } from '../support/fshGa';
+import setInnerHtml from '../dom/setInnerHtml';
 import { createButton, createDiv } from '../common/cElement';
 
 let profileCombatSetDiv;
 
 function clearBox(link, json) {
   if (json.s) {
-    link.parentNode.innerHTML = '';
+    setInnerHtml('', link.parentNode);
   }
 }
 

@@ -1,10 +1,11 @@
 import { createTable } from '../../common/cElement';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
+import setText from '../../dom/setText';
 
 let outputTable;
 
@@ -24,7 +25,7 @@ let outputTable;
 // https://github.com/julienetie/volve
 function debounce(callback, delay) {
   let timeoutId;
-  return function () {
+  return function a() {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(callback, delay);
   };
@@ -32,7 +33,7 @@ function debounce(callback, delay) {
 
 function injectTable(myTable) {
   outputTable.replaceChild(myTable.children[0], outputTable.children[0]);
-  getElementById('fshOutput').textContent = 'Complete.';
+  setText('Complete.', getElementById('fshOutput'));
 }
 
 function makeRows(myTable, r) {

@@ -12,6 +12,6 @@ export default function rollupFsh(outdir, jsccValues) {
       clear({ targets: [`dist/${outdir}`] }),
       replace({ values: jsccValues }),
     ],
-    external: [jsccValues._CALFJS],
+    external: [jsccValues._CALFJS], // eslint-disable-line no-underscore-dangle
   };
 }

@@ -1,4 +1,4 @@
-import { arrayFrom } from '../../common/arrayFrom';
+import arrayFrom from '../../common/arrayFrom';
 import { indexPhp } from '../../support/constants';
 
 export default function updateUrl(e) {

@@ -25,7 +25,7 @@ import { sendException } from '../../support/fshGa';
 import toggleForce from '../../common/toggleForce';
 import {
   ahSearchUrl,
-  def_subcmd,
+  defSubcmd,
   guideUrl,
   rarity,
 } from '../../support/constants';
@@ -53,7 +53,7 @@ function afterbegin(o, item) {
     pattern += `[<a href="${ahSearchUrl
     }${encodeURIComponent(item.item_name)}">AH</a>]`;
   }
-  pattern += `</span>[<a href="${guideUrl}items${def_subcmd
+  pattern += `</span>[<a href="${guideUrl}items${defSubcmd
   }view&item_id=${item.item_id}" target="_blank">UFSG</a>]</span>`;
   insertHtmlAfterBegin(o.injectHere, pattern);
 }
@@ -66,29 +66,21 @@ function itemColouring(o, item) {
 
 const buildTrailer = [
   [
-    function (item) { return !checkAll && itemsHash[item.item_id] !== 1; },
-    function (o, item) {
-      return ` [<span linkto="${item.item_id
-      }" class="fshLink">Check all</span>]`;
-    },
+    (item) => !checkAll && itemsHash[item.item_id] !== 1,
+    (o, item) => ` [<span linkto="${
+      item.item_id}" class="fshLink">Check all</span>]`,
   ],
   [
-    function (item) { return !sendLinks && showQuickSendLinks && !item.bound; },
-    function (o) {
-      return `${' <span class="quickAction sendLink tip-static" '
-        + 'itemInvId="'}${o.invid}" data-tipped="INSTANTLY SENDS THE `
-        + 'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
-    },
+    (item) => !sendLinks && showQuickSendLinks && !item.bound,
+    (o) => ` <span class="quickAction sendLink tip-static" itemInvId="${
+      o.invid}" data-tipped="INSTANTLY SENDS THE ITEM. `
+      + 'NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>',
   ],
   [
-    function (item) {
-      return !dropLinks && showQuickDropLinks && item.guild_tag === -1;
-    },
-    function (o) {
-      return ` <span class="quickAction dropLink tip-static" itemInvId="${
-        o.invid}" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS `
-        + 'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
-    },
+    (item) => !dropLinks && showQuickDropLinks && item.guild_tag === -1,
+    (o) => ` <span class="quickAction dropLink tip-static" itemInvId="${
+      o.invid}" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS `
+      + 'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>',
   ],
 ];
 
@@ -167,8 +159,8 @@ function selfIds() {
 function evts() {
   return selfIds().concat([
     [
-      function (target) { return target.hasAttribute('linkto'); },
-      function (target) {
+      (target) => target.hasAttribute('linkto'),
+      (target) => {
         doCheckboxesByType('item', target.getAttribute('linkto'));
       },
     ],

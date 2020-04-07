@@ -1,10 +1,4 @@
 import './whosGotWhat.postcss';
-import { table as tableComponentFactory } from 'smart-table-vanilla';
-import {
-  paginationDirective,
-  searchDirective,
-  smartTable,
-} from 'smart-table-core';
 import allthen from '../../common/allthen';
 import { daGuildManage } from '../../_dataAccess/_dataAccess';
 import displayChange from './displayChange';
@@ -15,7 +9,9 @@ import onclick from '../../common/onclick';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 import prepareData from './prepareData';
-import { theadHtml } from './assets';
+import setInnerHtml from '../../dom/setInnerHtml';
+import { table as tableComponentFactory } from 'smart-table-vanilla';
+import theadHtml from './assets';
 import {
   createButton,
   createDiv,
@@ -23,6 +19,11 @@ import {
   createSelect,
   createTable,
 } from '../../common/cElement';
+import {
+  paginationDirective,
+  searchDirective,
+  smartTable,
+} from 'smart-table-core';
 
 function makeTable(el) {
   return insertElement(el, createTable({
@@ -79,10 +80,10 @@ function makeSummary(bottom, table, data) {
   slice.onSummaryChange(({ page, size, filteredCount }) => {
     let filterModifier = 0;
     if (filteredCount) { filterModifier = 1; }
-    summaryDiv.innerHTML = `showing ${
+    setInnerHtml(`showing ${
       (page - 1) * size + filterModifier} - ${
       Math.min(filteredCount, page * size)} of ${
-      filteredCount} (${data.length} total)`;
+      filteredCount} (${data.length} total)`, summaryDiv);
   });
 }
 
@@ -101,7 +102,7 @@ function makePager(bottom, table) {
     prevBtn.disabled = !pager.isPreviousPageEnabled();
     nextBtn.disabled = !pager.isNextPageEnabled();
     lastBtn.disabled = !pager.isNextPageEnabled();
-    pageBtn.innerHTML = page;
+    setInnerHtml(page, pageBtn);
     lastPage = Math.ceil(filteredCount / size);
   });
 
@@ -122,7 +123,7 @@ function showMe(dataAry) {
   // console.log(dataAry);
   const data = prepareData(dataAry);
   // console.log('data', data);
-  pCC.innerHTML = '';
+  setInnerHtml('', pCC);
   const el = insertElement(pCC, createDiv());
   const top = insertElement(el, createDiv({ className: 'st-top-container' }));
   const tableContainer = insertElement(el, createDiv());
@@ -147,6 +148,6 @@ function showMe(dataAry) {
 }
 
 export default function whosGotWhat() {
-  pCC.innerHTML = 'Loading...';
+  setInnerHtml('Loading...', pCC);
   allthen([guildStore(), daGuildManage()], showMe);
 }

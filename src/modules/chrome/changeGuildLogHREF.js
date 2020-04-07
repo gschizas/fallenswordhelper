@@ -8,7 +8,7 @@ import {
 } from '../support/constants';
 
 function testForGuildLogMsg(guildLogNode) {
-  return location.search !== newGuildLogLoc
+  return window.location.search !== newGuildLogLoc
     || guildLogNode.parentNode.id !== 'notification-guild-log';
 }
 
@@ -21,6 +21,7 @@ function hideGuildLogMsg(guildLogNode) {
   }
 }
 
+// eslint-disable-next-line no-param-reassign
 function updateHref(el) { el.href = newGuildLogUrl; }
 
 function gotGuildLogNodes(guildLogNodes) {

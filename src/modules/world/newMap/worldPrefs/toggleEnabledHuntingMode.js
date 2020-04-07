@@ -1,5 +1,5 @@
 import calf from '../../../support/calf';
-import { def_fetch_playerBuffs } from '../../../support/constants';
+import { defFetchPlayerBuffs } from '../../../support/constants';
 import { setCurrentBuffList } from './setCurrentBuffList';
 import setValue from '../../../system/setValue';
 
@@ -8,5 +8,5 @@ export default function toggleEnabledHuntingMode(e) {
   calf.enabledHuntingMode = e.target.value;
   setValue('enabledHuntingMode', calf.enabledHuntingMode);
   setCurrentBuffList();
-  GameData.fetch(def_fetch_playerBuffs);
+  GameData.fetch(defFetchPlayerBuffs);
 }

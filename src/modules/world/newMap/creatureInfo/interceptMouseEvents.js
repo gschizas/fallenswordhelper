@@ -1,7 +1,7 @@
-import { arrayFrom } from '../../../common/arrayFrom';
+import arrayFrom from '../../../common/arrayFrom';
 import calf from '../../../support/calf';
 import getCreatureStats from '../getCreatureStats/getCreatureStats';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import hasClass from '../../../common/hasClass';
 import hasClasses from '../../../common/hasClasses';
 import on from '../../../common/on';
@@ -66,6 +66,6 @@ function moEvt(evt) {
   }
 }
 
-export function interceptMouseEvents() {
+export default function interceptMouseEvents() {
   on(getElementById('actionList'), 'mouseover', moEvt);
 }

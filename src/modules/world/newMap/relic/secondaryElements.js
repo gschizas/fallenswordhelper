@@ -1,11 +1,11 @@
 import { createDiv } from '../../../common/cElement';
-import { getElementById } from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import getMembrList from '../../../ajax/getMembrList';
 import getValue from '../../../system/getValue';
 import hideElement from '../../../common/hideElement';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
-import { keys } from '../../../common/keys';
+import keys from '../../../common/keys';
 import { nowSecs } from '../../../support/now';
 import partial from '../../../common/partial';
 import { playerIdUrl } from '../../../support/constants';
@@ -20,53 +20,43 @@ import {
 let guildMemberList;
 let twoMinutesAgo;
 let sevenDaysAgo;
-export var relicCountElement;
-export var lDPercentageElement;
-export var lDCloakedElement;
-export var attackElement;
-export var attackBuffedElement;
-export var defenseElement;
-export var defenseBuffedElement;
-export var armorElement;
-export var armorBuffedElement;
-export var damageElement;
-export var damageBuffedElement;
-export var hpElement;
-export var hpBuffedElement;
-export var defCloakedElement;
-export var defProcessedElement;
-export var dc225Element;
-export var dc175Element;
-export var groupAttackElement;
-export var groupAttackBuffedElement;
-export var groupDefenseElement;
-export var groupDefenseBuffedElement;
-export var groupArmorElement;
-export var groupArmorBuffedElement;
-export var groupDamageElement;
-export var groupDamageBuffedElement;
-export var groupHPElement;
-export var groupHPBuffedElement;
-export var processingStatus;
+export let relicCountElement;
+export let lDPercentageElement;
+export let lDCloakedElement;
+export let attackElement;
+export let attackBuffedElement;
+export let defenseElement;
+export let defenseBuffedElement;
+export let armorElement;
+export let armorBuffedElement;
+export let damageElement;
+export let damageBuffedElement;
+export let hpElement;
+export let hpBuffedElement;
+export let defCloakedElement;
+export let defProcessedElement;
+export let dc225Element;
+export let dc175Element;
+export let groupAttackElement;
+export let groupAttackBuffedElement;
+export let groupDefenseElement;
+export let groupDefenseBuffedElement;
+export let groupArmorElement;
+export let groupArmorBuffedElement;
+export let groupDamageElement;
+export let groupDamageBuffedElement;
+export let groupHPElement;
+export let groupHPBuffedElement;
+export let processingStatus;
 
 const available = [
-  function (key) { return key !== 'lastUpdate'; },
-  function (key) { return !myDefenders.includes(key); },
-  function (key) { return guildMemberList[key].last_login; },
-  function (key) {
-    return Number(guildMemberList[key].last_login) < twoMinutesAgo;
-  },
-  function (key) {
-    return Number(guildMemberList[key].last_login) > sevenDaysAgo;
-  },
-  function (key) {
-    return guildMemberList[key].level < 400
-      || guildMemberList[key].level > 421;
-  },
-  function (key) {
-    return guildMemberList[key].level < 441
-      || guildMemberList[key].level > 450;
-  },
+  (key) => key !== 'lastUpdate',
+  (key) => !myDefenders.includes(key),
+  (key) => guildMemberList[key].last_login,
+  (key) => Number(guildMemberList[key].last_login) < twoMinutesAgo,
+  (key) => Number(guildMemberList[key].last_login) > sevenDaysAgo,
+  (key) => guildMemberList[key].level < 400 || guildMemberList[key].level > 421,
+  (key) => guildMemberList[key].level < 441 || guildMemberList[key].level > 450,
 ];
 
 function condition(key, fn) { return fn(key); }
@@ -87,9 +77,10 @@ function missingMembers(membrList) {
   const filtered = keys(guildMemberList)
     .filter(availableMembers).map(makeLinks);
   insertHtmlBeforeEnd(containerDiv,
-    `${'<div class="fshFloatLeft fshRelicLowDiv">'
-    + '<table class="relicT"><thead><tr><th>'}${filtered.length.toString()
-    } Offline guild members not at relic:</th></tr></thead>`
+    '<div class="fshFloatLeft fshRelicLowDiv">'
+    + `<table class="relicT"><thead><tr><th>${
+      filtered.length.toString()}`
+    + ' Offline guild members not at relic:</th></tr></thead>'
     + `<tbody><tr><td>${filtered.join(' ')}</td></tr></tbody>`
     + '</table></div>');
 }

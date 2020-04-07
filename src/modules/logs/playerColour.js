@@ -1,4 +1,4 @@
-import { keys } from '../common/keys';
+import keys from '../common/keys';
 
 let memberNamesAsStrings = [];
 let listOfAllies;

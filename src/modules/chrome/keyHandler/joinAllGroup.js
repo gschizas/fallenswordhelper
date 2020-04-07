@@ -7,8 +7,8 @@ export default function joinAllGroup() {
   keyHandlerEvent('joinAllGroup');
   expandMenu('4');
   if (!getValue('enableMaxGroupSizeToJoin')) {
-    location.href = joinallUrl;
+    window.location.href = joinallUrl;
   } else {
-    location.href = joinUnderUrl;
+    window.location.href = joinUnderUrl;
   }
 }

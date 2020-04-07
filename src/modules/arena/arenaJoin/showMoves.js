@@ -5,6 +5,7 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import isSelected from '../../system/isSelected';
 import on from '../../common/on';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import usesetup from '../../app/arena/usesetup';
 import { createDiv, createSelect } from '../../common/cElement';
 
@@ -24,15 +25,14 @@ function injectImg(container, id) {
     `<img src="${cdn}arena/${move}.png" class="moveImg">`);
 }
 
-function thisOptions(current_set, e) {
-  return `<option value="${String(e.id)}"`
-    + `${isSelected(current_set.slots.join(), e.slots.join())}>`
-    + `${e.name}</option>`;
+function thisOptions(currentSet, e) {
+  return `<option value="${String(e.id)}"${
+    isSelected(currentSet.slots.join(), e.slots.join())}>${e.name}</option>`;
 }
 
 function doMoves(thisSet, movesController) {
   const container = getContainer(movesController);
-  container.innerHTML = '';
+  setInnerHtml('', container);
   thisSet.slots.forEach(partial(injectImg, container));
 }
 

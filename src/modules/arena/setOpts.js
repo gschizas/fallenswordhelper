@@ -3,8 +3,8 @@ import defaults from '../support/dataObj.json';
 import { fshArenaKey } from './assets';
 import { set } from '../system/idb';
 
-export var opts;
-export var oldIds;
+export let opts;
+export let oldIds;
 
 export function storeOpts() {
   set(fshArenaKey, opts);

@@ -1,5 +1,5 @@
-import { terser } from 'rollup-plugin-terser';
 import rollupCalf from './rollupCalf';
+import { terser } from 'rollup-plugin-terser';
 
 export default function uglyCalf(outdir, jsccValues) {
   const options = rollupCalf(

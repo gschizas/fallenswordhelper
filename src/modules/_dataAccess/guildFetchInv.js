@@ -1,14 +1,14 @@
 import indexAjaxJson from '../ajax/indexAjaxJson';
 
 function updateType(item) {
-  item.a = Number(item.a);
-  item.b = Number(item.b);
-  item.l = Number(item.l);
-  if (item.extra) {
-    item.n = item.extra.name;
-  }
-  item.t = Number(item.t);
-  return item;
+  const updates = {
+    a: Number(item.a),
+    b: Number(item.b),
+    l: Number(item.l),
+    n: item.extra ? item.extra.name : item.n,
+    t: Number(item.t),
+  };
+  return { ...item, ...updates };
 }
 
 function formatResponse(json) {

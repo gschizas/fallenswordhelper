@@ -1,4 +1,4 @@
-import { entries } from '../../../common/entries';
+import entries from '../../../common/entries';
 import isSelected from '../../../system/isSelected';
 import partial from '../../../common/partial';
 import { playerIdUrl } from '../../../support/constants';
@@ -13,15 +13,15 @@ function whereRenderGuildDisplay(row) {
 
 function numeric(a, b) { return a[0] - b[0]; }
 
-function makeOption(folder_id, pair) {
+function makeOption(folderId, pair) {
   return `<option value="${pair[0]}"${
-    isSelected(Number(pair[0]), folder_id)}>${
+    isSelected(Number(pair[0]), folderId)}>${
     pair[1]}</option>`;
 }
 
-function makeFolderOptions(folder_id, folders) {
+function makeFolderOptions(folderId, folders) {
   return entries(folders).sort(numeric)
-    .map(partial(makeOption, folder_id)).join('');
+    .map(partial(makeOption, folderId)).join('');
 }
 
 export default function whereRenderDisplay(data, type, row) {

@@ -1,6 +1,6 @@
-import { arrayFrom } from './arrayFrom';
+import arrayFrom from './arrayFrom';
 import fallback from '../system/fallback';
-import { getElementById } from './getElement';
+import getElementById from './getElement';
 import hideElement from './hideElement';
 import isFunction from './isFunction';
 import on from './on';
@@ -17,6 +17,7 @@ function hideRow(el) { hideElement(el.row); }
 
 function collapseArt(article) {
   article.rows.forEach(hideRow);
+  // eslint-disable-next-line no-param-reassign
   article.open = false;
 }
 
@@ -28,6 +29,7 @@ function show(el) { toggleForce(el.row, false); }
 
 function expandArt(article) {
   article.rows.forEach(show);
+  // eslint-disable-next-line no-param-reassign
   article.open = true;
 }
 
@@ -67,8 +69,10 @@ function makeHeaderClickable(row) {
 function collapseDuringAnalysis(row, thisArticle) {
   if (prefValue) {
     hideElement(row);
+    // eslint-disable-next-line no-param-reassign
     thisArticle.open = false;
   } else {
+    // eslint-disable-next-line no-param-reassign
     thisArticle.open = true;
   }
 }
@@ -77,12 +81,15 @@ function hasExtraFn(extraFn, row) { if (isFunction(extraFn)) { extraFn(row); } }
 
 function testRowType(row, rowType, thisArticle, param) {
   if (rowType === 0) {
+    // eslint-disable-next-line no-param-reassign
     thisArticle.header = row;
     makeHeaderClickable(row);
     hasExtraFn(param.extraFn, row);
   }
   if (param.articleTest(rowType)) {
+    // eslint-disable-next-line no-param-reassign
     thisArticle.rows[rowType] = fallback(thisArticle[rowType], {});
+    // eslint-disable-next-line no-param-reassign
     thisArticle.rows[rowType].row = row;
     collapseDuringAnalysis(row, thisArticle);
   }

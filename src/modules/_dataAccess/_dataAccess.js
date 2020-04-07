@@ -77,7 +77,7 @@ function initAppBad() {
   }
 }
 
-export function _dataAccess(appFn, fallbackFn, ...args) {
+function $dataAccess(appFn, fallbackFn, ...args) {
   initAppBad();
   if (appBad[1]) { return fallbackFn(...args); }
   return appFn(...args)
@@ -93,33 +93,59 @@ export function _dataAccess(appFn, fallbackFn, ...args) {
     .catch(() => fallbackFn(...args));
 }
 
-export const daAdvisor = (period) => _dataAccess(advisorView, viewAdvisor, period);
-export const daBazaarBuy = (item) => _dataAccess(buyitem, bazaarBuy, item);
-export const daComponents = () => _dataAccess(loadComponents, components);
-export const daComposing = () => _dataAccess(composingView, composing);
-export const daDestroyComponent = (componentIdAry) => _dataAccess(destroyComponent, dropComponent, componentIdAry);
-export const daDoInvent = (recipe) => _dataAccess(doinvent, invent, recipe);
-export const daFindPlayer = (username) => _dataAccess(appFindPlayer, findPlayer, username);
-export const daGroupStats = (groupId) => _dataAccess(groupsViewStats, groupStats, groupId);
-export const daGsTake = (invId) => _dataAccess(takeitem, gsTake, invId);
-export const daGuildFetchInv = () => _dataAccess(appFetchinv, guildFetchInv);
-export const daGuildManage = () => _dataAccess(appGuildManage, guildManage);
-export const daGuildRecall = (invId, playerId, mode) => _dataAccess(recall, guildInvRecall, invId, playerId, mode);
-export const daGuildReport = () => _dataAccess(report, guildReport);
-export const daGuildView = (guildId) => _dataAccess(appGuildView, guildView, guildId);
-export const daLoadInventory = () => _dataAccess(loadInventory, fetchinv);
-export const daMailboxTake = (invIdAry) => _dataAccess(takeitems, mailboxTake, invIdAry);
-export const daQuickbuff = (userAry, buffAry) => _dataAccess(appQb, ajaxQb, userAry, buffAry);
-export const daRankPosition = (direction, rankId) => _dataAccess(rankPosition, moveRank, direction, rankId);
-export const daRanksView = () => _dataAccess(ranks, ranksView);
-export const daScoutTower = () => _dataAccess(appScouttower, scouttower);
-export const daSendItems = (user, invIdAry) => _dataAccess(appSendItems, senditems, user, invIdAry);
-export const daAjaxSendItemsToRecipient = (invIdAry) => _dataAccess(appSendItemsToRecipient, sendItemsToRecipient, invIdAry);
-export const daSendToFolder = (folderId, itemsAry) => _dataAccess(sendtofolder, moveItems, folderId, itemsAry);
-export const daStoreItems = (invIdAry) => _dataAccess(dostoreitems, storeitems, invIdAry);
-export const daSuperElite = () => _dataAccess(appSe, superelite);
-export const daUnequipItem = (item) => _dataAccess(unequipitem, unequip, item);
-export const daUseItem = (item) => _dataAccess(useitem, useItem, item);
-export const daViewCombat = (id) => _dataAccess(appViewCombat, viewCombat, id);
-export const daViewGroups = () => _dataAccess(groupsView, viewGroups);
-export const daViewProfile = () => _dataAccess(appViewProfile, viewProfile);
+export const daAdvisor = (period) => $dataAccess(
+  advisorView, viewAdvisor, period,
+);
+export const daBazaarBuy = (item) => $dataAccess(buyitem, bazaarBuy, item);
+export const daComponents = () => $dataAccess(loadComponents, components);
+export const daComposing = () => $dataAccess(composingView, composing);
+export const daDestroyComponent = (componentIdAry) => $dataAccess(
+  destroyComponent, dropComponent, componentIdAry,
+);
+export const daDoInvent = (recipe) => $dataAccess(doinvent, invent, recipe);
+export const daFindPlayer = (username) => $dataAccess(
+  appFindPlayer, findPlayer, username,
+);
+export const daGroupStats = (groupId) => $dataAccess(
+  groupsViewStats, groupStats, groupId,
+);
+export const daGsTake = (invId) => $dataAccess(takeitem, gsTake, invId);
+export const daGuildFetchInv = () => $dataAccess(appFetchinv, guildFetchInv);
+export const daGuildManage = () => $dataAccess(appGuildManage, guildManage);
+export const daGuildRecall = (invId, playerId, mode) => $dataAccess(
+  recall, guildInvRecall, invId, playerId, mode,
+);
+export const daGuildReport = () => $dataAccess(report, guildReport);
+export const daGuildView = (guildId) => $dataAccess(
+  appGuildView, guildView, guildId,
+);
+export const daLoadInventory = () => $dataAccess(loadInventory, fetchinv);
+export const daMailboxTake = (invIdAry) => $dataAccess(
+  takeitems, mailboxTake, invIdAry,
+);
+export const daQuickbuff = (userAry, buffAry) => $dataAccess(
+  appQb, ajaxQb, userAry, buffAry,
+);
+export const daRankPosition = (direction, rankId) => $dataAccess(
+  rankPosition, moveRank, direction, rankId,
+);
+export const daRanksView = () => $dataAccess(ranks, ranksView);
+export const daScoutTower = () => $dataAccess(appScouttower, scouttower);
+export const daSendItems = (user, invIdAry) => $dataAccess(
+  appSendItems, senditems, user, invIdAry,
+);
+export const daAjaxSendItemsToRecipient = (invIdAry) => $dataAccess(
+  appSendItemsToRecipient, sendItemsToRecipient, invIdAry,
+);
+export const daSendToFolder = (folderId, itemsAry) => $dataAccess(
+  sendtofolder, moveItems, folderId, itemsAry,
+);
+export const daStoreItems = (invIdAry) => $dataAccess(
+  dostoreitems, storeitems, invIdAry,
+);
+export const daSuperElite = () => $dataAccess(appSe, superelite);
+export const daUnequipItem = (item) => $dataAccess(unequipitem, unequip, item);
+export const daUseItem = (item) => $dataAccess(useitem, useItem, item);
+export const daViewCombat = (id) => $dataAccess(appViewCombat, viewCombat, id);
+export const daViewGroups = () => $dataAccess(groupsView, viewGroups);
+export const daViewProfile = () => $dataAccess(appViewProfile, viewProfile);

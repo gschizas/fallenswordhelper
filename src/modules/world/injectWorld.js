@@ -1,4 +1,4 @@
-import { getElementById } from '../common/getElement';
+import getElementById from '../common/getElement';
 import jQueryPresent from '../common/jQueryPresent';
 import subscribes from './newMap/newMap';
 

@@ -1,32 +1,29 @@
 import getElementsByClassName from './getElementsByClassName';
 import getValue from '../system/getValue';
 import intValue from '../system/intValue';
-import partial from './partial';
 import valueText from './valueText';
-import { def_characterVirtualLevel, def_statLevel } from '../support/constants';
+import { defCharacterVirtualLevel, defStatLevel } from '../support/constants';
 
-export var pvpLowerLevel;
-export var pvpUpperLevel;
-export var gvgLowerLevel;
-export var gvgUpperLevel;
+export let pvpLowerLevel;
+export let pvpUpperLevel;
+export let gvgLowerLevel;
+export let gvgUpperLevel;
 
 const lowerGvgCalcs = [
-  function (levelToTest) { if (levelToTest >= 801) { return 100; } },
-  function (levelToTest) { if (levelToTest >= 752) { return levelToTest - 701; } },
-  function (levelToTest) { if (levelToTest >= 351) { return 50; } },
-  function (levelToTest) { if (levelToTest >= 326) { return levelToTest - 301; } },
-  function () { return 25; },
+  (levelToTest) => { if (levelToTest >= 801) { return 100; } },
+  (levelToTest) => { if (levelToTest >= 752) { return levelToTest - 701; } },
+  (levelToTest) => { if (levelToTest >= 351) { return 50; } },
+  (levelToTest) => { if (levelToTest >= 326) { return levelToTest - 301; } },
+  () => 25,
 ];
 
 function calcLvlToTest() {
-  return getValue(def_characterVirtualLevel)
-    || intValue(valueText(getElementsByClassName(def_statLevel)));
+  return getValue(defCharacterVirtualLevel)
+    || intValue(valueText(getElementsByClassName(defStatLevel)));
 }
 
-function band(levelToTest, ary) { return ary(levelToTest); }
-
 function lowerModifier(levelToTest) {
-  return lowerGvgCalcs.find(partial(band, levelToTest))(levelToTest);
+  return lowerGvgCalcs.find((ary) => ary(levelToTest))(levelToTest);
 }
 
 function calcLowerGvGLevel(levelToTest) {

@@ -1,5 +1,5 @@
 import getArrayByTagName from '../../common/getArrayByTagName';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';

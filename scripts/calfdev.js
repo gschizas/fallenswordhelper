@@ -1,6 +1,6 @@
 import uglyCalf from './uglyCalf';
 
-const port = require('./config.json').port;
+const { port } = require('./config.json');
 
 export default uglyCalf(
   'dev',

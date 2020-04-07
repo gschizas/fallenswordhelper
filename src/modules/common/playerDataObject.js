@@ -1,6 +1,7 @@
-import isNaN from './isNaN';
+import numberIsNaN from './numberIsNaN';
 import partial from './partial';
 import reduceBuffArray from './reduceBuffArray';
+import round from './round';
 
 function cloakGuess(bonus, level) {
   if (bonus > level * 10 || bonus < level) {
@@ -10,11 +11,13 @@ function cloakGuess(bonus, level) {
 }
 
 function updateForCloak(obj) {
+  /* eslint-disable no-param-reassign */
   obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
   obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
   obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
   obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
   obj.hpValue = obj.hpBonus;
+  /* eslint-enable no-param-reassign */
 }
 
 const statList = [
@@ -32,6 +35,7 @@ const statList = [
   ['killStreakValue', 'killstreak'],
 ];
 
+// eslint-disable-next-line no-param-reassign
 function assignStats(obj, json, arr) { obj[arr[0]] = Number(json[arr[1]]); }
 
 function importStats(obj, json) {
@@ -60,6 +64,7 @@ const buffList = [
   ['cloakLevel', 'Cloak'],
 ];
 
+// eslint-disable-next-line no-param-reassign
 function assignBuffs(obj, buffs, arr) { obj[arr[0]] = buffs[arr[1]] || 0; }
 
 function importBuffs(obj, buffs) {
@@ -71,8 +76,8 @@ export default function playerDataObject(json) {
   const obj = {};
   importStats(obj, json);
   importBuffs(obj, buffs);
-  obj.superEliteSlayerMultiplier = Math.round(0.002
-    * obj.superEliteSlayerLevel * 100) / 100;
-  if (isNaN(obj.armorValue)) { updateForCloak(obj); }
+  obj.superEliteSlayerMultiplier = round(0.002
+    * obj.superEliteSlayerLevel, 2);
+  if (numberIsNaN(obj.armorValue)) { updateForCloak(obj); }
   return obj;
 }

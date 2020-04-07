@@ -4,10 +4,12 @@ let invItems;
 let itemId;
 
 function guildTagged(o, el) {
+  // eslint-disable-next-line no-param-reassign
   el.checked = !el.disabled && invItems[o.invid].guild_tag !== -1;
 }
 
 function tickElement(o, el) {
+  // eslint-disable-next-line no-param-reassign
   el.checked = !el.disabled && !el.checked;
 }
 

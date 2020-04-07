@@ -8,8 +8,8 @@ function displayMinGroupLevel() { // jQuery
   const minGroupLevel = getValue('minGroupLevel');
   if (minGroupLevel) {
     $('#pCC > table > tbody > tr > td > table td').first()
-      .append(`${'<span style="color:blue"> '
-      + 'Current Min Level Setting: '}${minGroupLevel}</span>`);
+      .append(`<span style="color:blue"> Current Min Level Setting: ${
+        minGroupLevel}</span>`);
   }
 }
 

@@ -26,9 +26,9 @@ function nameRenderDisplay(data, row) {
   let bold = data;
   if (row.equipped) { bold = `<b>${data}</b>`; }
 
-  let _setName = '';
+  let setName = '';
   if (isPartOfSet(row)) {
-    _setName = ` (<span class="fshLink setName" set="${row.stats.set_name
+    setName = ` (<span class="fshLink setName" set="${row.stats.set_name
     }">set</span>)`;
   }
 
@@ -37,7 +37,7 @@ function nameRenderDisplay(data, row) {
     rarity[row.rarity].clas}" `
     + `data-tipped="fetchitem.php?item_id=${row.item_id
     }&inv_id=${row.inv_id}&t=${t}&p=${p}">${
-      bold}</a>${_setName}`;
+      bold}</a>${setName}`;
 }
 
 export default function nameRender(data, type, row) {

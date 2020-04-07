@@ -2,17 +2,18 @@ import { cdn } from '../../system/system';
 import hideQTip from '../../common/hideQTip';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 function anotherSpinner(target) {
-  target.innerHTML = `<img class="quickActionSpinner" src="${
-    cdn
-  }ui/misc/spinner.gif" width="15" height="15">`;
+  setInnerHtml(`<img class="quickActionSpinner" src="${
+    cdn}ui/misc/spinner.gif" width="15" height="15">`, target);
 }
 
 function actionReturn(target, success, data) {
   if (data.r === 1) { return; }
+  // eslint-disable-next-line no-param-reassign
   target.style.color = 'green';
-  target.innerHTML = success;
+  setInnerHtml(success, target);
 }
 
 function doAction(target, fn, success) {
@@ -24,7 +25,7 @@ function disableOtherButton(theTd, otherClass) {
   const otherButton = querySelector(otherClass, theTd);
   if (otherButton) {
     otherButton.className = 'quickAction';
-    otherButton.innerHTML = '';
+    setInnerHtml('', otherButton);
   }
 }
 
@@ -35,6 +36,7 @@ function disableCheckbox(theTd) {
 }
 
 export default function quickAction(fn, success, otherClass, target) {
+  // eslint-disable-next-line no-param-reassign
   target.className = 'quickAction';
   doAction(target, fn, success);
   hideQTip(target);

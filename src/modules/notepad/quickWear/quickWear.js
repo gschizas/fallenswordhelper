@@ -10,7 +10,7 @@ import hasClass from '../../common/hasClass';
 import hasClasses from '../../common/hasClasses';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import { isArray } from '../../common/isArray';
+import isArray from '../../common/isArray';
 import jConfirm from '../../common/jConfirm';
 import jQueryPresent from '../../common/jQueryPresent';
 import onclick from '../../common/onclick';
@@ -18,7 +18,8 @@ import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 import selfIdIs from '../../common/selfIdIs';
 import { sendEvent } from '../../support/fshGa';
-import setText from '../../common/setText';
+import setInnerHtml from '../../dom/setInnerHtml';
+import setText from '../../dom/setText';
 import setValue from '../../system/setValue';
 import showAHInvManager from './showAHInvManager';
 import { simpleCheckboxHtml } from '../../settings/simpleCheckbox';
@@ -26,13 +27,13 @@ import { subscribeOnce } from '../../support/pubsub';
 import toggleForce from '../../common/toggleForce';
 import useItem from '../../ajax/useItem';
 
-const def_disableQuickWearPrompts = 'disableQuickWearPrompts';
+const defDisableQuickWearPrompts = 'disableQuickWearPrompts';
 let disableQuickWearPrompts;
 let itemList;
 
 function actionResult(target, verb, data) {
   if (data.r !== 0) { return; }
-  target.parentNode.innerHTML = `<span class="fastWorn">${verb}</span>`;
+  setInnerHtml(`<span class="fastWorn">${verb}</span>`, target.parentNode);
 }
 
 function doAction(target, fn, verb) { // jQuery.min
@@ -83,7 +84,7 @@ function hideFolders(target) {
 
 function togglePref() {
   disableQuickWearPrompts = !disableQuickWearPrompts;
-  setValue(def_disableQuickWearPrompts, disableQuickWearPrompts);
+  setValue(defDisableQuickWearPrompts, disableQuickWearPrompts);
 }
 
 function evts5() {
@@ -91,7 +92,7 @@ function evts5() {
     [partial(hasClasses, ['smallLink', 'fshEq']), equipProfileInventoryItem],
     [partial(hasClasses, ['smallLink', 'fshUse']), useProfileInventoryItem],
     [partial(hasClass, 'fshFolder'), hideFolders],
-    [selfIdIs(def_disableQuickWearPrompts), togglePref],
+    [selfIdIs(defDisableQuickWearPrompts), togglePref],
   ];
 }
 
@@ -102,7 +103,7 @@ function goodData(appInv) {
 function makePref(thisList) {
   insertElement(thisList, createDiv({
     className: 'qwPref',
-    innerHTML: simpleCheckboxHtml(def_disableQuickWearPrompts),
+    innerHTML: simpleCheckboxHtml(defDisableQuickWearPrompts),
   }));
 }
 
@@ -131,7 +132,7 @@ function hasJquery(injector) { // jQuery.min
   if (!content) { return; }
   insertHtmlBeforeEnd(content, 'Getting item list from backpack...');
   daLoadInventory().then(partial(showQuickWear, content));
-  disableQuickWearPrompts = getValue(def_disableQuickWearPrompts);
+  disableQuickWearPrompts = getValue(defDisableQuickWearPrompts);
 }
 
 export default function insertQuickWear(injector) {

@@ -1,4 +1,4 @@
-import isType from '../../common/isType';
+import isString from '../../common/isString';
 import partial from '../../common/partial';
 
 const lookup = [
@@ -33,7 +33,7 @@ const lookup = [
 ];
 
 function isMatch(data, el) {
-  if (isType(el, 'string')) {
+  if (isString(el)) {
     return data.includes(el);
   }
   return el.test(data);
@@ -41,7 +41,7 @@ function isMatch(data, el) {
 
 function logType(data, ary) { return ary.some(partial(isMatch, data)); }
 
-export function rowProfile(data) {
+export default function rowProfile(data) {
   const myIndex = lookup.findIndex(partial(logType, data));
   if (myIndex === -1) { return 0; }
   return myIndex;

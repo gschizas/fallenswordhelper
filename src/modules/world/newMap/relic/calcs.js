@@ -3,7 +3,7 @@ import fallback from '../../../system/fallback';
 import playerDataObject from '../../../common/playerDataObject';
 import reduceBuffArray from '../../../common/reduceBuffArray';
 import { relicMultiplier } from './parseGuild';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import setTextCommas from '../../../common/setTextCommas';
 import {
   armorBuffedElement,

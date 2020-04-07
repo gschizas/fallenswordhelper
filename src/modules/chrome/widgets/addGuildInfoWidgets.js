@@ -3,9 +3,10 @@ import contactColour from './contactColour';
 import contains from '../../common/contains';
 import doHideBtn from './doHideBtn';
 import doHideBuffSelected from './doHideBuffSelected';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import { guildSubcmdUrl } from '../../support/constants';
 import querySelectorArray from '../../common/querySelectorArray';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 function guildColour(el) {
   contactColour(el, {
@@ -16,7 +17,7 @@ function guildColour(el) {
 }
 
 function makeLink(el) {
-  el.innerHTML = `<a href="${guildSubcmdUrl}chat">Chat</a>`;
+  setInnerHtml(`<a href="${guildSubcmdUrl}chat">Chat</a>`, el);
 }
 
 function updateChatLink() {

@@ -3,6 +3,7 @@ import partial from '../../common/partial';
 import toggleForce from '../../common/toggleForce';
 
 function clearCheck(el) {
+  // eslint-disable-next-line no-param-reassign
   el.parentNode.parentNode.previousElementSibling.children[0].checked = false;
 }
 

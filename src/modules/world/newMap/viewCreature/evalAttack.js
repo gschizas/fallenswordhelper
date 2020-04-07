@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 function calcAttack(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupAttackValue;

@@ -1,6 +1,6 @@
 import createDocument from '../../system/createDocument';
 import getArrayByTagName from '../../common/getArrayByTagName';
-import { getElementById } from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';
@@ -32,7 +32,9 @@ function buildResult(img, mouseOverRX) {
 function hasAmounts(result, amounts) {
   if (amounts) {
     const resultAmounts = getText(amounts).split('/');
+    // eslint-disable-next-line no-param-reassign
     result.amountPresent = parseInt(resultAmounts[0], 10);
+    // eslint-disable-next-line no-param-reassign
     result.amountNeeded = parseInt(resultAmounts[1], 10);
   }
 }
@@ -56,8 +58,11 @@ export default function processRecipe(output, recipebook, recipe, html) {
   insertHtmlBeforeEnd(output,
     `Parsing blueprint ${recipe.name}...<br>`);
   const tblCells = getTblCells(doc);
+  // eslint-disable-next-line no-param-reassign
   recipe.items = parseRecipe(tblCells, '/inventory/2x3.');
+  // eslint-disable-next-line no-param-reassign
   recipe.components = parseRecipe(tblCells, '/inventory/1x1mini.');
-  recipe.target = parseRecipe(tblCells, '/hellforge/2x3.')[0];
+  // eslint-disable-next-line no-param-reassign
+  [recipe.target] = parseRecipe(tblCells, '/hellforge/2x3.');
   recipebook.recipe.push(recipe);
 }
