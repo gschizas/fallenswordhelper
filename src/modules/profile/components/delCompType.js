@@ -14,8 +14,7 @@ function doSpinner(td) {
   // eslint-disable-next-line no-param-reassign
   td.className = 'guildTagSpinner';
   // eslint-disable-next-line no-param-reassign
-  td.style.backgroundImage = `url('${cdn
-  }ui/misc/spinner.gif')`;
+  td.style.backgroundImage = `url('${cdn}ui/misc/spinner.gif')`;
 }
 
 function destroyed(data) {
