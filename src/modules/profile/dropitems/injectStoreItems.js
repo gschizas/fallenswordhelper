@@ -114,7 +114,9 @@ function doneInvPaint() {
 }
 
 function toggleExtraLinks(o) {
-  toggleForce(o.injectHere.children[0], !showExtraLinks);
+  if (o.injectHere) {
+    toggleForce(o.injectHere.children[0], !showExtraLinks);
+  }
 }
 
 function toggleShowExtraLinks() {
