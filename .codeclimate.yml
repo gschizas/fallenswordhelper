@@ -1,22 +1,15 @@
 ---
-engines:
+version: "2"
+plugins:
+  csslint:
+    enabled: true
   duplication:
     enabled: true
     config:
       languages:
-      - javascript
+      - javascript:
   eslint:
     enabled: true
-    config: .eslintrc.js
-  csslint:
-    enabled: true
+    channel: "eslint-6"
   fixme:
     enabled: true
-  nodesecurity:
-    enabled: false
-ratings:
-  paths:
-  - "**.css"
-  - "**.js"
-exclude_paths:
-- "dist/"
