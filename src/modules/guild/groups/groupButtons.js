@@ -1,6 +1,6 @@
 import addButton from './addButton';
 import calf from '../../support/calf';
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import csvSplit from '../../common/csvSplit';
 import { defJoinallgroupsundersize } from '../../support/constants';
 import fetchGroupStatsButton from './fetchGroupStatsButton';

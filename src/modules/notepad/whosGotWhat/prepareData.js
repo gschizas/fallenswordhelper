@@ -5,10 +5,10 @@ import partial from '../../common/partial';
 import toLowerCase from '../../common/toLowerCase';
 
 function byMember(acc, curr) {
-  // if (curr.item_id === 11503) { // Zombie Brew
-  acc[curr.player_id] = acc[curr.player_id] || [];
-  acc[curr.player_id].push(curr);
-  // }
+  if (curr.item_id === 11503) { // Zombie Brew
+    acc[curr.player_id] = acc[curr.player_id] || [];
+    acc[curr.player_id].push(curr);
+  }
   return acc;
 }
 

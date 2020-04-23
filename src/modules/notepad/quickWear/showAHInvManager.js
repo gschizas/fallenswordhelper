@@ -1,4 +1,4 @@
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import entries from '../../common/entries';
 import getValueJSON from '../../system/getValueJSON';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';

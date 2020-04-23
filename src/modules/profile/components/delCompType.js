@@ -2,7 +2,7 @@ import allthen from '../../common/allthen';
 import { cdn } from '../../system/system';
 import chunk from '../../common/chunk';
 import { componentList } from './prepareComponentList';
-import { daDestroyComponent } from '../../_dataAccess/_dataAccess';
+import daDestroyComponent from '../../_dataAccess/daDestroyComponent';
 import deleteVisible from './deleteVisible';
 import isArray from '../../common/isArray';
 import partial from '../../common/partial';

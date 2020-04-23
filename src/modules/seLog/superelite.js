@@ -1,4 +1,6 @@
 import calf from '../support/calf';
+import createTBody from '../common/cElement/createTBody';
+import createTable from '../common/cElement/createTable';
 import entries from '../common/entries';
 import formatUtcDateTime from '../common/formatUtcDateTime';
 import insertElement from '../common/insertElement';
@@ -10,7 +12,6 @@ import partial from '../common/partial';
 import setInnerHtml from '../dom/setInnerHtml';
 import setValue from '../system/setValue';
 import { simpleCheckboxHtml } from '../settings/simpleCheckbox';
-import { createTBody, createTable } from '../common/cElement';
 import {
   disableBackgroundChecks,
   doBackgroundCheck,

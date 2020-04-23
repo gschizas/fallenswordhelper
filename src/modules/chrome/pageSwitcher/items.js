@@ -1,5 +1,7 @@
-import allowBack from '../../guide/allowBack';
-import itemsView from '../../guide/itemsView';
+import { allowBack } from './loader';
+import runDefault from '../../common/runDefault';
+
+const itemsView = () => { runDefault(import('../../guide/itemsView')); };
 
 export default {
   '-': { '-': allowBack },

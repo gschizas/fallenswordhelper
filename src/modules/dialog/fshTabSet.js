@@ -1,16 +1,14 @@
 import './fshTabSet.postcss';
+import createDiv from '../common/cElement/createDiv';
+import createInput from '../common/cElement/createInput';
+import createLabel from '../common/cElement/createLabel';
+import createLi from '../common/cElement/createLi';
+import createUl from '../common/cElement/createUl';
 import insertElement from '../common/insertElement';
 import once from '../common/once';
 import partial from '../common/partial';
 import { publish } from '../support/pubsub';
 import setInnerHtml from '../dom/setInnerHtml';
-import {
-  createDiv,
-  createInput,
-  createLabel,
-  createLi,
-  createUl,
-} from '../common/cElement';
 
 const toggleId = (groupName, i) => groupName + String(i);
 

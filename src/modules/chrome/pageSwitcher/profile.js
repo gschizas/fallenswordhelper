@@ -1,6 +1,4 @@
-import dropItemLoader from '../../profile/dropitems/dropItemLoader';
-import injectBioWidgets from '../../profile/bio/bioWidgets';
-import injectProfile from '../../profile/profile';
+import { injectBioWidgets, injectProfile, injectStoreItems } from './loader';
 
 export default {
   '-': { '-': injectProfile },
@@ -9,5 +7,5 @@ export default {
   equipitem: { '-': injectProfile },
   useitem: { '-': injectProfile },
   changebio: { '-': injectBioWidgets },
-  dropitems: { '-': dropItemLoader },
+  dropitems: { '-': injectStoreItems },
 };

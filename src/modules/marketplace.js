@@ -1,5 +1,5 @@
 import addCommas from './system/addCommas';
-import { closestTable } from './common/closest';
+import closestTable from './common/closestTable';
 import getElementById from './common/getElement';
 import on from './common/on';
 import { pCC } from './support/layout';

@@ -1,5 +1,7 @@
-import guildHall from '../../../guild/hall/hall';
-import injectBioWidgets from '../../../profile/bio/bioWidgets';
+import { injectBioWidgets } from '../loader';
+import runDefault from '../../../common/runDefault';
+
+const guildHall = () => { runDefault(import('../../../guild/hall/hall')); };
 
 export default {
   '-': guildHall,

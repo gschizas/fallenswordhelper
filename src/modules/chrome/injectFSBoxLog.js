@@ -1,11 +1,11 @@
-import { createSpan } from '../common/cElement';
+import createSpan from '../common/cElement/createSpan';
 import { doAddIgnore } from '../support/constants';
 import getElementById from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import injectFsBoxContent from '../notepad/injectFsBoxContent';
+import { injectFsBoxContent } from './pageSwitcher/loader';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';

@@ -1,4 +1,6 @@
 import calf from '../../../support/calf';
+import createButton from '../../../common/cElement/createButton';
+import createDiv from '../../../common/cElement/createDiv';
 import eventHandler5 from '../../../common/eventHandler5';
 import fixTeleport from './fixTeleport';
 import getElementById from '../../../common/getElement';
@@ -13,11 +15,7 @@ import openQuickBuffByName from '../../../common/openQuickBuffByName';
 import playerName from '../../../common/playerName';
 import setText from '../../../dom/setText';
 import setValue from '../../../system/setValue';
-import {
-  createButton,
-  createDiv,
-  textSpan,
-} from '../../../common/cElement';
+import textSpan from '../../../common/cElement/textSpan';
 import {
   defPlayerLevel,
   defRealmUpdate,

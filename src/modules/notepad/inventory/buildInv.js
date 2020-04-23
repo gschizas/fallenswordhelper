@@ -1,13 +1,11 @@
 import allthen from '../../common/allthen';
 import calf from '../../support/calf';
+import daGuildFetchInv from '../../_dataAccess/daGuildFetchInv';
+import daGuildReport from '../../_dataAccess/daGuildReport';
+import daLoadInventory from '../../_dataAccess/daLoadInventory';
 import getInventory from '../../ajax/getInventory';
 import isArray from '../../common/isArray';
 import partial from '../../common/partial';
-import {
-  daGuildFetchInv,
-  daGuildReport,
-  daLoadInventory,
-} from '../../_dataAccess/_dataAccess';
 
 export let theInv;
 let composed = [];

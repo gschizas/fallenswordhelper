@@ -1,5 +1,7 @@
 import all from '../../common/all';
 import completed from '../../app/arena/completed';
+import createAnchor from '../../common/cElement/createAnchor';
+import createBr from '../../common/cElement/createBr';
 import entries from '../../common/entries';
 import formatUtcDateTime from '../../common/formatUtcDateTime';
 import fromEntries from '../../common/fromEntries';
@@ -7,9 +9,8 @@ import insertElement from '../../common/insertElement';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 // import {removeKeys} from '../../common/removeKeys';
-import results from '../../app/arena/results';
+import { results } from '../../chrome/pageSwitcher/loader';
 import round from '../../common/round';
-import { createAnchor, createBr } from '../../common/cElement';
 import { cyrb32, cyrb53, makeHash } from './makeHash';
 import { get, set } from '../../system/idb';
 

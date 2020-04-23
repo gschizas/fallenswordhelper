@@ -1,4 +1,4 @@
-import { daGuildManage } from '../_dataAccess/_dataAccess';
+import daGuildManage from '../_dataAccess/daGuildManage';
 import fallback from '../system/fallback';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';

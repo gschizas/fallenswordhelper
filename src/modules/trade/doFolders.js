@@ -1,5 +1,7 @@
 import './doFolders.css';
 import add from '../support/task';
+import createDiv from '../common/cElement/createDiv';
+import createTr from '../common/cElement/createTr';
 import { defTable } from '../support/constants';
 import entries from '../common/entries';
 import fallback from '../system/fallback';
@@ -14,7 +16,6 @@ import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import onclick from '../common/onclick';
 import partial from '../common/partial';
-import { createDiv, createTr } from '../common/cElement';
 // #if _BETA  //  Timing output
 import { time, timeEnd } from '../support/debug';
 // #endif

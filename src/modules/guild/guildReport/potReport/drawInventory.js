@@ -1,4 +1,4 @@
-import { createDiv } from '../../../common/cElement';
+import createDiv from '../../../common/cElement/createDiv';
 import insertElement from '../../../common/insertElement';
 import keys from '../../../common/keys';
 import once from '../../../common/once';

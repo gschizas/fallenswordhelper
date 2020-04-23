@@ -1,4 +1,4 @@
-import { daRankPosition } from '../../_dataAccess/_dataAccess';
+import daRankPosition from '../../_dataAccess/daRankPosition';
 import getValue from '../../system/getValue';
 import insertElementBefore from '../../common/insertElementBefore';
 import onclick from '../../common/onclick';

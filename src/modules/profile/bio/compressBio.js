@@ -1,10 +1,12 @@
 import './compressBio.postcss';
+import createDiv from '../../common/cElement/createDiv';
+import createInput from '../../common/cElement/createInput';
+import createLabel from '../../common/cElement/createLabel';
 import insertElement from '../../common/insertElement';
 import on from '../../common/on';
 import partial from '../../common/partial';
 import { sendEvent } from '../../support/fshGa';
 import setInnerHtml from '../../dom/setInnerHtml';
-import { createDiv, createInput, createLabel } from '../../common/cElement';
 
 function injectToggle(fshCompressor) {
   const toggle = insertElement(fshCompressor,

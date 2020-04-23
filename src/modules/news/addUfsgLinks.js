@@ -1,3 +1,5 @@
+import createAnchor from '../common/cElement/createAnchor';
+import createSpan from '../common/cElement/createSpan';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getTitle from '../common/getTitle';
 import { guideUrl } from '../support/constants';
@@ -5,7 +7,6 @@ import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import { pCC } from '../support/layout';
 import querySelectorArray from '../common/querySelectorArray';
-import { createAnchor, createSpan } from '../common/cElement';
 
 const titanRe = /(\s*A ')([^']*)(' titan has been spotted in )([^!]*)(!)/;
 

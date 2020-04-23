@@ -6,7 +6,7 @@ import generalPrefs from './generalPrefs';
 import guildPrefs from './guildPrefs';
 import logPrefs from './logPrefs';
 import otherPrefs from './otherPrefs';
-import { prefs } from './worldPrefs';
+import prefs from './worldPrefs';
 import profilePrefs from './profilePrefs';
 import questPrefs from './questPrefs';
 import { notepadBlankUrl, playerIdUrl } from '../support/constants';

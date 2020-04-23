@@ -1,7 +1,9 @@
 /* eslint-disable no-param-reassign */
 import './viewCreature.css';
 import calf from '../../../support/calf';
-import { createDiv } from '../../../common/cElement';
+import createDiv from '../../../common/cElement/createDiv';
+import daGroupStats from '../../../_dataAccess/daGroupStats';
+import daViewGroups from '../../../_dataAccess/daViewGroups';
 import { defViewCreature } from '../../../support/constants';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
@@ -20,7 +22,6 @@ import partial from '../../../common/partial';
 import playerDataObject from '../../../common/playerDataObject';
 import playerName from '../../../common/playerName';
 import setInnerHtml from '../../../dom/setInnerHtml';
-import { daGroupStats, daViewGroups } from '../../../_dataAccess/_dataAccess';
 
 let dialogViewCreature;
 let combatEvalContainer;

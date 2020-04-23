@@ -3,7 +3,7 @@ import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
 import addLogColoring from '../../logs/addLogColoring';
 import all from '../../common/all';
 import createDocument from '../../system/createDocument';
-import { createTable } from '../../common/cElement';
+import createTable from '../../common/cElement/createTable';
 import eventHandler5 from '../../common/eventHandler5';
 import functionPasses from '../../common/functionPasses';
 import getArrayByTagName from '../../common/getArrayByTagName';

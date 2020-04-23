@@ -1,4 +1,4 @@
-import { createTable } from '../../common/cElement';
+import createTable from '../../common/cElement/createTable';
 import getElementById from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';

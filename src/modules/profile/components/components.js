@@ -1,7 +1,7 @@
 import classHandler from '../../common/classHandler';
 import clickThis from '../../common/clickThis';
 import countComponent from './countComponent';
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import decorateButton from './decorateButton';
 import delCompType from './delCompType';
 import delComponent from './delComponent';
@@ -11,7 +11,7 @@ import getInvTable from './getInvTable';
 import hideElement from '../../common/hideElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
-import insertQuickExtract from '../../notepad/quickExtract/quickExtract';
+import { insertQuickExtract } from '../../chrome/pageSwitcher/loader';
 import jQueryDialog from '../../chrome/jQueryDialog';
 import onclick from '../../common/onclick';
 import { sendEvent } from '../../support/fshGa';

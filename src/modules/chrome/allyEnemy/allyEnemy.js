@@ -2,7 +2,7 @@ import add from '../../support/task';
 import addContacts from './addContacts';
 import calf from '../../support/calf';
 import classHandler from '../../common/classHandler';
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import fallback from '../../system/fallback';
 import getArrayByClassName from '../../common/getArrayByClassName';
 import getElementById from '../../common/getElement';

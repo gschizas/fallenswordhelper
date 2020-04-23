@@ -1,4 +1,6 @@
 import { cdn } from '../../system/system';
+import createDiv from '../../common/cElement/createDiv';
+import createSelect from '../../common/cElement/createSelect';
 import insertElement from '../../common/insertElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -7,7 +9,6 @@ import on from '../../common/on';
 import partial from '../../common/partial';
 import setInnerHtml from '../../dom/setInnerHtml';
 import usesetup from '../../app/arena/usesetup';
-import { createDiv, createSelect } from '../../common/cElement';
 
 let moveContainer;
 

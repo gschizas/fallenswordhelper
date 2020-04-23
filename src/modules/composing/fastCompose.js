@@ -1,6 +1,9 @@
 import './fastCompose.css';
 import backgroundCreate from './backgroundCreate';
 import contains from '../common/contains';
+import createDiv from '../common/cElement/createDiv';
+import createInput from '../common/cElement/createInput';
+import createTable from '../common/cElement/createTable';
 import getArrayByClassName from '../common/getArrayByClassName';
 import insertElement from '../common/insertElement';
 import insertElementAfter from '../common/insertElementAfter';
@@ -16,7 +19,6 @@ import querySelectorArray from '../common/querySelectorArray';
 import { sendEvent } from '../support/fshGa';
 import setText from '../dom/setText';
 import { subscribe } from '../support/pubsub';
-import { createDiv, createInput, createTable } from '../common/cElement';
 
 function doTableClass(myTable, slotsLeft) {
   myTable.classList.add(`left-${slotsLeft.toString()}`);

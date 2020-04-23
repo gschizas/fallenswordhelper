@@ -1,6 +1,6 @@
 import './newGuildLog5.css';
 import add from '../../support/task';
-import { createTable } from '../../common/cElement';
+import createTable from '../../common/cElement/createTable';
 import { get } from '../../system/idb';
 import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';

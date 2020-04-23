@@ -1,5 +1,5 @@
 import clickThis from './clickThis';
-import { createDiv } from './cElement';
+import createDiv from './cElement/createDiv';
 import getArrayByClassName from './getArrayByClassName';
 import getElementById from './getElement';
 import getInventoryById from '../ajax/getInventoryById';

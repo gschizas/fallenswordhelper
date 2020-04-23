@@ -1,5 +1,5 @@
 import addStatsQuickBuff from './addStatsQuickBuff';
-import { createSpan } from '../common/cElement';
+import createSpan from '../common/cElement/createSpan';
 import csvSplit from '../common/csvSplit';
 import getProfile from '../ajax/getProfile';
 import getText from '../common/getText';

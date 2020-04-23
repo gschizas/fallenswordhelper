@@ -1,18 +1,10 @@
-import { createDiv } from '../common/cElement';
+import createDiv from '../common/cElement/createDiv';
 import draggable from '../common/dragStart';
 import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import injectBuffLog from '../notepad/buffLog/injectBuffLog';
-import injectFsBoxContent from '../notepad/injectFsBoxContent';
-import injectMonsterLog from '../notepad/monstorLog/monstorLog';
-import injectNotepadShowLogs from '../notepad/combatLog';
-import injectOnlinePlayers from '../notepad/onlinePlayers/injectOnlinePlayers';
-import injectRecipeManager from '../notepad/recipeMgr/recipeMgr';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import insertQuickExtract from '../notepad/quickExtract/quickExtract';
-import insertQuickWear from '../notepad/quickWear/quickWear';
 import isFunction from '../common/isFunction';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
@@ -20,9 +12,20 @@ import once from '../common/once';
 import onclick from '../common/onclick';
 import { playerIdUrl } from '../support/constants';
 import { sendEvent } from '../support/fshGa';
-import { injectAuctionSearch, injectQuickLinkManager } from
-  '../notepad/lists/lists';
-import { injectFindBuffs, injectFindOther } from '../notepad/findBuffs/findBuffs';
+import {
+  injectAuctionSearch,
+  injectBuffLog,
+  injectFindBuffs,
+  injectFindOther,
+  injectFsBoxContent,
+  injectMonsterLog,
+  injectNotepadShowLogs,
+  injectOnlinePlayers,
+  injectQuickLinkManager,
+  injectRecipeManager,
+  insertQuickExtract,
+  insertQuickWear,
+} from './pageSwitcher/loader';
 
 const helperMenuBlob = '<div class="column"><h3>Character</h3><ul>'
   + '<li><span class="fshLink">Buff Log</span></li>'

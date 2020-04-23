@@ -1,7 +1,7 @@
 import addCommas from '../../system/addCommas';
 import allthen from '../../common/allthen';
-import { createTFoot } from '../../common/cElement';
-import { daAdvisor } from '../../_dataAccess/_dataAccess';
+import createTFoot from '../../common/cElement/createTFoot';
+import daAdvisor from '../../_dataAccess/daAdvisor';
 import getMembrList from '../../ajax/getMembrList';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import partial from '../../common/partial';

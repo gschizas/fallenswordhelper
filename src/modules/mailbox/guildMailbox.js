@@ -1,5 +1,5 @@
 import clickThis from '../common/clickThis';
-import { closestTable } from '../common/closest';
+import closestTable from '../common/closestTable';
 import dialog from '../ajax/dialog';
 import getArrayByTagName from '../common/getArrayByTagName';
 import infoBoxFrom from '../common/InfoBoxFrom';

@@ -1,7 +1,7 @@
 import './newMap.css';
 import { buffInfo } from './buffInfo/buffInfo';
 import combatLogger from './combatLogger';
-import { createStyle } from '../../common/cElement';
+import createStyle from '../../common/cElement/createStyle';
 import doNotKill from './doNotKill/doNotKill';
 import executeAll from '../../common/executeAll';
 import getElementById from '../../common/getElement';

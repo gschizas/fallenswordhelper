@@ -1,5 +1,11 @@
 import add from '../../../support/task';
 import batch from '../../../common/batch';
+import createDiv from '../../../common/cElement/createDiv';
+import createInput from '../../../common/cElement/createInput';
+import createOption from '../../../common/cElement/createOption';
+import createSelect from '../../../common/cElement/createSelect';
+import createTable from '../../../common/cElement/createTable';
+import createTr from '../../../common/cElement/createTr';
 import entries from '../../../common/entries';
 import insertElement from '../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../common/insertHtmlBeforeEnd';
@@ -7,14 +13,6 @@ import once from '../../../common/once';
 import partial from '../../../common/partial';
 import { sendEvent } from '../../../support/fshGa';
 import setText from '../../../dom/setText';
-import {
-  createDiv,
-  createInput,
-  createOption,
-  createSelect,
-  createTable,
-  createTr,
-} from '../../../common/cElement';
 
 let mapping;
 let selectRowTmp;

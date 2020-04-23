@@ -1,6 +1,9 @@
 import './craftForge.css';
 import add from '../support/task';
 import calf from '../support/calf';
+import createDiv from '../common/cElement/createDiv';
+import createInput from '../common/cElement/createInput';
+import createLabel from '../common/cElement/createLabel';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
@@ -14,7 +17,6 @@ import on from '../common/on';
 import onclick from '../common/onclick';
 import { pCC } from '../support/layout';
 import toggleForce from '../common/toggleForce';
-import { createDiv, createInput, createLabel } from '../common/cElement';
 import { defTable, itemRE } from '../support/constants';
 
 let itemTable;

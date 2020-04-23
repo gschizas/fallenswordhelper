@@ -1,5 +1,5 @@
 import './potReport.css';
-import { createDiv } from '../../../common/cElement';
+import createDiv from '../../../common/cElement/createDiv';
 import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';
 import fallback from '../../../system/fallback';

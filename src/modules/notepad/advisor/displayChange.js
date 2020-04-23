@@ -1,4 +1,4 @@
-import { createTBody } from '../../common/cElement';
+import createTBody from '../../common/cElement/createTBody';
 import rowFactory from './rowFactory';
 
 export default function displayChange(domTable, displayed) {

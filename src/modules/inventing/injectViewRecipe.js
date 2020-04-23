@@ -1,4 +1,4 @@
-import { createAnchor } from '../common/cElement';
+import createAnchor from '../common/cElement/createAnchor';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import querySelector from '../common/querySelector';

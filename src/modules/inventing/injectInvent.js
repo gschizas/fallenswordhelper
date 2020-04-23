@@ -1,4 +1,7 @@
-import { daDoInvent } from '../_dataAccess/_dataAccess';
+import createInput from '../common/cElement/createInput';
+import createOl from '../common/cElement/createOl';
+import createSpan from '../common/cElement/createSpan';
+import daDoInvent from '../_dataAccess/daDoInvent';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jsonFail from '../common/jsonFail';
@@ -7,7 +10,6 @@ import outputResult from '../common/outputResult';
 import { pCC } from '../support/layout';
 import querySelector from '../common/querySelector';
 import setInnerHtml from '../dom/setInnerHtml';
-import { createInput, createOl, createSpan } from '../common/cElement';
 
 let invAmount;
 let invResultHeader;

@@ -1,4 +1,4 @@
-import { daQuickbuff } from '../_dataAccess/_dataAccess';
+import daQuickbuff from '../_dataAccess/daQuickbuff';
 import partial from '../common/partial';
 import quickbuffSuccess from '../common/quickbuffSuccess';
 import setInnerHtml from '../dom/setInnerHtml';

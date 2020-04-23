@@ -1,4 +1,6 @@
 import addRows from './addRows';
+import createSpan from '../../../common/cElement/createSpan';
+import createTable from '../../../common/cElement/createTable';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import {
@@ -21,7 +23,6 @@ import {
   statusText,
   totalPct,
 } from './placeholders';
-import { createSpan, createTable } from '../../../common/cElement';
 
 export let titanTbl;
 

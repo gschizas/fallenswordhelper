@@ -1,5 +1,5 @@
 import alpha from '../common/alpha';
-import { createDiv } from '../common/cElement';
+import createDiv from '../common/cElement/createDiv';
 import entries from '../common/entries';
 import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';

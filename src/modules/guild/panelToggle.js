@@ -1,4 +1,4 @@
-import { createSpan } from '../common/cElement';
+import createSpan from '../common/cElement/createSpan';
 import getValue from '../system/getValue';
 import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';

@@ -1,4 +1,4 @@
-import { createDiv } from './cElement';
+import createDiv from './cElement/createDiv';
 import getElementById from './getElement';
 import insertElement from './insertElement';
 import setText from '../dom/setText';

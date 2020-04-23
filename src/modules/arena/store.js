@@ -1,4 +1,4 @@
-import { closestTd } from '../common/closest';
+import closestTd from '../common/closestTd';
 import { fshArenaKey } from './assets';
 import getTextTrim from '../common/getTextTrim';
 import querySelectorArray from '../common/querySelectorArray';

@@ -1,10 +1,5 @@
 import anchorButton from './anchorButton';
 import getValue from '../../system/getValue';
-import injectBuffLog from '../../notepad/buffLog/injectBuffLog';
-import injectMonsterLog from '../../notepad/monstorLog/monstorLog';
-import injectNotepadShowLogs from '../../notepad/combatLog';
-import { injectQuickLinkManager } from '../../notepad/lists/lists';
-import injectRecipeManager from '../../notepad/recipeMgr/recipeMgr';
 import insertAfterParent from './insertAfterParent';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import {
@@ -12,6 +7,13 @@ import {
   notepadBlankUrl,
   profileUrl,
 } from '../../support/constants';
+import {
+  injectBuffLog,
+  injectMonsterLog,
+  injectNotepadShowLogs,
+  injectQuickLinkManager,
+  injectRecipeManager,
+} from '../pageSwitcher/loader';
 
 function buffLogLink() {
   if (getValue('keepBuffLog')) {

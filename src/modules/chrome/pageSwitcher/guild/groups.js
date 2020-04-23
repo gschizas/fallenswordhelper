@@ -1,5 +1,11 @@
-import injectGroupStats from '../../../guild/groups/injectGroupStats';
-import injectGroups from '../../../guild/groups/groups';
+import runDefault from '../../../common/runDefault';
+
+const injectGroups = () => {
+  runDefault(import('../../../guild/groups/groups'));
+};
+const injectGroupStats = () => {
+  runDefault(import('../../../guild/groups/injectGroupStats'));
+};
 
 export default {
   viewstats: injectGroupStats,

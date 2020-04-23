@@ -1,13 +1,14 @@
 import addCommas from '../../system/addCommas';
 import calf from '../../support/calf';
-import { daViewCombat } from '../../_dataAccess/_dataAccess';
+import createDiv from '../../common/cElement/createDiv';
+import createSpan from '../../common/cElement/createSpan';
+import daViewCombat from '../../_dataAccess/daViewCombat';
 import getText from '../../common/getText';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
 import setInnerHtml from '../../dom/setInnerHtml';
 import { cacheCombat, combatCache } from './combatCache';
-import { createDiv, createSpan } from '../../common/cElement';
 
 function result(stat, desc, color) {
   if (stat !== 0) {

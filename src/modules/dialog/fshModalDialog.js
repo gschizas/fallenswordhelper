@@ -1,8 +1,10 @@
 import './fshModalDialog.postcss';
+import createDiv from '../common/cElement/createDiv';
+import createInput from '../common/cElement/createInput';
+import createLabel from '../common/cElement/createLabel';
 import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import { publish } from '../support/pubsub';
-import { createDiv, createInput, createLabel } from '../common/cElement';
 
 function makeDialog(name) {
   const thisContainer = createDiv({ className: 'fshDialog' });

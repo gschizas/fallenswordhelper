@@ -1,9 +1,10 @@
+import createDiv from '../common/cElement/createDiv';
+import createTable from '../common/cElement/createTable';
 import entries from '../common/entries';
 import { get } from '../system/idb';
 import insertElement from '../common/insertElement';
 import { pCC } from '../support/layout';
 import thisTournament from './arenaJoin/thisTournament';
-import { createDiv, createTable } from '../common/cElement';
 import { cyrb32, cyrb53, makeHash } from '../notepad/arenaCrawler/makeHash';
 
 function makeRows(equip) {

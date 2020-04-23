@@ -1,4 +1,6 @@
 import calf from '../../support/calf';
+import createTd from '../../common/cElement/createTd';
+import createTr from '../../common/cElement/createTr';
 import { defTable } from '../../support/constants';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import insertElement from '../../common/insertElement';
@@ -7,7 +9,6 @@ import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import makeFolderSpans from '../../common/makeFolderSpans';
 import { pCC } from '../../support/layout';
 import setInnerHtml from '../../dom/setInnerHtml';
-import { createTd, createTr } from '../../common/cElement';
 
 function extraButtons() {
   const tRows = getElementsByTagName(defTable, pCC)[0].rows;

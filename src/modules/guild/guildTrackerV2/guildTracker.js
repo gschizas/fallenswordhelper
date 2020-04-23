@@ -1,4 +1,6 @@
 import './guildTracker.css';
+import createDiv from '../../common/cElement/createDiv';
+import createLabel from '../../common/cElement/createLabel';
 import { defEnableGuildActivityTracker } from '../../support/constants';
 import fshTabbedModal from '../../dialog/fshTabbedModal';
 import getValue from '../../system/getValue';
@@ -12,7 +14,6 @@ import querySelector from '../../common/querySelector';
 import setValue from '../../system/setValue';
 import { simpleCheckboxHtml } from '../../settings/simpleCheckbox';
 import { subscribeOnce } from '../../support/pubsub';
-import { createDiv, createLabel } from '../../common/cElement';
 
 function togglePref(evt) {
   if (evt.target.id === defEnableGuildActivityTracker) {

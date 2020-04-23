@@ -1,35 +1,41 @@
-import allowBack from '../../guide/allowBack';
 import arena from './arena';
 import auctionhouse from './auctionhouse';
 import composing from './composing';
-import craftForge from '../../craftForge/craftForge';
 import guild from './guild/guild';
-import injectBank from '../../bank/injectBank';
-import injectBazaar from '../../bazaar';
-import injectFindPlayer from '../../injectFindPlayer';
-import injectMailbox from '../../mailbox/mailbox';
-import injectProfile from '../../profile/profile';
-import injectQuickBuff from '../../quickbuff/quickBuff';
-import injectSettings from '../../settings/injectSettings';
-import injectTitan from '../../injectTitan';
-import injectWorld from '../../world/injectWorld';
-import inventing from '../../inventing/inventing';
 import items from './items';
-import ladder from '../../ladder/ladder';
 import log from './log';
-import marketplace from '../../marketplace';
 import news from './news';
 import noCmd from './noCmd';
 import notepad from './notepad';
 import parseTemplePage from '../notification/parseTemplePage';
-import points from './points';
 import profile from './profile';
 import questbook from './questbook';
 import quests from './quests';
+import runDefault from '../../common/runDefault';
 import scavenging from './scavenging';
-import superelite from '../../seLog/superelite';
 import toprated from './toprated';
 import trade from './trade';
+import { allowBack, injectProfile, inventing } from './loader';
+
+const craftForge = () => { runDefault(import('../../craftForge/craftForge')); };
+const injectBank = () => { runDefault(import('../../bank/injectBank')); };
+const injectBazaar = () => { runDefault(import('../../bazaar')); };
+const injectFindPlayer = () => {
+  runDefault(import('../../injectFindPlayer'));
+};
+const injectMailbox = () => { runDefault(import('../../mailbox/mailbox')); };
+const injectQuickBuff = () => {
+  runDefault(import('../../quickbuff/quickBuff'));
+};
+const injectTitan = () => { runDefault(import('../../injectTitan')); };
+const injectSettings = () => {
+  runDefault(import('../../settings/injectSettings'));
+};
+const injectWorld = () => { runDefault(import('../../world/injectWorld')); };
+const ladder = () => { runDefault(import('../../ladder/ladder')); };
+const marketplace = () => { runDefault(import('../../marketplace')); };
+const points = () => { runDefault(import('./points')); };
+const superelite = () => { runDefault(import('../../seLog/superelite')); };
 
 export default {
   settings: { '-': { '-': injectSettings } },

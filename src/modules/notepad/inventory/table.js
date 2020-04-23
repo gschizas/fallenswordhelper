@@ -1,7 +1,7 @@
 import bpRender from './render/bpRender';
 import { craftHash } from './assets';
 import craftRender from './render/craftRender';
-import { createTable } from '../../common/cElement';
+import createTable from '../../common/cElement/createTable';
 import createdRow from './render/createdRow';
 import dropRender from './render/dropRender';
 import durabilityRender from './render/durabilityRender';

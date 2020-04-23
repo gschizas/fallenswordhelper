@@ -1,4 +1,4 @@
-import { createSpan } from '../../../common/cElement';
+import createSpan from '../../../common/cElement/createSpan';
 import setInnerHtml from '../../../dom/setInnerHtml';
 import setText from '../../../dom/setText';
 

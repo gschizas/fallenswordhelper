@@ -1,7 +1,7 @@
 import { cmdUrl } from '../support/constants';
-import { createSpan } from '../common/cElement';
+import createSpan from '../common/cElement/createSpan';
 import insertElement from '../common/insertElement';
-import insertQuickWear from '../notepad/quickWear/quickWear';
+import { insertQuickWear } from '../chrome/pageSwitcher/loader';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jQueryDialog from '../chrome/jQueryDialog';
 import onclick from '../common/onclick';

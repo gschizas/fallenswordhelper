@@ -1,5 +1,5 @@
 import './injectShowTracker.css';
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';

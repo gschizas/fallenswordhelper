@@ -1,5 +1,5 @@
 import addCommas from '../../system/addCommas';
-import { createTr } from '../../common/cElement';
+import createTr from '../../common/cElement/createTr';
 import { playerIdUrl } from '../../support/constants';
 
 function rowHtml(aRow, withCommas) {

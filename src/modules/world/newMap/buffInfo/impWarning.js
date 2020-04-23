@@ -1,6 +1,6 @@
 import './impWarning.css';
-import { createSpan } from '../../../common/cElement';
-import { daQuickbuff } from '../../../_dataAccess/_dataAccess';
+import createSpan from '../../../common/cElement/createSpan';
+import daQuickbuff from '../../../_dataAccess/daQuickbuff';
 import { defFetchPlayerBuffs } from '../../../support/constants';
 import getBuff from './getBuff';
 import insertElement from '../../../common/insertElement';

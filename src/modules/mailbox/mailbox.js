@@ -1,6 +1,10 @@
 import './mailbox.css';
 import chunk from '../common/chunk';
-import { daMailboxTake } from '../_dataAccess/_dataAccess';
+import createDiv from '../common/cElement/createDiv';
+import createInput from '../common/cElement/createInput';
+import createLabel from '../common/cElement/createLabel';
+import createUl from '../common/cElement/createUl';
+import daMailboxTake from '../_dataAccess/daMailboxTake';
 import entries from '../common/entries';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementById from '../common/getElement';
@@ -16,12 +20,6 @@ import outputResult from '../common/outputResult';
 import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import setInnerHtml from '../dom/setInnerHtml';
-import {
-  createDiv,
-  createInput,
-  createLabel,
-  createUl,
-} from '../common/cElement';
 
 function makeQtLabel(id, text, injector) {
   const lbl = createLabel({

@@ -1,11 +1,16 @@
-import dropItemLoader from '../../../profile/dropitems/dropItemLoader';
-import injectGuildAddTagsWidgets from
-  '../../../guild/injectGuildAddTagsWidgets';
-import injectReportPaint from '../../../guild/guildReport/guildReport';
+import { injectStoreItems } from '../loader';
+import runDefault from '../../../common/runDefault';
+
+const injectGuildAddTagsWidgets = () => {
+  runDefault(import('../../../guild/injectGuildAddTagsWidgets'));
+};
+const injectReportPaint = () => {
+  runDefault(import('../../../guild/guildReport/guildReport'));
+};
 
 export default {
   report: injectReportPaint,
   addtags: injectGuildAddTagsWidgets,
   removetags: injectGuildAddTagsWidgets,
-  storeitems: dropItemLoader,
+  storeitems: injectStoreItems,
 };

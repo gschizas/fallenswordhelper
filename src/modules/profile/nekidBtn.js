@@ -1,4 +1,6 @@
-import { daUnequipItem } from '../_dataAccess/_dataAccess';
+import createButton from '../common/cElement/createButton';
+import createDiv from '../common/cElement/createDiv';
+import daUnequipItem from '../_dataAccess/daUnequipItem';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
@@ -7,7 +9,6 @@ import onclick from '../common/onclick';
 import partial from '../common/partial';
 import { sendEvent } from '../support/fshGa';
 import setInnerHtml from '../dom/setInnerHtml';
-import { createButton, createDiv } from '../common/cElement';
 
 let profileCombatSetDiv;
 

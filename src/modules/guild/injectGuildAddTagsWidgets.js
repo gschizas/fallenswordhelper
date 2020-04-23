@@ -1,10 +1,10 @@
 import { cdn } from '../system/system';
 import clickThis from '../common/clickThis';
-import { createInput } from '../common/cElement';
-import { daGsTake } from '../_dataAccess/_dataAccess';
+import createInput from '../common/cElement/createInput';
+import daGsTake from '../_dataAccess/daGsTake';
 import getElementById from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
-import injectGuild from './guild';
+import { injectGuild } from '../chrome/pageSwitcher/loader';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import onclick from '../common/onclick';

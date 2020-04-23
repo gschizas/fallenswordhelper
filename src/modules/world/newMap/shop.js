@@ -1,5 +1,8 @@
 import addCommas from '../../system/addCommas';
 import allthen from '../../common/allthen';
+import createButton from '../../common/cElement/createButton';
+import createDiv from '../../common/cElement/createDiv';
+import createInput from '../../common/cElement/createInput';
 import { defShopPrompt } from '../../support/constants';
 import fetchdata from '../../ajax/fetchdata';
 import getElementById from '../../common/getElement';
@@ -8,7 +11,6 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import onclick from '../../common/onclick';
 import setText from '../../dom/setText';
 import testQuant from '../../system/testQuant';
-import { createButton, createDiv, createInput } from '../../common/cElement';
 
 let shoppingData;
 let dialog;

@@ -1,6 +1,6 @@
-import { createDiv } from '../../../common/cElement';
+import createDiv from '../../../common/cElement/createDiv';
 import getElementById from '../../../common/getElement';
-import { huntingBuffsHtml } from '../../../settings/worldPrefs';
+import { huntingBuffsHtml } from '../../../settings/huntingBuffs';
 import insertElement from '../../../common/insertElement';
 import insertElementBefore from '../../../common/insertElementBefore';
 import isFunction from '../../../common/isFunction';

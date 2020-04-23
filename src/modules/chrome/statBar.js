@@ -1,4 +1,4 @@
-import { createAnchor } from '../common/cElement';
+import createAnchor from '../common/cElement/createAnchor';
 import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';

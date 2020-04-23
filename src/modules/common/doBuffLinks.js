@@ -1,10 +1,12 @@
+import createButton from './cElement/createButton';
+import createLi from './cElement/createLi';
+import createUl from './cElement/createUl';
 import fallback from '../system/fallback';
 import insertElement from './insertElement';
 import onclick from './onclick';
 import openQuickBuffByName from './openQuickBuffByName';
 import partial from './partial';
 import { places } from '../support/constants';
-import { createButton, createLi, createUl } from './cElement';
 
 function batchUp(acc, curr, i) {
   const slot = Math.floor(i / 16);

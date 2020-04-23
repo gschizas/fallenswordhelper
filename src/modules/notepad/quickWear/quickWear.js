@@ -1,7 +1,7 @@
 import './quickWear.postcss';
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import createQuickWear from './createQuickWear';
-import { daLoadInventory } from '../../_dataAccess/_dataAccess';
+import daLoadInventory from '../../_dataAccess/daLoadInventory';
 import equipItem from '../../ajax/equipItem';
 import eventHandler5 from '../../common/eventHandler5';
 import fshTabSet from '../../dialog/fshTabSet';

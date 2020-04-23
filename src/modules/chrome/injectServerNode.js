@@ -1,5 +1,5 @@
 import contains from '../common/contains';
-import { createDiv } from '../common/cElement';
+import createDiv from '../common/cElement/createDiv';
 import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import hasClass from '../common/hasClass';

@@ -1,6 +1,6 @@
 import add from '../support/task';
 import { cdn } from '../system/system';
-import { createDiv } from '../common/cElement';
+import createDiv from '../common/cElement/createDiv';
 import equipItem from '../ajax/equipItem';
 import getElementById from '../common/getElement';
 import getText from '../common/getText';

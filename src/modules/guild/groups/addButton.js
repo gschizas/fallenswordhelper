@@ -1,4 +1,4 @@
-import { createInput } from '../../common/cElement';
+import createInput from '../../common/cElement/createInput';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 

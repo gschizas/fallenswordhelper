@@ -1,7 +1,7 @@
 import allthen from '../../common/allthen';
 import arrayFrom from '../../common/arrayFrom';
-import { closestTable } from '../../common/closest';
-import { createDiv } from '../../common/cElement';
+import closestTable from '../../common/closestTable';
+import createDiv from '../../common/cElement/createDiv';
 import createDocument from '../../system/createDocument';
 import dataRows from '../../common/dataRows';
 import getTextTrim from '../../common/getTextTrim';

@@ -1,7 +1,7 @@
+import createBr from '../common/cElement/createBr';
+import createSpan from '../common/cElement/createSpan';
 import dialogMsg from '../common/dialogMsg';
 import getElementById from '../common/getElement';
-import injectMonsterLog from '../notepad/monstorLog/monstorLog';
-import injectNotepadShowLogs from '../notepad/combatLog';
 import insertElement from '../common/insertElement';
 import jConfirm from '../common/jConfirm';
 import jQueryDialog from '../chrome/jQueryDialog';
@@ -12,7 +12,10 @@ import saveBoxes from './saveBoxes.json';
 import { sendEvent } from '../support/fshGa';
 import setValue from '../system/setValue';
 import toggleVisibilty from '../common/toggleVisibilty';
-import { createBr, createSpan } from '../common/cElement';
+import {
+  injectMonsterLog,
+  injectNotepadShowLogs,
+} from '../chrome/pageSwitcher/loader';
 
 function findEl(el, name) {
   return querySelector(`#fshSettingsTable ${el}[name="${name}"]`);

@@ -1,4 +1,4 @@
-import { daDestroyComponent } from '../../_dataAccess/_dataAccess';
+import daDestroyComponent from '../../_dataAccess/daDestroyComponent';
 import errorDialog from '../../common/errorDialog';
 import getText from '../../common/getText';
 import { itemRE } from '../../support/constants';

@@ -1,7 +1,7 @@
 import bunchOfSimple from './bunchOfSimple';
 import calf from '../support/calf';
 import getValue from '../system/getValue';
-import isChecked from '../system/isChecked';
+import { huntingBuffs } from './huntingBuffs';
 import isSelected from '../system/isSelected';
 import isValueChecked from './isValueChecked';
 import {
@@ -105,42 +105,6 @@ function theDoNotKillList() {
     calf.doNotKillList}"></td></tr>`;
 }
 
-function huntBuff() {
-  return `Hunting Buffs${helpLink('Hunting Buffs',
-    'Customize which buffs are designated as hunting buffs. '
-    + 'You must type the full name of each buff, separated by commas. '
-    + 'Use the checkbox to enable/disable them.')}:`;
-}
-
-function huntBuffCheck() {
-  return '<input name="showHuntingBuffs" '
-    + `class="fshVMid" type="checkbox" value="on"${
-      isChecked(calf.showBuffs)}>`;
-}
-
-export function huntMode() {
-  return `Enabled Hunting Mode${
-    helpLink('Enabled Hunting Mode',
-      'This will determine which list of buffs gets checked '
-      + 'on the world screen.')}:<select name="enabledHuntingMode">`
-    + `<option value="1"${
-      isSelected(calf.enabledHuntingMode, '1')}>${calf.buffsName}</option>`
-    + `<option value="2"${
-      isSelected(calf.enabledHuntingMode, '2')}>${calf.buffs2Name}</option>`
-    + `<option value="3"${
-      isSelected(calf.enabledHuntingMode, '3')}>${calf.buffs3Name}</option>`
-    + '</select>';
-}
-
-export function huntingBuffsHtml() {
-  return `${huntBuff() + huntBuffCheck()} ${huntMode()}`;
-}
-
-function huntingBuffs() {
-  return `<tr><td class="fshRight">${huntBuff()}</td><td colspan="3">${
-    huntBuffCheck()} ${huntMode()}</td></tr>`;
-}
-
 function huntingBuffsList(modeLabel, modeName, buffsName, buffs) {
   return `<tr><td class="fshRight">${modeLabel} Hunting Buff List${
     helpLink(`${modeLabel} Hunting Buff List`,
@@ -172,7 +136,7 @@ function joinFuncs() {
   ].join('');
 }
 
-export function prefs() {
+export default function prefs() {
   // World Screen
   return '<tr><th colspan="2"><b>'
     + `World screen/Hunting preferences</b></th></tr>${

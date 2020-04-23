@@ -1,5 +1,5 @@
 import calf from '../../support/calf';
-import insertQuickWear from '../../notepad/quickWear/quickWear';
+import { insertQuickWear } from '../pageSwitcher/loader';
 import jQueryDialog from '../jQueryDialog';
 import keyHandlerEvent from './keyHandlerEvent';
 

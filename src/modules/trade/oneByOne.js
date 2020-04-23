@@ -1,6 +1,6 @@
 import './oneByOne.css';
-import { createButton } from '../common/cElement';
-import { daSendItems } from '../_dataAccess/_dataAccess';
+import createButton from '../common/cElement/createButton';
+import daSendItems from '../_dataAccess/daSendItems';
 import insertElementAfter from '../common/insertElementAfter';
 import onclick from '../common/onclick';
 import querySelector from '../common/querySelector';

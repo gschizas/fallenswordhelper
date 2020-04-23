@@ -1,5 +1,5 @@
-import { closestTable } from '../common/closest';
-import { createSpan } from '../common/cElement';
+import closestTable from '../common/closestTable';
+import createSpan from '../common/cElement/createSpan';
 import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import insertElement from '../common/insertElement';

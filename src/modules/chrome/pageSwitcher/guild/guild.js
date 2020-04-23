@@ -1,15 +1,27 @@
 import advisor from './advisor';
 import groups from './groups';
-import guildMailbox from '../../../mailbox/guildMailbox';
 import hall from './hall';
-import injectBioWidgets from '../../../profile/bio/bioWidgets';
-import injectGuild from '../../../guild/guild';
-import injectGuildBank from '../../../bank/injectGuildBank';
-import injectGuildRanks from '../../../guild/ranks/rank';
-import injectRPUpgrades from '../../../guild/injectRPUpgrades';
-import injectScouttower from '../../../guild/scoutTower/injectScouttower';
 import inventory from './inventory';
-import { guildChat, guildLog } from '../../../logs/logs';
+import runDefault from '../../../common/runDefault';
+import { injectBioWidgets, injectGuild } from '../loader';
+
+const guildChat = () => { runDefault(import('../../../logs/guildChat')); };
+const guildLog = () => { runDefault(import('../../../logs/guildLog')); };
+const guildMailbox = () => {
+  runDefault(import('../../../mailbox/guildMailbox'));
+};
+const injectGuildBank = () => {
+  runDefault(import('../../../bank/injectGuildBank'));
+};
+const injectGuildRanks = () => {
+  runDefault(import('../../../guild/ranks/rank'));
+};
+const injectRPUpgrades = () => {
+  runDefault(import('../../../guild/injectRPUpgrades'));
+};
+const injectScouttower = () => {
+  runDefault(import('../../../guild/scoutTower/injectScouttower'));
+};
 
 export default {
   inventory,

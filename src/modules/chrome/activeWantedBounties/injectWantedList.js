@@ -1,11 +1,12 @@
 import { bountyUrl } from '../../support/constants';
+import createDiv from '../../common/cElement/createDiv';
+import createSpan from '../../common/cElement/createSpan';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import setInnerHtml from '../../dom/setInnerHtml';
 import setValueJSON from '../../system/setValueJSON';
 import { wantedList } from './lists';
 import { wantedListDiv } from './createDivs';
-import { createDiv, createSpan } from '../../common/cElement';
 
 export let wantedListReset;
 

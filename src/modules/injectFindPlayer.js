@@ -1,4 +1,4 @@
-import { closestForm } from './common/closest';
+import closestForm from './common/closestForm';
 import dontPost from './common/dontPost';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import onclick from './common/onclick';

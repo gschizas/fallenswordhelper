@@ -1,5 +1,5 @@
 import clickThis from '../common/clickThis';
-import { createTextArea } from '../common/cElement';
+import createTextArea from '../common/cElement/createTextArea';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';

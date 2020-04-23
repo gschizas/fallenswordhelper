@@ -1,6 +1,6 @@
 import './hall.css';
 import collapse from '../../common/collapse';
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import insertElement from '../../common/insertElement';
 import { pCC } from '../../support/layout';
 import { simpleCheckboxHtml } from '../../settings/simpleCheckbox';

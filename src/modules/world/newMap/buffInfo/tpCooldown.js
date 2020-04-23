@@ -1,6 +1,6 @@
 import insertElement from '../../../common/insertElement';
 import setText from '../../../dom/setText';
-import { textSpan } from '../../../common/cElement';
+import textSpan from '../../../common/cElement/textSpan';
 import toggleForce from '../../../common/toggleForce';
 
 let cdDiv;

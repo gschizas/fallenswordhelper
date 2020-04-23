@@ -1,4 +1,4 @@
-import { createSpan } from '../common/cElement';
+import createSpan from '../common/cElement/createSpan';
 import formatLastActivity from '../system/formatLastActivity';
 import getElementsByTagName from '../common/getElementsByTagName';
 import insertElementAfter from '../common/insertElementAfter';

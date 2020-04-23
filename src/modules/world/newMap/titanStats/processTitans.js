@@ -1,4 +1,6 @@
 import addRows from './addRows';
+import getKillsPct from '../../../guild/scoutTower/getKillsPct';
+import getTitanString from '../../../guild/scoutTower/getTitanString';
 import { months } from '../../../support/constants';
 import { now } from '../../../support/now';
 import padZ from '../../../system/padZ';
@@ -7,7 +9,7 @@ import { realmName } from './realm';
 import roundToString from '../../../common/roundToString';
 import setInnerHtml from '../../../dom/setInnerHtml';
 import setText from '../../../dom/setText';
-import { textSpan } from '../../../common/cElement';
+import textSpan from '../../../common/cElement/textSpan';
 import { titanId } from './hasTitan';
 import { clearMemberRows, titanTbl } from './buildTitanInfoTable';
 import {
@@ -19,10 +21,6 @@ import {
   statusText,
   totalPct,
 } from './placeholders';
-import {
-  getKillsPct,
-  getTitanString,
-} from '../../../guild/scoutTower/injectScouttower';
 
 function formatOffset(secs) {
   const aDate = new Date(now + secs * 1000);

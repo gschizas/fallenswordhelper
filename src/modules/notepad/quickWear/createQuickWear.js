@@ -1,13 +1,15 @@
 import './createQuickWear.css';
 import calf from '../../support/calf';
 import { cdn } from '../../system/system';
+import createDiv from '../../common/cElement/createDiv';
+import createTBody from '../../common/cElement/createTBody';
+import createTable from '../../common/cElement/createTable';
 import insertElement from '../../common/insertElement';
 import makeFolderSpan from '../../common/makeFolderSpan';
 import partial from '../../common/partial';
 import playerId from '../../common/playerId';
 import setInnerHtml from '../../dom/setInnerHtml';
 import stringSort from '../../system/stringSort';
-import { createDiv, createTBody, createTable } from '../../common/cElement';
 
 function initSort() {
   calf.sortBy = 'n';

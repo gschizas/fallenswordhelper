@@ -1,4 +1,4 @@
-import { createSpan } from '../../../common/cElement';
+import createSpan from '../../../common/cElement/createSpan';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import round from '../../../common/round';

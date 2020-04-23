@@ -1,6 +1,6 @@
 import add from '../support/task';
 import calf from '../support/calf';
-import { createTr } from '../common/cElement';
+import createTr from '../common/cElement/createTr';
 import defaults from '../support/dataObj.json';
 import doFolders from './doFolders';
 import getElementById from '../common/getElement';

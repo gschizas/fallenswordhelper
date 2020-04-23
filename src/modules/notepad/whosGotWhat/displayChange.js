@@ -1,4 +1,5 @@
-import { createTBody, createTr } from '../../common/cElement';
+import createTBody from '../../common/cElement/createTBody';
+import createTr from '../../common/cElement/createTr';
 
 function rowHtml(obj) {
   return `<td>${obj.slot}</td>`

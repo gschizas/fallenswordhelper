@@ -1,7 +1,7 @@
 import arrayFrom from '../../common/arrayFrom';
 import calf from '../../support/calf';
 import { cmdUrl } from '../../support/constants';
-import { createTFoot } from '../../common/cElement';
+import createTFoot from '../../common/cElement/createTFoot';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getElementsByTagName from '../../common/getElementsByTagName';
 import getMembrList from '../../ajax/getMembrList';

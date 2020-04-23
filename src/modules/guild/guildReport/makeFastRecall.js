@@ -1,4 +1,4 @@
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import partial from '../../common/partial';
 
 const fastBpHtml = '<span class="sendLink fast-bp">Fast BP</span> | ';

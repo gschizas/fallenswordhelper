@@ -1,12 +1,13 @@
 import afterUpdateActionList from '../doNotKill/afterUpdateActionList';
 import calf from '../../../support/calf';
+import createButton from '../../../common/cElement/createButton';
+import createDiv from '../../../common/cElement/createDiv';
 import getElementsByClassName from '../../../common/getElementsByClassName';
 import insertElement from '../../../common/insertElement';
 import isOnList from '../doNotKill/isOnList';
 import onclick from '../../../common/onclick';
 import setText from '../../../dom/setText';
 import setValue from '../../../system/setValue';
-import { createButton, createDiv } from '../../../common/cElement';
 
 let creatureBody;
 let dnkName;

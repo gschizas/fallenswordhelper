@@ -1,5 +1,3 @@
-// import results from '../---/arena/results';
-
 function getPvpId(aRow) {
   return aRow.cells[2] && /pvp_id=(\d+)/.exec(aRow.cells[2].innerHTML);
 }

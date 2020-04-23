@@ -1,4 +1,4 @@
-import { createSpan } from '../common/cElement';
+import createSpan from '../common/cElement/createSpan';
 import hideElement from '../common/hideElement';
 import hideQTip from '../common/hideQTip';
 

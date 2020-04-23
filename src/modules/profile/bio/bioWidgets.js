@@ -1,6 +1,8 @@
 import './bioWidgets.css';
 import bioEvtHdl from './bioEvtHdl';
 import calf from '../../support/calf';
+import createDiv from '../../common/cElement/createDiv';
+import createInput from '../../common/cElement/createInput';
 import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
@@ -13,7 +15,6 @@ import renderBio from './render';
 import setInnerHtml from '../../dom/setInnerHtml';
 import setValue from '../../system/setValue';
 import testQuant from '../../system/testQuant';
-import { createDiv, createInput } from '../../common/cElement';
 
 let bioEditLines;
 let textArea;

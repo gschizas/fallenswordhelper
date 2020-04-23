@@ -1,6 +1,11 @@
 import './whosGotWhat.postcss';
 import allthen from '../../common/allthen';
-import { daGuildManage } from '../../_dataAccess/_dataAccess';
+import createButton from '../../common/cElement/createButton';
+import createDiv from '../../common/cElement/createDiv';
+import createInput from '../../common/cElement/createInput';
+import createSelect from '../../common/cElement/createSelect';
+import createTable from '../../common/cElement/createTable';
+import daGuildManage from '../../_dataAccess/daGuildManage';
 import displayChange from './displayChange';
 import guildStore from '../../_dataAccess/export/guildStore';
 import insertElement from '../../common/insertElement';
@@ -12,13 +17,6 @@ import prepareData from './prepareData';
 import setInnerHtml from '../../dom/setInnerHtml';
 import { table as tableComponentFactory } from 'smart-table-vanilla';
 import theadHtml from './assets';
-import {
-  createButton,
-  createDiv,
-  createInput,
-  createSelect,
-  createTable,
-} from '../../common/cElement';
 import {
   paginationDirective,
   searchDirective,

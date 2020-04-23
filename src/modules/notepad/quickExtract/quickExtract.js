@@ -1,7 +1,7 @@
 import { cdn } from '../../system/system';
 import { composingFragmentType } from '../../support/constants';
-import { createTable } from '../../common/cElement';
-import { daUseItem } from '../../_dataAccess/_dataAccess';
+import createTable from '../../common/cElement/createTable';
+import daUseItem from '../../_dataAccess/daUseItem';
 import eventHandler5 from '../../common/eventHandler5';
 import getElementById from '../../common/getElement';
 import getInventory from '../../ajax/getInventory';

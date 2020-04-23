@@ -1,3 +1,5 @@
+import createAnchor from '../../common/cElement/createAnchor';
+import createLi from '../../common/cElement/createLi';
 import insertAfterParent from './insertAfterParent';
 import insertElement from '../../common/insertElement';
 import insertElementAfter from '../../common/insertElementAfter';
@@ -5,7 +7,6 @@ import jQueryDialog from '../jQueryDialog';
 import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import { sendEvent } from '../../support/fshGa';
-import { createAnchor, createLi } from '../../common/cElement';
 
 function openDialog(text, fn) {
   sendEvent('accordion', text);

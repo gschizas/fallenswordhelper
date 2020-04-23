@@ -1,5 +1,5 @@
 import { cmdUrl } from './support/constants';
-import { createSpan } from './common/cElement';
+import createSpan from './common/cElement/createSpan';
 import getElementById from './common/getElement';
 import getText from './common/getText';
 import insertElement from './common/insertElement';

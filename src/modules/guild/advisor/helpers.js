@@ -1,10 +1,11 @@
 import './advisor.css';
 import add from '../../support/task';
+import createDiv from '../../common/cElement/createDiv';
+import createTable from '../../common/cElement/createTable';
 import insertElement from '../../common/insertElement';
 import partial from '../../common/partial';
 import { playerIdUrl } from '../../support/constants';
 import replaceChild from '../../common/replaceChild';
-import { createDiv, createTable } from '../../common/cElement';
 
 export const advisorColumns = [
   { title: '<div class="fshBold">Member</div>' },

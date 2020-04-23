@@ -1,5 +1,5 @@
 import allowBack from './allowBack';
-import { createTr } from '../common/cElement';
+import createTr from '../common/cElement/createTr';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 // #if _DEV  //  Ladder Margin

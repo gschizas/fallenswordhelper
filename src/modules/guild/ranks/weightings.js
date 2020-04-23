@@ -1,5 +1,7 @@
 import bitwiseAnd from '../../common/bitwiseAnd';
-import { daRanksView } from '../../_dataAccess/_dataAccess';
+import createInput from '../../common/cElement/createInput';
+import createSpan from '../../common/cElement/createSpan';
+import daRanksView from '../../_dataAccess/daRanksView';
 import getText from '../../common/getText';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
@@ -9,7 +11,6 @@ import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import replaceChild from '../../common/replaceChild';
 import roundToString from '../../common/roundToString';
-import { createInput, createSpan } from '../../common/cElement';
 
 const privLookup = [
   [0x2, 5], //       Bank Withdraw

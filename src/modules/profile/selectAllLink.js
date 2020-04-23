@@ -1,5 +1,5 @@
 import clickThis from '../common/clickThis';
-import { createSpan } from '../common/cElement';
+import createSpan from '../common/cElement/createSpan';
 import { dropItemsUrl } from '../support/constants';
 import getElementById from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';

@@ -1,3 +1,7 @@
+import createDiv from '../../common/cElement/createDiv';
+import createTBody from '../../common/cElement/createTBody';
+import createTHead from '../../common/cElement/createTHead';
+import createTable from '../../common/cElement/createTable';
 import displayChange from './displayChange';
 import insertElement from '../../common/insertElement';
 import { pCC } from '../../support/layout';
@@ -7,12 +11,6 @@ import { smartTable } from 'smart-table-core';
 import smartTableConfig from './smartTableConfig';
 import { table as tableComponentFactory } from 'smart-table-vanilla';
 import theadHtml from './assets';
-import {
-  createDiv,
-  createTBody,
-  createTHead,
-  createTable,
-} from '../../common/cElement';
 
 function insertDiv(parent) {
   return insertElement(parent, createDiv());

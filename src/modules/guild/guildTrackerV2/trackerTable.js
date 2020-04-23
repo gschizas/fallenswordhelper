@@ -1,14 +1,12 @@
 import './trackerTable.css';
+import createDiv from '../../common/cElement/createDiv';
+import createTBody from '../../common/cElement/createTBody';
+import createTable from '../../common/cElement/createTable';
+import createTh from '../../common/cElement/createTh';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 // import on from '../../common/on';
 // import partial from '../../common/partial';
-import {
-  createDiv,
-  createTBody,
-  createTable,
-  createTh,
-} from '../../common/cElement';
 
 let actBody;
 let tgCont;

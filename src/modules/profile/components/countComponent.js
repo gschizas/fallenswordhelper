@@ -1,5 +1,8 @@
 import { cdn } from '../../system/system';
-import { daComponents } from '../../_dataAccess/_dataAccess';
+import createSpan from '../../common/cElement/createSpan';
+import createTBody from '../../common/cElement/createTBody';
+import createTable from '../../common/cElement/createTable';
+import daComponents from '../../_dataAccess/daComponents';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
@@ -9,7 +12,6 @@ import playerId from '../../common/playerId';
 import { sendEvent } from '../../support/fshGa';
 import setInnerHtml from '../../dom/setInnerHtml';
 import { componentList, prepareComponentList } from './prepareComponentList';
-import { createSpan, createTBody, createTable } from '../../common/cElement';
 
 function tallyTableRow(acc, comp) {
   return `${acc}<tr><td><img src="${cdn}items/${comp.b

@@ -1,4 +1,4 @@
-import { createDiv } from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import generateRecipeTable from './generateRecipeTable';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import insertElement from '../../common/insertElement';

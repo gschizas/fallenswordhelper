@@ -1,9 +1,11 @@
-import { createAnchor } from '../../common/cElement';
+import createAnchor from '../../common/cElement/createAnchor';
 import dataRows from '../../common/dataRows';
 import displayTracker from './displayTracker';
 import entries from '../../common/entries';
 import getElementsByTagName from '../../common/getElementsByTagName';
+import getKillsPct from './getKillsPct';
 import getText from '../../common/getText';
+import getTitanString from './getTitanString';
 import getTitle from '../../common/getTitle';
 import injectScouttowerBuffLinks from './injectScouttowerBuffLinks';
 import insertElement from '../../common/insertElement';
@@ -55,23 +57,6 @@ function anyMissing(newTitans, pair) {
 function addMissingTitansFromOld(oldTitans, newTitans) {
   if (!oldTitans) { return; }
   entries(oldTitans).forEach(partial(anyMissing, newTitans));
-}
-
-export function getTitanString(guildKills, totalHP, currentHP) {
-  const numberOfKillsToSecure = Math.ceil(totalHP / 2 + 1);
-  if (guildKills >= numberOfKillsToSecure) {
-    return 'Secured';
-  }
-  const remainingKills = numberOfKillsToSecure - guildKills;
-  if (remainingKills > currentHP) {
-    return '<span class="fshRed">Cannot Secure</span>';
-  }
-  return `<span class="fshRed">${remainingKills}</span> to secure`;
-}
-
-export function getKillsPct(currentNumberOfKills, guildKills) {
-  if (currentNumberOfKills === 0) { return 0; }
-  return (guildKills * 100) / currentNumberOfKills;
 }
 
 function summaryHtml(guildKills, currentHP, totalHP) {

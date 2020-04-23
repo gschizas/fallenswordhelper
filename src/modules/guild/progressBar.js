@@ -1,3 +1,5 @@
+import createDiv from '../common/cElement/createDiv';
+import createStyle from '../common/cElement/createStyle';
 import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
@@ -9,7 +11,6 @@ import querySelectorArray from '../common/querySelectorArray';
 import { sendEvent } from '../support/fshGa';
 import setValue from '../system/setValue';
 import { simpleCheckboxHtml } from '../settings/simpleCheckbox';
-import { createDiv, createStyle } from '../common/cElement';
 
 const prefEnableStamBars = 'enableStamBars';
 let enableStamBars;

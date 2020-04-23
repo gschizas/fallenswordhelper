@@ -1,7 +1,7 @@
 import arrayFrom from './arrayFrom';
-import { closestTable } from './closest';
+import closestTable from './closestTable';
 import contains from './contains';
-import { createDiv } from './cElement';
+import createDiv from './cElement/createDiv';
 import getArrayByTagName from './getArrayByTagName';
 import getText from './getText';
 import getTextTrim from './getTextTrim';

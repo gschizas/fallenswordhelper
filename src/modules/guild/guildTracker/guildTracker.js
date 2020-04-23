@@ -1,5 +1,8 @@
 import './guildTracker.css';
 import calf from '../../support/calf';
+import createDiv from '../../common/cElement/createDiv';
+import createInput from '../../common/cElement/createInput';
+import createUl from '../../common/cElement/createUl';
 import draggable from '../../common/dragStart';
 import { get } from '../../system/idb';
 import injectShowTracker from './injectShowTracker';
@@ -9,11 +12,6 @@ import on from '../../common/on';
 import once from '../../common/once';
 import partial from '../../common/partial';
 import { sendEvent } from '../../support/fshGa';
-import {
-  createDiv,
-  createInput,
-  createUl,
-} from '../../common/cElement';
 import { initTable, makeTg } from './trackerTable';
 import { makeInOut, queueRawData } from './rawData';
 

@@ -1,9 +1,7 @@
+import createDiv from '../../../common/cElement/createDiv';
+import createInput from '../../../common/cElement/createInput';
+import createLabel from '../../../common/cElement/createLabel';
 import insertElement from '../../../common/insertElement';
-import {
-  createDiv,
-  createInput,
-  createLabel,
-} from '../../../common/cElement';
 
 function createLbl(className, tip, htmlFor) {
   return createLabel({

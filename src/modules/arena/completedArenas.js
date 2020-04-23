@@ -1,5 +1,5 @@
 import { arenaUrl } from '../support/constants';
-import { createInput } from '../common/cElement';
+import createInput from '../common/cElement/createInput';
 import getText from '../common/getText';
 import insertElementAfter from '../common/insertElementAfter';
 import insertElementBefore from '../common/insertElementBefore';

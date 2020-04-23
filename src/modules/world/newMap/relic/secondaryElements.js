@@ -1,4 +1,4 @@
-import { createDiv } from '../../../common/cElement';
+import createDiv from '../../../common/cElement/createDiv';
 import getElementById from '../../../common/getElement';
 import getMembrList from '../../../ajax/getMembrList';
 import getValue from '../../../system/getValue';

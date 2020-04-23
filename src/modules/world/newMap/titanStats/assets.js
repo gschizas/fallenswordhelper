@@ -1,4 +1,4 @@
-import { textSpan } from '../../../common/cElement';
+import textSpan from '../../../common/cElement/textSpan';
 
 export let current;
 export let kills;

@@ -1,10 +1,9 @@
 import getElementById from '../common/getElement';
-import injectQuestBookFull from '../questbook/injectQuestBookFull';
-import inventing from '../inventing/inventing';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import { screenview } from '../support/fshGa';
 import updateBuffLog from '../notepad/buffLog/updateBuffLog';
 import xPath from '../common/xPath';
+import { injectQuestBookFull, inventing } from './pageSwitcher/loader';
 
 const unknown = [
   [

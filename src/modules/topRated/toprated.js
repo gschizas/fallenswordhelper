@@ -1,4 +1,4 @@
-import { createInput } from '../common/cElement';
+import createInput from '../common/cElement/createInput';
 import findOnlinePlayers from './findOnlinePlayers';
 import functionPasses from '../common/functionPasses';
 import getElementsByTagName from '../common/getElementsByTagName';
