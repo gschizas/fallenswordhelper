@@ -1,5 +1,6 @@
 import getElementById from '../common/getElement';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import querySelectorAll from '../common/querySelectorAll';
 import { screenview } from '../support/fshGa';
 import updateBuffLog from '../notepad/buffLog/updateBuffLog';
 import xPath from '../common/xPath';
@@ -21,7 +22,7 @@ const unknown = [
     },
   ],
   [
-    () => $('#pCC img[title="Inventing"]').length > 0,
+    () => querySelectorAll('#pCC img[title="Inventing"]').length > 0,
     () => {
       screenview('unknown.recipes.inventing');
       inventing();
@@ -42,5 +43,6 @@ export default function unknownPage() { // Legacy
   // eslint-disable-next-line no-console
   console.log('unknownPage');
   // #endif
-  unknown.find((el) => el[0]())[1]();
+  const known = unknown.find((el) => el[0]());
+  if (known) { known[1](); }
 }
