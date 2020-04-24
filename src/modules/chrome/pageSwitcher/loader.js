@@ -4,6 +4,7 @@ export const allowBack = () => { runDefault(import('../../guide/allowBack')); };
 export const injectBioWidgets = () => { runDefault(import('../../profile/bio/bioWidgets')); };
 export const injectGuild = () => { runDefault(import('../../guild/guild')); };
 export const injectProfile = () => { runDefault(import('../../profile/profile')); };
+export const injectProfileDropItems = () => { runDefault(import('../../profile/dropitems/injectProfileDropItems')); };
 export const injectQuestBookFull = () => { runDefault(import('../../questbook/injectQuestBookFull')); };
 export const injectStoreItems = () => { runDefault(import('../../profile/dropitems/injectStoreItems')); };
 export const inventing = () => { runDefault(import('../../inventing/inventing')); };
