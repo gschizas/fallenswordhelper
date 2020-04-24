@@ -16,7 +16,8 @@ function canIHit(combat) {
 function evalPlayerHits(combat) {
   if (combat.numberOfCreatureHitsTillDead === '-') {
     return combat.numberOfHitsRequired;
-  } if (canIHit(combat)) {
+  }
+  if (canIHit(combat)) {
     return '-';
   }
   return combat.numberOfHitsRequired;
@@ -30,7 +31,8 @@ function canCreatureHit(combat) {
 function evalCreatureHits(combat) {
   if (combat.numberOfHitsRequired === '-') {
     return combat.numberOfCreatureHitsTillDead;
-  } if (canCreatureHit(combat)) {
+  }
+  if (canCreatureHit(combat)) {
     return '-';
   }
   return combat.numberOfCreatureHitsTillDead;

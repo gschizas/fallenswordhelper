@@ -9,7 +9,7 @@ import insertElement from '../../common/insertElement';
 import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 // import {removeKeys} from '../../common/removeKeys';
-import { results } from '../../chrome/pageSwitcher/loader';
+import results from '../../app/arena/results';
 import round from '../../common/round';
 import { cyrb32, cyrb53, makeHash } from './makeHash';
 import { get, set } from '../../system/idb';

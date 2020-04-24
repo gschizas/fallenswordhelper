@@ -24,7 +24,8 @@ function detailRow(j, itemField) { // Legacy
   if (param.tags[j] === 'checkbox') {
     return `<input type="checkbox"${isChecked(itemField)
     } disabled>`;
-  } if (hasUrl(j)) {
+  }
+  if (hasUrl(j)) {
     return `<a href="${param.url[j].replace('@replaceme@', itemField)
     }">${itemField}</a>`;
   }
