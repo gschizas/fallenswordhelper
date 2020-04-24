@@ -1,15 +1,16 @@
+import numberIsNaN from './numberIsNaN';
 import partial from './partial';
 
-export var playerLvlTest = [
-  function(level, min) {return !min;},
-  function(level, min, max) {return !max;},
-  function(level, min, max) {return isNaN(min) && isNaN(max);},
-  function(level, min, max) {return isNaN(min) && level <= max;},
-  function(level, min, max) {return min <= level && isNaN(max);},
-  function(level, min, max) {return min <= level && level <= max;}
+export const playerLvlTest = [
+  (level, min) => !min,
+  (level, min, max) => !max,
+  (level, min, max) => numberIsNaN(min) && numberIsNaN(max),
+  (level, min, max) => numberIsNaN(min) && level <= max,
+  (level, min, max) => min <= level && numberIsNaN(max),
+  (level, min, max) => min <= level && level <= max,
 ];
 
-function condition(level, min, max, fn) {return fn(level, min, max);}
+function condition(level, min, max, fn) { return fn(level, min, max); }
 
 export function lvlTest(ary, level, min, max) {
   return ary.some(partial(condition, level, min, max));

@@ -1,6 +1,6 @@
 import bitwiseAnd from '../../../common/bitwiseAnd';
 import calf from '../../../support/calf';
-import {def_fetch_worldRealmActions} from '../../../support/constants';
+import { defFetchWorldRealmActions } from '../../../support/constants';
 import jsonParse from '../../../common/jsonParse';
 import partial from '../../../common/partial';
 
@@ -16,26 +16,27 @@ function subLvlMobs(realmLevel, el) {
 }
 
 function getLvlToTest(myData) {
-  return myData.realm && myData.realm.minlevel || GameData.realm().minlevel;
+  return (myData.realm && myData.realm.minlevel) || GameData.realm().minlevel;
 }
 
 function xhrDataFilter(data) {
-  var myData = jsonParse(data);
-  if (noAction(myData)) {return data;}
+  const myData = jsonParse(data);
+  if (noAction(myData)) { return data; }
   myData.actions = myData.actions.filter(
-    partial(subLvlMobs, getLvlToTest(myData))
+    partial(subLvlMobs, getLvlToTest(myData)),
   );
   return JSON.stringify(myData);
 }
 
 function isActionList(originalOptions) {
-  return originalOptions.data &&
-    originalOptions.data.d &&
-    bitwiseAnd(originalOptions.data.d, def_fetch_worldRealmActions);
+  return originalOptions.data
+    && originalOptions.data.d
+    && bitwiseAnd(originalOptions.data.d, defFetchWorldRealmActions);
 }
 
 function xhrPreFilter(options, originalOptions) {
   if (calf.hideSubLvlCreature && isActionList(originalOptions)) {
+    // eslint-disable-next-line no-param-reassign
     options.dataFilter = xhrDataFilter;
   }
 }
@@ -43,6 +44,6 @@ function xhrPreFilter(options, originalOptions) {
 export default function interceptXHR() { // jQuery.min
   $.ajaxPrefilter('JSON', xhrPreFilter);
   if (calf.hideSubLvlCreature) {
-    GameData.fetch(def_fetch_worldRealmActions);
+    GameData.fetch(defFetchWorldRealmActions);
   }
 }

@@ -1,29 +1,27 @@
+import createDiv from '../../../common/cElement/createDiv';
+import createInput from '../../../common/cElement/createInput';
+import createLabel from '../../../common/cElement/createLabel';
 import insertElement from '../../../common/insertElement';
-import {
-  createDiv,
-  createInput,
-  createLabel,
-} from '../../../common/cElement';
 
 function createLbl(className, tip, htmlFor) {
   return createLabel({
-    className: 'fshCurveEle fshCurveLbl fshPoint tip-static ' + className,
-    dataset: {tipped: tip},
-    htmlFor: htmlFor
+    className: `fshCurveEle fshCurveLbl fshPoint tip-static ${className}`,
+    dataset: { tipped: tip },
+    htmlFor,
   });
 }
 
 export default function makeToggleBtn(o) {
-  var btnDiv = createDiv({className: 'fshToggle'});
-  var btnCheck = createInput({
+  const btnDiv = createDiv({ className: 'fshToggle' });
+  const btnCheck = createInput({
     checked: o.prefVal,
     id: o.checkId,
-    type: 'checkbox'
+    type: 'checkbox',
   });
   insertElement(btnDiv, btnCheck);
-  var onLbl = createLbl(o.onClass, o.onTip, o.checkId);
+  const onLbl = createLbl(o.onClass, o.onTip, o.checkId);
   insertElement(btnDiv, onLbl);
-  var offLbl = createLbl(o.offClass, o.offTip, o.checkId);
+  const offLbl = createLbl(o.offClass, o.offTip, o.checkId);
   insertElement(btnDiv, offLbl);
   insertElement(o.worldName, btnDiv);
   return btnCheck;

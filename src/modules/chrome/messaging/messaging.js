@@ -1,7 +1,7 @@
 import './messaging.css';
 import classHandler from '../../common/classHandler';
 import fallback from '../../system/fallback';
-import {getElementById} from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getText from '../../common/getText';
 import getValue from '../../system/getValue';
@@ -10,19 +10,19 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import on from '../../common/on';
 import onclick from '../../common/onclick';
-import setText from '../../common/setText';
+import setText from '../../dom/setText';
 import setValueJSON from '../../system/setValueJSON';
 
-var enterForSendMessage;
-var quickMsgDialog;
-var $quickMessageDialog;
-var fshTemplate;
-var msgTbl;
-var sendMessage;
-var targetPlayer;
-var dialogMsg;
-var validateTips;
-var showingTemplates;
+let enterForSendMessage;
+let quickMsgDialog;
+let $quickMessageDialog;
+let fshTemplate;
+let msgTbl;
+let sendMessage;
+let targetPlayer;
+let dialogMsg;
+let validateTips;
+let showingTemplates;
 
 function getQuickMessageDialog() { // jQuery
   if (!quickMsgDialog) {
@@ -65,9 +65,9 @@ function captureEnter() {
 
 function getValidateTips() {
   if (!validateTips) {
-    var nodes = getElementsByClassName('validateTips', quickMsgDialog);
+    const nodes = getElementsByClassName('validateTips', quickMsgDialog);
     if (nodes.length === 1) {
-      validateTips = nodes[0];
+      [validateTips] = nodes;
     }
   }
 }
@@ -80,36 +80,36 @@ function doValidateTip(text) {
 }
 
 function addRow(index, myBtn, html) {
-  var newRow = msgTbl.insertRow(index);
-  var newCell = newRow.insertCell(-1);
+  const newRow = msgTbl.insertRow(index);
+  let newCell = newRow.insertCell(-1);
   insertHtmlBeforeEnd(newCell, myBtn);
   newCell = newRow.insertCell(-1);
   insertHtmlBeforeEnd(newCell, html);
 }
 
 function fshButton(classPrefix, label) {
-  return '<button class="fshButton ui-corner-all ' + classPrefix +
-    '-button">' + label + '</button>';
+  return `<button class="fshButton ui-corner-all ${classPrefix
+  }-button">${label}</button>`;
 }
 
 function addTemplateRow(index, text) {
   addRow(index, fshButton('del', 'Del'),
-    '<span class="ui-widget-content fshBlck add-template">' +
-    text + '</span>');
+    `<span class="ui-widget-content fshBlck add-template">${
+      text}</span>`);
 }
 
 function deleteTemplate(target) {
-  var myRow = target.parentNode.parentNode.rowIndex;
+  const myRow = target.parentNode.parentNode.rowIndex;
   msgTbl.deleteRow(myRow);
   fshTemplate.splice(myRow - 2, 1);
   setValueJSON('quickMsg', fshTemplate);
 }
 
 function addNewTemplate(target) {
-  var templateInput = target.parentNode.nextElementSibling.children[0];
-  var templateValue = templateInput.value;
+  const templateInput = target.parentNode.nextElementSibling.children[0];
+  const templateValue = templateInput.value;
   if (templateValue !== '') {
-    var myRow = target.parentNode.parentNode.rowIndex;
+    const myRow = target.parentNode.parentNode.rowIndex;
     addTemplateRow(myRow, templateValue);
     templateInput.value = '';
     fshTemplate.push(templateValue);
@@ -118,17 +118,17 @@ function addNewTemplate(target) {
 }
 
 function insertTemplate(target) {
-  dialogMsg.value += getText(target)
-    .replace(/\{playername\}/g, targetPlayer) + '\n';
+  dialogMsg.value += `${getText(target)
+    .replace(/\{playername\}/g, targetPlayer)}\n`;
 }
 
-var classEvents = [
+const classEvents = [
   ['del-button', deleteTemplate],
   ['add-button', addNewTemplate],
   ['add-template', insertTemplate],
 ];
 
-function makeRows(text) {addTemplateRow(-1, text);}
+function makeRows(text) { addTemplateRow(-1, text); }
 
 function showMsgTemplate() {
   if (!showingTemplates) {
@@ -145,7 +145,7 @@ function showMsgTemplate() {
 function getFshTemplate() { // jQuery
   if (!fshTemplate) {
     fshTemplate = getValueJSON('quickMsg');
-    var buttons = $quickMessageDialog.dialog('option', 'buttons');
+    const buttons = $quickMessageDialog.dialog('option', 'buttons');
     sendMessage = buttons['Send Message'];
   }
 }
@@ -164,7 +164,7 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
 }
 
 export default function injectQuickMsgDialogJQ() {
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   enterForSendMessage = getValue('enterForSendMessage');
   window.openQuickMsgDialog = openQuickMsgDialog;
 }

@@ -1,11 +1,11 @@
 import on from '../common/on';
 import parseError from './parseError';
-import {sendException} from './fshGa';
+import { sendException } from './fshGa';
 
-var enabled;
+let enabled;
 
 function handleMsgStack(type, stuff) {
-  var msg = parseError(stuff);
+  const msg = parseError(stuff);
   if (msg.includes('calfSystem')) {
     sendException(type + msg, true);
     return true;

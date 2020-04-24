@@ -1,35 +1,37 @@
 import calf from '../../../support/calf';
-import {def_playerBuffs} from '../../../support/constants';
+import { defPlayerBuffs } from '../../../support/constants';
 import partial from '../../../common/partial';
+import setInnerHtml from '../../../dom/setInnerHtml';
 import {
   huntingBuffs,
   huntingBuffsName,
-  setCurrentBuffList
+  setCurrentBuffList,
 } from './setCurrentBuffList';
 
-function buildBuffHash(prev, curr) {
-  prev[curr.name] = true;
-  return prev;
+function buildBuffHash(acc, curr) {
+  acc[curr.name] = true;
+  return acc;
 }
 
-function findMissingBuffs(buffHash, prev, curr) {
-  if (!buffHash[curr.trim()]) {prev.push(curr);}
-  return prev;
+function findMissingBuffs(buffHash, acc, curr) {
+  if (!buffHash[curr.trim()]) { acc.push(curr); }
+  return acc;
 }
 
 function displayMissingBuffs(missingBuffsDiv, missingBuffs) {
-  missingBuffsDiv.innerHTML = 'You are missing some ' + huntingBuffsName +
-    ' hunting buffs<br>(' + missingBuffs.join(', ') + ')';
+  setInnerHtml(`You are missing some ${huntingBuffsName} hunting buffs<br>(${
+    missingBuffs.join(', ')})`, missingBuffsDiv);
 }
 
 function clearBuffDiv(missingBuffsDiv) {
-  missingBuffsDiv.innerHTML = '';
+  setInnerHtml('', missingBuffsDiv);
 }
 
 function lookForMissingBuffs(missingBuffsDiv, data) {
-  var buffHash = data.b.reduce(buildBuffHash, {});
-  var missingBuffs = huntingBuffs.reduce(
-    partial(findMissingBuffs, buffHash), []);
+  const buffHash = data.b.reduce(buildBuffHash, {});
+  const missingBuffs = huntingBuffs.reduce(
+    partial(findMissingBuffs, buffHash), [],
+  );
   if (missingBuffs.length > 0) {
     displayMissingBuffs(missingBuffsDiv, missingBuffs);
   } else {
@@ -46,14 +48,14 @@ function huntingBuffsEnabled(missingBuffsDiv, evt, data) {
 }
 
 function dataEventsPlayerBuffs(missingBuffsDiv, evt, data) {
-  if (huntingBuffs) {huntingBuffsEnabled(missingBuffsDiv, evt, data);}
+  if (huntingBuffs) { huntingBuffsEnabled(missingBuffsDiv, evt, data); }
 }
 
 export default function doHuntingBuffs(missingBuffsDiv) { // jQuery.min
   setCurrentBuffList();
-  var buffsFn = partial(dataEventsPlayerBuffs, missingBuffsDiv);
-  $.subscribe(def_playerBuffs, buffsFn);
+  const buffsFn = partial(dataEventsPlayerBuffs, missingBuffsDiv);
+  $.subscribe(defPlayerBuffs, buffsFn);
   if (calf.showBuffs && window.initialGameData) { // HCS initial data
-    buffsFn(null, {b: window.initialGameData.player.buffs});
+    buffsFn(null, { b: window.initialGameData.player.buffs });
   }
 }

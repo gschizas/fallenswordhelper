@@ -22,11 +22,11 @@
 // EVERYTHING MUST BE IN main()
 function fshMain(gmInfo) {
   import('https://fallenswordhelper.github.io/fallenswordhelper/resources/prod/1524/calfSystem.min.js')
-    .then(m => m.default('1524', gmInfo));
+    .then((m) => m.default('1524', gmInfo));
 } // end of var main
 
-var script = document.createElement('script');
-script.textContent = `(${fshMain.toString()})` +
-  `("${encodeURIComponent(JSON.stringify(GM_info))}");`;
+const script = document.createElement('script');
+script.textContent = `(${fshMain.toString()})`
+  + `("${encodeURIComponent(JSON.stringify(GM_info))}");`;
 document.body.appendChild(script);
 document.body.removeChild(script);

@@ -1,6 +1,6 @@
 import parseError from '../support/parseError';
-import {sendException} from '../support/fshGa';
-import {get as idbGet, set as idbSet} from 'idb-keyval';
+import { sendException } from '../support/fshGa';
+import { get as idbGet, set as idbSet } from 'idb-keyval';
 
 export async function get(key, store) {
   try {

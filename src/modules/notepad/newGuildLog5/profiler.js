@@ -1,7 +1,7 @@
-import isType from '../common/isType';
-import partial from '../common/partial';
+import isString from '../../common/isString';
+import partial from '../../common/partial';
 
-var lookup = [
+const lookup = [
   [],
   ['(Potion)'],
   ['recalled the item', 'took the item', 'auto-returned the',
@@ -32,16 +32,16 @@ var lookup = [
 ];
 
 function isMatch(data, el) {
-  if (isType(el, 'string')) {
+  if (isString(el)) {
     return data.includes(el);
   }
   return el.test(data);
 }
 
-function ofMatch(data, ary) {return ary.some(partial(isMatch, data));}
+function ofMatch(data, ary) { return ary.some(partial(isMatch, data)); }
 
-export function rowProfile(data) {
-  var myIndex = lookup.findIndex(partial(ofMatch, data));
-  if (myIndex === -1) {return 0;}
+export default function rowProfile(data) {
+  const myIndex = lookup.findIndex(partial(ofMatch, data));
+  if (myIndex === -1) { return 0; }
   return myIndex;
 }

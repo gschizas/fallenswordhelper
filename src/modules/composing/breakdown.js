@@ -1,41 +1,41 @@
 import doBreakdown from '../ajax/doBreakdown';
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import getValue from '../system/getValue';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import perfFilter from '../common/perfFilter';
 import setValue from '../system/setValue';
-import {simpleCheckbox} from '../settings/simpleCheckbox';
-import {composingUrl, def_subcmd} from '../support/constants';
+import { simpleCheckbox } from '../settings/simpleCheckbox';
+import { composingUrl, defSubcmd } from '../support/constants';
 
-var prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
-var disableBreakdownPrompts;
-var selectedList = [];
+const prefDisableBreakdownPrompts = 'disableBreakdownPrompts';
+let disableBreakdownPrompts;
+const selectedList = [];
 
-function disappearance(target) {target.hide();}
+function disappearance(target) { target.hide(); }
 
 function goDown(target, disappear) {
-  target.animate({height: 0}, 500, disappear);
+  target.animate({ height: 0 }, 500, disappear);
 }
 
 function fadeAway() {
-  var target = $('#composingMessageContainer');
-  target.animate({opacity: 0}, 500,
+  const target = $('#composingMessageContainer');
+  target.animate({ opacity: 0 }, 500,
     partial(goDown, target, partial(disappearance, target)));
 }
 
 function msgText(message, bgcolor) {
-  return $('<div/>', {id: 'composingMessageText'})
+  return $('<div/>', { id: 'composingMessageText' })
     .css({
       width: '90%',
       'text-align': 'center',
       'background-color': bgcolor,
       color: 'rgb(255, 255, 255)',
       margin: '5px auto 5px auto',
-      padding: '2px'
+      padding: '2px',
     })
     .html(message);
 }
@@ -47,8 +47,8 @@ function showComposingMessage(message, bgcolor) { // jQuery
     .append(
       $('<div/>', {
         id: 'composingMessageContainer',
-        width: '100%'
-      }).append(msgText(message, bgcolor))
+        width: '100%',
+      }).append(msgText(message, bgcolor)),
     );
 
   setTimeout(fadeAway, 5000);
@@ -56,9 +56,9 @@ function showComposingMessage(message, bgcolor) { // jQuery
 
 function handleResponse(response) {
   if (response.error !== 0) {
-    showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
+    showComposingMessage(`Error: ${response.msg}`, 'rgb(164, 28, 28)');
   } else {
-    window.location = composingUrl + def_subcmd + 'breakdown&m=1';
+    window.location = `${composingUrl + defSubcmd}breakdown&m=1`;
   }
 }
 
@@ -76,16 +76,16 @@ function validBreakEvent(evt) {
 }
 
 function breakEvt(evt) {
-  if (disableBreakdownPrompts &&
-      evt.target.id === 'breakdown-selected-items') {
+  if (disableBreakdownPrompts
+      && evt.target.id === 'breakdown-selected-items') {
     validBreakEvent(evt);
   }
 }
 
 function itemClick(evt) {
-  if (!evt.target.classList.contains('selectable-item')) {return;}
-  var myItem = evt.target.id.replace('composing-item-', '');
-  var itemPos = selectedList.indexOf(myItem);
+  if (!evt.target.classList.contains('selectable-item')) { return; }
+  const myItem = evt.target.id.replace('composing-item-', '');
+  const itemPos = selectedList.indexOf(myItem);
   if (itemPos === -1) {
     selectedList.push(myItem);
   } else {
@@ -100,9 +100,9 @@ function togglePref() {
 
 function prefBox() {
   insertHtmlBeforeEnd(pCC,
-    '<table class="fshTblCenter"><tbody>' +
-    simpleCheckbox(prefDisableBreakdownPrompts) +
-    '</tbody></table>');
+    `<table class="fshTblCenter"><tbody>${
+      simpleCheckbox(prefDisableBreakdownPrompts)
+    }</tbody></table>`);
 }
 
 function setupHandlers() {
@@ -113,7 +113,7 @@ function setupHandlers() {
 }
 
 export default function composingBreakdown() {
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   perfFilter('composing');
   disableBreakdownPrompts = getValue(prefDisableBreakdownPrompts);
   prefBox();

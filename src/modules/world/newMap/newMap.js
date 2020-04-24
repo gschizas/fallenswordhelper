@@ -1,20 +1,20 @@
 import './newMap.css';
-import {buffInfo} from './buffInfo/buffInfo';
+import { buffInfo } from './buffInfo/buffInfo';
 import combatLogger from './combatLogger';
-import {createStyle} from '../../common/cElement';
+import createStyle from '../../common/cElement/createStyle';
 import doNotKill from './doNotKill/doNotKill';
 import executeAll from '../../common/executeAll';
-import {getElementById} from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import hideQTip from '../../common/hideQTip';
-//#if _DEV  //  hide titan combat results
+// #if _DEV  //  hide titan combat results
 import hideTitanCombatResults from './hideTitanCombatResults';
-//#endif
+// #endif
 import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
-import {injectSendGoldOnWorld} from './sendGold';
+import { injectSendGoldOnWorld } from './sendGold';
 import insertElement from '../../common/insertElement';
-import {interceptMouseEvents} from './creatureInfo/interceptMouseEvents';
+import interceptMouseEvents from './creatureInfo/interceptMouseEvents';
 import onWorld from './onWorld';
 import onclick from '../../common/onclick';
 import partial from '../../common/partial';
@@ -23,28 +23,28 @@ import startMonsterLog from './monsterLog/monsterLog';
 import viewCreature from './viewCreature/viewCreature';
 import worldPrefs from './worldPrefs/worldPrefs';
 import {
-  def_afterUpdateActionlist,
-  def_controlsKeydown,
-  def_fetch_playerBackpackCount,
-  def_fetch_playerBuffs,
-  def_fetch_worldRealmActions,
-  def_fetch_worldRealmDynamic
+  defAfterUpdateActionlist,
+  defControlsKeydown,
+  defFetchPlayerBackpackCount,
+  defFetchPlayerBuffs,
+  defFetchWorldRealmActions,
+  defFetchWorldRealmDynamic,
 } from '../../support/constants';
 
 function hideGroupByType(type) { // jQuery
-  $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
+  $(`#actionList li.creature-${type.toString()} a.create-group`).hide();
 }
 
 function hideGroupSubscribe(type) { // jQuery.min
-  $.subscribe(def_afterUpdateActionlist, partial(hideGroupByType, type));
+  $.subscribe(defAfterUpdateActionlist, partial(hideGroupByType, type));
 }
 
-var hideGroupTypes = [
+const hideGroupTypes = [
   'hideChampionsGroup',
   'hideElitesGroup',
   'hideSEGroup',
   'hideTitanGroup',
-  'hideLegendaryGroup'
+  'hideLegendaryGroup',
 ];
 
 function groupType(el, i) {
@@ -60,33 +60,33 @@ function hideGroupButton() {
 
 function injectMonsterStyle() {
   insertElement(document.body, createStyle(
-    '#actionList .creature-1 {color: green;}\n' +
-    '#actionList .creature-2 {color: yellow;}\n' +
-    '#actionList .creature-3 {color: red;}'
+    '#actionList .creature-1 {color: green;}\n'
+    + '#actionList .creature-2 {color: yellow;}\n'
+    + '#actionList .creature-3 {color: red;}',
   ));
 }
 
 function doMonsterColors() {
-  if (getValue('enableCreatureColoring')) {injectMonsterStyle();}
+  if (getValue('enableCreatureColoring')) { injectMonsterStyle(); }
 }
 
 function doRepair(e, key) {
   if (key === 'ACT_REPAIR') {
     GameData.fetch(
-      def_fetch_playerBackpackCount +
-      def_fetch_playerBuffs +
-      def_fetch_worldRealmDynamic +
-      def_fetch_worldRealmActions
+      defFetchPlayerBackpackCount
+      + defFetchPlayerBuffs
+      + defFetchWorldRealmDynamic
+      + defFetchWorldRealmActions,
     );
   }
 }
 
 function repairButton() {
-  $.subscribe(def_controlsKeydown, doRepair);
+  $.subscribe(defControlsKeydown, doRepair);
 }
 
 function msgCenterOffset() {
-  $('#messageCenter').worldMessageCenter({offset: '0 60'});
+  $('#messageCenter').worldMessageCenter({ offset: '0 60' });
 }
 
 function hideMapTooltip() {
@@ -121,9 +121,9 @@ export default function subscribes() {
     buffInfo,
     fixDebuff,
     interceptMouseEvents,
-    //#if _DEV  //  hide titan combat results
-    hideTitanCombatResults
-    //#endif
+    // #if _DEV  //  hide titan combat results
+    hideTitanCombatResults,
+    // #endif
   ]);
 }
 

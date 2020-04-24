@@ -1,31 +1,28 @@
 import currentGuildId from '../../common/currentGuildId';
 import getValue from '../../system/getValue';
 import intValue from '../../system/intValue';
-import partial from '../../common/partial';
 import {
   pvpLowerLevel,
-  pvpUpperLevel
+  pvpUpperLevel,
 } from '../../common/levelHighlight';
 
-var highlightPlayersNearMyLvl;
-var table;
+let highlightPlayersNearMyLvl;
+let table;
 
 function guildNumber(html) {
-  var match = html.match(/;guild_id=([0-9]+)"/);
-  if (match) {return Number(match[1]);}
+  const match = html.match(/;guild_id=([0-9]+)"/);
+  if (match) { return Number(match[1]); }
 }
 
-var highlightTests = [
-  function() {return highlightPlayersNearMyLvl;},
-  function(data) {return guildNumber(data[0]) !== currentGuildId();},
-  function(data) {return intValue(data[2]) >= pvpLowerLevel;},
-  function(data) {return intValue(data[2]) <= pvpUpperLevel;}
+const highlightTests = [
+  () => highlightPlayersNearMyLvl,
+  (data) => guildNumber(data[0]) !== currentGuildId(),
+  (data) => intValue(data[2]) >= pvpLowerLevel,
+  (data) => intValue(data[2]) <= pvpUpperLevel,
 ];
 
-function condition(data, el) {return el(data);}
-
 function pvpHighlight(data) {
-  return highlightTests.every(partial(condition, data));
+  return highlightTests.every((el) => el(data));
 }
 
 function createdRow(row, data) {
@@ -37,19 +34,19 @@ function createdRow(row, data) {
 function tableOpts(onlineData) {
   return {
     columns: [
-      {title: 'Guild', 'class': 'dt-center', orderable: false},
-      {title: 'Name', 'class': 'dt-center'},
-      {title: 'Level', 'class': 'dt-center'},
-      {title: 'Page/Index', 'class': 'dt-center'}
+      { title: 'Guild', class: 'dt-center', orderable: false },
+      { title: 'Name', class: 'dt-center' },
+      { title: 'Level', class: 'dt-center' },
+      { title: 'Page/Index', class: 'dt-center' },
     ],
-    createdRow: createdRow,
+    createdRow,
     data: onlineData,
     deferRender: true,
     lengthMenu: [[30, 60, -1], [30, 60, 'All']],
     order: [3, 'desc'],
     pageLength: 30,
     stateDuration: 0,
-    stateSave: true
+    stateSave: true,
   };
 }
 

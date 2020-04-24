@@ -1,35 +1,35 @@
-import {arrayFrom} from '../common/arrayFrom';
+import arrayFrom from '../common/arrayFrom';
 import contains from '../common/contains';
-import {dataRows} from '../common/dataRows';
+import dataRows from '../common/dataRows';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
 import searchPlayerHref from '../common/searchPlayerHref';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function getPlayer(playerAry) { // Legacy
-  if (playerAry) {return Number(playerAry[1]);}
+  if (playerAry) { return Number(playerAry[1]); }
   return 0;
 }
 
 function msgDoesNotIncludePlayer(aRow) {
-  var messageHTML = aRow.cells[2].innerHTML;
-  var doublerPlayerMessageRE =
-    /member\s<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
-  var secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
-  var singlePlayerMessageRE =
-    /<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
-  var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
-  var firstPlayerID = getPlayer(firstPlayer);
-  var secondPlayerID = getPlayer(secondPlayer);
-  return firstPlayer &&
-    firstPlayerID !== playerId() &&
-    secondPlayerID !== playerId();
+  const messageHTML = aRow.cells[2].innerHTML;
+  const doublerPlayerMessageRE = /member\s<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
+  const secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
+  const singlePlayerMessageRE = /<a\shref="index\.php\?cmd=profile&amp;player_id=(\d+)/;
+  const firstPlayer = singlePlayerMessageRE.exec(messageHTML);
+  const firstPlayerID = getPlayer(firstPlayer);
+  const secondPlayerID = getPlayer(secondPlayer);
+  return firstPlayer
+    && firstPlayerID !== playerId()
+    && secondPlayerID !== playerId();
 }
 
-function stripClassName(el) {el.className = '';}
+// eslint-disable-next-line no-param-reassign
+function stripClassName(el) { el.className = ''; }
 
 function findPlayers(aRow) { // Legacy
   if (msgDoesNotIncludePlayer(aRow)) {
@@ -42,22 +42,23 @@ function findPlayers(aRow) { // Legacy
 function dimIfNotMe(aRow, hasInvited, targetPlayerName) {
   if (!hasInvited && targetPlayerName !== playerName()) {
     $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
+    // eslint-disable-next-line no-param-reassign
     aRow.style.color = 'gray';
   }
 }
 
 function likeInvite(aRow, hasInvited) {
-  var message = aRow.cells[2].innerHTML;
-  var parts = message.split('\'');
-  var targetPlayerName = parts[1];
+  const message = aRow.cells[2].innerHTML;
+  const parts = message.split('\'');
+  const targetPlayerName = parts[1];
   parts[1] = searchPlayerHref(targetPlayerName);
-  aRow.cells[2].innerHTML = parts.join('\'');
+  setInnerHtml(parts.join('\''), aRow.cells[2]);
   dimIfNotMe(aRow, hasInvited, targetPlayerName);
 }
 
 function guildInvite(aRow) { // Legacy
-  var msg = getText(aRow.cells[2]);
-  var hasInvited = msg.includes('has invited the player');
+  const msg = getText(aRow.cells[2]);
+  const hasInvited = msg.includes('has invited the player');
   if (msg.charAt(0) === '\'' || hasInvited) {
     likeInvite(aRow, hasInvited);
   }
@@ -73,11 +74,11 @@ function getMessageHeader() {
 }
 
 function guildLogWidgetsEnabled() { // Legacy
-  var messageNameCell = getMessageHeader();
-  if (!messageNameCell) {return;}
-  var logTable = messageNameCell.parentNode.parentNode.parentNode;
-  messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
-    '(Guild Log messages not involving self are dimmed!)</span>';
+  const messageNameCell = getMessageHeader();
+  if (!messageNameCell) { return; }
+  const logTable = messageNameCell.parentNode.parentNode.parentNode;
+  messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">'
+    + '(Guild Log messages not involving self are dimmed!)</span>';
   dataRows(logTable.rows, 3, 0).forEach(processGuildWidgetRow);
 }
 

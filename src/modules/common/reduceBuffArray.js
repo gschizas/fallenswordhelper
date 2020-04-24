@@ -1,6 +1,6 @@
-function pair(prev, curr) {
-  prev[curr.name] = Number(curr.level);
-  return prev;
+function pair(acc, curr) {
+  acc[curr.name] = Number(curr.level);
+  return acc;
 }
 
 export default function reduceBuffArray(buffAry) {

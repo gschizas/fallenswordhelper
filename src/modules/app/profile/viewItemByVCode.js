@@ -6,6 +6,6 @@ export default function viewItemByVCode(itemId, invId, vcode) {
     item_id: itemId,
     inv_id: invId,
     v: vcode,
-    t: 2
+    t: 2,
   });
 }

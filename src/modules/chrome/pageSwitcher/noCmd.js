@@ -1,8 +1,10 @@
-import unknownPage from '../unknownPage';
-import viewArchive from '../../news/viewArchive';
+import runDefault from '../../common/runDefault';
+import { viewArchive } from './loader';
+
+const unknownPage = () => { runDefault(import('../unknownPage')); };
 
 export default {
-  viewupdatearchive: {'-': viewArchive},
-  viewarchive: {'-': viewArchive},
-  '-': {'-': unknownPage}
+  viewupdatearchive: { '-': viewArchive },
+  viewarchive: { '-': viewArchive },
+  '-': { '-': unknownPage },
 };

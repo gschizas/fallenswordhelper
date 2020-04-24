@@ -1,13 +1,13 @@
 import calf from '../../support/calf';
-import {createDiv} from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
-import {pCR} from '../../support/layout';
+import { pCR } from '../../support/layout';
 
-export var bountyListDiv;
-export var wantedListDiv;
+export let bountyListDiv;
+export let wantedListDiv;
 
 function createMiniBox() {
-  return createDiv({className: 'minibox'});
+  return createDiv({ className: 'minibox' });
 }
 
 export function createDivs() {

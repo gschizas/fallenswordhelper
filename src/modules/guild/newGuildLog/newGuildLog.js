@@ -3,11 +3,11 @@ import addGuildLogWidgets from '../../logs/addGuildLogWidgets';
 import addLogColoring from '../../logs/addLogColoring';
 import all from '../../common/all';
 import createDocument from '../../system/createDocument';
-import {createTable} from '../../common/cElement';
+import createTable from '../../common/cElement/createTable';
 import eventHandler5 from '../../common/eventHandler5';
 import functionPasses from '../../common/functionPasses';
 import getArrayByTagName from '../../common/getArrayByTagName';
-import {getElementById} from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getElementsByClassName from '../../common/getElementsByClassName';
 import getGuildLogPage from './getGuildLogPage';
 import getText from '../../common/getText';
@@ -17,59 +17,62 @@ import hideElement from '../../common/hideElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import onclick from '../../common/onclick';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
-import {rowProfile} from './profiler';
+import rowProfile from './profiler';
 import selfIdIs from '../../common/selfIdIs';
-import setText from '../../common/setText';
+import setInnerHtml from '../../dom/setInnerHtml';
+import setText from '../../dom/setText';
 import toggleForce from '../../common/toggleForce';
-import {defChecks, guildLogFilter, headerRow, noChecks} from './assets';
-import {get, set} from '../../system/idb';
+import {
+  defChecks, guildLogFilter, headerRow, noChecks,
+} from './assets';
+import { get, set } from '../../system/idb';
 
-var options = {};
-var fshNewGuildLog;
-var fshOutput;
-var maxPagesToFetch;
-var maxPage;
-var doc;
-var currPage;
-var lastPage;
-var tmpGuildLog = [];
-var completeReload = true;
-var myTable;
+let options = {};
+let fshNewGuildLog;
+let fshOutput;
+let maxPagesToFetch;
+let maxPage;
+let doc;
+let currPage;
+let lastPage;
+let tmpGuildLog = [];
+let completeReload = true;
+let myTable;
 
 function parsePage(data) {
   doc = createDocument(data);
-  var pageInput = querySelector('input[name="page"]', doc);
+  const pageInput = querySelector('input[name="page"]', doc);
   if (pageInput) {
     currPage = Number(pageInput.value);
     lastPage = Number(/\d+/.exec(getText(pageInput.parentNode))[0]);
-    if (currPage === 1) {maxPage = Math.min(lastPage, maxPagesToFetch);}
-    setText('Loading ' + currPage + ' of ' + maxPage + '...', fshOutput);
+    if (currPage === 1) { maxPage = Math.min(lastPage, maxPagesToFetch); }
+    setText(`Loading ${currPage} of ${maxPage}...`, fshOutput);
   }
 }
 
 function seenRowBefore(timestamp, myMsg) {
   return [
-    function() {return currPage === 1;},
-    function() {return options.log;},
-    function() {return options.log[0];},
-    function() {return options.log[0][0];},
-    function() {return timestamp === options.log[0][0];},
-    function() {return myMsg === options.log[0][2];}
+    () => currPage === 1,
+    () => options.log,
+    () => options.log[0],
+    () => options.log[0][0],
+    () => timestamp === options.log[0][0],
+    () => myMsg === options.log[0][2],
   ].every(functionPasses);
 }
 
 function getTableList(tableList) {
-  var theTable = tableList[0];
-  var limit = theTable.rows.length - 1;
-  for (var i = 1; i < limit; i += 2) {
-    var myRow = theTable.rows[i];
-    var myDate = getTextTrim(myRow.cells[1]);
-    var timestamp = parseDateAsTimestamp(myDate);
-    var myMsg = myRow.cells[2].innerHTML;
+  const theTable = tableList[0];
+  const limit = theTable.rows.length - 1;
+  for (let i = 1; i < limit; i += 2) {
+    const myRow = theTable.rows[i];
+    const myDate = getTextTrim(myRow.cells[1]);
+    const timestamp = parseDateAsTimestamp(myDate);
+    const myMsg = myRow.cells[2].innerHTML;
     if (seenRowBefore(timestamp, myMsg)) {
       completeReload = false;
       break;
@@ -80,8 +83,8 @@ function getTableList(tableList) {
 }
 
 function parseTable() {
-  var tableList = getElementsByClassName('width_full', doc);
-  if (tableList.length === 1) {getTableList(tableList);}
+  const tableList = getElementsByClassName('width_full', doc);
+  if (tableList.length === 1) { getTableList(tableList); }
 }
 
 function processPage(data) {
@@ -89,12 +92,12 @@ function processPage(data) {
   parseTable();
 }
 
-function useCache(e) {tmpGuildLog.push([0].concat(e));}
+function useCache(e) { tmpGuildLog.push([0].concat(e)); }
 
 function getOtherPages() {
-  var prm = [];
+  const prm = [];
   if (completeReload) {
-    for (var i = 2; i <= maxPage; i += 1) {
+    for (let i = 2; i <= maxPage; i += 1) {
       prm.push(getGuildLogPage(i).then(processPage));
     }
   } else {
@@ -103,11 +106,11 @@ function getOtherPages() {
   return all(prm);
 }
 
-function storeOptions() {set('fsh_guildLog', options);}
+function storeOptions() { set('fsh_guildLog', options); }
 
-function notThisMinute(nowUtc, ary) {return ary[1] !== nowUtc;}
+function notThisMinute(nowUtc, ary) { return ary[1] !== nowUtc; }
 
-function cacheValues(ary) {return ary.slice(1, 5);}
+function cacheValues(ary) { return ary.slice(1, 5); }
 
 function updateOptionsLog() {
   // Don't cache current minute as it may be incomplete
@@ -118,26 +121,26 @@ function updateOptionsLog() {
 }
 
 function makeCell(row, html) {
-  var thisCell = row.insertCell(-1);
-  thisCell.innerHTML = html;
+  const thisCell = row.insertCell(-1);
+  setInnerHtml(html, thisCell);
   thisCell.className = 'row';
 }
 
 function dataRow(r) {
-  var myRow = myTable.insertRow(-1);
+  const myRow = myTable.insertRow(-1);
   r.push(myRow);
-  if (!options.checks[r[4]]) {myRow.className = 'fshHide';}
+  if (!options.checks[r[4]]) { myRow.className = 'fshHide'; }
   makeCell(myRow,
     '<span class="newGuildLog"></span>');
-  makeCell(myRow, '<nobr>' + r[2] + '</nobr>');
+  makeCell(myRow, `<nobr>${r[2]}</nobr>`);
   makeCell(myRow, r[3]);
 }
 
 function separatorRow(r) {
-  var sepRow = myTable.insertRow(-1);
+  const sepRow = myTable.insertRow(-1);
   r.push(sepRow);
-  if (!options.checks[r[4]]) {sepRow.className = 'fshHide';}
-  var sep = sepRow.insertCell(-1);
+  if (!options.checks[r[4]]) { sepRow.className = 'fshHide'; }
+  const sep = sepRow.insertCell(-1);
   sep.className = 'divider';
   sep.colSpan = 3;
 }
@@ -148,18 +151,19 @@ function buildRow(r) {
 }
 
 function buildTable() {
-  myTable = createTable({id: 'fshInjectHere', className: 'width_full'});
+  myTable = createTable({ id: 'fshInjectHere', className: 'width_full' });
   insertHtmlBeforeEnd(myTable, headerRow);
 
   tmpGuildLog.forEach(buildRow);
 
-  var injector = getElementById('fshInjectHere');
+  const injector = getElementById('fshInjectHere');
   pCC.replaceChild(myTable, injector);
   addLogColoring('myGuildLog', 1);
   addGuildLogWidgets();
 }
 
 function doChecked(el) {
+  // eslint-disable-next-line no-param-reassign
   el.checked = options.checks[el.getAttribute('item')];
 }
 
@@ -168,10 +172,10 @@ function setChecks() {
   storeOptions();
 }
 
-function byFirstElement(a, b) {return a[0] - b[0];}
+function byFirstElement(a, b) { return a[0] - b[0]; }
 
 function gotOtherPages() {
-  if (completeReload) {tmpGuildLog.sort(byFirstElement);}
+  if (completeReload) { tmpGuildLog.sort(byFirstElement); }
   setText('Loading complete.', fshOutput);
   updateOptionsLog();
   buildTable();
@@ -183,20 +187,20 @@ function processFirstPage(data) {
 }
 
 function toggle(item, hide, r) {
-  if (r[4] !== item) {return;}
+  if (r[4] !== item) { return; }
   toggleForce(r[5], hide);
   toggleForce(r[6], hide);
 }
 
 function toggleItem(target) {
-  var item = Number(target.getAttribute('item'));
+  const item = Number(target.getAttribute('item'));
   options.checks[item] = !options.checks[item];
   storeOptions();
   tmpGuildLog.forEach(partial(toggle, item, !options.checks[item]));
 }
 
 function removeHide(el) {
-  if (el && el.classList) {el.classList.remove('fshHide');}
+  if (el && el.classList) { el.classList.remove('fshHide'); }
 }
 
 function show(r) {
@@ -227,16 +231,16 @@ function refresh() {
   setText('Loading Page 1 ...', fshOutput);
   tmpGuildLog = [];
   completeReload = true;
-  getElementById('fshInjectHere').innerHTML = '';
+  setInnerHtml('', getElementById('fshInjectHere'));
   getGuildLogPage(1).then(processFirstPage);
 }
 
 function guildLogEvents() {
   return [
-    [function(target) {return target.tagName === 'INPUT';}, toggleItem],
+    [(target) => target.tagName === 'INPUT', toggleItem],
     [selfIdIs('fshAll'), selectAll],
     [selfIdIs('fshNone'), selectNone],
-    [selfIdIs('rfsh'), refresh]
+    [selfIdIs('rfsh'), refresh],
   ];
 }
 
@@ -257,7 +261,7 @@ function setMaxPage() {
 
 function gotOptions(guildLog) {
   setOpts(guildLog);
-  pCC.innerHTML = guildLogFilter;
+  setInnerHtml(guildLogFilter, pCC);
   getElements();
   onclick(fshNewGuildLog, eventHandler5(guildLogEvents()));
   setChecks();
@@ -266,6 +270,6 @@ function gotOptions(guildLog) {
 }
 
 export default function injectNewGuildLog() { // jQuery.min
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   get('fsh_guildLog').then(gotOptions);
 }

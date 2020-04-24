@@ -2,10 +2,10 @@ import partial from '../common/partial';
 import pipeRecallToQueue from './pipeRecallToQueue';
 import pipeTakeToQueue from './pipeTakeToQueue';
 
-var dfr;
+let dfr;
 
 function getDfr() {
-  if (!dfr) {dfr = Promise.resolve();}
+  if (!dfr) { dfr = Promise.resolve(); }
   return dfr;
 }
 

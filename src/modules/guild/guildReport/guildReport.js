@@ -6,10 +6,10 @@ import prepareChildRows from './prepareChildRows';
 import reportHeader from './reportHeader';
 import searchUser from './searchUser';
 
-function doReportHeader() {add(3, reportHeader);}
+function doReportHeader() { add(3, reportHeader); }
 
 export default function injectReportPaint() { // jQuery
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   getMembrList(false).then(doReportHeader);
   add(2, searchUser);
   add(3, prepareChildRows);

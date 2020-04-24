@@ -1,21 +1,22 @@
-import {cmdUrl} from './support/constants';
-import {createSpan} from './common/cElement';
-import {getElementById} from './common/getElement';
+import { cmdUrl } from './support/constants';
+import createSpan from './common/cElement/createSpan';
+import getElementById from './common/getElement';
 import getText from './common/getText';
 import insertElement from './common/insertElement';
 import insertTextBeforeEnd from './common/insertTextBeforeEnd';
 import intValue from './system/intValue';
-import isNaN from './common/isNaN';
+import numberIsNaN from './common/numberIsNaN';
 import on from './common/on';
 import partial from './common/partial';
 import querySelectorArray from './common/querySelectorArray';
-import {server} from './system/system';
-import setText from './common/setText';
+import { server } from './system/system';
+import setInnerHtml from './dom/setInnerHtml';
+import setText from './dom/setText';
 import setValue from './system/setValue';
 
-var upgrades;
-var currentFSP;
-var warehouse = {};
+let upgrades;
+let currentFSP;
+const warehouse = {};
 
 function includesText(text, el) {
   return getText(el).includes(text);
@@ -37,15 +38,15 @@ function getInputElement(el) {
 
 function getRe(type, label) {
   if (label === 'amount') {
-    return new RegExp('\\+(\\d+) ' + type);
+    return new RegExp(`\\+(\\d+) ${type}`);
   }
   return /(\d+)\xA0/;
 }
 
 function getValue(type, element, label) {
   if (!warehouse[type][label]) {
-    var valRe = getRe(type, label);
-    var value = getText(element).match(valRe)[1];
+    const valRe = getRe(type, label);
+    const value = getText(element).match(valRe)[1];
     warehouse[type][label] = value;
   }
   return warehouse[type][label];
@@ -60,9 +61,9 @@ function getCost(type, upgrade) {
 }
 
 function getCell(type, upgrade) {
-  if (!warehouse[type]) {warehouse[type] = {};}
+  if (!warehouse[type]) { warehouse[type] = {}; }
   if (!warehouse[type].span) {
-    var span = createSpan();
+    const span = createSpan();
     insertTextBeforeEnd(upgrade, ' ');
     insertElement(upgrade, span);
     warehouse[type].span = span;
@@ -71,25 +72,27 @@ function getCell(type, upgrade) {
 }
 
 function doStamCount(type, upgrade, quantity, cell) {
-  var amount = getAmount(type, upgrade);
-  var cost = getCost(type, upgrade);
+  const amount = getAmount(type, upgrade);
+  const cost = getCost(type, upgrade);
   // cap the value if the user goes over his current FSP
-  var extraStam;
+  let extraStam;
   if (quantity * cost <= currentFSP) {
     extraStam = quantity * amount;
+    // eslint-disable-next-line no-param-reassign
     cell.className = 'fshBlue';
   } else {
     extraStam = Math.floor(currentFSP / cost) * amount;
+    // eslint-disable-next-line no-param-reassign
     cell.className = 'fshRed';
   }
-  setText('(+' + extraStam + ' stamina)', cell);
+  setText(`(+${extraStam} stamina)`, cell);
 }
 
 function updateStamCount(type, upgrade, evt) {
-  var target = evt.target;
-  var quantity = Number(target.value);
-  var cell = getCell(type, upgrade);
-  if (isNaN(quantity) || quantity === 0) {
+  const { target } = evt;
+  const quantity = Number(target.value);
+  const cell = getCell(type, upgrade);
+  if (numberIsNaN(quantity) || quantity === 0) {
     cell.className = 'fshHide';
     return;
   }
@@ -97,7 +100,7 @@ function updateStamCount(type, upgrade, evt) {
 }
 
 function injectUpgradeHelper(type) {
-  var upgrade = findText(type);
+  const upgrade = findText(type);
   on(getInputElement(upgrade), 'keyup',
     partial(updateStamCount, type, upgrade));
 }
@@ -106,23 +109,23 @@ function injectPoints() {
   currentFSP = intValue(getText(getElementById('statbar-fsp')));
   injectUpgradeHelper('Current');
   injectUpgradeHelper('Maximum');
-  getInputCell('Gold').innerHTML = '<a href="' + server + cmdUrl +
-    'marketplace">Sell at Marketplace</a>';
+  setInnerHtml(`<a href="${server}${
+    cmdUrl}marketplace">Sell at Marketplace</a>`, getInputCell('Gold'));
 }
 
 function saveUpgradeValue(upgrade, key) {
-  var text = findText(upgrade);
-  var ratio = text.nextElementSibling.nextElementSibling;
+  const text = findText(upgrade);
+  const ratio = text.nextElementSibling.nextElementSibling;
   if (ratio) {
-    var valueRE = /(\d+) \/ 115/;
-    var value = Number(valueRE.exec(ratio.innerHTML)[1]);
+    const valueRE = /(\d+) \/ 115/;
+    const value = Number(valueRE.exec(ratio.innerHTML)[1]);
     setValue(key, value + 5);
   }
 }
 
 export default function storePlayerUpgrades() {
-  upgrades = querySelectorArray('#pCC > table:last-of-type > tbody > ' +
-    'tr:nth-child(even) > td:first-child');
+  upgrades = querySelectorArray('#pCC > table:last-of-type > tbody > '
+    + 'tr:nth-child(even) > td:first-child');
   saveUpgradeValue('+1 Max Allies', 'alliestotal');
   saveUpgradeValue('+1 Max Enemies', 'enemiestotal');
   injectPoints();

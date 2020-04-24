@@ -1,9 +1,8 @@
 import getText from '../../common/getText';
 import toLowerCase from '../../common/toLowerCase';
 
-var numRE = /[^a-zA-Z0-9.,+\- ]/g;
-var priceRE =
-  /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
+const numRE = /[^a-zA-Z0-9.,+\- ]/g;
+const priceRE = /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
 
 function thisLine(node) {
   return node && node.nodeName !== 'BR';
@@ -14,12 +13,12 @@ function formatPrice(text) {
 }
 
 function priceAfterName(buffNameNode) {
-  var text = '';
-  var node = buffNameNode;
+  let text = '';
+  let node = buffNameNode;
   // get the whole line from the buff name towards the end (even after
   // the ',', in case of 'AL, Lib, Mer: 10k each'
   while (thisLine(node)) {
-    var newtext = getText(node);
+    const newtext = getText(node);
     node = node.nextSibling; // Text Node
     text += newtext;
   }
@@ -27,10 +26,10 @@ function priceAfterName(buffNameNode) {
 }
 
 function priceBeforeName(buffNameNode) {
-  var text = '';
-  var node = buffNameNode;
+  let text = '';
+  let node = buffNameNode;
   while (thisLine(node)) {
-    var newtext = getText(node);
+    const newtext = getText(node);
     node = node.previousSibling; // Text Node
     text = newtext + text;
   }
@@ -38,7 +37,7 @@ function priceBeforeName(buffNameNode) {
 }
 
 export default function getPrice(buffNameNode) {
-  var price = priceAfterName(buffNameNode);
+  let price = priceAfterName(buffNameNode);
   if (!price) { // some players have prices BEFORE the buff names
     price = priceBeforeName(buffNameNode);
   }

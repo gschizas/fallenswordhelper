@@ -1,49 +1,51 @@
-import {cdn} from '../system/system';
+import { cdn } from '../system/system';
 import createPotionFromTemplate from '../ajax/createPotionFromTemplate';
-import {def_needToCompose} from '../support/constants';
+import { defNeedToCompose } from '../support/constants';
 import getRandomInt from '../system/getRandomInt';
 import partial from '../common/partial';
-import {publish} from '../support/pubsub';
+import { publish } from '../support/pubsub';
 import querySelectorAll from '../common/querySelectorAll';
+import setInnerHtml from '../dom/setInnerHtml';
 import setValue from '../system/setValue';
 
 function randomBackgroundImage() {
-  return 'url(' + cdn + 'composing/' +
-    getRandomInt(1, 11) + '_' + getRandomInt(1, 51) + '.png)';
+  return `url(${cdn}composing/${
+    getRandomInt(1, 11)}_${getRandomInt(1, 51)}.png)`;
 }
 
 function updateInfoDiv(infoDiv, potName) {
-  infoDiv.children[0].innerHTML = '';
+  setInnerHtml('', infoDiv.children[0]);
   infoDiv.children[0].classList.add('fshPot');
+  // eslint-disable-next-line no-param-reassign
   infoDiv.children[0].style.backgroundImage = randomBackgroundImage();
-  infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
-    potName + '</span>\' Potion';
-  infoDiv.children[3].innerHTML = '';
+  setInnerHtml(`Creating '<span class="fshBold">${potName}</span>' Potion`,
+    infoDiv.children[2]);
+  setInnerHtml('', infoDiv.children[3]);
 }
 
 function amILast() {
-  var openTemplates = querySelectorAll(
-    '[id|="composing-template"]:not(#composing-template-multi)');
+  const openTemplates = querySelectorAll(
+    '[id|="composing-template"]:not(#composing-template-multi)',
+  );
   if (openTemplates.length === 0) {
-    setValue(def_needToCompose, false);
+    setValue(defNeedToCompose, false);
   }
 }
 
 function createSuccess(temp) {
-  var myParent = temp.parentNode;
-  if (!myParent) {return;}
-  myParent.innerHTML = '<div class="fshScs">Success</div>';
+  const myParent = temp.parentNode;
+  if (!myParent) { return; }
+  setInnerHtml('<div class="fshScs">Success</div>', myParent);
   updateInfoDiv(myParent.previousElementSibling.previousElementSibling,
     temp[temp.selectedIndex].text);
   amILast();
 }
 
 function potionDone(temp, data) {
-  var resultNode = temp.parentNode;
-  if (!resultNode) {return;}
+  const resultNode = temp.parentNode;
+  if (!resultNode) { return; }
   if (data.error) {
-    resultNode.innerHTML = '<div class="fshScs">' +
-      data.error + '</div>';
+    setInnerHtml(`<div class="fshScs">${data.error}</div>`, resultNode);
   } else {
     createSuccess(temp);
   }
@@ -55,7 +57,7 @@ function createPotion(temp) { // jQuery.min
 }
 
 export default function backgroundCreate(target, temp) {
-  target.innerHTML = '';
+  setInnerHtml('', target);
   target.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
   createPotion(temp);
   publish('quickcreate');

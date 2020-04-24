@@ -1,20 +1,19 @@
 import addCommas from '../../system/addCommas';
 import lastActivityToDays from '../../common/lastActivityToDays';
-import {nowSecs} from '../../support/now';
+import { nowSecs } from '../../support/now';
 import partial from '../../common/partial';
 import toLowerCase from '../../common/toLowerCase';
 
-function byMember(prev, curr) {
-  // if (curr.item_id === 11503) { // Zombie Brew
-  prev[curr.player_id] = prev[curr.player_id] || [];
-  prev[curr.player_id].push(curr);
-  // }
-  return prev;
+function byMember(acc, curr) {
+  if (curr.item_id === 11503) { // Zombie Brew
+    acc[curr.player_id] = acc[curr.player_id] || [];
+    acc[curr.player_id].push(curr);
+  }
+  return acc;
 }
 
-function addRank(rank_name, thisMember) {
-  thisMember.rank_name = rank_name;
-  return thisMember;
+function addRank(rankName, thisMember) {
+  return { ...thisMember, rank_name: rankName };
 }
 
 function extractMembers(thisRank) {
@@ -26,19 +25,21 @@ function processGuild(guild) {
 }
 
 function decorateMembers(pots, obj, i) {
-  obj.slot = i + 1;
-  obj.name_lower = toLowerCase(obj.name);
-  obj.lvl_reverse = 0 - obj.level;
-  obj.rank_lower = toLowerCase(obj.rank_name.trim());
-  obj.gxp = addCommas(obj.guild_xp);
-  obj.gxp_reverse = 0 - obj.guild_xp;
-  obj.activity = lastActivityToDays(obj.last_activity);
-  obj.act = obj.last_activity - nowSecs;
-  obj.pack = (pots[obj.id] || []).length;
-  obj.pack_reverse = 0 - (pots[obj.id] || []).length;
-  obj.stam = addCommas(obj.current_stamina);
-  obj.stam_reverse = 0 - obj.current_stamina;
-  return obj;
+  return {
+    ...obj,
+    slot: i + 1,
+    name_lower: toLowerCase(obj.name),
+    lvl_reverse: 0 - obj.level,
+    rank_lower: toLowerCase(obj.rank_name.trim()),
+    gxp: addCommas(obj.guild_xp),
+    gxp_reverse: 0 - obj.guild_xp,
+    activity: lastActivityToDays(obj.last_activity),
+    act: obj.last_activity - nowSecs,
+    pack: (pots[obj.id] || []).length,
+    pack_reverse: 0 - (pots[obj.id] || []).length,
+    stam: addCommas(obj.current_stamina),
+    stam_reverse: 0 - obj.current_stamina,
+  };
 }
 
 export default function prepareData([json, guild]) {

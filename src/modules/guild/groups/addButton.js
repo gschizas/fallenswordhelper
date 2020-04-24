@@ -1,12 +1,12 @@
-import {createInput} from '../../common/cElement';
+import createInput from '../../common/cElement/createInput';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 
 export default function addButton(target, val) {
-  var theButton = createInput({
+  const theButton = createInput({
     className: 'custombutton',
     type: 'button',
-    value: val
+    value: val,
   });
   insertHtmlBeforeEnd(target, '&nbsp;');
   insertElement(target, theButton);

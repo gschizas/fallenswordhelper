@@ -1,23 +1,25 @@
-import {daUnequipItem} from '../_dataAccess/_dataAccess';
+import createButton from '../common/cElement/createButton';
+import createDiv from '../common/cElement/createDiv';
+import daUnequipItem from '../_dataAccess/daUnequipItem';
 import getArrayByTagName from '../common/getArrayByTagName';
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import onclick from '../common/onclick';
 import partial from '../common/partial';
-import {sendEvent} from '../support/fshGa';
-import {createButton, createDiv} from '../common/cElement';
+import { sendEvent } from '../support/fshGa';
+import setInnerHtml from '../dom/setInnerHtml';
 
-var profileCombatSetDiv;
+let profileCombatSetDiv;
 
 function clearBox(link, json) {
   if (json.s) {
-    link.parentNode.innerHTML = '';
+    setInnerHtml('', link.parentNode);
   }
 }
 
 function removeItem(link) {
-  var item = /inventory_id=(\d+)/.exec(link.href)[1];
+  const item = /inventory_id=(\d+)/.exec(link.href)[1];
   if (item) {
     daUnequipItem(item).then(partial(clearBox, link));
   }
@@ -25,15 +27,15 @@ function removeItem(link) {
 
 function getNekid() {
   sendEvent('profile', 'nekidBtn');
-  var profileBlock = profileCombatSetDiv.nextElementSibling;
+  const profileBlock = profileCombatSetDiv.nextElementSibling;
   getArrayByTagName('a', profileBlock).forEach(removeItem);
 }
 
 function makeButton() {
-  var nekidDiv = createDiv({className: 'fshCenter'});
-  var theBtn = createButton({
+  const nekidDiv = createDiv({ className: 'fshCenter' });
+  const theBtn = createButton({
     className: 'fshBl fshBls',
-    textContent: 'Nekid'
+    textContent: 'Nekid',
   });
   insertTextBeforeEnd(nekidDiv, '[ ');
   insertElement(nekidDiv, theBtn);
@@ -43,10 +45,9 @@ function makeButton() {
 }
 
 export default function nekidBtn() {
-  var profileRightColumn = getElementById('profileRightColumn');
+  const profileRightColumn = getElementById('profileRightColumn');
   profileCombatSetDiv = getElementById('profileCombatSetDiv');
-  var targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
-  var nekidDiv = makeButton();
+  const targetBr = profileCombatSetDiv.parentNode.nextElementSibling;
+  const nekidDiv = makeButton();
   profileRightColumn.replaceChild(nekidDiv, targetBr);
 }
-

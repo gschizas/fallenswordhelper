@@ -5,6 +5,6 @@ export default function recall(invId, playerId, mode) {
     subcmd2: 'recall',
     id: invId,
     player_id: playerId,
-    mode: mode
+    mode,
   });
 }

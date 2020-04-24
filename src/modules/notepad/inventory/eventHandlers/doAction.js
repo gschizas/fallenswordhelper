@@ -1,4 +1,4 @@
-import {cdn} from '../../../system/system';
+import { cdn } from '../../../system/system';
 import hideQTip from '../../../common/hideQTip';
 import partial from '../../../common/partial';
 
@@ -8,7 +8,7 @@ function removeClass(target) {
     .removeClass();
 }
 
-function clear(td, i) {td.eq(i).empty();} // jQuery
+function clear(td, i) { td.eq(i).empty(); } // jQuery
 
 function clearButtons(td) {
   [
@@ -17,21 +17,21 @@ function clearButtons(td) {
     13, // GS - W/U
     14, // W/U - Tag
     15, // Tag - Drop
-    16 // ? - Send
+    16, // ? - Send
   ].forEach(partial(clear, td));
 }
 
 function killRow(target, data) { // jQuery
-  if (data.r === 1) {return;}
-  var tr = target.closest('tr');
-  var td = $('td', tr);
+  if (data.r === 1) { return; }
+  const tr = target.closest('tr');
+  const td = $('td', tr);
   clearButtons(td);
   tr.css('text-decoration', 'line-through');
 }
 
 function anotherSpinner(target) { // jQuery
-  target.empty().append('<img src="' + cdn +
-    'ui/misc/spinner.gif" width="11" height="11">');
+  target.empty().append(`<img src="${cdn
+  }ui/misc/spinner.gif" width="11" height="11">`);
 }
 
 export default function doAction(fn, target) { // jQuery

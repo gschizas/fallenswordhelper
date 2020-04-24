@@ -1,9 +1,8 @@
 const fs = require('fs');
-const port = require('./config.json').port;
+const { port } = require('./config.json');
 
-const betaProdSourceRoot =
-  'https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/' +
-    `${process.env.npm_package_version}`;
+const betaProdSourceRoot = 'https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/'
+    + `${process.env.npm_package_version}`;
 
 function addSourceRoot(file, sourceRoot) {
   const data = fs.readFileSync(file);
@@ -14,8 +13,8 @@ function addSourceRoot(file, sourceRoot) {
 
 function fixMaps(dir, sourceRoot) {
   fs.readdir(`dist/${dir}`, (err, items) => {
-    const maps = items.filter(fn => fn.endsWith('.map'));
-    maps.forEach(map => {addSourceRoot(`dist/${dir}/${map}`, sourceRoot);});
+    const maps = items.filter((fn) => fn.endsWith('.map'));
+    maps.forEach((map) => { addSourceRoot(`dist/${dir}/${map}`, sourceRoot); });
   });
 }
 

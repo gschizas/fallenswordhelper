@@ -2,18 +2,17 @@ import backpack from './backpack';
 import combatSetKey from './combatSetKey';
 import createGroup from './createGroup';
 import doRepair from './doRepair';
-import {doSendGold} from '../../world/newMap/sendGold';
+import { doSendGold } from '../../world/newMap/sendGold';
 import fastWearMgr from './fastWearMgr';
 import gotoGuild from './gotoGuild';
 import joinAllGroup from './joinAllGroup';
 import logPage from './logPage';
 import movePage from './movePage';
 import on from '../../common/on';
-import partial from '../../common/partial';
 import profile from './profile';
 import toWorld from './toWorld';
 
-var keyLookup = [
+const keyLookup = [
   ['!', combatSetKey, 0], // Shift+1
   ['@', combatSetKey, 1], // Shift+2
   ['"', combatSetKey, 1], // Shift+2 -- for UK keyboards
@@ -37,37 +36,29 @@ var keyLookup = [
   ['p', profile], // profile [p]
   ['r', doRepair], // repair [r]
   ['v', fastWearMgr], // fast wear manager [v]
-  ['y', doSendGold] // fast send gold [y]
+  ['y', doSendGold], // fast send gold [y]
 ];
-
-function thisKey(key, arr) {return key === arr[0];}
 
 function handleKey(key) {
-  var mapping = keyLookup.find(partial(thisKey, key));
-  if (mapping) {mapping[1](mapping[2]);}
+  const mapping = keyLookup.find((arr) => key === arr[0]);
+  if (mapping) { mapping[1](mapping[2]); }
 }
 
-function notTagName(evt, tag) {return evt.target.tagName !== tag;}
-
-var bailOut = [
-  function(evt) {
-    return ['HTML', 'BODY'].every(partial(notTagName, evt));
-  },
+const bailOut = [
+  (evt) => ['HTML', 'BODY'].every((tag) => evt.target.tagName !== tag),
   /* ignore control, alt and meta keys
   (I think meta is the command key in Macintoshes) */
-  function(evt) {return evt.ctrlKey;},
-  function(evt) {return evt.metaKey;},
-  function(evt) {return evt.altKey;}
+  (evt) => evt.ctrlKey,
+  (evt) => evt.metaKey,
+  (evt) => evt.altKey,
 ];
 
-function reason(evt, fn) {return fn(evt);}
-
 function doNotHandle(evt) {
-  return bailOut.some(partial(reason, evt));
+  return bailOut.some((fn) => fn(evt));
 }
 
 function handleKeyUp(e) {
-  if (doNotHandle(e)) {return;}
+  if (doNotHandle(e)) { return; }
   handleKey(e.key);
 }
 

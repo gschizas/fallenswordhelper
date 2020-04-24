@@ -1,4 +1,6 @@
-import {addRows} from './addRows';
+import addRows from './addRows';
+import createSpan from '../../../common/cElement/createSpan';
+import createTable from '../../../common/cElement/createTable';
 import insertElement from '../../../common/insertElement';
 import insertTextBeforeEnd from '../../../common/insertTextBeforeEnd';
 import {
@@ -10,7 +12,7 @@ import {
   status,
   titanHp,
   total,
-  yourGuild
+  yourGuild,
 } from './assets';
 import {
   cooldownText,
@@ -19,11 +21,10 @@ import {
   guildKills,
   maxHp,
   statusText,
-  totalPct
+  totalPct,
 } from './placeholders';
-import {createSpan, createTable} from '../../../common/cElement';
 
-export var titanTbl;
+export let titanTbl;
 
 export function clearMemberRows() {
   while (titanTbl.rows.length > 7) {
@@ -32,7 +33,7 @@ export function clearMemberRows() {
 }
 
 function makeTitanHpWrapper() {
-  var titanHpWrapper = createSpan();
+  const titanHpWrapper = createSpan();
   insertElement(titanHpWrapper, currentHp);
   insertTextBeforeEnd(titanHpWrapper, '/');
   insertElement(titanHpWrapper, maxHp);
@@ -40,14 +41,14 @@ function makeTitanHpWrapper() {
 }
 
 function makePctWrapper(pct) {
-  var pctWrapper = createSpan();
+  const pctWrapper = createSpan();
   insertElement(pctWrapper, pct);
   insertTextBeforeEnd(pctWrapper, '%');
   return pctWrapper;
 }
 
 export function buildTitanInfoTable() {
-  titanTbl = createTable({className: 'fshCenter'});
+  titanTbl = createTable({ className: 'fshCenter' });
   buildAssets();
   addRows(titanTbl, [
     [[[2, titanHp, true], [4, yourGuild, true]]],
@@ -57,6 +58,6 @@ export function buildTitanInfoTable() {
     [[[2, status, true], [4, statusText]], true],
     [[[6, cooldownText]]],
     [[[2, member, true], [2, kills, true],
-      [2, pctTotal, true]]]
+      [2, pctTotal, true]]],
   ]);
 }

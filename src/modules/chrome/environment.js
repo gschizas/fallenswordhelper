@@ -3,8 +3,8 @@ import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import getUrlParameter from '../system/getUrlParameter';
 import globalErrorHandler from '../support/globalErrorHandler';
-import {initNow} from '../support/now';
-import {initPcc} from '../support/layout';
+import { initNow } from '../support/now';
+import { initPcc } from '../support/layout';
 import isFunction from '../common/isFunction';
 import isMessageSound from './isMessageSound';
 import isObject from '../common/isObject';
@@ -13,28 +13,30 @@ import loadCss from '../common/loadCss';
 import lookForHcsData from './lookForHcsData/lookForHcsData';
 import pageSwitcher from './pageSwitcher/pageSwitcher';
 import querySelector from '../common/querySelector';
-import {end, screenview, setup, start} from '../support/fshGa';
+import {
+  end, screenview, setup, start,
+} from '../support/fshGa';
 
-var cmd;
-var subcmd;
-var subcmd2;
-var type = '';
-var coreFunction;
-var functionPath;
+let cmd;
+let subcmd;
+let subcmd2;
+let type = '';
+let coreFunction;
+let functionPath;
 
 function getParam(param) {
   return getUrlParameter(param) || '-';
 }
 
 function newSelector(selector) {
-  var test_cmd = querySelector(selector);
-  return test_cmd && test_cmd.value || '-';
+  const testCmd = querySelector(selector);
+  return (testCmd && testCmd.value) || '-';
 }
 
 function isValid() {
-  return isObject(pageSwitcher[cmd]) &&
-    isObject(pageSwitcher[cmd][subcmd]) &&
-    isFunction(pageSwitcher[cmd][subcmd][subcmd2]);
+  return isObject(pageSwitcher[cmd])
+    && isObject(pageSwitcher[cmd][subcmd])
+    && isFunction(pageSwitcher[cmd][subcmd][subcmd2]);
 }
 
 function testCoreFunction() {
@@ -47,7 +49,7 @@ function getParamsFromUrl() {
   cmd = getParam('cmd');
   subcmd = getParam('subcmd');
   subcmd2 = getParam('subcmd2');
-  if (cmd === 'points') {type = `/${getParam('type')}`;}
+  if (cmd === 'points') { type = `/${getParam('type')}`; }
 }
 
 function getParamsFromPage() {
@@ -73,7 +75,7 @@ function getCoreFunction() {
   coreFunction = testCoreFunction();
 }
 
-//#if _DEV  //  asyncDispatcher messages
+// #if _DEV  //  asyncDispatcher messages
 function devHooks() {
   /* eslint-disable no-console */
   console.log('functionPath', functionPath);
@@ -85,11 +87,11 @@ function devHooks() {
   /* eslint-enable no-console */
 }
 
-//#endif
+// #endif
 function asyncDispatcher() {
-  //#if _DEV  //  asyncDispatcher messages
+  // #if _DEV  //  asyncDispatcher messages
   devHooks();
-  //#endif
+  // #endif
   if (isFunction(coreFunction)) {
     screenview(functionPath);
     start('JS Perf', functionPath);
@@ -129,11 +131,11 @@ function setVer(fshVer, gmInfo) {
 // main event dispatcher
 export default function dispatch(fshVer, gmInfo) {
   start('JS Perf', 'FSH.dispatch');
-  if (badEnv()) {return;}
+  if (badEnv()) { return; }
   globalErrorHandler();
   setVer(fshVer, gmInfo);
   setup();
-  //#set _CALFCSS = _CSSPATH + 'calfSystem.css'
+  // #set _CALFCSS = _CSSPATH + 'calfSystem.css'
   loadCss('$_CALFCSS').then(runCore);
   end('JS Perf', 'FSH.dispatch');
 }

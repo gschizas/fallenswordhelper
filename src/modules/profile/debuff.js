@@ -1,30 +1,31 @@
 import errorDialog from '../common/errorDialog';
 import fetchdata from '../ajax/fetchdata';
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import getValue from '../system/getValue';
 import hideQTip from '../common/hideQTip';
 import jConfirm from '../common/jConfirm';
 import onclick from '../common/onclick';
 import partial from '../common/partial';
-import {sendEvent} from '../support/fshGa';
+import { sendEvent } from '../support/fshGa';
+import setInnerHtml from '../dom/setInnerHtml';
 
 let disableDeactivatePrompts;
-const success = json => json && json.response && json.response.response === 0;
-const removeskill = buffId => fetchdata({a: 22, id: buffId});
+const success = (json) => json && json.response && json.response.response === 0;
+const removeskill = (buffId) => fetchdata({ a: 22, id: buffId });
 
 function debuffSuccess(aLink, json) {
-  if (success(json)) {aLink.parentNode.innerHTML = '';}
+  if (success(json)) { setInnerHtml('', aLink.parentNode); }
 }
 
 function doDebuff(aLink) { // jQuery.min
   sendEvent('profile', 'doDebuff');
-  var buffId = aLink.href.match(/(\d+)$/)[1];
+  const buffId = aLink.href.match(/(\d+)$/)[1];
   removeskill(buffId).then(errorDialog).then(partial(debuffSuccess, aLink));
 }
 
 function doPrompt(aLink) {
-  var hcsOnclick = aLink.getAttribute('onclick');
-  var warn = hcsOnclick
+  const hcsOnclick = aLink.getAttribute('onclick');
+  const warn = hcsOnclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
   jConfirm('Remove Skill', warn, partial(doDebuff, aLink));
 }
@@ -38,18 +39,18 @@ function checkForPrompt(aLink) {
 }
 
 function interceptDebuff(e) {
-  var aLink = e.target;
+  let aLink = e.target;
   if (aLink.tagName === 'IMG') {
     hideQTip(e.target);
     aLink = aLink.parentNode;
-  } else if (aLink.tagName !== 'A') {return;}
+  } else if (aLink.tagName !== 'A') { return; }
   e.stopPropagation();
   e.preventDefault();
   checkForPrompt(aLink);
 }
 
 export default function fastDebuff() {
-  var profileRightColumn = getElementById('profileRightColumn');
+  const profileRightColumn = getElementById('profileRightColumn');
   if (profileRightColumn) {
     disableDeactivatePrompts = getValue('disableDeactivatePrompts');
     onclick(profileRightColumn.lastElementChild, interceptDebuff, true);

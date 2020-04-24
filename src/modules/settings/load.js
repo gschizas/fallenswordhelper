@@ -1,27 +1,28 @@
 import dialogMsg from '../common/dialogMsg';
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import getValue from '../system/getValue';
 import isObject from '../common/isObject';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import jsonParse from '../common/jsonParse';
-import {keys} from '../common/keys';
-import {listValues} from '../system/listValues';
-import {pCC} from '../support/layout';
+import keys from '../common/keys';
+import listValues from '../system/listValues';
+import { pCC } from '../support/layout';
 import partial from '../common/partial';
+import setInnerHtml from '../dom/setInnerHtml';
 import setValue from '../system/setValue';
 
 function drawBox(content, fshSettings) {
-  content.innerHTML = '<h1>FSH Settings</h1><br><center>The box below ' +
-    'is your current settings. Copy it to save your current settings<br>' +
-    'To load saved settings, simply replace the contents of the box with ' +
-    'your saved copy and press the button below.' +
-    '<textarea align="center" cols="80" rows="25" style="' +
-    'background-color:white;' +
-    'font-family:Consolas,\'Lucida Console\',\'Courier New\',monospace;" ' +
-    'id="HelperfshSettings" name="fshSettings">' +
-    JSON.stringify(fshSettings) + '</textarea>' +
-    '<br><input id="HelperLoadSettings" class="custombutton" ' +
-    'type="submit" value="Load Settings!" /></center>';
+  setInnerHtml('<h1>FSH Settings</h1><br><center>The box below '
+    + 'is your current settings. Copy it to save your current settings<br>'
+    + 'To load saved settings, simply replace the contents of the box with '
+    + 'your saved copy and press the button below.'
+    + '<textarea align="center" cols="80" rows="25" style="'
+    + 'background-color:white;'
+    + 'font-family:Consolas,\'Lucida Console\',\'Courier New\',monospace;" '
+    + `id="HelperfshSettings" name="fshSettings">${
+      JSON.stringify(fshSettings)}</textarea>`
+    + '<br><input id="HelperLoadSettings" class="custombutton" '
+    + 'type="submit" value="Load Settings!" /></center>', content);
 }
 
 function saveSetting(settings, id) {
@@ -29,22 +30,22 @@ function saveSetting(settings, id) {
 }
 
 function clickHandler() {
-  var userInput = jsonParse(getElementById('HelperfshSettings').value);
+  const userInput = jsonParse(getElementById('HelperfshSettings').value);
   if (isObject(userInput)) {
-    var settings = userInput;
+    const settings = userInput;
     keys(settings).forEach(partial(saveSetting, settings));
     dialogMsg('Settings loaded successfully!');
   }
 }
 
-function buildSettingsObj(prev, curr) {
-  prev[curr] = getValue(curr);
-  return prev;
+function buildSettingsObj(acc, curr) {
+  acc[curr] = getValue(curr);
+  return acc;
 }
 
 export default function injectSaveSettings() { // Hybrid
-  if (jQueryNotPresent()) {return;}
-  var fshSettings = listValues().reduce(buildSettingsObj, {});
+  if (jQueryNotPresent()) { return; }
+  const fshSettings = listValues().reduce(buildSettingsObj, {});
   drawBox(pCC, fshSettings);
   $('#HelperLoadSettings').on('click', clickHandler);
 }

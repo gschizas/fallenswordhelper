@@ -16,18 +16,18 @@ import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import moveItemsToFolder from './moveItemsToFolder';
 import onclick from '../../common/onclick';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import quickAction from './quickAction';
 import selfIdIs from '../../common/selfIdIs';
-import {sendException} from '../../support/fshGa';
+import { sendException } from '../../support/fshGa';
 import toggleForce from '../../common/toggleForce';
 import {
   ahSearchUrl,
-  def_subcmd,
+  defSubcmd,
   guideUrl,
-  rarity
+  rarity,
 } from '../../support/constants';
 import {
   disableItemColoring,
@@ -35,26 +35,26 @@ import {
   setShowQuickDropLinks,
   showExtraLinks,
   showQuickDropLinks,
-  showQuickSendLinks
+  showQuickSendLinks,
 } from './getPrefs';
-import {getItems, itemsAry, itemsHash} from './getItems';
+import { getItems, itemsAry, itemsHash } from './getItems';
 
-var extraLinks;
-var checkAll;
-var dropLinks;
-var invItems;
-var colouring;
-var sendLinks;
+let extraLinks;
+let checkAll;
+let dropLinks;
+let invItems;
+let colouring;
+let sendLinks;
 
 function afterbegin(o, item) {
-  if (fallback(extraLinks, !showExtraLinks)) {return;}
-  var pattern = '<span><span class="aHLink">';
+  if (fallback(extraLinks, !showExtraLinks)) { return; }
+  let pattern = '<span><span class="aHLink">';
   if (!item.bound) {
-    pattern += '[<a href="' + ahSearchUrl +
-      encodeURIComponent(item.item_name) + '">AH</a>]';
+    pattern += `[<a href="${ahSearchUrl
+    }${encodeURIComponent(item.item_name)}">AH</a>]`;
   }
-  pattern += '</span>[<a href="' + guideUrl + 'items' + def_subcmd +
-    'view&item_id=' + item.item_id + '" target="_blank">UFSG</a>]</span>';
+  pattern += `</span>[<a href="${guideUrl}items${defSubcmd
+  }view&item_id=${item.item_id}" target="_blank">UFSG</a>]</span>`;
   insertHtmlAfterBegin(o.injectHere, pattern);
 }
 
@@ -64,47 +64,39 @@ function itemColouring(o, item) {
   }
 }
 
-var buildTrailer = [
+const buildTrailer = [
   [
-    function(item) {return !checkAll && itemsHash[item.item_id] !== 1;},
-    function(o, item) {
-      return ' [<span linkto="' + item.item_id +
-        '" class="fshLink">Check all</span>]';
-    }
+    (item) => !checkAll && itemsHash[item.item_id] !== 1,
+    (o, item) => ` [<span linkto="${
+      item.item_id}" class="fshLink">Check all</span>]`,
   ],
   [
-    function(item) {return !sendLinks && showQuickSendLinks && !item.bound;},
-    function(o) {
-      return ' <span class="quickAction sendLink tip-static" ' +
-        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
-        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
-    }
+    (item) => !sendLinks && showQuickSendLinks && !item.bound,
+    (o) => ` <span class="quickAction sendLink tip-static" itemInvId="${
+      o.invid}" data-tipped="INSTANTLY SENDS THE ITEM. `
+      + 'NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>',
   ],
   [
-    function(item) {
-      return !dropLinks && showQuickDropLinks && item.guild_tag === -1;
-    },
-    function(o) {
-      return ' <span class="quickAction dropLink tip-static" itemInvId="' +
-        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
-        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
-    }
-  ]
+    (item) => !dropLinks && showQuickDropLinks && item.guild_tag === -1,
+    (o) => ` <span class="quickAction dropLink tip-static" itemInvId="${
+      o.invid}" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS `
+      + 'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>',
+  ],
 ];
 
-function condition(item, pair) {return pair[0](item);}
+function condition(item, pair) { return pair[0](item); }
 
-function generateHtml(o, item, pair) {return pair[1](o, item);}
+function generateHtml(o, item, pair) { return pair[1](o, item); }
 
 function beforeend(o, item) {
   itemColouring(o, item);
-  var pattern = buildTrailer.filter(partial(condition, item))
+  const pattern = buildTrailer.filter(partial(condition, item))
     .map(partial(generateHtml, o, item)).join('');
-  if (pattern !== '') {insertHtmlBeforeEnd(o.injectHere, pattern);}
+  if (pattern !== '') { insertHtmlBeforeEnd(o.injectHere, pattern); }
 }
 
 function itemWidgets(o) {
-  var item = invItems[o.invid];
+  const item = invItems[o.invid];
   if (item) {
     afterbegin(o, item);
     beforeend(o, item);
@@ -114,15 +106,17 @@ function itemWidgets(o) {
 }
 
 function doneInvPaint() {
-  if (showExtraLinks) {extraLinks = true;}
+  if (showExtraLinks) { extraLinks = true; }
   checkAll = true;
   colouring = true;
-  if (showQuickDropLinks) {dropLinks = true;}
+  if (showQuickDropLinks) { dropLinks = true; }
   sendLinks = true;
 }
 
 function toggleExtraLinks(o) {
-  toggleForce(o.injectHere.children[0], !showExtraLinks);
+  if (o.injectHere) {
+    toggleForce(o.injectHere.children[0], !showExtraLinks);
+  }
 }
 
 function toggleShowExtraLinks() {
@@ -160,23 +154,23 @@ function selfIds() {
     [selfIdIs('fshSelectAllGuildLocked'),
       partial(doCheckboxesByType, 'guild', null)],
     [selfIdIs('fshMove'), partial(moveItemsToFolder, itemsAry)],
-    [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)]
+    [selfIdIs('fshChkAll'), partial(doCheckboxesByType, 'checkAll', null)],
   ];
 }
 
 function evts() {
   return selfIds().concat([
     [
-      function(target) {return target.hasAttribute('linkto');},
-      function(target) {
+      (target) => target.hasAttribute('linkto'),
+      (target) => {
         doCheckboxesByType('item', target.getAttribute('linkto'));
-      }
+      },
     ],
     [partial(hasClass, 'sendLink'),
       partial(quickAction, ajaxSendItems, 'Sent', '.dropLink')],
     [partial(hasClass, 'dropLink'),
       partial(quickAction, dropItem, 'Dropped', '.sendLink')],
-    [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)]
+    [partial(hasClass, 'fshFolder'), partial(hideFolders, itemsAry, invItems)],
   ]);
 }
 
@@ -185,7 +179,7 @@ function badData(data) {
 }
 
 function inventory(data) {
-  if (badData(data) || !itemsAry) {return;}
+  if (badData(data) || !itemsAry) { return; }
   extraLinks = false;
   checkAll = false;
   invItems = data.items;
@@ -198,7 +192,7 @@ function inventory(data) {
 }
 
 export default function injectStoreItems() {
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   getInventoryById().then(inventory);
   add(3, getItems);
 }

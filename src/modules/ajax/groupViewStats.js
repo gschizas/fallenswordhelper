@@ -1,26 +1,26 @@
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import intValue from '../system/intValue';
 import {
-  def_statArmor,
-  def_statAttack,
-  def_statDamage,
-  def_statDefense,
-  def_statHp
+  defStatArmor,
+  defStatAttack,
+  defStatDamage,
+  defStatDefense,
+  defStatHp,
 } from '../support/constants';
 
-var attackElement;
-var defenseElement;
-var armorElement;
-var damageElement;
-var hpElement;
+let attackElement;
+let defenseElement;
+let armorElement;
+let damageElement;
+let hpElement;
 
 function getElements(doc) {
-  attackElement = getElementById(def_statAttack, doc);
-  defenseElement = getElementById(def_statDefense, doc);
-  armorElement = getElementById(def_statArmor, doc);
-  damageElement = getElementById(def_statDamage, doc);
-  hpElement = getElementById(def_statHp, doc);
+  attackElement = getElementById(defStatAttack, doc);
+  defenseElement = getElementById(defStatDefense, doc);
+  armorElement = getElementById(defStatArmor, doc);
+  damageElement = getElementById(defStatDamage, doc);
+  hpElement = getElementById(defStatHp, doc);
 }
 
 function statAsNumber(el) {
@@ -34,14 +34,14 @@ export default function groupViewStats(doc) {
   getElements(doc);
   return {
     attack: statAsNumber(attackElement),
-    attackElement: attackElement,
+    attackElement,
     defense: statAsNumber(defenseElement),
-    defenseElement: defenseElement,
+    defenseElement,
     armor: statAsNumber(armorElement),
-    armorElement: armorElement,
+    armorElement,
     damage: statAsNumber(damageElement),
-    damageElement: damageElement,
+    damageElement,
     hp: statAsNumber(hpElement),
-    hpElement: hpElement
+    hpElement,
   };
 }

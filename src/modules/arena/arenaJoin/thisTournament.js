@@ -1,3 +1,5 @@
 import getUrlParameter from '../../system/getUrlParameter';
 
-export const thisTournament = () => Number(getUrlParameter('pvp_id'));
+const thisTournament = () => Number(getUrlParameter('pvp_id'));
+
+export default thisTournament;

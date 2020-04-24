@@ -2,7 +2,7 @@ import getText from '../../common/getText';
 import querySelector from '../../common/querySelector';
 
 function getTarget(firstCell) {
-  if (firstCell.children[0].tagName === 'A') {return firstCell.children[0];}
+  if (firstCell.children[0].tagName === 'A') { return firstCell.children[0]; }
   return firstCell.children[0].children[0];
 }
 
@@ -11,7 +11,7 @@ function rewardType(theCells) {
 }
 
 export default function basicBounty(theCells) {
-  var targetData = getTarget(theCells[0]);
+  const targetData = getTarget(theCells[0]);
   return {
     target: getText(targetData),
     link: targetData.href,

@@ -1,20 +1,22 @@
-import {createTBody, createTr} from '../../common/cElement';
+import createTBody from '../../common/cElement/createTBody';
+import createTr from '../../common/cElement/createTr';
 
 function rowHtml(obj) {
-  return `<td>${obj.slot}</td>` +
-    `<td>${obj.name}</td>` +
-    `<td>${obj.level}</td>` +
-    `<td>${obj.rank_name}</td>` +
-    `<td>${obj.gxp}</td>` +
-    `<td>${obj.activity}</td>` +
-    `<td>${obj.pack}</td>` +
-    `<td>${obj.stam}</td>`;
+  return `<td>${obj.slot}</td>`
+    + `<td>${obj.name}</td>`
+    + `<td>${obj.level}</td>`
+    + `<td>${obj.rank_name}</td>`
+    + `<td>${obj.gxp}</td>`
+    + `<td>${obj.activity}</td>`
+    + `<td>${obj.pack}</td>`
+    + `<td>${obj.stam}</td>`;
 }
 
 function rowFactory(aRow) {
   if (!aRow.dom) {
+    // eslint-disable-next-line no-param-reassign
     aRow.dom = createTr(
-      {innerHTML: rowHtml(aRow)}
+      { innerHTML: rowHtml(aRow) },
     );
   }
   return aRow.dom;
@@ -24,7 +26,7 @@ export default function displayChange(domTable, table, displayed) {
   // console.log(table.getTableState());
   const domTBody = domTable.tBodies[0];
   const thisTBody = createTBody();
-  for (let r of displayed) {
+  for (const r of displayed) {
     thisTBody.appendChild(rowFactory(r.value));
   }
   domTable.replaceChild(thisTBody, domTBody);

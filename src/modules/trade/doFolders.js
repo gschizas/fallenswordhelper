@@ -1,10 +1,12 @@
 import './doFolders.css';
 import add from '../support/task';
-import {def_table} from '../support/constants';
-import {entries} from '../common/entries';
+import createDiv from '../common/cElement/createDiv';
+import createTr from '../common/cElement/createTr';
+import { defTable } from '../support/constants';
+import entries from '../common/entries';
 import fallback from '../system/fallback';
 import getArrayByTagName from '../common/getArrayByTagName';
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
 import hideElement from '../common/hideElement';
@@ -14,19 +16,18 @@ import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import onclick from '../common/onclick';
 import partial from '../common/partial';
-import {createDiv, createTr} from '../common/cElement';
-//#if _BETA  //  Timing output
-import {time, timeEnd} from '../support/debug';
-//#endif
+// #if _BETA  //  Timing output
+import { time, timeEnd } from '../support/debug';
+// #endif
 
-var invItems;
+let invItems;
 
 function getItemDiv() {
-  var itemDiv = getElementById('item-div');
+  let itemDiv = getElementById('item-div');
   if (!itemDiv) {
-    itemDiv = createDiv({id: 'item-div', className: 'itemDiv'});
-    var itemList = getElementById('item-list');
-    var oldItems = getElementsByTagName(def_table, itemList);
+    itemDiv = createDiv({ id: 'item-div', className: 'itemDiv' });
+    const itemList = getElementById('item-list');
+    const oldItems = getElementsByTagName(defTable, itemList);
     while (oldItems.length) {
       oldItems[0].classList.add('fshBlock');
       insertElement(itemDiv, oldItems[0]);
@@ -45,10 +46,11 @@ function shouldHide(hidden, all, hasFolder) {
 }
 
 function hideFolderItem(folderid, el) {
+  // eslint-disable-next-line no-param-reassign
   el.children[0].lastElementChild.children[0].children[0].checked = false;
-  var hidden = el.classList.contains('fshHide');
-  var all = folderid === 'folderid0';
-  var hasFolder = el.classList.contains(folderid);
+  const hidden = el.classList.contains('fshHide');
+  const all = folderid === 'folderid0';
+  const hasFolder = el.classList.contains(folderid);
   if (shouldShow(hidden, all, hasFolder)) {
     el.classList.remove('fshHide');
     el.classList.add('fshBlock'); // show()
@@ -60,35 +62,35 @@ function hideFolderItem(folderid, el) {
 }
 
 function doHideFolder(evt) {
-  var items = getArrayByTagName(def_table, getItemDiv());
+  const items = getArrayByTagName(defTable, getItemDiv());
   items.forEach(partial(hideFolderItem, evt.target.id));
 }
 
 function hideFolder(evt) {
-  if (evt.target.nodeName === 'SPAN' &&
-      evt.target.id.indexOf('folderid') !== -1) {doHideFolder(evt);}
+  if (evt.target.nodeName === 'SPAN'
+      && evt.target.id.indexOf('folderid') !== -1) { doHideFolder(evt); }
 }
 
 function folderSpan(pair) {
-  return ' &ensp;<span id="folderid' + pair[0] +
-    '" class="fshLink fshNoWrap" fid=' + pair[0] + '>' +
-    pair[1] + '</span> ';
+  return ` &ensp;<span id="folderid${pair[0]
+  }" class="fshLink fshNoWrap" fid=${pair[0]}>${
+    pair[1]}</span> `;
 }
 
 function doFolderHeaders(folders) {
-  var foldersRow = createTr({
+  const foldersRow = createTr({
     id: 'fshFolderSelect',
-    innerHTML: '<td colspan=6>' +
-      '<span id="folderid0" class="fshLink" fid=0>All</span>' +
-      ' &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>' +
-      entries(folders).map(folderSpan).join('')
+    innerHTML: '<td colspan=6>'
+      + '<span id="folderid0" class="fshLink" fid=0>All</span>'
+      + ` &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>${
+        entries(folders).map(folderSpan).join('')}`,
   });
   onclick(foldersRow, hideFolder);
-  var el = getElementById('item-list').parentNode.parentNode;
-  insertHtmlBeforeBegin(el, '<tr id="fshShowSTs">' +
-    '<td align="center" colspan=6>' +
-    '<label><input type="checkbox" id="itemsInSt" checked> ' +
-    'Select items in ST</label></td></tr>');
+  const el = getElementById('item-list').parentNode.parentNode;
+  insertHtmlBeforeBegin(el, '<tr id="fshShowSTs">'
+    + '<td align="center" colspan=6>'
+    + '<label><input type="checkbox" id="itemsInSt" checked> '
+    + 'Select items in ST</label></td></tr>');
   insertElementBefore(foldersRow, el);
 }
 
@@ -99,32 +101,32 @@ function stColor(el, item) {
 }
 
 function forEachInvItem(el) {
-  var checkbox = el.children[0].lastElementChild.children[0].children[0];
-  var item = invItems[checkbox.getAttribute('value')];
+  const checkbox = el.children[0].lastElementChild.children[0].children[0];
+  const item = invItems[checkbox.getAttribute('value')];
   if (item) {
-    el.classList.add('folderid' + item.folder_id);
-    if (invItems.fshHasST) {stColor(el, item);}
-    checkbox.classList.add('itemid' + item.item_id);
-    checkbox.classList.add('itemtype' + item.type);
+    el.classList.add(`folderid${item.folder_id}`);
+    if (invItems.fshHasST) { stColor(el, item); }
+    checkbox.classList.add(`itemid${item.item_id}`);
+    checkbox.classList.add(`itemtype${item.type}`);
   }
 }
 
 function processTrade(data) {
-  //#if _BETA  //  Timing output
+  // #if _BETA  //  Timing output
 
   time('trade.processTrade');
 
-  //#endif
+  // #endif
   invItems = data.items;
   // Highlight items in ST
-  var nodeList = getArrayByTagName(def_table, getElementById('item-list'));
+  const nodeList = getArrayByTagName(defTable, getElementById('item-list'));
   nodeList.forEach(forEachInvItem); // TODO unnecessary DOM manipulation
   doFolderHeaders(data.folders);
-  //#if _BETA  //  Timing output
+  // #if _BETA  //  Timing output
 
   timeEnd('trade.processTrade');
 
-  //#endif
+  // #endif
 }
 
 function gotInventory(data) {
@@ -132,6 +134,6 @@ function gotInventory(data) {
 }
 
 export default function doFolders() { // jQuery.min
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   getInventoryById().then(gotInventory);
 }

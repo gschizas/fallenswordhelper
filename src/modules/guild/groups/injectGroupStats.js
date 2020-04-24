@@ -2,12 +2,13 @@ import addCommas from '../../system/addCommas';
 import getMercStats from '../../ajax/getMercStats';
 import groupViewStats from '../../ajax/groupViewStats';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
+import setInnerHtml from '../../dom/setInnerHtml';
 
-var groupStats;
+let groupStats;
 
 function displayStat(el, groupStat, mercStat) {
-  el.innerHTML = '<span class="fshBlue">' + addCommas(groupStat) + '</span>' +
-    ' ( ' + addCommas(groupStat - mercStat) + ' )';
+  setInnerHtml(`<span class="fshBlue">${addCommas(groupStat)}</span> ( ${
+    addCommas(groupStat - mercStat)} )`, el);
 }
 
 function parseMercStats(mercStats) {
@@ -19,7 +20,7 @@ function parseMercStats(mercStats) {
 }
 
 export default function injectGroupStats() { // jQuery
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   groupStats = groupViewStats(document);
   if (groupStats.attackElement) {
     getMercStats().then(parseMercStats);

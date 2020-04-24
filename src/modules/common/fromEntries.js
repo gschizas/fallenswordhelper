@@ -1,1 +1,3 @@
-export const fromEntries = entries => Object.fromEntries(entries);
+const fromEntries = (entries) => Object.fromEntries(entries);
+
+export default fromEntries;

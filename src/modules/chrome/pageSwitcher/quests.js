@@ -1,7 +1,11 @@
-import allowBack from '../../guide/allowBack';
-import showAllQuestSteps from '../../guide/showAllQuestSteps';
+import { allowBack } from './loader';
+import runDefault from '../../common/runDefault';
+
+const showAllQuestSteps = () => {
+  runDefault(import('../../guide/showAllQuestSteps'));
+};
 
 export default {
-  '-': {'-': allowBack},
-  view: {'-': showAllQuestSteps}
+  '-': { '-': allowBack },
+  view: { '-': showAllQuestSteps },
 };

@@ -1,11 +1,11 @@
-import {getElementById} from './getElement';
+import getElementById from './getElement';
 import getText from './getText';
 
-var thisPlayerName;
+let thisPlayerName;
 
 export default function playerName() {
   if (!thisPlayerName) {
-    var statBarCharacter = getElementById('statbar-character');
+    const statBarCharacter = getElementById('statbar-character');
     if (statBarCharacter) {
       thisPlayerName = getText(statBarCharacter);
     }

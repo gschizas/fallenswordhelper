@@ -1,41 +1,41 @@
-import {createSpan} from '../common/cElement';
-import {doAddIgnore} from '../support/constants';
-import {getElementById} from '../common/getElement';
+import createSpan from '../common/cElement/createSpan';
+import { doAddIgnore } from '../support/constants';
+import getElementById from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import injectFsBoxContent from '../notepad/injectFsBoxContent';
+import { injectFsBoxContent } from './pageSwitcher/loader';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
 import onclick from '../common/onclick';
-import {sendEvent} from '../support/fshGa';
-import {get, set} from '../system/idb';
+import { sendEvent } from '../support/fshGa';
+import { get, set } from '../system/idb';
 
 function getBoxList(boxList) {
-  if (boxList) {return boxList;}
+  if (boxList) { return boxList; }
   return '';
 }
 
 function storeFSBox(_boxList) {
-  var boxList = getBoxList(_boxList);
-  var fsbox = getElementsByClassName('message',
+  let boxList = getBoxList(_boxList);
+  const fsbox = getElementsByClassName('message',
     getElementById('minibox-fsbox'))[0].innerHTML;
-  if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
-  if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
+  if (boxList.indexOf(fsbox) < 0) { boxList = `<br>${fsbox}${boxList}`; }
+  if (boxList.length > 10000) { boxList = boxList.substring(0, 10000); }
   set('fsh_fsboxcontent', boxList);
 }
 
 function storeMsg(nodediv) {
-  var playerName = getElementsByTagName('a', nodediv);
-  if (playerName.length === 0) {return;}
+  let playerName = getElementsByTagName('a', nodediv);
+  if (playerName.length === 0) { return; }
   get('fsh_fsboxcontent').then(storeFSBox);
   playerName = getText(playerName[0]);
   insertHtmlBeforeEnd(nodediv,
-    '<span class="fshPaleVioletRed">[ <a href="' + doAddIgnore +
-    playerName + '">Ignore</a> ]</span> ');
+    `<span class="fshPaleVioletRed">[ <a href="${doAddIgnore
+    }${playerName}">Ignore</a> ]</span> `);
 }
 
 function openDialog() {
@@ -44,23 +44,23 @@ function openDialog() {
 }
 
 function fSBoxExists(node) {
-  var nodediv = node.lastElementChild;
+  const nodediv = node.lastElementChild;
   insertHtmlBeforeEnd(nodediv, '<br>');
   storeMsg(nodediv);
-  var log = createSpan({
+  const log = createSpan({
     className: 'fshYellow',
-    innerHTML: '[ <span class="fshLink">Log</span> ]'
+    innerHTML: '[ <span class="fshLink">Log</span> ]',
   });
   onclick(log, openDialog);
   insertElement(nodediv, log);
 }
 
 function findFsBox() {
-  var node = getElementById('minibox-fsbox');
-  if (jQueryPresent() && node) {fSBoxExists(node);}
+  const node = getElementById('minibox-fsbox');
+  if (jQueryPresent() && node) { fSBoxExists(node); }
 }
 
 export default function injectFSBoxLog() {
-  if (!getValue('fsboxlog')) {return;}
+  if (!getValue('fsboxlog')) { return; }
   findFsBox();
 }

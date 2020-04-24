@@ -1,6 +1,7 @@
-import isNaN from './isNaN';
+import numberIsNaN from './numberIsNaN';
 import partial from './partial';
 import reduceBuffArray from './reduceBuffArray';
+import round from './round';
 
 function cloakGuess(bonus, level) {
   if (bonus > level * 10 || bonus < level) {
@@ -10,14 +11,16 @@ function cloakGuess(bonus, level) {
 }
 
 function updateForCloak(obj) {
+  /* eslint-disable no-param-reassign */
   obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
   obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
   obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
   obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
   obj.hpValue = obj.hpBonus;
+  /* eslint-enable no-param-reassign */
 }
 
-var statList = [
+const statList = [
   ['levelValue', 'level'],
   ['attackValue', 'attack'],
   ['attackBonus', 'bonus_attack'],
@@ -29,16 +32,17 @@ var statList = [
   ['damageBonus', 'bonus_damage'],
   ['hpValue', 'hp'],
   ['hpBonus', 'bonus_hp'],
-  ['killStreakValue', 'killstreak']
+  ['killStreakValue', 'killstreak'],
 ];
 
-function assignStats(obj, json, arr) {obj[arr[0]] = Number(json[arr[1]]);}
+// eslint-disable-next-line no-param-reassign
+function assignStats(obj, json, arr) { obj[arr[0]] = Number(json[arr[1]]); }
 
 function importStats(obj, json) {
   statList.forEach(partial(assignStats, obj, json));
 }
 
-var buffList = [
+const buffList = [
   ['counterAttackLevel', 'Counter Attack'],
   ['doublerLevel', 'Doubler'],
   ['deathDealerLevel', 'Death Dealer'],
@@ -57,22 +61,23 @@ var buffList = [
   ['anchoredLevel', 'Anchored'],
   ['severeConditionLevel', 'Severe Condition'],
   ['entrenchLevel', 'Entrench'],
-  ['cloakLevel', 'Cloak']
+  ['cloakLevel', 'Cloak'],
 ];
 
-function assignBuffs(obj, buffs, arr) {obj[arr[0]] = buffs[arr[1]] || 0;}
+// eslint-disable-next-line no-param-reassign
+function assignBuffs(obj, buffs, arr) { obj[arr[0]] = buffs[arr[1]] || 0; }
 
 function importBuffs(obj, buffs) {
   buffList.forEach(partial(assignBuffs, obj, buffs));
 }
 
 export default function playerDataObject(json) {
-  var buffs = reduceBuffArray(json._skills);
-  var obj = {};
+  const buffs = reduceBuffArray(json._skills);
+  const obj = {};
   importStats(obj, json);
   importBuffs(obj, buffs);
-  obj.superEliteSlayerMultiplier = Math.round(0.002 *
-    obj.superEliteSlayerLevel * 100) / 100;
-  if (isNaN(obj.armorValue)) {updateForCloak(obj);}
+  obj.superEliteSlayerMultiplier = round(0.002
+    * obj.superEliteSlayerLevel, 2);
+  if (numberIsNaN(obj.armorValue)) { updateForCloak(obj); }
   return obj;
 }

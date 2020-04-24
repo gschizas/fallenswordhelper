@@ -1,7 +1,7 @@
-import {simpleCheckbox} from './simpleCheckbox';
+import { simpleCheckbox } from './simpleCheckbox';
 
-function concatSimple(prev, curr) {
-  return prev + simpleCheckbox(curr);
+function concatSimple(acc, curr) {
+  return acc + simpleCheckbox(curr);
 }
 
 export default function bunchOfSimple(ary) {

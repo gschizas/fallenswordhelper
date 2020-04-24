@@ -1,22 +1,23 @@
 import afterUpdateActionList from '../doNotKill/afterUpdateActionList';
 import calf from '../../../support/calf';
+import createButton from '../../../common/cElement/createButton';
+import createDiv from '../../../common/cElement/createDiv';
 import getElementsByClassName from '../../../common/getElementsByClassName';
 import insertElement from '../../../common/insertElement';
 import isOnList from '../doNotKill/isOnList';
 import onclick from '../../../common/onclick';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import setValue from '../../../system/setValue';
-import {createButton, createDiv} from '../../../common/cElement';
 
-var creatureBody;
-var dnkName;
-var doNotKillBtn;
+let creatureBody;
+let dnkName;
+let doNotKillBtn;
 
 function getCreatureBody(dialogViewCreature) {
   if (!creatureBody) {
-    var bodyCollection = getElementsByClassName('body', dialogViewCreature);
+    const bodyCollection = getElementsByClassName('body', dialogViewCreature);
     if (bodyCollection.length === 1) {
-      creatureBody = bodyCollection[0];
+      [creatureBody] = bodyCollection;
     }
   }
 }
@@ -33,7 +34,7 @@ function updateText() {
 }
 
 function addRemoveCreature() {
-  var index = calf.doNotKillList.indexOf(dnkName);
+  const index = calf.doNotKillList.indexOf(dnkName);
   if (index === -1) {
     calf.doNotKillList.push(dnkName);
   } else {
@@ -48,12 +49,12 @@ function makeDnkBtn() {
   doNotKillBtn = createButton({
     className: 'fshBl',
     textContent: doNotKillText(),
-    type: 'button'
+    type: 'button',
   });
-  var btnContainer = createDiv({
+  const btnContainer = createDiv({
     className: 'description',
-    innerHTML: '<span class="ui-helper-hidden-accessible">' +
-      '<input type="text"></span>'
+    innerHTML: '<span class="ui-helper-hidden-accessible">'
+      + '<input type="text"></span>',
   });
   insertElement(btnContainer, doNotKillBtn);
   insertElement(creatureBody, btnContainer);

@@ -1,23 +1,24 @@
 import './guildTracker.css';
-import {def_enableGuildActivityTracker} from '../../support/constants';
+import createDiv from '../../common/cElement/createDiv';
+import createLabel from '../../common/cElement/createLabel';
+import { defEnableGuildActivityTracker } from '../../support/constants';
 import fshTabbedModal from '../../dialog/fshTabbedModal';
 import getValue from '../../system/getValue';
 import insertElement from '../../common/insertElement';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
-import {makeTg} from './trackerTable';
+import makeTg from './trackerTable';
 import on from '../../common/on';
 import once from '../../common/once';
 import partial from '../../common/partial';
 import querySelector from '../../common/querySelector';
 import setValue from '../../system/setValue';
-import {simpleCheckboxHtml} from '../../settings/simpleCheckbox';
-import {subscribeOnce} from '../../support/pubsub';
-import {createDiv, createLabel} from '../../common/cElement';
+import { simpleCheckboxHtml } from '../../settings/simpleCheckbox';
+import { subscribeOnce } from '../../support/pubsub';
 
 function togglePref(evt) {
-  if (evt.target.id === def_enableGuildActivityTracker) {
-    setValue(def_enableGuildActivityTracker,
-      !getValue(def_enableGuildActivityTracker));
+  if (evt.target.id === defEnableGuildActivityTracker) {
+    setValue(defEnableGuildActivityTracker,
+      !getValue(defEnableGuildActivityTracker));
   }
 }
 
@@ -32,18 +33,18 @@ function showDialog() {
 }
 
 function injectShowTracker() {
-  var gs = querySelector('#pCC img.guild_openGuildStore');
-  var td = gs.parentNode;
-  var container = createDiv({className: 'fsh-tracker'});
-  var myDiv = createDiv({
-    innerHTML: simpleCheckboxHtml(def_enableGuildActivityTracker) +
-      '&nbsp;'
+  const gs = querySelector('#pCC img.guild_openGuildStore');
+  const td = gs.parentNode;
+  const container = createDiv({ className: 'fsh-tracker' });
+  const myDiv = createDiv({
+    innerHTML: `${simpleCheckboxHtml(defEnableGuildActivityTracker)
+    }&nbsp;`,
   });
   on(myDiv, 'change', togglePref);
-  var showTrackerDialog = createLabel({
+  const showTrackerDialog = createLabel({
     className: 'custombutton',
     htmlFor: 'tracker',
-    textContent: 'Show'
+    textContent: 'Show',
   });
   once(showTrackerDialog, 'click', showDialog);
   insertElement(myDiv, showTrackerDialog);

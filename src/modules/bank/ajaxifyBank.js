@@ -2,23 +2,23 @@ import createDocument from '../system/createDocument';
 import indexAjaxData from '../ajax/indexAjaxData';
 import jQueryPresent from '../common/jQueryPresent';
 import partial from '../common/partial';
-import {def_table, guildSubcmdUrl} from '../support/constants';
+import { defTable, guildSubcmdUrl } from '../support/constants';
 
-var statbarGold = '#pH #statbar-gold';
-var statbarGoldTooltip = '#pH #statbar-gold-tooltip-general dd';
-var pccB = '#pCC b';
-var infoMsg = '#pCC #info-msg';
-var withdrawAmount = '#pCC #withdraw_amount';
-var depositAmount = '#pCC #deposit_amount';
-var disabled = 'disabled';
-var inputDepo = '#pCC input[value="Deposit"]';
+const statbarGold = '#pH #statbar-gold';
+const statbarGoldTooltip = '#pH #statbar-gold-tooltip-general dd';
+const pccB = '#pCC b';
+const infoMsg = '#pCC #info-msg';
+const withdrawAmount = '#pCC #withdraw_amount';
+const depositAmount = '#pCC #deposit_amount';
+const disabled = 'disabled';
+const inputDepo = '#pCC input[value="Deposit"]';
 
 function doInfoBox(infoBox) { // jQuery
-  var target = $(infoMsg);
+  const target = $(infoMsg);
   if (target.length === 0) {
-    $('#pCC').prepend(infoBox.closest(def_table));
+    $('#pCC').prepend(infoBox.closest(defTable));
   } else {
-    target.closest(def_table).replaceWith(infoBox.closest(def_table));
+    target.closest(defTable).replaceWith(infoBox.closest(defTable));
   }
 }
 
@@ -63,15 +63,15 @@ function replaceValues(bankSettings, doc, infoBox) {
 }
 
 function transResponse(bankSettings, response) { // jQuery
-  var doc = createDocument(response);
-  var infoBox = $(infoMsg, doc);
-  if (infoBox.length === 0) {return;}
+  const doc = createDocument(response);
+  const infoBox = $(infoMsg, doc);
+  if (infoBox.length === 0) { return; }
   replaceValues(bankSettings, doc, infoBox);
 }
 
 function invalidAmount(o, amount) { // jQuery
-  return $(pccB).eq(o.depoPos).text() === '0' ||
-    !$.isNumeric(amount) || amount < 1;
+  return $(pccB).eq(o.depoPos).text() === '0'
+    || !$.isNumeric(amount) || amount < 1;
 }
 
 function doAjax(bankSettings) {
@@ -80,27 +80,30 @@ function doAjax(bankSettings) {
 
 function bankDeposit(bankSettings, e) { // jQuery
   e.preventDefault();
-  var amount = $(depositAmount).val();
-  if (invalidAmount(bankSettings, amount)) {return;}
+  const amount = $(depositAmount).val();
+  if (invalidAmount(bankSettings, amount)) { return; }
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.mode = 'deposit';
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.amount = amount;
   doAjax(bankSettings);
 }
 
 function bankWithdrawal(bankSettings, e) { // jQuery
   e.preventDefault();
-  var amount = $(withdrawAmount).val();
-  if (!$.isNumeric(amount) || amount < 1) {return;}
+  const amount = $(withdrawAmount).val();
+  if (!$.isNumeric(amount) || amount < 1) { return; }
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.mode = 'withdraw';
+  // eslint-disable-next-line no-param-reassign
   bankSettings.data.amount = amount;
   doAjax(bankSettings);
 }
 
 function linkToGuildBank(bankSettings, bank) { // jQuery
   if (bankSettings.appLink) {
-    bank.after('<div class="fshCenter">' +
-      '<a href="' + guildSubcmdUrl + 'bank">Go to Guild Bank</a>' +
-      '</div>');
+    bank.after(`<div class="fshCenter"><a href="${
+      guildSubcmdUrl}bank">Go to Guild Bank</a></div>`);
   }
 }
 
@@ -115,20 +118,20 @@ function captureButtons(bankSettings, depo, withdraw) { // jQuery
 
 function appLink(bankSettings, bank) { // jQuery
   linkToGuildBank(bankSettings, bank);
-  var depo = $(inputDepo);
-  if (depo.length !== 1) {return;}
-  var withdraw = $('#pCC input[value="Withdraw"]');
-  if (withdraw.length !== 1) {return;}
+  const depo = $(inputDepo);
+  if (depo.length !== 1) { return; }
+  const withdraw = $('#pCC input[value="Withdraw"]');
+  if (withdraw.length !== 1) { return; }
   captureButtons(bankSettings, depo, withdraw);
 }
 
 function hasJquery(bankSettings) { // jQuery
-  var bank = $(bankSettings.headSelector);
+  const bank = $(bankSettings.headSelector);
   if (bank.length !== 0 && bank.eq(0).text() === bankSettings.headText) {
     appLink(bankSettings, bank);
   }
 }
 
 export default function ajaxifyBank(bankSettings) {
-  if (jQueryPresent()) {hasJquery(bankSettings);}
+  if (jQueryPresent()) { hasJquery(bankSettings); }
 }

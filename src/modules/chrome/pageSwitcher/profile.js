@@ -1,13 +1,11 @@
-import dropItemLoader from '../../profile/dropitems/dropItemLoader';
-import injectBioWidgets from '../../profile/bio/bioWidgets';
-import injectProfile from '../../profile/profile';
+import { injectBioWidgets, injectProfile, injectStoreItems } from './loader';
 
 export default {
-  '-': {'-': injectProfile},
-  managecombatset: {'-': injectProfile},
-  report: {'-': injectProfile},
-  equipitem: {'-': injectProfile},
-  useitem: {'-': injectProfile},
-  changebio: {'-': injectBioWidgets},
-  dropitems: {'-': dropItemLoader}
+  '-': { '-': injectProfile },
+  managecombatset: { '-': injectProfile },
+  report: { '-': injectProfile },
+  equipitem: { '-': injectProfile },
+  useitem: { '-': injectProfile },
+  changebio: { '-': injectBioWidgets },
+  dropitems: { '-': injectStoreItems },
 };

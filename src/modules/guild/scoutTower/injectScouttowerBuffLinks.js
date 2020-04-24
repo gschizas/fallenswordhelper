@@ -1,6 +1,6 @@
-import {arrayFrom} from '../../common/arrayFrom';
+import arrayFrom from '../../common/arrayFrom';
 import containsText from '../../common/containsText';
-import {dataRows} from '../../common/dataRows';
+import dataRows from '../../common/dataRows';
 import getText from '../../common/getText';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import onclick from '../../common/onclick';
@@ -12,16 +12,16 @@ function buffIndividual(target) {
   }
 }
 
-function memberName(el) {return getText(el.cells[0].children[0].children[0]);}
+function memberName(el) { return getText(el.cells[0].children[0].children[0]); }
 
 function buffAll(target) {
-  var titanTable = target.parentNode.parentNode.parentNode.parentNode;
-  var shortList = dataRows(titanTable.rows, 3, 0).map(memberName);
+  const titanTable = target.parentNode.parentNode.parentNode.parentNode;
+  const shortList = dataRows(titanTable.rows, 3, 0).map(memberName);
   openQuickBuffByName(shortList.join());
 }
 
 function buffEvent(e) {
-  var target = e.target;
+  const { target } = e;
   if (containsText('[b]', target)) {
     buffIndividual(target);
   }
@@ -31,7 +31,7 @@ function buffEvent(e) {
 }
 
 function evtHdl(e) {
-  if (e.target.classList.contains('fshBl')) {buffEvent(e);}
+  if (e.target.classList.contains('fshBl')) { buffEvent(e); }
 }
 
 function playerBufflink(el) {
@@ -45,7 +45,7 @@ function doBuffLinks(titanTable) {
     ' <button class="fshBl fshXSmall">all</button>');
 }
 
-function myTables(el, i) {return el.rows.length > 1 && i > 1;}
+function myTables(el, i) { return el.rows.length > 1 && i > 1; }
 
 function gotTables(titanTables) {
   arrayFrom(titanTables).filter(myTables).forEach(doBuffLinks);
@@ -53,5 +53,5 @@ function gotTables(titanTables) {
 }
 
 export default function injectScouttowerBuffLinks(titanTables) {
-  if (titanTables.length > 2) {gotTables(titanTables);}
+  if (titanTables.length > 2) { gotTables(titanTables); }
 }

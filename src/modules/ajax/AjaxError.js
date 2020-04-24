@@ -1,19 +1,20 @@
 function url(opt) {
   if (opt.data) {
-    delete opt.data._rnd;
+    // eslint-disable-next-line no-param-reassign
+    delete opt.data.fshrnd;
     return $.param(opt.data);
   }
   return opt.url;
 }
 
 function buildErrorMsg(opt, jqXhr, textStatus, errorThrown) {
-  var xhrStatus = jqXhr.status + ' ' + jqXhr.statusText + ' - ';
+  const xhrStatus = `${jqXhr.status} ${jqXhr.statusText} - `;
   if (jqXhr.statusText === errorThrown.toString()) {
     return xhrStatus + url(opt);
   }
-  var jqStatus = xhrStatus + textStatus + ' ' + errorThrown + ' - ' + url(opt);
+  const jqStatus = `${xhrStatus + textStatus} ${errorThrown} - ${url(opt)}`;
   if (textStatus === 'parsererror') {
-    return jqStatus + ' - ' + jqXhr.responseText;
+    return `${jqStatus} - ${jqXhr.responseText}`;
   }
   return jqStatus;
 }

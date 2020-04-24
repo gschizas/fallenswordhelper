@@ -1,9 +1,11 @@
-import composingBreakdown from '../../composing/breakdown';
-import composingCreate from '../../composing/composingCreate';
-import injectComposing from '../../composing/composing';
+import runDefault from '../../common/runDefault';
+
+const composingBreakdown = () => { runDefault(import('../../composing/breakdown')); };
+const composingCreate = () => { runDefault(import('../../composing/composingCreate')); };
+const injectComposing = () => { runDefault(import('../../composing/composing')); };
 
 export default {
-  '-': {'-': injectComposing},
-  breakdown: {'-': composingBreakdown},
-  create: {'-': composingCreate}
+  '-': { '-': injectComposing },
+  breakdown: { '-': composingBreakdown },
+  create: { '-': composingCreate },
 };

@@ -12,53 +12,53 @@ import resetChecks from './resetChecks';
 import resetLvls from './resetLvls';
 import storeItems from '../../../ajax/storeItems';
 import useItem from '../../../ajax/useItem';
-import {queueRecallItem, queueTakeItem} from '../../../ajaxQueue/queue';
+import { queueRecallItem, queueTakeItem } from '../../../ajaxQueue/queue';
 
 function setName(fshInv, e) { // jQuery
   $(fshInv).DataTable().search($(e.target).attr('set')).draw();
-  $('#' + fshInv.id + '_filter input').trigger('focus');
+  $(`#${fshInv.id}_filter input`).trigger('focus');
 }
 
 function takeItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   doAction(partial(queueTakeItem, target.attr('invid'), target.attr('action')),
     target);
 }
 
 function recallItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   doAction(partial(queueRecallItem, target.attr('invid'),
     target.attr('playerid'), target.attr('mode'), target.attr('action')),
   target);
 }
 
 function wearItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   doAction(partial(equipItem, target.attr('invid')), target);
 }
 
 function doUseItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   doAction(partial(useItem, target.attr('invid')), target);
 }
 
 function doMoveItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   moveItem([target.data('inv')], target.val());
 }
 
 function doStoreItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   doAction(partial(storeItems, [target.attr('invid')]), target);
 }
 
 function doDropItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   doAction(partial(dropItem, [target.data('inv')]), target);
 }
 
 function doSendItem(e) { // jQuery
-  var target = $(e.target);
+  const target = $(e.target);
   doAction(partial(ajaxSendItems, [target.data('inv')]), target);
 }
 
@@ -71,11 +71,11 @@ function elementClickHandlers(fshInv) {
     ['#fshReset', resetLvls],
     ['#fshAll', allChecks],
     ['#fshNone', clearChecks],
-    ['#fshDefault', resetChecks]
+    ['#fshDefault', resetChecks],
   ].forEach(partial(elClick, fshInv));
 }
 
-function spanClick(fshInv, el) {$(fshInv).on('click', 'span.' + el[0], el[1]);} // jQuery
+function spanClick(fshInv, el) { $(fshInv).on('click', `span.${el[0]}`, el[1]); } // jQuery
 
 function spanClickHandlers(fshInv) {
   [
@@ -86,7 +86,7 @@ function spanClickHandlers(fshInv) {
     ['useItem', doUseItem],
     ['dropItem', doDropItem],
     ['sendItem', doSendItem],
-    ['storeItem', doStoreItem]
+    ['storeItem', doStoreItem],
   ].forEach(partial(spanClick, fshInv));
 }
 

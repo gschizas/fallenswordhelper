@@ -1,31 +1,30 @@
 import all from '../../common/all';
 import completed from '../../app/arena/completed';
-import {entries} from '../../common/entries';
+import createAnchor from '../../common/cElement/createAnchor';
+import createBr from '../../common/cElement/createBr';
+import entries from '../../common/entries';
 import formatUtcDateTime from '../../common/formatUtcDateTime';
-import {fromEntries} from '../../common/fromEntries';
+import fromEntries from '../../common/fromEntries';
 import insertElement from '../../common/insertElement';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 // import {removeKeys} from '../../common/removeKeys';
-import results from '../../app/arena/results';
+import { results } from '../../chrome/pageSwitcher/loader';
 import round from '../../common/round';
-import {createAnchor, createBr} from '../../common/cElement';
-import {cyrb32, cyrb53, makeHash} from './makeHash';
-import {get, set} from '../../system/idb';
+import { cyrb32, cyrb53, makeHash } from './makeHash';
+import { get, set } from '../../system/idb';
 
 const tabDelimited = (s, a) => s.concat(a.join('\t'), '\n');
 const byWins = (a, b) => b[2] - a[2] || b[1] - a[1];
-const addWinners = (arenaWinners, [name, entered]) =>
-  [name, entered, arenaWinners[name] || 0];
+const addWinners = (arenaWinners, [name, entered]) => [name, entered, arenaWinners[name] || 0];
 
 function calcRatio(dividend, divisor) {
   let ratio = 0;
-  if (divisor !== 0) {ratio = round(dividend / divisor, 3);}
+  if (divisor !== 0) { ratio = round(dividend / divisor, 3); }
   return ratio;
 }
 
-const addRatio = ([name, entered, wins]) =>
-  [name, entered, wins, calcRatio(wins, entered)];
+const addRatio = ([name, entered, wins]) => [name, entered, wins, calcRatio(wins, entered)];
 
 function findWinner(result) {
   const lastBattle = result.r[result.r.length - 1];
@@ -41,12 +40,12 @@ async function getWinner(id) {
 }
 
 function makeDownloadAnchor(output, type, filename, text) {
-  const blob = new Blob([output], {type});
+  const blob = new Blob([output], { type });
   const url = URL.createObjectURL(blob);
   const anchor = createAnchor({
     download: filename,
     href: url,
-    textContent: text
+    textContent: text,
   });
   insertElement(pCC, anchor);
   insertElement(pCC, createBr());
@@ -68,46 +67,43 @@ const joinedFields = ['pvpId', 'joinDate', 'helmet', 'armor', 'gloves', 'boots',
   'stat_armor', 'stat_damage', 'stat_hp', 'winner', 'cyrb32', 'cyrb53'];
 
 async function makeArenaJoined(listOfWinners) {
-  const fsh_arenaJoined = await get('fsh_arenaJoined');
-  if (!fsh_arenaJoined) {return;}
-  const output = fsh_arenaJoined
-    .map(o =>
-      fromEntries(entries(o)
-        .concat([['joinDate', formatUtcDateTime(new Date(o.joined * 1000))]])
-        .concat([['winner', listOfWinners[o.pvpId]]])
-        .concat([['cyrb32', makeHash(cyrb32, o)]])
-        .concat([['cyrb53', makeHash(cyrb53, o)]])
-      )
-    )
-    .map(o => joinedFields.map(j => o[j]))
-    .reduce(tabDelimited, joinedFields.join('\t') + '\n');
+  const fshArenaJoined = await get('fsh_arenaJoined');
+  if (!fshArenaJoined) { return; }
+  const output = fshArenaJoined
+    .map((o) => fromEntries(entries(o)
+      .concat([['joinDate', formatUtcDateTime(new Date(o.joined * 1000))]])
+      .concat([['winner', listOfWinners[o.pvpId]]])
+      .concat([['cyrb32', makeHash(cyrb32, o)]])
+      .concat([['cyrb53', makeHash(cyrb53, o)]])))
+    .map((o) => joinedFields.map((j) => o[j]))
+    .reduce(tabDelimited, `${joinedFields.join('\t')}\n`);
   makeDownloadAnchor(output,
     'text/plain', 'fsh_arenaJoined.txt', 'fsh_arenaJoined');
 }
 
-function occurences(obj, player) {
-  if (!obj[player]) {obj[player] = 0;}
-  obj[player] += 1;
-  return obj;
+function occurences(acc, player) {
+  if (!acc[player]) { acc[player] = 0; }
+  acc[player] += 1;
+  return acc;
 }
 
 function countEntries(ary) {
-  return entries([].concat(...ary.map(o => o.players)).reduce(occurences, {}));
+  return entries([].concat(...ary.map((o) => o.players)).reduce(occurences, {}));
 }
 
 async function getListOfWinners(thisArenas) {
-  const fsh_arenaWinners = await get('fsh_arenaWinners') || {};
-  const winnersToGet = thisArenas.filter(a => !fsh_arenaWinners[a.id])
-    .map(o => o.id);
+  const fshArenaWinners = await get('fsh_arenaWinners') || {};
+  const winnersToGet = thisArenas.filter((a) => !fshArenaWinners[a.id])
+    .map((o) => o.id);
   const prm = winnersToGet.map(getWinner);
   const newWinners = fromEntries(await all(prm));
-  const combinedWinners = {...fsh_arenaWinners, ...newWinners};
+  const combinedWinners = { ...fshArenaWinners, ...newWinners };
   set('fsh_arenaWinners', combinedWinners);
   return combinedWinners;
 }
 
 function countWinners(ary) {
-  return ary.map(o => o.winner).reduce(occurences, {});
+  return ary.map((o) => o.winner).reduce(occurences, {});
 }
 
 function processArenas(arenas) {
@@ -127,19 +123,20 @@ async function processCompleted(thisComplete) {
   const listOfWinners = await getListOfWinners(thisArenas);
   // console.log('listOfWinners', listOfWinners);
 
-  const arenaStandard = thisArenas.filter(o => o.type === 1).map(o => ({
+  const arenaStandard = thisArenas.filter((o) => o.type === 1).map((o) => ({
     id: o.id,
-    players: o.players.map(p => p.name),
+    players: o.players.map((p) => p.name),
     specials: o.specials,
-    winner: listOfWinners[o.id]
+    winner: listOfWinners[o.id],
   }));
 
-  const arenaBasicStats = processArenas(arenaStandard.filter(o => !o.specials));
-  console.log('arenaBasicStats', arenaBasicStats); // eslint-disable-line no-console
+  const arenaBasicStats = processArenas(arenaStandard.filter((o) => !o.specials));
+  // eslint-disable-next-line no-console
+  console.log('arenaBasicStats', arenaBasicStats);
 
-  const arenaSpecialStats =
-    processArenas(arenaStandard.filter(o => o.specials));
-  console.log('arenaSpecialStats', arenaSpecialStats); // eslint-disable-line no-console
+  const arenaSpecialStats = processArenas(arenaStandard.filter((o) => o.specials));
+  // eslint-disable-next-line no-console
+  console.log('arenaSpecialStats', arenaSpecialStats);
 
   // makeArenaWins(typeWins);
   await makeArenaJoined(listOfWinners);
@@ -147,5 +144,5 @@ async function processCompleted(thisComplete) {
 
 export default async function crawler() {
   const thisComplete = await completed();
-  if (thisComplete.s) {processCompleted(thisComplete);}
+  if (thisComplete.s) { processCompleted(thisComplete); }
 }

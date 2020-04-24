@@ -1,17 +1,17 @@
 import './hasTitan.css';
-import {createDiv} from '../../../common/cElement';
-import {getElementById} from '../../../common/getElement';
+import createDiv from '../../../common/cElement/createDiv';
+import getElementById from '../../../common/getElement';
 import insertElement from '../../../common/insertElement';
 import toggleForce from '../../../common/toggleForce';
 import {
   buildTitanInfoTable,
   clearMemberRows,
-  titanTbl
+  titanTbl,
 } from './buildTitanInfoTable';
-import {clearTitanDiv, initVars} from './placeholders';
+import { clearTitanDiv, initVars } from './placeholders';
 
-export var titanDiv;
-export var titanId;
+export let titanDiv;
+export let titanId;
 
 export function hideTitanDiv() {
   titanId = null;
@@ -34,8 +34,8 @@ export function setupTitanDiv() {
   if (titanDiv) {
     toggleForce(titanDiv, false);
   } else {
-    var actCont = getElementById('actionContainer');
-    titanDiv = createDiv({className: 'fshActionBox titanInfo'});
+    const actCont = getElementById('actionContainer');
+    titanDiv = createDiv({ className: 'fshActionBox titanInfo' });
     initVars();
     buildTitanInfoTable();
     insertElement(titanDiv, titanTbl);

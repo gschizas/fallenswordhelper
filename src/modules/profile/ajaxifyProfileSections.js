@@ -1,12 +1,12 @@
 import getCustomUrlParameter from '../system/getCustomUrlParameter';
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import hideElement from '../common/hideElement';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import retryAjax from '../ajax/retryAjax';
 
-var bpc;
+let bpc;
 
 function bp() {
   if (!bpc) {
@@ -15,13 +15,13 @@ function bp() {
   return bpc;
 }
 
-var elementTests = [
-  function(target) {return target.tagName === 'A';},
-  function(target) {return Boolean(target.href);},
-  function(target) {return target.href.includes('togglesection');}
+const elementTests = [
+  (target) => target.tagName === 'A',
+  (target) => Boolean(target.href),
+  (target) => target.href.includes('togglesection'),
 ];
 
-function condition(target, fn) {return fn(target);}
+function condition(target, fn) { return fn(target); }
 
 function isSectionToggle(target) {
   return elementTests.every(partial(condition, target));
@@ -44,7 +44,7 @@ function toggleTarget(target) {
 }
 
 function toggleSection(target) {
-  var sectionId = Number(getCustomUrlParameter(target.href, 'section_id'));
+  const sectionId = Number(getCustomUrlParameter(target.href, 'section_id'));
   if (sectionId === 5) {
     toggleTarget(bp());
   } else {
@@ -53,7 +53,7 @@ function toggleSection(target) {
 }
 
 function testForSection(evt) {
-  var target = evt.target;
+  const { target } = evt;
   if (isSectionToggle(target)) {
     toggleSection(target);
     retryAjax(target.href);

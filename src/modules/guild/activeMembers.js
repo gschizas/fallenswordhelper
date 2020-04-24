@@ -2,26 +2,26 @@ import addCommas from '../system/addCommas';
 import contains from '../common/contains';
 import getArrayByTagName from '../common/getArrayByTagName';
 import lastActivityMins from '../common/lastActivityMins';
-import {lastActivityRE} from '../support/constants';
-import {pCC} from '../support/layout';
+import { lastActivityRE } from '../support/constants';
+import { pCC } from '../support/layout';
 import querySelectorArray from '../common/querySelectorArray';
 
-var ACTIVE = 0;
-var STAMINA = 1;
+const ACTIVE = 0;
+const STAMINA = 1;
 
-function countActive(prev, curr) {
-  var lastActivity = lastActivityRE.exec(curr.dataset.tipped);
-  var mins = lastActivityMins({
+function countActive(acc, curr) {
+  const lastActivity = lastActivityRE.exec(curr.dataset.tipped);
+  const mins = lastActivityMins({
     min: lastActivity[3],
     hour: lastActivity[2],
-    day: lastActivity[1]
+    day: lastActivity[1],
   });
   if (mins < 44640) {
-    prev[ACTIVE] += 1;
-    prev[STAMINA] +=
-      Number(/Stamina:<\/td><td>(\d+)/.exec(curr.dataset.tipped)[1]);
+    acc[ACTIVE] += 1;
+    acc[STAMINA]
+      += Number(/Stamina:<\/td><td>(\d+)/.exec(curr.dataset.tipped)[1]);
   }
-  return prev;
+  return acc;
 }
 
 function getActive(dots) {
@@ -29,13 +29,13 @@ function getActive(dots) {
 }
 
 export default function activeMembers() {
-  var members = getArrayByTagName('b', pCC).find(contains('Members'));
+  const members = getArrayByTagName('b', pCC).find(contains('Members'));
   if (members) {
-    var dots = querySelectorArray('#pCC a[data-tipped*="Last Activity"]');
-    var memberStats = getActive(dots);
+    const dots = querySelectorArray('#pCC a[data-tipped*="Last Activity"]');
+    const memberStats = getActive(dots);
     members.classList.add('tip-static');
-    members.dataset.tipped = 'Active: ' + memberStats[ACTIVE] + '/' +
-      dots.length + '<br>' +
-      'Stamina: ' + addCommas(memberStats[STAMINA]);
+    members.dataset.tipped = `Active: ${memberStats[ACTIVE]}/${
+      dots.length}<br>`
+      + `Stamina: ${addCommas(memberStats[STAMINA])}`;
   }
 }

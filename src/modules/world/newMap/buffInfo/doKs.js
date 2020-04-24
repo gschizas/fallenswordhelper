@@ -1,13 +1,14 @@
-import {createSpan} from '../../../common/cElement';
+import createSpan from '../../../common/cElement/createSpan';
 import insertElement from '../../../common/insertElement';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import setTextCommas from '../../../common/setTextCommas';
 import toggleForce from '../../../common/toggleForce';
 
-var ksDiv;
-var killStreakSpan;
+let ksDiv;
+let killStreakSpan;
 
 function initKsDiv(containerDiv) {
+  // eslint-disable-next-line prefer-destructuring
   ksDiv = containerDiv.children[1];
   setText('Kill Streak: ', ksDiv);
   killStreakSpan = createSpan();

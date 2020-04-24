@@ -1,13 +1,13 @@
-import {textSpan} from '../../../common/cElement';
+import textSpan from '../../../common/cElement/textSpan';
 
-export var current;
-export var kills;
-export var member;
-export var pctTotal;
-export var status;
-export var titanHp;
-export var total;
-export var yourGuild;
+export let current;
+export let kills;
+export let member;
+export let pctTotal;
+export let status;
+export let titanHp;
+export let total;
+export let yourGuild;
 
 function partOne() {
   current = textSpan('Current');

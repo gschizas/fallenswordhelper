@@ -11,19 +11,19 @@ import impWarning from './impWarning';
 import setValue from '../../../system/setValue';
 import titanKs from './titanKs';
 import {
-  def_playerBuffs,
-  def_playerUpdate,
-  def_teleport
+  defPlayerBuffs,
+  defPlayerUpdate,
+  defTeleport,
 } from '../../../support/constants';
-import {doCountdown, tpCooldown} from './tpCooldown';
+import { doCountdown, tpCooldown } from './tpCooldown';
 
-var dd;
-var dbl;
-var ca;
-var imp;
-var cd;
-var titanActive;
-var ks;
+let dd;
+let dbl;
+let ca;
+let imp;
+let cd;
+let titanActive;
+let ks;
 
 function initVars() {
   dd = getBuff('Death Dealer');
@@ -38,7 +38,7 @@ function initVars() {
 function updateBuffInfo() {
   impIconColour();
   initVars();
-  var containerDiv = buffInfoDiv([dd, dbl, ca, imp, cd, titanActive]);
+  const containerDiv = buffInfoDiv([dd, dbl, ca, imp, cd, titanActive]);
   if (containerDiv) {
     impWarning(containerDiv, imp, dd);
     doKs(containerDiv, dd, titanActive, ks);
@@ -55,8 +55,8 @@ function teleportEvent(e, data) {
 
 export function buffInfo() {
   updateBuffInfo();
-  $.subscribe(def_playerBuffs + ' ' + def_playerUpdate, updateBuffInfo);
-  $.subscribe(def_teleport, teleportEvent);
+  $.subscribe(`${defPlayerBuffs} ${defPlayerUpdate}`, updateBuffInfo);
+  $.subscribe(defTeleport, teleportEvent);
 }
 
 export function toggleBuffInfo() {

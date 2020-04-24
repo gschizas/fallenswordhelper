@@ -1,8 +1,8 @@
-import {keys} from '../common/keys';
+import keys from '../common/keys';
 
-var memberNamesAsStrings = [];
-var listOfAllies;
-var listOfEnemies;
+let memberNamesAsStrings = [];
+let listOfAllies;
+let listOfEnemies;
 
 function setColour(el, col) {
   el.classList.add(col);
@@ -21,7 +21,7 @@ function isAlly(playerName, playerElement) {
 }
 
 export function playerColor(colorPlayerName, playerName, playerElement) {
-  if (!colorPlayerName) {return false;}
+  if (!colorPlayerName) { return false; }
   if (memberNamesAsStrings.includes(playerName)) {
     setColour(playerElement, 'fshGreen');
     return true;

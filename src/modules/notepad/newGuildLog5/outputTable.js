@@ -1,12 +1,13 @@
-import {createTable} from '../../common/cElement';
-import {getElementById} from '../../common/getElement';
+import createTable from '../../common/cElement/createTable';
+import getElementById from '../../common/getElement';
 import insertElement from '../../common/insertElement';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
+import setText from '../../dom/setText';
 
-var outputTable;
+let outputTable;
 
 /* function analyseOutput() {
   Array.from(outputTable.rows).forEach(function(el, i) {
@@ -19,12 +20,12 @@ var outputTable;
       );
     }
   });
-}*/
+} */
 
 // https://github.com/julienetie/volve
 function debounce(callback, delay) {
-  var timeoutId;
-  return function() {
+  let timeoutId;
+  return function a() {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(callback, delay);
   };
@@ -32,29 +33,28 @@ function debounce(callback, delay) {
 
 function injectTable(myTable) {
   outputTable.replaceChild(myTable.children[0], outputTable.children[0]);
-  getElementById('fshOutput').textContent = 'Complete.';
+  setText('Complete.', getElementById('fshOutput'));
 }
 
 function makeRows(myTable, r) {
   insertHtmlBeforeEnd(myTable.tBodies[0], r);
-  var sepRow = myTable.insertRow(-1);
-  var sep = sepRow.insertCell(-1);
+  const sepRow = myTable.insertRow(-1);
+  const sep = sepRow.insertCell(-1);
   sep.className = 'divider';
   sep.colSpan = 3;
 }
 
 function drawTable(foo) {
+  const rectTop = outputTable.getBoundingClientRect().top;
+  const topHeight = Math.abs(Math.min(rectTop, 0));
+  const topRows = topHeight / 24;
+  const numOfVisibleRows = Math.ceil(document.documentElement.clientHeight / 24);
+  const remainingRows = foo.length - topRows - numOfVisibleRows;
 
-  var rectTop = outputTable.getBoundingClientRect().top;
-  var topHeight = Math.abs(Math.min(rectTop, 0));
-  var topRows = topHeight / 24;
-  var numOfVisibleRows = Math.ceil(document.documentElement.clientHeight / 24);
-  var remainingRows = foo.length - topRows - numOfVisibleRows;
+  const myTable = createTable({ innerHTML: '<tbody></tbody>' });
 
-  var myTable = createTable({innerHTML: '<tbody></tbody>'});
-
-  var topSpace = myTable.insertRow(-1);
-  topSpace.style.height = topHeight.toString() + 'px';
+  const topSpace = myTable.insertRow(-1);
+  topSpace.style.height = `${topHeight.toString()}px`;
   topSpace.insertCell(-1);
   topSpace.insertCell(-1);
   topSpace.insertCell(-1);
@@ -62,9 +62,9 @@ function drawTable(foo) {
   foo.slice(topRows, topRows + numOfVisibleRows - 1)
     .forEach(partial(makeRows, myTable));
 
-  var bottomPadding = myTable.insertRow(-1);
-  var remainingHeight = remainingRows * 24;
-  bottomPadding.style.height = remainingHeight.toString() + 'px';
+  const bottomPadding = myTable.insertRow(-1);
+  const remainingHeight = remainingRows * 24;
+  bottomPadding.style.height = `${remainingHeight.toString()}px`;
 
   getElementById('fshOutput').textContent = 'Inject table.';
   // add(3, injectTable, [myTable]);
@@ -75,7 +75,7 @@ export default function initTable(foo) {
   outputTable = createTable({
     className: 'width_full',
     id: 'fshInjectHere5',
-    innerHTML: '<tbody></tbody>'
+    innerHTML: '<tbody></tbody>',
   });
   insertElement(pCC, outputTable);
   drawTable(foo);

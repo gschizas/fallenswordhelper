@@ -1,8 +1,8 @@
-import {entries} from './entries';
+import entries from './entries';
 import makeFolderSpan from './makeFolderSpan';
 
 function wornSelector(needsWorn) {
-  if (needsWorn) {return makeFolderSpan('-2', 'Worn');}
+  if (needsWorn) { return makeFolderSpan('-2', 'Worn'); }
   return '';
 }
 
@@ -11,8 +11,8 @@ function folderSpan(ary) {
 }
 
 export default function makeFolderSpans(folders, needsWorn) {
-  return makeFolderSpan('0', 'All') +
-    wornSelector(needsWorn) +
-    makeFolderSpan('-1', 'Main') +
-    entries(folders).map(folderSpan).join('');
+  return makeFolderSpan('0', 'All')
+    + wornSelector(needsWorn)
+    + makeFolderSpan('-1', 'Main')
+    + entries(folders).map(folderSpan).join('');
 }

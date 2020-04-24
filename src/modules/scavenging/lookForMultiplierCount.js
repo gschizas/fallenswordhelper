@@ -1,33 +1,35 @@
-import {closestTable} from '../common/closest';
-import {createSpan} from '../common/cElement';
-import {getElementById} from '../common/getElement';
+import closestTable from '../common/closestTable';
+import createSpan from '../common/cElement/createSpan';
+import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import insertElement from '../common/insertElement';
 import intValue from '../system/intValue';
+import numberIsNaN from '../common/numberIsNaN';
 import on from '../common/on';
 import partial from '../common/partial';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function clearWidth(multCnt) {
-  var parentTable = closestTable(multCnt);
+  const parentTable = closestTable(multCnt);
   parentTable.removeAttribute('width');
 }
 
 function makeMaxTimes(multCnt) {
-  var maxTimes = createSpan();
+  const maxTimes = createSpan();
   insertElement(multCnt.parentNode, maxTimes);
   return maxTimes;
 }
 
 function updateMaxTimes(maxTimes, statbarGold, scoutGold) {
-  var myGold = intValue(getText(statbarGold));
-  var times = Math.floor(myGold / scoutGold).toString();
-  maxTimes.innerHTML = '&nbsp;&nbsp;Max: ' + times + ' times';
+  const myGold = intValue(getText(statbarGold));
+  const times = Math.floor(myGold / scoutGold).toString();
+  setInnerHtml(`&nbsp;&nbsp;Max: ${times} times`, maxTimes);
 }
 
 function redrawMaxTimes(maxTimes, statbarGold, gold) {
-  maxTimes.innerHTML = '';
-  var scoutGold = Number(gold.value);
-  if (!isNaN(scoutGold) && scoutGold !== 0) {
+  setInnerHtml('', maxTimes);
+  const scoutGold = Number(gold.value);
+  if (!numberIsNaN(scoutGold) && scoutGold !== 0) {
     updateMaxTimes(maxTimes, statbarGold, scoutGold);
   }
 }
@@ -39,7 +41,7 @@ function setMaxTimes(maxTimes, statbarGold, gold) {
 }
 
 function initMaxTimes(maxTimes, statbarGold, gold) {
-  var boundSet = partial(setMaxTimes, maxTimes, statbarGold, gold);
+  const boundSet = partial(setMaxTimes, maxTimes, statbarGold, gold);
   boundSet();
   on(gold, 'keyup', boundSet);
 }
@@ -51,6 +53,6 @@ function foundMultiplierCount(multCnt) {
 }
 
 export default function lookForMultiplierCount() {
-  var multCnt = getElementById('multiplier_count');
-  if (multCnt) {foundMultiplierCount(multCnt);}
+  const multCnt = getElementById('multiplier_count');
+  if (multCnt) { foundMultiplierCount(multCnt); }
 }

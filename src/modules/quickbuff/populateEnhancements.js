@@ -1,24 +1,25 @@
-import {getElementById} from '../common/getElement';
+import getElementById from '../common/getElement';
 import partial from '../common/partial';
+import setInnerHtml from '../dom/setInnerHtml';
 
 function thisName(name, enhancement) {
   return enhancement.name === name;
 }
 
 function thisEnhancementLevel(enhancements, name) {
-  var thisEnhancement = enhancements.find(partial(thisName, name));
-  return thisEnhancement && thisEnhancement.value || 0;
+  const thisEnhancement = enhancements.find(partial(thisName, name));
+  return (thisEnhancement && thisEnhancement.value) || 0;
 }
 
 function getEnhancement(enhancements, name, inject) {
-  var enhLevel = thisEnhancementLevel(enhancements, name);
-  var enhClass = 'fshLime';
-  if (enhLevel < 100) {enhClass = 'fshRed';}
-  inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
+  const enhLevel = thisEnhancementLevel(enhancements, name);
+  let enhClass = 'fshLime';
+  if (enhLevel < 100) { enhClass = 'fshRed'; }
+  setInnerHtml(`<span class="${enhClass}">${enhLevel}%</span>`, inject);
 }
 
 export default function populateEnhancements(responseText) {
-  var enh = responseText._enhancements;
+  const enh = responseText._enhancements;
   getEnhancement(enh, 'Sustain', getElementById('fshSus'));
   getEnhancement(enh, 'Fury Caster', getElementById('fshFur'));
 }

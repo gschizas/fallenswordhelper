@@ -1,55 +1,51 @@
-import {def_table} from '../support/constants';
+import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import injectQuestRow from './injectQuestRow';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import setValue from '../system/setValue';
 import updateUrl from './updateUrl';
 
-var normalLink;
-var seasonLink;
-var activeLink;
-var completeLink;
-var notStartedLink;
-var currentPageValue;
+let normalLink;
+let seasonLink;
+let activeLink;
+let completeLink;
+let notStartedLink;
+let currentPageValue;
 
-var currentLocationValue = [0, 3, 0, 1, 2];
+const currentLocationValue = [0, 3, 0, 1, 2];
 
-var savePrefKey = [
+const savePrefKey = [
   'lastNormalActiveQuestPage',
   'lastNormalCompletedQuestPage',
   'lastNormalNotStartedQuestPage',
   'lastSeasonalActiveQuestPage',
   'lastSeasonalCompletedQuestPage',
-  'lastSeasonalNotStartedQuestPage'
+  'lastSeasonalNotStartedQuestPage',
 ];
 
-function pageCombo(aLinks, prev, curr, i) {
+function pageCombo(aLinks, acc, curr, i) {
   if (aLinks[i].children[0].getAttribute('color') === '#FF0000') {
-    return prev + curr;
+    return acc + curr;
   }
-  return prev;
+  return acc;
 }
 
 function whereAmI() {
-  var aLinks = getElementsByTagName('a', pCC);
-  normalLink = aLinks[0];
-  seasonLink = aLinks[1];
-  activeLink = aLinks[2];
-  completeLink = aLinks[3];
-  notStartedLink = aLinks[4];
+  const aLinks = getElementsByTagName('a', pCC);
+  [normalLink, seasonLink, activeLink, completeLink, notStartedLink] = aLinks;
   currentPageValue = currentLocationValue.reduce(partial(pageCombo, aLinks), 0);
 }
 
 function storeLoc() {
-  var lastQBPage = location.search;
+  const lastQBPage = window.location.search;
   setValue('lastActiveQuestPage', lastQBPage);
   setValue(savePrefKey[currentPageValue], lastQBPage);
 }
 
-function getPref(pref) {return getValue(pref);}
+function getPref(pref) { return getValue(pref); }
 
 function getPrevVals() {
   return savePrefKey.map(getPref);
@@ -62,7 +58,7 @@ function oppositeType(lastPages) {
     lastPages[5],
     lastPages[0],
     lastPages[1],
-    lastPages[2]
+    lastPages[2],
   ];
 }
 
@@ -79,8 +75,8 @@ function subset(lastPages, i) {
 }
 
 function updateLinks() {
-  var lastPages = getPrevVals();
-  var oppositeTypeUrl = oppositeType(lastPages);
+  const lastPages = getPrevVals();
+  const oppositeTypeUrl = oppositeType(lastPages);
 
   if (currentPageValue < 3) {
     setLink(seasonLink, oppositeTypeUrl[currentPageValue]);
@@ -102,7 +98,7 @@ function storeQuestPage() {
 export default function injectQuestBookFull() {
   onclick(pCC, updateUrl);
   storeQuestPage();
-  var questTable = getElementsByTagName(def_table, pCC)[5];
-  if (!questTable) {return;}
+  const questTable = getElementsByTagName(defTable, pCC)[5];
+  if (!questTable) { return; }
   injectQuestRow(questTable);
 }

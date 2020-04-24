@@ -1,5 +1,7 @@
-import {GMSTORAGE_PATH} from '../support/constants';
-import partial from '../common/partial';
+import { GMSTORAGE_PATH } from '../support/constants';
+import isBoolean from '../common/isBoolean';
+import isNumber from '../common/isNumber';
+import isString from '../common/isString';
 
 function storItem(name, type, value) {
   if (Modernizr && Modernizr.localstorage) {
@@ -7,20 +9,20 @@ function storItem(name, type, value) {
   }
 }
 
-var cold = [
-  ['string', function(name, value) {storItem(name, 'S]', value);}],
+const cold = [
+  [isString, (name, value) => { storItem(name, 'S]', value); }],
   [
-    'number',
-    function(name, value) {
-      if (value.toString().indexOf('.') < 0) {storItem(name, 'N]', value);}
-    }
+    isNumber,
+    (name, value) => {
+      if (value.toString().indexOf('.') < 0) { storItem(name, 'N]', value); }
+    },
   ],
-  ['boolean', function(name, value) {storItem(name, 'B]', value);}]
+  [isBoolean, (name, value) => { storItem(name, 'B]', value); }],
 ];
 
-function typeStor(value, el) {return typeof value === el[0];}
-
 export default function setValue(name, value) {
-  var storType = cold.find(partial(typeStor, value));
-  if (storType) {storType[1](name, value);}
+  const storType = cold.find((pair) => pair[0](value));
+  if (storType) {
+    storType[1](name, value);
+  }
 }

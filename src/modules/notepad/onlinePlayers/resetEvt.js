@@ -1,6 +1,6 @@
 import defaults from '../../support/dataObj.json';
 import setValue from '../../system/setValue';
-import {tableDraw} from './doTable';
+import { tableDraw } from './doTable';
 
 export default function resetEvt(context) {
   setValue('onlinePlayerMinLvl', defaults.onlinePlayerMinLvl);

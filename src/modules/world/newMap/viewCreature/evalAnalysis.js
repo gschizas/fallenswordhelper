@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import partial from '../../../common/partial';
 
 function evalMiss(combat) {
@@ -8,58 +9,53 @@ function evalMiss(combat) {
 }
 
 function canIHit(combat) {
-  return combat.numberOfHitsRequired === '-' ||
-    combat.numberOfHitsRequired > combat.numberOfCreatureHitsTillDead;
+  return combat.numberOfHitsRequired === '-'
+    || combat.numberOfHitsRequired > combat.numberOfCreatureHitsTillDead;
 }
 
 function evalPlayerHits(combat) {
   if (combat.numberOfCreatureHitsTillDead === '-') {
     return combat.numberOfHitsRequired;
-  } else if (canIHit(combat)) {
+  } if (canIHit(combat)) {
     return '-';
   }
   return combat.numberOfHitsRequired;
 }
 
 function canCreatureHit(combat) {
-  return combat.numberOfCreatureHitsTillDead === '-' ||
-    combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired;
+  return combat.numberOfCreatureHitsTillDead === '-'
+    || combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired;
 }
 
 function evalCreatureHits(combat) {
   if (combat.numberOfHitsRequired === '-') {
     return combat.numberOfCreatureHitsTillDead;
-  } else if (canCreatureHit(combat)) {
+  } if (canCreatureHit(combat)) {
     return '-';
   }
   return combat.numberOfCreatureHitsTillDead;
 }
 
-var evalFightStatus = [
+const evalFightStatus = [
   [
-    function(combat) {
-      return combat.playerHits === '-' && combat.creatureHits === '-';
-    },
-    function() {return 'Unresolved';}
+    (combat) => combat.playerHits === '-' && combat.creatureHits === '-',
+    () => 'Unresolved',
+  ],
+  [(combat) => combat.playerHits === '-', () => 'Player dies'],
+  [
+    (combat) => combat.playerHits === 1,
+    (combat) => `Player 1 hits${evalMiss(combat)}`,
   ],
   [
-    function(combat) {return combat.playerHits === '-';},
-    function() {return 'Player dies';}
+    (combat) => combat.playerHits > 1,
+    (combat) => `Player > 1 hits${evalMiss(combat)}`,
   ],
-  [
-    function(combat) {return combat.playerHits === 1;},
-    function(combat) {return 'Player 1 hits' + evalMiss(combat);}
-  ],
-  [
-    function(combat) {return combat.playerHits > 1;},
-    function(combat) {return 'Player > 1 hits' + evalMiss(combat);}
-  ]
 ];
 
-function condition(combat, el) {return el[0](combat);}
+function condition(combat, el) { return el[0](combat); }
 
 function getStatus(combat) {
-  var status = evalFightStatus.find(partial(condition, combat));
+  const status = evalFightStatus.find(partial(condition, combat));
   if (status) {
     return status[1](combat);
   }

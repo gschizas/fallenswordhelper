@@ -3,20 +3,21 @@ import contactColour from './contactColour';
 import contains from '../../common/contains';
 import doHideBtn from './doHideBtn';
 import doHideBuffSelected from './doHideBuffSelected';
-import {getElementById} from '../../common/getElement';
-import {guildSubcmdUrl} from '../../support/constants';
+import getElementById from '../../common/getElement';
+import { guildSubcmdUrl } from '../../support/constants';
 import querySelectorArray from '../../common/querySelectorArray';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 function guildColour(el) {
   contactColour(el, {
     l1: 'fshGreen',
     l2: 'fshWhite',
-    l3: 'fshGrey'
+    l3: 'fshGrey',
   });
 }
 
 function makeLink(el) {
-  el.innerHTML = '<a href="' + guildSubcmdUrl + 'chat">Chat</a>';
+  setInnerHtml(`<a href="${guildSubcmdUrl}chat">Chat</a>`, el);
 }
 
 function updateChatLink() {
@@ -24,8 +25,8 @@ function updateChatLink() {
 }
 
 export default function addGuildInfoWidgets() {
-  var guildMembrList = getElementById('minibox-guild-members-list');
-  if (!guildMembrList) {return;} // list exists
+  const guildMembrList = getElementById('minibox-guild-members-list');
+  if (!guildMembrList) { return; } // list exists
   // hide guild info links
   doHideBtn(guildMembrList, 1);
   doHideBuffSelected(guildMembrList, 'guild-buff-check-on', 'guild-quick-buff');

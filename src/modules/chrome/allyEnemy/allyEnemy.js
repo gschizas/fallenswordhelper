@@ -2,10 +2,10 @@ import add from '../../support/task';
 import addContacts from './addContacts';
 import calf from '../../support/calf';
 import classHandler from '../../common/classHandler';
-import {createDiv} from '../../common/cElement';
+import createDiv from '../../common/cElement/createDiv';
 import fallback from '../../system/fallback';
 import getArrayByClassName from '../../common/getArrayByClassName';
-import {getElementById} from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getText from '../../common/getText';
 import insertElementAfterBegin from '../../common/insertElementAfterBegin';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -13,8 +13,9 @@ import jQueryNotPresent from '../../common/jQueryNotPresent';
 import myStats from '../../ajax/myStats';
 import onclick from '../../common/onclick';
 import openQuickBuffByName from '../../common/openQuickBuffByName';
-import {pCR} from '../../support/layout';
+import { pCR } from '../../support/layout';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import {
   enemyBuffCheckOff,
   enemyBuffCheckOn,
@@ -23,39 +24,39 @@ import {
   enemySendMessage,
 } from './constants';
 
-var noAlliesTests = [
-  function(allies, enemies) {return allies.length + enemies.length;},
-  function(allies, enemies) {
-    if (!calf.enableAllyOnlineList) {return enemies.length;}
+const noAlliesTests = [
+  (allies, enemies) => allies.length + enemies.length,
+  (allies, enemies) => {
+    if (!calf.enableAllyOnlineList) { return enemies.length; }
   },
-  function(allies) {
-    if (!calf.enableEnemyOnlineList) {return allies.length;}
-  }
+  (allies) => {
+    if (!calf.enableEnemyOnlineList) { return allies.length; }
+  },
 ];
 
-function condition(allies, enemies, e) {return e(allies, enemies) === 0;}
+function condition(allies, enemies, e) { return e(allies, enemies) === 0; }
 
 function noAllies(allies, enemies) {
   return noAlliesTests.every(partial(condition, allies, enemies));
 }
 
 function hazAllies(allies, enemies) {
-  var output = '';
+  let output = '';
   if (calf.enableAllyOnlineList) {
     output += addContacts(allies, true);
   }
   if (calf.enableEnemyOnlineList) {
     output += addContacts(enemies, false);
   }
-  var fshContactList = getElementById('fshContactList');
-  fshContactList.innerHTML = '';
+  const fshContactList = getElementById('fshContactList');
+  setInnerHtml('', fshContactList);
   insertHtmlBeforeEnd(fshContactList, output);
 }
 
 function injectAllyEnemyList(data) {
-  var allies = fallback(data._allies, []);
-  var enemies = fallback(data._enemies, []);
-  if (noAllies(allies, enemies)) {return;}
+  const allies = fallback(data._allies, []);
+  const enemies = fallback(data._enemies, []);
+  if (noAllies(allies, enemies)) { return; }
   hazAllies(allies, enemies);
 }
 
@@ -79,23 +80,24 @@ function buffPlayer(target) {
 }
 
 function selectedBuff() {
-  var buffBalls = getArrayByClassName(enemyBuffCheckOn,
+  const buffBalls = getArrayByClassName(enemyBuffCheckOn,
     getElementById('fshContactList'));
-  var sendstring = buffBalls.map(
-    function(el) {return getText(el.nextElementSibling);});
+  const sendstring = buffBalls.map(
+    (el) => getText(el.nextElementSibling),
+  );
   openQuickBuffByName(sendstring.join());
 }
 
-var classEvt = [
+const classEvt = [
   [enemyBuffCheckOn, toggleBuffSelected],
   [enemyBuffCheckOff, toggleBuffSelected],
   [enemySendMessage, msgPlayer],
   [enemyQuickbuff, buffPlayer],
-  [enemySelectedBuff, selectedBuff]
+  [enemySelectedBuff, selectedBuff],
 ];
 
 function eventHandler(evt) {
-  var target = evt.target;
+  const { target } = evt;
   if (target.id === 'fshResetEnemy') {
     resetList();
     return;
@@ -104,15 +106,15 @@ function eventHandler(evt) {
 }
 
 function makeDiv(data) {
-  var fshAllyEnemy = createDiv({
+  const fshAllyEnemy = createDiv({
     id: 'fshAllyEnemy',
-    className: 'minibox'
+    className: 'minibox',
   });
-  var wrapper = '<h3>Allies/Enemies</h3><div class="minibox-content">' +
-    '<h4>Online Contacts <span id="fshResetEnemy">Reset</span></h4>' +
-    '<div id="minibox-enemy"><ul id="fshContactList"></ul>';
+  let wrapper = '<h3>Allies/Enemies</h3><div class="minibox-content">'
+    + '<h4>Online Contacts <span id="fshResetEnemy">Reset</span></h4>'
+    + '<div id="minibox-enemy"><ul id="fshContactList"></ul>';
   if (!calf.hideBuffSelected) {
-    wrapper += '<ul class="' + enemySelectedBuff + '">Quick Buff Selected</ul>';
+    wrapper += `<ul class="${enemySelectedBuff}">Quick Buff Selected</ul>`;
   }
   wrapper += '</div></div>';
   insertHtmlBeforeEnd(fshAllyEnemy, wrapper);
@@ -128,6 +130,6 @@ function nextTick(data) {
 }
 
 export default function prepareAllyEnemyList() {
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   myStats(false).then(nextTick);
 }

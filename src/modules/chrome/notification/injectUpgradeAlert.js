@@ -3,7 +3,7 @@ import displayUpgradeMsg from './displayUpgradeMsg';
 import getValue from '../../system/getValue';
 import jQueryPresent from '../../common/jQueryPresent';
 import notGoldUpgradesPage from './notGoldUpgradesPage';
-import {now} from '../../support/now';
+import { now } from '../../support/now';
 import parseGoldUpgrades from './parseGoldUpgrades';
 import upgradesGold from '../../ajax/upgradesGold';
 
@@ -12,8 +12,8 @@ function asyncParse(data) {
 }
 
 function checkLastUpgrade() {
-  var lastUpgradeCheck = getValue('lastUpgradeCheck');
-  if (lastUpgradeCheck && now < lastUpgradeCheck) {return;}
+  const lastUpgradeCheck = getValue('lastUpgradeCheck');
+  if (lastUpgradeCheck && now < lastUpgradeCheck) { return; }
   upgradesGold().then(asyncParse);
 }
 

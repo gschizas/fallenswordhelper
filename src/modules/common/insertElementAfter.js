@@ -9,8 +9,8 @@ function refIsLast(newNode, referenceNode) {
 }
 
 export default function insertElementAfter(newNode, referenceNode) {
-  if (referenceNode instanceof Node &&
-      referenceNode.parentNode instanceof Node) {
+  if (referenceNode instanceof Node
+      && referenceNode.parentNode instanceof Node) {
     return refIsLast(newNode, referenceNode);
   }
 }

@@ -6,18 +6,18 @@ import injectComposeAlert from '../../composing/injectComposeAlert';
 import injectTempleAlert from '../notification/injectTempleAlert';
 import injectUpgradeAlert from '../notification/injectUpgradeAlert';
 import prepareAllyEnemyList from '../allyEnemy/allyEnemy';
-import {prepareBountyData} from '../activeWantedBounties/activeWantedBounties';
+import prepareBountyData from '../activeWantedBounties/activeWantedBounties';
 
 function callAllyEnemy() {
-  if (calf.enableAllyOnlineList ||
-      calf.enableEnemyOnlineList) {
+  if (calf.enableAllyOnlineList
+      || calf.enableEnemyOnlineList) {
     add(3, prepareAllyEnemyList);
   }
 }
 
 function callBounties() {
-  if (calf.enableWantedList ||
-      calf.enableActiveBountyList) {
+  if (calf.enableWantedList
+      || calf.enableActiveBountyList) {
     add(3, prepareBountyData);
   }
 }

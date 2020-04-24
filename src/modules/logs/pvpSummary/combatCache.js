@@ -2,31 +2,31 @@ import combatView from '../../ajax/combatView';
 import createDocument from '../../system/createDocument';
 import getText from '../../common/getText';
 import getTextTrim from '../../common/getTextTrim';
-import {keys} from '../../common/keys';
-import {nowSecs} from '../../support/now';
+import keys from '../../common/keys';
+import { nowSecs } from '../../support/now';
 import parseDateAsTimestamp from '../../system/parseDateAsTimestamp';
 import partial from '../../common/partial';
 import querySelectorAll from '../../common/querySelectorAll';
-import {sendEvent} from '../../support/fshGa';
+import { sendEvent } from '../../support/fshGa';
 import specials from '../../support/specials.json';
-import {get, set} from '../../system/idb';
+import { get, set } from '../../system/idb';
 
 export let combatCache = {};
 
 function currentCombatRecord(data, combatId, sevenDays) {
-  return combatId === 'lastCheck' || data[combatId].logTime &&
-    data[combatId].logTime > sevenDays;
+  return combatId === 'lastCheck'
+    || (data[combatId].logTime && data[combatId].logTime > sevenDays);
 }
 
-function keepRecent(data, sevenDays, prev, combatId) {
+function keepRecent(data, sevenDays, acc, combatId) {
   if (currentCombatRecord(data, combatId, sevenDays)) {
-    prev[combatId] = data[combatId];
+    acc[combatId] = data[combatId];
   }
-  return prev;
+  return acc;
 }
 
 function cleanCache(data) {
-  var sevenDays = nowSecs - 7 * 24 * 60 * 60;
+  const sevenDays = nowSecs - 7 * 24 * 60 * 60;
   combatCache = keys(data)
     .reduce(partial(keepRecent, data, sevenDays), {});
   combatCache.lastCheck = nowSecs;
@@ -34,7 +34,7 @@ function cleanCache(data) {
 }
 
 function prepareCache(data) {
-  var oneDay = nowSecs - 24 * 60 * 60;
+  const oneDay = nowSecs - 24 * 60 * 60;
   if (!data.lastCheck || data.lastCheck < oneDay) {
     cleanCache(data);
   } else {
@@ -43,7 +43,7 @@ function prepareCache(data) {
 }
 
 function checkCache(data) {
-  if (data) {prepareCache(data);}
+  if (data) { prepareCache(data); }
 }
 
 export function initCache() {
@@ -56,16 +56,17 @@ function inSpecialsList(el) {
 
 function check(specialHtml, el, i) {
   if (!inSpecialsList(el)) {
-    var label = JSON.stringify(el) + ' ' + getText(specialHtml[i]);
-    //#if _DEV  //  PvP missing Special
-    console.log(label); // eslint-disable-line no-console
-    //#endif
+    const label = `${JSON.stringify(el)} ${getText(specialHtml[i])}`;
+    // #if _DEV  //  PvP missing Special
+    // eslint-disable-next-line no-console
+    console.log(label);
+    // #endif
     sendEvent('Logs', 'Missing PvP Special', label);
   }
 }
 
 function whatsMissing(json, html) {
-  var specialHtml = querySelectorAll('#specialsDiv', createDocument(html));
+  const specialHtml = querySelectorAll('#specialsDiv', createDocument(html));
   json.r.specials.forEach(partial(check, specialHtml));
 }
 
@@ -77,8 +78,10 @@ function unknownSpecials(json) {
 
 export function cacheCombat(aRow, json) {
   if (json.s) {
-    json.logTime = parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000;
-    combatCache[json.r.id] = json;
+    combatCache[json.r.id] = {
+      ...json,
+      logTime: parseDateAsTimestamp(getTextTrim(aRow.cells[1])) / 1000,
+    };
     set('fsh_pvpCombat', combatCache);
     unknownSpecials(json);
   }

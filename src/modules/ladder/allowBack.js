@@ -1,6 +1,6 @@
 import dontPost from '../common/dontPost';
 import onclick from '../common/onclick';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import querySelector from '../common/querySelector';
 
 function updateUrl(e) {
@@ -9,7 +9,7 @@ function updateUrl(e) {
 }
 
 export default function allowBack() {
-  var submitButton = querySelector('input[type="submit"]', pCC);
+  const submitButton = querySelector('input[type="submit"]', pCC);
   if (submitButton) {
     onclick(submitButton, updateUrl);
   }

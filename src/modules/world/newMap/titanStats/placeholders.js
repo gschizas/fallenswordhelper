@@ -1,13 +1,14 @@
-import {createSpan} from '../../../common/cElement';
-import setText from '../../../common/setText';
+import createSpan from '../../../common/cElement/createSpan';
+import setInnerHtml from '../../../dom/setInnerHtml';
+import setText from '../../../dom/setText';
 
-export var currentHp;
-export var maxHp;
-export var guildKills;
-export var currentPct;
-export var totalPct;
-export var statusText;
-export var cooldownText;
+export let currentHp;
+export let maxHp;
+export let guildKills;
+export let currentPct;
+export let totalPct;
+export let statusText;
+export let cooldownText;
 
 export function initVars() {
   currentHp = createSpan();
@@ -25,6 +26,6 @@ export function clearTitanDiv() {
   setText('', guildKills);
   setText('', currentPct);
   setText('', totalPct);
-  statusText.innerHTML = '';
-  cooldownText.innerHTML = '';
+  setInnerHtml('', statusText);
+  setInnerHtml('', cooldownText);
 }

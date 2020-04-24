@@ -1,39 +1,31 @@
 import partial from '../../common/partial';
+import roundToString from '../../common/roundToString';
 
-var costFormatter = [
+const costFormatter = [
   [
-    function(total) {return total.fsp > 0;},
-    function(total) {
-      return String(Math.round(total.fsp * 100) / 100) + ' FSP';
-    }
+    (total) => total.fsp > 0,
+    (total) => `${roundToString(total.fsp, 2)} FSP`,
   ],
   [
-    function(total) {return total.fsp > 0 && total.k > 0;},
-    function() {return ' and ';}
+    (total) => total.fsp > 0 && total.k > 0,
+    () => ' and ',
   ],
   [
-    function(total) {return total.k > 0;},
-    function(total) {return total.k + ' k';}
+    (total) => total.k > 0,
+    (total) => `${total.k} k`,
   ],
   [
-    function(total) {
-      return total.stam > 0 && (total.fsp > 0 || total.k > 0);
-    },
-    function() {return ' and ';}
+    (total) => total.stam > 0 && (total.fsp > 0 || total.k > 0),
+    () => ' and ',
   ],
   [
-    function(total) {return total.stam > 0;},
-    function(total) {
-      return total.stam + ' Stam(' +
-        String(Math.round(total.stam / 25 * 10) / 10) + 'fsp)';
-    }
+    (total) => total.stam > 0,
+    (total) => `${total.stam} Stam(${roundToString(total.stam / 25, 1)}fsp)`,
   ],
   [
-    function(total) {return total.unknown > 0;},
-    function(total) {
-      return ' (' + total.unknown + ' buff(s) with unknown cost)';
-    }
-  ]
+    (total) => total.unknown > 0,
+    (total) => ` (${total.unknown} buff(s) with unknown cost)`,
+  ],
 ];
 
 function costElement(total, el) {

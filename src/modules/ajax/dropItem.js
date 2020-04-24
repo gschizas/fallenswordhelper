@@ -6,6 +6,6 @@ export default function dropItem(invIdList) {
     cmd: 'profile',
     subcmd: 'dodropitems',
     removeIndex: invIdList,
-    ajax: 1
+    ajax: 1,
   }).then(dialog);
 }

@@ -3,7 +3,7 @@ import groupViewStats from './groupViewStats';
 import retryAjax from './retryAjax';
 
 function parseGroupStats(html) {
-  var doc = createDocument(html);
+  const doc = createDocument(html);
   return groupViewStats(doc);
 }
 

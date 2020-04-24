@@ -1,7 +1,7 @@
 import add from '../../support/task';
 import calf from '../../support/calf';
 import gameHelpLink from './gameHelpLink';
-import {getElementById} from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import injectHelperMenu from '../helperMenu';
 import jsonParse from '../../common/jsonParse';
@@ -21,21 +21,21 @@ function prepareEnv() {
 }
 
 function findHcsData() {
-  var hcsHtml = getElementById('html');
+  const hcsHtml = getElementById('html');
   if (hcsHtml && hcsHtml.dataset) {
     return hcsHtml.dataset.hcs;
   }
 }
 
 function lookForUi(hcsData) {
-  var thisJson = jsonParse(hcsData);
+  const thisJson = jsonParse(hcsData);
   if (thisJson && thisJson['new-ui']) {
     prepareEnv();
   }
 }
 
 export default function lookForHcsData() {
-  var hcsData = findHcsData();
+  const hcsData = findHcsData();
   if (hcsData) {
     lookForUi(hcsData);
   }

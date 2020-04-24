@@ -1,34 +1,35 @@
 import './potReport.css';
-import {createDiv} from '../../../common/cElement';
+import createDiv from '../../../common/cElement/createDiv';
 import eventHandler5 from '../../../common/eventHandler5';
 import extend from '../../../common/extend';
 import fallback from '../../../system/fallback';
 import insertElement from '../../../common/insertElement';
 import isChecked from '../../../system/isChecked';
-import {keys} from '../../../common/keys';
+import keys from '../../../common/keys';
 import on from '../../../common/on';
 import onclick from '../../../common/onclick';
-import {pCC} from '../../../support/layout';
+import { pCC } from '../../../support/layout';
 import partial from '../../../common/partial';
 import selfIdIs from '../../../common/selfIdIs';
 import sortKeys from './sortKeys';
 import testRange from '../../../system/testRange';
-import {drawInventory, initInventory} from './drawInventory';
-import {drawMapping, initMapping} from './drawMapping';
-import {get, set} from '../../../system/idb';
+import { drawInventory, initInventory } from './drawInventory';
+import { drawMapping, initMapping } from './drawMapping';
+import { get, set } from '../../../system/idb';
 
-var storeMap = 'fsh_potMap';
-var defaultOpts = {
+const storeMap = 'fsh_potMap';
+const defaultOpts = {
   pottab1: false,
   pottab2: false,
   pottab3: false,
   myMap: {},
   minpoint: 12,
-  maxpoint: 20
+  maxpoint: 20,
 };
 
 function update(potOpts, pot) {
-  if (!potOpts.myMap[pot]) {potOpts.myMap[pot] = pot;}
+  // eslint-disable-next-line no-param-reassign
+  if (!potOpts.myMap[pot]) { potOpts.myMap[pot] = pot; }
 }
 
 function buildMap(potOpts, potObj) {
@@ -39,49 +40,49 @@ function buildMap(potOpts, potObj) {
 function createContainer(potOpts) {
   return createDiv({
     id: 'potReport',
-    innerHTML: '<input id="pottab1" type="checkbox"' +
-      isChecked(potOpts.pottab1) + '>' +
-      '<label for="pottab1">Composed Potion Inventory</label>' +
-      '<input id="pottab2" type="checkbox"' +
-      isChecked(potOpts.pottab2) + '>' +
-      '<label for="pottab2">Mapping</label>' +
-      '<input id="pottab3" type="checkbox"' +
-      isChecked(potOpts.pottab3) + '>' +
-      '<label for="pottab3">Thresholds</label>'
+    innerHTML: `<input id="pottab1" type="checkbox"${
+      isChecked(potOpts.pottab1)}>`
+      + '<label for="pottab1">Composed Potion Inventory</label>'
+      + `<input id="pottab2" type="checkbox"${
+        isChecked(potOpts.pottab2)}>`
+      + '<label for="pottab2">Mapping</label>'
+      + `<input id="pottab3" type="checkbox"${
+        isChecked(potOpts.pottab3)}>`
+      + '<label for="pottab3">Thresholds</label>',
   });
 }
 
 function createThresholds(potOpts, panels) {
-  var thresholds = createDiv({
+  const thresholds = createDiv({
     id: 'thresholds',
-    innerHTML: 'Min:' +
-      '<input id="minpoint" type="number" value="' +
-      potOpts.minpoint + '" min="0" max="999">' +
-      'Max:' +
-      '<input id="maxpoint" type="number" value="' +
-      potOpts.maxpoint + '" min="0" max="999">',
+    innerHTML: `Min:<input id="minpoint" type="number" value="${
+      potOpts.minpoint}" min="0" max="999">`
+      + `Max:<input id="maxpoint" type="number" value="${
+        potOpts.maxpoint}" min="0" max="999">`,
   });
   insertElement(panels, thresholds);
 }
 
 function onChange(potOpts, potObj, e) {
   if (e.target.tagName === 'SELECT') {
+    // eslint-disable-next-line no-param-reassign
     potOpts.myMap[e.target.name] = e.target.value;
     set(storeMap, potOpts);
     drawInventory(potOpts, potObj);
   }
 }
 
-function reMap(ignore, prev, pot) {
+function reMap(ignore, acc, pot) {
   if (ignore) {
-    prev[pot] = 'Ignore';
+    acc[pot] = 'Ignore';
   } else {
-    prev[pot] = pot;
+    acc[pot] = pot;
   }
-  return prev;
+  return acc;
 }
 
 function resetMap(potOpts, potObj, ignore) {
+  // eslint-disable-next-line no-param-reassign
   potOpts.myMap = keys(potObj).reduce(partial(reMap, ignore), {});
 }
 
@@ -92,10 +93,11 @@ function doReset(potOpts, potObj, ignore) {
   drawInventory(potOpts, potObj);
 }
 
-function toggleTab(target) {return /^pottab\d$/.test(target.id);}
+function toggleTab(target) { return /^pottab\d$/.test(target.id); }
 
 function saveState(potOpts, target) {
-  var option = target.id;
+  const option = target.id;
+  // eslint-disable-next-line no-param-reassign
   potOpts[option] = target.checked;
   set(storeMap, potOpts);
 }
@@ -104,14 +106,15 @@ function clickEvents(potOpts, potObj) {
   return [
     [selfIdIs('fshIgnoreAll'), partial(doReset, potOpts, potObj, true)],
     [selfIdIs('fshReset'), partial(doReset, potOpts, potObj, null)],
-    [toggleTab, partial(saveState, potOpts)]
+    [toggleTab, partial(saveState, potOpts)],
   ];
 }
 
 function onInput(potOpts, potObj, e) {
-  var target = e.target.id;
-  var maybeValue = testRange(e.target.value, 0, 999);
+  const target = e.target.id;
+  const maybeValue = testRange(e.target.value, 0, 999);
   if (maybeValue) {
+    // eslint-disable-next-line no-param-reassign
     potOpts[target] = maybeValue;
     set(storeMap, potOpts);
     drawInventory(potOpts, potObj);
@@ -125,14 +128,14 @@ function cellEventHandlers(potOpts, potObj, myCell) {
 }
 
 function injectCell(potOpts, potObj) {
-  var myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
+  const myCell = pCC.lastElementChild.insertRow(2).insertCell(-1);
   cellEventHandlers(potOpts, potObj, myCell);
   return myCell;
 }
 
 function buildPanels(potOpts, potObj) {
-  var container = createContainer(potOpts);
-  var panels = createDiv({id: 'panels'});
+  const container = createContainer(potOpts);
+  const panels = createDiv({ id: 'panels' });
   insertElement(container, panels);
   initInventory(potOpts, potObj, panels);
   initMapping(potOpts, panels);
@@ -141,7 +144,7 @@ function buildPanels(potOpts, potObj) {
 }
 
 function gotMap(potObj, data) {
-  var potOpts = extend({}, defaultOpts); // deep clone
+  const potOpts = extend({}, defaultOpts); // deep clone
   extend(potOpts, fallback(data, {}));
   potOpts.myMap = buildMap(potOpts, potObj);
   set(storeMap, potOpts);

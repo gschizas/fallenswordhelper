@@ -1,7 +1,7 @@
-export var act = 0;
-export var cur = 1;
-export var lvl = 2;
-export var max = 3;
-export var utc = 4;
-export var vl = 5;
-export var gxp = 6;
+export const act = 0;
+export const cur = 1;
+export const lvl = 2;
+export const max = 3;
+export const utc = 4;
+export const vl = 5;
+export const gxp = 6;

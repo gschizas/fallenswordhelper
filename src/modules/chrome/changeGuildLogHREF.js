@@ -4,24 +4,25 @@ import querySelectorArray from '../common/querySelectorArray';
 import {
   guildLogUrl,
   newGuildLogLoc,
-  newGuildLogUrl
+  newGuildLogUrl,
 } from '../support/constants';
 
 function testForGuildLogMsg(guildLogNode) {
-  return location.search !== newGuildLogLoc ||
-    guildLogNode.parentNode.id !== 'notification-guild-log';
+  return window.location.search !== newGuildLogLoc
+    || guildLogNode.parentNode.id !== 'notification-guild-log';
 }
 
 function hideGuildLogMsg(guildLogNode) {
   // hide the lhs box
-  if (testForGuildLogMsg(guildLogNode)) {return;}
-  var messageBox = guildLogNode.parentNode;
+  if (testForGuildLogMsg(guildLogNode)) { return; }
+  const messageBox = guildLogNode.parentNode;
   if (messageBox) {
     hideElement(messageBox);
   }
 }
 
-function updateHref(el) {el.href = newGuildLogUrl;}
+// eslint-disable-next-line no-param-reassign
+function updateHref(el) { el.href = newGuildLogUrl; }
 
 function gotGuildLogNodes(guildLogNodes) {
   guildLogNodes.forEach(updateHref);
@@ -29,8 +30,9 @@ function gotGuildLogNodes(guildLogNodes) {
 }
 
 export default function changeGuildLogHREF() {
-  if (!getValue('useNewGuildLog')) {return;}
-  var guildLogNodes = querySelectorArray(
-    '#pCL a[href="' + guildLogUrl + '"]');
-  if (guildLogNodes.length > 0) {gotGuildLogNodes(guildLogNodes);}
+  if (!getValue('useNewGuildLog')) { return; }
+  const guildLogNodes = querySelectorArray(
+    `#pCL a[href="${guildLogUrl}"]`,
+  );
+  if (guildLogNodes.length > 0) { gotGuildLogNodes(guildLogNodes); }
 }

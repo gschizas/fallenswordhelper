@@ -1,15 +1,16 @@
 import clickThis from '../common/clickThis';
-import {createTextArea} from '../common/cElement';
+import createTextArea from '../common/cElement/createTextArea';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import on from '../common/on';
-import {pCC} from '../support/layout';
+import { pCC } from '../support/layout';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
 
 function removeCrlf(fshTxt) {
+  // eslint-disable-next-line no-param-reassign
   fshTxt.value = fshTxt.value.replace(/\r\n|\n|\r/g, ' ');
 }
 
@@ -18,23 +19,23 @@ function setDoChat(el) {
 }
 
 function giveFormId() {
-  var formList = getElementsByTagName('form', pCC);
+  const formList = getElementsByTagName('form', pCC);
   formList[0].id = 'dochat';
   return formList[0];
 }
 
 function giveInputsId() {
-  var filteredList = getArrayByTagName('input', pCC).slice(0, 7);
+  const filteredList = getArrayByTagName('input', pCC).slice(0, 7);
   filteredList.forEach(setDoChat);
   return filteredList[5];
 }
 
 function rearrangeTable(btnMass) {
-  var theTable = querySelector('#pCC table table');
+  const theTable = querySelector('#pCC table table');
   theTable.rows[0].cells[0].remove();
-  var myCell = theTable.insertRow(-1).insertCell(-1);
+  const myCell = theTable.insertRow(-1).insertCell(-1);
   insertElement(myCell, btnMass);
-  var ourTd = theTable.rows[0].cells[0];
+  const ourTd = theTable.rows[0].cells[0];
   ourTd.rowSpan = 2;
   return ourTd;
 }
@@ -47,11 +48,11 @@ function keypress(sendBtn, evt) {
 }
 
 function makeTextArea(sendBtn) {
-  var fshTxt = createTextArea({
+  const fshTxt = createTextArea({
     cols: 72,
     name: 'msg',
     required: true,
-    rows: 2
+    rows: 2,
   });
   setDoChat(fshTxt);
   on(fshTxt, 'keypress', partial(keypress, sendBtn));
@@ -59,17 +60,17 @@ function makeTextArea(sendBtn) {
 }
 
 function hasTextEntry() {
-  var btnMass = querySelector('input[value="Send As Mass"]');
-  if (!btnMass) {return;}
-  var theForm = giveFormId();
-  var sendBtn = giveInputsId();
-  var ourTd = rearrangeTable(btnMass);
-  var fshTxt = makeTextArea(sendBtn);
+  const btnMass = querySelector('input[value="Send As Mass"]');
+  if (!btnMass) { return; }
+  const theForm = giveFormId();
+  const sendBtn = giveInputsId();
+  const ourTd = rearrangeTable(btnMass);
+  const fshTxt = makeTextArea(sendBtn);
   ourTd.replaceChild(fshTxt, ourTd.children[0]);
   on(theForm, 'submit', partial(removeCrlf, fshTxt));
 }
 
 export default function addChatTextArea() {
-  if (!getValue('enhanceChatTextEntry') || !pCC) {return;}
+  if (!getValue('enhanceChatTextEntry') || !pCC) { return; }
   hasTextEntry();
 }

@@ -1,67 +1,66 @@
 import './whosGotWhat.postcss';
 import allthen from '../../common/allthen';
-import {daGuildManage} from '../../_dataAccess/_dataAccess';
+import createButton from '../../common/cElement/createButton';
+import createDiv from '../../common/cElement/createDiv';
+import createInput from '../../common/cElement/createInput';
+import createSelect from '../../common/cElement/createSelect';
+import createTable from '../../common/cElement/createTable';
+import daGuildManage from '../../_dataAccess/daGuildManage';
 import displayChange from './displayChange';
 import guildStore from '../../_dataAccess/export/guildStore';
 import insertElement from '../../common/insertElement';
 import on from '../../common/on';
 import onclick from '../../common/onclick';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
 import prepareData from './prepareData';
-import {table as tableComponentFactory} from 'smart-table-vanilla';
-import {theadHtml} from './assets';
-import {
-  createButton,
-  createDiv,
-  createInput,
-  createSelect,
-  createTable
-} from '../../common/cElement';
+import setInnerHtml from '../../dom/setInnerHtml';
+import { table as tableComponentFactory } from 'smart-table-vanilla';
+import theadHtml from './assets';
 import {
   paginationDirective,
   searchDirective,
-  smartTable
+  smartTable,
 } from 'smart-table-core';
 
 function makeTable(el) {
   return insertElement(el, createTable({
     className: 'whosGotWhat',
-    innerHTML: theadHtml
+    innerHTML: theadHtml,
   }));
 }
 
 function makeSizer(el, table) {
   const thisSizer = createSelect({
-    innerHTML: '<option value="25" selected>25</option>' +
-      '<option value="50">50</option>' +
-      '<option value="0">All</option>'
+    innerHTML: '<option value="25" selected>25</option>'
+      + '<option value="50">50</option>'
+      + '<option value="0">All</option>',
   });
   const box = createDiv();
   insertElement(box, thisSizer);
   insertElement(el, box);
-  const slice = paginationDirective({table});
-  on(thisSizer, 'change', e => {
+  const slice = paginationDirective({ table });
+  on(thisSizer, 'change', (e) => {
     slice.changePageSize(Number(e.target.value));
   });
 }
 
 function makeSearch(top, table) {
-  const wrapper = createDiv({className: 'fsh-search-wrapper'});
+  const wrapper = createDiv({ className: 'fsh-search-wrapper' });
   const input = createInput({
     dataset: {
       stSearch: 'name, rank_name',
-      stSearchFlags: 'i'
+      stSearchFlags: 'i',
     },
     placeholder: 'Enter search term',
     required: true,
-    type: 'text'
+    type: 'text',
   });
   const button = createButton({
     innerHTML: '&times;',
-    type: 'button'
+    type: 'button',
   });
-  const directive = searchDirective({table});
+  const directive = searchDirective({ table });
   onclick(button, () => {
     input.value = '';
     input.focus();
@@ -75,33 +74,33 @@ function makeSearch(top, table) {
 function makeSummary(bottom, table, data) {
   const summaryDiv = createDiv();
   insertElement(bottom, summaryDiv);
-  const slice = paginationDirective({table});
-  slice.onSummaryChange(({page, size, filteredCount}) => {
+  const slice = paginationDirective({ table });
+  slice.onSummaryChange(({ page, size, filteredCount }) => {
     let filterModifier = 0;
-    if (filteredCount) {filterModifier = 1;}
-    summaryDiv.innerHTML = `showing ${
+    if (filteredCount) { filterModifier = 1; }
+    setInnerHtml(`showing ${
       (page - 1) * size + filterModifier} - ${
       Math.min(filteredCount, page * size)} of ${
-      filteredCount} (${data.length} total)`;
+      filteredCount} (${data.length} total)`, summaryDiv);
   });
 }
 
 function makePager(bottom, table) {
   const pagerDiv = createDiv();
-  const firstBtn = createButton({innerHTML: '«'});
-  const prevBtn = createButton({innerHTML: '‹'});
-  const pageBtn = createButton({disabled: true, innerHTML: '1'});
-  const nextBtn = createButton({innerHTML: '›'});
-  const lastBtn = createButton({innerHTML: '»'});
+  const firstBtn = createButton({ innerHTML: '«' });
+  const prevBtn = createButton({ innerHTML: '‹' });
+  const pageBtn = createButton({ disabled: true, innerHTML: '1' });
+  const nextBtn = createButton({ innerHTML: '›' });
+  const lastBtn = createButton({ innerHTML: '»' });
   let lastPage = 1;
 
-  const pager = paginationDirective({table});
-  pager.onSummaryChange(({page, size, filteredCount}) => {
+  const pager = paginationDirective({ table });
+  pager.onSummaryChange(({ page, size, filteredCount }) => {
     firstBtn.disabled = !pager.isPreviousPageEnabled();
     prevBtn.disabled = !pager.isPreviousPageEnabled();
     nextBtn.disabled = !pager.isNextPageEnabled();
     lastBtn.disabled = !pager.isNextPageEnabled();
-    pageBtn.innerHTML = page;
+    setInnerHtml(page, pageBtn);
     lastPage = Math.ceil(filteredCount / size);
   });
 
@@ -122,31 +121,31 @@ function showMe(dataAry) {
   // console.log(dataAry);
   const data = prepareData(dataAry);
   // console.log('data', data);
-  pCC.innerHTML = '';
+  setInnerHtml('', pCC);
   const el = insertElement(pCC, createDiv());
-  const top = insertElement(el, createDiv({className: 'st-top-container'}));
+  const top = insertElement(el, createDiv({ className: 'st-top-container' }));
   const tableContainer = insertElement(el, createDiv());
   const domTable = makeTable(tableContainer);
   const bottom = insertElement(el,
-    createDiv({className: 'st-bottom-container'}));
+    createDiv({ className: 'st-bottom-container' }));
   const tableState = {
-    sort: {pointer: 'slot', direction: 'asc'},
-    slice: {page: 1, size: 25},
+    sort: { pointer: 'slot', direction: 'asc' },
+    slice: { page: 1, size: 25 },
     filter: {},
-    search: {}
+    search: {},
   };
-  const table = smartTable({data, tableState});
+  const table = smartTable({ data, tableState });
   makeSizer(top, table);
   makeSearch(top, table);
   makeSummary(bottom, table, data);
   makePager(bottom, table);
-  const tableComponent = tableComponentFactory({el, table});
+  const tableComponent = tableComponentFactory({ el, table });
   tableComponent.onDisplayChange(partial(displayChange, domTable, table));
   tableComponent.exec();
   // slice.selectNextPage();
 }
 
 export default function whosGotWhat() {
-  pCC.innerHTML = 'Loading...';
+  setInnerHtml('Loading...', pCC);
   allthen([guildStore(), daGuildManage()], showMe);
 }

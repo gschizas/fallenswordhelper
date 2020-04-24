@@ -1,36 +1,37 @@
 import buildHtml from './buildHtml';
 import calf from '../../support/calf';
 import doSortParams from '../../common/doSortParams';
-import {getElementById} from '../../common/getElement';
+import getElementById from '../../common/getElement';
 import jQueryPresent from '../../common/jQueryPresent';
-import {keys} from '../../common/keys';
+import keys from '../../common/keys';
 import numberSort from '../../system/numberSort';
 import onclick from '../../common/onclick';
-import {pCC} from '../../support/layout';
+import { pCC } from '../../support/layout';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import stringSort from '../../system/stringSort';
-import {get, set} from '../../system/idb';
+import { get, set } from '../../system/idb';
 
-var content;
-var monsterAry;
+let content;
+let monsterAry;
 
 function noMobs() {
-  content.innerHTML = '<span>No monster information! ' +
-    'Please enable entity log and travel a bit to see the world</span>';
+  setInnerHtml('<span>No monster information! Please enable entity log '
+    + 'and travel a bit to see the world</span>', content);
 }
 
 function makeRow(el) {
-  return '<tr>' +
-    '<td class="fshCenter">' + el.image + '</td>' +
-    '<td>' + el.name + '</td>' +
-    '<td class="fshCenter">' + el.creature_class + '</td>' +
-    '<td class="fshCenter">' + el.level + '</td>' +
-    '<td class="fshCenter">' + el.attack + '</td>' +
-    '<td class="fshCenter">' + el.defense + '</td>' +
-    '<td class="fshCenter">' + el.armor + '</td>' +
-    '<td class="fshCenter">' + el.damage + '</td>' +
-    '<td class="fshCenter">' + el.hp + '</td>' +
-    '<td class="fshCenter">' + el.enhancements + '</td></tr>';
+  return '<tr>'
+    + `<td class="fshCenter">${el.image}</td>`
+    + `<td>${el.name}</td>`
+    + `<td class="fshCenter">${el.creature_class}</td>`
+    + `<td class="fshCenter">${el.level}</td>`
+    + `<td class="fshCenter">${el.attack}</td>`
+    + `<td class="fshCenter">${el.defense}</td>`
+    + `<td class="fshCenter">${el.armor}</td>`
+    + `<td class="fshCenter">${el.damage}</td>`
+    + `<td class="fshCenter">${el.hp}</td>`
+    + `<td class="fshCenter">${el.enhancements}</td></tr>`;
 }
 
 function mobRows() {
@@ -38,9 +39,9 @@ function mobRows() {
 }
 
 function drawMobs() {
-  var inject = getElementById('entityTableOutput');
-  if (!monsterAry || !inject) {return;}
-  inject.innerHTML = mobRows();
+  const inject = getElementById('entityTableOutput');
+  if (!monsterAry || !inject) { return; }
+  setInnerHtml(mobRows(), inject);
 }
 
 function findSortType(target) {
@@ -57,18 +58,18 @@ function sortMonsterAry(sortType) {
 
 function sortCol(target) {
   doSortParams(target);
-  var sortType = findSortType(target);
+  const sortType = findSortType(target);
   sortMonsterAry(sortType);
   drawMobs();
 }
 
 function isSortHeader(target) {
-  return target.classList.contains('fshLink') &&
-    target.hasAttribute('sortkey');
+  return target.classList.contains('fshLink')
+    && target.hasAttribute('sortkey');
 }
 
 function doHandlers(evt) {
-  var target = evt.target;
+  const { target } = evt;
   if (target.id === 'clearEntityLog') {
     set('fsh_monsterLog', '');
     noMobs();
@@ -80,24 +81,24 @@ function doHandlers(evt) {
 }
 
 function drawTable() {
-  if (!monsterAry) {return;}
-  content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" ' +
-    'width="100%"><tr class="fshBlack fshWhite">' +
-    '<td width="90%" class="fshCenter"><b>Entity Information</b></td>' +
-    '<td width="10%">[<span id="clearEntityLog" class="fshPoint">Clear' +
-    '</span>]</td></tr></table>' +
-    '<table cellspacing="1" cellpadding="2" border="0"><thead>' +
-    '<tr class="fshVerySoftOrange">' +
-    '<th width="25%" class="fshLink" sortkey="name" colspan="2">Entity</th>' +
-    '<th class="fshCenter fshLink" sortkey="creature_class">Class</th>' +
-    '<th class="fshCenter fshLink" sortkey="level" sorttype="number">Lvl</th>' +
-    '<th class="fshCenter">Attack</th>' +
-    '<th class="fshCenter">Defence</th>' +
-    '<th class="fshCenter">Armor</th>' +
-    '<th class="fshCenter">Damage</th>' +
-    '<th class="fshCenter">HP</th>' +
-    '<th class="fshCenter">Enhancements</th>' +
-    '</tr></thead><tbody id="entityTableOutput"></tbody></table>';
+  if (!monsterAry) { return; }
+  setInnerHtml('<table cellspacing="0" cellpadding="0" border="0" '
+    + 'width="100%"><tr class="fshBlack fshWhite">'
+    + '<td width="90%" class="fshCenter"><b>Entity Information</b></td>'
+    + '<td width="10%">[<span id="clearEntityLog" class="fshPoint">Clear'
+    + '</span>]</td></tr></table>'
+    + '<table cellspacing="1" cellpadding="2" border="0"><thead>'
+    + '<tr class="fshVerySoftOrange">'
+    + '<th width="25%" class="fshLink" sortkey="name" colspan="2">Entity</th>'
+    + '<th class="fshCenter fshLink" sortkey="creature_class">Class</th>'
+    + '<th class="fshCenter fshLink" sortkey="level" sorttype="number">Lvl</th>'
+    + '<th class="fshCenter">Attack</th>'
+    + '<th class="fshCenter">Defence</th>'
+    + '<th class="fshCenter">Armor</th>'
+    + '<th class="fshCenter">Damage</th>'
+    + '<th class="fshCenter">HP</th>'
+    + '<th class="fshCenter">Enhancements</th>'
+    + '</tr></thead><tbody id="entityTableOutput"></tbody></table>', content);
   onclick(content, doHandlers);
 }
 
@@ -120,10 +121,10 @@ function prepAry(data) {
 
 function haveJquery(injector) { // jQuery.min
   content = injector || pCC;
-  if (!content) {return;}
+  if (!content) { return; }
   get('fsh_monsterLog').then(prepAry);
 }
 
 export default function injectMonsterLog(injector) {
-  if (jQueryPresent()) {haveJquery(injector);}
+  if (jQueryPresent()) { haveJquery(injector); }
 }

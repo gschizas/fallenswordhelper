@@ -1,9 +1,10 @@
 import anchorButton from './anchorButton';
-import {injectAuctionSearch} from '../../notepad/lists/lists';
-import injectOnlinePlayers from
-  '../../notepad/onlinePlayers/injectOnlinePlayers';
-import {injectFindBuffs, injectFindOther} from
-  '../../notepad/findBuffs/findBuffs';
+import {
+  injectAuctionSearch,
+  injectFindBuffs,
+  injectFindOther,
+  injectOnlinePlayers,
+} from '../pageSwitcher/loader';
 
 export default function actionButtons() {
   anchorButton('2', 'AH Quick Search', injectAuctionSearch,

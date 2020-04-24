@@ -1,4 +1,4 @@
-import {closestForm} from './common/closest';
+import closestForm from './common/closestForm';
 import dontPost from './common/dontPost';
 import jQueryNotPresent from './common/jQueryNotPresent';
 import onclick from './common/onclick';
@@ -8,9 +8,9 @@ import {
   gvgLowerLevel,
   gvgUpperLevel,
   pvpLowerLevel,
-  pvpUpperLevel
+  pvpUpperLevel,
 } from './common/levelHighlight';
-import {playerIDRE, searchPlayerUrl} from './support/constants';
+import { playerIDRE, searchPlayerUrl } from './support/constants';
 
 function updateUrl(evt) {
   evt.preventDefault();
@@ -22,18 +22,18 @@ function allowBack(findPlayerButton) {
 }
 
 function searchUrl(min, max, guild) {
-  return searchPlayerUrl +
-    '&search_level_min=' + min +
-    '&search_level_max=' + max +
-    '&search_in_guild=' + guild;
+  return `${searchPlayerUrl
+  }&search_level_min=${min
+  }&search_level_max=${max
+  }&search_in_guild=${guild}`;
 }
 
 function shortcuts() {
-  return '&nbsp;<a class="fshBlue" href="' +
-    searchUrl(pvpLowerLevel, pvpUpperLevel, '-1') +
-    '">Get PvP targets</a>&nbsp;<a class="fshBlue" href="' +
-    searchUrl(gvgLowerLevel, gvgUpperLevel, '1') +
-    '">Get GvG targets</a>';
+  return `&nbsp;<a class="fshBlue" href="${
+    searchUrl(pvpLowerLevel, pvpUpperLevel, '-1')
+  }">Get PvP targets</a>&nbsp;<a class="fshBlue" href="${
+    searchUrl(gvgLowerLevel, gvgUpperLevel, '1')
+  }">Get GvG targets</a>`;
 }
 
 function doShortcuts(findPlayerButton) {
@@ -41,14 +41,14 @@ function doShortcuts(findPlayerButton) {
 }
 
 function doFindPlayer() {
-  var findPlayerButton = $('input[value="Find Player"]');
+  const findPlayerButton = $('input[value="Find Player"]');
   allowBack(findPlayerButton[0]);
   doShortcuts(findPlayerButton);
 }
 
 function addBuffLinks(i, e) {
-  var id = playerIDRE.exec($(e).attr('href'));
-  $(e).after(' <a class="fshBf" ' + quickBuffHref(id[1]) + '>[b]</a>');
+  const id = playerIDRE.exec($(e).attr('href'));
+  $(e).after(` <a class="fshBf" ${quickBuffHref(id[1])}>[b]</a>`);
 }
 
 function doBuffLinks() {
@@ -57,7 +57,7 @@ function doBuffLinks() {
 }
 
 export default function injectFindPlayer() { // Bad jQuery
-  if (jQueryNotPresent()) {return;}
+  if (jQueryNotPresent()) { return; }
   calculateBoundaries();
   doFindPlayer();
   doBuffLinks();

@@ -1,13 +1,13 @@
 import calf from '../support/calf';
-import {daComposing} from '../_dataAccess/_dataAccess';
+import daComposing from '../_dataAccess/daComposing';
 import displayComposeMsg from './displayComposeMsg';
 import getValue from '../system/getValue';
 import jQueryPresent from '../common/jQueryPresent';
-import {now} from '../support/now';
+import { now } from '../support/now';
 import setValue from '../system/setValue';
 import {
-  def_lastComposeCheck,
-  def_needToCompose
+  defLastComposeCheck,
+  defNeedToCompose,
 } from '../support/constants';
 
 function getTime(pot) {
@@ -16,14 +16,14 @@ function getTime(pot) {
 
 function displayAlert() {
   displayComposeMsg();
-  setValue(def_needToCompose, true);
+  setValue(defNeedToCompose, true);
 }
 
 function potsBrewing(potions) {
-  var minTimeInSecs = Math.min.apply(null, potions.map(getTime));
+  const minTimeInSecs = Math.min.apply(null, potions.map(getTime));
   if (minTimeInSecs > 0) {
-    setValue(def_needToCompose, false);
-    setValue(def_lastComposeCheck, now + minTimeInSecs * 1000);
+    setValue(defNeedToCompose, false);
+    setValue(defLastComposeCheck, now + minTimeInSecs * 1000);
   } else {
     displayAlert();
   }
@@ -38,17 +38,17 @@ function parseComposingApp(result) {
 }
 
 function checkAppResponse(json) {
-  if (json.s) {parseComposingApp(json.r);}
+  if (json.s) { parseComposingApp(json.r); }
 }
 
 function checkLastCompose() { // jQuery.min
-  var lastComposeCheck = getValue(def_lastComposeCheck);
-  if (lastComposeCheck && now < lastComposeCheck) {return;}
+  const lastComposeCheck = getValue(defLastComposeCheck);
+  if (lastComposeCheck && now < lastComposeCheck) { return; }
   daComposing().then(checkAppResponse);
 }
 
 function composeAlert() {
-  if (getValue(def_needToCompose)) {
+  if (getValue(defNeedToCompose)) {
     displayComposeMsg();
   } else {
     checkLastCompose();
@@ -56,5 +56,5 @@ function composeAlert() {
 }
 
 export default function injectComposeAlert() {
-  if (calf.cmd !== 'composing' && jQueryPresent()) {composeAlert();}
+  if (calf.cmd !== 'composing' && jQueryPresent()) { composeAlert(); }
 }

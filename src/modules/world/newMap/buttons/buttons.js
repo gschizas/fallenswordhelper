@@ -1,7 +1,9 @@
 import calf from '../../../support/calf';
+import createButton from '../../../common/cElement/createButton';
+import createDiv from '../../../common/cElement/createDiv';
 import eventHandler5 from '../../../common/eventHandler5';
 import fixTeleport from './fixTeleport';
-import {getElementById} from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import getValue from '../../../system/getValue';
 import hideQTip from '../../../common/hideQTip';
 import insertElement from '../../../common/insertElement';
@@ -11,30 +13,26 @@ import on from '../../../common/on';
 import onclick from '../../../common/onclick';
 import openQuickBuffByName from '../../../common/openQuickBuffByName';
 import playerName from '../../../common/playerName';
-import setText from '../../../common/setText';
+import setText from '../../../dom/setText';
 import setValue from '../../../system/setValue';
+import textSpan from '../../../common/cElement/textSpan';
 import {
-  createButton,
-  createDiv,
-  textSpan
-} from '../../../common/cElement';
-import {
-  def_playerLevel,
-  def_realmUpdate,
-  def_subcmd,
+  defPlayerLevel,
+  defRealmUpdate,
+  defSubcmd,
   guideUrl,
-  worldUrl
+  worldUrl,
 } from '../../../support/constants';
 
-var buttonContainer;
-var realmLvl;
-var yourLvl;
-var formGroup;
-var quickBuff;
-var realmMap;
-var ufsgMap;
-var soundCheck;
-var huntCheck;
+let buttonContainer;
+let realmLvl;
+let yourLvl;
+let formGroup;
+let quickBuff;
+let realmMap;
+let ufsgMap;
+let soundCheck;
+let huntCheck;
 
 function doFormGroup(target) {
   hideQTip(target);
@@ -46,14 +44,14 @@ function openQuickBuff() {
 }
 
 function openRealmMap() {
-  window.open(worldUrl + def_subcmd + 'map', 'fsMap');
+  window.open(`${worldUrl + defSubcmd}map`, 'fsMap');
 }
 
 function openUfsgMap() {
-  var gameRealm = GameData.realm();
+  const gameRealm = GameData.realm();
   window.open(
-    guideUrl + 'realms' + def_subcmd + 'view&realm_id=' + gameRealm.id,
-    'mapUfsg'
+    `${guideUrl}realms${defSubcmd}view&realm_id=${gameRealm.id}`,
+    'mapUfsg',
   );
 }
 
@@ -70,40 +68,40 @@ function toggleHuntMode() {
 function makeButtonContainer() {
   return createDiv({
     className: 'fshCurveContainer',
-    id: 'fshWorldButtonContainer'
+    id: 'fshWorldButtonContainer',
   });
 }
 
 function exists(val) {
-  if (val) {return val.toString();}
+  if (val) { return val.toString(); }
   return '?';
 }
 
 function minLvl() {
-  var topDiv = createDiv({textContent: 'Min Lvl: '});
+  const topDiv = createDiv({ textContent: 'Min Lvl: ' });
   realmLvl = textSpan(exists(GameData.realm().minlevel));
   insertElement(topDiv, realmLvl);
   return topDiv;
 }
 
 function yrLvl() {
-  var btmDiv = createDiv({textContent: 'Your Lvl: '});
+  const btmDiv = createDiv({ textContent: 'Your Lvl: ' });
   yourLvl = textSpan(exists(GameData.player().level));
   insertElement(btmDiv, yourLvl);
   return btmDiv;
 }
 
 function doLevels(worldName) {
-  var lvlDiv = createDiv({className: 'fshFsty'});
+  const lvlDiv = createDiv({ className: 'fshFsty' });
   insertElement(lvlDiv, minLvl());
   insertElement(lvlDiv, yrLvl());
   insertElement(worldName, lvlDiv);
 }
 
 function doBtn(className, tip, worldName) {
-  var btn = createButton({
-    className: 'fshCurveEle fshCurveBtn fshPoint tip-static ' + className,
-    dataset: {tipped: tip}
+  const btn = createButton({
+    className: `fshCurveEle fshCurveBtn fshPoint tip-static ${className}`,
+    dataset: { tipped: tip },
   });
   insertElement(worldName, btn);
   return btn;
@@ -119,7 +117,7 @@ function showQuickLinks(worldName) {
 
 function showSpeakerOnWorld(worldName) {
   if (getValue('showSpeakerOnWorld')) {
-    var msgSounds = getValue('playNewMessageSound');
+    const msgSounds = getValue('playNewMessageSound');
     soundCheck = makeToggleBtn({
       prefVal: msgSounds,
       checkId: 'fshSoundCheck',
@@ -127,13 +125,13 @@ function showSpeakerOnWorld(worldName) {
       onTip: 'Turn Off Sound when you have a new log message',
       offClass: 'soundOff',
       offTip: 'Turn On Sound when you have a new log message',
-      worldName: worldName
+      worldName,
     });
   }
 }
 
 function showHuntMode(worldName) {
-  var inHuntMode = calf.huntingMode;
+  const inHuntMode = calf.huntingMode;
   huntCheck = makeToggleBtn({
     prefVal: inHuntMode,
     checkId: 'fshHuntCheck',
@@ -141,7 +139,7 @@ function showHuntMode(worldName) {
     onTip: 'Hunting mode is ON',
     offClass: 'huntOff',
     offTip: 'Hunting mode is OFF',
-    worldName: worldName
+    worldName,
   });
 }
 
@@ -151,16 +149,16 @@ function addButtons() {
   showHuntMode(buttonContainer);
 }
 
-var changeHdl = [
-  [function(target) {return target === soundCheck;}, toggleSound],
-  [function(target) {return target === huntCheck;}, toggleHuntMode]
+const changeHdl = [
+  [(target) => target === soundCheck, toggleSound],
+  [(target) => target === huntCheck, toggleHuntMode],
 ];
 
-var clickHdl = [
-  [function(target) {return target === formGroup;}, doFormGroup],
-  [function(target) {return target === quickBuff;}, openQuickBuff],
-  [function(target) {return target === realmMap;}, openRealmMap],
-  [function(target) {return target === ufsgMap;}, openUfsgMap]
+const clickHdl = [
+  [(target) => target === formGroup, doFormGroup],
+  [(target) => target === quickBuff, openQuickBuff],
+  [(target) => target === realmMap, openRealmMap],
+  [(target) => target === ufsgMap, openUfsgMap],
 ];
 
 function setupHandlers() {
@@ -192,6 +190,6 @@ function levelStats(e, data) {
 
 export default function initButtons() {
   injectButtons();
-  $.subscribe(def_realmUpdate, realmUpdate);
-  $.subscribe(def_playerLevel, levelStats);
+  $.subscribe(defRealmUpdate, realmUpdate);
+  $.subscribe(defPlayerLevel, levelStats);
 }

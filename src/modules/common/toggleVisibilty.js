@@ -1,10 +1,10 @@
-import {getElementById} from './getElement';
+import getElementById from './getElement';
 import setValue from '../system/setValue';
 
 export default function toggleVisibilty(evt) {
-  var anItemId = evt.target.dataset.linkto;
-  var anItem = getElementById(anItemId);
-  var currentVisibility = anItem.classList.contains('fshHide');
+  const anItemId = evt.target.dataset.linkto;
+  const anItem = getElementById(anItemId);
+  const currentVisibility = anItem.classList.contains('fshHide');
   anItem.classList.toggle('fshHide');
   if (currentVisibility) {
     setValue(anItemId, '');

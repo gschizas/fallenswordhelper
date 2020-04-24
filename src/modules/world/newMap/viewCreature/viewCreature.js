@@ -1,7 +1,10 @@
+/* eslint-disable no-param-reassign */
 import './viewCreature.css';
 import calf from '../../../support/calf';
-import {createDiv} from '../../../common/cElement';
-import {def_viewCreature} from '../../../support/constants';
+import createDiv from '../../../common/cElement/createDiv';
+import daGroupStats from '../../../_dataAccess/daGroupStats';
+import daViewGroups from '../../../_dataAccess/daViewGroups';
+import { defViewCreature } from '../../../support/constants';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
 import evalAttack from './evalAttack';
@@ -10,20 +13,20 @@ import evalDamage from './evalDamage';
 import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHTML from './evalHtml';
-import {getElementById} from '../../../common/getElement';
+import getElementById from '../../../common/getElement';
 import insertElement from '../../../common/insertElement';
-import {isArray} from '../../../common/isArray';
+import isArray from '../../../common/isArray';
 import makeDoNotKillLink from './makeDoNotKillLink';
 import myStats from '../../../ajax/myStats';
 import partial from '../../../common/partial';
 import playerDataObject from '../../../common/playerDataObject';
 import playerName from '../../../common/playerName';
-import {daGroupStats, daViewGroups} from '../../../_dataAccess/_dataAccess';
+import setInnerHtml from '../../../dom/setInnerHtml';
 
-var dialogViewCreature;
-var combatEvalContainer;
-var combatEvaluator;
-var groupEvaluator;
+let dialogViewCreature;
+let combatEvalContainer;
+let combatEvaluator;
+let groupEvaluator;
 
 function getDialogViewCreature() {
   if (!dialogViewCreature) {
@@ -36,12 +39,12 @@ function getCombatEvalContainer() {
     combatEvalContainer = createDiv();
     insertElement(dialogViewCreature, combatEvalContainer);
     insertElement(dialogViewCreature, createDiv({
-      innerHTML: '<span class="fshFooter">' +
-        '*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NMV, ' +
-        'Sanctuary, Constitution, Fortitude, Chi Strike and ' +
-        'Terrorize (if active) and allow for randomness (1.1053). ' +
-        'Constitution, NMV, Fortitude and Chi Strike apply to group ' +
-        'stats.</span>'
+      innerHTML: '<span class="fshFooter">'
+        + '*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NMV, '
+        + 'Sanctuary, Constitution, Fortitude, Chi Strike and '
+        + 'Terrorize (if active) and allow for randomness (1.1053). '
+        + 'Constitution, NMV, Fortitude and Chi Strike apply to group '
+        + 'stats.</span>',
     }));
   }
 }
@@ -64,12 +67,12 @@ function getGroupEvaluator() {
 
 function setCombatEvaluator(html) {
   getCombatEvaluator();
-  combatEvaluator.innerHTML = html;
+  setInnerHtml(html, combatEvaluator);
 }
 
 function setGroupEvalalutor(html) {
   getGroupEvaluator();
-  groupEvaluator.innerHTML = html;
+  setInnerHtml(html, groupEvaluator);
 }
 
 function superElite(ses, obj, type) {
@@ -84,14 +87,14 @@ function superElite(ses, obj, type) {
 }
 
 function creatureData(creature, ses) {
-  var obj = {
+  const obj = {
     name: creature.name,
-    'class': creature.creature_class,
+    class: creature.creature_class,
     attack: Number(creature.attack),
     defense: Number(creature.defense),
     armor: Number(creature.armor),
     damage: Number(creature.damage),
-    hp: Number(creature.hp)
+    hp: Number(creature.hp),
   };
   superElite(ses, obj, creature.type);
   return obj;
@@ -115,7 +118,7 @@ function buffProcessing(combat) {
 }
 
 function doCombatEval(data, playerJson, groupData) {
-  var combat = {};
+  const combat = {};
   combat.callback = groupData;
   // playerdata
   combat.player = playerDataObject(playerJson);
@@ -142,15 +145,15 @@ function getGroupId(json) {
 }
 
 function processGroupStats(data, playerJson, groupJson) {
-  if (!groupJson.r || !groupJson.r.attributes) {return;}
-  var attr = groupJson.r.attributes;
+  if (!groupJson.r || !groupJson.r.attributes) { return; }
+  const attr = groupJson.r.attributes;
   doCombatEval(data, playerJson, {
     groupExists: true,
     groupAttackValue: attr[0].value,
     groupDefenseValue: attr[1].value,
     groupArmorValue: attr[2].value,
     groupDamageValue: attr[3].value,
-    groupHPValue: attr[4].value
+    groupHPValue: attr[4].value,
   });
 }
 
@@ -166,8 +169,8 @@ function processGroup(data, playerJson) {
 }
 
 function processPlayer(data, playerJson) {
-  if (data.player.hasGroup) {processGroup(data, playerJson);}
-  doCombatEval(data, playerJson, {groupExists: false});
+  if (data.player.hasGroup) { processGroup(data, playerJson); }
+  doCombatEval(data, playerJson, { groupExists: false });
 }
 
 function isValidData(data) {
@@ -176,7 +179,7 @@ function isValidData(data) {
 
 function processCreature(e, data) {
   getDialogViewCreature();
-  if (!dialogViewCreature) {return;}
+  if (!dialogViewCreature) { return; }
   setCombatEvaluator('');
   setGroupEvalalutor('');
   if (isValidData(data)) {
@@ -186,5 +189,5 @@ function processCreature(e, data) {
 }
 
 export default function viewCreature() {
-  $.subscribe(def_viewCreature, processCreature);
+  $.subscribe(defViewCreature, processCreature);
 }

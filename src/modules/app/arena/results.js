@@ -1,27 +1,27 @@
 import arena from './arena';
-import {entries} from '../../common/entries';
-import {nowSecs} from '../../support/now';
+import entries from '../../common/entries';
+import { nowSecs } from '../../support/now';
 import partial from '../../common/partial';
-import {get, set} from '../../system/idb';
+import { get, set } from '../../system/idb';
 
 let resultsPromise;
 let resultsCache;
 
 function currentCombatRecord(combatId, obj, sevenDays) {
-  return combatId === 'lastCheck' || obj.logTime && obj.logTime > sevenDays;
+  return combatId === 'lastCheck' || (obj.logTime && obj.logTime > sevenDays);
 }
 
-function keepRecent(sevenDays, prev, [combatId, obj]) {
+function keepRecent(sevenDays, acc, [combatId, obj]) {
   if (currentCombatRecord(combatId, obj, sevenDays)) {
-    prev[combatId] = obj;
+    acc[combatId] = obj;
   }
-  return prev;
+  return acc;
 }
 
 function cleanCache(data) {
   const thirtyDays = nowSecs - 30 * 24 * 60 * 60;
   return entries(data)
-    .reduce(partial(keepRecent, thirtyDays), {lastCheck: nowSecs});
+    .reduce(partial(keepRecent, thirtyDays), { lastCheck: nowSecs }); // FIXME
 }
 
 function prepareCache(data) {
@@ -38,12 +38,12 @@ async function initCache() {
     resultsCache = prepareCache(cache);
     set('fsh_arenaResults', resultsCache);
   } else {
-    resultsCache = {lastCheck: nowSecs};
+    resultsCache = { lastCheck: nowSecs };
   }
 }
 
 async function useApi(pvpId) {
-  const json = await arena({subcmd: 'results', pvp_id: pvpId});
+  const json = await arena({ subcmd: 'results', pvp_id: pvpId });
   if (json.s) {
     json.logTime = nowSecs;
     resultsCache[pvpId] = json;
@@ -53,11 +53,11 @@ async function useApi(pvpId) {
 }
 
 function returnResults(pvpId) {
-  if (resultsCache[pvpId]) {return resultsCache[pvpId];}
+  if (resultsCache[pvpId]) { return resultsCache[pvpId]; }
   return useApi(pvpId);
 }
 
 export default function results(pvpId) {
-  if (!resultsPromise) {resultsPromise = initCache();}
+  if (!resultsPromise) { resultsPromise = initCache(); }
   return resultsPromise.then(partial(returnResults, pvpId));
 }
