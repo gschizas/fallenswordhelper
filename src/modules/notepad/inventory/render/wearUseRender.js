@@ -44,7 +44,8 @@ export default function wearUseRender(data, _type, row) {
       b: 'Wear',
       c: 'wearItem',
     });
-  } if (action === 2) {
+  }
+  if (action === 2) {
     return wuRender(row, {
       a: 'use',
       b: 'Use',
