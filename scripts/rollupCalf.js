@@ -30,7 +30,7 @@ export default function rollupCalf(dir, entryFileNames, jsccValues) {
       json({ compact: true }),
       postcss({
         extensions: ['.css', '.postcss'],
-        extract: `${dir}calfSystem.css`,
+        extract: 'calfSystem.css',
         plugins: [postcssNesting(), cssnano()],
       }),
     ],

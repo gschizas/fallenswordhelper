@@ -22,11 +22,11 @@
 // EVERYTHING MUST BE IN main()
 function fshMain(gmInfo) {
   import('https://localhost:9966/dist/watch/calfSystem.js')
-    .then(m => m.default('1524a', gmInfo));
+    .then((m) => m.default('1524a', gmInfo));
 } // end of var main
 
-var script = document.createElement('script');
-script.textContent = `(${fshMain.toString()})` +
-  `("${encodeURIComponent(JSON.stringify(GM_info))}");`;
+const script = document.createElement('script');
+script.textContent = `(${fshMain.toString()})`
+  + `("${encodeURIComponent(JSON.stringify(GM_info))}");`;
 document.body.appendChild(script);
 document.body.removeChild(script);
