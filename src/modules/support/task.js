@@ -57,7 +57,6 @@ function initMessageHandler() {
   }
 }
 
-// #if _DEV  //  Not sending args as Array
 function devLog(args) {
   if (args && !isArray(args)) {
     // eslint-disable-next-line no-console
@@ -65,11 +64,11 @@ function devLog(args) {
   }
 }
 
-// #endif
 export default function add(priority, fn, args, scope) {
-  // #if _DEV  //  Not sending args as Array
-  devLog(args);
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  Not sending args as Array
+    devLog(args);
+  }
   if (isFunction(fn)) {
     initMessageHandler();
     const scopeGuard = fallback(scope, window);

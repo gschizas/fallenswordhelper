@@ -13,6 +13,5 @@ function loadScript() {
 }
 
 export default function loadDataTables() {
-  // #set _DTCSS = _CSSPATH + 'dataTables.css'
-  return all([loadScript(), loadCss('$_DTCSS')]);
+  return all([loadScript(), loadCss('_CSSPATH/dataTables.css')]);
 }

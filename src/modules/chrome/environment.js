@@ -75,7 +75,6 @@ function getCoreFunction() {
   coreFunction = testCoreFunction();
 }
 
-// #if _DEV  //  asyncDispatcher messages
 function devHooks() {
   /* eslint-disable no-console */
   console.log('functionPath', functionPath);
@@ -87,11 +86,11 @@ function devHooks() {
   /* eslint-enable no-console */
 }
 
-// #endif
 function asyncDispatcher() {
-  // #if _DEV  //  asyncDispatcher messages
-  devHooks();
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  asyncDispatcher messages
+    devHooks();
+  }
   if (isFunction(coreFunction)) {
     screenview(functionPath);
     start('JS Perf', functionPath);
@@ -125,7 +124,7 @@ function setVer(fshVer, gmInfo) {
   } else {
     calf.fshVer = `${fshVer}_native`;
   }
-  calf.calfVer = '$_CALFVER';
+  calf.calfVer = '_CALFVER';
 }
 
 // main event dispatcher
@@ -135,7 +134,6 @@ export default function dispatch(fshVer, gmInfo) {
   globalErrorHandler();
   setVer(fshVer, gmInfo);
   setup();
-  // #set _CALFCSS = _CSSPATH + 'calfSystem.css'
-  loadCss('$_CALFCSS').then(runCore);
+  loadCss('_CSSPATH/calfSystem.css').then(runCore);
   end('JS Perf', 'FSH.dispatch');
 }

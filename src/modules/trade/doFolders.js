@@ -16,9 +16,7 @@ import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import onclick from '../common/onclick';
 import partial from '../common/partial';
-// #if _BETA  //  Timing output
 import { time, timeEnd } from '../support/debug';
-// #endif
 
 let invItems;
 
@@ -112,21 +110,19 @@ function forEachInvItem(el) {
 }
 
 function processTrade(data) {
-  // #if _BETA  //  Timing output
-
-  time('trade.processTrade');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    time('trade.processTrade');
+  }
   invItems = data.items;
   // Highlight items in ST
   const nodeList = getArrayByTagName(defTable, getElementById('item-list'));
   nodeList.forEach(forEachInvItem); // TODO unnecessary DOM manipulation
   doFolderHeaders(data.folders);
-  // #if _BETA  //  Timing output
-
-  timeEnd('trade.processTrade');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    timeEnd('trade.processTrade');
+  }
 }
 
 function gotInventory(data) {

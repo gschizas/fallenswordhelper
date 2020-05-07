@@ -27,22 +27,27 @@ const unknown = [
       screenview('unknown.recipes.inventing');
       inventing();
     },
-  // #if _DEV  //  Fell through!
-  ],
-  [
-    () => true,
-    // eslint-disable-next-line no-console
-    () => { console.log('Fell through!'); },
-  // #endif
   ],
 ];
 
+// eslint-disable-next-line no-unused-labels, no-labels
+devLbl: { // Fell through!
+  unknown.push(
+    [
+      () => true,
+      // eslint-disable-next-line no-console
+      () => { console.log('Fell through!'); },
+    ],
+  );
+}
+
 export default function unknownPage() { // Legacy
   if (jQueryNotPresent()) { return; }
-  // #if _DEV  //  unknownPage
-  // eslint-disable-next-line no-console
-  console.log('unknownPage');
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { // unknownPage
+    // eslint-disable-next-line no-console
+    console.log('unknownPage');
+  }
   const known = unknown.find((el) => el[0]());
   if (known) { known[1](); }
 }

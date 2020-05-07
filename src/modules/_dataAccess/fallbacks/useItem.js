@@ -20,10 +20,11 @@ function stash(info) {
     return { r: { frags }, s: true };
   }
   sendEvent('da/useItem', 'Bad Msg', info);
-  // #if _DEV  //  da/useItem Bad Msg
-  // eslint-disable-next-line no-console
-  console.log('da/useItem', 'Bad Msg', info);
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  da/useItem Bad Msg
+    // eslint-disable-next-line no-console
+    console.log('da/useItem', 'Bad Msg', info);
+  }
 }
 
 const outputLookup = [
@@ -40,10 +41,11 @@ function formatResults(html) {
     if (thisResult) { return thisResult[1](info); }
   } else {
     sendEvent('da/useItem', 'No Info');
-    // #if _DEV  //  da/useItem No Info
-    // eslint-disable-next-line no-console
-    console.log('da/useItem', 'No Info');
-    // #endif
+    // eslint-disable-next-line no-unused-labels, no-labels
+    devLbl: { //  da/useItem No Info
+      // eslint-disable-next-line no-console
+      console.log('da/useItem', 'No Info');
+    }
     return { s: false };
   }
   return { e: { message: info }, s: false };

@@ -5,9 +5,6 @@ const { github } = require('./config.json');
 
 export default uglyCalf(
   'prod',
-  {
-    _BETA: false,
-    _CSSPATH: `${github}resources/prod/${core}/`,
-    _DEV: false,
-  },
+  { _CSSPATH: `${github}resources/prod/${core}` },
+  ['devLbl', 'betaLbl'],
 );

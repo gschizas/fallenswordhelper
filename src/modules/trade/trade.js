@@ -10,9 +10,7 @@ import insertElementBefore from '../common/insertElementBefore';
 import jsonParse from '../common/jsonParse';
 import numberIsNaN from '../common/numberIsNaN';
 import onclick from '../common/onclick';
-// #if _DEV  //  oneByOne
 import oneByOne from './oneByOne';
-// #endif
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
 
@@ -116,7 +114,8 @@ function injectTradeOld() {
 export default function injectTrade() {
   add(3, doFolders);
   add(3, injectTradeOld);
-  // #if _DEV  //  oneByOne
-  add(3, oneByOne);
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  oneByOne
+    add(3, oneByOne);
+  }
 }

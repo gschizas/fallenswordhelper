@@ -9,9 +9,7 @@ import setInnerHtml from '../../dom/setInnerHtml';
 import {
   injectTable, playerLevel, playerName, playerRank,
 } from './helpers';
-// #if _BETA  //  Timing output
 import { time, timeEnd } from '../../support/debug';
-// #endif
 
 function returnAdvisorPage(list, e, response) {
   insertHtmlBeforeEnd(list.lastElementChild.lastElementChild,
@@ -83,11 +81,10 @@ function addAdvisorPages(list, [membrList, ...args]) {
 }
 
 export default function injectAdvisorWeekly(list) { // jQuery
-  // #if _BETA  //  Timing output
-
-  time('guildAdvisor.injectAdvisorWeekly');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    time('guildAdvisor.injectAdvisorWeekly');
+  }
   setInnerHtml('<span class="fshCurveContainer fshFlex">'
     + '<span class="fshCurveEle fshCurveLbl fshOldSpinner"></span>'
     + '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>'
@@ -97,9 +94,8 @@ export default function injectAdvisorWeekly(list) { // jQuery
     .concat([1, 2, 3, 4, 5, 6, 7].map(partial(getAdvisorPage, list)));
 
   allthen(prm, partial(addAdvisorPages, list));
-  // #if _BETA  //  Timing output
-
-  timeEnd('guildAdvisor.injectAdvisorWeekly');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    timeEnd('guildAdvisor.injectAdvisorWeekly');
+  }
 }

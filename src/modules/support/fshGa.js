@@ -1,8 +1,6 @@
 import calf from './calf';
 import isUndefined from '../common/isUndefined';
-// #if _BETA  //  Timing output
 import { log } from './debug';
-// #endif
 import playerId from '../common/playerId';
 
 const times = {};
@@ -56,9 +54,10 @@ function sendTiming(category, variable, label) {
     ga('fshApp.send', 'timing', category, variable, Math.round(myTime),
       label);
   }
-  // #if _BETA  //  Timing output
-  log(variable, `${myTime}ms`);
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    log(variable, `${myTime}ms`);
+  }
 }
 
 export function end(category, variable, label) {
@@ -104,10 +103,11 @@ export function sendEvent(eventCategory, eventAction, eventLabel) {
 }
 
 export function sendException(desc, fatal) {
-  // #if _BETA  //  sendException
-  // eslint-disable-next-line no-console
-  console.log('sendException', desc);
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  sendException
+    // eslint-disable-next-line no-console
+    console.log('sendException', desc);
+  }
   if (noGa()) { return; }
   ga('fshApp.send', 'exception', {
     exDescription: desc,

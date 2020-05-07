@@ -23,9 +23,7 @@ import setLvls from './setLvls';
 import {
   lvlFilter, rarityFilter, setFilter, typeFilter,
 } from './filters';
-// #if _BETA  //  Timing output
 import { time, timeEnd } from '../../support/debug';
-// #endif
 
 function doSpinner() { // jQuery
   setInnerHtml(`<span id="fshInvMan"><img src = "${
@@ -67,17 +65,15 @@ function doInventory() {
 }
 
 function getInvMan() {
-  // #if _BETA  //  Timing output
-
-  time('inventory.getInvMan');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    time('inventory.getInvMan');
+  }
   doInventory();
-  // #if _BETA  //  Timing output
-
-  timeEnd('inventory.getInvMan');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    timeEnd('inventory.getInvMan');
+  }
 }
 
 function asyncCall() {

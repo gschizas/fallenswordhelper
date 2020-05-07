@@ -6,9 +6,7 @@ import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import guildTracker from './guildTracker/guildTracker';
-// #if _DEV  //  guildTrackerV2
 import guildTrackerV2 from './guildTrackerV2/guildTracker';
-// #endif
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import { pCC } from '../support/layout';
@@ -59,10 +57,11 @@ function doGuildTracker() {
   const test = 0;
   if (test === 0) {
     add(4, guildTracker);
-    // #if _DEV  //  guildTrackerV2
   } else {
-    add(4, guildTrackerV2);
-    // #endif
+    // eslint-disable-next-line no-unused-labels, no-labels
+    devLbl: { //  guildTrackerV2
+      add(4, guildTrackerV2);
+    }
   }
 }
 
