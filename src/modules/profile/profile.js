@@ -26,7 +26,7 @@ import querySelector from '../common/querySelector';
 import quickWearLink from './quickWearLink';
 import selectAllLink from './selectAllLink';
 import storeVL from './storeVL';
-import updateNmv from './updateNmv';
+import updateBuffs from './updateBuffs';
 import updateStatistics from './updateStatistics';
 
 function ifSelf(isSelf) {
@@ -55,7 +55,7 @@ function guildRelationship(avyImg, playername, isSelf) {
 function updateDom(avyImg, playername, isSelf) {
   ifSelf(isSelf);
   guildRelationship(avyImg, playername, isSelf);
-  updateNmv();
+  updateBuffs();
   updateStatistics();
   highlightPvpProtection();
   add(3, profileRenderBio, [isSelf]);
