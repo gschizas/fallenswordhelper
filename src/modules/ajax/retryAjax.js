@@ -66,7 +66,7 @@ function doAjax(options, retries, resolve, reject) {
 }
 
 function attemptTask(runner) {
-  if ($.active < 4) {
+  if ($.active < 5) {
     const opts = queue.shift();
     doAjax(...opts);
     runner();
