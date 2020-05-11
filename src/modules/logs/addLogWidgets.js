@@ -17,9 +17,7 @@ import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
 import querySelector from '../common/querySelector';
 import setInnerHtml from '../dom/setInnerHtml';
-// #if _DEV  //  arena Combat
 import viewCombat from './viewCombat';
-// #endif
 import {
   attackplayerUrl,
   doAddIgnore,
@@ -111,9 +109,10 @@ function processLogWidgetRow(aRow) { // Legacy
     doLogWidgetRow(aRow, messageType);
     addPvpSummary(aRow, messageType);
     processLadder(aRow, messageType);
-    // #if _DEV  //  arena Combat
-    viewCombat(aRow);
-    // #endif
+    // eslint-disable-next-line no-unused-labels, no-labels
+    devLbl: { //  arena Combat
+      viewCombat(aRow);
+    }
   }
 }
 

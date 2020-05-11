@@ -5,6 +5,7 @@ import lastActivityMins from '../common/lastActivityMins';
 import { lastActivityRE } from '../support/constants';
 import { pCC } from '../support/layout';
 import querySelectorArray from '../common/querySelectorArray';
+import setTipped from '../common/setTipped';
 
 const ACTIVE = 0;
 const STAMINA = 1;
@@ -34,8 +35,7 @@ export default function activeMembers() {
     const dots = querySelectorArray('#pCC a[data-tipped*="Last Activity"]');
     const memberStats = getActive(dots);
     members.classList.add('tip-static');
-    members.dataset.tipped = `Active: ${memberStats[ACTIVE]}/${
-      dots.length}<br>`
-      + `Stamina: ${addCommas(memberStats[STAMINA])}`;
+    setTipped(`Active: ${memberStats[ACTIVE]}/${dots.length}<br>Stamina: ${
+      addCommas(memberStats[STAMINA])}`, members);
   }
 }

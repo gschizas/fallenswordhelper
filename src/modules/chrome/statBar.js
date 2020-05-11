@@ -17,7 +17,7 @@ function preventHcs(evt) {
 }
 
 function statbarWrapper(href, id) {
-  const character = getElementById(id);
+  const character = getElementById(`statbar-${id}`);
   if (!character) { return; }
   const myWrapper = createAnchor({ href });
   const statWrapper = character.parentNode;
@@ -27,10 +27,10 @@ function statbarWrapper(href, id) {
 }
 
 export default function statbar() {
-  statbarWrapper(profileUrl, 'statbar-character');
-  statbarWrapper(`${pointsUrl + defSubcmd}reserve`, 'statbar-stamina');
-  statbarWrapper(blacksmithUrl, 'statbar-equipment');
-  statbarWrapper(dropItemsUrl, 'statbar-inventory');
-  statbarWrapper(pointsUrl, 'statbar-fsp');
-  statbarWrapper(`${cmdUrl}bank`, 'statbar-gold');
+  statbarWrapper(profileUrl, 'character');
+  statbarWrapper(`${pointsUrl + defSubcmd}reserve`, 'stamina');
+  statbarWrapper(blacksmithUrl, 'equipment');
+  statbarWrapper(dropItemsUrl, 'inventory');
+  statbarWrapper(pointsUrl, 'fsp');
+  statbarWrapper(`${cmdUrl}bank`, 'gold');
 }

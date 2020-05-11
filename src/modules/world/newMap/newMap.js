@@ -7,9 +7,7 @@ import executeAll from '../../common/executeAll';
 import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import hideQTip from '../../common/hideQTip';
-// #if _DEV  //  hide titan combat results
 import hideTitanCombatResults from './hideTitanCombatResults';
-// #endif
 import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
 import { injectSendGoldOnWorld } from './sendGold';
@@ -121,10 +119,11 @@ export default function subscribes() {
     buffInfo,
     fixDebuff,
     interceptMouseEvents,
-    // #if _DEV  //  hide titan combat results
-    hideTitanCombatResults,
-    // #endif
   ]);
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  hide titan combat results
+    hideTitanCombatResults();
+  }
 }
 
 // -1 = world page

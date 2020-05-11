@@ -2,9 +2,7 @@ import allowBack from './allowBack';
 import createTr from '../common/cElement/createTr';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
-// #if _DEV  //  Ladder Margin
 import margin from './margin';
-// #endif
 import { now } from '../support/now';
 import outputFormat from '../system/outputFormat';
 import querySelector from '../common/querySelector';
@@ -56,7 +54,8 @@ function lastReset() {
 export default function ladder() {
   allowBack();
   lastReset();
-  // #if _DEV  //  Ladder Margin
-  margin();
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  Ladder Margin
+    margin();
+  }
 }

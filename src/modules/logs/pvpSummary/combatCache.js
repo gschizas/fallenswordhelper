@@ -57,10 +57,11 @@ function inSpecialsList(el) {
 function check(specialHtml, el, i) {
   if (!inSpecialsList(el)) {
     const label = `${JSON.stringify(el)} ${getText(specialHtml[i])}`;
-    // #if _DEV  //  PvP missing Special
-    // eslint-disable-next-line no-console
-    console.log(label);
-    // #endif
+    // eslint-disable-next-line no-unused-labels, no-labels
+    devLbl: { //  PvP missing Special
+      // eslint-disable-next-line no-console
+      console.log(label);
+    }
     sendEvent('Logs', 'Missing PvP Special', label);
   }
 }

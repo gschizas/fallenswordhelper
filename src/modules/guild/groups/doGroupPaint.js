@@ -3,9 +3,7 @@ import doBuffLinks from '../../common/doBuffLinks';
 import onlineDot from '../../common/onlineDot';
 import partial from '../../common/partial';
 import { months, playerIdUrl } from '../../support/constants';
-// #if _BETA  //  Timing output
 import { time, timeEnd } from '../../support/debug';
-// #endif
 
 const xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
 
@@ -89,16 +87,14 @@ function doGroupRow(membrlist, i, row) { // jQuery
 }
 
 export default function doGroupPaint(m) { // jQuery
-  // #if _BETA  //  Timing output
-
-  time('groups.doGroupPaint');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    time('groups.doGroupPaint');
+  }
   $('#pCC table table table tr').has('.group-action-container')
     .each(partial(doGroupRow, m));
-  // #if _BETA  //  Timing output
-
-  timeEnd('groups.doGroupPaint');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    timeEnd('groups.doGroupPaint');
+  }
 }

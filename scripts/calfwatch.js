@@ -5,16 +5,13 @@ import serve from 'rollup-plugin-serve';
 const fs = require('fs');
 const { port } = require('./config.json');
 
-const outPath = 'dist/watch/';
+const outPath = 'dist/watch';
 
 const options = rollupCalf(
   outPath,
   '[name].js',
-  {
-    _BETA: true,
-    _CSSPATH: `https://localhost:${port}/${outPath}`,
-    _DEV: true,
-  },
+  { _CSSPATH: `https://localhost:${port}/${outPath}` },
+  [],
 );
 options.treeshake = false;
 options.watch = { include: 'src/**' };
@@ -31,9 +28,9 @@ options.plugins.push(serve({
 
 options.plugins.push(del({
   targets: [
-    `${outPath}*`,
-    `!${outPath}dataTables.css`,
-    `!${outPath}fallenswordhelper.user.js`,
+    `${outPath}/*`,
+    `!${outPath}/dataTables.css`,
+    `!${outPath}/fallenswordhelper.user.js`,
   ],
 }));
 

@@ -21,11 +21,12 @@ function fshGetValue(name, defValue) {
 }
 
 export default function getValue(name) {
-  // #if _DEV  //  No default setting available
-  if (isUndefined(defaults[name])) {
-    // eslint-disable-next-line no-console
-    console.log('No default setting available', name, defaults[name]);
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  No default setting available
+    if (isUndefined(defaults[name])) {
+      // eslint-disable-next-line no-console
+      console.log('No default setting available', name, defaults[name]);
+    }
   }
-  // #endif
   return fshGetValue(name, defaults[name]);
 }

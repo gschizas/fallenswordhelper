@@ -1,6 +1,3 @@
-// #if _DEV  //  arena results
-import { results } from './loader';
-// #endif
 import runDefault from '../../common/runDefault';
 
 const injectArena = () => { runDefault(import('../../arena/arena')); };
@@ -15,15 +12,20 @@ const setupMoves = () => {
   runDefault(import('../../arena/arenaSetup/setup'));
 };
 const storeMoves = () => { runDefault(import('../../arena/store')); };
+const results = () => { runDefault(import('../../arena/results')); };
 
-export default {
+const arena = {
   '-': { '-': injectArena },
   dojoin: { '-': arenaDoJoin },
   join: { '-': arenaJoin },
   completed: { '-': completedArenas },
   pickmove: { '-': storeMoves },
-  // #if _DEV  //  arena results
-  results: { '-': results },
-  // #endif
   setup: { '-': setupMoves },
 };
+
+// eslint-disable-next-line no-unused-labels, no-labels
+devLbl: { //  arena results
+  arena.results = { '-': results };
+}
+
+export default arena;

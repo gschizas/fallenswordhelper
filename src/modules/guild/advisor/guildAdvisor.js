@@ -17,9 +17,7 @@ import partial from '../../common/partial';
 import {
   injectTable, playerLevel, playerName, playerRank,
 } from './helpers';
-// #if _BETA  //  Timing output
 import { time, timeEnd } from '../../support/debug';
-// #endif
 
 function getTfoot(list) {
   const totalRow = list.rows[list.rows.length - 1];
@@ -59,20 +57,18 @@ function summaryLink() {
 }
 
 function injectAdvisorDaily(list, membrList) {
-  // #if _BETA  //  Timing output
-
-  time('guildAdvisor.injectAdvisorDaily');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    time('guildAdvisor.injectAdvisorDaily');
+  }
   const data = getData(list, membrList);
   const tfoot = getTfoot(list);
   injectTable(list, tfoot, data);
   summaryLink();
-  // #if _BETA  //  Timing output
-
-  timeEnd('guildAdvisor.injectAdvisorDaily');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    timeEnd('guildAdvisor.injectAdvisorDaily');
+  }
 }
 
 function switcher(list) {

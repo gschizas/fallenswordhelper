@@ -4,6 +4,7 @@ import isArray from '../common/isArray';
 import isObject from '../common/isObject';
 import partial from '../common/partial';
 import querySelectorArray from '../common/querySelectorArray';
+import setTipped from '../common/setTipped';
 
 const addId = (e) => [e, Number(e.previousElementSibling.value)];
 
@@ -45,9 +46,8 @@ function testGuildies(myGuild, button, arena) {
 }
 
 function hazPlayers(myGuild, button, arena) {
-  // eslint-disable-next-line no-param-reassign
-  button.dataset.tipped = arena.players.map(partial(listPlayers, myGuild))
-    .join('<br>');
+  setTipped(arena.players.map(partial(listPlayers, myGuild)).join('<br>'),
+    button);
   button.classList.add('tip-static');
   if (myGuild && button.value === 'Join') {
     testGuildies(myGuild, button, arena);

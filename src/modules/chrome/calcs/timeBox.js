@@ -2,12 +2,10 @@ import { months } from '../../support/constants';
 import { now } from '../../support/now';
 import padZ from '../../system/padZ';
 
-const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 function formatShortDate(aDate) {
   return `${padZ(aDate.getHours())}:${
     padZ(aDate.getMinutes())} ${
-    days[aDate.getDay()]} ${
+    aDate.toLocaleString('en', { weekday: 'short' })} ${
     padZ(aDate.getDate())}/${
     months[aDate.getMonth()]}/${
     aDate.getFullYear()}`;
@@ -16,8 +14,8 @@ function formatShortDate(aDate) {
 export default function timeBox(nextGainTime, hrsToGo) {
   const nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
   if (!nextGain) { return; }
-  return `<dd>${
-    formatShortDate(new Date(now
-    + (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60
-    + parseInt(nextGain[2], 10)) * 1000))}</dd>`;
+  return `<dd>${formatShortDate(new Date(
+    now + ((hrsToGo * 60 + Number(nextGain[1])) * 60
+    + Number(nextGain[2])) * 1000,
+  ))}</dd>`;
 }

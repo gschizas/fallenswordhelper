@@ -29,8 +29,9 @@ export default function showAttribs(json) {
     const thisArena = findArena(json.r);
     insertHtmlBeforeEnd(thisCell, paramBox(thisArena));
     showMoves(json.r, thisCell, thisArena);
-    // #if _DEV  //  arena snapshot
-    takeSnapshot();
-    // #endif
+    // eslint-disable-next-line no-unused-labels, no-labels
+    devLbl: { //  arena snapshot
+      takeSnapshot();
+    }
   }
 }

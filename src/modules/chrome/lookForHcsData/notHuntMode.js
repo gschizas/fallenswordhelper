@@ -73,13 +73,11 @@ function doMoveDailyQuest() {
   }
 }
 
-// #if _DEV  //  doMoveXmas
 function doMoveXmas() {
   // if (getValue('moveFSBox')) {
   add(3, moveRHSBoxToLHS, ['minibox-xmas']);
   // }
 }
-// #endif
 
 function asyncPFour(fn) { add(4, fn); }
 
@@ -93,10 +91,11 @@ function priorityFour() {
 export default function notHuntMode() {
   if (calf.huntingMode) { return; }
   // move boxes in opposite order that you want them to appear.
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  doMoveXmas
+    doMoveXmas();
+  }
   executeAll([
-    // #if _DEV  //  doMoveXmas
-    doMoveXmas,
-    // #endif
     doMoveGuildList,
     doMoveAllyList,
     doMoveDailyQuest,

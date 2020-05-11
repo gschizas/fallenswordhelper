@@ -1,0 +1,25 @@
+import{b as e,p as t,g as o,$ as s,D as r}from"./calfSystem-8dc0fa4b.js"
+import"./batch-5f01c08c.js"
+import"./dialogMsg-7427fbc4.js"
+import"./closest-9cd85ce4.js"
+import"./closestTable-432fe19a.js"
+import"./insertHtmlBeforeBegin-3f5cdd49.js"
+import"./addStatTotalToMouseover-ba438fda.js"
+import"./chunk-a5b00e9c.js"
+import"./dialog-f4d2194e.js"
+import"./ajaxReturnCode-c433c790.js"
+import"./senditems-edb76148.js"
+import"./dropItem-a782c1a7.js"
+import i from"./injectStoreItems-e372e595.js"
+import"./createTr-07128daa.js"
+import"./makeFolderSpan-abc934ab.js"
+import"./makeFolderSpans-479bff76.js"
+import"./eventHandler5-31d45a93.js"
+import"./guildStore-b172d7f4.js"
+import"./getInventory-20cd9685.js"
+import"./getInventoryById-f0471a4b.js"
+import"./selfIdIs-531fc9b8.js"
+const n=e=>e.src.includes("/folder.png")
+function a(e){return`<option value=${e.parentNode.href.match(/&folder_id=(-?\d+)/i)[1]}>${r(e.parentNode.parentNode)}</option>`}export default function(){i(),function(){const r=e("form",t)[0].nextElementSibling.nextElementSibling.nextElementSibling,i=o("img",r).filter(n)
+0!==i.length&&s(r,'<tr><td class="fshCenter">Move selected items to: '+`<select name="folder" id="selectFolderId" class="customselect">${i.map(a).join("")}</select>&nbsp;<input type="button" class="custombutton" `+'id="fshMove" value="Move"></td></tr>')}()}
+//# sourceMappingURL=injectProfileDropItems-e1d4a626.js.map

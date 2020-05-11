@@ -18,9 +18,7 @@ import {
   setOpts,
   storeOpts,
 } from './setOpts';
-// #if _BETA  //  Timing output
 import { time, timeEnd } from '../support/debug';
-// #endif
 
 function removeHiddenRows() {
   const hiddenRows = querySelectorArray(
@@ -55,18 +53,16 @@ function arenaDataTable(tabs, [arena, obj, json]) { // jQuery
 }
 
 function process(tabs, values) {
-  // #if _BETA  //  Timing output
-
-  time('arena.process');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    time('arena.process');
+  }
   removeHiddenRows();
   arenaDataTable(tabs, values);
-  // #if _BETA  //  Timing output
-
-  timeEnd('arena.process');
-
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  betaLbl: { //  Timing output
+    timeEnd('arena.process');
+  }
 }
 
 export default function injectArena() { // jQuery

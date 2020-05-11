@@ -14,7 +14,6 @@ function lvlFilter(_settings, data) {
   return true;
 }
 
-// #if _DEV  //  specFilter
 function specFilter(_settings, _searchData, _index, rowData) {
   const test = 0;
   if (test) {
@@ -23,10 +22,10 @@ function specFilter(_settings, _searchData, _index, rowData) {
   return true;
 }
 
-// #endif
 export default function doLvlFilter() {
   $.fn.dataTable.ext.search.push(lvlFilter);
-  // #if _DEV  //  specFilter
-  $.fn.dataTable.ext.search.push(specFilter);
-  // #endif
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  specFilter
+    $.fn.dataTable.ext.search.push(specFilter);
+  }
 }
