@@ -1,11 +1,12 @@
 import { core } from './getVersion';
 import rollupFsh from './rollupFsh';
 
-const outdir = 'watch';
 const { port } = require('./config.json');
 
+const outdir = 'watch';
 const watchUrl = `https://localhost:${port}/dist/${outdir}/`;
-const options = rollupFsh(
+
+export default rollupFsh(
   outdir,
   {
     _CALFJS: `${watchUrl}calfSystem.js`,
@@ -13,7 +14,3 @@ const options = rollupFsh(
     _VER: `${core}a`,
   },
 );
-options.treeshake = false;
-options.watch = { include: 'src/**' };
-
-export default options;
