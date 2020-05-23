@@ -21,6 +21,6 @@ export default function arenaJoin() {
     injectArena();
   } else {
     allowBack();
-    view().then(showAttribs);
+    view().catch(() => ({})).then(showAttribs);
   }
 }
