@@ -1,2 +1,0 @@
-function o(o){$("#dialog_msg").html(o).dialog("open")}export{o as d}
-//# sourceMappingURL=dialogMsg-efcd2089.js.map

@@ -99,27 +99,29 @@ function fixDebuff() {
   onclick(getElementById('buffList'), fixDebuffQTip);
 }
 
+const usualRoutines = [
+  worldPrefs,
+  injectSendGoldOnWorld,
+  viewCreature,
+  hideGroupButton,
+  doMonsterColors,
+  doNotKill,
+  startMonsterLog,
+  repairButton,
+  combatLogger,
+  onWorld,
+  prepareShop,
+  injectRelic,
+  msgCenterOffset,
+  hideMapTooltip,
+  initButtons,
+  buffInfo,
+  fixDebuff,
+  interceptMouseEvents,
+];
+
 export default function subscribes() {
-  executeAll([
-    worldPrefs,
-    injectSendGoldOnWorld,
-    viewCreature,
-    hideGroupButton,
-    doMonsterColors,
-    doNotKill,
-    startMonsterLog,
-    repairButton,
-    combatLogger,
-    onWorld,
-    prepareShop,
-    injectRelic,
-    msgCenterOffset,
-    hideMapTooltip,
-    initButtons,
-    buffInfo,
-    fixDebuff,
-    interceptMouseEvents,
-  ]);
+  executeAll(usualRoutines);
   // eslint-disable-next-line no-unused-labels, no-labels
   devLbl: { //  hide titan combat results
     hideTitanCombatResults();
