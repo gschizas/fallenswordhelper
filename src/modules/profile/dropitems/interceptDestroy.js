@@ -18,6 +18,7 @@ const destroyChunk = (itemsAry) => {
 };
 
 const checkItems = (e) => {
+  if (!e.returnValue) { return; }
   e.preventDefault();
   const items = querySelectorArray('[name="removeIndex[]"]:checked');
   chunk(30, items).forEach(destroyChunk);

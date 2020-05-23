@@ -1,0 +1,1 @@
+{"version":3,"file":"updateUrl-4bfd5c5c.js","sources":["src/modules/arena/updateUrl.js"],"sourcesContent":null,"names":["updateUrl","e","preventDefault","dontPost","target","parentNode"],"mappings":";AAEe,SAASA,EAAUC,GAChCA,EAAEC,iBACFC,EAASF,EAAEG,OAAOC","sourceRoot":"https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/15.24.12"}
