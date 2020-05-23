@@ -1,5 +1,3 @@
-import { calfVer } from './getVersion';
-import child from 'child_process';
 import cssnano from 'cssnano';
 import json from '@rollup/plugin-json';
 import nesting from 'postcss-nesting';
@@ -10,9 +8,9 @@ import pluginStrip from '@rollup/plugin-strip';
 import { terser as pluginTerser } from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
-import svelte from 'rollup-plugin-svelte';
+// import svelte from 'rollup-plugin-svelte';
 
-const { port } = require('./config.json');
+const { calfVer } = require('./getVersion');
 
 const watch = process.env.ROLLUP_WATCH;
 
@@ -31,7 +29,6 @@ function del(dir) {
     targets: [
       `${dir}/*`,
       `!${dir}/dataTables.css`,
-      `!${dir}/fallenswordhelper.user.js`,
     ],
   });
 }
@@ -42,23 +39,6 @@ function postcss() {
     extract: 'calfSystem.css',
     plugins: [nesting(), cssnano()],
   });
-}
-
-function serve() {
-  let started = false;
-
-  return {
-    writeBundle() {
-      if (!started) {
-        started = true;
-
-        child.spawn('npm', ['run', 'start', '--', `-p ${port}`], {
-          stdio: ['ignore', 'inherit', 'inherit'],
-          shell: true,
-        });
-      }
-    },
-  };
 }
 
 function strip(labels) {
@@ -80,14 +60,13 @@ function terser() {
 export default function calfPlugins(dir, jsccValues, labels) {
   return [
     copy(dir),
-    watch && del(dir),
-    svelte({ emitCss: true }),
+    del(dir),
+    // svelte({ emitCss: true }),
     resolve(),
     replace({ values: { ...jsccValues, _CALFVER: calfVer } }),
     strip(labels),
     json({ compact: true }),
     postcss(),
     !watch && terser(),
-    watch && serve(),
   ];
 }

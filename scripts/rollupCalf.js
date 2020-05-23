@@ -1,11 +1,14 @@
 import pluginsCalf from './pluginsCalf';
 
+const { calfVer } = require('./getVersion');
+
 const watch = process.env.ROLLUP_WATCH;
 
 export default function rollupCalf(dir, entryFileNames, jsccValues, labels) {
   return {
     input: 'src/calfSystem.js',
     output: {
+      chunkFileNames: `${calfVer}/[name]-[hash].js`,
       dir,
       entryFileNames,
       format: 'es',

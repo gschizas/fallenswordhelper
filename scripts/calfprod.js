@@ -1,6 +1,6 @@
-import { core } from './getVersion';
 import uglyCalf from './uglyCalf';
 
+const { core } = require('./getVersion');
 const { github } = require('./config.json');
 
 export default uglyCalf(

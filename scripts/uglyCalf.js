@@ -1,15 +1,18 @@
 import rollupCalf from './rollupCalf';
 
+const { core } = require('./getVersion');
+
 export default function uglyCalf(outdir, jsccValues, labels) {
   const options = rollupCalf(
-    `dist/${outdir}`,
+    `dist/resources/${outdir}/${core}`,
     '[name].min.js',
     jsccValues,
     labels,
   );
 
   if (['beta', 'prod'].includes(outdir)) {
-    options.output.sourcemapPathTransform = (relativePath) => relativePath.replace('..\\..\\', '');
+    options.output.sourcemapPathTransform = (relativePath) => relativePath
+      .replace('..\\..\\..\\..\\..\\', '');
   }
 
   return options;

@@ -1,15 +1,16 @@
-import { core } from './getVersion';
 import rollupFsh from './rollupFsh';
 
+const { core } = require('./getVersion');
 const { port } = require('./config.json');
 
-const devUrl = `https://localhost:${port}/dist/dev/`;
+const outdir = 'dev';
+const devUrl = `https://localhost:${port}/dist/`;
 
 export default rollupFsh(
-  'dev',
+  outdir,
   {
-    _CALFJS: `${devUrl}calfSystem.min.js`,
-    _DLURL: `${devUrl}fallenswordhelper.user.js`,
+    _CALFJS: `${devUrl}resources/${outdir}/${core}/calfSystem.min.js`,
+    _DLURL: `${devUrl}Releases/${outdir}/fallenswordhelper.user.js`,
     _VER: `${core}a`,
   },
 );

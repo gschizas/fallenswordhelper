@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+const { calfVer, core } = require('./getVersion');
 const fs = require('fs');
 const gzipSize = require('gzip-size');
 
@@ -16,9 +17,10 @@ function getFileSize(file) {
 }
 
 function getCalfSize(dir) {
-  fs.readdir(`dist/${dir}`, (err, items) => {
+  const thisDir = `dist/resources/${dir}/${core}/${calfVer}`;
+  fs.readdir(thisDir, (err, items) => {
     const files = items.filter(calfFiles);
-    files.forEach((fn) => { getFileSize(`dist/${dir}/${fn}`); });
+    files.forEach((fn) => { getFileSize(`${thisDir}/${fn}`); });
   });
 }
 
