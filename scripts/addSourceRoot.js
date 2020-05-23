@@ -1,3 +1,4 @@
+const { calfVer, core } = require('./getVersion');
 const fs = require('fs');
 const { port } = require('./config.json');
 
@@ -12,12 +13,16 @@ function addSourceRoot(file, sourceRoot) {
 }
 
 function fixMaps(dir, sourceRoot) {
-  fs.readdir(`dist/${dir}`, (err, items) => {
+  const thisDir = `dist/resources/${dir}`;
+  fs.readdir(thisDir, (err, items) => {
     const maps = items.filter((fn) => fn.endsWith('.map'));
-    maps.forEach((map) => { addSourceRoot(`dist/${dir}/${map}`, sourceRoot); });
+    maps.forEach((map) => { addSourceRoot(`${thisDir}/${map}`, sourceRoot); });
   });
 }
 
-fixMaps('dev', `https://localhost:${port}`);
-fixMaps('beta', betaProdSourceRoot);
-fixMaps('prod', betaProdSourceRoot);
+fixMaps(`dev/${core}`, `https://localhost:${port}`);
+fixMaps(`dev/${core}/${calfVer}`, `https://localhost:${port}`);
+fixMaps(`beta/${core}`, betaProdSourceRoot);
+fixMaps(`beta/${core}/${calfVer}`, betaProdSourceRoot);
+fixMaps(`prod/${core}`, betaProdSourceRoot);
+fixMaps(`prod/${core}/${calfVer}`, betaProdSourceRoot);

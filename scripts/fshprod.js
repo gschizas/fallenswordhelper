@@ -1,10 +1,10 @@
-import { core } from './getVersion';
 import rollupFsh from './rollupFsh';
 
+const { core } = require('./getVersion');
 const { github } = require('./config.json');
 
 export default rollupFsh(
-  'prod',
+  'Current',
   {
     _CALFJS: `${github}resources/prod/${core}/calfSystem.min.js`,
     _DLURL: `${github}Releases/Current/fallenswordhelper.user.js`,

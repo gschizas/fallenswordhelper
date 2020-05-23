@@ -1,5 +1,6 @@
-const { version } = require('../package.json');
-
+const version = process.env.npm_package_version;
 const varAry = version.split('.');
-export const core = varAry[0] + varAry[1];
-export const calfVer = varAry[2];
+const core = varAry[0] + varAry[1];
+const calfVer = varAry[2];
+
+module.exports = { calfVer, core, version };
