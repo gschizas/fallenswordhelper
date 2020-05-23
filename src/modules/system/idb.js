@@ -3,7 +3,7 @@ import { sendException } from '../support/fshGa';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
 
 const processError = (e) => {
-  if (e.name !== 'NotFoundError') {
+  if (e && e.name !== 'NotFoundError') {
     sendException(parseError(e), false);
   }
 };
