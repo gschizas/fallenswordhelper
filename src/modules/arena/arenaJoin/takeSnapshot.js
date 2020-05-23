@@ -1,5 +1,6 @@
 import all from '../../common/all';
 import fromEntries from '../../common/fromEntries';
+import isArray from '../../common/isArray';
 import join from '../../app/arena/join';
 import loadEquipped from '../../app/profile/loadequipped';
 import { nowSecs } from '../../support/now';
@@ -27,15 +28,17 @@ async function buttonPress(e) {
   const pvpId = thisTournament();
   const [equipped, joinData, fshArenaJoined] = await all([
     loadEquipped(), join(pvpId), get('fsh_arenaJoined')]);
-  const thisData = {
-    pvpId,
-    joined: nowSecs,
-    ...mapEquipment(equipped),
-    ...mapAttribs(joinData),
-  };
-  const newJoined = fshArenaJoined || [];
-  newJoined.push(thisData);
-  set('fsh_arenaJoined', newJoined);
+  if (isArray(equipped.r)) {
+    const thisData = {
+      pvpId,
+      joined: nowSecs,
+      ...mapEquipment(equipped),
+      ...mapAttribs(joinData),
+    };
+    const newJoined = fshArenaJoined || [];
+    newJoined.push(thisData);
+    set('fsh_arenaJoined', newJoined);
+  }
   updateUrl(e);
 }
 
