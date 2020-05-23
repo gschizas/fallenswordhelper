@@ -1,0 +1,2 @@
+function n(n){return Number.isNaN(n)}export{n}
+//# sourceMappingURL=numberIsNaN-c4fdd2a1.js.map
