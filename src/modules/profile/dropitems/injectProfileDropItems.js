@@ -6,7 +6,7 @@ export default function injectProfileDropItems() {
   injectStoreItems();
   injectMoveItems();
   // eslint-disable-next-line no-unused-labels, no-labels
-  devLbl: { //  interceptDestroy
+  betaLbl: { //  interceptDestroy
     interceptDestroy();
   }
 }
