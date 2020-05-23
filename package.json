@@ -19,9 +19,9 @@
     "rollup": "rollup -c scripts/rollup.config.js",
     "postrollup": "echo Finished rollup",
     "silence": "npm config set loglevel silent",
-    "start": "ws --http2 --key key.pem --cert cert.crt",
     "test": "npm run eslint",
-    "watch": "rollup -c scripts/rollup.watch.config.js -w"
+    "watch": "rollup -c scripts/rollup.watch.config.js -w",
+    "ws": "ws"
   },
   "repository": {
     "type": "git",
