@@ -5,5 +5,8 @@ import interceptDestroy from './interceptDestroy';
 export default function injectProfileDropItems() {
   injectStoreItems();
   injectMoveItems();
-  interceptDestroy();
+  // eslint-disable-next-line no-unused-labels, no-labels
+  devLbl: { //  interceptDestroy
+    interceptDestroy();
+  }
 }

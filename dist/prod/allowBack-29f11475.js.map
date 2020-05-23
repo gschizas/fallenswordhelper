@@ -1,0 +1,1 @@
+{"version":3,"file":"allowBack-29f11475.js","sources":["src/modules/guide/allowBack.js"],"sourcesContent":null,"names":["updateUrl","evt","preventDefault","dontPost","onclick","querySelector"],"mappings":";;AAIA,SAASA,EAAUC,GACjBA,EAAIC,iBACJC,mBAGa,WACbC,EAAQC,EAAc,wBAAyBL","sourceRoot":"https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/15.24.11"}
