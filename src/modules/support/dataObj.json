@@ -185,5 +185,6 @@
   "showBuffInfo":false,
   "enableHistoryCompressor":false,
   "enableStamBars":false,
-  "appBad": [0, false]
+  "appBad": [0, false],
+  "ajaxifyDestroy": false
 }

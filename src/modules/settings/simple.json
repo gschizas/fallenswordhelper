@@ -267,5 +267,10 @@
   "enableStamBars":{
     "helpTitle":"Stamina Bars",
     "helpText":"This shows stamina as a coloured bar."
+  },
+  "ajaxifyDestroy":{
+    "helpTitle":"Ajaxify Destroy",
+    "helpText":"Destroy items without page redirect.<br>This also allows you to drop more than 100 items",
+    "network":true
   }
 }
