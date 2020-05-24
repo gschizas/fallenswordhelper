@@ -1,1 +1,0 @@
-{"version":3,"file":"closest-42af84ad.js","sources":["src/modules/common/closest.js"],"sourcesContent":null,"names":["closest","tag","el","tagName","parentNode"],"mappings":"AAAe,SAASA,EAAQC,EAAKC,GACnC,OAAIA,EAAGC,UAAYF,EAAcC,EAC1BF,EAAQC,EAAKC,EAAGE","sourceRoot":"https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/15.24.13"}
