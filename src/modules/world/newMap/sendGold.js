@@ -1,33 +1,10 @@
 import addCommas from '../../system/addCommas';
+import { defPlayerGold } from '../../support/constants';
+import doSendGold from './doSendGold';
 import getValue from '../../system/getValue';
-import indexAjaxData from '../../ajax/indexAjaxData';
-import infoBoxFrom from '../../common/InfoBoxFrom';
-import setValue from '../../system/setValue';
-import { defFetchPlayerStats, defPlayerGold } from '../../support/constants';
+import { initSendGoldOnWorld, sendGoldonWorld } from './sendGoldPref';
 
 let goldAmount;
-let sendGoldonWorld;
-
-function doneSendGold(data) {
-  const info = infoBoxFrom(data);
-  if (info === 'You successfully sent gold!' || info === '') {
-    setValue('currentGoldSentTotal',
-      parseInt(getValue('currentGoldSentTotal'), 10)
-      + parseInt(getValue('goldAmount'), 10));
-    GameData.fetch(defFetchPlayerStats);
-  }
-}
-
-export function doSendGold() { // jQuery
-  if (!sendGoldonWorld) { return; }
-  indexAjaxData({
-    cmd: 'trade',
-    subcmd: 'sendgold',
-    xc: window.ajaxXC,
-    target_username: $('#HelperSendTo').html(),
-    gold_amount: $('#HelperSendAmt').html().replace(/[^\d]/g, ''),
-  }).then(doneSendGold);
-}
 
 function statbarGoldBackground(colour) {
   $('#statbar-gold').css('background-color', colour);
@@ -63,7 +40,7 @@ function prepareSendGoldOnWorld() {
   $.subscribe(defPlayerGold, updateSendGoldOnWorld);
 }
 
-export function injectSendGoldOnWorld() { // jQuery
-  sendGoldonWorld = getValue('sendGoldonWorld');
+export default function injectSendGoldOnWorld() { // jQuery
+  initSendGoldOnWorld();
   if (sendGoldonWorld) { prepareSendGoldOnWorld(); }
 }

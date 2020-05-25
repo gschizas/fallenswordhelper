@@ -2,7 +2,7 @@ import backpack from './backpack';
 import combatSetKey from './combatSetKey';
 import createGroup from './createGroup';
 import doRepair from './doRepair';
-import { doSendGold } from '../../world/newMap/sendGold';
+import doSendGold from '../../world/newMap/doSendGold';
 import fastWearMgr from './fastWearMgr';
 import gotoGuild from './gotoGuild';
 import joinAllGroup from './joinAllGroup';
@@ -40,7 +40,7 @@ const keyLookup = [
 ];
 
 function handleKey(key) {
-  const mapping = keyLookup.find((arr) => key === arr[0]);
+  const mapping = keyLookup.find(([mapped]) => key === mapped);
   if (mapping) { mapping[1](mapping[2]); }
 }
 

@@ -10,7 +10,7 @@ import hideQTip from '../../common/hideQTip';
 import hideTitanCombatResults from './hideTitanCombatResults';
 import initButtons from './buttons/buttons';
 import injectRelic from './relic/relic';
-import { injectSendGoldOnWorld } from './sendGold';
+import injectSendGoldOnWorld from './sendGold';
 import insertElement from '../../common/insertElement';
 import interceptMouseEvents from './creatureInfo/interceptMouseEvents';
 import onWorld from './onWorld';
