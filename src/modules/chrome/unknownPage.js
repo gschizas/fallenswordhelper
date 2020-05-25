@@ -1,12 +1,20 @@
 import getElementById from '../common/getElement';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import querySelector from '../common/querySelector';
 import querySelectorAll from '../common/querySelectorAll';
 import { screenview } from '../support/fshGa';
 import updateBuffLog from '../notepad/buffLog/updateBuffLog';
 import xPath from '../common/xPath';
-import { injectQuestBookFull, inventing } from './pageSwitcher/loader';
+import { injectQuestBookFull, inventing, news } from './pageSwitcher/loader';
 
 const unknown = [
+  [
+    () => querySelector('.news_left_column'),
+    () => {
+      screenview('unknown.news');
+      news();
+    },
+  ],
   [
     () => getElementById('quickbuff-report'),
     () => {

@@ -53,7 +53,9 @@ function lastReset() {
 
 export default function ladder() {
   allowBack();
-  lastReset();
+  if (getValue('trackLadderReset')) {
+    lastReset();
+  }
   // eslint-disable-next-line no-unused-labels, no-labels
   devLbl: { //  Ladder Margin
     margin();

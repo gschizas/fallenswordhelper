@@ -272,5 +272,37 @@
     "helpTitle":"Ajaxify Destroy",
     "helpText":"Destroy items without page redirect.<br>This also allows you to drop more than 100 items",
     "network":true
+  },
+  "statBarLinks":{
+    "helpTitle":"Statbar links",
+    "helpText":"This changes the statbar links to allow middle button clicks."
+  },
+  "staminaCalculator":{
+    "helpTitle":"Stamina Calculator",
+    "helpText":"This displays when you will reach max stamina thru stamina gain."
+  },
+  "levelUpCalculator":{
+    "helpTitle":"Level Up Calculator",
+    "helpText":"This displays when you will reach your next level thru XP gain."
+  },
+  "resizeQuickBuff":{
+    "helpTitle":"Resize Quick Buff Window",
+    "helpText":"This makes the quick buff window a bit bigger."
+  },
+  "joinAllLink":{
+    "helpTitle":"Join All Groups Link",
+    "helpText":"This makes a notification with a join all groups link in it when there are new groups."
+  },
+  "pageTwoLinks":{
+    "helpTitle":"Archive Page 2 Links",
+    "helpText":"This makes links to page 2 of each archive on the news page."
+  },
+  "trackLadderReset":{
+    "helpTitle":"Track Ladder Reset",
+    "helpText":"This tracks ladder resets from logs and news articles."
+  },
+  "addUfsgLinks":{
+    "helpTitle":"Add UFSG Links to News",
+    "helpText":"This adds UFSG links to news articles."
   }
 }

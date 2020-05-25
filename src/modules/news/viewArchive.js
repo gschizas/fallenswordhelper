@@ -12,9 +12,10 @@ import { simpleCheckbox } from '../settings/simpleCheckbox';
 
 const ladderResetPref = 'lastLadderReset';
 let lastLadderReset;
+let trackLadderReset;
 
 function checkForPvPLadder(row) {
-  if (containsText('PvP Ladder', row.children[1].children[0])) {
+  if (trackLadderReset && containsText('PvP Ladder', row.children[1].children[0])) {
     const logTime = parseDateAsTimestamp(
       getText(row.children[1].children[2]).replace('Posted: ', ''),
     );
@@ -33,6 +34,7 @@ function setupPref(prefName, rowInjector) {
 
 export default function viewArchive() {
   lastLadderReset = getValue(ladderResetPref);
+  trackLadderReset = getValue('trackLadderReset');
   const prefName = 'collapseNewsArchive';
   const theTables = getElementsByTagName(defTable, pCC);
   if (theTables.length > 2) {

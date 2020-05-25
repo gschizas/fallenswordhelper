@@ -29,9 +29,10 @@ import { getKeys, playerColor, prepareAlliesEnemies } from './playerColour';
 
 function getCalfVars() {
   [
-    'showPvPSummaryInLog',
-    'lastLadderReset',
     'enableChatParsing',
+    'lastLadderReset',
+    'showPvPSummaryInLog',
+    'trackLadderReset',
   ].forEach(getCalfPrefs);
 }
 

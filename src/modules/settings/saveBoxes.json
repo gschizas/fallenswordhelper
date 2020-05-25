@@ -107,5 +107,13 @@
   "showExtraLinks",
   "expandMenuOnKeyPress",
   "highlightPvpProtection",
-  "enableHistoryCompressor"
+  "enableHistoryCompressor",
+  "statBarLinks",
+  "staminaCalculator",
+  "levelUpCalculator",
+  "resizeQuickBuff",
+  "joinAllLink",
+  "pageTwoLinks",
+  "addUfsgLinks",
+  "trackLadderReset"
 ]

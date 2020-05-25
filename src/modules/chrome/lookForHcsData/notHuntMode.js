@@ -5,6 +5,7 @@ import getCalfPrefs from '../../common/getCalfPrefs';
 import getValue from '../../system/getValue';
 import priorityFour from './priorityFour';
 import priorityThree from './priorityThree';
+import runDefault from '../../common/runDefault';
 
 function getEnvVars() {
   [
@@ -66,21 +67,72 @@ function doMoveDailyQuest() {
 //   }
 // }
 
+function statbar() {
+  if (getValue('statBarLinks')) {
+    runDefault(import('../statBar'));
+  }
+}
+
+function staminaCalc() {
+  if (getValue('staminaCalculator')) {
+    runDefault(import('../calcs/injectStaminaCalculator'));
+  }
+}
+
+function levelCalc() {
+  if (getValue('levelUpCalculator')) {
+    runDefault(import('../calcs/injectLevelupCalculator'));
+  }
+}
+
+function fsBoxLog() {
+  if (getValue('fsboxlog')) {
+    runDefault(import('../injectFSBoxLog'));
+  }
+}
+
+function expandQb() {
+  if (getValue('resizeQuickBuff')) {
+    runDefault(import('../interceptQuickBuff'));
+  }
+}
+
+function joinAll() {
+  if (getValue('joinAllLink')) {
+    runDefault(import('../notification/injectJoinAllLink'));
+  }
+}
+
+function guildLogHref() {
+  if (getValue('useNewGuildLog')) {
+    runDefault(import('../changeGuildLogHREF'));
+  }
+}
+
+// move boxes in opposite order that you want them to appear.
+const notHuntModeFunctions = [
+  doMoveGuildList,
+  doMoveAllyList,
+  doMoveDailyQuest,
+  doMoveFsBox,
+  getEnvVars,
+  conditional,
+  priorityThree,
+  priorityFour,
+  statbar,
+  staminaCalc,
+  levelCalc,
+  fsBoxLog,
+  expandQb,
+  joinAll,
+  guildLogHref,
+];
+
 export default function notHuntMode() {
   if (calf.huntingMode) { return; }
-  // move boxes in opposite order that you want them to appear.
   // eslint-disable-next-line no-unused-labels, no-labels
   // devLbl: { //  doMoveXmas
   //   doMoveXmas();
   // }
-  executeAll([
-    doMoveGuildList,
-    doMoveAllyList,
-    doMoveDailyQuest,
-    doMoveFsBox,
-    getEnvVars,
-    conditional,
-    priorityThree,
-    priorityFour,
-  ]);
+  executeAll(notHuntModeFunctions);
 }

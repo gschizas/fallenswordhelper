@@ -27,6 +27,10 @@ const middleBlock = [
 const bottomBlock = [
   'draggableQuickLinks',
   'expandMenuOnKeyPress',
+  'statBarLinks',
+  'staminaCalculator',
+  'levelUpCalculator',
+  'resizeQuickBuff',
 ];
 
 function guildInfoWidgets() {

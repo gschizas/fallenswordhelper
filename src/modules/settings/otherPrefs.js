@@ -31,13 +31,19 @@ function groupJoinSize() {
 export default function otherPrefs() {
   // Other prefs
   return `<tr><th colspan="2"><b>Other preferences</b></th></tr>${
-    simpleCheckbox('autoFillMinBidPrice')
-  }${recipeHiding()
-  }${bunchOfSimple([
-    'hideRelicOffline',
-    'enterForSendMessage',
-    'navigateToLogAfterMsg',
-  ])
-  }${groupJoinSize()
-  }${simpleCheckbox('moveComposingButtons')}`;
+    simpleCheckbox('autoFillMinBidPrice')}${
+    recipeHiding()}${
+    bunchOfSimple([
+      'hideRelicOffline',
+      'enterForSendMessage',
+      'navigateToLogAfterMsg',
+      'joinAllLink',
+    ])}${
+    groupJoinSize()}${
+    bunchOfSimple([
+      'moveComposingButtons',
+      'pageTwoLinks',
+      'addUfsgLinks',
+      'trackLadderReset',
+    ])}`;
 }

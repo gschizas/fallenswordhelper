@@ -8,6 +8,7 @@ export const injectProfileDropItems = () => { runDefault(import('../../profile/d
 export const injectQuestBookFull = () => { runDefault(import('../../questbook/injectQuestBookFull')); };
 export const injectStoreItems = () => { runDefault(import('../../profile/dropitems/injectStoreItems')); };
 export const inventing = () => { runDefault(import('../../inventing/inventing')); };
+export const news = () => { runDefault(import('../../news/news')); };
 export const viewArchive = () => { runDefault(import('../../news/viewArchive')); };
 
 export const injectBuffLog = (i) => { import('../../notepad/buffLog/injectBuffLog').then((m) => m.default(i)); };

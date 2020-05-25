@@ -186,5 +186,13 @@
   "enableHistoryCompressor":false,
   "enableStamBars":false,
   "appBad": [0, false],
-  "ajaxifyDestroy": false
+  "ajaxifyDestroy": false,
+  "statBarLinks": false,
+  "staminaCalculator": false,
+  "levelUpCalculator": false,
+  "resizeQuickBuff": false,
+  "joinAllLink": false,
+  "pageTwoLinks": false,
+  "addUfsgLinks": false,
+  "trackLadderReset": false
 }
