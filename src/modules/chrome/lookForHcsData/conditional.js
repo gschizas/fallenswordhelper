@@ -1,54 +1,47 @@
-import add from '../../support/task';
-import addGuildInfoWidgets from '../widgets/addGuildInfoWidgets';
-import addOnlineAlliesWidgets from '../widgets/addOnlineAlliesWidgets';
 import calf from '../../support/calf';
-import injectComposeAlert from '../../composing/injectComposeAlert';
-import injectTempleAlert from '../notification/injectTempleAlert';
-import injectUpgradeAlert from '../notification/injectUpgradeAlert';
-import prepareAllyEnemyList from '../allyEnemy/allyEnemy';
-import prepareBountyData from '../activeWantedBounties/activeWantedBounties';
+import runDefault from '../../common/runDefault';
 
 function callAllyEnemy() {
   if (calf.enableAllyOnlineList
       || calf.enableEnemyOnlineList) {
-    add(3, prepareAllyEnemyList);
+    runDefault(import('../allyEnemy/allyEnemy'));
   }
 }
 
 function callBounties() {
   if (calf.enableWantedList
       || calf.enableActiveBountyList) {
-    add(3, prepareBountyData);
+    runDefault(import('../activeWantedBounties/activeWantedBounties'));
   }
 }
 
 function callGuildInfo() {
   if (calf.enableGuildInfoWidgets) {
-    add(3, addGuildInfoWidgets);
+    runDefault(import('../widgets/addGuildInfoWidgets'));
   }
 }
 
 function callAllies() {
   if (calf.enableOnlineAlliesWidgets) {
-    add(3, addOnlineAlliesWidgets);
+    runDefault(import('../widgets/addOnlineAlliesWidgets'));
   }
 }
 
 function callTemple() {
   if (calf.enableTempleAlert) {
-    add(3, injectTempleAlert);
+    runDefault(import('../notification/injectTempleAlert'));
   }
 }
 
 function callUpgrade() {
   if (calf.enableUpgradeAlert) {
-    add(3, injectUpgradeAlert);
+    runDefault(import('../notification/injectUpgradeAlert'));
   }
 }
 
 function callComposing() {
   if (calf.enableComposingAlert) {
-    add(3, injectComposeAlert);
+    runDefault(import('../../composing/injectComposeAlert'));
   }
 }
 
