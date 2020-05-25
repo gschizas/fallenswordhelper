@@ -31,11 +31,19 @@ const urlPatch = [
   [/\?ref=[0-9]+/],
 ];
 
+let autoRefferer = false;
+let haveRefferer = false;
+
 function isAuto() {
-  let docRef = document.referrer
-    .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
-  if (docRef) { [, docRef] = docRef; }
-  return refAry.includes(docRef);
+  if (!haveRefferer) {
+    const referrer = document.referrer
+      .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
+    let docRef;
+    if (referrer) { [, docRef] = referrer; }
+    autoRefferer = refAry.includes(docRef);
+    haveRefferer = true;
+  }
+  return autoRefferer;
 }
 
 function noGa() {
@@ -72,12 +80,12 @@ function stripExtra(acc, curr) {
 function fixupUrl() {
   const origPath = window.location.pathname + window.location.search;
   const page = urlPatch.reduce(stripExtra, origPath);
+  ga('fshApp.set', 'screenName', page);
   ga('fsh.set', 'page', page);
 }
 
 export function setup() {
   if (noGa()) { return; }
-
   ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
     userId: playerId(),
     siteSpeedSampleRate: 10,
@@ -94,7 +102,8 @@ export function setup() {
 
 export function screenview(funcName) {
   if (noGa()) { return; }
-  ga('fshApp.send', 'screenview', { screenName: funcName });
+  ga('fshApp.set', 'screenName', funcName);
+  ga('fshApp.send', 'screenview');
 }
 
 export function sendEvent(eventCategory, eventAction, eventLabel) {
