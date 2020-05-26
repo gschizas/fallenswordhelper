@@ -125,5 +125,12 @@
   "buffLogLink",
   "combatLogLink",
   "creatureLogLink",
-  "quickLinksLink"
+  "quickLinksLink",
+  "auctionSearchLink",
+  "onlinePlayersLink",
+  "findOtherLink",
+  "findBuffsLink",
+  "guildInventoryLink",
+  "newGuildLogLink",
+  "topRatedLink"
 ]

@@ -8,6 +8,13 @@ const theLinks = [
   'combatLogLink',
   'creatureLogLink',
   'quickLinksLink',
+  'auctionSearchLink',
+  'onlinePlayersLink',
+  'findOtherLink',
+  'findBuffsLink',
+  'guildInventoryLink',
+  'newGuildLogLink',
+  'topRatedLink',
 ];
 
 export default function leftHandLinks() {

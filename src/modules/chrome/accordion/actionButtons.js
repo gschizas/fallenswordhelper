@@ -1,4 +1,5 @@
 import anchorButton from './anchorButton';
+import getValue from '../../system/getValue';
 import {
   injectAuctionSearch,
   injectFindBuffs,
@@ -7,12 +8,20 @@ import {
 } from '../pageSwitcher/loader';
 
 export default function actionButtons() {
-  anchorButton('2', 'AH Quick Search', injectAuctionSearch,
-    'nav-actions-trade-auctionhouse');
-  anchorButton('2', 'Online Players', injectOnlinePlayers,
-    'nav-actions-interaction-findplayer');
-  anchorButton('2', 'Find Other', injectFindOther,
-    'nav-actions-interaction-findplayer');
-  anchorButton('2', 'Find Buffs', injectFindBuffs,
-    'nav-actions-interaction-findplayer');
+  if (getValue('auctionSearchLink')) {
+    anchorButton('2', 'AH Quick Search', injectAuctionSearch,
+      'nav-actions-trade-auctionhouse');
+  }
+  if (getValue('onlinePlayersLink')) {
+    anchorButton('2', 'Online Players', injectOnlinePlayers,
+      'nav-actions-interaction-findplayer');
+  }
+  if (getValue('findOtherLink')) {
+    anchorButton('2', 'Find Other', injectFindOther,
+      'nav-actions-interaction-findplayer');
+  }
+  if (getValue('findBuffsLink')) {
+    anchorButton('2', 'Find Buffs', injectFindBuffs,
+      'nav-actions-interaction-findplayer');
+  }
 }

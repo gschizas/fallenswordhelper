@@ -34,7 +34,7 @@ function updateScavLink() {
 }
 
 function guildInventory() {
-  if (currentGuildId()) {
+  if (getValue('guildInventoryLink') && currentGuildId()) {
     insertAfterParent('nav-guild-storehouse-inventory', insertHtmlAfterEnd,
       '<li class="nav-level-2"><a class="nav-link" '
       + `id="nav-guild-guildinvmanager" href="${
@@ -43,7 +43,7 @@ function guildInventory() {
 }
 
 function newGuildLogLink() {
-  if (currentGuildId() && !getValue('useNewGuildLog')) {
+  if (getValue('newGuildLogLink') && currentGuildId() && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
     insertAfterParent('nav-guild-ledger-guildlog', insertHtmlBeforeBegin,
       `<li class="nav-level-2"><a class="nav-link" href="${
@@ -52,9 +52,11 @@ function newGuildLogLink() {
 }
 
 function topRatedLink() {
-  insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
-    '<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" '
+  if (getValue('topRatedLink')) {
+    insertAfterParent('nav-toprated-players-level', insertHtmlAfterEnd,
+      '<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" '
     + `href="${cmdUrl}toprated${defSubcmd}xp">Top 250 Players</a></li>`);
+  }
 }
 
 function updateLinks() {
@@ -65,10 +67,10 @@ function updateLinks() {
 function injectItems() {
   executeAll([
     characterButtons,
+    actionButtons,
     guildInventory,
     newGuildLogLink,
     topRatedLink,
-    actionButtons,
   ]);
 }
 

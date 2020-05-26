@@ -319,11 +319,11 @@
   },
   "recipeManagerLink":{
     "helpTitle":"Recipe Manager",
-    "helpText":"Recipe Manager Link - Helper Menu"
+    "helpText":"Recipe Manager Link (Helper Menu)"
   },
   "medalGuideLink":{
     "helpTitle":"Medal Guide",
-    "helpText":"Medal Guide Link - Profile Page"
+    "helpText":"Medal Guide Link (Profile Page)"
   },
   "inventoryManagerLink":{
     "helpTitle":"Inventory Manager",
@@ -331,18 +331,46 @@
   },
   "buffLogLink":{
     "helpTitle":"Buff Log",
-    "helpText":"Buff Log Link - Helper Menu"
+    "helpText":"Buff Log Link (Helper Menu)"
   },
   "combatLogLink":{
     "helpTitle":"Combat Log",
-    "helpText":"Combat Log Link - Helper Menu"
+    "helpText":"Combat Log Link (Helper Menu)"
   },
   "creatureLogLink":{
     "helpTitle":"Creature Log",
-    "helpText":"Creature Log Link - Helper Menu"
+    "helpText":"Creature Log Link (Helper Menu)"
   },
   "quickLinksLink":{
     "helpTitle":"Quick Links",
-    "helpText":"Quick Links Link - Helper Menu"
+    "helpText":"Quick Links Link (Helper Menu)"
+  },
+  "auctionSearchLink":{
+    "helpTitle":"AH Quick Search",
+    "helpText":"AH Quick Search Link (Helper Menu)"
+  },
+  "onlinePlayersLink":{
+    "helpTitle":"Online Players",
+    "helpText":"Online Players Link (Helper Menu)"
+  },
+  "findOtherLink":{
+    "helpTitle":"Find Other",
+    "helpText":"Find Other Link (Helper Menu)"
+  },
+  "findBuffsLink":{
+    "helpTitle":"Find Buffs",
+    "helpText":"Find Buffs Link (Helper Menu)"
+  },
+  "guildInventoryLink":{
+    "helpTitle":"Guild Inventory",
+    "helpText":"Guild Inventory Link"
+  },
+  "newGuildLogLink":{
+    "helpTitle":"New Guild Log",
+    "helpText":"New Guild Log Link<br>When you are not using new guild log by default"
+  },
+  "topRatedLink":{
+    "helpTitle":"Top 250 Players",
+    "helpText":"Top 250 Players Link (Top 100 Players)"
   }
 }

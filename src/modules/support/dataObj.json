@@ -204,5 +204,12 @@
   "buffLogLink": false,
   "combatLogLink": false,
   "creatureLogLink": false,
-  "quickLinksLink": false
+  "quickLinksLink": false,
+  "auctionSearchLink": false,
+  "onlinePlayersLink": false,
+  "findOtherLink": false,
+  "findBuffsLink": false,
+  "guildInventoryLink": false,
+  "newGuildLogLink": false,
+  "topRatedLink": false
 }
