@@ -327,7 +327,7 @@
   },
   "inventoryManagerLink":{
     "helpTitle":"Inventory Manager",
-    "helpText":"Inventory Manager Link"
+    "helpText":"Inventory Manager Link (Helper Menu)"
   },
   "buffLogLink":{
     "helpTitle":"Buff Log",
@@ -363,11 +363,11 @@
   },
   "guildInventoryLink":{
     "helpTitle":"Guild Inventory",
-    "helpText":"Guild Inventory Link"
+    "helpText":"Guild Inventory Link (Helper Menu)"
   },
   "newGuildLogLink":{
     "helpTitle":"New Guild Log",
-    "helpText":"New Guild Log Link<br>When you are not using new guild log by default"
+    "helpText":"New Guild Log Link (Helper Menu)<br>When you are not using new guild log by default"
   },
   "topRatedLink":{
     "helpTitle":"Top 250 Players",
