@@ -4,6 +4,7 @@ import equipPrefs from './equipPrefs';
 import functionPasses from '../common/functionPasses';
 import generalPrefs from './generalPrefs';
 import guildPrefs from './guildPrefs';
+import leftHandLinks from './leftHandLinks';
 import logPrefs from './logPrefs';
 import otherPrefs from './otherPrefs';
 import prefs from './worldPrefs';
@@ -62,6 +63,7 @@ function corePrefs() {
   return [
     // General Prefs
     generalPrefs,
+    leftHandLinks,
     // Guild Manage
     guildPrefs,
     // World Screen

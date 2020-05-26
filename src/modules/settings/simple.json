@@ -304,5 +304,45 @@
   "addUfsgLinks":{
     "helpTitle":"Add UFSG Links to News",
     "helpText":"This adds UFSG links to news articles."
+  },
+  "addServerNode":{
+    "helpTitle":"Add Server Node to Top Stats",
+    "helpText":"This adds clickable online players and server node to top stats<br>if you have the options 'Show Game Stats At Top' enabled,<br>'Hide Games Stats' disabled and<br>'Game Stats Summary Only' disabled.<br>It also hides the Game Stats box."
+  },
+  "addScoutTowerLink":{
+    "helpTitle":"Add Scout Tower Link",
+    "helpText":"This adds a Scout Tower link to the Spoils of War info box."
+  },
+  "storeLastScavPage":{
+    "helpTitle":"Store Last Scavenging Page",
+    "helpText":"This will remember last used scavenging settings."
+  },
+  "recipeManagerLink":{
+    "helpTitle":"Recipe Manager",
+    "helpText":"Recipe Manager Link - Helper Menu"
+  },
+  "medalGuideLink":{
+    "helpTitle":"Medal Guide",
+    "helpText":"Medal Guide Link - Profile Page"
+  },
+  "inventoryManagerLink":{
+    "helpTitle":"Inventory Manager",
+    "helpText":"Inventory Manager Link"
+  },
+  "buffLogLink":{
+    "helpTitle":"Buff Log",
+    "helpText":"Buff Log Link - Helper Menu"
+  },
+  "combatLogLink":{
+    "helpTitle":"Combat Log",
+    "helpText":"Combat Log Link - Helper Menu"
+  },
+  "creatureLogLink":{
+    "helpTitle":"Creature Log",
+    "helpText":"Creature Log Link - Helper Menu"
+  },
+  "quickLinksLink":{
+    "helpTitle":"Quick Links",
+    "helpText":"Quick Links Link - Helper Menu"
   }
 }

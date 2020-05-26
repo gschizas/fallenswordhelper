@@ -194,5 +194,15 @@
   "joinAllLink": false,
   "pageTwoLinks": false,
   "addUfsgLinks": false,
-  "trackLadderReset": false
+  "trackLadderReset": false,
+  "addServerNode": false,
+  "addScoutTowerLink": false,
+  "storeLastScavPage": false,
+  "recipeManagerLink": false,
+  "medalGuideLink": false,
+  "inventoryManagerLink": false,
+  "buffLogLink": false,
+  "combatLogLink": false,
+  "creatureLogLink": false,
+  "quickLinksLink": false
 }

@@ -20,14 +20,14 @@ import {
 
 function updateQuestLink() {
   const lastActiveQuestPage = getValue('lastActiveQuestPage');
-  if (lastActiveQuestPage.length > 0) {
+  if (getValue('storeLastQuestPage') && lastActiveQuestPage.length > 0) {
     getElementById('nav-character-questbook').href = lastActiveQuestPage;
   }
 }
 
 function updateScavLink() {
   const lastScavPage = getValue('lastScavPage');
-  if (lastScavPage.length > 0) {
+  if (getValue('storeLastScavPage') && lastScavPage.length > 0) {
     getElementById('nav-actions-artisanship-scavenging').href = lastScavPage;
   }
 }
@@ -56,10 +56,13 @@ function topRatedLink() {
     + `href="${cmdUrl}toprated${defSubcmd}xp">Top 250 Players</a></li>`);
 }
 
+function updateLinks() {
+  updateQuestLink();
+  updateScavLink();
+}
+
 function injectItems() {
   executeAll([
-    updateQuestLink,
-    updateScavLink,
     characterButtons,
     guildInventory,
     newGuildLogLink,
@@ -71,6 +74,7 @@ function injectItems() {
 function doAccordion() {
   const [theNav, myNav] = preFlight();
   if (theNav && myNav) {
+    updateLinks();
     injectItems();
     adjustHeight(theNav, myNav);
     navMenu(myNav);

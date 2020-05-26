@@ -31,6 +31,8 @@ const bottomBlock = [
   'staminaCalculator',
   'levelUpCalculator',
   'resizeQuickBuff',
+  'addServerNode',
+  'addScoutTowerLink',
 ];
 
 function guildInfoWidgets() {

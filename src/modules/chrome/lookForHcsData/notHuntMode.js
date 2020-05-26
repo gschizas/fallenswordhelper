@@ -109,6 +109,18 @@ function guildLogHref() {
   }
 }
 
+function gameStats() {
+  if (getValue('addServerNode')) {
+    runDefault(import('../injectServerNode'));
+  }
+}
+
+function scoutTower() {
+  if (getValue('addScoutTowerLink')) {
+    runDefault(import('../scoutTowerLink'));
+  }
+}
+
 // move boxes in opposite order that you want them to appear.
 const notHuntModeFunctions = [
   doMoveGuildList,
@@ -126,6 +138,8 @@ const notHuntModeFunctions = [
   expandQb,
   joinAll,
   guildLogHref,
+  gameStats,
+  scoutTower,
 ];
 
 export default function notHuntMode() {

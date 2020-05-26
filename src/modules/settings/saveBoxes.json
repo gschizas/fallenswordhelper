@@ -115,5 +115,15 @@
   "joinAllLink",
   "pageTwoLinks",
   "addUfsgLinks",
-  "trackLadderReset"
+  "trackLadderReset",
+  "addServerNode",
+  "addScoutTowerLink",
+  "storeLastScavPage",
+  "recipeManagerLink",
+  "medalGuideLink",
+  "inventoryManagerLink",
+  "buffLogLink",
+  "combatLogLink",
+  "creatureLogLink",
+  "quickLinksLink"
 ]

@@ -15,37 +15,62 @@ import {
   injectRecipeManager,
 } from '../pageSwitcher/loader';
 
+const recipeManagerLink = () => {
+  if (getValue('recipeManagerLink')) {
+    anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
+  }
+};
+
+const inventoryManagerLink = () => {
+  if (getValue('inventoryManagerLink')) {
+    insertAfterParent('nav-character-log', insertHtmlAfterEnd,
+      '<li class="nav-level-1"><a class="nav-link" '
+      + `id="nav-character-invmanager" href="${
+        notepadBlankUrl}invmanagernew">Inventory Manager</a></li>`);
+  }
+};
+
+const medalGuideLink = () => {
+  if (getValue('medalGuideLink')) {
+    insertAfterParent('nav-character-log', insertHtmlAfterEnd,
+      '<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide"'
+        + ` href="${profileUrl}${defSubcmd}medalguide">Medal Guide</a></li>`);
+  }
+};
+
 function buffLogLink() {
-  if (getValue('keepBuffLog')) {
+  if (getValue('buffLogLink') && getValue('keepBuffLog')) {
     anchorButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
 function combatLogLink() {
-  if (getValue('keepLogs')) {
+  if (getValue('combatLogLink') && getValue('keepLogs')) {
     anchorButton('1', 'Combat Logs', injectNotepadShowLogs,
       'nav-character-notepad');
   }
 }
 
 function creatureLogLink() {
-  if (getValue('showMonsterLog')) {
+  if (getValue('creatureLogLink') && getValue('showMonsterLog')) {
     anchorButton('1', 'Creature Logs', injectMonsterLog,
       'nav-character-notepad');
   }
 }
 
+function quickLinksLink() {
+  if (getValue('quickLinksLink')) {
+    anchorButton('1', 'Quick Links', injectQuickLinkManager,
+      'nav-character-notepad');
+  }
+}
+
 export default function characterButtons() {
-  anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  insertAfterParent('nav-character-log', insertHtmlAfterEnd,
-    '<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide"'
-    + ` href="${profileUrl}${defSubcmd}medalguide">Medal Guide</a></li>`
-    + '<li class="nav-level-1"><a class="nav-link" '
-    + `id="nav-character-invmanager" href="${
-      notepadBlankUrl}invmanagernew">Inventory Manager</a></li>`);
+  recipeManagerLink();
+  inventoryManagerLink();
+  medalGuideLink();
   buffLogLink();
   combatLogLink();
   creatureLogLink();
-  anchorButton('1', 'Quick Links', injectQuickLinkManager,
-    'nav-character-notepad');
+  quickLinksLink();
 }
