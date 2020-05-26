@@ -5,7 +5,7 @@ import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import setValue from '../system/setValue';
 
 function isLadderReset(aRow) {
-  return aRow.cells[2]
+  return calf.trackLadderReset && aRow.cells[2]
     && /You ranked \w{3} in your PvP Band! You have gained \d x PvP Ladder Token/
       .test(getText(aRow.cells[2]));
 }

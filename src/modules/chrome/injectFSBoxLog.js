@@ -4,7 +4,6 @@ import getElementById from '../common/getElement';
 import getElementsByClassName from '../common/getElementsByClassName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
-import getValue from '../system/getValue';
 import { injectFsBoxContent } from './pageSwitcher/loader';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
@@ -55,12 +54,7 @@ function fSBoxExists(node) {
   insertElement(nodediv, log);
 }
 
-function findFsBox() {
+export default function injectFSBoxLog() {
   const node = getElementById('minibox-fsbox');
   if (jQueryPresent() && node) { fSBoxExists(node); }
-}
-
-export default function injectFSBoxLog() {
-  if (!getValue('fsboxlog')) { return; }
-  findFsBox();
 }

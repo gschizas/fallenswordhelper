@@ -15,37 +15,62 @@ import {
   injectRecipeManager,
 } from '../pageSwitcher/loader';
 
-function buffLogLink() {
-  if (getValue('keepBuffLog')) {
+function recipeManagerLink(linkConfig) {
+  if (linkConfig.recipeManagerLink) {
+    anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
+  }
+}
+
+function inventoryManagerLink(linkConfig) {
+  if (linkConfig.inventoryManagerLink) {
+    insertAfterParent('nav-character-log', insertHtmlAfterEnd,
+      '<li class="nav-level-1"><a class="nav-link" '
+      + `id="nav-character-invmanager" href="${
+        notepadBlankUrl}invmanagernew">Inventory Manager</a></li>`);
+  }
+}
+
+function medalGuideLink(linkConfig) {
+  if (linkConfig.medalGuideLink) {
+    insertAfterParent('nav-character-log', insertHtmlAfterEnd,
+      '<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide"'
+        + ` href="${profileUrl}${defSubcmd}medalguide">Medal Guide</a></li>`);
+  }
+}
+
+function buffLogLink(linkConfig) {
+  if (linkConfig.buffLogLink && getValue('keepBuffLog')) {
     anchorButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
-function combatLogLink() {
-  if (getValue('keepLogs')) {
+function combatLogLink(linkConfig) {
+  if (linkConfig.combatLogLink && getValue('keepLogs')) {
     anchorButton('1', 'Combat Logs', injectNotepadShowLogs,
       'nav-character-notepad');
   }
 }
 
-function creatureLogLink() {
-  if (getValue('showMonsterLog')) {
+function creatureLogLink(linkConfig) {
+  if (linkConfig.creatureLogLink && getValue('showMonsterLog')) {
     anchorButton('1', 'Creature Logs', injectMonsterLog,
       'nav-character-notepad');
   }
 }
 
-export default function characterButtons() {
-  anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
-  insertAfterParent('nav-character-log', insertHtmlAfterEnd,
-    '<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide"'
-    + ` href="${profileUrl}${defSubcmd}medalguide">Medal Guide</a></li>`
-    + '<li class="nav-level-1"><a class="nav-link" '
-    + `id="nav-character-invmanager" href="${
-      notepadBlankUrl}invmanagernew">Inventory Manager</a></li>`);
-  buffLogLink();
-  combatLogLink();
-  creatureLogLink();
-  anchorButton('1', 'Quick Links', injectQuickLinkManager,
-    'nav-character-notepad');
+function quickLinksLink(linkConfig) {
+  if (linkConfig.quickLinksLink) {
+    anchorButton('1', 'Quick Links', injectQuickLinkManager,
+      'nav-character-notepad');
+  }
+}
+
+export default function characterButtons(linkConfig) {
+  recipeManagerLink(linkConfig);
+  inventoryManagerLink(linkConfig);
+  medalGuideLink(linkConfig);
+  buffLogLink(linkConfig);
+  combatLogLink(linkConfig);
+  creatureLogLink(linkConfig);
+  quickLinksLink(linkConfig);
 }

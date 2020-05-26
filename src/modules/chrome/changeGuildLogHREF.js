@@ -1,4 +1,3 @@
-import getValue from '../system/getValue';
 import hideElement from '../common/hideElement';
 import querySelectorArray from '../common/querySelectorArray';
 import {
@@ -30,7 +29,6 @@ function gotGuildLogNodes(guildLogNodes) {
 }
 
 export default function changeGuildLogHREF() {
-  if (!getValue('useNewGuildLog')) { return; }
   const guildLogNodes = querySelectorArray(
     `#pCL a[href="${guildLogUrl}"]`,
   );

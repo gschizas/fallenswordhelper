@@ -1,4 +1,4 @@
-import cmdExport from './export';
+import cmdExport from './cmdExport';
 
 const cache = {};
 

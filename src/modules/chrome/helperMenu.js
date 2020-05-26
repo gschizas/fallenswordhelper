@@ -10,7 +10,6 @@ import jQueryDialog from './jQueryDialog';
 import jQueryPresent from '../common/jQueryPresent';
 import once from '../common/once';
 import onclick from '../common/onclick';
-import { playerIdUrl } from '../support/constants';
 import { sendEvent } from '../support/fshGa';
 import {
   injectAuctionSearch,
@@ -26,6 +25,7 @@ import {
   insertQuickExtract,
   insertQuickWear,
 } from './pageSwitcher/loader';
+import { newGuildLogUrl, notepadBlankUrl, playerIdUrl } from '../support/constants';
 
 const helperMenuBlob = '<div class="column"><h3>Character</h3><ul>'
   + '<li><span class="fshLink">Buff Log</span></li>'
@@ -33,11 +33,15 @@ const helperMenuBlob = '<div class="column"><h3>Character</h3><ul>'
   + '<li><span class="fshLink">Creature Log</span></li>'
   + '<li><span class="fshLink">Recipe Manager</span></li>'
   + '<li><span class="fshLink">Quick Links</span></li>'
+  + `<li><a href="${notepadBlankUrl}invmanagernew">Inventory Manager</a></li>`
   + '</ul><h3>Actions</h3><ul>'
   + '<li><span class="fshLink">Find Buffs</span></li>'
   + '<li><span class="fshLink">Find Other</span></li>'
   + '<li><span class="fshLink">Online Players</span></li>'
   + '<li><span class="fshLink">AH Quick Search</span></li>'
+  + '</ul><h3>Guild</h3><ul>'
+  + `<li><a href="${notepadBlankUrl}guildinvmgr">Guild Inventory</a></li>`
+  + `<li><a href="${newGuildLogUrl}">New Guild Log</a></li>`
   + '</ul><h3>Extra</h3><ul>'
   + '<li><span class="fshLink">Quick Extract</span></li>'
   + '<li><span class="fshLink">Quick Wear</span></li>'
