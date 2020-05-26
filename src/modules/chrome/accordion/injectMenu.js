@@ -7,6 +7,7 @@ import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import insertAfterParent from './insertAfterParent';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
+import insertHtmlBeforeBegin from '../../common/insertHtmlBeforeBegin';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import navMenu from './navMenu';
 import { pCL } from '../../support/layout';
@@ -44,7 +45,7 @@ function guildInventory() {
 function newGuildLogLink() {
   if (currentGuildId() && !getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
-    insertAfterParent('nav-guild-ledger-advisor', insertHtmlAfterEnd,
+    insertAfterParent('nav-guild-ledger-guildlog', insertHtmlBeforeBegin,
       `<li class="nav-level-2"><a class="nav-link" href="${
         newGuildLogUrl}">New Guild Log</a></li>`);
   }
