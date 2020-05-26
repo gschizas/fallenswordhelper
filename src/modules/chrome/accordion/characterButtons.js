@@ -15,62 +15,62 @@ import {
   injectRecipeManager,
 } from '../pageSwitcher/loader';
 
-const recipeManagerLink = () => {
-  if (getValue('recipeManagerLink')) {
+function recipeManagerLink(linkConfig) {
+  if (linkConfig.recipeManagerLink) {
     anchorButton('1', 'Recipe Manager', injectRecipeManager, 'nav-character-log');
   }
-};
+}
 
-const inventoryManagerLink = () => {
-  if (getValue('inventoryManagerLink')) {
+function inventoryManagerLink(linkConfig) {
+  if (linkConfig.inventoryManagerLink) {
     insertAfterParent('nav-character-log', insertHtmlAfterEnd,
       '<li class="nav-level-1"><a class="nav-link" '
       + `id="nav-character-invmanager" href="${
         notepadBlankUrl}invmanagernew">Inventory Manager</a></li>`);
   }
-};
+}
 
-const medalGuideLink = () => {
-  if (getValue('medalGuideLink')) {
+function medalGuideLink(linkConfig) {
+  if (linkConfig.medalGuideLink) {
     insertAfterParent('nav-character-log', insertHtmlAfterEnd,
       '<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide"'
         + ` href="${profileUrl}${defSubcmd}medalguide">Medal Guide</a></li>`);
   }
-};
+}
 
-function buffLogLink() {
-  if (getValue('buffLogLink') && getValue('keepBuffLog')) {
+function buffLogLink(linkConfig) {
+  if (linkConfig.buffLogLink && getValue('keepBuffLog')) {
     anchorButton('1', 'Buff Log', injectBuffLog, 'nav-character-log');
   }
 }
 
-function combatLogLink() {
-  if (getValue('combatLogLink') && getValue('keepLogs')) {
+function combatLogLink(linkConfig) {
+  if (linkConfig.combatLogLink && getValue('keepLogs')) {
     anchorButton('1', 'Combat Logs', injectNotepadShowLogs,
       'nav-character-notepad');
   }
 }
 
-function creatureLogLink() {
-  if (getValue('creatureLogLink') && getValue('showMonsterLog')) {
+function creatureLogLink(linkConfig) {
+  if (linkConfig.creatureLogLink && getValue('showMonsterLog')) {
     anchorButton('1', 'Creature Logs', injectMonsterLog,
       'nav-character-notepad');
   }
 }
 
-function quickLinksLink() {
-  if (getValue('quickLinksLink')) {
+function quickLinksLink(linkConfig) {
+  if (linkConfig.quickLinksLink) {
     anchorButton('1', 'Quick Links', injectQuickLinkManager,
       'nav-character-notepad');
   }
 }
 
-export default function characterButtons() {
-  recipeManagerLink();
-  inventoryManagerLink();
-  medalGuideLink();
-  buffLogLink();
-  combatLogLink();
-  creatureLogLink();
-  quickLinksLink();
+export default function characterButtons(linkConfig) {
+  recipeManagerLink(linkConfig);
+  inventoryManagerLink(linkConfig);
+  medalGuideLink(linkConfig);
+  buffLogLink(linkConfig);
+  combatLogLink(linkConfig);
+  creatureLogLink(linkConfig);
+  quickLinksLink(linkConfig);
 }

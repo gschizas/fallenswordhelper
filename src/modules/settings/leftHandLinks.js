@@ -1,21 +1,5 @@
 import bunchOfSimple from './bunchOfSimple';
-
-const theLinks = [
-  'recipeManagerLink',
-  'medalGuideLink',
-  'inventoryManagerLink',
-  'buffLogLink',
-  'combatLogLink',
-  'creatureLogLink',
-  'quickLinksLink',
-  'auctionSearchLink',
-  'onlinePlayersLink',
-  'findOtherLink',
-  'findBuffsLink',
-  'guildInventoryLink',
-  'newGuildLogLink',
-  'topRatedLink',
-];
+import theLinks from './leftHandLinks.json';
 
 export default function leftHandLinks() {
   return '<tr><th colspan="2"><b>Left Hand Menu Additional Links</b></th></tr>'
