@@ -6,7 +6,6 @@ import getValue from '../../system/getValue';
 import insertAfterParent from './insertAfterParent';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
 import insertHtmlBeforeBegin from '../../common/insertHtmlBeforeBegin';
-import navMenu from './navMenu';
 import {
   cmdUrl,
   defSubcmd,
@@ -47,5 +46,4 @@ export default function injectItems(theNav, myNav, linkConfig) {
   newGuildLogLink(linkConfig);
   topRatedLink(linkConfig);
   adjustHeight(theNav, myNav);
-  navMenu(myNav);
 }

@@ -2,6 +2,7 @@ import fromEntries from '../../common/fromEntries';
 import getElementById from '../../common/getElement';
 import getValue from '../../system/getValue';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
+import navMenu from './navMenu';
 import { pCL } from '../../support/layout';
 import preFlight from './preFlight';
 import theLinks from '../../settings/leftHandLinks.json';
@@ -38,6 +39,7 @@ function doAccordion() {
   if (theNav && myNav) {
     updateLinks();
     getLinkConfig(theNav, myNav);
+    navMenu(myNav);
   }
 }
 
