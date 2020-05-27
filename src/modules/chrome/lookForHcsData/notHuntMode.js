@@ -1,9 +1,10 @@
 import calf from '../../support/calf';
 import conditional from './conditional';
+import { defEnableGuildActivityTracker } from '../../support/constants';
 import executeAll from '../../common/executeAll';
 import getCalfPrefs from '../../common/getCalfPrefs';
 import getValue from '../../system/getValue';
-import priorityFour from './priorityFour';
+import jQueryPresent from '../../common/jQueryPresent';
 import priorityThree from './priorityThree';
 import runDefault from '../../common/runDefault';
 
@@ -121,6 +122,18 @@ function scoutTower() {
   }
 }
 
+function guildActivityTracker() {
+  if (jQueryPresent() && getValue(defEnableGuildActivityTracker)) {
+    runDefault(import('../../guild/guildActivity'));
+  }
+}
+
+function seTracker() {
+  if (jQueryPresent() && calf.enableSeTracker && calf.cmd !== 'superelite') {
+    import('../../seLog/seLog').then((m) => m.seLog());
+  }
+}
+
 // move boxes in opposite order that you want them to appear.
 const notHuntModeFunctions = [
   doMoveGuildList,
@@ -130,7 +143,6 @@ const notHuntModeFunctions = [
   getEnvVars,
   conditional,
   priorityThree,
-  priorityFour,
   statbar,
   staminaCalc,
   levelCalc,
@@ -140,6 +152,8 @@ const notHuntModeFunctions = [
   guildLogHref,
   gameStats,
   scoutTower,
+  guildActivityTracker,
+  seTracker,
 ];
 
 export default function notHuntMode() {

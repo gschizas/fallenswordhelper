@@ -1,6 +1,4 @@
-import calf from '../support/calf';
 import daSuperElite from '../_dataAccess/daSuperElite';
-import jQueryPresent from '../common/jQueryPresent';
 import { nowSecs } from '../support/now';
 import partial from '../common/partial';
 import { get, set } from '../system/idb';
@@ -79,12 +77,6 @@ export function getFshSeLog() { // jQuery.min
   return get('fsh_seLog').then(gotLog);
 }
 
-function shouldLog() {
-  return jQueryPresent() && calf.enableSeTracker && calf.cmd !== 'superelite';
-}
-
 export function seLog() { // jQuery.min
-  if (shouldLog()) {
-    getFshSeLog().then(setupBackgroundCheck);
-  }
+  getFshSeLog().then(setupBackgroundCheck);
 }

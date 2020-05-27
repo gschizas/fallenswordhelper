@@ -1,7 +1,5 @@
 import daGuildManage from '../_dataAccess/daGuildManage';
 import fallback from '../system/fallback';
-import getValue from '../system/getValue';
-import jQueryPresent from '../common/jQueryPresent';
 import lastActivityToDays from '../common/lastActivityToDays';
 import { nowSecs } from '../support/now';
 import partial from '../common/partial';
@@ -109,7 +107,5 @@ function gotActivity(data) { // jQuery.min
 }
 
 export default function guildActivity() { // jQuery.min
-  if (jQueryPresent() && getValue('enableGuildActivityTracker')) {
-    get('fsh_guildActivity').then(gotActivity);
-  }
+  get('fsh_guildActivity').then(gotActivity);
 }
