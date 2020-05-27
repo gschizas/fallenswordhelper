@@ -56,7 +56,6 @@
   "highlightGvGPlayersNearMyLvl":false,
   "detailedConflictInfo":false,
   "gameHelpLink":true,
-  "navigateToLogAfterMsg":false,
   "enableAllyOnlineList":false,
   "enableEnemyOnlineList":false,
   "allyEnemyOnlineRefreshTime":300,
@@ -211,5 +210,6 @@
   "findBuffsLink": false,
   "guildInventoryLink": false,
   "newGuildLogLink": false,
-  "topRatedLink": false
+  "topRatedLink": false,
+  "enableMessageTemplates":false
 }

@@ -1,5 +1,4 @@
 [
-  "navigateToLogAfterMsg",
   "gameHelpLink",
   "guildSelf",
   "guildSelfMessage",
@@ -132,5 +131,6 @@
   "findBuffsLink",
   "guildInventoryLink",
   "newGuildLogLink",
-  "topRatedLink"
+  "topRatedLink",
+  "enableMessageTemplates"
 ]

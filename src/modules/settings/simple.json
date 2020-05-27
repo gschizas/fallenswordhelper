@@ -182,10 +182,6 @@
     "helpTitle":"Enter Sends Message",
     "helpText":"If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift when you press enter."
   },
-  "navigateToLogAfterMsg":{
-    "helpTitle":"Navigate After Message Sent",
-    "helpText":"If enabled, will navigate to the referring page after a successful message is sent. Example:  if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen."
-  },
   "moveComposingButtons":{
     "helpTitle":"Move Composing Buttons",
     "helpText":"If enabled, will move composing buttons to the top of the composing screen."
@@ -372,5 +368,9 @@
   "topRatedLink":{
     "helpTitle":"Top 250 Players",
     "helpText":"Top 250 Players Link (Top 100 Players)"
+  },
+  "enableMessageTemplates":{
+    "helpTitle":"Enable Message Templates",
+    "helpText":"This add templates to the message dialog."
   }
 }
