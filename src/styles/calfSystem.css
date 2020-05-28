@@ -574,15 +574,6 @@ button::-moz-focus-inner {
 /* Success Msg */
 .fshScs {height: 26px;}
 
-/* Guild Chat */
-.fshGc {
-  table-layout: fixed;
-  overflow-wrap: break-word;
-}
-.fshGc td:nth-child(1) {width: 120px;}
-.fshGc td:nth-child(2) {width: 100px;}
-.fshGc td:nth-child(3) {width: 418px;}
-
 /* New Row */
 .fshNr {
   background-color: #F5F298;

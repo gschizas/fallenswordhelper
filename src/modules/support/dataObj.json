@@ -211,5 +211,6 @@
   "guildInventoryLink": false,
   "newGuildLogLink": false,
   "topRatedLink": false,
-  "enableMessageTemplates":false
+  "enableMessageTemplates":false,
+  "wrapGuildChat":false
 }

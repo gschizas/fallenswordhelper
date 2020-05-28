@@ -372,5 +372,9 @@
   "enableMessageTemplates":{
     "helpTitle":"Enable Message Templates",
     "helpText":"This add templates to the message dialog."
+  },
+  "wrapGuildChat":{
+    "helpTitle":"Wrap Guild Chat",
+    "helpText":"This forces word wrap in guild chat."
   }
 }

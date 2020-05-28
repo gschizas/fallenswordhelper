@@ -57,5 +57,6 @@ export default function logPrefs() {
     'keepBuffLog',
     'addAttackLinkToLog',
     'enhanceChatTextEntry',
+    'wrapGuildChat',
   ])}`;
 }
