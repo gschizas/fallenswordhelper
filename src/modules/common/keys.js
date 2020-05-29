@@ -1,3 +1,3 @@
-const keys = (obj) => Object.keys(obj);
-
-export default keys;
+export default function keys(obj) {
+  return Object.keys(obj);
+}
