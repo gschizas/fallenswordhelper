@@ -80,11 +80,11 @@ function makeRows(text) { addTemplateRow(-1, text); }
 
 export default function showMsgTemplate() {
   if (getValue('enableMessageTemplates') && !showingTemplates) {
+    onclick(getTable(), classHandler(classEvents));
     getFshTemplate().forEach(makeRows);
     addRow(-1,
       fshButton('add', 'Add'),
       '<input id="newTmpl" class="ui-widget-content fshTmpl">');
     showingTemplates = true;
-    onclick(getTable(), classHandler(classEvents));
   }
 }
