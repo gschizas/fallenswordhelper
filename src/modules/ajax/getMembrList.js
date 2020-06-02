@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import currentGuildId from '../common/currentGuildId';
+import fromEntries from '../common/fromEntries';
 import getGuild from '../_dataAccess/export/guildMembers';
 import isObject from '../common/isObject';
 import { now } from '../support/now';
@@ -17,17 +18,9 @@ function addMembrListToForage(membrList) {
   return membrList;
 }
 
-function memberToObject(membrList, guildId, ele) {
-  // eslint-disable-next-line no-param-reassign
-  membrList[guildId][ele.username] = ele;
-}
-
 function membrListToHash(guildId, data) {
-  const membrList = {};
-  membrList[guildId] = {};
-  membrList[guildId].lastUpdate = now;
-  data.forEach(partial(memberToObject, membrList, guildId));
-  return membrList;
+  const memberObj = fromEntries(data.map((o) => [o.username, o]));
+  return { [guildId]: { lastUpdate: now, ...memberObj } };
 }
 
 function getGuildMembers(guildId) {
