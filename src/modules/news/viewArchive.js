@@ -1,6 +1,5 @@
 import collapse from '../common/collapse';
 import containsText from '../common/containsText';
-import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
@@ -9,8 +8,8 @@ import { pCC } from '../support/layout';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import setValue from '../system/setValue';
 import { simpleCheckbox } from '../settings/simpleCheckbox';
+import { defLastLadderReset, defTable } from '../support/constants';
 
-const ladderResetPref = 'lastLadderReset';
 let lastLadderReset;
 let trackLadderReset;
 
@@ -20,7 +19,7 @@ function checkForPvPLadder(row) {
       getText(row.children[1].children[2]).replace('Posted: ', ''),
     );
     if (logTime > lastLadderReset) {
-      setValue(ladderResetPref, logTime);
+      setValue(defLastLadderReset, logTime);
       lastLadderReset = logTime;
     }
   }
@@ -33,7 +32,7 @@ function setupPref(prefName, rowInjector) {
 }
 
 export default function viewArchive() {
-  lastLadderReset = getValue(ladderResetPref);
+  lastLadderReset = getValue(defLastLadderReset);
   trackLadderReset = getValue('trackLadderReset');
   const prefName = 'collapseNewsArchive';
   const theTables = getElementsByTagName(defTable, pCC);

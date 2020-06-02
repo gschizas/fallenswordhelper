@@ -114,6 +114,7 @@ export const defNeedToCompose = 'needToCompose';
 export const defLastComposeCheck = 'lastComposeCheck';
 export const defCharacterVirtualLevel = 'characterVirtualLevel';
 export const defEnableGuildActivityTracker = 'enableGuildActivityTracker';
+export const defLastLadderReset = 'lastLadderReset';
 
 export const defForm = 'form';
 export const defTable = 'table';
