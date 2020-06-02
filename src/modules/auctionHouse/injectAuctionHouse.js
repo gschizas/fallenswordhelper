@@ -60,5 +60,5 @@ export default function injectAuctionHouse() {
   if (jQueryNotPresent() || !pCC) { return; }
   makeCancelAll();
   autoFill();
-  clickThis(getElementById('sort0'));
+  // clickThis(getElementById('sort0'));
 }
