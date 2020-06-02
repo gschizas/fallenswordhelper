@@ -1,6 +1,5 @@
 import addCommas from '../../system/addCommas';
 import closestTr from '../../common/closestTr';
-import { combatSelector } from '../../support/constants';
 import createDiv from '../../common/cElement/createDiv';
 import getCombat from './getCombat';
 import insertElement from '../../common/insertElement';
@@ -24,7 +23,7 @@ function parseCombatWinner(r, msgHtml) {
   if (defeat) {
     return [red, `You were <span class="${red}">defeated</span> by `];
   }
-  return r.cells[2].firstChild;
+  return ['', r.cells[2].firstChild];
 }
 
 function result(stat, desc, color) {
@@ -65,9 +64,9 @@ function updateTd([r, msgHtml, json]) {
 }
 
 export default async function addPvPSummary(logTable) {
-  const combatImg = querySelectorArray(combatSelector, logTable);
-  if (combatImg.length === 0) { return; }
-  const combatRows = combatImg.map(closestTr);
+  const combatLinks = querySelectorArray('a[href*="&combat_id="]', logTable);
+  if (combatLinks.length === 0) { return; }
+  const combatRows = combatLinks.map(closestTr);
   const withHtml = combatRows.map((r) => [r, r.cells[2].innerHTML]);
   const notGuild = withHtml.filter(notGuildCombat);
   const combats = await Promise.all(notGuild.map(getCombats));

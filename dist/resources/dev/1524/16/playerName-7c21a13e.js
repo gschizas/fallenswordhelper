@@ -1,5 +1,0 @@
-import{x as t,A as a}from"./calfSystem-d49dbbd3.js"
-let r
-function s(){if(!r){const s=t("statbar-character")
-s&&(r=a(s))}return r}export{s as p}
-//# sourceMappingURL=playerName-7c21a13e.js.map
