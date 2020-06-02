@@ -56,6 +56,10 @@ export default function logPrefs() {
     'enableChatParsing',
     'keepBuffLog',
     'addAttackLinkToLog',
+    'colorPlayerNames',
+    'addIgnoreLink',
+    'changeButtonLabels',
+    'notificationWidgets',
     'enhanceChatTextEntry',
     'wrapGuildChat',
   ])}`;

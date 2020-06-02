@@ -1,5 +1,5 @@
 import addLogColoring from './addLogColoring';
-import addLogWidgets from './addLogWidgets';
+import addLogWidgets from './playerLogWidgets/addLogWidgets';
 
 export default function playerLog() {
   addLogColoring('PlayerLog', 1);

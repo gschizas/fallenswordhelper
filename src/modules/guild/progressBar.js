@@ -1,6 +1,5 @@
 import createDiv from '../common/cElement/createDiv';
 import createStyle from '../common/cElement/createStyle';
-import { defTable } from '../support/constants';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
@@ -11,6 +10,7 @@ import querySelectorArray from '../common/querySelectorArray';
 import { sendEvent } from '../support/fshGa';
 import setValue from '../system/setValue';
 import { simpleCheckboxHtml } from '../settings/simpleCheckbox';
+import { defTable, playerLinkSelector } from '../support/constants';
 
 const prefEnableStamBars = 'enableStamBars';
 let enableStamBars;
@@ -33,7 +33,7 @@ function injectStyle() {
   const tables = getElementsByTagName(defTable, pCC);
   const memberList = tables[tables.length - 1];
   memberList.id = 'fshMemberList';
-  const memberLinks = querySelectorArray('a[href*="&player_id="]', memberList);
+  const memberLinks = querySelectorArray(playerLinkSelector, memberList);
   const myTest = memberLinks.map(stamBarStyle).join('\n');
   thisStyle = insertElement(document.body, createStyle(myTest)).sheet;
 }

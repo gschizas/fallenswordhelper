@@ -212,5 +212,9 @@
   "newGuildLogLink": false,
   "topRatedLink": false,
   "enableMessageTemplates":false,
-  "wrapGuildChat":false
+  "wrapGuildChat":false,
+  "colorPlayerNames":false,
+  "addIgnoreLink":false,
+  "changeButtonLabels":false,
+  "notificationWidgets":false
 }

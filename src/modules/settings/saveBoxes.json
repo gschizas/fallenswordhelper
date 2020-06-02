@@ -133,5 +133,9 @@
   "newGuildLogLink",
   "topRatedLink",
   "enableMessageTemplates",
-  "wrapGuildChat"
+  "wrapGuildChat",
+  "colorPlayerNames",
+  "addIgnoreLink",
+  "changeButtonLabels",
+  "notificationWidgets"
 ]
