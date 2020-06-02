@@ -2,6 +2,7 @@ import arena from './arena';
 import auctionhouse from './auctionhouse';
 import composing from './composing';
 import guild from './guild/guild';
+import injectWorld from '../../world/injectWorld';
 import items from './items';
 import log from './log';
 import news from './news';
@@ -31,7 +32,6 @@ const injectTitan = () => { runDefault(import('../../injectTitan')); };
 const injectSettings = () => {
   runDefault(import('../../settings/injectSettings'));
 };
-const injectWorld = () => { runDefault(import('../../world/injectWorld')); };
 const ladder = () => { runDefault(import('../../ladder/ladder')); };
 const marketplace = () => { runDefault(import('../../marketplace')); };
 const points = () => { runDefault(import('./points')); };
