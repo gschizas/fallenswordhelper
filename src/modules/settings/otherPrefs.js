@@ -36,7 +36,7 @@ export default function otherPrefs() {
     bunchOfSimple([
       'hideRelicOffline',
       'enterForSendMessage',
-      'navigateToLogAfterMsg',
+      'enableMessageTemplates',
       'joinAllLink',
     ])}${
     groupJoinSize()}${

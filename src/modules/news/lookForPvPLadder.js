@@ -1,4 +1,5 @@
 import containsText from '../common/containsText';
+import { defLastLadderReset } from '../support/constants';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
@@ -14,7 +15,7 @@ export default function lookForPvPLadder() {
   const rumours = getArrayByClassName('news_head_tavern', pCC);
   const pvpTimes = rumours.filter(pvpLadder).map(timestamp);
   const logTime = Math.max.apply(null, pvpTimes);
-  if (logTime > getValue('lastLadderReset')) {
-    setValue('lastLadderReset', logTime);
+  if (logTime > getValue(defLastLadderReset)) {
+    setValue(defLastLadderReset, logTime);
   }
 }

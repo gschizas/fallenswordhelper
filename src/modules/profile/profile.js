@@ -2,6 +2,7 @@ import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
 import arrayFrom from '../common/arrayFrom';
+import closestForm from '../common/closestForm';
 import colouredDots from '../common/colouredDots';
 import components from './components/components';
 import fallback from '../system/fallback';
@@ -65,7 +66,7 @@ function updateDom(avyImg, playername, isSelf) {
 
 function updateUrl(e) {
   e.preventDefault();
-  const validInputs = arrayFrom(e.target.closest('form').elements)
+  const validInputs = arrayFrom(closestForm(e.target).elements)
     .filter((i) => i.type !== 'submit')
     .map((i) => `${i.name}=${i.value}`).join('&');
   window.location = `${indexPhp}?${validInputs}`;

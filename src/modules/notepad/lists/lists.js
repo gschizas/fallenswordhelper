@@ -1,3 +1,4 @@
+import './lists.css';
 import defaults from '../../support/dataObj.json';
 import eventHandler5 from '../../common/eventHandler5';
 import getElementById from '../../common/getElement';
@@ -75,7 +76,7 @@ function doInputs() { // Legacy
 }
 
 function generateManageTable() { // Legacy
-  let result = '<table cellspacing="2" cellpadding="2" class="fshGc" '
+  let result = '<table cellspacing="2" cellpadding="2" class="fshLists" '
     + 'width="100%"><tr class="fshOr">';
   result += param.headers.reduce(headersToHtml, '');
   result += '<th>Action</th></tr>';

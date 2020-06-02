@@ -8,6 +8,7 @@ import getTextTrim from '../../common/getTextTrim';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import isUndefined from '../../common/isUndefined';
 import querySelector from '../../common/querySelector';
+import textNodes from '../../common/textNodes';
 import { attribType, enhancementType } from '../../support/constants';
 
 function guildReliclist(page) {
@@ -46,7 +47,7 @@ function parseLocation(div) {
 
 function getTextNodes(div) {
   return arrayFrom(div.childNodes)
-    .filter((n) => n.nodeType === Node.TEXT_NODE)
+    .filter(textNodes)
     .map(getTextTrim)
     .map((e) => e.split('\u00A0'));
 }

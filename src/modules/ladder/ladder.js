@@ -1,5 +1,6 @@
 import allowBack from './allowBack';
 import createTr from '../common/cElement/createTr';
+import { defLastLadderReset } from '../support/constants';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import margin from './margin';
@@ -17,7 +18,7 @@ function formatLastReset(lastLadderReset) {
 }
 
 function formatTime() {
-  const lastLadderReset = getValue('lastLadderReset');
+  const lastLadderReset = getValue(defLastLadderReset);
   if (lastLadderReset < now - 48 * 60 * 60 * 1000) {
     return '<span class="fshLink tip-static" data-tipped="FSH has not seen '
       + 'the last ladder reset.<br>You can find it in your log if you '

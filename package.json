@@ -1,6 +1,6 @@
 {
   "name": "fallenswordhelper",
-  "version": "15.24.15",
+  "version": "15.24.16",
   "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
   "scripts": {
     "addsourceroot": "node scripts/addSourceRoot.js",
@@ -51,7 +51,7 @@
     "husky": "^4.2.5",
     "local-web-server": "^4.2.0",
     "postcss-nesting": "^7.0.0",
-    "rollup": "^2.10.9",
+    "rollup": "^2.12.0",
     "rollup-plugin-clear": "^2.0.7",
     "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-delete": "^1.2.0",
@@ -61,8 +61,7 @@
     "stylelint": "^13.5.0",
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-config-standard": "^20.0.0",
-    "svelte": "^3.22.3",
-    "trucker": "^0.8.6"
+    "svelte": "^3.23.0"
   },
   "dependencies": {
     "idb-keyval": "^3.2.0",

@@ -110,7 +110,8 @@
   },
   "addAttackLinkToLog":{
     "helpTitle":"Add attack link to log",
-    "helpText":"If checked, this will add an Attack link to each message in your log."
+    "helpText":"If checked, this will add an Attack link to each message in your log.",
+    "network":true
   },
   "enhanceChatTextEntry":{
     "helpTitle":"Enhance Chat Text Entry",
@@ -181,10 +182,6 @@
   "enterForSendMessage":{
     "helpTitle":"Enter Sends Message",
     "helpText":"If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift when you press enter."
-  },
-  "navigateToLogAfterMsg":{
-    "helpTitle":"Navigate After Message Sent",
-    "helpText":"If enabled, will navigate to the referring page after a successful message is sent. Example:  if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen."
   },
   "moveComposingButtons":{
     "helpTitle":"Move Composing Buttons",
@@ -372,5 +369,30 @@
   "topRatedLink":{
     "helpTitle":"Top 250 Players",
     "helpText":"Top 250 Players Link (Top 100 Players)"
+  },
+  "enableMessageTemplates":{
+    "helpTitle":"Enable Message Templates",
+    "helpText":"This add templates to the message dialog."
+  },
+  "wrapGuildChat":{
+    "helpTitle":"Wrap Guild Chat",
+    "helpText":"This forces word wrap in guild chat."
+  },
+  "colorPlayerNames":{
+    "helpTitle":"Color Player Names",
+    "helpText":"This colors players' names in the log. Green for guild mates, Blue for allies, red for enemies.",
+    "network":true
+  },
+  "addIgnoreLink":{
+    "helpTitle":"Add Ignore Link",
+    "helpText":"This adds an ignore link to chat messages."
+  },
+  "changeButtonLabels":{
+    "helpTitle":"Change Button Labels",
+    "helpText":"This changes Send button to be Trade and Trade button to be ST."
+  },
+  "notificationWidgets":{
+    "helpTitle":"Notification Widgets",
+    "helpText":"This adds ignore/reply/send/trade/ST/buff/attack links to player notifications."
   }
 }

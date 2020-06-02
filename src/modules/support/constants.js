@@ -34,24 +34,24 @@ export const defJoinallgroupsundersize = 'joinallgroupsundersize';
 
 export const indexPhp = 'index.php';
 export const defCmd = '?cmd=';
-export const cmdUrl = indexPhp + defCmd;
+export const cmdUrl = `${indexPhp}${defCmd}`;
 export const defSubcmd = '&subcmd=';
 const defTargetUsername = '&target_username=';
 const notepadBlank = `${defCmd}notepad&blank=1${defSubcmd}`;
 export const newGuildLogLoc = `${notepadBlank}newguildlog`;
-export const newGuildLogUrl = indexPhp + newGuildLogLoc;
+export const newGuildLogUrl = `${indexPhp}${newGuildLogLoc}`;
 export const auctionhouseUrl = `${cmdUrl}auctionhouse`;
 export const ahSearchUrl = `${auctionhouseUrl}&search=`;
 export const logUrl = `${cmdUrl}log`;
-export const doAddIgnore = `${logUrl + defSubcmd}doaddignore&ignore_username=`;
+export const doAddIgnore = `${logUrl}${defSubcmd}doaddignore&ignore_username=`;
 export const profileUrl = `${cmdUrl}profile`;
 export const playerIdUrl = `${profileUrl}&player_id=`;
-export const dropItemsUrl = `${profileUrl + defSubcmd}dropitems`;
+export const dropItemsUrl = `${profileUrl}${defSubcmd}dropitems`;
 export const tradeUrl = `${cmdUrl}trade&target_player=`;
 export const secureUrl = `${cmdUrl}trade${defSubcmd}createsecure${
   defTargetUsername}`;
 export const arenaUrl = `${cmdUrl}arena${defSubcmd}`;
-export const notepadBlankUrl = indexPhp + notepadBlank;
+export const notepadBlankUrl = `${indexPhp}${notepadBlank}`;
 export const auctionSearchUrl = `${notepadBlankUrl}auctionsearch`;
 export const pointsUrl = `${cmdUrl}points`;
 export const guildSubcmdUrl = `${cmdUrl}guild${defSubcmd}`;
@@ -61,7 +61,7 @@ export const groupsSubcmdUrl = `${guildSubcmdUrl}groups&subcmd2=`;
 export const recallUserUrl = `${guildSubcmdUrl}inventory&subcmd2=report&user=`;
 export const guildViewUrl = `${guildSubcmdUrl}view&guild_id=`;
 export const joinallUrl = `${groupsSubcmdUrl}joinall`;
-export const joinUnderUrl = groupsSubcmdUrl + defJoinallgroupsundersize;
+export const joinUnderUrl = `${groupsSubcmdUrl}${defJoinallgroupsundersize}`;
 export const worldUrl = `${cmdUrl}world`;
 export const searchPlayerUrl = `${cmdUrl}findplayer`;
 export const showPlayerUrl = `${searchPlayerUrl
@@ -70,8 +70,8 @@ export const blacksmithUrl = `${cmdUrl}blacksmith`;
 export const quickbuffUrl = `${cmdUrl}quickbuff`;
 export const composingUrl = `${cmdUrl}composing`;
 export const attackplayerUrl = `${cmdUrl}attackplayer${defTargetUsername}`;
-export const updateArchiveUrl = `${cmdUrl + defSubcmd}viewupdatearchive`;
-export const archiveUrl = `${cmdUrl + defSubcmd}viewarchive`;
+export const updateArchiveUrl = `${cmdUrl}${defSubcmd}viewupdatearchive`;
+export const archiveUrl = `${cmdUrl}${defSubcmd}viewarchive`;
 export const bountyUrl = `${cmdUrl}bounty`;
 
 export const guideUrl = `https://guide.fallensword.com/${cmdUrl}`;
@@ -114,8 +114,12 @@ export const defNeedToCompose = 'needToCompose';
 export const defLastComposeCheck = 'lastComposeCheck';
 export const defCharacterVirtualLevel = 'characterVirtualLevel';
 export const defEnableGuildActivityTracker = 'enableGuildActivityTracker';
+export const defLastLadderReset = 'lastLadderReset';
 
+export const defForm = 'form';
 export const defTable = 'table';
+export const defTd = 'td';
+export const defTr = 'tr';
 
 export const fshBuffLog = 'fsh_buffLog';
 
@@ -149,3 +153,8 @@ export const itemType = ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon',
   'Resource', 'Recipe', 'Container', 'Composed', 'Frag Stash'];
 
 export const oldActionSpinner = `${cdn}ui/world/action_spinner.gif`;
+
+export const chatSelector = 'img[title="Chat"], img[oldtitle="Chat"]';
+export const combatSelector = 'img[title="Combat"], img[oldtitle="Combat"]';
+export const noteSelector = 'img[title="Notification"], img[oldtitle="Notification"]';
+export const playerLinkSelector = 'a[href*="&player_id="]';
