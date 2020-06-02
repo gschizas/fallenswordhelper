@@ -1,4 +1,5 @@
 import chunk from '../../common/chunk';
+import closestTr from '../../common/closestTr';
 import daDropItems from '../../_dataAccess/daDropItems';
 import errorDialog from '../../common/errorDialog';
 import getValue from '../../system/getValue';
@@ -14,7 +15,7 @@ const prefAjaxifyDestroy = 'ajaxifyDestroy';
 let ajaxifyDestroy;
 
 const removeRow = (j) => {
-  const tr = j.closest('tr');
+  const tr = closestTr(j);
   tr.nextElementSibling.remove();
   tr.remove();
 };

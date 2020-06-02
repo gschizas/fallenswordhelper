@@ -115,7 +115,10 @@ export const defLastComposeCheck = 'lastComposeCheck';
 export const defCharacterVirtualLevel = 'characterVirtualLevel';
 export const defEnableGuildActivityTracker = 'enableGuildActivityTracker';
 
+export const defForm = 'form';
 export const defTable = 'table';
+export const defTd = 'td';
+export const defTr = 'tr';
 
 export const fshBuffLog = 'fsh_buffLog';
 

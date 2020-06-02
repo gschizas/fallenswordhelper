@@ -1,3 +1,4 @@
+import closestTr from '../common/closestTr';
 import entries from '../common/entries';
 import isObject from '../common/isObject';
 import partial from '../common/partial';
@@ -7,7 +8,7 @@ import { set } from '../system/idb';
 function func(withPvpId, acc, [key, value]) {
   const thisBtn = withPvpId.find(([, id]) => id === key);
   if (thisBtn) {
-    thisBtn[0].closest('tr').style.backgroundColor = '#ff0000';
+    closestTr(thisBtn[0]).style.backgroundColor = '#ff0000';
     acc[key] = value;
   }
   return acc;
