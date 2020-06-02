@@ -6,6 +6,7 @@ import getTextTrim from '../common/getTextTrim';
 import numberIsNaN from '../common/numberIsNaN';
 import querySelector from '../common/querySelector';
 import setTipped from '../common/setTipped';
+import textNodes from '../common/textNodes';
 
 const BARRICADE = 98;
 const ENTRENCH = 85;
@@ -16,7 +17,7 @@ function getStatVal(stat) {
     arrayFrom(
       getElementById(`stat-${stat.toLowerCase()}`).childNodes,
     )
-      .filter((el) => el.nodeType === 3)
+      .filter(textNodes)
       .map(getTextTrim)
       .join(''),
   );
