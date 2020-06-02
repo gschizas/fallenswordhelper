@@ -9,7 +9,7 @@ function calculateSortOrder(target) {
   return 'desc';
 }
 
-function sortDataTable(target, myCol, sortOrder) {
+function sortDataTable(target, myCol, sortOrder) { // jQuery
   const table = target.closest(defTable).DataTable();
   if (myCol !== 3) {
     table.order([3, 'asc'], [myCol, sortOrder]).draw();

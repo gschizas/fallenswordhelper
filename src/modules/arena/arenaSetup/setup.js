@@ -89,7 +89,7 @@ function pickerRow(table) { // jQuery
   table.append(row);
 }
 
-function getTable() {
+function getTable() { // jQuery
   return imgNodes.eq(0).closest(defTable).parent().closest(defTable);
 }
 
