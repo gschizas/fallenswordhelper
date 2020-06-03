@@ -9,6 +9,7 @@ import {
   attackplayerUrl,
   doAddIgnore,
   noteSelector,
+  playerIDRE,
   playerLinkSelector,
   secureUrl,
   tradeUrl,
@@ -24,7 +25,7 @@ function addIgnore([, row, name]) {
 }
 
 async function otherLinks(addAttackLinkToLog, [a, , name]) {
-  const playerId = /&player_id=(\d+)/.exec(a.href)[1];
+  const playerId = playerIDRE.exec(a.href)[1];
   const attackLink = addAttackLinkToLog && !await isGuildMate(name)
     ? ` | <a href="${attackplayerUrl}${name}">Attack</a>` : '';
   insertHtmlBeforeEnd(a.parentNode, '&nbsp;&nbsp; '
