@@ -26,12 +26,6 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
   }
 }
 
-// enterOnMsgSend
-// renderSelfBio
-// renderOtherBios
-// enableChatParsing
-// enableMessageTemplates
-
 export default function injectQuickMsgDialogJQ() {
   if (jQueryNotPresent()) { return; }
   window.openQuickMsgDialog = openQuickMsgDialog;
