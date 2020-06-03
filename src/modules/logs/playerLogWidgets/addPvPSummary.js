@@ -11,7 +11,7 @@ import querySelectorArray from '../../common/querySelectorArray';
 const green = 'fshGreen';
 const red = 'fshRed';
 
-const isPvp = ([r]) => querySelector(combatSelector, r);
+const isPvp = (r) => querySelector(combatSelector, r);
 const notGuildCombat = ([, msgHtml]) => !/\(Guild Conflict\)/.test(msgHtml);
 const getCombats = async ([r, msgHtml]) => [
   r, msgHtml, await getCombat(r, /combat_id=(\d+)/.exec(msgHtml)[1]),
