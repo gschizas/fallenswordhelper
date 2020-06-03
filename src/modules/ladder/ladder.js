@@ -1,8 +1,8 @@
-import allowBack from './allowBack';
 import createTr from '../common/cElement/createTr';
 import { defLastLadderReset } from '../support/constants';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
+import interceptSubmit from '../common/interceptSubmit';
 import margin from './margin';
 import { now } from '../support/now';
 import outputFormat from '../system/outputFormat';
@@ -53,7 +53,7 @@ function lastReset() {
 }
 
 export default function ladder() {
-  allowBack();
+  interceptSubmit();
   if (getValue('trackLadderReset')) {
     lastReset();
   }

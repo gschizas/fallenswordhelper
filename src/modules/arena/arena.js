@@ -3,6 +3,7 @@ import arenaFull from './arenaFull';
 import doLvlFilter from './doLvlFilter';
 import filterHeader from './filterHeader';
 import { get } from '../system/idb';
+import interceptSubmit from '../common/interceptSubmit';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import loadDataTables from '../common/loadDataTables';
 import orderData from './orderData';
@@ -11,7 +12,6 @@ import participants from './participants';
 import querySelectorArray from '../common/querySelectorArray';
 import redoSort from './redoSort';
 import { sendEvent } from '../support/fshGa';
-import updateUrl from './updateUrl';
 import view from '../app/arena/view';
 import { fshArenaKey, tableOpts } from './assets';
 import {
@@ -49,7 +49,6 @@ function arenaDataTable(tabs, [arena, obj, json]) { // jQuery
   prepareEnv();
   theTables.DataTable(tableOpts);
   redoSort(tabs);
-  tabs.on('click', 'input.custombutton[type="submit"]', updateUrl);
 }
 
 function process(tabs, values) {
@@ -59,6 +58,7 @@ function process(tabs, values) {
   }
   removeHiddenRows();
   arenaDataTable(tabs, values);
+  interceptSubmit();
   // eslint-disable-next-line no-unused-labels, no-labels
   betaLbl: { //  Timing output
     timeEnd('arena.process');

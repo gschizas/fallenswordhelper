@@ -1,8 +1,6 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
-import arrayFrom from '../common/arrayFrom';
-import closestForm from '../common/closestForm';
 import colouredDots from '../common/colouredDots';
 import components from './components/components';
 import fallback from '../system/fallback';
@@ -11,11 +9,10 @@ import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
 import highlightPvpProtection from './highlightPvpProtection';
-import { indexPhp } from '../support/constants';
 import injectFastWear from './fastWear';
+import interceptSubmit from '../common/interceptSubmit';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import nekidBtn from './nekidBtn';
-import on from '../common/on';
 import { pCC } from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
@@ -64,17 +61,9 @@ function updateDom(avyImg, playername, isSelf) {
   add(3, colouredDots);
 }
 
-function updateUrl(e) {
-  e.preventDefault();
-  const validInputs = arrayFrom(closestForm(e.target).elements)
-    .filter((i) => i.type !== 'submit')
-    .map((i) => `${i.name}=${i.value}`).join('&');
-  window.location = `${indexPhp}?${validInputs}`;
-}
-
 function allowBack(isSelf) {
   if (!isSelf) {
-    on(querySelector('#profileRightColumn'), 'submit', updateUrl);
+    interceptSubmit();
   }
 }
 

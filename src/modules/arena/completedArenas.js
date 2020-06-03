@@ -5,15 +5,10 @@ import insertElementAfter from '../common/insertElementAfter';
 import insertElementBefore from '../common/insertElementBefore';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import insertHtmlBeforeBegin from '../common/insertHtmlBeforeBegin';
+import interceptSubmit from '../common/interceptSubmit';
 import onclick from '../common/onclick';
 import partial from '../common/partial';
 import querySelector from '../common/querySelector';
-import updateGoUrl from './updateGoUrl';
-import updateUrl from './updateUrl';
-
-function intercept(val, fn) {
-  onclick(querySelector(`#pCC input[value="${val}"]`), fn);
-}
 
 function gotoPage(pageId) {
   window.location = `${arenaUrl}completed&page=${pageId}`;
@@ -47,6 +42,5 @@ function injectFinishButton() {
 export default function completedArenas() {
   injectStartButton();
   injectFinishButton();
-  intercept('View', updateUrl);
-  intercept('Go', updateGoUrl);
+  interceptSubmit();
 }
