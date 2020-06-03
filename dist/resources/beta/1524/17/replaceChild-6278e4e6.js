@@ -1,2 +1,0 @@
-function e(e,n){return e instanceof Node&&n instanceof Node&&n.parentNode.replaceChild(e,n),n}export{e as r}
-//# sourceMappingURL=replaceChild-6278e4e6.js.map
