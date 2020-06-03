@@ -1,14 +1,15 @@
 import createStyle from '../common/cElement/createStyle';
 import dataRows from '../common/dataRows';
+import doBuffLink from '../common/doBuffLink';
+import doBuffLinkClick from '../common/doBuffLinkClick';
 import entries from '../common/entries';
 import getTextTrim from '../common/getTextTrim';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import onclick from '../common/onclick';
-import openQuickBuffByName from '../common/openQuickBuffByName';
 import parseDateAsTimestamp from '../system/parseDateAsTimestamp';
 import partial from '../common/partial';
+import { playerLinkSelector } from '../support/constants';
 import querySelector from '../common/querySelector';
 import setValue from '../system/setValue';
 
@@ -26,21 +27,8 @@ function isOldRow(postAgeMins, postDateUtc) {
   return postAgeMins > 20 && postDateUtc <= lastCheckUtc;
 }
 
-function doBuffLink(aRow) {
-  insertHtmlBeforeEnd(aRow.cells[1],
-    ' <button class="fshBl fshBls">[b]</button>');
-}
-
 function getLastCheck(lastCheckScreen) {
   return getValue(lastCheckScreen) || nowUtc;
-}
-
-const isBuffLink = (target) => target.classList.contains('fshBl') && target.previousElementSibling;
-
-function handleClick(e) {
-  if (isBuffLink(e.target)) {
-    openQuickBuffByName(getTextTrim(e.target.previousElementSibling));
-  }
 }
 
 function typeMap(dateColumn, aRow) {
@@ -60,7 +48,7 @@ function typeMap(dateColumn, aRow) {
 function doBuffLinks(logScreen, rowTags) {
   if (logScreen === 'Chat') {
     rowTags.filter(([, rowType]) => rowType !== 'old')
-      .map(([aRow]) => aRow)
+      .map(([aRow]) => querySelector(playerLinkSelector, aRow))
       .forEach(doBuffLink);
   }
 }
@@ -103,7 +91,7 @@ function doLogColoring(logScreen, dateColumn, chatTable) {
   const lastCheckScreen = `last${logScreen}Check`;
   lastCheckUtc = getLastCheck(lastCheckScreen);
   processRows(logScreen, dateColumn, chatTable);
-  onclick(chatTable, handleClick);
+  onclick(chatTable, doBuffLinkClick);
   setValue(lastCheckScreen, nowUtc);
 }
 
