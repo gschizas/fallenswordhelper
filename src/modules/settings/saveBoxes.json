@@ -137,5 +137,6 @@
   "colorPlayerNames",
   "addIgnoreLink",
   "changeButtonLabels",
-  "notificationWidgets"
+  "notificationWidgets",
+  "fastDebuff"
 ]

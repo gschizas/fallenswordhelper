@@ -216,5 +216,6 @@
   "colorPlayerNames":false,
   "addIgnoreLink":false,
   "changeButtonLabels":false,
-  "notificationWidgets":false
+  "notificationWidgets":false,
+  "fastDebuff":false
 }

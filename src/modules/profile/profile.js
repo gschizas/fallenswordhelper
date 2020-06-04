@@ -4,10 +4,10 @@ import ajaxifyProfileSections from './ajaxifyProfileSections';
 import colouredDots from '../common/colouredDots';
 import components from './components/components';
 import fallback from '../system/fallback';
-import fastDebuff from './debuff';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
+import getValue from '../system/getValue';
 import highlightPvpProtection from './highlightPvpProtection';
 import injectFastWear from './fastWear';
 import interceptSubmit from '../common/interceptSubmit';
@@ -27,10 +27,19 @@ import storeVL from './storeVL';
 import updateBuffs from './updateBuffs';
 import updateStatistics from './updateStatistics';
 
+async function doFastDebuff() {
+  const fastDebuff = getValue('fastDebuff');
+  const disableDeactivatePrompts = getValue('disableDeactivatePrompts');
+  if (fastDebuff || disableDeactivatePrompts) {
+    const m = await import('./debuff');
+    m.default(fastDebuff, disableDeactivatePrompts);
+  }
+}
+
 function ifSelf(isSelf) {
   if (isSelf) {
     // self inventory
-    fastDebuff();
+    doFastDebuff();
     profileParseAllyEnemy();
     injectFastWear();
     components();
