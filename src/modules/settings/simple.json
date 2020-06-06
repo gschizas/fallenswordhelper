@@ -414,5 +414,9 @@
   "quickWearLink":{
     "helpTitle":"Quick Wear Link",
     "helpText":"This adds a quick wear link to the inventory section header."
+  },
+  "selectAllLink":{
+    "helpTitle":"Select All Link",
+    "helpText":"This adds a select all link to the backpack section header."
   }
 }

@@ -221,5 +221,6 @@
   "countAllyEnemy":false,
   "fixFolderImages":false,
   "componentWidgets":false,
-  "quickWearLink":false
+  "quickWearLink":false,
+  "selectAllLink":false
 }

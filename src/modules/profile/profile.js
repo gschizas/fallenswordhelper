@@ -18,7 +18,7 @@ import { profileInjectGuildRel } from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
 import profileRenderBio from './bio/bio';
 import querySelector from '../common/querySelector';
-import selectAllLink from './selectAllLink';
+import runDefault from '../common/runDefault';
 import storeVL from './storeVL';
 import updateBuffs from './updateBuffs';
 import updateStatistics from './updateStatistics';
@@ -32,39 +32,34 @@ async function doFastDebuff() {
   }
 }
 
-async function doAllyEnemy() {
-  if (getValue('countAllyEnemy')) {
-    const m = await import('./profileAllyEnemy');
-    m.default();
-  }
+function doAllyEnemy() {
+  if (getValue('countAllyEnemy')) { runDefault(import('./profileAllyEnemy')); }
 }
 
-async function doFastWear() {
+function doFastWear() {
   if (getValue('enableQuickDrink')) {
-    const m = await import('./backpack/fastWear');
-    m.default();
+    runDefault(import('./backpack/fastWear'));
   }
 }
 
-async function doFixFolders() {
+function doFixFolders() {
   if (getValue('fixFolderImages')) {
-    const m = await import('./backpack/fixFolders');
-    m.default();
+    runDefault(import('./backpack/fixFolders'));
   }
 }
 
-async function doComponents() {
+function doComponents() {
   if (getValue('componentWidgets')) {
-    const m = await import('./components/components');
-    m.default();
+    runDefault(import('./components/components'));
   }
 }
 
-async function doQuickWearLink() {
-  if (getValue('quickWearLink')) {
-    const m = await import('./quickWearLink');
-    m.default();
-  }
+function doQuickWearLink() {
+  if (getValue('quickWearLink')) { runDefault(import('./quickWearLink')); }
+}
+
+function doSelectAllLink() {
+  if (getValue('selectAllLink')) { runDefault(import('./selectAllLink')); }
 }
 
 function ifSelf(isSelf) {
@@ -76,7 +71,7 @@ function ifSelf(isSelf) {
     doFixFolders();
     doComponents();
     doQuickWearLink();
-    selectAllLink();
+    doSelectAllLink();
     storeVL();
     nekidBtn();
     ajaxifyProfileSections();

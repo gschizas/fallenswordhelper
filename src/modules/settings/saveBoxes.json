@@ -142,5 +142,6 @@
   "countAllyEnemy",
   "fixFolderImages",
   "componentWidgets",
-  "quickWearLink"
+  "quickWearLink",
+  "selectAllLink"
 ]
