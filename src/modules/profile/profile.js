@@ -1,6 +1,5 @@
 import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
-import ajaxifyProfileSections from './ajaxifyProfileSections';
 import colouredDots from '../common/colouredDots';
 import fallback from '../system/fallback';
 import getElementsByTagName from '../common/getElementsByTagName';
@@ -65,6 +64,12 @@ function doNekidBtn() {
   if (getValue('nekidButton')) { runDefault(import('./nekidBtn')); }
 }
 
+function doAjaxifySections() {
+  if (getValue('ajaxifyProfileSections')) {
+    runDefault(import('./ajaxifyProfileSections'));
+  }
+}
+
 function ifSelf(isSelf) {
   if (isSelf) {
     // self inventory
@@ -77,7 +82,7 @@ function ifSelf(isSelf) {
     doSelectAllLink();
     storeVL();
     doNekidBtn();
-    ajaxifyProfileSections();
+    doAjaxifySections();
   }
 }
 

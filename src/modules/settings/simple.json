@@ -422,5 +422,9 @@
   "nekidButton":{
     "helpTitle":"Nekid Button",
     "helpText":"This adds Nekid button below worn items."
+  },
+  "ajaxifyProfileSections":{
+    "helpTitle":"Ajaxify Profile Sections",
+    "helpText":"This collapses and expands profile sections without a page reload."
   }
 }

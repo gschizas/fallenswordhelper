@@ -223,5 +223,6 @@
   "componentWidgets":false,
   "quickWearLink":false,
   "selectAllLink":false,
-  "nekidButton":false
+  "nekidButton":false,
+  "ajaxifyProfileSections":false
 }

@@ -144,5 +144,6 @@
   "componentWidgets",
   "quickWearLink",
   "selectAllLink",
-  "nekidButton"
+  "nekidButton",
+  "ajaxifyProfileSections"
 ]
