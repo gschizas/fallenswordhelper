@@ -3,6 +3,7 @@ import draggable from '../common/dragStart';
 import getElementById from '../common/getElement';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
+import hasClass from '../common/hasClass';
 import insertElement from '../common/insertElement';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import isFunction from '../common/isFunction';
@@ -82,11 +83,11 @@ function callHelperFunction(evt) {
 }
 
 function eventHandler(evt) {
-  if (evt.target.classList.contains('fshLink')) {
+  if (hasClass('fshLink', evt.target)) {
     callHelperFunction(evt);
     return;
   }
-  if (evt.target.classList.contains('a-reply')) {
+  if (hasClass('a-reply', evt.target)) {
     window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
   }
 }

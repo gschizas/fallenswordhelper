@@ -3,6 +3,7 @@ import getArrayByTagName from './common/getArrayByTagName';
 import getElementById from './common/getElement';
 import getElementsByTagName from './common/getElementsByTagName';
 import getText from './common/getText';
+import hasClass from './common/hasClass';
 import insertElement from './common/insertElement';
 import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
 import jQueryNotPresent from './common/jQueryNotPresent';
@@ -51,7 +52,7 @@ function buyTarget(target, theValue) {
 
 function select(evt) {
   const { target } = evt;
-  if (!target.classList.contains('bazaarButton')) { return; }
+  if (!hasClass('bazaarButton', target)) { return; }
   const theValue = testBuyAmount();
   if (!theValue) { return; }
   buyTarget(target, theValue);

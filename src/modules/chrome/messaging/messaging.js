@@ -3,6 +3,7 @@ import doValidateTip from './doValidateTip';
 import fallback from '../../system/fallback';
 import getMsg from './getMsg';
 import getQuickMessageDialog from './getQuickMessageDialog';
+import hasClass from '../../common/hasClass';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import sendOnEnter from './sendOnEnter';
 import { setName } from './targetPlayer';
@@ -16,7 +17,7 @@ function setMsg(msg) {
 
 function openQuickMsgDialog(name, msg, tip) { // jQuery
   const quickMsgDialog = getQuickMessageDialog();
-  if (quickMsgDialog.classList.contains('ui-dialog-content')) {
+  if (hasClass('ui-dialog-content', quickMsgDialog)) {
     setName(name);
     setMsg(msg);
     doValidateTip(tip);

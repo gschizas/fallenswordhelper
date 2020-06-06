@@ -9,6 +9,7 @@ import getArrayByTagName from '../common/getArrayByTagName';
 import getElementById from '../common/getElement';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
+import hasClass from '../common/hasClass';
 import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
@@ -46,9 +47,9 @@ function shouldHide(hidden, all, hasFolder) {
 function hideFolderItem(folderid, el) {
   // eslint-disable-next-line no-param-reassign
   el.children[0].lastElementChild.children[0].children[0].checked = false;
-  const hidden = el.classList.contains('fshHide');
+  const hidden = hasClass('fshHide', el);
   const all = folderid === 'folderid0';
-  const hasFolder = el.classList.contains(folderid);
+  const hasFolder = hasClass(folderid, el);
   if (shouldShow(hidden, all, hasFolder)) {
     el.classList.remove('fshHide');
     el.classList.add('fshBlock'); // show()

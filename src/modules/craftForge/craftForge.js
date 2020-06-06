@@ -7,6 +7,7 @@ import createLabel from '../common/cElement/createLabel';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getInventoryById from '../ajax/getInventoryById';
+import hasClass from '../common/hasClass';
 import hideElement from '../common/hideElement';
 import insertElement from '../common/insertElement';
 import insertElementAfterBegin from '../common/insertElementAfterBegin';
@@ -69,7 +70,7 @@ function reDrawGrid() {
 }
 
 function doHideFolders(evt) {
-  if (!evt.target.classList.contains('fshFolder')) { return; }
+  if (!hasClass('fshFolder', evt.target)) { return; }
   const evtFid = Number(evt.target.dataset.folder);
   if (evtFid !== folderId) {
     folderId = evtFid;

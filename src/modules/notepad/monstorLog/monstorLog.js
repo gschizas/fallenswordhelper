@@ -2,6 +2,7 @@ import buildHtml from './buildHtml';
 import calf from '../../support/calf';
 import doSortParams from '../../common/doSortParams';
 import getElementById from '../../common/getElement';
+import hasClass from '../../common/hasClass';
 import jQueryPresent from '../../common/jQueryPresent';
 import keys from '../../common/keys';
 import numberSort from '../../system/numberSort';
@@ -64,7 +65,7 @@ function sortCol(target) {
 }
 
 function isSortHeader(target) {
-  return target.classList.contains('fshLink')
+  return hasClass('fshLink', target)
     && target.hasAttribute('sortkey');
 }
 

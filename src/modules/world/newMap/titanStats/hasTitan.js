@@ -1,6 +1,7 @@
 import './hasTitan.css';
 import createDiv from '../../../common/cElement/createDiv';
 import getElementById from '../../../common/getElement';
+import hasClass from '../../../common/hasClass';
 import insertElement from '../../../common/insertElement';
 import toggleForce from '../../../common/toggleForce';
 import {
@@ -15,7 +16,7 @@ export let titanId;
 
 export function hideTitanDiv() {
   titanId = null;
-  if (titanDiv && !titanDiv.classList.contains('fshHide')) {
+  if (titanDiv && !hasClass('fshHide', titanDiv)) {
     toggleForce(titanDiv, true);
     clearTitanDiv();
     clearMemberRows();
