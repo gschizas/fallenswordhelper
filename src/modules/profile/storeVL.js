@@ -18,7 +18,7 @@ function sameAsLevel(virtualLevel) {
 
 export default function storeVL() {
   // store the VL of the player
-  const virtualLevel = parseInt(getText(getElementById(defStatVl)), 10);
+  const virtualLevel = Number(getText(getElementById(defStatVl)));
   if (sameAsLevel(virtualLevel)) {
     setValue(defCharacterVirtualLevel, ''); // ?
   } else {
