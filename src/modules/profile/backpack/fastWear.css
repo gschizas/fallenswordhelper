@@ -1,0 +1,12 @@
+.fastDiv {
+  display: flex;
+  height: 16px;
+  justify-content: center;
+}
+.fastAction {
+  font-size: 12px;
+  /* margin-right: 0.2em; */
+  position: relative;
+  top: -10%;
+  width: 3em;
+}

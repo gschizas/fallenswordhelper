@@ -402,5 +402,9 @@
   "countAllyEnemy":{
     "helpTitle":"Count Ally Enemy",
     "helpText":"This shows a count of the number of allies and enemies."
+  },
+  "fixFolderImages":{
+    "helpTitle":"Fix Folder Images",
+    "helpText":"This fixes the backpack folder images."
   }
 }

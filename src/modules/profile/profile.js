@@ -9,7 +9,6 @@ import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
 import highlightPvpProtection from './highlightPvpProtection';
-import injectFastWear from './fastWear';
 import interceptSubmit from '../common/interceptSubmit';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import nekidBtn from './nekidBtn';
@@ -42,13 +41,27 @@ async function doAllyEnemy() {
   }
 }
 
+async function doFastWear() {
+  if (getValue('enableQuickDrink')) {
+    const m = await import('./backpack/fastWear');
+    m.default();
+  }
+}
+
+async function doFixFolders() {
+  if (getValue('fixFolderImages')) {
+    const m = await import('./backpack/fixFolders');
+    m.default();
+  }
+}
+
 function ifSelf(isSelf) {
   if (isSelf) {
     // self inventory
     doFastDebuff();
     doAllyEnemy();
-    profileParseAllyEnemy();
-    injectFastWear();
+    doFastWear();
+    doFixFolders();
     components();
     quickWearLink();
     selectAllLink();

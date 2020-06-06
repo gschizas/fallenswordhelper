@@ -139,5 +139,6 @@
   "changeButtonLabels",
   "notificationWidgets",
   "fastDebuff",
-  "countAllyEnemy"
+  "countAllyEnemy",
+  "fixFolderImages"
 ]

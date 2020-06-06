@@ -218,5 +218,6 @@
   "changeButtonLabels":false,
   "notificationWidgets":false,
   "fastDebuff":false,
-  "countAllyEnemy":false
+  "countAllyEnemy":false,
+  "fixFolderImages":false
 }
