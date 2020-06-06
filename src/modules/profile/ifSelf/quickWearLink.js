@@ -1,12 +1,12 @@
-import { cmdUrl } from '../support/constants';
-import createSpan from '../common/cElement/createSpan';
-import insertElement from '../common/insertElement';
-import { insertQuickWear } from '../chrome/pageSwitcher/loader';
-import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
-import jQueryDialog from '../chrome/jQueryDialog';
-import onclick from '../common/onclick';
-import querySelector from '../common/querySelector';
-import { sendEvent } from '../support/fshGa';
+import { cmdUrl } from '../../support/constants';
+import createSpan from '../../common/cElement/createSpan';
+import insertElement from '../../common/insertElement';
+import { insertQuickWear } from '../../chrome/pageSwitcher/loader';
+import insertTextBeforeEnd from '../../common/insertTextBeforeEnd';
+import jQueryDialog from '../../chrome/jQueryDialog';
+import onclick from '../../common/onclick';
+import querySelector from '../../common/querySelector';
+import { sendEvent } from '../../support/fshGa';
 
 function openQwDialog() {
   sendEvent('profile', 'insertQuickWear');

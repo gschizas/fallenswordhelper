@@ -1,10 +1,10 @@
-import getCustomUrlParameter from '../system/getCustomUrlParameter';
-import getElementById from '../common/getElement';
-import hideElement from '../common/hideElement';
-import onclick from '../common/onclick';
-import { pCC } from '../support/layout';
-import partial from '../common/partial';
-import retryAjax from '../ajax/retryAjax';
+import getCustomUrlParameter from '../../system/getCustomUrlParameter';
+import getElementById from '../../common/getElement';
+import hideElement from '../../common/hideElement';
+import onclick from '../../common/onclick';
+import { pCC } from '../../support/layout';
+import partial from '../../common/partial';
+import retryAjax from '../../ajax/retryAjax';
 
 let bpc;
 

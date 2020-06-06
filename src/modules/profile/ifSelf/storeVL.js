@@ -1,14 +1,14 @@
-import getElementById from '../common/getElement';
-import getElementsByClassName from '../common/getElementsByClassName';
-import getText from '../common/getText';
-import intValue from '../system/intValue';
-import setValue from '../system/setValue';
-import valueText from '../common/valueText';
+import getElementById from '../../common/getElement';
+import getElementsByClassName from '../../common/getElementsByClassName';
+import getText from '../../common/getText';
+import intValue from '../../system/intValue';
+import setValue from '../../system/setValue';
+import valueText from '../../common/valueText';
 import {
   defCharacterVirtualLevel,
   defStatLevel,
   defStatVl,
-} from '../support/constants';
+} from '../../support/constants';
 
 function sameAsLevel(virtualLevel) {
   return intValue(valueText(

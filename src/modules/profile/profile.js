@@ -5,8 +5,8 @@ import fallback from '../system/fallback';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
-import getValue from '../system/getValue';
 import highlightPvpProtection from './highlightPvpProtection';
+import ifSelf from './ifSelf/ifSelf';
 import interceptSubmit from '../common/interceptSubmit';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import { pCC } from '../support/layout';
@@ -16,75 +16,8 @@ import { profileInjectGuildRel } from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
 import profileRenderBio from './bio/bio';
 import querySelector from '../common/querySelector';
-import runDefault from '../common/runDefault';
-import storeVL from './storeVL';
 import updateBuffs from './updateBuffs';
 import updateStatistics from './updateStatistics';
-
-async function doFastDebuff() {
-  const fastDebuff = getValue('fastDebuff');
-  const disableDeactivatePrompts = getValue('disableDeactivatePrompts');
-  if (fastDebuff || disableDeactivatePrompts) {
-    const m = await import('./debuff');
-    m.default(fastDebuff, disableDeactivatePrompts);
-  }
-}
-
-function doAllyEnemy() {
-  if (getValue('countAllyEnemy')) { runDefault(import('./profileAllyEnemy')); }
-}
-
-function doFastWear() {
-  if (getValue('enableQuickDrink')) {
-    runDefault(import('./backpack/fastWear'));
-  }
-}
-
-function doFixFolders() {
-  if (getValue('fixFolderImages')) {
-    runDefault(import('./backpack/fixFolders'));
-  }
-}
-
-function doComponents() {
-  if (getValue('componentWidgets')) {
-    runDefault(import('./components/components'));
-  }
-}
-
-function doQuickWearLink() {
-  if (getValue('quickWearLink')) { runDefault(import('./quickWearLink')); }
-}
-
-function doSelectAllLink() {
-  if (getValue('selectAllLink')) { runDefault(import('./selectAllLink')); }
-}
-
-function doNekidBtn() {
-  if (getValue('nekidButton')) { runDefault(import('./nekidBtn')); }
-}
-
-function doAjaxifySections() {
-  if (getValue('ajaxifyProfileSections')) {
-    runDefault(import('./ajaxifyProfileSections'));
-  }
-}
-
-function ifSelf(isSelf) {
-  if (isSelf) {
-    // self inventory
-    doFastDebuff();
-    doAllyEnemy();
-    doFastWear();
-    doFixFolders();
-    doComponents();
-    doQuickWearLink();
-    doSelectAllLink();
-    storeVL();
-    doNekidBtn();
-    doAjaxifySections();
-  }
-}
 
 function guildRelationship(avyImg, playername, isSelf) {
   // Must be before profileInjectQuickButton

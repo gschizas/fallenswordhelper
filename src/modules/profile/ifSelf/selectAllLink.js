@@ -1,13 +1,13 @@
-import clickThis from '../common/clickThis';
-import createSpan from '../common/cElement/createSpan';
-import { dropItemsUrl } from '../support/constants';
-import getElementById from '../common/getElement';
-import getElementsByClassName from '../common/getElementsByClassName';
-import insertElement from '../common/insertElement';
-import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import onclick from '../common/onclick';
-import querySelector from '../common/querySelector';
-import querySelectorArray from '../common/querySelectorArray';
+import clickThis from '../../common/clickThis';
+import createSpan from '../../common/cElement/createSpan';
+import { dropItemsUrl } from '../../support/constants';
+import getElementById from '../../common/getElement';
+import getElementsByClassName from '../../common/getElementsByClassName';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
+import onclick from '../../common/onclick';
+import querySelector from '../../common/querySelector';
+import querySelectorArray from '../../common/querySelectorArray';
 
 function profileSelectAll() {
   const bpTabs = getElementById('backpack_tabs');

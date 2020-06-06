@@ -1,11 +1,11 @@
-import daRemoveSkill from '../_dataAccess/daRemoveSkill';
-import errorDialog from '../common/errorDialog';
-import getElementById from '../common/getElement';
-import hideQTip from '../common/hideQTip';
-import onclick from '../common/onclick';
-import partial from '../common/partial';
-import { sendEvent } from '../support/fshGa';
-import setInnerHtml from '../dom/setInnerHtml';
+import daRemoveSkill from '../../_dataAccess/daRemoveSkill';
+import errorDialog from '../../common/errorDialog';
+import getElementById from '../../common/getElement';
+import hideQTip from '../../common/hideQTip';
+import onclick from '../../common/onclick';
+import partial from '../../common/partial';
+import { sendEvent } from '../../support/fshGa';
+import setInnerHtml from '../../dom/setInnerHtml';
 
 function debuffSuccess(aLink, json) {
   if (json && json.s) { setInnerHtml('', aLink.parentNode); }
