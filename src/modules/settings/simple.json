@@ -426,5 +426,9 @@
   "ajaxifyProfileSections":{
     "helpTitle":"Ajaxify Profile Sections",
     "helpText":"This collapses and expands profile sections without a page reload."
+  },
+  "injectBuffGuide":{
+    "helpTitle":"Inject Buff Guide",
+    "helpText":"This attempts to calculate stat movement for barricade, entrench and nightmare visage. These calculations are NOT cumulative and are intended only as a guide."
   }
 }

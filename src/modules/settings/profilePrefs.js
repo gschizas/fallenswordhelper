@@ -33,6 +33,7 @@ export default function profilePrefs() {
     'componentWidgets',
     'fastDebuff',
     'disableDeactivatePrompts',
+    'injectBuffGuide',
     'countAllyEnemy',
     'highlightPvpProtection',
   ])}`;

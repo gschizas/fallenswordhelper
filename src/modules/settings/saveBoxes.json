@@ -145,5 +145,6 @@
   "quickWearLink",
   "selectAllLink",
   "nekidButton",
-  "ajaxifyProfileSections"
+  "ajaxifyProfileSections",
+  "injectBuffGuide"
 ]

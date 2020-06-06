@@ -224,5 +224,6 @@
   "quickWearLink":false,
   "selectAllLink":false,
   "nekidButton":false,
-  "ajaxifyProfileSections":false
+  "ajaxifyProfileSections":false,
+  "injectBuffGuide":false
 }

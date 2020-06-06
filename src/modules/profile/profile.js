@@ -5,6 +5,7 @@ import fallback from '../system/fallback';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
+import getValue from '../system/getValue';
 import highlightPvpProtection from './highlightPvpProtection';
 import ifSelf from './ifSelf/ifSelf';
 import interceptSubmit from '../common/interceptSubmit';
@@ -16,7 +17,7 @@ import { profileInjectGuildRel } from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
 import profileRenderBio from './bio/bio';
 import querySelector from '../common/querySelector';
-import updateBuffs from './updateBuffs';
+import runDefault from '../common/runDefault';
 import updateStatistics from './updateStatistics';
 
 function guildRelationship(avyImg, playername, isSelf) {
@@ -27,10 +28,14 @@ function guildRelationship(avyImg, playername, isSelf) {
   profileInjectQuickButton(avyImg, playerid, playername);
 }
 
+function doUpdateBuffs() {
+  if (getValue('injectBuffGuide')) { runDefault(import('./updateBuffs')); }
+}
+
 function updateDom(avyImg, playername, isSelf) {
   ifSelf(isSelf);
   guildRelationship(avyImg, playername, isSelf);
-  updateBuffs();
+  doUpdateBuffs();
   updateStatistics();
   highlightPvpProtection();
   add(3, profileRenderBio, [isSelf]);
