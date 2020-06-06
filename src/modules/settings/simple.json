@@ -398,5 +398,9 @@
   "fastDebuff":{
     "helpTitle":"Fast Debuff",
     "helpText":"This allows debuffing without a page reload."
+  },
+  "countAllyEnemy":{
+    "helpTitle":"Count Ally Enemy",
+    "helpText":"This shows a count of the number of allies and enemies."
   }
 }

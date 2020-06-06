@@ -138,5 +138,6 @@
   "addIgnoreLink",
   "changeButtonLabels",
   "notificationWidgets",
-  "fastDebuff"
+  "fastDebuff",
+  "countAllyEnemy"
 ]

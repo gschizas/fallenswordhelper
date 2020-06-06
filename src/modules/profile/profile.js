@@ -18,7 +18,6 @@ import playerId from '../common/playerId';
 import playerName from '../common/playerName';
 import { profileInjectGuildRel } from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
-import profileParseAllyEnemy from './profileAllyEnemy';
 import profileRenderBio from './bio/bio';
 import querySelector from '../common/querySelector';
 import quickWearLink from './quickWearLink';
@@ -36,10 +35,18 @@ async function doFastDebuff() {
   }
 }
 
+async function doAllyEnemy() {
+  if (getValue('countAllyEnemy')) {
+    const m = await import('./profileAllyEnemy');
+    m.default();
+  }
+}
+
 function ifSelf(isSelf) {
   if (isSelf) {
     // self inventory
     doFastDebuff();
+    doAllyEnemy();
     profileParseAllyEnemy();
     injectFastWear();
     components();

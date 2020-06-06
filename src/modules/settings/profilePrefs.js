@@ -27,6 +27,7 @@ export default function profilePrefs() {
     'enableQuickDrink',
     'fastDebuff',
     'disableDeactivatePrompts',
+    'countAllyEnemy',
     'highlightPvpProtection',
   ])}`;
 }
