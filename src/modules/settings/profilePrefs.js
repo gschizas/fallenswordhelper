@@ -24,6 +24,7 @@ export default function profilePrefs() {
   }${buffGreet()
   }${bunchOfSimple([
     'showStatBonusTotal',
+    'quickWearLink',
     'enableQuickDrink',
     'fixFolderImages',
     'componentWidgets',

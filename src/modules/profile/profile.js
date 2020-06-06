@@ -18,7 +18,6 @@ import { profileInjectGuildRel } from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
 import profileRenderBio from './bio/bio';
 import querySelector from '../common/querySelector';
-import quickWearLink from './quickWearLink';
 import selectAllLink from './selectAllLink';
 import storeVL from './storeVL';
 import updateBuffs from './updateBuffs';
@@ -61,6 +60,13 @@ async function doComponents() {
   }
 }
 
+async function doQuickWearLink() {
+  if (getValue('quickWearLink')) {
+    const m = await import('./quickWearLink');
+    m.default();
+  }
+}
+
 function ifSelf(isSelf) {
   if (isSelf) {
     // self inventory
@@ -69,7 +75,7 @@ function ifSelf(isSelf) {
     doFastWear();
     doFixFolders();
     doComponents();
-    quickWearLink();
+    doQuickWearLink();
     selectAllLink();
     storeVL();
     nekidBtn();

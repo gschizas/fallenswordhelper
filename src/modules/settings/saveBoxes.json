@@ -141,5 +141,6 @@
   "fastDebuff",
   "countAllyEnemy",
   "fixFolderImages",
-  "componentWidgets"
+  "componentWidgets",
+  "quickWearLink"
 ]

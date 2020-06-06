@@ -220,5 +220,6 @@
   "fastDebuff":false,
   "countAllyEnemy":false,
   "fixFolderImages":false,
-  "componentWidgets":false
+  "componentWidgets":false,
+  "quickWearLink":false
 }

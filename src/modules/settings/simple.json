@@ -410,5 +410,9 @@
   "componentWidgets":{
     "helpTitle":"Component Widgets",
     "helpText":"This adds buttons to the components section. Quick delete, counts and quick extract."
+  },
+  "quickWearLink":{
+    "helpTitle":"Quick Wear Link",
+    "helpText":"This adds a quick wear link to the inventory section header."
   }
 }
