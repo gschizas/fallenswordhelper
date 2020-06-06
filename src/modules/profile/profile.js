@@ -1,12 +1,11 @@
 import add from '../support/task';
-import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import colouredDots from '../common/colouredDots';
+import doStatTotal from './dropitems/doStatTotal';
 import fallback from '../system/fallback';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
 import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
-import highlightPvpProtection from './highlightPvpProtection';
 import ifSelf from './ifSelf/ifSelf';
 import interceptSubmit from '../common/interceptSubmit';
 import jQueryNotPresent from '../common/jQueryNotPresent';
@@ -18,7 +17,6 @@ import profileInjectQuickButton from './profileInjectQuickButton';
 import profileRenderBio from './bio/bio';
 import querySelector from '../common/querySelector';
 import runDefault from '../common/runDefault';
-import updateStatistics from './updateStatistics';
 
 function guildRelationship(avyImg, playername, isSelf) {
   // Must be before profileInjectQuickButton
@@ -32,14 +30,24 @@ function doUpdateBuffs() {
   if (getValue('injectBuffGuide')) { runDefault(import('./updateBuffs')); }
 }
 
+function doUpdateStatistics() {
+  if (getValue('statisticsWrap')) { runDefault(import('./updateStatistics')); }
+}
+
+function doHighlightPvPProt() {
+  if (getValue('highlightPvpProtection')) {
+    runDefault(import('./highlightPvpProtection'));
+  }
+}
+
 function updateDom(avyImg, playername, isSelf) {
   ifSelf(isSelf);
   guildRelationship(avyImg, playername, isSelf);
   doUpdateBuffs();
-  updateStatistics();
-  highlightPvpProtection();
+  doUpdateStatistics();
+  doHighlightPvPProt();
   add(3, profileRenderBio, [isSelf]);
-  addStatTotalToMouseover();
+  doStatTotal();
   add(3, colouredDots);
 }
 

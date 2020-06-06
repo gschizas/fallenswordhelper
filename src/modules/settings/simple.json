@@ -430,5 +430,9 @@
   "injectBuffGuide":{
     "helpTitle":"Inject Buff Guide",
     "helpText":"This attempts to calculate stat movement for barricade, entrench and nightmare visage. These calculations are NOT cumulative and are intended only as a guide."
+  },
+  "statisticsWrap":{
+    "helpTitle":"Statistics Wrap",
+    "helpText":"This fixes the wrapping of the statistics section."
   }
 }

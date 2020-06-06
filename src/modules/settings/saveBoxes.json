@@ -146,5 +146,6 @@
   "selectAllLink",
   "nekidButton",
   "ajaxifyProfileSections",
-  "injectBuffGuide"
+  "injectBuffGuide",
+  "statisticsWrap"
 ]

@@ -25,6 +25,7 @@ export default function profilePrefs() {
   }${bunchOfSimple([
     'showStatBonusTotal',
     'ajaxifyProfileSections',
+    'statisticsWrap',
     'quickWearLink',
     'nekidButton',
     'selectAllLink',
