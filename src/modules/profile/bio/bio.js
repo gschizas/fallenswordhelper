@@ -1,15 +1,19 @@
-import add from '../../support/task';
 import bioEvtHdl from './bioEvtHdl';
-import compressBio from './compressBio';
 import getElementById from '../../common/getElement';
-import getValue from '../../system/getValue';
 import onclick from '../../common/onclick';
-import testForRender from './testForRender';
+import renderBio from './render';
+import setInnerHtml from '../../dom/setInnerHtml';
 
-export default function profileRenderBio(isSelf) {
+function doRender(bioCell) {
+  const bioContents = renderBio(bioCell.innerHTML);
+  if (bioContents) {
+    setInnerHtml(bioContents, bioCell);
+  }
+}
+
+export default function profileRenderBio() {
   const bioCell = getElementById('profile-bio');
   if (!bioCell) { return; }
-  testForRender(isSelf, bioCell);
-  if (getValue('enableBioCompressor')) { add(3, compressBio, [bioCell]); }
+  doRender(bioCell);
   onclick(bioCell, bioEvtHdl);
 }

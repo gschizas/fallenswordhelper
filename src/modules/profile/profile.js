@@ -14,9 +14,9 @@ import playerId from '../common/playerId';
 import playerName from '../common/playerName';
 import { profileInjectGuildRel } from './profileInjectGuildRel';
 import profileInjectQuickButton from './profileInjectQuickButton';
-import profileRenderBio from './bio/bio';
 import querySelector from '../common/querySelector';
 import runDefault from '../common/runDefault';
+import shouldRender from './bio/shouldRender';
 
 function guildRelationship(avyImg, playername, isSelf) {
   // Must be before profileInjectQuickButton
@@ -40,13 +40,24 @@ function doHighlightPvPProt() {
   }
 }
 
+function doRenderBio(isSelf) {
+  if (shouldRender(isSelf)) { runDefault(import('./bio/bio')); }
+}
+
+function doCompressBio() {
+  if (getValue('enableBioCompressor')) {
+    runDefault(import('./bio/compressBio'));
+  }
+}
+
 function updateDom(avyImg, playername, isSelf) {
   ifSelf(isSelf);
   guildRelationship(avyImg, playername, isSelf);
   doUpdateBuffs();
   doUpdateStatistics();
   doHighlightPvPProt();
-  add(3, profileRenderBio, [isSelf]);
+  doRenderBio(isSelf);
+  doCompressBio();
   doStatTotal();
   add(3, colouredDots);
 }
@@ -57,7 +68,7 @@ function allowBack(isSelf) {
   }
 }
 
-export default function injectProfile() { // Legacy
+export default function injectProfile() {
   if (jQueryNotPresent()) { return; }
   const avyImg = querySelector(
     '#profileLeftColumn img[src*="/avatars/"][width="200"]',

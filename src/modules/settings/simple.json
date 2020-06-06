@@ -138,12 +138,14 @@
     "helpText":"Shows all quest steps in the UFSG."
   },
   "renderSelfBio":{
-    "helpTitle":"Render self bio",
-    "helpText":"This determines if your own bio will render the FSH special bio tags."
+    "helpTitle":"Render self bio (SLOW)",
+    "helpText":"This determines if your own bio will render the FSH special bio tags.",
+    "title":"Render self bio"
   },
   "renderOtherBios":{
-    "helpTitle":"Render other players&#39; bios",
-    "helpText":"This determines if other players bios will render the FSH special bio tags."
+    "helpTitle":"Render other players&apos; bios (SLOW)",
+    "helpText":"This determines if other players bios will render the FSH special bio tags.",
+    "title":"Render other players&apos; bios"
   },
   "enableBioCompressor":{
     "helpTitle":"Enable Bio Compressor",

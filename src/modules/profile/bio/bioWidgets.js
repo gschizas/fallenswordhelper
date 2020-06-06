@@ -114,9 +114,9 @@ function bioHeight() {
 }
 
 function updateBioCharacters() {
-  let bioContents = convertTextToHtml(textArea.value);
-  bioContents = renderBio(bioContents);
-  setInnerHtml(bioContents, previewArea);
+  const bioContents = convertTextToHtml(textArea.value);
+  const rendered = renderBio(bioContents);
+  setInnerHtml(rendered || bioContents, previewArea);
 }
 
 export default function injectBioWidgets() {
