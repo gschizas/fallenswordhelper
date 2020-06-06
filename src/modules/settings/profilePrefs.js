@@ -25,6 +25,7 @@ export default function profilePrefs() {
   }${bunchOfSimple([
     'showStatBonusTotal',
     'quickWearLink',
+    'nekidButton',
     'selectAllLink',
     'enableQuickDrink',
     'fixFolderImages',

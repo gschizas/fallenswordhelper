@@ -222,5 +222,6 @@
   "fixFolderImages":false,
   "componentWidgets":false,
   "quickWearLink":false,
-  "selectAllLink":false
+  "selectAllLink":false,
+  "nekidButton":false
 }

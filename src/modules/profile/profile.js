@@ -10,7 +10,6 @@ import getValue from '../system/getValue';
 import highlightPvpProtection from './highlightPvpProtection';
 import interceptSubmit from '../common/interceptSubmit';
 import jQueryNotPresent from '../common/jQueryNotPresent';
-import nekidBtn from './nekidBtn';
 import { pCC } from '../support/layout';
 import playerId from '../common/playerId';
 import playerName from '../common/playerName';
@@ -62,6 +61,10 @@ function doSelectAllLink() {
   if (getValue('selectAllLink')) { runDefault(import('./selectAllLink')); }
 }
 
+function doNekidBtn() {
+  if (getValue('nekidButton')) { runDefault(import('./nekidBtn')); }
+}
+
 function ifSelf(isSelf) {
   if (isSelf) {
     // self inventory
@@ -73,7 +76,7 @@ function ifSelf(isSelf) {
     doQuickWearLink();
     doSelectAllLink();
     storeVL();
-    nekidBtn();
+    doNekidBtn();
     ajaxifyProfileSections();
   }
 }

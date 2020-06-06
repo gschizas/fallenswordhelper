@@ -418,5 +418,9 @@
   "selectAllLink":{
     "helpTitle":"Select All Link",
     "helpText":"This adds a select all link to the backpack section header."
+  },
+  "nekidButton":{
+    "helpTitle":"Nekid Button",
+    "helpText":"This adds Nekid button below worn items."
   }
 }
