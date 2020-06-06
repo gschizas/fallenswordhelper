@@ -406,5 +406,9 @@
   "fixFolderImages":{
     "helpTitle":"Fix Folder Images",
     "helpText":"This fixes the backpack folder images."
+  },
+  "componentWidgets":{
+    "helpTitle":"Component Widgets",
+    "helpText":"This adds buttons to the components section. Quick delete, counts and quick extract."
   }
 }

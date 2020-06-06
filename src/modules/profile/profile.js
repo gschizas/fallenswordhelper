@@ -2,7 +2,6 @@ import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import ajaxifyProfileSections from './ajaxifyProfileSections';
 import colouredDots from '../common/colouredDots';
-import components from './components/components';
 import fallback from '../system/fallback';
 import getElementsByTagName from '../common/getElementsByTagName';
 import getText from '../common/getText';
@@ -55,6 +54,13 @@ async function doFixFolders() {
   }
 }
 
+async function doComponents() {
+  if (getValue('componentWidgets')) {
+    const m = await import('./components/components');
+    m.default();
+  }
+}
+
 function ifSelf(isSelf) {
   if (isSelf) {
     // self inventory
@@ -62,7 +68,7 @@ function ifSelf(isSelf) {
     doAllyEnemy();
     doFastWear();
     doFixFolders();
-    components();
+    doComponents();
     quickWearLink();
     selectAllLink();
     storeVL();

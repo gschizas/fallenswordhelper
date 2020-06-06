@@ -219,5 +219,6 @@
   "notificationWidgets":false,
   "fastDebuff":false,
   "countAllyEnemy":false,
-  "fixFolderImages":false
+  "fixFolderImages":false,
+  "componentWidgets":false
 }

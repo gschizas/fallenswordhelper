@@ -140,5 +140,6 @@
   "notificationWidgets",
   "fastDebuff",
   "countAllyEnemy",
-  "fixFolderImages"
+  "fixFolderImages",
+  "componentWidgets"
 ]

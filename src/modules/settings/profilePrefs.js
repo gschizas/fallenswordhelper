@@ -26,6 +26,7 @@ export default function profilePrefs() {
     'showStatBonusTotal',
     'enableQuickDrink',
     'fixFolderImages',
+    'componentWidgets',
     'fastDebuff',
     'disableDeactivatePrompts',
     'countAllyEnemy',
