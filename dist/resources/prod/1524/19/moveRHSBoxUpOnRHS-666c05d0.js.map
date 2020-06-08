@@ -1,1 +1,0 @@
-{"version":3,"file":"moveRHSBoxUpOnRHS-666c05d0.js","sources":["src/modules/chrome/lookForHcsData/moveRHSBoxUpOnRHS.js"],"sourcesContent":null,"names":["title","box","getElementById","insertElementAfterBegin","pCR"],"mappings":";;;eAIe,SAA2BA,GACxC,MAAMC,EAAMC,EAAeF;AACvBC,GACFE,EAAwBC,EAAKH","sourceRoot":"https://rawcdn.githack.com/fallenswordhelper/fallenswordhelper/15.24.19"}
