@@ -1,7 +1,7 @@
 import bunchOfSimple from './bunchOfSimple';
 import getValue from '../system/getValue';
-import { helpLink } from './simpleCheckbox';
 import isValueChecked from './isValueChecked';
+import { helpLink, simpleCheckbox } from './simpleCheckbox';
 
 function injectSettingsGuildData(guildType) {
   let title = '';
@@ -54,6 +54,7 @@ export default function guildPrefs() {
   // Guild Manage
   return '<tr><th colspan="2"><b>Guild>Manage preferences'
     + `</b></th></tr>${
+      simpleCheckbox('showGuildRelationship')}${
       guildNames()}${
       pvpTargets()}${
       bunchOfSimple([

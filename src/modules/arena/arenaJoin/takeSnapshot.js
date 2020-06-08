@@ -1,5 +1,6 @@
 import all from '../../common/all';
 import fromEntries from '../../common/fromEntries';
+import handleSubmit from '../../common/handleSubmit';
 import isArray from '../../common/isArray';
 import join from '../../app/arena/join';
 import loadEquipped from '../../app/profile/loadequipped';
@@ -7,10 +8,9 @@ import { nowSecs } from '../../support/now';
 import off from '../../common/off';
 import once from '../../common/once';
 import { pCC } from '../../support/layout';
-import querySelector from '../../common/querySelector';
+// import querySelector from '../../common/querySelector';
 import thisTournament from './thisTournament';
 import toLowerCase from '../../common/toLowerCase';
-import updateUrl from './updateUrl';
 import { attribType, itemType } from '../../support/constants';
 import { get, set } from '../../system/idb';
 
@@ -39,13 +39,16 @@ async function buttonPress(e) {
     newJoined.push(thisData);
     set('fsh_arenaJoined', newJoined);
   }
-  updateUrl(e);
+  handleSubmit(e);
 }
 
 export default function takeSnapshot() {
-  const submitButton = querySelector('input[type="submit"]', pCC);
-  if (submitButton) {
-    off(submitButton, 'click', updateUrl);
-    once(submitButton, 'click', buttonPress);
-  }
+  // const submitButton = querySelector('input[type="submit"]', pCC);
+  // if (submitButton) {
+  // off(submitButton, 'click', zzzupdateUrl);
+  // It might be better to replace the Join Tournament Button entirely
+  off(pCC, 'submit', handleSubmit);
+  // once(submitButton, 'click', buttonPress);
+  once(pCC, 'submit', buttonPress);
+  // }
 }

@@ -1,33 +1,27 @@
-import './compressBio.postcss';
-import createDiv from '../../common/cElement/createDiv';
+import './compressBio.css';
 import createInput from '../../common/cElement/createInput';
 import createLabel from '../../common/cElement/createLabel';
-import insertElement from '../../common/insertElement';
+import getElementById from '../../common/getElement';
+import insertElementBefore from '../../common/insertElementBefore';
 import on from '../../common/on';
 import partial from '../../common/partial';
 import { sendEvent } from '../../support/fshGa';
-import setInnerHtml from '../../dom/setInnerHtml';
 
-function injectToggle(fshCompressor) {
-  const toggle = insertElement(fshCompressor,
-    createInput({ id: 'fshCompressToggle', type: 'checkbox' }));
+function injectToggle(bioCell) {
+  const toggle = insertElementBefore(
+    createInput({ id: 'fshCompressToggle', type: 'checkbox' }),
+    bioCell,
+  );
   on(toggle, 'change', partial(sendEvent, 'bio', 'toggle'));
 }
 
-function hideBlock(bioCell, fshCompressor) {
-  const fshCompress = insertElement(fshCompressor,
-    createDiv({ className: 'fshCompress' }));
-  setInnerHtml(bioCell.innerHTML, fshCompress);
-  setInnerHtml('', bioCell);
-}
-
 function doCompression(bioCell) {
-  const fshCompressor = createDiv({ className: 'fshCompressor' });
-  injectToggle(fshCompressor);
-  insertElement(fshCompressor,
-    createLabel({ className: 'sendLink', htmlFor: 'fshCompressToggle' }));
-  hideBlock(bioCell, fshCompressor);
-  insertElement(bioCell, fshCompressor);
+  bioCell.parentNode.classList.add('fshCompressor');
+  injectToggle(bioCell);
+  insertElementBefore(
+    createLabel({ className: 'sendLink', htmlFor: 'fshCompressToggle' }),
+    bioCell,
+  );
 }
 
 function getFontSize(bioCell) {
@@ -35,7 +29,9 @@ function getFontSize(bioCell) {
   return parseInt(computedStyle.getPropertyValue('font-size'), 10);
 }
 
-export default function compressBio(bioCell) {
+export default function compressBio() {
+  const bioCell = getElementById('profile-bio');
+  if (!bioCell) { return; }
   if (bioCell.clientHeight / getFontSize(bioCell) > 10) {
     doCompression(bioCell);
   }

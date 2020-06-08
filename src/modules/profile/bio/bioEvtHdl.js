@@ -4,6 +4,7 @@ import getBuffsToBuy from './getBuffsToBuy';
 import getElementById from '../../common/getElement';
 import getPrice from './getPrice';
 import getText from '../../common/getText';
+import hasClass from '../../common/hasClass';
 import setInnerHtml from '../../dom/setInnerHtml';
 
 const buffCost = { count: 0, buffs: {} };
@@ -69,7 +70,7 @@ function getBuffCost(buffNameNode) {
 }
 
 function toggleBuffsToBuy(buffNameNode) { // Legacy
-  const selected = buffNameNode.classList.contains('fshBlue');
+  const selected = hasClass('fshBlue', buffNameNode);
   buffNameNode.classList.toggle('fshBlue');
   buffNameNode.classList.toggle('fshYellow');
   const buffName = getText(buffNameNode);
@@ -88,8 +89,7 @@ function closestSpan(el) {
 }
 
 function isBuffLink(buffNameNode) {
-  return buffNameNode.classList
-    && buffNameNode.classList.contains('buffLink');
+  return buffNameNode.classList && hasClass('buffLink', buffNameNode);
 }
 
 export default function bioEvtHdl(e) {

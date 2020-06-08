@@ -16,7 +16,7 @@ import runDefault from '../../common/runDefault';
 import scavenging from './scavenging';
 import toprated from './toprated';
 import trade from './trade';
-import { allowBack, injectProfile, inventing } from './loader';
+import { injectProfile, inventing, ufsgAllowBack } from './loader';
 
 const craftForge = () => { runDefault(import('../../craftForge/craftForge')); };
 const injectBank = () => { runDefault(import('../../bank/injectBank')); };
@@ -61,11 +61,11 @@ export default {
   findplayer: { '-': { '-': injectFindPlayer } },
   quests, // UFSG
   items, // UFSG
-  creatures: { '-': { '-': allowBack } }, // UFSG
-  masterrealms: { '-': { '-': allowBack } }, // UFSG
-  realms: { '-': { '-': allowBack } }, // UFSG
-  relics: { '-': { '-': allowBack } }, // UFSG
-  shops: { '-': { '-': allowBack } }, // UFSG
+  creatures: { '-': { '-': ufsgAllowBack } }, // UFSG
+  masterrealms: { '-': { '-': ufsgAllowBack } }, // UFSG
+  realms: { '-': { '-': ufsgAllowBack } }, // UFSG
+  relics: { '-': { '-': ufsgAllowBack } }, // UFSG
+  shops: { '-': { '-': ufsgAllowBack } }, // UFSG
   scavenging,
   temple: { '-': { '-': parseTemplePage } },
   composing,

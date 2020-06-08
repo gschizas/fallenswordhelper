@@ -48,7 +48,7 @@ function addTemplateRow(index, text) {
 
 function insertTemplate(target) {
   getMsg().value += `${getText(target)
-    .replace(/\{playername\}/g, getName())}\n`;
+    .replace(/\{playername\}/g, getName())}`;
 }
 
 function deleteTemplate(target) {

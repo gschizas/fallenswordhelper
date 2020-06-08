@@ -4,7 +4,6 @@ import findArena from './findArena';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import querySelector from '../../common/querySelector';
 import showMoves from './showMoves';
-import takeSnapshot from './takeSnapshot';
 
 const boolToString = (e) => String(Number(e));
 
@@ -29,9 +28,5 @@ export default function showAttribs(json) {
     const thisArena = findArena(json.r);
     insertHtmlBeforeEnd(thisCell, paramBox(thisArena));
     showMoves(json.r, thisCell, thisArena);
-    // eslint-disable-next-line no-unused-labels, no-labels
-    devLbl: { //  arena snapshot
-      takeSnapshot();
-    }
   }
 }

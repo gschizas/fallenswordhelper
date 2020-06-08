@@ -1,4 +1,4 @@
-import addStatTotalToMouseover from '../../common/addStatTotalToMouseover';
+import doStatTotal from './doStatTotal';
 import doToggleButtons from './doToggleButtons';
 import getArrayByTagName from '../../common/getArrayByTagName';
 import getElementsByTagName from '../../common/getElementsByTagName';
@@ -44,7 +44,7 @@ function getInjector(ary) {
 }
 
 export function getItems() {
-  addStatTotalToMouseover();
+  doStatTotal();
   getPrefs();
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   const imgList = getItemImg();

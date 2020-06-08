@@ -1,3 +1,4 @@
+import hasClass from '../../common/hasClass';
 import partial from '../../common/partial';
 
 let invItems;
@@ -30,7 +31,7 @@ function thisType(type, test) { return test[0] === type; }
 function doCheck(how, o) {
   if (!o.injectHere) { return; }
   const tr = o.injectHere.parentNode;
-  if (tr.classList.contains('fshHide')) { return; }
+  if (hasClass('fshHide', tr)) { return; }
   const el = o.el.parentNode.parentNode.previousElementSibling.children[0];
   how(o, el);
 }

@@ -1,8 +1,11 @@
-import closestForm from './common/closestForm';
-import dontPost from './common/dontPost';
-import jQueryNotPresent from './common/jQueryNotPresent';
+import doBuffLink from './common/doBuffLink';
+import doBuffLinkClick from './common/doBuffLinkClick';
+import insertHtmlBeforeEnd from './common/insertHtmlBeforeEnd';
+import interceptSubmit from './common/interceptSubmit';
 import onclick from './common/onclick';
-import quickBuffHref from './common/quickBuffHref';
+import { pCC } from './support/layout';
+import querySelector from './common/querySelector';
+import querySelectorArray from './common/querySelectorArray';
 import {
   calculateBoundaries,
   gvgLowerLevel,
@@ -10,55 +13,42 @@ import {
   pvpLowerLevel,
   pvpUpperLevel,
 } from './common/levelHighlight';
-import { playerIDRE, searchPlayerUrl } from './support/constants';
-
-function updateUrl(evt) {
-  evt.preventDefault();
-  dontPost(closestForm(evt.target));
-}
-
-function allowBack(findPlayerButton) {
-  onclick(findPlayerButton, updateUrl);
-}
+import { playerLinkSelector, searchPlayerUrl } from './support/constants';
 
 function searchUrl(min, max, guild) {
-  return `${searchPlayerUrl
-  }&search_level_min=${min
-  }&search_level_max=${max
-  }&search_in_guild=${guild}`;
+  return `${searchPlayerUrl}&search_level_min=${
+    min}&search_level_max=${
+    max}&search_in_guild=${
+    guild}`;
 }
 
 function shortcuts() {
   return `&nbsp;<a class="fshBlue" href="${
     searchUrl(pvpLowerLevel, pvpUpperLevel, '-1')
   }">Get PvP targets</a>&nbsp;<a class="fshBlue" href="${
-    searchUrl(gvgLowerLevel, gvgUpperLevel, '1')
-  }">Get GvG targets</a>`;
+    searchUrl(gvgLowerLevel, gvgUpperLevel, '1')}">Get GvG targets</a>`;
 }
 
 function doShortcuts(findPlayerButton) {
-  findPlayerButton.parent().append(shortcuts());
+  insertHtmlBeforeEnd(findPlayerButton.parentNode, shortcuts());
 }
 
 function doFindPlayer() {
-  const findPlayerButton = $('input[value="Find Player"]');
-  allowBack(findPlayerButton[0]);
-  doShortcuts(findPlayerButton);
-}
-
-function addBuffLinks(i, e) {
-  const id = playerIDRE.exec($(e).attr('href'));
-  $(e).after(` <a class="fshBf" ${quickBuffHref(id[1])}>[b]</a>`);
+  const findPlayerButton = querySelector('input[value="Find Player"]');
+  if (findPlayerButton) {
+    doShortcuts(findPlayerButton);
+  }
 }
 
 function doBuffLinks() {
-  $('table[class="width_full"]').find('a[href*="player_id"]')
-    .each(addBuffLinks);
+  const playerLinks = querySelectorArray(playerLinkSelector, pCC);
+  playerLinks.forEach(doBuffLink);
+  onclick(pCC, doBuffLinkClick);
 }
 
-export default function injectFindPlayer() { // Bad jQuery
-  if (jQueryNotPresent()) { return; }
+export default function injectFindPlayer() {
   calculateBoundaries();
   doFindPlayer();
   doBuffLinks();
+  interceptSubmit();
 }

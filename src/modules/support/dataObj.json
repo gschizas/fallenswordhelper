@@ -216,5 +216,17 @@
   "colorPlayerNames":false,
   "addIgnoreLink":false,
   "changeButtonLabels":false,
-  "notificationWidgets":false
+  "notificationWidgets":false,
+  "fastDebuff":false,
+  "countAllyEnemy":false,
+  "fixFolderImages":false,
+  "componentWidgets":false,
+  "quickWearLink":false,
+  "selectAllLink":false,
+  "nekidButton":false,
+  "ajaxifyProfileSections":false,
+  "injectBuffGuide":false,
+  "statisticsWrap":false,
+  "showGuildRelationship":false,
+  "showQuickButtons":false
 }

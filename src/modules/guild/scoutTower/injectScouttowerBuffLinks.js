@@ -2,6 +2,7 @@ import arrayFrom from '../../common/arrayFrom';
 import containsText from '../../common/containsText';
 import dataRows from '../../common/dataRows';
 import getText from '../../common/getText';
+import hasClass from '../../common/hasClass';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import onclick from '../../common/onclick';
 import openQuickBuffByName from '../../common/openQuickBuffByName';
@@ -31,7 +32,7 @@ function buffEvent(e) {
 }
 
 function evtHdl(e) {
-  if (e.target.classList.contains('fshBl')) { buffEvent(e); }
+  if (hasClass('fshBl', e.target)) { buffEvent(e); }
 }
 
 function playerBufflink(el) {

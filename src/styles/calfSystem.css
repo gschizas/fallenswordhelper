@@ -200,20 +200,6 @@
   background-repeat: no-repeat;
   background-position: center;
 }
-.fshBackpack  {height: 490px;}
-.fshBackpack .backpackTabContent > div {height: 110px;}
-.backpackTabContent > div {width: 60px;}
-.fastDiv {
-  display: flex;
-  height: 16px;
-  justify-content: center;
-}
-.fastAction {
-  /* margin-right: 0.2em; */
-  position: relative;
-  top: -16%;
-  width: 3em;
-}
 .fastWorn {
   color: green;
   font-weight: bold;
@@ -581,11 +567,6 @@ button::-moz-focus-inner {
 /* Old Row */
 .fshOr {
   background-color: #CD9E4B;
-}
-/* Buff Link */
-.fshBf {
-  color: blue;
-  font-size: 84%;
 }
 
 /* AH Quick Search - Category Header */

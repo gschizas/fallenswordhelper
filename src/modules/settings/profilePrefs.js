@@ -17,6 +17,7 @@ export default function profilePrefs() {
   // profile prefs
   return `<tr><th colspan="2"><b>Profile preferences</b></th></tr>${
     bunchOfSimple([
+      'showQuickButtons',
       'renderSelfBio',
       'renderOtherBios',
       'enableBioCompressor',
@@ -24,8 +25,18 @@ export default function profilePrefs() {
   }${buffGreet()
   }${bunchOfSimple([
     'showStatBonusTotal',
+    'ajaxifyProfileSections',
+    'statisticsWrap',
+    'quickWearLink',
+    'nekidButton',
+    'selectAllLink',
     'enableQuickDrink',
+    'fixFolderImages',
+    'componentWidgets',
+    'fastDebuff',
     'disableDeactivatePrompts',
+    'injectBuffGuide',
+    'countAllyEnemy',
     'highlightPvpProtection',
   ])}`;
 }

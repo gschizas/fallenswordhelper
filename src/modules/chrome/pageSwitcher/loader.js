@@ -1,6 +1,5 @@
 import runDefault from '../../common/runDefault';
 
-export const allowBack = () => { runDefault(import('../../guide/allowBack')); };
 export const injectBioWidgets = () => { runDefault(import('../../profile/bio/bioWidgets')); };
 export const injectGuild = () => { runDefault(import('../../guild/guild')); };
 export const injectProfile = () => { runDefault(import('../../profile/profile')); };
@@ -9,6 +8,7 @@ export const injectQuestBookFull = () => { runDefault(import('../../questbook/in
 export const injectStoreItems = () => { runDefault(import('../../profile/dropitems/injectStoreItems')); };
 export const inventing = () => { runDefault(import('../../inventing/inventing')); };
 export const news = () => { runDefault(import('../../news/news')); };
+export const ufsgAllowBack = () => { runDefault(import('../../guide/ufsgAllowBack')); };
 export const viewArchive = () => { runDefault(import('../../news/viewArchive')); };
 
 export const injectBuffLog = (i) => { import('../../notepad/buffLog/injectBuffLog').then((m) => m.default(i)); };

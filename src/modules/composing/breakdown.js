@@ -1,6 +1,7 @@
 import doBreakdown from '../ajax/doBreakdown';
 import getElementById from '../common/getElement';
 import getValue from '../system/getValue';
+import hasClass from '../common/hasClass';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
 import onclick from '../common/onclick';
@@ -83,7 +84,7 @@ function breakEvt(evt) {
 }
 
 function itemClick(evt) {
-  if (!evt.target.classList.contains('selectable-item')) { return; }
+  if (!hasClass('selectable-item', evt.target)) { return; }
   const myItem = evt.target.id.replace('composing-item-', '');
   const itemPos = selectedList.indexOf(myItem);
   if (itemPos === -1) {

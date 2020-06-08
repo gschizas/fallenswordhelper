@@ -8,6 +8,7 @@ import daMailboxTake from '../_dataAccess/daMailboxTake';
 import entries from '../common/entries';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getElementById from '../common/getElement';
+import hasClass from '../common/hasClass';
 import insertElement from '../common/insertElement';
 import insertElementBefore from '../common/insertElementBefore';
 import isArray from '../common/isArray';
@@ -122,7 +123,7 @@ function takeSimilar(itemList, takeResult, target) { // jQuery.min
 }
 
 function clickEvt(itemList, takeResult, evt) {
-  if (evt.target.classList.contains('fshBls')) {
+  if (hasClass('fshBls', evt.target)) {
     takeSimilar(itemList, takeResult, evt.target);
   }
 }

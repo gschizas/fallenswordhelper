@@ -137,5 +137,17 @@
   "colorPlayerNames",
   "addIgnoreLink",
   "changeButtonLabels",
-  "notificationWidgets"
+  "notificationWidgets",
+  "fastDebuff",
+  "countAllyEnemy",
+  "fixFolderImages",
+  "componentWidgets",
+  "quickWearLink",
+  "selectAllLink",
+  "nekidButton",
+  "ajaxifyProfileSections",
+  "injectBuffGuide",
+  "statisticsWrap",
+  "showGuildRelationship",
+  "showQuickButtons"
 ]

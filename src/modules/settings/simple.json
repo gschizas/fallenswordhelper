@@ -56,7 +56,7 @@
   },
   "showAdmin":{
     "helpTitle":"Show rank controls",
-    "helpText":"Show ranking controls for guild managemenet in member profile page - this works for guild founders only"
+    "helpText":"Show ranking controls for guild management in member profile page - this works for guild founders only"
   },
   "ajaxifyRankControls":{
     "helpTitle":"AJAXify rank controls",
@@ -138,12 +138,14 @@
     "helpText":"Shows all quest steps in the UFSG."
   },
   "renderSelfBio":{
-    "helpTitle":"Render self bio",
-    "helpText":"This determines if your own bio will render the FSH special bio tags."
+    "helpTitle":"Render self bio (SLOW)",
+    "helpText":"This determines if your own bio will render the FSH special bio tags.",
+    "title":"Render self bio"
   },
   "renderOtherBios":{
-    "helpTitle":"Render other players&#39; bios",
-    "helpText":"This determines if other players bios will render the FSH special bio tags."
+    "helpTitle":"Render other players&apos; bios (SLOW)",
+    "helpText":"This determines if other players bios will render the FSH special bio tags.",
+    "title":"Render other players&apos; bios"
   },
   "enableBioCompressor":{
     "helpTitle":"Enable Bio Compressor",
@@ -394,5 +396,53 @@
   "notificationWidgets":{
     "helpTitle":"Notification Widgets",
     "helpText":"This adds ignore/reply/send/trade/ST/buff/attack links to player notifications."
+  },
+  "fastDebuff":{
+    "helpTitle":"Fast Debuff",
+    "helpText":"This allows debuffing without a page reload."
+  },
+  "countAllyEnemy":{
+    "helpTitle":"Count Ally Enemy",
+    "helpText":"This shows a count of the number of allies and enemies."
+  },
+  "fixFolderImages":{
+    "helpTitle":"Fix Folder Images",
+    "helpText":"This fixes the backpack folder images."
+  },
+  "componentWidgets":{
+    "helpTitle":"Component Widgets",
+    "helpText":"This adds buttons to the components section. Quick delete, counts and quick extract."
+  },
+  "quickWearLink":{
+    "helpTitle":"Quick Wear Link",
+    "helpText":"This adds a quick wear link to the inventory section header."
+  },
+  "selectAllLink":{
+    "helpTitle":"Select All Link",
+    "helpText":"This adds a select all link to the backpack section header."
+  },
+  "nekidButton":{
+    "helpTitle":"Nekid Button",
+    "helpText":"This adds Nekid button below worn items."
+  },
+  "ajaxifyProfileSections":{
+    "helpTitle":"Ajaxify Profile Sections",
+    "helpText":"This collapses and expands profile sections without a page reload."
+  },
+  "injectBuffGuide":{
+    "helpTitle":"Inject Buff Guide",
+    "helpText":"This attempts to calculate stat movement for barricade, entrench and nightmare visage. These calculations are NOT cumulative and are intended only as a guide."
+  },
+  "statisticsWrap":{
+    "helpTitle":"Statistics Wrap",
+    "helpText":"This fixes the wrapping of the statistics section."
+  },
+  "showGuildRelationship":{
+    "helpTitle":"Show Guild Relationship",
+    "helpText":"This show the guild relationship in players&apos; profiles."
+  },
+  "showQuickButtons":{
+    "helpTitle":"Show Quick Buttons",
+    "helpText":"This shows quick access buttons under the avatar in players&apos; profiles."
   }
 }

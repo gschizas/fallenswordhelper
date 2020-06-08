@@ -1,0 +1,10 @@
+import{I as t,y as a,i as s}from"./calfSystem-a2862afc.js"
+import{i as n}from"./intValue-8b673ab3.js"
+import{v as i}from"./valueText-0b6b2a96.js"
+import"./padZ-c3ec0e2d.js"
+import{t as e,a as o}from"./timeBox-792eac23.js"
+export default function(){const r=t("stat-stamina-nextGain")
+if(0===r.length)return
+const m=a("statbar-stamina-tooltip-stamina"),c=function(a){return/([,0-9]+)\s\/\s([,0-9]+)/.exec(i(t("stat-name",a)))}(m)
+s(m,function(t,a){return'<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>'+e(i(t),Math.floor((n(a[2])-n(a[1]))/o("stat-stamina-gainPerHour")))}(r,c))}
+//# sourceMappingURL=injectStaminaCalculator-62e7c6bd.js.map

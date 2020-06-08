@@ -1,17 +1,15 @@
-import currentGuildId from '../common/currentGuildId';
+import escapeHtml from '../system/escapeHtml';
+import getGuildALink from './getGuildALink';
+import getIsOwnGuild from './getIsOwnGuild';
+import getIsSelf from './getIsSelf';
 import getText from '../common/getText';
 import getValue from '../system/getValue';
-import { guildViewUrl } from '../support/constants';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
-import partial from '../common/partial';
-import querySelector from '../common/querySelector';
 import replaceDoubleSpace from '../common/replaceDoubleSpace';
 import setValue from '../system/setValue';
 import shouldBeArray from '../system/shouldBeArray';
 import toLowerCase from '../common/toLowerCase';
 
-export let guildId;
-export let currentGuildRelationship;
 const myGuildMsgs = [
   ['self', 'fshGreen', 'guildSelfMessage'],
   ['friendly', 'fshOliveDrab', 'guildFrndMessage'],
@@ -32,61 +30,44 @@ function guildAry(pref) {
   return [];
 }
 
-function expandList(arr) {
-  return [guildAry(arr[0]), arr[1]];
-}
-
-function buildScenario() {
-  return typeMapping.map(expandList);
-}
-
-function hasRelationship(txt, el) {
-  return el[0].includes(txt);
-}
-
 function externalRelationship(_txt) {
-  const scenario = buildScenario();
+  const scenario = typeMapping.map(([pref, label]) => [guildAry(pref), label]);
   const txt = replaceDoubleSpace(toLowerCase(_txt));
-  const relObj = scenario.find(partial(hasRelationship, txt));
+  const relObj = scenario.find(([guilds]) => guilds.includes(txt));
   if (relObj) { return relObj[1]; }
 }
 
-function thisGuildId(aLink) {
-  const guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-  if (guildIdResult) { return Number(guildIdResult[1]); }
-}
-
 function guildRelationship(aLink) {
-  guildId = thisGuildId(aLink);
-  if (guildId && guildId === currentGuildId()) {
+  if (getIsOwnGuild()) {
     setValue('guildSelf', getText(aLink));
     return 'self';
   }
   return externalRelationship(getText(aLink));
 }
 
-function whichMsg(arr) { return arr[0] === currentGuildRelationship; }
-
-function setMsg(aLink) {
-  const thisGuildRel = myGuildMsgs.find(whichMsg);
-  aLink.parentNode.classList.add(thisGuildRel[1]);
-  insertHtmlBeforeEnd(aLink.parentNode, `<br>${getValue(thisGuildRel[2])}`);
-}
-
-function foundGuildLink(aLink) {
-  currentGuildRelationship = guildRelationship(aLink);
-  if (currentGuildRelationship) {
-    setMsg(aLink);
+function setMsg(aLink, currentGuildRelationship) {
+  const [, color, pref] = myGuildMsgs.find(
+    ([rel]) => rel === currentGuildRelationship,
+  );
+  aLink.parentNode.classList.add(color);
+  const msg = getValue(pref);
+  if (msg && msg.length > 0) {
+    insertHtmlBeforeEnd(aLink.parentNode, `<br>${escapeHtml(msg)}`);
   }
 }
 
-export function profileInjectGuildRel(isSelf) {
-  const aLink = querySelector(
-    `#pCC a[href^="${guildViewUrl}"]`,
-  );
+function foundGuildLink(aLink) {
+  const currentGuildRelationship = guildRelationship(aLink);
+  if (currentGuildRelationship) {
+    setMsg(aLink, currentGuildRelationship);
+  }
+}
+
+export default function profileInjectGuildRel() {
+  const aLink = getGuildALink();
   if (aLink) {
     foundGuildLink(aLink);
-  } else if (isSelf) {
+  } else if (getIsSelf()) {
     setValue('guildSelf', '');
   }
 }
