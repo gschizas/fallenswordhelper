@@ -52,7 +52,8 @@ function makeCancelAll() {
 
 function autoFill() {
   if (getValue('autoFillMinBidPrice')) {
-    getElementById('auto-fill').checked = true;
+    // getElementById('auto-fill').checked = true;
+    getElementById('auto-fill').click();
   }
 }
 
