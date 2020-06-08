@@ -1,3 +1,4 @@
+import getIsSelf from '../getIsSelf';
 import getValue from '../../system/getValue';
 import runDefault from '../../common/runDefault';
 import storeVL from './storeVL';
@@ -51,8 +52,8 @@ function doAjaxifySections() {
   }
 }
 
-export default function ifSelf(isSelf) {
-  if (isSelf) {
+export default function ifSelf() {
+  if (getIsSelf()) {
     // self inventory
     doFastDebuff();
     doAllyEnemy();

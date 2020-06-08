@@ -226,5 +226,7 @@
   "nekidButton":false,
   "ajaxifyProfileSections":false,
   "injectBuffGuide":false,
-  "statisticsWrap":false
+  "statisticsWrap":false,
+  "showGuildRelationship":false,
+  "showQuickButtons":false
 }

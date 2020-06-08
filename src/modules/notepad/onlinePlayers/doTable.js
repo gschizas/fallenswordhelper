@@ -1,5 +1,6 @@
 import currentGuildId from '../../common/currentGuildId';
 import getValue from '../../system/getValue';
+import { guildRE } from '../../support/constants';
 import intValue from '../../system/intValue';
 import {
   pvpLowerLevel,
@@ -10,7 +11,7 @@ let highlightPlayersNearMyLvl;
 let table;
 
 function guildNumber(html) {
-  const match = html.match(/;guild_id=([0-9]+)"/);
+  const match = html.match(guildRE);
   if (match) { return Number(match[1]); }
 }
 

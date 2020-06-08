@@ -56,7 +56,7 @@
   },
   "showAdmin":{
     "helpTitle":"Show rank controls",
-    "helpText":"Show ranking controls for guild managemenet in member profile page - this works for guild founders only"
+    "helpText":"Show ranking controls for guild management in member profile page - this works for guild founders only"
   },
   "ajaxifyRankControls":{
     "helpTitle":"AJAXify rank controls",
@@ -436,5 +436,13 @@
   "statisticsWrap":{
     "helpTitle":"Statistics Wrap",
     "helpText":"This fixes the wrapping of the statistics section."
+  },
+  "showGuildRelationship":{
+    "helpTitle":"Show Guild Relationship",
+    "helpText":"This show the guild relationship in players&apos; profiles."
+  },
+  "showQuickButtons":{
+    "helpTitle":"Show Quick Buttons",
+    "helpText":"This shows quick access buttons under the avatar in players&apos; profiles."
   }
 }

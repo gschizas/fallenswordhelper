@@ -1,13 +1,13 @@
-import { defTable } from '../support/constants';
 import getArrayByTagName from '../common/getArrayByTagName';
 import getTextTrim from '../common/getTextTrim';
 import { pCC } from '../support/layout';
 import partial from '../common/partial';
+import { defTable, guildRE } from '../support/constants';
 
 function getGuild(tbl) {
   if (tbl.rows[0].cells[0].children[0]) {
     return Number(
-      /guild_id=(\d+)/.exec(tbl.rows[0].cells[0].children[0].href)[1],
+      guildRE.exec(tbl.rows[0].cells[0].children[0].href)[1],
     );
   }
   return -1;

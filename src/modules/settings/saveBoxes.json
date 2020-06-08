@@ -147,5 +147,7 @@
   "nekidButton",
   "ajaxifyProfileSections",
   "injectBuffGuide",
-  "statisticsWrap"
+  "statisticsWrap",
+  "showGuildRelationship",
+  "showQuickButtons"
 ]

@@ -9,7 +9,7 @@ import indexAjaxData from '../../ajax/indexAjaxData';
 import isUndefined from '../../common/isUndefined';
 import querySelector from '../../common/querySelector';
 import textNodes from '../../common/textNodes';
-import { attribType, enhancementType } from '../../support/constants';
+import { attribType, enhancementType, guildRE } from '../../support/constants';
 
 function guildReliclist(page) {
   return indexAjaxData({
@@ -31,7 +31,7 @@ function parseTime(string) {
 
 function parseGuild(cell) {
   const a = cell.children[0].rows[0].cells[1].children[0];
-  const id = a.href.match(/&guild_id=(\d+)/)[1];
+  const id = a.href.match(guildRE)[1];
   const name = getTextTrim(a);
   return { id, name };
 }

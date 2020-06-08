@@ -17,6 +17,7 @@ export default function profilePrefs() {
   // profile prefs
   return `<tr><th colspan="2"><b>Profile preferences</b></th></tr>${
     bunchOfSimple([
+      'showQuickButtons',
       'renderSelfBio',
       'renderOtherBios',
       'enableBioCompressor',

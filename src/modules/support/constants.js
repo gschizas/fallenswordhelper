@@ -28,6 +28,8 @@ export const mercRE = [
 export const lastActivityRE = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 export const playerIDRE = /player_id=(\d+)/;
 export const itemRE = /item_id=(\d+)&inv_id=(\d+)/;
+export const guildRE = /guild_id=(\d+)/;
+
 export const defenderMultiplier = 0.2;
 
 export const defJoinallgroupsundersize = 'joinallgroupsundersize';
