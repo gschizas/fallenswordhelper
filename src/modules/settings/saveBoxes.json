@@ -149,5 +149,6 @@
   "injectBuffGuide",
   "statisticsWrap",
   "showGuildRelationship",
-  "showQuickButtons"
+  "showQuickButtons",
+  "showBuffLevel"
 ]

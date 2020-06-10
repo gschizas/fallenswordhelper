@@ -228,5 +228,6 @@
   "injectBuffGuide":false,
   "statisticsWrap":false,
   "showGuildRelationship":false,
-  "showQuickButtons":false
+  "showQuickButtons":false,
+  "showBuffLevel":false
 }

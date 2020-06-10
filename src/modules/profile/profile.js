@@ -45,6 +45,10 @@ function doCompressBio() {
   }
 }
 
+function doBuffLevels() {
+  if (getValue('showBuffLevel')) { runDefault(import('./buffLevelDisplay')); }
+}
+
 function updateDom() {
   ifSelf();
   doGuildRelationship();
@@ -55,6 +59,7 @@ function updateDom() {
   doRenderBio();
   doCompressBio();
   doStatTotal();
+  doBuffLevels();
   add(3, colouredDots);
 }
 

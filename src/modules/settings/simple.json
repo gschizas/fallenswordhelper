@@ -444,5 +444,9 @@
   "showQuickButtons":{
     "helpTitle":"Show Quick Buttons",
     "helpText":"This shows quick access buttons under the avatar in players&apos; profiles."
+  },
+  "showBuffLevel":{
+    "helpTitle":"Show Buff Level",
+    "helpText":"This shows level underneath buffs in players&apos; profiles."
   }
 }
