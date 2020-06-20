@@ -5,7 +5,7 @@ function hasErrorMsg(json) {
 }
 
 export default function errorDialog(json) {
-  if (!json.s && hasErrorMsg(json)) {
+  if (json && !json.s && hasErrorMsg(json)) {
     dialogMsg(json.e.message);
   }
   return json;
