@@ -27,7 +27,8 @@ function fastAction(theBackpack, evt, action, result) {
   const { target } = evt;
   const invId = target.parentNode.parentNode.children[0].dataset.inv;
   setText('', target);
-  target.className = 'fastAction fshSpinner fshSpinner12';
+  target.blur();
+  target.className = 'fastAction fshBl fshSpinner fshSpinner12';
   action(invId).then(
     partial(actionResult, [theBackpack, result, target, invId]),
   );
