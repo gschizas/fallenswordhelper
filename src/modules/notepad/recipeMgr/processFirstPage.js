@@ -9,7 +9,7 @@ import processFolderFirstPage from './processFolderFirstPage';
 import retryAjax from '../../ajax/retryAjax';
 
 function notUnassigned(el) {
-  return getCustomUrlParameter(el.parentNode.href, 'folder_id') !== '-1';
+  return getCustomUrlParameter(el.parentNode.search, 'folder_id') !== '-1';
 }
 
 function noQuests(output, el) {

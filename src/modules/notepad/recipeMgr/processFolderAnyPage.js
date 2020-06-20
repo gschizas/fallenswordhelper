@@ -20,7 +20,7 @@ function makeRecipe(el) {
     img: el.parentNode.previousElementSibling.children[0].getAttribute('src'),
     link: el.href,
     name: getText(el),
-    id: getCustomUrlParameter(el.href, 'recipe_id'),
+    id: getCustomUrlParameter(el.search, 'recipe_id'),
   };
 }
 
