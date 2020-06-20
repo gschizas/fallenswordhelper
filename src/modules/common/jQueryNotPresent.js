@@ -1,3 +1,3 @@
-import isFunction from './isFunction';
+import jQueryPresent from './jQueryPresent';
 
-export default function jQueryNotPresent() { return !isFunction(window.jQuery); }
+export default function jQueryNotPresent() { return !jQueryPresent(); }
