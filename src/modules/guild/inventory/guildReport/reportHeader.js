@@ -1,10 +1,10 @@
-import batch from '../../common/batch';
-import calf from '../../support/calf';
-import getText from '../../common/getText';
-import onlineDot from '../../common/onlineDot';
-import { playerIdUrl } from '../../support/constants';
-import querySelectorAll from '../../common/querySelectorAll';
-import setInnerHtml from '../../dom/setInnerHtml';
+import batch from '../../../common/batch';
+import calf from '../../../support/calf';
+import getText from '../../../common/getText';
+import onlineDot from '../../../common/onlineDot';
+import { playerIdUrl } from '../../../support/constants';
+import querySelectorAll from '../../../common/querySelectorAll';
+import setInnerHtml from '../../../dom/setInnerHtml';
 
 function memberHeader(oldhtml) {
   return `${onlineDot({ last_login: calf.membrList[oldhtml].last_login })

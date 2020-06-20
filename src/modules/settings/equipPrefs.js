@@ -2,10 +2,11 @@ import bunchOfSimple from './bunchOfSimple';
 import escapeHtml from '../system/escapeHtml';
 import getValue from '../system/getValue';
 import isValueChecked from './isValueChecked';
+import networkIcon from './settingObj';
 import { helpLink, simpleCheckbox } from './simpleCheckbox';
 
 function quickSend() {
-  return `<tr><td class="fshRight">Show Quick Send Item${
+  return `<tr><td class="fshRight">${networkIcon}Show Quick Send Item${
     helpLink('Show Quick Send on Manage Backpack',
       'This will show a link beside each item which gives the option to '
       + 'quick send the item to this person')
@@ -31,6 +32,13 @@ function makeSendClasses() {
 export default function equipPrefs() {
   // Equipment screen prefs
   return '<tr><th colspan="2"><b>Equipment screen preferences</b></th></tr>'
-    + `${bunchOfSimple(['showExtraLinks', 'disableItemColoring'])}${
-      quickSend()}${simpleCheckbox('showQuickDropLinks')}${makeSendClasses()}`;
+    + `${bunchOfSimple([
+      'showExtraLinks',
+      'enableItemColoring',
+      'checkAllOfType',
+      'enableFolderFilter',
+    ])}${
+      quickSend()}${
+      simpleCheckbox('showQuickDropLinks')}${
+      makeSendClasses()}`;
 }

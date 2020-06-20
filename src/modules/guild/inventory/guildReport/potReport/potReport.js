@@ -1,21 +1,21 @@
 import './potReport.css';
-import createDiv from '../../../common/cElement/createDiv';
-import eventHandler5 from '../../../common/eventHandler5';
-import extend from '../../../common/extend';
-import fallback from '../../../system/fallback';
-import insertElement from '../../../common/insertElement';
-import isChecked from '../../../system/isChecked';
-import keys from '../../../common/keys';
-import on from '../../../common/on';
-import onclick from '../../../common/onclick';
-import { pCC } from '../../../support/layout';
-import partial from '../../../common/partial';
-import selfIdIs from '../../../common/selfIdIs';
+import createDiv from '../../../../common/cElement/createDiv';
+import eventHandler5 from '../../../../common/eventHandler5';
+import extend from '../../../../common/extend';
+import fallback from '../../../../system/fallback';
+import insertElement from '../../../../common/insertElement';
+import isChecked from '../../../../system/isChecked';
+import keys from '../../../../common/keys';
+import on from '../../../../common/on';
+import onclick from '../../../../common/onclick';
+import { pCC } from '../../../../support/layout';
+import partial from '../../../../common/partial';
+import selfIdIs from '../../../../common/selfIdIs';
 import sortKeys from './sortKeys';
-import testRange from '../../../system/testRange';
+import testRange from '../../../../system/testRange';
 import { drawInventory, initInventory } from './drawInventory';
 import { drawMapping, initMapping } from './drawMapping';
-import { get, set } from '../../../system/idb';
+import { get, set } from '../../../../system/idb';
 
 const storeMap = 'fsh_potMap';
 const defaultOpts = {

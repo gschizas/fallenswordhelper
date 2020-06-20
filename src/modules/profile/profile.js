@@ -1,6 +1,6 @@
 import add from '../support/task';
 import colouredDots from '../common/colouredDots';
-import doStatTotal from './dropitems/doStatTotal';
+import doStatTotal from './doStatTotal';
 import getIsSelf from './getIsSelf';
 import getValue from '../system/getValue';
 import ifSelf from './ifSelf/ifSelf';

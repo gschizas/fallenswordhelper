@@ -1,10 +1,10 @@
-import createDiv from '../../../common/cElement/createDiv';
-import insertElement from '../../../common/insertElement';
-import keys from '../../../common/keys';
-import once from '../../../common/once';
-import partial from '../../../common/partial';
-import { sendEvent } from '../../../support/fshGa';
-import setInnerHtml from '../../../dom/setInnerHtml';
+import createDiv from '../../../../common/cElement/createDiv';
+import insertElement from '../../../../common/insertElement';
+import keys from '../../../../common/keys';
+import once from '../../../../common/once';
+import partial from '../../../../common/partial';
+import { sendEvent } from '../../../../support/fshGa';
+import setInnerHtml from '../../../../dom/setInnerHtml';
 import sortKeys from './sortKeys';
 
 let inventory;

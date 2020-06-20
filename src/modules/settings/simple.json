@@ -119,15 +119,13 @@
   },
   "showExtraLinks":{
     "helpTitle":"Show Extra Links",
-    "helpText":"If checked, this will add AH and UFSG links to equipment screens."
-  },
-  "disableItemColoring":{
-    "helpTitle":"Disable Item Coloring",
-    "helpText":"Disable the code that colors the item text based on the rarity of the item."
+    "helpText":"If checked, this will add AH and UFSG links to equipment screens.",
+    "network":true
   },
   "showQuickDropLinks":{
     "helpTitle":"Show Quick Drop Item",
-    "helpText":"This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR"
+    "helpText":"This will show a link beside each item which gives the option to drop the item. WARNING: NO REFUNDS ON ERROR",
+    "network":true
   },
   "storeLastQuestPage":{
     "helpTitle":"Store Last Quest Page",
@@ -448,5 +446,20 @@
   "showBuffLevel":{
     "helpTitle":"Show Buff Level",
     "helpText":"This shows level underneath buffs in players&apos; profiles."
+  },
+  "enableItemColoring":{
+    "helpTitle":"Enable Item Coloring",
+    "helpText":"This colors the item text based on the rarity of the item.",
+    "network":true
+  },
+  "checkAllOfType":{
+    "helpTitle":"Check All of Type",
+    "helpText":"This adds a button to select all of the same items.",
+    "network":true
+  },
+  "enableFolderFilter":{
+    "helpTitle":"Enable Folder Filter",
+    "helpText":"This adds folder filtering to the Store Items page.",
+    "network":true
   }
 }

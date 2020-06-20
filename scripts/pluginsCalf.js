@@ -8,7 +8,7 @@ import pluginStrip from '@rollup/plugin-strip';
 import { terser as pluginTerser } from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
-// import svelte from 'rollup-plugin-svelte';
+import svelte from 'rollup-plugin-svelte';
 
 const { calfVer } = require('./getVersion');
 
@@ -61,7 +61,7 @@ export default function calfPlugins(dir, jsccValues, labels) {
   return [
     copy(dir),
     del(dir),
-    // svelte({ emitCss: true }),
+    svelte({ emitCss: true }),
     resolve(),
     replace({ values: { ...jsccValues, _CALFVER: calfVer } }),
     strip(labels),

@@ -1,18 +1,18 @@
 import './guildReport.css';
-import { cdn } from '../../system/system';
-import classHandler from '../../common/classHandler';
-import classPair from '../../common/classPair';
-import equipItem from '../../ajax/equipItem';
-import getElementsByTagName from '../../common/getElementsByTagName';
+import { cdn } from '../../../system/system';
+import classHandler from '../../../common/classHandler';
+import classPair from '../../../common/classPair';
+import equipItem from '../../../ajax/equipItem';
+import getElementsByTagName from '../../../common/getElementsByTagName';
 import itemId from './itemId';
-import onclick from '../../common/onclick';
-import { pCC } from '../../support/layout';
-import partial from '../../common/partial';
-import { playerIDRE } from '../../support/constants';
-import playerId from '../../common/playerId';
-import { queueRecallItem } from '../../ajaxQueue/queue';
-import { sendEvent } from '../../support/fshGa';
-import setInnerHtml from '../../dom/setInnerHtml';
+import onclick from '../../../common/onclick';
+import { pCC } from '../../../support/layout';
+import partial from '../../../common/partial';
+import { playerIDRE } from '../../../support/constants';
+import playerId from '../../../common/playerId';
+import { queueRecallItem } from '../../../ajaxQueue/queue';
+import { sendEvent } from '../../../support/fshGa';
+import setInnerHtml from '../../../dom/setInnerHtml';
 
 const spinner = '<span class="guildReportSpinner" '
   + `style="background-image: url('${cdn}ui/misc/spinner.gif');"></span>`;

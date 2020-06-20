@@ -1,5 +1,5 @@
-import createDiv from '../../common/cElement/createDiv';
-import partial from '../../common/partial';
+import createDiv from '../../../common/cElement/createDiv';
+import partial from '../../../common/partial';
 
 const fastBpHtml = '<span class="sendLink fast-bp">Fast BP</span> | ';
 const fastGsHtml = '<span class="sendLink fast-gs">Fast GS</span>';

@@ -1,6 +1,6 @@
-import alpha from '../../../common/alpha';
-import keys from '../../../common/keys';
-import partial from '../../../common/partial';
+import alpha from '../../../../common/alpha';
+import keys from '../../../../common/keys';
+import partial from '../../../../common/partial';
 
 function cloneObj(obj, acc, key) {
   acc[key] = obj[key];

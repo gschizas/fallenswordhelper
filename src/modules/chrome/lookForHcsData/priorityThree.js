@@ -1,4 +1,4 @@
-import add from '../../support/task';
+import asyncPThree from '../../common/asyncPThree';
 import calf from '../../support/calf';
 import { defEnableGuildActivityTracker } from '../../support/constants';
 import getValue from '../../system/getValue';
@@ -183,12 +183,10 @@ const p3functions = [
   seTracker,
 ];
 
-function asyncPThree(fn) { add(3, fn); }
-
 export default function priorityThree() {
   // eslint-disable-next-line no-unused-labels, no-labels
   // devLbl: { //  doMoveXmas
   //   doMoveXmas();
   // }
-  p3functions.forEach(asyncPThree);
+  asyncPThree(p3functions);
 }

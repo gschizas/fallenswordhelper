@@ -1,9 +1,9 @@
-import batch from '../../common/batch';
-import insertElement from '../../common/insertElement';
+import batch from '../../../common/batch';
+import insertElement from '../../../common/insertElement';
 import makeFastRecall from './makeFastRecall';
-import partial from '../../common/partial';
+import partial from '../../../common/partial';
 import potReport from './potReport/potReport';
-import querySelectorAll from '../../common/querySelectorAll';
+import querySelectorAll from '../../../common/querySelectorAll';
 
 let nodeArray;
 let nodeList;
