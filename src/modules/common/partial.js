@@ -1,3 +1,3 @@
-export default function partial(fn, ...args) {
-  return fn.bind(fn, ...args);
+export default function partial(fn, ...outer) {
+  return (...inner) => fn(...outer, ...inner);
 }

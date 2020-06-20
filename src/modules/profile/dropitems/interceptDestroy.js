@@ -1,24 +1,24 @@
+import arrayFrom from '../../common/arrayFrom';
 import chunk from '../../common/chunk';
-import closestTr from '../../common/closestTr';
 import daDropItems from '../../_dataAccess/daDropItems';
 import errorDialog from '../../common/errorDialog';
+import getCheckboxes from '../../guild/inventory/storeitems/getCheckboxes';
+import getCheckedItems from './getCheckedItems';
 import getValue from '../../system/getValue';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import on from '../../common/on';
 import querySelector from '../../common/querySelector';
-import querySelectorArray from '../../common/querySelectorArray';
+import removeRow from './removeRow';
 import { sendEvent } from '../../support/fshGa';
 import setValue from '../../system/setValue';
 import { simpleCheckboxHtml } from '../../settings/simpleCheckbox';
 
+function check(mode) {
+  arrayFrom(getCheckboxes()).forEach((ctx) => { ctx.checked = Boolean(mode); });
+}
+
 const prefAjaxifyDestroy = 'ajaxifyDestroy';
 let ajaxifyDestroy;
-
-const removeRow = (j) => {
-  const tr = closestTr(j);
-  tr.nextElementSibling.remove();
-  tr.remove();
-};
 
 const destroyChunk = (itemsAry) => {
   daDropItems(itemsAry.map((i) => i.value))
@@ -32,8 +32,7 @@ const destroyChunk = (itemsAry) => {
 const checkItems = (e) => {
   if (!e.returnValue || !ajaxifyDestroy) { return; }
   e.preventDefault();
-  const items = querySelectorArray('[name="removeIndex[]"]:checked');
-  chunk(30, items).forEach(destroyChunk);
+  chunk(30, getCheckedItems()).forEach(destroyChunk);
   sendEvent('profileDropitems', 'Destroy by AJAX');
 };
 
@@ -53,4 +52,5 @@ export default function interceptDestroy() {
   injectPref();
   ajaxifyDestroy = getValue(prefAjaxifyDestroy);
   on(document.forms[0], 'submit', checkItems);
+  window.check = check;
 }

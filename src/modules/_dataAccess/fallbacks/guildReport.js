@@ -1,7 +1,7 @@
 import createDocument from '../../system/createDocument';
 import getTextTrim from '../../common/getTextTrim';
 import indexAjaxData from '../../ajax/indexAjaxData';
-import itemId from '../../guild/guildReport/itemId';
+import itemId from '../../guild/inventory/guildReport/itemId';
 import querySelectorArray from '../../common/querySelectorArray';
 
 function details(td) {

@@ -1,0 +1,24 @@
+.bob {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family : inherit;
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+  text-decoration: underline;
+  user-select: text;
+}
+.aHSpacer {
+  display: inline-block;
+  width: 1.9em;
+}
+.actionButton {
+  height: 1em;
+  position: relative;
+  width: 5.2em;
+}
+.inProgress {
+  cursor: default;
+  text-decoration: none;
+}

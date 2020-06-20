@@ -36,6 +36,7 @@ export default function profilePrefs() {
     'fastDebuff',
     'disableDeactivatePrompts',
     'injectBuffGuide',
+    'showBuffLevel',
     'countAllyEnemy',
     'highlightPvpProtection',
   ])}`;

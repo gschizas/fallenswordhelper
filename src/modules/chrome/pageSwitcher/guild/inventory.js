@@ -1,16 +1,18 @@
-import { injectStoreItems } from '../loader';
 import runDefault from '../../../common/runDefault';
 
-const injectGuildAddTagsWidgets = () => {
-  runDefault(import('../../../guild/injectGuildAddTagsWidgets'));
-};
 const injectReportPaint = () => {
-  runDefault(import('../../../guild/guildReport/guildReport'));
+  runDefault(import('../../../guild/inventory/guildReport/guildReport'));
+};
+const injectGuildAddTagsWidgets = () => {
+  runDefault(import('../../../guild/inventory/injectGuildAddTagsWidgets'));
+};
+const storeitems = () => {
+  runDefault(import('../../../guild/inventory/storeitems/storeitems'));
 };
 
 export default {
   report: injectReportPaint,
   addtags: injectGuildAddTagsWidgets,
   removetags: injectGuildAddTagsWidgets,
-  storeitems: injectStoreItems,
+  storeitems,
 };

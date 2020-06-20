@@ -1,6 +1,5 @@
-export default function setText(text, node) {
-  if (node instanceof Node) {
-    // eslint-disable-next-line no-param-reassign
-    node.textContent = String(text);
+export default function setText(text, ctx) {
+  if (ctx instanceof Node) {
+    ctx.textContent = String(text);
   }
 }

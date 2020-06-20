@@ -44,7 +44,7 @@ function toggleTarget(target) {
 }
 
 function toggleSection(target) {
-  const sectionId = Number(getCustomUrlParameter(target.href, 'section_id'));
+  const sectionId = Number(getCustomUrlParameter(target.search, 'section_id'));
   if (sectionId === 5) {
     toggleTarget(bp());
   } else {

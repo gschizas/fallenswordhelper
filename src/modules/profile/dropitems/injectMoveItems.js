@@ -1,26 +1,32 @@
-import getArrayByTagName from '../../common/getArrayByTagName';
-import getElementsByTagName from '../../common/getElementsByTagName';
-import getText from '../../common/getText';
-import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
-import { pCC } from '../../support/layout';
+import MoveItems from './MoveItems.svelte';
+import chunk from '../../common/chunk';
+import closestTable from '../../common/closestTable';
+import closestTr from '../../common/closestTr';
+import daSendToFolder from '../../_dataAccess/daSendToFolder';
+import getCheckedItems from './getCheckedItems';
+import partial from '../../common/partial';
+import querySelectorArray from '../../common/querySelectorArray';
+import removeRow from './removeRow';
 
-const otherFolders = (el) => el.src.includes('/folder.png');
+async function moveList(folderId, list) {
+  const json = await daSendToFolder(folderId, list.map((c) => c.value));
+  if (json.s) {
+    list.forEach(removeRow);
+  }
+}
 
-function makeOption(e) {
-  return `<option value=${
-    e.parentNode.href.match(/&folder_id=(-?\d+)/i)[1]}>${
-    getText(e.parentNode.parentNode)}</option>`;
+function moveItemsToFolder(e) {
+  chunk(30, getCheckedItems()).forEach(partial(moveList, e.detail));
 }
 
 export default function injectMoveItems() {
-  const flrRow = getElementsByTagName('form', pCC)[0]
-    .nextElementSibling.nextElementSibling.nextElementSibling;
-  const folders = getArrayByTagName('img', flrRow).filter(otherFolders);
+  const folders = querySelectorArray('#pCC img[src$="/folder.png"]');
   if (folders.length === 0) { return; }
-  insertHtmlAfterEnd(flrRow,
-    '<tr><td class="fshCenter">Move selected items to: '
-      + `<select name="folder" id="selectFolderId" class="customselect">${
-        folders.map(makeOption).join('')
-      }</select>&nbsp;<input type="button" class="custombutton" `
-      + 'id="fshMove" value="Move"></td></tr>');
+  const flrRow = closestTr(closestTable(folders[0]));
+  const app = new MoveItems({
+    anchor: flrRow.nextElementSibling,
+    props: { folders },
+    target: flrRow.parentNode,
+  });
+  app.$on('move', moveItemsToFolder);
 }

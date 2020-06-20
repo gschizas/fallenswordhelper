@@ -3,6 +3,7 @@ import closestTr from '../../common/closestTr';
 import { combatSelector } from '../../support/constants';
 import createDiv from '../../common/cElement/createDiv';
 import getCombat from './getCombat';
+import getText from '../../common/getText';
 import insertElement from '../../common/insertElement';
 import insertHtmlAfterBegin from '../../common/insertHtmlAfterBegin';
 import querySelector from '../../common/querySelector';
@@ -26,7 +27,7 @@ function parseCombatWinner(r, msgHtml) {
   if (defeat) {
     return [red, `You were <span class="${red}">defeated</span> by `];
   }
-  return ['', r.cells[2].firstChild.textContent];
+  return ['', getText(r.cells[2].firstChild)];
 }
 
 function result(stat, desc, color) {

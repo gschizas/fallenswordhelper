@@ -145,7 +145,6 @@
   "statisticsControl":false,
   "guildStructureControl":false,
   "lastMembrListCheck":0,
-  "disableItemColoring":true,
   "showQuickSendLinks":false,
   "needToCompose":false,
   "lastComposeCheck":0,
@@ -228,5 +227,9 @@
   "injectBuffGuide":false,
   "statisticsWrap":false,
   "showGuildRelationship":false,
-  "showQuickButtons":false
+  "showQuickButtons":false,
+  "showBuffLevel":false,
+  "enableItemColoring":false,
+  "checkAllOfType":false,
+  "enableFolderFilter":false
 }

@@ -66,7 +66,7 @@ function drawTable(foo) {
   const remainingHeight = remainingRows * 24;
   bottomPadding.style.height = `${remainingHeight.toString()}px`;
 
-  getElementById('fshOutput').textContent = 'Inject table.';
+  setText('Inject table.', getElementById('fshOutput'));
   // add(3, injectTable, [myTable]);
   requestAnimationFrame(partial(injectTable, myTable));
 }
