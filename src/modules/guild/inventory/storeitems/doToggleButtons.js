@@ -1,7 +1,6 @@
 import ToggleButtons from './ToggleButtons.svelte';
-import arrayFrom from '../../../common/arrayFrom';
-import getCheckboxes from './getCheckboxes';
 import getInv from './getInv';
+import getVisibleCheckboxes from './getVisibleCheckboxes';
 import updateDomItems from './updateDomItems';
 import { showExtraLinks, showQuickDropLinks } from './constants';
 
@@ -17,11 +16,11 @@ function makeToggleButtons(prefs) {
 }
 
 async function selectLocked() {
-  const checkboxes = getCheckboxes();
-  if (!checkboxes) { return; }
+  const visibleCheckboxes = getVisibleCheckboxes();
+  if (!visibleCheckboxes) { return; }
   const inv = await getInv();
   if (!inv || !inv.items) { return; }
-  arrayFrom(checkboxes)
+  visibleCheckboxes
     .map((cb) => [cb, inv.items[cb.value]])
     .filter(([, invItem]) => invItem)
     .forEach(([e, invItem]) => {
