@@ -6,7 +6,7 @@ import closestTr from '../../../common/closestTr';
 import getCheckboxes from './getCheckboxes';
 import getInv from './getInv';
 import getValue from '../../../system/getValue';
-import hasClass from '../../../common/hasClass';
+import getVisibleCheckboxes from './getVisibleCheckboxes';
 import injectStoreItems from './injectStoreItems';
 import jQueryPresent from '../../../common/jQueryPresent';
 import partial from '../../../common/partial';
@@ -44,8 +44,7 @@ async function doFolders() {
 }
 
 function doCheckAll() {
-  arrayFrom(getCheckboxes())
-    .filter((cb) => !hasClass('fshHide', closestTr(cb)))
+  getVisibleCheckboxes()
     .forEach((ctx) => { ctx.checked = !ctx.disabled && !ctx.checked; });
 }
 
