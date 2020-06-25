@@ -17,7 +17,7 @@ function makeToggleButtons(prefs) {
 
 async function selectLocked() {
   const visibleCheckboxes = getVisibleCheckboxes();
-  if (!visibleCheckboxes) { return; }
+  if (!visibleCheckboxes.length) { return; }
   const inv = await getInv();
   if (!inv || !inv.items) { return; }
   visibleCheckboxes
