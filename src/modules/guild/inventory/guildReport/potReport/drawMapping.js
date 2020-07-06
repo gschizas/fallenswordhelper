@@ -9,9 +9,11 @@ import createTr from '../../../../common/cElement/createTr';
 import entries from '../../../../common/entries';
 import insertElement from '../../../../common/insertElement';
 import insertHtmlBeforeEnd from '../../../../common/insertHtmlBeforeEnd';
+import on from '../../../../common/on';
 import once from '../../../../common/once';
 import partial from '../../../../common/partial';
 import { sendEvent } from '../../../../support/fshGa';
+import setInnerHtml from '../../../../dom/setInnerHtml';
 import setText from '../../../../dom/setText';
 
 let mapping;
@@ -35,29 +37,29 @@ function insertOption(selectTmp, el) {
   insertElement(selectTmp, setOption(el[0]));
 }
 
-function getSelect(ary) {
+function getSelect() {
   const selectTmp = createSelect({
     className: 'tip-static',
     dataset: { tipped: 'Set to "Ignore" to exclude from report' },
+    style: { width: '130px' },
   });
-  insertElement(selectTmp, setOption('Ignore'));
-  ary.forEach(partial(insertOption, selectTmp));
   return selectTmp;
 }
 
-function getSelectRow(ary) {
+function getSelectRow() {
   if (!selectRowTmp) {
     selectRowTmp = getRow();
-    const select = getSelect(ary);
+    const select = getSelect();
     insertElement(selectRowTmp.cells[1], select);
   }
   return selectRowTmp.cloneNode(true);
 }
 
-function insertRows(mapTbl, el, i, ary) {
-  const selectRow = getSelectRow(ary);
+function insertRows(mapTbl, el) {
+  const selectRow = getSelectRow();
   setText(el[0], selectRow.cells[0]);
   const select = selectRow.cells[1].children[0];
+  insertElement(select, setOption(el[1]));
   [select.name, select.value] = el;
   insertElement(mapTbl.tBodies[0], selectRow);
 }
@@ -80,17 +82,30 @@ function insertFinal(mapTbl) {
   return 0;
 }
 
+function renderDropDown(myMap, e) {
+  if (e.target.tagName === 'SELECT') {
+    const select = e.target;
+    const { value } = select;
+    setInnerHtml('', select);
+    insertElement(select, setOption('Ignore'));
+    entries(myMap).forEach(partial(insertOption, select));
+    select.value = value;
+  }
+}
+
 export function drawMapping(potOpts) {
   sendEvent('potReport', 'drawMapping');
   const mapTbl = createTable({ innerHTML: '<tbody></tbody>' });
   mapping.replaceChild(mapTbl, mapping.children[0]);
+  on(mapping, 'mousedown', partial(renderDropDown, potOpts.myMap));
   add(3, batch, [
     [
       5,
       3,
       entries(potOpts.myMap),
       0,
-      partial(insertRows, mapTbl), partial(insertFinal, mapTbl),
+      partial(insertRows, mapTbl),
+      partial(insertFinal, mapTbl),
     ],
   ]);
 }
