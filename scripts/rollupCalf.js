@@ -8,6 +8,7 @@ export default function rollupCalf(dir, entryFileNames, jsccValues, labels) {
   return {
     input: 'src/calfSystem.js',
     output: {
+      assetFileNames: '[name][extname]',
       chunkFileNames: `${calfVer}/[name]-[hash].js`,
       dir,
       entryFileNames,

@@ -1,10 +1,9 @@
-import cssnano from 'cssnano';
 import json from '@rollup/plugin-json';
 import nesting from 'postcss-nesting';
 import pluginCopy from 'rollup-plugin-copy';
 import pluginDel from 'rollup-plugin-delete';
-import pluginPostcss from 'rollup-plugin-postcss';
 import pluginStrip from '@rollup/plugin-strip';
+import pluginStyles from 'rollup-plugin-styles';
 import { terser as pluginTerser } from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
@@ -33,18 +32,18 @@ function del(dir) {
   });
 }
 
-function postcss() {
-  return pluginPostcss({
-    extensions: ['.css', '.postcss'],
-    extract: 'calfSystem.css',
-    plugins: [nesting(), cssnano()],
-  });
-}
-
 function strip(labels) {
   return pluginStrip({
     functions: [],
     labels,
+  });
+}
+
+function styles() {
+  return pluginStyles({
+    minimize: !watch,
+    mode: ['extract', 'calfSystem.css'],
+    plugins: [nesting()],
   });
 }
 
@@ -66,7 +65,7 @@ export default function calfPlugins(dir, jsccValues, labels) {
     replace({ values: { ...jsccValues, _CALFVER: calfVer } }),
     strip(labels),
     json({ compact: true }),
-    postcss(),
+    styles(),
     !watch && terser(),
   ];
 }
