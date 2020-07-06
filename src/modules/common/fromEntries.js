@@ -1,3 +1,3 @@
-const fromEntries = (entries) => Object.fromEntries(entries);
-
-export default fromEntries;
+export default function fromEntries(entries) {
+  return Object.fromEntries(entries);
+}

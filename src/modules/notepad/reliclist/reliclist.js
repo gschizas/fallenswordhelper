@@ -54,9 +54,20 @@ function makeRow(relic) {
 
 function makeTable(thisRelicList) {
   return '<style>'
-    + '#pCC .reliclist {border-collapse: collapse; border-spacing: 0;}'
-    + '.reliclist, .reliclist th, .reliclist td {border: 1px solid black;}'
-    + '.reliclist th, .reliclist td {padding: 5px;}'
+    + `#pCC .reliclist {
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: fixed;
+      }
+      .reliclist, .reliclist th, .reliclist td {
+        border: 1px solid black;
+      }
+      .reliclist th, .reliclist td {
+        padding: 5px;
+      }
+      .reliclist th:nth-of-type(10), .reliclist td:nth-of-type(10) {
+        width: 100px;
+      }`
     + '</style><table class="reliclist"><thead><tr>'
     + '<th>Level</th>'
     + '<th>Name</th>'

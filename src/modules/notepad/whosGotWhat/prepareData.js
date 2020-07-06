@@ -5,7 +5,8 @@ import partial from '../../common/partial';
 import toLowerCase from '../../common/toLowerCase';
 
 function byMember(acc, curr) {
-  if (curr.item_id === 11503) { // Zombie Brew
+  // if (curr.item_id === 11503) { // Zombie Brew
+  if (!curr.equipped) {
     acc[curr.player_id] = acc[curr.player_id] || [];
     acc[curr.player_id].push(curr);
   }
@@ -21,7 +22,7 @@ function extractMembers(thisRank) {
 }
 
 function processGuild(guild) {
-  return [].concat(...guild.r.ranks.map(extractMembers));
+  return guild.r.ranks.flatMap(extractMembers);
 }
 
 function decorateMembers(pots, obj, i) {

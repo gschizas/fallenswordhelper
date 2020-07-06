@@ -99,11 +99,12 @@ function asyncDispatcher() {
   }
 }
 
-function runCore() {
+async function runCore(cssPrm) {
   start('JS Perf', 'FSH.runCore');
   initNow();
   initPcc();
   getCoreFunction();
+  await cssPrm;
   lookForHcsData();
   add(3, asyncDispatcher);
   isMessageSound();
@@ -131,9 +132,10 @@ function setVer(fshVer, gmInfo) {
 export default function dispatch(fshVer, gmInfo) {
   start('JS Perf', 'FSH.dispatch');
   if (badEnv()) { return; }
+  const cssPrm = loadCss('_CSSPATH/calfSystem.css');
   globalErrorHandler();
   setVer(fshVer, gmInfo);
   setup();
-  loadCss('_CSSPATH/calfSystem.css').then(runCore);
+  runCore(cssPrm);
   end('JS Perf', 'FSH.dispatch');
 }
