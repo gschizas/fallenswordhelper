@@ -23,22 +23,22 @@ function getStamPerc(a) {
 
 function stamBarStyle(a) {
   const perc = getStamPerc(a);
-  return '#fshMemberList '
+  return '.fshProgressBar '
     + `tr:nth-child(${a.parentNode.parentNode.rowIndex + 1}) {`
-    + `background: linear-gradient(to right, rgba(255, 153, 0, 0.5) ${perc}%, `
+    + `background-image: linear-gradient(to right, rgba(255, 153, 0, 0.5) ${perc}%, `
     + `transparent ${perc + 1}%)}`;
 }
 
 function injectStyle() {
   const tables = getElementsByTagName(defTable, pCC);
   const memberList = tables[tables.length - 1];
-  memberList.id = 'fshMemberList';
+  memberList.classList.add('fshProgressBar');
   const memberLinks = querySelectorArray(playerLinkSelector, memberList);
   const myTest = memberLinks.map(stamBarStyle).join('\n');
   thisStyle = insertElement(document.body, createStyle(myTest)).sheet;
 }
 
-function toggleStyle() {
+export function toggleStyle() {
   if (!thisStyle) {
     injectStyle();
   } else {
