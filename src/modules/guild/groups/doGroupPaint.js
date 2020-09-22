@@ -1,7 +1,13 @@
+import closestTr from '../../common/closestTr';
 import csvSplit from '../../common/csvSplit';
 import doBuffLinks from '../../common/doBuffLinks';
+import getArrayByClassName from '../../common/getArrayByClassName';
+import getText from '../../common/getText';
+import insertElement from '../../common/insertElement';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import onlineDot from '../../common/onlineDot';
 import partial from '../../common/partial';
+import setInnerHtml from '../../dom/setInnerHtml';
 import { months, playerIdUrl } from '../../support/constants';
 import { time, timeEnd } from '../../support/debug';
 
@@ -17,28 +23,21 @@ function dateFromUTC(x, curYear) {
   return groupDate;
 }
 
-function groupLocalTime(row) { // jQuery
-  const theDateCell = $('td', row).eq(2);
-  const x = xRE.exec(theDateCell.text());
+function groupLocalTime(row) {
+  const theDateCell = row.cells[3];
+  const x = xRE.exec(getText(theDateCell));
   const curYear = new Date().getFullYear(); // TODO Boundary condition
-  theDateCell.append(`<br><span class="fshBlue fshXSmall">Local: ${
+  insertHtmlBeforeEnd(theDateCell, `<br><span class="fshBlue fshXSmall">Local: ${
     dateFromUTC(x, curYear).toString().substr(0, 21)}</span>`);
 }
 
-function creatorDotAndLink(membrlist, row) {
-  const creator = $('b', row).text();
+function creatorDotAndLink(membrlist, creatorCell) {
+  const creator = getText(creatorCell.children[0]);
   if (membrlist[creator]) {
-    return `${onlineDot({ last_login: membrlist[creator].last_login })
-    }&nbsp;<a href="${playerIdUrl}${membrlist[creator].id
-    }"><b>${creator}</b></a> [${membrlist[creator].level}]`;
+    return `${onlineDot({ last_login: membrlist[creator].last_login })}&nbsp;<a href="${
+      playerIdUrl}${membrlist[creator].id}"><b>${creator}</b></a> [${membrlist[creator].level}]`;
   }
   return `<b>${creator}</b>`;
-}
-
-function getCreatorCell(membrlist, row) {
-  const creatorCell = $('td', row).first();
-  creatorCell.html(creatorDotAndLink(membrlist, row));
-  return creatorCell;
 }
 
 function memberLevel(membrlist, member) {
@@ -56,7 +55,7 @@ function profileLink(membrlist, name) {
 }
 
 function groupMembers(membrlist, membersCell) {
-  const listArr = csvSplit(membersCell.html());
+  const listArr = csvSplit(membersCell.innerHTML);
   if (listArr.length > 1) { listArr.sort(partial(byMemberLevel, membrlist)); }
   return listArr;
 }
@@ -67,32 +66,33 @@ function ourMembers(name) {
 
 function buffLinks(creatorCell, listArr) {
   const buffList = listArr.filter(ourMembers);
-  if (buffList.length > 0) { creatorCell.append(doBuffLinks(buffList)); }
-  creatorCell.append(`<span class="fshXSmall">Members: ${
-    buffList.length}</span>`);
+  if (buffList.length > 0) { insertElement(creatorCell, doBuffLinks(buffList)); }
+  insertHtmlBeforeEnd(creatorCell, `<span class="fshXSmall">Members: ${buffList.length}</span>`);
 }
 
 function memberProfileLinks(membrlist, membersCell, listArr) {
   const memberLinks = listArr.map(partial(profileLink, membrlist));
-  membersCell.html(`<span>${memberLinks.join(', ')}</span>`);
+  setInnerHtml(`<span>${memberLinks.join(', ')}</span>`, membersCell);
 }
 
-function doGroupRow(membrlist, i, row) { // jQuery
-  const creatorCell = getCreatorCell(membrlist, row);
-  const membersCell = $('td', row).eq(1);
+function doGroupRow(membrlist, row) {
+  const creatorCell = row.cells[0];
+  setInnerHtml(creatorDotAndLink(membrlist, creatorCell), creatorCell);
+  const membersCell = row.cells[1];
   const listArr = groupMembers(membrlist, membersCell);
   buffLinks(creatorCell, listArr);
   memberProfileLinks(membrlist, membersCell, listArr);
   groupLocalTime(row);
 }
 
-export default function doGroupPaint(m) { // jQuery
+export default function doGroupPaint(membrlist) {
   // eslint-disable-next-line no-unused-labels, no-labels
   betaLbl: { //  Timing output
     time('groups.doGroupPaint');
   }
-  $('#pCC table table table tr').has('.group-action-container')
-    .each(partial(doGroupRow, m));
+  getArrayByClassName('group-action-container')
+    .map((c) => closestTr(c))
+    .forEach(partial(doGroupRow, membrlist));
   // eslint-disable-next-line no-unused-labels, no-labels
   betaLbl: { //  Timing output
     timeEnd('groups.doGroupPaint');
