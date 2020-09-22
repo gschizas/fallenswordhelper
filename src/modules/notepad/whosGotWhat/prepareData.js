@@ -38,8 +38,10 @@ function decorateMembers(pots, obj, i) {
     act: obj.last_activity - nowSecs,
     pack: (pots[obj.id] || []).length,
     pack_reverse: 0 - (pots[obj.id] || []).length,
-    stam: addCommas(obj.current_stamina),
-    stam_reverse: 0 - obj.current_stamina,
+    // stam: addCommas(obj.current_stamina),
+    // stam_reverse: 0 - obj.current_stamina,
+    stam: addCommas(obj.max_stamina),
+    stam_reverse: 0 - obj.max_stamina,
   };
 }
 
