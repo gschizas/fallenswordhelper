@@ -2,9 +2,9 @@ import closestTr from '../../../common/closestTr';
 import daAjaxSendItemsToRecipient from '../../../_dataAccess/daAjaxSendItemsToRecipient';
 import daDropItems from '../../../_dataAccess/daDropItems';
 import errorDialog from '../../../common/errorDialog';
+import getCheckboxesVisible from './getCheckboxesVisible';
 import getInv from './getInv';
 import getText from '../../../common/getText';
-import getVisibleCheckboxes from './getVisibleCheckboxes';
 import hasClass from '../../../common/hasClass';
 import querySelectorArray from '../../../common/querySelectorArray';
 import { sendEvent } from '../../../support/fshGa';
@@ -16,7 +16,7 @@ function getInvId(e) {
 async function doCheckAll(evt) {
   const { items } = await getInv();
   sendEvent('storeitems', 'Check All of Type');
-  getVisibleCheckboxes()
+  getCheckboxesVisible()
     .filter((cb) => items[cb.value] && items[cb.value].item_id === items[getInvId(evt)].item_id)
     .forEach((e) => { e.checked = !e.disabled && !e.checked; });
 }

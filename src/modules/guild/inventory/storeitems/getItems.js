@@ -1,8 +1,7 @@
-import arrayFrom from '../../../common/arrayFrom';
 import closestTr from '../../../common/closestTr';
 import entries from '../../../common/entries';
 import fromEntries from '../../../common/fromEntries';
-import getCheckboxes from './getCheckboxes';
+import getCheckboxesArray from './getCheckboxesArray';
 import getInv from './getInv';
 import getTextTrim from '../../../common/getTextTrim';
 
@@ -10,7 +9,7 @@ let itemsCache;
 
 function updateName(checkboxes, item) {
   if (item.item_id !== 13699) { return item.item_name; }
-  const thisItem = arrayFrom(checkboxes).find((cb) => cb.value === String(item.inv_id));
+  const thisItem = checkboxes.find((cb) => cb.value === String(item.inv_id));
   if (!thisItem) { return item.item_name; }
   return getTextTrim(thisItem.parentNode.parentNode.children[2]);
 }
@@ -32,10 +31,10 @@ async function getItemsFromInventory(checkboxes) {
 }
 
 export default async function getItems() {
-  const checkboxes = getCheckboxes();
-  if (!checkboxes) { return []; }
+  const checkboxes = getCheckboxesArray();
+  if (!checkboxes.length) { return []; }
   const items = await getItemsFromInventory(checkboxes);
-  return arrayFrom(checkboxes)
+  return checkboxes
     .map((cb) => [
       closestTr(cb).cells[2],
       items[cb.value],

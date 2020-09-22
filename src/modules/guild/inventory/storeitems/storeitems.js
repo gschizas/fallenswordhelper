@@ -3,10 +3,10 @@ import FolderFilter from './FolderFilter.svelte';
 import arrayFrom from '../../../common/arrayFrom';
 import batch from '../../../common/batch';
 import closestTr from '../../../common/closestTr';
-import getCheckboxes from './getCheckboxes';
+import getCheckboxesArray from './getCheckboxesArray';
+import getCheckboxesVisible from './getCheckboxesVisible';
 import getInv from './getInv';
 import getValue from '../../../system/getValue';
-import getVisibleCheckboxes from './getVisibleCheckboxes';
 import injectStoreItems from './injectStoreItems';
 import jQueryPresent from '../../../common/jQueryPresent';
 import partial from '../../../common/partial';
@@ -25,7 +25,7 @@ function doFilter(inv, e) {
   batch([
     5,
     3,
-    getCheckboxes(),
+    getCheckboxesArray(),
     0,
     partial(updateList, inv, Number(e.detail)),
   ]);
@@ -44,7 +44,7 @@ async function doFolders() {
 }
 
 function doCheckAll() {
-  getVisibleCheckboxes()
+  getCheckboxesVisible()
     .forEach((ctx) => { ctx.checked = !ctx.disabled && !ctx.checked; });
 }
 
