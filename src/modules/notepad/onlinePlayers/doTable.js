@@ -2,10 +2,7 @@ import currentGuildId from '../../common/currentGuildId';
 import getValue from '../../system/getValue';
 import { guildRE } from '../../support/constants';
 import intValue from '../../system/intValue';
-import {
-  pvpLowerLevel,
-  pvpUpperLevel,
-} from '../../common/levelHighlight';
+import { getLowerPvpLevel, getUpperPvpLevel } from '../../common/levelHighlight';
 
 let highlightPlayersNearMyLvl;
 let table;
@@ -18,8 +15,8 @@ function guildNumber(html) {
 const highlightTests = [
   () => highlightPlayersNearMyLvl,
   (data) => guildNumber(data[0]) !== currentGuildId(),
-  (data) => intValue(data[2]) >= pvpLowerLevel,
-  (data) => intValue(data[2]) <= pvpUpperLevel,
+  (data) => intValue(data[2]) >= getLowerPvpLevel(),
+  (data) => intValue(data[2]) <= getUpperPvpLevel(),
 ];
 
 function pvpHighlight(data) {

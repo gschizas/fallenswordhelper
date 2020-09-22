@@ -1,15 +1,18 @@
 import compressHistory from './compressHistory';
+import createStyle from '../common/cElement/createStyle';
 import currentGuildId from '../common/currentGuildId';
+import getElementsByTagName from '../common/getElementsByTagName';
 import getUrlParameter from '../system/getUrlParameter';
 import getValue from '../system/getValue';
-import { lastActivityRE } from '../support/constants';
+import insertElement from '../common/insertElement';
+import { pCC } from '../support/layout';
 import querySelectorArray from '../common/querySelectorArray';
+import { defTable, lastActivityRE } from '../support/constants';
 import {
-  calculateBoundaries,
-  gvgLowerLevel,
-  gvgUpperLevel,
-  pvpLowerLevel,
-  pvpUpperLevel,
+  getLowerGvGLevel,
+  getLowerPvpLevel,
+  getUpperGvgLevel,
+  getUpperPvpLevel,
 } from '../common/levelHighlight';
 
 let highlightPlayersNearMyLvl;
@@ -17,30 +20,31 @@ let highlightGvGPlayersNearMyLvl;
 
 function isPvpTarget(vlevel) {
   return highlightPlayersNearMyLvl
-    && vlevel >= pvpLowerLevel
-    && vlevel <= pvpUpperLevel;
+    && vlevel >= getLowerPvpLevel()
+    && vlevel <= getUpperPvpLevel();
 }
 
 function isGvgTarget(vlevel) {
   return highlightGvGPlayersNearMyLvl
-    && vlevel >= gvgLowerLevel
-    && vlevel <= gvgUpperLevel;
+    && vlevel >= getLowerGvGLevel()
+    && vlevel <= getUpperGvgLevel();
 }
 
-function isActive(el, tipped) {
-  const vlevel = Number(/VL:.+?(\d+)/.exec(tipped)[1]);
-  const aRow = el.parentNode.parentNode;
-  if (isPvpTarget(vlevel)) {
-    aRow.classList.add('lvlHighlight');
-  } else if (isGvgTarget(vlevel)) {
-    aRow.classList.add('lvlGvGHighlight');
-  }
-}
+const getLastActivity = (a) => [a, lastActivityRE.exec(a.dataset.tipped)[1]];
+const recentActivity = ([, lastActDays]) => lastActDays < 7;
+const getVLevel = ([a]) => [a, Number(/VL:.+?(\d+)/.exec(a.dataset.tipped)[1])];
+const getFlags = ([a, vlevel]) => [
+  a.parentNode.parentNode.rowIndex,
+  isPvpTarget(vlevel),
+  isGvgTarget(vlevel),
+];
 
-function highlightMembers(el) {
-  const { tipped } = el.dataset;
-  const lastActDays = lastActivityRE.exec(tipped)[1];
-  if (lastActDays < 7) { isActive(el, tipped); }
+function getPlayerLinks() {
+  return querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
+    .map(getLastActivity)
+    .filter(recentActivity)
+    .map(getVLevel)
+    .map(getFlags);
 }
 
 function shouldHighlight() {
@@ -48,11 +52,44 @@ function shouldHighlight() {
     && (highlightPlayersNearMyLvl || highlightGvGPlayersNearMyLvl);
 }
 
+const selector = (targets) => targets
+  .map(([rowIndex]) => `.fshHighlight tr:nth-child(${rowIndex + 1})`)
+  .join(',');
+
+function pvpTargetStyle(pvpTargets) {
+  if (pvpTargets.length) {
+    const pvpStyle = `${selector(pvpTargets)} {background-color: #4671C8;}`;
+    insertElement(document.body, createStyle(pvpStyle));
+  }
+}
+
+function gvgTargetStyle(gvgTargets) {
+  if (gvgTargets.length) {
+    const gvgStyle = `${selector(gvgTargets)} {background-color: #FF9900;}`;
+    insertElement(document.body, createStyle(gvgStyle));
+  }
+}
+
+function memberListStyle(pvpTargets, gvgTargets) {
+  if (pvpTargets.length + gvgTargets.length) {
+    const tables = getElementsByTagName(defTable, pCC);
+    const memberList = tables[tables.length - 1];
+    memberList.classList.add('fshHighlight');
+  }
+}
+
+function actuallyHighlight() {
+  const playerLinks = getPlayerLinks();
+  const pvpTargets = playerLinks.filter(([, pvpTarget]) => pvpTarget);
+  const gvgTargets = playerLinks.filter(([, pvpTarget, gvgTarget]) => !pvpTarget && gvgTarget);
+  pvpTargetStyle(pvpTargets);
+  gvgTargetStyle(gvgTargets);
+  memberListStyle(pvpTargets, gvgTargets);
+}
+
 function doHighlights() {
   if (shouldHighlight()) {
-    calculateBoundaries();
-    querySelectorArray('#pCC a[data-tipped*="<td>VL:</td>"]')
-      .forEach(highlightMembers);
+    actuallyHighlight();
   }
 }
 

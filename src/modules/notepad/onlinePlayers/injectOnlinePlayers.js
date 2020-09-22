@@ -1,5 +1,4 @@
 import buildOnlinePlayerData from './buildOnlinePlayerData';
-import { calculateBoundaries } from '../../common/levelHighlight';
 import changeLvl from './changeLvl';
 import createDocument from '../../system/createDocument';
 import doRefreshButton from './doRefreshButton';
@@ -24,7 +23,6 @@ let lastPage;
 function gotOnlinePlayers(value) { // jQuery
   onlinePlayers = value || {};
   filterHeaderOnlinePlayers(context);
-  calculateBoundaries();
   doTable(context, buildOnlinePlayerData(onlinePlayers));
 }
 
