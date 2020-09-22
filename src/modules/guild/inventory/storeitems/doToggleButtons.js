@@ -1,6 +1,6 @@
 import ToggleButtons from './ToggleButtons.svelte';
+import getCheckboxesVisible from './getCheckboxesVisible';
 import getInv from './getInv';
-import getVisibleCheckboxes from './getVisibleCheckboxes';
 import updateDomItems from './updateDomItems';
 import { showExtraLinks, showQuickDropLinks } from './constants';
 
@@ -16,7 +16,7 @@ function makeToggleButtons(prefs) {
 }
 
 async function selectLocked() {
-  const visibleCheckboxes = getVisibleCheckboxes();
+  const visibleCheckboxes = getCheckboxesVisible();
   if (!visibleCheckboxes.length) { return; }
   const inv = await getInv();
   if (!inv || !inv.items) { return; }

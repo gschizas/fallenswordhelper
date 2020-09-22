@@ -1,8 +1,7 @@
-import arrayFrom from '../../common/arrayFrom';
 import chunk from '../../common/chunk';
 import daDropItems from '../../_dataAccess/daDropItems';
 import errorDialog from '../../common/errorDialog';
-import getCheckboxes from '../../guild/inventory/storeitems/getCheckboxes';
+import getCheckboxesArray from '../../guild/inventory/storeitems/getCheckboxesArray';
 import getCheckedItems from './getCheckedItems';
 import getValue from '../../system/getValue';
 import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
@@ -14,7 +13,7 @@ import setValue from '../../system/setValue';
 import { simpleCheckboxHtml } from '../../settings/simpleCheckbox';
 
 function check(mode) {
-  arrayFrom(getCheckboxes()).forEach((ctx) => { ctx.checked = Boolean(mode); });
+  getCheckboxesArray().forEach((ctx) => { ctx.checked = Boolean(mode); });
 }
 
 const prefAjaxifyDestroy = 'ajaxifyDestroy';

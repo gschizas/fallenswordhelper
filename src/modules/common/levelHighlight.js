@@ -4,56 +4,52 @@ import intValue from '../system/intValue';
 import valueText from './valueText';
 import { defCharacterVirtualLevel, defStatLevel } from '../support/constants';
 
-export let pvpLowerLevel;
-export let pvpUpperLevel;
-export let gvgLowerLevel;
-export let gvgUpperLevel;
-
-const lowerGvgCalcs = [
-  (levelToTest) => { if (levelToTest >= 801) { return 100; } },
-  (levelToTest) => { if (levelToTest >= 752) { return levelToTest - 701; } },
-  (levelToTest) => { if (levelToTest >= 351) { return 50; } },
-  (levelToTest) => { if (levelToTest >= 326) { return levelToTest - 301; } },
-  () => 25,
-];
+let lvlToTest;
 
 function calcLvlToTest() {
-  return getValue(defCharacterVirtualLevel)
-    || intValue(valueText(getElementsByClassName(defStatLevel)));
+  if (!lvlToTest) {
+    lvlToTest = getValue(defCharacterVirtualLevel)
+      || intValue(valueText(getElementsByClassName(defStatLevel)));
+  }
+  return lvlToTest;
 }
 
-function lowerModifier(levelToTest) {
-  return lowerGvgCalcs.find((ary) => ary(levelToTest))(levelToTest);
-}
-
-function calcLowerGvGLevel(levelToTest) {
-  return levelToTest - lowerModifier(levelToTest);
-}
-
-function calcLowerPvpLevel(levelToTest) {
+export function getLowerPvpLevel() {
+  const levelToTest = calcLvlToTest();
   let modifier = 10;
   if (levelToTest <= 209) { modifier = levelToTest - 200; }
   if (levelToTest <= 205) { modifier = 5; }
   return levelToTest - modifier;
 }
 
-function calcUpperPvpLevel(levelToTest) {
+export function getUpperPvpLevel() {
+  const levelToTest = calcLvlToTest();
   let modifier = 10;
   if (levelToTest < 200) { modifier = 5; }
   return levelToTest + modifier;
 }
 
-function calcUpperGvgLevel(levelToTest) {
+const lowerGvgCalcs = [
+  [(levelToTest) => levelToTest >= 800, () => 100],
+  [(levelToTest) => levelToTest >= 752, (levelToTest) => levelToTest - 701],
+  [(levelToTest) => levelToTest >= 351, () => 50],
+  [(levelToTest) => levelToTest >= 326, (levelToTest) => levelToTest - 301],
+  [() => true, () => 25],
+];
+
+function lowerModifier(levelToTest) {
+  return lowerGvgCalcs.find(([test]) => test(levelToTest))[1](levelToTest);
+}
+
+export function getLowerGvGLevel() {
+  const levelToTest = calcLvlToTest();
+  return levelToTest - lowerModifier(levelToTest);
+}
+
+export function getUpperGvgLevel() {
+  const levelToTest = calcLvlToTest();
   let modifier = 100;
   if (levelToTest <= 700) { modifier = 50; }
   if (levelToTest <= 300) { modifier = 25; }
   return levelToTest + modifier;
-}
-
-export function calculateBoundaries() {
-  const levelToTest = calcLvlToTest();
-  pvpLowerLevel = calcLowerPvpLevel(levelToTest);
-  pvpUpperLevel = calcUpperPvpLevel(levelToTest);
-  gvgLowerLevel = calcLowerGvGLevel(levelToTest);
-  gvgUpperLevel = calcUpperGvgLevel(levelToTest);
 }

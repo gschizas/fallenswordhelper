@@ -7,11 +7,10 @@ import { pCC } from './support/layout';
 import querySelector from './common/querySelector';
 import querySelectorArray from './common/querySelectorArray';
 import {
-  calculateBoundaries,
-  gvgLowerLevel,
-  gvgUpperLevel,
-  pvpLowerLevel,
-  pvpUpperLevel,
+  getLowerGvGLevel,
+  getLowerPvpLevel,
+  getUpperGvgLevel,
+  getUpperPvpLevel,
 } from './common/levelHighlight';
 import { playerLinkSelector, searchPlayerUrl } from './support/constants';
 
@@ -24,9 +23,9 @@ function searchUrl(min, max, guild) {
 
 function shortcuts() {
   return `&nbsp;<a class="fshBlue" href="${
-    searchUrl(pvpLowerLevel, pvpUpperLevel, '-1')
+    searchUrl(getLowerPvpLevel(), getUpperPvpLevel(), '-1')
   }">Get PvP targets</a>&nbsp;<a class="fshBlue" href="${
-    searchUrl(gvgLowerLevel, gvgUpperLevel, '1')}">Get GvG targets</a>`;
+    searchUrl(getLowerGvGLevel(), getUpperGvgLevel(), '1')}">Get GvG targets</a>`;
 }
 
 function doShortcuts(findPlayerButton) {
@@ -47,7 +46,6 @@ function doBuffLinks() {
 }
 
 export default function injectFindPlayer() {
-  calculateBoundaries();
   doFindPlayer();
   doBuffLinks();
   interceptSubmit();

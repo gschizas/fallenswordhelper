@@ -2,24 +2,27 @@ import doGroupPaint from './doGroupPaint';
 import getMembrList from '../../ajax/getMembrList';
 import getValue from '../../system/getValue';
 import groupButtons from './groupButtons';
+import insertHtmlBeforeEnd from '../../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
+import querySelector from '../../common/querySelector';
+import querySelectorArray from '../../common/querySelectorArray';
 
-function displayMinGroupLevel() { // jQuery
+function displayMinGroupLevel() {
   const minGroupLevel = getValue('minGroupLevel');
   if (minGroupLevel) {
-    $('#pCC > table > tbody > tr > td > table td').first()
-      .append(`<span style="color:blue"> Current Min Level Setting: ${
-        minGroupLevel}</span>`);
+    insertHtmlBeforeEnd(querySelector('#pCC > table > tbody > tr > td > table td'),
+      `<div class="fshBlue"> Current Min Level Setting: ${minGroupLevel}</div>`);
   }
 }
 
-function fixTable() { // jQuery
+function fixTable() {
   // Cows don't add!
-  const tds = $('#pCC td.header-dark');
-  tds.eq(0).attr('width', '20%');
-  tds.eq(1).attr('width', '51%');
-  tds.eq(2).attr('width', '22%');
-  tds.eq(3).attr('width', '7%');
+  const tds = querySelectorArray('#pCC td.header-dark');
+  tds[0].setAttribute('width', '20%');
+  tds[1].setAttribute('width', '44%');
+  tds[2].setAttribute('width', '7%');
+  tds[3].setAttribute('width', '22%');
+  tds[4].setAttribute('width', '7%');
 }
 
 export default function injectGroups() { // jQuery

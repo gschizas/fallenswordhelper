@@ -5,7 +5,6 @@ import fallback from '../system/fallback';
 import insertElement from './insertElement';
 import onclick from './onclick';
 import openQuickBuffByName from './openQuickBuffByName';
-import partial from './partial';
 import { places } from '../support/constants';
 
 function batchUp(acc, curr, i) {
@@ -20,11 +19,14 @@ function makeButtons(acc, curr, i) {
   const modifierWord = places[i];
   const li = createLi();
   const btn = createButton({
-    className: 'fshBl fshBls tip-static',
-    dataset: { tipped: 'Quick buff functionality from HCS only does 16' },
+    className: 'fshBl fshBls tooltip-top-left',
+    dataset: { tooltip: 'Quick buff functionality from HCS only does 16' },
     textContent: `Buff ${modifierWord} 16`,
   });
-  onclick(btn, partial(openQuickBuffByName, theNames));
+  onclick(btn, (evt) => {
+    evt.target.blur();
+    openQuickBuffByName(theNames);
+  });
   insertElement(li, btn);
   insertElement(acc, li);
   return acc;

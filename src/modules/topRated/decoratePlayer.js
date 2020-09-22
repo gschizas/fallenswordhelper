@@ -4,11 +4,7 @@ import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import isUndefined from '../common/isUndefined';
 import { nowSecs } from '../support/now';
 import onlineDot from '../common/onlineDot';
-import {
-  calculateBoundaries,
-  pvpLowerLevel,
-  pvpUpperLevel,
-} from '../common/levelHighlight';
+import { getLowerPvpLevel, getUpperPvpLevel } from '../common/levelHighlight';
 
 let highlightPlayersNearMyLvl;
 let myGuildId;
@@ -17,8 +13,8 @@ const highlightTests = [
   () => highlightPlayersNearMyLvl,
   (guildId) => isUndefined(guildId) || guildId !== myGuildId,
   (guildId, data) => data.last_login >= nowSecs - 604800,
-  (guildId, data) => data.virtual_level >= pvpLowerLevel,
-  (guildId, data) => data.virtual_level <= pvpUpperLevel,
+  (guildId, data) => data.virtual_level >= getLowerPvpLevel(),
+  (guildId, data) => data.virtual_level <= getUpperPvpLevel(),
 ];
 
 function pvpHighlight(guildId, data) {
@@ -36,7 +32,6 @@ export function decoratePlayer(aTable, guildId, data) {
 export function initDecorate() {
   highlightPlayersNearMyLvl = getValue('highlightPlayersNearMyLvl');
   if (highlightPlayersNearMyLvl) {
-    calculateBoundaries();
     myGuildId = currentGuildId();
   }
 }
