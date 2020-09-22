@@ -33,6 +33,7 @@ globals:
   GameController: readonly
   GameData: readonly
   Modernizr: readonly
+  RadioNodeList: readonly
 rules:
   consistent-return: off # 74
   import/no-extraneous-dependencies:
