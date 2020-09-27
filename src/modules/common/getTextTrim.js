@@ -1,5 +1,9 @@
 import getText from './getText';
+import isString from './isString';
 
 export default function getTextTrim(node) {
-  return getText(node).trim();
+  const text = getText(node);
+  if (isString(text)) {
+    return getText(node).trim();
+  }
 }
