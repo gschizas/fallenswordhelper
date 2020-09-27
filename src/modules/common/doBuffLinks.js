@@ -1,39 +1,38 @@
+import chunk from './chunk';
 import createButton from './cElement/createButton';
 import createLi from './cElement/createLi';
 import createUl from './cElement/createUl';
-import fallback from '../system/fallback';
 import insertElement from './insertElement';
 import onclick from './onclick';
 import openQuickBuffByName from './openQuickBuffByName';
 import { places } from '../support/constants';
+import { sendEvent } from '../support/fshGa';
 
-function batchUp(acc, curr, i) {
-  const slot = Math.floor(i / 16);
-  acc[slot] = fallback(acc[slot], []);
-  acc[slot].push(curr);
-  return acc;
-}
-
-function makeButtons(acc, curr, i) {
-  const theNames = curr.join(',');
-  const modifierWord = places[i];
+function getListItem(words, names) {
   const li = createLi();
   const btn = createButton({
-    className: 'fshBl fshBls tooltip-top-left',
-    dataset: { tooltip: 'Quick buff functionality from HCS only does 16' },
-    textContent: `Buff ${modifierWord} 16`,
+    className: 'fshBl fshBls',
+    textContent: words,
   });
   onclick(btn, (evt) => {
     evt.target.blur();
-    openQuickBuffByName(theNames);
+    openQuickBuffByName(names);
+    sendEvent('doBuffLinks', words);
   });
   insertElement(li, btn);
-  insertElement(acc, li);
+  return li;
+}
+
+function makeButtons(acc, curr, i) {
+  insertElement(acc, getListItem(`Buff ${places[i]} 16`, curr.join(',')));
   return acc;
 }
 
 export default function doBuffLinks(members) {
-  // quick buff only supports 16
-  const shortList = members.reduce(batchUp, []).reduce(makeButtons, createUl());
-  return shortList;
+  const chunks = chunk(16, members);
+  const ul = createUl();
+  if (chunks.length > 1) {
+    insertElement(ul, getListItem('Buff All', members.join(',')));
+  }
+  return chunks.reduce(makeButtons, ul);
 }

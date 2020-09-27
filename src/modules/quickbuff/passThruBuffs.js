@@ -12,7 +12,7 @@ function tickBuffs(passThru) {
   passThru.split(';').forEach(tickBuff);
 }
 
-export default function doPassThru() {
+export default function passThruBuffs() {
   const passThru = getUrlParameter('blist');
   if (passThru) { tickBuffs(passThru); }
 }
