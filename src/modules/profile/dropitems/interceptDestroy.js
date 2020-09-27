@@ -32,7 +32,7 @@ const checkItems = (e) => {
   if (!e.returnValue || !ajaxifyDestroy) { return; }
   e.preventDefault();
   chunk(30, getCheckedItems()).forEach(destroyChunk);
-  sendEvent('profileDropitems', 'Destroy by AJAX');
+  sendEvent('dropitems', 'Destroy by AJAX');
 };
 
 function changePref() {

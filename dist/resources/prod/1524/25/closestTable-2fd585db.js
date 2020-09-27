@@ -1,0 +1,4 @@
+import{d as s}from"./calfSystem-71b9378d.js"
+import{c as o}from"./closest-8d8d60b3.js"
+function r(r){return o(s,r)}export{r as c}
+//# sourceMappingURL=closestTable-2fd585db.js.map

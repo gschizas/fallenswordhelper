@@ -8,15 +8,20 @@ import getValue from '../system/getValue';
 import insertHtmlAfterEnd from '../common/insertHtmlAfterEnd';
 import playerId from '../common/playerId';
 import querySelector from '../common/querySelector';
-import quickBuffHref from '../common/quickBuffHref';
 import {
   auctionhouseUrl,
   guildSubcmdUrl,
   joinUnderUrl,
   joinallUrl,
+  quickbuffUrl,
   recallUserUrl,
   secureUrl,
 } from '../support/constants';
+
+function quickBuffHref(aPlayerId) { // Bad Pattern
+  return `href='javascript:window.openWindow("${quickbuffUrl}&tid=${
+    aPlayerId}", "fsQuickBuff", 618, 1000, ",scrollbars")'`;
+}
 
 function joinGroups() {
   let url = joinallUrl;
