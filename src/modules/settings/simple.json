@@ -391,10 +391,6 @@
     "helpTitle":"Change Button Labels",
     "helpText":"This changes Send button to be Trade and Trade button to be ST."
   },
-  "notificationWidgets":{
-    "helpTitle":"Notification Widgets",
-    "helpText":"This adds ignore/reply/send/trade/ST/buff/attack links to player notifications."
-  },
   "fastDebuff":{
     "helpTitle":"Fast Debuff",
     "helpText":"This allows debuffing without a page reload."
