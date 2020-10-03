@@ -29,7 +29,7 @@ export default function addGuildInfoWidgets() {
   if (!guildMembrList) { return; } // list exists
   // hide guild info links
   doHideBtn(guildMembrList, 1);
-  doHideBuffSelected(guildMembrList, 'guild-buff-check-on', 'guild-quick-buff');
+  doHideBuffSelected(guildMembrList, 'guild');
   // add coloring for offline time
   colouring(guildMembrList, guildColour);
   updateChatLink();

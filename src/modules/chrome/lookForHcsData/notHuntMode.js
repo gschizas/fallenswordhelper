@@ -16,6 +16,7 @@ function getEnvVars() {
     'hideGuildInfoBuff',
     'hideGuildInfoMessage',
     'hideBuffSelected',
+    'fixBuffSelected',
     'enableTempleAlert',
     'enableUpgradeAlert',
     'enableComposingAlert',

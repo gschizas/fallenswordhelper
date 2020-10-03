@@ -20,6 +20,7 @@ const middleBlock = [
   'enableComposingAlert',
   'enhanceOnlineDots',
   'hideBuffSelected',
+  'fixBuffSelected',
   'hideHelperMenu',
   'keepHelperMenuOnScreen',
   'draggableHelperMenu',

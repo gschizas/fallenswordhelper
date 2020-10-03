@@ -102,6 +102,7 @@
   "enableQuickDrink":false,
   "enhanceOnlineDots":false,
   "hideBuffSelected":false,
+  "fixBuffSelected":false,
   "hideHelperMenu":false,
   "keepHelperMenuOnScreen":true,
   "draggableHelperMenu":false,
