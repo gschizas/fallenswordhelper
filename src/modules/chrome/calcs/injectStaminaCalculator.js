@@ -29,5 +29,7 @@ export default function injectStaminaCalculator() {
   if (nextGain.length === 0) { return; }
   const staminaMouseover = getElementById('statbar-stamina-tooltip-stamina');
   const stamVals = getStamVals(staminaMouseover);
-  insertHtmlBeforeEnd(staminaMouseover, maxStamAt(nextGain, stamVals));
+  if (stamVals) {
+    insertHtmlBeforeEnd(staminaMouseover, maxStamAt(nextGain, stamVals));
+  }
 }
