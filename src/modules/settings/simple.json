@@ -46,6 +46,10 @@
     "helpTitle":"Hide Buff Selected",
     "helpText":"Hides the buff selected functionality in the online allies and guild info section."
   },
+  "fixBuffSelected":{
+    "helpTitle":"Fix Buff Selected",
+    "helpText":"Fixes the buff selected functionality in the online allies and guild info section."
+  },
   "hideHelperMenu":{
     "helpTitle":"Hide Helper Menu",
     "helpText":"Hides the helper menu from top left."
@@ -390,10 +394,6 @@
   "changeButtonLabels":{
     "helpTitle":"Change Button Labels",
     "helpText":"This changes Send button to be Trade and Trade button to be ST."
-  },
-  "notificationWidgets":{
-    "helpTitle":"Notification Widgets",
-    "helpText":"This adds ignore/reply/send/trade/ST/buff/attack links to player notifications."
   },
   "fastDebuff":{
     "helpTitle":"Fast Debuff",

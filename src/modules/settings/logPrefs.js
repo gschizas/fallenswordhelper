@@ -59,7 +59,6 @@ export default function logPrefs() {
     'colorPlayerNames',
     'addIgnoreLink',
     'changeButtonLabels',
-    'notificationWidgets',
     'enhanceChatTextEntry',
     'wrapGuildChat',
   ])}`;

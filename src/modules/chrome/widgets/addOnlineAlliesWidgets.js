@@ -16,7 +16,7 @@ export default function addOnlineAlliesWidgets() {
   const onlineAlliesList = getElementById('minibox-allies-list');
   if (!onlineAlliesList) { return; }
   doHideBtn(onlineAlliesList, 2);
-  doHideBuffSelected(onlineAlliesList, 'ally-buff-check-on', 'ally-quick-buff');
+  doHideBuffSelected(onlineAlliesList, 'ally');
   // add coloring for offline time
   colouring(onlineAlliesList, alliesColour);
 }
