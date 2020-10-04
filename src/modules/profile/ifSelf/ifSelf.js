@@ -1,3 +1,4 @@
+import executeAll from '../../common/executeAll';
 import getIsSelf from '../getIsSelf';
 import getValue from '../../system/getValue';
 import runDefault from '../../common/runDefault';
@@ -55,15 +56,17 @@ function doAjaxifySections() {
 export default function ifSelf() {
   if (getIsSelf()) {
     // self inventory
-    doFastDebuff();
-    doAllyEnemy();
-    doFastWear();
-    doFixFolders();
-    doComponents();
-    doQuickWearLink();
-    doSelectAllLink();
-    storeVL();
-    doNekidBtn();
-    doAjaxifySections();
+    executeAll([
+      doFastDebuff,
+      doAllyEnemy,
+      doFastWear,
+      doFixFolders,
+      doComponents,
+      doQuickWearLink,
+      doSelectAllLink,
+      storeVL,
+      doNekidBtn,
+      doAjaxifySections,
+    ]);
   }
 }

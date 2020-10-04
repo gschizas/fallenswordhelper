@@ -65,13 +65,7 @@ function process(tabs, values) {
   }
 }
 
-export default function injectArena() { // jQuery
-  if (jQueryNotPresent()) { return; }
-  const tabs = $('#arenaTypeTabs');
-  if (tabs.length !== 1) { // Join error screen
-    sendEvent('arena', 'Join error screen ?');
-    return;
-  }
+function prepare(tabs) {
   allthen([
     get(fshArenaKey),
     get('fsh_arenaFull'),
@@ -79,4 +73,14 @@ export default function injectArena() { // jQuery
     loadDataTables(),
   ],
   partial(process, tabs));
+}
+
+export default function injectArena() { // jQuery
+  if (jQueryNotPresent()) { return; }
+  const tabs = $('#arenaTypeTabs');
+  if (tabs.length === 1) {
+    prepare(tabs);
+  } else {
+    sendEvent('arena', 'Join error screen ?');
+  }
 }

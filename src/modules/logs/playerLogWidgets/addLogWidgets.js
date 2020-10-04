@@ -6,31 +6,28 @@ import colorPlayers from './colorPlayers';
 import getValue from '../../system/getValue';
 import interceptLinks from './interceptLinks';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
+import partial from '../../common/partial';
 import processLadder from './processLadder';
 import querySelector from '../../common/querySelector';
 
+const conditionalArray = [
+  ['addIgnoreLink', addIgnoreLinks],
+  ['colorPlayerNames', colorPlayers],
+  ['addAttackLinkToLog', addAttackLink],
+  ['changeButtonLabels', changeLabels],
+  ['trackLadderReset', processLadder],
+  ['showPvPSummaryInLog', addPvPSummary],
+];
+
+function processConditionals(logTable, pair) {
+  if (getValue(pair[0])) {
+    pair[1](logTable);
+  }
+}
+
 function foundLogTable(logTable) {
   interceptLinks(logTable);
-  const addIgnoreLink = getValue('addIgnoreLink');
-  const addAttackLinkToLog = getValue('addAttackLinkToLog');
-  if (addIgnoreLink) {
-    addIgnoreLinks(logTable);
-  }
-  if (getValue('colorPlayerNames')) {
-    colorPlayers(logTable);
-  }
-  if (addAttackLinkToLog) {
-    addAttackLink(logTable);
-  }
-  if (getValue('changeButtonLabels')) {
-    changeLabels(logTable);
-  }
-  if (getValue('trackLadderReset')) {
-    processLadder(logTable);
-  }
-  if (getValue('showPvPSummaryInLog')) {
-    addPvPSummary(logTable);
-  }
+  conditionalArray.forEach(partial(processConditionals, logTable));
 }
 
 export default function addLogWidgets() {

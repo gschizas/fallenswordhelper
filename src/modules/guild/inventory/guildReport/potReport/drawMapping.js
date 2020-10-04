@@ -79,7 +79,6 @@ function insertFinal(mapTbl) {
   insertHtmlBeforeEnd(row.cells[1], '&nbsp;');
   makeButton(row, 'fshReset', 'Reset');
   insertElement(mapTbl.tBodies[0], row);
-  return 0;
 }
 
 function renderDropDown(myMap, e) {

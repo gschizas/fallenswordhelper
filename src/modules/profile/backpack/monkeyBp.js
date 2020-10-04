@@ -3,15 +3,19 @@ import isFunction from '../../common/isFunction';
 const patchList = [];
 let monkeyInstalled;
 
+function runPatches(theBackpack) {
+  if (patchList.length > 0) {
+    patchList.forEach((fn) => fn(theBackpack));
+  }
+}
+
 function installMonkey(theBackpack) {
   const oldShow = theBackpack._showPage;
   // eslint-disable-next-line no-param-reassign
   theBackpack._showPage = function _showPage(type, page) {
     if (!theBackpack.tabData) { return; }
     oldShow.call(theBackpack, type, page);
-    if (patchList.length > 0) {
-      patchList.forEach((fn) => fn(theBackpack));
-    }
+    runPatches(theBackpack);
   };
   monkeyInstalled = true;
 }

@@ -63,5 +63,4 @@ export default function fshTabSet(container, tabs, groupName) {
   thisDivs.forEach(appendToTabSet);
   setInnerHtml('', container);
   insertElement(container, thisTabSet);
-  return 0;
 }

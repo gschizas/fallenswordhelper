@@ -5,7 +5,6 @@ import csvSplit from '../../common/csvSplit';
 import { defJoinallgroupsundersize } from '../../support/constants';
 import fetchGroupStatsButton from './fetchGroupStatsButton';
 import getText from '../../common/getText';
-import getValue from '../../system/getValue';
 import hideElement from '../../common/hideElement';
 import indexAjaxData from '../../ajax/indexAjaxData';
 import onclick from '../../common/onclick';
@@ -14,8 +13,6 @@ import querySelector from '../../common/querySelector';
 import querySelectorArray from '../../common/querySelectorArray';
 import { sendEvent } from '../../support/fshGa';
 import setInnerHtml from '../../dom/setInnerHtml';
-
-let maxGroupSizeToJoin;
 
 function filterMercs(e) { return !e.includes('#000099'); }
 
@@ -38,7 +35,7 @@ function doJoinUnderSize(joinButton) {
   const memListArrayWithMercs = csvSplit(getText(memList));
   const memListArrayWithoutMercs = memListArrayWithMercs
     .filter(filterMercs);
-  if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
+  if (memListArrayWithoutMercs.length < calf.maxGroupSizeToJoin) {
     const container = createDiv({
       className: 'group-action-link fshRelative',
       innerHTML: '<span class="fshSpinner fshSpinner12"></span>',
@@ -57,16 +54,14 @@ function joinAllGroupsUnderSize() {
 
 function joinUnderButton(buttonRow) {
   const joinUnder = addButton(buttonRow,
-    `Join All Groups < ${maxGroupSizeToJoin} Members`);
+    `Join All Groups < ${calf.maxGroupSizeToJoin} Members`);
   onclick(joinUnder, joinAllGroupsUnderSize);
 }
 
 export default function groupButtons() {
   const joinAll = querySelector('#pCC input[value="Join All Available Groups"]');
   const buttonRow = joinAll.parentNode;
-  const enableMaxGroupSizeToJoin = getValue('enableMaxGroupSizeToJoin');
-  if (enableMaxGroupSizeToJoin) {
-    maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+  if (calf.enableMaxGroupSizeToJoin) {
     hideElement(joinAll);
     joinUnderButton(buttonRow);
   }

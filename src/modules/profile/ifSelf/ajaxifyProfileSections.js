@@ -32,7 +32,6 @@ function oldStyleDiv(target) {
     hideElement(target);
   }
   target.removeAttribute('style');
-  return 0;
 }
 
 function toggleTarget(target) {

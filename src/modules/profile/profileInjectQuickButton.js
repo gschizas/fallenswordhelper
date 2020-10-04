@@ -1,3 +1,4 @@
+import calf from '../support/calf';
 import { cdn } from '../system/system';
 import currentGuildId from '../common/currentGuildId';
 import fallback from '../system/fallback';
@@ -26,9 +27,9 @@ function quickBuffHref(aPlayerId) { // Bad Pattern
 function joinGroups() {
   let url = joinallUrl;
   let suffix = '';
-  if (getValue('enableMaxGroupSizeToJoin')) {
+  if (calf.enableMaxGroupSizeToJoin) {
     url = joinUnderUrl;
-    suffix = ` < ${getValue('maxGroupSizeToJoin')} Members`;
+    suffix = ` < ${calf.maxGroupSizeToJoin} Members`;
   }
   return `<a class="fshJoin quickButton tip-static" href="${
     url}" data-tipped="Join All Groups${

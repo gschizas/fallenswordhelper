@@ -67,13 +67,20 @@ function updateTd([r, msgHtml, json]) {
   insertElement(r.cells[2], createDiv({ innerHTML: summaryDiv }));
 }
 
+function notGuild(combatLinks) {
+  return combatLinks
+    .map(closestTr)
+    .filter(isPvp)
+    .map((r) => [r, r.cells[2].innerHTML])
+    .filter(notGuildCombat)
+    .map(getCombats);
+}
+
+const goodCombats = ([, , json]) => json && json.s;
+
 export default async function addPvPSummary(logTable) {
   const combatLinks = querySelectorArray('a[href*="&combat_id="]', logTable);
   if (combatLinks.length === 0) { return; }
-  const combatRows = combatLinks.map(closestTr).filter(isPvp);
-  const withHtml = combatRows.map((r) => [r, r.cells[2].innerHTML]);
-  const notGuild = withHtml.filter(notGuildCombat);
-  const combats = await Promise.all(notGuild.map(getCombats));
-  const goodCombats = combats.filter(([, , json]) => json && json.s);
-  goodCombats.forEach(updateTd);
+  const combats = await Promise.all(notGuild(combatLinks));
+  combats.filter(goodCombats).forEach(updateTd);
 }
