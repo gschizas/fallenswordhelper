@@ -1,6 +1,7 @@
 import add from '../support/task';
 import colouredDots from '../common/colouredDots';
 import doStatTotal from './doStatTotal';
+import executeAll from '../common/executeAll';
 import getIsSelf from './getIsSelf';
 import getValue from '../system/getValue';
 import ifSelf from './ifSelf/ifSelf';
@@ -50,16 +51,18 @@ function doBuffLevels() {
 }
 
 function updateDom() {
-  ifSelf();
-  doGuildRelationship();
-  doQuickButtons();
-  doUpdateBuffs();
-  doUpdateStatistics();
-  doHighlightPvPProt();
-  doRenderBio();
-  doCompressBio();
-  doStatTotal();
-  doBuffLevels();
+  executeAll([
+    ifSelf,
+    doGuildRelationship,
+    doQuickButtons,
+    doUpdateBuffs,
+    doUpdateStatistics,
+    doHighlightPvPProt,
+    doRenderBio,
+    doCompressBio,
+    doStatTotal,
+    doBuffLevels,
+  ]);
   add(3, colouredDots);
 }
 

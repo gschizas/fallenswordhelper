@@ -22,5 +22,4 @@ export default function arenaFull(obj) {
   const withPvpId = theButtons.map((e) => [e, e.previousElementSibling.value]);
   const newObj = entries(obj).reduce(partial(func, withPvpId), {});
   set('fsh_arenaFull', newObj);
-  return 0;
 }

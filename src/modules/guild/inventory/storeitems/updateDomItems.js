@@ -60,25 +60,30 @@ const canSend = (prefs, invItem) => prefs[showQuickSendLinks]
 
 const canDrop = (prefs, invItem) => prefs[showQuickDropLinks] && invItem.guild_tag === -1;
 
+function buildNewInner(acc, cur) {
+  if (cur[0]()) { return acc + cur[1](); }
+  return acc;
+}
+
+function getConditionalArray(prefs, itemHash, invItem) {
+  return [
+    [() => prefs[showExtraLinks], () => `${doAhLinks(invItem)} ${doUfsgLink(invItem)}`],
+    [() => true, () => `&nbsp;${invItem.item_name}`],
+    [
+      () => hasMultiple(prefs, itemHash, invItem),
+      () => ` ${generalButton('fshBlack', '', 'Check All')}`,
+    ],
+    [() => canSend(prefs, invItem), () => actionButton('fshBlue', 'SENDS', 'Send')],
+    [() => canDrop(prefs, invItem), () => actionButton('fshRed', 'DROP', 'Drop')],
+  ];
+}
+
 function decorateItems(prefs, itemHash, [inject, invItem]) {
   const thisTd = inject;
   if (prefs[enableItemColoring]) {
     thisTd.className = rarity[invItem.rarity].clas;
   }
-  let newInner = '';
-  if (prefs[showExtraLinks]) {
-    newInner = `${doAhLinks(invItem)} ${doUfsgLink(invItem)}`;
-  }
-  newInner += `&nbsp;${invItem.item_name}`;
-  if (hasMultiple(prefs, itemHash, invItem)) {
-    newInner += ` ${generalButton('fshBlack', '', 'Check All')}`;
-  }
-  if (canSend(prefs, invItem)) {
-    newInner += actionButton('fshBlue', 'SENDS', 'Send');
-  }
-  if (canDrop(prefs, invItem)) {
-    newInner += actionButton('fshRed', 'DROP', 'Drop');
-  }
+  const newInner = getConditionalArray(prefs, itemHash, invItem).reduce(buildNewInner, '');
   if (thisTd.innerHTML !== newInner) {
     thisTd.innerHTML = newInner;
   }

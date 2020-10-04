@@ -59,16 +59,24 @@ function makeStyle([key, selectors]) {
   return `${selectors.join(', ')} { color: ${colorLookup[key]}; }`;
 }
 
-export default async function colorPlayers(logTable) {
-  const playerLinks = querySelectorArray(playerLinkSelector, logTable);
-  if (playerLinks.length === 0) { return; }
-  const playerTags = await Promise.all(playerLinks.map(playerType));
-  const playersToColor = playerTags.filter(([, type]) => type !== '');
-  const playerGroups = entries(playersToColor.reduce(byType, {}));
-  const playerStyles = playerGroups.map(makeStyle);
+const foundType = ([, type]) => type;
+
+function getPlayerStyles(playerTags) {
+  return entries(playerTags.filter(foundType).reduce(byType, {})).map(makeStyle);
+}
+
+function playerStyling(logTable, playerTags) {
+  const playerStyles = getPlayerStyles(playerTags);
   if (playerStyles.length) {
     doMsgHeader(logTable);
     logTable.classList.add('fshPlayerColoring');
     insertElement(document.body, createStyle(playerStyles.join('\n')));
   }
+}
+
+export default async function colorPlayers(logTable) {
+  const playerLinks = querySelectorArray(playerLinkSelector, logTable);
+  if (!playerLinks.length) { return; }
+  const playerTags = await Promise.all(playerLinks.map(playerType));
+  playerStyling(logTable, playerTags);
 }

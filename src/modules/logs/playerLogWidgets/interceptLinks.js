@@ -64,5 +64,4 @@ function intercept(e) {
 
 export default function interceptLinks(logTable) {
   onclick(logTable, intercept);
-  return 0;
 }

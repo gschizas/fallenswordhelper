@@ -66,14 +66,15 @@ function decorate(myGuild, [button, , arena]) {
   }
 }
 
+function getMeta(json) {
+  return querySelectorArray(
+    '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]',
+  ).map(addId).map(partial(addMeta, json));
+}
+
 export default function participants(json) {
   if (!json.s || !isObject(json.r)) { return; }
-  const theButtons = querySelectorArray(
-    '#arenaTypeTabs tr:not([style="display: none;"]) input[type="submit"]',
-  );
-  const withPvpId = theButtons.map(addId);
-  const withMeta = withPvpId.map(partial(addMeta, json));
+  const withMeta = getMeta(json);
   withMeta.forEach(partial(decorate, currentGuildId()));
   withMeta.forEach(partial(testMoves, json));
-  return 0;
 }

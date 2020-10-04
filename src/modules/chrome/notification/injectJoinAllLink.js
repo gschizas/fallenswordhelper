@@ -1,27 +1,26 @@
+import calf from '../../support/calf';
 import getArrayByTagName from '../../common/getArrayByTagName';
-import getElementById from '../../common/getElement';
 import getText from '../../common/getText';
-import getValue from '../../system/getValue';
 import insertHtmlAfterEnd from '../../common/insertHtmlAfterEnd';
+import { pCL } from '../../support/layout';
 import { joinUnderUrl, joinallUrl } from '../../support/constants';
 
 function findNewGroup(el) {
   if (!getText(el).includes('New attack group created.')) { return; }
   let groupJoinHTML = '';
-  if (!getValue('enableMaxGroupSizeToJoin')) {
+  if (!calf.enableMaxGroupSizeToJoin) {
     groupJoinHTML = `<a href="${joinallUrl}"><span `
       + 'class="notification-icon"></span><p class="notification-content">'
       + 'Join all attack groups.</p></a>';
   } else {
-    const maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
     groupJoinHTML = `<a href="${joinUnderUrl}"><span `
       + 'class="notification-icon"></span><p class="notification-content">'
-      + `Join all attack groups less than size ${maxGroupSizeToJoin
+      + `Join all attack groups less than size ${calf.maxGroupSizeToJoin
       }.</p></a>`;
   }
   insertHtmlAfterEnd(el, `<li class="notification">${groupJoinHTML}</li>`);
 }
 
 export default function injectJoinAllLink() {
-  getArrayByTagName('li', getElementById('pCL')).forEach(findNewGroup);
+  getArrayByTagName('li', pCL).forEach(findNewGroup);
 }

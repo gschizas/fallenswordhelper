@@ -23,6 +23,8 @@ function getEnvVars() {
     'enableActiveBountyList',
     'enableWantedList',
     'wantedGuildMembers',
+    'enableMaxGroupSizeToJoin',
+    'maxGroupSizeToJoin',
   ].forEach(getCalfPrefs);
   calf.allyEnemyOnlineRefreshTime = getValue('allyEnemyOnlineRefreshTime')
     * 1000;

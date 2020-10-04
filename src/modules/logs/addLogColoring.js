@@ -72,14 +72,17 @@ function toStyle(spacing, [rowType, { min, max }]) {
     rowType === 'old' ? '#CD9E4B' : '#F5F298'};}`;
 }
 
-function processRows(logScreen, dateColumn, chatTable) {
-  const rows = dataRows(chatTable.rows, 3, 0);
-  const rowTags = rows.map(partial(typeMap, dateColumn));
-  doBuffLinks(logScreen, rowTags);
-  const rowsToColor = rowTags.filter(([, rowType]) => rowType !== 'seen');
-  const rowGroups = rowsToColor.reduce(byType, {});
+function makeRowStyle(logScreen, rowTags) {
   const spacing = logScreen === 'Chat' ? 4 : 2;
-  const rowStyle = entries(rowGroups).map(partial(toStyle, spacing));
+  return entries(rowTags.filter(([, rowType]) => rowType !== 'seen')
+    .reduce(byType, {}))
+    .map(partial(toStyle, spacing));
+}
+
+function processRows(logScreen, dateColumn, chatTable) {
+  const rowTags = dataRows(chatTable.rows, 3, 0).map(partial(typeMap, dateColumn));
+  doBuffLinks(logScreen, rowTags);
+  const rowStyle = makeRowStyle(logScreen, rowTags);
   if (rowStyle.length) {
     insertElement(document.body, createStyle(rowStyle.join('\n')));
   }

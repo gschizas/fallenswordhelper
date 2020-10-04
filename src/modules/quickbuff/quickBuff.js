@@ -1,5 +1,6 @@
 import addBuffLevels from './addBuffLevels';
 import doLabels from './doLabels';
+import executeAll from '../common/executeAll';
 import firstPlayerStats from './firstPlayerStats';
 import getElementById from '../common/getElement';
 import getProfile from '../ajax/getProfile';
@@ -23,9 +24,11 @@ export default function injectQuickBuff() { // jQuery.min
   if (!quickbuffDiv) { return; }
   getProfile(window.self).then(getSustain);
   insertHtmlAfterEnd(quickbuffDiv.children[0], quickBuffHeader);
-  doLabels();
-  passThruBuffs();
-  passThruPlayers();
-  setupEventHandlers();
-  firstPlayerStats();
+  executeAll([
+    doLabels,
+    passThruBuffs,
+    passThruPlayers,
+    setupEventHandlers,
+    firstPlayerStats,
+  ]);
 }

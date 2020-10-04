@@ -52,12 +52,18 @@ function statusTextHtml(ourTitan) {
   return getTitanString(ourTitan.kills, ourTitan.max_hp, ourTitan.current_hp);
 }
 
+function setAllText(ary) {
+  ary.forEach(([txt, ctx]) => { setText(txt, ctx); });
+}
+
 function doTopLabels(ourTitan) {
-  setText(ourTitan.current_hp, currentHp);
-  setText(ourTitan.max_hp, maxHp);
-  setText(ourTitan.kills, guildKills);
-  setText(currentPctText(ourTitan), currentPct);
-  setText(totalPctText(ourTitan), totalPct);
+  setAllText([
+    [ourTitan.current_hp, currentHp],
+    [ourTitan.max_hp, maxHp],
+    [ourTitan.kills, guildKills],
+    [currentPctText(ourTitan), currentPct],
+    [totalPctText(ourTitan), totalPct],
+  ]);
   setInnerHtml(statusTextHtml(ourTitan), statusText);
   setInnerHtml(getCooldownHtml(ourTitan.cooldown), cooldownText);
 }
