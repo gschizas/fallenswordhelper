@@ -1,3 +1,4 @@
+import './composing.css';
 import backgroundCreate from './backgroundCreate';
 import fastCompose from './fastCompose';
 import getElementById from '../common/getElement';

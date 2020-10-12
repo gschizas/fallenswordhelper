@@ -293,13 +293,6 @@
 .fshBlock {display: inline-block;}
 .fshNoWrap {white-space: nowrap;}
 .fshBold {font-weight: bold;}
-.quickCreate {
-  display: inline-block;
-  height: 1.2em;
-  margin-left: 0.4em;
-  position: relative;
-  width: 6.5em;
-}
 .fshFixed {position: fixed;}
 .fshRelative {position: relative;}
 .fshXSmall {font-size: x-small;}
