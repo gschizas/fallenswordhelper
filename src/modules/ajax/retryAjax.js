@@ -40,10 +40,11 @@ function ignore(ajaxErr) {
     );
 }
 
-function handleFailure(reject, ajaxErr) {
+function handleFailure(resolve, ajaxErr) {
   if (!ignore(ajaxErr)) {
     sendException(ajaxErr.toString(), false);
-    reject(ajaxErr);
+    // reject(ajaxErr);
+    resolve(undefined);
   }
 }
 
@@ -52,7 +53,7 @@ function failFilter([fn, opt, retries, resolve, reject]) {
     if (retries > 0 && jqXhr.status === 503) {
       setTimeout(fn, 100, opt, retries - 1, resolve, reject);
     } else {
-      handleFailure(reject,
+      handleFailure(resolve,
         new AjaxError([opt, jqXhr, textStatus, errorThrown]));
     }
   };
