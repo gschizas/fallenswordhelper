@@ -10,14 +10,14 @@ import {
 
 const timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
 
-function timeRemaining(times, el) {
+function timeRemaining(el) {
   const timeArr = timeRE.exec(getText(el));
   if (timeArr) {
     const milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3]))
       * 1000 + now;
-    return times.concat(milli);
+    return milli;
   }
-  return times.concat(0);
+  return 0;
 }
 
 function setNeed(bool) {
@@ -27,8 +27,7 @@ function setNeed(bool) {
 export default function parseComposing() {
   if (!calf.enableComposingAlert) { return; }
   const openSlots = getArrayByClassName('composing-potion-time', document);
-  const times = openSlots.reduce(timeRemaining, []);
-  const eta = Math.min.apply(null, times);
+  const eta = Math.min(...openSlots.map(timeRemaining));
   if (eta === 0) {
     setNeed(true);
   } else {

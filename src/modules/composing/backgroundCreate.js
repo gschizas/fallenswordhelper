@@ -57,6 +57,8 @@ function createPotion(temp) { // jQuery.min
 }
 
 export default function backgroundCreate(target, temp) {
+  // eslint-disable-next-line no-param-reassign
+  temp.id = `proc-${temp.id}`;
   setInnerHtml('', target);
   target.classList.add('fshSpinner', 'fshSpinner12', 'fshComposingSpinner');
   createPotion(temp);
