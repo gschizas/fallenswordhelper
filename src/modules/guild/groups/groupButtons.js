@@ -17,8 +17,8 @@ import setInnerHtml from '../../dom/setInnerHtml';
 function filterMercs(e) { return !e.includes('#000099'); }
 
 function joined(container) {
-  setInnerHtml('<span class="fshXSmall fshBlue" '
-    + 'style="line-height: 19px;">Joined</span>', container);
+  setInnerHtml('<span class="fshXSmall fshBlue" style="line-height: 19px;">Joined</span>',
+    container);
 }
 
 function joinGroup(groupID, container) { // jQuery.min
@@ -53,13 +53,13 @@ function joinAllGroupsUnderSize() {
 }
 
 function joinUnderButton(buttonRow) {
-  const joinUnder = addButton(buttonRow,
-    `Join All Groups < ${calf.maxGroupSizeToJoin} Members`);
+  const joinUnder = addButton(buttonRow, `Join All Groups < ${calf.maxGroupSizeToJoin} Members`);
   onclick(joinUnder, joinAllGroupsUnderSize);
 }
 
 export default function groupButtons() {
   const joinAll = querySelector('#pCC input[value="Join All Available Groups"]');
+  if (!joinAll) { return; }
   const buttonRow = joinAll.parentNode;
   if (calf.enableMaxGroupSizeToJoin) {
     hideElement(joinAll);
