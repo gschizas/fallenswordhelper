@@ -156,7 +156,7 @@ export const itemType = ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon',
 
 export const oldActionSpinner = `${cdn}ui/world/action_spinner.gif`;
 
-export const chatSelector = 'img[title="Chat"], img[oldtitle="Chat"]';
-export const combatSelector = 'img[title="Combat"], img[oldtitle="Combat"]';
-export const noteSelector = 'img[title="Notification"], img[oldtitle="Notification"]';
+export const chatSelector = '.fa-comments-alt';
+export const combatSelector = '.fa-swords';
+export const noteSelector = '.fa-envelope';
 export const playerLinkSelector = 'a[href*="&player_id="]';
