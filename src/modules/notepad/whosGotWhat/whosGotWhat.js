@@ -32,9 +32,9 @@ function makeTable(el) {
 
 function makeSizer(el, table) {
   const thisSizer = createSelect({
-    innerHTML: '<option value="25" selected>25</option>'
+    innerHTML: '<option value="25">25</option>'
       + '<option value="50">50</option>'
-      + '<option value="0">All</option>',
+      + '<option value="0" selected>All</option>',
   });
   const box = createDiv();
   insertElement(box, thisSizer);
@@ -130,7 +130,7 @@ function showMe(dataAry) {
     createDiv({ className: 'st-bottom-container' }));
   const tableState = {
     sort: { pointer: 'slot', direction: 'asc' },
-    slice: { page: 1, size: 25 },
+    slice: { page: 1, size: 0 },
     filter: {},
     search: {},
   };
