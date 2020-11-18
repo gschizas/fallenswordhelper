@@ -1,9 +1,11 @@
 import createTBody from '../../common/cElement/createTBody';
 import createTr from '../../common/cElement/createTr';
+import { playerIdUrl } from '../../support/constants';
 
 function rowHtml(obj) {
   return `<td>${obj.slot}</td>`
-    + `<td>${obj.name}</td>`
+    // + `<td>${obj.name}</td>`
+    + `<td><a href="${playerIdUrl}${obj.id}">${obj.name}</a></td>`
     + `<td>${obj.level}</td>`
     + `<td>${obj.rank_name}</td>`
     + `<td>${obj.gxp}</td>`

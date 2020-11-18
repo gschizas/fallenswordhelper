@@ -10,10 +10,7 @@ import removeGuildAvyImgBorder from './removeGuildAvyImgBorder';
 export default function injectGuild() {
   add(3, colouredDots);
   add(3, removeGuildAvyImgBorder);
-  // eslint-disable-next-line no-unused-labels, no-labels
-  devLbl: { //  guildXPLock
-    add(3, guildXPLock);
-  }
+  add(3, guildXPLock);
   add(3, activeMembers);
 
   if (calf.subcmd === 'manage') { manage(); }

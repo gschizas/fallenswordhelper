@@ -16,7 +16,7 @@ const lookup = [
   ['has disbanded one of their groups',
     /A group from your guild was (.*) in combat./],
   [/deposited ([,0-9]+) gold into the guild bank/,
-    /deposited ([,0-9]+) FallenSword Points into the guild./],
+    /deposited ([,0-9]+) Fallen Sword Points into the guild./],
   ['has added a new rank entitled', 'has deleted the rank',
     'has requested to join the guild', 'has invited the player',
     'has officially joined the guild', 'has been kicked from the guild by',
