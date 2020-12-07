@@ -39,11 +39,11 @@ function doMoveDailyQuest() {
   }
 }
 
-// function doMoveXmas() {
-//   if (getValue('moveXmasBox')) {
-//     moveLeft('minibox-xmas');
-//   }
-// }
+function doMoveXmas() {
+  if (getValue('moveXmasBox')) {
+    moveLeft('minibox-xmas');
+  }
+}
 
 function callAllyEnemy() {
   if (calf.enableAllyOnlineList
@@ -159,6 +159,7 @@ function seTracker() {
 const p3functions = [
   doMoveGuildList,
   doMoveAllyList,
+  doMoveXmas,
   doMoveDailyQuest,
   doMoveFsBox,
   callAllyEnemy,
@@ -184,9 +185,5 @@ const p3functions = [
 ];
 
 export default function priorityThree() {
-  // eslint-disable-next-line no-unused-labels, no-labels
-  // devLbl: { //  doMoveXmas
-  //   doMoveXmas();
-  // }
   asyncPThree(p3functions);
 }

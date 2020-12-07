@@ -231,5 +231,6 @@
   "showBuffLevel":false,
   "enableItemColoring":false,
   "checkAllOfType":false,
-  "enableFolderFilter":false
+  "enableFolderFilter":false,
+  "moveXmasBox":false
 }
