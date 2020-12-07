@@ -19,6 +19,10 @@
     "helpTitle":"Move Daily Quest",
     "helpText":"This will move the Daily Quest to the left, under the menu, for better visibility (unless it is already hidden.)"
   },
+  "moveXmasBox":{
+    "helpTitle":"Move Christmas Offer",
+    "helpText":"This will move the Christmas Offer to the left, under the menu, for better visibility."
+  },
   "gameHelpLink":{
     "helpTitle":"&quot;Game Help&quot; Settings Link",
     "helpText":"This turns the Game Help text in the lower right box into a link to this settings page."

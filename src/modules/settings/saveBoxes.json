@@ -152,5 +152,6 @@
   "showBuffLevel",
   "enableItemColoring",
   "checkAllOfType",
-  "enableFolderFilter"
+  "enableFolderFilter",
+  "moveXmasBox"
 ]

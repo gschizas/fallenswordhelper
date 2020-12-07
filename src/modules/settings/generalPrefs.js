@@ -11,8 +11,9 @@ const topBlock = [
 ];
 const middleBlock = [
   'enableOnlineAlliesWidgets',
-  'moveFSBox',
   'moveDailyQuest',
+  'moveXmasBox',
+  'moveFSBox',
   'fsboxlog',
   'gameHelpLink',
   'enableTempleAlert',
