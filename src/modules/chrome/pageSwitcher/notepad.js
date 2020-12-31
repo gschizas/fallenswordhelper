@@ -27,13 +27,6 @@ const injectSaveSettings = () => { runDefault(import('../../settings/load')); };
 const reliclist = () => {
   runDefault(import('../../notepad/reliclist/reliclist'));
 };
-const advisor = () => { runDefault(import('../../notepad/advisor/advisor')); };
-const crawler = () => {
-  runDefault(import('../../notepad/arenaCrawler/crawler'));
-};
-const newGuildLog5 = () => {
-  runDefault(import('../../notepad/newGuildLog5/newGuildLog5'));
-};
 const whosGotWhat = () => {
   runDefault(import('../../notepad/whosGotWhat/whosGotWhat'));
 };
@@ -59,10 +52,7 @@ const notepad = {
 };
 
 // eslint-disable-next-line no-unused-labels, no-labels
-devLbl: { //  advisor, crawler, newGuildLog5, whosGotWhat
-  notepad.newGuildLog5 = { '-': newGuildLog5 };
-  notepad.advisor = { '-': advisor };
-  notepad.crawler = { '-': crawler };
+devLbl: { //  whosGotWhat
   notepad.whosgotwhat = { '-': whosGotWhat };
 }
 

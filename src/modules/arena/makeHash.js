@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise */
-import { itemType } from '../../support/constants';
-import toLowerCase from '../../common/toLowerCase';
+import { itemType } from '../support/constants';
+import toLowerCase from '../common/toLowerCase';
 
 /* https://stackoverflow.com/a/52171480/1274806 */
 

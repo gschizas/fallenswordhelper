@@ -4,7 +4,7 @@ import createQuickWear from './createQuickWear';
 import daLoadInventory from '../../_dataAccess/daLoadInventory';
 import equipItem from '../../ajax/equipItem';
 import eventHandler5 from '../../common/eventHandler5';
-import fshTabSet from '../../dialog/fshTabSet';
+import fshTabSet from './fshTabSet';
 import getValue from '../../system/getValue';
 import hasClass from '../../common/hasClass';
 import hasClasses from '../../common/hasClasses';
