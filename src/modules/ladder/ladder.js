@@ -3,7 +3,6 @@ import { defLastLadderReset } from '../support/constants';
 import getValue from '../system/getValue';
 import insertElement from '../common/insertElement';
 import interceptSubmit from '../common/interceptSubmit';
-import margin from './margin';
 import { now } from '../support/now';
 import outputFormat from '../system/outputFormat';
 import querySelector from '../common/querySelector';
@@ -56,9 +55,5 @@ export default function ladder() {
   interceptSubmit();
   if (getValue('trackLadderReset')) {
     lastReset();
-  }
-  // eslint-disable-next-line no-unused-labels, no-labels
-  devLbl: { //  Ladder Margin
-    margin();
   }
 }
