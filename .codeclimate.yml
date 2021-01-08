@@ -1,0 +1,15 @@
+---
+version: "2"
+plugins:
+  csslint:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - javascript:
+  eslint:
+    enabled: true
+    channel: "eslint-6"
+  fixme:
+    enabled: true

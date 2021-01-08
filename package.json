@@ -1,0 +1,70 @@
+{
+  "name": "fallenswordhelper",
+  "version": "15.24.30",
+  "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
+  "scripts": {
+    "addsourceroot": "node scripts/addSourceRoot.js",
+    "prebuild": "npm run test",
+    "build": "npm run rollup",
+    "postbuild": "npm run addsourceroot && npm run getsize",
+    "predevbuild": "npm outdated",
+    "devbuild": "npm run build",
+    "preeslint": "echo Starting eslint",
+    "eslint": "eslint . --cache",
+    "posteslint": "echo Finished eslint",
+    "getsize": "node scripts/getCalfSize.js",
+    "minor": "npm --no-git-tag-version version minor",
+    "patch": "npm --no-git-tag-version version patch",
+    "prerollup": "echo Starting rollup",
+    "rollup": "rollup -c scripts/rollup.config.js",
+    "postrollup": "echo Finished rollup",
+    "silence": "npm config set loglevel silent",
+    "test": "npm run eslint",
+    "watch": "rollup -c scripts/rollup.watch.config.js -w",
+    "ws": "ws"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fallenswordhelper/fallenswordhelper.git"
+  },
+  "keywords": [
+    "fallensword",
+    "fallenswordhelper"
+  ],
+  "author": "fallenswordhelper",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fallenswordhelper/fallenswordhelper/issues"
+  },
+  "homepage": "https://fallenswordhelper.github.io/fallenswordhelper",
+  "devDependencies": {
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-replace": "^2.3.4",
+    "@rollup/plugin-strip": "^2.0.0",
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "gzip-size": "^6.0.0",
+    "husky": "^4.3.5",
+    "local-web-server": "^4.2.1",
+    "postcss-nesting": "^7.0.0",
+    "rollup": "^2.34.2",
+    "rollup-plugin-clear": "^2.0.7",
+    "rollup-plugin-copy": "^3.3.0",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-styles": "^3.11.0",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "stylelint": "^13.8.0",
+    "stylelint-config-recommended": "^3.0.0",
+    "stylelint-config-standard": "^20.0.0",
+    "svelte": "^3.31.0"
+  },
+  "dependencies": {
+    "css-tooltip": "^0.3.4",
+    "idb-keyval": "^3.2.0",
+    "smart-table-core": "^3.0.7",
+    "smart-table-vanilla": "^0.2.0"
+  }
+}
