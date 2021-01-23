@@ -938,49 +938,6 @@ textarea {resize: none;}
   border-radius: 2px;
 }
 
-
-
-  .fshTabSet .ui-tabs-panel {
-    padding: 0;
-  }
-.fshTabSet > input {
-    display: none;
-  }
-.fshTabSet > ul > li > label {
-    cursor: pointer;
-    display: block;
-    padding: 0.5em;
-  }
-.fshTabSet > ul > li:hover {
-    background: #f0be00 url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_70_f0be00_500x100.png) 50% 50% repeat-x;
-    border: 1px solid #a45b13;
-    border-bottom-width: 0;
-    color: #381f00;
-  }
-.fshTabSet > input:first-of-type:checked ~ ul li:first-of-type,
-  .fshTabSet > input:nth-of-type(2):checked ~ ul li:nth-of-type(2),
-  .fshTabSet > input:nth-of-type(3):checked ~ ul li:nth-of-type(3) {
-    background: #ffa614 url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_30_ffa614_500x100.png) 50% 50% repeat;
-    border: solid #655e4e;
-    border-width: 1px 1px 0;
-    margin-bottom: -1px;
-    padding-bottom: 1px;
-    color: #381f00
-
-  }
-.fshTabSet > input:first-of-type:checked ~ ul li:first-of-type > label:hover, .fshTabSet > input:nth-of-type(2):checked ~ ul li:nth-of-type(2) > label:hover, .fshTabSet > input:nth-of-type(3):checked ~ ul li:nth-of-type(3) > label:hover {
-      cursor: text;
-    }
-.fshTabSet > div {
-    height: 0;
-    overflow: hidden;
-  }
-.fshTabSet > input:first-of-type:checked ~ div:first-of-type,
-  .fshTabSet > input:nth-of-type(2):checked ~ div:nth-of-type(2) {
-    height: auto;
-    padding: 1em 1.4em;
-  }
-
 .fshStoreItemsButton {
   background: transparent;
   border: none;
@@ -1026,13 +983,59 @@ button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointe
 #quickTake > div:nth-child(2),
 #quickTake > div:nth-child(4) {height: 10px;}
 
+.moveImg {
+  display: inline-block;
+  height: 25px;
+  width: 25px;
+}
+
+.flex {
+  align-items: center;
+  display: flex;
+  justify-content: center
+}
+
+.flex div {padding: 2px;}
+
+.quickCreate {
+  display: inline-block;
+  height: 1.2em;
+  margin-left: 0.4em;
+  position: relative;
+  width: 6.5em;
+}
+
+#fast-compose,
+#fast-compose + div {display: none;}
+#fast-compose:checked + div {display: block;}
+
+.left-0 td:nth-child(n+2) input,
+.left-1 td:nth-child(n+3) input,
+.left-2 td:nth-child(n+4) input,
+.left-3 td:nth-child(n+5) input,
+.left-4 td:nth-child(n+6) input,
+.left-5 td:nth-child(n+7) input,
+.left-6 td:nth-child(n+8) input,
+.left-7 td:nth-child(n+9) input,
+.left-8 td:nth-child(n+10) input,
+.left-9 td:nth-child(n+11) input {
+  background: #B8B8B8;
+  pointer-events: none;
+}
+
+#fshFastCompose {margin: 0 auto;}
+#fshFastCompose td:nth-child(1) {text-align: left;}
+
+.fshGc {
+  table-layout: fixed;
+  overflow-wrap: break-word;
+}
+.fshGc td:nth-child(1) {width: 120px;}
+.fshGc td:nth-child(2) {width: 100px;}
+.fshGc td:nth-child(3) {width: 418px;}
+
 /* World Action List */
 #actionList .crate {background-color: PaleVioletRed;}
-
-#dialog-viewcreature .fshFooter {
-  color: grey;
-  font-size: x-small;
-}
 
 .cR .imp-0 {
   color: red;
@@ -1066,27 +1069,10 @@ button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointe
 .titanInfo .header {font-size: 11px;}
 .titanInfo .cooldown {font-weight: bold;}
 
-.moveImg {
-  display: inline-block;
-  height: 25px;
-  width: 25px;
+#dialog-viewcreature .fshFooter {
+  color: grey;
+  font-size: x-small;
 }
-
-.flex {
-  align-items: center;
-  display: flex;
-  justify-content: center
-}
-
-.flex div {padding: 2px;}
-
-.fshGc {
-  table-layout: fixed;
-  overflow-wrap: break-word;
-}
-.fshGc td:nth-child(1) {width: 120px;}
-.fshGc td:nth-child(2) {width: 100px;}
-.fshGc td:nth-child(3) {width: 418px;}
 
 .newGuildLog {
   background-image: url('https://cdn2.fallensword.com/ui/misc/log_1.png');
@@ -1094,88 +1080,6 @@ button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointe
   height: 16px;
   width: 16px;
 }
-
-.fshSmartTable {
-  border: 1px solid black;
-  table-layout: fixed;
-  width: 650px;
-}
-
-.fshSmartTable thead tr {
-  height: 22px;
-}
-
-.fshSmartTable thead th {
-  background-color: #cd9e4b;
-  position: relative;
-}
-
-.fshSmartTable thead th span {
-  cursor: pointer;
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-.fshSmartTable tbody tr:hover {
-  background-color: whitesmoke;
-}
-
-.fshSmartTable td {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.fshSmartTable td:nth-child(1), .fshSmartTable th:nth-child(1) {width: 64px;} /* member */
-.fshSmartTable td:nth-child(2), .fshSmartTable th:nth-child(2) {width: 24px;} /* lvl */
-.fshSmartTable td:nth-child(3), .fshSmartTable th:nth-child(3) {width: 76px;} /* rank */
-.fshSmartTable td:nth-child(4), .fshSmartTable th:nth-child(4) {width: 70px;} /* depo */
-.fshSmartTable td:nth-child(5), .fshSmartTable th:nth-child(5) {width: 70px;} /* tax */
-.fshSmartTable td:nth-child(6), .fshSmartTable th:nth-child(6) {width: 70px;} /* total */
-.fshSmartTable td:nth-child(7), .fshSmartTable th:nth-child(7) {width: 32px;} /* fsp */
-.fshSmartTable td:nth-child(8), .fshSmartTable th:nth-child(8) {width: 38px;} /* skill */
-.fshSmartTable td:nth-child(9), .fshSmartTable th:nth-child(9) {width: 32px;} /* create */
-.fshSmartTable td:nth-child(10), .fshSmartTable th:nth-child(10) {width: 30px;} /* join */
-.fshSmartTable td:nth-child(11), .fshSmartTable th:nth-child(11) {width: 26px;} /* relic */
-.fshSmartTable td:nth-child(12), .fshSmartTable th:nth-child(12) {width: 90px;} /* gxp */
-
-.fshSmartTable td:nth-child(n+4), .fshSmartTable th:nth-child(n+4) {
-  text-align: center;
-}
-
-/* Smart Table */
-.fshSmartTable th[data-st-sort]:after {
-  /* color: #999; */
-  /* content: '\f0dc'; */
-  position: absolute;
-  right: 8px;
-}
-
-/* .fshSmartTable th[data-st-sort]:hover::after {
-  color: #333;
-} */
-
-.st-sort-asc:after {
-  /* content: '\25b3\0020'; */
-  /* content: '\25b3'; */
-}
-
-.st-sort-desc:after {
-  /* content: '\25bd\0020'; */
-  /* content: '\25bd'; */
-}
-
-/* New Guild Log */
-#fshInjectHere5, #headerTable5 {
-  table-layout: fixed;
-}
-#headerTable5 td:nth-child(1),
-#fshInjectHere5 td:nth-child(1) {width: 16px;}
-#headerTable5 td:nth-child(2),
-#fshInjectHere5 td:nth-child(2) {width: 108px;}
-#headerTable5 td:nth-child(3),
-#fshInjectHere5 td:nth-child(3) {width: 488px;}
-/* #fshInjectHere5 tr:nth-child(2n+2) {height: 19px;} */
 
 .whosGotWhat {
   border: 1px solid black;
@@ -1456,12 +1360,6 @@ button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointe
   justify-content: space-between;
 }
 
-.fsh-tracker {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-}
-
 #tg {
   border: none;
   width: 620px;
@@ -1511,74 +1409,6 @@ button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointe
   width: 550px;
   word-break: break-all;
 }
-
-#tg {
-  border: none;
-  width: 620px;
-  table-layout: fixed;
-}
-#tg th {text-align: center;}
-#tg td, #tg th{
-  overflow-x: hidden;
-  padding: 0.1em 0.1em 0.1em 0.1em;
-}
-#tg td{
-  padding: 0.1em 0.1em 0.1em 0.1em;
-  border-bottom: 1px solid gray;
-}
-#tg td:nth-child(1), #tg th:nth-child(1) {width: 125px;}
-#tg td:nth-child(2), #tg th:nth-child(2) {width: 80px;}
-#tg td:nth-child(3), #tg th:nth-child(3) {width: 40px;}
-#tg td:nth-child(4), #tg th:nth-child(4) {width: 40px;}
-#tg td:nth-child(5), #tg th:nth-child(5) {width: 50px;}
-#tg td:nth-child(6), #tg th:nth-child(6) {width: 50px;}
-#tg td:nth-child(7), #tg th:nth-child(7) {width: 30px;}
-#tg td:nth-child(8), #tg th:nth-child(8) {width: 40px;}
-#tg td:nth-child(9), #tg th:nth-child(9) {width: 115px;}
-#tg thead tr {
-  display: block;
-  position: relative;
-  background-color: #CD9E4B;
-}
-#tg tbody {
-  display: block;
-  height: 60vh;
-  overflow-y: scroll;
-  width: 100%;
-}
-#tg tr:last-child td {border-bottom: none;}
-#tg thead tr select {width: 79px;}
-
-.fshDialog {
-
-  height: 0;
-  overflow: hidden
-
-}
-.fshDialog > input {
-    display: none;
-  }
-.fshDialog > div {
-    transform: translateX(-100vw);
-  }
-.fshDialog > div:first-of-type > label {
-    height: 100%;
-    position: absolute;
-    width: 100%;
-  }
-.fshDialog > input:checked ~ div {
-    transform: none;
-    z-index: 500;
-  }
-.fshDialog > input:checked ~ div:nth-of-type(2) {
-    left: 50%;
-    max-width: 644px;
-    min-height: 100px;
-    min-width: 200px;
-    position: absolute;
-    top: 75px;
-    transform: translateX(-50%);
-  }
 
 .fshCompressor {
   margin-bottom: 0.5em;
@@ -1635,39 +1465,90 @@ button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointe
   width: 36px;
 }
 
+
+
+  .fshTabSet .ui-tabs-panel {
+    padding: 0;
+  }
+.fshTabSet > input {
+    display: none;
+  }
+.fshTabSet > ul > li > label {
+    cursor: pointer;
+    display: block;
+    padding: 0.5em;
+  }
+.fshTabSet > ul > li:hover {
+    background: #f0be00 url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_70_f0be00_500x100.png) 50% 50% repeat-x;
+    border: 1px solid #a45b13;
+    border-bottom-width: 0;
+    color: #381f00;
+  }
+.fshTabSet > input:first-of-type:checked ~ ul li:first-of-type,
+  .fshTabSet > input:nth-of-type(2):checked ~ ul li:nth-of-type(2),
+  .fshTabSet > input:nth-of-type(3):checked ~ ul li:nth-of-type(3) {
+    background: #ffa614 url(https://www.fallensword.com/media/dist/img/jQueryUITheme/ui-bg_gloss-wave_30_ffa614_500x100.png) 50% 50% repeat;
+    border: solid #655e4e;
+    border-width: 1px 1px 0;
+    margin-bottom: -1px;
+    padding-bottom: 1px;
+    color: #381f00
+
+  }
+.fshTabSet > input:first-of-type:checked ~ ul li:first-of-type > label:hover, .fshTabSet > input:nth-of-type(2):checked ~ ul li:nth-of-type(2) > label:hover, .fshTabSet > input:nth-of-type(3):checked ~ ul li:nth-of-type(3) > label:hover {
+      cursor: text;
+    }
+.fshTabSet > div {
+    height: 0;
+    overflow: hidden;
+  }
+.fshTabSet > input:first-of-type:checked ~ div:first-of-type,
+  .fshTabSet > input:nth-of-type(2):checked ~ div:nth-of-type(2) {
+    height: auto;
+    padding: 1em 1.4em;
+  }
+
 .fshLists {
   table-layout: fixed;
   overflow-wrap: break-word;
 }
 
-.quickCreate {
-  display: inline-block;
-  height: 1.2em;
-  margin-left: 0.4em;
-  position: relative;
-  width: 6.5em;
+.xxsLink {
+  color: yellow;
+  cursor: pointer;
+  font-size: xx-small;
+  text-decoration: underline;
+}
+.xsGreen {
+  color: lawngreen;
+  cursor: pointer;
+  font-size: x-small;
+  text-decoration: underline;
+}
+.xsOrange {
+  color: orange;
+  font-size: x-small;
+}
+.xsKhaki {
+  color: khaki;
+  font-size: x-small;
 }
 
-#fast-compose,
-#fast-compose + div {display: none;}
-#fast-compose:checked + div {display: block;}
-
-.left-0 td:nth-child(n+2) input,
-.left-1 td:nth-child(n+3) input,
-.left-2 td:nth-child(n+4) input,
-.left-3 td:nth-child(n+5) input,
-.left-4 td:nth-child(n+6) input,
-.left-5 td:nth-child(n+7) input,
-.left-6 td:nth-child(n+8) input,
-.left-7 td:nth-child(n+9) input,
-.left-8 td:nth-child(n+10) input,
-.left-9 td:nth-child(n+11) input {
-  background: #B8B8B8;
-  pointer-events: none;
+table.fshDataTable {
+  border: 1px solid black;
+  width: 650px;
 }
 
-#fshFastCompose {margin: 0 auto;}
-#fshFastCompose td:nth-child(1) {text-align: left;}
+.fshgrpstat {
+  font-size: x-small;
+  border-top: 2px black solid;
+}
+
+.fshHallPref {
+  position: absolute;
+  right: 1em;
+  top: 0.2em;
+}
 
 .guildReportSpinner {
   width: 25px;
@@ -1710,43 +1591,6 @@ button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointe
 
 button.svelte-1recp8w{font-size:12px}
 button.svelte-1gvij2s{background:transparent;border:none;cursor:pointer;font-family:inherit;font-size:12px;margin:auto 3px;padding:0;text-decoration:underline;user-select:text}
-.fshgrpstat {
-  font-size: x-small;
-  border-top: 2px black solid;
-}
-
-table.fshDataTable {
-  border: 1px solid black;
-  width: 650px;
-}
-
-.fshHallPref {
-  position: absolute;
-  right: 1em;
-  top: 0.2em;
-}
-
-.xxsLink {
-  color: yellow;
-  cursor: pointer;
-  font-size: xx-small;
-  text-decoration: underline;
-}
-.xsGreen {
-  color: lawngreen;
-  cursor: pointer;
-  font-size: x-small;
-  text-decoration: underline;
-}
-.xsOrange {
-  color: orange;
-  font-size: x-small;
-}
-.xsKhaki {
-  color: khaki;
-  font-size: x-small;
-}
-
 .fastDiv {
   display: flex;
   height: 16px;
