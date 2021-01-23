@@ -2,6 +2,7 @@ import allthen from '../common/allthen';
 import { cdn } from '../system/system';
 import clickThis from '../common/clickThis';
 import createSpan from '../common/cElement/createSpan';
+import doStatTotal from '../profile/doStatTotal';
 import getArrayByClassName from '../common/getArrayByClassName';
 import getElementById from '../common/getElement';
 import getValue from '../system/getValue';
@@ -53,7 +54,7 @@ function makeCancelAll() {
 function autoFill() {
   if (getValue('autoFillMinBidPrice')) {
     // getElementById('auto-fill').checked = true;
-    getElementById('auto-fill').click();
+    clickThis(getElementById('auto-fill'));
   }
 }
 
@@ -61,5 +62,6 @@ export default function injectAuctionHouse() {
   if (jQueryNotPresent() || !pCC) { return; }
   makeCancelAll();
   autoFill();
+  doStatTotal();
   // clickThis(getElementById('sort0'));
 }

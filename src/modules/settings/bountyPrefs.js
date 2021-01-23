@@ -45,7 +45,6 @@ export default function bountyPrefs() {
   }${wantedNames()
   }${bunchOfSimple([
     'wantedGuildMembers',
-    'enableAttackHelper',
     'showPvPSummaryInLog',
   ])}`;
 }

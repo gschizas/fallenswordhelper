@@ -169,11 +169,6 @@
     "helpTitle":"Disable Deactivate Prompts",
     "helpText":"This disables the prompts for deactivating buffs on the profile page."
   },
-  "enableAttackHelper":{
-    "helpTitle":"Show Attack Helper",
-    "helpText":"This will show extra information on the attack player screen about stats and buffs on you and your target",
-    "network":true
-  },
   "showPvPSummaryInLog":{
     "helpTitle":"Show PvP Summary in Log",
     "helpText":"This will show a summary of the PvP results in the log.",
