@@ -47,7 +47,7 @@
     width: 11.8em;
   }
   button:nth-of-type(2) {
-    width: 10.1em;
+    width: 10.6em;
   }
   button:nth-of-type(3) {
     width: 10.8em;
