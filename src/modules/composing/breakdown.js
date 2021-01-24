@@ -4,6 +4,7 @@ import getValue from '../system/getValue';
 import hasClass from '../common/hasClass';
 import insertHtmlBeforeEnd from '../common/insertHtmlBeforeEnd';
 import jQueryNotPresent from '../common/jQueryNotPresent';
+import navigateTo from '../common/navigateTo';
 import onclick from '../common/onclick';
 import { pCC } from '../support/layout';
 import partial from '../common/partial';
@@ -59,7 +60,7 @@ function handleResponse(response) {
   if (response.error !== 0) {
     showComposingMessage(`Error: ${response.msg}`, 'rgb(164, 28, 28)');
   } else {
-    window.location = `${composingUrl + defSubcmd}breakdown&m=1`;
+    navigateTo(`${composingUrl + defSubcmd}breakdown&m=1`);
   }
 }
 

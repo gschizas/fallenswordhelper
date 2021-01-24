@@ -1,6 +1,7 @@
 import daViewProfile from '../../_dataAccess/daViewProfile';
 import expandMenu from './expandMenu';
 import keyHandlerEvent from './keyHandlerEvent';
+import navigateTo from '../../common/navigateTo';
 import partial from '../../common/partial';
 import { defSubcmd, profileUrl } from '../../support/constants';
 
@@ -22,8 +23,7 @@ function changeCombatSet(itemIndex, json) {
   if (goodData(itemIndex, json)) {
     const cbsIndex = json.r.equip_sets[itemIndex].id;
     expandMenu('2');
-    window.location.href = `${profileUrl + defSubcmd
-    }managecombatset&submit=Use&combatSetId=${cbsIndex}`;
+    navigateTo(`${profileUrl + defSubcmd}managecombatset&submit=Use&combatSetId=${cbsIndex}`);
   }
 }
 

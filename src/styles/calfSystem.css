@@ -193,13 +193,6 @@
 .HelperTextLink:hover {text-decoration: underline;}
 
 /* Profile*/
-.quickButton {
-  display: inline-block;
-  height: 17px;
-  width: 17px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
 .fastWorn {
   color: green;
   font-weight: bold;

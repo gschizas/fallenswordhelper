@@ -4,6 +4,7 @@ import indexAjaxData from '../../ajax/indexAjaxData';
 import jQueryNotPresent from '../../common/jQueryNotPresent';
 import moveOptions from './moveOptions';
 import { moveRe } from '../assets';
+import navigateTo from '../../common/navigateTo';
 import partial from '../../common/partial';
 import { arenaUrl, defTable, oldActionSpinner } from '../../support/constants';
 
@@ -42,7 +43,7 @@ function newMove(val, ind) {
 }
 
 function pageRefresh() {
-  window.location = `${arenaUrl}setup`;
+  navigateTo(`${arenaUrl}setup`);
 }
 
 function changeMoves(newMoves) {

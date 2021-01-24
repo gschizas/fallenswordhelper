@@ -18,7 +18,7 @@ function doGuildRelationship() {
 
 function doQuickButtons() {
   if (getValue('showQuickButtons')) {
-    runDefault(import('./profileInjectQuickButton'));
+    runDefault(import('./profileInjectQuickButton/profileInjectQuickButton'));
   }
 }
 

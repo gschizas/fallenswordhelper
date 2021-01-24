@@ -2,6 +2,7 @@ import daRemoveSkill from '../../_dataAccess/daRemoveSkill';
 import errorDialog from '../../common/errorDialog';
 import getElementById from '../../common/getElement';
 import hideQTip from '../../common/hideQTip';
+import navigateTo from '../../common/navigateTo';
 import onclick from '../../common/onclick';
 import partial from '../../common/partial';
 import { sendEvent } from '../../support/fshGa';
@@ -17,7 +18,7 @@ function doDebuff(fastDebuff, aLink) {
     const buffId = aLink.href.match(/(\d+)$/)[1];
     daRemoveSkill(buffId).then(errorDialog).then(partial(debuffSuccess, aLink));
   } else {
-    window.location = aLink.href;
+    navigateTo(aLink.href);
   }
 }
 

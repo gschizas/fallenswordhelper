@@ -1,5 +1,6 @@
 import arrayFrom from './arrayFrom';
 import { indexPhp } from '../support/constants';
+import navigateTo from './navigateTo';
 
 export default function formToUrl(form) {
   const validInputs = arrayFrom(form.elements)
@@ -7,5 +8,5 @@ export default function formToUrl(form) {
     .filter((i) => i.type !== 'checkbox' || i.checked)
     .map((i) => `${i.name}=${i.value}`)
     .join('&');
-  window.location = `${indexPhp}?${validInputs}`;
+  navigateTo(`${indexPhp}?${validInputs}`);
 }
