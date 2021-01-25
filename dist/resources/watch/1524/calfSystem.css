@@ -251,13 +251,6 @@
 .HelperTextLink:hover {text-decoration: underline;}
 
 /* Profile*/
-.quickButton {
-  display: inline-block;
-  height: 17px;
-  width: 17px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
 .fastWorn {
   color: green;
   font-weight: bold;
@@ -963,7 +956,7 @@ textarea {resize: none;}
   text-decoration: none;
 }
 
-button.svelte-hnk7js{background:transparent;border:none;color:blue;cursor:pointer;font-family:inherit;font-size:12px;margin:0;padding:0;text-decoration:underline;user-select:text}button.svelte-hnk7js:first-of-type{width:11.8em}button.svelte-hnk7js:nth-of-type(2){width:10.1em}button.svelte-hnk7js:nth-of-type(3){width:10.8em}
+button.svelte-h3aclh{background:transparent;border:none;color:blue;cursor:pointer;font-family:inherit;font-size:12px;margin:0;padding:0;text-decoration:underline;user-select:text}button.svelte-h3aclh:first-of-type{width:11.8em}button.svelte-h3aclh:nth-of-type(2){width:10.6em}button.svelte-h3aclh:nth-of-type(3){width:10.8em}
 .fshItemGrid .fshHide {
   display: none;
 }
@@ -1591,6 +1584,7 @@ table.fshDataTable {
 
 button.svelte-1recp8w{font-size:12px}
 button.svelte-1gvij2s{background:transparent;border:none;cursor:pointer;font-family:inherit;font-size:12px;margin:auto 3px;padding:0;text-decoration:underline;user-select:text}
+button.svelte-1xo8gqh{background-color:transparent;background-position:center;background-repeat:no-repeat;border:none;cursor:pointer;height:17px;margin:auto 2px;width:17px;user-select:none}
 .fastDiv {
   display: flex;
   height: 16px;
