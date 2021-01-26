@@ -1,3 +1,5 @@
+import createBr from '../common/cElement/createBr';
+import createForm from '../common/cElement/createForm';
 import createInput from '../common/cElement/createInput';
 import createOl from '../common/cElement/createOl';
 import createSpan from '../common/cElement/createSpan';
@@ -6,6 +8,7 @@ import insertElement from '../common/insertElement';
 import insertTextBeforeEnd from '../common/insertTextBeforeEnd';
 import jsonFail from '../common/jsonFail';
 import onclick from '../common/onclick';
+import onsubmit from '../common/onsubmit';
 import outputResult from '../common/outputResult';
 import { pCC } from '../support/layout';
 import querySelector from '../common/querySelector';
@@ -33,7 +36,8 @@ function initResults(str) {
   setInnerHtml('', invResults);
 }
 
-function quickInvent() {
+function quickInvent(e) {
+  e.preventDefault()
   const amountToInvent = Number(invAmount.value);
   if (!amountToInvent) {
     initResults('');
@@ -53,6 +57,17 @@ function makeCell(injector) {
   return myCell;
 }
 
+function makeInvForm(myCell) {
+  const invForm = createForm({
+    action: "#",
+  });
+  onsubmit(invForm, quickInvent);
+  makeInvAmount(invForm);
+  insertElement(createBr(), invForm);
+  makeQuickInv(invForm);
+  insertElement(myCell, invForm);
+}
+
 function makeInvAmount(myCell) {
   insertTextBeforeEnd(myCell, 'Select how many to quick invent');
   invAmount = createInput({
@@ -67,11 +82,10 @@ function makeInvAmount(myCell) {
 function makeQuickInv(myCell) {
   const quickInv = createInput({
     className: 'custombutton',
-    type: 'button',
+    type: 'submit',
     value: 'Quick invent items',
   });
   insertElement(myCell, quickInv);
-  onclick(quickInv, quickInvent);
 }
 
 function makeInvResultHeader(myCell) {
@@ -90,8 +104,7 @@ function resultContainer(myCell) {
 }
 
 function makeLayout(injector) {
-  makeInvAmount(makeCell(injector));
-  makeQuickInv(makeCell(injector));
+  makeInvForm(makeCell(injector));
   resultContainer(makeCell(injector));
 }
 
