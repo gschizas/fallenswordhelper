@@ -59,7 +59,7 @@
     "stylelint": "^13.8.0",
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-config-standard": "^20.0.0",
-    "svelte": "^3.31.0"
+    "svelte": "^3.49.0"
   },
   "dependencies": {
     "css-tooltip": "^0.3.4",
